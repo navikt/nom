@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RessursStateListener.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.ressurs.eventsourcing.state</a> &gt; <span class="el_source">RessursStateListener.java</span></div><h1>RessursStateListener.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.ressurs.eventsourcing.state;
+
+
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.lucenesearch.LuceneService;
+import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.utils.common.kafka.KafkaUtils;
+import org.apache.kafka.clients.admin.Admin;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.PartitionOffset;
+import org.springframework.kafka.annotation.TopicPartition;
+import org.springframework.kafka.core.KafkaAdmin;
+import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.StreamSupport;
+
+<span class="fc" id="L29">@Slf4j</span>
+@Service
+public class RessursStateListener {
+<span class="fc" id="L32">    private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);</span>
+    private final String stateTopic;
+    private final RessursStateRepository ressursStateRepository;
+
+<span class="fc" id="L36">    private final Map&lt;String, CompletableFuture&lt;RessursState&gt;&gt; waitingMapByFid = Collections.synchronizedMap(new HashMap&lt;&gt;());</span>
+
+    private final Admin adminClient;
+    private final KafkaProperties kafkaProperties;
+    private final LuceneService luceneService;
+
+    public RessursStateListener(
+        @Value(&quot;${app.kafka.ressurs.stateTopic}&quot;) String stateTopic,
+        RessursStateRepository ressursStateRepository,
+        Admin adminClient, LuceneService luceneService,
+        KafkaAdmin admin,
+        KafkaProperties kafkaProperties
+<span class="fc" id="L48">    ) {</span>
+<span class="fc" id="L49">        this.stateTopic = stateTopic;</span>
+<span class="fc" id="L50">        this.ressursStateRepository = ressursStateRepository;</span>
+<span class="fc" id="L51">        this.adminClient = adminClient;</span>
+<span class="fc" id="L52">        this.kafkaProperties = kafkaProperties;</span>
+<span class="fc" id="L53">        this.luceneService = luceneService;</span>
+<span class="fc" id="L54">    }</span>
+
+    @KafkaListener(
+            containerFactory = &quot;ressursStateKafkaListenerContainerFactory&quot;,
+            clientIdPrefix = &quot;ressursStateListener&quot;,
+            topicPartitions = @TopicPartition(
+                    topic = &quot;${app.kafka.ressurs.stateTopic}&quot;, partitionOffsets = @PartitionOffset(partition = &quot;0&quot;, initialOffset = &quot;0&quot;)
+            )
+    )
+    public void onMessage(ConsumerRecords&lt;String, RessursState&gt; records, Consumer&lt;String, String&gt; consumer) {
+<span class="fc" id="L64">        StreamSupport.stream(records.spliterator(), false).forEach(it -&gt; {</span>
+<span class="fc" id="L65">            processMessage(it.key(), it.value());</span>
+<span class="fc" id="L66">        });</span>
+
+<span class="fc" id="L68">        KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -&gt; log.info(&quot;Kafka RessursState listener initial load finished. {} ressurser&quot;, ressursStateRepository.count()));</span>
+<span class="fc" id="L69">    }</span>
+
+    private void processMessage(String key, RessursState ressursState) {
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        if (ressursState == null) {</span>
+<span class="nc" id="L73">            ressursStateRepository.remove(key);</span>
+        } else {
+<span class="fc" id="L75">            ressursStateRepository.putEventAggregate(ressursState);</span>
+<span class="fc" id="L76">            this.luceneService.invalidateRessurs(ressursState.navident());</span>
+        }
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        if (waitingMapByFid.containsKey(key)) {</span>
+<span class="nc" id="L79">            waitingMapByFid.remove(key).complete(ressursState);</span>
+        }
+<span class="fc" id="L81">    }</span>
+
+    public boolean initloadComplete() {
+<span class="nc" id="L84">        return initialLoadComplete.get();</span>
+    }
+
+    public CompletableFuture&lt;RessursState&gt; waitForAggregate(String fid) {
+<span class="nc" id="L88">        final CompletableFuture&lt;RessursState&gt; completableFuture = new CompletableFuture&lt;&gt;();</span>
+<span class="nc" id="L89">        waitingMapByFid.put(fid, completableFuture);</span>
+<span class="nc" id="L90">        return completableFuture;</span>
+    }
+
+    public void removeWait(String fid){
+<span class="nc" id="L94">        waitingMapByFid.remove(fid);</span>
+<span class="nc" id="L95">    }</span>
+
+    public boolean consumerGroupRegistedForTopic(String topic) throws ExecutionException, InterruptedException, TimeoutException {
+<span class="nc" id="L98">        final var topicPartitions = adminClient.listConsumerGroupOffsets(kafkaProperties.getConsumer().getGroupId())</span>
+<span class="nc" id="L99">                .partitionsToOffsetAndMetadata()</span>
+<span class="nc" id="L100">                .get(10, TimeUnit.SECONDS);</span>
+
+<span class="nc" id="L102">        return topicPartitions.entrySet().stream().anyMatch(entry -&gt; entry.getKey().topic().equals(topic));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

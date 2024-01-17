@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DvhRestConsumer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.dvh</a> &gt; <span class="el_source">DvhRestConsumer.java</span></div><h1>DvhRestConsumer.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.dvh;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import io.getunleash.Unleash;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
+import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.apps.api.dvh.dto.DvhLeder;
+import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
+import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
+import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
+import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
+import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
+import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
+import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
+import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
+import no.nav.nom.libs.utils.common.platform.LeaderElection;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyRessursType.ANNEN_STATLIG;
+
+<span class="fc" id="L42">@Slf4j</span>
+@Component
+@RequiredArgsConstructor
+public class DvhRestConsumer {
+    public static final String CACHE = &quot;cache-source-dvh&quot;;
+    public static final String UNLEASH_PRODUSERE_NYE_ORGANISERING_MELDINGER = &quot;nom.organisering.enable_new_topics&quot;;
+    private final long LOAD_INTERVAL = 30 * 60 * 1000; // sync hvert 30min
+    private final AppProperties appProperties;
+
+    private final DvhRepository dvhRepository;
+    private final DvhService dvhService;
+    private final NomProxyClient nomProxyClient;
+    private final RessursStateListener ressursStateListener;
+    private final OrgtilknytningStateListener orgtilknytningStateListener;
+    private final OrgEnhetStateListener orgEnhetStateListener;
+    private final RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
+    private final LeaderElection leaderElection;
+    private final DvhOrgenhetsLast dvhOrgenhetsLast;
+    private final OrgEnhetTypeHandler orgEnhetTypeHandler;
+
+    private final RessursStillingLoader ressursStillingLoader;
+    private final EksterneRessurserLoader eksterneRessurserLoader;
+    private final OrganiseringService organiseringService;
+
+    private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
+    private final Unleash unleash;
+
+
+    @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
+    public void scheduledOppdateringFraDvh() {
+<span class="nc" id="L72">        log.info(&quot;Starter schedulert oppdatering fra DVH&quot;);</span>
+<span class="nc" id="L73">        LocalDateTime start = LocalDateTime.now();</span>
+
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        while (!isInitialStateReady()) { // Wait on startup until state topics are read</span>
+            try {
+<span class="nc" id="L77">                Thread.sleep(5_000);</span>
+<span class="nc" id="L78">                log.debug(&quot;InitialState er ikke klar enda&quot;);</span>
+<span class="nc" id="L79">                log.debug(</span>
+                    &quot;Ressurs state: {}  Orgtilkn. state: {}  Orgenhet state: {}&quot;,
+<span class="nc" id="L81">                    ressursStateListener.initloadComplete(),</span>
+<span class="nc" id="L82">                    orgtilknytningStateListener.initloadComplete(),</span>
+<span class="nc" id="L83">                    orgEnhetStateListener.initloadComplete()</span>
+                );
+<span class="nc" id="L85">            } catch (Exception logMe) {</span>
+<span class="nc" id="L86">                log.error(&quot;Waiting for initialState last feilet&quot;, logMe);</span>
+<span class="nc" id="L87">            }</span>
+        }
+
+<span class="nc" id="L90">        log.info(&quot;State topics er lest, fortsetter schedulert oppdatering fra DVH etter {}&quot;, durationAsH24(start));</span>
+
+<span class="nc" id="L92">        loadLedereAndOrganiseringerFromDvh();</span>
+<span class="nc" id="L93">        loadTlfFromDvh();</span>
+
+
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        if (!dvhStartupLoadMonitor.hasCompleted()) { // Pod kan markeres som klar etter oppstart</span>
+<span class="nc" id="L97">            dvhStartupLoadMonitor.setCompleted();</span>
+<span class="nc" id="L98">            log.info(&quot;Initial oppdatering fra DVH er klar. Etter {}&quot;, durationAsH24(start));</span>
+        }
+
+<span class="nc bnc" id="L101" title="All 2 branches missed.">        if (leaderElection.isLeader()) { // Oppdater state fra dvh - holder at en Pod gjør dette</span>
+<span class="nc" id="L102">            updateOrgtilknytningerStateFromDvh();</span>
+
+<span class="nc" id="L104">            updateOrgtilknytningerForEksterneFromDvh();</span>
+
+<span class="nc" id="L106">            loadRessurserFromDvh();</span>
+
+<span class="nc" id="L108">            dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();</span>
+
+<span class="nc" id="L110">            orgEnhetTypeHandler.updateOrgEnhetsTypeForLeafs();</span>
+        }
+
+<span class="nc" id="L113">        log.info(&quot;Ferdig med schedulert oppdatering fra DVH. Tok {}&quot;, durationAsH24(start));</span>
+<span class="nc" id="L114">    }</span>
+
+    public void loadRessurserOgOrgEnheter() {
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        if (leaderElection.isLeader()) {</span>
+<span class="fc" id="L118">            loadRessurserFromDvh();</span>
+
+<span class="fc" id="L120">            dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();</span>
+        }
+<span class="fc" id="L122">    }</span>
+
+<span class="pc" id="L124">    @SneakyThrows</span>
+    public void loadRessurserFromDvh() {
+<span class="fc" id="L126">        log.info(&quot;Laster ressurser fra dvh&quot;);</span>
+        try {
+<span class="fc" id="L128">            var jsonRessurser = dvhExchange(appProperties.clients().nomProxy().ansatteBucketsPath());</span>
+
+<span class="fc" id="L130">            val dvhRessurs = StreamSupport.stream(jsonRessurser.get(&quot;NOM_ANSATTE_BUCKETS_v2Response&quot;).spliterator(), false)</span>
+<span class="fc" id="L131">                .map(DvhRessurs::new)</span>
+<span class="fc" id="L132">                .distinct()</span>
+<span class="fc" id="L133">                .collect(Collectors.groupingBy(DvhRessurs::getPersonIdent))</span>
+<span class="fc" id="L134">                .values()</span>
+<span class="fc" id="L135">                .stream()</span>
+<span class="fc" id="L136">                .peek(l -&gt; {</span>
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">                    if (l.size() &gt; 1) {</span>
+<span class="nc" id="L138">                        l.removeAll(l.stream().filter(Predicate.not(DvhRessurs::getRemedyAktiv)).toList());</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">                        if (l.size() &gt; 1) {</span>
+<span class="nc" id="L140">                            val personIdent = l.get(0).getPersonIdent();</span>
+<span class="nc" id="L141">                            val navIdenter = l.stream().map(DvhRessurs::getNavIdent).toList();</span>
+<span class="nc" id="L142">                            log.warn(SECURE_LOGS, &quot;Forkastet lesing av ansatt med personident &quot; + personIdent + &quot; har flere aktive navidenter: &quot; + navIdenter);</span>
+<span class="nc" id="L143">                            l.clear();</span>
+                        }
+                    }
+<span class="fc" id="L146">                })</span>
+<span class="fc" id="L147">                .flatMap(Collection::stream)</span>
+<span class="fc" id="L148">                .collect(Collectors.groupingBy(DvhRessurs::getNavIdent))</span>
+<span class="fc" id="L149">                .values()</span>
+<span class="fc" id="L150">                .stream()</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">                .filter(l -&gt; l.size() == 1)</span>
+<span class="fc" id="L152">                .flatMap(Collection::stream)</span>
+<span class="fc" id="L153">                .toList();</span>
+
+<span class="fc" id="L155">            ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);</span>
+<span class="fc" id="L156">            dvhRepository.saveAnnenStatNavIdenter(findAnnenStatNavIdenter(dvhRessurs));</span>
+<span class="nc" id="L157">        } catch (Exception e) {</span>
+<span class="nc" id="L158">            log.error(&quot;Feilet i last av ressurser fra dvh&quot;, e);</span>
+<span class="fc" id="L159">        }</span>
+<span class="fc" id="L160">    }</span>
+
+    private Set&lt;String&gt; findAnnenStatNavIdenter(List&lt;DvhRessurs&gt; dvhRessurs) {
+<span class="fc" id="L163">        return dvhRessurs.stream()</span>
+<span class="fc" id="L164">            .filter(r -&gt; r.getRemedyAnsattType().equals(ANNEN_STATLIG.beskrivelse))</span>
+<span class="fc" id="L165">            .map(DvhRessurs::getNavIdent)</span>
+<span class="fc" id="L166">            .collect(Collectors.toSet());</span>
+    }
+
+    private void updateOrgtilknytningerStateFromDvh() {
+<span class="nc bnc" id="L170" title="All 4 branches missed.">        if (dvhStartupLoadMonitor.hasCompleted() &amp;&amp; leaderElection.isLeader()) {</span>
+<span class="nc" id="L171">            log.info(&quot;Oppdater Orgtilnytninger state fra dvh&quot;);</span>
+<span class="nc" id="L172">            lastOrgtilknytningerTilEvtsrc();</span>
+        }
+<span class="nc" id="L174">    }</span>
+
+    public void lastOrgtilknytningerTilEvtsrc() {
+        try {
+<span class="nc" id="L178">            ressursStillingLoader.loadAndProcess();</span>
+<span class="nc" id="L179">        } catch (Exception e) {</span>
+<span class="nc" id="L180">            log.error(&quot;Feilet i last av ressursStillinger&quot;, e);</span>
+<span class="nc" id="L181">        }</span>
+<span class="nc" id="L182">    }</span>
+
+    public void updateOrgtilknytningerForEksterneFromDvh() {
+<span class="nc" id="L185">        log.info(&quot;Oppdater Orgtilknytninger for eksterne fra dvh&quot;);</span>
+<span class="nc" id="L186">        eksterneRessurserLoader.loadAndProcess();</span>
+<span class="nc" id="L187">    }</span>
+
+
+    public void loadTlfFromDvh() {
+<span class="fc" id="L191">        log.info(&quot;Laster tlf fra dvh&quot;);</span>
+        try {
+<span class="fc" id="L193">            val jsonTlfNr = dvhExchange(appProperties.clients().nomProxy().tlfPath());</span>
+<span class="fc" id="L194">            val tlfRader = StreamSupport.stream(jsonTlfNr.get(&quot;NOM_TLF_v1Result&quot;).spliterator(), false)</span>
+<span class="fc" id="L195">                .filter(this::validateTlf)</span>
+<span class="fc" id="L196">                .map(DvhTelefon::new)</span>
+<span class="fc" id="L197">                .collect(Collectors.toList());</span>
+<span class="fc" id="L198">            log.info(&quot;Telefonnr lastet: Antall rader = &quot; + tlfRader.size());</span>
+<span class="fc" id="L199">            dvhRepository.saveTlf(tlfRader);</span>
+<span class="fc" id="L200">        } catch (Exception e) {</span>
+<span class="fc" id="L201">            log.error(&quot;Failure loading tlf data from DVH&quot;, e);</span>
+<span class="fc" id="L202">        }</span>
+<span class="fc" id="L203">    }</span>
+
+    private boolean validateTlf(JsonNode jsonNode) {
+<span class="pc bpc" id="L206" title="1 of 6 branches missed.">        val isSecretNumber = !jsonNode.hasNonNull(&quot;issecretnumber&quot;) || (jsonNode.hasNonNull(&quot;issecretnumber&quot;) &amp;&amp; !jsonNode.get(&quot;issecretnumber&quot;).asBoolean());</span>
+<span class="fc" id="L207">        val userRef1 = jsonNode.get(&quot;userreference1&quot;);</span>
+
+<span class="pc bpc" id="L209" title="1 of 6 branches missed.">        return isSecretNumber &amp;&amp; (userRef1.asText().startsWith(&quot;PT-&quot;) || userRef1.asText().startsWith(&quot;PK-&quot;));</span>
+    }
+
+    public void loadLedereAndOrganiseringerFromDvh() {
+<span class="fc" id="L213">        log.info(&quot;Laster ledere og Organisering fra dvh&quot;);</span>
+        try {
+<span class="fc" id="L215">            val jsonOrgenheter = dvhExchange(appProperties.clients().nomProxy().orgHierarkiPath());</span>
+<span class="fc" id="L216">            val ledere = new LinkedList&lt;DvhLeder&gt;();</span>
+<span class="fc" id="L217">            val organiseringer = new LinkedList&lt;DvhOrganisering&gt;();</span>
+
+<span class="fc" id="L219">            StreamSupport.stream(jsonOrgenheter.get(&quot;NOM_HRORG_HIERARKI2_v2Response&quot;).spliterator(), false)</span>
+<span class="fc" id="L220">                .filter(this::determineEnhetActive)</span>
+<span class="fc" id="L221">                .filter(this::determineEnhetNotIgnored)</span>
+<span class="fc" id="L222">                .forEach(e -&gt; {</span>
+<span class="fc bfc" id="L223" title="All 2 branches covered.">                    if (validateOrganisering(e)) {</span>
+<span class="fc" id="L224">                        organiseringer.add(new DvhOrganisering(e));</span>
+                    }
+
+<span class="fc bfc" id="L227" title="All 2 branches covered.">                    if (validateLeder(e)) {</span>
+<span class="fc" id="L228">                        ledere.add(new DvhLeder(e));</span>
+                    }
+<span class="fc" id="L230">                });</span>
+
+<span class="fc" id="L232">            dvhService.saveLedere(ledere);</span>
+<span class="fc" id="L233">            dvhService.saveOrganiseringerAndSetOrganiserteOrgenheter(organiseringer);</span>
+
+<span class="fc bfc" id="L235" title="All 2 branches covered.">            if (unleash.isEnabled(UNLEASH_PRODUSERE_NYE_ORGANISERING_MELDINGER)) {</span>
+<span class="fc" id="L236">                organiseringService.saveOrganiseringer(organiseringer);</span>
+            }
+<span class="nc" id="L238">        } catch (Exception e) {</span>
+<span class="nc" id="L239">            log.error(&quot;Failure loading ledere og Organisering data from DVH&quot;, e);</span>
+<span class="fc" id="L240">        }</span>
+<span class="fc" id="L241">    }</span>
+
+    private boolean determineEnhetNotIgnored(JsonNode jsonNode) {
+        // 'deltar i rekruttering' og 'nav ventelønn' er kun for intern bruk i agresso.
+<span class="fc" id="L245">        val orgnodeKode = jsonNode.get(&quot;ORGNODE_KODE&quot;).asText();</span>
+<span class="fc" id="L246">        val deltarIRekruttering = orgnodeKode.matches(&quot;0+&quot;);</span>
+<span class="fc" id="L247">        val navVenteloenn = orgnodeKode.equals(&quot;9999920&quot;);</span>
+<span class="pc bpc" id="L248" title="2 of 4 branches missed.">        return !(deltarIRekruttering || navVenteloenn);</span>
+    }
+
+    private JsonNode dvhExchange(String urlPath) {
+<span class="fc" id="L252">        return nomProxyClient.getWebClient().get()</span>
+<span class="fc" id="L253">            .uri(urlPath)</span>
+<span class="fc" id="L254">            .retrieve()</span>
+<span class="fc" id="L255">            .bodyToMono(JsonNode.class)</span>
+<span class="fc" id="L256">            .block();</span>
+
+    }
+
+    private boolean determineEnhetActive(JsonNode e) {
+<span class="fc" id="L261">        return e.get(&quot;ORGNODE_STATUS&quot;).asText().equals(&quot;N&quot;);</span>
+    }
+
+    private boolean validateOrganisering(JsonNode e) {
+<span class="pc bpc" id="L265" title="1 of 4 branches missed.">        final var validate = e.hasNonNull(&quot;ORGNODE_KODE_OVER&quot;) &amp;&amp; e.hasNonNull(&quot;ORGNODE_KODE&quot;)</span>
+<span class="pc bpc" id="L266" title="2 of 4 branches missed.">            &amp;&amp; e.hasNonNull(&quot;ORGNODE_NIVA_OVER&quot;) &amp;&amp; e.hasNonNull(&quot;ORGNODE_NIVA&quot;);</span>
+<span class="fc bfc" id="L267" title="All 2 branches covered.">        if (!validate) {</span>
+<span class="fc" id="L268">            log.info(&quot;Ugyldig organisering fra dvh, ORGNODE_KODE_OVER: {}, ORGNODE_KODE: {}&quot;, getAsText(e, &quot;ORGNODE_KODE_OVER&quot;), getAsText(e, &quot;ORGNODE_KODE&quot;));</span>
+        }
+<span class="fc" id="L270">        return validate;</span>
+    }
+
+    private boolean validateLeder(JsonNode e) {
+<span class="pc bpc" id="L274" title="2 of 6 branches missed.">        final var validate = e.hasNonNull(&quot;LEDER_NAVIDENT&quot;) &amp;&amp; e.hasNonNull(&quot;ORGNODE_KODE&quot;) &amp;&amp; e.hasNonNull(&quot;ORGNODE_NIVA&quot;);</span>
+<span class="fc bfc" id="L275" title="All 2 branches covered.">        if (!validate) {</span>
+<span class="fc" id="L276">            log.info(&quot;Ugyldig leder fra dvh, LEDER_NAVIDENT: {}, ORGNODE_KODE: {}&quot;, getAsText(e, &quot;LEDER_NAVIDENT&quot;), getAsText(e, &quot;ORGNODE_KODE&quot;));</span>
+        }
+<span class="fc" id="L278">        return validate;</span>
+    }
+
+    private String getAsText(JsonNode e, String field) {
+<span class="fc" id="L282">        JsonNode jsonNode = e.get(field);</span>
+<span class="pc bpc" id="L283" title="1 of 2 branches missed.">        return jsonNode == null ? &quot;&lt;null&gt;&quot; : jsonNode.asText();</span>
+    }
+
+    private boolean isInitialStateReady() {
+<span class="nc bnc" id="L287" title="All 4 branches missed.">        return ressursStateListener.initloadComplete() &amp;&amp; orgtilknytningStateListener.initloadComplete()</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">            &amp;&amp; orgEnhetStateListener.initloadComplete();</span>
+    }
+
+    private String durationAsH24(LocalDateTime start) {
+<span class="nc" id="L292">        Duration duration = Duration.between(start, LocalDateTime.now());</span>
+<span class="nc" id="L293">        return &quot;%02d:%02d:%02d&quot;.formatted(duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

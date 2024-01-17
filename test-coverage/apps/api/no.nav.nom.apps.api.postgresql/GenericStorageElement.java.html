@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GenericStorageElement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.postgresql</a> &gt; <span class="el_source">GenericStorageElement.java</span></div><h1>GenericStorageElement.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.postgresql;
+
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.JsonNode;
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Converter;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+
+import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.UUID;
+
+@Data
+@Entity
+@Builder
+@Table(name = &quot;T_GENERIC_STORAGE&quot;)
+@AllArgsConstructor
+@NoArgsConstructor
+public class GenericStorageElement {
+
+    @Id
+    @JdbcTypeCode(SqlTypes.UUID)
+    @Column(name = &quot;ID&quot;, nullable = false, updatable = false)
+    private UUID id;
+
+    @NotNull
+    @Convert(converter = DataTypeConverter.class)
+    @Column(name = &quot;DATA_TYPE&quot;, nullable = false, updatable = false)
+    private DataType dataType;
+
+    @Type(JsonBinaryType.class)
+    @Column(name = &quot;DOCUMENT&quot;, nullable = false, updatable = false)
+    private JsonNode document;
+
+    @NotNull
+    @Column(name = &quot;STORED_DATE&quot;, nullable = false, updatable = false)
+    private LocalDateTime storedDate;
+
+<span class="fc" id="L54">    public enum DataType {</span>
+<span class="fc" id="L55">        HENDELSE_V1(&quot;no.nav.nom.generic.storage:Hendelse:v1&quot;),</span>
+<span class="fc" id="L56">        VALIDATION_V1(&quot;no.nav.nom.generic.storage:Validation:v1&quot;);</span>
+
+        String dataType;
+
+<span class="fc" id="L60">        DataType(String dataType) {</span>
+<span class="fc" id="L61">            this.dataType = dataType;</span>
+<span class="fc" id="L62">        }</span>
+
+        @JsonValue
+        public String getDataType() {
+<span class="nc" id="L66">            return dataType;</span>
+        }
+
+        public static DataType fromString(String value) {
+<span class="nc" id="L70">            return Arrays.stream(DataType.values())</span>
+<span class="nc" id="L71">                    .filter(v -&gt; v.getDataType().equals(value))</span>
+<span class="nc" id="L72">                    .findAny()</span>
+<span class="nc" id="L73">                    .orElseThrow(() -&gt; new IllegalArgumentException(&quot;No enum with value &quot; + value + &quot; found&quot;));</span>
+        }
+    }
+
+    @Converter
+<span class="fc" id="L78">    static class DataTypeConverter implements AttributeConverter&lt;DataType, String&gt; {</span>
+
+        @Override
+        public String convertToDatabaseColumn(DataType dataType) {
+<span class="nc" id="L82">            return dataType.getDataType();</span>
+        }
+
+        @Override
+        public DataType convertToEntityAttribute(String dataTypeValue) {
+<span class="nc" id="L87">            return DataType.fromString(dataTypeValue);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

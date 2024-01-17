@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RessursRestService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.ressurs.api.app</a> &gt; <span class="el_source">RessursRestService.java</span></div><h1>RessursRestService.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.ressurs.api.app;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.nik.NIKClient;
+import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
+import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtype;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
+import no.nav.nom.apps.api.pdl.PdlClient;
+import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
+import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
+import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
+import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
+import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
+import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
+import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
+import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
+import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.RessursState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
+
+import static no.nav.nom.apps.api.common.DateUtils.validateChronologicalDates;
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
+import static no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService.validateOrgtilknytningTypeSektorCombination;
+
+@Service
+public class RessursRestService {
+
+<span class="fc" id="L59">    private final static Logger logger = LoggerFactory.getLogger(RessursRestService.class);</span>
+
+    private final RessursStateRepository ressursStateRepository;
+    private final RessursCommadService ressursCommadService;
+    private final OrgtilknytningCommandService orgtilknytningCommandService;
+    private final OrgtilknytningRestService orgtilknytningRestService;
+    private final NIKClient nikClient;
+    private final PdlClient pdlClient;
+    private final NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient;
+    private final OrgEnhetStateRepository orgEnhetStateRepository;
+    private final RessursOpprettetEmailService ressursOpprettetEmailService;
+    private final RessursContactDetailsResolver ressursContactDetailsResolver;
+    private final RessursLedereResolver ressursLedereResolver;
+    private final KafkaTopicReader kafkaTopicReader;
+    private final NomMastered nomMastered;
+
+    public RessursRestService(
+        RessursStateRepository ressursStateRepository,
+        RessursCommadService ressursCommadService,
+        OrgtilknytningCommandService orgtilknytningCommandService,
+        OrgtilknytningRestService orgtilknytningRestService,
+        NIKClient nikClient,
+        PdlClient pdlClient,
+        NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient, OrgEnhetStateRepository orgEnhetStateRepository,
+        RessursOpprettetEmailService ressursOpprettetEmailService,
+        RessursContactDetailsResolver ressursContactDetailsResolver,
+        RessursLedereResolver ressursLedereResolver,
+        KafkaTopicReader kafkaTopicReader,
+        NomMastered nomMastered
+<span class="fc" id="L88">    ) {</span>
+<span class="fc" id="L89">        this.ressursStateRepository = ressursStateRepository;</span>
+<span class="fc" id="L90">        this.ressursCommadService = ressursCommadService;</span>
+<span class="fc" id="L91">        this.orgtilknytningCommandService = orgtilknytningCommandService;</span>
+<span class="fc" id="L92">        this.orgtilknytningRestService = orgtilknytningRestService;</span>
+<span class="fc" id="L93">        this.nikClient = nikClient;</span>
+<span class="fc" id="L94">        this.pdlClient = pdlClient;</span>
+<span class="fc" id="L95">        this.nomRemedyIntegrasjonClient = nomRemedyIntegrasjonClient;</span>
+<span class="fc" id="L96">        this.orgEnhetStateRepository = orgEnhetStateRepository;</span>
+<span class="fc" id="L97">        this.ressursOpprettetEmailService = ressursOpprettetEmailService;</span>
+<span class="fc" id="L98">        this.kafkaTopicReader = kafkaTopicReader;</span>
+<span class="fc" id="L99">        this.ressursContactDetailsResolver = ressursContactDetailsResolver;</span>
+<span class="fc" id="L100">        this.ressursLedereResolver = ressursLedereResolver;</span>
+<span class="fc" id="L101">        this.nomMastered = nomMastered;</span>
+<span class="fc" id="L102">    }</span>
+
+    public Ressurs findRessursByNavident(String navident, Boolean obfuscatePersonident) {
+<span class="fc" id="L105">        var ressursState = findRessursStateByNavident(navident);</span>
+<span class="fc" id="L106">        return obfuscatePersonidentAndEnrichRessursStateWithDvhData(ressursState, obfuscatePersonident);</span>
+    }
+
+    private RessursState findRessursStateByNavident(String navident) {
+<span class="pc" id="L110">        return ressursStateRepository.findByNavident(navident).orElseThrow(() -&gt; RessursNotFoundException.navident(navident));</span>
+    }
+
+    private RessursState findRessursStateByFid(String fid) {
+<span class="pc" id="L114">        return ressursStateRepository.findByFid(fid).orElseThrow(() -&gt; RessursNotFoundException.fid(fid));</span>
+    }
+
+    public Ressurs findRessursByFid(String fid, Boolean obfuscatePersonident) {
+<span class="fc" id="L118">        var ressursState = findRessursStateByFid(fid);</span>
+<span class="fc" id="L119">        return obfuscatePersonidentAndEnrichRessursStateWithDvhData(ressursState, obfuscatePersonident);</span>
+    }
+
+    private Ressurs obfuscatePersonidentAndEnrichRessursStateWithDvhData(RessursState ressursState, Boolean obfuscatePersonident) {
+<span class="fc" id="L123">        var telefoner = ressursContactDetailsResolver.fetchTelefoner(ressursState.navident());</span>
+<span class="fc" id="L124">        var epost = ressursContactDetailsResolver.fetchEmail(ressursState.navident());</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        var personident = obfuscatePersonident</span>
+<span class="fc" id="L126">            ? ressursState.personident().replaceFirst(&quot;.{5}$&quot;, &quot;*****&quot;)</span>
+<span class="fc" id="L127">            : ressursState.personident();</span>
+
+<span class="fc" id="L129">        return new Ressurs(</span>
+<span class="fc" id="L130">            ressursState.toBuilder()</span>
+<span class="fc" id="L131">                .personident(personident).build(),</span>
+            telefoner,
+<span class="fc" id="L133">            epost.orElse(null)</span>
+        );
+    }
+
+    public void updateRessursNavn(String navident, UpdateVisningsnavnRequest updateVisningsnavnRequest) {
+<span class="fc" id="L138">        var ressursState = findRessursStateByNavident(navident);</span>
+
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        if (ressursState.sektor() != Sektor.EKSTERN) {</span>
+<span class="fc" id="L141">            throw new InvalidSektorException(&quot;Kun eksterne ressurser kan endres&quot;);</span>
+        }
+
+<span class="fc" id="L144">        var oppdaterPersonaliaCommand = new OppdaterPersonaliaCommand(</span>
+<span class="fc" id="L145">            ressursState.fid(),</span>
+<span class="fc" id="L146">            new Visningsnavn(updateVisningsnavnRequest.fornavn(), updateVisningsnavnRequest.mellomnavn(), updateVisningsnavnRequest.etternavn())</span>
+        );
+
+<span class="fc" id="L149">        var inputMetadata = new InputMetadata(&quot;REST&quot;, &quot;updateRessursNavn&quot;, updateVisningsnavnRequest, new Origination(</span>
+<span class="fc" id="L150">            getAuthenticatedNavIdent(),</span>
+<span class="fc" id="L151">            SecurityUtil.getAuthenticatedAzpName()</span>
+        ));
+
+<span class="fc" id="L154">        ressursCommadService.oppdaterPersonaliaEvent(oppdaterPersonaliaCommand, inputMetadata);</span>
+<span class="fc" id="L155">        nomMastered.markRessursAsMasteredInNom(navident);</span>
+<span class="fc" id="L156">    }</span>
+
+    public void updateFysiskeBrukersteder(String fid, UpdateFysiskeBrukerstederRequest updateFysiskeBrukerstederRequest) {
+<span class="pc bpc" id="L159" title="1 of 4 branches missed.">        if (updateFysiskeBrukerstederRequest.primaryFysiskBrukersted() == null || updateFysiskeBrukerstederRequest.primaryFysiskBrukersted().isBlank()) {</span>
+<span class="fc" id="L160">            throw new IllegalArgumentException(&quot;primaryFysiskBrukersted cannot be blank or null&quot;);</span>
+        }
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        if (!updateFysiskeBrukerstederRequest.fysiskeBrukersteder().contains(updateFysiskeBrukerstederRequest.primaryFysiskBrukersted())) {</span>
+<span class="fc" id="L163">            throw new IllegalArgumentException(&quot;Value for primaryFysiskBrukersted must be included in fysiske brukersteder&quot;);</span>
+        }
+
+<span class="fc" id="L166">        validateFysiskeBrukerstederExists(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());</span>
+
+<span class="pc" id="L168">        var ressursState = ressursStateRepository.findByFid(fid).orElseThrow(() -&gt; RessursNotFoundException.fid(fid));</span>
+
+<span class="fc" id="L170">        var existingFysiskeBrukerstederForRessurs = Optional.ofNullable(ressursState.fysiskeBrukersteder()).orElse(Collections.emptyList());</span>
+
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">        var requestContainsNewValues = !Set.copyOf(existingFysiskeBrukerstederForRessurs).equals(updateFysiskeBrukerstederRequest.fysiskeBrukersteder())</span>
+<span class="pc bnc" id="L173" title="All 2 branches missed.">            || !ressursState.primaryFysiskBrukersted().equals(Optional.of(updateFysiskeBrukerstederRequest.primaryFysiskBrukersted()));</span>
+
+<span class="pc bpc" id="L175" title="1 of 2 branches missed.">        if (requestContainsNewValues) {</span>
+
+<span class="fc" id="L177">            ressursCommadService.oppdaterFysiskeBrukerstederCommand(</span>
+<span class="fc" id="L178">                OppdaterFysiskeBrukerstederCommand.builder()</span>
+<span class="fc" id="L179">                    .fid(ressursState.fid())</span>
+<span class="fc" id="L180">                    .primaryFysiskBrukersted(updateFysiskeBrukerstederRequest.primaryFysiskBrukersted())</span>
+<span class="fc" id="L181">                    .fysiskeBrukersteder(updateFysiskeBrukerstederRequest.fysiskeBrukersteder())</span>
+<span class="fc" id="L182">                    .build(),</span>
+                new InputMetadata(
+                    &quot;REST-API&quot;,
+                    &quot;updateFysiskeBrukersteder&quot;,
+<span class="fc" id="L186">                    Map.of(&quot;navident&quot;, ressursState.navident()),</span>
+                    new Origination(
+<span class="fc" id="L188">                        getAuthenticatedNavIdent(),</span>
+<span class="fc" id="L189">                        SecurityUtil.getAuthenticatedAzpName()</span>
+                    )
+                )
+            );
+        } else {
+<span class="nc" id="L194">            logger.info(&quot;UpdateFysiskeBrukerstederRequest contained no new values, skipping update on ressurs with fid {}&quot;, fid);</span>
+        }
+<span class="fc" id="L196">    }</span>
+
+    private void validateFysiskeBrukerstederExists(Set&lt;String&gt; brukerstedNrs) {
+<span class="fc" id="L199">        var existingBrukerstedNrs = nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(brukerstedNrs.stream().toList());</span>
+
+<span class="pc bpc" id="L201" title="1 of 2 branches missed.">        if (!existingBrukerstedNrs.containsAll(brukerstedNrs)) {</span>
+<span class="nc" id="L202">            var nonExistingBrukerstedNrs = brukerstedNrs.stream().filter(existingBrukerstedNrs::contains)</span>
+<span class="nc" id="L203">                .collect(Collectors.toSet());</span>
+
+<span class="nc" id="L205">            throw new IllegalArgumentException(String.format(</span>
+                &quot;Fysiske brukersteder with brukerstedNr %s does not exist&quot;,
+                nonExistingBrukerstedNrs
+            ));
+        }
+<span class="fc" id="L210">    }</span>
+
+    public List&lt;JsonNode&gt; getRessursEvents(ReadTopicRequest readTopicRequest) {
+<span class="nc" id="L213">        return kafkaTopicReader.getRessursEvents(readTopicRequest.maxRecords(), readTopicRequest.fromOffset(), readTopicRequest.partition());</span>
+    }
+
+    public List&lt;RessursLeder&gt; getLedereForRessurs(String navident) {
+<span class="nc" id="L217">        return ressursLedereResolver.ledere(navident);</span>
+    }
+
+    public RessursState createRessursAndNotify(
+        OpprettRessursRequest request
+    ) {
+<span class="fc" id="L223">        validateOpprettRessursRequest(request);</span>
+
+<span class="fc" id="L225">        return ressursStateRepository.findByPersonident(request.personident()).orElseGet(() -&gt; {</span>
+<span class="fc" id="L226">            final var createdRessurs = createRessurs(request);</span>
+
+            try {
+<span class="nc" id="L229">                ressursOpprettetEmailService.notifyByEmail(createdRessurs.navident(), request.orgEnhetId());</span>
+<span class="fc" id="L230">            } catch (RessursOpprettetEmailException exception) {</span>
+                //TODO: consider handling exception if email sending is important
+<span class="fc" id="L232">                logger.warn(&quot;Epost varsling om opprettelse av ressurs til orgenhet leder feilet. {}&quot;, exception.getMessage());</span>
+<span class="nc" id="L233">            }</span>
+
+<span class="fc" id="L235">            return createdRessurs;</span>
+        });
+
+    }
+
+    private RessursState createRessurs(OpprettRessursRequest request) {
+
+<span class="fc" id="L242">        final var opprettNavidentResponse = nikClient.opprettNavidentOnBehalfOfUser(</span>
+<span class="fc" id="L243">            OpprettNavidentRequest.builder()</span>
+<span class="fc" id="L244">                .personid(request.personident())</span>
+<span class="fc" id="L245">                .identPrefix(request.visningsetternavn().substring(0, 1))</span>
+<span class="fc" id="L246">                .identType(&quot;STANDARD&quot;)</span>
+<span class="fc" id="L247">                .build()</span>
+        );
+
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">        if (!opprettNavidentResponse.getStatusCode().is2xxSuccessful()) {</span>
+<span class="nc" id="L251">            throw new ResponseStatusException(</span>
+<span class="nc" id="L252">                opprettNavidentResponse.getStatusCode(),</span>
+<span class="nc" id="L253">                Optional.ofNullable(opprettNavidentResponse.getBody())</span>
+<span class="nc" id="L254">                    .map(OpprettNavidentResponse::getFeilmelding)</span>
+<span class="nc" id="L255">                    .orElse(&quot;NIK connection error&quot;)</span>
+            );
+        }
+
+<span class="pc bpc" id="L259" title="2 of 4 branches missed.">        if (opprettNavidentResponse.getBody() != null &amp;&amp; opprettNavidentResponse.getBody().getFeilmelding() != null) {</span>
+<span class="nc" id="L260">            throw new ResponseStatusException(</span>
+<span class="nc" id="L261">                opprettNavidentResponse.getStatusCode(),</span>
+<span class="nc" id="L262">                opprettNavidentResponse.getBody().getFeilmelding()</span>
+            );
+        }
+
+<span class="fc" id="L266">        final var pdlPerson = pdlClient.hentPerson(request.personident());</span>
+
+<span class="pc bpc" id="L268" title="2 of 4 branches missed.">        if (request.visningsmellomnavn() != null &amp;&amp; request.visningsmellomnavn().isBlank()) {</span>
+<span class="nc" id="L269">            request = request.toBuilder().visningsmellomnavn(null).build();</span>
+        }
+
+<span class="fc" id="L272">        logger.debug(&quot;createRessurs for {} - {}&quot;, opprettNavidentResponse.getBody().getNavident(), request.visningsetternavn());</span>
+
+<span class="fc" id="L274">        var metaData = new InputMetadata(</span>
+            &quot;REST-API&quot;,
+            &quot;opprettRessurs&quot;,
+            request,
+            new Origination(
+<span class="fc" id="L279">                getAuthenticatedNavIdent(),</span>
+<span class="fc" id="L280">                SecurityUtil.getAuthenticatedAzpName()</span>
+            )
+        );
+
+<span class="fc" id="L284">        final var opprettRessursCommand = new OpprettRessursCommand(</span>
+<span class="fc" id="L285">            request.personident(),</span>
+<span class="fc" id="L286">            opprettNavidentResponse.getBody().getNavident(),</span>
+            pdlPerson,
+<span class="fc" id="L288">            request.sektor(),</span>
+            new Visningsnavn(
+<span class="fc" id="L290">                request.visningsfornavn(),</span>
+<span class="fc" id="L291">                Optional.ofNullable(request.visningsmellomnavn()),</span>
+<span class="fc" id="L292">                request.visningsetternavn()</span>
+            ),
+            metaData,
+<span class="fc" id="L295">            request.startDato(),</span>
+<span class="fc" id="L296">            Optional.ofNullable(request.orgEnhetId())</span>
+<span class="fc" id="L297">                .flatMap(orgEnhetStateRepository::findById)</span>
+<span class="fc" id="L298">                .flatMap(OrgEnhetState::agressoId)</span>
+<span class="fc" id="L299">                .orElse(null), // TODO: Validate not null in RessursCommandService</span>
+<span class="fc" id="L300">            request.ansettelsesType(),</span>
+<span class="fc" id="L301">            request.fysiskBrukerstedNr()</span>
+        );
+
+
+        try {
+<span class="fc" id="L306">            RessursState opprettetRessurs = ressursCommadService.createRessursSync(opprettRessursCommand);</span>
+<span class="fc" id="L307">            nomMastered.markRessursAsMasteredInNom(opprettetRessurs.navident());</span>
+
+            // If ressurs is EKSTERN we fire a separate &quot;avsluttRessursEvent&quot; so that other systems, such as skjerming, know the ressurs already has a sluttDato.
+<span class="pc bpc" id="L310" title="2 of 4 branches missed.">            if (request.sektor() == Sektor.EKSTERN &amp;&amp; request.sluttDato().isPresent()) {</span>
+<span class="fc" id="L311">                ressursCommadService.avsluttRessursEvent(</span>
+<span class="fc" id="L312">                    new OpphorRessursCommand(opprettetRessurs.fid(), request.sluttDato().get()),</span>
+                    metaData
+                );
+
+<span class="fc" id="L316">                var orgTilknytningFid = orgtilknytningCommandService.opprettOrgtilknytning(</span>
+                    new OpprettOrgtilknytning(
+<span class="fc" id="L318">                        opprettetRessurs.navident(),</span>
+<span class="fc" id="L319">                        request.orgEnhetId(),</span>
+<span class="fc" id="L320">                        request.startDato(),</span>
+                        metaData,
+                        null
+                    )
+                );
+
+<span class="fc" id="L326">                orgtilknytningCommandService.avvikleOrgtilknytning(</span>
+                    orgTilknytningFid,
+                    new AvvikleOrgtilknytning(
+<span class="fc" id="L329">                        opprettetRessurs.navident(),</span>
+<span class="fc" id="L330">                        request.orgEnhetId(),</span>
+<span class="fc" id="L331">                        request.sluttDato().get(),</span>
+                        metaData,
+                        null
+                    )
+                );
+
+<span class="fc" id="L337">                orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(</span>
+                    orgTilknytningFid,
+                    new EndreDagligOppfolgingOrgtilknytning(
+<span class="fc" id="L340">                        opprettetRessurs.navident(),</span>
+<span class="fc" id="L341">                        request.orgEnhetId(),</span>
+<span class="fc" id="L342">                        request.startDato(),</span>
+<span class="fc" id="L343">                        request.sluttDato(),</span>
+                        true,
+                        metaData,
+                        null
+                    )
+                );
+
+<span class="fc" id="L350">                orgtilknytningCommandService.endreTilknytningtype(</span>
+                    orgTilknytningFid,
+                    new EndreTilknytningtype(
+<span class="fc" id="L353">                        Optional.of(request.tilknytningtype()),</span>
+                        metaData
+                    )
+                );
+            }
+
+<span class="fc" id="L359">            return opprettetRessurs;</span>
+<span class="nc" id="L360">        } catch (ExecutionException | TimeoutException | InterruptedException e) {</span>
+<span class="nc" id="L361">            throw new RuntimeException(e);</span>
+        }
+    }
+
+    public void avvikleRessurs(String fid, AvvikleRessursRequest request) {
+<span class="fc" id="L366">        var ressursState = findRessursStateByFid(fid);</span>
+<span class="fc" id="L367">        var metaData = new InputMetadata(</span>
+            &quot;REST&quot;,
+            &quot;avvikleRessurs&quot;,
+            request,
+            new Origination(
+<span class="fc" id="L372">                getAuthenticatedNavIdent(),</span>
+<span class="fc" id="L373">                SecurityUtil.getAuthenticatedAzpName()</span>
+            )
+        );
+
+<span class="fc" id="L377">        ressursCommadService.avsluttRessursEvent(</span>
+<span class="fc" id="L378">            new OpphorRessursCommand(fid, request.sluttDato()),</span>
+            metaData
+        );
+
+<span class="fc" id="L382">        var orgtilknytninger = orgtilknytningRestService.getOrgtilknytninger(Optional.of(ressursState.navident()));</span>
+
+<span class="fc" id="L384">        orgtilknytninger.forEach(orgtilknytningState -&gt; {</span>
+<span class="fc" id="L385">            var gyldigTomIsAfterAvvikletDato = orgtilknytningState.gyldigTom().orElse(LocalDate.MAX).isAfter(request.sluttDato());</span>
+<span class="fc bfc" id="L386" title="All 2 branches covered.">            if (gyldigTomIsAfterAvvikletDato) {</span>
+<span class="fc" id="L387">                orgtilknytningCommandService.avvikleOrgtilknytning(</span>
+<span class="fc" id="L388">                    orgtilknytningState.fid(),</span>
+                    new AvvikleOrgtilknytning(
+<span class="fc" id="L390">                        ressursState.navident(),</span>
+<span class="fc" id="L391">                        orgtilknytningState.orgEnhetId(),</span>
+<span class="fc" id="L392">                        request.sluttDato(),</span>
+                        metaData,
+                        null
+                    )
+                );
+            }
+<span class="fc" id="L398">        });</span>
+
+<span class="fc" id="L400">        nomMastered.markRessursAsMasteredInNom(ressursState.navident());</span>
+<span class="fc" id="L401">    }</span>
+
+    private void validateOpprettRessursRequest(OpprettRessursRequest request) {
+<span class="fc bfc" id="L404" title="All 2 branches covered.">        if (request.sektor() != Sektor.EKSTERN) {</span>
+<span class="fc" id="L405">            throw InvalidSektorException.actionNotAllowedForSektor(request.sektor());</span>
+        }
+<span class="fc" id="L407">        validateChronologicalDates(request.startDato(), request.sluttDato().orElse(null));</span>
+<span class="fc bfc" id="L408" title="All 2 branches covered.">        if (request.sluttDato().isEmpty()) {</span>
+<span class="fc" id="L409">            throw new IllegalArgumentException(&quot;Sluttdato må oppgis for opprettelse av ekstern ressurs&quot;);</span>
+        }
+<span class="fc" id="L411">        validateFysiskeBrukerstederExists(Set.of(request.fysiskBrukerstedNr()));</span>
+<span class="fc" id="L412">        validateOrgtilknytningTypeSektorCombination(request.tilknytningtype(), request.sektor());</span>
+
+<span class="fc" id="L414">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

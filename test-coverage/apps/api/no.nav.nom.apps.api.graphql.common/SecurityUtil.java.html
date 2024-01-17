@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecurityUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.graphql.common</a> &gt; <span class="el_source">SecurityUtil.java</span></div><h1>SecurityUtil.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.graphql.common;
+
+import graphql.schema.DataFetchingFieldSelectionSet;
+import no.nav.nom.apps.api.common.security.NomApiAccessScope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AuthenticationTrustResolver;
+import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+@Component
+public class SecurityUtil {
+
+<span class="fc" id="L29">    private final static Logger logger = LoggerFactory.getLogger(SecurityUtil.class);</span>
+
+    private final boolean securityEnabled;
+<span class="fc" id="L32">    private final AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();</span>
+
+    public static final String NAVIDENT = &quot;NAVident&quot;;
+    public static final String AZP_NAME = &quot;azp_name&quot;;
+
+<span class="fc" id="L37">    public SecurityUtil(Environment environment) {</span>
+<span class="pc bpc" id="L38" title="1 of 2 branches missed.">        securityEnabled = !Arrays.stream(environment.getActiveProfiles()).toList().contains(&quot;local&quot;);</span>
+<span class="fc" id="L39">    }</span>
+
+    /**
+     * Used to check auth with spring security @Preauthorize(@securityUtil.checkAuth(authentication))
+     *
+     * @param authentication the authentication object to check
+     * @return true if authentication is accepted
+     * @throws InvalidBearerTokenException when the token is missing or invalid
+     */
+    public boolean checkAuth(Authentication authentication) {
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        if (securityEnabled) {</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">            if (trustResolver.isAnonymous(authentication)) {</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">                if (logger.isTraceEnabled()) {</span>
+<span class="nc" id="L52">                    logger.trace(&quot;Anonymous user blocked: {}&quot;, authentication);</span>
+                }
+<span class="fc" id="L54">                throw new InvalidBearerTokenException(&quot;Missing or invalid token&quot;);</span>
+            }
+        }
+
+<span class="fc" id="L58">        return true;</span>
+    }
+
+    /**
+     * Field Selection auth check for any query trying to access a field with a protected property.
+     * Intended use is at query level with @PreAuthorize(@securityUtil.hasPersonIdentAccess(authentication, #dataFetchingEnvironment.selectionSet))
+     *
+     * @param authentication    the user we're checking if it has access
+     * @param fieldSelectionSet the DataFetchingFieldSelectionSet we're checking
+     * @return true if the user has access
+     */
+    public boolean hasPersonIdentAccess(Authentication authentication, DataFetchingFieldSelectionSet fieldSelectionSet) {
+<span class="fc" id="L70">        return hasRequiredAccess(</span>
+                authentication,
+                fieldSelectionSet,
+                new String[]{&quot;**/personIdent&quot;, &quot;**/personident&quot;},
+<span class="fc" id="L74">                new String[]{NomApiAccessScope.QUERY_PERSON.getScope()}</span>
+        );
+    }
+
+    /**
+     * Field Selection auth check for any query trying to access a field with a protected property
+     * Primarly intended for creating shorthand access controls like {@link SecurityUtil#hasPersonIdentAccess(Authentication, DataFetchingFieldSelectionSet)}
+     * Can also be used in a controller at query level with @PreAuthorize(@securityUtil.hasPersonIdentAccess(authentication, #dataFetchingEnvironment.selectionSet, {'**\fieldA', '**\fieldB'}, 'ROLE_B'))
+     *
+     * @param authentication    the user we're checking if it has access
+     * @param fieldSelectionSet the DataFetchingFieldSelectionSet we're checking
+     * @param fieldGlobPatterns the fields we'd like to check if a user has access to
+     * @param requiredRoles     the roles required to access the fields from fieldGlobPatterns
+     * @return true if the user has access, or if security is disabled
+     * @throws AccessDeniedException if user does not have access to the fields specified
+     */
+    public boolean hasRequiredAccess(
+            Authentication authentication, DataFetchingFieldSelectionSet fieldSelectionSet, String[] fieldGlobPatterns, String[] requiredRoles
+    ) {
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        if (securityEnabled) {</span>
+<span class="fc" id="L94">            var authorities = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();</span>
+
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">            if (logger.isTraceEnabled()) {</span>
+<span class="nc" id="L97">                logger.trace(&quot;Checking access to fields {} with required roles {} for current authorities {}&quot;, fieldGlobPatterns, requiredRoles, authorities);</span>
+            }
+
+<span class="fc bfc" id="L100" title="All 4 branches covered.">            if (fieldSelectionSet.containsAnyOf(&quot;&quot;, fieldGlobPatterns) &amp;&amp; Arrays.stream(requiredRoles).noneMatch(authorities::contains)) {</span>
+<span class="fc" id="L101">                throw new AccessDeniedException(String.format(&quot;User does not have the correct access rights for fields %s&quot;, List.of(fieldGlobPatterns)));</span>
+            }
+
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">            if (logger.isTraceEnabled()) {</span>
+<span class="nc" id="L105">                logger.trace(&quot;User did not query any of {}, granting access!&quot;, List.of(fieldGlobPatterns));</span>
+            }
+        }
+
+<span class="fc" id="L109">        return true;</span>
+    }
+
+    public Optional&lt;String&gt; getAzpName() {
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">        if (securityEnabled) {</span>
+<span class="fc" id="L114">            final var auth = SecurityContextHolder.getContext().getAuthentication();</span>
+
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">            if (auth instanceof JwtAuthenticationToken token) {</span>
+<span class="fc" id="L117">                var azp_name = token.getTokenAttributes().get(AZP_NAME);</span>
+<span class="fc" id="L118">                return Optional.ofNullable(azp_name).map(Objects::toString);</span>
+            }
+        }
+<span class="nc" id="L121">        return Optional.empty();</span>
+    }
+
+    public static Optional&lt;String&gt; getNavIdent(Authentication authentication) {
+<span class="fc" id="L125">        Jwt jwt = (Jwt) authentication.getPrincipal();</span>
+<span class="fc" id="L126">        return Optional.ofNullable(jwt.getClaimAsString(NAVIDENT));</span>
+    }
+
+    // When consumer is an application
+    public static Optional&lt;String&gt; getAzpName(Authentication authentication){
+<span class="fc" id="L131">        Jwt jwt = (Jwt) authentication.getPrincipal();</span>
+<span class="fc" id="L132">        return Optional.ofNullable(jwt.getClaimAsString(AZP_NAME));</span>
+    }
+
+
+    public static String getAuthenticatedNavIdent() {
+<span class="fc" id="L137">        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="fc" id="L138">        return getNavIdent(authentication).orElseThrow(</span>
+<span class="nc" id="L139">            () -&gt; new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format(&quot;Couldn't find %s in Claims&quot;, NAVIDENT)));</span>
+    }
+
+    public static String getAuthenticatedAzpName() {
+<span class="fc" id="L143">        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="fc" id="L144">        return getAzpName(authentication).orElseThrow(</span>
+<span class="nc" id="L145">            () -&gt; new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format(&quot;Couldn't find %s in Claims&quot;, AZP_NAME)));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

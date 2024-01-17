@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RessurserSearch.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.graphql.common.projections</a> &gt; <span class="el_source">RessurserSearch.java</span></div><h1>RessurserSearch.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.graphql.common.projections;
+
+import org.springframework.data.web.ProjectedPayload;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static java.util.Collections.emptySet;
+
+/**
+ * Projected payload for binding the graphql input type RessurserSearch
+ * Use resolvePersonidenter() to resolve the list of personidenter to search for.
+ * Use resolveNavidenter() to resolve the list of navidenter to search for.
+ */
+@ProjectedPayload
+public interface RessurserSearch {
+<span class="fc" id="L17">    RessurserSearch EMPTY_SEARCH = emptyRessurserSearch();</span>
+
+    @Deprecated(forRemoval = true)
+    Set&lt;String&gt; getPersonIdenter();
+
+    Set&lt;String&gt; getPersonidenter();
+
+    @Deprecated(forRemoval = true)
+    Set&lt;String&gt; getNavIdenter();
+
+    Set&lt;String&gt; getNavidenter();
+
+    default Set&lt;String&gt; resolvePersonidenter() {
+<span class="fc" id="L30">        Set&lt;String&gt; identer = new HashSet&lt;&gt;();</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if (getPersonidenter() != null) {</span>
+<span class="nc" id="L32">            identer.addAll(getPersonidenter());</span>
+        }
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if (getPersonIdenter() != null) {</span>
+<span class="fc" id="L35">            identer.addAll(getPersonIdenter());</span>
+        }
+<span class="fc" id="L37">        return identer;</span>
+    }
+
+    default Set&lt;String&gt; resolveNavidenter() {
+<span class="fc" id="L41">        Set&lt;String&gt; identer = new HashSet&lt;&gt;();</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        if (getNavidenter() != null) {</span>
+<span class="nc" id="L43">            identer.addAll(getNavidenter());</span>
+        }
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        if (getNavIdenter() != null) {</span>
+<span class="fc" id="L46">            identer.addAll(getNavIdenter());</span>
+        }
+<span class="fc" id="L48">        return identer;</span>
+    }
+
+    static RessurserSearch emptyRessurserSearch() {
+<span class="fc" id="L52">        return new RessurserSearch() {</span>
+            @Override
+            public Set&lt;String&gt; getPersonIdenter() {
+<span class="nc" id="L55">                return emptySet();</span>
+            }
+
+            @Override
+            public Set&lt;String&gt; getPersonidenter() {
+<span class="nc" id="L60">                return emptySet();</span>
+            }
+
+            @Override
+            public Set&lt;String&gt; getNavIdenter() {
+<span class="nc" id="L65">                return emptySet();</span>
+            }
+
+            @Override
+            public Set&lt;String&gt; getNavidenter() {
+<span class="nc" id="L70">                return emptySet();</span>
+            }
+        };
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

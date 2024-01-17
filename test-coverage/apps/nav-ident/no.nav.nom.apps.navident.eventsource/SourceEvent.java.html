@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SourceEvent.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Nav Ident</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.navident.eventsource</a> &gt; <span class="el_source">SourceEvent.java</span></div><h1>SourceEvent.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.navident.eventsource;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+@Entity
+@Table(name = &quot;SOURCE_EVENT&quot;)
+@EntityListeners(AuditingEntityListener.class)
+public class SourceEvent {
+
+    @Id
+    @Column(name = &quot;ID&quot;)
+    @JsonIgnore
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = &quot;idGenerator&quot;)
+    @SequenceGenerator(name = &quot;idGenerator&quot;, sequenceName = &quot;EVENT_SEQ&quot;, allocationSize = 1)
+    private Long id;
+
+    @Column(name = &quot;EVENT_TYPE&quot;)
+    @Enumerated(EnumType.STRING)
+    EventType event;
+
+    @Column(name = &quot;EVENT_TS&quot;)
+    @CreatedDate
+    LocalDateTime eventTS;
+
+    @Column(name = &quot;BESTILLER&quot;)
+    @CreatedBy
+    String bestiller;
+
+    @Embedded
+    EventPayload payload;
+
+    public String maskedToString() {
+<span class="fc" id="L57">        SourceEvent masked = this.toBuilder().build(); // Is not a deep copy</span>
+<span class="fc" id="L58">        masked.payload = payload.toBuilder().build();</span>
+<span class="fc" id="L59">        masked.payload.personid = mask(payload.personid);</span>
+
+<span class="fc" id="L61">        return masked.toString();</span>
+    }
+
+    private String mask(String toBeMasked) {
+<span class="pc bpc" id="L65" title="1 of 4 branches missed.">        if (toBeMasked == null || toBeMasked.length() &lt; 7) return toBeMasked;</span>
+<span class="fc" id="L66">        return toBeMasked.substring(0, 6) + &quot;***&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

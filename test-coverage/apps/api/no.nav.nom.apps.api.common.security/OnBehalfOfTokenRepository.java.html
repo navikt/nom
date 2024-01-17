@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OnBehalfOfTokenRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.common.security</a> &gt; <span class="el_source">OnBehalfOfTokenRepository.java</span></div><h1>OnBehalfOfTokenRepository.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.common.security;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.crypto.factories.DefaultJWSSignerFactory;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import lombok.SneakyThrows;
+import lombok.val;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import java.time.Instant;
+import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+
+@Component
+public class OnBehalfOfTokenRepository {
+
+    private static final String AAD_GRANT_TYPE_OBO = &quot;urn:ietf:params:oauth:grant-type:jwt-bearer&quot;;
+    private static final String AAD_TOKEN_USE = &quot;on_behalf_of&quot;;
+    private static final String AAD_CLIENT_ASSERTION_TYPE = &quot;urn:ietf:params:oauth:client-assertion-type:jwt-bearer&quot;;
+    private final AuthenticationProperties.Aad aadAuthenticationProperties;
+    private final WebClient webClient;
+    private final JWSSigner jwsSigner;
+<span class="fc" id="L36">    private final Map&lt;String, SignedJWT&gt; cachedAadTokensByUserAndScope = new ConcurrentHashMap&lt;&gt;(2);</span>
+
+<span class="fc" id="L38">    public OnBehalfOfTokenRepository(AuthenticationProperties authenticationProperties) throws Exception {</span>
+<span class="fc" id="L39">        this.aadAuthenticationProperties = authenticationProperties.aad();</span>
+<span class="fc" id="L40">        this.webClient = WebClient.builder()</span>
+<span class="fc" id="L41">            .baseUrl(aadAuthenticationProperties.issuerBaseUrl())</span>
+<span class="fc" id="L42">            .build();</span>
+<span class="fc" id="L43">        this.jwsSigner = new DefaultJWSSignerFactory().createJWSSigner(aadAuthenticationProperties.jwk());</span>
+<span class="fc" id="L44">    }</span>
+
+<span class="nc" id="L46">    @SneakyThrows</span>
+    public String getOnbehalfofTokenFor(String scope) {
+<span class="nc" id="L48">        String assertion = ((JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication()).getToken().getTokenValue();</span>
+<span class="nc" id="L49">        val signedJwt = cachedAadTokensByUserAndScope.get(assertion + scope);</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        return String.format(&quot;%s&quot;, isValidToken(signedJwt) ? signedJwt : refreshOnbehalfofTokenFor(assertion, scope));</span>
+    }
+
+<span class="nc" id="L53">    @SneakyThrows</span>
+    private synchronized SignedJWT refreshOnbehalfofTokenFor(String assertion, String scope) {
+<span class="nc" id="L55">        var cacheKey = assertion + scope;</span>
+
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (isValidToken(cachedAadTokensByUserAndScope.get(cacheKey))) {</span>
+<span class="nc" id="L58">            return cachedAadTokensByUserAndScope.get(cacheKey);</span>
+        }
+
+<span class="nc" id="L61">        val aadHeaders = new HttpHeaders();</span>
+<span class="nc" id="L62">        aadHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);</span>
+
+<span class="nc" id="L64">        val aadBodyMap = new LinkedMultiValueMap&lt;String, String&gt;();</span>
+<span class="nc" id="L65">        aadBodyMap.add(&quot;scope&quot;, scope);</span>
+<span class="nc" id="L66">        aadBodyMap.add(&quot;client_id&quot;, aadAuthenticationProperties.clientId());</span>
+<span class="nc" id="L67">        aadBodyMap.add(&quot;client_assertion_type&quot;, AAD_CLIENT_ASSERTION_TYPE);</span>
+<span class="nc" id="L68">        aadBodyMap.add(&quot;client_assertion&quot;, generateClientAssertionToken());</span>
+<span class="nc" id="L69">        aadBodyMap.add(&quot;assertion&quot;, assertion);</span>
+<span class="nc" id="L70">        aadBodyMap.add(&quot;grant_type&quot;, AAD_GRANT_TYPE_OBO);</span>
+<span class="nc" id="L71">        aadBodyMap.add(&quot;requested_token_use&quot;, AAD_TOKEN_USE);</span>
+
+<span class="nc" id="L73">        var createTokenResponseBody = webClient.post()</span>
+<span class="nc" id="L74">            .uri(&quot;/oauth2/v2.0/token&quot;)</span>
+<span class="nc" id="L75">            .contentType(MediaType.APPLICATION_FORM_URLENCODED)</span>
+<span class="nc" id="L76">            .bodyValue(aadBodyMap)</span>
+<span class="nc" id="L77">            .retrieve()</span>
+<span class="nc" id="L78">            .bodyToMono(JsonNode.class)</span>
+<span class="nc" id="L79">            .block();</span>
+
+<span class="nc" id="L81">        val accessToken = SignedJWT.parse(createTokenResponseBody.get(&quot;access_token&quot;).asText());</span>
+<span class="nc" id="L82">        cachedAadTokensByUserAndScope.put(cacheKey, accessToken);</span>
+<span class="nc" id="L83">        return accessToken;</span>
+    }
+
+<span class="nc" id="L86">    @SneakyThrows</span>
+    private String generateClientAssertionToken() {
+<span class="nc" id="L88">        final var claimSet = new JWTClaimsSet.Builder().audience(aadAuthenticationProperties.issuerBaseUrl() + &quot;/v2.0&quot;)</span>
+<span class="nc" id="L89">            .expirationTime(Date.from(Instant.now().plusSeconds(60 * 5)))</span>
+<span class="nc" id="L90">            .issuer(aadAuthenticationProperties.clientId())</span>
+<span class="nc" id="L91">            .jwtID(UUID.randomUUID().toString())</span>
+<span class="nc" id="L92">            .notBeforeTime(Date.from(Instant.now()))</span>
+<span class="nc" id="L93">            .subject(aadAuthenticationProperties.clientId())</span>
+<span class="nc" id="L94">            .build();</span>
+
+<span class="nc" id="L96">        final var signedJWT = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(aadAuthenticationProperties.jwk().getKeyID()).build(), claimSet);</span>
+<span class="nc" id="L97">        signedJWT.sign(jwsSigner);</span>
+<span class="nc" id="L98">        return signedJWT.serialize();</span>
+    }
+
+<span class="nc" id="L101">    @SneakyThrows</span>
+    private boolean isValidToken(SignedJWT signedJwt) {
+<span class="nc bnc" id="L103" title="All 4 branches missed.">        return signedJwt != null &amp;&amp; signedJwt.getJWTClaimsSet().getExpirationTime().after(Date.from(Instant.now().plusSeconds(20)));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

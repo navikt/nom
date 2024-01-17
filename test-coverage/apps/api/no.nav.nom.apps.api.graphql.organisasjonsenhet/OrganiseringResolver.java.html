@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrganiseringResolver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.graphql.organisasjonsenhet</a> &gt; <span class="el_source">OrganiseringResolver.java</span></div><h1>OrganiseringResolver.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.graphql.organisasjonsenhet;
+
+import io.getunleash.Unleash;
+import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
+import no.nav.nom.contract.nom.api.graphql.Organisering;
+import no.nav.nom.contract.nom.api.graphql.OrganiseringRetning;
+import no.nav.nom.contract.nom.state.OrganiseringState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.List;
+
+import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
+
+@Component
+public class OrganiseringResolver {
+
+<span class="fc" id="L23">    private final Logger logger = LoggerFactory.getLogger(this.getClass());</span>
+
+    private final DvhRepository dvhRepository;
+    private final OrganiseringStateRepository organiseringStateRepository;
+    private final Unleash unleash;
+
+
+<span class="fc" id="L30">    public OrganiseringResolver(DvhRepository dvhRepository, OrganiseringStateRepository organiseringStateRepository, Unleash unleash) {</span>
+<span class="fc" id="L31">        this.dvhRepository = dvhRepository;</span>
+<span class="fc" id="L32">        this.organiseringStateRepository = organiseringStateRepository;</span>
+<span class="fc" id="L33">        this.unleash = unleash;</span>
+<span class="fc" id="L34">    }</span>
+
+    public List&lt;Organisering&gt; organiseringer(OrgEnhet orgEnhet, OrganiseringRetning retning) {
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if (orgEnhet.endedOnStartDate()) return Collections.emptyList();</span>
+
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {</span>
+<span class="fc" id="L40">            logger.debug(&quot;Henter organiseringer for {} retning '{}' med ny implementasjon&quot;, orgEnhet.getId(), retning);</span>
+<span class="fc" id="L41">            return organiseringStateRepository.getOrganiseringerContainingId(orgEnhet.getId()).stream()</span>
+<span class="fc" id="L42">                .map(organiseringState -&gt; convert(organiseringState, orgEnhet))</span>
+<span class="fc bfc" id="L43" title="All 4 branches covered.">                .filter(organisering -&gt; retning == null || organisering.getRetning() == retning)</span>
+<span class="fc" id="L44">                .toList();</span>
+
+        } else {
+<span class="fc" id="L47">            logger.debug(&quot;Henter organiseringer for {} retning '{}' med gammel implementasjon&quot;, orgEnhet.getId(), retning);</span>
+<span class="fc" id="L48">            return dvhRepository.getOrganiseringer(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn())</span>
+<span class="fc" id="L49">                .stream()</span>
+<span class="fc" id="L50">                .map(organisering -&gt; convert(organisering, orgEnhet))</span>
+<span class="pc bpc" id="L51" title="1 of 4 branches missed.">                .filter(organisering -&gt; retning == null || organisering.getRetning() == retning)</span>
+<span class="fc" id="L52">                .toList();</span>
+        }
+    }
+
+    private Organisering convert(OrganiseringState organisering, OrgEnhet orgEnhet) {
+<span class="fc" id="L57">        var retning = OrganiseringRetning.over;</span>
+
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        if (organisering.idOver().equals(orgEnhet.getId())) {</span>
+<span class="fc" id="L60">            retning = OrganiseringRetning.under;</span>
+        }
+
+<span class="fc" id="L63">        return Organisering.builder()</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">            .id(retning == OrganiseringRetning.over ? organisering.idOver() : organisering.id())</span>
+<span class="fc" id="L65">            .retning(retning)</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            .orgEnhetNr(retning == OrganiseringRetning.over ? organisering.idOver() : organisering.id())</span>
+<span class="fc" id="L67">            .orgNiv(&quot;&quot;)</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">            .orgEnhetNavn(retning == OrganiseringRetning.over ? organisering.navnOver() : organisering.navn())</span>
+<span class="fc" id="L69">            .gyldigFom(organisering.gyldigFom())</span>
+<span class="fc" id="L70">            .gyldigTom(organisering.gyldigTom().orElse(null))</span>
+<span class="fc" id="L71">            .build();</span>
+    }
+
+    private Organisering convert(DvhOrganisering organisering, OrgEnhet orgEnhet) {
+<span class="fc" id="L75">        var retning = OrganiseringRetning.over;</span>
+
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        if (organisering.getAgressoIdOver().equals(orgEnhet.getAgressoId()) &amp;&amp; organisering.getOrgNivOver()</span>
+<span class="pc bpc" id="L78" title="2 of 4 branches missed.">            .equals(orgEnhet.getOrgNiv()) &amp;&amp; organisering.getNavnOver().equals(orgEnhet.getNavn())) {</span>
+<span class="fc" id="L79">            retning = OrganiseringRetning.under;</span>
+        }
+
+<span class="fc" id="L82">        return Organisering.builder()</span>
+<span class="fc" id="L83">            .id(&quot;&quot;)</span>
+<span class="fc" id="L84">            .retning(retning)</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">            .orgEnhetNr(retning == OrganiseringRetning.over ? organisering.getAgressoIdOver() : organisering.getAgressoIdUnder())</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">            .orgNiv(retning == OrganiseringRetning.over ? organisering.getOrgNivOver() : organisering.getOrgNivUnder())</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">            .orgEnhetNavn(retning == OrganiseringRetning.over ? organisering.getNavnOver() : organisering.getNavnUnder())</span>
+<span class="fc" id="L88">            .gyldigFom(organisering.getGyldigFom())</span>
+<span class="fc" id="L89">            .gyldigTom(organisering.getGyldigTom())</span>
+<span class="fc" id="L90">            .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

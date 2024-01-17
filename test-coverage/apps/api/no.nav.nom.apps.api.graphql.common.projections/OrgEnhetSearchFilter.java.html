@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrgEnhetSearchFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.graphql.common.projections</a> &gt; <span class="el_source">OrgEnhetSearchFilter.java</span></div><h1>OrgEnhetSearchFilter.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.graphql.common.projections;
+
+import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgenhetFilter;
+import org.springframework.data.web.ProjectedPayload;
+
+@ProjectedPayload
+public interface OrgEnhetSearchFilter extends ResultLimit {
+    GyldigTomSelection getGyldigTomSelection();
+
+    OrgnivSelection getOrgnivSelection();
+
+    default LuceneOrgenhetFilter toLuceneFilter() {
+<span class="pc bpc" id="L13" title="1 of 3 branches missed.">        var luceneGyldigTom = switch (this.getGyldigTomSelection()) {</span>
+
+<span class="fc" id="L15">            case IKKE_PASSERT -&gt; LuceneOrgenhetFilter.GyldigTomSelection.IKKE_PASSERT;</span>
+<span class="nc" id="L16">            case PASSERT -&gt; LuceneOrgenhetFilter.GyldigTomSelection.PASSERT;</span>
+<span class="fc" id="L17">            case ALLE -&gt; LuceneOrgenhetFilter.GyldigTomSelection.ALLE;</span>
+        };
+
+<span class="pc bpc" id="L20" title="1 of 3 branches missed.">        var luceneOrgniv = switch (this.getOrgnivSelection()) {</span>
+<span class="fc" id="L21">            case ORGNIV_ORGENHET -&gt; LuceneOrgenhetFilter.OrgnivSelection.ORGNIV_ORGENHET;</span>
+<span class="nc" id="L22">            case IKKE_ORGNIV_ORGENHET -&gt; LuceneOrgenhetFilter.OrgnivSelection.IKKE_ORGNIV_ORGENHET;</span>
+<span class="fc" id="L23">            case ALLE -&gt; LuceneOrgenhetFilter.OrgnivSelection.ALLE;</span>
+        };
+<span class="fc" id="L25">        return new LuceneOrgenhetFilter(luceneGyldigTom, luceneOrgniv);</span>
+    }
+
+<span class="fc" id="L28">    enum GyldigTomSelection {</span>
+<span class="fc" id="L29">        IKKE_PASSERT, // GYLDIG_TOM_FRAMTIDIG</span>
+<span class="fc" id="L30">        PASSERT, // GYLDIG_TOM_PASSERT</span>
+<span class="fc" id="L31">        ALLE</span>
+    }
+
+<span class="fc" id="L34">    enum OrgnivSelection {</span>
+<span class="fc" id="L35">        ORGNIV_ORGENHET,</span>
+<span class="fc" id="L36">        IKKE_ORGNIV_ORGENHET,</span>
+<span class="fc" id="L37">        ALLE</span>
+    }
+
+    static OrgEnhetSearchFilter alle() {
+<span class="fc" id="L41">        return new OrgEnhetSearchFilter() {</span>
+            @Override
+            public GyldigTomSelection getGyldigTomSelection() {
+<span class="fc" id="L44">                return GyldigTomSelection.ALLE;</span>
+            }
+
+            @Override
+            public OrgnivSelection getOrgnivSelection() {
+<span class="fc" id="L49">                return OrgnivSelection.ALLE;</span>
+            }
+
+            @Override
+            public Limit getLimit() {
+<span class="fc" id="L54">                return Limit.LIMIT_30;</span>
+            }
+        };
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

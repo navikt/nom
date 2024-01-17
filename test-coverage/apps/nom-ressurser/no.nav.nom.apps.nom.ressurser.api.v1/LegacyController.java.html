@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LegacyController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Ressurser</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.nom.ressurser.api.v1</a> &gt; <span class="el_source">LegacyController.java</span></div><h1>LegacyController.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.nom.ressurser.api.v1;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.nom.ressurser.api.v1.dto.RessursResponseDTO;
+import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
+import no.nav.nom.apps.nom.ressurser.ressurser.RessursRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
+
+/*
+Brukes bare i overgang til sikring av endepunkter i nom-ressurser, skal slettes.
+*/
+<span class="nc" id="L21">@Slf4j</span>
+@RestController
+@RequestMapping(value = &quot;/api/legacy/ressurs&quot;, produces = APPLICATION_JSON_VALUE)
+@RequiredArgsConstructor
+public class LegacyController {
+
+    private final RessursRepository repository;
+
+    @GetMapping(&quot;ansatt&quot;) //todo: Skal denne være beskyttet med persontoken eller servicebruker?
+    public RessursResponseDTO hentRessurs(@RequestHeader(required = false) String navident,
+                                          @RequestHeader(required = false) String personident,
+                                          @RequestParam(required = false) List&lt;String&gt; ressursType,
+                                          @RequestParam(defaultValue = &quot;true&quot;) boolean gyldig){
+<span class="nc bnc" id="L34" title="All 4 branches missed.">        if (navident == null &amp;&amp; personident == null) {</span>
+<span class="nc" id="L35">            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, &quot;Oppgi identifikator i header enten som navident eller personident.&quot;);</span>
+        }
+
+        Optional&lt;Ressurs&gt; ressurs;
+
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (navident != null) {</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">            ressurs = gyldig ? repository.getGyldigRessursByNavident(navident) : repository.findByNavident(navident);</span>
+        } else {
+<span class="nc bnc" id="L43" title="All 2 branches missed.">            ressurs = gyldig ? repository.getGyldigRessursByPersonident(personident) : repository.findByPersonident(personident);</span>
+        }
+
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        if (ressursType != null) {</span>
+<span class="nc" id="L47">            ressursType.replaceAll(String::toUpperCase);</span>
+<span class="nc" id="L48">            ressurs = ressurs.filter(ressursen -&gt; ressursType.contains(ressursen.getRessurstype().toString()));</span>
+        }
+
+<span class="nc" id="L51">        return ressurs.map(RessursResponseDTO::fromEntity).orElse(null);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EventSourceProducer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Nav Ident</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.navident.eventsource</a> &gt; <span class="el_source">EventSourceProducer.java</span></div><h1>EventSourceProducer.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.navident.eventsource;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import no.nav.nom.apps.navident.common.LogConfig;
+import no.nav.nom.apps.navident.common.cache.RnRClientTokenCache;
+import no.nav.nom.apps.navident.common.cache.RnRMdcCache;
+import no.nav.nom.apps.navident.rnrservices.Need;
+import no.nav.nom.contract.nom.IdentType;
+import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+<span class="fc" id="L22">@Slf4j</span>
+public class EventSourceProducer {
+    private final KafkaTemplate&lt;String, SourceEvent&gt; producer;
+    private final SourceEventRepository sourceEventRepository;
+    private final RnRClientTokenCache cache;
+    private final RnRMdcCache mdcCache;
+
+    @Value(&quot;${app.kafka.topic.eventsource.name}&quot;)
+    private String eventSourceTopic;
+
+    @KafkaListener(id = &quot;EventSourceProducer&quot;, topics = &quot;${app.kafka.topic.rnr.name}&quot;)
+    public void listen(Need need) {
+<span class="fc" id="L34">        mdcCache.loadMdc(need.getUuid());</span>
+
+<span class="pc bpc" id="L36" title="1 of 6 branches missed.">        if (need.isResponsProdusentVisited() &amp;&amp; need.getRespons() != null &amp;&amp; List.of(HttpStatus.OK, HttpStatus.CREATED).contains(need.getRespons().getHttpStatus())) {</span>
+<span class="fc" id="L37">            log.debug(LogConfig.SECURE_LOGS,&quot;Producing and persisting SourceEvent for need: {}&quot;, need);</span>
+<span class="fc" id="L38">            log.debug(&quot;Producing and persisting SourceEvent for need: %s&quot;.formatted(need.maskedToString()));</span>
+<span class="fc" id="L39">            val responseBody = need.getRespons().getBody();</span>
+<span class="fc" id="L40">            val sourceEvent = SourceEvent.builder()</span>
+<span class="fc" id="L41">                    .event(EventType.OPPRETT)</span>
+<span class="fc" id="L42">                    .payload(</span>
+<span class="fc" id="L43">                            EventPayload.builder()</span>
+<span class="fc" id="L44">                                    .navident(responseBody.getNavident())</span>
+<span class="fc" id="L45">                                    .identType(need.getIdentType())</span>
+<span class="fc" id="L46">                                    .personid(need.getPersonid())</span>
+<span class="fc" id="L47">                                    .build()</span>
+<span class="fc" id="L48">                    ).build();</span>
+
+            // Since this is async from request there is no SecurityContext.Authentication present.
+            // This is needed for jpa @CreatedBy
+<span class="fc" id="L52">            cache.setCachedTokedBackOnSecurityContext(need.getUuid());</span>
+
+<span class="fc" id="L54">            val persistedSourceEvent = sourceEventRepository.save(sourceEvent);</span>
+
+<span class="fc" id="L56">            producer.send(eventSourceTopic, persistedSourceEvent);</span>
+
+<span class="fc" id="L58">            log.debug(&quot;Persisted SourceEvent posted: %s&quot;.formatted(persistedSourceEvent.maskedToString()));</span>
+
+<span class="fc" id="L60">            MDC.clear();</span>
+        }
+<span class="fc" id="L62">    }</span>
+
+    public void produceSlettEvent(String navident, IdentType identType, String personid) {
+<span class="nc" id="L65">        val sourceEvent = SourceEvent.builder()</span>
+<span class="nc" id="L66">            .event(EventType.SLETT)</span>
+<span class="nc" id="L67">            .payload(</span>
+<span class="nc" id="L68">                EventPayload.builder()</span>
+<span class="nc" id="L69">                    .navident(navident)</span>
+<span class="nc" id="L70">                    .identType(identType)</span>
+<span class="nc" id="L71">                    .personid(personid)</span>
+<span class="nc" id="L72">                    .build()</span>
+<span class="nc" id="L73">            ).build();</span>
+
+<span class="nc" id="L75">        val persistedSourceEvent = sourceEventRepository.save(sourceEvent);</span>
+
+<span class="nc" id="L77">        producer.send(eventSourceTopic, persistedSourceEvent);</span>
+
+<span class="nc" id="L79">        log.debug(&quot;Persisted SourceEvent posted: %s&quot;.formatted(persistedSourceEvent.maskedToString()));</span>
+<span class="nc" id="L80">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

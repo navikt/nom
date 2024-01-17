@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActiveDirectoryRessursBatchLoader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.graphql.common.loader</a> &gt; <span class="el_source">ActiveDirectoryRessursBatchLoader.java</span></div><h1>ActiveDirectoryRessursBatchLoader.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.graphql.common.loader;
+
+import graphql.GraphQLError;
+import graphql.GraphQLException;
+import graphql.execution.DataFetcherResult;
+import graphql.schema.DataFetchingEnvironment;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.clients.ad.ADResponseException;
+import no.nav.nom.apps.api.clients.ad.AdClient;
+import no.nav.nom.apps.api.graphql.common.ErrorCode;
+import no.nav.nom.contract.ad.AdRessurs;
+import no.nav.nom.contract.ad.AdRessurs.AdStatus;
+import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
+import java.util.function.Function;
+
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
+import static no.nav.nom.apps.api.clients.ad.AdClient.AD_MAX_BATCH_SIZE;
+import static no.nav.nom.apps.api.clients.ad.AdClient.listToBatches;
+
+<span class="fc" id="L25">@Slf4j</span>
+@Component
+public class ActiveDirectoryRessursBatchLoader {
+
+
+    private final AdClient adClient;
+
+<span class="fc" id="L32">    public ActiveDirectoryRessursBatchLoader(AdClient adClient) {</span>
+<span class="fc" id="L33">        this.adClient = adClient;</span>
+<span class="fc" id="L34">    }</span>
+
+    public &lt;T&gt; Map&lt;Ressurs, DataFetcherResult&lt;T&gt;&gt; load(List&lt;Ressurs&gt; ressurser, Function&lt;AdRessurs, T&gt; propertyResolver) {
+<span class="fc" id="L37">        final var adRessurser = listToBatches(ressurser, AD_MAX_BATCH_SIZE).stream() // Split into MAX_BATCH_SIZE lists</span>
+<span class="fc" id="L38">            .map(batch -&gt; getAdRessurser(batch.stream().map(Ressurs::getNavIdent).collect(toSet()), propertyResolver)) // Get AD ressurser from nom-proxy</span>
+<span class="fc" id="L39">            .flatMap(batchResult -&gt; batchResult.entrySet().stream()) // Convert all Maps to a big stream of EntrySet</span>
+<span class="fc" id="L40">            .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)); // Collect all entries to a Map</span>
+
+<span class="fc" id="L42">        return ressurser.stream()</span>
+<span class="fc" id="L43">                .collect(toMap(Function.identity(), ressurs -&gt; adRessurser.getOrDefault(ressurs.getNavIdent(), DataFetcherResult.&lt;T&gt;newResult().build())));</span>
+    }
+
+<span class="nc" id="L46">    @SneakyThrows</span>
+    public &lt;T&gt; Map&lt;String, DataFetcherResult&lt;T&gt;&gt; getAdRessurser(Set&lt;String&gt; navIdenter, Function&lt;AdRessurs, T&gt; propertyResolver) {
+        try {
+<span class="fc" id="L49">            var result = adClient.getAdRessurser(navIdenter);</span>
+
+<span class="fc" id="L51">            return result.getRessurser().stream().collect(toMap(AdRessurs::getNavIdent, o -&gt; convert(o, propertyResolver)));</span>
+
+<span class="nc" id="L53">        } catch (Exception exception) {</span>
+<span class="nc" id="L54">            log.error(&quot;Feil i oppslag mot AD i proxy&quot;, exception);</span>
+<span class="nc" id="L55">            return navIdenter.stream().collect(toMap(Function.identity(), p -&gt; convertToError(ErrorCode.SERVER_ERROR, &quot;Oppslag mot AD feilet&quot;)));</span>
+        }
+    }
+
+
+    private &lt;T&gt; DataFetcherResult&lt;T&gt; convert(AdRessurs ressurs, Function&lt;AdRessurs, T&gt; propertyResolver) {
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (ressurs.getStatus() == AdStatus.OK) {</span>
+<span class="fc" id="L62">            return DataFetcherResult.&lt;T&gt;newResult().data(propertyResolver.apply(ressurs)).build();</span>
+        }
+<span class="fc" id="L64">        log.debug(&quot;Manglende data fra AD&quot;, new GraphQLException(&quot;Manglende data fra AD for ident=&quot; + ressurs.getNavIdent()));</span>
+<span class="fc" id="L65">        return convertToError(ErrorCode.NOT_FOUND, &quot;AD har ingen data på nav-ident: &quot; + ressurs.getNavIdent());</span>
+    }
+
+    private &lt;T&gt; DataFetcherResult&lt;T&gt; convertToError(ErrorCode errorCode, String message) {
+<span class="fc" id="L69">        return DataFetcherResult.&lt;T&gt;newResult().error(errorCode.construct(message)).build();</span>
+    }
+
+    public static GraphQLError handleADResponseException(Throwable throwable, DataFetchingEnvironment environment) {
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        if (throwable instanceof ADResponseException exc) {</span>
+<span class="nc" id="L74">            return exc.getErrorCode().construct(environment, exc.getMessage());</span>
+        }
+<span class="fc" id="L76">        return null;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

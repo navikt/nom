@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NavIdGeneratorKonsument.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Nav Ident</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.navident.rnrservices</a> &gt; <span class="el_source">NavIdGeneratorKonsument.java</span></div><h1>NavIdGeneratorKonsument.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.navident.rnrservices;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.navident.common.cache.RnRMdcCache;
+import no.nav.nom.apps.navident.idgenerator.NavidGenerator;
+import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+<span class="fc" id="L15">@Slf4j</span>
+public class NavIdGeneratorKonsument {
+    final KafkaTemplate&lt;String, Need&gt; kafkaTemplate;
+    private final NavidGenerator idGenerator;
+    private final RnRMdcCache mdcCache;
+
+    @Value(&quot;${app.kafka.topic.rnr.name}&quot;)  private String topic;
+
+    @KafkaListener(
+            id = &quot;NavIdGeneratorKonsument&quot;,
+            topics = &quot;${app.kafka.topic.rnr.name}&quot;)
+    public void listen(Need need) {
+<span class="fc" id="L27">        mdcCache.loadMdc(need.getUuid());</span>
+
+<span class="fc" id="L29">        log.debug(&quot;Got Need %s&quot;.formatted(need.maskedToString()));</span>
+
+<span class="fc bfc" id="L31" title="All 6 branches covered.">        if (need.idGeneratorVisited || !need.personOppslagVisited || need.eksisterendeId != null) {</span>
+<span class="fc" id="L32">            log.debug(&quot;Nothing to do - skipping message&quot;);</span>
+<span class="fc" id="L33">            return;</span>
+        }
+
+<span class="fc" id="L36">        need.setGenerertId(idGenerator.generate(need.idPrefix));</span>
+
+        // Need er oppdatert - publiser på nytt
+<span class="fc" id="L39">        need.idGeneratorVisited = true;</span>
+<span class="fc" id="L40">        need.visited++;</span>
+<span class="fc" id="L41">        kafkaTemplate.send(topic, need);</span>
+
+<span class="fc" id="L43">        log.debug(&quot;Publisert Need melding: %s&quot;.formatted(need.maskedToString()));</span>
+
+<span class="fc" id="L45">        MDC.clear();</span>
+<span class="fc" id="L46">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TeamcatRessursDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.teamcat</a> &gt; <span class="el_source">TeamcatRessursDTO.java</span></div><h1>TeamcatRessursDTO.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.teamcat;
+
+import no.nav.nom.contract.nom.Sektor;
+
+import java.time.LocalDate;
+
+<span class="fc" id="L7">public record TeamcatRessursDTO(</span>
+    LocalDate startdato,
+    LocalDate sluttdato,
+    String epost,
+    String navident,
+    ResourceType ressurstype,
+    String visningsnavn,
+    String enhetId,
+    String lederNavident
+) {
+<span class="fc" id="L17">    public enum ResourceType {</span>
+<span class="fc" id="L18">        ANNEN_STAT(&quot;ANNEN_STAT&quot;),</span>
+<span class="fc" id="L19">        EKSTERN(&quot;EKSTERN&quot;),</span>
+<span class="fc" id="L20">        INTERN(&quot;INTERN&quot;);</span>
+
+
+        public final String textRepresentation;
+
+
+<span class="fc" id="L26">        ResourceType(String textRepresentation) {</span>
+<span class="fc" id="L27">            this.textRepresentation = textRepresentation;</span>
+<span class="fc" id="L28">        }</span>
+
+        public static ResourceType from(Sektor sektor, boolean isAnnenStat) {
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">            if (isAnnenStat) {</span>
+<span class="nc" id="L32">                return ResourceType.ANNEN_STAT;</span>
+            }
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">            if (sektor.equals(Sektor.EKSTERN)) {</span>
+<span class="nc" id="L35">                return ResourceType.EKSTERN;</span>
+            }
+<span class="fc" id="L37">            return ResourceType.INTERN;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

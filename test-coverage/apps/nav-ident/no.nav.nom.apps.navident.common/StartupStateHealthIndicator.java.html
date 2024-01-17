@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StartupStateHealthIndicator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Nav Ident</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.navident.common</a> &gt; <span class="el_source">StartupStateHealthIndicator.java</span></div><h1>StartupStateHealthIndicator.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.navident.common;
+
+import no.nav.nom.apps.navident.eventsource.EventSourceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.availability.ApplicationAvailability;
+import org.springframework.boot.availability.LivenessState;
+import org.springframework.boot.availability.ReadinessState;
+import org.springframework.stereotype.Component;
+
+import java.util.Map;
+
+@Component
+public class StartupStateHealthIndicator implements HealthIndicator {
+
+<span class="fc" id="L18">    private final static Logger logger = LoggerFactory.getLogger(StartupStateHealthIndicator.class);</span>
+
+    private final ApplicationAvailability applicationAvailability;
+    private final EventSourceService eventSourceService;
+
+<span class="fc" id="L23">    public StartupStateHealthIndicator(ApplicationAvailability applicationAvailability, EventSourceService eventSourceService) {</span>
+<span class="fc" id="L24">        this.applicationAvailability = applicationAvailability;</span>
+<span class="fc" id="L25">        this.eventSourceService = eventSourceService;</span>
+<span class="fc" id="L26">    }</span>
+
+    @Override
+    public Health health() {
+<span class="nc bnc" id="L30" title="All 2 branches missed.">        boolean isAlive = applicationAvailability.getLivenessState() == LivenessState.CORRECT;</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        boolean isReady = applicationAvailability.getReadinessState() == ReadinessState.ACCEPTING_TRAFFIC;</span>
+
+<span class="nc" id="L33">        Health.Builder status = Health.up();</span>
+<span class="nc bnc" id="L34" title="All 6 branches missed.">        if (! (hasAllSourceEventsBeenRead() &amp;&amp; isAlive &amp;&amp; isReady) ) {</span>
+<span class="nc" id="L35">            status = new Health.Builder()</span>
+<span class="nc" id="L36">                    .withDetails(</span>
+<span class="nc" id="L37">                            Map.ofEntries(</span>
+<span class="nc" id="L38">                                    Map.entry(&quot;sourceEventsRead&quot;, hasAllSourceEventsBeenRead()),</span>
+<span class="nc" id="L39">                                    Map.entry(&quot;isAlive&quot;, isAlive),</span>
+<span class="nc" id="L40">                                    Map.entry(&quot;isReady&quot;, isReady)</span>
+                            )
+                    )
+<span class="nc" id="L43">                    .down();</span>
+<span class="nc" id="L44">            logger.debug(&quot;Current startup state: {}&quot;, status);</span>
+        }
+<span class="nc" id="L46">        return status.build();</span>
+    }
+
+    private boolean hasAllSourceEventsBeenRead() {
+<span class="nc" id="L50">        return eventSourceService.hasAllSourceEventsBeenRead();</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

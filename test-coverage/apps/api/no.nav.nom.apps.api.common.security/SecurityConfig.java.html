@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecurityConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.common.security</a> &gt; <span class="el_source">SecurityConfig.java</span></div><h1>SecurityConfig.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.common.security;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+
+@Configuration(proxyBeanMethods = false)
+@EnableMethodSecurity
+<span class="fc" id="L20">public class SecurityConfig {</span>
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JWTFilter jwtFilter) throws Exception {
+<span class="fc" id="L24">        return http</span>
+<span class="fc" id="L25">            .sessionManagement(session -&gt; session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</span>
+<span class="fc" id="L26">            .csrf(AbstractHttpConfigurer::disable)</span>
+<span class="fc" id="L27">            .logout(AbstractHttpConfigurer::disable)</span>
+<span class="fc" id="L28">            .securityMatcher(&quot;/**&quot;)</span>
+<span class="fc" id="L29">            .authorizeHttpRequests((auth) -&gt; auth</span>
+<span class="fc" id="L30">                .requestMatchers(</span>
+                    // Default/internal paths
+                    &quot;/internal/**&quot;,
+                    //  Swagger/openapi paths
+                    &quot;/swagger-ui.html&quot;,
+                    &quot;/swagger-ui/**&quot;,
+                    &quot;/swagger-resources/**&quot;,
+                    &quot;/v3/api-docs/**&quot;,
+                    // Graphql paths
+                    &quot;/graphql&quot;,
+                    &quot;/graphql/schema&quot;,
+                    &quot;/graphiql/**&quot;,
+                    // https://github.com/spring-projects/spring-boot/issues/33934
+                    &quot;/error&quot;
+<span class="fc" id="L44">                ).permitAll()</span>
+<span class="fc" id="L45">                .anyRequest().fullyAuthenticated()</span>
+            )
+<span class="fc" id="L47">            .addFilterBefore(jwtFilter, RequestHeaderAuthenticationFilter.class)</span>
+<span class="fc" id="L48">            .exceptionHandling((exceptionHandling) -&gt;</span>
+<span class="fc" id="L49">                exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)</span>
+                ))
+<span class="fc" id="L51">            .build();</span>
+    }
+
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+<span class="fc" id="L56">        return new WebMvcConfigurer() {</span>
+            @Override
+            public void addCorsMappings(final CorsRegistry registry) {
+<span class="fc" id="L59">                registry.addMapping(&quot;/graphql/**&quot;)</span>
+<span class="fc" id="L60">                    .allowedOriginPatterns(&quot;https://*.svc.local&quot;, &quot;https://*.nav.no&quot;, &quot;https://navno.sharepoint.com&quot;, &quot;http://localhost:[*]&quot;)</span>
+                    //                    .allowedOrigins(&quot;https://nom.nav.no&quot;,&quot;https://nom.dev.nav.no&quot;,&quot;https://navno.sharepoint.com&quot;)
+                    //                    .allowedOrigins(CorsConfiguration.ALL)    // BRUK DENNE HVIS DET OVER IKKE FUNKER
+<span class="fc" id="L63">                    .allowedHeaders(CorsConfiguration.ALL)</span>
+<span class="fc" id="L64">                    .allowCredentials(true)</span>
+<span class="fc" id="L65">                    .allowedMethods(CorsConfiguration.ALL);</span>
+<span class="fc" id="L66">            }</span>
+        };
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

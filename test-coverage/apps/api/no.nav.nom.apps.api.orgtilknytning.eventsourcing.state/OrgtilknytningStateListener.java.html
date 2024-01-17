@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrgtilknytningStateListener.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.orgtilknytning.eventsourcing.state</a> &gt; <span class="el_source">OrgtilknytningStateListener.java</span></div><h1>OrgtilknytningStateListener.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.orgtilknytning.eventsourcing.state;
+
+
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.lucenesearch.LuceneService;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.libs.utils.common.kafka.KafkaUtils;
+import org.apache.kafka.clients.admin.Admin;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.PartitionOffset;
+import org.springframework.kafka.annotation.TopicPartition;
+import org.springframework.kafka.core.KafkaAdmin;
+import org.springframework.stereotype.Service;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.StreamSupport;
+
+<span class="fc" id="L26">@Slf4j</span>
+@Service
+public class OrgtilknytningStateListener {
+<span class="fc" id="L29">    private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);</span>
+    private final String stateTopic;
+    private final OrgtilknytningStateRepository orgtilknytningStateService;
+    private final Admin adminClient;
+    private final KafkaProperties kafkaProperties;
+    private final LuceneService luceneService;
+
+    public OrgtilknytningStateListener(
+        @Value(&quot;${app.kafka.orgtilknytning.state-topic}&quot;) String stateTopic,
+        OrgtilknytningStateRepository orgtilknytningStateService,
+        Admin adminClient, LuceneService luceneService,
+        KafkaAdmin admin,
+        KafkaProperties kafkaProperties
+<span class="fc" id="L42">    ) {</span>
+<span class="fc" id="L43">        this.stateTopic = stateTopic;</span>
+<span class="fc" id="L44">        this.orgtilknytningStateService = orgtilknytningStateService;</span>
+<span class="fc" id="L45">        this.adminClient = adminClient;</span>
+<span class="fc" id="L46">        this.kafkaProperties = kafkaProperties;</span>
+<span class="fc" id="L47">        this.luceneService = luceneService;</span>
+<span class="fc" id="L48">    }</span>
+
+    @KafkaListener(
+            containerFactory = &quot;orgtilknytningStateKafkaListenerContainerFactory&quot;,
+            clientIdPrefix = &quot;orgtilknytningStateListener&quot;,
+            topicPartitions = @TopicPartition(
+                    topic = &quot;${app.kafka.orgtilknytning.state-topic}&quot;, partitionOffsets = @PartitionOffset(partition = &quot;0&quot;, initialOffset = &quot;0&quot;)
+            )
+    )
+    public void onMessage(ConsumerRecords&lt;String, OrgtilknytningState&gt; records, Consumer&lt;String, String&gt; consumer) {
+<span class="nc" id="L58">        StreamSupport.stream(records.spliterator(), false)</span>
+<span class="nc" id="L59">            .forEach( it -&gt; orgtilknytningStateService.putEventAggregate(it.key(), it.value())); //,it.timestamp();</span>
+
+<span class="nc" id="L61">        KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -&gt; log.info(&quot;Kafka OrgtilknytningState listener initial load finished - {} Orgtilknytninger&quot;, orgtilknytningStateService.count()));</span>
+<span class="nc" id="L62">    }</span>
+
+    public boolean initloadComplete() {
+<span class="nc" id="L65">        return initialLoadComplete.get();</span>
+    }
+
+    public boolean consumerGroupRegistedForTopic(String topic) throws ExecutionException, InterruptedException, TimeoutException {
+<span class="nc" id="L69">        final var topicPartitions = adminClient.listConsumerGroupOffsets(kafkaProperties.getConsumer().getGroupId())</span>
+<span class="nc" id="L70">                .partitionsToOffsetAndMetadata()</span>
+<span class="nc" id="L71">                .get(10, TimeUnit.SECONDS);</span>
+
+<span class="nc" id="L73">        return topicPartitions.entrySet().stream().anyMatch(entry -&gt; entry.getKey().topic().equals(topic));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

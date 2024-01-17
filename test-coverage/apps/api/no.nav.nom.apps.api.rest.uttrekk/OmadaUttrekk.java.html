@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OmadaUttrekk.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.rest.uttrekk</a> &gt; <span class="el_source">OmadaUttrekk.java</span></div><h1>OmadaUttrekk.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.rest.uttrekk;
+
+import io.getunleash.Unleash;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.dvh.dto.DvhLeder;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.contract.nom.NomNivaa;
+import no.nav.nom.contract.nom.OrgEnhetsType;
+import no.nav.nom.contract.nom.state.OrganiseringState;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.time.format.DateTimeFormatter;
+
+import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
+
+@Tag(name = &quot;Omada uttrekk&quot;)
+@RestController
+@RequestMapping(&quot;/api/v1/uttrekk/omada&quot;)
+public class OmadaUttrekk {
+<span class="fc" id="L44">    private final String EXCLUDE_ORG_ENHET = &quot;bu282j&quot;; // bu282j;0000000;ORGENHET;;Deltar i Rekruttering;01-05-2019;;;;</span>
+<span class="fc" id="L45">    private final Logger log = LoggerFactory.getLogger(OmadaUttrekk.class);</span>
+    private final RessursStateRepository ressursStateRepository;
+    private final OrgenhetService orgenhetService;
+    private final OrgtilknytningService orgtilknytningService;
+    private final RemedyEnhetIdResolver remedyEnhetIdResolver;
+    private final DvhRepository dvhRepository;
+    private final OrganiseringStateRepository organiseringStateRepository;
+    private final Unleash unleash;
+<span class="fc" id="L53">    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(&quot;dd-MM-yyyy&quot;);</span>
+
+    public OmadaUttrekk(
+            RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService,
+            OrgtilknytningService orgtilknytningService,
+            RemedyEnhetIdResolver remedyEnhetIdResolver, DvhRepository dvhRepository, OrganiseringStateRepository organiseringStateRepository, Unleash unleash
+<span class="fc" id="L59">    ) {</span>
+<span class="fc" id="L60">        this.ressursStateRepository = ressursStateRepository;</span>
+<span class="fc" id="L61">        this.orgenhetService = orgenhetService;</span>
+<span class="fc" id="L62">        this.orgtilknytningService = orgtilknytningService;</span>
+<span class="fc" id="L63">        this.remedyEnhetIdResolver = remedyEnhetIdResolver;</span>
+<span class="fc" id="L64">        this.dvhRepository = dvhRepository;</span>
+<span class="fc" id="L65">        this.organiseringStateRepository = organiseringStateRepository;</span>
+<span class="fc" id="L66">        this.unleash = unleash;</span>
+<span class="fc" id="L67">    }</span>
+
+    @Operation(
+        description = &quot;Returnerer csv med alle ressurser&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;)
+        }
+    )
+    @GetMapping(value = &quot;/ressurs&quot;, produces = &quot;text/csv&quot;)
+    public @ResponseBody byte[] exportRessurs() throws IOException {
+<span class="nc" id="L80">        StringWriter writer = new StringWriter();</span>
+
+<span class="nc" id="L82">        final var cSVFormat = getCSVFormat(&quot;nomId&quot;, &quot;navident&quot;, &quot;fornavn&quot;, &quot;mellomnavn&quot;, &quot;etternavn&quot;, &quot;visningsnavn&quot;, &quot;sektor&quot;, &quot;sluttdato&quot;);</span>
+
+<span class="nc" id="L84">        try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {</span>
+<span class="nc" id="L85">            ressursStateRepository.getAll().forEach(ressurs -&gt; {</span>
+                try {
+<span class="nc" id="L87">                    printer.printRecord(</span>
+<span class="nc" id="L88">                        ressurs.fid(),</span>
+<span class="nc" id="L89">                        ressurs.navident(),</span>
+<span class="nc" id="L90">                        ressurs.visningsnavn().fornavn(),</span>
+<span class="nc" id="L91">                        ressurs.visningsnavn().mellomnavn().orElse(&quot;&quot;),</span>
+<span class="nc" id="L92">                        ressurs.visningsnavn().etternavn(),</span>
+<span class="nc" id="L93">                        ressurs.visningsnavn().getFormattedVisningsnavn(),</span>
+<span class="nc" id="L94">                        ressurs.sektor(),</span>
+<span class="nc" id="L95">                        ressurs.sluttdato().map(dateTimeFormatter::format).orElse(&quot;&quot;)</span>
+                    );
+
+<span class="nc" id="L98">                    writer.close();</span>
+<span class="nc" id="L99">                } catch (IOException e) {</span>
+<span class="nc" id="L100">                    log.error(&quot;Error writing to CSV&quot;, e);</span>
+<span class="nc" id="L101">                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, &quot;Kunne ikke generere uttrekk&quot;);</span>
+<span class="nc" id="L102">                }</span>
+<span class="nc" id="L103">            });</span>
+<span class="nc" id="L104">            return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), &quot;UTF-8&quot;));</span>
+        }
+    }
+
+    @Operation(
+        description = &quot;Returnerer csv med alle orgtilknytninger for ressurser&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;)
+        }
+    )
+    @GetMapping(value = &quot;/orgtilknytning&quot;, produces = &quot;text/csv&quot;)
+    public @ResponseBody byte[] exportOrgtilknytning(
+        @RequestParam(required = false, defaultValue = &quot;false&quot;) boolean includeDagligOppfolging
+    ) throws IOException {
+<span class="nc" id="L121">        StringWriter writer = new StringWriter();</span>
+
+<span class="nc" id="L123">        final var cSVFormat = getCSVFormat(&quot;navident&quot;, &quot;org_enhet_id&quot;, &quot;fid&quot;, &quot;erDagligOppfolging&quot;, &quot;gyldig_fom&quot;, &quot;gyldig_tom&quot;);</span>
+
+<span class="nc" id="L125">        try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {</span>
+<span class="nc" id="L126">            orgtilknytningService.getAll()</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">                .stream().filter( ot -&gt; !ot.orgEnhetId().equals(EXCLUDE_ORG_ENHET))</span>
+<span class="nc" id="L128">                .forEach(kobling -&gt; {</span>
+                    try {
+<span class="nc" id="L130">                        printer.printRecord(</span>
+<span class="nc" id="L131">                            kobling.navident(),</span>
+<span class="nc" id="L132">                            kobling.orgEnhetId(),</span>
+<span class="nc" id="L133">                            kobling.fid(),</span>
+<span class="nc" id="L134">                            kobling.erDagligOppfolging(),</span>
+<span class="nc" id="L135">                            kobling.gyldigFom().format(dateTimeFormatter),</span>
+<span class="nc" id="L136">                            kobling.gyldigTom().map(dateTimeFormatter::format).orElse(&quot;&quot;)</span>
+                        );
+
+<span class="nc" id="L139">                        writer.close();</span>
+<span class="nc" id="L140">                    } catch (IOException e) {</span>
+<span class="nc" id="L141">                        log.error(&quot;Error writing to CSV&quot;, e);</span>
+<span class="nc" id="L142">                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, &quot;Kunne ikke generere uttrekk&quot;);</span>
+<span class="nc" id="L143">                    }</span>
+
+<span class="nc" id="L145">            });</span>
+
+<span class="nc" id="L147">            return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), &quot;UTF-8&quot;));</span>
+        }
+    }
+
+    @Operation(
+        description = &quot;Returnerer csv med alle telefonnumre for ressurser&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;)
+        }
+    )
+    @GetMapping(value = &quot;/telefon&quot;, produces = &quot;text/csv&quot;)
+    public @ResponseBody byte[] exportTelefon() throws IOException {
+<span class="nc" id="L162">        StringWriter writer = new StringWriter();</span>
+
+<span class="nc" id="L164">        final var cSVFormat = getCSVFormat(&quot;navident&quot;, &quot;nummer&quot;, &quot;type&quot;, &quot;beskrivelse&quot;);</span>
+
+<span class="nc" id="L166">        try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {</span>
+<span class="nc" id="L167">            dvhRepository.getNavidentTelefonNrMap().forEach(telefon -&gt; {</span>
+                try {
+<span class="nc" id="L169">                    printer.printRecord(</span>
+<span class="nc" id="L170">                        telefon.getNavIdent(),</span>
+<span class="nc" id="L171">                        telefon.getNummer(),</span>
+<span class="nc" id="L172">                        telefon.getType(),</span>
+<span class="nc" id="L173">                        telefon.getBeskrivelse()</span>
+                    );
+
+<span class="nc" id="L176">                    writer.close();</span>
+<span class="nc" id="L177">                } catch (IOException e) {</span>
+<span class="nc" id="L178">                    log.error(&quot;Error writing to CSV&quot;, e);</span>
+<span class="nc" id="L179">                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, &quot;Kunne ikke generere uttrekk&quot;);</span>
+<span class="nc" id="L180">                }</span>
+<span class="nc" id="L181">            });</span>
+
+<span class="nc" id="L183">            return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), &quot;UTF-8&quot;));</span>
+        }
+    }
+
+    @Operation(
+        description = &quot;Returnerer csv med alle orgenheter, og deres leder og organisering&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;)
+        }
+    )
+    @GetMapping(value = &quot;/orgenhet&quot;, produces = &quot;text/csv&quot;)
+    public @ResponseBody byte[] exportOrgenhet() throws IOException {
+<span class="nc" id="L198">        StringWriter writer = new StringWriter();</span>
+
+<span class="nc" id="L200">        boolean useNewOrganisering = unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE);</span>
+<span class="nc" id="L201">        log.debug(&quot;Eksporterer orgenheter. Bruke ny organisering: {}&quot;, useNewOrganisering);</span>
+
+<span class="nc" id="L203">        final var cSVFormat =</span>
+<span class="nc" id="L204">            getCSVFormat(</span>
+                &quot;org_enhet_id&quot;,
+                &quot;agresso_id&quot;,
+                &quot;agresso_org_niv&quot;,
+                &quot;agresso_orgenhet_type&quot;,
+                &quot;navn&quot;,
+                &quot;gyldig_fom&quot;,
+                &quot;gyldig_tom&quot;,
+                &quot;leder_navident&quot;,
+                &quot;org_enhets_nivaa&quot;,
+                &quot;org_enhet_type&quot;,
+                &quot;org_enhet_over&quot;,
+                &quot;remedyEnhetId&quot;
+            );
+
+<span class="nc" id="L219">        try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {</span>
+<span class="nc" id="L220">            orgenhetService.getAllEnheter()</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">                .stream().filter( oe -&gt; !oe.getId().equals(EXCLUDE_ORG_ENHET))</span>
+<span class="nc" id="L222">                .forEach(orgenhet -&gt; {</span>
+                try {
+<span class="nc" id="L224">                    printer.printRecord(</span>
+<span class="nc" id="L225">                        orgenhet.getId(),</span>
+<span class="nc" id="L226">                        orgenhet.getAgressoId(),</span>
+<span class="nc" id="L227">                        orgenhet.getOrgNiv(),</span>
+<span class="nc" id="L228">                        orgenhet.getAgressoOrgenhetType(),</span>
+<span class="nc" id="L229">                        orgenhet.getNavn(),</span>
+<span class="nc" id="L230">                        orgenhet.getGyldigFom().format(dateTimeFormatter),</span>
+<span class="nc" id="L231">                        orgenhet.getGyldigTom().map(dateTimeFormatter::format).orElse(&quot;&quot;),</span>
+<span class="nc" id="L232">                        dvhRepository.getLedere().stream()</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">                            .filter(leder -&gt; leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) &amp;&amp; leder.getOrgNiv()</span>
+<span class="nc bnc" id="L234" title="All 4 branches missed.">                                .equals(orgenhet.getOrgNiv()) &amp;&amp; leder.getOrgenhetNavn().equals(orgenhet.getNavn()))</span>
+<span class="nc" id="L235">                            .findAny()</span>
+<span class="nc" id="L236">                            .map(DvhLeder::getNavIdent)</span>
+<span class="nc" id="L237">                            .orElse(&quot;&quot;),</span>
+<span class="nc" id="L238">                        orgenhet.getNomNivaa().map(NomNivaa::name).orElse(&quot;&quot;),</span>
+<span class="nc" id="L239">                        orgenhet.getOrgEnhetsType().map(OrgEnhetsType::name).orElse(&quot;&quot;),</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">                        orgenhet.endedOnStartDate() ? &quot;&quot; : // Hvis enhet er avsluttet samme dag som den er opprettet, så er den ikke i organiseringen</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">                            useNewOrganisering ? getOrgenhetOverUsingNewOrganisering(orgenhet) : getOrgenhetOver(orgenhet),</span>
+<span class="nc" id="L242">                        remedyEnhetIdResolver.remedyEnhetId(orgenhet)</span>
+                    );
+<span class="nc" id="L244">                    writer.close();</span>
+<span class="nc" id="L245">                } catch (IOException e) {</span>
+<span class="nc" id="L246">                    log.error(&quot;Error writing to CSV&quot;, e);</span>
+<span class="nc" id="L247">                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, &quot;Kunne ikke generere uttrekk&quot;);</span>
+<span class="nc" id="L248">                }</span>
+<span class="nc" id="L249">            });</span>
+
+<span class="nc" id="L251">            return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), &quot;UTF-8&quot;));</span>
+        }
+    }
+
+    private String getOrgenhetOver(IOrgenhet orgenhet) {
+<span class="nc" id="L256">        return dvhRepository.getOrganiseringer(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn()).stream()</span>
+<span class="nc" id="L257">            .filter(organisering -&gt;</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">                organisering.getAgressoIdUnder().equals(orgenhet.getAgressoId()) &amp;&amp;</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">                    organisering.getOrgNivUnder().equals(orgenhet.getOrgNiv()) &amp;&amp;</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">                    organisering.getNavnUnder().equals(orgenhet.getNavn())</span>
+            )
+<span class="nc" id="L262">            .findAny()</span>
+<span class="nc" id="L263">            .map(organisering -&gt; orgenhetService.getEnhetByAgressoIdNivaAndName(</span>
+<span class="nc" id="L264">                organisering.getAgressoIdOver(),</span>
+<span class="nc" id="L265">                organisering.getOrgNivOver(),</span>
+<span class="nc" id="L266">                organisering.getNavnOver()</span>
+<span class="nc" id="L267">            ).map(IOrgenhet::getId).orElse(null))</span>
+<span class="nc" id="L268">            .orElse(&quot;&quot;);</span>
+    }
+
+    private String getOrgenhetOverUsingNewOrganisering(IOrgenhet orgenhet) {
+<span class="nc" id="L272">        return organiseringStateRepository.findActiveById(orgenhet.getId())</span>
+<span class="nc" id="L273">            .map(OrganiseringState::idOver)</span>
+<span class="nc" id="L274">            .orElse(&quot;&quot;);</span>
+    }
+
+    private CSVFormat getCSVFormat(String... headers) {
+<span class="nc" id="L278">        return CSVFormat.Builder.create()</span>
+<span class="nc" id="L279">            .setDelimiter(';')</span>
+<span class="nc" id="L280">            .setQuoteMode(CSVFormat.DEFAULT.getQuoteMode())</span>
+<span class="nc" id="L281">            .setHeader(headers)</span>
+<span class="nc" id="L282">            .setRecordSeparator(&quot;\n&quot;)</span>
+<span class="nc" id="L283">            .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

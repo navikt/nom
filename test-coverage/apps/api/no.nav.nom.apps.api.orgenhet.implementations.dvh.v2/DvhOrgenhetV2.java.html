@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DvhOrgenhetV2.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.orgenhet.implementations.dvh.v2</a> &gt; <span class="el_source">DvhOrgenhetV2.java</span></div><h1>DvhOrgenhetV2.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.orgenhet.implementations.dvh.v2;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import lombok.Data;
+import lombok.val;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.contract.nom.NomNivaa;
+import no.nav.nom.contract.nom.OrgEnhetsType;
+import no.nav.nom.libs.utils.common.util.DateValidator;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+
+import static java.util.function.Predicate.not;
+
+@Data
+public class DvhOrgenhetV2 implements IOrgenhet {
+    private String agressoId;
+    private String orgNiv;
+    private String navn;
+    private String agressoOrgenhetType;
+    private String agressoGyldigFom;
+    private String agressoGyldigTom;
+    private String orgenhetStatus;
+    private LocalDate stillingMaksDato;
+    private LocalDate dvhLastetDato;
+    private String lederRessursNr;
+    private JsonNode rawData;
+
+    private static final String FIRST_DAY_OF_MONTH = &quot;01&quot;;
+<span class="fc" id="L34">    private final static LocalDate AGRESSO_MAX_DATE = LocalDate.parse(&quot;2099-12-31&quot;);</span>
+<span class="fc" id="L35">    private final static DateTimeFormatter yyyyMMdd_FORMATTER = DateTimeFormatter.ofPattern(&quot;yyyyMMdd&quot;);</span>
+<span class="fc" id="L36">    private final static DateTimeFormatter YYYY_MM_DD_FORMATTER = DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd&quot;);</span>
+<span class="fc" id="L37">    private final DateValidator dateValidator = new DateValidator(yyyyMMdd_FORMATTER);</span>
+
+<span class="fc" id="L39">    public DvhOrgenhetV2(JsonNode node) {</span>
+<span class="fc" id="L40">        this.rawData = node;</span>
+<span class="fc" id="L41">        this.agressoId = node.get(&quot;ORGENHET_KODE&quot;).asText();</span>
+<span class="fc" id="L42">        this.orgNiv = node.get(&quot;ORGNODE_NIV&quot;).asText();</span>
+<span class="fc" id="L43">        this.navn = node.get(&quot;ORGENHET_NAVN&quot;).asText();</span>
+<span class="fc" id="L44">        this.agressoOrgenhetType = node.get(&quot;ENHETTYPE_NAVN&quot;).asText(null);</span>
+<span class="fc" id="L45">        this.agressoGyldigFom = node.get(&quot;ORGENHET_FRA_PERIODE&quot;).asText();</span>
+<span class="fc" id="L46">        val tempGyldigTom = node.get(&quot;ORGENHET_TIL_PERIODE&quot;).asText();</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        this.agressoGyldigTom = tempGyldigTom.equals(&quot;209999&quot;) ? &quot;209912&quot; : tempGyldigTom;</span>
+<span class="fc" id="L48">        this.orgenhetStatus = node.get(&quot;ORGENHET_STATUS&quot;).asText().toUpperCase();</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        this.stillingMaksDato = node.hasNonNull(&quot;STILLING_MAKS_GYLDIG_TIL_DATO&quot;) ?</span>
+<span class="pc" id="L50">            LocalDate.parse(node.get(&quot;STILLING_MAKS_GYLDIG_TIL_DATO&quot;).asText(), YYYY_MM_DD_FORMATTER) : null;</span>
+<span class="fc" id="L51">        this.dvhLastetDato = LocalDate.parse(node.get(&quot;LASTET_DATO&quot;).asText());</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        this.lederRessursNr = node.hasNonNull(&quot;LEDER_RESSURSNR&quot;) ? node.get(&quot;LEDER_RESSURSNR&quot;).asText() : null;</span>
+
+        // Hvis stillingMaksDato er før Agresso sin gyldigFom dato, er den nok knyttet
+        // til en tidligere enhet med samme agressoId.
+<span class="pc bpc" id="L56" title="2 of 4 branches missed.">        if (stillingMaksDato != null &amp;&amp; getGyldigFom().isAfter(stillingMaksDato)) {</span>
+<span class="nc" id="L57">            stillingMaksDato = null;</span>
+        }
+<span class="fc" id="L59">    }</span>
+
+    @Override
+    public String getFid() {
+<span class="nc" id="L63">        return null;</span>
+    }
+    @Override
+    public String getId() {
+<span class="nc" id="L67">        return null;</span>
+    }
+
+    @Override
+    public LocalDate getGyldigFom() {
+<span class="pc bpc" id="L72" title="2 of 4 branches missed.">        return !agressoGyldigFom.equals(&quot;0&quot;) &amp;&amp; dateValidator.isValid(agressoGyldigFom + FIRST_DAY_OF_MONTH) ? getFirstDay(agressoGyldigFom) : dvhLastetDato;</span>
+    }
+
+    @Override
+    public Optional&lt;LocalDate&gt; getGyldigTom() {
+        // Alle Enheter !&quot;ORGENHET&quot; har alltid agressoGyldigFom=&quot;0&quot; &amp;&amp; agressoGyldigTom = &quot;209912&quot; =&gt; Så alltid return empty()
+        // &quot;ORGENHET&quot; har aldri agressoGyldigFom=&quot;0&quot;
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        if (!&quot;ORGENHET&quot;.equals(orgNiv)) {</span>
+<span class="fc" id="L80">            return Optional.empty();</span>
+        }
+
+<span class="fc" id="L83">        final var agressoGyldigTomDato = getDate(getLastDay(agressoGyldigTom)); // getDate returnerer Optional.Empty hvis Max dato (2099-12-31)</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        if (agressoGyldigTomDato.isPresent()) {</span>
+<span class="fc" id="L85">            return agressoGyldigTomDato;</span>
+        }
+
+<span class="pc bpc" id="L88" title="1 of 4 branches missed.">        final var useMaxStillingDate = &quot;P&quot;.equals(orgenhetStatus) &amp;&amp; &quot;ORGENHET&quot;.equals(orgNiv);</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        return useMaxStillingDate ? getDate(stillingMaksDato) : Optional.empty();</span>
+    }
+
+    @Override
+    public Optional&lt;NomNivaa&gt; getNomNivaa() {
+<span class="nc" id="L94">        return Optional.empty();</span>
+    }
+
+    @Override
+    public Optional&lt;OrgEnhetsType&gt; getOrgEnhetsType() {
+<span class="nc" id="L99">        return Optional.empty();</span>
+    }
+
+    @Override
+    public String getUniqueAgressoId() {
+<span class="fc" id="L104">        return getAgressoId() + &quot;-&quot; + getNavn() + &quot;-&quot; + getOrgNiv();</span>
+    }
+
+    private LocalDate getLastDay(String yyyyMM) {
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">        if (yyyyMM == null) {</span>
+<span class="nc" id="L109">            return null;</span>
+        }
+<span class="fc" id="L111">        LocalDate convertedDate = getFirstDay(yyyyMM);</span>
+<span class="fc" id="L112">        return convertedDate.withDayOfMonth(convertedDate.getMonth().length(convertedDate.isLeapYear()));</span>
+    }
+
+    private LocalDate getFirstDay(String yyyyMM) {
+<span class="fc" id="L116">        return LocalDate.parse(yyyyMM + FIRST_DAY_OF_MONTH, yyyyMMdd_FORMATTER);</span>
+    }
+
+    private Optional&lt;LocalDate&gt; getDate(LocalDate date) {
+<span class="fc" id="L120">        return Optional.ofNullable(date).filter(not(AGRESSO_MAX_DATE::isEqual));</span>
+    }
+
+    public DvhOrgenhetV2 merge(DvhOrgenhetV2 dvhOrgenhetV2, ObjectMapper objectMapper) {
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">        if (getGyldigFom().isAfter(dvhOrgenhetV2.getGyldigFom())) {</span>
+<span class="nc" id="L125">            this.agressoGyldigFom = dvhOrgenhetV2.getAgressoGyldigFom();</span>
+        }
+<span class="pc bpc" id="L127" title="1 of 2 branches missed.">        if (getGyldigTom().orElse(LocalDate.MAX).isBefore(dvhOrgenhetV2.getGyldigTom().orElse(LocalDate.MAX))) {</span>
+<span class="fc" id="L128">            this.agressoGyldigTom = dvhOrgenhetV2.getAgressoGyldigTom();</span>
+        }
+<span class="fc bfc" id="L130" title="All 2 branches covered.">        if (dvhOrgenhetV2.orgenhetStatus.equals(&quot;N&quot;)) {</span>
+<span class="fc" id="L131">            this.orgenhetStatus = dvhOrgenhetV2.orgenhetStatus;</span>
+        }
+
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">        if (!this.getRawData().isArray()) {</span>
+<span class="fc" id="L135">            this.setRawData(objectMapper.createArrayNode().add(this.getRawData()));</span>
+        }
+<span class="fc" id="L137">        ((ArrayNode) this.getRawData()).add(dvhOrgenhetV2.getRawData());</span>
+
+<span class="fc" id="L139">        return this;</span>
+    }
+
+    @Override
+    public Optional&lt;String&gt; getOverordnetOrgEnhetFid() {
+<span class="nc" id="L144">        return Optional.empty();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

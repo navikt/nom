@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RemedyController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.ressurs.api.v1.remedy</a> &gt; <span class="el_source">RemedyController.java</span></div><h1>RemedyController.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.ressurs.api.v1.remedy;
+
+import io.getunleash.Unleash;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.nik.NIKClient;
+import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
+import no.nav.nom.apps.api.pdl.PdlClient;
+import no.nav.nom.apps.api.pdl.Person;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.apps.api.rest.dto.NavnDTO;
+import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.RessursState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
+
+import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
+@Tag(name = &quot;Remedy&quot;)
+@RestController
+@RequestMapping(&quot;/api/v1/remedy&quot;)
+public class RemedyController {
+<span class="fc" id="L47">    private final Logger log = LoggerFactory.getLogger(RemedyController.class);</span>
+    private final RessursStateRepository ressursStateRepository;
+    private final PdlClient pdlClient;
+    private final NIKClient nikClient;
+    private final RessursCommadService ressursCommadService;
+
+    public static final String UNLEASH_HANDLE_PERSONIDENT_CHANGE = &quot;nom.remedy_opprett_ressurs.handle_personident_change&quot;;
+    private final Unleash unleash;
+
+    public RemedyController(
+        RessursStateRepository ressursStateRepository, PdlClient pdlClient, NIKClient nikClient, RessursCommadService ressursCommadService,
+        Unleash unleash
+<span class="fc" id="L59">    ) {</span>
+<span class="fc" id="L60">        this.ressursStateRepository = ressursStateRepository;</span>
+<span class="fc" id="L61">        this.pdlClient = pdlClient;</span>
+<span class="fc" id="L62">        this.nikClient = nikClient;</span>
+<span class="fc" id="L63">        this.ressursCommadService = ressursCommadService;</span>
+<span class="fc" id="L64">        this.unleash = unleash;</span>
+<span class="fc" id="L65">    }</span>
+
+    @PostMapping(&quot;/finnRessurs&quot;)
+    @Operation(
+        description = &quot;Personoppslag&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;),
+        }
+    )
+    @PreAuthorize(&quot;hasAuthority('QUERY_PERSON')&quot;)
+    public ResponseEntity&lt;RessursDTO&gt; finnRessurs(@RequestBody FinnRessursRequest request) {
+<span class="fc" id="L79">        return ResponseEntity.ok(finnRessurs(request.getPersonident()));</span>
+    }
+
+    public RessursDTO finnRessurs(String personident) {
+<span class="fc" id="L83">        log.info(SECURE_LOGS, &quot;Finn ressurs request mottatt:\n{}&quot;, personident);</span>
+
+<span class="pc bpc" id="L85" title="2 of 4 branches missed.">        if (personident == null || personident.isBlank()) {</span>
+<span class="nc" id="L86">            log.error(&quot;Personident er tom&quot;);</span>
+<span class="nc" id="L87">            return createErrorResponse(</span>
+                HttpStatus.BAD_REQUEST,
+                &quot;Angitt personident er ikke gyldig&quot;
+            );
+        }
+<span class="fc" id="L92">        var response = ressursStateRepository.findByPersonident(personident)</span>
+<span class="fc" id="L93">            .map(this::from);</span>
+
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        if (response.isPresent()) {</span>
+<span class="fc" id="L96">            log.info(SECURE_LOGS, &quot;Ressurs {} funnet med personident {}&quot;, response.get().getNavident(), personident);</span>
+<span class="fc" id="L97">            return response.get();</span>
+        } else {
+<span class="fc" id="L99">            log.debug(&quot;Forsøker å finne ressurs i PDL&quot;);</span>
+<span class="fc" id="L100">            return pdlClient.hentPerson(personident)</span>
+<span class="fc" id="L101">                .map(this::from)</span>
+<span class="fc" id="L102">                .orElse(null);</span>
+
+        }
+    }
+
+    @PostMapping(&quot;/opprettRessurs&quot;)
+    @Transactional
+    @Operation(
+        description = &quot;Henter en eksisterende eller oppretter en ny navident&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;)
+        }
+    )
+    @PreAuthorize(&quot;hasAuthority('MUTATE_RESSURS')&quot;)
+    public ResponseEntity&lt;RessursDTO&gt; opprettRessurs(@RequestBody OpprettRessursRequest request) {
+<span class="fc" id="L120">        return ResponseEntity.ok(tryOpprettRessurs(request));</span>
+    }
+
+    public RessursDTO tryOpprettRessurs(OpprettRessursRequest request) {
+<span class="fc" id="L124">        log.info(SECURE_LOGS, &quot;Opprett ressurs request mottatt:\n{}&quot;, request);</span>
+<span class="fc" id="L125">        var funnetRessurs = ressursStateRepository.findByPersonident(request.getPersonident());</span>
+
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        if (funnetRessurs.isPresent()) {</span>
+<span class="fc" id="L128">            log.debug(SECURE_LOGS, &quot;Ressurs med personident {} finnes fra før&quot;, request.getPersonident());</span>
+<span class="fc" id="L129">            return funnetRessurs.map(this::from).get();</span>
+        }
+
+        String opprettetNavident;
+        try {
+<span class="fc" id="L134">            final var nikResponse = nikClient.opprettNavident(</span>
+<span class="fc" id="L135">                OpprettNavidentRequest.builder()</span>
+<span class="fc" id="L136">                    .personid(request.getPersonident())</span>
+<span class="fc" id="L137">                    .identPrefix(request.getForbokstav())</span>
+<span class="fc" id="L138">                    .identType(request.getIdentType())</span>
+<span class="fc" id="L139">                    .build()</span>
+            );
+
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">            if (!nikResponse.getStatusCode().is2xxSuccessful()) {</span>
+<span class="nc" id="L143">                return createErrorResponse(</span>
+<span class="nc" id="L144">                    nikResponse.getStatusCode(),</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">                    nikResponse.hasBody() ? nikResponse.getBody().getFeilmelding() : &quot;Ukjent feil har oppstått under opprettelse av navident&quot;</span>
+                );
+            }
+
+<span class="fc" id="L149">            opprettetNavident = nikResponse.getBody().getNavident();</span>
+
+<span class="nc" id="L151">        } catch (Exception exception) {</span>
+<span class="nc" id="L152">            log.warn(&quot;Unhandled exception during call to nav-ident: &quot; + exception.getMessage(), exception);</span>
+<span class="nc" id="L153">            return createErrorResponse(INTERNAL_SERVER_ERROR, &quot;Intern feil inntraff&quot;);</span>
+<span class="fc" id="L154">        }</span>
+
+<span class="fc" id="L156">        InputMetadata metadataFromRequest = new InputMetadata(</span>
+            &quot;REST&quot;,
+            &quot;/api/v1/remedy/ressurs&quot;,
+            request,
+<span class="fc" id="L160">            new Origination(request.getSubmitter(), SecurityUtil.getAuthenticatedAzpName())</span>
+        );
+
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        if (unleash.isEnabled(UNLEASH_HANDLE_PERSONIDENT_CHANGE)) {</span>
+            // Det kan være at identen person har byttet f.nr. i såfall har nav-ident returnert eksisterende navident for personen
+<span class="fc" id="L165">            funnetRessurs = ressursStateRepository.findByNavident(opprettetNavident);</span>
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">            if (funnetRessurs.isPresent()) {</span>
+<span class="fc" id="L167">                log.debug(&quot;Ressurs funnet med navident {}&quot;, opprettetNavident);</span>
+
+                // Endre personident på eksisterende ressurs
+<span class="fc" id="L170">                var eksisterendeRessurs = funnetRessurs.get();</span>
+
+<span class="fc" id="L172">                ressursCommadService.oppdaterPersonidentCommand(</span>
+                    new OppdaterPersonidentCommand(
+<span class="fc" id="L174">                        eksisterendeRessurs.fid(),</span>
+<span class="fc" id="L175">                        request.getPersonident()</span>
+                    ),
+                    metadataFromRequest
+                );
+
+                // Hvis personalia/visningsnavn er endret, gjør en endre personalia også.
+<span class="pc bpc" id="L181" title="1 of 2 branches missed.">                if (!visningsnavnEquals(request, eksisterendeRessurs)) {</span>
+<span class="fc" id="L182">                    ressursCommadService.oppdaterPersonaliaEvent(</span>
+                        new OppdaterPersonaliaCommand(
+<span class="fc" id="L184">                            eksisterendeRessurs.fid(),</span>
+<span class="fc" id="L185">                            new Visningsnavn(request.getFornavn(), Optional.ofNullable(request.getMellomnavn()), request.getEtternavn())</span>
+                        ),
+                        metadataFromRequest
+                    );
+                }
+<span class="fc" id="L190">                return RessursDTO.builder()</span>
+<span class="fc" id="L191">                    .personident(request.getPersonident())</span>
+<span class="fc" id="L192">                    .navident(eksisterendeRessurs.navident())</span>
+<span class="fc" id="L193">                    .navn(NavnDTO.builder()</span>
+<span class="fc" id="L194">                        .fornavn(request.getFornavn())</span>
+<span class="fc" id="L195">                        .mellomnavn(request.getMellomnavn())</span>
+<span class="fc" id="L196">                        .etternavn(request.getEtternavn())</span>
+<span class="fc" id="L197">                        .build())</span>
+<span class="fc" id="L198">                    .build();</span>
+            }
+        }
+
+<span class="fc" id="L202">        Optional&lt;Person&gt; pdlPerson = pdlClient.hentPerson(request.getPersonident());</span>
+
+        try {
+<span class="fc" id="L205">            final var opprettRessursCommand = new OpprettRessursCommand(</span>
+<span class="fc" id="L206">                request.getPersonident(),</span>
+                opprettetNavident,
+                pdlPerson,
+<span class="fc" id="L209">                Sektor.valueOf(request.getSektor()),</span>
+<span class="fc" id="L210">                new Visningsnavn(request.getFornavn(), Optional.ofNullable(request.getMellomnavn()), request.getEtternavn()),</span>
+                metadataFromRequest,
+                null,
+                null,
+                null,
+                null
+            );
+
+<span class="fc" id="L218">            return from(ressursCommadService.createRessursSync(opprettRessursCommand));</span>
+<span class="nc" id="L219">        } catch (Exception exception) {</span>
+<span class="nc" id="L220">            log.warn(&quot;Unhandled exception during creation of ressurs: &quot; + exception.getMessage(), exception);</span>
+<span class="nc" id="L221">            return createErrorResponse(INTERNAL_SERVER_ERROR, &quot;Intern feil inntraff&quot;);</span>
+        }
+    }
+
+    private boolean visningsnavnEquals(OpprettRessursRequest request, RessursState eksisterendeRessurs) {
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">        return eksisterendeRessurs.visningsnavn().fornavn().equals(request.getFornavn()) &amp;&amp;</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">            eksisterendeRessurs.visningsnavn().etternavn().equals(request.getEtternavn()) &amp;&amp;</span>
+<span class="nc bnc" id="L228" title="All 4 branches missed.">            (eksisterendeRessurs.visningsnavn().mellomnavn().isEmpty() &amp;&amp; request.getMellomnavn() == null ||</span>
+<span class="pc bnc" id="L229" title="All 2 branches missed.">                eksisterendeRessurs.visningsnavn().mellomnavn().get().equals(request.getMellomnavn()));</span>
+    }
+
+    private RessursDTO createErrorResponse(HttpStatusCode httpStatusCode, String feilmelding) {
+<span class="nc" id="L233">        log.error(&quot;Feilhåndtering i kall fra Remedy - Returnerer feil '{} - {}'&quot;, httpStatusCode, feilmelding);</span>
+<span class="nc" id="L234">        return RessursDTO.builder()</span>
+<span class="nc" id="L235">            .status(String.valueOf(httpStatusCode.value()))</span>
+<span class="nc" id="L236">            .feilmelding(feilmelding)</span>
+<span class="nc" id="L237">            .build();</span>
+    }
+
+    private RessursDTO from(RessursState state) {
+<span class="fc" id="L241">        return RessursDTO.builder()</span>
+<span class="fc" id="L242">            .status(Integer.toString(HttpStatus.OK.value()))</span>
+<span class="fc" id="L243">            .personident(state.personident())</span>
+<span class="fc" id="L244">            .navident(state.navident())</span>
+<span class="fc" id="L245">            .navn(NavnDTO.builder()</span>
+<span class="fc" id="L246">                .fornavn(state.visningsnavn().fornavn())</span>
+<span class="fc" id="L247">                .mellomnavn(state.visningsnavn().mellomnavn().orElse(null))</span>
+<span class="fc" id="L248">                .etternavn(state.visningsnavn().etternavn())</span>
+<span class="fc" id="L249">                .build())</span>
+<span class="fc" id="L250">            .build();</span>
+    }
+
+    private RessursDTO from(Person person) {
+<span class="fc" id="L254">        return RessursDTO.builder()</span>
+<span class="fc" id="L255">            .status(Integer.toString(HttpStatus.OK.value()))</span>
+<span class="fc" id="L256">            .navn(NavnDTO.builder()</span>
+<span class="fc" id="L257">                .fornavn(person.getFornavn())</span>
+<span class="fc" id="L258">                .mellomnavn(person.getMellomnavn())</span>
+<span class="fc" id="L259">                .etternavn(person.getEtternavn())</span>
+<span class="fc" id="L260">                .build())</span>
+<span class="fc" id="L261">            .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KorrigerOrgtilknytningerUtoverOrgenhetensPeriode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.orgtilknytning.api.admin</a> &gt; <span class="el_source">KorrigerOrgtilknytningerUtoverOrgenhetensPeriode.java</span></div><h1>KorrigerOrgtilknytningerUtoverOrgenhetensPeriode.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.orgtilknytning.api.admin;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+<span class="fc" id="L33">@Slf4j</span>
+@Tag(name = &quot;Admin for korrigeringer&quot;)
+@RestController
+@RequestMapping(&quot;/api/admin/korrigerreOrgtilknytingMedPeriodeUtoverEnhetensPeriode&quot;)
+public class KorrigerOrgtilknytningerUtoverOrgenhetensPeriode {
+
+    private final OrgenhetService orgenhetService;
+    private final OrgtilknytningService orgtilknytningService;
+    private final OrgtilknytningCommandService orgtilknytningCommandService;
+
+    public KorrigerOrgtilknytningerUtoverOrgenhetensPeriode(OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService,
+                                                            OrgtilknytningCommandService orgtilknytningCommandService
+<span class="fc" id="L45">    ) {</span>
+<span class="fc" id="L46">        this.orgenhetService = orgenhetService;</span>
+<span class="fc" id="L47">        this.orgtilknytningService = orgtilknytningService;</span>
+<span class="fc" id="L48">        this.orgtilknytningCommandService = orgtilknytningCommandService;</span>
+<span class="fc" id="L49">    }</span>
+
+    @Operation(
+        description = &quot;Lag avvikle eventer for orgtilknytinger som går utover orgenhetens periode. Kjør med False for kun dry-run&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping()
+    public String korrigere(@RequestParam(defaultValue = &quot;false&quot;) boolean performUpdate) {
+<span class="nc" id="L57">        var alleOrgtilknytningState = orgtilknytningService.getAll();</span>
+<span class="nc" id="L58">        var aktiveOrgtilknytningState = aktiveOrgtilknytninger(alleOrgtilknytningState);</span>
+<span class="nc" id="L59">        var aktiveTilknytningerUtoverEnhetPeriode = orgtilknytningerUtoverEnhetPeriode(aktiveOrgtilknytningState);</span>
+
+<span class="nc" id="L61">        ObjectMapper mapper = new ObjectMapper();</span>
+<span class="nc" id="L62">        StringBuffer str = new StringBuffer();</span>
+<span class="nc" id="L63">        aktiveTilknytningerUtoverEnhetPeriode.forEach( ot -&gt; {</span>
+<span class="nc" id="L64">                var orgenhet = orgenhetService.getById(ot.orgEnhetId()).get();</span>
+<span class="nc" id="L65">                String otDescription = &quot;Orgtilknytning %s for %s/%s med periode %s - %s&quot;.formatted(</span>
+<span class="nc" id="L66">                    ot.fid(),</span>
+<span class="nc" id="L67">                    ot.navident(),</span>
+<span class="nc" id="L68">                    ot.orgEnhetId(),</span>
+<span class="nc" id="L69">                    ot.gyldigFom(),</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">                    ot.gyldigTom().isPresent() ? ot.gyldigTom().get() : &quot; &quot;</span>
+                );
+<span class="nc" id="L72">                String orgenhetDescription = &quot;Orgenhet %s %s med periode %s - %s&quot;.formatted(</span>
+<span class="nc" id="L73">                    orgenhet.getId(),</span>
+<span class="nc" id="L74">                    orgenhet.getNavn(),</span>
+<span class="nc" id="L75">                    orgenhet.getGyldigFom(),</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">                    orgenhet.getGyldigTom().isPresent() ? orgenhet.getGyldigTom().get() : &quot; &quot;</span>
+                );
+
+<span class="nc" id="L79">                ObjectNode node = mapper.createObjectNode();</span>
+<span class="nc" id="L80">                node.put(&quot;Orgiltknytning&quot;, otDescription);</span>
+<span class="nc" id="L81">                node.put(&quot;Orgenhet&quot;, orgenhetDescription);</span>
+
+<span class="nc bnc" id="L83" title="All 2 branches missed.">                if (ot.gyldigFom().isAfter(orgenhet.getGyldigTom().get())) {</span>
+                    // Vi må fjerne orgtilknytningen, dne starteretter orgenheten slutter
+<span class="nc" id="L85">                    FjernOrgtilknytning fjernOrgtilknytning =</span>
+                        new FjernOrgtilknytning(
+<span class="nc" id="L87">                            ot.navident(),</span>
+<span class="nc" id="L88">                            ot.orgEnhetId(),</span>
+<span class="nc" id="L89">                            ot.gyldigFom(),</span>
+<span class="nc" id="L90">                            ot.gyldigTom(),</span>
+                            new InputMetadata(
+                                &quot;Swagger&quot;,
+                                &quot;Fjerner orgtilknytinger som går utover orgenhetens periode&quot;,
+                                node,
+                                new Origination(&quot;nom-api&quot;, &quot;nom-api&quot;)
+                            ),
+                            null
+                        );
+<span class="nc" id="L99">                    str.append(&quot;Fjerner orgtilknytning %s&quot;.formatted(ot.fid())).append(&quot;\n&quot;);</span>
+<span class="nc" id="L100">                    str.append(&quot;\t&quot;).append(String.join(&quot; og &quot;, otDescription, orgenhetDescription)).append(&quot;\n&quot;);</span>
+
+<span class="nc" id="L102">                    log.info(&quot;Fjerner orgtilknytning for\n\t{} og {}&quot;, otDescription, orgenhetDescription);</span>
+
+<span class="nc bnc" id="L104" title="All 2 branches missed.">                    if (performUpdate) orgtilknytningCommandService.fjernOrgtilknytning(ot.fid(), fjernOrgtilknytning);</span>
+<span class="nc" id="L105">                } else {</span>
+<span class="nc" id="L106">                    AvvikleOrgtilknytning avvikleOrgtilknytning =</span>
+                        new AvvikleOrgtilknytning(
+<span class="nc" id="L108">                            ot.navident(),</span>
+<span class="nc" id="L109">                            ot.orgEnhetId(),</span>
+<span class="nc" id="L110">                            orgenhet.getGyldigTom().get(),</span>
+                            new InputMetadata(
+                                &quot;Swagger&quot;,
+                                &quot;Korriger orgtilknytinger som går utover orgenhetens periode&quot;,
+                                node,
+                                new Origination(&quot;nom-api&quot;, &quot;nom-api&quot;)
+                            ),
+                            null
+                        );
+<span class="nc" id="L119">                    str.append(&quot;Avvikler orgtilknytning på dato %s&quot;.formatted(avvikleOrgtilknytning.gyldigTom())).append(&quot;\n&quot;);</span>
+<span class="nc" id="L120">                    str.append(&quot;\t&quot;).append(String.join(&quot; og &quot;, otDescription, orgenhetDescription)).append(&quot;\n&quot;);</span>
+
+<span class="nc" id="L122">                    log.info(&quot;Avvikler orgtilknytning på dato {} for\n\t{} og {}&quot;, avvikleOrgtilknytning.gyldigTom(), otDescription, orgenhetDescription);</span>
+
+<span class="nc bnc" id="L124" title="All 2 branches missed.">                    if (performUpdate) orgtilknytningCommandService.avvikleOrgtilknytning(ot.fid(), avvikleOrgtilknytning);</span>
+                }
+<span class="nc" id="L126">        });</span>
+<span class="nc" id="L127">        return str.toString();</span>
+    }
+
+    private List&lt;OrgtilknytningState&gt; aktiveOrgtilknytninger(Collection&lt;OrgtilknytningState&gt; orgtilknytninger) {
+<span class="nc" id="L131">        return orgtilknytninger.stream().filter( ot -&gt;</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">            ot.gyldigFom().isBefore(LocalDate.now().plusDays(1)) &amp;&amp;</span>
+<span class="nc bnc" id="L133" title="All 4 branches missed.">                (!ot.gyldigTom().isPresent() || ot.gyldigTom().get().isAfter(LocalDate.now()))</span>
+<span class="nc" id="L134">        ).toList();</span>
+    }
+    private List&lt;OrgtilknytningState&gt; orgtilknytningerUtoverEnhetPeriode(List&lt;OrgtilknytningState&gt; orgtilknytninger) {
+<span class="nc" id="L137">        return orgtilknytninger.stream()</span>
+<span class="nc" id="L138">            .filter( t -&gt; {</span>
+<span class="nc" id="L139">                var orgEnhet = orgenhetService.getById(t.orgEnhetId());</span>
+<span class="nc bnc" id="L140" title="All 4 branches missed.">                if (orgEnhet.get().getGyldigTom().isPresent() &amp;&amp; orgEnhet.get().getGyldigTom().get().isBefore(t.gyldigFom())) {</span>
+<span class="nc" id="L141">                    return true; // orgEnhet.gyldigTom &lt; tilknytning.gyldigFom</span>
+                }
+<span class="nc bnc" id="L143" title="All 4 branches missed.">                if (t.gyldigTom().isPresent() &amp;&amp; orgEnhet.get().getGyldigFom().isAfter(t.gyldigTom().get())) {</span>
+<span class="nc" id="L144">                    return true; // orgEnhet.gyldigFom &gt; tilknytning.gyldigTom</span>
+                }
+<span class="nc bnc" id="L146" title="All 4 branches missed.">                if (t.gyldigTom().isEmpty() &amp;&amp; orgEnhet.get().getGyldigTom().isPresent()) {</span>
+<span class="nc" id="L147">                    return true; // orgEnhet avsluttet &lt; tilknytning ikke avsluttet</span>
+                }
+<span class="nc bnc" id="L149" title="All 6 branches missed.">                if (t.gyldigTom().isPresent() &amp;&amp; orgEnhet.get().getGyldigTom().isPresent() &amp;&amp; orgEnhet.get().getGyldigTom().get().isBefore(t.gyldigTom().get())) {</span>
+<span class="nc" id="L150">                    return true; // orgEnhet avsluttet &lt; tilknytning avsluttet</span>
+                }
+<span class="nc" id="L152">                return false;</span>
+<span class="nc" id="L153">            } ).toList();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

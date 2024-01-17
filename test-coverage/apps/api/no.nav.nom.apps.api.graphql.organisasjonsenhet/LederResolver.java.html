@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LederResolver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.graphql.organisasjonsenhet</a> &gt; <span class="el_source">LederResolver.java</span></div><h1>LederResolver.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.graphql.organisasjonsenhet;
+
+import graphql.GraphQLError;
+import graphql.schema.DataFetchingEnvironment;
+import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.graphql.MappingUtils;
+import no.nav.nom.apps.api.graphql.common.ErrorCode;
+import no.nav.nom.apps.api.graphql.common.exception.LederNotFoundException;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
+import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+
+@Component(&quot;OrgEnhetsLeder&quot;)
+public class LederResolver {
+
+    private final DvhRepository dvhRepository;
+    private final RessursStateRepository ressursStateRepository;
+
+<span class="fc" id="L24">    public LederResolver(DvhRepository dvhRepository, RessursStateRepository ressursStateRepository) {</span>
+<span class="fc" id="L25">        this.dvhRepository = dvhRepository;</span>
+<span class="fc" id="L26">        this.ressursStateRepository = ressursStateRepository;</span>
+<span class="fc" id="L27">    }</span>
+
+    public List&lt;OrgEnhetsLeder&gt; leder(OrgEnhet orgEnhet) {
+<span class="fc" id="L30">        return dvhRepository.getLederByAgressoIdAndNivAndNavn(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn())</span>
+<span class="fc" id="L31">                .stream()</span>
+<span class="fc" id="L32">                .map(leder -&gt; tilOrgEnhetsLeder(ressursStateRepository.findByNavident(leder.getNavIdent(), MappingUtils::toRessurs)</span>
+<span class="fc" id="L33">                                                        .orElseThrow(LederNotFoundException::new)))</span>
+<span class="fc" id="L34">                .toList();</span>
+    }
+
+    private OrgEnhetsLeder tilOrgEnhetsLeder(Ressurs leder) {
+<span class="fc" id="L38">        return OrgEnhetsLeder.builder().ressurs(leder).build();</span>
+    }
+
+    public static GraphQLError handleLederNotFoundException(Throwable throwable, DataFetchingEnvironment environment) {
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        if (throwable instanceof LederNotFoundException) {</span>
+<span class="nc" id="L43">            return ErrorCode.NOT_FOUND.construct(environment, &quot;Kunne ikke slå opp leder!&quot;);</span>
+        }
+<span class="fc" id="L45">        return null;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

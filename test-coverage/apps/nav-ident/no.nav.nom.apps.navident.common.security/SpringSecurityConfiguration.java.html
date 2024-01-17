@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SpringSecurityConfiguration.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Nav Ident</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.navident.common.security</a> &gt; <span class="el_source">SpringSecurityConfiguration.java</span></div><h1>SpringSecurityConfiguration.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.navident.common.security;
+
+import no.nav.nom.apps.navident.common.SwaggerConfig;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.web.reactive.function.client.WebClient;
+
+@Configuration(proxyBeanMethods = false)
+@EnableMethodSecurity
+<span class="fc" id="L18">public class SpringSecurityConfiguration {</span>
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+<span class="fc" id="L22">        http.sessionManagement(session -&gt; session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</span>
+<span class="fc" id="L23">            .csrf(AbstractHttpConfigurer::disable)</span>
+<span class="fc" id="L24">            .authorizeHttpRequests(auth -&gt; auth</span>
+<span class="fc" id="L25">                .requestMatchers(SwaggerConfig.SWAGGER_API_URLS).permitAll()</span>
+<span class="fc" id="L26">                .requestMatchers(&quot;/internal/**&quot;).permitAll()</span>
+                // https://github.com/spring-projects/spring-boot/issues/33934
+<span class="fc" id="L28">                .requestMatchers(&quot;/errors&quot;).permitAll()</span>
+<span class="fc" id="L29">                .anyRequest().fullyAuthenticated()</span>
+            )
+<span class="fc" id="L31">            .oauth2ResourceServer(oauth2 -&gt; oauth2.jwt(Customizer.withDefaults()))</span>
+<span class="fc" id="L32">            .exceptionHandling(handler -&gt; handler.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));</span>
+<span class="fc" id="L33">        return http.build();</span>
+    }
+
+    @Bean
+    public WebClient aadWebClient(AuthenticationProperties authenticationProperties) {
+<span class="fc" id="L38">        return WebClient.builder()</span>
+<span class="fc" id="L39">            .baseUrl(authenticationProperties.getAad().getIssuerBaseUrl())</span>
+<span class="fc" id="L40">            .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

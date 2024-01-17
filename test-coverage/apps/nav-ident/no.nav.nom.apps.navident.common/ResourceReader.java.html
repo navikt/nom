@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResourceReader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Nav Ident</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.navident.common</a> &gt; <span class="el_source">ResourceReader.java</span></div><h1>ResourceReader.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.navident.common;
+
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.FileCopyUtils;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UncheckedIOException;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+<span class="nc" id="L15">public class ResourceReader {</span>
+    public static String asString(Resource resource) {
+<span class="fc" id="L17">        try (Reader reader = new InputStreamReader(resource.getInputStream(), UTF_8)) {</span>
+<span class="fc" id="L18">            return FileCopyUtils.copyToString(reader);</span>
+<span class="nc" id="L19">        } catch (IOException e) {</span>
+<span class="nc" id="L20">            throw new UncheckedIOException(e);</span>
+        }
+    }
+
+    public static String readFileToString(String path) {
+<span class="fc" id="L25">        ResourceLoader resourceLoader = new DefaultResourceLoader();</span>
+<span class="fc" id="L26">        Resource resource = resourceLoader.getResource(path);</span>
+<span class="fc" id="L27">        return asString(resource);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
