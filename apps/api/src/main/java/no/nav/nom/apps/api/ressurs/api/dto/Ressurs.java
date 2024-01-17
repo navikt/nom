@@ -12,7 +12,8 @@ import java.util.List;
 public record Ressurs(
     @JsonUnwrapped RessursState state,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<Telefon> telefoner,
-    String epost
+    String epost,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Boolean isNomMastered
 ) {
 
     public record Telefon(
