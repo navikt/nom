@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Unit4PatchRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Unit4</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.nom.unit4.unit4.dto</a> &gt; <span class="el_source">Unit4PatchRequest.java</span></div><h1>Unit4PatchRequest.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.nom.unit4.unit4.dto;
+
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.nom.apps.nom.unit4.unit4.Utils;
+
+import java.time.LocalDate;
+import java.util.List;
+
+<span class="nc" id="L9">public record Unit4PatchRequest(</span>
+        Operation op,
+        String path, // Se apps/unit4/unit4PatchResponse.json for paths
+        Object value
+) {
+
+
+    // Husk at Unit4 ønsker folkeregistrert navn formatert med apps/unit4/src/main/java/no/nav/nom/apps/nom/unit4/unit4/Utils.java
+    // sin formatName metode
+
+    /*
+    EKSEMPEL BODY:
+    [
+      {
+        &quot;op&quot;: &quot;Replace&quot;,
+        &quot;path&quot;: &quot;nameInformation.firstName&quot;,
+        &quot;value&quot;: &quot;NYTT FORNAVN&quot;
+      },
+      {
+        &quot;op&quot;: &quot;Replace&quot;,
+        &quot;path&quot;: &quot;nameInformation.surname&quot;,
+        &quot;value&quot;: &quot;NYTT ETTERNAVN&quot;
+      }
+    ]
+    */
+    public static List&lt;Unit4PatchRequest&gt; createEndreNavnPatchRequest(String fornavn, String etternavn) {
+<span class="nc" id="L35">        return List.of(</span>
+<span class="nc" id="L36">                new Unit4PatchRequest(Operation.REPLACE, &quot;nameInformation.firstName&quot;, Utils.formatName(fornavn)),</span>
+<span class="nc" id="L37">                new Unit4PatchRequest(Operation.REPLACE, &quot;nameInformation.surname&quot;, Utils.formatName(etternavn))</span>
+        );
+    }
+
+    // Må avklares!!
+    // Skal orgtilknytning på employment (stilling) relatedValues endres?
+    /*
+    [
+        {
+            &quot;op&quot;: &quot;AddOrReplaceById&quot;,
+            &quot;path&quot;: &quot;relatedValues&quot;,
+            &quot;value&quot;: {
+                &quot;relationId&quot;: &quot;M0&quot;,
+                &quot;relatedValue&quot;: &quot;0101001&quot;,
+                &quot;dateFrom&quot;: &quot;2023-01-11T00:00:00.000&quot;,
+                &quot;dateTo&quot;: &quot;2099-12-31T00:00:00.000&quot;
+            }
+        }
+    ]
+     */
+    public static List&lt;Unit4PatchRequest&gt; createEndreOrgtilknytningPatchRequest(String agressoId) {
+<span class="nc" id="L58">        return List.of(</span>
+                new Unit4PatchRequest(Operation.ADD_OR_REPLACE_BY_ID,
+                        &quot;relatedValues&quot;,
+<span class="nc" id="L61">                        RelatedValue.builder()</span>
+<span class="nc" id="L62">                                .relationId(&quot;M0&quot;)</span>
+<span class="nc" id="L63">                                .relatedValue(agressoId)</span>
+<span class="nc" id="L64">                                .dateFrom(LocalDate.now().atStartOfDay())</span>
+<span class="nc" id="L65">                                .dateTo(Unit4RessursDto.AGRESSO_TIMESTAMP_NULL_VALUE)</span>
+<span class="nc" id="L66">                                .build()</span>
+                )
+        );
+    }
+
+    // Må avklares!!
+    // Skal ressurstype på employment (stilling) endres?
+    /*
+    EKSEMPEL BODY:
+    [
+      {
+        &quot;op&quot;: &quot;Replace&quot;,
+        &quot;path&quot;: &quot;personnelType&quot;,
+        &quot;value&quot;: &quot;E&quot;
+      }
+    ]
+    */
+    public static List&lt;Unit4PatchRequest&gt; createEndreRessurstypePatchRequest(Unit4RessursType ressursType) {
+<span class="nc" id="L84">        return List.of(</span>
+                new Unit4PatchRequest(Operation.REPLACE, &quot;personnelType&quot;, ressursType)
+        );
+    }
+
+
+    // Må avklares!!
+    // Hva skal status på ressurs settes til hvis det er frem i tid eller det er noen som allrede har sluttet?
+    // status og dateTo på relatedValues?
+    // status og dateTo på employment og dens relatedValues?
+    // andre ting som må endres i unit4 når en ressurs endrer startdato?
+    /*
+    EKSEMPEL BODY:
+    [
+        {
+            &quot;op&quot;: &quot;Replace&quot;,
+            &quot;path&quot;: &quot;dateFrom&quot;,
+            &quot;value&quot;: &quot;2023-01-14T00:00:00.000&quot;
+        }
+    ]
+     */
+    public static List&lt;Unit4PatchRequest&gt; createEndreStartDatoPatchRequest(LocalDate startDato) {
+<span class="nc" id="L106">        return List.of(</span>
+<span class="nc" id="L107">                new Unit4PatchRequest(Operation.REPLACE, &quot;dateFrom&quot;, startDato.atStartOfDay())</span>
+        );
+    }
+
+    // Må avklares!!
+    // Hva skal status på ressurs settes til?
+    // status og dateTo på relatedValues?
+    // status og dateTo på employment og dens relatedValues?
+    // andre ting som må endres i unit4 når en ressurs slutter?
+    /*
+    EKSEMPEL BODY:
+    [
+        {
+            &quot;op&quot;: &quot;Replace&quot;,
+            &quot;path&quot;: &quot;dateTo&quot;,
+            &quot;value&quot;: &quot;2023-01-14T00:00:00.000&quot;
+        }
+    ]
+     */
+    public static List&lt;Unit4PatchRequest&gt; createEndreSluttDatoPatchRequest(LocalDate sluttDato) {
+<span class="nc" id="L127">        return List.of(</span>
+<span class="nc" id="L128">                new Unit4PatchRequest(Operation.REPLACE, &quot;dateTo&quot;, sluttDato.atStartOfDay())</span>
+                //new Unit4PatchRequest(Operation.REPLACE, &quot;status&quot;, Unit4Status.PARKERT)
+        );
+    }
+
+    /*
+    [
+        {
+            &quot;op&quot;: &quot;AddOrReplaceById&quot;,
+            &quot;path&quot;: &quot;employments&quot;,
+            &quot;value&quot;: {
+              &quot;status&quot;: &quot;N&quot;,
+              &quot;positionId&quot;: &quot;265&quot;,
+              &quot;relatedValues&quot;: [
+                {
+                    &quot;positionId&quot;: &quot;265&quot;,
+                    &quot;status&quot;: &quot;N&quot;,
+                    &quot;dateFrom&quot;: &quot;2023-01-12T00:00:00&quot;,
+                    &quot;dateTo&quot;: &quot;2099-12-31T00:00:00.000&quot;,
+                    &quot;percentage&quot;: 100.0,
+                    &quot;relationGroup&quot;: &quot;&quot;,
+                    &quot;isDefaulted&quot;: false,
+                    &quot;useInFixedPd&quot;: false,
+                    &quot;useInAccountingCategories&quot;: false,
+                    &quot;useInRateCalculation&quot;: false,
+                    &quot;useInReport&quot;: false,
+                    &quot;relationId&quot;: &quot;M0&quot;,
+                    &quot;relationName&quot;: &quot;ORGENHET&quot;,
+                    &quot;relatedValue&quot;: &quot;0316006&quot;
+                }
+              ]
+            }
+        }
+    ]
+     */
+    public static List&lt;Unit4PatchRequest&gt; createEndreEmploymentsPatchRequest(String agressoId, Employment employment) {
+<span class="nc" id="L164">        return List.of(</span>
+            new Unit4PatchRequest(Operation.ADD_OR_REPLACE_BY_ID,
+                &quot;employments&quot;,
+                employment
+            )
+        );
+    }
+
+<span class="nc" id="L172">    enum Operation {</span>
+<span class="nc" id="L173">        ADD(&quot;Add&quot;),</span>
+<span class="nc" id="L174">        REPLACE(&quot;Replace&quot;),</span>
+<span class="nc" id="L175">        REMOVE(&quot;Remove&quot;),</span>
+<span class="nc" id="L176">        ADD_OR_REPLACE_BY_ID(&quot;AddOrReplaceById&quot;),</span>
+<span class="nc" id="L177">        REPLACE_BY_ID(&quot;ReplaceById&quot;),</span>
+<span class="nc" id="L178">        REMOVE_BY_ID(&quot;RemoveById&quot;);</span>
+
+        private final String value;
+
+<span class="nc" id="L182">        Operation(String value) {</span>
+<span class="nc" id="L183">            this.value = value;</span>
+<span class="nc" id="L184">        }</span>
+
+        @JsonValue // Jackson will serialize this enum as the value of the field
+        public String getValue() {
+<span class="nc" id="L188">            return value;</span>
+        }
+
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SyntetiskDataRestController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Unit4</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.nom.unit4.admin</a> &gt; <span class="el_source">SyntetiskDataRestController.java</span></div><h1>SyntetiskDataRestController.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.nom.unit4.admin;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import no.nav.nom.apps.nom.unit4.common.SwaggerConfig;
+import no.nav.nom.apps.nom.unit4.unit4.Unit4Client;
+import no.nav.nom.apps.nom.unit4.unit4.Unit4Exception;
+import no.nav.nom.apps.nom.unit4.unit4.Unit4NotFoundException;
+import no.nav.nom.apps.nom.unit4.unit4.Unit4RequestException;
+import no.nav.nom.apps.nom.unit4.unit4.dto.Employment;
+import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4PatchRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+
+@Tag(name = &quot;Admin for å administrere syntetisk test data&quot;)
+@RestController
+@Profile(&quot;!prod&quot;)
+@RequestMapping(&quot;/api/v1/test/syntetisk&quot;)
+public class SyntetiskDataRestController {
+<span class="fc" id="L35">    private final Logger log = LoggerFactory.getLogger(SyntetiskDataRestController.class);</span>
+
+    private final Unit4Client unit4Client;
+
+<span class="fc" id="L39">    public SyntetiskDataRestController(Unit4Client unit4Client) {</span>
+<span class="fc" id="L40">        this.unit4Client = unit4Client;</span>
+<span class="fc" id="L41">    }</span>
+
+    @Operation(
+        description = &quot;Slett ressurs&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;),
+        @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Not Found&quot;),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal Server Error&quot;)
+    })
+    @DeleteMapping(value = &quot;/ressurs/{ressursId}&quot;)
+    public void slettRessurs(@PathVariable String ressursId) {
+        // Slett Unit4 Employee med tilhørende Employments
+        try {
+<span class="nc" id="L56">            unit4Client.deleteRessurs(ressursId);</span>
+<span class="nc" id="L57">        } catch (Unit4NotFoundException e) {</span>
+<span class="nc" id="L58">            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());</span>
+<span class="nc" id="L59">        } catch (Unit4RequestException e) {</span>
+<span class="nc" id="L60">            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());</span>
+<span class="nc" id="L61">        } catch (Unit4Exception e) {</span>
+<span class="nc" id="L62">            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());</span>
+<span class="nc" id="L63">        }</span>
+<span class="nc" id="L64">    }</span>
+
+    @Operation(
+        description = &quot;Lag eller endre Employment for ressurs&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;),
+        @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Not Found&quot;),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal Server Error&quot;)
+    })
+    @PatchMapping(value = &quot;/ressurs/employments/{ressursId}&quot;)
+    public void addEmployment(@PathVariable String ressursId, @RequestBody Employment employment) {
+<span class="nc" id="L77">        List&lt;Unit4PatchRequest&gt; patch = Unit4PatchRequest.createEndreEmploymentsPatchRequest(ressursId, employment);</span>
+        try {
+<span class="nc" id="L79">            unit4Client.patchRessurs(ressursId, patch);</span>
+<span class="nc" id="L80">        } catch (Unit4NotFoundException e) {</span>
+<span class="nc" id="L81">            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());</span>
+<span class="nc" id="L82">        } catch (Unit4RequestException e) {</span>
+<span class="nc" id="L83">            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());</span>
+<span class="nc" id="L84">        } catch (Unit4Exception|JsonProcessingException e) {</span>
+<span class="nc" id="L85">            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());</span>
+<span class="nc" id="L86">        }</span>
+<span class="nc" id="L87">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

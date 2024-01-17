@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Unit4Controller.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: PROXY</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.proxy.api</a> &gt; <span class="el_source">Unit4Controller.java</span></div><h1>Unit4Controller.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.proxy.api;
+
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.proxy.common.AppProperties;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunctions;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriBuilderFactory;
+import reactor.core.publisher.Mono;
+
+import jakarta.servlet.http.HttpServletRequest;
+import java.net.URI;
+
+import static no.nav.nom.apps.proxy.common.CommonConfig.SECURE_LOGS;
+
+
+<span class="fc" id="L30">@Slf4j</span>
+@RestController
+@RequestMapping(value = &quot;/proxy/unit4&quot;, produces = MediaType.APPLICATION_JSON_VALUE)
+public class Unit4Controller {
+
+    private final AppProperties appProperties;
+
+    private final String unit4EmployeesUrl;
+
+    private final WebClient webClient;
+
+    private final UriBuilderFactory uriBuilderFactory;
+
+<span class="fc" id="L43">    public Unit4Controller(AppProperties appProperties, WebClient.Builder webClientBuilder) {</span>
+<span class="fc" id="L44">        this.appProperties = appProperties;</span>
+<span class="fc" id="L45">        this.webClient = webClientBuilder</span>
+<span class="fc" id="L46">            .filter(ExchangeFilterFunctions</span>
+<span class="fc" id="L47">                .basicAuthentication(appProperties.getUnit4().getUnit4Username(), appProperties.getUnit4().getUnit4Password()))</span>
+<span class="fc" id="L48">            .build();</span>
+<span class="fc" id="L49">        this.uriBuilderFactory = new DefaultUriBuilderFactory(appProperties.getUnit4().getBaseUrl());</span>
+<span class="fc" id="L50">        this.unit4EmployeesUrl = appProperties.getUnit4().getBaseUrl() + appProperties.getUnit4().getEmployeesPath();</span>
+<span class="fc" id="L51">    }</span>
+
+    @PostMapping(&quot;/ressurs&quot;)
+    public ResponseEntity&lt;String&gt; postRessurs(@RequestBody String body) {
+<span class="fc" id="L55">        log.info(&quot;Mottatt /proxy/unit4/ressurs POST request&quot;);</span>
+<span class="fc" id="L56">        log.debug(SECURE_LOGS, &quot;POST /proxy/unit4/ressurs payload: {}&quot;, body);</span>
+
+        try {
+<span class="fc" id="L59">            return webClient</span>
+<span class="fc" id="L60">                .post()</span>
+<span class="fc" id="L61">                .uri(unit4EmployeesUrl)</span>
+<span class="fc" id="L62">                .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L63">                .body(Mono.just(body), String.class)</span>
+<span class="fc" id="L64">                .accept(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L65">                .retrieve()</span>
+<span class="fc" id="L66">                .toEntity(String.class)</span>
+<span class="fc" id="L67">                .block();</span>
+
+<span class="fc" id="L69">        } catch (WebClientResponseException ex) {</span>
+<span class="fc" id="L70">            log.error(&quot;Error in Unit4 POST request:&quot;, ex);</span>
+
+<span class="fc" id="L72">            return getErrorResponseEntity(ex);</span>
+<span class="nc" id="L73">        } catch (Exception ex) {</span>
+<span class="nc" id="L74">            return ResponseEntity.internalServerError().body(&quot;Internal server error: &quot; + ex.getMessage());</span>
+        }
+    }
+
+    @PatchMapping(&quot;/ressurs/{personId}&quot;)
+    public ResponseEntity&lt;String&gt; patchRessurs(@PathVariable String personId, @RequestBody String body) {
+<span class="fc" id="L80">        String url = unit4EmployeesUrl + &quot;/&quot; + personId;</span>
+<span class="fc" id="L81">        log.info(&quot;Mottatt /proxy/unit4/ressurs PATCH request -&gt; {}&quot;, url);</span>
+<span class="fc" id="L82">        log.debug(SECURE_LOGS, &quot;PATCH /proxy/unit4/ressurs/{} payload: {}&quot;, personId, body);</span>
+
+        try {
+<span class="fc" id="L85">            return webClient</span>
+<span class="fc" id="L86">                .patch()</span>
+<span class="fc" id="L87">                .uri(url)</span>
+<span class="fc" id="L88">                .contentType(MediaType.valueOf(&quot;application/json-patch+json&quot;))  //Content-type i request må være application/json-patch+json</span>
+<span class="fc" id="L89">                .body(Mono.just(body), String.class)</span>
+<span class="fc" id="L90">                .accept(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L91">                .retrieve()</span>
+<span class="fc" id="L92">                .toEntity(String.class)</span>
+<span class="fc" id="L93">                .block();</span>
+
+<span class="nc" id="L95">        } catch (WebClientResponseException ex) {</span>
+<span class="nc" id="L96">            log.error(&quot;Error in Unit4 PATCH request:&quot;, ex);</span>
+
+<span class="nc" id="L98">            return getErrorResponseEntity(ex);</span>
+<span class="nc" id="L99">        } catch (Exception ex) {</span>
+<span class="nc" id="L100">            return ResponseEntity.internalServerError().body(&quot;Internal server error: &quot; + ex.getMessage());</span>
+        }
+    }
+
+    @DeleteMapping(&quot;/ressurs/{personId}&quot;)
+    public ResponseEntity&lt;String&gt; deleteRessurs(@PathVariable String personId) {
+<span class="fc" id="L106">        log.info(&quot;Mottatt /proxy/unit4/ressurs DELETE request&quot;);</span>
+<span class="fc" id="L107">        log.debug(SECURE_LOGS, &quot;DELETE /proxy/unit4/ressurs/{}&quot;, personId);</span>
+
+        try {
+<span class="fc" id="L110">            return webClient</span>
+<span class="fc" id="L111">                .delete()</span>
+<span class="fc" id="L112">                .uri(unit4EmployeesUrl + &quot;/&quot; + personId)</span>
+<span class="fc" id="L113">                .accept(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L114">                .retrieve()</span>
+<span class="fc" id="L115">                .toEntity(String.class)</span>
+<span class="fc" id="L116">                .block();</span>
+
+<span class="nc" id="L118">        } catch (WebClientResponseException ex) {</span>
+<span class="nc" id="L119">            log.error(&quot;Error in Unit4 DELETE request:&quot;, ex);</span>
+
+<span class="nc" id="L121">            return getErrorResponseEntity(ex);</span>
+<span class="nc" id="L122">        } catch (Exception ex) {</span>
+<span class="nc" id="L123">            return ResponseEntity.internalServerError().body(&quot;Internal server error: &quot; + ex.getMessage());</span>
+        }
+    }
+
+    @GetMapping(&quot;/ressurs/{personId}&quot;)
+    public ResponseEntity&lt;String&gt; getRessurs(@PathVariable String personId) {
+<span class="fc" id="L129">        log.info(&quot;Mottatt /proxy/unit4/{personId} ressurs GET request&quot;);</span>
+<span class="fc" id="L130">        log.debug(SECURE_LOGS, &quot;GET /proxy/unit4/ressurs/{}&quot;, personId);</span>
+
+        try {
+<span class="fc" id="L133">            String response = webClient.get()</span>
+<span class="fc" id="L134">                .uri(unit4EmployeesUrl + &quot;/&quot; + personId)</span>
+<span class="fc" id="L135">                .accept(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L136">                .retrieve()</span>
+<span class="fc" id="L137">                .bodyToMono(String.class)</span>
+<span class="fc" id="L138">                .block();</span>
+
+<span class="fc" id="L140">            return ResponseEntity.ok(response);</span>
+<span class="fc" id="L141">        } catch (WebClientResponseException ex) {</span>
+<span class="fc" id="L142">            log.error(&quot;Error in Unit4 GET ressurs/{personId} request:&quot;, ex);</span>
+
+<span class="fc" id="L144">            return getErrorResponseEntity(ex);</span>
+<span class="nc" id="L145">        } catch (Exception ex) {</span>
+<span class="nc" id="L146">            return ResponseEntity.internalServerError().body(&quot;Internal server error: &quot; + ex.getMessage());</span>
+        }
+    }
+
+    @GetMapping(&quot;/**&quot;)
+    public ResponseEntity&lt;String&gt; unit4GetProxy(HttpServletRequest request) {
+<span class="fc" id="L152">        String targetPath = appProperties.getUnit4().getApiPath() + request.getRequestURI().replaceFirst(&quot;/proxy/unit4&quot;, &quot;&quot;);</span>
+
+<span class="fc" id="L154">        URI uri = uriBuilderFactory</span>
+<span class="fc" id="L155">            .uriString(targetPath)</span>
+<span class="fc" id="L156">            .query(request.getQueryString())</span>
+<span class="fc" id="L157">            .build();</span>
+
+<span class="fc" id="L159">        log.info(&quot;Mottatt GET-forespørsel med path: &quot; + request.getRequestURI() + &quot;, ruter til: &quot; + uri);</span>
+
+<span class="fc" id="L161">        return webClient</span>
+<span class="fc" id="L162">            .get()</span>
+<span class="fc" id="L163">            .uri(uri)</span>
+<span class="fc" id="L164">            .retrieve()</span>
+<span class="fc" id="L165">            .toEntity(String.class)</span>
+<span class="fc" id="L166">            .block();</span>
+    }
+
+    private static ResponseEntity&lt;String&gt; getErrorResponseEntity(WebClientResponseException ex) {
+<span class="fc" id="L170">        String errorBody = ex.getResponseBodyAsString();</span>
+<span class="fc" id="L171">        HttpStatusCode status = ex.getStatusCode();</span>
+<span class="fc" id="L172">        HttpHeaders headers = ex.getHeaders();</span>
+
+<span class="fc" id="L174">        return ResponseEntity.status(status)</span>
+<span class="fc" id="L175">            .headers(headers)</span>
+<span class="fc" id="L176">            .body(errorBody);</span>
+    }
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

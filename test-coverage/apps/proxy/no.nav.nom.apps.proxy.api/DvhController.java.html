@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DvhController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: PROXY</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.proxy.api</a> &gt; <span class="el_source">DvhController.java</span></div><h1>DvhController.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.proxy.api;
+
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.proxy.common.AppProperties;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunctions;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriBuilderFactory;
+
+import jakarta.servlet.http.HttpServletRequest;
+import java.net.URI;
+
+
+<span class="fc" id="L21">@Slf4j</span>
+@RestController
+@RequestMapping(&quot;/proxy&quot;)
+public class DvhController {
+
+    private final AppProperties appProperties;
+    private final WebClient webClient;
+    private final UriBuilderFactory uriBuilderFactory;
+
+<span class="fc" id="L30">    private final String PROXY_PATH = &quot;/dvh&quot;;</span>
+
+<span class="fc" id="L32">    public DvhController(AppProperties appProperties, WebClient.Builder webClientBuilder) {</span>
+<span class="fc" id="L33">        this.appProperties = appProperties;</span>
+<span class="fc" id="L34">        this.webClient = webClientBuilder</span>
+<span class="fc" id="L35">            .baseUrl(appProperties.getDvh().getBaseUrl())</span>
+<span class="fc" id="L36">            .exchangeStrategies(useLargeInMemorySize())</span>
+<span class="fc" id="L37">            .filter(ExchangeFilterFunctions.basicAuthentication(appProperties.getDvh().getTdvUsername(), appProperties.getDvh().getTdvPassword()))</span>
+<span class="fc" id="L38">            .build();</span>
+<span class="fc" id="L39">        this.uriBuilderFactory = new DefaultUriBuilderFactory(appProperties.getDvh().getBaseUrl());</span>
+<span class="fc" id="L40">    }</span>
+
+    private ExchangeStrategies useLargeInMemorySize() {
+<span class="fc" id="L43">        return ExchangeStrategies.builder()</span>
+<span class="fc" id="L44">            .codecs(configurer -&gt; configurer.defaultCodecs()</span>
+<span class="fc" id="L45">                .maxInMemorySize(appProperties.getWebClientMaxBytesInMemorySize()))</span>
+<span class="fc" id="L46">            .build();</span>
+    }
+
+    @GetMapping(PROXY_PATH + &quot;/**&quot;)
+    public ResponseEntity&lt;String&gt; dvhProxyEndpoint(HttpServletRequest request, JwtAuthenticationToken token) {
+<span class="fc" id="L51">        String targetPath = request.getRequestURI().replaceFirst(&quot;/proxy&quot; + PROXY_PATH, &quot;&quot;);</span>
+
+<span class="fc" id="L53">        URI uri = uriBuilderFactory</span>
+<span class="fc" id="L54">            .uriString(targetPath)</span>
+<span class="fc" id="L55">            .query(request.getQueryString())</span>
+<span class="fc" id="L56">            .build();</span>
+
+
+<span class="fc" id="L59">        var appName = &quot;ukjent&quot;;</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if (token != null) {</span>
+<span class="fc" id="L61">            var tokenAtts = token.getTokenAttributes();</span>
+<span class="fc" id="L62">            appName = tokenAtts.getOrDefault(&quot;azp_name&quot;, tokenAtts.getOrDefault(&quot;azp&quot;, appName)).toString();</span>
+        }
+
+<span class="fc" id="L65">        log.info(&quot;Mottatt forespørsel fra [&quot; + appName + &quot;] med path: &quot; + request.getRequestURI() + &quot;, ruter til: &quot; + uri);</span>
+
+<span class="fc" id="L67">        return webClient.get()</span>
+<span class="fc" id="L68">            .uri(uri)</span>
+<span class="fc" id="L69">            .retrieve()</span>
+<span class="fc" id="L70">            .toEntity(String.class)</span>
+<span class="fc" id="L71">            .block();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

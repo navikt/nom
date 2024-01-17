@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KafkaRessursListener.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Unit4</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.nom.unit4.kafka</a> &gt; <span class="el_source">KafkaRessursListener.java</span></div><h1>KafkaRessursListener.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.nom.unit4.kafka;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.getunleash.Unleash;
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.nom.unit4.unit4.Unit4Client;
+import no.nav.nom.apps.nom.unit4.unit4.Unit4ConflictException;
+import no.nav.nom.apps.nom.unit4.unit4.Unit4Exception;
+import no.nav.nom.apps.nom.unit4.unit4.Unit4RequestException;
+import no.nav.nom.apps.nom.unit4.unit4.Unit4ServerException;
+import no.nav.nom.apps.nom.unit4.unit4.Unit4UnknownException;
+import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
+import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.eventsource.RessursEvent;
+import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.stereotype.Component;
+
+import static no.nav.nom.apps.nom.unit4.AppConfig.SECURE_LOGS;
+
+@Component
+<span class="fc" id="L25">@Slf4j</span>
+public class KafkaRessursListener {
+
+    public static final String UNLEASH_SKRU_AV_EKSTRAAGA_TOGGLE = &quot;nom.unit4.ikke_legg_til_ekstra_arbeidsgiveravgift_relasjon&quot;;
+    private final Unit4Client unit4Client;
+    private final Unleash unleash;
+    @Value(&quot;${app.unit4.felles-kobling-value:000000}&quot;)
+    private String fellesKoblingValue;
+
+    private final KafkaRessursDltProducer kafkaRessursDltProducer;
+
+<span class="fc" id="L36">    public KafkaRessursListener(Unit4Client unit4Client, Unleash unleash, KafkaRessursDltProducer kafkaRessursDltProducer) {</span>
+<span class="fc" id="L37">        this.unit4Client = unit4Client;</span>
+<span class="fc" id="L38">        this.unleash = unleash;</span>
+<span class="fc" id="L39">        this.kafkaRessursDltProducer = kafkaRessursDltProducer;</span>
+<span class="fc" id="L40">    }</span>
+
+    @KafkaListener(topics = &quot;${app.ressurs.topic}&quot;)
+    public void listener(RessursEvent record, @Header(KafkaHeaders.RECEIVED_KEY) String uuid) {
+<span class="fc" id="L44">        log.info(&quot;Unit4 ressurs listener mottok melding for ressurs {} på meldings-key: {}&quot;, record.getFid(), uuid);</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">        if(record instanceof RessursOpprettetEventV1 ressursOpprettetEventV1) {</span>
+
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">            if(ressursOpprettetEventV1.getData() instanceof RessursOpprettetEventV1.RessursOpprettetEventData ressursData) {</span>
+                // Hvis en ressurs er ekstern skal vi ikke sende noe data videre til Unit4.
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">                if (ressursData.sektor() == Sektor.EKSTERN) {</span>
+<span class="nc" id="L50">                    return;</span>
+                }
+            }
+<span class="fc bfc" id="L53" title="All 2 branches covered.">            if(ressursOpprettetEventV1.getMetadata().inputMetadata().origination().initiatedFrom().contains(&quot;nom-ui&quot;)) {</span>
+                Unit4RessursDto unit4RessursDto;
+                try {
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">                    unit4RessursDto = new Unit4RessursDto(ressursOpprettetEventV1, fellesKoblingValue, !unleash.isEnabled(UNLEASH_SKRU_AV_EKSTRAAGA_TOGGLE, true));</span>
+<span class="nc" id="L57">                } catch (Exception e) {</span>
+<span class="nc" id="L58">                    log.error(&quot;Feil ved konvertering til Unit4 objekt på meldings-key: {}&quot;, uuid);</span>
+<span class="nc" id="L59">                    log.error(SECURE_LOGS, &quot;Feil ved konvertering til Unit4 objekt på meldings-key: {}, event: {}&quot;, uuid, ressursOpprettetEventV1, e); // Send more detailed information to secure-logs logger.</span>
+<span class="nc" id="L60">                    return;</span>
+<span class="fc" id="L61">                }</span>
+
+                try {
+<span class="fc" id="L64">                    unit4Client.createRessurs(unit4RessursDto);</span>
+<span class="fc" id="L65">                } catch (Unit4ConflictException e) {</span>
+<span class="fc" id="L66">                    log.warn(&quot;Ressurs finnes i Unit4. Oppdatere i stedet? På meldings-key: {}&quot;, uuid);</span>
+<span class="fc" id="L67">                } catch (Unit4ServerException e) {  // Andre Unit4 feil (5xx) ? -&gt; Vent x-sec før behandle på nytt</span>
+<span class="fc" id="L68">                    log.warn(&quot;Unit 4 server error på meldings-key: {}&quot;, uuid, e);</span>
+<span class="fc" id="L69">                    throw new KafkaRessursBlockingException(e);</span>
+<span class="fc" id="L70">                } catch (Unit4RequestException e) { // Klient feil (4xx) -&gt; Logge, og baile ut? Hva med endring i Unit4 som gjør at vi starter å feile. På alt...</span>
+<span class="fc" id="L71">                    log.warn(&quot;Unit 4 request error på meldings-key: {}. Sender meldingen til DLT topicen&quot;, uuid, e);</span>
+<span class="fc" id="L72">                    kafkaRessursDltProducer.send(record, uuid);</span>
+<span class="nc" id="L73">                } catch (Unit4UnknownException e) { // Andre feil</span>
+<span class="nc" id="L74">                    log.warn(&quot;Unit 4 Unknown error på meldings-key: {}&quot;, uuid, e);</span>
+<span class="nc" id="L75">                    throw new KafkaRessursBlockingException(e);</span>
+<span class="nc" id="L76">                } catch (JsonProcessingException e) {</span>
+<span class="nc" id="L77">                    log.error(&quot;NomRessursDto kan ikke serialiseres til Json på meldings-key: {}&quot;, uuid, e);</span>
+<span class="nc" id="L78">                } catch (Unit4Exception e) {</span>
+<span class="nc" id="L79">                    log.warn(&quot;Ubehandlet Unit4 Exception! På meldings-key: {}&quot;, uuid, e);</span>
+<span class="nc" id="L80">                    throw new KafkaRessursBlockingException(e);</span>
+<span class="pc" id="L81">                }</span>
+            }
+        }
+<span class="fc" id="L84">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

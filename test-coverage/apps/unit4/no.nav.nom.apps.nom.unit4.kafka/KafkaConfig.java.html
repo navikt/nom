@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KafkaConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Unit4</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.nom.unit4.kafka</a> &gt; <span class="el_source">KafkaConfig.java</span></div><h1>KafkaConfig.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.nom.unit4.kafka;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.nom.apps.nom.unit4.AppProperties;
+import no.nav.nom.contract.nom.eventsource.RessursEvent;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.config.KafkaListenerContainerFactory;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.util.backoff.BackOff;
+import org.springframework.util.backoff.FixedBackOff;
+
+@Configuration
+<span class="fc" id="L25">public class KafkaConfig {</span>
+
+    /* Ressurs Topic */
+
+    @Bean
+    public ConsumerFactory&lt;String, RessursEvent&gt; consumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+<span class="fc" id="L31">        JsonDeserializer&lt;RessursEvent&gt; jsonEventDeserializer = new JsonDeserializer&lt;&gt;(objectMapper);</span>
+<span class="fc" id="L32">        return new DefaultKafkaConsumerFactory&lt;&gt;(properties.buildConsumerProperties(), new StringDeserializer(), jsonEventDeserializer);</span>
+    }
+
+    @Bean
+    public KafkaListenerContainerFactory&lt;ConcurrentMessageListenerContainer&lt;String, RessursEvent&gt;&gt;
+            kafkaListenerContainerFactory(ConsumerFactory&lt;String, RessursEvent&gt; consumerFactory, DefaultErrorHandler errorHandler) {
+<span class="fc" id="L38">        var concurrentKafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory&lt;String, RessursEvent&gt;();</span>
+<span class="fc" id="L39">        concurrentKafkaListenerContainerFactory.setConsumerFactory(consumerFactory);</span>
+<span class="fc" id="L40">        concurrentKafkaListenerContainerFactory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);</span>
+<span class="fc" id="L41">        concurrentKafkaListenerContainerFactory.setCommonErrorHandler(errorHandler);</span>
+
+<span class="fc" id="L43">        return concurrentKafkaListenerContainerFactory;</span>
+    }
+
+    @Bean
+    public DefaultErrorHandler errorHandler(AppProperties appProperties) {
+<span class="fc" id="L48">        var interval = appProperties.kafka().listener().blockSecondsOnBail().toMillis();</span>
+
+<span class="fc" id="L50">        BackOff fixedBackOff = new FixedBackOff(interval, FixedBackOff.UNLIMITED_ATTEMPTS);</span>
+<span class="fc" id="L51">        DefaultErrorHandler errorHandler = new DefaultErrorHandler(fixedBackOff);</span>
+
+<span class="fc" id="L53">        errorHandler.addRetryableExceptions(KafkaRessursBlockingException.class);</span>
+
+<span class="fc" id="L55">        return errorHandler;</span>
+    }
+
+    @Bean
+    public ProducerFactory&lt;String, RessursEvent&gt; ressursEventDltProducerFactory(KafkaProperties properties) {
+<span class="fc" id="L60">        return new DefaultKafkaProducerFactory&lt;&gt;(properties.buildProducerProperties());</span>
+    }
+
+    @Bean
+    public KafkaTemplate&lt;String, RessursEvent&gt; ressursEventDltKafkaTemplate(ProducerFactory&lt;String, RessursEvent&gt; producerFactory) {
+<span class="fc" id="L65">        KafkaTemplate&lt;String, RessursEvent&gt; kafkaTemplate = new KafkaTemplate&lt;&gt;(producerFactory);</span>
+<span class="fc" id="L66">        return kafkaTemplate;</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

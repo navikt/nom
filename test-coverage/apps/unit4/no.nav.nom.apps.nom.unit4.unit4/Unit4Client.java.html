@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Unit4Client.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Unit4</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.nom.unit4.unit4</a> &gt; <span class="el_source">Unit4Client.java</span></div><h1>Unit4Client.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.nom.unit4.unit4;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import no.nav.nom.apps.nom.unit4.AppProperties;
+import no.nav.nom.apps.nom.unit4.TokenRepository;
+import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4PatchRequest;
+import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+import static no.nav.nom.apps.nom.unit4.AppConfig.SECURE_LOGS;
+
+@Service
+@RequiredArgsConstructor
+<span class="fc" id="L28">@Slf4j</span>
+public class Unit4Client {
+
+<span class="fc" id="L31">    private final static MediaType UNIT4_MEDIETYPE_JSON_PATCH = new MediaType(&quot;application&quot;, &quot;json-patch+json&quot;);</span>
+    private final WebClient webClient = WebClient.create();
+    private final ObjectMapper objectMapper;
+
+    private final TokenRepository tokenRepository;
+
+    private final AppProperties appProperties;
+
+    private final static String RESSURS_ENDPOINT = &quot;/proxy/unit4/ressurs&quot;;
+
+    public JsonNode findRessurs(String personId) throws Unit4Exception{
+<span class="fc" id="L42">        val url = appProperties.proxy().baseUrl() + RESSURS_ENDPOINT + &quot;/&quot; + personId;</span>
+<span class="fc" id="L43">        log.debug(&quot;Get unit4 ressurs [{}]&quot;, url);</span>
+
+        try {
+<span class="fc" id="L46">            JsonNode response =</span>
+<span class="fc" id="L47">                webClient.get()</span>
+<span class="fc" id="L48">                    .uri(url)</span>
+<span class="fc" id="L49">                    .headers(httpHeaders -&gt; {</span>
+<span class="fc" id="L50">                        httpHeaders.setContentType(MediaType.APPLICATION_JSON);</span>
+<span class="fc" id="L51">                        httpHeaders.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.proxy().aadClientId()).serialize());</span>
+<span class="fc" id="L52">                        httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));</span>
+<span class="fc" id="L53">                    })</span>
+<span class="fc" id="L54">                    .retrieve()</span>
+<span class="fc" id="L55">                    .bodyToMono(JsonNode.class)</span>
+<span class="fc" id="L56">                    .block();</span>
+
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">            log.debug(SECURE_LOGS, &quot;Response fra find unit4 ressurs:\n{}&quot;, response != null ? response.toPrettyString() : &quot;n/a&quot;);</span>
+<span class="fc" id="L59">            return response;</span>
+<span class="nc" id="L60">        } catch (WebClientResponseException wce) {</span>
+<span class="nc" id="L61">            HttpStatusCode httpStatusCode = wce.getStatusCode();</span>
+<span class="nc" id="L62">            log.error(&quot;Error finding unit4 ressurs&quot;, wce);</span>
+
+<span class="nc" id="L64">            logIfErrorMessageInBody(wce.getResponseBodyAsString(StandardCharsets.UTF_8));</span>
+
+<span class="nc bnc" id="L66" title="All 4 branches missed.">            if (httpStatusCode == HttpStatus.NOT_FOUND || httpStatusCode == HttpStatus.GONE) {</span>
+<span class="nc" id="L67">                throw new Unit4NotFoundException(&quot;Ressurs finnes ikke i Unit4.&quot;);</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">            } else if (httpStatusCode.is4xxClientError()) {</span>
+<span class="nc" id="L69">                throw new Unit4RequestException(&quot;Unit4 melder klient feil. HttpStatus: %s&quot;.formatted(httpStatusCode.toString()));</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">            } else if (httpStatusCode.is5xxServerError()) {</span>
+<span class="nc" id="L71">                throw new Unit4ServerException(&quot;Unit4 melder server feil. HttpStatus: %s&quot;.formatted(httpStatusCode.toString()));</span>
+            } else {
+<span class="nc" id="L73">                throw new Unit4UnknownException(&quot;Ukjent feil fra Unit4. HttpStatus: %s&quot;.formatted(httpStatusCode.toString()));</span>
+            }
+<span class="nc" id="L75">        } catch (WebClientException wce) {</span>
+<span class="nc" id="L76">            log.warn(&quot;Unit4 findRessurs request error&quot;, wce);</span>
+<span class="nc" id="L77">            throw new Unit4UnknownException(&quot;Annen ukjent feil ved request til Unit4&quot;, wce);</span>
+        }
+    }
+
+
+    public JsonNode createRessurs(Unit4RessursDto unit4RessursDto) throws Unit4Exception, JsonProcessingException {
+<span class="fc" id="L83">        val body = objectMapper.writeValueAsString(unit4RessursDto);</span>
+<span class="fc" id="L84">        log.debug(SECURE_LOGS, &quot;Create unit4 ressurs:\n{}&quot;, body);</span>
+        try {
+<span class="fc" id="L86">            JsonNode response =</span>
+<span class="fc" id="L87">                webClient.post()</span>
+<span class="fc" id="L88">                    .uri(appProperties.proxy().baseUrl() + RESSURS_ENDPOINT)</span>
+<span class="fc" id="L89">                    .headers(httpHeaders -&gt; {</span>
+<span class="fc" id="L90">                        httpHeaders.setContentType(MediaType.APPLICATION_JSON);</span>
+<span class="fc" id="L91">                        httpHeaders.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.proxy().aadClientId()).serialize());</span>
+<span class="fc" id="L92">                        httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));</span>
+<span class="fc" id="L93">                    })</span>
+<span class="fc" id="L94">                    .bodyValue(body)</span>
+<span class="fc" id="L95">                    .retrieve()</span>
+<span class="fc" id="L96">                    .toEntity(JsonNode.class)</span>
+<span class="fc" id="L97">                    .block()</span>
+<span class="fc" id="L98">                    .getBody();</span>
+
+
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">            log.debug(SECURE_LOGS, &quot;Response fra create unit4 ressurs:\n{}&quot;, response != null ? response.toPrettyString() : &quot;n/a&quot;);</span>
+<span class="fc" id="L102">            return response;</span>
+<span class="fc" id="L103">        } catch (WebClientResponseException wce) {</span>
+<span class="fc" id="L104">            HttpStatusCode httpStatusCode = wce.getStatusCode();</span>
+<span class="fc" id="L105">            log.error(SECURE_LOGS, &quot;Error posting to Unit4[{}], dumping dto({}): {} &quot;, appProperties.proxy().baseUrl() + RESSURS_ENDPOINT, unit4RessursDto.getClass().getSimpleName(), body, wce);</span>
+<span class="fc" id="L106">            log.debug(&quot;Error creating unit4 ressurs&quot;, wce);</span>
+
+<span class="fc" id="L108">            logIfErrorMessageInBody(wce.getResponseBodyAsString(StandardCharsets.UTF_8));</span>
+
+<span class="fc bfc" id="L110" title="All 2 branches covered.">            if (httpStatusCode == HttpStatus.CONFLICT) {</span>
+<span class="fc" id="L111">                throw new Unit4ConflictException(&quot;Ressurs finnes i Unit4. (HttpStatus.CONFLICT)&quot;);</span>
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">            } else if (httpStatusCode.is4xxClientError()) {</span>
+<span class="fc" id="L113">                throw new Unit4RequestException(&quot;Unit4 melder klient feil. HttpStatus: %s&quot;.formatted(httpStatusCode.toString()));</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">            } else if (httpStatusCode.is5xxServerError()) {</span>
+<span class="nc" id="L115">                throw new Unit4ServerException(&quot;Unit4 melder server feil. HttpStatus: %s&quot;.formatted(httpStatusCode.toString()));</span>
+            } else {
+<span class="nc" id="L117">                throw new Unit4UnknownException(&quot;Ukjent feil fra Unit4. HttpStatus: %s&quot;.formatted(httpStatusCode.toString()));</span>
+            }
+<span class="nc" id="L119">        } catch (WebClientException wce) {</span>
+<span class="nc" id="L120">            log.warn(&quot;Unit4 createRessurs request error&quot;, wce);</span>
+<span class="nc" id="L121">            log.warn(SECURE_LOGS, &quot;Unit4 createRessurs request error for Unit4[{}], dumping dto({}): {}&quot;, appProperties.proxy().baseUrl() + RESSURS_ENDPOINT, unit4RessursDto.getClass().getSimpleName(), body, wce);</span>
+<span class="nc" id="L122">            throw new Unit4UnknownException(&quot;Annen ukjent feil ved request til Unit4&quot;);</span>
+        }
+    }
+
+    public JsonNode patchRessurs(String personId, List&lt;Unit4PatchRequest&gt; unit4PatchRequest) throws Unit4Exception, JsonProcessingException{
+<span class="nc" id="L127">        val body = objectMapper.writeValueAsString(unit4PatchRequest);</span>
+<span class="nc" id="L128">        val url = appProperties.proxy().baseUrl() + RESSURS_ENDPOINT + &quot;/&quot; + personId;</span>
+<span class="nc" id="L129">        log.debug(SECURE_LOGS, &quot;Patch unit4 ressurs [{}]:\n{}&quot;, url, body);</span>
+
+        try {
+<span class="nc" id="L132">            JsonNode response =</span>
+<span class="nc" id="L133">                webClient.patch()</span>
+<span class="nc" id="L134">                    .uri(url)</span>
+<span class="nc" id="L135">                    .headers(httpHeaders -&gt; {</span>
+<span class="nc" id="L136">                        httpHeaders.setContentType(MediaType.APPLICATION_JSON);</span>
+<span class="nc" id="L137">                        httpHeaders.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.proxy().aadClientId()).serialize());</span>
+<span class="nc" id="L138">                        httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));</span>
+<span class="nc" id="L139">                    })</span>
+<span class="nc" id="L140">                    .bodyValue(body)</span>
+<span class="nc" id="L141">                    .retrieve()</span>
+<span class="nc" id="L142">                    .toEntity(JsonNode.class)</span>
+<span class="nc" id="L143">                    .block()</span>
+<span class="nc" id="L144">                    .getBody() ;</span>
+
+<span class="nc bnc" id="L146" title="All 2 branches missed.">            log.debug(SECURE_LOGS, &quot;Response fra patch unit4 ressurs:\n{}&quot;, response != null ? response.toPrettyString() : &quot;n/a&quot;);</span>
+<span class="nc" id="L147">            return response;</span>
+<span class="nc" id="L148">        } catch (WebClientResponseException wce) {</span>
+<span class="nc" id="L149">            HttpStatusCode httpStatusCode = wce.getStatusCode();</span>
+<span class="nc" id="L150">            log.error(SECURE_LOGS, &quot;Error patching to Unit4[{}], dumping dto({}): {} &quot;, url, unit4PatchRequest.getClass().getSimpleName(), body, wce);</span>
+
+<span class="nc" id="L152">            logIfErrorMessageInBody(wce.getResponseBodyAsString(StandardCharsets.UTF_8));</span>
+
+<span class="nc bnc" id="L154" title="All 4 branches missed.">            if (httpStatusCode == HttpStatus.NOT_FOUND || httpStatusCode == HttpStatus.GONE){</span>
+<span class="nc" id="L155">                throw new Unit4NotFoundException(&quot;Ressurs finnes ikke i Unit4. HttpsStatus: %s&quot;.formatted(httpStatusCode.toString()));</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">            } else if (httpStatusCode.is4xxClientError()) {</span>
+<span class="nc" id="L157">                throw new Unit4RequestException(&quot;Unit4 melder klient feil. HttpStatus: %s&quot;.formatted(httpStatusCode.toString()));</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">            } else if (httpStatusCode.is5xxServerError()) {</span>
+<span class="nc" id="L159">                throw new Unit4ServerException(&quot;Unit4 melder server feil. HttpStatus: %s&quot;.formatted(httpStatusCode.toString()));</span>
+            } else {
+<span class="nc" id="L161">                throw new Unit4UnknownException(&quot;Ukjent feil fra Unit4. HttpStatus: %s&quot;.formatted(httpStatusCode.toString()));</span>
+            }
+<span class="nc" id="L163">        } catch (WebClientException wce) {</span>
+<span class="nc" id="L164">            log.warn(&quot;Unit4 patchRessurs request error&quot;, wce);</span>
+<span class="nc" id="L165">            log.warn(SECURE_LOGS, &quot;Unit4 patchRessurs request error for Unit4[{}], dumping dto({}): {}&quot;, url, unit4PatchRequest.getClass().getSimpleName(), body, wce);</span>
+<span class="nc" id="L166">            throw new Unit4UnknownException(&quot;Annen ukjent feil ved request til Unit4&quot;);</span>
+        }
+    }
+
+    public void deleteRessurs(String personId) throws Unit4Exception {
+<span class="nc" id="L171">        val url = appProperties.proxy().baseUrl() + RESSURS_ENDPOINT + &quot;/&quot; + personId;</span>
+<span class="nc" id="L172">        log.debug(&quot;Delete unit4 ressurs [{}]:\n{}&quot;, url);</span>
+
+        try {
+<span class="nc" id="L175">            webClient.delete()</span>
+<span class="nc" id="L176">                .uri(url)</span>
+<span class="nc" id="L177">                .headers(httpHeaders -&gt; {</span>
+<span class="nc" id="L178">                    httpHeaders.setContentType(UNIT4_MEDIETYPE_JSON_PATCH);</span>
+<span class="nc" id="L179">                    httpHeaders.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.proxy().aadClientId()).serialize());</span>
+<span class="nc" id="L180">                    httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));</span>
+<span class="nc" id="L181">                })</span>
+<span class="nc" id="L182">                .retrieve()</span>
+<span class="nc" id="L183">                .toEntity(JsonNode.class)</span>
+<span class="nc" id="L184">                .block();</span>
+
+<span class="nc" id="L186">        } catch (WebClientResponseException wce) {</span>
+<span class="nc" id="L187">            HttpStatusCode httpStatusCode = wce.getStatusCode();</span>
+<span class="nc" id="L188">            log.error(SECURE_LOGS, &quot;Error in delete Ressurs to Unit4[{}]&quot;, wce);</span>
+
+<span class="nc" id="L190">            logIfErrorMessageInBody(wce.getResponseBodyAsString(StandardCharsets.UTF_8));</span>
+
+<span class="nc bnc" id="L192" title="All 4 branches missed.">            if (httpStatusCode == HttpStatus.NOT_FOUND || httpStatusCode == HttpStatus.GONE){</span>
+<span class="nc" id="L193">                throw new Unit4NotFoundException(&quot;Ressurs finnes ikke i Unit4. HttpsStatus: %s&quot;.formatted(httpStatusCode.toString()));</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">            } else if (httpStatusCode.is4xxClientError()) {</span>
+<span class="nc" id="L195">                throw new Unit4RequestException(&quot;Unit4 melder klient feil. HttpStatus: %s&quot;.formatted(httpStatusCode.toString()));</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">            } else if (httpStatusCode.is5xxServerError()) {</span>
+<span class="nc" id="L197">                throw new Unit4ServerException(&quot;Unit4 melder server feil. HttpStatus: %s&quot;.formatted(httpStatusCode.toString()));</span>
+            } else {
+<span class="nc" id="L199">                throw new Unit4UnknownException(&quot;Ukjent feil fra Unit4. HttpStatus: %s&quot;.formatted(httpStatusCode.toString()));</span>
+            }
+<span class="nc" id="L201">        } catch (WebClientException wce) {</span>
+<span class="nc" id="L202">            log.warn(&quot;Unit4 deleteRessurs request error&quot;, wce);</span>
+<span class="nc" id="L203">            log.warn(SECURE_LOGS, &quot;Unit4 deleteRessurs request error for Unit4[{}]&quot;, url, wce);</span>
+<span class="nc" id="L204">            throw new Unit4UnknownException(&quot;Annen ukjent feil ved request til Unit4&quot;);</span>
+<span class="nc" id="L205">        }</span>
+<span class="nc" id="L206">    }</span>
+
+    private void logIfErrorMessageInBody(String body) {
+<span class="pc bpc" id="L209" title="2 of 4 branches missed.">        if (body != null &amp;&amp; body.length() &gt; 0) {</span>
+<span class="fc" id="L210">            ObjectMapper mapper = new ObjectMapper();</span>
+<span class="fc" id="L211">            JsonNode bodyNode = null;</span>
+            try {
+<span class="fc" id="L213">                bodyNode = mapper.readTree(body);</span>
+<span class="nc" id="L214">            } catch (JsonProcessingException e) {</span>
+<span class="nc" id="L215">                log.warn(&quot;Could not parse Unit4 response body when looking for 'notificationMessages'&quot;);</span>
+<span class="fc" id="L216">            }</span>
+<span class="fc" id="L217">            logIfNotificationMessagesInJson(bodyNode);</span>
+        }
+<span class="fc" id="L219">    }</span>
+
+    private void logIfNotificationMessagesInJson(JsonNode node) {
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        if (node.isObject()) {</span>
+<span class="fc" id="L223">            node.fields().forEachRemaining(field -&gt; {</span>
+<span class="fc bfc" id="L224" title="All 2 branches covered.">                if (field.getKey().equals(&quot;notificationMessages&quot;)) {</span>
+<span class="fc" id="L225">                    log.warn(field.getValue().toPrettyString());</span>
+                } else {
+<span class="fc" id="L227">                    logIfNotificationMessagesInJson(field.getValue());</span>
+                }
+<span class="fc" id="L229">            });</span>
+<span class="fc bfc" id="L230" title="All 2 branches covered.">        } else if (node.isArray()) {</span>
+<span class="fc" id="L231">            node.forEach(this::logIfNotificationMessagesInJson);</span>
+        }
+<span class="fc" id="L233">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

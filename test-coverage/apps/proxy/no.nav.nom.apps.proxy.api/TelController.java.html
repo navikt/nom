@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TelController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: PROXY</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.proxy.api</a> &gt; <span class="el_source">TelController.java</span></div><h1>TelController.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.proxy.api;
+
+import no.nav.nom.apps.proxy.common.AppProperties;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunctions;
+import org.springframework.web.reactive.function.client.WebClient;
+
+@RestController
+@RequestMapping(&quot;/proxy&quot;)
+public class TelController {
+
+    private final WebClient webClient;
+
+<span class="fc" id="L17">    public TelController(AppProperties appProperties, WebClient.Builder webClientBuilder) {</span>
+<span class="fc" id="L18">        this.webClient = webClientBuilder</span>
+<span class="fc" id="L19">            .baseUrl(appProperties.getTel().getUrl())</span>
+<span class="fc" id="L20">            .filter(ExchangeFilterFunctions</span>
+<span class="fc" id="L21">                .basicAuthentication(appProperties.getTel().getTelUsername(), appProperties.getTel().getTelPassword()))</span>
+<span class="fc" id="L22">            .build();</span>
+<span class="fc" id="L23">    }</span>
+
+    @GetMapping(&quot;/tel&quot;)
+    public ResponseEntity&lt;String&gt; getTelv1() {
+<span class="fc" id="L27">        return webClient.get()</span>
+<span class="fc" id="L28">            .retrieve()</span>
+<span class="fc" id="L29">            .toEntity(String.class)</span>
+<span class="fc" id="L30">            .block();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

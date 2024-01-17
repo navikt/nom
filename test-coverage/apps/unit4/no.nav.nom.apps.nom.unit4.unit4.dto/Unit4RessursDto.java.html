@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Unit4RessursDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Unit4</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.nom.unit4.unit4.dto</a> &gt; <span class="el_source">Unit4RessursDto.java</span></div><h1>Unit4RessursDto.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.nom.unit4.unit4.dto;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Builder;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import no.nav.nom.apps.nom.unit4.input.NomRessursDTO;
+import no.nav.nom.apps.nom.unit4.unit4.Utils;
+import no.nav.nom.contract.nom.AnsettelsesType;
+import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOpprettetAdditionalData;
+import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOpprettetAdditionalData.FolkeregistrertNavn;
+import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOpprettetEventData;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+@Value
+@Builder
+@RequiredArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Jacksonized
+<span class="fc" id="L33">@Slf4j</span>
+public class Unit4RessursDto {
+
+    @JsonIgnore
+<span class="fc" id="L37">    public final static LocalDateTime AGRESSO_TIMESTAMP_NULL_VALUE = LocalDateTime.parse(&quot;2099-12-31T00:00:00.000&quot;);</span>
+
+    AdditionalInformation additionalInformation;
+    LocalDateTime birthDate;
+<span class="pc" id="L41">    String companyId = &quot;HR&quot;;</span>
+    LocalDateTime dateFrom;
+<span class="pc" id="L43">    LocalDateTime dateTo = AGRESSO_TIMESTAMP_NULL_VALUE;</span>
+<span class="pc" id="L44">    String languageCode = &quot;NO&quot;;</span>
+    String name;
+    NameInformation nameInformation;
+    PaymentInformation paymentInformation;
+    PersonalInformation personalInformation;
+    String personId; // Siste 6 siffer av navident
+<span class="pc" id="L50">    Unit4RessursType personnelType = Unit4RessursType.FAST_ANSATTE;</span>
+<span class="pc" id="L51">    Unit4Status status = Unit4Status.AKTIV;</span>
+<span class="pc" id="L52">    List&lt;ContactPoint&gt; contactPoints = getContactPointsDefault();</span>
+    List&lt;RelatedValue&gt; relatedValues;
+    List&lt;Employment&gt; employments;
+
+<span class="nc" id="L56">    public Unit4RessursDto(NomRessursDTO nomRessursDTO, String fellesKoblingValue) {</span>
+<span class="nc" id="L57">        String ressursNr = nomRessursDTO.getNavident().substring(1);</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        String firstName = Utils.formatName(nomRessursDTO.getFornavn()) + (nomRessursDTO.getMellomnavn() != null ? &quot; &quot;+Utils.formatName(nomRessursDTO.getMellomnavn()) : &quot;&quot;);</span>
+<span class="nc" id="L59">        String surName = Utils.formatName(nomRessursDTO.getEtternavn());</span>
+<span class="nc" id="L60">        String aliasName = (firstName.substring(0,2) + surName.substring(0,2)).toUpperCase();</span>
+
+<span class="nc" id="L62">        additionalInformation = AdditionalInformation.builder()</span>
+<span class="nc" id="L63">                .relatedPersonId(ressursNr)</span>
+<span class="nc" id="L64">                .build();</span>
+
+
+        LocalDateTime birthDateTemp;
+        try {
+<span class="nc" id="L69">            val parsedBirthDate = LocalDate.parse(nomRessursDTO.getPersonident().substring(0, 6), DateTimeFormatter.ofPattern(&quot;ddMMyy&quot;));</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">            birthDateTemp = (parsedBirthDate.isAfter(LocalDate.now()) ? parsedBirthDate.minusYears(100) : parsedBirthDate).atStartOfDay();</span>
+<span class="nc" id="L71">        } catch (Exception ex){</span>
+<span class="nc" id="L72">            birthDateTemp = LocalDate.parse(&quot;1995-04-12&quot;).atStartOfDay();</span>
+<span class="nc" id="L73">        }</span>
+<span class="nc" id="L74">        birthDate = birthDateTemp;</span>
+<span class="nc" id="L75">        dateFrom = LocalDate.now().atStartOfDay();</span>
+<span class="nc" id="L76">        name = firstName + &quot; &quot; + surName;</span>
+<span class="nc" id="L77">        nameInformation = NameInformation.builder()</span>
+<span class="nc" id="L78">                .aliasName(aliasName)</span>
+<span class="nc" id="L79">                .firstName(firstName)</span>
+<span class="nc" id="L80">                .surname(surName)</span>
+<span class="nc" id="L81">                .build();</span>
+<span class="nc" id="L82">        paymentInformation = PaymentInformation.builder()</span>
+<span class="nc" id="L83">                .supplierId(ressursNr)</span>
+<span class="nc" id="L84">                .build();</span>
+<span class="nc" id="L85">        personalInformation = PersonalInformation.builder()</span>
+<span class="nc" id="L86">                .gender(Unit4RessursGender.FEMALE)</span>
+<span class="nc" id="L87">                .nationalIdentityNo(nomRessursDTO.getPersonident())</span>
+<span class="nc" id="L88">                .build();</span>
+<span class="nc" id="L89">        personId = ressursNr;</span>
+<span class="nc" id="L90">        relatedValues = getRelatedValuesDefault(fellesKoblingValue);</span>
+<span class="nc" id="L91">        relatedValues.add(</span>
+<span class="nc" id="L92">                RelatedValue.builder()</span>
+<span class="nc" id="L93">                .relationId(&quot;M0&quot;)</span>
+<span class="nc" id="L94">                .relatedValue(&quot;5224300&quot;)</span>
+<span class="nc" id="L95">                .dateFrom(dateFrom)</span>
+<span class="nc" id="L96">                .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)</span>
+<span class="nc" id="L97">                .build()</span>
+        );
+<span class="nc" id="L99">        relatedValues.add(</span>
+<span class="nc" id="L100">            RelatedValue.builder()</span>
+<span class="nc" id="L101">                .relationId(&quot;C8&quot;)</span>
+<span class="nc" id="L102">                .relatedValue(&quot;FLON&quot;)</span>
+<span class="nc" id="L103">                .dateFrom(dateFrom)</span>
+<span class="nc" id="L104">                .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)</span>
+<span class="nc" id="L105">                .build()</span>
+        );
+<span class="nc" id="L107">        employments = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L108">    }</span>
+
+<span class="fc" id="L110">    public Unit4RessursDto(RessursOpprettetEventV1 record, String fellesKoblingValue, boolean leverEkstraAvgRelasjon) throws IllegalArgumentException {</span>
+<span class="fc" id="L111">        RessursOpprettetEventData eventData = (RessursOpprettetEventData) record.getData();</span>
+<span class="fc" id="L112">        RessursOpprettetAdditionalData additionalData = (RessursOpprettetAdditionalData) record.getAdditionalData();</span>
+
+<span class="pc" id="L114">        String navident = additionalData.navident().orElseThrow(() -&gt; new NoSuchElementException(&quot;Navident is missing from event&quot;));</span>
+<span class="fc" id="L115">        String ressursNr = navident.substring(1);</span>
+
+<span class="pc bpc" id="L117" title="3 of 4 branches missed.">        String firstName = additionalData.folkeregistrertNavn().map(navn -&gt; navn.fornavn() + (navn.mellomnavn() != null &amp;&amp; !navn.mellomnavn().equals(&quot;&quot;) ? &quot; &quot; + navn.mellomnavn() : &quot;&quot;))</span>
+<span class="pc" id="L118">                .orElseThrow(() -&gt; new NoSuchElementException(&quot;FolkeregistrertNavn is missing from event&quot;));</span>
+
+<span class="fc" id="L120">        String surName = additionalData.folkeregistrertNavn().map(FolkeregistrertNavn::etternavn)</span>
+<span class="pc" id="L121">                .orElseThrow(() -&gt; new NoSuchElementException(&quot;FolkeregistrertNavn is missing from event&quot;));</span>
+
+<span class="fc" id="L123">        firstName = Utils.formatName(firstName);</span>
+<span class="fc" id="L124">        surName = Utils.formatName(surName);</span>
+
+<span class="fc" id="L126">        String aliasName = (firstName.substring(0,2) + surName.substring(0,2)).toUpperCase();</span>
+
+<span class="fc" id="L128">        Unit4RessursGender kjoenn = additionalData.kjoenn().map(k -&gt;</span>
+<span class="pc bpc" id="L129" title="2 of 3 branches missed.">                switch (k){</span>
+<span class="fc" id="L130">                    case &quot;MANN&quot; -&gt; Unit4RessursGender.MALE;</span>
+<span class="nc" id="L131">                    case &quot;KVINNE&quot; -&gt; Unit4RessursGender.FEMALE;</span>
+<span class="nc" id="L132">                    default -&gt; null;</span>
+                }
+<span class="pc" id="L134">        ).orElseThrow(() -&gt; new NoSuchElementException(&quot;Folkeregistrert kjoenn is missing from event&quot;));</span>
+<span class="fc" id="L135">        dateFrom =  additionalData.startdato()</span>
+<span class="fc" id="L136">                .map(LocalDate::atStartOfDay)</span>
+<span class="pc" id="L137">                .orElseThrow(() -&gt; new NoSuchElementException(&quot;Startdato is missing from event&quot;));</span>
+<span class="fc" id="L138">        birthDate = ((RessursOpprettetAdditionalData) record.getAdditionalData()).foedselsdato().map(LocalDate::atStartOfDay)</span>
+<span class="pc" id="L139">                .orElseThrow(() -&gt; new NoSuchElementException(&quot;Foedseldato is missing from event&quot;));</span>
+
+<span class="fc" id="L141">        additionalInformation = AdditionalInformation.builder()</span>
+<span class="fc" id="L142">                .relatedPersonId(ressursNr)</span>
+<span class="fc" id="L143">                .build();</span>
+
+<span class="fc" id="L145">        name = surName + &quot;, &quot; + firstName;</span>
+<span class="fc" id="L146">        nameInformation = NameInformation.builder()</span>
+<span class="fc" id="L147">                .aliasName(aliasName)</span>
+<span class="fc" id="L148">                .firstName(firstName)</span>
+<span class="fc" id="L149">                .surname(surName)</span>
+<span class="fc" id="L150">                .build();</span>
+<span class="fc" id="L151">        paymentInformation = PaymentInformation.builder()</span>
+<span class="fc" id="L152">                .supplierId(ressursNr)</span>
+<span class="fc" id="L153">                .build();</span>
+<span class="fc" id="L154">        personalInformation = PersonalInformation.builder()</span>
+<span class="fc" id="L155">                .gender(kjoenn)</span>
+<span class="fc" id="L156">                .nationalIdentityNo(eventData.personident())</span>
+<span class="fc" id="L157">                .build();</span>
+<span class="fc" id="L158">        personId = ressursNr;</span>
+<span class="fc" id="L159">        relatedValues = getRelatedValuesDefault(fellesKoblingValue);</span>
+
+<span class="fc" id="L161">        relatedValues.add(</span>
+<span class="fc" id="L162">                additionalData.orgEnhet()</span>
+<span class="fc" id="L163">                        .map((orgenhet) -&gt; RelatedValue.builder()</span>
+<span class="fc" id="L164">                                .relationId(&quot;M0&quot;)</span>
+<span class="fc" id="L165">                                .relatedValue(additionalData.orgEnhet().get())</span>
+<span class="fc" id="L166">                                .dateFrom(dateFrom)</span>
+<span class="fc" id="L167">                                .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)</span>
+<span class="fc" id="L168">                                .build()</span>
+                        )
+<span class="pc" id="L170">                        .orElseThrow(() -&gt; new NoSuchElementException(&quot;Agresso unit id is missing from event&quot;))</span>
+        );
+
+<span class="fc" id="L173">        relatedValues.add(</span>
+            // Varierer basert på INTERN/EKSTERN/MIDLERTIDIG
+<span class="fc" id="L175">            RelatedValue.builder()</span>
+<span class="fc" id="L176">                .relationId(&quot;C8&quot;)   // C8: Begrep=GRUPPE, Beskrivelse=Gruppe</span>
+<span class="fc" id="L177">                .relatedValue(additionalData.ansettelsesType()</span>
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">                    .map(ansettelsesType -&gt; ansettelsesType == AnsettelsesType.MIDLERTIDIG ? &quot;MIDL&quot; : &quot;FLON&quot;)</span>
+<span class="fc" id="L179">                    .orElse(&quot;FLON&quot;)</span>
+                ) // FLON: 5000 - Oppg. Faste stillinger, ordinær
+<span class="fc" id="L181">                .dateFrom(dateFrom)</span>
+<span class="fc" id="L182">                .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)</span>
+<span class="fc" id="L183">                .build()</span>
+        );
+
+<span class="pc bpc" id="L186" title="1 of 2 branches missed.">        if (leverEkstraAvgRelasjon) {</span>
+<span class="nc" id="L187">            log.info(&quot;Ressurs opprettes med MNAO - EKTRAAGA relasjon (ekstra arbeidsgiveravgift 2023)&quot;);</span>
+<span class="nc" id="L188">            relatedValues.add(</span>
+                // Foreløpig oppsett for 2023 og ekstra arbeidsgiveravgift.
+<span class="nc" id="L190">                RelatedValue.builder()</span>
+<span class="nc" id="L191">                    .relationId(&quot;MNAO&quot;)  // NOM: Begrep=MNAO, Beskrivelse=EKSTRAAGA</span>
+<span class="nc" id="L192">                    .relatedValue(&quot;EA&quot;)  // EA</span>
+<span class="nc" id="L193">                    .dateFrom(dateFrom)</span>
+<span class="nc" id="L194">                    .dateTo(LocalDate.of(2023,12,31).atStartOfDay()) // Midlertidig til for 2023</span>
+<span class="nc" id="L195">                    .build()</span>
+            );
+        } else {
+<span class="fc" id="L198">            log.info(&quot;Ressurs opprettes uten MNAO - EKTRAAGA relasjon (ekstra arbeidsgiveravgift 2023)&quot;);</span>
+        }
+<span class="fc" id="L200">        employments = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L201">    }</span>
+
+    private List&lt;ContactPoint&gt; getContactPointsDefault(){
+<span class="fc" id="L204">        val contactPontOne = ContactPoint.builder()</span>
+<span class="fc" id="L205">                .contactPointType(&quot;1&quot;)</span>
+<span class="fc" id="L206">                .build();</span>
+<span class="fc" id="L207">        return List.of(contactPontOne);</span>
+    }
+
+    private List&lt;RelatedValue&gt; getRelatedValuesDefault(String fellesKoblingValue){
+<span class="fc" id="L211">        return Stream.of(</span>
+                // Default verdi. Endres i unit4 etter opprettelse ved behov.
+<span class="fc" id="L213">                RelatedValue.builder()</span>
+<span class="fc" id="L214">                        .relationId(&quot;23&quot;)   // 23: Begrep=FELLES, Beskrivelse=Felles</span>
+<span class="fc" id="L215">                        .relatedValue(fellesKoblingValue) // Skal være 000000 USPESIFISERT, men denne verdien finnes ikke enda.L03034 står for &quot;Oslo, Fyrstikkalléen 1&quot;</span>
+<span class="fc" id="L216">                        .dateFrom(dateFrom)</span>
+<span class="fc" id="L217">                        .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)</span>
+<span class="fc" id="L218">                        .build(),</span>
+
+                // Uspesifisert verdi som gjelder det fleste. Verdien Skal settes til dette for default, dermed endres det etter behov.
+                // Eksterne skal muligens ha annen default verdi når det blir aktuelt.
+<span class="fc" id="L222">                RelatedValue.builder()</span>
+<span class="fc" id="L223">                        .relationId(&quot;20&quot;)   // 20: Begrep=PRODUKT, Beskrivelse=Produkt</span>
+<span class="fc" id="L224">                        .relatedValue(&quot;000000&quot;) // 000000: Uspesifisert</span>
+<span class="fc" id="L225">                        .dateFrom(dateFrom)</span>
+<span class="fc" id="L226">                        .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)</span>
+<span class="fc" id="L227">                        .build(),</span>
+
+                // Default verdi, 2 typer eksterne som kanskje skal ha annen default verdi.
+<span class="fc" id="L230">                RelatedValue.builder()</span>
+<span class="fc" id="L231">                        .relationId(&quot;B1&quot;)   // B1: Begrep=OPPGAVE, Beskrivelse=Oppgave</span>
+<span class="fc" id="L232">                        .relatedValue(&quot;000000&quot;) // 000000: Uspesifisert</span>
+<span class="fc" id="L233">                        .dateFrom(dateFrom)</span>
+<span class="fc" id="L234">                        .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)</span>
+<span class="fc" id="L235">                        .build(),</span>
+
+                // Default verdi for alle
+<span class="fc" id="L238">                RelatedValue.builder()</span>
+<span class="fc" id="L239">                        .relationId(&quot;MQ&quot;)   // MQ: Begrep=AGASTAT, Beskrivelse=Arbeidsgiveravgift</span>
+<span class="fc" id="L240">                        .relatedValue(&quot;BB&quot;) // BB: Statsforvaltning og helseforetak</span>
+<span class="fc" id="L241">                        .dateFrom(dateFrom)</span>
+<span class="fc" id="L242">                        .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)</span>
+<span class="fc" id="L243">                        .build(),</span>
+
+                // Default verdi for alle faste og midlertidige og timelønnet.
+                // Kommunale Eksterne står det Nei på.
+<span class="fc" id="L247">                RelatedValue.builder()</span>
+<span class="fc" id="L248">                        .relationId(&quot;Y7&quot;) // Y7: Begrep=PENSJON, Beskrivelse=Pensjonsplan - nivå</span>
+<span class="fc" id="L249">                        .relatedValue(&quot;SPK&quot;) // SPK: Pensjonstrekk SPK 2%</span>
+<span class="fc" id="L250">                        .dateFrom(dateFrom.withDayOfMonth(1)) // Alltid første dag i startmåned</span>
+<span class="fc" id="L251">                        .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)</span>
+<span class="fc" id="L252">                        .build(),</span>
+
+                // Flagg for å indikere at ressursen er opprettet av NOM
+<span class="fc" id="L255">                RelatedValue.builder()</span>
+<span class="fc" id="L256">                        .relationId(&quot;NOM&quot;)  // NOM: Begrep=AUTO_GEN_NOM, Beskrivelse=Generert av NOM</span>
+<span class="fc" id="L257">                        .relatedValue(&quot;1&quot;)  // 1: Generert av NOM</span>
+<span class="fc" id="L258">                        .dateFrom(dateFrom)</span>
+<span class="fc" id="L259">                        .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)</span>
+<span class="fc" id="L260">                        .build()</span>
+<span class="fc" id="L261">        ).collect(Collectors.toList());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

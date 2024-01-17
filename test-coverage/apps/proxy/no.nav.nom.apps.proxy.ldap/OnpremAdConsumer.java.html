@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OnpremAdConsumer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: PROXY</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.proxy.ldap</a> &gt; <span class="el_source">OnpremAdConsumer.java</span></div><h1>OnpremAdConsumer.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.proxy.ldap;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.contract.ad.AdRessurs;
+import org.springframework.ldap.core.DirContextOperations;
+import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.core.support.AbstractContextMapper;
+import org.springframework.ldap.query.ContainerCriteria;
+import org.springframework.ldap.query.LdapQuery;
+import org.springframework.ldap.query.LdapQueryBuilder;
+import org.springframework.ldap.query.SearchScope;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.springframework.ldap.query.LdapQueryBuilder.query;
+
+<span class="fc" id="L20">@Slf4j</span>
+@Component
+@RequiredArgsConstructor
+public class OnpremAdConsumer {
+
+    private static final String MAIL_ATTR = &quot;mail&quot;;
+    private static final String IDENT_ATTR = &quot;sAMAccountName&quot;;
+    private static final String DISPLAY_NAME_ATTR = &quot;displayName&quot;;
+    private static final String GIVEN_NAME_ATTR = &quot;givenName&quot;;
+    private static final String SURNAME_ATTR = &quot;sn&quot;;
+
+    private final LdapTemplate ldapTemplate;
+
+    public List&lt;AdRessurs&gt; findRessurser(List&lt;String&gt; navIdenter) {
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">        if (navIdenter.isEmpty()) {</span>
+<span class="nc" id="L35">            return List.of();</span>
+        }
+
+<span class="fc" id="L38">        LdapQuery query = query()</span>
+<span class="fc" id="L39">                .searchScope(SearchScope.SUBTREE)</span>
+<span class="fc" id="L40">                .timeLimit(3000)</span>
+<span class="fc" id="L41">                .attributes(MAIL_ATTR, IDENT_ATTR, DISPLAY_NAME_ATTR, GIVEN_NAME_ATTR, SURNAME_ATTR)</span>
+<span class="fc" id="L42">                .where(&quot;objectClass&quot;).is(&quot;user&quot;)</span>
+<span class="fc" id="L43">                .and(buildQuery(query(), navIdenter));</span>
+<span class="fc" id="L44">        var result = new ArrayList&lt;&gt;(ldapTemplate.search(query, new Mapper()));</span>
+
+<span class="fc" id="L46">        var missingIdenter = new ArrayList&lt;&gt;(navIdenter);</span>
+<span class="fc" id="L47">        result.forEach(i -&gt; missingIdenter.remove(i.getNavIdent()));</span>
+<span class="fc" id="L48">        missingIdenter.forEach(i -&gt; result.add(AdRessurs.ikkeFunnet(i)));</span>
+<span class="fc" id="L49">        return result;</span>
+    }
+
+    private ContainerCriteria buildQuery(LdapQueryBuilder query, List&lt;String&gt; navIdenter) {
+<span class="fc" id="L53">        return navIdenter.stream().reduce(</span>
+<span class="fc" id="L54">                query.where(IDENT_ATTR).is(navIdenter.get(0)),</span>
+<span class="fc" id="L55">                (cc, s) -&gt; cc.or(IDENT_ATTR).is(s), ContainerCriteria::or);</span>
+    }
+
+    private static class Mapper extends AbstractContextMapper&lt;AdRessurs&gt; {
+
+        @Override
+        protected AdRessurs doMapFromContext(DirContextOperations ctx) {
+<span class="fc" id="L62">            return AdRessurs.builder()</span>
+<span class="fc" id="L63">                    .email(ctx.getStringAttribute(MAIL_ATTR))</span>
+<span class="fc" id="L64">                    .navIdent(ctx.getStringAttribute(IDENT_ATTR))</span>
+<span class="fc" id="L65">                    .displayName(ctx.getStringAttribute(DISPLAY_NAME_ATTR))</span>
+<span class="fc" id="L66">                    .givenName(ctx.getStringAttribute(GIVEN_NAME_ATTR))</span>
+<span class="fc" id="L67">                    .surname(ctx.getStringAttribute(SURNAME_ATTR))</span>
+<span class="fc" id="L68">                    .build();</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
