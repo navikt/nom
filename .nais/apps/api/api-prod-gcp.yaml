@@ -68,6 +68,9 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: shout-out-api
+          namespace: shout-out
+          cluster: prod-gcp
         - application: nom-ui2
           namespace: org
           cluster: prod-gcp
