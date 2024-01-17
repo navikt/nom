@@ -75,7 +75,8 @@ export const ValgtOrgEnhet = ({
                 )}
                 {orgEnhet.gyldigFom && (
                   <BodyShort size="small">
-                    Gyldig FOM: <b>{formatDisplayDate(orgEnhet.gyldigFom)}</b>
+                    Gyldig f.o.m.:{" "}
+                    <b>{formatDisplayDate(orgEnhet.gyldigFom)}</b>
                   </BodyShort>
                 )}
                 {orgEnhet.nomNivaa && (
@@ -98,7 +99,8 @@ export const ValgtOrgEnhet = ({
                 )}
                 {orgEnhet.gyldigTom && (
                   <BodyShort size="small">
-                    Gyldig TOM: <b>{formatDisplayDate(orgEnhet.gyldigTom)}</b>
+                    Gyldig t.o.m.:{" "}
+                    <b>{formatDisplayDate(orgEnhet.gyldigTom)}</b>
                   </BodyShort>
                 )}
                 {orgEnhet.orgEnhetsType && (
