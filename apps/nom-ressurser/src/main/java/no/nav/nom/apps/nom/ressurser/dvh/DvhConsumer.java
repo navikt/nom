@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Slf4j
@@ -40,6 +41,10 @@ public class DvhConsumer {
         this.dvhReadCounter = dvhReadCounter;
 
         this.webClient = WebClient.builder()
+            .exchangeStrategies(
+                ExchangeStrategies.builder()
+                    .codecs(codecConfigurer -> codecConfigurer.defaultCodecs().maxInMemorySize(2 * 1024 * 1024))
+                    .build())
             .baseUrl(dvhEndpoint)
             .build();
     }
