@@ -219,6 +219,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 156300;1563;ORGNIV3;NAV Indre Nordmøre;Beholdt;;;JA;156300;ORGNIV3;leggInn;
 157300;1573;ORGNIV3;Smøla;Beholdt;;;JA;157300;ORGNIV3;leggInn;
 157600;1576;ORGNIV3;Aure;Beholdt;;;JA;157600;ORGNIV3;leggInn;
+;1580;;Haram;;;;;;;pe321h;Lagt inn ifm. kommuneoppsplitting 1.jan 2024
 1599000;1591;AGRESSOORGENHET;Møre og Romsdal Arbeidslivssenter;Opp til ORGNIV3;159900;ma928e;JA;159900;ORGNIV3;ma928e;Ligger flere underenheter under den nye enheten i ORGNIV3, men stikkprøver av ansatte i alle disse underliggende viser at det er 1591 i trydeident på alle.
 161200;1612;ORGNIV3;Hemne;Beholdt;;;JA;161200;ORGNIV3;leggInn;
 162000;1620;ORGNIV3;Frøya;Beholdt;;;JA;162000;ORGNIV3;leggInn;
