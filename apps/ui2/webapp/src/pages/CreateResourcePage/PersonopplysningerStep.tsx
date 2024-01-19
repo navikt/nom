@@ -3,6 +3,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Alert, BodyShort, Loader, TextField } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { Navigate, useNavigate, useSearch } from "@tanstack/react-router";
+import type { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -14,7 +15,7 @@ import { SearchForPerson } from "~/pages/CreateResourcePage/components/SearchFor
 import { createRessursRoute, ressursRoute } from "~/reactRouterRoutes";
 import { fullwidthRow } from "~/resources/NomStyles";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
-import type { FolkeregisterPerson } from "~/types/api-models";
+import type { FolkeregisterPerson, Person } from "~/types/api-models";
 import { capitalizeName } from "~/utils";
 
 export function PersonopplysningerStep() {
@@ -34,9 +35,10 @@ export function PersonopplysningerStep() {
 }
 
 function CreateResourceForm({ personident }: { personident: string }) {
-  const hentPersonQuery = useQuery({
+  const hentPersonQuery = useQuery<Person, AxiosError<Error>>({
     queryKey: getPerson.queryKey(personident),
     queryFn: () => getPerson.queryFn(personident),
+    retry: false,
   });
 
   if (hentPersonQuery.isLoading) {
@@ -52,7 +54,13 @@ function CreateResourceForm({ personident }: { personident: string }) {
   }
 
   if (hentPersonQuery.error) {
-    return <Alert variant="error">{hentPersonQuery.error.message}</Alert>;
+    return (
+      <Alert variant="error">
+        {hentPersonQuery.error.response?.status === 404
+          ? "Ingen resultater for søket"
+          : "En teknisk feil forhindret søket"}
+      </Alert>
+    );
   }
 
   const person = hentPersonQuery.data;

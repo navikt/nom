@@ -8,6 +8,7 @@ import lombok.val;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
+import no.nav.nom.libs.utils.common.util.DateValidator;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -29,9 +30,11 @@ public class DvhOrgenhetV2 implements IOrgenhet {
     private String lederRessursNr;
     private JsonNode rawData;
 
+    private static final String FIRST_DAY_OF_MONTH = "01";
     private final static LocalDate AGRESSO_MAX_DATE = LocalDate.parse("2099-12-31");
     private final static DateTimeFormatter yyyyMMdd_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private final static DateTimeFormatter YYYY_MM_DD_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final DateValidator dateValidator = new DateValidator(yyyyMMdd_FORMATTER);
 
     public DvhOrgenhetV2(JsonNode node) {
         this.rawData = node;
@@ -66,7 +69,7 @@ public class DvhOrgenhetV2 implements IOrgenhet {
 
     @Override
     public LocalDate getGyldigFom() {
-        return !agressoGyldigFom.equals("0") ? getFirstDay(agressoGyldigFom) : dvhLastetDato;
+        return !agressoGyldigFom.equals("0") && dateValidator.isValid(agressoGyldigFom + FIRST_DAY_OF_MONTH) ? getFirstDay(agressoGyldigFom) : dvhLastetDato;
     }
 
     @Override
@@ -110,7 +113,7 @@ public class DvhOrgenhetV2 implements IOrgenhet {
     }
 
     private LocalDate getFirstDay(String yyyyMM) {
-        return LocalDate.parse(yyyyMM + "01", yyyyMMdd_FORMATTER);
+        return LocalDate.parse(yyyyMM + FIRST_DAY_OF_MONTH, yyyyMMdd_FORMATTER);
     }
 
     private Optional<LocalDate> getDate(LocalDate date) {

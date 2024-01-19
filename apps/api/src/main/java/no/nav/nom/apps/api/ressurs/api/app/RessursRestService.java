@@ -130,7 +130,8 @@ public class RessursRestService {
             ressursState.toBuilder()
                 .personident(personident).build(),
             telefoner,
-            epost.orElse(null)
+            epost.orElse(null),
+            nomMastered.isMastered(ressursState.navident())
         );
     }
 

@@ -1,0 +1,113 @@
+package no.nav.nom.apps.api.orgenhet;
+
+import no.nav.nom.apps.api.TestBase;
+import no.nav.nom.apps.api.organisering.OrganiseringConfig;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.OrganiseringState;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
+
+import static no.nav.nom.apps.api.common.TestData.orgEnhetState;
+import static no.nav.nom.apps.api.common.TestData.organiseringState;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+public class OrgEnhetUnderordnetResolverTest extends TestBase {
+
+    @Autowired
+    private OrgEnhetUnderordnetResolver orgEnhetUnderordnetResolver;
+
+    @Test
+    @DisplayName("Returner underordnede orgenheter, men ikke orgenheten selv")
+    public void should_return_list_of_subordinate_orgenheter() {
+        when(unleash.isEnabled(OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE)).thenReturn(true);
+
+        final String idOrgEnhet = "orgEnhet";
+        final String idUnderordnet1 = "under1";
+        final String idUnderordnet2 = "under2";
+        final String idUnderordnet3 = "under3";
+
+        OrganiseringState organiseringOrgEnhet = organiseringState().toBuilder()
+            .id(idOrgEnhet)
+            .idOver("someId")
+            .build();
+        OrganiseringState organiseringUnderordnet1 = organiseringState().toBuilder()
+            .id(idUnderordnet1)
+            .idOver(idOrgEnhet)
+            .build();
+        OrganiseringState organiseringUnderordnet2 = organiseringState().toBuilder()
+            .id(idUnderordnet2)
+            .idOver(idOrgEnhet)
+            .build();
+        OrganiseringState organiseringUnderordnet3 = organiseringState().toBuilder()
+            .id(idUnderordnet3)
+            .idOver(idOrgEnhet)
+            .build();
+
+        organiseringStateRepository.putEventAggregate(organiseringOrgEnhet);
+        organiseringStateRepository.putEventAggregate(organiseringUnderordnet1);
+        organiseringStateRepository.putEventAggregate(organiseringUnderordnet2);
+        organiseringStateRepository.putEventAggregate(organiseringUnderordnet3);
+
+        orgEnhetStateRepository.putEventAggregate(orgEnhetState().toBuilder().id(idUnderordnet1).build());
+        orgEnhetStateRepository.putEventAggregate(orgEnhetState().toBuilder().id(idUnderordnet2).build());
+        orgEnhetStateRepository.putEventAggregate(orgEnhetState().toBuilder().id(idUnderordnet3).build());
+
+
+        OrgEnhetState orgEnhet = orgEnhetState().toBuilder()
+            .id(idOrgEnhet)
+            .build();
+
+        List<OrgEnhetState> underordnedeOrgEnheter = orgEnhetUnderordnetResolver.findUnderordnedeOrgEnheter(orgEnhet);
+
+
+        assertThat(underordnedeOrgEnheter.size()).isEqualTo(3);
+
+        List<String> returnedOrgEnhetIds = underordnedeOrgEnheter.stream().map(OrgEnhetState::id).toList();
+        assertThat(returnedOrgEnhetIds).contains(idUnderordnet1, idUnderordnet2, idUnderordnet3);
+        assertThat(returnedOrgEnhetIds).doesNotContain(idOrgEnhet);
+    }
+
+    @Test
+    @DisplayName("Ikke returner duplikate underordnede orgenheter")
+    public void should_not_return_duplicate_subordinate_orgenheter() {
+        when(unleash.isEnabled(OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE)).thenReturn(true);
+
+        final String idOrgEnhet = "orgEnhet";
+        final String idUnderordnet = "under";
+
+        OrganiseringState organiseringOrgEnhet = organiseringState().toBuilder()
+            .id(idOrgEnhet)
+            .idOver("someId")
+            .build();
+        // To underenheter med samme id, men forskjellig fid
+        OrganiseringState organiseringUnderordnet1 = organiseringState().toBuilder()
+            .id(idUnderordnet)
+            .idOver(idOrgEnhet)
+            .build();
+        OrganiseringState organiseringUnderordnet2 = organiseringState().toBuilder()
+            .id(idUnderordnet)
+            .idOver(idOrgEnhet)
+            .build();
+
+        organiseringStateRepository.putEventAggregate(organiseringOrgEnhet);
+        organiseringStateRepository.putEventAggregate(organiseringUnderordnet1);
+        organiseringStateRepository.putEventAggregate(organiseringUnderordnet2);
+
+        orgEnhetStateRepository.putEventAggregate(orgEnhetState().toBuilder().id(idUnderordnet).build());
+
+
+        OrgEnhetState orgEnhet = orgEnhetState().toBuilder()
+            .id(idOrgEnhet)
+            .build();
+
+        List<OrgEnhetState> underordnedeOrgEnheter = orgEnhetUnderordnetResolver.findUnderordnedeOrgEnheter(orgEnhet);
+
+
+        assertThat(underordnedeOrgEnheter.size()).isEqualTo(1);
+    }
+
+}

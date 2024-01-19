@@ -31,7 +31,7 @@
         <spring-boot.version>3.2.1</spring-boot.version>
 
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
-        <gcp.libraries-bom.version>26.29.0</gcp.libraries-bom.version>
+        <gcp.libraries-bom.version>26.30.0</gcp.libraries-bom.version>
         <springdoc.version>2.3.0</springdoc.version>
         <springdoc-openapi-security.version>1.7.0</springdoc-openapi-security.version>
         <hypersistence-utils-hibernate-62.version>3.7.0</hypersistence-utils-hibernate-62.version>
@@ -54,7 +54,7 @@
 
         <!-- Override spring-boot-dependencies version -->
             <!-- note - local precedence import in utils-common, api, proxy, nom-ressurser, Unit4, nav-ident, og streams appene -->
-        <netty.version>4.1.104.Final</netty.version> <!-- https://github.com/navikt/nom/security/dependabot/90 + https://github.com/navikt/nom/security/dependabot/89 -->
+        <netty.version>4.1.105.Final</netty.version> <!-- https://github.com/navikt/nom/security/dependabot/90 + https://github.com/navikt/nom/security/dependabot/89 -->
         <zookeeper.version>3.9.1</zookeeper.version> <!-- https://github.com/navikt/nom/security/dependabot/91 -->
 
         <!-- Override av andre transient dependencies -->
