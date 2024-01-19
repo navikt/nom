@@ -8,6 +8,7 @@ import {
   XMarkIcon,
 } from "@navikt/aksel-icons";
 import {
+  BodyShort,
   Button,
   ExpansionCard,
   Heading,
@@ -101,6 +102,9 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
       <OrgTilknytningSection ressurs={ressurs} />
       <TeamCatSection navident={ressurs.navident} />
       <TerminateButton ressurs={ressurs} />
+      {ressurs.isNomMastered && (
+        <BodyShort size="small">Opprettet/Endret i NOM</BodyShort>
+      )}
     </div>
   );
 }
