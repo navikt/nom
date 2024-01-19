@@ -24,7 +24,6 @@ import {
   ResultLimit,
   useSearchOrgenheterQuery,
 } from "~/api/generated/graphql_generated";
-import { Divider } from "~/components/Divider";
 import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
 import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBrukerstedSelect";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
@@ -141,8 +140,10 @@ export const eksternPeriodeValidationSchema = yup.object().shape({
   gyldigTom: yup
     .string()
     .required("Obligatorisk")
-    .test("ensure-max-1-year", "Kan maks være 1 år frem i tid", (v) =>
-      isBefore(new Date(v), addYears(new Date(), 1)),
+    .test(
+      "ensure-max-1-year",
+      "Kan maks være 1 år frem i tid fra dagens dato",
+      (v) => isBefore(new Date(v), addYears(new Date(), 1)),
     ),
 });
 
@@ -197,8 +198,7 @@ function CreateEksternRessurs() {
           }
           defaultStartDato={gyldigFom}
         />
-        <Divider />
-        <FysiskBrukerstedSelectFormPart description="Med fysisk brukersted menes hvor(kontor/lokasjon) medarbeideren skal arbeide." />
+        <FysiskBrukerstedSelectFormPart />
         <NavigationButtons />
       </form>
     </FormProvider>
@@ -244,7 +244,14 @@ export function OrganisasjonstilknytningInnerForm({
   return (
     <>
       <InnerOrgEnhetSelect />
-      <div css={fullwidthRow}>
+      <div
+        css={css(
+          fullwidthRow,
+          css`
+            margin-top: var(--a-spacing-8);
+          `,
+        )}
+      >
         <FullWidthDatePickerWrapper>
           <DatePicker {...startDatePicker.datepickerProps}>
             <DatePicker.Input
@@ -277,7 +284,7 @@ export function OrganisasjonstilknytningInnerForm({
                   Sluttdato
                   <HelpText strategy="fixed">
                     Bruk datoen for normal avvikling av avtalen. Opsjoner skal
-                    ikke beregnes med her
+                    ikke beregnes med her.
                   </HelpText>
                 </span>
               }
@@ -322,9 +329,21 @@ function InnerOrgEnhetSelect() {
           <span>
             Leder: <b>{selectedOrgEnhet.leder[0]?.ressurs.visningsnavn}</b>
           </span>
-          <span>
-            Enhet i Remedy: <b>{selectedOrgEnhet.remedyEnhetId ?? "-"}</b>
-          </span>
+          <div
+            css={css`
+              display: inline-flex;
+              gap: var(--a-spacing-2);
+            `}
+          >
+            <span>
+              Enhet i Remedy: <b>{selectedOrgEnhet.remedyEnhetId ?? "-"}</b>
+            </span>
+            <HelpText>
+              Brukes blant annet til å opprette trygdeident og er nødvendig for
+              enkelte tilganger. Utledes automatisk basert på
+              organisasjonsenheten medarbeideren tilhører.
+            </HelpText>
+          </div>
         </div>
       ) : undefined}
     </>
