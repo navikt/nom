@@ -79,7 +79,9 @@ public class RemedyEnhetMapperService {
         while (currentOptionalOrgEnhet.isPresent()) {
             final var orgEnhet = currentOptionalOrgEnhet.get();
 
-            var remedyEnhet =  remedyEnhetList.stream().filter(e -> orgEnhet.getId().equals(e.nomId())).findFirst();
+            var remedyEnhet = remedyEnhetList.stream()
+                .filter(r -> r.agressoId().equals(orgEnhet.getAgressoId()) && r.orgNivaa().equals(orgEnhet.getOrgNiv()))
+                .findFirst();
 
             if (remedyEnhet.isPresent()) {
                 return remedyEnhet;
