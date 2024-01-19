@@ -47,6 +47,11 @@ on:
         required: false
         default: false
         description: Skip tests. This makes build faster.
+      dockerfile:
+        type: string
+        required: false
+        default: Dockerfile
+        description: Dockerfile to use for building the docker image
     secrets:
       GITHUB_PAT:
         required: true
@@ -83,10 +88,11 @@ jobs:
         with:
           team: nom
           image_suffix: ${{ inputs.image-suffix }}
-          dockerfile: Dockerfile
+          dockerfile: ${{ inputs.dockerfile }}
           docker_context: .
           build_args: |
             JAR_PATH=${{ inputs.jar-path }}
+            JAVA_OPTS=${{ inputs.java-opts }}
           build_secrets: |
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
