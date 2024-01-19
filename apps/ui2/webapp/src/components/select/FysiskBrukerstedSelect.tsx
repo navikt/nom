@@ -69,6 +69,8 @@ function FysiskBrukerstedSelect({
     <SelectLayoutWrapper
       description={description}
       error={error}
+      helpText="Med fysisk brukersted menes hvor (kontor/plassering) medarbeideren skal
+          arbeide."
       htmlFor="Fysisk brukersted"
       label="Fysisk brukersted"
     >
