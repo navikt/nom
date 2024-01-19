@@ -156,6 +156,9 @@ spec:
         - application: salesforce
           namespace: teamcrm
           cluster: prod-external
+        - application: org-okonomi-mapping-backend
+          namespace: org
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
