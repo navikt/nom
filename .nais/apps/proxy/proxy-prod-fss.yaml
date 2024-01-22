@@ -17,7 +17,7 @@ spec:
     - name: LOGGING_CONFIG
       value: 'classpath:logback-nais.xml'
     - name: JAVA_OPTS
-      value: "-Xms512m -Xmx2048m"
+      value: "-Xms1024m -Xmx4096m"
   envFrom:
     - secret: nom-tdv-cred
     - secret: nom-api-serviceuser
@@ -65,7 +65,7 @@ spec:
       memory: 1024Mi
     limits:
       cpu: 1000m
-      memory: 3072Mi
+      memory: 5120Mi
   prometheus:
     enabled: true
     path: internal/prometheus
