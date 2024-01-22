@@ -12,6 +12,7 @@ on:
       - '.github/workflows/deploy-unit4.yaml'
       - 'apps/pom.xml'
       - 'pom.xml'
+      - 'Dockerfile_distroless'
   workflow_dispatch:
 
 jobs:
@@ -27,6 +28,7 @@ jobs:
       nais-config-file-path-dev: .nais/apps/unit4/unit4-dev-gcp.yaml
       nais-config-file-path-prod: .nais/apps/unit4/unit4-prod-gcp.yaml
       unleash-vars-file-path: .nais/apps/unit4/unleash-vars.yaml
+      dockerfile: Dockerfile_distroless
     secrets:
       GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}

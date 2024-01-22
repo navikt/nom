@@ -9,6 +9,7 @@ on:
       - 'libs/contract-nom-dto/**'
       - '.nais/streams/kafka-api-hendelser.yaml'
       - '.github/*/deploy-streams-kafka-api-hendelser.yaml'
+      - 'Dockerfile_distroless'
   workflow_dispatch:
 
 jobs:
@@ -25,6 +26,7 @@ jobs:
       nais-config-file-path-prod: .nais/streams/kafka-api-hendelser.yaml
       additional-nais-vars-dev: ',kafka-pool=nav-dev'
       additional-nais-vars-prod: ',kafka-pool=nav-prod'
+      dockerfile: Dockerfile_distroless
     secrets:
       GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
