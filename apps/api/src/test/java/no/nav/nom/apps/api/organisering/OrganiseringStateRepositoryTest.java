@@ -23,7 +23,7 @@ public class OrganiseringStateRepositoryTest {
     @MethodSource("getOrganiseringStates")
     void test_getActiveOrganisering(String ignoredDescription, OrganiseringState organiseringsState, int expectedNumberOfActiveOrganisering) {
         OrganiseringStateRepository repository = new OrganiseringStateRepository();
-        repository.put(organiseringsState.fid(), organiseringsState);
+        repository.putEventAggregate(organiseringsState);
 
         assertThat(repository.getActiveOrganisering().size())
             .isEqualTo(expectedNumberOfActiveOrganisering);
@@ -53,6 +53,7 @@ public class OrganiseringStateRepositoryTest {
         OrganiseringState organisering_fom_tom_today = OrganiseringState.builder()
             .fid("organisering_fom_tom_today" + "_fid")
             .id("the_id")
+            .idOver("id_over")
             .gyldigFom(LocalDate.now())
             .gyldigTom(Optional.of(LocalDate.now()))
             .build();
@@ -60,6 +61,7 @@ public class OrganiseringStateRepositoryTest {
         OrganiseringState organisering_fom_todayMinus10_tom_todayMinus2_dager = OrganiseringState.builder()
             .fid("organisering_fom_todayMinus10_tom_todayMinus2_dager" + "_fid")
             .id("the_id")
+            .idOver("id_over")
             .gyldigFom(LocalDate.now().minusDays(10))
             .gyldigTom(Optional.of(LocalDate.now().minusDays(2)))
             .build();
@@ -67,6 +69,7 @@ public class OrganiseringStateRepositoryTest {
         OrganiseringState organisering_fom_today_tom_todayPlus2_dager = OrganiseringState.builder()
             .fid("organisering_fom_today_tom_todayPlus2_dager" + "_fid")
             .id("the_id")
+            .idOver("id_over")
             .gyldigFom(LocalDate.now())
             .gyldigTom(Optional.of(LocalDate.now().plusDays(2)))
             .build();
@@ -74,6 +77,7 @@ public class OrganiseringStateRepositoryTest {
         OrganiseringState organisering_fom_todayMinus10_tom_today = OrganiseringState.builder()
             .fid("organisering_fom_todayMinus10_tom_today" + "_fid")
             .id("the_id")
+            .idOver("id_over")
             .gyldigFom(LocalDate.now().minusDays(10))
             .gyldigTom(Optional.of(LocalDate.now()))
             .build();
@@ -81,6 +85,7 @@ public class OrganiseringStateRepositoryTest {
         OrganiseringState organisering_fom_today_tom_todayMinus1 = OrganiseringState.builder()
             .fid("organisering_fom_today_tom_todayMinus1" + "_fid")
             .id("the_id")
+            .idOver("id_over")
             .gyldigFom(LocalDate.now())
             .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
             .build();
@@ -88,6 +93,7 @@ public class OrganiseringStateRepositoryTest {
         OrganiseringState organisering_fom_todayMinus10_tom_todayPlus10 = OrganiseringState.builder()
             .fid("organisering_fom_todayMinus10_tom_todayPlus10" + "_fid")
             .id("the_id")
+            .idOver("id_over")
             .gyldigFom(LocalDate.now().minusDays(10))
             .gyldigTom(Optional.of(LocalDate.now().plusDays(10)))
             .build();
@@ -95,12 +101,14 @@ public class OrganiseringStateRepositoryTest {
         OrganiseringState organisering_fom_today_tom_notset = OrganiseringState.builder()
             .fid("organisering_fom_today_tom_notset" + "_fid")
             .id("the_id")
+            .idOver("id_over")
             .gyldigFom(LocalDate.now())
             .build();
 
         OrganiseringState organisering_fom_today_tom_empty = OrganiseringState.builder()
             .fid("organisering_fom_today_tom_empty" + "_fid")
             .id("the_id")
+            .idOver("id_over")
             .gyldigFom(LocalDate.now())
             .gyldigTom(Optional.empty())
             .build();
@@ -117,40 +125,166 @@ public class OrganiseringStateRepositoryTest {
         );
     }
 
-
     @Test
-    @DisplayName("getOrganiseringerContainingId returnerer organiseringer med id enten i id eller idOver")
-    void getOrganiseringerContainingId_should_return_organiseringer_with_id_both_in_id_and_idOver() {
+    @DisplayName("Id ikke sett før i id-felt gir ny key")
+    void should_add_new_key_from_id_if_not_present() {
         final String idToFind = "the_id";
         OrganiseringStateRepository repository = new OrganiseringStateRepository();
 
         OrganiseringState idInId = OrganiseringState.builder()
             .fid("1")
             .id(idToFind)
-            .idOver("some_other_id")
+            .idOver("a_random_id")
             .build();
+        repository.putEventAggregate(idInId);
+
+        List<OrganiseringState> organiseringerReturned = repository.getOrganiseringerContainingId(idToFind);
+
+        assertThat(organiseringerReturned.size()).isEqualTo(1);
+        assertThat(organiseringerReturned).containsAll(List.of(idInId));
+    }
+
+    @Test
+    @DisplayName("Id ikke sett før i idOver-felt gir ny key")
+    void should_add_new_key_from_idOver_if_not_present() {
+        final String idToFind = "the_id";
+        OrganiseringStateRepository repository = new OrganiseringStateRepository();
+
+        OrganiseringState idInIdOver = OrganiseringState.builder()
+            .fid("1")
+            .id("a_random_id")
+            .idOver(idToFind)
+            .build();
+        repository.putEventAggregate(idInIdOver);
+
+        List<OrganiseringState> organiseringerReturned = repository.getOrganiseringerContainingId(idToFind);
+
+        assertThat(organiseringerReturned.size()).isEqualTo(1);
+        assertThat(organiseringerReturned).containsAll(List.of(idInIdOver));
+    }
+
+    @Test
+    @DisplayName("Id i idOver-felt som allerede finnes som key legger til i liste for key")
+    void should_add_to_list_of_existing_key_for_idOver() {
+        final String idToFind = "the_id";
+        OrganiseringStateRepository repository = new OrganiseringStateRepository();
+
+        OrganiseringState idInId = OrganiseringState.builder()
+            .fid("1")
+            .id(idToFind)
+            .idOver("a_random_id")
+            .build();
+        repository.putEventAggregate(idInId);
 
         OrganiseringState idInIdOver = OrganiseringState.builder()
             .fid("2")
-            .id("a_different_id")
+            .id("some_random_id")
             .idOver(idToFind)
             .build();
-
-        OrganiseringState notIncludingId = OrganiseringState.builder()
-            .fid("3")
-            .id("a_different_id")
-            .idOver("some_other_id")
-            .build();
-
-        repository.putEventAggregate(idInId);
         repository.putEventAggregate(idInIdOver);
-        repository.putEventAggregate(notIncludingId);
-
 
         List<OrganiseringState> organiseringerReturned = repository.getOrganiseringerContainingId(idToFind);
 
         assertThat(organiseringerReturned.size()).isEqualTo(2);
         assertThat(organiseringerReturned).containsAll(List.of(idInId, idInIdOver));
-        assertThat(organiseringerReturned).doesNotContain(notIncludingId);
     }
+
+    @Test
+    @DisplayName("Id i id-felt som allerede er opprettet som key fra idOver legger til i liste for key")
+    void should_add_to_list_of_existing_key_for_id() {
+        final String idToFind = "the_id";
+        OrganiseringStateRepository repository = new OrganiseringStateRepository();
+
+        // ID mottas først i et idOver-felt
+        OrganiseringState idInIdOver = OrganiseringState.builder()
+            .fid("1")
+            .id("some_random_id")
+            .idOver(idToFind)
+            .build();
+        repository.putEventAggregate(idInIdOver);
+
+        OrganiseringState idInId = OrganiseringState.builder()
+            .fid("2")
+            .id(idToFind)
+            .idOver("a_random_id")
+            .build();
+        repository.putEventAggregate(idInId);
+
+        List<OrganiseringState> organiseringerReturned = repository.getOrganiseringerContainingId(idToFind);
+
+        assertThat(organiseringerReturned.size()).isEqualTo(2);
+        assertThat(organiseringerReturned).containsAll(List.of(idInId, idInIdOver));
+    }
+
+    @Test
+    @DisplayName("Id i id-felt som allerede finnes som key fra id-felt oppretter ikke ny key")
+    void should_not_create_new_key_for_id_already_in_existing_key() {
+        final String idToFind = "the_id";
+        OrganiseringStateRepository repository = new OrganiseringStateRepository();
+
+        // ID mottas først en gang i id-felt
+        OrganiseringState idToFindInId = OrganiseringState.builder()
+            .fid("1")
+            .id(idToFind)
+            .idOver("a_random_id")
+            .build();
+        repository.putEventAggregate(idToFindInId);
+
+        OrganiseringState alsoIdToFindInId = OrganiseringState.builder()
+            .fid("2")
+            .id(idToFind)
+            .idOver("another_random_id")
+            .build();
+        repository.putEventAggregate(alsoIdToFindInId);
+
+        List<OrganiseringState> organiseringerReturned = repository.getOrganiseringerContainingId(idToFind);
+
+        assertThat(organiseringerReturned.size()).isEqualTo(1);
+        assertThat(organiseringerReturned).containsAll(List.of(idToFindInId));
+    }
+
+    @Test
+    @DisplayName("Alle organiseringer som inneholder samme id kommer i listen")
+    void putOrUpdateAlleOrganiseringer_should_add_organisering_with_id_already_present() {
+        final String idToFind = "the_id";
+        final String differentId1 = "different_id_1";
+        final String differentId2 = "different_id_2";
+        OrganiseringStateRepository repository = new OrganiseringStateRepository();
+
+        OrganiseringState idInId = OrganiseringState.builder()
+            .fid("1")
+            .id(idToFind)
+            .idOver("a_random_id")
+            .build();
+        repository.putEventAggregate(idInId);
+
+        OrganiseringState idInIdOver1 = OrganiseringState.builder()
+            .fid("2")
+            .id("second_random_id")
+            .idOver(idToFind)
+            .build();
+        repository.putEventAggregate(idInIdOver1);
+
+        OrganiseringState idInIdOver2 = OrganiseringState.builder()
+            .fid("3")
+            .id("third_random_id")
+            .idOver(idToFind)
+            .build();
+        repository.putEventAggregate(idInIdOver2);
+
+        // En annen orgEnhet som ikke inneholder samme id
+        OrganiseringState differentOrg = OrganiseringState.builder()
+            .fid("4")
+            .id(differentId1)
+            .idOver(differentId2)
+            .build();
+        repository.putEventAggregate(differentOrg);
+
+        List<OrganiseringState> organiseringerReturned = repository.getOrganiseringerContainingId(idToFind);
+
+        assertThat(organiseringerReturned.size()).isEqualTo(3);
+        assertThat(organiseringerReturned).containsAll(List.of(idInId, idInIdOver1, idInIdOver2));
+        assertThat(organiseringerReturned).doesNotContain(differentOrg);
+    }
+
 }

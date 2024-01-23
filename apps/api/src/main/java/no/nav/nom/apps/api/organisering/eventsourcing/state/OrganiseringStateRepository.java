@@ -2,22 +2,56 @@ package no.nav.nom.apps.api.organisering.eventsourcing.state;
 
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.contract.nom.state.OrganiseringState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
 public class OrganiseringStateRepository {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private final Map<String, OrganiseringState> organiseringByFid = new ConcurrentHashMap<>(16, 0.9f, 1);
     private final Map<String, OrganiseringState> organiseringById = new ConcurrentHashMap<>(16, 0.9f, 1);
+    private final Map<String, Set<OrganiseringState>> allOrganiseringerContainingId = new ConcurrentHashMap<>(16, 0.9f, 1);
 
-    public void put(String fid, OrganiseringState organiseringState) {
-        organiseringByFid.put(fid, organiseringState);
+    private void putOrUpdateAllOrganiseringer(OrganiseringState organiseringState) {
+        String id = organiseringState.id();
+        String idOver = organiseringState.idOver();
+
+        if (id == null || idOver == null) {
+            logger.warn("ID-felt mangler verdi: {}", organiseringState);
+            return;
+        }
+
+        if (allOrganiseringerContainingId.containsKey(id)) {
+            var connectedOrgEnheter = allOrganiseringerContainingId.get(id);
+
+            var connectedOrgEnheterWithSameId = connectedOrgEnheter.stream().filter(o -> o.id().equals(id)).toList();
+            if (!connectedOrgEnheterWithSameId.isEmpty()) {
+                logger.warn("Forsøker å legge til {}, men ID '{}' inneholder allerede {}", organiseringState, id, connectedOrgEnheterWithSameId);
+            } else {
+                connectedOrgEnheter.add(organiseringState);
+            }
+        } else {
+            allOrganiseringerContainingId.put(id, new HashSet<>(List.of(organiseringState)));
+        }
+
+        if (allOrganiseringerContainingId.containsKey(idOver)) {
+            allOrganiseringerContainingId.get(idOver).add(organiseringState);
+        } else {
+            allOrganiseringerContainingId.put(idOver, new HashSet<>(List.of(organiseringState)));
+        }
     }
 
     public Optional<OrganiseringState> findByFid(String fid) {
@@ -48,19 +82,18 @@ public class OrganiseringStateRepository {
     public void clear() {
         organiseringByFid.clear();
         organiseringById.clear();
+        allOrganiseringerContainingId.clear();
     }
 
     public void putEventAggregate(OrganiseringState organiseringState) {
         organiseringByFid.put(organiseringState.fid(), organiseringState);
         organiseringById.put(organiseringState.id(), organiseringState);
+
+        putOrUpdateAllOrganiseringer(organiseringState);
     }
 
     public int count() {
         return organiseringByFid.size();
-    }
-
-    public Map<String, OrganiseringState> getAll() {
-        return organiseringByFid;
     }
 
     public Map<String, OrganiseringState> getActiveOrganisering() {
@@ -75,9 +108,15 @@ public class OrganiseringStateRepository {
     }
 
     public List<OrganiseringState> getOrganiseringerContainingId(String id) {
-        return getActiveOrganisering().values().stream()
-            .filter(o -> o.containsOrgEnhet(id))
-            .toList();
+        var organiseringerWithId = allOrganiseringerContainingId.get(id);
+
+        if (organiseringerWithId != null) {
+            return organiseringerWithId.stream()
+                .filter(this::isActive)
+                .toList();
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     private boolean isActive(OrganiseringState organiseringState) {
