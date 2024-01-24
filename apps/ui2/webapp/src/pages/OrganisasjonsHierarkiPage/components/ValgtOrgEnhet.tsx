@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { BodyShort, Heading, Link, ReadMore } from "@navikt/ds-react";
+import { BodyShort, Heading, HGrid, Link, ReadMore } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 import partition from "lodash/partition";
@@ -49,69 +49,39 @@ export const ValgtOrgEnhet = ({
           <Heading level="2" size="large" spacing>
             {orgEnhet.navn}
           </Heading>
-          <div
-            css={css`
-              display: flex;
-              column-gap: var(--a-spacing-4);
-            `}
-          >
-            <div
-              css={css`
-                display: flex;
-                column-gap: var(--a-spacing-6);
-              `}
-            >
-              <div
-                css={css`
-                  display: grid;
-                  row-gap: var(--a-spacing-2);
-                  height: fit-content;
-                `}
-              >
-                {orgEnhet.id && (
-                  <BodyShort size="small">
-                    ID: <b>{orgEnhet.id}</b>
-                  </BodyShort>
-                )}
-                {orgEnhet.gyldigFom && (
-                  <BodyShort size="small">
-                    Gyldig f.o.m.:{" "}
-                    <b>{formatDisplayDate(orgEnhet.gyldigFom)}</b>
-                  </BodyShort>
-                )}
-                {orgEnhet.nomNivaa && (
-                  <BodyShort size="small">
-                    NOM-nivå: <b>{NomNivaaNameMapping[orgEnhet.nomNivaa]}</b>
-                  </BodyShort>
-                )}
-              </div>
-              <div
-                css={css`
-                  display: grid;
-                  row-gap: var(--a-spacing-2);
-                  height: fit-content;
-                `}
-              >
-                {orgEnhet.remedyEnhetId && (
-                  <BodyShort size="small">
-                    Remedy-enhet: <b>{orgEnhet.remedyEnhetId}</b>
-                  </BodyShort>
-                )}
-                {orgEnhet.gyldigTom && (
-                  <BodyShort size="small">
-                    Gyldig t.o.m.:{" "}
-                    <b>{formatDisplayDate(orgEnhet.gyldigTom)}</b>
-                  </BodyShort>
-                )}
-                {orgEnhet.orgEnhetsType && (
-                  <BodyShort size="small">
-                    Enhetstype:{" "}
-                    <b>{OrgEnhetsTypeNameMapping[orgEnhet.orgEnhetsType]}</b>
-                  </BodyShort>
-                )}
-              </div>
-            </div>
-          </div>
+          <HGrid columns={2} gap="4">
+            {orgEnhet.id && (
+              <BodyShort size="small">
+                ID: <b>{orgEnhet.id}</b>
+              </BodyShort>
+            )}
+            {orgEnhet.gyldigFom && (
+              <BodyShort size="small">
+                Gyldig f.o.m.: <b>{formatDisplayDate(orgEnhet.gyldigFom)}</b>
+              </BodyShort>
+            )}
+            {orgEnhet.nomNivaa && (
+              <BodyShort size="small">
+                NOM-nivå: <b>{NomNivaaNameMapping[orgEnhet.nomNivaa]}</b>
+              </BodyShort>
+            )}
+            {orgEnhet.remedyEnhetId && (
+              <BodyShort size="small">
+                Remedy-enhet: <b>{orgEnhet.remedyEnhetId}</b>
+              </BodyShort>
+            )}
+            {orgEnhet.gyldigTom && (
+              <BodyShort size="small">
+                Gyldig t.o.m.: <b>{formatDisplayDate(orgEnhet.gyldigTom)}</b>
+              </BodyShort>
+            )}
+            {orgEnhet.orgEnhetsType && (
+              <BodyShort size="small">
+                Enhetstype:{" "}
+                <b>{OrgEnhetsTypeNameMapping[orgEnhet.orgEnhetsType]}</b>
+              </BodyShort>
+            )}
+          </HGrid>
         </div>
 
         <div
