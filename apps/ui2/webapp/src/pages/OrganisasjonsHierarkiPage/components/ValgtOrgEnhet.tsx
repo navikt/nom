@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { BodyShort, Heading, Link, ReadMore } from "@navikt/ds-react";
+import { BodyShort, Heading, HGrid, Link, ReadMore } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 import partition from "lodash/partition";
@@ -11,8 +11,8 @@ import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardV
 import { ressursRoute } from "~/reactRouterRoutes";
 import building from "~/resources/building.svg";
 import type { OrgEnhet } from "~/types/api-models";
-import { Sektor } from "~/types/api-models";
-import { formatVisningsnavn } from "~/utils";
+import { NomNivaa, OrgEnhetsType, Sektor } from "~/types/api-models";
+import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
 export const ValgtOrgEnhet = ({
   ressurser,
@@ -49,21 +49,45 @@ export const ValgtOrgEnhet = ({
           <Heading level="2" size="large" spacing>
             {orgEnhet.navn}
           </Heading>
-          <div
+          <HGrid
+            columns={2}
             css={css`
-              display: flex;
-              column-gap: var(--a-spacing-4);
+              row-gap: var(--a-spacing-2);
             `}
+            gap="4"
           >
-            <BodyShort size="small">
-              ID: <b>{orgEnhet.id}</b>
-            </BodyShort>
+            {orgEnhet.id && (
+              <BodyShort size="small">
+                ID: <b>{orgEnhet.id}</b>
+              </BodyShort>
+            )}
             {orgEnhet.remedyEnhetId && (
               <BodyShort size="small">
                 Remedy-enhet: <b>{orgEnhet.remedyEnhetId}</b>
               </BodyShort>
             )}
-          </div>
+            {orgEnhet.gyldigFom && (
+              <BodyShort size="small">
+                Gyldig f.o.m.: <b>{formatDisplayDate(orgEnhet.gyldigFom)}</b>
+              </BodyShort>
+            )}
+            {orgEnhet.gyldigTom && (
+              <BodyShort size="small">
+                Gyldig t.o.m.: <b>{formatDisplayDate(orgEnhet.gyldigTom)}</b>
+              </BodyShort>
+            )}
+            {orgEnhet.orgEnhetsType && (
+              <BodyShort size="small">
+                Enhetstype:{" "}
+                <b>{OrgEnhetsTypeNameMapping[orgEnhet.orgEnhetsType]}</b>
+              </BodyShort>
+            )}
+            {orgEnhet.nomNivaa && (
+              <BodyShort size="small">
+                NOM-nivå: <b>{NomNivaaNameMapping[orgEnhet.nomNivaa]}</b>
+              </BodyShort>
+            )}
+          </HGrid>
         </div>
 
         <div
@@ -219,3 +243,27 @@ function OrgenhetLederLink({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     </span>
   );
 }
+
+export const OrgEnhetsTypeNameMapping = {
+  [OrgEnhetsType.ARBEIDSLIVSSENTER]: "Arbeidslivssenter",
+  [OrgEnhetsType.NAV_ARBEID_OG_YTELSER]: "Arbeid og ytelser",
+  [OrgEnhetsType.ARBEIDSRAADGIVNING]: "Arbeidsrådgivning",
+  [OrgEnhetsType.DIREKTORAT]: "Direktorat",
+  [OrgEnhetsType.DIR]: "DIR",
+  [OrgEnhetsType.FYLKE]: "Fylke",
+  [OrgEnhetsType.NAV_FAMILIE_OG_PENSJONSYTELSER]: "Familie- og pensjonsytelser",
+  [OrgEnhetsType.HJELPEMIDLER_OG_TILRETTELEGGING]:
+    "Hjelpemidler og tilrettelegging",
+  [OrgEnhetsType.KLAGEINSTANS]: "Klageinstans",
+  [OrgEnhetsType.NAV_KONTAKTSENTER]: "Kontaktsenter",
+  [OrgEnhetsType.KONTROLL_KONTROLLENHET]: "Kontroll",
+  [OrgEnhetsType.NAV_KONTOR]: "NAV-kontor",
+  [OrgEnhetsType.TILTAK]: "Tiltak",
+  [OrgEnhetsType.NAV_OKONOMITJENESTE]: "Økonomi",
+};
+
+export const NomNivaaNameMapping = {
+  [NomNivaa.LINJEENHET]: "Linjeenhet",
+  [NomNivaa.DRIFTSENHET]: "Driftsenhet",
+  [NomNivaa.ARBEIDSOMRAADE]: "Arbeidsområde",
+};
