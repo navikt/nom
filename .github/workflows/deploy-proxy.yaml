@@ -28,7 +28,7 @@ jobs:
       nais-config-file-path-prod: .nais/apps/proxy/proxy-prod-fss.yaml
       dev-cluster: dev-fss
       prod-cluster: prod-fss
-      dockerfile: Dockerfile_distroless
+      dockerfile: Dockerfile_distroless_debug
     secrets:
       GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
