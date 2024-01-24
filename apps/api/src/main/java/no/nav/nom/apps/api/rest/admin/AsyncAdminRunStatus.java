@@ -65,6 +65,9 @@ public class AsyncAdminRunStatus {
             strBuf.append("\n\n");
             strBuf.append(e.message);
         });
+
+        currentRun.remove(runType);
+
         return strBuf.toString();
     }
 
