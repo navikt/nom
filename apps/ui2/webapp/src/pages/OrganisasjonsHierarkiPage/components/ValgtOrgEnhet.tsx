@@ -49,25 +49,26 @@ export const ValgtOrgEnhet = ({
           <Heading level="2" size="large" spacing>
             {orgEnhet.navn}
           </Heading>
-          <HGrid columns={2} gap="4">
+          <HGrid
+            columns={2}
+            css={css`
+              row-gap: var(--a-spacing-2);
+            `}
+            gap="4"
+          >
             {orgEnhet.id && (
               <BodyShort size="small">
                 ID: <b>{orgEnhet.id}</b>
               </BodyShort>
             )}
-            {orgEnhet.gyldigFom && (
-              <BodyShort size="small">
-                Gyldig f.o.m.: <b>{formatDisplayDate(orgEnhet.gyldigFom)}</b>
-              </BodyShort>
-            )}
-            {orgEnhet.nomNivaa && (
-              <BodyShort size="small">
-                NOM-nivå: <b>{NomNivaaNameMapping[orgEnhet.nomNivaa]}</b>
-              </BodyShort>
-            )}
             {orgEnhet.remedyEnhetId && (
               <BodyShort size="small">
                 Remedy-enhet: <b>{orgEnhet.remedyEnhetId}</b>
+              </BodyShort>
+            )}
+            {orgEnhet.gyldigFom && (
+              <BodyShort size="small">
+                Gyldig f.o.m.: <b>{formatDisplayDate(orgEnhet.gyldigFom)}</b>
               </BodyShort>
             )}
             {orgEnhet.gyldigTom && (
@@ -79,6 +80,11 @@ export const ValgtOrgEnhet = ({
               <BodyShort size="small">
                 Enhetstype:{" "}
                 <b>{OrgEnhetsTypeNameMapping[orgEnhet.orgEnhetsType]}</b>
+              </BodyShort>
+            )}
+            {orgEnhet.nomNivaa && (
+              <BodyShort size="small">
+                NOM-nivå: <b>{NomNivaaNameMapping[orgEnhet.nomNivaa]}</b>
               </BodyShort>
             )}
           </HGrid>
