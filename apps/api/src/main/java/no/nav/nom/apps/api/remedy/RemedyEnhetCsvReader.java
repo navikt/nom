@@ -8,8 +8,8 @@ import com.opencsv.exceptions.CsvException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,10 +18,10 @@ public class RemedyEnhetCsvReader {
 
     private final CSVReader csvReader;
 
-    public RemedyEnhetCsvReader(Resource file) {
+    public RemedyEnhetCsvReader(Resource resource) {
 
         try {
-            Reader reader = new FileReader(file.getFile());
+            Reader reader = new InputStreamReader(resource.getInputStream());
 
             CSVParser parser = new CSVParserBuilder()
                 .withSeparator(';')

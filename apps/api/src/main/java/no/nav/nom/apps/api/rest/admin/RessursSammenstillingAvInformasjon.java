@@ -134,13 +134,14 @@ public class RessursSammenstillingAvInformasjon {
     }
 
     private Map<String, DvhRessursStillingData> getDvhRessursStillingInfo(List<String> navidenterINom) {
-        var dvhRessurseStillinger = getDvhRessurserStillinger();
+        var dvhRessurseStillinger = getDvhRessurserStillinger().stream()
+            .filter(dvhRessursStilling -> dvhRessursStilling.getNavident().isPresent() && navidenterINom.contains(dvhRessursStilling.getNavident().get()))
+            .toList();
 
         Map<String, List<StillingPeriode>> stillingPerioderPerNavident = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(dvhRessurseStillinger);
         int stillingePerioder = stillingPerioderPerNavident.values().stream().mapToInt(List::size).sum();
 
         Map<String, DvhRessursStillingData> dvhRessurserData = dvhRessurseStillinger.stream()
-            .filter(dvhRessursStilling -> dvhRessursStilling.getNavident().isPresent() && navidenterINom.contains(dvhRessursStilling.getNavident().get()))
             .collect(Collectors.toMap( r -> r.getNavident().get(),
                 r -> new DvhRessursStillingData(r, getOrgenhetPaaRessurs(r)),
                 (r1, r2) -> r2));

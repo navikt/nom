@@ -219,6 +219,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 156300;1563;ORGNIV3;NAV Indre Nordmøre;Beholdt;;;JA;156300;ORGNIV3;leggInn;
 157300;1573;ORGNIV3;Smøla;Beholdt;;;JA;157300;ORGNIV3;leggInn;
 157600;1576;ORGNIV3;Aure;Beholdt;;;JA;157600;ORGNIV3;leggInn;
+158000;1580;ORGNIV3;Haram;;;;;158000;ORGNIV3;vu497s;Lagt inn ifm. kommuneoppsplitting 1.jan 2024
 1599000;1591;AGRESSOORGENHET;Møre og Romsdal Arbeidslivssenter;Opp til ORGNIV3;159900;ma928e;JA;159900;ORGNIV3;ma928e;Ligger flere underenheter under den nye enheten i ORGNIV3, men stikkprøver av ansatte i alle disse underliggende viser at det er 1591 i trydeident på alle.
 161200;1612;ORGNIV3;Hemne;Beholdt;;;JA;161200;ORGNIV3;leggInn;
 162000;1620;ORGNIV3;Frøya;Beholdt;;;JA;162000;ORGNIV3;leggInn;
@@ -249,7 +250,6 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 183200;1832;ORGNIV3;Hemnes;Beholdt;;;JA;183200;ORGNIV3;leggInn;
 183300;1833;ORGNIV3;Rana;Beholdt;;;JA;183300;ORGNIV3;leggInn;
 183400;1834;ORGNIV3;Lurøy;Beholdt;;;JA;183400;ORGNIV3;leggInn;
-183600;1836;ORGNIV3;Rødøy;Beholdt;;;JA;183600;ORGNIV3;leggInn;
 183700;1837;ORGNIV3;Meløy;Beholdt;;;JA;183700;ORGNIV3;leggInn;
 183800;1838;ORGNIV3;Gildeskål;Beholdt;;;JA;183800;ORGNIV3;leggInn;
 184100;1841;ORGNIV3;Indre Salten;Beholdt;;;JA;184100;ORGNIV3;leggInn;

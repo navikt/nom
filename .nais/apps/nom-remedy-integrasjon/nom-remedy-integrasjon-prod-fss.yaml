@@ -3,6 +3,9 @@ kind: Application
 metadata:
   name: nom-remedy-integrasjon
   namespace: org
+  annotations:
+    nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
+    nais.io/run-as-user: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
   labels:
     team: org
 spec:
@@ -17,6 +20,8 @@ spec:
       value: https://nom-api.intern.nav.no/
     - name: NOM_API_SCOPE
       value: api://prod-gcp.nom.nom-api/.default
+    - name: JDK_JAVA_OPTIONS
+      value: "-Dhttp.proxyHost=webproxy.nais -Dhttps.proxyHost=webproxy.nais -Dhttp.proxyPort=8088 -Dhttps.proxyPort=8088 -Dhttp.nonProxyHosts=localhost|127.0.0.1|10.254.0.1|*.local|*.adeo.no|*.nav.no|*.aetat.no|*.devillo.no|*.oera.no|*.nais.io|*.aivencloud.com|*.intern.dev.nav.no"
   envFrom:
     - secret: nom-remedy-integrasjon-unleash-api-token
   vault:
