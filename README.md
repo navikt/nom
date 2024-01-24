@@ -2,6 +2,18 @@
 
 Docs: https://navikt.github.io/nom/
 
+#### Testdekning
+[![Test Coverage](https://navikt.github.io/nom/test-coverage/api/badges/api-jacoco.svg?raw=true)](https://navikt.github.io/nom/test-coverage/api/)
+ [![Branches](https://navikt.github.io/nom/test-coverage/api/badges/api-branches.svg?raw=true)](https://navikt.github.io/nom/test-coverage/api/)
+[![Test Coverage](https://navikt.github.io/nom/test-coverage/nav-ident/badges/nav-ident-jacoco.svg?raw=true)](https://navikt.github.io/nom/test-coverage/nav-ident/)
+[![Branches](https://navikt.github.io/nom/test-coverage/nav-ident/badges/nav-ident-branches.svg?raw=true)](https://navikt.github.io/nom/test-coverage/nav-ident/)
+[![Test Coverage](https://navikt.github.io/nom/test-coverage/nom-ressurser/badges/nom-ressurser-jacoco.svg?raw=true)](https://navikt.github.io/nom/test-coverage/nom-ressurser/)
+[![Branches](https://navikt.github.io/nom/test-coverage/nom-ressurser/badges/nom-ressurser-branches.svg?raw=true)](https://navikt.github.io/nom/test-coverage/nom-ressurser/)
+[![Test Coverage](https://navikt.github.io/nom/test-coverage/proxy/badges/proxy-jacoco.svg?raw=true)](https://navikt.github.io/nom/test-coverage/proxy/)
+[![Branches](https://navikt.github.io/nom/test-coverage/proxy/badges/proxy-branches.svg?raw=true)](https://navikt.github.io/nom/test-coverage/proxy/)
+[![Test Coverage](https://navikt.github.io/nom/test-coverage/unit4/badges/unit4-jacoco.svg?raw=true)](https://navikt.github.io/nom/test-coverage/unit4/)
+[![Branches](https://navikt.github.io/nom/test-coverage/unit4/badges/unit4-branches.svg?raw=true)](https://navikt.github.io/nom/test-coverage/unit4/)
+
 ## Hente AAD properties
 
 For å hente AAD properties så gjør følgende fra terminal i github-prosjektets rot.
