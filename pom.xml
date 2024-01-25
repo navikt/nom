@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.1</version> <!-- Ved oppdatering av Spring - sjekk changelog for nye versjoner, og om man da kan ta bort overstyrte versjoner under -->
+        <version>3.2.2</version> <!-- Ved oppdatering av Spring - sjekk changelog for nye versjoner, og om man da kan ta bort overstyrte versjoner under -->
         <relativePath/>
     </parent>
 
