@@ -147,6 +147,7 @@ export interface Ressurs {
   epost?: string;
   fid: string;
   fysiskeBrukersteder: string[];
+  isNomMastered: boolean;
   navident: string;
   personident: string;
   primaryFysiskBrukersted?: string;

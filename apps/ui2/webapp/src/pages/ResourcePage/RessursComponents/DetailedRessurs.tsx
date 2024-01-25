@@ -90,6 +90,17 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
       <OrgTilknytningSection ressurs={ressurs} />
       <TeamCatSection navident={ressurs.navident} />
       <TerminateButton ressurs={ressurs} />
+      {ressurs.isNomMastered && (
+        <Tag
+          css={css`
+            width: fit-content;
+          `}
+          size="small"
+          variant="alt1"
+        >
+          Opprettet/endret i NOM
+        </Tag>
+      )}
     </div>
   );
 }
