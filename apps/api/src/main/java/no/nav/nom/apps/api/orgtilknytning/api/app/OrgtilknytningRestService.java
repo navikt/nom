@@ -2,15 +2,19 @@ package no.nav.nom.apps.api.orgtilknytning.api.app;
 
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOverlapException;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtype;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
+import no.nav.nom.apps.api.remedy.RemedyEnhet;
+import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
@@ -28,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodsOverlapping;
 import static no.nav.nom.apps.api.common.DateUtils.validateChronologicalDates;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
@@ -39,17 +44,22 @@ public class OrgtilknytningRestService {
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final RessursStateRepository ressursStateRepository;
+    private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final NomMastered nomMastered;
 
     public OrgtilknytningRestService(
-        OrgtilknytningStateRepository orgtilknytningStateRepository, OrgtilknytningCommandService orgtilknytningCommandService,
-        OrgEnhetStateRepository orgEnhetStateRepository, RessursStateRepository ressursStateRepository,
+        OrgtilknytningStateRepository orgtilknytningStateRepository,
+        OrgtilknytningCommandService orgtilknytningCommandService,
+        OrgEnhetStateRepository orgEnhetStateRepository,
+        RessursStateRepository ressursStateRepository,
+        RemedyEnhetMapperService remedyEnhetMapperService,
         NomMastered nomMastered
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.ressursStateRepository = ressursStateRepository;
+        this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.nomMastered = nomMastered;
     }
 
@@ -179,6 +189,13 @@ public class OrgtilknytningRestService {
 
     public void addOrgtilknyting(LeggTilOrgtilknytningRequest leggTilOrgtilknytningRequest) {
         validateLeggTilOrgilknytningRequest(leggTilOrgtilknytningRequest);
+
+        var erDagligOppfolging = leggTilOrgtilknytningRequest.erDagligOppfolging().orElse(false);
+
+        if (erDagligOppfolging) {
+            validateLeggTilDagligOppfolgingOrgilknytningRequest(leggTilOrgtilknytningRequest);
+        }
+
         var metaData = new InputMetadata(
             "REST",
             "addOrgtilknyting",
@@ -210,9 +227,22 @@ public class OrgtilknytningRestService {
             )
         ));
 
-        nomMastered.markRessursAsMasteredInNom(leggTilOrgtilknytningRequest.navident());
+        if(erDagligOppfolging) {
+            orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(
+                orgTilknytningFid,
+                new EndreDagligOppfolgingOrgtilknytning(
+                    leggTilOrgtilknytningRequest.navident(),
+                    leggTilOrgtilknytningRequest.orgEnhetId(),
+                    leggTilOrgtilknytningRequest.gyldigFom(),
+                    leggTilOrgtilknytningRequest.gyldigTom(),
+                    erDagligOppfolging,
+                    metaData,
+                    null
+                )
+            );
+        }
 
-        //TODO: håndtere daglig oppfølging
+        nomMastered.markRessursAsMasteredInNom(leggTilOrgtilknytningRequest.navident());
     }
 
     private void validateLeggTilOrgilknytningRequest(LeggTilOrgtilknytningRequest leggTilOrgtilknytningRequest) {
@@ -230,22 +260,63 @@ public class OrgtilknytningRestService {
 
         validateChronologicalDates(leggTilOrgtilknytningRequest.gyldigFom(), leggTilOrgtilknytningRequest.gyldigTom().orElse(null));
 
-        var orgtilknytninger = orgtilknytningStateRepository.findByNavident(leggTilOrgtilknytningRequest.navident())
+        var existingOegtilknytningerForOrgEnhet = orgtilknytningStateRepository.findByNavident(leggTilOrgtilknytningRequest.navident())
             .stream()
             .filter(orgtilknytningState -> orgtilknytningState.orgEnhetId().equals(leggTilOrgtilknytningRequest.orgEnhetId()))
             .toList();
 
-        orgtilknytninger.forEach(orgtilknytningState -> {
+        existingOegtilknytningerForOrgEnhet.forEach(orgtilknytningState -> {
             if (isPeriodsOverlapping(
                 orgtilknytningState.gyldigFom(),
                 orgtilknytningState.gyldigTom(),
                 leggTilOrgtilknytningRequest.gyldigFom(),
                 leggTilOrgtilknytningRequest.gyldigTom()
             )) {
-                throw new OrgtilknytningPeriodeOverlapException("Det finnes allerede en orgtilknytning innenfor forespurt periode");
+                throw new OrgtilknytningPeriodeOverlapException("Det finnes allerede en orgtilknytning for samme orgenhet innenfor forespurt periode");
 
             }
         });
+    }
+
+    private void validateLeggTilDagligOppfolgingOrgilknytningRequest(LeggTilOrgtilknytningRequest leggTilOrgtilknytningRequest) {
+        var existingDagligOppfolgningTilknytninger = orgtilknytningStateRepository.findByNavident(leggTilOrgtilknytningRequest.navident())
+            .stream()
+            .filter(OrgtilknytningState::erDagligOppfolging)
+            .toList();
+
+
+        existingDagligOppfolgningTilknytninger.forEach(orgtilknytningState -> {
+                if (isPeriodsOverlapping(
+                    orgtilknytningState.gyldigFom(),
+                    orgtilknytningState.gyldigTom(),
+                    leggTilOrgtilknytningRequest.gyldigFom(),
+                    leggTilOrgtilknytningRequest.gyldigTom()
+                )) {
+                    throw new OrgtilknytningPeriodeOverlapException("Det finnes allerede en daglig oppfølging orgtilknytning innenfor forespurt periode");
+
+                }
+            });
+
+        // https://jira.adeo.no/browse/ORG-1759
+        existingDagligOppfolgningTilknytninger.stream()
+            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
+            .findFirst()
+            .ifPresent(currentlyActiveDagligOppfolging -> {
+                var currentRemedyEnhetId = remedyEnhetMapperService.findByNomId(currentlyActiveDagligOppfolging.orgEnhetId())
+                    .map(RemedyEnhet::remedyEnhetId);
+                var newRemedyEnhetId = remedyEnhetMapperService.findByNomId(leggTilOrgtilknytningRequest.orgEnhetId())
+                    .map(RemedyEnhet::remedyEnhetId);
+
+                var newDagligOppfolgningIsActivatedAfterTomorrow = leggTilOrgtilknytningRequest.gyldigFom()
+                    .isAfter(LocalDate.now().plusDays(1));
+
+                if (!currentRemedyEnhetId.equals(newRemedyEnhetId) && newDagligOppfolgningIsActivatedAfterTomorrow) {
+                    throw new InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException(
+                        "Siden den nye daglig oppfolging orgtilknytningen vil endre den ansattes remedy enhet kan 'gyldigFom' være maks én dag frem i tid"
+                    );
+                }
+            });
+
     }
 
     private void validateEksternOrgtilknytningPeriode(Optional<LocalDate> gyldigTom) {

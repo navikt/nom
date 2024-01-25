@@ -11,6 +11,7 @@ public record LeggTilOrgtilknytningRequest(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String navident,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String orgEnhetId,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate gyldigFom,
-    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> gyldigTom
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> gyldigTom,
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<Boolean> erDagligOppfolging
 )
 { }

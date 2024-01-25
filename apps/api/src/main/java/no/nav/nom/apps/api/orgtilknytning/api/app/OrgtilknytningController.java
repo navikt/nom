@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOverlapException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
@@ -158,7 +159,8 @@ public class OrgtilknytningController {
         IllegalArgumentException.class,
         NoSuchElementException.class,
         InvalidSektorException.class,
-        InvalidOrgtilknytningTypeAndSektorCombinationException.class
+        InvalidOrgtilknytningTypeAndSektorCombinationException.class,
+        InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException.class
     })
     public ResponseEntity<StandardResponse> handleBadRequest(RuntimeException exception) {
         return ResponseEntity

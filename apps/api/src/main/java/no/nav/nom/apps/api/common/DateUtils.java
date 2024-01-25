@@ -9,6 +9,15 @@ public class DateUtils {
             .isBefore(period1End.orElse(LocalDate.MAX));
     }
 
+    public static boolean isPeriodActive(LocalDate periodStart, Optional<LocalDate> periodEnd) {
+        var today = LocalDate.now();
+        var isPeriodStartBeforeOrEqualToToday = periodStart.isBefore(today) || periodStart.isEqual(today);
+        var isPeriodEndAfterOrEqualToToday = periodEnd.map(endDate -> endDate.isAfter(today) || endDate.isEqual(today))
+            .orElse(true);
+
+        return isPeriodStartBeforeOrEqualToToday && isPeriodEndAfterOrEqualToToday;
+    }
+
     public static void validateChronologicalDates(LocalDate startDato, LocalDate sluttDato) {
         if (sluttDato != null) {
             if (sluttDato.isBefore(startDato)) {

@@ -48,14 +48,14 @@ public class RemedyEnhetMapperService {
     }
 
 
-    public Optional<RemedyEnhet> findByNomId(String nomId) {
+    public Optional<RemedyEnhet> findByNomId(String nomOrgEnhetId) {
 
-        var remedyEnhetWithNomId = remedyEnhetList.stream().filter(remedyEnhet -> nomId.equals(remedyEnhet.nomId())).findFirst();
+        var remedyEnhetWithNomId = remedyEnhetList.stream().filter(remedyEnhet -> nomOrgEnhetId.equals(remedyEnhet.nomId())).findFirst();
 
         if (remedyEnhetWithNomId.isPresent()) {
             return remedyEnhetWithNomId;
         } else {
-            var remedyEnhet = findRemedyEnhet(nomId);
+            var remedyEnhet = findRemedyEnhet(nomOrgEnhetId);
 
             if (remedyEnhet.isPresent()) {
                 return Optional.of(
@@ -63,18 +63,18 @@ public class RemedyEnhetMapperService {
                         remedyEnhet.get().remedyEnhetId(),
                         remedyEnhet.get().agressoId(),
                         remedyEnhet.get().orgNivaa(),
-                        nomId
+                        nomOrgEnhetId
                     ));
             } else {
-                logger.debug("Kunne ikke finne remedyEnhet for nomId {} ", nomId);
+                logger.debug("Kunne ikke finne remedyEnhet for nomId {} ", nomOrgEnhetId);
             }
         }
 
         return Optional.empty();
     }
 
-    private Optional<RemedyEnhet> findRemedyEnhet(String nomId) {
-        var currentOptionalOrgEnhet = orgenhetService.getById(nomId);
+    private Optional<RemedyEnhet> findRemedyEnhet(String nomOrgEnhetId) {
+        var currentOptionalOrgEnhet = orgenhetService.getById(nomOrgEnhetId);
 
         while (currentOptionalOrgEnhet.isPresent()) {
             final var orgEnhet = currentOptionalOrgEnhet.get();
