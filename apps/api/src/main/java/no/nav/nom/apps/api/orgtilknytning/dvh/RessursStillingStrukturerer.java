@@ -51,7 +51,7 @@ public class RessursStillingStrukturerer {
 
     public Map<String, List<StillingPeriode>> strukturerStilingPerioderPerNavident(List<DvhRessursStilling> ressursStillinger) {
         Map <String, List<DvhRessursStilling>> ressursStillingerGruppert = grupperPerNavident(ressursStillinger);
-        log.debug("Gruppert ressursStilligner på {} navidenter", ressursStillingerGruppert.keySet().size());
+        log.info("Gruppert ressursStilligner på {} navidenter", ressursStillingerGruppert.keySet().size());
 
         Map <String, List<StillingPeriode>> stillingPerioderPerNavident = new HashMap<>();
 
@@ -65,8 +65,8 @@ public class RessursStillingStrukturerer {
             var stillingerMedDagligOppfolging = finnKorrekteDagligOppfolginger(navident, stillingerGruppert);
             if (log.isDebugEnabled()) {
                 log.debug("Resultat av gruppering og matching til orgenhet for navident {}:\n{}", navident, StillingPeriode.toString(stillingerMedDagligOppfolging, true));
-                stillingPerioderPerNavident.put(navident, stillingerMedDagligOppfolging);
             }
+            stillingPerioderPerNavident.put(navident, stillingerMedDagligOppfolging);
         });
         return stillingPerioderPerNavident;
     }
