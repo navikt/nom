@@ -1,6 +1,8 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
+  BodyShort,
+  Checkbox,
   DatePicker,
   HelpText,
   Radio,
@@ -9,7 +11,7 @@ import {
 } from "@navikt/ds-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { addYears, isBefore } from "date-fns";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Controller,
   FormProvider,
@@ -197,6 +199,7 @@ function CreateEksternRessurs() {
             gyldigTom || formatDateWithoutTimezone(addYears(new Date(), 1))
           }
           defaultStartDato={gyldigFom}
+          erDagligOppfolgingLockedToTrue
         />
         <FysiskBrukerstedSelectFormPart />
         <NavigationButtons />
@@ -208,13 +211,16 @@ function CreateEksternRessurs() {
 export function OrganisasjonstilknytningInnerForm({
   defaultStartDato,
   defaultSluttDato,
+  erDagligOppfolgingLockedToTrue = false,
 }: {
   defaultStartDato?: string;
   defaultSluttDato?: string;
+  erDagligOppfolgingLockedToTrue?: boolean;
 }) {
   const {
     setValue,
     formState: { errors },
+    watch,
   } = useFormContext();
 
   useEffect(() => {
@@ -241,9 +247,28 @@ export function OrganisasjonstilknytningInnerForm({
     defaultSelected: defaultSluttDato ? new Date(defaultSluttDato) : undefined,
   });
 
+  const [erDagligOppfolgingChecked, setErDagligOppfolgingChecked] = useState(
+    erDagligOppfolgingLockedToTrue,
+  );
+
   return (
     <>
       <InnerOrgEnhetSelect />
+      {watch("orgEnhetId") ? (
+        <Checkbox
+          checked={erDagligOppfolgingChecked}
+          disabled={erDagligOppfolgingLockedToTrue}
+          onChange={(event) => {
+            setErDagligOppfolgingChecked(event.target.checked);
+            setValue("erDagligOppfolging", event.target.checked);
+          }}
+        >
+          <BodyShort>
+            Denne lederen har ansvar for den daglige oppfølgingen av
+            medarbeideren
+          </BodyShort>
+        </Checkbox>
+      ) : undefined}
       <div
         css={css(
           fullwidthRow,

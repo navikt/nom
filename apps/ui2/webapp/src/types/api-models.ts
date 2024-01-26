@@ -41,6 +41,7 @@ export interface GetPersonRequest {
 export type JsonNode = object;
 
 export interface LeggTilOrgtilknytningRequest {
+  erDagligOppfolging?: boolean;
   /** @format date */
   gyldigFom: string;
   /** @format date */
