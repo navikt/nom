@@ -244,6 +244,34 @@ public class OrganiseringStateRepositoryTest {
     }
 
     @Test
+    @DisplayName("Identisk organisering legges ikke til i listen")
+    void should_not_add_identical_organisering() {
+        final String idOver = "id_over";
+        final String orgenhetId = "orgenhet_id";
+        OrganiseringStateRepository repository = new OrganiseringStateRepository();
+
+        OrganiseringState idToFindInId = OrganiseringState.builder()
+            .fid("1")
+            .id(orgenhetId)
+            .idOver(idOver)
+            .build();
+        repository.putEventAggregate(idToFindInId);
+
+        // Identisk som første organisering, bare fid er forskjellig
+        OrganiseringState alsoIdToFindInId = OrganiseringState.builder()
+            .fid("2")
+            .id(orgenhetId)
+            .idOver(idOver)
+            .build();
+        repository.putEventAggregate(alsoIdToFindInId);
+
+        List<OrganiseringState> organiseringerReturned = repository.getOrganiseringerContainingId(idOver);
+
+        assertThat(organiseringerReturned.size()).isEqualTo(1);
+    }
+
+
+    @Test
     @DisplayName("Alle organiseringer som inneholder samme id kommer i listen")
     void putOrUpdateAlleOrganiseringer_should_add_organisering_with_id_already_present() {
         final String idToFind = "the_id";

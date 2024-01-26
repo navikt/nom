@@ -7,12 +7,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -23,34 +22,45 @@ public class OrganiseringStateRepository {
 
     private final Map<String, OrganiseringState> organiseringByFid = new ConcurrentHashMap<>(16, 0.9f, 1);
     private final Map<String, OrganiseringState> organiseringById = new ConcurrentHashMap<>(16, 0.9f, 1);
-    private final Map<String, Set<OrganiseringState>> allOrganiseringerContainingId = new ConcurrentHashMap<>(16, 0.9f, 1);
+    private final Map<String, List<OrganiseringState>> allOrganiseringerContainingId = new ConcurrentHashMap<>(16, 0.9f, 1);
 
-    private void putOrUpdateAllOrganiseringer(OrganiseringState organiseringState) {
-        String id = organiseringState.id();
-        String idOver = organiseringState.idOver();
+    private void putOrUpdateAllOrganiseringer(OrganiseringState newOrganisering) {
+        String id = newOrganisering.id();
+        String idOver = newOrganisering.idOver();
 
         if (id == null || idOver == null) {
-            logger.warn("ID-felt mangler verdi: {}", organiseringState);
+            logger.warn("ID-felt mangler verdi: {}", newOrganisering);
             return;
         }
 
         if (allOrganiseringerContainingId.containsKey(id)) {
-            var connectedOrgEnheter = allOrganiseringerContainingId.get(id);
+            var organiseringerContainingId = allOrganiseringerContainingId.get(id);
+            var connectedOrganiseringerWithSameId = organiseringerContainingId.stream()
+                .filter(o -> o.id().equals(id))
+                .toList();
 
-            var connectedOrgEnheterWithSameId = connectedOrgEnheter.stream().filter(o -> o.id().equals(id)).toList();
-            if (!connectedOrgEnheterWithSameId.isEmpty()) {
-                logger.warn("Forsøker å legge til {}, men ID '{}' inneholder allerede {}", organiseringState, id, connectedOrgEnheterWithSameId);
+            if (!connectedOrganiseringerWithSameId.isEmpty()) {
+                logger.warn("Forsøker å legge til {}, men key '{}' inneholder allerede {}", newOrganisering, id, connectedOrganiseringerWithSameId);
             } else {
-                connectedOrgEnheter.add(organiseringState);
+                organiseringerContainingId.add(newOrganisering);
             }
         } else {
-            allOrganiseringerContainingId.put(id, new HashSet<>(List.of(organiseringState)));
+            allOrganiseringerContainingId.put(id, new ArrayList<>(List.of(newOrganisering)));
         }
 
         if (allOrganiseringerContainingId.containsKey(idOver)) {
-            allOrganiseringerContainingId.get(idOver).add(organiseringState);
+            var organiseringerContainingIdOver = allOrganiseringerContainingId.get(idOver);
+            var identicalOrganiseringer = organiseringerContainingIdOver.stream()
+                .filter(organisering -> organisering.id().equals(id) && organisering.idOver().equals(idOver))
+                .toList();
+
+            if (!identicalOrganiseringer.isEmpty()) {
+                logger.warn("Forsøker å legge til {}, men key '{}' inneholder allerede {}", newOrganisering, idOver, identicalOrganiseringer);
+            } else {
+                allOrganiseringerContainingId.get(idOver).add(newOrganisering);
+            }
         } else {
-            allOrganiseringerContainingId.put(idOver, new HashSet<>(List.of(organiseringState)));
+            allOrganiseringerContainingId.put(idOver, new ArrayList<>(List.of(newOrganisering)));
         }
     }
 
