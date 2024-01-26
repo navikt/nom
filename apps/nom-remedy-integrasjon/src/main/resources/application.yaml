@@ -26,8 +26,8 @@ spring:
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
     url: ${REMEDY_DATASOURCE_URL}
-    username: ${REMEDY_DB_USER} # Denne lastes også inn fra vault ved deploy. Grunnen til at vi ikke skriver den rett in her er for å unngå at brukeren blir låst, pga gjentatte påloggingsforsøk, dersom appen ikke får hentet secrets fra vault ved deploy.
-    password: ${REMEDY_DB_PWD} # Lastes inn fra vault ved deploy
+    username: ${REMEDY_DB_USER} # Denne lastes også inn fra remedy-db-credentials k8s seecret. Grunnen til at vi ikke skriver den rett in her er for å unngå at brukeren blir låst, pga gjentatte påloggingsforsøk, dersom appen ikke får hentet secrets.
+    password: ${REMEDY_DB_PWD} # Lastes inn fra remedy-db-credentials k8s seecret
 
     hikari:
       data-source-properties:
