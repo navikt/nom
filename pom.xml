@@ -47,7 +47,7 @@
         <org.wiremock.version>3.3.1</org.wiremock.version>
         <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
         <spring-cloud-contract-wiremock.version>4.1.1</spring-cloud-contract-wiremock.version>
-        <mock-oauth2-server.version>2.1.0</mock-oauth2-server.version>
+        <mock-oauth2-server.version>2.1.1</mock-oauth2-server.version>
         <nimbus-jose-jwt.version>9.37.3</nimbus-jose-jwt.version>
         <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
         <ojdbc.version>23.3.0.23.09</ojdbc.version>
