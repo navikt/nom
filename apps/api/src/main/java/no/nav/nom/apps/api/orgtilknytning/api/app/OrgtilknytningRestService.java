@@ -78,10 +78,11 @@ public class OrgtilknytningRestService {
     }
 
     public void updateOrgtilknyting(String fid, EndreOrgtilknytningDatoRequest endreOrgtilknytningDatoRequest) {
-        validateChronologicalDates(endreOrgtilknytningDatoRequest.gyldigFom(), endreOrgtilknytningDatoRequest.gyldigTom().orElse(null));
 
         var orgtilknytning = orgtilknytningStateRepository.findByFid(fid)
             .orElseThrow(() -> OrgtilknytningNotFoundException.fid(fid));
+
+        validateEndreOrgtilknytningDato(orgtilknytning, endreOrgtilknytningDatoRequest);
 
         ressursStateRepository.findByNavident(orgtilknytning.navident())
             .ifPresentOrElse(
@@ -227,7 +228,7 @@ public class OrgtilknytningRestService {
             )
         ));
 
-        if(erDagligOppfolging) {
+        if (erDagligOppfolging) {
             orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(
                 orgTilknytningFid,
                 new EndreDagligOppfolgingOrgtilknytning(
@@ -286,16 +287,16 @@ public class OrgtilknytningRestService {
 
 
         existingDagligOppfolgningTilknytninger.forEach(orgtilknytningState -> {
-                if (isPeriodsOverlapping(
-                    orgtilknytningState.gyldigFom(),
-                    orgtilknytningState.gyldigTom(),
-                    leggTilOrgtilknytningRequest.gyldigFom(),
-                    leggTilOrgtilknytningRequest.gyldigTom()
-                )) {
-                    throw new OrgtilknytningPeriodeOverlapException("Det finnes allerede en daglig oppfølging orgtilknytning innenfor forespurt periode");
+            if (isPeriodsOverlapping(
+                orgtilknytningState.gyldigFom(),
+                orgtilknytningState.gyldigTom(),
+                leggTilOrgtilknytningRequest.gyldigFom(),
+                leggTilOrgtilknytningRequest.gyldigTom()
+            )) {
+                throw new OrgtilknytningPeriodeOverlapException("Det finnes allerede en daglig oppfølging orgtilknytning innenfor forespurt periode");
 
-                }
-            });
+            }
+        });
 
         // https://jira.adeo.no/browse/ORG-1759
         existingDagligOppfolgningTilknytninger.stream()
@@ -317,6 +318,55 @@ public class OrgtilknytningRestService {
                 }
             });
 
+    }
+
+    private void validateEndreOrgtilknytningDato(
+        OrgtilknytningState existingOrgtilknytningToUpdate,
+        EndreOrgtilknytningDatoRequest endreOrgtilknytningDatoRequest
+    ) {
+        validateChronologicalDates(endreOrgtilknytningDatoRequest.gyldigFom(), endreOrgtilknytningDatoRequest.gyldigTom().orElse(null));
+
+        var ressursState = ressursStateRepository.findByNavident(existingOrgtilknytningToUpdate.navident()).orElseThrow(
+            () -> new IllegalArgumentException("Finner ikke ressurs med navident %s".formatted(existingOrgtilknytningToUpdate.navident()))
+        );
+
+        if (ressursState.sektor() == Sektor.EKSTERN) {
+            validateEksternOrgtilknytningPeriode(endreOrgtilknytningDatoRequest.gyldigTom());
+        }
+
+        var otherOrgtilknytningerForRessurs = orgtilknytningStateRepository.findByNavident(existingOrgtilknytningToUpdate.navident()).stream()
+            .filter(orgtilknytningState -> !orgtilknytningState.fid().equals(existingOrgtilknytningToUpdate.fid()))
+            .toList();
+
+        otherOrgtilknytningerForRessurs.stream()
+            .filter(orgtilknytningState -> orgtilknytningState.orgEnhetId().equals(existingOrgtilknytningToUpdate.orgEnhetId()))
+            .forEach(orgtilknytningState -> {
+                if (isPeriodsOverlapping(
+                    orgtilknytningState.gyldigFom(),
+                    orgtilknytningState.gyldigTom(),
+                    endreOrgtilknytningDatoRequest.gyldigFom(),
+                    endreOrgtilknytningDatoRequest.gyldigTom()
+                )) {
+                    throw new OrgtilknytningPeriodeOverlapException("Det finnes allerede en orgtilknytning for samme orgenhet innenfor forespurt periode");
+
+                }
+            });
+
+        if (existingOrgtilknytningToUpdate.erDagligOppfolging()) {
+            otherOrgtilknytningerForRessurs
+                .stream().filter(OrgtilknytningState::erDagligOppfolging)
+                .forEach(orgtilknytningState -> {
+                    if (isPeriodsOverlapping(
+                        orgtilknytningState.gyldigFom(),
+                        orgtilknytningState.gyldigTom(),
+                        endreOrgtilknytningDatoRequest.gyldigFom(),
+                        endreOrgtilknytningDatoRequest.gyldigTom()
+                    )) {
+                        throw new OrgtilknytningPeriodeOverlapException("Det finnes allerede en daglig oppfølging orgtilknytning innenfor forespurt periode");
+
+                    }
+                });
+        }
     }
 
     private void validateEksternOrgtilknytningPeriode(Optional<LocalDate> gyldigTom) {

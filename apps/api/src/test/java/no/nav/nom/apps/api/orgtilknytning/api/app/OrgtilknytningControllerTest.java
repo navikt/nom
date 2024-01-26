@@ -183,6 +183,118 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
+    @DisplayName("Should ensure no overlapping period for orgenhet when updating period")
+    void test_no_overlapping_periode_for_orgenhet_navident_on_update_date() {
+        var navident = "Y654321";
+        var orgEnhet = orgEnhetState();
+
+        var existingOrgtilknytningWithConflictingPeriod = orgtilknytningState().toBuilder()
+            .navident(navident)
+            .orgEnhetId(orgEnhet.id())
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.empty())
+            .build();
+
+        var orgtilknytningToChange = orgtilknytningState().toBuilder()
+            .navident(navident)
+            .orgEnhetId(orgEnhet.id()).build();
+
+        saveOrgtilknytninger(List.of(existingOrgtilknytningWithConflictingPeriod, orgtilknytningToChange));
+        saveRessurser(List.of(
+            ressursState().toBuilder()
+                .navident(navident)
+                .sektor(Sektor.EKSTERN)
+                .build()
+        ));
+        saveOrgenheter(List.of(orgEnhet));
+
+
+        var endreOrgtilknytningDatoRequest = EndreOrgtilknytningDatoRequest.builder()
+            .gyldigFom(LocalDate.now().plusMonths(1))
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(6)))
+            .build();
+
+        webTestClient
+            .post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgtilknytninger/{fid}/dato")
+                .build(orgtilknytningToChange.fid())
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(nomWriteUserToken());
+            })
+            .bodyValue(endreOrgtilknytningDatoRequest)
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+            .expectBody()
+            .jsonPath("message")
+            .isEqualTo("Det finnes allerede en orgtilknytning for samme orgenhet innenfor forespurt periode");
+
+        verify(
+            orgtilknytningCommandService,
+            times(0)
+        ).endreOrgtilknytningDato(any(), any());
+    }
+
+    @Test
+    @DisplayName("Should ensure no overlapping period for daglig oppfolging when updating period")
+    void test_no_overlapping_periode_for_daglig_oppfolging_on_update_date() {
+        var navident = "Y654321";
+        var orgEnhet = orgEnhetState();
+
+        var existingDagligOppfolgingWithConflictingPeriod = orgtilknytningState().toBuilder()
+            .navident(navident)
+            .orgEnhetId("some-other-orgenhet")
+            .erDagligOppfolging(true)
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.empty())
+            .build();
+
+        var dagligOppfolgingToChange = orgtilknytningState().toBuilder()
+            .navident(navident)
+            .erDagligOppfolging(true)
+            .orgEnhetId(orgEnhet.id()).build();
+
+        saveOrgtilknytninger(List.of(existingDagligOppfolgingWithConflictingPeriod, dagligOppfolgingToChange));
+        saveRessurser(List.of(
+            ressursState().toBuilder()
+                .navident(navident)
+                .sektor(Sektor.EKSTERN)
+                .build()
+        ));
+        saveOrgenheter(List.of(orgEnhet));
+
+
+        var endreOrgtilknytningDatoRequest = EndreOrgtilknytningDatoRequest.builder()
+            .gyldigFom(LocalDate.now().plusMonths(1))
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(6)))
+            .build();
+
+        webTestClient
+            .post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgtilknytninger/{fid}/dato")
+                .build(dagligOppfolgingToChange.fid())
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(nomWriteUserToken());
+            })
+            .bodyValue(endreOrgtilknytningDatoRequest)
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+            .expectBody()
+            .jsonPath("message")
+            .isEqualTo("Det finnes allerede en daglig oppfølging orgtilknytning innenfor forespurt periode");
+
+        verify(
+            orgtilknytningCommandService,
+            times(0)
+        ).endreOrgtilknytningDato(any(), any());
+    }
+
+    @Test
     @DisplayName("Should not be able to update dato if it leads to no active orgtilknytninger")
     void test_disallow_update_if_no_remaining_active() {
 
@@ -547,7 +659,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should ensure no overlapping period for unique orgenhetId + navident combination")
+    @DisplayName("Should ensure no overlapping period for unique orgenhetId + navident combination when creating orgtilknytning")
     void test_unique_orgenhet_navident_for_orgtilknytning() {
         var navident = "Y654321";
         var orgEnhet = orgEnhetState();
