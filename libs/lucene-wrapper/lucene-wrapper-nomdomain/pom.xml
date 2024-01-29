@@ -12,7 +12,6 @@
 
     <artifactId>lucene-wrapper-nomdomain</artifactId>
     <name>NOM :: Libs :: Lucene Wrapper NomDomain</name>
-    <version>1.1.0</version>
 
     <dependencies>
         <dependency>

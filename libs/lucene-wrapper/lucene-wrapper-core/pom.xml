@@ -12,7 +12,6 @@
 
     <artifactId>lucene-wrapper-core</artifactId>
     <name>NOM :: Libs :: Lucene Wrapper Core</name>
-    <version>1.1.0</version>
 
     <properties>
         <lucene.version>9.9.1</lucene.version>

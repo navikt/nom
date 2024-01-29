@@ -4,34 +4,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.2</version>
-        <relativePath/>
+        <groupId>no.nav.nom</groupId>
+        <artifactId>apps</artifactId>
+        <version>1.1.0</version>
     </parent>
 
     <name>NOM :: Apps :: Nom-remedy-integrasjon</name>
-    <groupId>no.nav.nom</groupId>
     <artifactId>nom-remedy-integrasjon</artifactId>
     <version>1.1.0</version>
 
     <properties>
         <openapi-generator-maven-plugin.version>7.2.0</openapi-generator-maven-plugin.version>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <!-- Bruk felles pom for angivelse av versjoner -->
-            <!-- Prosjekt overstyrte versjoner må angis over denne -->
-            <dependency>
-                <groupId>no.nav.nom</groupId>
-                <artifactId>nom</artifactId>
-                <version>${project.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <dependency>
