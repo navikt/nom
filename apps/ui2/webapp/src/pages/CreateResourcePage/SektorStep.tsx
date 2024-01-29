@@ -15,8 +15,8 @@ import { Sektor, Tilknytningtype } from "~/types/api-models";
 
 export const SektorNameMapping = {
   [Sektor.EKSTERN]: "Ekstern",
-  [Sektor.NAV_KOMMUNAL]: "Kommunal (Ikke tilgjengelig ennå)",
-  [Sektor.NAV_STATLIG]: "Statlig (Ikke tilgjengelig ennå)",
+  [Sektor.NAV_KOMMUNAL]: "Kommunal",
+  [Sektor.NAV_STATLIG]: "Statlig",
 };
 
 export const TilknytningtypeNameMapping = {
@@ -72,10 +72,10 @@ export function SektorStep() {
             {SektorNameMapping[Sektor.EKSTERN]}
           </Radio>
           <Radio disabled value={Sektor.NAV_STATLIG}>
-            {SektorNameMapping[Sektor.NAV_STATLIG]}
+            {`${SektorNameMapping[Sektor.NAV_STATLIG]} (Ikke tilgjengelig ennå)`}
           </Radio>
           <Radio disabled value={Sektor.NAV_KOMMUNAL}>
-            {SektorNameMapping[Sektor.NAV_KOMMUNAL]}
+            {`${SektorNameMapping[Sektor.NAV_KOMMUNAL]} (Ikke tilgjengelig ennå)`}
           </Radio>
         </RadioGroup>
         <SelectLayoutWrapper
