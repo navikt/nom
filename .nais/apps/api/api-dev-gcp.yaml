@@ -93,6 +93,12 @@ spec:
         - application: salesforce
           namespace: teamcrm
           cluster: dev-external
+        - application: saas-proxy-test
+          namespace: teamcrm
+          cluster: dev-gcp
+        - application: itestapp
+          namespace: teamcrm
+          cluster: dev-gcp
         - application: journalforing-frontend-q1
           namespace: isa
           cluster: dev-fss
