@@ -92,7 +92,6 @@ jobs:
           docker_context: .
           build_args: |
             JAR_PATH=${{ inputs.jar-path }}
-            JAVA_OPTS=${{ inputs.java-opts }}
           build_secrets: |
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}

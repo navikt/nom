@@ -1,10 +1,8 @@
 # Kjører opp med BusyBox shell - ikke kjør med dette i vanlig oppsett
 FROM gcr.io/distroless/java21-debian12:debug-nonroot
 ARG JAR_PATH
-ARG JAVA_OPTS
 
 ENV LC_ALL='nb_NO.UTF-8' LANG='nb_NO.UTF-8' TZ='Europe/Oslo'
-ENV JDK_JAVA_OPTIONS ${JAVA_OPTS}
 
 USER nonroot
 WORKDIR /app

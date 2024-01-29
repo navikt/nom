@@ -14,7 +14,7 @@ spec:
       value: dev
     - name: LOGGING_CONFIG
       value: 'classpath:logback-nais.xml'
-    - name: JAVA_OPTS
+    - name: JDK_JAVA_OPTIONS
       value: "-Xms1024m -Xmx8192m"
   envFrom:
     - secret: nom-api-unleash-api-token
