@@ -279,7 +279,7 @@ export const getUnderliggendeOrgenheter = {
   queryFn: async (parentId: string): Promise<string[]> =>
     (
       await axios.get<string[]>(
-        `/nom-api/app/orgenhet/underLiggende/${parentId}`,
+        `/nom-api/app/orgenheter/underliggende/${parentId}`,
       )
     ).data,
 };

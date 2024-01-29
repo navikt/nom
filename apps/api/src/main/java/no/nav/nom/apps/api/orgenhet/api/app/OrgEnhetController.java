@@ -69,7 +69,7 @@ public class OrgEnhetController {
         return orgenhetService.getEnheterByLeder(navident).stream().map(orgEnhetMapper::mapFrom).collect(Collectors.toList());
     }
 
-    @GetMapping("/underLiggende/{parentId}")
+    @GetMapping("/underliggende/{parentId}")
     @Operation(
         description = "Henter ut id for alle underliggende organisasjonsenheter",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)

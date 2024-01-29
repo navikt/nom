@@ -524,10 +524,10 @@ function FullRessursInfo({ ressurs }: { ressurs: RessursFields }) {
 function applyFilter(
   ressurs: RessursFields,
   filter: RessursFilterValues,
-  underLiggendeOrgenheter: string[],
+  underliggendeOrgenheter: string[],
 ) {
   return (
-    orgEnhetMatches(ressurs, filter, underLiggendeOrgenheter) &&
+    orgEnhetMatches(ressurs, filter, underliggendeOrgenheter) &&
     sektorMatches(ressurs, filter) &&
     includeInactiveMatches(ressurs, filter) &&
     startDatoMatches(ressurs, filter) &&
@@ -567,7 +567,7 @@ function sektorMatches(ressurs: RessursFields, filter: RessursFilterValues) {
 function orgEnhetMatches(
   ressurs: RessursFields,
   filter: RessursFilterValues,
-  underLiggendeOrgenheter: string[],
+  underliggendeOrgenheter: string[],
 ) {
   const orgEnhetMatch = filter.orgEnhet
     ? ressurs.orgTilknytning
@@ -579,17 +579,17 @@ function orgEnhetMatches(
         )
         .some((orgTilknytning) => {
           const orgEnhetMatch = orgTilknytning.orgEnhet.id === filter.orgEnhet;
-          const underLiggendeMatch = filter.includeUnderliggendeOrgEnheter
-            ? underLiggendeOrgenheter.includes(orgTilknytning.orgEnhet.id)
+          const underliggendeMatch = filter.includeUnderliggendeOrgEnheter
+            ? underliggendeOrgenheter.includes(orgTilknytning.orgEnhet.id)
             : false;
-          return orgEnhetMatch || underLiggendeMatch;
+          return orgEnhetMatch || underliggendeMatch;
         })
     : true;
 
   const underliggendeOrgEnhetMatch =
     Boolean(filter.includeUnderliggendeOrgEnheter) &&
     ressurs.orgTilknytning.some((orgTilknytning) =>
-      underLiggendeOrgenheter.includes(orgTilknytning.orgEnhet.id),
+      underliggendeOrgenheter.includes(orgTilknytning.orgEnhet.id),
     );
 
   return orgEnhetMatch || underliggendeOrgEnhetMatch;

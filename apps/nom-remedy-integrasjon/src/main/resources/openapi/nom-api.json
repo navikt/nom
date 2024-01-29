@@ -154,7 +154,7 @@
         ]
       }
     },
-    "/app/orgenheter/underLiggende/{parentId}": {
+    "/app/orgenheter/underliggende/{parentId}": {
       "get": {
         "description": "Henter ut id for alle underliggende organisasjonsenheter",
         "operationId": "getUnderliggendeOrgEnheter",
