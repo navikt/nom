@@ -3,16 +3,18 @@ package no.nav.nom.apps.api.orgenhet.eventsourcing.producer;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.IntStream;
-
-import static java.util.function.Predicate.not;
 
 @Component
 public class OrgEnhetIdGenerator {
     private final Random random = new Random();
     private final OrgEnhetStateRepository orgEnhetStateService;
+
+    // Holde oversikt over id-er generert av denne instansen,
+    // slik at vi unngår duplikater selv om det tar litt tid før nye orgEnheter er oppdatert i OrgEnhetStateRepository.
+    private final HashSet<String> generatedIds = new HashSet<>();
 
     public OrgEnhetIdGenerator(OrgEnhetStateRepository orgEnhetStateService) {
         this.orgEnhetStateService = orgEnhetStateService;
@@ -29,9 +31,10 @@ public class OrgEnhetIdGenerator {
      */
     public String newId() {
         String id = letter(letter1)+letter(letter2)+digits(3)+letter(letter3);
-        if (orgEnhetStateService.findById(id).isPresent()) {
+        if (generatedIds.contains(id) || orgEnhetStateService.findById(id).isPresent()) {
             id = newId();
         }
+        generatedIds.add(id);
         return id;
     }
 
