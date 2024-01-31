@@ -183,6 +183,9 @@ spec:
         - application: org-okonomi-mapping-backend
           namespace: org
           cluster: dev-gcp
+        - application: org-okonomi-mapping-ui
+          namespace: org
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident

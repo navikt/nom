@@ -162,6 +162,9 @@ spec:
         - application: org-okonomi-mapping-backend
           namespace: org
           cluster: prod-gcp
+        - application: org-okonomi-mapping-ui
+          namespace: org
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
