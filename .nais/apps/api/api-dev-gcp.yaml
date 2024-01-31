@@ -186,6 +186,9 @@ spec:
         - application: org-okonomi-mapping-ui
           namespace: org
           cluster: dev-gcp
+        - application: kodeverk-web
+          namespace: team-rocket
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
