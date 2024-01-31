@@ -24,7 +24,6 @@ import { useEffect, useState } from "react";
 
 import { getAllOrgEnheter, orgEnheterKeys } from "~/api/react-query-endpoints";
 import { showToast } from "~/hooks/showToast";
-import { orgEnheterAdminRoute } from "~/reactRouterRoutes";
 import type { OrgEnhet, SetOrgEnhetsTypeRequest } from "~/types/api-models";
 import { NomNivaa, OrgEnhetsType } from "~/types/api-models";
 import { isAfterPresent } from "~/utils";
@@ -272,7 +271,7 @@ export function OrgEnheterAdminPage() {
 }
 
 function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhet }) {
-  const { allowEdit } = useSearch({ from: orgEnheterAdminRoute.fullPath });
+  const { allowEdit } = useSearch({ from: "/admin/orgenheter" });
   const queryClient = useQueryClient();
 
   const updateOrgEnhetsTypeMutation = useMutation({
@@ -331,7 +330,7 @@ function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhet }) {
 }
 
 function ToggleEditMode() {
-  const { allowEdit } = useSearch({ from: orgEnheterAdminRoute.fullPath });
+  const { allowEdit } = useSearch({ from: "/admin/orgenheter" });
   const navigate = useNavigate();
 
   if (allowEdit) {

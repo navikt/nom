@@ -7,8 +7,6 @@ import axios from "axios";
 import type { OptionProps } from "react-select";
 import { components } from "react-select";
 
-import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
-
 import { AsyncSearch } from "./CustomSelectComponents";
 
 const RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT = 3;
@@ -185,7 +183,7 @@ async function createOptions(inputValue: string): Promise<SearchOption[]> {
         return {
           tag: "Medarbeider",
           navigationOptions: {
-            to: ressursRoute.to,
+            to: "/ressurs/$id",
             params: {
               id: r.navident,
             },
@@ -202,7 +200,7 @@ async function createOptions(inputValue: string): Promise<SearchOption[]> {
         return {
           tag: "OrgEnhet",
           navigationOptions: {
-            to: orgRoute.to,
+            to: "/org/$id",
             params: {
               id: r.id,
             },

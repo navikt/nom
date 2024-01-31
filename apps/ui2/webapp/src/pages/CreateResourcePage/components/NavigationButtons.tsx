@@ -2,8 +2,6 @@ import { css } from "@emotion/react";
 import { Button } from "@navikt/ds-react";
 import { useNavigate, useParams } from "@tanstack/react-router";
 
-import { createRessursRoute, indexRoute } from "~/reactRouterRoutes";
-
 export const navigationButtonCss = css`
   display: grid;
   grid-template-columns: repeat(2, 150px);
@@ -30,8 +28,8 @@ export const navigationButtonCss = css`
 `;
 
 export function NavigationButtons() {
-  const { step } = useParams({ from: createRessursRoute.fullPath });
-  const navigate = useNavigate({ from: createRessursRoute.fullPath });
+  const { step } = useParams({ from: "/ressurs/create/$step" });
+  const navigate = useNavigate({ from: "/ressurs/create/$step" });
   return (
     <div css={navigationButtonCss}>
       <Button size="small" type="submit" variant="primary">
@@ -41,7 +39,7 @@ export function NavigationButtons() {
         <Button
           onClick={() =>
             navigate({
-              to: createRessursRoute.to,
+              to: "/ressurs/create/$step",
               params: { step: String(Number(step) - 1) },
               search: (oldSearch) => oldSearch,
             })
@@ -54,7 +52,7 @@ export function NavigationButtons() {
         </Button>
       )}
       <Button
-        onClick={() => navigate({ to: indexRoute.to })}
+        onClick={() => navigate({ to: "/" })}
         size="small"
         type="button"
         variant="tertiary"

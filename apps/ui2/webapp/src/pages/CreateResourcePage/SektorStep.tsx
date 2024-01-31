@@ -9,7 +9,6 @@ import {
 } from "~/components/select/CustomSelectComponents";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
-import { createRessursRoute } from "~/reactRouterRoutes";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import { Sektor, Tilknytningtype } from "~/types/api-models";
 
@@ -49,7 +48,7 @@ export function SektorStep() {
         onSubmit={(event) => {
           event.preventDefault();
           navigate({
-            to: createRessursRoute.id,
+            to: "/ressurs/create/$step",
             params: { step: "2" },
             search: (oldSearch) => ({
               ...oldSearch,

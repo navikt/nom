@@ -7,7 +7,6 @@ import React from "react";
 import { getOrgEnhet } from "~/api/react-query-endpoints";
 import { PageBanner } from "~/components/PageBanner";
 import { HierarkiFrontPage } from "~/pages/OrganisasjonsHierarkiPage/components/HierarkiFrontPage";
-import { orgRoute } from "~/reactRouterRoutes";
 import type { OrgEnhet } from "~/types/api-models";
 import { isGyldighetsPeriodeActive } from "~/utils";
 
@@ -107,7 +106,7 @@ export function UnderEnheterGraphic({ valgtEnhet }: { valgtEnhet: OrgEnhet }) {
 }
 
 export function OrganisasjonHierarkiPage() {
-  const { id } = useParams({ from: orgRoute.fullPath });
+  const { id } = useParams({ from: "/org/$id" });
 
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(id as string),

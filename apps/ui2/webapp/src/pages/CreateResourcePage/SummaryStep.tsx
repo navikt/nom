@@ -7,14 +7,13 @@ import { Link as ReactRouterLink, useSearch } from "@tanstack/react-router";
 import { getRessurs } from "~/api/react-query-endpoints";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { ReceiptRessurs } from "~/pages/ResourcePage/RessursComponents/ReceiptRessurs";
-import { createRessursRoute, indexRoute } from "~/reactRouterRoutes";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import type { Ressurs } from "~/types/api-models";
 import { AnsettelsesType, Sektor } from "~/types/api-models";
 import { formatVisningsnavn, isInDevelopment } from "~/utils";
 
 export function SummaryStep() {
-  const { navident } = useSearch({ from: createRessursRoute.fullPath });
+  const { navident } = useSearch({ from: "/ressurs/create/$step" });
 
   const ressursQuery = useQuery({
     queryKey: getRessurs.queryKey(navident as string),
@@ -66,7 +65,7 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
         `}
         params={{}}
         search={{}}
-        to={indexRoute.to}
+        to={"/"}
       >
         <Link as="span">Gå tilbake til forsiden</Link>
       </ReactRouterLink>
@@ -126,7 +125,7 @@ function InformationText({ ressurs }: { ressurs: Ressurs }) {
 
 function Unit4Link() {
   const { navident, ansettelsesType } = useSearch({
-    from: createRessursRoute.fullPath,
+    from: "/ressurs/create/$step",
   });
 
   const navidentWithoutFirstLetter = navident?.slice(1);

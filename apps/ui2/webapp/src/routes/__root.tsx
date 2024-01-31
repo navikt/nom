@@ -1,0 +1,61 @@
+import { css } from "@emotion/react";
+import { QueryClient } from "@tanstack/react-query";
+import {
+  createRootRouteWithContext,
+  Outlet,
+  ScrollRestoration,
+} from "@tanstack/react-router";
+import React from "react";
+
+import { useHasAdminAccess } from "~/api/useGetSession";
+import { Footer, footerHeight } from "~/components/Footer";
+import { headerHeight, NavHeader } from "~/components/NavHeader";
+import PilotBanner, { pilotBannerHeight } from "~/components/PilotBanner";
+import { PrefetchUsefulAdminQueries } from "~/components/PrefetchUsefulQueries";
+
+export const queryClient = new QueryClient();
+
+const TanStackRouterDevtools =
+  process.env.NODE_ENV === "production"
+    ? () => null // Render nothing in production
+    : React.lazy(() =>
+        // Lazy load in development
+        import("@tanstack/router-devtools").then((response) => ({
+          default: response.TanStackRouterDevtools,
+        })),
+      );
+
+export const Route = createRootRouteWithContext<{
+  queryClient: typeof queryClient;
+}>()({
+  component: () => {
+    const hasAdminAccess = useHasAdminAccess();
+
+    return (
+      <>
+        {hasAdminAccess && <PrefetchUsefulAdminQueries />}
+        <React.Suspense fallback="">
+          <TanStackRouterDevtools position="bottom-right" />
+        </React.Suspense>
+        <ScrollRestoration />
+        <NavHeader />
+        <PilotBanner />
+        <div
+          css={css`
+            background-color: var(--a-gray-100);
+            min-height: calc(
+              100vh - ${headerHeight} - ${pilotBannerHeight} - ${footerHeight}
+            );
+            width: 100%;
+            display: flex;
+          `}
+        >
+          <div css={css({ width: "100%" })}>
+            <Outlet />
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  },
+});

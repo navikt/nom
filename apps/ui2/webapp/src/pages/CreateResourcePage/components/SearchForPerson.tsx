@@ -2,10 +2,8 @@ import { Search } from "@navikt/ds-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Controller, useForm } from "react-hook-form";
 
-import { createRessursRoute } from "~/reactRouterRoutes";
-
 export function SearchForPerson() {
-  const { personident } = useSearch({ from: createRessursRoute.fullPath });
+  const { personident } = useSearch({ from: "/ressurs/create/$step" });
   const { handleSubmit, control, reset } = useForm({
     defaultValues: {
       personident: personident,

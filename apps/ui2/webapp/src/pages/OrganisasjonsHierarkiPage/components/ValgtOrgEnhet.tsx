@@ -8,7 +8,6 @@ import React from "react";
 import { getRessurserForOrgenhet } from "~/api/react-query-endpoints";
 import { UserImage } from "~/components/UserImage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
-import { ressursRoute } from "~/reactRouterRoutes";
 import building from "~/resources/building.svg";
 import type { OrgEnhet } from "~/types/api-models";
 import { NomNivaa, OrgEnhetsType, Sektor } from "~/types/api-models";
@@ -233,11 +232,7 @@ function OrgenhetLederLink({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   return (
     <span>
       Leder:{" "}
-      <ReactRouterLink
-        params={{ id: navident }}
-        search={{}}
-        to={ressursRoute.to}
-      >
+      <ReactRouterLink params={{ id: navident }} search={{}} to="/ressurs/$id">
         <Link as="span">{formatVisningsnavn(visningsnavn)}</Link>
       </ReactRouterLink>
     </span>

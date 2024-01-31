@@ -12,7 +12,6 @@ import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/componen
 import { FolkeregisterPersonInfo } from "~/pages/CreateResourcePage/components/FolkeregisterPersonInfo";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
 import { SearchForPerson } from "~/pages/CreateResourcePage/components/SearchForPerson";
-import { createRessursRoute, ressursRoute } from "~/reactRouterRoutes";
 import { fullwidthRow } from "~/resources/NomStyles";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import type { FolkeregisterPerson, Person } from "~/types/api-models";
@@ -20,7 +19,7 @@ import { capitalizeName } from "~/utils";
 
 export function PersonopplysningerStep() {
   const { personident } = useSearch({
-    from: createRessursRoute.fullPath,
+    from: "/ressurs/create/$step",
   });
 
   return (
@@ -71,7 +70,7 @@ function CreateResourceForm({ personident }: { personident: string }) {
         params={{ id: person.navident }}
         replace
         search={{ alreadyExists: true }}
-        to={ressursRoute.to}
+        to="/ressurs/$id"
       />
     );
   }
@@ -95,9 +94,9 @@ function VisningsnavnForm({
 }: {
   folkeregisterPerson: FolkeregisterPerson;
 }) {
-  const navigate = useNavigate({ from: createRessursRoute.fullPath });
+  const navigate = useNavigate({ from: "/ressurs/create/$step" });
   const { visningsfornavn, visningsmellomnavn, visningsetternavn } = useSearch({
-    from: createRessursRoute.fullPath,
+    from: "/ressurs/create/$step",
   });
 
   const methods = useForm({
@@ -126,7 +125,7 @@ function VisningsnavnForm({
       <form
         onSubmit={handleSubmit((values) =>
           navigate({
-            to: createRessursRoute.id,
+            to: "/ressurs/create/$step",
             params: { step: "3" },
             search: (oldSearch) => ({ ...oldSearch, ...values }),
           }),

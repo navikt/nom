@@ -15,7 +15,6 @@ import {
   SektorNameMapping,
   TilknytningtypeNameMapping,
 } from "~/pages/CreateResourcePage/SektorStep";
-import { createRessursRoute } from "~/reactRouterRoutes";
 import type {
   OpprettRessursRequest,
   OpprettRessursResponse,
@@ -23,7 +22,7 @@ import type {
 import { DATE_FORMATS, formatVisningsnavn } from "~/utils";
 
 export function ConfirmStep() {
-  const navigate = useNavigate({ from: createRessursRoute.fullPath });
+  const navigate = useNavigate({ from: "/ressurs/create/$step" });
   const {
     personident,
     visningsfornavn,
@@ -36,7 +35,7 @@ export function ConfirmStep() {
     orgEnhetId,
     fysiskBrukerstedNr,
     tilknytningtype,
-  } = useSearch({ from: createRessursRoute.fullPath });
+  } = useSearch({ from: "/ressurs/create/$step" });
 
   const formattedName = [visningsfornavn, visningsmellomnavn, visningsetternavn]
     .filter((navn) => !!navn)
@@ -57,7 +56,7 @@ export function ConfirmStep() {
 
   const onClose = () =>
     navigate({
-      to: createRessursRoute.to,
+      to: "/ressurs/create/$step",
       params: { step: "3" },
       search: (oldSearch) => oldSearch,
     });
@@ -88,7 +87,7 @@ export function ConfirmStep() {
     onSuccess: (opprettRessursResponse) => {
       // Because ansettelsesType is not yet persisted in NOM we must retrieve it from the form.
       navigate({
-        to: createRessursRoute.id,
+        to: "/ressurs/create/$step",
         search: (old) => ({
           ...old,
           navident: opprettRessursResponse.data.navident,

@@ -22,13 +22,12 @@ import { PageBanner } from "~/components/PageBanner";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { RessursCard } from "~/pages/ResourcePage/RessursComponents/RessursCard";
-import { ressursRoute, terminateRessursRoute } from "~/reactRouterRoutes";
 import fjernRessursIcon from "~/resources/fjernRessursIcon.svg";
 import type { AvvikleRessursRequest } from "~/types/api-models";
 import { formatDateWithoutTimezone } from "~/utils";
 
 export function TerminateResourcePage() {
-  const { id } = useParams({ from: terminateRessursRoute.fullPath });
+  const { id } = useParams({ from: "/ressurs/$id/terminate" });
   const navigate = useNavigate();
 
   const ressurs = useQuery({
@@ -71,7 +70,7 @@ export function TerminateResourcePage() {
     },
     onSuccess: () => {
       showToast({ text: "Avsluttet" });
-      navigate({ params: { id }, to: ressursRoute.id });
+      navigate({ params: { id }, to: "/ressurs/$id" });
     },
   });
 
@@ -140,7 +139,7 @@ export function TerminateResourcePage() {
               >
                 <Button
                   onClick={() =>
-                    navigate({ params: { id }, to: ressursRoute.id })
+                    navigate({ params: { id }, to: "/ressurs/$id" })
                   }
                   size="small"
                   type="button"

@@ -10,7 +10,6 @@ import {
   OverEnheterDivider,
   VerticalEdge,
 } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
-import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
 import building from "~/resources/building.svg";
 import type { OrgEnhet, Ressurs } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
@@ -103,7 +102,7 @@ function CompactOrgEnhet({
         <ReactRouterLink
           params={{ id: orgEnhet.id }}
           search={{}}
-          to={orgRoute.to}
+          to={"/org/$id"}
         >
           <Link as={Heading} level="3" size="small">
             {orgEnhet.navn}
@@ -112,7 +111,7 @@ function CompactOrgEnhet({
         <ReactRouterLink
           params={{ id: orgEnhet.ledere[0]?.navident }}
           search={{}}
-          to={ressursRoute.to}
+          to="/ressurs/$id"
         >
           <Link as="span">
             Leder: {formatVisningsnavn(orgEnhet.ledere[0]?.visningsnavn)}

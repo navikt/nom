@@ -38,11 +38,6 @@ import {
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
 import { OrgEnhetSearch } from "~/pages/AdminPage/components/OrgEnhetSearch";
-import {
-  orgRoute,
-  ressurserAdminRoute,
-  ressursRoute,
-} from "~/reactRouterRoutes";
 import { Sektor } from "~/types/api-models";
 import { formatDateWithoutTimezone, isGyldighetsPeriodeActive } from "~/utils";
 
@@ -52,7 +47,7 @@ export function RessurserAdminPage() {
     direction: "ascending",
   });
 
-  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.fullPath });
+  const ressursFilterValues = useSearch({ from: "/admin/ressurser" });
   // Using react query instead of apollo because it runs  more smoothly
   const alleRessurser = useQuery<RessursFields[], unknown>({
     ...getAlleRessurserGraphql,
@@ -279,7 +274,7 @@ function OrgEnhetLink({
   orgenhet?: { id: string; navn: string };
 }) {
   return orgenhet ? (
-    <ReactRouterLink params={{ id: orgenhet.id }} to={orgRoute.to}>
+    <ReactRouterLink params={{ id: orgenhet.id }} to="/org/$id">
       {orgenhet.navn}
     </ReactRouterLink>
   ) : undefined;
@@ -335,7 +330,7 @@ function RessursLink({
   ressurs?: { navident: string; visningsnavn: string };
 }) {
   return ressurs ? (
-    <ReactRouterLink params={{ id: ressurs.navident }} to={ressursRoute.to}>
+    <ReactRouterLink params={{ id: ressurs.navident }} to="/ressurs/$id">
       {`${ressurs.visningsnavn} (${ressurs.navident})`}
     </ReactRouterLink>
   ) : undefined;
@@ -383,7 +378,7 @@ function Pluralize({
 }
 
 function RessursFilter() {
-  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.fullPath });
+  const ressursFilterValues = useSearch({ from: "/admin/ressurser" });
   const navigate = useNavigate();
 
   return (
@@ -423,7 +418,7 @@ function DateSelect({
   label: string;
   filterKey: "startDato" | "sluttDato";
 }) {
-  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.fullPath });
+  const ressursFilterValues = useSearch({ from: "/admin/ressurser" });
   const navigate = useNavigate();
 
   const defaultValue = ressursFilterValues[filterKey] as string;
@@ -453,7 +448,7 @@ function DateSelect({
 }
 
 function SektorSelect() {
-  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.fullPath });
+  const ressursFilterValues = useSearch({ from: "/admin/ressurser" });
   const navigate = useNavigate();
 
   const options = Object.entries(Sektor).map((entry) => ({
@@ -487,7 +482,7 @@ function SektorSelect() {
 
 function FilterChips() {
   const navigate = useNavigate();
-  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.fullPath });
+  const ressursFilterValues = useSearch({ from: "/admin/ressurser" });
   return (
     <Chips>
       {Object.entries(ressursFilterValues).map((entry) => {

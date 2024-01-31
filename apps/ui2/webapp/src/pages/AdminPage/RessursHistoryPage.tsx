@@ -8,7 +8,6 @@ import {
   getRessursEvents,
 } from "~/api/react-query-endpoints";
 import { JsonModal } from "~/pages/AdminPage/components/JsonModal";
-import { ressursRoute } from "~/reactRouterRoutes";
 import { formatDisplayDatetime, formatVisningsnavn } from "~/utils";
 
 export function RessursHistoryPage() {
@@ -55,7 +54,7 @@ export function RessursHistoryPage() {
                 <Table.DataCell>
                   <Link
                     params={{ id: ressursEvent.additionalData?.navident }}
-                    to={ressursRoute.id}
+                    to="/ressurs/$id"
                   >
                     {ressursEvent.additionalData?.navident}
                   </Link>

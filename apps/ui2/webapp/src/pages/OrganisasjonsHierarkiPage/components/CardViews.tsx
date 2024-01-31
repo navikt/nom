@@ -9,7 +9,6 @@ import React, { useEffect, useRef } from "react";
 import { getOrgEnhet, getRessurs } from "~/api/react-query-endpoints";
 import { UserImage } from "~/components/UserImage";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
-import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
 import building from "~/resources/building.svg";
 import { formatVisningsnavn } from "~/utils";
 
@@ -42,7 +41,7 @@ export function OrgEnhetView({
       `}
       params={{ id: orgEnhetId }}
       ref={reference}
-      to={orgRoute.to}
+      to="/org/$id"
     >
       <UnitContainerLink>
         <VerticalEdge size="large">
@@ -91,7 +90,7 @@ export function ResourceLink({ navident }: { navident: string }) {
         }
       `}
       params={{ id: ressurs.navident }}
-      to={ressursRoute.to}
+      to="/ressurs/$id"
     >
       <UnitContainerLink>
         <UserImage

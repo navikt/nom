@@ -10,14 +10,13 @@ import { OrganisasjonstilknytningStep } from "~/pages/CreateResourcePage/Organis
 import { PersonopplysningerStep } from "~/pages/CreateResourcePage/PersonopplysningerStep";
 import { SektorStep } from "~/pages/CreateResourcePage/SektorStep";
 import { SummaryStep } from "~/pages/CreateResourcePage/SummaryStep";
-import { createRessursRoute } from "~/reactRouterRoutes";
 import { Tilknytningtype } from "~/types/api-models";
 import { AnsettelsesType, Sektor } from "~/types/api-models";
 
 import ContentWrapper from "../../components/ContentWrapper";
 
 export function CreateRessursPage() {
-  const { step } = useParams({ from: createRessursRoute.fullPath });
+  const { step } = useParams({ from: "/ressurs/create/$step" });
 
   const stepIdAsNumber = Number(step);
 

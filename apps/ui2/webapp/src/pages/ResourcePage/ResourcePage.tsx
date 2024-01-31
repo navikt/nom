@@ -7,14 +7,13 @@ import React from "react";
 import { getRessurs } from "~/api/react-query-endpoints";
 import { DetailedRessurs } from "~/pages/ResourcePage/RessursComponents/DetailedRessurs";
 import { RessursCard } from "~/pages/ResourcePage/RessursComponents/RessursCard";
-import { ressursRoute } from "~/reactRouterRoutes";
 import { isBeforePresent } from "~/utils";
 
 import ContentWrapper from "../../components/ContentWrapper";
 
 export const ResourcePage = () => {
-  const { id } = useParams({ from: ressursRoute.fullPath });
-  const { alreadyExists } = useSearch({ from: ressursRoute.fullPath });
+  const { id } = useParams({ from: "/ressurs/$id" });
+  const { alreadyExists } = useSearch({ from: "/ressurs/$id" });
 
   const ressursQuery = useQuery({
     queryKey: getRessurs.queryKey(id),

@@ -32,14 +32,13 @@ import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
 import { AnsettelsesTypeNameMapping } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
-import { createRessursRoute } from "~/reactRouterRoutes";
 import { defaultFormStyle, fullwidthRow } from "~/resources/NomStyles";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import { AnsettelsesType, Sektor } from "~/types/api-models";
 import { formatDateWithoutTimezone } from "~/utils";
 
 export function OrganisasjonstilknytningStep() {
-  const { sektor } = useSearch({ from: createRessursRoute.fullPath });
+  const { sektor } = useSearch({ from: "/ressurs/create/$step" });
   return (
     <ContainerWithHighlightedTop
       icon={opprettRessursIcon}
@@ -55,9 +54,9 @@ export function OrganisasjonstilknytningStep() {
 }
 
 function CreateStatligRessurs() {
-  const navigate = useNavigate({ from: createRessursRoute.fullPath });
+  const navigate = useNavigate({ from: "/ressurs/create/$step" });
   const { ansettelsesType, orgEnhetId, gyldigFom } = useSearch({
-    from: createRessursRoute.fullPath,
+    from: "/ressurs/create/$step",
   });
   const methods = useForm({
     defaultValues: {
@@ -93,7 +92,7 @@ function CreateStatligRessurs() {
         css={defaultFormStyle}
         onSubmit={handleSubmit((values) =>
           navigate({
-            to: createRessursRoute.id,
+            to: "/ressurs/create/$step",
             params: { step: "9" },
             search: (oldSearch) => ({ ...oldSearch, ...values }),
           }),
@@ -157,9 +156,9 @@ export const eksternValidationSchema = eksternPeriodeValidationSchema.concat(
 );
 
 function CreateEksternRessurs() {
-  const navigate = useNavigate({ from: createRessursRoute.fullPath });
+  const navigate = useNavigate({ from: "/ressurs/create/$step" });
   const { orgEnhetId, gyldigFom, gyldigTom, fysiskBrukerstedNr } = useSearch({
-    from: createRessursRoute.fullPath,
+    from: "/ressurs/create/$step",
   });
 
   const methods = useForm({
@@ -188,7 +187,7 @@ function CreateEksternRessurs() {
         css={defaultFormStyle}
         onSubmit={handleSubmit((values) =>
           navigate({
-            to: createRessursRoute.id,
+            to: "/ressurs/create/$step",
             params: { step: "9" },
             search: (oldSearch) => ({ ...oldSearch, ...values }),
           }),

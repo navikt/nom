@@ -44,11 +44,6 @@ import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrap
 import { EditFysiskeBrukerstederForm } from "~/pages/ResourcePage/EditForms/EditFysiskeBrukerstederForm";
 import { EditNameForm } from "~/pages/ResourcePage/EditForms/EditNameForm";
 import { EditOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/EditOrgtilknytningForm";
-import {
-  orgRoute,
-  ressursRoute,
-  terminateRessursRoute,
-} from "~/reactRouterRoutes";
 import { blueTopBorder } from "~/resources/NomStyles";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 import {
@@ -113,7 +108,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
 
   const orgtilknytninger = orgtilknytningerQuery.data ?? [];
 
-  const { editOrgtilknytning } = useSearch({ from: ressursRoute.fullPath });
+  const { editOrgtilknytning } = useSearch({ from: "/ressurs/$id" });
 
   if (orgtilknytninger.length === 0) {
     return <></>;
@@ -186,7 +181,7 @@ function FutureOrgTilknytninger({
   futureOrgTilknytninger: OrgtilknytningState[];
   ressurs: Ressurs;
 }) {
-  const { editOrgtilknytning } = useSearch({ from: ressursRoute.fullPath });
+  const { editOrgtilknytning } = useSearch({ from: "/ressurs/$id" });
 
   if (futureOrgTilknytninger.length === 0) {
     return <></>;
@@ -439,7 +434,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
             key={orgEnhet.id}
             params={{ id: orgEnhet.id }}
             search={{}}
-            to={orgRoute.to}
+            to={"/org/$id"}
           >
             <Link as="span">{orgEnhet.navn}</Link>
           </ReactRouterLink>
@@ -450,7 +445,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
 }
 
 function Name({ ressurs }: { ressurs: Ressurs }) {
-  const { editPersonopplysninger } = useSearch({ from: ressursRoute.fullPath });
+  const { editPersonopplysninger } = useSearch({ from: "/ressurs/$id" });
 
   if (editPersonopplysninger) {
     return <EditNameForm ressurs={ressurs} />;
@@ -471,7 +466,7 @@ function Name({ ressurs }: { ressurs: Ressurs }) {
 function Telephone({ ressurs }: { ressurs: Ressurs }) {
   // TODO: Edit telephone is not implemented in backend yet
   /*
-   const { edit } = useSearch({ from: ressursRoute.fullPath });
+   const { edit } = useSearch({ from: "/ressurs/$id" });
 
    if (edit) {
      return (
@@ -554,7 +549,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
                 <ReactRouterLink
                   params={{ id: dagligLeder.navident }}
                   search={{}}
-                  to={ressursRoute.to}
+                  to="/ressurs/$id"
                 >
                   <Link as="span">
                     {formatVisningsnavn(dagligLeder.visningsnavn)}
@@ -614,7 +609,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
 }
 
 function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {
-  const { editPersonopplysninger } = useSearch({ from: ressursRoute.fullPath });
+  const { editPersonopplysninger } = useSearch({ from: "/ressurs/$id" });
   const fysiskBrukersted = useFysiskBrukersted(ressurs.primaryFysiskBrukersted);
 
   if (editPersonopplysninger) {
@@ -682,7 +677,7 @@ function TerminateButton({ ressurs }: { ressurs: Ressurs }) {
         `}
         params={{ id: ressurs.navident }}
         search={{}}
-        to={terminateRessursRoute.id}
+        to="/ressurs/$id/terminate"
       >
         <Button
           css={css`

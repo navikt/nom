@@ -11,15 +11,14 @@ import {
   AsyncSearch,
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
-import { ressurserAdminRoute } from "~/reactRouterRoutes";
 
 const SEARCH_TERM_LOWER_LENGTH_LIMIT = 3;
 export function OrgEnhetSearch() {
-  const search = useSearch({ from: ressurserAdminRoute.fullPath });
+  const search = useSearch({ from: "/admin/ressurser" });
   const [selectedOrgEnhet, setSelectedOrgEnhet] = useState<
     OrgEnhetSearchResult | undefined
   >();
-  const navigate = useNavigate({ from: ressurserAdminRoute.fullPath });
+  const navigate = useNavigate({ from: "/admin/ressurser" });
 
   const includeUnderliggendeOrgEnheter = search.includeUnderliggendeOrgEnheter;
 

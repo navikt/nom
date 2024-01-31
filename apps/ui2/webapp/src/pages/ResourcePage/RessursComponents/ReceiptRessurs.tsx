@@ -10,7 +10,6 @@ import { LabelWithValue } from "~/components/LabelWithValue";
 import { UserImage } from "~/components/UserImage";
 import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
-import { ressursRoute } from "~/reactRouterRoutes";
 import { blueTopBorder } from "~/resources/NomStyles";
 import type { Ressurs } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
@@ -77,7 +76,7 @@ export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
               <ReactRouterLink
                 params={{ id: leder.navident }}
                 search={{}}
-                to={ressursRoute.to}
+                to="/ressurs/$id"
               >
                 <Link as="span">{formatVisningsnavn(leder.visningsnavn)}</Link>
               </ReactRouterLink>

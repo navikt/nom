@@ -13,12 +13,6 @@ import {
   useHasAdminAccess,
   useHasWriteAccess,
 } from "~/api/useGetSession";
-import {
-  createRessursRoute,
-  indexRoute,
-  orgEnheterAdminRoute,
-  ressursRoute,
-} from "~/reactRouterRoutes";
 import hierarchyFilled from "~/resources/hierarchyFilled.svg";
 
 export function BurgerMenu() {
@@ -48,16 +42,14 @@ export function BurgerMenu() {
         `}
       >
         <Dropdown.Menu.List>
-          <Dropdown.Menu.List.Item
-            onClick={() => navigate({ to: indexRoute.to })}
-          >
+          <Dropdown.Menu.List.Item onClick={() => navigate({ to: "/" })}>
             <img alt="hierarki" src={hierarchyFilled} />
             <span>Organisasjonshierarki</span>
           </Dropdown.Menu.List.Item>
           <Dropdown.Menu.List.Item
             onClick={() =>
               navigate({
-                to: ressursRoute.to,
+                to: "/ressurs/$id",
                 params: { id: session.data?.navident ?? "" },
               })
             }
@@ -68,7 +60,7 @@ export function BurgerMenu() {
           {hasWriteAccess && (
             <Dropdown.Menu.List.Item
               onClick={() =>
-                navigate({ to: createRessursRoute.to, params: { step: "1" } })
+                navigate({ to: "/ressurs/create/$step", params: { step: "1" } })
               }
             >
               <PersonPlusFillIcon color="black" fontSize="24px" />
@@ -77,7 +69,7 @@ export function BurgerMenu() {
           )}
           {hasAdminAccess && (
             <Dropdown.Menu.List.Item
-              onClick={() => navigate({ to: orgEnheterAdminRoute.to })}
+              onClick={() => navigate({ to: "/admin/orgenheter" })}
             >
               <TokenFillIcon color="black" fontSize="24px" />
               <span>Admin</span>

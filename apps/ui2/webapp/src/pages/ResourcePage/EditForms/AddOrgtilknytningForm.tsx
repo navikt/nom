@@ -21,7 +21,6 @@ import {
 } from "~/pages/CreateResourcePage/OrganisasjonstilknytningStep";
 import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
 import { SaveOrAbortButtons } from "~/pages/ResourcePage/EditForms/SaveOrAbortButtons";
-import { ressursRoute } from "~/reactRouterRoutes";
 import { defaultFormStyle } from "~/resources/NomStyles";
 import type { LeggTilOrgtilknytningRequest, Ressurs } from "~/types/api-models";
 import type { StandardResponse } from "~/types/api-models";
@@ -30,7 +29,7 @@ import { formatDateWithoutTimezone } from "~/utils";
 export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { addOrgtilknytning } = useSearch({ from: ressursRoute.fullPath });
+  const { addOrgtilknytning } = useSearch({ from: "/ressurs/$id" });
 
   const methods = useForm({
     defaultValues: {
