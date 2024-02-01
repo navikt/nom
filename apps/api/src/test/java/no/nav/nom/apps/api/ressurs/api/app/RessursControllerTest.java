@@ -20,6 +20,7 @@ import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -69,6 +70,42 @@ public class RessursControllerTest extends RestTestBase {
     @BeforeEach
     void enableFeatureFlag(){
         when(unleash.isEnabled(UNLEASH_EDIT_RESSURS)).thenReturn(true);
+    }
+
+    @Test
+    @DisplayName("Should get ressurser that satisfies filter values")
+    void test_getRessurser() {
+
+        var sluttDatoFilterValue = LocalDate.now();
+        var sektorFilterValue = Sektor.EKSTERN;
+
+        when(ressursStateRepository.getAll()).thenReturn(List.of(
+            ressursState().toBuilder()
+                .sluttdato(Optional.of(sluttDatoFilterValue))
+                .sektor(sektorFilterValue).build(),
+            ressursState(),
+            ressursState()
+        ));
+
+        var ressurser = webTestClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/ressurser")
+                .queryParam("sektor", Sektor.EKSTERN)
+                .queryParam("sluttdato", LocalDate.now())
+                .build()
+            )
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomWriteUserToken()))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBodyList(RessursState.class)
+            .returnResult().getResponseBody();
+
+        assertThat(ressurser)
+            .hasSize(1)
+            .allMatch(ressursState -> ressursState.sektor().equals(sektorFilterValue))
+            .allMatch(ressursState -> ressursState.sluttdato().equals(Optional.of(sluttDatoFilterValue)));
+
+
     }
 
     @ParameterizedTest(name = "Skal ikke opprette ressurs i sektor {0}")

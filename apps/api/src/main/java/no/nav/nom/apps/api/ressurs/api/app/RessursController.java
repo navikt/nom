@@ -55,6 +55,19 @@ public class RessursController {
         this.unleash = unleash;
     }
 
+    @GetMapping
+    @Operation(
+        description = "Henter ressurser",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Ressurs"),
+    })
+    public ResponseEntity<List<Ressurs>> getRessurser(RessursFilter ressursFilter) {
+
+        return ResponseEntity.ok(ressursRestService.findRessurser(ressursFilter));
+    }
+
     @PostMapping
     @Operation(
         description = "Oppretter ressurs eller returnerer det som allerede eksisterer",

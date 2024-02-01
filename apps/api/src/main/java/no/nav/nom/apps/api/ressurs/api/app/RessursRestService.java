@@ -101,6 +101,14 @@ public class RessursRestService {
         this.nomMastered = nomMastered;
     }
 
+    public List<Ressurs> findRessurser(RessursFilter ressursFilter) {
+        return ressursStateRepository.getAll().stream()
+            .filter(ressursState -> (ressursFilter.sektor().isEmpty() || ressursState.sektor().equals(ressursFilter.sektor().get()))
+                && (ressursFilter.sluttdato().isEmpty() || ressursState.sluttdato().equals(ressursFilter.sluttdato())))
+            .map(ressursState -> obfuscatePersonidentAndEnrichRessursStateWithDvhData(ressursState, true))
+            .toList();
+    }
+
     public Ressurs findRessursByNavident(String navident, Boolean obfuscatePersonident) {
         var ressursState = findRessursStateByNavident(navident);
         return obfuscatePersonidentAndEnrichRessursStateWithDvhData(ressursState, obfuscatePersonident);
