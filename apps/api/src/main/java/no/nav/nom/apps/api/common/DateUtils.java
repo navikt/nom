@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.common;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -24,5 +25,19 @@ public class DateUtils {
                 throw new IllegalArgumentException("Sluttdato kan ikke være før startdato");
             }
         }
+    }
+
+    public static LocalDate nextWorkingDay() {
+        LocalDate today = LocalDate.now();
+
+        if(today.getDayOfWeek() == DayOfWeek.FRIDAY) {
+            return today.plusDays(3);
+        }
+
+        if(today.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            return today.plusDays(2);
+        }
+
+        return today.plusDays(1);
     }
 }

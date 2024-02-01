@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.api.app;
 
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOverlapException;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
@@ -241,30 +242,33 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @DisplayName("Should ensure no overlapping period for daglig oppfolging when updating period")
     void test_no_overlapping_periode_for_daglig_oppfolging_on_update_date() {
         var navident = "Y654321";
-        var orgEnhet = orgEnhetState();
-
-        var existingDagligOppfolgingWithConflictingPeriod = orgtilknytningState().toBuilder()
-            .navident(navident)
-            .orgEnhetId("some-other-orgenhet")
-            .erDagligOppfolging(true)
-            .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.empty())
-            .build();
-
-        var dagligOppfolgingToChange = orgtilknytningState().toBuilder()
-            .navident(navident)
-            .erDagligOppfolging(true)
-            .orgEnhetId(orgEnhet.id()).build();
-
-        saveOrgtilknytninger(List.of(existingDagligOppfolgingWithConflictingPeriod, dagligOppfolgingToChange));
         saveRessurser(List.of(
             ressursState().toBuilder()
                 .navident(navident)
                 .sektor(Sektor.EKSTERN)
                 .build()
         ));
-        saveOrgenheter(List.of(orgEnhet));
 
+
+        var orgEnhetForDagligOppfolgingToChange = orgEnhetState();
+        var orgEnhetForDagligOppfolgingWithConflictingPeriod = orgEnhetState().toBuilder()
+            .id("some-other-orgenhet")
+            .navn("En org i NAV")
+            .build();
+        saveOrgenheter(List.of(orgEnhetForDagligOppfolgingToChange, orgEnhetForDagligOppfolgingWithConflictingPeriod));
+
+        var dagligOppfolgingWithConflictingPeriod = orgtilknytningState().toBuilder()
+            .navident(navident)
+            .orgEnhetId(orgEnhetForDagligOppfolgingWithConflictingPeriod.id())
+            .erDagligOppfolging(true)
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.empty())
+            .build();
+        var dagligOppfolgingToChange = orgtilknytningState().toBuilder()
+            .navident(navident)
+            .erDagligOppfolging(true)
+            .orgEnhetId(orgEnhetForDagligOppfolgingToChange.id()).build();
+        saveOrgtilknytninger(List.of(dagligOppfolgingWithConflictingPeriod, dagligOppfolgingToChange));
 
         var endreOrgtilknytningDatoRequest = EndreOrgtilknytningDatoRequest.builder()
             .gyldigFom(LocalDate.now().plusMonths(1))
@@ -286,7 +290,11 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .expectStatus().isEqualTo(HttpStatus.CONFLICT)
             .expectBody()
             .jsonPath("message")
-            .isEqualTo("Det finnes allerede en daglig oppfølging orgtilknytning innenfor forespurt periode");
+            .isEqualTo(OrgtilknytningPeriodeOverlapException.forDagligOppfolgingInPeriod(
+                orgEnhetForDagligOppfolgingWithConflictingPeriod.navn(),
+                dagligOppfolgingWithConflictingPeriod.gyldigFom(),
+                dagligOppfolgingWithConflictingPeriod.gyldigTom()
+            ).getMessage());
 
         verify(
             orgtilknytningCommandService,
@@ -711,17 +719,17 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @DisplayName("Should ensure no overlapping period for daglig oppfolging")
     void test_no_overlapping_daglig_oppfolging() {
         var navident = "Y654321";
-        var orgEnhet = orgEnhetState();
+        var orgEnhetForExistingDagligOppfolging = orgEnhetState();
 
-        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+        var existingDagligOppfolging = orgtilknytningState().toBuilder()
             .navident(navident)
-            .orgEnhetId(orgEnhet.id())
+            .orgEnhetId(orgEnhetForExistingDagligOppfolging.id())
             .gyldigFom(LocalDate.now())
             .gyldigTom(Optional.empty())
             .erDagligOppfolging(true)
             .build();
 
-        saveOrgtilknytninger(List.of(existingOrgtilknytning));
+        saveOrgtilknytninger(List.of(existingDagligOppfolging));
         saveRessurser(List.of(
             ressursState().toBuilder()
                 .navident(navident)
@@ -738,8 +746,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .build();
 
         saveOrgenheter(List.of(
-            orgEnhet,
-            orgEnhet.toBuilder().id(leggTilOrgtilknytningRequest.orgEnhetId()).build()
+            orgEnhetForExistingDagligOppfolging,
+            orgEnhetForExistingDagligOppfolging.toBuilder().id(leggTilOrgtilknytningRequest.orgEnhetId()).build()
         ));
 
         webTestClient
@@ -754,7 +762,11 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .expectStatus().isEqualTo(HttpStatus.CONFLICT)
             .expectBody()
             .jsonPath("message")
-            .isEqualTo("Det finnes allerede en daglig oppfølging orgtilknytning innenfor forespurt periode");
+            .isEqualTo(OrgtilknytningPeriodeOverlapException.forDagligOppfolgingInPeriod(
+                orgEnhetForExistingDagligOppfolging.navn(),
+                existingDagligOppfolging.gyldigFom(),
+                existingDagligOppfolging.gyldigTom()
+            ).getMessage());
 
         verify(
             orgtilknytningCommandService,
@@ -817,7 +829,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .expectStatus().isEqualTo(HttpStatus.BAD_REQUEST)
             .expectBody()
             .jsonPath("message")
-            .isEqualTo("Siden den nye daglig oppfolging orgtilknytningen vil endre den ansattes remedy enhet kan 'gyldigFom' være maks én dag frem i tid");
+            .isEqualTo("Siden den nye daglig oppfolging orgtilknytningen vil endre den ansattes remedy enhet kan 'gyldigFom' være maks én virkedag frem i tid");
 
         verify(
             orgtilknytningCommandService,

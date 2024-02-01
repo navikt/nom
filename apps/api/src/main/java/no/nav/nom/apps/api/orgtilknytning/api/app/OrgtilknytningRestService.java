@@ -23,6 +23,7 @@ import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +35,7 @@ import java.util.Optional;
 
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodsOverlapping;
+import static no.nav.nom.apps.api.common.DateUtils.nextWorkingDay;
 import static no.nav.nom.apps.api.common.DateUtils.validateChronologicalDates;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
@@ -285,19 +287,6 @@ public class OrgtilknytningRestService {
             .filter(OrgtilknytningState::erDagligOppfolging)
             .toList();
 
-
-        existingDagligOppfolgningTilknytninger.forEach(orgtilknytningState -> {
-            if (isPeriodsOverlapping(
-                orgtilknytningState.gyldigFom(),
-                orgtilknytningState.gyldigTom(),
-                leggTilOrgtilknytningRequest.gyldigFom(),
-                leggTilOrgtilknytningRequest.gyldigTom()
-            )) {
-                throw new OrgtilknytningPeriodeOverlapException("Det finnes allerede en daglig oppfølging orgtilknytning innenfor forespurt periode");
-
-            }
-        });
-
         // https://jira.adeo.no/browse/ORG-1759
         existingDagligOppfolgningTilknytninger.stream()
             .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
@@ -309,14 +298,30 @@ public class OrgtilknytningRestService {
                     .map(RemedyEnhet::remedyEnhetId);
 
                 var newDagligOppfolgningIsActivatedAfterTomorrow = leggTilOrgtilknytningRequest.gyldigFom()
-                    .isAfter(LocalDate.now().plusDays(1));
+                    .isAfter(nextWorkingDay());
 
                 if (!currentRemedyEnhetId.equals(newRemedyEnhetId) && newDagligOppfolgningIsActivatedAfterTomorrow) {
                     throw new InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException(
-                        "Siden den nye daglig oppfolging orgtilknytningen vil endre den ansattes remedy enhet kan 'gyldigFom' være maks én dag frem i tid"
+                        "Siden den nye daglig oppfolging orgtilknytningen vil endre den ansattes remedy enhet kan 'gyldigFom' være maks én virkedag frem i tid"
                     );
                 }
             });
+
+
+        existingDagligOppfolgningTilknytninger.forEach(orgtilknytningState -> {
+            if (isPeriodsOverlapping(
+                orgtilknytningState.gyldigFom(),
+                orgtilknytningState.gyldigTom(),
+                leggTilOrgtilknytningRequest.gyldigFom(),
+                leggTilOrgtilknytningRequest.gyldigTom()
+            )) {
+                throw OrgtilknytningPeriodeOverlapException.forDagligOppfolgingInPeriod(
+                    orgEnhetStateRepository.findById(orgtilknytningState.orgEnhetId()).map(OrgEnhetState::navn).orElse(orgtilknytningState.orgEnhetId()),
+                    orgtilknytningState.gyldigFom(),
+                    orgtilknytningState.gyldigTom()
+                );
+            }
+        });
 
     }
 
@@ -348,7 +353,6 @@ public class OrgtilknytningRestService {
                     endreOrgtilknytningDatoRequest.gyldigTom()
                 )) {
                     throw new OrgtilknytningPeriodeOverlapException("Det finnes allerede en orgtilknytning for samme orgenhet innenfor forespurt periode");
-
                 }
             });
 
@@ -362,8 +366,11 @@ public class OrgtilknytningRestService {
                         endreOrgtilknytningDatoRequest.gyldigFom(),
                         endreOrgtilknytningDatoRequest.gyldigTom()
                     )) {
-                        throw new OrgtilknytningPeriodeOverlapException("Det finnes allerede en daglig oppfølging orgtilknytning innenfor forespurt periode");
-
+                        throw OrgtilknytningPeriodeOverlapException.forDagligOppfolgingInPeriod(
+                            orgEnhetStateRepository.findById(orgtilknytningState.orgEnhetId()).map(OrgEnhetState::navn).orElse(orgtilknytningState.orgEnhetId()),
+                            orgtilknytningState.gyldigFom(),
+                            orgtilknytningState.gyldigTom()
+                        );
                     }
                 });
         }

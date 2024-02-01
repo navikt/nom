@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -35,5 +36,17 @@ class DateUtilsTest {
     @DisplayName("Sluttdato can be null")
     void test_sluttdato_can_be_null() {
         DateUtils.validateChronologicalDates(LocalDate.now(), null);
+    }
+
+    @Test
+    @DisplayName("Neste virkedag fungerer som tiltenkt")
+    void test_nextWorkingDay() {
+        if (LocalDate.now().getDayOfWeek() == DayOfWeek.FRIDAY) {
+            Assertions.assertEquals(LocalDate.now().plusDays(3), DateUtils.nextWorkingDay());
+        } else if (LocalDate.now().getDayOfWeek() == DayOfWeek.SATURDAY) {
+            Assertions.assertEquals(LocalDate.now().plusDays(2), DateUtils.nextWorkingDay());
+        } else {
+            Assertions.assertEquals(LocalDate.now().plusDays(1), DateUtils.nextWorkingDay());
+        }
     }
 }
