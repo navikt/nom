@@ -101,11 +101,14 @@ public class RessursRestService {
         this.nomMastered = nomMastered;
     }
 
-    public List<Ressurs> findRessurser(RessursFilter ressursFilter) {
+    public List<RessursState> findRessurser(RessursFilter ressursFilter) {
         return ressursStateRepository.getAll().stream()
             .filter(ressursState -> (ressursFilter.sektor().isEmpty() || ressursState.sektor().equals(ressursFilter.sektor().get()))
                 && (ressursFilter.sluttdato().isEmpty() || ressursState.sluttdato().equals(ressursFilter.sluttdato())))
-            .map(ressursState -> obfuscatePersonidentAndEnrichRessursStateWithDvhData(ressursState, true))
+            .map(ressursState -> ressursState.toBuilder()
+                .personident(ressursState.personident().replaceFirst(".{5}$", "*****"))
+                .build()
+            )
             .toList();
     }
 

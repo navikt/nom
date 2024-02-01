@@ -63,7 +63,7 @@ public class RessursController {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Ressurs"),
     })
-    public ResponseEntity<List<Ressurs>> getRessurser(RessursFilter ressursFilter) {
+    public ResponseEntity<List<RessursState>> getRessurser(RessursFilter ressursFilter) {
 
         return ResponseEntity.ok(ressursRestService.findRessurser(ressursFilter));
     }
