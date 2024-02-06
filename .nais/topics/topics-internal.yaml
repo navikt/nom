@@ -244,8 +244,6 @@ spec:
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  annotations:
-    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
   name: nom.organisering-eventsource
   namespace: org
   labels:
@@ -277,8 +275,6 @@ spec:
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  annotations:
-    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
   name: nom.intern-organisering-state
   namespace: org
   labels:
