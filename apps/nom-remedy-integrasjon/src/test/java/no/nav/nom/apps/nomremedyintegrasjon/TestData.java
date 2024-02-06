@@ -56,10 +56,10 @@ public class TestData {
         );
     }
 
-    public static RessursSluttetEventV1 ressursSluttetEventV1() {
+    public static RessursSluttetEventV1 ressursSluttetEventV1(LocalDate sluttdato) {
         return new RessursSluttetEventV1(
             UUID.randomUUID().toString(),
-            new RessursSluttetEventV1.RessursSluttetEventData(LocalDate.now()),
+            new RessursSluttetEventV1.RessursSluttetEventData(sluttdato),
             inputMetadata()
         );
     }

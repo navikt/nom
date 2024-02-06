@@ -23,10 +23,12 @@ UNLEASH_SERVER_API_URL: https://unleash.nais.io/api
 UNLEASH_SERVER_API_TOKEN: some-token
 
 azure:
-  issuer-uri: ${mock-oauth2-server.baseUrl}/issuer
+  issuer-uri: ${mock-oauth2-server.baseUrl}/aad
 
 AZURE_APP_CLIENT_ID: nom-remedy-integrasjon
 AZURE_APP_CLIENT_SECRET: nom-remedy-integrasjon-client-secret
 
 NOM_API_URL: http://localhost:${wiremock.server.port}
 NOM_API_SCOPE: api://dev-gcp.nom.nom-api/.default
+
+NOM_ADMIN_GROUP_ID: nom-admin-group # Settet i nais-config i dev og prod profiles

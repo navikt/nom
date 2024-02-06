@@ -1,15 +1,9 @@
 package no.nav.nom.apps.nomremedyintegrasjon.api;
 
-import com.nimbusds.jose.JOSEObjectType;
 import no.nav.nom.apps.nomremedyintegrasjon.TestBase;
-import no.nav.security.mock.oauth2.MockOAuth2Server;
-import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.web.reactive.server.WebTestClient;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyList;
@@ -19,12 +13,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class FysiskBrukerstedControllerTest extends TestBase {
-
-    @Autowired
-    private MockOAuth2Server mockOAuth2Server;
-
-    @Autowired
-    private WebTestClient webTestClient;
 
     private final String apiPath = "/api/fysiskebrukersteder";
 
@@ -41,7 +29,7 @@ public class FysiskBrukerstedControllerTest extends TestBase {
         webTestClient.get()
             .uri(apiPath)
             .headers(httpHeaders -> httpHeaders.setBearerAuth(
-                generateToken("nom-remedy-integrasjon")
+                noScopesUserToken()
             ))
             .exchange()
             .expectStatus().isOk()
@@ -68,7 +56,7 @@ public class FysiskBrukerstedControllerTest extends TestBase {
                 .build()
             )
             .headers(httpHeaders -> httpHeaders.setBearerAuth(
-                generateToken("nom-remedy-integrasjon")
+                noScopesUserToken()
             ))
             .exchange()
             .expectStatus().isOk()
@@ -85,24 +73,10 @@ public class FysiskBrukerstedControllerTest extends TestBase {
         webTestClient.get()
             .uri(apiPath)
             .headers(httpHeaders -> httpHeaders.setBearerAuth(
-                generateToken("invalid-audience")
+                invalidAudienceToken()
             ))
             .exchange()
             .expectStatus().isUnauthorized();
     }
 
-    private String generateToken(String audience) {
-        return mockOAuth2Server.issueToken(
-            "issuer",
-            "clientId",
-            new DefaultOAuth2TokenCallback(
-                "aad",
-                "subjectId",
-                JOSEObjectType.JWT.getType(),
-                List.of(audience),
-                Collections.emptyMap(),
-                3600
-            )
-        ).serialize();
-    }
 }

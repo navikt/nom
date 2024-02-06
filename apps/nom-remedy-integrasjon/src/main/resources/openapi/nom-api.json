@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "https://nom-api.intern.nav.no",
+      "url": "https://nom-api.intern.dev.nav.no",
       "description": "Generated server url"
     }
   ],
@@ -384,6 +384,52 @@
         ]
       }
     },
+    "/app/orgtilknytninger/{fid}/tilknytningtype": {
+      "post": {
+        "description": "Endrer orgtilknytningType for en orgtilknytning",
+        "operationId": "updateOrgtilknytningType",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fid",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndreTilknytningtypeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Orgtilknytning"
+        ]
+      }
+    },
     "/app/person": {
       "post": {
         "description": "Henter person med gitt personident",
@@ -421,6 +467,43 @@
       }
     },
     "/app/ressurser": {
+      "get": {
+        "description": "Henter ressurser",
+        "operationId": "getRessurser",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "ressursFilter",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RessursFilter"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RessursState"
+                  }
+                }
+              }
+            },
+            "description": "Ressurs"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      },
       "post": {
         "description": "Oppretter ressurs eller returnerer det som allerede eksisterer",
         "operationId": "opprettRessurs",
@@ -478,6 +561,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "obfuscatePersonident",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
           }
         ],
         "responses": {
@@ -513,6 +605,15 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "obfuscatePersonident",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
             }
           }
         ],
@@ -814,6 +915,14 @@
           }
         }
       },
+      "EndreTilknytningtypeRequest": {
+        "type": "object",
+        "properties": {
+          "tilknytningtype": {
+            "$ref": "#/components/schemas/Tilknytningtype"
+          }
+        }
+      },
       "FolkeregisterPerson": {
         "required": [
           "navn"
@@ -847,6 +956,9 @@
         ],
         "type": "object",
         "properties": {
+          "erDagligOppfolging": {
+            "type": "boolean"
+          },
           "gyldigFom": {
             "type": "string",
             "format": "date"
@@ -878,6 +990,7 @@
           "personident",
           "sektor",
           "startDato",
+          "tilknytningtype",
           "visningsetternavn",
           "visningsfornavn"
         ],
@@ -905,6 +1018,9 @@
           "startDato": {
             "type": "string",
             "format": "date"
+          },
+          "tilknytningtype": {
+            "$ref": "#/components/schemas/Tilknytningtype"
           },
           "visningsetternavn": {
             "type": "string"
@@ -948,6 +1064,7 @@
         "required": [
           "agressoId",
           "agressoOrgenhetType",
+          "fid",
           "gyldigFom",
           "id",
           "ledere",
@@ -962,6 +1079,9 @@
             "type": "string"
           },
           "agressoOrgenhetType": {
+            "type": "string"
+          },
+          "fid": {
             "type": "string"
           },
           "gyldigFom": {
@@ -1061,6 +1181,9 @@
           },
           "orgEnhetId": {
             "type": "string"
+          },
+          "orgtilknytningType": {
+            "$ref": "#/components/schemas/Tilknytningtype"
           }
         }
       },
@@ -1107,6 +1230,7 @@
         "required": [
           "fid",
           "fysiskeBrukersteder",
+          "isNomMastered",
           "navident",
           "personident",
           "sektor",
@@ -1126,6 +1250,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "isNomMastered": {
+            "type": "boolean"
           },
           "navident": {
             "type": "string"
@@ -1155,6 +1282,18 @@
           },
           "visningsnavn": {
             "$ref": "#/components/schemas/Visningsnavn"
+          }
+        }
+      },
+      "RessursFilter": {
+        "type": "object",
+        "properties": {
+          "sektor": {
+            "$ref": "#/components/schemas/Sektor"
+          },
+          "sluttdato": {
+            "type": "string",
+            "format": "date"
           }
         }
       },
@@ -1316,6 +1455,12 @@
           "NAV_TJENESTE_TELEFON",
           "NAV_KONTOR_TELEFON",
           "PRIVAT_TELEFON"
+        ]
+      },
+      "Tilknytningtype": {
+        "type": "string",
+        "enum": [
+          "KONSULENT"
         ]
       },
       "UpdateFysiskeBrukerstederRequest": {

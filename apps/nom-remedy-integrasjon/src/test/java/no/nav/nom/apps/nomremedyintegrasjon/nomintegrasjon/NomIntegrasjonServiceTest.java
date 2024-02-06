@@ -11,6 +11,7 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.generated.model.OrgEnhet;
 import no.nav.nom.generated.model.OrgtilknytningState;
 import no.nav.nom.generated.model.Ressurs;
+import no.nav.nom.generated.model.RessursState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -139,18 +140,14 @@ public class NomIntegrasjonServiceTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Should create new entry with utlopsdato from RessursSluttetEventV1")
-    void testShoulSetUtlopsdatoFromRessursSluttetEventV1() {
+    @DisplayName("Should mark ressurs for deletion on RessursSluttetEventV1 with past sluttdato")
+    void testShouldDeleteRessursOnRessursSluttetEventV1() {
 
         var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
-        var dagligOppfolgingOrgtilknytning = orgtilknytningState().erDagligOppfolging(true);
-        var dagligOppfolgingOrgenhet = orgenhet();
 
-        var ressursSluttetEventV1 = ressursSluttetEventV1();
+        var ressursSluttetEventV1 = ressursSluttetEventV1(LocalDate.now().minusDays(1));
 
         when(nomApiClient.getRessursByFid(ressursSluttetEventV1.getFid())).thenReturn(existingRessurs);
-        when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(dagligOppfolgingOrgtilknytning));
-        when(nomApiClient.getOrgEnhet(dagligOppfolgingOrgtilknytning.getOrgEnhetId())).thenReturn(dagligOppfolgingOrgenhet);
 
         nomIntegrasjonService.handleRessursEvent(ressursSluttetEventV1);
 
@@ -161,20 +158,29 @@ public class NomIntegrasjonServiceTest extends TestBase {
             .isEqualTo(Optional.of(
                 NomIntegrasjonEntity.builder()
                     .entryId(fifteenCharLengthZeroPaddedNumber(0L))
-                    .entryBestiller(ressursSluttetEventV1.getMetadata().inputMetadata().origination().initiatedBy())
-                    .entryOperasjon("Ny")
-                    .entryStatus("Ubehandlet")
-                    .enhetsId(dagligOppfolgingOrgenhet.getRemedyEnhetId())
-                    .etternavn(capitalizeNavn(existingRessurs.getVisningsnavn().getEtternavn()))
-                    .fodselsnummer(existingRessurs.getPersonident())
-                    .fornavn(capitalizeNavn(formatFornavnWithMellomnavn(existingRessurs.getVisningsnavn())))
-                    .fysiskBrukerstedId(existingRessurs.getPrimaryFysiskBrukersted())
                     .navId(existingRessurs.getNavident())
-                    .sektor(2)
-                    .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
-                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(ressursSluttetEventV1.getRessursSluttetEventData().sluttdato()))
+                    .entryOperasjon("Slette")
+                    .entryStatus("Ubehandlet")
+                    .entryBestiller(ressursSluttetEventV1.getMetadata().inputMetadata().origination().initiatedBy())
                     .build()
             ));
+    }
+
+    @Test
+    @DisplayName("Should NOT mark ressurs for deletion on RessursSluttetEventV1 with future sluttdato")
+    void testShouldNotDeleteRessursOnRessursSluttetEventV1() {
+
+        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+
+        var ressursSluttetEventV1 = ressursSluttetEventV1(LocalDate.now().plusDays(1));
+
+        when(nomApiClient.getRessursByFid(ressursSluttetEventV1.getFid())).thenReturn(existingRessurs);
+
+        nomIntegrasjonService.handleRessursEvent(ressursSluttetEventV1);
+
+        var nomIntegrasjonEntry = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
+
+        assertThat(nomIntegrasjonEntry).isEmpty();
     }
 
     @Test
@@ -247,7 +253,6 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 inputMetadata(),
                 ressursOpprettetAdditionalData()
             )),
-            Arguments.of(ressursSluttetEventV1()),
             Arguments.of(ressursPersonaliaOppdatertV1()),
             Arguments.of(ressursFysiskeBrukerstederOppdatertEventV1())
         );
@@ -495,6 +500,32 @@ public class NomIntegrasjonServiceTest extends TestBase {
             .usingRecursiveComparison()
             .isEqualTo(Optional.of(existingNomIntegrasjonEntity));
 
+    }
+
+    @Test
+    @DisplayName("Should find ressurser with sluttdato and mark for deletion")
+    void testFindRessurserWithSluttdatoAndMarkForDeletion() {
+        var sluttdato = LocalDate.now();
+        var navidentForRessursToDelete = "X12345";
+        var initiatedBy = "initiator";
+
+        when(nomApiClient.getRessurser(no.nav.nom.generated.model.Sektor.EKSTERN, sluttdato))
+            .thenReturn(List.of(
+                new RessursState().navident(navidentForRessursToDelete)
+            ));
+
+        nomIntegrasjonService.findRessurserWithSluttdatoAndMarkForDeletion(sluttdato, initiatedBy);
+
+        assertThat(nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(navidentForRessursToDelete))
+            .contains(
+                NomIntegrasjonEntity.builder()
+                    .entryId(fifteenCharLengthZeroPaddedNumber(0L))
+                    .navId(navidentForRessursToDelete)
+                    .entryOperasjon("Slette")
+                    .entryStatus("Ubehandlet")
+                    .entryBestiller(initiatedBy)
+                    .build()
+            );
     }
 
     @ParameterizedTest(name = "latestId: {0} expectedNextId: {1}")

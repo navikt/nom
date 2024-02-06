@@ -11,5 +11,9 @@ NAIS_APP_NAME: nom-remedy-integrasjon-local
 KAFKA_BROKERS: localhost:39092
 spring.kafka.properties.security.protocol: PLAINTEXT
 
+NOM_ADMIN_GROUP_ID: 9e0e2958-df7a-4376-83f3-9bcbec1f2650
+
+ELECTOR_PATH: Dummy
+
 logging:
   config: classpath:logback-local.xml

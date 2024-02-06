@@ -9,7 +9,6 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 public class NomIntegrasjonListenerTest extends TestBase {
@@ -37,11 +35,6 @@ public class NomIntegrasjonListenerTest extends TestBase {
 
     @Autowired
     private KafkaTemplate<String, OrgtilknytningEvent> orgtilknytningEventKafkaTemplate;
-
-    @BeforeEach
-    void unleashFeaturesEnabled() {
-        when(unleash.isEnabled(any())).thenReturn(true);
-    }
 
     @Test
     @DisplayName("Should handle ressurs events")

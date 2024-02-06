@@ -2,6 +2,7 @@ package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.getunleash.Unleash;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredValueMissingException;
 import no.nav.nom.contract.nom.Sektor;
@@ -15,8 +16,11 @@ import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.generated.model.OrgtilknytningState;
 import no.nav.nom.generated.model.Ressurs;
+import no.nav.nom.generated.model.RessursState;
+import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -38,12 +42,33 @@ public class NomIntegrasjonService {
 
     private final NomApiClient nomApiClient;
 
+    private final LeaderElection leaderElection;
+
+    private final Unleash unleash;
+
     private final ObjectMapper objectMapper;
 
-    public NomIntegrasjonService(NomIntegrasjonRepository nomIntegrasjonRepository, NomApiClient nomApiClient, ObjectMapper objectMapper) {
+
+    public NomIntegrasjonService(
+        NomIntegrasjonRepository nomIntegrasjonRepository, NomApiClient nomApiClient, LeaderElection leaderElection,
+        Unleash unleash,
+        ObjectMapper objectMapper
+    ) {
         this.nomIntegrasjonRepository = nomIntegrasjonRepository;
         this.nomApiClient = nomApiClient;
+        this.leaderElection = leaderElection;
+        this.unleash = unleash;
         this.objectMapper = objectMapper;
+    }
+
+    // Run at 00:15 every night
+    @Scheduled(cron = "0 15 0 * * *")
+    public void findRessurserWithSluttdatoYesterdayAndDeleteThemFromRemedy() {
+        if (leaderElection.isLeader()) {
+            var yesterday = LocalDate.now().minusDays(1);
+            logger.info("Sjekker om det finnes eksterne ressurser som sluttet på dato %s".formatted(yesterday));
+            findRessurserWithSluttdatoAndMarkForDeletion(yesterday, "nom-job");
+        }
     }
 
     public void handleRessursEvent(RessursEvent ressursEvent) {
@@ -64,7 +89,7 @@ public class NomIntegrasjonService {
 
         } else if (ressursEvent instanceof RessursFysiskeBrukerstederOppdatertEventV1 ressursFysiskeBrukerstederOppdatertEventV1
             && isFidEksternRessurs(ressursEvent.getFid())) {
-           updateRessursFysiskeBrukersteder(ressursFysiskeBrukerstederOppdatertEventV1);
+            updateRessursFysiskeBrukersteder(ressursFysiskeBrukerstederOppdatertEventV1);
         }
     }
 
@@ -135,21 +160,44 @@ public class NomIntegrasjonService {
 
         logger.info("Updating remedy data for RessursSluttetEventV1 with fid {}", ressursSluttetEventV1.getFid());
 
-        var ressursState = nomApiClient.getRessursByFid(ressursSluttetEventV1.getFid());
+        var sluttdatoForRessurs = ressursSluttetEventV1.getRessursSluttetEventData().sluttdato();
 
-        var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
+        if (sluttdatoForRessurs.isBefore(LocalDate.now())) {
+            var ressursState = nomApiClient.getRessursByFid(ressursSluttetEventV1.getFid());
 
-        var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
-            .utlopsdato(epochSecondsNorwegianTimeEndOfDay(ressursSluttetEventV1.getRessursSluttetEventData().sluttdato()))
-            .build();
+            markRessursForDeletion(
+                ressursState.getNavident(),
+                ressursSluttetEventV1.getMetadata().inputMetadata().origination().initiatedBy()
+            );
 
-        saveNewNomIntegrasjonEntity(
-            newNomIntegrasjonEntity.toBuilder()
-                .utlopsdato(epochSecondsNorwegianTimeEndOfDay(ressursSluttetEventV1.getRessursSluttetEventData().sluttdato()))
-                .build(),
-            ressursSluttetEventV1.getMetadata().inputMetadata().origination().initiatedBy()
+            logger.info("Deleted ressurs with fid {} and with sluttdato {}", ressursSluttetEventV1.getFid(), sluttdatoForRessurs);
+        }
+    }
+
+
+    public void findRessurserWithSluttdatoAndMarkForDeletion(LocalDate sluttdato, String initiatedBy) {
+
+        if (!unleash.isEnabled("nom-remedy-integrasjon.delete_avsluttede_ressurser")) {
+            return;
+        }
+
+        var ressurserWithSluttdato = nomApiClient.getRessurser(
+            no.nav.nom.generated.model.Sektor.EKSTERN,
+            sluttdato
         );
 
+        var ressurserToDeleteFromRemedy = ressurserWithSluttdato.stream()
+            .filter(ressurs -> nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(ressurs.getNavident())
+                .map(existingNomIntegrasjonEntityForRessurs ->
+                    existingNomIntegrasjonEntityForRessurs.getEntryOperasjon().equals("Slette"))
+                .orElse(true)
+            ).toList();
+
+        ressurserToDeleteFromRemedy.forEach(ressursSomSkalSlettes ->
+            markRessursForDeletion(ressursSomSkalSlettes.getNavident(), initiatedBy)
+        );
+
+        logger.info("Deleted following resssurser from remedy: {}", ressurserToDeleteFromRemedy.stream().map(RessursState::getNavident).toList());
     }
 
     private void createRessurs(RessursOpprettetEventV1 ressursOpprettetEventV1) {
@@ -298,19 +346,31 @@ public class NomIntegrasjonService {
 
     }
 
+    private void markRessursForDeletion(String navident, String initiatedBy) {
+        nomIntegrasjonRepository.save(
+            NomIntegrasjonEntity.builder()
+                .entryId(nextId())
+                .navId(navident)
+                .entryOperasjon("Slette")
+                .entryStatus("Ubehandlet")
+                .entryBestiller(initiatedBy)
+                .build()
+        );
+    }
+
     private boolean nomIntegrasjonEntityProvidesNewDataFromNom(NomIntegrasjonEntity newNomIntegrasjonEntity) {
         return nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(newNomIntegrasjonEntity.getNavId())
             .map(latestEntityForNavident -> !(
                 latestEntityForNavident.getEnhetsId().equals(newNomIntegrasjonEntity.getEnhetsId())
-                && latestEntityForNavident.getEtternavn().equals(newNomIntegrasjonEntity.getEtternavn())
-                && latestEntityForNavident.getFodselsnummer().equals(newNomIntegrasjonEntity.getFodselsnummer())
-                && latestEntityForNavident.getFornavn().equals(newNomIntegrasjonEntity.getFornavn())
-                && latestEntityForNavident.getFysiskBrukerstedId().equals(newNomIntegrasjonEntity.getFysiskBrukerstedId())
-                && latestEntityForNavident.getNavId().equals(newNomIntegrasjonEntity.getNavId())
-                && latestEntityForNavident.getSektor().equals(newNomIntegrasjonEntity.getSektor())
-                && latestEntityForNavident.getTiltredelsesdato().equals(newNomIntegrasjonEntity.getTiltredelsesdato())
-                && latestEntityForNavident.getUtlopsdato().equals(newNomIntegrasjonEntity.getUtlopsdato())
-                ))
+                    && latestEntityForNavident.getEtternavn().equals(newNomIntegrasjonEntity.getEtternavn())
+                    && latestEntityForNavident.getFodselsnummer().equals(newNomIntegrasjonEntity.getFodselsnummer())
+                    && latestEntityForNavident.getFornavn().equals(newNomIntegrasjonEntity.getFornavn())
+                    && latestEntityForNavident.getFysiskBrukerstedId().equals(newNomIntegrasjonEntity.getFysiskBrukerstedId())
+                    && latestEntityForNavident.getNavId().equals(newNomIntegrasjonEntity.getNavId())
+                    && latestEntityForNavident.getSektor().equals(newNomIntegrasjonEntity.getSektor())
+                    && latestEntityForNavident.getTiltredelsesdato().equals(newNomIntegrasjonEntity.getTiltredelsesdato())
+                    && latestEntityForNavident.getUtlopsdato().equals(newNomIntegrasjonEntity.getUtlopsdato())
+            ))
             .orElse(true);
     }
 

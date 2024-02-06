@@ -13,6 +13,7 @@ spec:
   port: 8080
   ingresses:
     - https://nom-remedy-integrasjon.dev-fss-pub.nais.io
+    - https://nom-remedy-integrasjon.intern.dev.nav.no
   env:
     - name: REMEDY_DATASOURCE_URL
       value: jdbc:oracle:thin:@//a01dbfl042.adeo.no:1521/remedy_q2
@@ -20,6 +21,8 @@ spec:
       value: https://nom-api.intern.dev.nav.no
     - name: NOM_API_SCOPE
       value: api://dev-gcp.nom.nom-api/.default
+    - name: NOM_ADMIN_GROUP_ID
+      value: 9e0e2958-df7a-4376-83f3-9bcbec1f2650
     - name: JDK_JAVA_OPTIONS
       value: "-Dhttp.proxyHost=webproxy.nais -Dhttps.proxyHost=webproxy.nais -Dhttp.proxyPort=8088 -Dhttps.proxyPort=8088 -Dhttp.nonProxyHosts=localhost|127.0.0.1|10.254.0.1|*.local|*.adeo.no|*.nav.no|*.aetat.no|*.devillo.no|*.oera.no|*.nais.io|*.aivencloud.com|*.intern.dev.nav.no"
   envFrom:
@@ -31,6 +34,13 @@ spec:
       enabled: true
       tenant: trygdeetaten.no
       allowAllUsers: true
+      claims:
+        groups:
+          - id: "9e0e2958-df7a-4376-83f3-9bcbec1f2650"
+        extra:
+          - azp_name
+          - NAVident
+  leaderElection: true
   liveness:
     path: /internal/health/liveness
     initialDelay: 30

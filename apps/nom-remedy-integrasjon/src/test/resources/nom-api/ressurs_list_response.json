@@ -1,0 +1,15 @@
+[
+  {
+    "fid": "string",
+    "navident": "string",
+    "personident": "string",
+    "sektor": "NAV_STATLIG",
+    "sluttdato": "2023-11-28",
+    "startdato": "2023-11-28",
+    "visningsnavn": {
+      "etternavn": "string",
+      "fornavn": "string",
+      "mellomnavn": "string"
+    }
+  }
+]

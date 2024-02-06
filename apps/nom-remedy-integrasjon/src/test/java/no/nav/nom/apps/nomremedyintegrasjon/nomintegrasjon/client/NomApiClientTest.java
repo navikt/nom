@@ -1,6 +1,7 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client;
 
 import no.nav.nom.apps.nomremedyintegrasjon.TestBase;
+import no.nav.nom.generated.model.Sektor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.time.Instant;
+import java.time.LocalDate;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
@@ -97,6 +99,28 @@ public class NomApiClientTest extends TestBase {
         verify(
             getRequestedFor(urlPathEqualTo(String.format("/app/ressurser/byNavident/%s", navident)))
                 .withQueryParam("obfuscatePersonident", equalTo("false"))
+                .withHeader("authorization", matching("Bearer tokenValue"))
+        );
+    }
+
+    @Test
+    @DisplayName("getRessurser should perform request as expected")
+    void testGetRessurser() {
+
+        var sektor = Sektor.EKSTERN;
+        var sluttdato = LocalDate.now();
+
+        stubResponse(
+            readResourceFile("nom-api/ressurs_list_response.json")
+        );
+
+        assertThat(nomApiClient.getRessurser(sektor, sluttdato))
+            .isNotNull();
+
+        verify(
+            getRequestedFor(urlPathEqualTo("/app/ressurser"))
+                .withQueryParam("sektor", equalTo(sektor.toString()))
+                .withQueryParam("sluttdato", equalTo(sluttdato.toString()))
                 .withHeader("authorization", matching("Bearer tokenValue"))
         );
     }
