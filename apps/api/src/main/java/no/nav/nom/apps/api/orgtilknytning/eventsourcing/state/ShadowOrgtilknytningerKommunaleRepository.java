@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -23,5 +24,13 @@ public class ShadowOrgtilknytningerKommunaleRepository {
 
     public boolean isInitialized() {
         return initialized.get();
+    }
+
+    public OrgtilknytningState getOrgtilknytningByNavident(String navIdent) {
+        return orgtilknytningByNavident.get(navIdent);
+    }
+
+    public Collection<OrgtilknytningState> getAll() {
+        return orgtilknytningByNavident.values();
     }
 }

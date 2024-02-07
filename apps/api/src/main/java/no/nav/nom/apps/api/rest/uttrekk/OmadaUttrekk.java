@@ -14,6 +14,7 @@ import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRep
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.ShadowOrgtilknytningerKommunaleRepository;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
@@ -46,6 +47,7 @@ public class OmadaUttrekk {
     private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
     private final OrgtilknytningService orgtilknytningService;
+    private final ShadowOrgtilknytningerKommunaleRepository shadowOrgtilknytningerKommunaleRepository;
     private final RemedyEnhetIdResolver remedyEnhetIdResolver;
     private final DvhRepository dvhRepository;
     private final OrganiseringStateRepository organiseringStateRepository;
@@ -54,12 +56,13 @@ public class OmadaUttrekk {
 
     public OmadaUttrekk(
             RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService,
-            OrgtilknytningService orgtilknytningService,
+            OrgtilknytningService orgtilknytningService, ShadowOrgtilknytningerKommunaleRepository shadowOrgtilknytningerKommunaleRepository,
             RemedyEnhetIdResolver remedyEnhetIdResolver, DvhRepository dvhRepository, OrganiseringStateRepository organiseringStateRepository, Unleash unleash
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
         this.orgtilknytningService = orgtilknytningService;
+        this.shadowOrgtilknytningerKommunaleRepository = shadowOrgtilknytningerKommunaleRepository;
         this.remedyEnhetIdResolver = remedyEnhetIdResolver;
         this.dvhRepository = dvhRepository;
         this.organiseringStateRepository = organiseringStateRepository;
@@ -144,6 +147,41 @@ public class OmadaUttrekk {
 
             });
 
+            return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
+        }
+    }
+
+    @Operation(
+        description = "Returnerer csv med orgtilknytninger for kommunale ressurser, som ikke er har presis orgtilknytning i NOM",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/skyggeOrgtilknytningKommunale", produces = "text/csv")
+    public @ResponseBody byte[] exportSkyggeOrgtilknytningKommunale() throws IOException {
+        StringWriter writer = new StringWriter();
+        final var cSVFormat = getCSVFormat("navident", "org_enhet_id", "gyldig_fom", "gyldig_tom");
+
+        try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
+            shadowOrgtilknytningerKommunaleRepository.getAll()
+                .stream().filter( ot -> !ot.orgEnhetId().equals(EXCLUDE_ORG_ENHET))
+                .forEach(kobling -> {
+                    try {
+                        printer.printRecord(
+                            kobling.navident(),
+                            kobling.orgEnhetId(),
+                            kobling.gyldigFom().format(dateTimeFormatter),
+                            kobling.gyldigTom().map(dateTimeFormatter::format).orElse("")
+                        );
+                        writer.close();
+                    } catch (IOException e) {
+                        log.error("Error writing to CSV", e);
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
+                    }
+                });
             return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
         }
     }

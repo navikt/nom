@@ -41,7 +41,7 @@ public class KommunaleRessurserProcessor {
 
             var orgenhetPaaRessurs = getOrgenhetPaaRessurs(kommunalRessurs);
             if (orgenhetPaaRessurs.isEmpty()) {
-                log.error("Kommunal Ressurs {} - klarer ikke finne Nom enhet for Orgenhet På Ressurs. Kan ikke behandles.", kommunalRessurs.getNavIdent());
+                log.error("Kommunal Ressurs {} - klarer ikke finne Nom enhet for Orgenhet På Ressurs ({}). Kan ikke behandles.", kommunalRessurs.getNavIdent(), orgenhetPaaRessursToString(kommunalRessurs));
                 return Optional.empty();
             }
 
@@ -83,6 +83,10 @@ public class KommunaleRessurserProcessor {
             dvhRessurs.getOrgenhetPaaRessursNiva(),
             dvhRessurs.getOrgenhetPaaRessursBeskrivelse()
         );
+    }
+
+    private String orgenhetPaaRessursToString(DvhRessurs dvhRessurs) {
+        return "OrgenhetPaaRessurs: " + dvhRessurs.getOrgenhetPaaRessurs() + " - " + dvhRessurs.getOrgenhetPaaRessursNiva() + " - " + dvhRessurs.getOrgenhetPaaRessursBeskrivelse();
     }
 
     private String detaljerToString(DvhRessurs kommunalRessurs, List<StillingPeriode> stillingPerioder, Collection<OrgtilknytningState> eksisterendeOrgtilknytninger) {
