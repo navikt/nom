@@ -14,6 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -31,7 +32,7 @@ class KommunaleRessurserLoaderTest  extends TestBase {
     @DisplayName("Test last fra Dvh json")
     public void testLoad() {
 
-        var result = kommunaleRessurserLoader.loadKommunale();;
+        var result = kommunaleRessurserLoader.loadKommunaleForNavidenter(List.of("N123321","G123321"));;
 
         assertEquals(2, result.size());
         var kari = result.stream().filter(r -> r.getNavIdent().equals("N123321")).findFirst().get();
