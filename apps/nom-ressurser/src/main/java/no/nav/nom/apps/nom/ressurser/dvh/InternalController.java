@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/internal")
-@Profile("!local")
+@Profile("!dev & !local")
 public class InternalController {
 
     private final DvhConsumer dvhConsumer;
