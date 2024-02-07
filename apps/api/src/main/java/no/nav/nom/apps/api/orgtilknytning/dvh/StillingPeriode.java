@@ -35,6 +35,9 @@ public record StillingPeriode(
     }
 
     public static String toString(List<StillingPeriode> stillingPerioder, boolean indent) {
+        if (stillingPerioder == null || stillingPerioder.isEmpty()) {
+            return "Ingen stillingPerioder";
+        }
         StringBuffer str = new StringBuffer();
         stillingPerioder.forEach( s -> str.append(indent ? "  " : "").append(s).append("\n"));
         return str.toString();
