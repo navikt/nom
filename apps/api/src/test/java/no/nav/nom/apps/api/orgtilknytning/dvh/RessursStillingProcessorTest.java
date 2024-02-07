@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@DisplayName("Tester Utility metoder for bruk i tolking og generering av events for RessursStillinger fra DVH")
+@DisplayName("Tester generering av orgtilknytning events for RessursStillinger fra DVH")
 public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBase {
     private static final LocalDate MAX_DATE = LocalDate.of(2099, 12, 31);
 

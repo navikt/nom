@@ -104,6 +104,18 @@ public class DvhLast {
     }
 
     @Operation(
+        description = "Last av skygge orgtilknytninger for kommunale (OMADA)",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Success")
+    })
+    @GetMapping(value = "/loadSkyggeOrgtilknytningerForKommunale")
+    public void loadSkyggeOrgtilknytningerForKommunale() {
+        triggerlastSkyggeOrgtilknytningerForKommunale();
+    }
+
+    @Operation(
         description = "Start last av typer for orgenheter",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
@@ -151,6 +163,11 @@ public class DvhLast {
     @Async
     public void triggerlastEksterneOrgtilknytningerTilEvtsrc() {
         dvhRestConsumer.updateOrgtilknytningerForEksterneFromDvh();
+    }
+
+    @Async
+    public void triggerlastSkyggeOrgtilknytningerForKommunale() {
+        dvhRestConsumer.updateShadowOrgtilknytningerForKommunaleFromDvh();
     }
 
     @Async

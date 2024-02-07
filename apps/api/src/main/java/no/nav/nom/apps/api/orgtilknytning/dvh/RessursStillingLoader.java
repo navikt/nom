@@ -52,7 +52,7 @@ public class RessursStillingLoader {
         ressursStillingLoadStatus.endLoad();
     }
 
-    protected List<DvhRessursStilling> load() {
+    public List<DvhRessursStilling> load() {
         log.info("Laster ressursStillinger fra {}", appProperties.clients().nomProxy().ressursStillingerPath());
         LocalDateTime start = LocalDateTime.now();
         val jsonRessursStillinger = dvhExchange(appProperties.clients().nomProxy().ressursStillingerPath());

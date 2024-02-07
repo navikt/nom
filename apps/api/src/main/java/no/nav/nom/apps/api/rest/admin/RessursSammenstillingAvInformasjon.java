@@ -142,6 +142,7 @@ public class RessursSammenstillingAvInformasjon {
         int stillingePerioder = stillingPerioderPerNavident.values().stream().mapToInt(List::size).sum();
 
         Map<String, DvhRessursStillingData> dvhRessurserData = dvhRessurseStillinger.stream()
+            .filter(dvhRessursStilling -> dvhRessursStilling.getNavident().isPresent() && navidenterINom.contains(dvhRessursStilling.getNavident().get()))
             .collect(Collectors.toMap( r -> r.getNavident().get(),
                 r -> new DvhRessursStillingData(r, getOrgenhetPaaRessurs(r)),
                 (r1, r2) -> r2));

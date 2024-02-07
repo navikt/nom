@@ -16,6 +16,7 @@ import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
+import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
@@ -62,6 +63,7 @@ public class DvhRestConsumer {
     private final RessursStillingLoader ressursStillingLoader;
     private final EksterneRessurserLoader eksterneRessurserLoader;
     private final OrganiseringService organiseringService;
+    private final KommunaleRessurserLoader kommunaleRessurserLoader;
 
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
     private final Unleash unleash;
@@ -92,6 +94,7 @@ public class DvhRestConsumer {
         loadLedereAndOrganiseringerFromDvh();
         loadTlfFromDvh();
 
+        updateShadowOrgtilknytningerForKommunaleFromDvh();
 
         if (!dvhStartupLoadMonitor.hasCompleted()) { // Pod kan markeres som klar etter oppstart
             dvhStartupLoadMonitor.setCompleted();
@@ -186,6 +189,10 @@ public class DvhRestConsumer {
         eksterneRessurserLoader.loadAndProcess();
     }
 
+    public void updateShadowOrgtilknytningerForKommunaleFromDvh() {
+        log.info("Oppdater skygge Orgtilknytninger for kommunale fra dvh");
+        kommunaleRessurserLoader.loadAndProcess();
+    }
 
     public void loadTlfFromDvh() {
         log.info("Laster tlf fra dvh");

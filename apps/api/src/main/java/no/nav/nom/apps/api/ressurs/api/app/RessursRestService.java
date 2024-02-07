@@ -246,7 +246,6 @@ public class RessursRestService {
 
             return createdRessurs;
         });
-
     }
 
     private RessursState createRessurs(OpprettRessursRequest request) {
