@@ -45,14 +45,23 @@ public class KommunaleRessurserProcessor {
                 return Optional.empty();
             }
 
-            var maksSluttDatoPaaEksisterendeOrgtilknytninger = maksSluttDato(eksisterendeOrgtilknytninger);
-            var startDatoPaaTmpOT = maksSluttDatoPaaEksisterendeOrgtilknytninger == null ?
+            var maksSluttDatoPaaEksisterendeHistoriskeOrgtilknytninger = maksSluttDatoIFortiden(eksisterendeOrgtilknytninger);
+            var startDatoPaaTmpOT = maksSluttDatoPaaEksisterendeHistoriskeOrgtilknytninger == null ?
                 kommunalRessurs.getStartDato() :
-                maksSluttDatoPaaEksisterendeOrgtilknytninger.plusDays(1);
+                maksSluttDatoPaaEksisterendeHistoriskeOrgtilknytninger.plusDays(1);
 
             startDatoPaaTmpOT = startDatoPaaTmpOT.isBefore(orgenhetPaaRessurs.get().getGyldigFom()) ?
                 orgenhetPaaRessurs.get().getGyldigFom() :
                 startDatoPaaTmpOT;
+
+            var minStartDatoPaaEksisterendeFremtidigeOrgtilknytninger = eksisterendeOrgtilknytninger.stream()
+                .map(OrgtilknytningState::gyldigFom)
+                .filter(d -> d.isAfter(LocalDate.now()))
+                .min(LocalDate::compareTo);
+
+            var sluttDatoPaaTmpOT = minStartDatoPaaEksisterendeFremtidigeOrgtilknytninger
+                .map(localDate -> localDate.minusDays(1))
+                .orElseGet(kommunalRessurs::getRemedySluttdato);
 
             OrgtilknytningState ot = new OrgtilknytningState(
                 fid,
@@ -60,7 +69,7 @@ public class KommunaleRessurserProcessor {
                 orgenhetPaaRessurs.get().getId(),
                 true,
                 startDatoPaaTmpOT,
-                Optional.ofNullable(kommunalRessurs.getSluttdato()),
+                Optional.ofNullable(sluttDatoPaaTmpOT),
                 Optional.empty()
             );
             return Optional.of(ot);
@@ -68,11 +77,12 @@ public class KommunaleRessurserProcessor {
         return Optional.empty();
     }
 
-    private static LocalDate maksSluttDato(Collection<OrgtilknytningState> eksisterendeOrgtilknytninger) {
+    private static LocalDate maksSluttDatoIFortiden(Collection<OrgtilknytningState> eksisterendeOrgtilknytninger) {
         return eksisterendeOrgtilknytninger.stream()
             .map(OrgtilknytningState::gyldigTom)
             .filter(Optional::isPresent)
             .map(Optional::get)
+            .filter(d -> d.isBefore(LocalDate.now()))
             .max(LocalDate::compareTo)
             .orElse(null);
     }
