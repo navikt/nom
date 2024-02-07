@@ -94,7 +94,7 @@ public class DvhRestConsumer {
         loadLedereAndOrganiseringerFromDvh();
         loadTlfFromDvh();
 
-        updateShadowOrgtilknytningerForKommunaleFromDvh();
+//        updateShadowOrgtilknytningerForKommunaleFromDvh();
 
         if (!dvhStartupLoadMonitor.hasCompleted()) { // Pod kan markeres som klar etter oppstart
             dvhStartupLoadMonitor.setCompleted();
