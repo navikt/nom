@@ -26,7 +26,7 @@ public class DvhConsumer {
 
     private final long incrementValue = 1000L;
 
-    private final long DELAY = 60*60*1000;
+    private final long DELAY = 60*1000;
 
     public DvhConsumer(
         @Value("${dvh.endpoint}") String dvhEndpoint,
