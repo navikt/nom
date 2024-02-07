@@ -14,7 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Slf4j
 @Component
-@Profile("!local & !test")
+@Profile("!dev & !local & !test")
 public class DvhConsumer {
 
     private final DvhConsumerProcessorService dvhConsumerProcessorService;
