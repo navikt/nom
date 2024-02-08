@@ -138,7 +138,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should update dato for orgtilknytning and NOT update ressurs sluttdato")
+    @DisplayName("POST /app/orgtilknytninger/{fid}/dato: Should update dato for orgtilknytning and NOT update ressurs sluttdato")
     void test_update_orgtilknytning_date() {
 
         var orgtilknytningToUpdate = orgtilknytningState();
@@ -180,7 +180,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should update sluttdato for ressurs on update orgtilknytning dato when setRessursSluttdato=true")
+    @DisplayName("POST /app/orgtilknytninger/{fid}/dato: Should update sluttdato for ressurs on update orgtilknytning dato when setRessursSluttdato=true")
     void test_update_ressurs_sluttdato_on_update_orgtilknytning_dato() {
 
         var orgtilknytningToUpdate = orgtilknytningState();
@@ -219,7 +219,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should NOT update sluttdato for ressurs on update orgtilknytning dato when setRessursSluttdato=true if another orgtilknytning has a later gyldigTom")
+    @DisplayName("POST /app/orgtilknytninger/{fid}/dato: Should NOT update sluttdato for ressurs on update orgtilknytning dato when setRessursSluttdato=true if another orgtilknytning has a later gyldigTom")
     void test_not_update_ressurs_sluttdato_on_update_orgtilknytning_dato_when_other_orgtilknytning_has_later_gyldig_tom() {
         var newSluttdato = LocalDate.now().plusMonths(5);
 
@@ -257,7 +257,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should ensure no overlapping period for orgenhet when updating period")
+    @DisplayName("POST /app/orgtilknytninger/{fid}/dato: Should ensure no overlapping period for orgenhet when updating period")
     void test_no_overlapping_periode_for_orgenhet_navident_on_update_date() {
         var navident = "Y654321";
         var orgEnhet = orgEnhetState();
@@ -302,7 +302,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should ensure no overlapping period for daglig oppfolging when updating period")
+    @DisplayName("POST /app/orgtilknytninger/{fid}/dato: Should ensure no overlapping period for daglig oppfolging when updating period")
     void test_no_overlapping_periode_for_daglig_oppfolging_on_update_date() {
         var navident = "Y654321";
         saveRessurser(List.of(
@@ -356,7 +356,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should not be able to update dato if it leads to no active orgtilknytninger")
+    @DisplayName("POST /app/orgtilknytninger/{fid}/dato: Should not be able to update dato if it leads to no active orgtilknytninger")
     void test_disallow_update_if_no_remaining_active() {
 
         var orgtilknytningToUpdate = orgtilknytningState();
@@ -388,7 +388,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should block update dato for orgtilknytning if tilknyttet ressurs is not EKSTERN")
+    @DisplayName("POST /app/orgtilknytninger/{fid}/dato: Should block update dato for orgtilknytning if tilknyttet ressurs is not EKSTERN")
     void test_update_orgtilknytning_for_ekstern_only_date() {
         var orgtilknytningToUpdate = orgtilknytningState();
         saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
@@ -406,7 +406,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should forbid update dato if user does not have granted authority 'MUTATE_RESSURS'")
+    @DisplayName("POST /app/orgtilknytninger/{fid}/dato: Should forbid update dato if user does not have granted authority 'MUTATE_RESSURS'")
     void test_update_orgtilknytning_forbidden() {
 
         postEndreOrgtilknytningDatoRequest(
@@ -512,7 +512,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .expectStatus().isForbidden();
     }
 
-    @ParameterizedTest(name = "Should add new orgtilknytning with erDagligOppfolging = {0}")
+    @ParameterizedTest(name = "POST /app/orgtilknytninger: Should add new orgtilknytning with erDagligOppfolging = {0}")
     @MethodSource("test_add_orgtilknytning_input")
     void test_add_orgtilknytning(Boolean erDagligOppfolging) {
         var navident = "Y654321";
@@ -532,23 +532,13 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .build();
         saveOrgtilknytninger(List.of(existingOrgtilknytning));
 
-        var leggTilOrgtilknytningRequest = LeggTilOrgtilknytningRequest.builder()
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
             .navident(navident)
             .orgEnhetId(orgEnhet.id())
-            .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(5)))
             .erDagligOppfolging(Optional.of(erDagligOppfolging))
             .build();
 
-        webTestClient
-            .post()
-            .uri("/app/orgtilknytninger")
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(leggTilOrgtilknytningRequest)
-            .exchange()
+        postLeggTilOrgtilknytningRequest(nomWriteUserToken(), leggTilOrgtilknytningRequest)
             .expectStatus().is2xxSuccessful();
 
         verify(
@@ -596,6 +586,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .matches(endreDagligOppfolgingOrgtilknytning ->
                     endreDagligOppfolgingOrgtilknytning.gyldigTom().equals(leggTilOrgtilknytningRequest.gyldigTom())
                 );
+        } else {
+            verify(orgtilknytningCommandService, times(0)).endreDagligOppfolgingOrgtilknytning(any(), any());
         }
     }
 
@@ -607,28 +599,125 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should ensure navident in orgtilknytning exists")
+    @DisplayName("POST /app/orgtilknytninger: Should set ressurs sluttdato when setRessursSluttdato=true")
+    void test_add_orgtilknytning_set_ressurs_sluttdato() {
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sluttdato(Optional.empty())
+            .sektor(Sektor.EKSTERN)
+            .build();
+
+        var tilknyttetOrgenhet = orgEnhetState();
+
+        saveOrgenheter(List.of(tilknyttetOrgenhet));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId(tilknyttetOrgenhet.id())
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(5)))
+            .setRessursSluttdato(Optional.of(true))
+            .build();
+
+        postLeggTilOrgtilknytningRequest(nomWriteUserToken(), leggTilOrgtilknytningRequest)
+            .expectStatus().is2xxSuccessful();
+
+        var oppdaterSluttdatoCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterSluttdatoCommand.class);
+
+        verify(ressursCommadService, times(1))
+            .oppdaterRessursSluttdatoEvent(oppdaterSluttdatoCommandArgumentCaptor.capture());
+
+        assertThat(oppdaterSluttdatoCommandArgumentCaptor.getValue())
+            .matches(oppdaterSluttdatoCommand ->
+                oppdaterSluttdatoCommand.sluttdato().equals(leggTilOrgtilknytningRequest.gyldigTom())
+            )
+            .matches(oppdaterSluttdatoCommand ->
+                oppdaterSluttdatoCommand.fid().equals(tilknyttetRessurs.fid())
+            );
+    }
+
+    @ParameterizedTest(name = "When setRessursSluttdato={0}")
+    @MethodSource("test_add_orgtilknytning_should_not_set_ressurs_sluttdato_input")
+    @DisplayName("POST /app/orgtilknytninger: Should NOT set ressurs sluttdato")
+    void test_add_orgtilknytning_should_not_set_ressurs_sluttdato(Optional<Boolean> setRessursSluttdato) {
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sluttdato(Optional.empty())
+            .sektor(Sektor.EKSTERN)
+            .build();
+
+        var tilknyttetOrgenhet = orgEnhetState();
+
+        saveOrgenheter(List.of(tilknyttetOrgenhet));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId(tilknyttetOrgenhet.id())
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(5)))
+            .setRessursSluttdato(setRessursSluttdato)
+            .build();
+
+        postLeggTilOrgtilknytningRequest(nomWriteUserToken(), leggTilOrgtilknytningRequest)
+            .expectStatus().is2xxSuccessful();
+
+        verify(ressursCommadService, times(0))
+            .oppdaterRessursSluttdatoEvent(any());
+    }
+
+    private static Stream<Arguments> test_add_orgtilknytning_should_not_set_ressurs_sluttdato_input() {
+        return Stream.of(
+            Arguments.of(Optional.empty()),
+            Arguments.of(Optional.of(false))
+        );
+    }
+
+    @Test
+    @DisplayName("POST /app/orgtilknytninger: Should not set ressurs sluttdato when setRessursSluttdato=true if there exists another orgtilknytning with later gyldigTom")
+    void test_add_orgtilknytning_should_not_set_ressurs_sluttdato_when_another_orgtilknytning_has_later_gyldigTom() {
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sluttdato(Optional.empty())
+            .sektor(Sektor.EKSTERN)
+            .build();
+
+        var tilknyttetOrgenhet = orgEnhetState();
+
+        saveOrgenheter(List.of(tilknyttetOrgenhet));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId(tilknyttetOrgenhet.id())
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(5)))
+            .setRessursSluttdato(Optional.of(true))
+            .build();
+
+        saveOrgtilknytninger(List.of(
+            orgtilknytningState().toBuilder()
+                .orgEnhetId("orgtilknytning-with-later-gyldigTom")
+                .gyldigTom(leggTilOrgtilknytningRequest.gyldigTom().map(gyldigTomInRequest ->
+                    gyldigTomInRequest.plusMonths(1))
+                ).build()
+        ));
+
+        postLeggTilOrgtilknytningRequest(nomWriteUserToken(), leggTilOrgtilknytningRequest)
+            .expectStatus().is2xxSuccessful();
+
+        verify(ressursCommadService, times(0))
+            .oppdaterRessursSluttdatoEvent(any());
+    }
+
+    @Test
+    @DisplayName("POST /app/orgtilknytninger: Should ensure navident in orgtilknytning exists")
     void test_navident_for_orgtilknytning_exists() {
         var navident = "Y654321";
         var orgenhet = orgEnhetState();
         saveOrgenheter(List.of(orgenhet));
 
-        var leggTilOrgtilknytningRequest = LeggTilOrgtilknytningRequest.builder()
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
             .navident(navident)
             .orgEnhetId(orgenhet.id())
-            .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
             .build();
 
-        webTestClient
-            .post()
-            .uri("/app/orgtilknytninger")
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(leggTilOrgtilknytningRequest)
-            .exchange()
+        postLeggTilOrgtilknytningRequest(nomWriteUserToken(), leggTilOrgtilknytningRequest)
             .expectStatus().isBadRequest();
 
         verify(
@@ -640,7 +729,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should ensure orgEnhetId in orgtilknytning exists")
+    @DisplayName("POST /app/orgtilknytninger: Should ensure orgEnhetId in orgtilknytning exists")
     void test_orgEnhet_for_orgtilknytning_exists() {
         var navident = "Y654321";
         var orgEnhetId = "orgEnhet123";
@@ -652,22 +741,12 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build()
         ));
 
-        var leggTilOrgtilknytningRequest = LeggTilOrgtilknytningRequest.builder()
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
             .navident(navident)
             .orgEnhetId(orgEnhetId)
-            .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
             .build();
 
-        webTestClient
-            .post()
-            .uri("/app/orgtilknytninger")
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(leggTilOrgtilknytningRequest)
-            .exchange()
+        postLeggTilOrgtilknytningRequest(nomWriteUserToken(), leggTilOrgtilknytningRequest)
             .expectStatus().isBadRequest();
 
         verify(
@@ -679,7 +758,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should ensure no overlapping period for unique orgenhetId + navident combination when creating orgtilknytning")
+    @DisplayName("POST /app/orgtilknytninger: Should ensure no overlapping period for unique orgenhetId + navident combination when creating orgtilknytning")
     void test_unique_orgenhet_navident_for_orgtilknytning() {
         var navident = "Y654321";
         var orgEnhet = orgEnhetState();
@@ -701,22 +780,14 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         saveOrgenheter(List.of(orgEnhet));
 
 
-        var leggTilOrgtilknytningRequest = LeggTilOrgtilknytningRequest.builder()
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
             .navident(navident)
             .orgEnhetId(orgEnhet.id())
             .gyldigFom(LocalDate.now().plusMonths(1))
             .gyldigTom(Optional.of(LocalDate.now().plusMonths(6)))
             .build();
 
-        webTestClient
-            .post()
-            .uri("/app/orgtilknytninger")
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(leggTilOrgtilknytningRequest)
-            .exchange()
+        postLeggTilOrgtilknytningRequest(nomWriteUserToken(), leggTilOrgtilknytningRequest)
             .expectStatus().isEqualTo(HttpStatus.CONFLICT);
 
         verify(
@@ -728,7 +799,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should ensure no overlapping period for daglig oppfolging")
+    @DisplayName("POST /app/orgtilknytninger: Should ensure no overlapping period for daglig oppfolging")
     void test_no_overlapping_daglig_oppfolging() {
         var navident = "Y654321";
         var orgEnhetForExistingDagligOppfolging = orgEnhetState();
@@ -749,7 +820,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build()
         ));
 
-        var leggTilOrgtilknytningRequest = LeggTilOrgtilknytningRequest.builder()
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
             .navident(navident)
             .orgEnhetId("some-other-orgenhet")
             .gyldigFom(LocalDate.now().plusMonths(1))
@@ -762,15 +833,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             orgEnhetForExistingDagligOppfolging.toBuilder().id(leggTilOrgtilknytningRequest.orgEnhetId()).build()
         ));
 
-        webTestClient
-            .post()
-            .uri("/app/orgtilknytninger")
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(leggTilOrgtilknytningRequest)
-            .exchange()
+        postLeggTilOrgtilknytningRequest(nomWriteUserToken(), leggTilOrgtilknytningRequest)
             .expectStatus().isEqualTo(HttpStatus.CONFLICT)
             .expectBody()
             .jsonPath("message")
@@ -789,7 +852,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should ensure that gyldigFom is not after tomorrow if new daglig oppfølging changes remedy enhet (https://jira.adeo.no/browse/ORG-1759)")
+    @DisplayName("POST /app/orgtilknytninger: Should ensure that gyldigFom is not after tomorrow if new daglig oppfølging changes remedy enhet (https://jira.adeo.no/browse/ORG-1759)")
     void test_new_remedy_enhet_valid_date() {
         var navident = "Y654321";
         var orgEnhet = orgEnhetState();
@@ -810,7 +873,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build()
         ));
 
-        var leggTilOrgtilknytningRequest = LeggTilOrgtilknytningRequest.builder()
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
             .navident(navident)
             .orgEnhetId("some-other-orgenhet")
             .gyldigFom(LocalDate.now().plusMonths(1))
@@ -829,15 +892,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(remedyEnhetMapperService.findByNomId(existingOrgtilknytning.orgEnhetId()))
             .thenReturn(Optional.of(RemedyEnhet.builder().remedyEnhetId("newRemedyEnhet").build()));
 
-        webTestClient
-            .post()
-            .uri("/app/orgtilknytninger")
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(leggTilOrgtilknytningRequest)
-            .exchange()
+        postLeggTilOrgtilknytningRequest(nomWriteUserToken(), leggTilOrgtilknytningRequest)
             .expectStatus().isEqualTo(HttpStatus.BAD_REQUEST)
             .expectBody()
             .jsonPath("message")
@@ -907,6 +962,17 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .build();
     }
 
+    private static LeggTilOrgtilknytningRequest leggTilOrgtilknytningRequest() {
+        return LeggTilOrgtilknytningRequest.builder()
+            .navident("X12345")
+            .orgEnhetId("some-orgenhet")
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(5)))
+            .erDagligOppfolging(Optional.empty())
+            .setRessursSluttdato(Optional.empty())
+            .build();
+    }
+
     private WebTestClient.ResponseSpec postEndreOrgtilknytningDatoRequest(
         String fid,
         String accessToken,
@@ -923,6 +989,21 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 httpHeaders.setBearerAuth(accessToken);
             })
             .bodyValue(endreOrgtilknytningDatoRequest)
+            .exchange();
+    }
+
+    private WebTestClient.ResponseSpec postLeggTilOrgtilknytningRequest(
+        String accessToken,
+        LeggTilOrgtilknytningRequest leggTilOrgtilknytningRequest
+    ) {
+        return webTestClient
+            .post()
+            .uri("/app/orgtilknytninger")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(accessToken);
+            })
+            .bodyValue(leggTilOrgtilknytningRequest)
             .exchange();
     }
 }

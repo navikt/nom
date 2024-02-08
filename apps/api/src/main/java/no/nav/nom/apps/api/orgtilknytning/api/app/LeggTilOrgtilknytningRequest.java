@@ -6,12 +6,13 @@ import lombok.Builder;
 import java.time.LocalDate;
 import java.util.Optional;
 
-@Builder
+@Builder(toBuilder = true)
 public record LeggTilOrgtilknytningRequest(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String navident,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String orgEnhetId,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate gyldigFom,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> gyldigTom,
-    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<Boolean> erDagligOppfolging
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<Boolean> erDagligOppfolging,
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<Boolean> setRessursSluttdato
 )
 { }

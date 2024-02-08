@@ -164,7 +164,6 @@ public class OrgtilknytningRestService {
                     )
                 );
             }
-
         }
 
         nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
@@ -238,7 +237,7 @@ public class OrgtilknytningRestService {
             )
         );
 
-        var orgTilknytningFid = orgtilknytningCommandService.opprettOrgtilknytning(
+        var opprettetOrgTilknytningFid = orgtilknytningCommandService.opprettOrgtilknytning(
             new OpprettOrgtilknytning(
                 leggTilOrgtilknytningRequest.navident(),
                 leggTilOrgtilknytningRequest.orgEnhetId(),
@@ -249,7 +248,7 @@ public class OrgtilknytningRestService {
         );
 
         leggTilOrgtilknytningRequest.gyldigTom().ifPresent(gyldigTom -> orgtilknytningCommandService.avvikleOrgtilknytning(
-            orgTilknytningFid,
+            opprettetOrgTilknytningFid,
             new AvvikleOrgtilknytning(
                 leggTilOrgtilknytningRequest.navident(),
                 leggTilOrgtilknytningRequest.orgEnhetId(),
@@ -261,7 +260,7 @@ public class OrgtilknytningRestService {
 
         if (erDagligOppfolging) {
             orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(
-                orgTilknytningFid,
+                opprettetOrgTilknytningFid,
                 new EndreDagligOppfolgingOrgtilknytning(
                     leggTilOrgtilknytningRequest.navident(),
                     leggTilOrgtilknytningRequest.orgEnhetId(),
@@ -272,6 +271,33 @@ public class OrgtilknytningRestService {
                     null
                 )
             );
+        }
+
+        if (leggTilOrgtilknytningRequest.setRessursSluttdato().orElse(false)) {
+            var maxGyldigTomOnExistingOrgtilknytningerIsBeforeNewGyldigTom = orgtilknytningStateRepository
+                .findByNavident(leggTilOrgtilknytningRequest.navident()).stream()
+                .filter(orgtilknytningState -> !orgtilknytningState.fid().equals(opprettetOrgTilknytningFid))
+                .map(orgtilknytningState -> orgtilknytningState.gyldigTom().orElse(LocalDate.MAX))
+                .max(LocalDate::compareTo)
+                .map(maxGyldigTom -> maxGyldigTom.isBefore(leggTilOrgtilknytningRequest.gyldigTom().orElse(LocalDate.MAX)))
+                .orElse(true);
+
+            var tilknyttetRessurs = ressursStateRepository.findByNavident(leggTilOrgtilknytningRequest.navident()).orElseThrow(
+                () -> RessursNotFoundException.navident(leggTilOrgtilknytningRequest.navident())
+            );
+
+            var tilknyttetRessursSluttdatoNotEqualToNewGyldigTom = !tilknyttetRessurs.sluttdato().equals(leggTilOrgtilknytningRequest.gyldigTom());
+
+            if (maxGyldigTomOnExistingOrgtilknytningerIsBeforeNewGyldigTom && tilknyttetRessursSluttdatoNotEqualToNewGyldigTom) {
+
+                ressursCommadService.oppdaterRessursSluttdatoEvent(
+                    new OppdaterSluttdatoCommand(
+                        tilknyttetRessurs.fid(),
+                        leggTilOrgtilknytningRequest.gyldigTom(),
+                        metaData
+                    )
+                );
+            }
         }
 
         nomMastered.markRessursAsMasteredInNom(leggTilOrgtilknytningRequest.navident());
