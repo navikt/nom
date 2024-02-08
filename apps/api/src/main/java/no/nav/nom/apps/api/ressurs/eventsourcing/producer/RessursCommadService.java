@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysis
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
@@ -18,6 +19,7 @@ import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonidentOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSektorOppdatertV1;
+import no.nav.nom.contract.nom.eventsource.RessursSluttdatoOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursStartDatoOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
@@ -77,6 +79,15 @@ public class RessursCommadService {
             inputMetadata
         ));
     }
+
+    public CompletableFuture<SendResult<String, RessursEvent>> oppdaterRessursSluttdatoEvent(OppdaterSluttdatoCommand oppdaterSluttdatoCommand) {
+        return eventProducer.sendMessage(new RessursSluttdatoOppdatertEventV1(
+            oppdaterSluttdatoCommand.fid(),
+            new RessursSluttdatoOppdatertEventV1.RessursSluttdatoOppdatertEventData(oppdaterSluttdatoCommand.sluttdato()),
+            oppdaterSluttdatoCommand.inputMetadata()
+        ));
+    }
+
 
     public CompletableFuture<SendResult<String, RessursEvent>> oppdaterPersonaliaEvent(
         OppdaterPersonaliaCommand oppdaterPersonaliaCommand,

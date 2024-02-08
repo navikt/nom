@@ -46,6 +46,7 @@ import { EditNameForm } from "~/pages/ResourcePage/EditForms/EditNameForm";
 import { EditOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/EditOrgtilknytningForm";
 import { blueTopBorder } from "~/resources/NomStyles";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
+import { Sektor } from "~/types/api-models";
 import {
   formatDisplayDate,
   formatTlf,
@@ -531,6 +532,12 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
             label="Startdato"
             value={formatDisplayDate(ressurs.startdato)}
           />
+          {ressurs.sluttdato && ressurs.sektor === Sektor.EKSTERN ? (
+            <LabelWithValue
+              label="Sluttdato"
+              value={formatDisplayDate(ressurs.sluttdato)}
+            />
+          ) : undefined}
           <LabelWithValue
             label="Sektor"
             value={SektorNameMapping[ressurs.sektor]}

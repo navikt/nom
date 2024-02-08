@@ -7,6 +7,7 @@ import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
+import no.nav.nom.contract.nom.eventsource.RessursSluttdatoOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.generated.model.OrgEnhet;
 import no.nav.nom.generated.model.OrgtilknytningState;
@@ -42,6 +43,7 @@ import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursFysiskeBruker
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursOpprettetAdditionalData;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursOpprettetEventData;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursPersonaliaOppdatertV1;
+import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursSluttdatoOppdatertEventV1;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursSluttetEventV1;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitalizeNavn;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeEndOfDay;
@@ -139,17 +141,16 @@ public class NomIntegrasjonServiceTest extends TestBase {
 
     }
 
-    @Test
-    @DisplayName("Should mark ressurs for deletion on RessursSluttetEventV1 with past sluttdato")
-    void testShouldDeleteRessursOnRessursSluttetEventV1() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("testShouldDeleteRessursInput")
+    @DisplayName("Should mark ressurs for deletion on RessursSluttetEventV1 and RessursSluttdatoOppdatertEventV1 with past sluttdato")
+    void testShouldDeleteRessurs(RessursEvent ressursEvent) {
 
         var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
 
-        var ressursSluttetEventV1 = ressursSluttetEventV1(LocalDate.now().minusDays(1));
+        when(nomApiClient.getRessursByFid(ressursEvent.getFid())).thenReturn(existingRessurs);
 
-        when(nomApiClient.getRessursByFid(ressursSluttetEventV1.getFid())).thenReturn(existingRessurs);
-
-        nomIntegrasjonService.handleRessursEvent(ressursSluttetEventV1);
+        nomIntegrasjonService.handleRessursEvent(ressursEvent);
 
         var nomIntegrasjonEntry = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
 
@@ -161,9 +162,18 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .navId(existingRessurs.getNavident())
                     .entryOperasjon("Slette")
                     .entryStatus("Ubehandlet")
-                    .entryBestiller(ressursSluttetEventV1.getMetadata().inputMetadata().origination().initiatedBy())
+                    .entryBestiller(ressursEvent.getMetadata().inputMetadata().origination().initiatedBy())
                     .build()
             ));
+    }
+
+    private static Stream<Arguments> testShouldDeleteRessursInput() {
+        var yesterday = LocalDate.now().minusDays(1);
+
+        return Stream.of(
+            Arguments.of(ressursSluttetEventV1(yesterday)),
+            Arguments.of(ressursSluttdatoOppdatertEventV1(yesterday))
+        );
     }
 
     @Test

@@ -11,6 +11,7 @@ import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEv
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursSluttdatoOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -36,9 +37,6 @@ public class EventsrcToStateTest {
     private TestInputTopic<String, RessursEvent> inputTopic;
     private TestOutputTopic<String, RessursState> outputTopic;
 
-    // Fjerne dette og heller ha tids-uavhengige tester?
-    private LocalDate mockToday = LocalDate.of(2023, 1, 1);
-
     @BeforeEach
     public void setup() {
         setupKafkaTransformer();
@@ -47,179 +45,48 @@ public class EventsrcToStateTest {
     @Test
     @DisplayName("RessursOpprettetEventV1 oppretter RessursState i output topic")
     public void test11() {
-        final RessursOpprettetEventV1.RessursOpprettetEventData eventData = new RessursOpprettetEventV1.RessursOpprettetEventData(
-                "personident",
-                Sektor.NAV_STATLIG,
-                new Visningsnavn(
-                        "fornavn",
-                        null,
-                        "etternavn"
-                ),
-                List.of("2011"),
-                "2011"
-        );
 
-        final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
-                Optional.of("navident"),
-                null,
-                null,
-                null,
-                Optional.of(mockToday),
-                Optional.empty(),
-                Optional.empty()
-        );
-
-        final RessursEvent event = new RessursOpprettetEventV1(
-                UUID.randomUUID().toString(),
-                eventData,
-                (Event.Metadata) null,
-                additionalData
-
-        );
-
-        final RessursState expected = new RessursState(
-                event.getFid(),
-                eventData.personident(),
-                additionalData.navident().get(),
-                eventData.sektor(),
-                new Visningsnavn(
-                        "fornavn",
-                        Optional.empty(),
-                        "etternavn"
-                ),
-                Optional.empty(),
-                Optional.of(mockToday),
-                Optional.ofNullable(eventData.primaryFysiskBrukersted()),
-                eventData.fysiskeBrukersteder()
-        );
-
-        inputTopic.pipeInput(UUID.randomUUID().toString(), event);
-
+        final RessursState expectedOpprettetRessurs = opprettRessurs();
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
                 .containsExactly(
-                        KeyValue.pair(event.getFid(), expected)
+                        KeyValue.pair(expectedOpprettetRessurs.fid(), expectedOpprettetRessurs)
                 );
     }
-
 
     @Test
     @DisplayName("Merger RessursSluttet event merges sammen inn i state")
     public void test21() {
-        final RessursOpprettetEventV1.RessursOpprettetEventData eventData = new RessursOpprettetEventV1.RessursOpprettetEventData(
-                "personident",
-                Sektor.NAV_STATLIG,
-                new Visningsnavn(
-                        "fornavn",
-                        null,
-                        "etternavn"
-                ),
-                List.of("2011"),
-                "2011"
-        );
 
-        final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
-                Optional.of("navident"),
-                null,
-                null,
-                null,
-                Optional.of(mockToday),
-                Optional.empty(),
-                Optional.empty()
-        );
-
-        final RessursEvent event = new RessursOpprettetEventV1(
-                UUID.randomUUID().toString(),
-                eventData,
-                (Event.Metadata) null,
-                additionalData
-
-        );
+        final RessursState opprettetRessurs = opprettRessurs();
 
         final RessursSluttetEventV1.RessursSluttetEventData sluttetEventData = new RessursSluttetEventV1.RessursSluttetEventData(LocalDate.now());
+
         final RessursEvent sluttetEvent = new RessursSluttetEventV1(
-                event.getFid(),
+                opprettetRessurs.fid(),
                 sluttetEventData,
                 (Event.Metadata) null
         );
 
-
-        final RessursState expectedOpprettet = new RessursState(
-                event.getFid(),
-                eventData.personident(),
-                additionalData.navident().get(),
-                eventData.sektor(),
-                new Visningsnavn(
-                        "fornavn",
-                        Optional.empty(),
-                        "etternavn"
-                ),
-                Optional.empty(),
-                Optional.of(mockToday),
-                Optional.ofNullable(eventData.primaryFysiskBrukersted()),
-                eventData.fysiskeBrukersteder()
-        );
-
-        final RessursState expectedSluttet = new RessursState(
-                event.getFid(),
-                eventData.personident(),
-                additionalData.navident().get(),
-                eventData.sektor(),
-                new Visningsnavn(
-                        "fornavn",
-                        Optional.empty(),
-                        "etternavn"
-                ),
-                Optional.of(sluttetEventData.sluttdato()),
-                Optional.of(mockToday),
-                Optional.ofNullable(eventData.primaryFysiskBrukersted()),
-                eventData.fysiskeBrukersteder()
-        );
+        final RessursState expectedSluttet = opprettetRessurs.toBuilder()
+            .sluttdato(Optional.of(sluttetEventData.sluttdato()))
+            .build();
 
 
-        inputTopic.pipeInput(UUID.randomUUID().toString(), event);
         inputTopic.pipeInput(UUID.randomUUID().toString(), sluttetEvent);
-
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
                 .containsExactly(
-                        KeyValue.pair(event.getFid(), expectedOpprettet),
-                        KeyValue.pair(event.getFid(), expectedSluttet)
+                        KeyValue.pair(opprettetRessurs.fid(), opprettetRessurs),
+                        KeyValue.pair(opprettetRessurs.fid(), expectedSluttet)
                 );
     }
 
     @Test
     @DisplayName("Merger PersonopplysningerEndret event merges sammen inn i state")
     public void test31() {
-        final RessursOpprettetEventV1.RessursOpprettetEventData eventData = new RessursOpprettetEventV1.RessursOpprettetEventData(
-                "personident",
-                Sektor.NAV_STATLIG,
-                new Visningsnavn(
-                        "fornavn",
-                        null,
-                        "etternavn"
-                ),
-                List.of("2011"),
-                "2011"
-        );
 
-        final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
-                Optional.of("navident"),
-                null,
-                null,
-                null,
-                Optional.of(mockToday),
-                Optional.empty(),
-                Optional.empty()
-        );
-
-        final RessursEvent event = new RessursOpprettetEventV1(
-                UUID.randomUUID().toString(),
-                eventData,
-                (Event.Metadata) null,
-                additionalData
-
-        );
+        final RessursState opprettetRessurs = opprettRessurs();
 
         final RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData personaliaOppdatertEventData = new RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData(
                 new Visningsnavn(
@@ -229,115 +96,43 @@ public class EventsrcToStateTest {
                 )
         );
         final RessursEvent personopplysningerEndretEvent = new RessursPersonaliaOppdatertV1(
-                event.getFid(),
+                opprettetRessurs.fid(),
                 personaliaOppdatertEventData,
                 (Event.Metadata) null
         );
 
+        final RessursState expectedEndret = opprettetRessurs.toBuilder()
+            .visningsnavn(personaliaOppdatertEventData.visningsnavn())
+            .build();
 
-        final RessursState expectedOpprettet = new RessursState(
-                event.getFid(),
-                eventData.personident(),
-                additionalData.navident().get(),
-                eventData.sektor(),
-                new Visningsnavn(
-                        "fornavn",
-                        Optional.empty(),
-                        "etternavn"
-                ),
-                Optional.empty(),
-                Optional.of(mockToday),
-                Optional.ofNullable(eventData.primaryFysiskBrukersted()),
-                eventData.fysiskeBrukersteder()
-        );
-
-        final RessursState expectedEndret = new RessursState(
-                event.getFid(),
-                eventData.personident(),
-                additionalData.navident().get(),
-                eventData.sektor(),
-                personaliaOppdatertEventData.visningsnavn(),
-                Optional.empty(),
-                Optional.of(mockToday),
-                Optional.ofNullable(eventData.primaryFysiskBrukersted()),
-                eventData.fysiskeBrukersteder()
-        );
-
-
-        inputTopic.pipeInput(UUID.randomUUID().toString(), event);
         inputTopic.pipeInput(UUID.randomUUID().toString(), personopplysningerEndretEvent);
 
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
                 .containsExactly(
-                        KeyValue.pair(event.getFid(), expectedOpprettet),
-                        KeyValue.pair(event.getFid(), expectedEndret)
+                        KeyValue.pair(opprettetRessurs.fid(), opprettetRessurs),
+                        KeyValue.pair(opprettetRessurs.fid(), expectedEndret)
                 );
     }
 
     @Test
     @DisplayName("RessursTekniskSlettetEventV1 lager tombstone/null RessursState i output topic")
     public void test41() {
-        String fid = UUID.randomUUID().toString();
 
-        final RessursOpprettetEventV1.RessursOpprettetEventData eventData = new RessursOpprettetEventV1.RessursOpprettetEventData(
-                "personident",
-                Sektor.NAV_STATLIG,
-                new Visningsnavn(
-                        "fornavn",
-                        null,
-                        "etternavn"
-                ),
-                List.of("2011"),
-                "2011"
-        );
-
-        final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
-                Optional.of("navident"),
-                null,
-                null,
-                null,
-                Optional.of(mockToday),
-                Optional.empty(),
-                Optional.empty()
-        );
-
-        final RessursEvent opprettEvent = new RessursOpprettetEventV1(
-                fid,
-                eventData,
-                (Event.Metadata) null,
-                additionalData
-        );
-
-        final RessursState expectedOpprettet = new RessursState(
-                fid,
-                eventData.personident(),
-                additionalData.navident().get(),
-                eventData.sektor(),
-                new Visningsnavn(
-                        "fornavn",
-                        Optional.empty(),
-                        "etternavn"
-                ),
-                Optional.empty(),
-                Optional.of(mockToday),
-                Optional.ofNullable(eventData.primaryFysiskBrukersted()),
-                eventData.fysiskeBrukersteder()
-        );
+        final RessursState opprettetRessurs = opprettRessurs();
 
         final RessursEvent slettEvent = new RessursTekniskSlettetEventV1(
-                fid,
-                null,
-                (Event.Metadata) null
+            opprettetRessurs.fid(),
+            null,
+            (Event.Metadata) null
         );
 
-        inputTopic.pipeInput(UUID.randomUUID().toString(), opprettEvent);
         inputTopic.pipeInput(UUID.randomUUID().toString(), slettEvent);
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
                 .containsExactly(
-                        KeyValue.pair(fid, expectedOpprettet),
-                        KeyValue.pair(fid, null)
+                        KeyValue.pair(opprettetRessurs.fid(), opprettetRessurs),
+                        KeyValue.pair(opprettetRessurs.fid(), null)
                 );
     }
 
@@ -363,7 +158,7 @@ public class EventsrcToStateTest {
                 null,
                 null,
                 null,
-                Optional.of(mockToday),
+                Optional.of(LocalDate.now()),
                 Optional.empty(),
                 Optional.empty()
         );
@@ -386,7 +181,7 @@ public class EventsrcToStateTest {
                         "etternavn"
                 ),
                 Optional.empty(),
-                Optional.of(mockToday),
+                additionalData.startdato(),
                 Optional.empty(),
                 Collections.emptyList()
         );
@@ -399,34 +194,73 @@ public class EventsrcToStateTest {
                 );
     }
 
-    private void setupKafkaTransformer() {
-        KafkaConfig kafkaConfig = new KafkaConfig();
-        final StreamsBuilder streamsBuilder = new StreamsBuilder();
-        final var objectSerde = kafkaConfig.objectSerde(objectMapper);
-
-
-        new EventsrcToState(
-                "inputTopic",
-                "outputTopic",
-                objectMapper,
-                objectSerde,
-                streamsBuilder
-        );
-
-        Topology topology = streamsBuilder.build();
-
-        TopologyTestDriver topologyTestDriver = new TopologyTestDriver(topology, new Properties());
-
-        inputTopic = topologyTestDriver.createInputTopic("inputTopic", new StringSerializer(), objectSerde.copyWithType(RessursEvent.class).serializer());
-
-        final var ressursStateSerde = objectSerde.copyWithType(RessursState.class);
-        ressursStateSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());
-        outputTopic = topologyTestDriver.createOutputTopic("outputTopic", new StringDeserializer(), ressursStateSerde.deserializer());
-    }
-
     @Test
     @DisplayName("Merger RessursFysiskeBrukerstederOppdatertEventV1 event merges sammen inn i state")
     public void testRessursFysiskeBrukerstederOppdatertEventV1() {
+
+        final RessursState opprettetRessurs = opprettRessurs();
+
+        final RessursFysiskeBrukerstederOppdatertEventV1.RessursFysiskeBrukerstederOppdatertEventData ressursFysiskeBrukerstederOppdatertEventData =
+            RessursFysiskeBrukerstederOppdatertEventV1.RessursFysiskeBrukerstederOppdatertEventData.builder()
+                .primaryFysiskBrukersted("oslo")
+                .fysiskeBrukersteder(List.of("oslo", "bergen"))
+                .build();
+
+        final RessursEvent ressursFysiskeBrukerstederOppdatertEventV1 = new RessursFysiskeBrukerstederOppdatertEventV1(
+            opprettetRessurs.fid(),
+            ressursFysiskeBrukerstederOppdatertEventData,
+            (Event.Metadata) null
+        );
+
+
+        final RessursState expectedEndret = opprettetRessurs.toBuilder()
+            .primaryFysiskBrukersted(Optional.ofNullable(ressursFysiskeBrukerstederOppdatertEventData.primaryFysiskBrukersted()))
+            .fysiskeBrukersteder(ressursFysiskeBrukerstederOppdatertEventData.fysiskeBrukersteder())
+            .build();
+
+        inputTopic.pipeInput(UUID.randomUUID().toString(), ressursFysiskeBrukerstederOppdatertEventV1);
+
+        Assertions.assertThat(outputTopic.readKeyValuesToList())
+            .containsExactly(
+                KeyValue.pair(opprettetRessurs.fid(), opprettetRessurs),
+                KeyValue.pair(opprettetRessurs.fid(), expectedEndret)
+            );
+    }
+
+    @Test
+    @DisplayName("Merger RessursSluttdatoOppdatertEventV1 event merges sammen inn i state")
+    public void testRessursSluttdatoOppdatertEventV1() {
+
+        final RessursState opprettetRessurs = opprettRessurs();
+
+        final RessursSluttdatoOppdatertEventV1.RessursSluttdatoOppdatertEventData ressursSluttdatoOppdatertEventData =
+            new RessursSluttdatoOppdatertEventV1.RessursSluttdatoOppdatertEventData(
+                Optional.of(LocalDate.now().plusYears(1))
+            );
+
+        final RessursEvent ressursSluttdatoOppdatertEventV1 = new RessursSluttdatoOppdatertEventV1(
+            opprettetRessurs.fid(),
+            ressursSluttdatoOppdatertEventData,
+            (Event.Metadata) null
+        );
+
+
+        final RessursState expectedEndret = opprettetRessurs.toBuilder()
+            .sluttdato(ressursSluttdatoOppdatertEventData.sluttdato())
+            .build();
+
+        inputTopic.pipeInput(UUID.randomUUID().toString(), ressursSluttdatoOppdatertEventV1);
+
+
+        Assertions.assertThat(outputTopic.readKeyValuesToList())
+            .containsExactly(
+                KeyValue.pair(opprettetRessurs.fid(), opprettetRessurs),
+                KeyValue.pair(opprettetRessurs.fid(), expectedEndret)
+            );
+    }
+
+    private RessursState opprettRessurs() {
+
         final RessursOpprettetEventV1.RessursOpprettetEventData ressursOpprettetEventData = new RessursOpprettetEventV1.RessursOpprettetEventData(
             "personident",
             Sektor.NAV_STATLIG,
@@ -444,7 +278,7 @@ public class EventsrcToStateTest {
             null,
             null,
             null,
-            Optional.of(mockToday),
+            Optional.of(LocalDate.now()),
             Optional.empty(),
             Optional.empty()
         );
@@ -457,52 +291,45 @@ public class EventsrcToStateTest {
 
         );
 
-        final RessursFysiskeBrukerstederOppdatertEventV1.RessursFysiskeBrukerstederOppdatertEventData ressursFysiskeBrukerstederOppdatertEventData =
-            RessursFysiskeBrukerstederOppdatertEventV1.RessursFysiskeBrukerstederOppdatertEventData.builder()
-                .primaryFysiskBrukersted("oslo")
-                .fysiskeBrukersteder(List.of("oslo", "bergen"))
-                .build();
+        inputTopic.pipeInput(UUID.randomUUID().toString(), event);
 
-        final RessursEvent ressursFysiskeBrukerstederOppdatertEventV1 = new RessursFysiskeBrukerstederOppdatertEventV1(
-            event.getFid(),
-            ressursFysiskeBrukerstederOppdatertEventData,
-            (Event.Metadata) null
-        );
-
-
-        final RessursState expectedOpprettet = new RessursState(
+        return new RessursState(
             event.getFid(),
             ressursOpprettetEventData.personident(),
             ressursOpprettetAdditionalData.navident().get(),
             ressursOpprettetEventData.sektor(),
             ressursOpprettetEventData.visningsnavn(),
             Optional.empty(),
-            Optional.of(mockToday),
+            ressursOpprettetAdditionalData.startdato(),
             Optional.ofNullable(ressursOpprettetEventData.primaryFysiskBrukersted()),
             ressursOpprettetEventData.fysiskeBrukersteder()
         );
 
-        final RessursState expectedEndret = new RessursState(
-            event.getFid(),
-            ressursOpprettetEventData.personident(),
-            ressursOpprettetAdditionalData.navident().get(),
-            ressursOpprettetEventData.sektor(),
-            ressursOpprettetEventData.visningsnavn(),
-            Optional.empty(),
-            Optional.of(mockToday),
-            Optional.ofNullable(ressursFysiskeBrukerstederOppdatertEventData.primaryFysiskBrukersted()),
-            ressursFysiskeBrukerstederOppdatertEventData.fysiskeBrukersteder()
+    }
+
+    private void setupKafkaTransformer() {
+        KafkaConfig kafkaConfig = new KafkaConfig();
+        final StreamsBuilder streamsBuilder = new StreamsBuilder();
+        final var objectSerde = kafkaConfig.objectSerde(objectMapper);
+
+
+        new EventsrcToState(
+            "inputTopic",
+            "outputTopic",
+            objectMapper,
+            objectSerde,
+            streamsBuilder
         );
 
-        inputTopic.pipeInput(UUID.randomUUID().toString(), event);
-        inputTopic.pipeInput(UUID.randomUUID().toString(), ressursFysiskeBrukerstederOppdatertEventV1);
+        Topology topology = streamsBuilder.build();
 
+        TopologyTestDriver topologyTestDriver = new TopologyTestDriver(topology, new Properties());
 
-        Assertions.assertThat(outputTopic.readKeyValuesToList())
-            .containsExactly(
-                KeyValue.pair(event.getFid(), expectedOpprettet),
-                KeyValue.pair(event.getFid(), expectedEndret)
-            );
+        inputTopic = topologyTestDriver.createInputTopic("inputTopic", new StringSerializer(), objectSerde.copyWithType(RessursEvent.class).serializer());
+
+        final var ressursStateSerde = objectSerde.copyWithType(RessursState.class);
+        ressursStateSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());
+        outputTopic = topologyTestDriver.createOutputTopic("outputTopic", new StringDeserializer(), ressursStateSerde.deserializer());
     }
 
     private static ObjectMapper configureObjectMapper() {

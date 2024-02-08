@@ -8,6 +8,8 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreT
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.Tilknytningtype;
@@ -24,6 +26,7 @@ import org.mockito.Captor;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -44,6 +47,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     @MockBean
     private OrgtilknytningCommandService orgtilknytningCommandService;
+
+    @MockBean
+    private RessursCommadService ressursCommadService;
 
     @MockBean
     private RessursStateListener ressursStateListener;
@@ -132,7 +138,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should update dato for orgtilknytning")
+    @DisplayName("Should update dato for orgtilknytning and NOT update ressurs sluttdato")
     void test_update_orgtilknytning_date() {
 
         var orgtilknytningToUpdate = orgtilknytningState();
@@ -145,25 +151,13 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build()
         ));
 
-        var endreOrgtilknytningDatoRequest = new EndreOrgtilknytningDatoRequest(
-            LocalDate.now(),
-            Optional.of(LocalDate.now().plusYears(1))
-        );
+        var endreOrgtilknytningDatoRequest = endreOrgtilknytningDatoRequest().toBuilder()
+            .setRessursSluttdato(Optional.empty())
+            .build();
 
-
-        webTestClient
-            .post()
-            .uri(uriBuilder -> uriBuilder
-                .path("/app/orgtilknytninger/{fid}/dato")
-                .build(orgtilknytningToUpdate.fid())
-            )
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(endreOrgtilknytningDatoRequest)
-            .exchange()
-            .expectStatus().is2xxSuccessful();
+        postEndreOrgtilknytningDatoRequest(
+            orgtilknytningToUpdate.fid(), nomWriteUserToken(), endreOrgtilknytningDatoRequest
+        ).expectStatus().is2xxSuccessful();
 
         verify(
             orgtilknytningCommandService,
@@ -181,6 +175,85 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .matches(endreOrgtilknytningDato ->
                 endreOrgtilknytningDato.gyldigTom().equals(endreOrgtilknytningDatoRequest.gyldigTom())
             );
+
+        verify(ressursCommadService, times(0)).oppdaterRessursSluttdatoEvent(any());
+    }
+
+    @Test
+    @DisplayName("Should update sluttdato for ressurs on update orgtilknytning dato when setRessursSluttdato=true")
+    void test_update_ressurs_sluttdato_on_update_orgtilknytning_dato() {
+
+        var orgtilknytningToUpdate = orgtilknytningState();
+        saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
+
+        saveRessurser(List.of(
+            ressursState().toBuilder()
+                .navident(orgtilknytningToUpdate.navident())
+                .sektor(Sektor.EKSTERN)
+                .build()
+        ));
+
+        var newSluttdato = LocalDate.now().plusMonths(5);
+        var endreOrgtilknytningDatoRequest = endreOrgtilknytningDatoRequest().toBuilder()
+            .gyldigTom(Optional.of(newSluttdato))
+            .setRessursSluttdato(Optional.of(true))
+            .build();
+
+        postEndreOrgtilknytningDatoRequest(
+            orgtilknytningToUpdate.fid(), nomWriteUserToken(), endreOrgtilknytningDatoRequest
+        ).expectStatus().is2xxSuccessful();
+
+        var oppdaterSluttdatoCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterSluttdatoCommand.class);
+
+        verify(
+            ressursCommadService,
+            times(1)
+        ).oppdaterRessursSluttdatoEvent(
+            oppdaterSluttdatoCommandArgumentCaptor.capture()
+        );
+
+        assertThat(oppdaterSluttdatoCommandArgumentCaptor.getValue())
+            .matches(oppdaterSluttdatoCommand ->
+                oppdaterSluttdatoCommand.sluttdato().equals(endreOrgtilknytningDatoRequest.gyldigTom())
+            );
+    }
+
+    @Test
+    @DisplayName("Should NOT update sluttdato for ressurs on update orgtilknytning dato when setRessursSluttdato=true if another orgtilknytning has a later gyldigTom")
+    void test_not_update_ressurs_sluttdato_on_update_orgtilknytning_dato_when_other_orgtilknytning_has_later_gyldig_tom() {
+        var newSluttdato = LocalDate.now().plusMonths(5);
+
+        var orgtilknytningToUpdate = orgtilknytningState();
+        saveOrgtilknytninger(List.of(
+            orgtilknytningToUpdate,
+            orgtilknytningState().toBuilder()
+                .gyldigTom(Optional.of(newSluttdato.plusMonths(1)))
+                .orgEnhetId("orgtilknytning-with-later-gyldigTom")
+                .build()
+        ));
+
+        saveRessurser(List.of(
+            ressursState().toBuilder()
+                .navident(orgtilknytningToUpdate.navident())
+                .sektor(Sektor.EKSTERN)
+                .build()
+        ));
+
+        var endreOrgtilknytningDatoRequest = endreOrgtilknytningDatoRequest().toBuilder()
+            .gyldigTom(Optional.of(newSluttdato))
+            .setRessursSluttdato(Optional.of(true))
+            .build();
+
+        postEndreOrgtilknytningDatoRequest(
+            orgtilknytningToUpdate.fid(), nomWriteUserToken(), endreOrgtilknytningDatoRequest
+        ).expectStatus().is2xxSuccessful();
+
+        verify(
+            ressursCommadService,
+            times(0)
+        ).oppdaterRessursSluttdatoEvent(
+            any()
+        );
     }
 
     @Test
@@ -210,24 +283,14 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         saveOrgenheter(List.of(orgEnhet));
 
 
-        var endreOrgtilknytningDatoRequest = EndreOrgtilknytningDatoRequest.builder()
+        var endreOrgtilknytningDatoRequest = endreOrgtilknytningDatoRequest().toBuilder()
             .gyldigFom(LocalDate.now().plusMonths(1))
             .gyldigTom(Optional.of(LocalDate.now().plusMonths(6)))
             .build();
 
-        webTestClient
-            .post()
-            .uri(uriBuilder -> uriBuilder
-                .path("/app/orgtilknytninger/{fid}/dato")
-                .build(orgtilknytningToChange.fid())
-            )
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(endreOrgtilknytningDatoRequest)
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+        postEndreOrgtilknytningDatoRequest(
+            orgtilknytningToChange.fid(), nomWriteUserToken(), endreOrgtilknytningDatoRequest
+        ).expectStatus().isEqualTo(HttpStatus.CONFLICT)
             .expectBody()
             .jsonPath("message")
             .isEqualTo("Det finnes allerede en orgtilknytning for samme orgenhet innenfor forespurt periode");
@@ -270,24 +333,14 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .orgEnhetId(orgEnhetForDagligOppfolgingToChange.id()).build();
         saveOrgtilknytninger(List.of(dagligOppfolgingWithConflictingPeriod, dagligOppfolgingToChange));
 
-        var endreOrgtilknytningDatoRequest = EndreOrgtilknytningDatoRequest.builder()
+        var endreOrgtilknytningDatoRequest = endreOrgtilknytningDatoRequest().toBuilder()
             .gyldigFom(LocalDate.now().plusMonths(1))
             .gyldigTom(Optional.of(LocalDate.now().plusMonths(6)))
             .build();
 
-        webTestClient
-            .post()
-            .uri(uriBuilder -> uriBuilder
-                .path("/app/orgtilknytninger/{fid}/dato")
-                .build(dagligOppfolgingToChange.fid())
-            )
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(endreOrgtilknytningDatoRequest)
-            .exchange()
-            .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+        postEndreOrgtilknytningDatoRequest(
+            dagligOppfolgingToChange.fid(), nomWriteUserToken(), endreOrgtilknytningDatoRequest
+        ).expectStatus().isEqualTo(HttpStatus.CONFLICT)
             .expectBody()
             .jsonPath("message")
             .isEqualTo(OrgtilknytningPeriodeOverlapException.forDagligOppfolgingInPeriod(
@@ -316,25 +369,14 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build()
         ));
 
-        var endreOrgtilknytningDatoRequest = new EndreOrgtilknytningDatoRequest(
-            orgtilknytningToUpdate.gyldigFom(),
-            Optional.of(LocalDate.now().minusDays(1))
-        );
+        var endreOrgtilknytningDatoRequest = endreOrgtilknytningDatoRequest().toBuilder()
+            .gyldigFom(orgtilknytningToUpdate.gyldigFom())
+            .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
+            .build();
 
-
-        webTestClient
-            .post()
-            .uri(uriBuilder -> uriBuilder
-                .path("/app/orgtilknytninger/{fid}/dato")
-                .build(orgtilknytningToUpdate.fid())
-            )
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(endreOrgtilknytningDatoRequest)
-            .exchange()
-            .expectStatus().isBadRequest();
+        postEndreOrgtilknytningDatoRequest(
+            orgtilknytningToUpdate.fid(), nomWriteUserToken(), endreOrgtilknytningDatoRequest
+        ).expectStatus().isBadRequest();
 
         verify(
             orgtilknytningCommandService,
@@ -358,48 +400,18 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build()
         ));
 
-        webTestClient
-            .post()
-            .uri(uriBuilder -> uriBuilder
-                .path("/app/orgtilknytninger/{fid}/dato")
-                .build(orgtilknytningToUpdate.fid())
-            )
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(
-                new EndreOrgtilknytningDatoRequest(
-                    LocalDate.now(),
-                    Optional.of(LocalDate.now().plusYears(1))
-                )
-            )
-            .exchange()
-            .expectStatus().isBadRequest();
+        postEndreOrgtilknytningDatoRequest(
+            orgtilknytningToUpdate.fid(), nomWriteUserToken(), endreOrgtilknytningDatoRequest()
+        ).expectStatus().isBadRequest();
     }
 
     @Test
     @DisplayName("Should forbid update dato if user does not have granted authority 'MUTATE_RESSURS'")
     void test_update_orgtilknytning_forbidden() {
 
-        webTestClient
-            .post()
-            .uri(uriBuilder -> uriBuilder
-                .path("/app/orgtilknytninger/{fid}/dato")
-                .build("some-fid")
-            )
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(noScopesUserToken());
-            })
-            .bodyValue(
-                new EndreOrgtilknytningDatoRequest(
-                    LocalDate.now(),
-                    Optional.of(LocalDate.now().plusYears(1))
-                )
-            )
-            .exchange()
-            .expectStatus().isForbidden();
+        postEndreOrgtilknytningDatoRequest(
+            "some-fid", noScopesUserToken(), endreOrgtilknytningDatoRequest()
+        ).expectStatus().isForbidden();
     }
 
     @Test
@@ -887,4 +899,30 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     }
 
+    private static EndreOrgtilknytningDatoRequest endreOrgtilknytningDatoRequest() {
+        return EndreOrgtilknytningDatoRequest.builder()
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(11)))
+            .setRessursSluttdato(Optional.empty())
+            .build();
+    }
+
+    private WebTestClient.ResponseSpec postEndreOrgtilknytningDatoRequest(
+        String fid,
+        String accessToken,
+        EndreOrgtilknytningDatoRequest endreOrgtilknytningDatoRequest
+    ) {
+        return webTestClient
+            .post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgtilknytninger/{fid}/dato")
+                .build(fid)
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(accessToken);
+            })
+            .bodyValue(endreOrgtilknytningDatoRequest)
+            .exchange();
+    }
 }

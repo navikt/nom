@@ -13,6 +13,7 @@ import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
+import no.nav.nom.contract.nom.eventsource.RessursSluttdatoOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.generated.model.OrgtilknytningState;
 import no.nav.nom.generated.model.Ressurs;
@@ -80,7 +81,10 @@ public class NomIntegrasjonService {
         } else if (ressursEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1
             && isFidEksternRessurs(ressursEvent.getFid())
         ) {
-            avsluttRessurs(ressursSluttetEventV1);
+            handleRessursSluttetEventV1(ressursSluttetEventV1);
+
+        } else if (ressursEvent instanceof RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
+            handleRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
 
         } else if (ressursEvent instanceof RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertV1
             && isFidEksternRessurs(ressursEvent.getFid())
@@ -156,7 +160,7 @@ public class NomIntegrasjonService {
 
     }
 
-    private void avsluttRessurs(RessursSluttetEventV1 ressursSluttetEventV1) {
+    private void handleRessursSluttetEventV1(RessursSluttetEventV1 ressursSluttetEventV1) {
 
         logger.info("Updating remedy data for RessursSluttetEventV1 with fid {}", ressursSluttetEventV1.getFid());
 
@@ -174,6 +178,41 @@ public class NomIntegrasjonService {
         }
     }
 
+
+    private void handleRessursSluttdatoOppdatertEventV1(RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
+
+        logger.info(
+            "Updating remedy data for {} with fid {}",
+            ressursSluttdatoOppdatertEventV1.getClass().getSimpleName(),
+            ressursSluttdatoOppdatertEventV1.getFid()
+        );
+
+        ressursSluttdatoOppdatertEventV1.getRessursSluttdatoOppdatertEventData().sluttdato().ifPresent(
+            sluttdatoForRessurs -> avsluttRessursInRemedy(
+                ressursSluttdatoOppdatertEventV1.getFid(),
+                sluttdatoForRessurs,
+                ressursSluttdatoOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy()
+                )
+        );
+    }
+
+    private void avsluttRessursInRemedy(String ressursFid, LocalDate sluttdatoForRessurs, String initiatedBy) {
+
+        if (!unleash.isEnabled("nom-remedy-integrasjon.delete_avsluttede_ressurser")) {
+            return;
+        }
+
+        if (sluttdatoForRessurs.isBefore(LocalDate.now())) {
+            var ressursState = nomApiClient.getRessursByFid(ressursFid);
+
+            markRessursForDeletion(
+                ressursState.getNavident(),
+                initiatedBy
+            );
+
+            logger.info("Deleted ressurs with fid {} and with sluttdato {}", ressursFid, sluttdatoForRessurs);
+        }
+    }
 
     public void findRessurserWithSluttdatoAndMarkForDeletion(LocalDate sluttdato, String initiatedBy) {
 

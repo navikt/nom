@@ -105,7 +105,7 @@ public class OrgtilknytningController {
         @RequestBody EndreOrgtilknytningDatoRequest endreOrgtilknytningDatoRequest
     ) {
         if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
-            orgtilknytningRestService.updateOrgtilknyting(fid, endreOrgtilknytningDatoRequest);
+            orgtilknytningRestService.updateOrgtilknytingDato(fid, endreOrgtilknytningDatoRequest);
 
             return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
         }

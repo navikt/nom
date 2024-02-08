@@ -9,6 +9,7 @@ import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
+import no.nav.nom.contract.nom.eventsource.RessursSluttdatoOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.generated.model.OrgEnhet;
@@ -60,6 +61,14 @@ public class TestData {
         return new RessursSluttetEventV1(
             UUID.randomUUID().toString(),
             new RessursSluttetEventV1.RessursSluttetEventData(sluttdato),
+            inputMetadata()
+        );
+    }
+
+    public static RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1(LocalDate sluttdato) {
+        return new RessursSluttdatoOppdatertEventV1(
+            UUID.randomUUID().toString(),
+            new RessursSluttdatoOppdatertEventV1.RessursSluttdatoOppdatertEventData(Optional.of(sluttdato)),
             inputMetadata()
         );
     }
