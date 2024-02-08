@@ -61,7 +61,7 @@ public class KommunaleRessurserProcessor {
 
             var sluttDatoPaaTmpOT = minStartDatoPaaEksisterendeFremtidigeOrgtilknytninger
                 .map(localDate -> localDate.minusDays(1))
-                .orElseGet(kommunalRessurs::getRemedySluttdato);
+                .orElseGet(kommunalRessurs::getSluttdato);
 
             OrgtilknytningState ot = new OrgtilknytningState(
                 fid,
