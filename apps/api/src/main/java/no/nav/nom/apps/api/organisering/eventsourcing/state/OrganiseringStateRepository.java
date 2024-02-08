@@ -110,6 +110,10 @@ public class OrganiseringStateRepository {
         return organiseringByFid.size();
     }
 
+    public void logRepositoryState() {
+        logger.debug("organiseringByFid: {} organiseringById: {} allOrganiseringerContainingId: {} Aktive organiseringer: {}", organiseringByFid.size(), organiseringById.size(), allOrganiseringerContainingId.size(), getActiveOrganisering().size());
+    }
+
     public Map<String, OrganiseringState> getActiveOrganisering() {
         // either terminating date is not present of it is today or later
         return organiseringByFid.entrySet().stream()
