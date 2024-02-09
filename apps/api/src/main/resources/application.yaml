@@ -182,6 +182,7 @@ logging:
     # Kjør med ekstra logging i oppstarten av orgtilknytning
     no.nav.nom.apps.api.orgtilknytning: DEBUG
     # Ekstra logging for test av ny organisering
+    no.nav.nom.apps.api.organisering: DEBUG
     no.nav.nom.apps.api.graphql.organisasjonsenhet: DEBUG
     no.nav.nom.apps.api.orgenhet: DEBUG
     no.nav.nom.apps.api.ressurs.api: DEBUG
