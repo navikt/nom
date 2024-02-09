@@ -198,6 +198,7 @@ export type Query = {
   person?: Maybe<PersonResult>;
   ressurs?: Maybe<Ressurs>;
   ressurser: Array<RessursResult>;
+  ressurserWithMetadata: Array<RessursWithMetadataResult>;
   search: Array<SearchResult>;
   searchOrgEnhet: Array<OrgEnhet>;
   searchRessurs: Array<Ressurs>;
@@ -323,6 +324,18 @@ export type RessursSearchFilter = {
   limit?: ResultLimit;
   sektorSelection?: SektorSelection;
   statusSelection?: StatusSelection;
+};
+
+export type RessursWithMetadataResult = {
+  __typename?: 'RessursWithMetadataResult';
+  code: ResultCode;
+  endretAv?: Maybe<Scalars['String']['output']>;
+  endretDato?: Maybe<Scalars['Date']['output']>;
+  endringEvent?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  opprettetAv?: Maybe<Scalars['String']['output']>;
+  opprettetDato?: Maybe<Scalars['Date']['output']>;
+  ressurs?: Maybe<Ressurs>;
 };
 
 export type RessurserSearch = {
@@ -500,6 +513,7 @@ export type ResolversTypes = {
   RessursResult: ResolverTypeWrapper<RessursResult>;
   RessursSearch: RessursSearch;
   RessursSearchFilter: RessursSearchFilter;
+  RessursWithMetadataResult: ResolverTypeWrapper<RessursWithMetadataResult>;
   RessurserSearch: RessurserSearch;
   ResultCode: ResultCode;
   ResultLimit: ResultLimit;
@@ -541,11 +555,16 @@ export type ResolversParentTypes = {
   RessursResult: RessursResult;
   RessursSearch: RessursSearch;
   RessursSearchFilter: RessursSearchFilter;
+  RessursWithMetadataResult: RessursWithMetadataResult;
   RessurserSearch: RessurserSearch;
   SearchResult: ResolversUnionTypes<ResolversParentTypes>['SearchResult'];
   String: Scalars['String']['output'];
   Telefon: Telefon;
 };
+
+export type OneOfDirectiveArgs = { };
+
+export type OneOfDirectiveResolver<Result, Parent, ContextType = any, Args = OneOfDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
 export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
   name: 'Date';
@@ -655,6 +674,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   person?: Resolver<Maybe<ResolversTypes['PersonResult']>, ParentType, ContextType, Partial<QueryPersonArgs>>;
   ressurs?: Resolver<Maybe<ResolversTypes['Ressurs']>, ParentType, ContextType, RequireFields<QueryRessursArgs, 'where'>>;
   ressurser?: Resolver<Array<ResolversTypes['RessursResult']>, ParentType, ContextType, Partial<QueryRessurserArgs>>;
+  ressurserWithMetadata?: Resolver<Array<ResolversTypes['RessursWithMetadataResult']>, ParentType, ContextType>;
   search?: Resolver<Array<ResolversTypes['SearchResult']>, ParentType, ContextType, RequireFields<QuerySearchArgs, 'term'>>;
   searchOrgEnhet?: Resolver<Array<ResolversTypes['OrgEnhet']>, ParentType, ContextType, RequireFields<QuerySearchOrgEnhetArgs, 'term'>>;
   searchRessurs?: Resolver<Array<ResolversTypes['Ressurs']>, ParentType, ContextType, RequireFields<QuerySearchRessursArgs, 'term'>>;
@@ -708,6 +728,18 @@ export type RessursResultResolvers<ContextType = any, ParentType extends Resolve
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type RessursWithMetadataResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['RessursWithMetadataResult'] = ResolversParentTypes['RessursWithMetadataResult']> = {
+  code?: Resolver<ResolversTypes['ResultCode'], ParentType, ContextType>;
+  endretAv?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  endretDato?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
+  endringEvent?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  opprettetAv?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  opprettetDato?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
+  ressurs?: Resolver<Maybe<ResolversTypes['Ressurs']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type SearchResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['SearchResult'] = ResolversParentTypes['SearchResult']> = {
   __resolveType: TypeResolveFn<'OrgEnhet' | 'Ressurs', ParentType, ContextType>;
 };
@@ -738,10 +770,14 @@ export type Resolvers<ContextType = any> = {
   RessursLeder?: RessursLederResolvers<ContextType>;
   RessursOrgTilknytning?: RessursOrgTilknytningResolvers<ContextType>;
   RessursResult?: RessursResultResolvers<ContextType>;
+  RessursWithMetadataResult?: RessursWithMetadataResultResolvers<ContextType>;
   SearchResult?: SearchResultResolvers<ContextType>;
   Telefon?: TelefonResolvers<ContextType>;
 };
 
+export type DirectiveResolvers<ContextType = any> = {
+  oneOf?: OneOfDirectiveResolver<any, any, ContextType>;
+};
 
 
 export const SearchOrgenheterDocument = gql`
@@ -776,7 +812,7 @@ export const SearchOrgenheterDocument = gql`
  *   },
  * });
  */
-export function useSearchOrgenheterQuery(baseOptions: Apollo.QueryHookOptions<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>) {
+export function useSearchOrgenheterQuery(baseOptions: Apollo.QueryHookOptions<SearchOrgenheterQuery, SearchOrgenheterQueryVariables> & ({ variables: SearchOrgenheterQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>(SearchOrgenheterDocument, options);
       }
@@ -784,6 +820,11 @@ export function useSearchOrgenheterLazyQuery(baseOptions?: Apollo.LazyQueryHookO
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>(SearchOrgenheterDocument, options);
         }
+export function useSearchOrgenheterSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>(SearchOrgenheterDocument, options);
+        }
 export type SearchOrgenheterQueryHookResult = ReturnType<typeof useSearchOrgenheterQuery>;
 export type SearchOrgenheterLazyQueryHookResult = ReturnType<typeof useSearchOrgenheterLazyQuery>;
+export type SearchOrgenheterSuspenseQueryHookResult = ReturnType<typeof useSearchOrgenheterSuspenseQuery>;
 export type SearchOrgenheterQueryResult = Apollo.QueryResult<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>;
