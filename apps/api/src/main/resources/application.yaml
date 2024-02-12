@@ -187,6 +187,7 @@ logging:
     no.nav.nom.apps.api.orgenhet: DEBUG
     no.nav.nom.apps.api.ressurs.api: DEBUG
     no.nav.nom.apps.api.rest.uttrekk: DEBUG
+    no.nav.nom.apps.api.common.security: DEBUG
 
 management:
   endpoints:
@@ -219,6 +220,10 @@ app:
         scopes: ["QUERY_PERSON"]
       teamcat:
         client-id: "16bf0ab5-d09b-4c38-ad6d-71f8d93ff7e4"
+        scopes: ["TEAMCAT"]
+#     For testing av endepunkter under /api/v1/teamcat
+      org-token-tool:
+        client-id: "18c1d86b-4635-461c-8718-62c130087211"
         scopes: ["TEAMCAT"]
     groups:
       nom-write:
