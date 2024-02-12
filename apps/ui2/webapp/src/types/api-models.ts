@@ -21,9 +21,10 @@ export interface AvvikleRessursRequest {
 
 export interface EndreOrgtilknytningDatoRequest {
   /** @format date */
-  gyldigFom?: string;
+  gyldigFom: string;
   /** @format date */
   gyldigTom?: string;
+  setRessursSluttdato?: boolean;
 }
 
 export interface EndreTilknytningtypeRequest {
@@ -48,6 +49,7 @@ export interface LeggTilOrgtilknytningRequest {
   gyldigTom?: string;
   navident: string;
   orgEnhetId: string;
+  setRessursSluttdato?: boolean;
 }
 
 export enum NomNivaa {
@@ -159,6 +161,12 @@ export interface Ressurs {
   startdato?: string;
   telefoner: Telefon[];
   visningsnavn: Visningsnavn;
+}
+
+export interface RessursFilter {
+  sektor?: Sektor;
+  /** @format date */
+  sluttdato?: string;
 }
 
 export interface RessursLeder {

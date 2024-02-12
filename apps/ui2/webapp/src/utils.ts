@@ -115,3 +115,17 @@ export function isAfterPresent(date: Date) {
 
   return isAfter(endOfDate, endOfToday);
 }
+
+export function isDateAfterOtherDates(
+  date?: string,
+  otherDates?: Array<string | undefined>,
+) {
+  const maxDate = new Date(maxTime);
+  const compareDate = date ? new Date(date) : maxDate;
+
+  return (
+    otherDates
+      ?.map((otherDate) => (otherDate ? new Date(otherDate) : maxDate))
+      .every((otherDate) => isAfter(compareDate, otherDate)) ?? true
+  );
+}

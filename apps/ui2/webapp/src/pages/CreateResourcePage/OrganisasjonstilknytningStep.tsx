@@ -146,6 +146,7 @@ export const eksternPeriodeValidationSchema = yup.object().shape({
       "Kan maks være 1 år frem i tid fra dagens dato",
       (v) => isBefore(new Date(v), addYears(new Date(), 1)),
     ),
+  setRessursSluttdato: yup.boolean(),
 });
 
 // eslint-disable-next-line unicorn/prefer-spread

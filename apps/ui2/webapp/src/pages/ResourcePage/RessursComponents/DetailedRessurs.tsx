@@ -153,7 +153,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
           editOrgtilknytning === orgTilknytning.fid ? (
             <EditOrgtilknytningForm
               key={orgTilknytning.fid}
-              orgTilknytning={orgTilknytning}
+              orgtilknytning={orgTilknytning}
             />
           ) : (
             <OrganisationHierarchyTree
@@ -197,7 +197,7 @@ function FutureOrgTilknytninger({
         editOrgtilknytning === orgTilknytning.fid ? (
           <EditOrgtilknytningForm
             key={orgTilknytning.fid}
-            orgTilknytning={orgTilknytning}
+            orgtilknytning={orgTilknytning}
           />
         ) : (
           <OrganisationHierarchyTree

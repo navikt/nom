@@ -2,7 +2,7 @@ import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { PencilIcon } from "@navikt/aksel-icons";
 import { Alert, Button } from "@navikt/ds-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { addYears } from "date-fns";
@@ -10,8 +10,10 @@ import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import {
+  getOrgTilknytninger,
   leggTilOrgtilknytning,
   orgtilknytningerKeys,
+  ressurserKeys,
 } from "~/api/react-query-endpoints";
 import { ApiResponseError } from "~/components/ApiResponseError";
 import { showToast } from "~/hooks/showToast";
@@ -20,16 +22,26 @@ import {
   OrganisasjonstilknytningInnerForm,
 } from "~/pages/CreateResourcePage/OrganisasjonstilknytningStep";
 import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
+import { SetRessursSluttdatoFormPart } from "~/pages/ResourcePage/EditForms/EditOrgtilknytningForm";
 import { SaveOrAbortButtons } from "~/pages/ResourcePage/EditForms/SaveOrAbortButtons";
 import { defaultFormStyle } from "~/resources/NomStyles";
 import type { LeggTilOrgtilknytningRequest, Ressurs } from "~/types/api-models";
 import type { StandardResponse } from "~/types/api-models";
-import { formatDateWithoutTimezone } from "~/utils";
+import {
+  formatDateWithoutTimezone,
+  formatDisplayDate,
+  isDateAfterOtherDates,
+} from "~/utils";
 
 export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { addOrgtilknytning } = useSearch({ from: "/ressurs/$id" });
+
+  const existingOrgtilknytningerQuery = useQuery({
+    queryKey: getOrgTilknytninger.queryKey(ressurs.navident),
+    queryFn: () => getOrgTilknytninger.queryFn(ressurs.navident),
+  });
 
   const methods = useForm({
     defaultValues: {
@@ -37,6 +49,7 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
       gyldigFom: undefined,
       gyldigTom: undefined,
     },
+    shouldUnregister: true,
     resolver: yupResolver(eksternValidationSchema),
   });
 
@@ -52,11 +65,14 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
       queryClient.invalidateQueries({
         queryKey: orgtilknytningerKeys.navident(ressurs.navident),
       });
+      queryClient.invalidateQueries({
+        queryKey: ressurserKeys.id(ressurs.navident),
+      });
       navigate({ search: {}, params: (previous) => previous });
     },
   });
 
-  const { handleSubmit } = methods;
+  const { handleSubmit, watch } = methods;
 
   if (addOrgtilknytning) {
     return (
@@ -74,6 +90,18 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
             defaultSluttDato={formatDateWithoutTimezone(
               addYears(new Date(), 1),
             )}
+          />
+          <SetRessursSluttdatoFormPart
+            enabled={
+              Boolean(watch("gyldigTom")) &&
+              isDateAfterOtherDates(
+                watch("gyldigTom"),
+                existingOrgtilknytningerQuery.data?.map(
+                  (existingOrgtilknytning) => existingOrgtilknytning.gyldigTom,
+                ),
+              )
+            }
+            text={`${formatDisplayDate(watch("gyldigTom"))} er ${ressurs?.visningsnavn.fornavn} sin siste arbeidsdag i NAV?`}
           />
           <ApiResponseError error={leggTilOrgtilknytningMutation.error} />
           <SaveOrAbortButtons

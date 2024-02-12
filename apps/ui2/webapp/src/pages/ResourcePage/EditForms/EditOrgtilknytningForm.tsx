@@ -1,15 +1,25 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { DatePicker, Heading, Label, useDatepicker } from "@navikt/ds-react";
+import {
+  BodyShort,
+  Checkbox,
+  DatePicker,
+  Heading,
+  Label,
+  useDatepicker,
+} from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import {
   getOrgEnhet,
+  getOrgTilknytninger,
+  getRessurs,
   orgtilknytningerKeys,
+  ressurserKeys,
   updateOrgtilknytningDato,
 } from "~/api/react-query-endpoints";
 import { ApiResponseError } from "~/components/ApiResponseError";
@@ -23,20 +33,25 @@ import type {
   OrgtilknytningState,
   StandardResponse,
 } from "~/types/api-models";
-import { formatDateWithoutTimezone, formatVisningsnavn } from "~/utils";
+import {
+  formatDateWithoutTimezone,
+  formatDisplayDate,
+  formatVisningsnavn,
+  isDateAfterOtherDates,
+} from "~/utils";
 
 export function EditOrgtilknytningForm({
-  orgTilknytning,
+  orgtilknytning,
 }: {
-  orgTilknytning: OrgtilknytningState;
+  orgtilknytning: OrgtilknytningState;
 }) {
   const queryClient = useQueryClient();
   const methods = useForm({
     defaultValues: {
-      gyldigFom: orgTilknytning.gyldigFom,
-      gyldigTom: orgTilknytning.gyldigTom,
+      gyldigFom: orgtilknytning.gyldigFom,
+      gyldigTom: orgtilknytning.gyldigTom,
     },
-    // @ts-expect-error -- For some strange reason yupResolver requires defaultValues to be either both string, or both undefined, but not a mix of both, which is our case
+    shouldUnregister: true,
     resolver: yupResolver(eksternPeriodeValidationSchema),
   });
 
@@ -44,25 +59,40 @@ export function EditOrgtilknytningForm({
     handleSubmit,
     setValue,
     formState: { errors },
+    watch,
   } = methods;
 
   const startDatepicker = useDatepicker({
     onDateChange: (date) =>
       setValue("gyldigFom", date ? formatDateWithoutTimezone(date) : ""),
-    defaultSelected: new Date(orgTilknytning.gyldigFom),
+    defaultSelected: new Date(orgtilknytning.gyldigFom),
   });
 
   const sluttDatepicker = useDatepicker({
     onDateChange: (date) =>
       setValue("gyldigTom", date ? formatDateWithoutTimezone(date) : ""),
-    defaultSelected: orgTilknytning.gyldigTom
-      ? new Date(orgTilknytning.gyldigTom)
+    defaultSelected: orgtilknytning.gyldigTom
+      ? new Date(orgtilknytning.gyldigTom)
       : undefined,
   });
 
+  const otherOrgtilknytningerQuery = useQuery({
+    queryKey: getOrgTilknytninger.queryKey(orgtilknytning.navident),
+    queryFn: () => getOrgTilknytninger.queryFn(orgtilknytning.navident),
+    select: (orgTilknytninger) =>
+      orgTilknytninger.filter(
+        (otherOrgtilknytning) => otherOrgtilknytning.fid !== orgtilknytning.fid,
+      ),
+  });
+
   const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(orgTilknytning.orgEnhetId),
-    queryFn: () => getOrgEnhet.queryFn(orgTilknytning.orgEnhetId),
+    queryKey: getOrgEnhet.queryKey(orgtilknytning.orgEnhetId),
+    queryFn: () => getOrgEnhet.queryFn(orgtilknytning.orgEnhetId),
+  });
+
+  const ressursQuery = useQuery({
+    queryKey: ressurserKeys.id(orgtilknytning.navident),
+    queryFn: () => getRessurs.queryFn(orgtilknytning.navident),
   });
 
   const orgtilknytningDatoMutation = useMutation<
@@ -71,11 +101,14 @@ export function EditOrgtilknytningForm({
     EndreOrgtilknytningDatoRequest
   >({
     mutationFn: async (values) =>
-      updateOrgtilknytningDato(orgTilknytning.fid, values),
+      updateOrgtilknytningDato(orgtilknytning.fid, values),
     onSuccess: () => {
       showToast({ text: "Lagret" });
       queryClient.invalidateQueries({
-        queryKey: orgtilknytningerKeys.navident(orgTilknytning.navident),
+        queryKey: orgtilknytningerKeys.navident(orgtilknytning.navident),
+      });
+      queryClient.invalidateQueries({
+        queryKey: ressurserKeys.id(orgtilknytning.navident),
       });
       navigate({
         search: { editOrgtilknytning: undefined },
@@ -85,6 +118,7 @@ export function EditOrgtilknytningForm({
   });
 
   const orgEnhet = orgEnhetQuery.data;
+  const ressurs = ressursQuery.data;
 
   const navigate = useNavigate();
 
@@ -141,43 +175,77 @@ export function EditOrgtilknytningForm({
           {orgEnhet.remedyEnhetId}
         </Label>
       ) : undefined}
-      <form
-        css={defaultFormStyle}
-        onSubmit={handleSubmit((values) =>
-          orgtilknytningDatoMutation.mutate(values),
-        )}
-      >
-        <div
-          css={css`
-            ${fullwidthRow}
-          `}
+      <FormProvider {...methods}>
+        <form
+          css={defaultFormStyle}
+          onSubmit={handleSubmit((values) =>
+            orgtilknytningDatoMutation.mutate(values),
+          )}
         >
-          <FullWidthDatePickerWrapper>
-            <DatePicker {...startDatepicker.datepickerProps}>
-              <DatePicker.Input
-                {...startDatepicker.inputProps}
-                error={errors.gyldigFom?.message?.toString()}
-                label="Første arbeidsdag i enheten"
-              />
-            </DatePicker>
-          </FullWidthDatePickerWrapper>
-          <FullWidthDatePickerWrapper>
-            <DatePicker {...sluttDatepicker.datepickerProps}>
-              <DatePicker.Input
-                {...sluttDatepicker.inputProps}
-                error={errors.gyldigTom?.message?.toString()}
-                label="Siste arbeidsdag i enheten"
-              />
-            </DatePicker>
-          </FullWidthDatePickerWrapper>
-        </div>
-        <ApiResponseError error={orgtilknytningDatoMutation.error} />
-        <span>
-          Sluttdato på dagens dato eller tidligere vil avslutte tilknytningen
-          med én gang.
-        </span>
-        <SaveOrAbortButtons isLoading={orgtilknytningDatoMutation.isPending} />
-      </form>
+          <div
+            css={css`
+              ${fullwidthRow}
+            `}
+          >
+            <FullWidthDatePickerWrapper>
+              <DatePicker {...startDatepicker.datepickerProps}>
+                <DatePicker.Input
+                  {...startDatepicker.inputProps}
+                  error={errors.gyldigFom?.message?.toString()}
+                  label="Første arbeidsdag i enheten"
+                />
+              </DatePicker>
+            </FullWidthDatePickerWrapper>
+            <FullWidthDatePickerWrapper>
+              <DatePicker {...sluttDatepicker.datepickerProps}>
+                <DatePicker.Input
+                  {...sluttDatepicker.inputProps}
+                  error={errors.gyldigTom?.message?.toString()}
+                  label="Siste arbeidsdag i enheten"
+                />
+              </DatePicker>
+            </FullWidthDatePickerWrapper>
+          </div>
+          <SetRessursSluttdatoFormPart
+            enabled={
+              Boolean(watch("gyldigTom")) &&
+              isDateAfterOtherDates(
+                watch("gyldigTom"),
+                otherOrgtilknytningerQuery.data?.map(
+                  (otherOrgtilknytning) => otherOrgtilknytning.gyldigTom,
+                ),
+              )
+            }
+            text={`${formatDisplayDate(watch("gyldigTom"))} er ${ressurs?.visningsnavn.fornavn} sin siste arbeidsdag i NAV?`}
+          />
+          <ApiResponseError error={orgtilknytningDatoMutation.error} />
+          <span>
+            Sluttdato på dagens dato eller tidligere vil avslutte tilknytningen
+            med én gang.
+          </span>
+          <SaveOrAbortButtons
+            isLoading={orgtilknytningDatoMutation.isPending}
+          />
+        </form>
+      </FormProvider>
     </div>
+  );
+}
+
+export function SetRessursSluttdatoFormPart({
+  text,
+  enabled,
+}: {
+  text: string;
+  enabled: boolean;
+}) {
+  const { register } = useFormContext();
+
+  return enabled ? (
+    <Checkbox {...register("setRessursSluttdato")}>
+      <BodyShort>{text}</BodyShort>
+    </Checkbox>
+  ) : (
+    <></>
   );
 }
