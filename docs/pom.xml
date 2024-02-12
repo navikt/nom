@@ -13,7 +13,7 @@
     <name>NOM :: Docs</name>
 
     <properties>
-        <asciidoc.version>2.2.5</asciidoc.version>
+        <asciidoc.version>2.2.6</asciidoc.version>
     </properties>
 
     <profiles>
