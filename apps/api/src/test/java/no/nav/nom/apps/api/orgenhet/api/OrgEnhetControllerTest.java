@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.reactive.server.WebTestClient;
+
 import java.util.Optional;
 import static no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils.orgEnhetStateBuilderWithDefaultValues;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,7 +21,6 @@ import static org.mockito.Mockito.verify;
 
 public class OrgEnhetControllerTest extends RestTestBase {
 
-    public static final String ORGENHETSTYPE_URL = "/app/orgenheter/orgEnhetsType";
     @MockBean
     OrgEnhetCommandService orgEnhetCommandService;
 
@@ -38,15 +39,14 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .orgEnhetsType(Optional.empty())
             .build();
 
-        var setOrgEnhetsTypeRequest = new SetOrgEnhetsTypeRequest(existingOrgEnhet.id(), OrgEnhetsType.ARBEIDSLIVSSENTER);
+        var setOrgEnhetsTypeRequest = setOrgEnhetsTypeRequest().toBuilder()
+            .nomId(existingOrgEnhet.id())
+            .orgEnhetsType(OrgEnhetsType.ARBEIDSLIVSSENTER)
+            .build();
 
         orgEnhetStateRepository.putEventAggregate(existingOrgEnhet);
 
-        webTestClient.post()
-            .uri(ORGENHETSTYPE_URL)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomAdminUserToken()))
-            .bodyValue(setOrgEnhetsTypeRequest)
-            .exchange()
+        postOrgenhetType(nomAdminUserToken(), setOrgEnhetsTypeRequest)
             .expectStatus().isOk();
 
         verify(orgEnhetCommandService, times(1))
@@ -67,14 +67,12 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
         orgEnhetStateRepository.putEventAggregate(existingOrgEnhet);
 
-        webTestClient.post()
-            .uri(ORGENHETSTYPE_URL)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomAdminUserToken()))
-            .bodyValue(new SetOrgEnhetsTypeRequest(
-                existingOrgEnhet.id(),
-                existingOrgenhetsType
-            ))
-            .exchange()
+        var requestBody = setOrgEnhetsTypeRequest().toBuilder()
+            .nomId(existingOrgEnhet.id())
+            .orgEnhetsType(existingOrgenhetsType)
+            .build();
+
+        postOrgenhetType(nomAdminUserToken(), requestBody)
             .expectStatus().isOk();
 
         verify(orgEnhetCommandService, times(0)).endreOrgEnhetsType(any(), any());
@@ -83,11 +81,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
     @Test
     public void should_return_404_when_org_enhet_not_found() {
 
-        webTestClient.post()
-            .uri(ORGENHETSTYPE_URL)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomAdminUserToken()))
-            .bodyValue(new SetOrgEnhetsTypeRequest("yobrah", OrgEnhetsType.ARBEIDSLIVSSENTER))
-            .exchange()
+        postOrgenhetType(nomAdminUserToken(), setOrgEnhetsTypeRequest())
             .expectStatus().isNotFound();
 
         verify(orgEnhetCommandService, times(0))
@@ -97,14 +91,20 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
     @Test
     public void should_return_403_for_users_without_access() {
-
-        webTestClient.post()
-            .uri(ORGENHETSTYPE_URL)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(noScopesUserToken()))
-            .bodyValue(new SetOrgEnhetsTypeRequest("yobrah", OrgEnhetsType.ARBEIDSLIVSSENTER))
-            .exchange()
+        postOrgenhetType(noScopesUserToken(), setOrgEnhetsTypeRequest())
             .expectStatus().isForbidden();
+    }
 
+    private WebTestClient.ResponseSpec postOrgenhetType(String accessToken, SetOrgEnhetsTypeRequest requestBody) {
+        return webTestClient.post()
+            .uri("/app/orgenheter/orgEnhetsType")
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(accessToken))
+            .bodyValue(requestBody)
+            .exchange();
+    }
+
+    private SetOrgEnhetsTypeRequest setOrgEnhetsTypeRequest() {
+        return new SetOrgEnhetsTypeRequest("yobrah", OrgEnhetsType.ARBEIDSLIVSSENTER);
     }
 
 }
