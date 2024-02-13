@@ -46,13 +46,13 @@ public class JWTFilter extends OncePerRequestFilter {
             Optional.ofNullable(tokenResolver.resolve(request))
                     .map(BearerTokenAuthenticationToken::new)
                     .map(jwtAuthenticationProvider::authenticate)
-                    .ifPresent(e -> {
+                    .ifPresent(authentication -> {
                         final var context = createEmptyContext();
-                        context.setAuthentication(e);
+                        context.setAuthentication(authentication);
                         SecurityContextHolder.setContext(context);
                     });
         } catch (RuntimeException e) {
-            // Consider catching OAuth2AuthenticationException or AuthenticationException in stead
+            // Consider catching OAuth2AuthenticationException or AuthenticationException instead
             log.warn("Failed to validate JWT token", e);
         }
 
