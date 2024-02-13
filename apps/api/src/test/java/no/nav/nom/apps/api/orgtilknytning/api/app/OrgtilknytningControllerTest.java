@@ -428,24 +428,15 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build()
         ));
 
-        var endreTilknytningtypeRequest = new EndreTilknytningtypeRequest(
-            Optional.of(Tilknytningtype.KONSULENT)
-        );
+        var endreTilknytningtypeRequest = endreTilknytningtypeRequest().toBuilder()
+            .tilknytningtype(Optional.of((Tilknytningtype.KONSULENT)))
+            .build();
 
-
-        webTestClient
-            .post()
-            .uri(uriBuilder -> uriBuilder
-                .path("/app/orgtilknytninger/{fid}/tilknytningtype")
-                .build(orgtilknytningToUpdate.fid())
-            )
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(endreTilknytningtypeRequest)
-            .exchange()
-            .expectStatus().is2xxSuccessful();
+        postEndreTilknytningtypeRequest(
+            orgtilknytningToUpdate.fid(),
+            nomWriteUserToken(),
+            endreTilknytningtypeRequest
+        ).expectStatus().is2xxSuccessful();
 
         verify(
             orgtilknytningCommandService,
@@ -475,41 +466,22 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build()
         ));
 
-        webTestClient
-            .post()
-            .uri(uriBuilder -> uriBuilder
-                .path("/app/orgtilknytninger/{fid}/tilknytningtype")
-                .build(orgtilknytningToUpdate.fid())
-            )
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(
-                new EndreTilknytningtypeRequest(
-                    Optional.empty()
-                )
-            )
-            .exchange()
-            .expectStatus().isBadRequest();
+        postEndreTilknytningtypeRequest(
+            orgtilknytningToUpdate.fid(),
+            nomWriteUserToken(),
+            endreTilknytningtypeRequest()
+        ).expectStatus().isBadRequest();
     }
 
     @Test
     @DisplayName("Should forbid update orgtilknytning type if user does not have granted authority 'MUTATE_RESSURS'")
     void test_update_orgtilknytning_type_forbidden() {
 
-        webTestClient
-            .post()
-            .uri("/app/orgtilknytninger/some-fid/tilknytningtype")
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(noScopesUserToken());
-            })
-            .bodyValue(
-                new EndreTilknytningtypeRequest(Optional.empty())
-            )
-            .exchange()
-            .expectStatus().isForbidden();
+        postEndreTilknytningtypeRequest(
+            "some-fid",
+            noScopesUserToken(),
+            endreTilknytningtypeRequest()
+        ).expectStatus().isForbidden();
     }
 
     @ParameterizedTest(name = "POST /app/orgtilknytninger: Should add new orgtilknytning with erDagligOppfolging = {0}")
@@ -954,6 +926,12 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     }
 
+    private static EndreTilknytningtypeRequest endreTilknytningtypeRequest() {
+        return EndreTilknytningtypeRequest.builder()
+            .tilknytningtype(Optional.empty())
+            .build();
+    }
+
     private static EndreOrgtilknytningDatoRequest endreOrgtilknytningDatoRequest() {
         return EndreOrgtilknytningDatoRequest.builder()
             .gyldigFom(LocalDate.now())
@@ -971,6 +949,24 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .erDagligOppfolging(Optional.empty())
             .setRessursSluttdato(Optional.empty())
             .build();
+    }
+
+    private WebTestClient.ResponseSpec postEndreTilknytningtypeRequest(
+        String fid,
+        String accessToken,
+        EndreTilknytningtypeRequest endreTilknytningtypeRequest) {
+        return webTestClient
+            .post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgtilknytninger/{fid}/tilknytningtype")
+                .build(fid)
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(accessToken);
+            })
+            .bodyValue(endreTilknytningtypeRequest)
+            .exchange();
     }
 
     private WebTestClient.ResponseSpec postEndreOrgtilknytningDatoRequest(
