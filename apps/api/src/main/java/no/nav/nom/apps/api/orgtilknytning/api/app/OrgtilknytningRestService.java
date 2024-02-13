@@ -101,20 +101,11 @@ public class OrgtilknytningRestService {
         validateEksternOrgtilknytningPeriode(endreOrgtilknytningDatoRequest.gyldigTom());
 
         // If gyldigTom is set to before today, verify there are other active tilknytninger
-        if (LocalDate.now().isAfter(endreOrgtilknytningDatoRequest.gyldigTom().orElse(LocalDate.MIN))) {
-            var activeOrgtilknytningExists = getOrgtilknytninger(Optional.ofNullable(tilknyttetRessurs.navident())).stream()
-                .anyMatch(orgtilknytningState -> {
-                    if (orgtilknytningState.fid().equals(fid)) {
-                        return false;
-                    }
+        var isGyldigTomInThePast = LocalDate.now().isAfter(endreOrgtilknytningDatoRequest.gyldigTom().orElse(LocalDate.MIN));
+        var setRessursSluttdatoIsEnabled = endreOrgtilknytningDatoRequest.setRessursSluttdato().orElse(false);
 
-                    return orgtilknytningState.gyldigTom().orElse(LocalDate.MAX).isAfter(LocalDate.now());
-                });
-
-            if (!activeOrgtilknytningExists) {
-                throw new IllegalArgumentException(
-                    "Du kan ikke avslutte denne tilknytningen før du har lagt til en ny tilknytning  som gjelder fra denne tilknytningens sluttdato. Medarbeideren må til enhver tid være tilknyttet en enhet.");
-            }
+        if (isGyldigTomInThePast && !setRessursSluttdatoIsEnabled) {
+            validateThatThereAreOtherActiveOrgtilknytninger(orgtilknytning);
         }
 
         var origination = new Origination(SecurityUtil.getAuthenticatedNavIdent(), SecurityUtil.getAuthenticatedAzpName());
@@ -139,7 +130,7 @@ public class OrgtilknytningRestService {
             )
         );
 
-        if (endreOrgtilknytningDatoRequest.setRessursSluttdato().orElse(false)) {
+        if (setRessursSluttdatoIsEnabled) {
             var maxGyldigTomOnExistingOrgtilknytningerIsBeforeNewGyldigTom = orgtilknytningStateRepository.findByNavident(orgtilknytning.navident()).stream()
                 .filter(orgtilknytningState -> !orgtilknytningState.fid().equals(orgtilknytning.fid()))
                 .map(orgtilknytningState -> orgtilknytningState.gyldigTom().orElse(LocalDate.MAX))
@@ -430,6 +421,17 @@ public class OrgtilknytningRestService {
                         );
                     }
                 });
+        }
+    }
+
+    private void validateThatThereAreOtherActiveOrgtilknytninger(OrgtilknytningState orgtilknytningState) {
+        var activeOrgtilknytningExists = getOrgtilknytninger(Optional.ofNullable(orgtilknytningState.navident())).stream()
+            .filter(otherOrgtilknytningState -> !otherOrgtilknytningState.fid().equals(orgtilknytningState.fid()))
+            .anyMatch(otherOrgtilknytningState ->  otherOrgtilknytningState.gyldigTom().orElse(LocalDate.MAX).isAfter(LocalDate.now()));
+
+        if (!activeOrgtilknytningExists) {
+            throw new IllegalArgumentException(
+                "Du kan ikke avslutte denne tilknytningen før du har lagt til en ny tilknytning  som gjelder fra denne tilknytningens sluttdato. Medarbeideren må til enhver tid være tilknyttet en enhet.");
         }
     }
 
