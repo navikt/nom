@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Optional;
 
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
-import static no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils.orgEnhetStatesToOrganiseringState;
+import static no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils.orgEnhetStateToOrganiseringState;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -207,8 +207,8 @@ public class LederForRessursTest extends RessursTestBase {
 
 
         // Samme som over - må lagre organisering state manuelt
-        organiseringStateRepository.putEventAggregate(orgEnhetStatesToOrganiseringState(1, ressursSinNedersteEnhetState, ressursSinOvreEnhetState));
-        organiseringStateRepository.putEventAggregate(orgEnhetStatesToOrganiseringState(2, ressursSinOvreEnhetState, ledersEnhetState));
+        organiseringStateRepository.putEventAggregate(orgEnhetStateToOrganiseringState(1, ressursSinNedersteEnhetState, ressursSinOvreEnhetState));
+        organiseringStateRepository.putEventAggregate(orgEnhetStateToOrganiseringState(2, ressursSinOvreEnhetState, ledersEnhetState));
 
 
         final var response = postForResource("ressurs/leder_over_rekursivt.graphql");

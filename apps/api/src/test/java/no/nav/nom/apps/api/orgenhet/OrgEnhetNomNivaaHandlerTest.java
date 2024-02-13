@@ -246,7 +246,7 @@ public class OrgEnhetNomNivaaHandlerTest extends TestBase {
     @DisplayName("updateNomNivaaWhenOrgEnhetsTypeIsSet() should not send event if no change in nomNivaa")
     public void mapOrgEnhetTypeToNewNomNivaaAndUpdate_should_not_send_event_if_no_change_in_nom_nivaa(){
 
-        var orgeEnhetState = orgEnhetStateBuilderWithDefaultValues()
+        var orgeEnhetState = orgEnhetStateBuilderWithDefaultValues().toBuilder()
             .nomNivaa(Optional.of(NomNivaa.DRIFTSENHET))
             .build();
 

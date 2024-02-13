@@ -23,7 +23,7 @@ import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toMap;
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
-import static no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils.orgEnhetStatesToOrganiseringState;
+import static no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils.orgEnhetStateToOrganiseringState;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -238,8 +238,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         // Same as above - need to create state manually
-        organiseringStateRepository.putEventAggregate(orgEnhetStatesToOrganiseringState(1, orgState, orgStateOver));
-        organiseringStateRepository.putEventAggregate(orgEnhetStatesToOrganiseringState(2, orgStateUnder, orgState));
+        organiseringStateRepository.putEventAggregate(orgEnhetStateToOrganiseringState(1, orgState, orgStateOver));
+        organiseringStateRepository.putEventAggregate(orgEnhetStateToOrganiseringState(2, orgStateUnder, orgState));
 
 
         final var response = postForResource("organisasjonsenhet/scenario3.graphql");
@@ -314,8 +314,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         // Same as above - need to create state manually
-        organiseringStateRepository.putEventAggregate(orgEnhetStatesToOrganiseringState(1, orgState, orgStateOver));
-        organiseringStateRepository.putEventAggregate(orgEnhetStatesToOrganiseringState(2, orgStateUnder, orgState));
+        organiseringStateRepository.putEventAggregate(orgEnhetStateToOrganiseringState(1, orgState, orgStateOver));
+        organiseringStateRepository.putEventAggregate(orgEnhetStateToOrganiseringState(2, orgStateUnder, orgState));
 
 
         final var response = postForResource("organisasjonsenhet/scenario33.graphql");

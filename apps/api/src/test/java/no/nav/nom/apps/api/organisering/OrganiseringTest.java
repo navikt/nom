@@ -507,7 +507,7 @@ public class OrganiseringTest extends TestBase {
     }
 
     private OrgEnhetState mockOrgenhetServiceGetEnhet(String id, String kode, String niva, String navn) {
-        var orgEnhetState = orgEnhetStateBuilderWithDefaultValues()
+        var orgEnhetState = orgEnhetStateBuilderWithDefaultValues().toBuilder()
             .id(id)
             .navn(navn)
             .build();

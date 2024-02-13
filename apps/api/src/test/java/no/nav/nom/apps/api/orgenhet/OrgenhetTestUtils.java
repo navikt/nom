@@ -1,7 +1,5 @@
 package no.nav.nom.apps.api.orgenhet;
 
-import
-    no.nav.nom.contract.nom.state.OrgEnhetState.OrgEnhetStateBuilder;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 
@@ -11,7 +9,7 @@ import java.util.UUID;
 
 public class OrgenhetTestUtils {
 
-    public static OrgEnhetStateBuilder orgEnhetStateBuilderWithDefaultValues() {
+    public static OrgEnhetState orgEnhetStateBuilderWithDefaultValues() {
         return OrgEnhetState.builder()
             .fid(UUID.randomUUID().toString())
             .id(UUID.randomUUID().toString())
@@ -20,11 +18,12 @@ public class OrgenhetTestUtils {
             .agressoOrgNivaa(Optional.empty())
             .agressoId(Optional.of(UUID.randomUUID().toString()))
             .gyldigTom(Optional.of(LocalDate.now().plusDays(1)))
-            .orgEnhetsType(Optional.empty());
+            .orgEnhetsType(Optional.empty())
+            .build();
 
     }
 
-    public static OrganiseringState orgEnhetStatesToOrganiseringState(int id, OrgEnhetState orgEnhet, OrgEnhetState orgEnhetOver) {
+    public static OrganiseringState orgEnhetStateToOrganiseringState(int id, OrgEnhetState orgEnhet, OrgEnhetState orgEnhetOver) {
         return new OrganiseringState(
             "FID_" + id,
             orgEnhet.id(),

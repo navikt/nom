@@ -35,7 +35,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
     @Test
     public void should_set_new_orgEnhetsType() {
 
-        var existingOrgEnhet = orgEnhetStateBuilderWithDefaultValues()
+        var existingOrgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
             .orgEnhetsType(Optional.empty())
             .build();
 
@@ -61,7 +61,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
         var existingOrgenhetsType = OrgEnhetsType.FYLKE;
 
-        var existingOrgEnhet = orgEnhetStateBuilderWithDefaultValues()
+        var existingOrgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
             .orgEnhetsType(Optional.of(existingOrgenhetsType))
             .build();
 

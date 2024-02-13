@@ -79,7 +79,7 @@ public class OrgEnhetTypeHandlerTest extends TestBase {
         // Add leaf nodes (agressoOrgNivaa = "ORGENHET") for all values for agressoOrgenhetType
         allAgressoOrgenhetTyper.stream()
             .map(agressoOrgenhetType ->
-                orgEnhetStateBuilderWithDefaultValues()
+                orgEnhetStateBuilderWithDefaultValues().toBuilder()
                     .agressoOrgNivaa(Optional.of("ORGENHET"))
                     .agressoOrgenhetType(Optional.of(agressoOrgenhetType))
                     .build()
@@ -107,18 +107,18 @@ public class OrgEnhetTypeHandlerTest extends TestBase {
     public void updateOrgEnhetsTypeForLeafs_should_send_events_for_leaf_nodes_only() {
 
         var leafNodes = List.of(
-            orgEnhetStateBuilderWithDefaultValues()
+            orgEnhetStateBuilderWithDefaultValues().toBuilder()
                 .agressoOrgNivaa(Optional.of("ORGENHET"))
                 .agressoOrgenhetType(Optional.of("Doksenter"))
                 .build(),
-            orgEnhetStateBuilderWithDefaultValues()
+            orgEnhetStateBuilderWithDefaultValues().toBuilder()
                 .agressoOrgNivaa(Optional.of("ORGENHET"))
                 .agressoOrgenhetType(Optional.of("Fylke"))
                 .build()
         );
 
         var nonLeafNodes = List.of(
-            orgEnhetStateBuilderWithDefaultValues()
+            orgEnhetStateBuilderWithDefaultValues().toBuilder()
             .agressoOrgNivaa(Optional.of("ORGNIV3"))
             .agressoOrgenhetType(Optional.of("HMS"))
             .build()
@@ -140,7 +140,7 @@ public class OrgEnhetTypeHandlerTest extends TestBase {
     @DisplayName("updateOrgEnhetsTypeForLeafs() should not send event if correct orgenhetType is already set")
     public void updateOrgEnhetsTypeForLeafs_should_not_send_event_if_correct_orgenhetType_is_already_set() {
 
-        var orgEnhetWithCorrectOrgenhetType = orgEnhetStateBuilderWithDefaultValues()
+        var orgEnhetWithCorrectOrgenhetType = orgEnhetStateBuilderWithDefaultValues().toBuilder()
             .agressoOrgNivaa(Optional.of("ORGENHET"))
             .agressoOrgenhetType(Optional.of("Fylke"))
             .orgEnhetsType(Optional.of(OrgEnhetsType.FYLKE))
@@ -158,7 +158,7 @@ public class OrgEnhetTypeHandlerTest extends TestBase {
     @DisplayName("updateOrgEnhetsTypeForLeafs() should send event if incorrect orgenhetType is set")
     public void updateOrgEnhetsTypeForLeafs_should_send_event_if_incorrect_orgenhetType_is_set() {
 
-        var orgEnhetWithCorrectOrgenhetType = orgEnhetStateBuilderWithDefaultValues()
+        var orgEnhetWithCorrectOrgenhetType = orgEnhetStateBuilderWithDefaultValues().toBuilder()
             .agressoOrgNivaa(Optional.of("ORGENHET"))
             .agressoOrgenhetType(Optional.of("Fylke"))
             .orgEnhetsType(Optional.of(OrgEnhetsType.NAV_KONTOR))
@@ -178,20 +178,19 @@ public class OrgEnhetTypeHandlerTest extends TestBase {
 
         var newOrgEnhetType = OrgEnhetsType.FYLKE;
 
-        var changedOrgenhet = orgEnhetStateBuilderWithDefaultValues()
-            .build();
+        var changedOrgenhet = orgEnhetStateBuilderWithDefaultValues();
 
         var changedOrgenhetAndSiblings = List.of(
             changedOrgenhet,
-            orgEnhetStateBuilderWithDefaultValues()
+            orgEnhetStateBuilderWithDefaultValues().toBuilder()
                 .orgEnhetsType(Optional.of(newOrgEnhetType))
                 .build(),
-            orgEnhetStateBuilderWithDefaultValues()
+            orgEnhetStateBuilderWithDefaultValues().toBuilder()
                 .orgEnhetsType(Optional.of(newOrgEnhetType))
                 .build()
         );
 
-        var overordnetOrgEnhet = orgEnhetStateBuilderWithDefaultValues().build();
+        var overordnetOrgEnhet = orgEnhetStateBuilderWithDefaultValues();
 
         Stream.of(List.of(overordnetOrgEnhet), changedOrgenhetAndSiblings).flatMap(List::stream)
                 .forEach(orgEnhetState -> orgEnhetStateRepository.putEventAggregate(orgEnhetState));
@@ -219,10 +218,11 @@ public class OrgEnhetTypeHandlerTest extends TestBase {
     @DisplayName("orgEnhetsTypeChanged() should not send an OrgEnhetTypeEndretEventV1 if its overordnet orgEnhetsType is already set")
     public void orgEnhetsTypeChanged_should_not_send_an_OrgEnhetTypeEndretEventV1_if_its_overordnet_orgEnhetsType_is_already_set() {
         var newOrgEnhetType = OrgEnhetsType.FYLKE;
-        var changedOrgenhet = orgEnhetStateBuilderWithDefaultValues()
-            .build();
+        var changedOrgenhet = orgEnhetStateBuilderWithDefaultValues();
 
-        var overordnetOrgEnhet = orgEnhetStateBuilderWithDefaultValues().orgEnhetsType(Optional.of(OrgEnhetsType.ARBEIDSLIVSSENTER)).build();
+        var overordnetOrgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .orgEnhetsType(Optional.of(OrgEnhetsType.ARBEIDSLIVSSENTER))
+            .build();
 
         Stream.of(List.of(changedOrgenhet), List.of(overordnetOrgEnhet)).flatMap(List::stream)
             .forEach(orgEnhetState -> orgEnhetStateRepository.putEventAggregate(orgEnhetState));
@@ -244,17 +244,18 @@ public class OrgEnhetTypeHandlerTest extends TestBase {
     @Test
     @DisplayName("orgEnhetsTypeChanged() should not send an OrgEnhetTypeEndretEventV1 for overordnet if children have different orgEnhetsType")
     public void orgEnhetsTypeChanged_should_not_send_an_OrgEnhetTypeEndretEventV1_for_overordnet_if_children_have_different_orgEnhetsType() {
-        var changedOrgenhet = orgEnhetStateBuilderWithDefaultValues()
-            .build();
+        var changedOrgenhet = orgEnhetStateBuilderWithDefaultValues();
 
         var changedOrgenhetAndSiblings = List.of(
             changedOrgenhet,
-            orgEnhetStateBuilderWithDefaultValues()
+            orgEnhetStateBuilderWithDefaultValues().toBuilder()
                 .orgEnhetsType(Optional.of(OrgEnhetsType.FYLKE))
                 .build()
         );
 
-        var overordnetOrgEnhet = orgEnhetStateBuilderWithDefaultValues().orgEnhetsType(Optional.empty()).build();
+        var overordnetOrgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .orgEnhetsType(Optional.empty())
+            .build();
 
         Stream.of(changedOrgenhetAndSiblings, List.of(overordnetOrgEnhet)).flatMap(List::stream)
             .forEach(orgEnhetState -> orgEnhetStateRepository.putEventAggregate(orgEnhetState));
@@ -278,17 +279,17 @@ public class OrgEnhetTypeHandlerTest extends TestBase {
     @Test
     @DisplayName("orgEnhetsTypeChanged() should send an OrgEnhetTypeEndretEventV1 for overordnet if its type is set to DIR")
     public void orgEnhetsTypeChanged_should_send_an_OrgEnhetTypeEndretEventV1_for_overordnet_if_its_type_is_set_to_DIR() {
-        var changedOrgenhet = orgEnhetStateBuilderWithDefaultValues()
-            .build();
+        var changedOrgenhet = orgEnhetStateBuilderWithDefaultValues();
 
         var changedOrgenhetAndSiblings = List.of(
             changedOrgenhet,
-            orgEnhetStateBuilderWithDefaultValues()
+            orgEnhetStateBuilderWithDefaultValues().toBuilder()
                 .orgEnhetsType(Optional.of(OrgEnhetsType.DIREKTORAT))
                 .build()
         );
 
-        var overordnetOrgEnhet = orgEnhetStateBuilderWithDefaultValues().orgEnhetsType(Optional.of(OrgEnhetsType.DIR)).build();
+        var overordnetOrgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .orgEnhetsType(Optional.of(OrgEnhetsType.DIR)).build();
 
         Stream.of(changedOrgenhetAndSiblings, List.of(overordnetOrgEnhet)).flatMap(List::stream)
             .forEach(orgEnhetState -> orgEnhetStateRepository.putEventAggregate(orgEnhetState));
