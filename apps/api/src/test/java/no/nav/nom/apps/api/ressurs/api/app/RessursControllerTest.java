@@ -10,6 +10,8 @@ import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.rest.RestTestBase;
@@ -29,9 +31,9 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -112,14 +114,10 @@ public class RessursControllerTest extends RestTestBase {
     @MethodSource("skal_bare_opprette_eksterne_ressurser_input")
     void skal_bare_opprette_eksterne_ressurser(Sektor sektor) {
 
-        webTestClient.post()
-            .uri("/app/ressurser")
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(opprettRessursRequest().toBuilder().sektor(sektor).build())
-            .exchange()
+        postOpprettRessursRequest(
+            nomWriteUserToken(),
+            opprettRessursRequest().toBuilder().sektor(sektor).build()
+        )
             .expectStatus().isBadRequest()
             .expectBody(StandardResponse.class)
             .isEqualTo(StandardResponse.builder()
@@ -155,55 +153,32 @@ public class RessursControllerTest extends RestTestBase {
 
         when(pdlClient.hentPerson(eq(personident))).thenReturn(Optional.empty());
 
-        var request = new OpprettRessursRequest(
-            personident,
-            navn.getFornavn(),
-            navn.getMellomnavn(),
-            navn.getEtternavn(),
-            Sektor.EKSTERN,
-            "",
-            LocalDate.now(),
-            Optional.of(LocalDate.now()),
-            null,
-            "",
-            Tilknytningtype.KONSULENT
-        );
+        var request = opprettRessursRequest().toBuilder()
+            .personident(personident)
+            .visningsfornavn(navn.getFornavn())
+            .visningsmellomnavn(navn.getMellomnavn())
+            .visningsetternavn(navn.getEtternavn())
+            .sektor(Sektor.EKSTERN)
+            .startDato(LocalDate.now())
+            .sluttDato(Optional.of(LocalDate.now().plusMonths(1)))
+            .tilknytningtype(Tilknytningtype.KONSULENT)
+            .ansettelsesType(null)
+            .fysiskBrukerstedNr("")
+            .orgEnhetId("")
+            .build();
 
         when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
             .thenReturn(Set.of(request.fysiskBrukerstedNr()));
 
         when(ressursCommadService.createRessursSync(any(OpprettRessursCommand.class)))
-            .thenReturn(
-                new RessursState(
-                    "fid",
-                    request.personident(),
-                    navident,
-                    request.sektor(),
-                    new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
-                    request.sluttDato(),
-                    Optional.empty(),
-                    null,
-                    Collections.emptyList()
-                ));
+            .thenReturn(ressursState());
 
-
-        webTestClient.post()
-            .uri("/app/ressurser")
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(request)
-            .exchange()
+        postOpprettRessursRequest(
+            nomWriteUserToken(),
+            request
+        )
             .expectStatus().is2xxSuccessful()
-            .expectBody(OpprettRessursResponse.class)
-            .isEqualTo(new OpprettRessursResponse(
-                personident,
-                navident,
-                navn.getFornavn() + " " + navn.getMellomnavn(),
-                navn.getEtternavn(),
-                request.sektor()
-            ));
+            .expectBody(OpprettRessursResponse.class);
 
         verify(ressursCommadService, times(1)).createRessursSync(any());
         verify(ressursCommadService, times(1)).avsluttRessursEvent(any(), any());
@@ -216,34 +191,16 @@ public class RessursControllerTest extends RestTestBase {
     @Test
     @SneakyThrows
     void skal_ikke_opprette_ekstern_ressurs_uten_sluttDato() {
-        String personident = "12345678910";
-        val navn = pdlUtils.mockSinglePersonResponse();
 
-        when(pdlClient.hentPerson(eq(personident))).thenReturn(Optional.empty());
-
-        var request = new OpprettRessursRequest(
-            personident,
-            navn.getFornavn(),
-            navn.getMellomnavn(),
-            navn.getEtternavn(),
-            Sektor.EKSTERN,
-            "",
-            LocalDate.now(),
-            Optional.empty(),
-            null,
-            "",
-            Tilknytningtype.KONSULENT
-        );
-
-        webTestClient.post()
-            .uri("/app/ressurser")
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(request)
-            .exchange()
-            .expectStatus().isBadRequest();
+        postOpprettRessursRequest(
+            nomWriteUserToken(),
+            opprettRessursRequest().toBuilder()
+                .sluttDato(Optional.empty()).build()
+        )
+            .expectStatus().isBadRequest()
+            .expectBody()
+            .jsonPath("message")
+            .isEqualTo("Sluttdato må oppgis for opprettelse av ekstern ressurs");
 
 
         verify(ressursCommadService, times(0)).createRessursSync(any());
@@ -256,51 +213,49 @@ public class RessursControllerTest extends RestTestBase {
 
     @Test
     void skal_kunne_endre_navn_for_eksterne() {
-        var navident = "A123456";
-        when(ressursStateRepository.findByNavident(navident))
-            .thenReturn(Optional.of(new RessursState(
-                "FID_1",
-                "01010154321",
-                navident,
-                Sektor.EKSTERN,
-                null,
-                Optional.empty(),
-                Optional.empty(),
-                null,
-                Collections.emptyList()
-            )));
+        var existingRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN)
+            .build();
 
+        when(ressursStateRepository.findByNavident(existingRessurs.navident()))
+            .thenReturn(Optional.of(existingRessurs));
 
-        var request = new UpdateVisningsnavnRequest(
+        var updateVisningsnavnRequest = new UpdateVisningsnavnRequest(
             "Erik",
             Optional.of("Ten"),
             "Haag"
         );
 
-        webTestClient.post()
-            .uri("/app/ressurser/" + navident + "/navn")
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(request)
-            .exchange()
+        postUpdateVisningsnavnRequest(
+            existingRessurs.navident(),
+            nomWriteUserToken(),
+            updateVisningsnavnRequest
+        )
             .expectStatus().isOk();
 
-        verify(ressursCommadService, times(1)).oppdaterPersonaliaEvent(any(), any());
+        var oppdaterPersonaliaCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterPersonaliaCommand.class);
+        verify(ressursCommadService, times(1))
+            .oppdaterPersonaliaEvent(oppdaterPersonaliaCommandArgumentCaptor.capture(), any());
+
+        assertThat(oppdaterPersonaliaCommandArgumentCaptor.getValue())
+            .matches(oppdaterPersonaliaCommand -> oppdaterPersonaliaCommand.fid().equals(existingRessurs.fid()))
+            .matches(oppdaterPersonaliaCommand -> oppdaterPersonaliaCommand.visningsnavn().equals(
+                new Visningsnavn(updateVisningsnavnRequest.fornavn(), updateVisningsnavnRequest.mellomnavn(), updateVisningsnavnRequest.etternavn())
+            ));
     }
 
     @Test
     void skal_kunne_avvikle_ressurs() {
+        var ressursSomSkalAvvikles = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
 
-        var ressurs = ressursState().toBuilder().fid("FID_1").navident("A123456").sektor(Sektor.EKSTERN).build();
-        when(ressursStateRepository.findByFid(ressurs.fid()))
-            .thenReturn(Optional.of(ressurs));
+        when(ressursStateRepository.findByFid(ressursSomSkalAvvikles.fid()))
+            .thenReturn(Optional.of(ressursSomSkalAvvikles));
 
         var existingOrgtilknytninger = List.of(
-            orgtilknytningState().toBuilder().navident(ressurs.navident()).build(),
+            orgtilknytningState().toBuilder().navident(ressursSomSkalAvvikles.navident()).build(),
             orgtilknytningState().toBuilder()
-                .navident(ressurs.navident())
+                .navident(ressursSomSkalAvvikles.navident())
                 .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
                 .build()
         );
@@ -312,7 +267,10 @@ public class RessursControllerTest extends RestTestBase {
         );
 
         webTestClient.post()
-            .uri("/app/ressurser/" + ressurs.fid() + "/avvikle")
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/ressurser/{fid}/avvikle")
+                .build(ressursSomSkalAvvikles.fid())
+            )
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                 httpHeaders.setBearerAuth(nomWriteUserToken());
@@ -321,41 +279,36 @@ public class RessursControllerTest extends RestTestBase {
             .exchange()
             .expectStatus().isOk();
 
-        verify(ressursCommadService, times(1)).avsluttRessursEvent(any(), any());
+        var opphorRessursCommandArgumentCaptor = ArgumentCaptor.forClass(OpphorRessursCommand.class);
+
+        verify(ressursCommadService, times(1)).avsluttRessursEvent(opphorRessursCommandArgumentCaptor.capture(), any());
         verify(orgtilknytningCommandService, times(1)).avvikleOrgtilknytning(any(), any());
+
+        assertThat(opphorRessursCommandArgumentCaptor.getValue())
+            .matches(opphorRessursCommand -> opphorRessursCommand.fid().equals(ressursSomSkalAvvikles.fid()));
     }
 
     @Test
     void skal_ikke_kunne_endre_navn_for_statlig() {
-        var navident = "A123456";
-        when(ressursStateRepository.findByNavident(navident))
-            .thenReturn(Optional.of(new RessursState(
-                "FID_1",
-                "01010154321",
-                navident,
-                Sektor.NAV_STATLIG,
-                null,
-                Optional.empty(),
-                Optional.empty(),
-                null,
-                Collections.emptyList()
-            )));
+        var existingRessurs = ressursState().toBuilder()
+                .sektor(Sektor.NAV_STATLIG)
+                    .build();
+
+        when(ressursStateRepository.findByNavident(existingRessurs.navident()))
+            .thenReturn(Optional.of(existingRessurs));
 
 
-        var request = new UpdateVisningsnavnRequest(
+        var updateVisningsnavnRequest = new UpdateVisningsnavnRequest(
             "Erik",
             Optional.of("Ten"),
             "Haag"
         );
 
-        webTestClient.post()
-            .uri("/app/ressurser/" + navident + "/navn")
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(request)
-            .exchange()
+        postUpdateVisningsnavnRequest(
+            existingRessurs.navident(),
+            nomWriteUserToken(),
+            updateVisningsnavnRequest
+        )
             .expectStatus().isBadRequest();
 
         verify(ressursCommadService, times(0)).oppdaterPersonaliaEvent(any(), any());
@@ -430,7 +383,6 @@ public class RessursControllerTest extends RestTestBase {
     @Test
     void skal_oppdatere_fysiske_brukersteder(){
 
-        var fid = "FID-uuid";
         var existingRessurs = ressursState()
             .toBuilder()
             .fysiskeBrukersteder(null)
@@ -441,22 +393,13 @@ public class RessursControllerTest extends RestTestBase {
             .fysiskeBrukersteder(Set.of("fyrstikken-id"))
             .build();
 
-        when(ressursStateRepository.findByFid(fid)).thenReturn(Optional.of(existingRessurs));
+        when(ressursStateRepository.findByFid(existingRessurs.fid())).thenReturn(Optional.of(existingRessurs));
         when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(argThat(l ->
                 new HashSet<>(l).equals(updateFysiskeBrukerstederRequest.fysiskeBrukersteder())
             )
         )).thenReturn(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());
 
-        webTestClient.post()
-            .uri(uriBuilder ->
-                uriBuilder.path("/app/ressurser/{fid}/fysiskebrukersteder").build(fid)
-            )
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(updateFysiskeBrukerstederRequest)
-            .exchange()
+        postUpdateFysiskeBrukerstederRequest(existingRessurs.fid(), nomWriteUserToken(), updateFysiskeBrukerstederRequest)
             .expectStatus().isOk();
 
         var oppdaterFysiskeBrukerstederCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterFysiskeBrukerstederCommand.class);
@@ -476,20 +419,14 @@ public class RessursControllerTest extends RestTestBase {
     @ParameterizedTest(name = "updateFysiskeBrukersteder should give 400 with message '{1}'")
     @MethodSource("testUpdateFysiskeBrukerstederBadRequestInput")
     void testUpdateFysiskeBrukerstederBadRequest(UpdateFysiskeBrukerstederRequest updateFysiskeBrukerstederRequest, String expectedMessage){
-        webTestClient.post()
-            .uri("/app/ressurser/fid-whatever/fysiskebrukersteder")
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(updateFysiskeBrukerstederRequest)
-            .exchange()
+
+        postUpdateFysiskeBrukerstederRequest("some-fid", nomWriteUserToken(), updateFysiskeBrukerstederRequest)
             .expectStatus().isBadRequest()
             .expectBody(StandardResponse.class)
             .isEqualTo(StandardResponse.builder().message(expectedMessage).build());
     }
 
-    static Stream<Arguments> testUpdateFysiskeBrukerstederBadRequestInput() {
+    private static Stream<Arguments> testUpdateFysiskeBrukerstederBadRequestInput() {
         return Stream.of(
             Arguments.of(
                 UpdateFysiskeBrukerstederRequest.builder()
@@ -508,7 +445,7 @@ public class RessursControllerTest extends RestTestBase {
         );
     }
 
-    OpprettRessursRequest opprettRessursRequest() {
+    private static OpprettRessursRequest opprettRessursRequest() {
         return OpprettRessursRequest.builder()
             .personident("whatever")
             .visningsfornavn("whatever")
@@ -519,5 +456,47 @@ public class RessursControllerTest extends RestTestBase {
             .fysiskBrukerstedNr("whatever")
             .tilknytningtype(Tilknytningtype.KONSULENT)
             .build();
+    }
+
+    private WebTestClient.ResponseSpec postUpdateVisningsnavnRequest(
+        String navident, String accessToken, UpdateVisningsnavnRequest updateVisningsnavnRequest
+    ) {
+        return webTestClient.post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/ressurser/{navident}/navn")
+                .build(navident)
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(accessToken);
+            })
+            .bodyValue(updateVisningsnavnRequest)
+            .exchange();
+    }
+
+    private WebTestClient.ResponseSpec postOpprettRessursRequest(String accessToken, OpprettRessursRequest opprettRessursRequest) {
+        return webTestClient.post()
+            .uri("/app/ressurser")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(accessToken);
+            })
+            .bodyValue(opprettRessursRequest)
+            .exchange();
+    }
+
+    private WebTestClient.ResponseSpec postUpdateFysiskeBrukerstederRequest(
+        String fid, String accessToken, UpdateFysiskeBrukerstederRequest updateFysiskeBrukerstederRequest
+    ) {
+        return webTestClient.post()
+            .uri(uriBuilder ->
+                uriBuilder.path("/app/ressurser/{fid}/fysiskebrukersteder").build(fid)
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(accessToken);
+            })
+            .bodyValue(updateFysiskeBrukerstederRequest)
+            .exchange();
     }
 }
