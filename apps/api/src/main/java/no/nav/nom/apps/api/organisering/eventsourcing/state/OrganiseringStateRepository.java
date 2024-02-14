@@ -118,28 +118,31 @@ public class OrganiseringStateRepository {
         // TODO delete the rest of this method. This is just for logging and testing and should be removed
        try {
            HashMap difference_allOrganiseringerContainingId_organiseringByFid = hashMapDifference(allOrganiseringerContainingId, organiseringByFid);
-           logger.debug("Diff: difference_allOrganiseringerContainingId_organiseringByFid");
+           StringBuilder message = new StringBuilder("Diff: difference_allOrganiseringerContainingId_organiseringByFid");
            for (Object id: difference_allOrganiseringerContainingId_organiseringByFid.keySet()) {
                String key = id.toString();
                String value = difference_allOrganiseringerContainingId_organiseringByFid.get(key).toString();
-               System.out.println(key + " " + value);
+               message.append(key).append(" ").append(value);
            }
+           logger.debug(message.toString());
 
            HashMap difference_allOrganiseringerContainingId_organiseringById = hashMapDifference(allOrganiseringerContainingId, organiseringById);
-           logger.debug("Diff: difference_allOrganiseringerContainingId_organiseringById");
+           StringBuilder message1 = new StringBuilder("Diff: difference_allOrganiseringerContainingId_organiseringById");
            for (Object id: difference_allOrganiseringerContainingId_organiseringById.keySet()) {
                String key = id.toString();
                String value = difference_allOrganiseringerContainingId_organiseringById.get(key).toString();
-               System.out.println(key + " " + value);
+               message1.append(key).append(" ").append(value);
            }
+           logger.debug(message1.toString());
 
            HashMap difference_organiseringByFid_allOrganiseringerContainingId = hashMapDifference(organiseringByFid, allOrganiseringerContainingId);
-           logger.debug("Diff: difference_organiseringByFid_allOrganiseringerContainingId");
+           StringBuilder message2 = new StringBuilder("Diff: difference_organiseringByFid_allOrganiseringerContainingId");
            for (Object id: difference_organiseringByFid_allOrganiseringerContainingId.keySet()) {
                String key = id.toString();
                String value = difference_organiseringByFid_allOrganiseringerContainingId.get(key).toString();
-               System.out.println(key + " " + value);
+               message2.append(key).append(" ").append(value);
            }
+           logger.debug(message2.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
