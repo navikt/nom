@@ -7,7 +7,8 @@ public enum NomApiAccessScope {
     QUERY_PERSON("QUERY_PERSON"),
     MUTATE_RESSURS("MUTATE_RESSURS"),
     ADMIN("ADMIN"),
-    TEAMCAT("TEAMCAT");
+    TEAMCAT("TEAMCAT"),
+    NOM_UI_APP("NOM_UI_APP");
 
     private final String scope;
 

@@ -75,7 +75,7 @@ public class OrgtilknytningController {
         @ApiResponse(responseCode = "200"),
     })
     @PreAuthorize(
-        "hasAuthority('MUTATE_RESSURS')"
+        "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
     )
     public ResponseEntity<StandardResponse> addOrgtilknytning(
         @RequestBody LeggTilOrgtilknytningRequest leggTilOrgtilknytningRequest
@@ -98,7 +98,7 @@ public class OrgtilknytningController {
         @ApiResponse(responseCode = "200"),
     })
     @PreAuthorize(
-        "hasAuthority('MUTATE_RESSURS')"
+        "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
     )
     public ResponseEntity<StandardResponse> updateDato(
         @PathVariable String fid,
@@ -122,7 +122,7 @@ public class OrgtilknytningController {
         @ApiResponse(responseCode = "200"),
     })
     @PreAuthorize(
-        "hasAuthority('MUTATE_RESSURS')"
+        "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
     )
     public ResponseEntity<StandardResponse> updateOrgtilknytningType(
         @PathVariable String fid,

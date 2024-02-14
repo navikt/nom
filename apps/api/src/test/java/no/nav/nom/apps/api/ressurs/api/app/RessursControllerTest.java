@@ -96,7 +96,7 @@ public class RessursControllerTest extends RestTestBase {
                 .queryParam("sluttdato", LocalDate.now())
                 .build()
             )
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomWriteUserToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomWriteGroupAndNomUiAzpToken()))
             .exchange()
             .expectStatus().isOk()
             .expectBodyList(RessursState.class)
@@ -115,7 +115,7 @@ public class RessursControllerTest extends RestTestBase {
     void skal_bare_opprette_eksterne_ressurser(Sektor sektor) {
 
         postOpprettRessursRequest(
-            nomWriteUserToken(),
+            nomWriteGroupAndNomUiAzpToken(),
             opprettRessursRequest().toBuilder().sektor(sektor).build()
         )
             .expectStatus().isBadRequest()
@@ -174,7 +174,7 @@ public class RessursControllerTest extends RestTestBase {
             .thenReturn(ressursState());
 
         postOpprettRessursRequest(
-            nomWriteUserToken(),
+            nomWriteGroupAndNomUiAzpToken(),
             request
         )
             .expectStatus().is2xxSuccessful()
@@ -193,7 +193,7 @@ public class RessursControllerTest extends RestTestBase {
     void skal_ikke_opprette_ekstern_ressurs_uten_sluttDato() {
 
         postOpprettRessursRequest(
-            nomWriteUserToken(),
+            nomWriteGroupAndNomUiAzpToken(),
             opprettRessursRequest().toBuilder()
                 .sluttDato(Optional.empty()).build()
         )
@@ -228,7 +228,7 @@ public class RessursControllerTest extends RestTestBase {
 
         postUpdateVisningsnavnRequest(
             existingRessurs.navident(),
-            nomWriteUserToken(),
+            nomWriteGroupAndNomUiAzpToken(),
             updateVisningsnavnRequest
         )
             .expectStatus().isOk();
@@ -273,7 +273,7 @@ public class RessursControllerTest extends RestTestBase {
             )
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
+                httpHeaders.setBearerAuth(nomWriteGroupAndNomUiAzpToken());
             })
             .bodyValue(request)
             .exchange()
@@ -306,7 +306,7 @@ public class RessursControllerTest extends RestTestBase {
 
         postUpdateVisningsnavnRequest(
             existingRessurs.navident(),
-            nomWriteUserToken(),
+            nomWriteGroupAndNomUiAzpToken(),
             updateVisningsnavnRequest
         )
             .expectStatus().isBadRequest();
@@ -332,7 +332,7 @@ public class RessursControllerTest extends RestTestBase {
 
         webTestClient.get()
             .uri(endpointPath)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomWriteUserToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomWriteGroupAndNomUiAzpToken()))
             .exchange()
             .expectStatus().isOk()
             .expectBody()
@@ -363,7 +363,7 @@ public class RessursControllerTest extends RestTestBase {
                 .queryParam("obfuscatePersonident", false)
                 .build()
             )
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomWriteUserToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomWriteGroupAndNomUiAzpToken()))
             .exchange()
             .expectStatus().isOk()
             .expectBody()
@@ -399,7 +399,7 @@ public class RessursControllerTest extends RestTestBase {
             )
         )).thenReturn(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());
 
-        postUpdateFysiskeBrukerstederRequest(existingRessurs.fid(), nomWriteUserToken(), updateFysiskeBrukerstederRequest)
+        postUpdateFysiskeBrukerstederRequest(existingRessurs.fid(), nomWriteGroupAndNomUiAzpToken(), updateFysiskeBrukerstederRequest)
             .expectStatus().isOk();
 
         var oppdaterFysiskeBrukerstederCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterFysiskeBrukerstederCommand.class);
@@ -420,7 +420,7 @@ public class RessursControllerTest extends RestTestBase {
     @MethodSource("testUpdateFysiskeBrukerstederBadRequestInput")
     void testUpdateFysiskeBrukerstederBadRequest(UpdateFysiskeBrukerstederRequest updateFysiskeBrukerstederRequest, String expectedMessage){
 
-        postUpdateFysiskeBrukerstederRequest("some-fid", nomWriteUserToken(), updateFysiskeBrukerstederRequest)
+        postUpdateFysiskeBrukerstederRequest("some-fid", nomWriteGroupAndNomUiAzpToken(), updateFysiskeBrukerstederRequest)
             .expectStatus().isBadRequest()
             .expectBody(StandardResponse.class)
             .isEqualTo(StandardResponse.builder().message(expectedMessage).build());

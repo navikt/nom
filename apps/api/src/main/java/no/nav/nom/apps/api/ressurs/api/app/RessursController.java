@@ -78,7 +78,7 @@ public class RessursController {
         @ApiResponse(responseCode = "201", description = "Created"),
     })
     @PreAuthorize(
-        "hasAuthority('MUTATE_RESSURS')"
+        "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
     )
     public ResponseEntity<OpprettRessursResponse> opprettRessurs(
         @RequestBody OpprettRessursRequest request) {
@@ -94,7 +94,7 @@ public class RessursController {
         @ApiResponse(responseCode = "200"),
     })
     @PreAuthorize(
-        "hasAuthority('MUTATE_RESSURS')"
+        "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
     )
     public ResponseEntity<StandardResponse> avvikleRessurs(
         @PathVariable String fid,
@@ -115,7 +115,7 @@ public class RessursController {
         @ApiResponse(responseCode = "200"),
     })
     @PreAuthorize(
-        "hasAuthority('MUTATE_RESSURS')"
+        "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
     )
     public ResponseEntity<StandardResponse> updateVisningsnavn(
         @PathVariable String navident,
@@ -208,7 +208,7 @@ public class RessursController {
         @ApiResponse(responseCode = "200"),
     })
     @PreAuthorize(
-        "hasAuthority('MUTATE_RESSURS')"
+        "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
     )
     public ResponseEntity<StandardResponse> updateFysiskeBrukersteder(
         @PathVariable String fid,

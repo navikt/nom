@@ -15,11 +15,6 @@ app:
 
   granted-authorities:
     clients:
-      mutateRessursAndQueryPersonClient:
-        client-id: mutateRessursAndQueryPersonClient
-        scopes:
-          - QUERY_PERSON
-          - MUTATE_RESSURS
       mutateRessursClient:
         client-id: mutateRessursClient
         scopes:
@@ -32,6 +27,11 @@ app:
         client-id: teamcatClient
         scopes:
           - TEAMCAT
+      nomUiClient:
+        client-id: nomUiClient
+        scopes:
+          - QUERY_PERSON
+          - NOM_UI_APP
     groups:
       nomWriteGroup:
         group-id: nomWriteGroup

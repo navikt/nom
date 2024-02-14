@@ -252,11 +252,11 @@ public abstract class TestBase {
         return validToken(claims);
     }
 
-    protected String nomWriteUserToken() {
+    protected String nomWriteGroupAndNomUiAzpToken() {
         Map<String, Object> claims = new HashMap<>();
         claims.put("NAVident", LOGGED_IN_USER_NAVIDENT);
         claims.put("groups", List.of("nomWriteGroup"));
-        claims.put("azp_name", "some-app");
+        claims.put("azp_name", "nomUiClient");
         return validToken(claims);
     }
 
@@ -276,12 +276,6 @@ public abstract class TestBase {
     protected String mutateRessursClientToken() {
         Map<String, Object> claims = new HashMap<>();
         claims.put("azp_name", "mutateRessursClient");
-        return validToken(claims);
-    }
-
-    protected String mutateRessursAndQueryPersonClientToken() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("azp_name", "mutateRessursAndQueryPersonClient");
         return validToken(claims);
     }
 

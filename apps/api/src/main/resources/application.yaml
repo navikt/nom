@@ -202,7 +202,7 @@ app:
     clients:
       nom-ui2:
         client-id: "af2f9386-07cf-4fb9-8612-c4724335a43c"
-        scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
+        scopes: ["QUERY_PERSON", "MUTATE_RESSURS", "NOM_UI_APP"]
       nom-ui2-srvuser:
         client-id: "9735c586-f3eb-4630-9b80-4088c21a8959"
         scopes: ["QUERY_PERSON"]
@@ -274,7 +274,7 @@ app:
     clients:
       nom-ui2:
         client-id: "78847351-6ee0-43cc-9c17-b92bc1eb076d"
-        scopes: ["QUERY_PERSON"]
+        scopes: ["QUERY_PERSON", "NOM_UI_APP"]
       remedy:
         client-id: "407c569a-a2e9-4530-9d9d-0270f4db8cf3"
         scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
