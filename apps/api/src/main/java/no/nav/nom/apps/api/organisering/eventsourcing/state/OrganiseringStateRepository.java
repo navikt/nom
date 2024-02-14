@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -112,6 +114,52 @@ public class OrganiseringStateRepository {
 
     public void logRepositoryState() {
         logger.debug("organiseringByFid: {} organiseringById: {} allOrganiseringerContainingId: {} Aktive organiseringer: {}", organiseringByFid.size(), organiseringById.size(), allOrganiseringerContainingId.size(), getActiveOrganisering().size());
+
+        // TODO delete the rest of this method. This is just for logging and testing and should be removed
+       try {
+           HashMap difference_allOrganiseringerContainingId_organiseringByFid = hashMapDifference(allOrganiseringerContainingId, organiseringByFid);
+           logger.debug("Diff: difference_allOrganiseringerContainingId_organiseringByFid");
+           for (Object id: difference_allOrganiseringerContainingId_organiseringByFid.keySet()) {
+               String key = id.toString();
+               String value = difference_allOrganiseringerContainingId_organiseringByFid.get(key).toString();
+               System.out.println(key + " " + value);
+           }
+
+           HashMap difference_allOrganiseringerContainingId_organiseringById = hashMapDifference(allOrganiseringerContainingId, organiseringById);
+           logger.debug("Diff: difference_allOrganiseringerContainingId_organiseringById");
+           for (Object id: difference_allOrganiseringerContainingId_organiseringById.keySet()) {
+               String key = id.toString();
+               String value = difference_allOrganiseringerContainingId_organiseringById.get(key).toString();
+               System.out.println(key + " " + value);
+           }
+
+           HashMap difference_organiseringByFid_allOrganiseringerContainingId = hashMapDifference(organiseringByFid, allOrganiseringerContainingId);
+           logger.debug("Diff: difference_organiseringByFid_allOrganiseringerContainingId");
+           for (Object id: difference_organiseringByFid_allOrganiseringerContainingId.keySet()) {
+               String key = id.toString();
+               String value = difference_organiseringByFid_allOrganiseringerContainingId.get(key).toString();
+               System.out.println(key + " " + value);
+           }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // TODO this method is just used for logging and testing and should be removed
+    private HashMap<String, Object> hashMapDifference(Map a, Map b) {
+        Iterator bKeyIterator = b.keySet().iterator();
+        String key;
+        Object value;
+        HashMap difference = new HashMap();
+
+        while (bKeyIterator.hasNext()) {
+            key = (String) bKeyIterator.next();
+            if (!a.containsKey(key)) {
+                value = b.get(key);
+                difference.put(key, value);
+            }
+        }
+        return difference;
     }
 
     public Map<String, OrganiseringState> getActiveOrganisering() {
