@@ -115,7 +115,7 @@ public class OrganiseringStateRepository {
 
         // TODO delete the rest of this method. This is just for logging and testing and should be removed
        try {
-           StringBuilder message = new StringBuilder("Diff: difference_allOrganiseringerContainingId_organiseringByFid ");
+           StringBuilder message = new StringBuilder("Diff: difference_organiseringByFid_organiseringById ");
            for (String fid: organiseringByFid.keySet()) {
                OrganiseringState organiseringState = organiseringByFid.get(fid);
                String id = organiseringState.id();
@@ -132,6 +132,26 @@ public class OrganiseringStateRepository {
                }
            }
            logger.debug(message1.toString());
+
+           StringBuilder message2= new StringBuilder("Diff: difference_allOrganiseringerContainingId_organiseringByFid ");
+           for (String id: organiseringById.keySet()) {
+               int count = 0;
+               List<String> fids = new ArrayList<>();
+               for (String fid: organiseringByFid.keySet()) {
+                     OrganiseringState organiseringState = organiseringByFid.get(fid);
+                     if(organiseringState.id().equals(id)) {
+                          count ++;
+                         fids.add(fid);
+                     }
+               }
+               if(count > 1) {
+                   message2.append(" id: ").append(id).append(" in organiseringById duplicate in organiseringByFid ").append(fids);
+               }
+           }
+           logger.debug(message2.toString());
+
+
+
         } catch (Exception e) {
             //e.printStackTrace();
            // ignore
