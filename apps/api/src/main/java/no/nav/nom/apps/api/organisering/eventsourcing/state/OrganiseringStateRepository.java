@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -117,52 +115,27 @@ public class OrganiseringStateRepository {
 
         // TODO delete the rest of this method. This is just for logging and testing and should be removed
        try {
-           HashMap difference_allOrganiseringerContainingId_organiseringByFid = hashMapDifference(allOrganiseringerContainingId, organiseringByFid);
-           StringBuilder message = new StringBuilder("Diff: difference_allOrganiseringerContainingId_organiseringByFid");
-           for (Object id: difference_allOrganiseringerContainingId_organiseringByFid.keySet()) {
-               String key = id.toString();
-               String value = difference_allOrganiseringerContainingId_organiseringByFid.get(key).toString();
-               message.append(key).append(" ").append(value);
+           StringBuilder message = new StringBuilder("Diff: difference_allOrganiseringerContainingId_organiseringByFid ");
+           for (String fid: organiseringByFid.keySet()) {
+               OrganiseringState organiseringState = organiseringByFid.get(fid);
+               String id = organiseringState.id();
+               if(!organiseringById.containsKey(id)) {
+                   message.append(" id: ").append(id).append(" in organiseringByFid is not in organiseringById ");
+               }
            }
            logger.debug(message.toString());
 
-           HashMap difference_allOrganiseringerContainingId_organiseringById = hashMapDifference(allOrganiseringerContainingId, organiseringById);
-           StringBuilder message1 = new StringBuilder("Diff: difference_allOrganiseringerContainingId_organiseringById");
-           for (Object id: difference_allOrganiseringerContainingId_organiseringById.keySet()) {
-               String key = id.toString();
-               String value = difference_allOrganiseringerContainingId_organiseringById.get(key).toString();
-               message1.append(key).append(" ").append(value);
+           StringBuilder message1 = new StringBuilder("Diff: difference_allOrganiseringerContainingId_organiseringById ");
+           for (String id: allOrganiseringerContainingId.keySet()) {
+               if(!organiseringById.containsKey(id)) {
+                   message1.append(" id: ").append(id).append(" in allOrganiseringerContainingId is not in organiseringById ");
+               }
            }
            logger.debug(message1.toString());
-
-           HashMap difference_organiseringByFid_allOrganiseringerContainingId = hashMapDifference(organiseringByFid, allOrganiseringerContainingId);
-           StringBuilder message2 = new StringBuilder("Diff: difference_organiseringByFid_allOrganiseringerContainingId");
-           for (Object id: difference_organiseringByFid_allOrganiseringerContainingId.keySet()) {
-               String key = id.toString();
-               String value = difference_organiseringByFid_allOrganiseringerContainingId.get(key).toString();
-               message2.append(key).append(" ").append(value);
-           }
-           logger.debug(message2.toString());
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+           // ignore
         }
-    }
-
-    // TODO this method is just used for logging and testing and should be removed
-    private HashMap<String, Object> hashMapDifference(Map a, Map b) {
-        Iterator bKeyIterator = b.keySet().iterator();
-        String key;
-        Object value;
-        HashMap difference = new HashMap();
-
-        while (bKeyIterator.hasNext()) {
-            key = (String) bKeyIterator.next();
-            if (!a.containsKey(key)) {
-                value = b.get(key);
-                difference.put(key, value);
-            }
-        }
-        return difference;
     }
 
     public Map<String, OrganiseringState> getActiveOrganisering() {
