@@ -168,6 +168,9 @@ spec:
         - application: kodeverk-web
           namespace: team-rocket
           cluster: prod-gcp
+        - application: spre-styringsinfo
+          namespace: tbd
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
