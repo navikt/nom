@@ -16,6 +16,7 @@ import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -36,6 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
 
@@ -435,6 +437,44 @@ public class SanityCheck {
         return orgtilknytningService.getAll().stream()
             .filter(ot -> ot.gyldigTom().isPresent() && ot.gyldigTom().get().isBefore(ot.gyldigFom()))
             .toList();
+    }
+
+    @Operation(
+        description = "Valider angivelse av ARBEIDSOMRÅDE på enheter",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/validerArbeidsomraade")
+    public String validerArbeidsomraade() {
+        var alleEnheter = orgenhetService.getAllEnheterMedOrganisering(); // Aktive enheter i organisasjonstreet
+        var alleIdOver = organiseringStateRepository.getActiveOrganisering().values().stream().map(OrganiseringState::idOver).toList();
+        var alleLeafNoder = alleEnheter.stream().filter( o -> !alleIdOver.contains(o.getId()) ).toList();
+
+        StringBuffer result = new StringBuffer();
+        result.append("Antall løvnoder: %s\n".formatted(alleLeafNoder.size()));
+
+        AtomicInteger branchesMedFeilAntAvArbomr = new AtomicInteger();
+        alleLeafNoder.forEach( orgenhet -> {
+            var count = findArbeidsomraadeCountInHierarkiAbove(orgenhet);
+            if (count != 1) {
+                branchesMedFeilAntAvArbomr.getAndIncrement();
+                result.append("%s %s har %s arbeidsområder over seg\n".formatted(orgenhet.getId(), orgenhet.getNavn(), count));
+            }
+        });
+        return result.toString();
+     }
+
+    private int findArbeidsomraadeCountInHierarkiAbove(IOrgenhet orgenhet) {
+        boolean isArbOmr = NomNivaa.ARBEIDSOMRAADE.equals(orgenhet.getNomNivaa().orElse(null));
+        AtomicInteger countAbove = new AtomicInteger();
+        organiseringStateRepository.findActiveById(orgenhet.getId()).ifPresent( org -> {
+            countAbove.set(findArbeidsomraadeCountInHierarkiAbove(orgenhetService.getById(org.idOver()).get()));
+        });
+        return countAbove.get() + (isArbOmr ? 1: 0);
     }
 
     private String sjekkOrgEnhetStartSluttDato() {
