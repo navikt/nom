@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.contract.nom.NomNivaa;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +22,7 @@ import java.util.Optional;
 @Tag(name = "Admin for å utlede nom nivåer på nytt.")
 @RestController
 @RequestMapping("/api/admin/utlednomnivaaer")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class TriggerUtledNomNivaaPaaNytt {
 
     private final OrgEnhetNomNivaaHandler orgEnhetNomNivaaHandler;

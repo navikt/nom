@@ -18,6 +18,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernO
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,6 +35,7 @@ import java.util.Map;
 @Tag(name = "Admin for korrigeringer")
 @RestController
 @RequestMapping("/api/admin/korrigerreOrgtilknytingMedPeriodeUtoverEnhetensPeriode")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class KorrigerOrgtilknytningerUtoverOrgenhetensPeriode {
 
     private final OrgenhetService orgenhetService;

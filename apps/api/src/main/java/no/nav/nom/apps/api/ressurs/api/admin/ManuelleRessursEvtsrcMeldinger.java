@@ -34,6 +34,7 @@ import java.util.Optional;
 @Tag(name = "Admin for å lage manuelle Evtsrc meldinger")
 @RestController
 @RequestMapping("/api/admin/manuelleEvtsrcMeldinger")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class ManuelleRessursEvtsrcMeldinger {
 
     private final RessursCommadService ressursCommadService;
@@ -58,7 +59,6 @@ public class ManuelleRessursEvtsrcMeldinger {
         }
     )
     @PostMapping(value = "/lagSlettRessursMelding")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> lagSlettRessursMelding(
         @Parameter(description = "FID for ressursen som skal slettes") @RequestParam String fid,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
@@ -118,7 +118,6 @@ public class ManuelleRessursEvtsrcMeldinger {
         }
     )
     @PostMapping(value = "/oppdaterPersonidentForRessurs")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> oppdaterPersonidentForRessurs(
         @Parameter(description = "FID for ressursen som skal få ny personident") @RequestParam String fid,
         @Parameter(description = "Ny personident (fnr)") @RequestParam String nyPersonident,
@@ -184,7 +183,6 @@ public class ManuelleRessursEvtsrcMeldinger {
         }
     )
     @PostMapping(value = "/oppdaterPersonaliaForRessurs")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> oppdaterPersonidentForRessurs(
         @Parameter(description = "FID for ressursen som skal få endret personalia") @RequestParam String fid,
         @Parameter(description = "Fornavn") @RequestParam String fornavn,

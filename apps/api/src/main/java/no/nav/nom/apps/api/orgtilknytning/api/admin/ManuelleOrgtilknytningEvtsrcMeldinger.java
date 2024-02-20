@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Admin for å lage manuelle Evtsrc meldinger")
 @RestController
 @RequestMapping("/api/admin/manuelleEvtsrcMeldinger")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class ManuelleOrgtilknytningEvtsrcMeldinger {
 
     private final OrgtilknytningCommandService orgtilknytningCommandService;
@@ -53,7 +54,6 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
         }
     )
     @PostMapping(value = "/fjernOrgtilknytning")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> fjernOrgtilknytning(
         @Parameter(description = "FID for orgtilknytningen som skal slettes") @RequestParam String fid,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
