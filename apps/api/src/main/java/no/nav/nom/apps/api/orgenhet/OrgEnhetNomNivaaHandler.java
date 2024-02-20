@@ -74,7 +74,7 @@ public class OrgEnhetNomNivaaHandler {
             orgEnhetStateRepository.findByFid(nomNivaaEndretEventV1.getFid()).ifPresent(
                 orgEnhetState -> {
                     addArbeidsomraadeInAllSubPathsIfMissing(orgEnhetState);
-                    logger.info("Ensured that ARBEIDSOMRAADE is set under DRIFTSENHET {}", orgEnhetState.id());
+                    logger.debug("Ensured that ARBEIDSOMRAADE is set under DRIFTSENHET {}", orgEnhetState.id());
                 }
             );
         }

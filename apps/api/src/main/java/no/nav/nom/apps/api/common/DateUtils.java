@@ -17,10 +17,13 @@ public class DateUtils {
     }
 
     public static boolean isPeriodActive(LocalDate periodStart, Optional<LocalDate> periodEnd) {
+        return isPeriodActive(periodStart, periodEnd.orElse(null));
+    }
+
+    public static boolean isPeriodActive(LocalDate periodStart, LocalDate periodEnd) {
         var today = LocalDate.now();
-        var isPeriodStartBeforeOrEqualToToday = periodStart.isBefore(today) || periodStart.isEqual(today);
-        var isPeriodEndAfterOrEqualToToday = periodEnd.map(endDate -> endDate.isAfter(today) || endDate.isEqual(today))
-            .orElse(true);
+        var isPeriodStartBeforeOrEqualToToday = periodStart.isBefore(today.plusDays(1));
+        var isPeriodEndAfterOrEqualToToday = periodEnd == null || periodEnd.isAfter(today.minusDays(1));
 
         return isPeriodStartBeforeOrEqualToToday && isPeriodEndAfterOrEqualToToday;
     }
