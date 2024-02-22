@@ -6,8 +6,14 @@ import java.util.Optional;
 
 public class DateUtils {
     public static boolean isPeriodsOverlapping(LocalDate period1Start, Optional<LocalDate> period1End, LocalDate period2Start, Optional<LocalDate> period2End) {
-        return period1Start.isBefore(period2End.orElse(LocalDate.MAX)) && period2Start
-            .isBefore(period1End.orElse(LocalDate.MAX));
+        return isPerioderOverlapping(
+            new Periode(period1Start, period1End.orElse(LocalDate.MAX)),
+            new Periode(period2Start, period2End.orElse(LocalDate.MAX))
+        );
+    }
+
+    public static Boolean isPerioderOverlapping(Periode periode1, Periode periode2) {
+        return periode1.start().isBefore(periode2.end) && periode2.start.isBefore(periode1.end);
     }
 
     public static boolean isPeriodActive(LocalDate periodStart, Optional<LocalDate> periodEnd) {
@@ -40,4 +46,9 @@ public class DateUtils {
 
         return today.plusDays(1);
     }
+
+    public record Periode(
+        LocalDate start,
+        LocalDate end
+    ) {}
 }

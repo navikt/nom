@@ -359,8 +359,8 @@ public class RessursRestService {
                 );
 
                 orgtilknytningCommandService.endreTilknytningtype(
-                    orgTilknytningFid,
                     new EndreTilknytningtype(
+                        orgTilknytningFid,
                         Optional.of(request.tilknytningtype()),
                         metaData
                     )

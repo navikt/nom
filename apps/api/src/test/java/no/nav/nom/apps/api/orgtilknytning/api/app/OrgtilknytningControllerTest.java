@@ -442,12 +442,12 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             orgtilknytningCommandService,
             times(1)
         ).endreTilknytningtype(
-            stringArgumentCaptor.capture(),
             endreTilknytningtypeArgumentCaptor.capture()
         );
 
-        assertThat(stringArgumentCaptor.getValue()).isEqualTo(orgtilknytningToUpdate.fid());
         assertThat(endreTilknytningtypeArgumentCaptor.getValue())
+            .matches(endreTilknytningtype ->
+                endreTilknytningtype.fid().equals(orgtilknytningToUpdate.fid()))
             .matches(endreTilknytningtype ->
                 endreTilknytningtype.tilknytningtype().equals(endreTilknytningtypeRequest.tilknytningtype())
             );
@@ -504,7 +504,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .build();
         saveOrgtilknytninger(List.of(existingOrgtilknytning));
 
-        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequestOld().toBuilder()
             .navident(navident)
             .orgEnhetId(orgEnhet.id())
             .erDagligOppfolging(Optional.of(erDagligOppfolging))
@@ -583,7 +583,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         saveOrgenheter(List.of(tilknyttetOrgenhet));
         saveRessurser(List.of(tilknyttetRessurs));
 
-        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequestOld().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId(tilknyttetOrgenhet.id())
             .gyldigTom(Optional.of(LocalDate.now().plusMonths(5)))
@@ -621,7 +621,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         saveOrgenheter(List.of(tilknyttetOrgenhet));
         saveRessurser(List.of(tilknyttetRessurs));
 
-        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequestOld().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId(tilknyttetOrgenhet.id())
             .gyldigTom(Optional.of(LocalDate.now().plusMonths(5)))
@@ -655,7 +655,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         saveOrgenheter(List.of(tilknyttetOrgenhet));
         saveRessurser(List.of(tilknyttetRessurs));
 
-        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequestOld().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId(tilknyttetOrgenhet.id())
             .gyldigTom(Optional.of(LocalDate.now().plusMonths(5)))
@@ -684,7 +684,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var orgenhet = orgEnhetState();
         saveOrgenheter(List.of(orgenhet));
 
-        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequestOld().toBuilder()
             .navident(navident)
             .orgEnhetId(orgenhet.id())
             .build();
@@ -713,7 +713,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build()
         ));
 
-        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequestOld().toBuilder()
             .navident(navident)
             .orgEnhetId(orgEnhetId)
             .build();
@@ -752,7 +752,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         saveOrgenheter(List.of(orgEnhet));
 
 
-        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequestOld().toBuilder()
             .navident(navident)
             .orgEnhetId(orgEnhet.id())
             .gyldigFom(LocalDate.now().plusMonths(1))
@@ -792,7 +792,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build()
         ));
 
-        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequestOld().toBuilder()
             .navident(navident)
             .orgEnhetId("some-other-orgenhet")
             .gyldigFom(LocalDate.now().plusMonths(1))
@@ -845,7 +845,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build()
         ));
 
-        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequestOld().toBuilder()
             .navident(navident)
             .orgEnhetId("some-other-orgenhet")
             .gyldigFom(LocalDate.now().plusMonths(1))
@@ -926,6 +926,43 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     }
 
+    @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} should update all orgtilknytninger for ressurs")
+    void test_update_orgtilknytninger_for_ressurs() {
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .build();
+
+        saveOrgtilknytninger(List.of(existingOrgtilknytning));
+
+        var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
+            .gyldigTom(
+                existingOrgtilknytning.gyldigTom().map(localDate -> localDate.plusMonths(1)).orElseThrow()
+            )
+            .build();
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .endredeOrgtilknytninger(List.of(endreOrgtilknytningRequest))
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            nomWriteGroupAndNomUiAzpToken(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().is2xxSuccessful();
+
+        verify(orgtilknytningCommandService, times(1)).endreOrgtilknytningDato(any());
+        verify(orgtilknytningCommandService, times(1)).opprettOrgtilknytning(any());
+
+    }
+
     private static EndreTilknytningtypeRequest endreTilknytningtypeRequest() {
         return EndreTilknytningtypeRequest.builder()
             .tilknytningtype(Optional.empty())
@@ -940,14 +977,50 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .build();
     }
 
-    private static LeggTilOrgtilknytningRequest leggTilOrgtilknytningRequest() {
-        return LeggTilOrgtilknytningRequest.builder()
+    private static LeggTilOrgtilknytningRequestOld leggTilOrgtilknytningRequestOld() {
+        return LeggTilOrgtilknytningRequestOld.builder()
             .navident("X12345")
             .orgEnhetId("some-orgenhet")
             .gyldigFom(LocalDate.now())
             .gyldigTom(Optional.of(LocalDate.now().plusMonths(5)))
             .erDagligOppfolging(Optional.empty())
             .setRessursSluttdato(Optional.empty())
+            .build();
+    }
+
+    private static LeggTilOrgtilknytningRequest leggTilOrgtilknytningRequest() {
+        return LeggTilOrgtilknytningRequest.builder()
+            .orgEnhetId("some-new-orgenhet")
+            .erDagligOppfolging(false)
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(LocalDate.now().plusMonths(12))
+            .orgtilknytningType(null)
+            .build();
+    }
+
+    private static EndreOrgtilknytningRequest endreOrgtilknytningRequest() {
+        return EndreOrgtilknytningRequest.builder()
+            .fid(UUID.randomUUID().toString())
+            .gyldigFom(LocalDate.now().minusMonths(4))
+            .gyldigTom(LocalDate.now().plusMonths(1))
+            .erDagligOppfolging(false)
+            .build();
+    }
+
+    private static EndreOrgtilknytningRequest endreOrgtilknytningRequest(OrgtilknytningState fromOrgtilknytningState) {
+        return EndreOrgtilknytningRequest.builder()
+            .fid(fromOrgtilknytningState.fid())
+            .gyldigFom(fromOrgtilknytningState.gyldigFom())
+            .gyldigTom(fromOrgtilknytningState.gyldigTom().orElse(null))
+            .erDagligOppfolging(fromOrgtilknytningState.erDagligOppfolging())
+            .build();
+    }
+
+    private static OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest() {
+        return OppdaterOrgtilknytningerForRessursRequest.builder()
+            .nyeOrgtilknytninger(List.of(leggTilOrgtilknytningRequest()))
+            .endredeOrgtilknytninger(List.of(endreOrgtilknytningRequest()))
+            .setRessursSluttdato(false)
             .build();
     }
 
@@ -990,7 +1063,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     private WebTestClient.ResponseSpec postLeggTilOrgtilknytningRequest(
         String accessToken,
-        LeggTilOrgtilknytningRequest leggTilOrgtilknytningRequest
+        LeggTilOrgtilknytningRequestOld leggTilOrgtilknytningRequest
     ) {
         return webTestClient
             .post()
@@ -1000,6 +1073,25 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 httpHeaders.setBearerAuth(accessToken);
             })
             .bodyValue(leggTilOrgtilknytningRequest)
+            .exchange();
+    }
+
+    private WebTestClient.ResponseSpec postOppdaterOrgtilknytningerForRessursRequest(
+        String navident,
+        String accessToken,
+        OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest
+    ) {
+        return webTestClient
+            .post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgtilknytninger/forRessurs/{navident}")
+                .build(navident)
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(accessToken);
+            })
+            .bodyValue(oppdaterOrgtilknytningerForRessursRequest)
             .exchange();
     }
 }

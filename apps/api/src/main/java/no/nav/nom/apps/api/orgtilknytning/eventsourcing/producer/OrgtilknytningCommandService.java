@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDatoCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtype;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
@@ -50,19 +51,19 @@ public class OrgtilknytningCommandService {
 
     public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreDagligOppfolgingOrgtilknytning(
         String fid,
-        EndreDagligOppfolgingOrgtilknytning primaeOrgtilknytningEndret
+        EndreDagligOppfolgingOrgtilknytning endreDagligOppfolgingOrgtilknytning
     ) {
         return eventProducer.sendMessage(new OrgtilknytningDagligOppfolgingEndretEventV1(
             fid,
             new OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData(
-                primaeOrgtilknytningEndret.navident(),
-                primaeOrgtilknytningEndret.orgenhetId(),
-                primaeOrgtilknytningEndret.gyldigFom(),
-                primaeOrgtilknytningEndret.gyldigTom(),
-                primaeOrgtilknytningEndret.dagligOppfolging()
+                endreDagligOppfolgingOrgtilknytning.navident(),
+                endreDagligOppfolgingOrgtilknytning.orgenhetId(),
+                endreDagligOppfolgingOrgtilknytning.gyldigFom(),
+                endreDagligOppfolgingOrgtilknytning.gyldigTom(),
+                endreDagligOppfolgingOrgtilknytning.dagligOppfolging()
             ),
-            primaeOrgtilknytningEndret.inputMetadata(),
-            primaeOrgtilknytningEndret.additionalAgressoData()
+            endreDagligOppfolgingOrgtilknytning.inputMetadata(),
+            endreDagligOppfolgingOrgtilknytning.additionalAgressoData()
         ));
     }
 
@@ -93,10 +94,24 @@ public class OrgtilknytningCommandService {
             ));
     }
 
-    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreTilknytningtype(String fid, EndreTilknytningtype endreTilknytningType) {
+
+    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreOrgtilknytningDato(EndreOrgtilknytningDatoCommand endreOrgtilknytningDatoCommand) {
+        return eventProducer.sendMessage(
+            new OrgtilknytningDatoEndretEventV2(
+                endreOrgtilknytningDatoCommand.fid(),
+                new OrgtilknytningDatoEndretEventV2.OrgtilknytningDatoEndretEventData(
+                    endreOrgtilknytningDatoCommand.gyldigFom(),
+                    endreOrgtilknytningDatoCommand.gyldigTom()
+                ),
+                endreOrgtilknytningDatoCommand.inputMetadata(),
+                null
+            ));
+    }
+
+    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreTilknytningtype(EndreTilknytningtype endreTilknytningType) {
         return eventProducer.sendMessage(
             new OrgtilknytningTilknytningtypeEndretEventV1(
-                fid,
+                endreTilknytningType.fid(),
                 new OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData(
                     endreTilknytningType.tilknytningtype()
                 ),
