@@ -238,8 +238,6 @@ public class RemedyControllerTest extends RestTestBase {
                     .navident(navident)
                     .build()));
 
-        when(unleash.isEnabled(RemedyController.UNLEASH_HANDLE_PERSONIDENT_CHANGE)).thenReturn(true);
-
         when(ressursStateRepository.findByPersonident(ny_personident)).thenReturn(Optional.empty()); // Nom har ikke ressurs på ny personident
         when(ressursStateRepository.findByNavident(navident)).thenReturn(Optional.of(new RessursState(
             // Men har eksisterende ressurs for navidenten returnert av nik
