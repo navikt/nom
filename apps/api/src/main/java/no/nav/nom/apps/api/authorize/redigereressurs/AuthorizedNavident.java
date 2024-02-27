@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStat
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.state.OrganiseringState;
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -27,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *  Denne tjenesten inneholder alle som har til å redigere ressurser under gitt orgenhet i hierarkiet.
  *  Alle ledere på en enhet fra og med 'Arbeidsområde' type og nedover har tilgang for ressurser som har en tilknytning til en av disse enhetene og nedover.
  *  TODO: Må vurdere om det gjelder for aktive orgtilknytninger etc. i forhold til bruksmønster på endring hvor ressursen går fra en enhet til en annen
+ *      --> Per nå sjekker den at orgtilknytning isCurrentOrFuturePeriod
  *
  *  Disse samme lederne har også mulighet til å gi andre ansatte tilgang til å redigere ressurser på samme orgenhet eller er valgt nivå under der igjen
  *  Disse tildelte rettighetene ka bestå også etter lederbytte, men må revideres på jevnlig basis. (Bekreftes på nytt, hvis ikke vil tilgangen tas vekk)
@@ -34,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @Slf4j
 public class AuthorizedNavident {
-    // Per leder for alle orgenheter på ARBEIDSOMRÅDE nivå og nedover. For den enkelte leder er alle undernivåer lagt til.
+    // Per leder for alle orgenheter på ARBEIDSOMRÅDE nivå og nedover. For den enkelte leder er alle under-nivåer lagt til.
     Map<String, HashSet<String>> lederForOrgenhet = new ConcurrentHashMap<>();
     // Delegert lederskap. Delegert leder for orgenhet, og alle underliggende enheter
     Map<String, HashSet<String>> delegertLederForOrgenhet = new ConcurrentHashMap<>();
@@ -76,6 +78,8 @@ public class AuthorizedNavident {
     public boolean addDelegertLederForOrgenhet(String leder, String delegertLeder, String orgenhetId) {
         sjekkParametereForAddRemoveDelegertLeder(leder, delegertLeder, orgenhetId);
 
+        // TODO: Invoker evtSrc, oppdater delegertLederForOrgenhet async i bakhånd, Ta med DATO!!
+
         HashSet<String> orgenheterForDelegertLeder = delegertLederForOrgenhet.containsKey(delegertLeder) ? delegertLederForOrgenhet.get(delegertLeder) : new HashSet<>();
         boolean added = orgenheterForDelegertLeder.add(orgenhetId);
         delegertLederForOrgenhet.put(delegertLeder, orgenheterForDelegertLeder);
@@ -85,11 +89,17 @@ public class AuthorizedNavident {
     public boolean removeDelegertLederForOrgenhet(String leder, String delegertLeder, String orgenhetId) {
         sjekkParametereForAddRemoveDelegertLeder(leder, delegertLeder, orgenhetId);
 
+        // TODO: Invoker evtSrc, oppdater delegertLederForOrgenhet async i bakhånd, Ta med DATO!!
         boolean removed = false;
         if (delegertLederForOrgenhet.containsKey(delegertLeder)) {
             removed = delegertLederForOrgenhet.get(delegertLeder).remove(orgenhetId);
         }
         return removed;
+    }
+
+    public boolean renewDelegertLederForOrgenhet(String leder, String delegertLeder, String orgenhetId) {
+        // TODO: Implementer renewDelegertLederForOrgenhet
+        throw new NotImplementedException("Ikke implementert enda");
     }
 
     private void sjekkParametereForAddRemoveDelegertLeder(String leder, String delegertLeder, String orgenhetId) {

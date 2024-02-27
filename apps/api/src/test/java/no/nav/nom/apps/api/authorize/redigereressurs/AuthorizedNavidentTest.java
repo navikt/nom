@@ -243,7 +243,6 @@ class AuthorizedNavidentTest {
         setupRessursState();
 
         authorizedNavident.oppdaterLedereForOrgenheter();
-
     }
 
     private void seutpBasisOrgenheter() {

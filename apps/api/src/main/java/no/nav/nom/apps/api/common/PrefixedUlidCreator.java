@@ -10,6 +10,7 @@ public class PrefixedUlidCreator {
     private static final String TMP_ORGTILKNYTNING_ULID_PREFIX = "tmp-orgtilknytning-";
     private static final String EVENT_ULID_PREFIX = "event-";
     private static final String ORGANISERING_ULID_PREFIX = "organisering-";
+    private static final String AUTHORAZITION_ULID_PREFIX = "authorize-";
 
     private static String createPrefixedUlid(String prefix) {
         return prefix + UlidCreator.getUlid().toString();
@@ -36,5 +37,9 @@ public class PrefixedUlidCreator {
 
     public static String createOrganiseringUlid() {
         return createPrefixedUlid(ORGANISERING_ULID_PREFIX);
+    }
+
+    public static String createAuthorizationUlid() {
+        return createPrefixedUlid(AUTHORAZITION_ULID_PREFIX);
     }
 }

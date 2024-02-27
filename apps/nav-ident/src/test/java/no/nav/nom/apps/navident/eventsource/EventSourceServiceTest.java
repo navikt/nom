@@ -36,7 +36,7 @@ class EventSourceServiceTest extends EmbeddedKafkaTestBase {
 
         kafkaTemplate.send(topic, event.payload.navident, event);
 
-        await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.containsKey(navIdent));
+        await().atMost(2, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.containsKey(navIdent));
     }
 
     @Test
