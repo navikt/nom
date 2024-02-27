@@ -29,4 +29,8 @@ public record OrgEnhetState (
     public boolean endedOnStartDate() {
         return gyldigTom().isPresent() && gyldigFom().isEqual(gyldigTom().get());
     }
+
+    public boolean isActive() {
+        return !endedOnStartDate() && gyldigTom().isPresent() && gyldigTom().get().isAfter(LocalDate.now().minusDays(1));
+    }
 }
