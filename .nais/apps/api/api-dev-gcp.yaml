@@ -192,6 +192,12 @@ spec:
         - application: spre-styringsinfo
           namespace: tbd
           cluster: dev-gcp
+        - application: prim-brukerstyring
+          namespace: pim
+          cluster: dev-gcp
+        - application: prim-brukerstyring-test
+          namespace: pim
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
