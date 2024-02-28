@@ -1,5 +1,6 @@
 package no.nav.nom.contract.nom.state;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
@@ -30,6 +31,7 @@ public record OrgEnhetState (
         return gyldigTom().isPresent() && gyldigFom().isEqual(gyldigTom().get());
     }
 
+    @JsonIgnore
     public boolean isActive() {
         return !endedOnStartDate() && gyldigTom().isPresent() && gyldigTom().get().isAfter(LocalDate.now().minusDays(1));
     }
