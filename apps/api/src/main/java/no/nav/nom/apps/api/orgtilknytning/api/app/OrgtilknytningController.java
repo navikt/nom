@@ -6,7 +6,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import jakarta.validation.Valid;
+
 import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
@@ -78,7 +82,7 @@ public class OrgtilknytningController {
         "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
     )
     public ResponseEntity<StandardResponse> addOrgtilknytning(
-        @RequestBody LeggTilOrgtilknytningRequest leggTilOrgtilknytningRequest
+        @RequestBody LeggTilOrgtilknytningRequestOld leggTilOrgtilknytningRequest
     ) {
         if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
             orgtilknytningRestService.addOrgtilknyting(leggTilOrgtilknytningRequest);
@@ -153,6 +157,30 @@ public class OrgtilknytningController {
         );
     }
 
+    @PostMapping("/forRessurs/{navident}")
+    @Operation(
+        description = "Sender inn komplett øyeblikksbilde av hvordan alle orgtilknytningene til en ressurs skal se ut",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200"),
+    })
+    @PreAuthorize(
+        "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
+    )
+    public ResponseEntity<StandardResponse> updateOrgtilknytninger(
+        @PathVariable String navident,
+        @Valid @RequestBody OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest
+    ) {
+        if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
+            orgtilknytningRestService.oppdaterOrgtilknytningerForRessurs(navident, oppdaterOrgtilknytningerForRessursRequest);
+
+            return ResponseEntity.ok(StandardResponse.builder().message("Orgtilknytninger for ressurs oppdatert").build());
+        }
+
+        throw new AccessDeniedException("Endring av orgtilknytning er blokkert");
+    }
+
 
     // TODO: Lage global ControllerAdvice
     @ExceptionHandler({
@@ -160,7 +188,8 @@ public class OrgtilknytningController {
         NoSuchElementException.class,
         InvalidSektorException.class,
         InvalidOrgtilknytningTypeAndSektorCombinationException.class,
-        InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException.class
+        InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException.class,
+        InvalidOppdaterOrgtilknytningerForRessursRequestException.class
     })
     public ResponseEntity<StandardResponse> handleBadRequest(RuntimeException exception) {
         return ResponseEntity

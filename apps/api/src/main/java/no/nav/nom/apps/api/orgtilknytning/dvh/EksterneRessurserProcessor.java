@@ -13,6 +13,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernO
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
+import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -31,16 +32,20 @@ public class EksterneRessurserProcessor {
     private final OrgtilknytningService orgtilknytningService;
     private final OrgenhetService orgenhetService;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
+    private final NomMastered nomMastered;
+    private final Unleash unleash;
 
     public EksterneRessurserProcessor(
-        RemedyEnhetMapperService remedyEnhetMapperService, OrgtilknytningService orgtilknytningService,
-        OrgenhetService orgenhetService,
-        OrgtilknytningCommandService orgtilknytningCommandService
+            RemedyEnhetMapperService remedyEnhetMapperService, OrgtilknytningService orgtilknytningService,
+            OrgenhetService orgenhetService,
+            OrgtilknytningCommandService orgtilknytningCommandService, NomMastered nomMastered, Unleash unleash
     ) {
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.orgtilknytningService = orgtilknytningService;
         this.orgenhetService = orgenhetService;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
+        this.nomMastered = nomMastered;
+        this.unleash = unleash;
     }
 
     public void process(DvhEksternRessurs eksternRessurs) {
@@ -216,6 +221,11 @@ public class EksterneRessurserProcessor {
     }
 
     private void opprettOrgtilknytning(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet, LocalDate gyldigFom, InputMetadata metadata) {
+        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(eksternRessurs.navident())) {
+            log.info("Navident {} er mastered. Vi lager ikke orgtilknytning for denne", eksternRessurs.navident());
+            return;
+        }
+
         var opprettOrgtilknytning = new OpprettOrgtilknytning(
             eksternRessurs.navident(),
             orgenhet.getId(),
@@ -260,6 +270,11 @@ public class EksterneRessurserProcessor {
 
 
     private void endreSluttdatoPaaEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
+        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(orgtilknytning.navident())) {
+            log.info("Navident {} er mastered. Vi endrer ikke sluttdato på orgtilknytning for denne", orgtilknytning.navident());
+            return;
+        }
+
         var endreOrgtilknytningDato = new EndreOrgtilknytningDato(
             orgtilknytning.navident(),
             orgtilknytning.orgEnhetId(),
@@ -275,6 +290,11 @@ public class EksterneRessurserProcessor {
     }
 
     private void avsluttOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
+        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(orgtilknytning.navident())) {
+            log.info("Navident {} er mastered. Vi avslutter ikke orgtilknytning for denne", orgtilknytning.navident());
+            return;
+        }
+
         var avvikleOrgtilknytning = new AvvikleOrgtilknytning(
             orgtilknytning.navident(),
             orgtilknytning.orgEnhetId(),
@@ -289,6 +309,11 @@ public class EksterneRessurserProcessor {
     }
 
     private void fjernEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
+        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(orgtilknytning.navident())) {
+            log.info("Navident {} er mastered. Vi fjerner ikke orgtilknytning for denne", orgtilknytning.navident());
+            return;
+        }
+
         var fjernOrgtilknytning = new FjernOrgtilknytning(
             orgtilknytning.navident(),
             orgtilknytning.orgEnhetId(),

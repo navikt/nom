@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
@@ -19,10 +20,9 @@ import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
-import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
-import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -64,6 +64,7 @@ public class DvhRestConsumer {
     private final EksterneRessurserLoader eksterneRessurserLoader;
     private final OrganiseringService organiseringService;
     private final KommunaleRessurserLoader kommunaleRessurserLoader;
+    private final AuthorizedNavident authorizedNavident;
 
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
     private final Unleash unleash;
@@ -95,6 +96,8 @@ public class DvhRestConsumer {
         loadTlfFromDvh();
 
         updateShadowOrgtilknytningerForKommunaleFromDvh();
+
+        authorizedNavident.oppdaterLedereForOrgenheter();
 
         if (!dvhStartupLoadMonitor.hasCompleted()) { // Pod kan markeres som klar etter oppstart
             dvhStartupLoadMonitor.setCompleted();

@@ -13,6 +13,7 @@ import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoadStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Admin for å manuelt trigge dvh Last")
 @RestController
 @RequestMapping("/api/admin/dvhLast")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class DvhLast {
     private final Logger log = LoggerFactory.getLogger(DvhLast.class);
 

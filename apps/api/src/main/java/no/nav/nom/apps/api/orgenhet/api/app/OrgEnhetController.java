@@ -83,6 +83,7 @@ public class OrgEnhetController {
             description = "Henter records fra ressurs event-source",
             security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<JsonNode>> readRessursTopic(@Valid ReadTopicRequest request){
         return ResponseEntity.ok(orgenhetService.getOrgEnhetEvents(request));
     }

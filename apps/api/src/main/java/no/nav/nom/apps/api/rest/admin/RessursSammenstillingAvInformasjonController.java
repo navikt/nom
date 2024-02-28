@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +25,7 @@ import static no.nav.nom.apps.api.rest.admin.RessursSammenstillingAvInformasjon.
 @Tag(name = "Admin for datagrunnlag og sammenstilling")
 @RestController
 @RequestMapping("/api/admin")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class RessursSammenstillingAvInformasjonController {
     private final RessursSammenstillingAvInformasjon ressursSammenstillingAvInformasjon;
     private final LeaderElection leaderElection;

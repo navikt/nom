@@ -87,4 +87,17 @@ public class AdminControllerTest extends TestBase {
             .exchange()
             .expectStatus().isForbidden();
     }
+
+    @Test
+    @DisplayName("POST /admin/bestillinger should return 403 FORBIDDEN for non admin users")
+    void testGetBestillingerForbidden() {
+
+        webTestClient.get()
+            .uri("/admin/bestillinger")
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(
+                noScopesUserToken()
+            ))
+            .exchange()
+            .expectStatus().isForbidden();
+    }
 }

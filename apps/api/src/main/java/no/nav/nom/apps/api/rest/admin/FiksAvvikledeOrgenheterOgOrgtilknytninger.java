@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +24,7 @@ import java.util.List;
 @Tag(name = "Admin for korrigeringer")
 @RestController
 @RequestMapping("/api/admin/korrigereAvvikledeEnheterOgOrgtilknytninger")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
     private final OrgenhetService orgenhetService;
     private final OrgtilknytningService orgtilknytningService;

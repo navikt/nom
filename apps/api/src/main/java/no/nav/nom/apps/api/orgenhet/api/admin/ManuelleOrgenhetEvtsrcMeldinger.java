@@ -33,6 +33,7 @@ import java.time.LocalDate;
 @Tag(name = "Admin for å lage manuelle Evtsrc meldinger")
 @RestController
 @RequestMapping("/api/admin/manuelleEvtsrcMeldinger")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class ManuelleOrgenhetEvtsrcMeldinger {
     private final OrgEnhetCommandService orgEnhetCommandService;
 
@@ -57,7 +58,6 @@ public class ManuelleOrgenhetEvtsrcMeldinger {
         }
     )
     @PostMapping(value = "/avvikleOrgenhet")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> avvikleOrgenhet(
         @Parameter(description = "Orgenhet Id") @RequestParam String orgenhetId,
         @Parameter(description = "Gyldig til og med") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate gylidgTom,

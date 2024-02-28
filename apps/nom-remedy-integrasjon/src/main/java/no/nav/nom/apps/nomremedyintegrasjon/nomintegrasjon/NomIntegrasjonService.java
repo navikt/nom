@@ -25,6 +25,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -455,6 +456,20 @@ public class NomIntegrasjonService {
             .map(latestEntry -> Long.parseLong(latestEntry.getEntryId()))
             .map(latestId -> fifteenCharLengthZeroPaddedNumber(latestId + 1))
             .orElse(fifteenCharLengthZeroPaddedNumber(0L));
+    }
+
+    public List<NomIntegrasjonEntity> getNomIntegrasjonEntities() {
+        return nomIntegrasjonRepository.findAll().stream()
+            .map(nomIntegrasjonEntity ->
+                nomIntegrasjonEntity.toBuilder()
+                    .fodselsnummer(
+                        Optional.ofNullable(nomIntegrasjonEntity.getFodselsnummer())
+                            .map(fodselsnummer -> fodselsnummer.replaceFirst(".{5}$", "*****"))
+                            .orElse(null)
+                    )
+                    .build()
+            )
+            .toList();
     }
 
     protected Integer nomSektorToRemedyCode(no.nav.nom.generated.model.Sektor sektor) {

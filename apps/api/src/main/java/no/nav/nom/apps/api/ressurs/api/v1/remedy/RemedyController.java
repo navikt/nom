@@ -50,18 +50,12 @@ public class RemedyController {
     private final NIKClient nikClient;
     private final RessursCommadService ressursCommadService;
 
-    public static final String UNLEASH_HANDLE_PERSONIDENT_CHANGE = "nom.remedy_opprett_ressurs.handle_personident_change";
-    private final Unleash unleash;
-
     public RemedyController(
-        RessursStateRepository ressursStateRepository, PdlClient pdlClient, NIKClient nikClient, RessursCommadService ressursCommadService,
-        Unleash unleash
-    ) {
+        RessursStateRepository ressursStateRepository, PdlClient pdlClient, NIKClient nikClient, RessursCommadService ressursCommadService) {
         this.ressursStateRepository = ressursStateRepository;
         this.pdlClient = pdlClient;
         this.nikClient = nikClient;
         this.ressursCommadService = ressursCommadService;
-        this.unleash = unleash;
     }
 
     @PostMapping("/finnRessurs")
@@ -160,43 +154,41 @@ public class RemedyController {
             new Origination(request.getSubmitter(), SecurityUtil.getAuthenticatedAzpName())
         );
 
-        if (unleash.isEnabled(UNLEASH_HANDLE_PERSONIDENT_CHANGE)) {
-            // Det kan være at identen person har byttet f.nr. i såfall har nav-ident returnert eksisterende navident for personen
-            funnetRessurs = ressursStateRepository.findByNavident(opprettetNavident);
-            if (funnetRessurs.isPresent()) {
-                log.debug("Ressurs funnet med navident {}", opprettetNavident);
+        // Det kan være at identen person har byttet f.nr. i såfall har nav-ident returnert eksisterende navident for personen
+        funnetRessurs = ressursStateRepository.findByNavident(opprettetNavident);
+        if (funnetRessurs.isPresent()) {
+            log.debug("Ressurs funnet med navident {}", opprettetNavident);
 
-                // Endre personident på eksisterende ressurs
-                var eksisterendeRessurs = funnetRessurs.get();
+            // Endre personident på eksisterende ressurs
+            var eksisterendeRessurs = funnetRessurs.get();
 
-                ressursCommadService.oppdaterPersonidentCommand(
-                    new OppdaterPersonidentCommand(
+            ressursCommadService.oppdaterPersonidentCommand(
+                new OppdaterPersonidentCommand(
+                    eksisterendeRessurs.fid(),
+                    request.getPersonident()
+                ),
+                metadataFromRequest
+            );
+
+            // Hvis personalia/visningsnavn er endret, gjør en endre personalia også.
+            if (!visningsnavnEquals(request, eksisterendeRessurs)) {
+                ressursCommadService.oppdaterPersonaliaEvent(
+                    new OppdaterPersonaliaCommand(
                         eksisterendeRessurs.fid(),
-                        request.getPersonident()
+                        new Visningsnavn(request.getFornavn(), Optional.ofNullable(request.getMellomnavn()), request.getEtternavn())
                     ),
                     metadataFromRequest
                 );
-
-                // Hvis personalia/visningsnavn er endret, gjør en endre personalia også.
-                if (!visningsnavnEquals(request, eksisterendeRessurs)) {
-                    ressursCommadService.oppdaterPersonaliaEvent(
-                        new OppdaterPersonaliaCommand(
-                            eksisterendeRessurs.fid(),
-                            new Visningsnavn(request.getFornavn(), Optional.ofNullable(request.getMellomnavn()), request.getEtternavn())
-                        ),
-                        metadataFromRequest
-                    );
-                }
-                return RessursDTO.builder()
-                    .personident(request.getPersonident())
-                    .navident(eksisterendeRessurs.navident())
-                    .navn(NavnDTO.builder()
-                        .fornavn(request.getFornavn())
-                        .mellomnavn(request.getMellomnavn())
-                        .etternavn(request.getEtternavn())
-                        .build())
-                    .build();
             }
+            return RessursDTO.builder()
+                .personident(request.getPersonident())
+                .navident(eksisterendeRessurs.navident())
+                .navn(NavnDTO.builder()
+                    .fornavn(request.getFornavn())
+                    .mellomnavn(request.getMellomnavn())
+                    .etternavn(request.getEtternavn())
+                    .build())
+                .build();
         }
 
         Optional<Person> pdlPerson = pdlClient.hentPerson(request.getPersonident());

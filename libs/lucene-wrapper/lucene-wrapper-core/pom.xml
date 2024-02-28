@@ -14,7 +14,7 @@
     <name>NOM :: Libs :: Lucene Wrapper Core</name>
 
     <properties>
-        <lucene.version>9.9.2</lucene.version>
+        <lucene.version>9.10.0</lucene.version>
     </properties>
 
     <dependencies>

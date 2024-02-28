@@ -1,8 +1,8 @@
 package no.nav.nom.apps.api.orgenhet.eventsourcing.consumer;
 
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
-import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetNomNivaaHandler;
+import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.contract.nom.eventsource.NomNivaaEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
@@ -48,8 +48,7 @@ public class OrgEnhetEventSourceListener {
                 orgEnhetTypeHandler.orgEnhetsTypeChanged(orgEnhetEndretEvent);
                 orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdateChildren(orgEnhetEndretEvent);
 
-                logger.info(
-                    "Listener received message with fid {} and orgEnhetsType {}", orgEnhetEvent.getFid(),
+                logger.debug("Listener received message with fid {} and orgEnhetsType {}", orgEnhetEvent.getFid(),
                     orgEnhetEndretEvent.getData().orgEnhetsType());
             } else if (orgEnhetEvent instanceof NomNivaaEndretEventV1 nomNivaaEndretEventV1) {
                 orgEnhetNomNivaaHandler.ensureArbeidsomraadePresentUnderDriftsenhet(nomNivaaEndretEventV1);
