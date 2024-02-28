@@ -113,6 +113,7 @@ public class OrganiseringStateRepositoryTest {
             .gyldigTom(Optional.empty())
             .build();
 
+
         return Stream.of(
             Arguments.of("organisering_fom_tom_today " + IS_NOT_ACTIVE, organisering_fom_tom_today, 0),
             Arguments.of("organisering_fom_todayMinus10_tom_todayMinus2_dager is " + IS_NOT_ACTIVE, organisering_fom_todayMinus10_tom_todayMinus2_dager, 0),

@@ -43,6 +43,7 @@ public class OrgEnhetUnderordnetResolver {
             return organiseringStateRepository.getOrganiseringerContainingId(orgEnhetState.id()).stream()
                 .filter(organiseringState -> organiseringState.idOver().equals(orgEnhetState.id()))
                 .map(organiseringState -> orgEnhetStateRepository.findById(organiseringState.id()))
+                .filter(matchedOrgEnhetState -> matchedOrgEnhetState.isPresent() && matchedOrgEnhetState.get().isActive()) // sjekker også orgnhet er aktiv!
                 .flatMap(Optional::stream)
                 .distinct()
                 .toList();
