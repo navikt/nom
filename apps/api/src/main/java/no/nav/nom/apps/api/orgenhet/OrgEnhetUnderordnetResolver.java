@@ -42,8 +42,18 @@ public class OrgEnhetUnderordnetResolver {
         if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {
             return organiseringStateRepository.getOrganiseringerContainingId(orgEnhetState.id()).stream()
                 .filter(organiseringState -> organiseringState.idOver().equals(orgEnhetState.id()))
+                .peek(organiseringState -> {
+                    if (organiseringState.gyldigTom().toString().equals("2024-02-25")) {
+                        logger.warn("Fant en utgåtte organisering med id: {}", organiseringState);
+                    }
+                })
                 .map(organiseringState -> orgEnhetStateRepository.findById(organiseringState.id()))
                 .filter(matchedOrgEnhetState -> matchedOrgEnhetState.isPresent() && matchedOrgEnhetState.get().isActive()) // sjekker også orgnhet er aktiv!
+                .peek(matchedOrgEnhetState -> {
+                    if (matchedOrgEnhetState.get().id().equals("py458c")) {
+                        logger.warn("Fant en rart orgEnhetState : {}", matchedOrgEnhetState);
+                    }
+                })
                 .flatMap(Optional::stream)
                 .distinct()
                 .toList();
