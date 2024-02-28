@@ -33,6 +33,9 @@ public record OrgEnhetState (
 
     @JsonIgnore
     public boolean isActive() {
-        return !endedOnStartDate() && gyldigTom().isPresent() && gyldigTom().get().isAfter(LocalDate.now().minusDays(1));
+        // return !endedOnStartDate() && gyldigTom().isPresent() && gyldigTom().get().isAfter(LocalDate.now().minusDays(1));
+        // når gyldigTom er null, orgenhetvurderes som aktiv
+        if(gyldigTom().isPresent()) return !endedOnStartDate() && gyldigTom().get().isAfter(LocalDate.now().minusDays(1));
+        else return true;
     }
 }

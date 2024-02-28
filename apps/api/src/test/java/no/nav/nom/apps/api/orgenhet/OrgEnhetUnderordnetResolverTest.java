@@ -153,4 +153,32 @@ public class OrgEnhetUnderordnetResolverTest extends TestBase {
         assertThat(underordnedeOrgEnheter.size()).isEqualTo(0);
     }
 
+    @Test
+    @DisplayName("Ikke returner utgåtte orgenheter")
+    public void should_not_return_subordinate_orgenheter_with_null_gyldigTOM() {
+        when(unleash.isEnabled(OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE)).thenReturn(true);
+
+        final String idOrgEnhet = "orgEnhet";
+        final String idOrgEnhetOver = "orgEnhet_idOver";
+
+        OrganiseringState organiseringOrgEnhet = organiseringState().toBuilder()
+            .id(idOrgEnhet)
+            .idOver(idOrgEnhetOver)
+            .build();
+
+        organiseringStateRepository.putEventAggregate(organiseringOrgEnhet);
+
+        orgEnhetStateRepository.putEventAggregate(orgEnhetState().toBuilder()
+            .id(idOrgEnhet)
+            .gyldigFom(LocalDate.now().minusDays(20))
+            .build());
+
+        orgEnhetStateRepository.putEventAggregate(orgEnhetState().toBuilder().id(idOrgEnhetOver).build());
+
+        OrgEnhetState orgEnhetOver = orgEnhetState().toBuilder().id(idOrgEnhetOver).build();
+        List<OrgEnhetState> underordnedeOrgEnheter = orgEnhetUnderordnetResolver.findUnderordnedeOrgEnheter(orgEnhetOver);
+
+        assertThat(underordnedeOrgEnheter.size()).isEqualTo(1); // når gyldigTom er null, orgenhetvurderes som aktiv
+    }
+
 }
