@@ -43,7 +43,7 @@ public class OrgEnhetUnderordnetResolver {
             return organiseringStateRepository.getOrganiseringerContainingId(orgEnhetState.id()).stream()
                 .filter(organiseringState -> organiseringState.idOver().equals(orgEnhetState.id()))
                 .peek(organiseringState -> {
-                    if (organiseringState.gyldigTom().toString().equals("2024-02-25")) {
+                    if (organiseringState.gyldigTom().toString().contains("2024-02-25")) {
                         logger.warn("Fant en utgåtte organisering med id: {}", organiseringState);
                     }
                 })
