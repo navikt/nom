@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -105,7 +107,7 @@ public class RessursHendelseForEventsourceService {
             null,
             null,
             null,
-            null
+            ressurs.getFysiskBrukersted()
         )));
     }
 
@@ -143,6 +145,16 @@ public class RessursHendelseForEventsourceService {
         if (currentSektor != null && !DvhRessurs.toSektor(currentSektor).equals(ressursState.sektor())) {
             ressursEndretSektor(ressursState.fid(), dvhRessurs);
         }
+
+        ressursState.primaryFysiskBrukersted().ifPresentOrElse((s) -> {
+            if (!s.equals(dvhRessurs.getFysiskBrukersted())) {
+                ressursEndretFysiskBrukersted(ressursState.fid(), dvhRessurs);
+            }
+        }, () -> {
+            if (dvhRessurs.getFysiskBrukersted() != null) {
+                ressursEndretFysiskBrukersted(ressursState.fid(), dvhRessurs);
+            }
+        });
     }
 
     private void ressursSluttet(String fid, DvhRessurs dvhRessurs) {
@@ -188,6 +200,17 @@ public class RessursHendelseForEventsourceService {
 
         ressursCommadService.oppdaterPersonidentCommand(
             new OppdaterPersonidentCommand(fid, dvhRessurs.getPersonIdent()),
+            createInputMetadata(dvhRessurs.getRawData())
+        );
+    }
+
+    private void ressursEndretFysiskBrukersted(String fid, DvhRessurs dvhRessurs) {
+        ressursCommadService.oppdaterFysiskeBrukerstederCommand(
+            OppdaterFysiskeBrukerstederCommand.builder()
+                .fid(fid)
+                .primaryFysiskBrukersted(dvhRessurs.getFysiskBrukersted())
+                .fysiskeBrukersteder(Set.of(dvhRessurs.getFysiskBrukersted()))
+                .build(),
             createInputMetadata(dvhRessurs.getRawData())
         );
     }

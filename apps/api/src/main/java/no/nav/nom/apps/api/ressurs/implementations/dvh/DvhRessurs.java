@@ -39,6 +39,7 @@ public class DvhRessurs {
     String orgenhetPaaRessurs;
     String orgenhetPaaRessursBeskrivelse;
     String orgenhetPaaRessursNiva;
+    String fysiskBrukersted;
 
     public DvhRessurs(JsonNode node) {
         this(node, false);
@@ -61,6 +62,7 @@ public class DvhRessurs {
             remedyPermisjon = node.get("REMEDY_PERMISJON").asText("NEI").equals("JA");
             identType = node.get("IDENT_TYPE").asText();
             epost = node.get("EPOST").asText();
+            fysiskBrukersted = parseNullableFromJson(node,"FYSISK_BRUKERSTED");
 
             orgenhetPaaRessurs = null;
             orgenhetPaaRessursBeskrivelse = null;
@@ -82,6 +84,7 @@ public class DvhRessurs {
             remedyPermisjon = node.get("PERMISJON").asText("NEI").equals("JA");
             identType = node.get("IDENTTYPE").asText();
             epost = node.get("EPOST").asText();
+            fysiskBrukersted = parseNullableFromJson(node,"FYSISK_BRUKERSTED");
 
             // Kommer med i spørring på kommunale (Hr/NOM3/NOM_KOMMUNALE_V1)
             orgenhetPaaRessurs = parseNullableFromJson(node, "ORGENHET_PAA_RESSURS");
