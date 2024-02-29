@@ -40,8 +40,7 @@ public class OrganiseringStateRepository {
                 .toList();
 
             if (!connectedOrganiseringerWithSameId.isEmpty()) {
-                logger.warn("Forsøker å legge til {}, men key '{}' inneholder allerede {}", newOrganisering, id, connectedOrganiseringerWithSameId);
-                // Forsøker
+                logger.trace("Forsøker å legge til {}, men key '{}' inneholder allerede {}", newOrganisering, id, connectedOrganiseringerWithSameId);
                 organiseringerContainingId.removeAll(connectedOrganiseringerWithSameId);
                 organiseringerContainingId.add(newOrganisering);
             } else {
@@ -60,8 +59,7 @@ public class OrganiseringStateRepository {
                 .toList();
 
             if (!identicalOrganiseringer.isEmpty()) {
-                logger.warn("Forsøker å legge til {}, men key '{}' inneholder allerede {}", newOrganisering, idOver, identicalOrganiseringer);
-                // Forsøker
+                logger.trace("Forsøker å legge til {}, men key '{}' inneholder allerede {}", newOrganisering, idOver, identicalOrganiseringer);
                 organiseringerContainingIdOver.removeAll(identicalOrganiseringer);
                 organiseringerContainingIdOver.add(newOrganisering);
             } else {
@@ -119,7 +117,7 @@ public class OrganiseringStateRepository {
     public void logRepositoryState() {
         logger.debug("organiseringByFid: {} organiseringById: {} allOrganiseringerContainingId: {} Aktive organiseringer: {}", organiseringByFid.size(), organiseringById.size(), allOrganiseringerContainingId.size(), getActiveOrganisering().size());
 
-        // TODO delete the rest of this method. This is just for logging and testing and should be removed
+        // Note: detailed information about organiseringByFid, organiseringById and allOrganiseringerContainingId is logged at TRACE level
        try {
            StringBuilder message = new StringBuilder("Diff: difference_organiseringByFid_organiseringById ");
            for (String fid: organiseringByFid.keySet()) {
@@ -129,7 +127,7 @@ public class OrganiseringStateRepository {
                    message.append(" id: ").append(id).append(" in organiseringByFid is not in organiseringById ");
                }
            }
-           logger.debug(message.toString());
+           logger.trace(message.toString());
 
            StringBuilder message1 = new StringBuilder("Diff: difference_allOrganiseringerContainingId_organiseringById ");
            for (String id: allOrganiseringerContainingId.keySet()) {
@@ -137,7 +135,7 @@ public class OrganiseringStateRepository {
                    message1.append(" id: ").append(id).append(" in allOrganiseringerContainingId is not in organiseringById ");
                }
            }
-           logger.debug(message1.toString());
+           logger.trace(message1.toString());
 
            StringBuilder message2= new StringBuilder("Diff: difference_allOrganiseringerContainingId_organiseringByFid ");
            for (String id: organiseringById.keySet()) {
@@ -154,13 +152,11 @@ public class OrganiseringStateRepository {
                    message2.append(" id: ").append(id).append(" in organiseringById duplicate in organiseringByFid ").append(fids);
                }
            }
-           logger.debug(message2.toString());
-
-
+           logger.trace(message2.toString());
 
         } catch (Exception e) {
-            //e.printStackTrace();
-           // ignore
+           // trace logging errors
+           logger.trace(e.getLocalizedMessage());
         }
     }
 
