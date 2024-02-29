@@ -41,6 +41,9 @@ public class OrganiseringStateRepository {
 
             if (!connectedOrganiseringerWithSameId.isEmpty()) {
                 logger.warn("Forsøker å legge til {}, men key '{}' inneholder allerede {}", newOrganisering, id, connectedOrganiseringerWithSameId);
+                // Forsøker
+                organiseringerContainingId.removeAll(connectedOrganiseringerWithSameId);
+                organiseringerContainingId.add(newOrganisering);
             } else {
                 logger.trace("Key {} legger til {}", id, newOrganisering);
                 organiseringerContainingId.add(newOrganisering);
@@ -58,6 +61,9 @@ public class OrganiseringStateRepository {
 
             if (!identicalOrganiseringer.isEmpty()) {
                 logger.warn("Forsøker å legge til {}, men key '{}' inneholder allerede {}", newOrganisering, idOver, identicalOrganiseringer);
+                // Forsøker
+                organiseringerContainingIdOver.removeAll(identicalOrganiseringer);
+                organiseringerContainingIdOver.add(newOrganisering);
             } else {
                 logger.trace("Key {} legger til {}", idOver, newOrganisering);
                 allOrganiseringerContainingId.get(idOver).add(newOrganisering);

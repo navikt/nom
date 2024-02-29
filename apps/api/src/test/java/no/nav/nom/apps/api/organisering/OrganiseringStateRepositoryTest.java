@@ -241,7 +241,8 @@ public class OrganiseringStateRepositoryTest {
         List<OrganiseringState> organiseringerReturned = repository.getOrganiseringerContainingId(idToFind);
 
         assertThat(organiseringerReturned.size()).isEqualTo(1);
-        assertThat(organiseringerReturned).containsAll(List.of(idToFindInId));
+        // assertThat(organiseringerReturned).containsAll(List.of(idToFindInId));
+        assertThat(organiseringerReturned).containsAll(List.of(alsoIdToFindInId));
     }
 
     @Test
