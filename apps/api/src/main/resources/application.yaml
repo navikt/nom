@@ -2,7 +2,7 @@ app:
   name: ${NAIS_APP_NAME:nom-api}
   kafka:
     authorize:
-      eventsource-topic: nom.nom-authorize-eventsource
+      eventsource-topic: org.nom.nom-authorize-eventsource
     ressurs:
       stateTopic: org.nom.intern-ressurs-state
       eventsourceTopic: org.nom.ressurs-eventsource
