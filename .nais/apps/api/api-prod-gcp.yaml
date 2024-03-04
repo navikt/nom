@@ -35,9 +35,9 @@ spec:
   readiness:
     path: internal/health/readiness
     initialDelay: 30
-    periodSeconds: 5
+    periodSeconds: 3
     timeout: 4
-    failureThreshold: 5
+    failureThreshold: 2
   startup:
     path: internal/health/startupState
     initialDelay: 15
