@@ -188,4 +188,13 @@ public class RessursCommadService {
             inputMetadata
         ));
     }
+
+    public CompletableFuture<SendResult<String, RessursEvent>> oppdaterRessursStartdatoEvent(OppdaterStartdatoCommand oppdaterStartdatoCommand, InputMetadata inputMetadata) {
+        return eventProducer.sendMessage(new RessursStartDatoOppdatertV1(
+            oppdaterStartdatoCommand.fid(),
+            new RessursStartDatoOppdatertV1.StartDatoOppdatertEventData(oppdaterStartdatoCommand.startdato())
+            ,inputMetadata
+            )
+        );
+    }
 }
