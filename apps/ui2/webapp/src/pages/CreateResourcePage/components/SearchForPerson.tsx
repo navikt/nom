@@ -36,7 +36,6 @@ export function SearchForPerson() {
             onClear={() => {
               reset({ personident: "" });
             }}
-            type="number"
             value={value}
             variant="secondary"
           />

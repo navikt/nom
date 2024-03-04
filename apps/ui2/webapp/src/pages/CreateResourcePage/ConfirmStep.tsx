@@ -105,6 +105,7 @@ export function ConfirmStep() {
         width: 600px;
         padding: var(--a-spacing-4);
       `}
+      header={{ heading: "Bekreft registrering" }}
       onClose={onClose}
       open
     >
