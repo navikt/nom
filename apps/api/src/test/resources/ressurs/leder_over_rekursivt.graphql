@@ -1,9 +1,10 @@
 query {
     ressurs(where: {navIdent: "testNavIdent1"}) {
-        navIdent
+        navident
         ledere {
             ressurs {
-                navIdent
+                navident
+                personident
             }
         }
     }

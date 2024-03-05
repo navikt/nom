@@ -113,8 +113,12 @@ public class LederForRessursTest extends RessursTestBase {
         final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
         assertThat(ledere.size()).isEqualTo(1);
 
+
         // Navident til leder på første nivå der ressurs ikke selv er leder skal returneres
-        assertThat(ledere.get(0).get("ressurs").get("navIdent").textValue()).isEqualTo(leder.navident());
+        assertThat(ledere.get(0).get("ressurs").get("navident").textValue()).isEqualTo(leder.navident());
+
+        // Sjekk at personnummer er sladdet ut.
+        assertThat(ledere.get(0).get("ressurs").get("personident").textValue()).endsWith("*****");
     }
 
 
@@ -217,7 +221,7 @@ public class LederForRessursTest extends RessursTestBase {
         assertThat(ledere.size()).isEqualTo(1);
 
         // Navident til leder på første nivå der ressurs ikke selv er leder skal returneres
-        assertThat(ledere.get(0).get("ressurs").get("navIdent").textValue()).isEqualTo(leder.navident());
+        assertThat(ledere.get(0).get("ressurs").get("navident").textValue()).isEqualTo(leder.navident());
     }
 
     private void addToOrgEnhetStateRepository(int idSuffix, DvhOrgEnhetMock dvhOrgEnhetMock) {

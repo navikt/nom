@@ -110,6 +110,7 @@ public class RessursLedereResolverTest {
 
         RessursState lederRessursState = RessursState.builder()
             .navident(NAV_IDENT_LEDER)
+            .personident(NAV_IDENT_LEDER + "4321")
             .build();
         when(ressursStateRepositoryMock.findByNavident(NAV_IDENT_LEDER)).thenReturn(Optional.ofNullable(lederRessursState));
 
@@ -173,9 +174,11 @@ public class RessursLedereResolverTest {
 
         RessursState ressursRessursState = RessursState.builder()
             .navident(NAV_IDENT_RESSURS)
+            .personident(NAV_IDENT_RESSURS + "4321")
             .build();
         RessursState lederRessursState = RessursState.builder()
             .navident(NAV_IDENT_LEDER)
+            .personident(NAV_IDENT_LEDER + "4321")
             .build();
         when(ressursStateRepositoryMock.findByNavident(NAV_IDENT_RESSURS)).thenReturn(Optional.ofNullable(ressursRessursState));
         when(ressursStateRepositoryMock.findByNavident(NAV_IDENT_LEDER)).thenReturn(Optional.ofNullable(lederRessursState));
@@ -259,9 +262,11 @@ public class RessursLedereResolverTest {
 
         RessursState ressursRessursState = RessursState.builder()
             .navident(NAV_IDENT_RESSURS)
+            .personident(NAV_IDENT_RESSURS + "4321")
             .build();
         RessursState lederRessursState = RessursState.builder()
             .navident(NAV_IDENT_LEDER)
+            .personident(NAV_IDENT_LEDER + "4321")
             .build();
         when(ressursStateRepositoryMock.findByNavident(NAV_IDENT_RESSURS)).thenReturn(Optional.ofNullable(ressursRessursState));
         when(ressursStateRepositoryMock.findByNavident(NAV_IDENT_LEDER)).thenReturn(Optional.ofNullable(lederRessursState));
