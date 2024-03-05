@@ -98,7 +98,6 @@ public class NomApiClientTest extends TestBase {
 
         verify(
             getRequestedFor(urlPathEqualTo(String.format("/app/ressurser/byNavident/%s", navident)))
-                .withQueryParam("obfuscatePersonident", equalTo("false"))
                 .withHeader("authorization", matching("Bearer tokenValue"))
         );
     }
@@ -140,7 +139,6 @@ public class NomApiClientTest extends TestBase {
 
         verify(
             getRequestedFor(urlPathEqualTo(String.format("/app/ressurser/byFid/%s", fid)))
-                .withQueryParam("obfuscatePersonident", equalTo("false"))
                 .withHeader("authorization", matching("Bearer tokenValue"))
         );
     }

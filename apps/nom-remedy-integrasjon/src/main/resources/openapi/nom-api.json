@@ -561,15 +561,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "obfuscatePersonident",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": true
-            }
           }
         ],
         "responses": {
@@ -605,15 +596,6 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "obfuscatePersonident",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": true
             }
           }
         ],

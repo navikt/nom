@@ -26,7 +26,6 @@ public class NomApiClient {
         return nomApiAuthorizedWebClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/app/ressurser/byNavident/{navident}")
-                .queryParam("obfuscatePersonident", false)
                 .build(navident)
             )
             .retrieve()
@@ -39,7 +38,6 @@ public class NomApiClient {
         return nomApiAuthorizedWebClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/app/ressurser/byFid/{fid}")
-                .queryParam("obfuscatePersonident", false)
                 .build(fid)
             )
             .retrieve()

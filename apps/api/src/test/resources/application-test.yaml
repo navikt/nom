@@ -32,6 +32,10 @@ app:
         scopes:
           - QUERY_PERSON
           - NOM_UI_APP
+      nomRemedyIntegrasjonClient:
+        client-id: nomRemedyIntegrasjonClient
+        scopes:
+          - NOM_REMEDY_INTEGRASJON_APP
     groups:
       nomWriteGroup:
         group-id: nomWriteGroup

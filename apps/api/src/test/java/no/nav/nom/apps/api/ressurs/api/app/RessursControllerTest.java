@@ -315,14 +315,18 @@ public class RessursControllerTest extends RestTestBase {
     }
 
 
-    @ParameterizedTest(name = "Obfuskerer personident for respons i GET {0}")
+    @ParameterizedTest(name = "GET {0}")
+    @DisplayName("Skjuler sensitiv data for vanlige brukere")
     @MethodSource("getRessursPathsTestInput")
-    void skalObfuskerePersonident(String endpointPath) {
+    void skalSkjuleSensitivDataForVanligeBrukerer(String endpointPath) {
 
         var personident = "01010154321";
 
         var ressursState = ressursState().toBuilder()
-            .personident(personident).build();
+            .personident(personident)
+            .primaryFysiskBrukersted(Optional.of("1234"))
+            .fysiskeBrukersteder(List.of("1234"))
+            .build();
 
         when(ressursStateRepository.findByNavident(anyString()))
             .thenReturn(Optional.of(ressursState));
@@ -337,18 +341,25 @@ public class RessursControllerTest extends RestTestBase {
             .expectStatus().isOk()
             .expectBody()
             .jsonPath("personident")
-            .isEqualTo(personident.replaceFirst(".{5}$", "*****"));
+            .isEqualTo(personident.replaceFirst(".{5}$", "*****"))
+            .jsonPath("primaryFysiskBrukersted")
+            .isEqualTo(null)
+            .jsonPath("fysiskeBrukersteder")
+            .isEmpty();
 
     }
 
 
-    @ParameterizedTest(name = "Overstyrer obfuskering av personident for respons i GET {0}")
+    @ParameterizedTest(name = "GET {0}")
+    @DisplayName("Skjuler ikke sensitiv data for admin brukere")
     @MethodSource("getRessursPathsTestInput")
-    void skalOverstyreObfuskeringAvPersonident(String endpointPath) {
+    void skalIkkeSkjuleSensitivDataForAdmin(String endpointPath) {
 
         var personident = "01010154321";
 
         var ressursState = ressursState().toBuilder()
+            .primaryFysiskBrukersted(Optional.of("1234"))
+            .fysiskeBrukersteder(List.of("1234"))
             .personident(personident).build();
 
         when(ressursStateRepository.findByNavident(anyString()))
@@ -358,12 +369,37 @@ public class RessursControllerTest extends RestTestBase {
             .thenReturn(Optional.of(ressursState));
 
         webTestClient.get()
-            .uri(uriBuilder -> uriBuilder
-                .path(endpointPath)
-                .queryParam("obfuscatePersonident", false)
-                .build()
-            )
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomWriteGroupAndNomUiAzpToken()))
+            .uri(endpointPath)
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomAdminUserToken()))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("personident")
+            .isEqualTo(personident);
+
+    }
+
+    @ParameterizedTest(name = "GET {0}")
+    @DisplayName("Skjuler ikke sensitiv data for nom-remedy-integrasjon")
+    @MethodSource("getRessursPathsTestInput")
+    void skalIkkeSkjuleSensitivDataForNomRemedyIntegrasjon(String endpointPath) {
+
+        var personident = "01010154321";
+
+        var ressursState = ressursState().toBuilder()
+            .primaryFysiskBrukersted(Optional.of("1234"))
+            .fysiskeBrukersteder(List.of("1234"))
+            .personident(personident).build();
+
+        when(ressursStateRepository.findByNavident(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        when(ressursStateRepository.findByFid(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        webTestClient.get()
+            .uri(endpointPath)
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomRemedyIntegrasjonAzpToken()))
             .exchange()
             .expectStatus().isOk()
             .expectBody()

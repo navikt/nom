@@ -8,7 +8,8 @@ public enum NomApiAccessScope {
     MUTATE_RESSURS("MUTATE_RESSURS"),
     ADMIN("ADMIN"),
     TEAMCAT("TEAMCAT"),
-    NOM_UI_APP("NOM_UI_APP");
+    NOM_UI_APP("NOM_UI_APP"),
+    NOM_REMEDY_INTEGRASJON_APP("NOM_REMEDY_INTEGRASJON_APP");
 
     private final String scope;
 
