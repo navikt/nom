@@ -58,6 +58,8 @@ spec:
   prometheus:
     enabled: true
     path: /internal/prometheus
+  vault:
+    enabled: true
   accessPolicy:
     inbound:
       rules:
