@@ -1,6 +1,7 @@
-package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
+package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy;
 
 import no.nav.nom.apps.nomremedyintegrasjon.TestBase;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Propagation;

@@ -5,6 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredValueMissingException;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEvent;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEventRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
@@ -46,19 +50,22 @@ public class NomIntegrasjonService {
 
     private final LeaderElection leaderElection;
 
+    private final DelayedEventRepository delayedEventRepository;
+
     private final Unleash unleash;
 
     private final ObjectMapper objectMapper;
 
 
     public NomIntegrasjonService(
-        NomIntegrasjonRepository nomIntegrasjonRepository, NomApiClient nomApiClient, LeaderElection leaderElection,
-        Unleash unleash,
-        ObjectMapper objectMapper
+            NomIntegrasjonRepository nomIntegrasjonRepository, NomApiClient nomApiClient, LeaderElection leaderElection, DelayedEventRepository delayedEventRepository,
+            Unleash unleash,
+            ObjectMapper objectMapper
     ) {
         this.nomIntegrasjonRepository = nomIntegrasjonRepository;
         this.nomApiClient = nomApiClient;
         this.leaderElection = leaderElection;
+        this.delayedEventRepository = delayedEventRepository;
         this.unleash = unleash;
         this.objectMapper = objectMapper;
     }
@@ -67,9 +74,7 @@ public class NomIntegrasjonService {
     @Scheduled(cron = "0 15 0 * * *")
     public void findRessurserWithSluttdatoYesterdayAndDeleteThemFromRemedy() {
         if (leaderElection.isLeader()) {
-            var yesterday = LocalDate.now().minusDays(1);
-            logger.info("Sjekker om det finnes eksterne ressurser som sluttet på dato %s".formatted(yesterday));
-            findRessurserWithSluttdatoAndMarkForDeletion(yesterday, "nom-job");
+            triggerDelayedEvents();
         }
     }
 
@@ -168,17 +173,33 @@ public class NomIntegrasjonService {
         var sluttdatoForRessurs = ressursSluttetEventV1.getRessursSluttetEventData().sluttdato();
 
         if (sluttdatoForRessurs.isBefore(LocalDate.now())) {
-            var ressursState = nomApiClient.getRessursByFid(ressursSluttetEventV1.getFid());
-
-            markRessursForDeletion(
-                ressursState.getNavident(),
+            avsluttRessursInRemedy(
+                ressursSluttetEventV1.getFid(),
+                sluttdatoForRessurs,
                 ressursSluttetEventV1.getMetadata().inputMetadata().origination().initiatedBy()
             );
-
-            logger.info("Deleted ressurs with fid {} and with sluttdato {}", ressursSluttetEventV1.getFid(), sluttdatoForRessurs);
+        } else {
+            delayedEventRepository.save(
+                DelayedEvent.builder()
+                    .delayedUntil(sluttdatoForRessurs)
+                    .event(ressursSluttetEventV1)
+                    .build()
+            );
         }
     }
 
+    private void handleDelayedRessursSluttetEventV1(RessursSluttetEventV1 ressursSluttetEventV1) {
+        logger.info("Handling delayed %s with fid %s".formatted(ressursSluttetEventV1.getClass().getSimpleName(), ressursSluttetEventV1.getFid()));
+
+        var ressursState = nomApiClient.getRessursByFid(ressursSluttetEventV1.getFid());
+
+        var sluttDatoInEventIsStillSluttdatoForRessurs = ressursSluttetEventV1.getRessursSluttetEventData().sluttdato()
+            .equals(ressursState.getSluttdato());
+
+        if (sluttDatoInEventIsStillSluttdatoForRessurs) {
+            handleRessursSluttetEventV1(ressursSluttetEventV1);
+        }
+    }
 
     private void handleRessursSluttdatoOppdatertEventV1(RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
 
@@ -189,12 +210,36 @@ public class NomIntegrasjonService {
         );
 
         ressursSluttdatoOppdatertEventV1.getRessursSluttdatoOppdatertEventData().sluttdato().ifPresent(
-            sluttdatoForRessurs -> avsluttRessursInRemedy(
-                ressursSluttdatoOppdatertEventV1.getFid(),
-                sluttdatoForRessurs,
-                ressursSluttdatoOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy()
-                )
+            sluttdatoForRessurs -> {
+                if (sluttdatoForRessurs.isBefore(LocalDate.now())) {
+                    avsluttRessursInRemedy(
+                        ressursSluttdatoOppdatertEventV1.getFid(),
+                        sluttdatoForRessurs,
+                        ressursSluttdatoOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy()
+                    );
+                } else {
+                    delayedEventRepository.save(
+                        DelayedEvent.builder()
+                            .delayedUntil(sluttdatoForRessurs)
+                            .event(ressursSluttdatoOppdatertEventV1)
+                            .build()
+                    );
+                }
+            }
         );
+    }
+
+    private void handleDelayedRessursSluttdatoOppdatertEventV1(RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
+        logger.info("Handling delayed %s with fid %s".formatted(ressursSluttdatoOppdatertEventV1.getClass().getSimpleName(), ressursSluttdatoOppdatertEventV1.getFid()));
+
+        var ressursState = nomApiClient.getRessursByFid(ressursSluttdatoOppdatertEventV1.getFid());
+
+        var sluttDatoInEventIsStillSluttdatoForRessurs = ressursSluttdatoOppdatertEventV1.getRessursSluttdatoOppdatertEventData().sluttdato()
+            .equals(Optional.ofNullable(ressursState.getSluttdato()));
+
+        if (sluttDatoInEventIsStillSluttdatoForRessurs) {
+            handleRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
+        }
     }
 
     private void avsluttRessursInRemedy(String ressursFid, LocalDate sluttdatoForRessurs, String initiatedBy) {
@@ -238,6 +283,26 @@ public class NomIntegrasjonService {
         );
 
         logger.info("Deleted following resssurser from remedy: {}", ressurserToDeleteFromRemedy.stream().map(RessursState::getNavident).toList());
+    }
+
+    protected void triggerDelayedEvents() {
+
+        var delayedEventsReadyForHandling = delayedEventRepository.findByDelayedUntilBefore(LocalDate.now());
+
+        delayedEventsReadyForHandling.forEach(this::handleDelayedEvent);
+
+    }
+
+    private void handleDelayedEvent(DelayedEvent delayedEvent) {
+        var nomEvent = delayedEvent.getEvent();
+
+        if (nomEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1) {
+            handleDelayedRessursSluttetEventV1(ressursSluttetEventV1);
+        } else if (nomEvent instanceof RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
+            handleDelayedRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
+        }
+
+        delayedEventRepository.deleteById(delayedEvent.getDelayedEventId());
     }
 
     private void createRessurs(RessursOpprettetEventV1 ressursOpprettetEventV1) {

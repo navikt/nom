@@ -2,12 +2,13 @@ package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
 import no.nav.nom.apps.nomremedyintegrasjon.TestBase;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEvent;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
-import no.nav.nom.contract.nom.eventsource.RessursSluttdatoOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.generated.model.OrgEnhet;
 import no.nav.nom.generated.model.OrgtilknytningState;
@@ -63,8 +64,9 @@ public class NomIntegrasjonServiceTest extends TestBase {
     private NomApiClient nomApiClient;
 
     @BeforeEach
-    void clearRepository() {
+    void clearRepositories() {
         nomIntegrasjonRepository.deleteAll();
+        delayedEventRepository.deleteAll();
     }
 
     @BeforeEach
@@ -176,21 +178,44 @@ public class NomIntegrasjonServiceTest extends TestBase {
         );
     }
 
-    @Test
-    @DisplayName("Should NOT mark ressurs for deletion on RessursSluttetEventV1 with future sluttdato")
-    void testShouldNotDeleteRessursOnRessursSluttetEventV1() {
+    @MethodSource("testShouldDelayRessursEventsInput")
+    @ParameterizedTest(name = "{0}")
+    @DisplayName("Should save delayed RessursEvent when future sluttdato")
+    void testShouldDelayRessursEvents(RessursEvent ressursEvent, DelayedEvent expectedDelayedEvent) {
 
         var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
 
-        var ressursSluttetEventV1 = ressursSluttetEventV1(LocalDate.now().plusDays(1));
+        when(nomApiClient.getRessursByFid(ressursEvent.getFid())).thenReturn(existingRessurs);
 
-        when(nomApiClient.getRessursByFid(ressursSluttetEventV1.getFid())).thenReturn(existingRessurs);
+        nomIntegrasjonService.handleRessursEvent(ressursEvent);
 
-        nomIntegrasjonService.handleRessursEvent(ressursSluttetEventV1);
+        assertThat(nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident())).isEmpty();
 
-        var nomIntegrasjonEntry = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
+        assertThat(delayedEventRepository.findAll())
+            .hasSize(1)
+            .first()
+            .usingRecursiveComparison().ignoringFieldsOfTypes(UUID.class)
+            .isEqualTo(expectedDelayedEvent);
+    }
 
-        assertThat(nomIntegrasjonEntry).isEmpty();
+    private static Stream<Arguments> testShouldDelayRessursEventsInput() {
+        var futureDate = LocalDate.now().plusDays(1);
+        var ressursSluttetEvent = ressursSluttetEventV1(futureDate);
+        var ressursSluttdatoOppdatertEventV1 = ressursSluttdatoOppdatertEventV1(futureDate);
+        return Stream.of(
+            Arguments.of(
+                ressursSluttetEvent,
+                DelayedEvent.builder()
+                    .delayedUntil(futureDate)
+                    .event(ressursSluttetEvent).build()
+            ),
+            Arguments.of(
+                ressursSluttdatoOppdatertEventV1,
+                DelayedEvent.builder()
+                    .delayedUntil(futureDate)
+                    .event(ressursSluttdatoOppdatertEventV1).build()
+            )
+        );
     }
 
     @Test
@@ -361,7 +386,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                         orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom())
                     )
                     .utlopsdato(epochSecondsNorwegianTimeEndOfDay(
-                        orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom().get())
+                        orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom().orElseThrow())
                     )
                     .build()
             ));
@@ -449,7 +474,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                         orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom())
                     )
                     .utlopsdato(epochSecondsNorwegianTimeEndOfDay(
-                        orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigTom().get())
+                        orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigTom().orElseThrow())
                     )
                     .build()
             ));
@@ -536,6 +561,71 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .entryBestiller(initiatedBy)
                     .build()
             );
+    }
+
+    @ParameterizedTest(name = "Delayed event: {0} \nfor ressurs: {1} \nresults in nom integrasjon entity: {2}")
+    @DisplayName("Should handle delayed RessursEvent")
+    @MethodSource("testDelayedDeleteRessursInput")
+    void testDelayedDeleteRessurs(
+        DelayedEvent delayedEvent, Ressurs existingRessurs, NomIntegrasjonEntity expectedNomIntegrasjonEntity
+    ) {
+
+        when(nomApiClient.getRessursByFid(delayedEvent.getEvent().getFid())).thenReturn(existingRessurs);
+
+        delayedEventRepository.saveAll(List.of(delayedEvent));
+
+        nomIntegrasjonService.triggerDelayedEvents();
+
+        assertThat(nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident()).orElse(null))
+            .usingRecursiveComparison().ignoringFields("entryId")
+            .isEqualTo(expectedNomIntegrasjonEntity);
+
+        assertThat(delayedEventRepository.findAll()).isEmpty();
+    }
+
+    private static Stream<Arguments> testDelayedDeleteRessursInput() {
+        var yesterday = LocalDate.now().minusDays(1);
+        var anotherDay = LocalDate.now().plusDays(5);
+
+        var existingRessursWithSluttdatoYesterday = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN).sluttdato(yesterday);
+        var existingRessursWithSluttdatoAnotherDay = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN).sluttdato(anotherDay);
+
+        var ressursSluttetEventV1 = ressursSluttetEventV1(yesterday);
+        var ressursSluttdatoOppdatertEventV1 = ressursSluttdatoOppdatertEventV1(yesterday);
+
+        var nomIntegrasjonEntityForDeletingRessurs = NomIntegrasjonEntity.builder()
+            .navId(existingRessursWithSluttdatoYesterday.getNavident())
+            .entryOperasjon("Slette")
+            .entryStatus("Ubehandlet")
+            .build();
+
+        return Stream.of(
+            Arguments.of(
+                DelayedEvent.builder().delayedUntil(yesterday).event(ressursSluttetEventV1).build(),
+                existingRessursWithSluttdatoYesterday,
+                nomIntegrasjonEntityForDeletingRessurs.toBuilder()
+                    .entryBestiller(ressursSluttetEventV1.getMetadata().inputMetadata().origination().initiatedBy())
+                    .build()
+            ),
+            Arguments.of(
+                DelayedEvent.builder().delayedUntil(yesterday).event(ressursSluttdatoOppdatertEventV1).build(),
+                existingRessursWithSluttdatoYesterday,
+                nomIntegrasjonEntityForDeletingRessurs.toBuilder()
+                    .entryBestiller(ressursSluttdatoOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy())
+                    .build()
+            ),
+            // Tester at man ikke sletter ressurs dersom ressursen har en annen sluttdato enn spesifisert i den forsinkede hendelsen
+            Arguments.of(
+                DelayedEvent.builder().delayedUntil(yesterday).event(ressursSluttetEventV1).build(),
+                existingRessursWithSluttdatoAnotherDay,
+                null
+            ),
+            Arguments.of(
+                DelayedEvent.builder().delayedUntil(yesterday).event(ressursSluttdatoOppdatertEventV1).build(),
+                existingRessursWithSluttdatoAnotherDay,
+                null
+            )
+        );
     }
 
     @ParameterizedTest(name = "latestId: {0} expectedNextId: {1}")

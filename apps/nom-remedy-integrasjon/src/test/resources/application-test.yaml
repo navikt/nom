@@ -1,12 +1,19 @@
-spring:
-  datasource:
-    url: jdbc:h2:mem:testdb;Mode=Oracle
-    username: sa
-    password: password
-    driver-class-name: org.h2.Driver
 
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+spring:
+  cloud:
+    vault:
+      enabled: false
+  datasource:
+    remedy:
+      url: jdbc:h2:mem:remedy;Mode=Oracle;INIT=RUNSCRIPT FROM 'src/test/resources/create_oracle_remedy_db.sql'
+      username: sa
+      password: password
+      driver-class-name: org.h2.Driver
+
+    nom-remedy-integrasjon:
+      url: jdbc:tc:postgresql:14.4:///nom-remedy-integrasjon
+      username: test
+      password: test
 
   kafka:
     bootstrap-servers: ${spring.embedded.kafka.brokers}
@@ -32,3 +39,5 @@ NOM_API_URL: http://localhost:${wiremock.server.port}
 NOM_API_SCOPE: api://dev-gcp.nom.nom-api/.default
 
 NOM_ADMIN_GROUP_ID: nom-admin-group # Settet i nais-config i dev og prod profiles
+
+DB_ENV: test

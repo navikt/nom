@@ -1,6 +1,6 @@
 package no.nav.nom.apps.nomremedyintegrasjon;
 
-import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.NomIntegrasjonEntity;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;

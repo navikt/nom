@@ -1,6 +1,7 @@
-package no.nav.nom.apps.nomremedyintegrasjon.api;
+package no.nav.nom.apps.nomremedyintegrasjon.fysiskbrukersted;
 
 import no.nav.nom.apps.nomremedyintegrasjon.TestBase;
+import no.nav.nom.apps.nomremedyintegrasjon.fysiskbrukersted.repository.FysiskBrukersted;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

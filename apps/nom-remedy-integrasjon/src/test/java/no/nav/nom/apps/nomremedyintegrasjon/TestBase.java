@@ -2,8 +2,9 @@ package no.nav.nom.apps.nomremedyintegrasjon;
 
 import com.nimbusds.jose.JOSEObjectType;
 import io.getunleash.Unleash;
-import no.nav.nom.apps.nomremedyintegrasjon.api.FysiskBrukerstedReadOnlyRepository;
-import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.NomIntegrasjonRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.fysiskbrukersted.repository.FysiskBrukerstedReadOnlyRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEventRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
@@ -30,7 +31,6 @@ import static org.mockito.Mockito.when;
     classes = NomRemedyIntegrasjonStarter.class,
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-
 @AutoConfigureWireMock(port = 0)
 @ContextConfiguration(initializers = {MockOAuth2ServerInitializer.class})
 @EmbeddedKafka(partitions = 1, topics = {"org.nom.ressurs-eventsource", "org.nom.orgtilknytning-eventsource"}, controlledShutdown = true)
@@ -58,6 +58,9 @@ public abstract class TestBase {
 
     @Autowired
     protected NomIntegrasjonRepository nomIntegrasjonRepository;
+
+    @Autowired
+    protected DelayedEventRepository delayedEventRepository;
 
     @MockBean
     protected FysiskBrukerstedReadOnlyRepository fysiskBrukerstedReadOnlyRepository;

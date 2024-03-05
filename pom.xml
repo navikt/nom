@@ -207,6 +207,12 @@
                 <version>${nimbus-jose-jwt.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-vault-config-databases</artifactId>
+                <version>${spring-cloud-vault-config-databases.version}</version>
+            </dependency>
+
             <!-- For å koble på Oracle datakilder  -->
             <dependency>
                 <groupId>org.hibernate</groupId>
