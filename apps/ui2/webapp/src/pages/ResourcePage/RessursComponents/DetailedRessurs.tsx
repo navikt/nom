@@ -22,6 +22,7 @@ import {
   useNavigate,
   useSearch,
 } from "@tanstack/react-router";
+import capitalize from "lodash/capitalize";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
 
@@ -35,6 +36,7 @@ import {
 import { Divider } from "~/components/Divider";
 import { LabelWithValue } from "~/components/LabelWithValue";
 import { UserImage } from "~/components/UserImage";
+import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { AddOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/AddOrgtilknytningForm";
@@ -615,21 +617,19 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
 
 function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {
   const { editPersonopplysninger } = useSearch({ from: "/ressurs/$id" });
-  // const fysiskBrukersted = useFysiskBrukersted(ressurs.primaryFysiskBrukersted);
+  const fysiskBrukersted = useFysiskBrukersted(ressurs.primaryFysiskBrukersted);
 
   if (editPersonopplysninger) {
     return <EditFysiskeBrukerstederForm ressurs={ressurs} />;
   }
 
   return (
-    //TODO: Denne skal kun vises for admin-brukere per nå. På sikt skal den vises dersom innlogget person er leder for den ansatte
-    // <LabelWithValue
-    //   label="Fysisk brukersted"
-    //   value={
-    //     fysiskBrukersted ? capitalize(fysiskBrukersted.brukerstedNavn) : "-"
-    //   }
-    // />
-    <></>
+    <LabelWithValue
+      label="Fysisk brukersted"
+      value={
+        fysiskBrukersted ? capitalize(fysiskBrukersted.brukerstedNavn) : "-"
+      }
+    />
   );
 }
 
