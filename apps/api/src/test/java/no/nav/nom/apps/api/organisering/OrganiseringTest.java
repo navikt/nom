@@ -152,8 +152,8 @@ public class OrganiseringTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Avslutt en organisering som ikke lenger mottas fra DVH")
-    void avslutt_en_organisering() throws JsonProcessingException {
+    @DisplayName("ignorere processering av organisering når tom liste mottas fra DVH")
+    void ignorerer_processering_organisering_nar_tom_lista_mottas_fra_dvh() throws JsonProcessingException {
 
         // Receive organisering from DVH
         var mockedOrganisering = DvhOrganiseringMock.getBuilderWithDefault()
@@ -178,7 +178,6 @@ public class OrganiseringTest extends TestBase {
         // First import from DVH, creates the organisering
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
-
         // The organisering is now present in the state
         OrganiseringState organiseringState = OrganiseringState.builder()
             .fid("organisering_1")
@@ -194,23 +193,96 @@ public class OrganiseringTest extends TestBase {
         // No longer receive organisering from DVH
         dvhOrganiseringMockUtils.clearResponse();
 
-
-        // Second import from DVH, creates avslutt organisering event
+        // Second import from DVH, this should not create avslutt organisering event
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         // Expect two messages
         await()
             .atMost(1, SECONDS)
             .pollInterval(10, MILLISECONDS)
-            .until(() -> recordsQueue.size() == 2);
+            .until(() -> recordsQueue.size() == 1);
+
+        var createRecord = recordsQueue.remove();
+        assertThat(createRecord.value().getData()).isExactlyInstanceOf(OrganiseringOpprettetEventData.class);
+    }
+
+    @Test
+    @DisplayName("Avslutt en organisering og opprett på nytt")
+    void avslutt_og_opprett_en_organisering() throws JsonProcessingException {
+
+        // 1. Receive organisering from DVH
+        var mockedOrganisering = DvhOrganiseringMock.getBuilderWithDefault()
+            .ORGNODE_KODE("1000000")
+            .ORGNODE_NAVN("Navn_1000000")
+            .ORGNODE_NIVA("Niva_1000000")
+            .ORGNODE_KODE_OVER("2000000")
+            .ORGNODE_NAVN_OVER("Navn_2000000")
+            .ORGNODE_NIVA_OVER("Niva_2000000")
+            .build();
+        dvhOrganiseringMockUtils.addToResponse(mockedOrganisering);
+
+        // Mock OrgenhetService where we find NOM id
+        var orgeEnhetState = mockOrgenhetServiceGetEnhet("mock_id", mockedOrganisering.getORGNODE_KODE(),
+            mockedOrganisering.getORGNODE_NIVA(), mockedOrganisering.getORGNODE_NAVN()
+        );
+
+        var orgeEnhetStateOver = mockOrgenhetServiceGetEnhet("mock_id_over", mockedOrganisering.getORGNODE_KODE_OVER(),
+            mockedOrganisering.getORGNODE_NIVA_OVER(), mockedOrganisering.getORGNODE_NAVN_OVER()
+        );
+
+        // First import from DVH, creates the organisering
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+
+        // The organisering is now present in the state
+        OrganiseringState organiseringState = OrganiseringState.builder()
+            .fid("organisering_1")
+            .id(orgeEnhetState.id())
+            .navn(orgeEnhetState.navn())
+            .idOver(orgeEnhetStateOver.id())
+            .navnOver(orgeEnhetStateOver.navn())
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.empty())
+            .build();
+        organiseringStateRepository.putEventAggregate(organiseringState);
+
+        // 2. No longer receive organisering from DVH
+        dvhOrganiseringMockUtils.clearResponse();
+        // Second import from DVH, this should not create avslutt organisering event
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+
+        // 3. The gyldigTom date of organisering present in the state is NOT anymore in the future
+        var newGyldigTom = LocalDate.now().minusDays(5);
+        var organiseringState_absluttet = organiseringState.toBuilder()
+            .gyldigTom(Optional.of(newGyldigTom))
+            .build();
+        organiseringStateRepository.putEventAggregate(organiseringState_absluttet);
+
+        // Change organisering from DVH. Organisering is same as the one received in step 1, but it will have new fid
+        var mockedOrganisering_new = mockedOrganisering.toBuilder().build();
+        dvhOrganiseringMockUtils.clearResponse();
+        dvhOrganiseringMockUtils.addToResponse(mockedOrganisering_new);
+
+        // Third import from DVH, creates avslutt organisering event
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+
+        // Expect two messages
+        await()
+            .atMost(1, SECONDS)
+            .pollInterval(10, MILLISECONDS)
+            .until(() -> recordsQueue.size() == 3);
 
         var createRecord = recordsQueue.remove();
         var terminateRecord = recordsQueue.remove();
+        var newCreateRecord = recordsQueue.remove();
         assertThat(createRecord.value().getData()).isExactlyInstanceOf(OrganiseringOpprettetEventData.class);
         assertThat(terminateRecord.value().getData()).isExactlyInstanceOf(OrganiseringAvsluttetEventData.class);
+        assertThat(newCreateRecord.value().getData()).isExactlyInstanceOf(OrganiseringOpprettetEventData.class);
 
         var terminateMessage = (OrganiseringAvsluttetEventData) terminateRecord.value().getData();
         assertThat(terminateMessage.gyldigTom()).isEqualTo(LocalDate.now());
+        var createMessage = (OrganiseringOpprettetEventData) createRecord.value().getData();
+        var createMessageNew = (OrganiseringOpprettetEventData) newCreateRecord.value().getData();
+        assertThat(createMessage.id()).isEqualTo(createMessageNew.id());
     }
 
     @Test

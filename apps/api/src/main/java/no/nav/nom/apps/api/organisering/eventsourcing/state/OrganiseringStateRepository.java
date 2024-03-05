@@ -110,6 +110,20 @@ public class OrganiseringStateRepository {
         putOrUpdateAllOrganiseringer(organiseringState);
     }
 
+    public void removeEventAggregate(OrganiseringState organiseringState) {
+        organiseringByFid.remove(organiseringState.fid());
+        organiseringById.forEach((key, value) -> {
+            if (value.fid().equals(organiseringState.fid())) {
+                organiseringById.remove(key);
+            }
+        });
+        allOrganiseringerContainingId.forEach((key, value) -> value.forEach(state -> {
+            if (state.fid().equals(organiseringState.fid())) {
+                allOrganiseringerContainingId.remove(key);
+            }
+        }));
+    }
+
     public int count() {
         return organiseringByFid.size();
     }
