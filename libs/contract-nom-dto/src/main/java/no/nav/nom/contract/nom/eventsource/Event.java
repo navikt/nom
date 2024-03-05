@@ -1,5 +1,6 @@
 package no.nav.nom.contract.nom.eventsource;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.time.LocalDateTime;
@@ -8,6 +9,10 @@ import java.time.LocalDateTime;
         use = JsonTypeInfo.Id.NAME,
         property = "type"
 )
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = OrgtilknytningEvent.class),
+    @JsonSubTypes.Type(value = RessursEvent.class)
+})
 public abstract class Event {
     private final String fid;
     private final Data data;

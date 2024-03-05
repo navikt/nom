@@ -22,6 +22,7 @@ import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.contract.nom.Tilknytningtype;
@@ -125,6 +126,29 @@ public class OrgtilknytningRestService {
             oppdaterRessursSluttdato(
                 tilknyttetRessurs,
                 oppdaterOrgtilknytningerForRessursRequest
+            );
+        }
+
+        if( oppdaterOrgtilknytningerForRessursRequest.setRessursStartdato()) {
+            oppdaterRessursStartdato(
+                tilknyttetRessurs,
+                oppdaterOrgtilknytningerForRessursRequest
+            );
+        }
+    }
+
+    private void oppdaterRessursStartdato(RessursState tilknyttetRessurs, OppdaterOrgtilknytningerForRessursRequest request) {
+
+        var endredeFomDatoer = request.endredeOrgtilknytninger().stream()
+            .map(EndreOrgtilknytningRequest::gyldigFom);
+        var nyeFomDatoer = request.nyeOrgtilknytninger().stream()
+            .map(LeggTilOrgtilknytningRequest::gyldigFom);
+
+        var nyMinimumStartdato = Stream.concat(endredeFomDatoer, nyeFomDatoer).reduce(LocalDate.MAX, (it, acc) -> it.isBefore(acc) ? it : acc);
+        if(nyMinimumStartdato != LocalDate.MAX && !nyMinimumStartdato.equals(tilknyttetRessurs.startdato().orElse(null))){
+            ressursCommadService.oppdaterRessursStartdatoEvent(
+                new OppdaterStartdatoCommand(tilknyttetRessurs.fid(), nyMinimumStartdato),
+                getInputMetadataOppdaterOrgtilknytningerForRessurs(request)
             );
         }
     }
@@ -299,17 +323,21 @@ public class OrgtilknytningRestService {
                     .fid(tilknyttetRessurs.fid())
                     .sluttdato(newSluttdato)
                     .inputMetadata(
-                        new InputMetadata(
-                            "REST",
-                            "oppdaterOrgtilknytningerForRessurs",
-                            oppdaterOrgtilknytningerForRessursRequest,
-                            new Origination(SecurityUtil.getAuthenticatedNavIdent(), SecurityUtil.getAuthenticatedAzpName())
-
-                        )
+                        getInputMetadataOppdaterOrgtilknytningerForRessurs(oppdaterOrgtilknytningerForRessursRequest)
                     )
                     .build()
             );
         }
+    }
+
+    private static InputMetadata getInputMetadataOppdaterOrgtilknytningerForRessurs(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
+        return new InputMetadata(
+            "REST",
+            "oppdaterOrgtilknytningerForRessurs",
+            oppdaterOrgtilknytningerForRessursRequest,
+            new Origination(SecurityUtil.getAuthenticatedNavIdent(), SecurityUtil.getAuthenticatedAzpName())
+
+        );
     }
 
     private boolean endreOrgtilknytningRequestProvidesChangesToState(

@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.Tilknytningtype;
@@ -68,6 +69,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     @Captor
     ArgumentCaptor<OpprettOrgtilknytning> opprettOrgtilknytningArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<OppdaterStartdatoCommand> oppdaterStartdatoCommandArgumentCaptor;
 
     @BeforeEach
     void setInitialLoadCompleteAndEnableUnleashAndClearData() {
@@ -927,6 +931,51 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} support updating startdato")
+    void test_update_orgtilknytninger_startdato() {
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var fomDate = LocalDate.now().plusMonths(1);
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .gyldigFom(fomDate)
+            .build();
+
+        saveOrgtilknytninger(List.of(existingOrgtilknytning));
+
+        var fomDate2 = fomDate.plusMonths(1);
+
+        var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
+            .gyldigFom(
+                fomDate2
+            )
+            .build();
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .endredeOrgtilknytninger(List.of(endreOrgtilknytningRequest))
+            .nyeOrgtilknytninger(List.of())
+            .setRessursStartdato(true)
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            nomWriteGroupAndNomUiAzpToken(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().is2xxSuccessful();
+
+        verify(orgtilknytningCommandService, times(1)).endreOrgtilknytningDato(any());
+        verify(ressursCommadService, times(1)).oppdaterRessursStartdatoEvent(oppdaterStartdatoCommandArgumentCaptor.capture(), any());
+
+        assertThat(oppdaterStartdatoCommandArgumentCaptor.getValue().startdato()).isEqualTo(fomDate2);
+
+    }
+
+    @Test
     @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} should update all orgtilknytninger for ressurs")
     void test_update_orgtilknytninger_for_ressurs() {
         var tilknyttetRessurs = ressursState().toBuilder()
@@ -1021,6 +1070,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .nyeOrgtilknytninger(List.of(leggTilOrgtilknytningRequest()))
             .endredeOrgtilknytninger(List.of(endreOrgtilknytningRequest()))
             .setRessursSluttdato(false)
+            .setRessursStartdato(false)
             .build();
     }
 

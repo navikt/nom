@@ -22,12 +22,21 @@ management:
       base-path: /internal
       exposure:
         include: prometheus, info, health, metrics
+
+vault:
+  postgresMountPath: postgresql/${DB_ENV}
+
 spring:
   datasource:
-    driver-class-name: oracle.jdbc.OracleDriver
-    url: ${REMEDY_DATASOURCE_URL}
-    username: ${REMEDY_DB_USER} # Denne lastes også inn fra remedy-db-credentials k8s seecret. Grunnen til at vi ikke skriver den rett in her er for å unngå at brukeren blir låst, pga gjentatte påloggingsforsøk, dersom appen ikke får hentet secrets.
-    password: ${REMEDY_DB_PWD} # Lastes inn fra remedy-db-credentials k8s seecret
+    remedy:
+      driver-class-name: oracle.jdbc.OracleDriver
+      url: ${REMEDY_DATASOURCE_URL}
+      username: ${REMEDY_DB_USER} # Denne lastes også inn fra remedy-db-credentials k8s seecret. Grunnen til at vi ikke skriver den rett in her er for å unngå at brukeren blir låst, pga gjentatte påloggingsforsøk, dersom appen ikke får hentet secrets.
+      password: ${REMEDY_DB_PWD} # Lastes inn fra remedy-db-credentials k8s seecret
+
+    nom-remedy-integrasjon:
+      url: jdbc:postgresql://${POSTGRES_DB_HOST}:5432/nom-remedy-integrasjon
+      username: nom-remedy-integrasjon-admin
 
     hikari:
       data-source-properties:
@@ -37,6 +46,13 @@ spring:
       idle-timeout: 30000
       max-lifetime: 2000000
       connection-timeout: 30000
+
+  flyway:
+    enabled: true
+    schemas: public
+    table: schema_version
+    baselineOnMigrate: true
+
   kafka:
     client-id: ${app.name}
     bootstrap-servers: ${KAFKA_BROKERS}
@@ -78,8 +94,6 @@ spring:
         provider:
           azure:
             issuer-uri: ${azure.issuer-uri}
-  jpa:
-    database-platform: org.hibernate.dialect.OracleDialect
 
 azure:
   issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
@@ -88,3 +102,21 @@ unleash:
   endpoint:
     url: ${UNLEASH_SERVER_API_URL}/api
   api-key: ${UNLEASH_SERVER_API_TOKEN}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev & !prod
+
+POSTGRES_DB_HOST: b27dbvl033.preprod.local
+DB_ENV: preprod-fss
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod & !dev
+
+POSTGRES_DB_HOST: A01DBVL029.adeo.no
+DB_ENV: prod-fss

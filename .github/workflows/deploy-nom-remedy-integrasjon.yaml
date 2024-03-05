@@ -12,6 +12,12 @@ on:
       - 'pom.xml'
       - 'Dockerfile_distroless'
   workflow_dispatch:
+    inputs:
+      skip-tests:
+        type: boolean
+        required: false
+        default: false
+        description: Skip tests.
 
 jobs:
   deploy-spring-app:
@@ -28,7 +34,8 @@ jobs:
       unleash-vars-file-path: .nais/apps/nom-remedy-integrasjon/unleash-vars.yaml
       dev-cluster: dev-fss
       prod-cluster: prod-fss
-      dockerfile: Dockerfile_distroless
+      skip-tests: ${{ github.event.inputs.skip-tests == 'true'}}
+      dockerfile: Dockerfile_distroless_debug
     secrets:
       GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}

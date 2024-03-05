@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
@@ -51,6 +52,7 @@ import java.util.stream.Collectors;
 
 import static no.nav.nom.apps.api.common.DateUtils.validateChronologicalDates;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
 import static no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService.validateOrgtilknytningTypeSektorCombination;
 
 @Service
@@ -102,19 +104,25 @@ public class RessursRestService {
     }
 
     public List<RessursState> findRessurser(RessursFilter ressursFilter) {
+
+        var showFysiskBrukersted = loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
+            loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP);
+
         return ressursStateRepository.getAll().stream()
             .filter(ressursState -> (ressursFilter.sektor().isEmpty() || ressursState.sektor().equals(ressursFilter.sektor().get()))
                 && (ressursFilter.sluttdato().isEmpty() || ressursState.sluttdato().equals(ressursFilter.sluttdato())))
             .map(ressursState -> ressursState.toBuilder()
                 .personident(ressursState.personident().replaceFirst(".{5}$", "*****"))
+                .primaryFysiskBrukersted(showFysiskBrukersted ? ressursState.primaryFysiskBrukersted() : Optional.empty())
+                .fysiskeBrukersteder(showFysiskBrukersted ? ressursState.fysiskeBrukersteder() : Collections.emptyList())
                 .build()
             )
             .toList();
     }
 
-    public Ressurs findRessursByNavident(String navident, Boolean obfuscatePersonident) {
+    public Ressurs findRessursByNavident(String navident) {
         var ressursState = findRessursStateByNavident(navident);
-        return obfuscatePersonidentAndEnrichRessursStateWithDvhData(ressursState, obfuscatePersonident);
+        return hideSensitiveDataAndEnrichRessursStateWithDvhData(ressursState);
     }
 
     private RessursState findRessursStateByNavident(String navident) {
@@ -125,21 +133,29 @@ public class RessursRestService {
         return ressursStateRepository.findByFid(fid).orElseThrow(() -> RessursNotFoundException.fid(fid));
     }
 
-    public Ressurs findRessursByFid(String fid, Boolean obfuscatePersonident) {
+    public Ressurs findRessursByFid(String fid) {
         var ressursState = findRessursStateByFid(fid);
-        return obfuscatePersonidentAndEnrichRessursStateWithDvhData(ressursState, obfuscatePersonident);
+        return hideSensitiveDataAndEnrichRessursStateWithDvhData(ressursState);
     }
 
-    private Ressurs obfuscatePersonidentAndEnrichRessursStateWithDvhData(RessursState ressursState, Boolean obfuscatePersonident) {
+    private Ressurs hideSensitiveDataAndEnrichRessursStateWithDvhData(RessursState ressursState) {
+
+        var showFysiskBrukerstedAndPersonident = loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
+            loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP);
+
         var telefoner = ressursContactDetailsResolver.fetchTelefoner(ressursState.navident());
         var epost = ressursContactDetailsResolver.fetchEmail(ressursState.navident());
-        var personident = obfuscatePersonident
-            ? ressursState.personident().replaceFirst(".{5}$", "*****")
-            : ressursState.personident();
+
+        var personident = showFysiskBrukerstedAndPersonident
+            ? ressursState.personident()
+            : ressursState.personident().replaceFirst(".{5}$", "*****");
 
         return new Ressurs(
             ressursState.toBuilder()
-                .personident(personident).build(),
+                .personident(personident)
+                .primaryFysiskBrukersted(showFysiskBrukerstedAndPersonident ? ressursState.primaryFysiskBrukersted() : Optional.empty())
+                .fysiskeBrukersteder(showFysiskBrukerstedAndPersonident ? ressursState.fysiskeBrukersteder() : Collections.emptyList())
+                .build(),
             telefoner,
             epost.orElse(null),
             nomMastered.isMastered(ressursState.navident())

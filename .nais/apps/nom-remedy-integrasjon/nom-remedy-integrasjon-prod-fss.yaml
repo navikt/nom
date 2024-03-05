@@ -14,6 +14,8 @@ spec:
   ingresses:
     - https://nom-remedy-integrasjon.prod-fss-pub.nais.io
   env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: prod
     - name: REMEDY_DATASOURCE_URL
       value: jdbc:oracle:thin:@//a01dbfl050.adeo.no:1521/remedyp
     - name: NOM_API_URL
@@ -56,6 +58,8 @@ spec:
   prometheus:
     enabled: true
     path: /internal/prometheus
+  vault:
+    enabled: true
   accessPolicy:
     inbound:
       rules:

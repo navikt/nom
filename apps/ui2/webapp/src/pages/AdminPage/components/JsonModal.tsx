@@ -14,7 +14,11 @@ export function JsonModal({ data, text }: { data: object; text: string }) {
       >
         {text}
       </Button>
-      <Modal closeOnBackdropClick ref={reference}>
+      <Modal
+        closeOnBackdropClick
+        header={{ heading: "Json data" }}
+        ref={reference}
+      >
         <Modal.Body>
           <JsonView data={data} />
         </Modal.Body>

@@ -22,6 +22,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -209,7 +210,7 @@ public class RessursHendelseForEventsourceService {
             OppdaterFysiskeBrukerstederCommand.builder()
                 .fid(fid)
                 .primaryFysiskBrukersted(dvhRessurs.getFysiskBrukersted())
-                .fysiskeBrukersteder(Set.of(dvhRessurs.getFysiskBrukersted()))
+                .fysiskeBrukersteder(dvhRessurs.getFysiskBrukersted() != null ? Set.of(dvhRessurs.getFysiskBrukersted()) : Collections.emptySet())
                 .build(),
             createInputMetadata(dvhRessurs.getRawData())
         );

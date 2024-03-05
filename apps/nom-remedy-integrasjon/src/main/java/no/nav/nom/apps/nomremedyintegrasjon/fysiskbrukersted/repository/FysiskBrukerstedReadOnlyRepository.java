@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nomremedyintegrasjon.api;
+package no.nav.nom.apps.nomremedyintegrasjon.fysiskbrukersted.repository;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;

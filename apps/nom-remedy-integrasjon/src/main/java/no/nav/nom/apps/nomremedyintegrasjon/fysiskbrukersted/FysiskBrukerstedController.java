@@ -1,7 +1,9 @@
-package no.nav.nom.apps.nomremedyintegrasjon.api;
+package no.nav.nom.apps.nomremedyintegrasjon.fysiskbrukersted;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import no.nav.nom.apps.nomremedyintegrasjon.fysiskbrukersted.repository.FysiskBrukersted;
+import no.nav.nom.apps.nomremedyintegrasjon.fysiskbrukersted.repository.FysiskBrukerstedReadOnlyRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
