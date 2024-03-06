@@ -28,7 +28,7 @@ import java.util.Optional;
 @RestController
 @Slf4j
 @RequestMapping("/api/app/authorizedRessursRedigering")
-@PreAuthorize("hasAuthority('NOM_WRITE')")
+@PreAuthorize("hasAuthority('MUTATE_RESSURS')")
 public class AuthorizedNavidentController {
 
     private final AuthorizedNavident authorizedNavident;

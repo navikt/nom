@@ -248,7 +248,7 @@ public abstract class TestBase {
         Map<String, Object> claims = new HashMap<>();
         claims.put("NAVident", LOGGED_IN_USER_NAVIDENT);
         claims.put("groups", List.of("nomAdminGroup"));
-        claims.put("azp_name", "some-app");
+        claims.put("azp_name", "nomUiClient");
         return validToken(claims);
     }
 
