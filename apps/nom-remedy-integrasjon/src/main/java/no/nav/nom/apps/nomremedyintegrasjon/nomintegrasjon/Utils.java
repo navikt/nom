@@ -34,4 +34,10 @@ public class Utils {
     public static String formatFornavnWithMellomnavn(Visningsnavn visningsnavn) {
         return visningsnavn.getFornavn() + Optional.ofNullable(visningsnavn.getMellomnavn()).map(it -> " " + it).orElse("");
     }
+
+    public static boolean isActive(LocalDate gyldigFom, LocalDate gyldigTom) {
+
+        return !gyldigFom.isAfter(LocalDate.now())
+            && !Optional.ofNullable(gyldigTom).orElse(LocalDate.MAX).isBefore(LocalDate.now());
+    }
 }
