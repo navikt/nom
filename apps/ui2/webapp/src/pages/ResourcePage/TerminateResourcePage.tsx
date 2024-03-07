@@ -10,6 +10,7 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
+import { addYears, isBefore, subDays } from "date-fns";
 import React from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -27,7 +28,7 @@ import type { AvvikleRessursRequest } from "~/types/api-models";
 import { formatDateWithoutTimezone } from "~/utils";
 
 export function TerminateResourcePage() {
-  const { id } = useParams({ from: "/ressurs/$id/terminate" });
+  const { id } = useParams({ from: "/ressurs-terminate/$id" });
   const navigate = useNavigate();
 
   const ressurs = useQuery({
@@ -41,7 +42,14 @@ export function TerminateResourcePage() {
     },
     resolver: yupResolver(
       yup.object({
-        sluttDato: yup.string().required("Obligatorisk"),
+        sluttDato: yup
+          .string()
+          .required("Obligatorisk")
+          .test(
+            "ensure-max-1-year",
+            "Kan maks være 1 år frem i tid fra dagens dato",
+            (v) => isBefore(new Date(v), subDays(addYears(new Date(), 1), 1)),
+          ),
       }),
     ),
   });
@@ -52,7 +60,7 @@ export function TerminateResourcePage() {
     formState: { errors },
   } = methods;
 
-  const sluttDatepicker = useDatepicker({
+  const sluttDatoDatepicker = useDatepicker({
     onDateChange: (date) => {
       setValue("sluttDato", date ? formatDateWithoutTimezone(date) : "");
     },
@@ -101,9 +109,9 @@ export function TerminateResourcePage() {
                 `}
               >
                 <FullWidthDatePickerWrapper>
-                  <DatePicker {...sluttDatepicker.datepickerProps}>
+                  <DatePicker {...sluttDatoDatepicker.datepickerProps}>
                     <DatePicker.Input
-                      {...sluttDatepicker.inputProps}
+                      {...sluttDatoDatepicker.inputProps}
                       error={errors.sluttDato?.message?.toString()}
                       label="Sluttdato (Siste arbeidsdag)"
                     />
@@ -116,7 +124,7 @@ export function TerminateResourcePage() {
                     height: fit-content;
                   `}
                   onClick={() => {
-                    sluttDatepicker.setSelected(new Date());
+                    sluttDatoDatepicker.setSelected(new Date());
                   }}
                   size="small"
                   type="button"

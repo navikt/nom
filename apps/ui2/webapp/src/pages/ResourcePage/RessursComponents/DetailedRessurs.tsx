@@ -684,7 +684,7 @@ function TerminateButton({ ressurs }: { ressurs: Ressurs }) {
         `}
         params={{ id: ressurs.navident }}
         search={{}}
-        to="/ressurs/$id/terminate"
+        to="/ressurs-terminate/$id"
       >
         <Button
           css={css`

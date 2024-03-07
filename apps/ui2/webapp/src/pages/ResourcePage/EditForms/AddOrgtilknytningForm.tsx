@@ -25,7 +25,10 @@ import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrap
 import { SetRessursSluttdatoFormPart } from "~/pages/ResourcePage/EditForms/EditOrgtilknytningForm";
 import { SaveOrAbortButtons } from "~/pages/ResourcePage/EditForms/SaveOrAbortButtons";
 import { defaultFormStyle } from "~/resources/NomStyles";
-import type { LeggTilOrgtilknytningRequest, Ressurs } from "~/types/api-models";
+import type {
+  LeggTilOrgtilknytningRequestOld,
+  Ressurs,
+} from "~/types/api-models";
 import type { StandardResponse } from "~/types/api-models";
 import {
   formatDateWithoutTimezone,
@@ -56,7 +59,7 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
   const leggTilOrgtilknytningMutation = useMutation<
     unknown,
     AxiosError<StandardResponse>,
-    LeggTilOrgtilknytningRequest
+    LeggTilOrgtilknytningRequestOld
   >({
     mutationFn: async (values) => leggTilOrgtilknytning(values),
     onSuccess: () => {
