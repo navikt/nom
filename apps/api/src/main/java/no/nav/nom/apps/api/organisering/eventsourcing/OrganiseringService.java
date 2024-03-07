@@ -1,5 +1,7 @@
 package no.nav.nom.apps.api.organisering.eventsourcing;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.AvsluttOrganiseringCmd;
@@ -31,15 +33,19 @@ public class OrganiseringService {
 
     private final OrgenhetService orgenhetService;
 
+    private final ObjectMapper objectMapper;
+
     private final OrganiseringEventCommandService organiseringEventCommandService;
 
     public OrganiseringService(
         OrganiseringStateRepository organiseringStateRepository, OrgenhetService orgenhetService,
-        OrganiseringEventCommandService organiseringEventCommandService
+        OrganiseringEventCommandService organiseringEventCommandService,
+        ObjectMapper objectMapper
     ) {
         this.organiseringStateRepository = organiseringStateRepository;
         this.orgenhetService = orgenhetService;
         this.organiseringEventCommandService = organiseringEventCommandService;
+        this.objectMapper = objectMapper;
     }
 
     public void saveOrganiseringer(List<DvhOrganisering> dvhOrganiseringer) {
@@ -75,7 +81,7 @@ public class OrganiseringService {
                     if (hasOrganiseringChangedOrExpired(organiseringState.get().fid(), orgEnhet.get(), orgEnhetOver.get())) {
                         organiseringEventCommandService.avsluttOrganisering(
                             organiseringState.get().fid(),
-                            getAvsluttOrganiseringCmd(organiseringState.get().gyldigFom())
+                            getAvsluttOrganiseringCmd(organiseringState.get().gyldigFom(), organiseringState.get())
                         );
                         numberOfTerminated++;
                         organiseringerTerminatedByUpdate.add(organiseringState.get().fid());
@@ -108,7 +114,7 @@ public class OrganiseringService {
             .peek(organiseringState -> numberOfTerminatedNotFromDvh.getAndIncrement())
             .forEach(organiseringState -> organiseringEventCommandService.avsluttOrganisering(
                 organiseringState.fid(),
-                getAvsluttOrganiseringCmd(organiseringState.gyldigFom())
+                getAvsluttOrganiseringCmd(organiseringState.gyldigFom(), organiseringState)
             ));
 
         logger.info("Antall organiseringer ikke lenger mottatt fra DVH og derfor avsluttet: {} ", numberOfTerminatedNotFromDvh.get());
@@ -155,19 +161,13 @@ public class OrganiseringService {
             }
             else {
                 Optional<OrganiseringState> eksisterendeOrganisering = organiseringStateRepository.findByFid(fid);
-                if(eksisterendeOrganisering.isPresent() && hasOrganiseringExpired(fid)){
+                // hvis organiseringen er inaktiv
+                if(eksisterendeOrganisering.isPresent()){
                     organiseringEndret = true;
                 }
             }
         }
         return organiseringEndret;
-    }
-
-    private boolean hasOrganiseringExpired(String fid) {
-        Optional<OrganiseringState> eksisterendeOrganisering = organiseringStateRepository.findByFid(fid);
-        return eksisterendeOrganisering.isPresent() &&
-            eksisterendeOrganisering.get().gyldigTom().isPresent() &&
-            eksisterendeOrganisering.get().gyldigTom().get().isBefore(LocalDate.now());
     }
 
     @SuppressWarnings("unused")
@@ -195,13 +195,16 @@ public class OrganiseringService {
         );
     }
 
-    private AvsluttOrganiseringCmd getAvsluttOrganiseringCmd(LocalDate gyldigFom) {
+    private AvsluttOrganiseringCmd getAvsluttOrganiseringCmd(LocalDate gyldigFom, OrganiseringState organiseringState) {
         return new AvsluttOrganiseringCmd(
             (gyldigFom == null || gyldigFom.isEqual(LocalDate.now())) ? LocalDate.now() : LocalDate.now().minusDays(1),
-            createInputMetadata()
+            createInputMetadata(getRawData(organiseringState))
         );
     }
 
+    public JsonNode getRawData(OrganiseringState organiseringState) {
+        return this.objectMapper.valueToTree(organiseringState);
+    }
 
     private InputMetadata createInputMetadata() {
         return createInputMetadata(null);
