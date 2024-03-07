@@ -11,7 +11,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import React from "react";
+import React, { useEffect } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import {
@@ -46,14 +46,30 @@ export function EditOrgtilknytningForm({
   orgtilknytning: OrgtilknytningState;
 }) {
   const queryClient = useQueryClient();
+
+  const gyldigFom = orgtilknytning.gyldigFom;
+  const gyldigTom = orgtilknytning.gyldigTom;
+
   const methods = useForm({
     defaultValues: {
-      gyldigFom: orgtilknytning.gyldigFom,
-      gyldigTom: orgtilknytning.gyldigTom,
+      gyldigFom: gyldigFom,
+      gyldigTom: gyldigTom,
     },
     shouldUnregister: true,
     resolver: yupResolver(eksternPeriodeValidationSchema),
   });
+
+  useEffect(() => {
+    if (gyldigFom) {
+      setValue("gyldigFom", gyldigFom);
+    }
+  }, [gyldigFom]);
+
+  useEffect(() => {
+    if (gyldigTom) {
+      setValue("gyldigTom", gyldigTom);
+    }
+  }, [gyldigTom]);
 
   const {
     handleSubmit,
