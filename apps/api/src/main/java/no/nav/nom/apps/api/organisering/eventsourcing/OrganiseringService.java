@@ -52,7 +52,7 @@ public class OrganiseringService {
         logger.info("Starter innlesning av organiseringer");
 
         if(dvhOrganiseringer.isEmpty()) {
-            logger.warn("Ingen organiseringer mottatt fra DVH");
+            logger.warn("Ingen organiseringer mottatt fra DVH, så ingen organiseringer vil bli endret.");
             return;
         }
 
@@ -101,8 +101,7 @@ public class OrganiseringService {
             }
         }
 
-        logger.info("Antall nye organiseringer: {} Antall avsluttede: {} Antall dvhOrganiseringer: {}", numberOfNew, numberOfTerminated, dvhOrganiseringer);
-
+        logger.info("Antall organiseringer fra DVH: {} Antall nye organiseringer: {} Antall avsluttede: {}", dvhOrganiseringer.size(), numberOfNew, numberOfTerminated);
 
         List<OrganiseringState> organiseringerToTerminate = organiseringerInStateNotInDvhOrganiseringer(
             organiseringIdsFromDvh,

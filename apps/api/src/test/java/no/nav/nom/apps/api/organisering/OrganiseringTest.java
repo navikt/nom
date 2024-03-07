@@ -174,7 +174,7 @@ public class OrganiseringTest extends TestBase {
         // Second import from DVH, this should not create avslutt organisering event
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
-        // Expect two messages
+        // Expect one messages
         await()
             .atMost(1, SECONDS)
             .pollInterval(10, MILLISECONDS)
@@ -227,7 +227,7 @@ public class OrganiseringTest extends TestBase {
         // Third import from DVH, creates avslutt organisering event
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
-        // Expect two messages
+        // Expect three messages
         await()
             .atMost(1, SECONDS)
             .pollInterval(10, MILLISECONDS)
