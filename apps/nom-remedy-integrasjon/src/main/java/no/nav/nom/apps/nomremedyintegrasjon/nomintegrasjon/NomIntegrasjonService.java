@@ -38,6 +38,7 @@ import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSec
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeNoon;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.fifteenCharLengthZeroPaddedNumber;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.formatFornavnWithMellomnavn;
+import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.isActive;
 
 @Service
 public class NomIntegrasjonService {
@@ -110,10 +111,12 @@ public class NomIntegrasjonService {
             && isNavidentEksternRessurs(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().navident())) {
 
             updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
+
         } else if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2
             && isOrgtilknytningEksternAndDagligOppfolgning(orgtilknytningDatoEndretEventV2.getFid())) {
 
             updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
+
         }
     }
 
@@ -129,7 +132,10 @@ public class NomIntegrasjonService {
         var gyldigTom = orgtilknytningDatoEndretEventData.gyldigTom()
             .orElseThrow(() -> new RequiredValueMissingException("Missing value for 'utlopsdato'"));
 
+        var remedyEnhetIdForOrgenhet = getRemedyEnhetId(orgtilknytningState.getOrgEnhetId());
+
         var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
+            .enhetsId(remedyEnhetIdForOrgenhet)
             .tiltredelsesdato(epochSecondsNorwegianTimeNoon(orgtilknytningDatoEndretEventData.gyldigFom()))
             .utlopsdato(epochSecondsNorwegianTimeEndOfDay(gyldigTom))
             .build();
@@ -396,6 +402,7 @@ public class NomIntegrasjonService {
     private NomIntegrasjonEntity nomIntegrasjonEntityFromNomData(Ressurs ressurs) {
 
         var dagligOppfolgningOrgTilknytning = nomApiClient.getOrgtilknytningerForNavident(ressurs.getNavident()).stream()
+            .filter(orgtilknytningState -> isActive(orgtilknytningState.getGyldigFom(), orgtilknytningState.getGyldigTom()))
             .filter(OrgtilknytningState::getErDagligOppfolging)
             .findFirst();
 

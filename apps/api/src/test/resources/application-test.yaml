@@ -12,37 +12,30 @@ app:
       max-attempts: 1
     nom-remedy-integrasjon:
       base-url: http://localhost:${wiremock.server.port}
-
   granted-authorities:
     clients:
       mutateRessursClient:
         client-id: mutateRessursClient
-        scopes:
-          - MUTATE_RESSURS
+        scopes: ["MUTATE_RESSURS"]
       queryPersonClient:
         client-id: queryPersonClient
-        scopes:
-          - QUERY_PERSON
+        scopes: ["QUERY_PERSON"]
       teamcatClient:
         client-id: teamcatClient
-        scopes:
-          - TEAMCAT
+        scopes: ["TEAMCAT"]
       nomUiClient:
         client-id: nomUiClient
-        scopes:
-          - QUERY_PERSON
-          - NOM_UI_APP
+        scopes: ["QUERY_PERSON", "MUTATE_RESSURS", "NOM_UI_APP"]
       nomRemedyIntegrasjonClient:
         client-id: nomRemedyIntegrasjonClient
-        scopes:
-          - NOM_REMEDY_INTEGRASJON_APP
+        scopes: ["NOM_REMEDY_INTEGRASJON_APP"]
     groups:
       nomWriteGroup:
         group-id: nomWriteGroup
-        scopes: ["MUTATE_RESSURS", "QUERY_PERSON"]
+        scopes: ["MUTATE_RESSURS"]
       nomAdminGroup:
         group-id: nomAdminGroup
-        scopes: ["ADMIN", "QUERY_PERSON"]
+        scopes: ["MUTATE_RESSURS", "ADMIN"]
   orgenhet:
     linjeenhetene: linje-enhet,en-annen-linjeenhet
 

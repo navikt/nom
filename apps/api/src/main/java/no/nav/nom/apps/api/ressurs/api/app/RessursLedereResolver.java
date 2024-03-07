@@ -150,7 +150,13 @@ public class RessursLedereResolver {
             .filter(Optional::isPresent)
             .map(Optional::get)
             .filter(not(r -> r.navident().equals(excludeNavIdent)))
+            .map(this::ressursWithObfuscatedPersonNr)
             .collect(Collectors.toList());
+    }
+
+    private RessursState ressursWithObfuscatedPersonNr(RessursState ressurs){
+        var obfuscatedPersonIdent = ressurs.personident().replaceFirst(".{5}$", "*****");
+        return ressurs.toBuilder().personident(obfuscatedPersonIdent).build();
     }
 
 }

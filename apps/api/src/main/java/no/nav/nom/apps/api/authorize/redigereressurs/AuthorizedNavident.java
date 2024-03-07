@@ -33,8 +33,8 @@ import java.util.concurrent.ConcurrentHashMap;
  *  Disse samme lederne har også mulighet til å gi andre ansatte tilgang til å redigere ressurser på samme orgenhet eller er valgt nivå under der igjen
  *  Disse tildelte rettighetene ka bestå også etter lederbytte, men må revideres på jevnlig basis. (Bekreftes på nytt, hvis ikke vil tilgangen tas vekk)
  */
-@Service
 @Slf4j
+@Service
 public class AuthorizedNavident {
     // Per leder for alle orgenheter på ARBEIDSOMRÅDE nivå og nedover. For den enkelte leder er alle under-nivåer lagt til.
     Map<String, HashSet<String>> lederForOrgenhet = new ConcurrentHashMap<>();
