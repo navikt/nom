@@ -493,7 +493,7 @@ public class OrganiseringTest extends TestBase {
         // Second import from DVH, creates the organisering and terminates the old one
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
-        // Expect one create message and then one terminate + one create message for the change in organisering
+        // Expect two create messages and then one terminate message
         await()
             .atMost(1, SECONDS)
             .pollInterval(10, MILLISECONDS)
