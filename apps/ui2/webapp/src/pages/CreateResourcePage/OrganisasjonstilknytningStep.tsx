@@ -10,7 +10,7 @@ import {
   useDatepicker,
 } from "@navikt/ds-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { addYears, isBefore } from "date-fns";
+import { addYears, isBefore, subDays } from "date-fns";
 import { useEffect, useState } from "react";
 import {
   Controller,
@@ -144,7 +144,7 @@ export const eksternPeriodeValidationSchema = yup.object().shape({
     .test(
       "ensure-max-1-year",
       "Kan maks være 1 år frem i tid fra dagens dato",
-      (v) => isBefore(new Date(v), addYears(new Date(), 1)),
+      (v) => isBefore(new Date(v), subDays(addYears(new Date(), 1), 1)),
     ),
   setRessursSluttdato: yup.boolean(),
 });
@@ -196,7 +196,8 @@ function CreateEksternRessurs() {
       >
         <OrganisasjonstilknytningInnerForm
           defaultSluttDato={
-            gyldigTom || formatDateWithoutTimezone(addYears(new Date(), 1))
+            gyldigTom ||
+            formatDateWithoutTimezone(subDays(addYears(new Date(), 1), 1))
           }
           defaultStartDato={gyldigFom}
           erDagligOppfolgingLockedToTrue

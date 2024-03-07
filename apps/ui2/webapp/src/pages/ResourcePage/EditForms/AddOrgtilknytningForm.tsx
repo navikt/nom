@@ -5,7 +5,7 @@ import { Alert, Button } from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { addYears } from "date-fns";
+import { addYears, subDays } from "date-fns";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
@@ -88,7 +88,7 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
         >
           <OrganisasjonstilknytningInnerForm
             defaultSluttDato={formatDateWithoutTimezone(
-              addYears(new Date(), 1),
+              subDays(addYears(new Date(), 1), 1),
             )}
           />
           <SetRessursSluttdatoFormPart
