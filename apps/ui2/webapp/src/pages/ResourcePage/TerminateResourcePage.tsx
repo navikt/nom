@@ -45,10 +45,8 @@ export function TerminateResourcePage() {
         sluttDato: yup
           .string()
           .required("Obligatorisk")
-          .test(
-            "ensure-max-1-year",
-            "Kan maks være 1 år frem i tid fra dagens dato",
-            (v) => isBefore(new Date(v), subDays(addYears(new Date(), 1), 1)),
+          .test("ensure-max-1-year", "Må være under et år frem i tid", (v) =>
+            isBefore(new Date(v), subDays(addYears(new Date(), 1), 1)),
           ),
       }),
     ),
