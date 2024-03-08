@@ -53,6 +53,8 @@ import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.fifteenC
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.formatFornavnWithMellomnavn;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class NomIntegrasjonServiceTest extends TestBase {
@@ -206,13 +208,13 @@ public class NomIntegrasjonServiceTest extends TestBase {
             Arguments.of(
                 ressursSluttetEvent,
                 DelayedEvent.builder()
-                    .delayedUntil(futureDate)
+                    .delayedUntil(futureDate.plusDays(1))
                     .event(ressursSluttetEvent).build()
             ),
             Arguments.of(
                 ressursSluttdatoOppdatertEventV1,
                 DelayedEvent.builder()
-                    .delayedUntil(futureDate)
+                    .delayedUntil(futureDate.plusDays(1))
                     .event(ressursSluttdatoOppdatertEventV1).build()
             )
         );
@@ -350,7 +352,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
             orgtilknytningDagligOppfolgingEndretEventData().toBuilder()
                 .navident(existingRessurs.getNavident())
                 .dagligOppfolging(true)
-                .gyldigFom(LocalDate.now().plusDays(1))
+                .gyldigFom(LocalDate.now())
                 .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
                 .orgEnhetId("new-orgenhet")
                 .build()
@@ -422,6 +424,24 @@ public class NomIntegrasjonServiceTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Should delay remedy update for OrgtilknytningDagligOppfolgingEndretEventV1")
+    void testShouldDelayUpdateForOrgtilknytningDagligOppfolgingEndretEventV1() {
+        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+
+        var orgtilknytningDagligOppfolgingEndretEventV1 = orgtilknytningDagligOppfolgingEndretEventV1(
+            orgtilknytningDagligOppfolgingEndretEventData().toBuilder()
+                .navident(existingRessurs.getNavident())
+                .dagligOppfolging(true)
+                .gyldigFom(LocalDate.now().plusDays(1))
+                .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+                .orgEnhetId("new-orgenhet")
+                .build()
+        );
+        nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
+        assertThat(delayedEventRepository.findAll()).hasSize(1);
+    }
+
+    @Test
     @DisplayName("Should write new entity with correctly updated values for OrgtilknytningDatoEndretEventV2")
     void testShouldUpdateForOrgtilknytningDatoEndretEventV2() {
 
@@ -433,7 +453,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
 
         var orgtilknytningDatoEndretEventV2 = orgtilknytningDatoEndretEventV2(
             orgtilknytningDatoEndretEventData().toBuilder()
-                .gyldigFom(dagligOppfolgingOrgtilknytning.getGyldigFom().plusDays(1))
+                .gyldigFom(dagligOppfolgingOrgtilknytning.getGyldigFom())
                 .gyldigTom(Optional.of(dagligOppfolgingOrgtilknytning.getGyldigTom().plusDays(1)))
                 .build()
         );

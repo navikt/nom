@@ -10,6 +10,7 @@ import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedeve
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonRepository;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
@@ -59,9 +60,12 @@ public class NomIntegrasjonService {
 
 
     public NomIntegrasjonService(
-            NomIntegrasjonRepository nomIntegrasjonRepository, NomApiClient nomApiClient, LeaderElection leaderElection, DelayedEventRepository delayedEventRepository,
-            Unleash unleash,
-            ObjectMapper objectMapper
+        NomIntegrasjonRepository nomIntegrasjonRepository,
+        NomApiClient nomApiClient,
+        LeaderElection leaderElection,
+        DelayedEventRepository delayedEventRepository,
+        Unleash unleash,
+        ObjectMapper objectMapper
     ) {
         this.nomIntegrasjonRepository = nomIntegrasjonRepository;
         this.nomApiClient = nomApiClient;
@@ -110,13 +114,35 @@ public class NomIntegrasjonService {
             && orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().dagligOppfolging()
             && isNavidentEksternRessurs(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().navident())) {
 
-            updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
-
+            handleOrgtilknytningDagligOppfolgingEndretEvent(orgtilknytningDagligOppfolgingEndretEventV1);
         } else if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2
             && isOrgtilknytningEksternAndDagligOppfolgning(orgtilknytningDatoEndretEventV2.getFid())) {
 
-            updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
+            handleOrgtilknytningDatoEndretEvent(orgtilknytningDatoEndretEventV2);
+        }
+    }
 
+    private void handleOrgtilknytningDagligOppfolgingEndretEvent(OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
+        if (orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom().isAfter(LocalDate.now())) {
+            logger.info("Delaying remedy update for OrgtilknytningDagligOppfolgingEndretEventV1 with fid {}", orgtilknytningDagligOppfolgingEndretEventV1.getFid());
+
+            delayEventUpdate(
+                orgtilknytningDagligOppfolgingEndretEventV1,
+                orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom());
+        } else {
+            updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
+        }
+    }
+
+    private void handleOrgtilknytningDatoEndretEvent(OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
+        if (orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom().isAfter(LocalDate.now())) {
+            logger.info("Delaying remedy update for OrgtilknytningDatoEndretEventV2 with fid {}", orgtilknytningDatoEndretEventV2.getFid());
+
+            delayEventUpdate(
+                orgtilknytningDatoEndretEventV2,
+                orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom());
+        } else {
+            updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
         }
     }
 
@@ -185,12 +211,7 @@ public class NomIntegrasjonService {
                 ressursSluttetEventV1.getMetadata().inputMetadata().origination().initiatedBy()
             );
         } else {
-            delayedEventRepository.save(
-                DelayedEvent.builder()
-                    .delayedUntil(sluttdatoForRessurs)
-                    .event(ressursSluttetEventV1)
-                    .build()
-            );
+            delayEventUpdate(ressursSluttetEventV1, sluttdatoForRessurs.plusDays(1));
         }
     }
 
@@ -224,15 +245,18 @@ public class NomIntegrasjonService {
                         ressursSluttdatoOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy()
                     );
                 } else {
-                    delayedEventRepository.save(
-                        DelayedEvent.builder()
-                            .delayedUntil(sluttdatoForRessurs)
-                            .event(ressursSluttdatoOppdatertEventV1)
-                            .build()
-                    );
+                    delayEventUpdate(ressursSluttdatoOppdatertEventV1, sluttdatoForRessurs.plusDays(1));
                 }
             }
         );
+    }
+
+    private void delayEventUpdate(Event event, LocalDate until) {
+        delayedEventRepository.save(
+            DelayedEvent.builder()
+                .delayedUntil(until)
+                .event(event)
+                .build());
     }
 
     private void handleDelayedRessursSluttdatoOppdatertEventV1(RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
@@ -306,6 +330,10 @@ public class NomIntegrasjonService {
             handleDelayedRessursSluttetEventV1(ressursSluttetEventV1);
         } else if (nomEvent instanceof RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
             handleDelayedRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
+        } else if (nomEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
+            updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
+        } else if (nomEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
+            updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
         }
 
         delayedEventRepository.deleteById(delayedEvent.getDelayedEventId());
