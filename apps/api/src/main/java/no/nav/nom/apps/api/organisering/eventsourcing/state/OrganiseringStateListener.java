@@ -11,6 +11,7 @@ import org.springframework.kafka.annotation.PartitionOffset;
 import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.StreamSupport;
 
@@ -41,9 +42,12 @@ public class OrganiseringStateListener {
     )
     public void onMessage(ConsumerRecords<String, OrganiseringState> records, Consumer<String, String> consumer) {
         StreamSupport.stream(records.spliterator(), false).forEach(it -> {
-            var orgEnhetState = it.value();
-
-            repository.putEventAggregate(orgEnhetState);
+            var organiseringState = it.value();
+            if(organiseringState.gyldigTom().isPresent() && organiseringState.gyldigTom().get().isBefore(LocalDate.now())){
+                repository.removeEventAggregate(organiseringState);
+            } else {
+                repository.putEventAggregate(organiseringState);
+            }
         });
 
         KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete,
