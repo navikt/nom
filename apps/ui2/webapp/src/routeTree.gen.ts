@@ -14,13 +14,13 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as AdminImport } from './routes/admin'
 import { Route as IndexImport } from './routes/index'
 import { Route as RessursIdImport } from './routes/ressurs.$id'
+import { Route as RessursTerminateIdImport } from './routes/ressurs-terminate.$id'
 import { Route as OrgIdImport } from './routes/org.$id'
 import { Route as AdminRessurserImport } from './routes/admin.ressurser'
 import { Route as AdminOrgenheterImport } from './routes/admin.orgenheter'
 import { Route as AdminHistoryRessurserImport } from './routes/admin.history-ressurser'
 import { Route as AdminHistoryOrgenheterImport } from './routes/admin.history-orgenheter'
 import { Route as RessursCreateStepImport } from './routes/ressurs.create.$step'
-import { Route as RessursIdTerminateImport } from './routes/ressurs.$id.terminate'
 
 // Create/Update Routes
 
@@ -36,6 +36,11 @@ const IndexRoute = IndexImport.update({
 
 const RessursIdRoute = RessursIdImport.update({
   path: '/ressurs/$id',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const RessursTerminateIdRoute = RessursTerminateIdImport.update({
+  path: '/ressurs-terminate/$id',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -67,11 +72,6 @@ const AdminHistoryOrgenheterRoute = AdminHistoryOrgenheterImport.update({
 const RessursCreateStepRoute = RessursCreateStepImport.update({
   path: '/ressurs/create/$step',
   getParentRoute: () => rootRoute,
-} as any)
-
-const RessursIdTerminateRoute = RessursIdTerminateImport.update({
-  path: '/terminate',
-  getParentRoute: () => RessursIdRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -106,13 +106,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrgIdImport
       parentRoute: typeof rootRoute
     }
+    '/ressurs-terminate/$id': {
+      preLoaderRoute: typeof RessursTerminateIdImport
+      parentRoute: typeof rootRoute
+    }
     '/ressurs/$id': {
       preLoaderRoute: typeof RessursIdImport
       parentRoute: typeof rootRoute
-    }
-    '/ressurs/$id/terminate': {
-      preLoaderRoute: typeof RessursIdTerminateImport
-      parentRoute: typeof RessursIdImport
     }
     '/ressurs/create/$step': {
       preLoaderRoute: typeof RessursCreateStepImport
@@ -132,7 +132,8 @@ export const routeTree = rootRoute.addChildren([
     AdminRessurserRoute,
   ]),
   OrgIdRoute,
-  RessursIdRoute.addChildren([RessursIdTerminateRoute]),
+  RessursTerminateIdRoute,
+  RessursIdRoute,
   RessursCreateStepRoute,
 ])
 

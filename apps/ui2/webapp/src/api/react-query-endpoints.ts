@@ -12,7 +12,7 @@ import type {
   AvvikleRessursRequest,
   EndreOrgtilknytningDatoRequest,
   GetPersonRequest,
-  LeggTilOrgtilknytningRequest,
+  LeggTilOrgtilknytningRequestOld,
   OrgEnhet,
   OrgtilknytningState,
   Person,
@@ -253,9 +253,9 @@ export const updateOrgtilknytningDato = async (
 };
 
 export const leggTilOrgtilknytning = async (
-  leggTilOrgtilknytningRequest: LeggTilOrgtilknytningRequest,
+  leggTilOrgtilknytningRequest: LeggTilOrgtilknytningRequestOld,
 ) => {
-  await axios.post<LeggTilOrgtilknytningRequest, AxiosResponse<unknown>>(
+  await axios.post<LeggTilOrgtilknytningRequestOld, AxiosResponse<unknown>>(
     `/nom-api/app/orgtilknytninger`,
     leggTilOrgtilknytningRequest,
   );

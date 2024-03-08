@@ -5,7 +5,7 @@ import { Alert, Button } from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { addYears } from "date-fns";
+import { addYears, subDays } from "date-fns";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
@@ -25,7 +25,10 @@ import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrap
 import { SetRessursSluttdatoFormPart } from "~/pages/ResourcePage/EditForms/EditOrgtilknytningForm";
 import { SaveOrAbortButtons } from "~/pages/ResourcePage/EditForms/SaveOrAbortButtons";
 import { defaultFormStyle } from "~/resources/NomStyles";
-import type { LeggTilOrgtilknytningRequest, Ressurs } from "~/types/api-models";
+import type {
+  LeggTilOrgtilknytningRequestOld,
+  Ressurs,
+} from "~/types/api-models";
 import type { StandardResponse } from "~/types/api-models";
 import {
   formatDateWithoutTimezone,
@@ -56,7 +59,7 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
   const leggTilOrgtilknytningMutation = useMutation<
     unknown,
     AxiosError<StandardResponse>,
-    LeggTilOrgtilknytningRequest
+    LeggTilOrgtilknytningRequestOld
   >({
     mutationFn: async (values) => leggTilOrgtilknytning(values),
     onSuccess: () => {
@@ -88,7 +91,7 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
         >
           <OrganisasjonstilknytningInnerForm
             defaultSluttDato={formatDateWithoutTimezone(
-              addYears(new Date(), 1),
+              subDays(addYears(new Date(), 1), 1),
             )}
           />
           <SetRessursSluttdatoFormPart
