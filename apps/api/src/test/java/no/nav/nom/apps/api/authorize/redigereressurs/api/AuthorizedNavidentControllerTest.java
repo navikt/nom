@@ -1,11 +1,17 @@
 package no.nav.nom.apps.api.authorize.redigereressurs.api;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
+import no.nav.nom.apps.api.authorize.eventsourcing.state.DelegertLederStateRepository;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.List;
+
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -16,6 +22,10 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
 
     @Autowired
     AuthorizedNavident authorizedNavident;
+    @MockBean
+    AuthorizeCommandService authorizeCommandService;
+    @MockBean
+    DelegertLederStateRepository delegertLederStateRepository;
 
     @Test
     @DisplayName("Godkjenne NOM-WRITE user token hvor leder er leder for aktuell ressurs")
@@ -56,7 +66,7 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
     @Test
     @DisplayName("Godkjenne NOM-WRITE user token hvor bruker er delegert leder for aktuell ressurs")
     public void test_0005() throws Exception {
-        authorizedNavident.addDelegertLederForOrgenhet("D", "HR", "D");
+        when(delegertLederStateRepository.aktiveDelegeringerForOrgenheterTilNavident("HR")).thenReturn(List.of("D"));
 
         String navident = "D100001";
         mockMvc.perform(get(API_URL + "/isAuthorizedFor/" + navident).header("Authorization", "Bearer " + nomWriteUserToken_DelegertLeder_HR()))
@@ -67,7 +77,7 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
     @Test
     @DisplayName("Avvise vanlig user token hvor selv om bruker er delegert leder for aktuell ressurs")
     public void test_0006() throws Exception {
-        authorizedNavident.addDelegertLederForOrgenhet("D", "HR", "D");
+        when(delegertLederStateRepository.aktiveDelegeringerForOrgenheterTilNavident("HR")).thenReturn(List.of("D"));
 
         String navident = "D100001";
         mockMvc.perform(get(API_URL + "/isAuthorizedFor/" + navident).header("Authorization", "Bearer " + vanligUserToken_DelegertLeder_HR()))

@@ -1,6 +1,11 @@
 package no.nav.nom.apps.api.authorize.redigereressurs;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
+import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.AvsluttDelegertAuthorization;
+import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.FornyDelegertAuthorization;
+import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.OpprettDelegertAuthorization;
+import no.nav.nom.apps.api.authorize.eventsourcing.state.DelegertLederStateRepository;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
@@ -10,8 +15,9 @@ import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.NomNivaa;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrganiseringState;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -39,8 +45,8 @@ public class AuthorizedNavident {
     // Per leder for alle orgenheter på ARBEIDSOMRÅDE nivå og nedover. For den enkelte leder er alle under-nivåer lagt til.
     Map<String, HashSet<String>> lederForOrgenhet = new ConcurrentHashMap<>();
     // Delegert lederskap. Delegert leder for orgenhet, og alle underliggende enheter
-    Map<String, HashSet<String>> delegertLederForOrgenhet = new ConcurrentHashMap<>();
-
+    private final AuthorizeCommandService authorizeCommandService;
+    private final DelegertLederStateRepository delegertLederStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final OrganiseringStateRepository organiseringStateRepository;
     private final RessursStateRepository ressursStateRepository;
@@ -48,11 +54,14 @@ public class AuthorizedNavident {
     private final DvhRepository dvhRepository;
 
     public AuthorizedNavident(
+            AuthorizeCommandService authorizeCommandService, DelegertLederStateRepository delegertLederStateRepository,
             OrgtilknytningStateRepository orgtilknytningStateRepository,
             OrganiseringStateRepository organiseringStateRepository, RessursStateRepository ressursStateRepository,
             OrgenhetService orgenhetService,
             DvhRepository dvhRepository
     ) {
+        this.authorizeCommandService = authorizeCommandService;
+        this.delegertLederStateRepository = delegertLederStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.organiseringStateRepository = organiseringStateRepository;
         this.ressursStateRepository = ressursStateRepository;
@@ -60,46 +69,104 @@ public class AuthorizedNavident {
         this.dvhRepository = dvhRepository;
     }
 
-    public boolean kanBrukerRedigereRessurs(String lederNavident, String ressursNavident) {
+    public boolean kanBrukerRedigereRessurs(String navident, String ressursNavident) {
         Set<String> orgenhetIder = new HashSet<>();
         synchronized (this) {
-            var orgenheter = lederForOrgenhet.get(lederNavident);
+            var orgenheter = lederForOrgenhet.get(navident);
             if (orgenheter != null) {
                 orgenhetIder.addAll(orgenheter);
             }
         }
-        var delegerteOrgenheter = delegertLederForOrgenhet.get(lederNavident);
-        if (delegerteOrgenheter != null) {
-            orgenhetIder.addAll(delegerteOrgenheter);
-        }
+
+        orgenhetIder.addAll(delegertLederStateRepository.aktiveDelegeringerForOrgenheterTilNavident(navident));
         return orgenhetIder.stream().anyMatch(orgenhetId -> erRessursInnunderOrgenhet(ressursNavident, orgenhetId));
     }
 
-    public boolean addDelegertLederForOrgenhet(String leder, String delegertLeder, String orgenhetId) {
-        sjekkParametereForAddRemoveDelegertLeder(leder, delegertLeder, orgenhetId);
-
-        // TODO: Invoker evtSrc, oppdater delegertLederForOrgenhet async i bakhånd, Ta med DATO!!
-
-        HashSet<String> orgenheterForDelegertLeder = delegertLederForOrgenhet.containsKey(delegertLeder) ? delegertLederForOrgenhet.get(delegertLeder) : new HashSet<>();
-        boolean added = orgenheterForDelegertLeder.add(orgenhetId);
-        delegertLederForOrgenhet.put(delegertLeder, orgenheterForDelegertLeder);
-        return added;
+    public boolean addDelegertLederRolleForOrgenhet(String leder, String delegertLeder, String orgenhetId) {
+        var inputMetadata = new InputMetadata("AuthorizedNavident", "addDelegertLederRolleForOrgenhet",
+            Map.of("leder", leder, "delegertLeder", delegertLeder, "orgenhetId", orgenhetId),
+            new Origination("nom-api", "nom-api")
+        );
+        return addDelegertLederRolleForOrgenhet(leder, delegertLeder, orgenhetId, inputMetadata);
     }
 
-    public boolean removeDelegertLederForOrgenhet(String leder, String delegertLeder, String orgenhetId) {
+    public boolean addDelegertLederRolleForOrgenhet(String leder, String delegertLeder, String orgenhetId, InputMetadata inputMetadata) {
         sjekkParametereForAddRemoveDelegertLeder(leder, delegertLeder, orgenhetId);
 
-        // TODO: Invoker evtSrc, oppdater delegertLederForOrgenhet async i bakhånd, Ta med DATO!!
-        boolean removed = false;
-        if (delegertLederForOrgenhet.containsKey(delegertLeder)) {
-            removed = delegertLederForOrgenhet.get(delegertLeder).remove(orgenhetId);
+        if (delegertLederStateRepository.erOrgenhetDelegertTilNavident(orgenhetId, delegertLeder)) {
+            return false;
         }
-        return removed;
+
+        OpprettDelegertAuthorization opprettDelegertAuthorization = OpprettDelegertAuthorization.builder()
+            .av(leder)
+            .til(delegertLeder)
+            .forOrgenhet(orgenhetId)
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(LocalDate.now().plusYears(1))
+            .inputMetadata(inputMetadata)
+            .build();
+
+        authorizeCommandService.opprettDelegertAuthorization(opprettDelegertAuthorization);
+        return true;
+    }
+    public boolean removeDelegertLederRolleForOrgenhet(String leder, String delegertLeder, String orgenhetId) {
+        var inputMetadata = new InputMetadata("AuthorizedNavident", "removeDelegertLederRolleForOrgenhet",
+            Map.of("leder", leder, "delegertLeder", delegertLeder, "orgenhetId", orgenhetId),
+            new Origination("nom-api", "nom-api")
+        );
+        return removeDelegertLederRolleForOrgenhet(leder, delegertLeder, orgenhetId, inputMetadata);
     }
 
-    public boolean renewDelegertLederForOrgenhet(String leder, String delegertLeder, String orgenhetId) {
-        // TODO: Implementer renewDelegertLederForOrgenhet
-        throw new NotImplementedException("Ikke implementert enda");
+    public boolean removeDelegertLederRolleForOrgenhet(String leder, String delegertLeder, String orgenhetId, InputMetadata inputMetadata) {
+        sjekkParametereForAddRemoveDelegertLeder(leder, delegertLeder, orgenhetId);
+
+        var opprinneligDelegering = delegertLederStateRepository.delegertLederRolleForOrgenhetOgNavident(orgenhetId, delegertLeder);
+        if (opprinneligDelegering.isEmpty()) {
+            log.warn("Fant ingen delegert leder rolle for orgenhet {} og navident {}. Kan ikke avsluttes", orgenhetId, delegertLeder);
+            return false;
+        }
+
+        AvsluttDelegertAuthorization avsluttDelegertAuthorization = AvsluttDelegertAuthorization.builder()
+            .av(leder)
+            .til(delegertLeder)
+            .forOrgenhet(orgenhetId)
+            .gyldigFom(opprinneligDelegering.get().gyldigFom())
+            .opprinneligGyldigTom(opprinneligDelegering.get().gyldigTom())
+            .nyGyldigTom(LocalDate.now().minusDays(1))
+            .build();
+
+        authorizeCommandService.avsluttDelegertAuthorization(opprinneligDelegering.get().fid(), avsluttDelegertAuthorization);
+        return true;
+    }
+
+    public boolean renewDelegertLederRolleForOrgenhet(String leder, String delegertLeder, String orgenhetId) {
+        var inputMetadata = new InputMetadata("AuthorizedNavident", "renewDelegertLederRolleForOrgenhet",
+            Map.of("leder", leder, "delegertLeder", delegertLeder, "orgenhetId", orgenhetId),
+            new Origination("nom-api", "nom-api")
+        );
+        return renewDelegertLederRolleForOrgenhet(leder, delegertLeder, orgenhetId, inputMetadata);
+    }
+
+    public boolean renewDelegertLederRolleForOrgenhet(String leder, String delegertLeder, String orgenhetId, InputMetadata inputMetadata) {
+        sjekkParametereForAddRemoveDelegertLeder(leder, delegertLeder, orgenhetId);
+
+        var opprinneligDelegering = delegertLederStateRepository.delegertLederRolleForOrgenhetOgNavident(orgenhetId, delegertLeder);
+        if (opprinneligDelegering.isEmpty()) {
+            log.warn("Fant ingen delegert leder rolle for orgenhet {} og navident {}. Kan ikke fornyes", orgenhetId, delegertLeder);
+            return false;
+        }
+
+        FornyDelegertAuthorization fornyDelegertAuthorization = FornyDelegertAuthorization.builder()
+            .av(leder)
+            .til(delegertLeder)
+            .forOrgenhet(orgenhetId)
+            .gyldigFom(opprinneligDelegering.get().gyldigFom())
+            .opprinneligGyldigTom(opprinneligDelegering.get().gyldigTom())
+            .nyGyldigTom(LocalDate.now().plusYears(1))
+            .inputMetadata(inputMetadata)
+            .build();
+
+        return true;
     }
 
     private void sjekkParametereForAddRemoveDelegertLeder(String leder, String delegertLeder, String orgenhetId) {
@@ -144,7 +211,7 @@ public class AuthorizedNavident {
     }
 
     /**
-     * Bør kalles når ledere oppdateres og også når organisasjon oppdateres.
+     * Bør kalles når ledere i organisasjonen oppdateres og også når organisasjon oppdateres.
      * Per nå skjer alt dette via DvhRestConsumer på samme syklus.
      */
     public void oppdaterLedereForOrgenheter() {
@@ -180,7 +247,7 @@ public class AuthorizedNavident {
     }
 
     private int orgenheterMedDelegertAuthedLederCount() {
-        return delegertLederForOrgenhet.values().stream().mapToInt(Collection::size).sum();
+        return delegertLederStateRepository.count();
     }
 
     private void addLederForOrgenhetToList(Map<String, HashSet<String>> lederForEnhet, String navident, String orgenhetId) {
