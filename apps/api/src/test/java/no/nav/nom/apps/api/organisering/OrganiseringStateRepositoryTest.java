@@ -18,6 +18,59 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class OrganiseringStateRepositoryTest {
 
+    @Test
+    @DisplayName("Test removeEventAggregate method")
+    void test_removeEventAggregate_one_organiseringState() {
+        final String idToFind = "the_id";
+        OrganiseringStateRepository repository = new OrganiseringStateRepository();
+
+        // Legg til en organisering
+        OrganiseringState organiseringState = OrganiseringState.builder()
+            .fid("1")
+            .id(idToFind)
+            .idOver("a_random_id")
+            .build();
+        repository.putEventAggregate(organiseringState);
+
+        // Sjekk at den er lagt til
+        List<OrganiseringState> organiseringStateInState = repository.getOrganiseringerContainingId(idToFind);
+        assertThat(organiseringStateInState).containsAll(List.of(organiseringState));
+
+        // Fjern organiseringen fra state
+        repository.removeEventAggregate(organiseringState);
+        organiseringStateInState = repository.getOrganiseringerContainingId(idToFind);
+        assertThat(organiseringStateInState.size()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("Test removeEventAggregate method")
+    void test_removeEventAggregate_more_organiseringStates() {
+        final String id_1 = "id_1";
+        final String id_2 = "id_2";
+        final String id_3 = "id_3";
+        OrganiseringStateRepository repository = new OrganiseringStateRepository();
+
+        // Legg til en organisering
+        String fid_1 = "fid_1";
+        String fid_2 = "fid_2";
+        OrganiseringState organiseringState_1 = OrganiseringState.builder().fid(fid_1).id(id_1).idOver(id_3).build();
+        OrganiseringState organiseringState_2 = OrganiseringState.builder().fid(fid_2).id(id_2).idOver(id_3).build();
+        repository.putEventAggregate(organiseringState_1);
+        repository.putEventAggregate(organiseringState_2);
+
+        // Sjekk at den er lagt til
+        List<OrganiseringState> organiseringStateInState = repository.getOrganiseringerContainingId(id_1);
+        assertThat(organiseringStateInState).containsAll(List.of(organiseringState_1));
+        organiseringStateInState = repository.getOrganiseringerContainingId(id_3);
+        assertThat(organiseringStateInState).containsAll(List.of(organiseringState_1, organiseringState_2));
+
+        // Fjern organiseringState_1 fra state
+        repository.removeEventAggregate(organiseringState_1);
+        organiseringStateInState = repository.getOrganiseringerContainingId(id_3);
+        assertThat(organiseringStateInState.size()).isEqualTo(1);
+        assertThat(organiseringStateInState).containsAll(List.of(organiseringState_2));
+    }
+
     @DisplayName("Test ActiveOrganisering method")
     @ParameterizedTest(name = "{index} {0}")
     @MethodSource("getOrganiseringStates")

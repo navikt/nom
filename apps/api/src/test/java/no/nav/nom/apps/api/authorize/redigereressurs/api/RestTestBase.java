@@ -1,8 +1,10 @@
 package no.nav.nom.apps.api.authorize.redigereressurs.api;
 
 import com.nimbusds.jose.JOSEObjectType;
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.MockOAuth2ServerInitializer;
+import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.authorize.redigereressurs.MockBasisTestOrganisering;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
@@ -39,16 +41,21 @@ public class RestTestBase extends MockBasisTestOrganisering {
     MockOAuth2Server mockOAuth2Server;
     @MockBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
-
     @Mock
     private Authentication auth;
     @Autowired
     MockMvc mockMvc;
-
+    @MockBean
+    Unleash unleash;
     public static final String LOGGED_IN_USER_NAVIDENT = "A321321";
     private static final String OAUTH_VALID_AUDIENCE = "test";
     private static final String OAUTH_VALID_ISSUER = "aad";
     private static final String NOM_WRITE_GROUP = "nomWriteGroup";
+
+    @BeforeEach
+    public void setUnleashUseNewAuth() {
+        when(unleash.isEnabled(AuthResolver.UNLEASH_REDIGERE_RESSURS_BRUK_NY_AUTH_RESOLVER)).thenReturn(true);
+    }
 
     @BeforeEach
     void mockOAuth2AuthorizedClientManager() {

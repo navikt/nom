@@ -10,6 +10,8 @@ import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -22,7 +24,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
 import java.util.Optional;
+
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
 @Tag(name = "Controller metode for å verifisere redigere ressurs tilgang og administrere delegerering av tilganger")
 @RestController
@@ -61,7 +66,16 @@ public class AuthorizedNavidentController {
         if(lederNavident.isEmpty()) {
             throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
         }
-        authorizedNavident.addDelegertLederForOrgenhet(lederNavident.get(), navidentDelegertLeder, orgenhetId);
+
+        var inputMetadata = new InputMetadata("REST", "addDelegatedAuthorization",
+            Map.of(
+                "navidentDelegertLeder", navidentDelegertLeder,
+                "orgenhetId", orgenhetId
+            ),
+            new Origination(getAuthenticatedNavIdent(), SecurityUtil.getAuthenticatedAzpName())
+        );
+
+        authorizedNavident.addDelegertLederRolleForOrgenhet(lederNavident.get(), navidentDelegertLeder, orgenhetId, inputMetadata);
     }
 
     @Operation(
@@ -75,7 +89,7 @@ public class AuthorizedNavidentController {
         if(lederNavident.isEmpty()) {
             throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
         }
-        authorizedNavident.removeDelegertLederForOrgenhet(lederNavident.get(), navidentDelegertLeder, orgenhetId);
+        authorizedNavident.removeDelegertLederRolleForOrgenhet(lederNavident.get(), navidentDelegertLeder, orgenhetId);
     }
 
     @Operation(
@@ -89,7 +103,7 @@ public class AuthorizedNavidentController {
         if(lederNavident.isEmpty()) {
             throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
         }
-        authorizedNavident.renewDelegertLederForOrgenhet(lederNavident.get(), navidentDelegertLeder, orgenhetId);
+        authorizedNavident.renewDelegertLederRolleForOrgenhet(lederNavident.get(), navidentDelegertLeder, orgenhetId);
     }
 
     @ExceptionHandler({

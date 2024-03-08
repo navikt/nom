@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Service
@@ -108,6 +109,28 @@ public class OrganiseringStateRepository {
         organiseringById.put(organiseringState.id(), organiseringState);
 
         putOrUpdateAllOrganiseringer(organiseringState);
+    }
+
+    public void removeEventAggregate(OrganiseringState organiseringState) {
+        organiseringByFid.remove(organiseringState.fid());
+        organiseringById.forEach((key, value) -> {
+            if (value.fid().equals(organiseringState.fid())) {
+                organiseringById.remove(key);
+            }
+        });
+        allOrganiseringerContainingId.forEach((key, value) -> value.forEach(state -> {
+            if (state.fid().equals(organiseringState.fid())) {
+                // delete the matched element from list and update allOrganiseringerContainingId with new list
+                // if list become empty then remove the key from allOrganiseringerContainingId
+                List<OrganiseringState> matchedList = new CopyOnWriteArrayList<>(value);
+                matchedList.remove(state);
+                if(matchedList.isEmpty()) {
+                    allOrganiseringerContainingId.remove(key);
+                } else {
+                    allOrganiseringerContainingId.put(key, matchedList);
+                }
+            }
+        }));
     }
 
     public int count() {

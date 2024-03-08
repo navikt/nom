@@ -68,21 +68,21 @@ public class DelegertLederEventListener {
 
     private void process(DelegertAuthorizationOpprettetEventV1 opprettet) {
         var eventData = (DelegertAuthorizationOpprettetEventV1.DelegertAuthorizationOpprettetEventData)opprettet.getData();
-        var newState = new DelegertLeder(opprettet.getFid(), eventData.til(), eventData.av(), eventData.forOrgenhet(), eventData.gyldigFom(), eventData.gyldigTom());
+        var newState = new DelegertLederRolle(opprettet.getFid(), eventData.til(), eventData.av(), eventData.forOrgenhet(), eventData.gyldigFom(), eventData.gyldigTom());
 
         delegertLederStateRepository.createDelegering(newState);
     }
 
     private void process(DelegertAuthorizationFornyetEventV1 fornyet) {
         var eventData = (DelegertAuthorizationFornyetEventV1.DelegertAuthorizationFornyetEventData)fornyet.getData();
-        var newState = new DelegertLeder(fornyet.getFid(), eventData.til(), eventData.av(), eventData.forOrgenhet(), eventData.gyldigFom(), eventData.nyGyldigTom());
+        var newState = new DelegertLederRolle(fornyet.getFid(), eventData.til(), eventData.av(), eventData.forOrgenhet(), eventData.gyldigFom(), eventData.nyGyldigTom());
 
         delegertLederStateRepository.updateDelegering(newState);
     }
 
     private void process(DelegertAuthorizationAvsluttetEventV1 avsluttet){
         var eventData = (DelegertAuthorizationAvsluttetEventV1.DelegertAuthorizationAvsluttetEventData)avsluttet.getData();
-        var newState = new DelegertLeder(avsluttet.getFid(), eventData.til(), eventData.av(), eventData.forOrgenhet(), eventData.gyldigFom(), eventData.nyGyldigTom());
+        var newState = new DelegertLederRolle(avsluttet.getFid(), eventData.til(), eventData.av(), eventData.forOrgenhet(), eventData.gyldigFom(), eventData.nyGyldigTom());
 
         delegertLederStateRepository.updateDelegering(newState);
     }

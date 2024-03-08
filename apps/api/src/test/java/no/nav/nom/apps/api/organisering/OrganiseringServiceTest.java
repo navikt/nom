@@ -58,7 +58,7 @@ class OrganiseringServiceTest {
             .navn(initialDvhOrg.getNavnOver())
             .build());
 
-        assertThat(organiseringService.hasOrganiseringChanged(fid, orgEnhet, orgEnhetOver)).isFalse();
+        assertThat(organiseringService.hasOrganiseringChangedOrExpired(fid, orgEnhet, orgEnhetOver)).isFalse();
     }
 
     @Test
@@ -90,7 +90,7 @@ class OrganiseringServiceTest {
             .navn(newNavnOver)
             .build());
 
-        assertThat(organiseringService.hasOrganiseringChanged(fid, orgEnhet, orgEnhetOver)).isTrue();
+        assertThat(organiseringService.hasOrganiseringChangedOrExpired(fid, orgEnhet, orgEnhetOver)).isTrue();
     }
 
     @Test
@@ -124,7 +124,7 @@ class OrganiseringServiceTest {
             .build());
 
 
-        assertThat(organiseringService.hasOrganiseringChanged(fid, orgEnhet, orgEnhetOver)).isTrue();
+        assertThat(organiseringService.hasOrganiseringChangedOrExpired(fid, orgEnhet, orgEnhetOver)).isTrue();
     }
 
     @Test
@@ -158,7 +158,7 @@ class OrganiseringServiceTest {
             .build());
 
 
-        assertThat(organiseringService.hasOrganiseringChanged(fid, orgEnhet, orgEnhetOver)).isTrue();
+        assertThat(organiseringService.hasOrganiseringChangedOrExpired(fid, orgEnhet, orgEnhetOver)).isTrue();
     }
 
     @Test
@@ -195,7 +195,7 @@ class OrganiseringServiceTest {
             .build());
 
 
-        assertThat(organiseringService.hasOrganiseringChanged(fid, orgEnhet, orgenhetOver)).isFalse();
+        assertThat(organiseringService.hasOrganiseringChangedOrExpired(fid, orgEnhet, orgenhetOver)).isFalse();
     }
 
 

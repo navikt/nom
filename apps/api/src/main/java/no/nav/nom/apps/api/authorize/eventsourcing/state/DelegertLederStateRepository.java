@@ -15,19 +15,38 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Slf4j
 // Kan ha flere like delegeringer for samme navident og enhet, men med forskjellige datoperioder
 public class DelegertLederStateRepository {
-    private final Map<String, DelegertLeder> delegertLederByFid = new ConcurrentHashMap<>();
-    private final Map<String, Map<String, List<DelegertLeder>>> delegertLederByNavidentAndEnhet = new ConcurrentHashMap<>();
-    private final Map<String, Map<String, List<DelegertLeder>>> delegertLederByEnhetAndNavident = new ConcurrentHashMap<>();
+    private final Map<String, DelegertLederRolle> delegertLederByFid = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, List<DelegertLederRolle>>> delegertLederByNavidentAndEnhet = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, List<DelegertLederRolle>>> delegertLederByEnhetAndNavident = new ConcurrentHashMap<>();
 
-    public Optional<DelegertLeder> findByFid(String fid) {
+    public Optional<DelegertLederRolle> findByFid(String fid) {
         return Optional.ofNullable(delegertLederByFid.get(fid));
     }
 
-    public Collection<DelegertLeder> findByNavident(String navident) {
+    public List<DelegertLederRolle> findByNavident(String navident) {
         return delegertLederByNavidentAndEnhet.getOrDefault(navident, Collections.emptyMap()).values().stream().flatMap(List::stream).toList();
     }
 
-    public Collection<DelegertLeder> getAll() {
+    public List<String> aktiveDelegeringerForOrgenheterTilNavident(String navident) {
+        return delegertLederByNavidentAndEnhet.getOrDefault(navident, Collections.emptyMap()).values().stream()
+            .flatMap(List::stream)
+            .filter(DelegertLederRolle::isActive)
+            .map(DelegertLederRolle::orgenhetId)
+            .toList();
+    }
+
+    public boolean erOrgenhetDelegertTilNavident(String orgenhetId, String navident) {
+        return delegertLederByNavidentAndEnhet.getOrDefault(navident, Collections.emptyMap()).containsKey(orgenhetId);
+    }
+
+    public Optional<DelegertLederRolle> delegertLederRolleForOrgenhetOgNavident(String orgenhetId, String navident) {
+        return delegertLederByNavidentAndEnhet.getOrDefault(navident, Collections.emptyMap()).values().stream().flatMap(List::stream)
+            .filter(delegertLederRolle -> delegertLederRolle.orgenhetId().equals(orgenhetId))
+            .filter(DelegertLederRolle::isActive)
+            .findFirst();
+    }
+
+    public Collection<DelegertLederRolle> getAll() {
         return delegertLederByFid.values();
     }
 
@@ -35,13 +54,13 @@ public class DelegertLederStateRepository {
         return delegertLederByFid.size();
     }
 
-    public void createDelegering(DelegertLeder newState) {
+    public void createDelegering(DelegertLederRolle newState) {
         delegertLederByFid.put(newState.fid(), newState);
         addToByNavidentAndEnhet(newState);
         addToByEnhetAndNavident(newState);
     }
 
-    public void updateDelegering(DelegertLeder newState) {
+    public void updateDelegering(DelegertLederRolle newState) {
         var oldState = delegertLederByFid.get(newState.fid());
         delegertLederByFid.put(newState.fid(), newState);
 
@@ -58,23 +77,23 @@ public class DelegertLederStateRepository {
         delegertLederByEnhetAndNavident.clear();
     }
 
-    private void addToByNavidentAndEnhet(DelegertLeder newState) {
+    private void addToByNavidentAndEnhet(DelegertLederRolle newState) {
         delegertLederByNavidentAndEnhet.computeIfAbsent(newState.til(), k -> new ConcurrentHashMap<>())
             .computeIfAbsent(newState.orgenhetId(), k -> new CopyOnWriteArrayList<>())
             .add(newState);
     }
 
-    private void addToByEnhetAndNavident(DelegertLeder newState) {
+    private void addToByEnhetAndNavident(DelegertLederRolle newState) {
         delegertLederByEnhetAndNavident.computeIfAbsent(newState.orgenhetId(), k -> new ConcurrentHashMap<>())
             .computeIfAbsent(newState.til(), k -> new CopyOnWriteArrayList<>())
             .add(newState);
     }
 
-    private void removeFromByNavidentAndEnhet(DelegertLeder oldState) {
+    private void removeFromByNavidentAndEnhet(DelegertLederRolle oldState) {
         delegertLederByNavidentAndEnhet.getOrDefault(oldState.til(), Collections.emptyMap()).get(oldState.orgenhetId()).remove(oldState);
     }
 
-    private void removeFromByEnhetAndNavident(DelegertLeder oldState) {
+    private void removeFromByEnhetAndNavident(DelegertLederRolle oldState) {
         delegertLederByEnhetAndNavident.getOrDefault(oldState.orgenhetId(), Collections.emptyMap()).get(oldState.til()).remove(oldState);
     }
 

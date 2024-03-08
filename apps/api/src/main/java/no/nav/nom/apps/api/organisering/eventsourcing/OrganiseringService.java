@@ -1,5 +1,7 @@
 package no.nav.nom.apps.api.organisering.eventsourcing;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.AvsluttOrganiseringCmd;
@@ -31,19 +33,28 @@ public class OrganiseringService {
 
     private final OrgenhetService orgenhetService;
 
+    private final ObjectMapper objectMapper;
+
     private final OrganiseringEventCommandService organiseringEventCommandService;
 
     public OrganiseringService(
         OrganiseringStateRepository organiseringStateRepository, OrgenhetService orgenhetService,
-        OrganiseringEventCommandService organiseringEventCommandService
+        OrganiseringEventCommandService organiseringEventCommandService,
+        ObjectMapper objectMapper
     ) {
         this.organiseringStateRepository = organiseringStateRepository;
         this.orgenhetService = orgenhetService;
         this.organiseringEventCommandService = organiseringEventCommandService;
+        this.objectMapper = objectMapper;
     }
 
     public void saveOrganiseringer(List<DvhOrganisering> dvhOrganiseringer) {
         logger.info("Starter innlesning av organiseringer");
+
+        if(dvhOrganiseringer.isEmpty()) {
+            logger.warn("Ingen organiseringer mottatt fra DVH, så ingen organiseringer vil bli endret.");
+            return;
+        }
 
         int numberOfNew = 0;
         int numberOfTerminated = 0;
@@ -67,25 +78,22 @@ public class OrganiseringService {
                 Optional<OrganiseringState> organiseringState = getOrganiseringState(dvhOrganisering);
 
                 if (organiseringState.isPresent()) {
-                    if (hasOrganiseringChanged(organiseringState.get().fid(), orgEnhet.get(), orgEnhetOver.get())) {
+                    if (hasOrganiseringChangedOrExpired(organiseringState.get().fid(), orgEnhet.get(), orgEnhetOver.get())) {
                         organiseringEventCommandService.avsluttOrganisering(
                             organiseringState.get().fid(),
-                            getAvsluttOrganiseringCmd(organiseringState.get().gyldigFom())
+                            getAvsluttOrganiseringCmd(organiseringState.get().gyldigFom(), organiseringState.get())
                         );
                         numberOfTerminated++;
                         organiseringerTerminatedByUpdate.add(organiseringState.get().fid());
 
-                        organiseringEventCommandService.opprettOrganisering(
-                            getOpprettOrganiseringCmd(orgEnhet.get(), orgEnhetOver.get(), dvhOrganisering));
+                        organiseringEventCommandService.opprettOrganisering(getOpprettOrganiseringCmd(orgEnhet.get(), orgEnhetOver.get(), dvhOrganisering));
                         numberOfNew++;
                     }
                 } else {
                     organiseringEventCommandService.opprettOrganisering(getOpprettOrganiseringCmd(orgEnhet.get(), orgEnhetOver.get(), dvhOrganisering));
                     numberOfNew++;
                 }
-
                 organiseringIdsFromDvh.add(new OrganiseringIdTuple(orgEnhet.get().getId(), orgEnhetOver.get().getId()));
-
             } else {
                 logger.info("orgEnhet eller orgEnhetOver ikke finnes i orgenhetStateRepository. orgEnhet: ({} {} {}) orgEnhetOver: ({} {} {})",
                     dvhOrganisering.getAgressoIdUnder(), dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder(),
@@ -93,8 +101,7 @@ public class OrganiseringService {
             }
         }
 
-        logger.info("Antall nye organiseringer: {} Antall avsluttede: {}", numberOfNew, numberOfTerminated);
-
+        logger.info("Antall organiseringer fra DVH: {} Antall nye organiseringer: {} Antall avsluttede: {}", dvhOrganiseringer.size(), numberOfNew, numberOfTerminated);
 
         List<OrganiseringState> organiseringerToTerminate = organiseringerInStateNotInDvhOrganiseringer(
             organiseringIdsFromDvh,
@@ -106,7 +113,7 @@ public class OrganiseringService {
             .peek(organiseringState -> numberOfTerminatedNotFromDvh.getAndIncrement())
             .forEach(organiseringState -> organiseringEventCommandService.avsluttOrganisering(
                 organiseringState.fid(),
-                getAvsluttOrganiseringCmd(organiseringState.gyldigFom())
+                getAvsluttOrganiseringCmd(organiseringState.gyldigFom(), organiseringState)
             ));
 
         logger.info("Antall organiseringer ikke lenger mottatt fra DVH og derfor avsluttet: {} ", numberOfTerminatedNotFromDvh.get());
@@ -137,18 +144,24 @@ public class OrganiseringService {
             .toList();
     }
 
-    public boolean hasOrganiseringChanged(String fid, IOrgenhet newOrgEnhet, IOrgenhet newOrgEnhetOver) {
+    public boolean hasOrganiseringChangedOrExpired(String fid, IOrgenhet newOrgEnhet, IOrgenhet newOrgEnhetOver) {
         boolean organiseringEndret = false;
 
         if (fid.startsWith("organisering")) {
-            Optional<OrganiseringState> eksisterendeOrganisering = organiseringStateRepository.findActiveByFid(fid);
-
-            if (eksisterendeOrganisering.isPresent()) {
-                OrganiseringState eksisterendeOrg = eksisterendeOrganisering.get();
+            Optional<OrganiseringState> eksisterendeAktivOrganisering = organiseringStateRepository.findActiveByFid(fid);
+            // hvis organisergingen er aktiv
+            if (eksisterendeAktivOrganisering.isPresent()) {
+                OrganiseringState eksisterendeOrg = eksisterendeAktivOrganisering.get();
 
                 if (!eksisterendeOrg.id().equals(newOrgEnhet.getId()) ||
-                    !eksisterendeOrg.idOver().equals(newOrgEnhetOver.getId())
-                ) {
+                    !eksisterendeOrg.idOver().equals(newOrgEnhetOver.getId())) {
+                    organiseringEndret = true;
+                }
+            }
+            else {
+                Optional<OrganiseringState> eksisterendeOrganisering = organiseringStateRepository.findByFid(fid);
+                // hvis organiseringen er inaktiv
+                if(eksisterendeOrganisering.isPresent()){
                     organiseringEndret = true;
                 }
             }
@@ -181,13 +194,16 @@ public class OrganiseringService {
         );
     }
 
-    private AvsluttOrganiseringCmd getAvsluttOrganiseringCmd(LocalDate gyldigFom) {
+    private AvsluttOrganiseringCmd getAvsluttOrganiseringCmd(LocalDate gyldigFom, OrganiseringState organiseringState) {
         return new AvsluttOrganiseringCmd(
             (gyldigFom == null || gyldigFom.isEqual(LocalDate.now())) ? LocalDate.now() : LocalDate.now().minusDays(1),
-            createInputMetadata()
+            createInputMetadata(getRawData(organiseringState))
         );
     }
 
+    public JsonNode getRawData(OrganiseringState organiseringState) {
+        return this.objectMapper.valueToTree(organiseringState);
+    }
 
     private InputMetadata createInputMetadata() {
         return createInputMetadata(null);
