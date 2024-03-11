@@ -60,7 +60,7 @@
         <!-- Override av andre transient dependencies -->
         <orgjson.version>20240303</orgjson.version>  <!-- https://github.com/navikt/nom/security/dependabot/92 -->
         <snappy-java.test.version>1.1.10.5</snappy-java.test.version>
-        <commons-compress.version>1.26.0</commons-compress.version> <!-- https://github.com/navikt/nom/security/dependabot/88 -->
+        <commons-compress.version>1.26.1</commons-compress.version> <!-- https://github.com/navikt/nom/security/dependabot/88 -->
         <httpclient.version>4.5.14</httpclient.version> <!-- https://github.com/navikt/nom/security/dependabot/94 -->
         <bcpkix-jdk18on.version>1.77</bcpkix-jdk18on.version> <!-- https://github.com/navikt/nom/security/dependabot/95 -->
         <reactor-netty-http.version>1.1.15</reactor-netty-http.version>
