@@ -4,8 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytningCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDatoCommand;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtype;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
@@ -49,21 +50,41 @@ public class OrgtilknytningCommandService {
         ));
     }
 
+    // TODO: Fjern denne metoden og bruk metoden endreDagligOppfolgingOrgtilknytning(EndreDagligOppfolgingOrgtilknytningCommand endreDagligOppfolgingOrgtilknytningCommand) istedet.
+    // Grunnen til dette er at det er enklere å lage tester med ArgumentCaptor når fid er inkludert i Command-objektet
     public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreDagligOppfolgingOrgtilknytning(
         String fid,
         EndreDagligOppfolgingOrgtilknytning endreDagligOppfolgingOrgtilknytning
     ) {
+
+        return endreDagligOppfolgingOrgtilknytning(
+            EndreDagligOppfolgingOrgtilknytningCommand.builder()
+                .fid(fid)
+                .navident(endreDagligOppfolgingOrgtilknytning.navident())
+                .orgenhetId(endreDagligOppfolgingOrgtilknytning.orgenhetId())
+                .gyldigFom(endreDagligOppfolgingOrgtilknytning.gyldigFom())
+                .gyldigTom(endreDagligOppfolgingOrgtilknytning.gyldigTom())
+                .erDagligOppfolging(endreDagligOppfolgingOrgtilknytning.dagligOppfolging())
+                .inputMetadata(endreDagligOppfolgingOrgtilknytning.inputMetadata())
+                .additionalAgressoData(endreDagligOppfolgingOrgtilknytning.additionalAgressoData())
+                .build()
+        );
+    }
+
+    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreDagligOppfolgingOrgtilknytning(
+        EndreDagligOppfolgingOrgtilknytningCommand endreDagligOppfolgingOrgtilknytningCommand
+    ) {
         return eventProducer.sendMessage(new OrgtilknytningDagligOppfolgingEndretEventV1(
-            fid,
+            endreDagligOppfolgingOrgtilknytningCommand.fid(),
             new OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData(
-                endreDagligOppfolgingOrgtilknytning.navident(),
-                endreDagligOppfolgingOrgtilknytning.orgenhetId(),
-                endreDagligOppfolgingOrgtilknytning.gyldigFom(),
-                endreDagligOppfolgingOrgtilknytning.gyldigTom(),
-                endreDagligOppfolgingOrgtilknytning.dagligOppfolging()
+                endreDagligOppfolgingOrgtilknytningCommand.navident(),
+                endreDagligOppfolgingOrgtilknytningCommand.orgenhetId(),
+                endreDagligOppfolgingOrgtilknytningCommand.gyldigFom(),
+                endreDagligOppfolgingOrgtilknytningCommand.gyldigTom(),
+                endreDagligOppfolgingOrgtilknytningCommand.erDagligOppfolging()
             ),
-            endreDagligOppfolgingOrgtilknytning.inputMetadata(),
-            endreDagligOppfolgingOrgtilknytning.additionalAgressoData()
+            endreDagligOppfolgingOrgtilknytningCommand.inputMetadata(),
+            endreDagligOppfolgingOrgtilknytningCommand.additionalAgressoData()
         ));
     }
 
@@ -108,14 +129,14 @@ public class OrgtilknytningCommandService {
             ));
     }
 
-    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreTilknytningtype(EndreTilknytningtype endreTilknytningType) {
+    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreTilknytningtype(EndreTilknytningtypeCommand endreTilknytningTypeCommand) {
         return eventProducer.sendMessage(
             new OrgtilknytningTilknytningtypeEndretEventV1(
-                endreTilknytningType.fid(),
+                endreTilknytningTypeCommand.fid(),
                 new OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData(
-                    endreTilknytningType.tilknytningtype()
+                    endreTilknytningTypeCommand.tilknytningtype()
                 ),
-                endreTilknytningType.inputMetadata()
+                endreTilknytningTypeCommand.inputMetadata()
             ));
     }
 
