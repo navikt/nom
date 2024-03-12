@@ -23,6 +23,7 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,6 +45,7 @@ import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NE
 @Tag(name = "Admin for å kjøre en sanity check på data")
 @RestController
 @RequestMapping("/api/admin/SanityCheck")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class SanityCheck {
     private final Logger log = LoggerFactory.getLogger(SanityCheck.class);
     private final DvhRepository dvhRepository;
