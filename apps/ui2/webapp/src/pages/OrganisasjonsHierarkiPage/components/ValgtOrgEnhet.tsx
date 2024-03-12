@@ -86,6 +86,11 @@ export const ValgtOrgEnhet = ({
                 NOM-nivå: <b>{NomNivaaNameMapping[orgEnhet.nomNivaa]}</b>
               </BodyShort>
             )}
+            {orgEnhet.agressoId && (
+              <BodyShort size="small">
+                Agresso-ID: <b>{orgEnhet.agressoId}</b>
+              </BodyShort>
+            )}
           </HGrid>
         </div>
 
