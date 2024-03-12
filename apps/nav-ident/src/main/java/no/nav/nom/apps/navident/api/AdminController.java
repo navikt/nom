@@ -12,6 +12,7 @@ import no.nav.nom.apps.navident.common.SwaggerConfig;
 import no.nav.nom.apps.navident.job.ImportNavIdenter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,10 +27,10 @@ public class AdminController {
 
     public final static String BASE_URL = "/admin";
     private final static Logger logger = LoggerFactory.getLogger(AdminController.class);
+    public static final String NAV_IDENT_RESURS_FILE = "NIK_identType.txt";
     private final ImportNavIdenter importNavIdenter;
     private final Unleash unleash;
     public static final String UNLEASH_PRODUSERE_ENDRE_NAV_IDENT_MELDINGER = "nom.nav_ident.enable_edit_topics";
-
 
     public AdminController(ImportNavIdenter importNavIdenter, Unleash unleash) {
         this.importNavIdenter = importNavIdenter;
@@ -62,10 +63,11 @@ public class AdminController {
 
     @GetMapping("/importerNavIdenterFraResursFil")
     @PreAuthorize("hasRole('ROLE_${group.id.nom.write}')")
-    public String importIdentTypeFromResourceFile(@RequestParam String bucketObjectName) {
+    public String importIdentTypeFromResourceFile() {
         logger.info("Starter NavIdent innlesning fra resursfil");
-        if (unleash.isEnabled(UNLEASH_PRODUSERE_ENDRE_NAV_IDENT_MELDINGER))
-            return importNavIdenter.importIdentTypeFromResourceFile();
+        if (unleash.isEnabled(UNLEASH_PRODUSERE_ENDRE_NAV_IDENT_MELDINGER)){
+            return importNavIdenter.importIdentTypeFromResourceFile(new ClassPathResource(NAV_IDENT_RESURS_FILE));
+        }
         else {
             return "Feature flag " + UNLEASH_PRODUSERE_ENDRE_NAV_IDENT_MELDINGER + " er ikke aktivert";
         }

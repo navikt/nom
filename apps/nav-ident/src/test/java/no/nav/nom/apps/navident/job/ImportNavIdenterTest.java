@@ -1,6 +1,5 @@
 package no.nav.nom.apps.navident.job;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.getunleash.Unleash;
 import lombok.SneakyThrows;
 import no.nav.nom.apps.navident.SpringBootTestBase;
@@ -18,9 +17,11 @@ import org.mockito.Captor;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,7 +55,7 @@ class ImportNavIdenterTest extends SpringBootTestBase {
     protected Unleash unleash;
 
     @BeforeEach
-    public void setUp() throws JsonProcessingException {
+    public void setUp() throws IOException {
         // Always enable features for tests
         when(unleash.isEnabled(any())).thenReturn(true);
     }
@@ -160,19 +161,19 @@ A867804,HAE4403,Horisontal,Abakus,27469208996,4403,NAV ARBEID OG YTELSER KRISTIA
             return Navident.builder().navident((String) args[0]).identType(IdentType.STANDARD).build();
         });
 
-        String res = importNavIdenter.importIdentTypeFromResourceFile();
-        assertTrue(res.startsWith("Totalt ident importert fra fil 592 av 592."), res);
+        String res = importNavIdenter.importIdentTypeFromResourceFile(new ClassPathResource("NIK_identType-test.txt"));
+        assertTrue(res.startsWith("Totalt ident importert fra fil 20 av 20."), res);
 
-        verify(producer, times(592)).send(any(), any());
-        verify(sourceEventRepository, times(592)).save(any());
+        verify(producer, times(20)).send(any(), any());
+        verify(sourceEventRepository, times(20)).save(any());
     }
 
     @Test
     @DisplayName("Test do not import navident from a resource file. ")
     void importNoneIdentTypeFromResourceFile () {
         when(eventSourceService.finnesNavIdent(any())).thenReturn(false);
-        String res = importNavIdenter.importIdentTypeFromResourceFile();
-        assertTrue(res.startsWith("Totalt ident importert fra fil 0 av 592."), res);
+        String res = importNavIdenter.importIdentTypeFromResourceFile(new ClassPathResource("NIK_identType-test.txt"));
+        assertTrue(res.startsWith("Totalt ident importert fra fil 0 av 20."), res);
         verify(producer, times(0)).send(any(), any());
         verify(sourceEventRepository, times(0)).save(any());
     }
@@ -188,10 +189,10 @@ A867804,HAE4403,Horisontal,Abakus,27469208996,4403,NAV ARBEID OG YTELSER KRISTIA
             return Navident.builder().navident((String) args[0]).identType(identType).build();
         });
 
-        String res = importNavIdenter.importIdentTypeFromResourceFile();
-        assertTrue(res.startsWith("Totalt ident importert fra fil 589 av 592."), res);
-        verify(producer, times(589)).send(any(), any());
-        verify(sourceEventRepository, times(589)).save(any());
+        String res = importNavIdenter.importIdentTypeFromResourceFile(new ClassPathResource("NIK_identType-test.txt"));
+        assertTrue(res.startsWith("Totalt ident importert fra fil 18 av 20."), res);
+        verify(producer, times(18)).send(any(), any());
+        verify(sourceEventRepository, times(18)).save(any());
     }
 
     @Test

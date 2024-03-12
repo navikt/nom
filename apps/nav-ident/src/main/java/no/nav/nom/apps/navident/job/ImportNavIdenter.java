@@ -16,10 +16,8 @@ import no.nav.nom.apps.navident.eventsource.EventSourceService;
 import no.nav.nom.apps.navident.eventsource.EventType;
 import no.nav.nom.apps.navident.eventsource.SourceEvent;
 import no.nav.nom.apps.navident.eventsource.SourceEventRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -50,9 +48,6 @@ public class ImportNavIdenter {
 
     private Map<String, String> importerteNavIdenter;
     private int skippedLines = 0;
-
-    @Autowired
-    ResourceLoader resourceLoader;
 
     public ImportNavIdenter(SourceEventRepository sourceEventRepository, EventSourceService eventSourceService, KafkaTemplate<String, SourceEvent> producer) {
         this.sourceEventRepository = sourceEventRepository;
@@ -161,34 +156,45 @@ public class ImportNavIdenter {
     /**
      * Importer ident type fra en ressursfil NIK_identType.txt som inneholder en liste over identer med riktig typer med navident_seq høyere enn 168000.
      */
-    public String importIdentTypeFromResourceFile() {
+    public String importIdentTypeFromResourceFile(final Resource resource) {
         LocalDateTime start = LocalDateTime.now();
+        Map<String, String> identsReadFromFile = readIdentTypeFromResourceFile(resource);
+        int totalIdentUpdated = sendEndreEvents(identsReadFromFile);
+        String result = "Totalt ident importert fra fil %s av %s. Tid brukt: %s".formatted(totalIdentUpdated, identsReadFromFile.size(), durationAsH24(start));
+        log.info(result);
+        return result;
+    }
+
+    public Map<String, String> readIdentTypeFromResourceFile(final Resource resource) {
         Map<String, String> identImportedFromFile = new HashMap<>();
-        int totalIdentUpdated = 0;
         try {
-            Resource resource = resourceLoader.getResource("classpath:NIK_identType.txt");
             File file = resource.getFile();
             Scanner sc = new Scanner(file);
             while (sc.hasNextLine()) {
                 String line = sc.nextLine();
                 String[] kolonner = line.split(",");
                 if (isValidNavIdentWithSequenceLessThan168000(kolonner[0])){
-                    if(eventSourceService.finnesNavIdent(kolonner[0])){
-                        Navident navIdent = eventSourceService.getsNavIdent(kolonner[0]);
-                        if (!navIdent.getIdentType().name().equals(kolonner[1])) {
-                            sendEndreEvent(kolonner[0], kolonner[1]);
-                            totalIdentUpdated++;
-                        }
-                    }
                     identImportedFromFile.put(kolonner[0], kolonner[1]);
-                };
+                }
             }
         } catch (Exception e) {
             log.error("Feil ved import av ident type fra ressursfil", e);
         }
-        String result = "Totalt ident importert fra fil %s av %s. Tid brukt: %s".formatted(totalIdentUpdated, identImportedFromFile.size(), durationAsH24(start));
-        log.info(result);
-        return result;
+        return identImportedFromFile;
+    }
+
+    public int sendEndreEvents(Map<String, String> navIdents) {
+        int totalIdentUpdated = 0;
+        for (Map.Entry<String, String> entry : navIdents.entrySet()) {
+            if(eventSourceService.finnesNavIdent(entry.getKey())){
+                Navident navIdent = eventSourceService.getsNavIdent(entry.getKey());
+                if (!navIdent.getIdentType().name().equals(entry.getValue())) {
+                    sendEndreEvent(entry.getKey(), entry.getValue());
+                    totalIdentUpdated++;
+                }
+            }
+        }
+        return totalIdentUpdated;
     }
 
     private void sendEndreEvent(String navident, String identType) {
