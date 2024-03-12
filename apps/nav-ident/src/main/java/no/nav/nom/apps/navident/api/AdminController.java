@@ -1,5 +1,6 @@
 package no.nav.nom.apps.navident.api;
 
+import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,9 +27,13 @@ public class AdminController {
     public final static String BASE_URL = "/admin";
     private final static Logger logger = LoggerFactory.getLogger(AdminController.class);
     private final ImportNavIdenter importNavIdenter;
+    private final Unleash unleash;
+    public static final String UNLEASH_PRODUSERE_ENDRE_NAV_IDENT_MELDINGER = "nom.nav_ident.enable_edit_topics";
 
-    public AdminController(ImportNavIdenter importNavIdenter) {
+
+    public AdminController(ImportNavIdenter importNavIdenter, Unleash unleash) {
         this.importNavIdenter = importNavIdenter;
+        this.unleash = unleash;
     }
 
     @Operation(
@@ -54,4 +59,17 @@ public class AdminController {
         logger.info("Starter NavIdent innlesning. kunLes={}", kunLes);
         return importNavIdenter.fromBucketObject(bucketObjectName, kunLes);
     }
+
+    @GetMapping("/importerNavIdenterFraResursFil")
+    @PreAuthorize("hasRole('ROLE_${group.id.nom.write}')")
+    public String importIdentTypeFromResourceFile(@RequestParam String bucketObjectName) {
+        logger.info("Starter NavIdent innlesning fra resursfil");
+        if (unleash.isEnabled(UNLEASH_PRODUSERE_ENDRE_NAV_IDENT_MELDINGER))
+            return importNavIdenter.importIdentTypeFromResourceFile();
+        else {
+            return "Feature flag " + UNLEASH_PRODUSERE_ENDRE_NAV_IDENT_MELDINGER + " er ikke aktivert";
+        }
+    }
+
+
 }

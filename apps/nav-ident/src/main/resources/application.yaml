@@ -97,6 +97,11 @@ management:
 server:
   shutdown: graceful
 
+unleash:
+  endpoint:
+    url: ${UNLEASH_SERVER_API_URL}/api
+  api-key: ${UNLEASH_SERVER_API_TOKEN}
+
 ---
 spring:
   config:

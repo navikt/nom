@@ -75,3 +75,7 @@ logging:
           core: INFO
       apache:
         kafka: ERROR
+
+
+UNLEASH_SERVER_API_URL: https://unleash.nais.io/api
+UNLEASH_SERVER_API_TOKEN: some-token

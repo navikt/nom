@@ -1,5 +1,7 @@
 package no.nav.nom.apps.navident.job;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.getunleash.Unleash;
 import lombok.SneakyThrows;
 import no.nav.nom.apps.navident.SpringBootTestBase;
 import no.nav.nom.apps.navident.domain.Navident;
@@ -7,6 +9,7 @@ import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.apps.navident.eventsource.EventSourceService;
 import no.nav.nom.apps.navident.eventsource.SourceEvent;
 import no.nav.nom.apps.navident.eventsource.SourceEventRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,6 +49,15 @@ class ImportNavIdenterTest extends SpringBootTestBase {
 
     @Captor
     ArgumentCaptor<SourceEvent> eventCaptor;
+
+    @MockBean
+    protected Unleash unleash;
+
+    @BeforeEach
+    public void setUp() throws JsonProcessingException {
+        // Always enable features for tests
+        when(unleash.isEnabled(any())).thenReturn(true);
+    }
 
     @Test()
     @SneakyThrows
