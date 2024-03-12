@@ -26,7 +26,7 @@ public class AuthResolver {
             Optional<String> lederNavident = SecurityUtil.getNavIdent(SecurityContextHolder.getContext().getAuthentication());
             return lederNavident.isPresent() && authorizedNavident.kanBrukerRedigereRessurs(lederNavident.get(), navident);
         } else {
-            return false;
+            return true;
         }
     }
 }

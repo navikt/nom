@@ -14,6 +14,7 @@ import java.util.List;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
@@ -42,7 +43,8 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
         String navident = "B110001";
         mockMvc.perform(get(API_URL + "/isAuthorizedFor/" + navident).header("Authorization", "Bearer " + nomWriteUserToken_Leder_C()))
             .andDo(print())
-            .andExpect(status().isForbidden());
+            .andExpect(status().isOk())
+            .andExpect(content().string("false"));
     }
 
     @Test

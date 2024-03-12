@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.api.app;
 
+import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOverlapException;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
@@ -61,6 +62,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @MockBean
     private RemedyEnhetMapperService remedyEnhetMapperService;
 
+    @MockBean
+    private AuthResolver authResolver;
+
     @Captor
     ArgumentCaptor<String> stringArgumentCaptor;
 
@@ -89,6 +93,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     void setInitialLoadCompleteAndEnableUnleashAndClearData() {
         when(ressursStateListener.initloadComplete()).thenReturn(true);
         when(unleash.isEnabled(any())).thenReturn(true);
+        when(authResolver.kanRedigereRessurs(any())).thenReturn(true);
         clearOrgtilknytninger();
         ressursStateRepository.clear();
     }
@@ -433,6 +438,19 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
+    @DisplayName("POST /app/orgtilknytninger/{fid}/dato: Should forbid when user has 'MUTATE_RESSURS' but is not authorized for ressurs")
+    void test_update_orgtilknytning_date_not_authorized() {
+        when(authResolver.kanRedigereRessurs(any())).thenReturn(false);
+
+        var orgtilknytningToUpdate = orgtilknytningState();
+        saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
+
+        postEndreOrgtilknytningDatoRequest(
+            orgtilknytningToUpdate.fid(), nomWriteGroupAndNomUiAzpToken(), endreOrgtilknytningDatoRequest()
+        ).expectStatus().isForbidden();
+    }
+
+    @Test
     @DisplayName("Should update tilknytningtype for orgtilknytning")
     void test_update_orgtilknytning_type() {
 
@@ -493,13 +511,25 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     @Test
     @DisplayName("Should forbid update orgtilknytning type if user does not have granted authority 'MUTATE_RESSURS'")
-    void test_update_orgtilknytning_type_forbidden() {
+    void test_update_orgtilknytning_not_authorized() {
 
         postEndreTilknytningtypeRequest(
             "some-fid",
             noScopesUserToken(),
             endreTilknytningtypeRequest()
         ).expectStatus().isForbidden();
+    }
+
+    @Test
+    @DisplayName("Should forbid update orgtilknytning type if user user has 'MUTATE_RESSURS' but is not authorized for ressurs")
+    void test_update_orgtilknytning_type_forbidden() {
+        when(authResolver.kanRedigereRessurs(any())).thenReturn(false);
+
+        var orgtilknytningToUpdate = orgtilknytningState();
+        saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
+
+        postEndreTilknytningtypeRequest(orgtilknytningToUpdate.fid(), nomWriteGroupAndNomUiAzpToken(),endreTilknytningtypeRequest())
+            .expectStatus().isForbidden();
     }
 
     @ParameterizedTest(name = "POST /app/orgtilknytninger: Should add new orgtilknytning with erDagligOppfolging = {0}")
@@ -900,6 +930,22 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         );
     }
 
+    @Test
+    @DisplayName("POST /app/orgtilknytninger Should forbid update orgtilknytning type if user user has 'MUTATE_RESSURS' but is not authorized for ressurs")
+    void test_update_orgtilknytninger_forbidden() {
+        when(authResolver.kanRedigereRessurs(any())).thenReturn(false);
+
+        var orgenhet = orgEnhetState();
+        saveOrgenheter(List.of(orgenhet));
+
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequestOld().toBuilder()
+            .navident("Y654321")
+            .orgEnhetId(orgenhet.id())
+            .build();
+
+        postLeggTilOrgtilknytningRequest(nomWriteGroupAndNomUiAzpToken(), leggTilOrgtilknytningRequest)
+            .expectStatus().isForbidden();
+    }
 
     @Test
     @DisplayName("Should get orgtilknytning for fid")
@@ -1191,6 +1237,37 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .tilknytningtype(Optional.ofNullable(leggTilDagligOppfolgingOrgtilknytningWithTilknytningtypeRequest.tilknytningtype()))
                 .build()
             );
+    }
+
+    @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} Should forbid update orgtilknytning type if user user has 'MUTATE_RESSURS' but is not authorized for ressurs")
+    void test_update_orgtilknytninger_for_ressurs_forbidden() {
+        when(authResolver.kanRedigereRessurs(any())).thenReturn(false);
+
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .build();
+
+        saveOrgtilknytninger(List.of(existingOrgtilknytning));
+
+        var leggTilDagligOppfolgingOrgtilknytningWithTilknytningtypeRequest = leggTilOrgtilknytningRequest().toBuilder()
+            .erDagligOppfolging(true)
+            .tilknytningtype(Tilknytningtype.KONSULENT)
+            .build();
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(Collections.emptyList())
+            .nyeOrgtilknytninger(List.of(leggTilDagligOppfolgingOrgtilknytningWithTilknytningtypeRequest))
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(tilknyttetRessurs.navident(),nomWriteGroupAndNomUiAzpToken(),oppdaterOrgtilknytningerForRessursRequest)
+            .expectStatus().isForbidden();
     }
 
     @ParameterizedTest(name = "{0}")

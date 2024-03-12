@@ -49,10 +49,8 @@ public class AuthorizedNavidentController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @GetMapping("isAuthorizedFor/{navident}")
-    void isAuthorizedFor(@PathVariable String navident) {
-        if (!authResolver.kanRedigereRessurs(navident)) {
-            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
-        }
+    boolean isAuthorizedFor(@PathVariable String navident) {
+        return authResolver.kanRedigereRessurs(navident);
     }
 
     @Operation(
