@@ -236,7 +236,7 @@ app:
         scopes: ["MUTATE_RESSURS", "QUERY_PERSON"]
       nom-admin:
         group-id: "${NOM_ADMIN_GROUPID}"
-        scopes: ["ADMIN", "QUERY_PERSON"]
+        scopes: ["ADMIN", "MUTATE_RESSURS"]
   orgenhet:
     linjeenhetene: me177r,su645c,hu797w,tu734a
   clients:
@@ -295,7 +295,7 @@ app:
         scopes: ["MUTATE_RESSURS"]
       nom-admin:
         group-id: "${NOM_ADMIN_GROUPID}"
-        scopes: ["ADMIN"]
+        scopes: ["ADMIN", "MUTATE_RESSURS"]
   orgenhet:
     linjeenhetene: ry630r,ky110z,se232x,ne994m
 

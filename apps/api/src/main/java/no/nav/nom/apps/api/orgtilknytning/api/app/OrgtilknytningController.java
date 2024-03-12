@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 
+import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
@@ -48,10 +49,12 @@ public class OrgtilknytningController {
 
     private final Unleash unleash;
     private final OrgtilknytningRestService orgtilknytningRestService;
+    private final AuthResolver authResolver;
 
-    public OrgtilknytningController(Unleash unleash, OrgtilknytningRestService orgtilknytningRestService) {
+    public OrgtilknytningController(Unleash unleash, OrgtilknytningRestService orgtilknytningRestService, AuthResolver authResolver) {
         this.unleash = unleash;
         this.orgtilknytningRestService = orgtilknytningRestService;
+        this.authResolver = authResolver;
     }
 
     @GetMapping()
@@ -84,6 +87,10 @@ public class OrgtilknytningController {
     public ResponseEntity<StandardResponse> addOrgtilknytning(
         @RequestBody LeggTilOrgtilknytningRequestOld leggTilOrgtilknytningRequest
     ) {
+        if (!authResolver.kanRedigereRessurs(leggTilOrgtilknytningRequest.navident())) {
+            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
+        }
+
         if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
             orgtilknytningRestService.addOrgtilknyting(leggTilOrgtilknytningRequest);
 
@@ -108,6 +115,10 @@ public class OrgtilknytningController {
         @PathVariable String fid,
         @RequestBody EndreOrgtilknytningDatoRequest endreOrgtilknytningDatoRequest
     ) {
+        if (!authResolver.kanRedigereRessurs(orgtilknytningRestService.getOrgtilknytning(fid).navident())) {
+            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
+        }
+
         if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
             orgtilknytningRestService.updateOrgtilknytingDato(fid, endreOrgtilknytningDatoRequest);
 
@@ -132,6 +143,10 @@ public class OrgtilknytningController {
         @PathVariable String fid,
         @RequestBody EndreTilknytningtypeRequest endreTilknytningtypeRequest
     ) {
+        if (!authResolver.kanRedigereRessurs(orgtilknytningRestService.getOrgtilknytning(fid).navident())) {
+            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
+        }
+
         if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
             orgtilknytningRestService.updateOrgtilknytningType(fid, endreTilknytningtypeRequest);
 
@@ -172,6 +187,10 @@ public class OrgtilknytningController {
         @PathVariable String navident,
         @Valid @RequestBody OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest
     ) {
+        if (!authResolver.kanRedigereRessurs(navident)) {
+            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
+        }
+
         if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
             orgtilknytningRestService.oppdaterOrgtilknytningerForRessurs(navident, oppdaterOrgtilknytningerForRessursRequest);
 

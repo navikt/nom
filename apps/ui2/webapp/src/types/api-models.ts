@@ -27,6 +27,16 @@ export interface EndreOrgtilknytningDatoRequest {
   setRessursSluttdato?: boolean;
 }
 
+export interface EndreOrgtilknytningRequest {
+  erDagligOppfolging: boolean;
+  fid: string;
+  /** @format date */
+  gyldigFom: string;
+  /** @format date */
+  gyldigTom?: string;
+  tilknytningtype?: Tilknytningtype;
+}
+
 export interface EndreTilknytningtypeRequest {
   tilknytningtype?: Tilknytningtype;
 }
@@ -42,6 +52,16 @@ export interface GetPersonRequest {
 export type JsonNode = object;
 
 export interface LeggTilOrgtilknytningRequest {
+  erDagligOppfolging: boolean;
+  /** @format date */
+  gyldigFom: string;
+  /** @format date */
+  gyldigTom?: string;
+  orgEnhetId: string;
+  orgtilknytningType?: Tilknytningtype;
+}
+
+export interface LeggTilOrgtilknytningRequestOld {
   erDagligOppfolging?: boolean;
   /** @format date */
   gyldigFom: string;
@@ -56,6 +76,13 @@ export enum NomNivaa {
   LINJEENHET = "LINJEENHET",
   DRIFTSENHET = "DRIFTSENHET",
   ARBEIDSOMRAADE = "ARBEIDSOMRAADE",
+}
+
+export interface OppdaterOrgtilknytningerForRessursRequest {
+  endredeOrgtilknytninger: EndreOrgtilknytningRequest[];
+  nyeOrgtilknytninger: LeggTilOrgtilknytningRequest[];
+  setRessursSluttdato: boolean;
+  setRessursStartdato: boolean;
 }
 
 export interface OpprettRessursRequest {
@@ -229,6 +256,7 @@ export enum TelefonType {
 
 export enum Tilknytningtype {
   KONSULENT = "KONSULENT",
+  EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER"
 }
 
 export interface UpdateFysiskeBrukerstederRequest {
