@@ -9,23 +9,29 @@ import com.google.cloud.storage.StorageOptions;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.navident.common.LogConfig;
+import no.nav.nom.apps.navident.domain.Navident;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.apps.navident.eventsource.EventPayload;
 import no.nav.nom.apps.navident.eventsource.EventSourceService;
 import no.nav.nom.apps.navident.eventsource.EventType;
 import no.nav.nom.apps.navident.eventsource.SourceEvent;
 import no.nav.nom.apps.navident.eventsource.SourceEventRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.nio.channels.Channels;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 @Service
 @Slf4j
@@ -44,6 +50,9 @@ public class ImportNavIdenter {
 
     private Map<String, String> importerteNavIdenter;
     private int skippedLines = 0;
+
+    @Autowired
+    ResourceLoader resourceLoader;
 
     public ImportNavIdenter(SourceEventRepository sourceEventRepository, EventSourceService eventSourceService, KafkaTemplate<String, SourceEvent> producer) {
         this.sourceEventRepository = sourceEventRepository;
@@ -147,6 +156,59 @@ public class ImportNavIdenter {
             log.debug(LogConfig.SECURE_LOGS, "Persisted SourceEvent posted: %s".formatted(sourceEvent.maskedToString()));
         }
     }
+
+
+    /**
+     * Importer ident type fra en ressursfil NIK_identType.txt som inneholder en liste over identer med riktig typer med navident_seq høyere enn 168000.
+     */
+    public String importIdentTypeFromResourceFile() {
+        LocalDateTime start = LocalDateTime.now();
+        Map<String, String> identImportedFromFile = new HashMap<>();
+        int totalIdentUpdated = 0;
+        try {
+            Resource resource = resourceLoader.getResource("classpath:NIK_identType.txt");
+            File file = resource.getFile();
+            Scanner sc = new Scanner(file);
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine();
+                String[] kolonner = line.split(",");
+                if (isValidNavIdentWithSequenceLessThan168000(kolonner[0])){
+                    if(eventSourceService.finnesNavIdent(kolonner[0])){
+                        Navident navIdent = eventSourceService.getsNavIdent(kolonner[0]);
+                        if (!navIdent.getIdentType().name().equals(kolonner[1])) {
+                            sendEndreEvent(kolonner[0], kolonner[1]);
+                            totalIdentUpdated++;
+                        }
+                    }
+                    identImportedFromFile.put(kolonner[0], kolonner[1]);
+                };
+            }
+        } catch (Exception e) {
+            log.error("Feil ved import av ident type fra ressursfil", e);
+        }
+        String result = "Totalt ident importert fra fil %s av %s. Tid brukt: %s".formatted(totalIdentUpdated, identImportedFromFile.size(), durationAsH24(start));
+        log.info(result);
+        return result;
+    }
+
+    private void sendEndreEvent(String navident, String identType) {
+        SourceEvent sourceEvent = SourceEvent.builder()
+                .event(EventType.ENDRE)
+                .payload(
+                        EventPayload.builder()
+                                .navident(navident)
+                                .identType(IdentType.valueOf(identType))
+                                .build()
+                ).build();
+        sourceEventRepository.save(sourceEvent);
+        producer.send(eventSourceTopic, sourceEvent);
+        log.debug(LogConfig.SECURE_LOGS, "Persisted SourceEvent posted: %s".formatted(sourceEvent.maskedToString()));
+    }
+
+    public boolean isValidNavIdentWithSequenceLessThan168000(String navIdent) {
+        return navIdent.length() == 7 && Integer.parseInt(navIdent.substring(1)) < 168000;
+    }
+
 
     private IdentType parse(String identType) {
         switch (identType) {

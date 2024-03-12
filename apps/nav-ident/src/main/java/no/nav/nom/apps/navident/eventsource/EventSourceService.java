@@ -40,8 +40,9 @@ public class EventSourceService {
         try {
             // Update domain model with sourced event
             switch (event.event) {
-                case OPPRETT -> handleCreateEvent(event);   // Knytning lages mellom personid og navident
-                case SLETT -> handleDeleteEvent(event);     // Knytning skal slettes og navident vil ikke være tilgjengelig mer i senere bestillinger. Administrativ funksjon
+                case OPPRETT -> handleCreateEvent(event); // Knytning lages mellom personid og navident
+                case ENDRE -> handleChangeEvent(event); // Knytning endres navident type
+                case SLETT -> handleDeleteEvent(event);  // Knytning skal slettes og navident vil ikke være tilgjengelig mer i senere bestillinger. Administrativ funksjon
                 default -> log.error("Unknown event type %s".formatted(event.event));
             }
         } catch (IllegalSourceEventException e) {
@@ -93,6 +94,10 @@ public class EventSourceService {
         log.debug(ident.maskedToString());
     }
 
+    private void handleChangeEvent(SourceEvent event) {
+
+    }
+
     private void handleDeleteEvent(SourceEvent event) {
         String navident = event.payload.navident;
         if (!navidenter.containsKey(navident)) {
@@ -117,5 +122,9 @@ public class EventSourceService {
 
     public boolean finnesNavIdent(String navIdent) {
         return navidenter.containsKey(navIdent);
+    }
+
+    public Navident getsNavIdent(String navIdent) {
+        return navidenter.get(navIdent);
     }
 }

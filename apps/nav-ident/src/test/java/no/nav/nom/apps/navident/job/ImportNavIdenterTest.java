@@ -2,6 +2,7 @@ package no.nav.nom.apps.navident.job;
 
 import lombok.SneakyThrows;
 import no.nav.nom.apps.navident.SpringBootTestBase;
+import no.nav.nom.apps.navident.domain.Navident;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.apps.navident.eventsource.EventSourceService;
 import no.nav.nom.apps.navident.eventsource.SourceEvent;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -23,6 +25,7 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -133,6 +136,63 @@ A867804,HAE4403,Horisontal,Abakus,27469208996,4403,NAV ARBEID OG YTELSER KRISTIA
         verify(sourceEventRepository, times(25107)).save(any());
 
         assertTrue(res.startsWith("Totalt importert 25107 av 124461"), res);
+    }
+
+    @Test
+    @DisplayName("Test import all navident from a resource file. ")
+    void importAllIdentTypeFromResourceFile () {
+        when(eventSourceService.finnesNavIdent(any())).thenReturn(true);
+        when(eventSourceService.getsNavIdent(anyString())).thenAnswer((Answer<Navident>) invocationOnMock -> {
+            Object[] args = invocationOnMock.getArguments();
+            //mocking Navident that already exists and with standard ident type
+            return Navident.builder().navident((String) args[0]).identType(IdentType.STANDARD).build();
+        });
+
+        String res = importNavIdenter.importIdentTypeFromResourceFile();
+        assertTrue(res.startsWith("Totalt ident importert fra fil 592 av 592."), res);
+
+        verify(producer, times(592)).send(any(), any());
+        verify(sourceEventRepository, times(592)).save(any());
+    }
+
+    @Test
+    @DisplayName("Test do not import navident from a resource file. ")
+    void importNoneIdentTypeFromResourceFile () {
+        when(eventSourceService.finnesNavIdent(any())).thenReturn(false);
+        String res = importNavIdenter.importIdentTypeFromResourceFile();
+        assertTrue(res.startsWith("Totalt ident importert fra fil 0 av 592."), res);
+        verify(producer, times(0)).send(any(), any());
+        verify(sourceEventRepository, times(0)).save(any());
+    }
+
+    @Test
+    @DisplayName("Test import some navident from a resource file. ")
+    void importSomeIdentTypeFromResourceFile () {
+        when(eventSourceService.finnesNavIdent(any())).thenReturn(true);
+        when(eventSourceService.getsNavIdent(anyString())).thenAnswer((Answer<Navident>) invocationOnMock -> {
+            Object[] args = invocationOnMock.getArguments();
+            //mocking such that Navident that starts with *11 as unknown ident type
+            IdentType identType = (((String) args[0]).substring(1).startsWith("11"))? IdentType.UKJENT : IdentType.STANDARD;
+            return Navident.builder().navident((String) args[0]).identType(identType).build();
+        });
+
+        String res = importNavIdenter.importIdentTypeFromResourceFile();
+        assertTrue(res.startsWith("Totalt ident importert fra fil 589 av 592."), res);
+        verify(producer, times(589)).send(any(), any());
+        verify(sourceEventRepository, times(589)).save(any());
+    }
+
+    @Test
+    @DisplayName("Test that navident is valid")
+    void test_isValidNavIdentWithSequenceLessThan168000 () {
+        String valid_navident_1 = "A123456";
+        String invalid_navident_1 = "";
+        String invalid_navident_2 = "123456";
+        String valid_navident_but_sequence_higherthan_168000 = "A223456";
+        assertTrue(importNavIdenter.isValidNavIdentWithSequenceLessThan168000(valid_navident_1));
+        assertFalse(importNavIdenter.isValidNavIdentWithSequenceLessThan168000(invalid_navident_1));
+        assertFalse(importNavIdenter.isValidNavIdentWithSequenceLessThan168000(invalid_navident_2));
+        assertFalse(importNavIdenter.isValidNavIdentWithSequenceLessThan168000(valid_navident_but_sequence_higherthan_168000));
     }
 
 }
