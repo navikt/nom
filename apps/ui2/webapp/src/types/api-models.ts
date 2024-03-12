@@ -256,6 +256,7 @@ export enum TelefonType {
 
 export enum Tilknytningtype {
   KONSULENT = "KONSULENT",
+  EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER"
 }
 
 export interface UpdateFysiskeBrukerstederRequest {

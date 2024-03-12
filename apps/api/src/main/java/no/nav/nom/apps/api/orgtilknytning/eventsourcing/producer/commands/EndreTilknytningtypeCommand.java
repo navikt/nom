@@ -7,7 +7,7 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import java.util.Optional;
 
 @Builder(toBuilder = true)
-public record EndreTilknytningtype(
+public record EndreTilknytningtypeCommand(
     String fid,
     Optional<Tilknytningtype> tilknytningtype,
     InputMetadata inputMetadata

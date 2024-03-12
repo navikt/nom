@@ -23,6 +23,6 @@ public record LeggTilOrgtilknytningRequest(
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     LocalDate gyldigTom,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    Tilknytningtype orgtilknytningType
+    Tilknytningtype tilknytningtype
 ) {
 }

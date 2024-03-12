@@ -8,7 +8,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 public record OppdaterOrgtilknytningerForRessursRequest(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<LeggTilOrgtilknytningRequest> nyeOrgtilknytninger,
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<EndreOrgtilknytningRequest> endredeOrgtilknytninger,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<EndreOrgtilknytningRequest> eksisterendeOrgtilknytninger,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Boolean setRessursSluttdato,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Boolean setRessursStartdato
 ) { }

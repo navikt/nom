@@ -20,6 +20,7 @@ export const SektorNameMapping = {
 
 export const TilknytningtypeNameMapping = {
   [Tilknytningtype.KONSULENT]: "Konsulent (standard)",
+  [Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER]: "Ekstern samarbeidspartner",
 };
 
 export function SektorStep() {
