@@ -82,6 +82,20 @@ public class AuthorizedNavident {
         return orgenhetIder.stream().anyMatch(orgenhetId -> erRessursInnunderOrgenhet(ressursNavident, orgenhetId));
     }
 
+    // TODO: Lag tester for denne
+    public boolean kanBrukerOppretteRessurs(String navident, String opprettesIOrgenhetId) {
+        Set<String> orgenhetIder = new HashSet<>();
+        synchronized (this) {
+            var orgenheter = lederForOrgenhet.get(navident);
+            if (orgenheter != null) {
+                orgenhetIder.addAll(orgenheter);
+            }
+        }
+
+        orgenhetIder.addAll(delegertLederStateRepository.aktiveDelegeringerForOrgenheterTilNavident(navident));
+        return orgenhetIder.stream().anyMatch(orgenhetId -> alleEnheterIHierarkiFra(orgenhetId).contains(opprettesIOrgenhetId));
+    }
+
     public boolean addDelegertLederRolleForOrgenhet(String leder, String delegertLeder, String orgenhetId) {
         var inputMetadata = new InputMetadata("AuthorizedNavident", "addDelegertLederRolleForOrgenhet",
             Map.of("leder", leder, "delegertLeder", delegertLeder, "orgenhetId", orgenhetId),

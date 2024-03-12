@@ -29,4 +29,14 @@ public class AuthResolver {
             return true;
         }
     }
+
+    public boolean kanOppretteRessurs(String orgenhetId) {
+        if (unleash.isEnabled(UNLEASH_REDIGERE_RESSURS_BRUK_NY_AUTH_RESOLVER)) {
+            Optional<String> lederNavident = SecurityUtil.getNavIdent(SecurityContextHolder.getContext().getAuthentication());
+            return orgenhetId != null && lederNavident.isPresent() && authorizedNavident.kanBrukerOppretteRessurs(lederNavident.get(), orgenhetId);
+        } else {
+            return true;
+        }
+    }
+
 }
