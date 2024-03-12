@@ -2,8 +2,9 @@ import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Alert, BodyShort, Loader, TextField } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
-import { Navigate, useNavigate, useSearch } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -40,6 +41,23 @@ function CreateResourceForm({ personident }: { personident: string }) {
     retry: false,
   });
 
+  const navigate = useNavigate();
+
+  const person = hentPersonQuery.data;
+
+  useEffect(() => {
+    if (person?.navident) {
+      navigate({
+        to: "/ressurs/create/$step",
+        params: { step: "2" },
+        search: (oldSearch) => ({
+          ...oldSearch,
+          navident: person.navident,
+        }),
+      });
+    }
+  }, [person?.navident, navigate]);
+
   if (hentPersonQuery.isLoading) {
     return (
       <Loader
@@ -62,22 +80,15 @@ function CreateResourceForm({ personident }: { personident: string }) {
     );
   }
 
-  const person = hentPersonQuery.data;
-
-  if (person?.navident) {
-    return (
-      <Navigate
-        params={{ id: person.navident }}
-        replace
-        search={{ alreadyExists: true }}
-        to="/ressurs/$id"
-      />
-    );
-  }
-
   if (person) {
     return (
       <>
+        {person?.navident && (
+          <Alert variant="info">
+            Medarbeideren har jobbet i NAV tidligere og vil beholde sin
+            tidligere NAV-ident <b>{person.navident}</b>
+          </Alert>
+        )}
         <FolkeregisterPersonInfo
           folkeregisterPerson={person.folkeregisterPerson}
         />

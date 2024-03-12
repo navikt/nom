@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { ExternalLinkIcon } from "@navikt/aksel-icons";
+import { CheckmarkCircleFillIcon, ExternalLinkIcon } from "@navikt/aksel-icons";
 import { Alert, BodyShort, Button, Link, Loader } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink, useSearch } from "@tanstack/react-router";
@@ -50,7 +50,18 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
   return (
     <ContainerWithHighlightedTop
       icon={opprettRessursIcon}
-      title="Medarbeideren er nå registrert i NOM"
+      title={
+        <>
+          <CheckmarkCircleFillIcon
+            css={css`
+              color: var(--a-surface-success-hover);
+              font-size: var(--a-spacing-8);
+            `}
+            title="a11y-title"
+          />{" "}
+          Medarbeideren er nå registrert i NOM
+        </>
+      }
     >
       <ReceiptRessurs ressurs={ressurs} />
       {ressurs.sektor === Sektor.NAV_STATLIG ? (
