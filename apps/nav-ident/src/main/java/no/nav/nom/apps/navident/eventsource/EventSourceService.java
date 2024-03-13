@@ -95,7 +95,13 @@ public class EventSourceService {
     }
 
     private void handleChangeEvent(SourceEvent event) {
-
+        String navident = event.payload.navident;
+        if (!navidenter.containsKey(navident)) {
+            throw new IllegalSourceEventException("Finner ingen NavIdent %s. Kan ikke behandle ENDRE SourceEvent", navident);
+        }
+        Navident ident = navidenter.get(navident);
+        ident.setIdentType(event.payload.identType);
+        log.debug("Oppdatert identTye for {}", ident.maskedToString());
     }
 
     private void handleDeleteEvent(SourceEvent event) {
