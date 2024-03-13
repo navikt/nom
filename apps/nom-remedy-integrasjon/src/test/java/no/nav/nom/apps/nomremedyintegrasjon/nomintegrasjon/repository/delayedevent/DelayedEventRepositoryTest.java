@@ -71,8 +71,8 @@ public class DelayedEventRepositoryTest extends TestBase {
 
         assertThat(delayedEventRepository.findAll()).hasSize(3);
 
-        assertThat(delayedEventRepository.findByDelayedUntilBefore(today))
-            .hasSize(1)
-            .allMatch(delayedEvent -> delayedEvent.getDelayedUntil().isBefore(today));
+        assertThat(delayedEventRepository.findByDelayedUntilLessThanEqual(today))
+            .hasSize(2)
+            .allMatch(delayedEvent -> delayedEvent.getDelayedUntil().isBefore(today) || delayedEvent.getDelayedUntil().isEqual(today));
     }
 }

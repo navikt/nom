@@ -128,7 +128,7 @@ public class NomIntegrasjonService {
 
             delayEventUpdate(
                 orgtilknytningDagligOppfolgingEndretEventV1,
-                orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom());
+                orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom().minusDays(1));
         } else {
             updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
         }
@@ -142,6 +142,31 @@ public class NomIntegrasjonService {
                 orgtilknytningDatoEndretEventV2,
                 orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom());
         } else {
+            updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
+        }
+    }
+
+    private void handleDelayedOrgtiknytning(OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
+        logger.info("Handling delayed update of OrgtilknytningDagligOppfolgingEndretEventV1 with fid {}", orgtilknytningDagligOppfolgingEndretEventV1.getFid());
+
+        var orgtilknytningDolEventData = orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData();
+        var orgtilknytningState = nomApiClient.getOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1.getFid());
+
+        if (orgtilknytningState.getErDagligOppfolging() &&
+            orgtilknytningDolEventData.gyldigFom().equals(orgtilknytningState.getGyldigFom()) &&
+            orgtilknytningDolEventData.gyldigTom().equals(Optional.of(orgtilknytningState.getGyldigTom()))) {
+            updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
+        }
+    }
+
+    private void handleDelayedOrgtiknytning(OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
+        logger.info("Handling delayed update of OrgtilknytningDatoEndretEventV2 with fid {}", orgtilknytningDatoEndretEventV2.getFid());
+
+        var orgtilknytningEventData = orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData();
+        var orgtilknytningState = nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid());
+
+        if (orgtilknytningEventData.gyldigFom().equals(orgtilknytningState.getGyldigFom()) &&
+            orgtilknytningEventData.gyldigTom().equals(Optional.of(orgtilknytningState.getGyldigTom()))) {
             updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
         }
     }
@@ -316,8 +341,9 @@ public class NomIntegrasjonService {
     }
 
     protected void triggerDelayedEvents() {
+        var all = delayedEventRepository.findAll();
 
-        var delayedEventsReadyForHandling = delayedEventRepository.findByDelayedUntilBefore(LocalDate.now());
+        var delayedEventsReadyForHandling = delayedEventRepository.findByDelayedUntilLessThanEqual(LocalDate.now());
 
         delayedEventsReadyForHandling.forEach(this::handleDelayedEvent);
 
@@ -331,9 +357,9 @@ public class NomIntegrasjonService {
         } else if (nomEvent instanceof RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
             handleDelayedRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
         } else if (nomEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
-            updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
+            handleDelayedOrgtiknytning(orgtilknytningDagligOppfolgingEndretEventV1);
         } else if (nomEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
-            updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
+            handleDelayedOrgtiknytning(orgtilknytningDatoEndretEventV2);
         }
 
         delayedEventRepository.deleteById(delayedEvent.getDelayedEventId());

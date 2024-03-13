@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface DelayedEventRepository extends JpaRepository<DelayedEvent, UUID> {
 
     List<DelayedEvent> findByDelayedUntilBefore(LocalDate localDate);
+
+    List<DelayedEvent> findByDelayedUntilLessThanEqual(LocalDate localDate);
 }
