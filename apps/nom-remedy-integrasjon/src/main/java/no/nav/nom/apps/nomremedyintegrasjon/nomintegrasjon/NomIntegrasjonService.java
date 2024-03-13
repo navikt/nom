@@ -165,7 +165,8 @@ public class NomIntegrasjonService {
         var orgtilknytningEventData = orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData();
         var orgtilknytningState = nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid());
 
-        if (orgtilknytningEventData.gyldigFom().equals(orgtilknytningState.getGyldigFom()) &&
+        if (orgtilknytningState.getErDagligOppfolging() &&
+            orgtilknytningEventData.gyldigFom().equals(orgtilknytningState.getGyldigFom()) &&
             orgtilknytningEventData.gyldigTom().equals(Optional.of(orgtilknytningState.getGyldigTom()))) {
             updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
         }
