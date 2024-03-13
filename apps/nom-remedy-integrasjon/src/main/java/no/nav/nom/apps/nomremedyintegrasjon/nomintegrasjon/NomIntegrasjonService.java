@@ -341,8 +341,6 @@ public class NomIntegrasjonService {
     }
 
     protected void triggerDelayedEvents() {
-        var all = delayedEventRepository.findAll();
-
         var delayedEventsReadyForHandling = delayedEventRepository.findByDelayedUntilLessThanEqual(LocalDate.now());
 
         delayedEventsReadyForHandling.forEach(this::handleDelayedEvent);
