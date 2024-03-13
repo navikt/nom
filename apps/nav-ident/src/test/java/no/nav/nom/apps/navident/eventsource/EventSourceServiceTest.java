@@ -23,6 +23,9 @@ class EventSourceServiceTest extends EmbeddedKafkaTestBase {
     @Value("${test.topic}")  private String topic;
 
 
+    @Autowired
+    private EventSourceService eventSourceService;
+
     @BeforeEach
     public void resetDomain() {
         navidenter.clear();
@@ -98,6 +101,20 @@ class EventSourceServiceTest extends EmbeddedKafkaTestBase {
 
     }
 
+    @Test
+    public void endreNavIdentTypeTest() {
+        String navIdent = "A000001";
+        String personid = "01019900001";
+        String newIdentType = "VIKAFOSSEN";
+        SourceEvent event = getOpprettEvent(navIdent, personid);
+        SourceEvent event2 = getEndreEvent(navIdent, newIdentType);
+
+        eventSourceService.handleCreateEvent(event);
+        assertEquals(eventSourceService.getsNavIdent(navIdent).getIdentType(), IdentType.STANDARD);
+        eventSourceService.handleChangeEvent(event2);
+        assertEquals(eventSourceService.getsNavIdent(navIdent).getIdentType(), IdentType.valueOf(newIdentType));
+    }
+
     private SourceEvent getOpprettEvent(String navid, String personid) {
         return SourceEvent.builder()
                 .bestiller("Test-bestiller")
@@ -110,4 +127,16 @@ class EventSourceServiceTest extends EmbeddedKafkaTestBase {
                                 .personid(personid)
                                 .build()
                 ).build();}
+
+    private SourceEvent getEndreEvent(String navid, String identType) {
+        return SourceEvent.builder()
+            .bestiller("Test-bestiller")
+            .event(EventType.ENDRE)
+            .eventTS(LocalDateTime.now())
+            .payload(
+                EventPayload.builder()
+                    .navident(navid)
+                    .identType(IdentType.valueOf(identType))
+                    .build()
+            ).build();}
 }
