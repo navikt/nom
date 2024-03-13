@@ -128,7 +128,7 @@ public class NomIntegrasjonService {
 
             delayEventUpdate(
                 orgtilknytningDagligOppfolgingEndretEventV1,
-                orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom().minusDays(1));
+                orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom());
         } else {
             updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
         }
