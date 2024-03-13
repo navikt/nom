@@ -33,8 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  *  Denne tjenesten inneholder alle som har til å redigere ressurser under gitt orgenhet i hierarkiet.
  *  Alle ledere på en enhet fra og med 'Arbeidsområde' type og nedover har tilgang for ressurser som har en tilknytning til en av disse enhetene og nedover.
- *  TODO: Må vurdere om det gjelder for aktive orgtilknytninger etc. i forhold til bruksmønster på endring hvor ressursen går fra en enhet til en annen
- *      --> Per nå sjekker den at orgtilknytning isCurrentOrFuturePeriod
+ *  Per nå sjekker den at orgtilknytning isCurrentOrFuturePeriod
  *
  *  Disse samme lederne har også mulighet til å gi andre ansatte tilgang til å redigere ressurser på samme orgenhet eller er valgt nivå under der igjen
  *  Disse tildelte rettighetene ka bestå også etter lederbytte, men må revideres på jevnlig basis. (Bekreftes på nytt, hvis ikke vil tilgangen tas vekk)
@@ -82,8 +81,11 @@ public class AuthorizedNavident {
         return orgenhetIder.stream().anyMatch(orgenhetId -> erRessursInnunderOrgenhet(ressursNavident, orgenhetId));
     }
 
-    // TODO: Lag tester for denne
     public boolean kanBrukerOppretteRessurs(String navident, String opprettesIOrgenhetId) {
+        if (opprettesIOrgenhetId == null) {
+            return false;
+        }
+
         Set<String> orgenhetIder = new HashSet<>();
         synchronized (this) {
             var orgenheter = lederForOrgenhet.get(navident);
