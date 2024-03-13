@@ -41,6 +41,9 @@ public class ImportNavIdenter {
     private String gsProjectId;
     @Value("${app.kafka.topic.eventsource.name}")
     private String eventSourceTopic;
+    @Value("${app.navident.sequence}")
+    private int navidentSequence;
+
     private final SourceEventRepository sourceEventRepository;
     private final EventSourceService eventSourceService;
 
@@ -173,7 +176,7 @@ public class ImportNavIdenter {
             while (sc.hasNextLine()) {
                 String line = sc.nextLine();
                 String[] kolonner = line.split(",");
-                if (isValidNavIdentWithSequenceLessThan168000(kolonner[0])){
+                if (isValidNavIdentAndHasValidSequenceNumber(kolonner[0])){
                     identImportedFromFile.put(kolonner[0], kolonner[1]);
                 }
             }
@@ -189,7 +192,7 @@ public class ImportNavIdenter {
             if(eventSourceService.finnesNavIdent(entry.getKey())){
                 Navident navIdent = eventSourceService.getsNavIdent(entry.getKey());
                 if (!navIdent.getIdentType().name().equals(entry.getValue())) {
-                    sendEndreEvent(entry.getKey(), entry.getValue());
+                    sendEndreEvent(navIdent, entry.getValue());
                     totalIdentUpdated++;
                 }
             }
@@ -197,12 +200,13 @@ public class ImportNavIdenter {
         return totalIdentUpdated;
     }
 
-    private void sendEndreEvent(String navident, String identType) {
+    private void sendEndreEvent(Navident navIdent, String identType) {
         SourceEvent sourceEvent = SourceEvent.builder()
                 .event(EventType.ENDRE)
                 .payload(
                         EventPayload.builder()
-                                .navident(navident)
+                                .navident(navIdent.getNavident())
+                                .personid(navIdent.getGjeldendePersonid())
                                 .identType(IdentType.valueOf(identType))
                                 .build()
                 ).build();
@@ -211,8 +215,8 @@ public class ImportNavIdenter {
         log.debug(LogConfig.SECURE_LOGS, "Persisted SourceEvent posted: %s".formatted(sourceEvent.maskedToString()));
     }
 
-    public boolean isValidNavIdentWithSequenceLessThan168000(String navIdent) {
-        return navIdent.length() == 7 && Integer.parseInt(navIdent.substring(1)) < 168000;
+    public boolean isValidNavIdentAndHasValidSequenceNumber(String navIdent) {
+        return navIdent.length() == 7 && Integer.parseInt(navIdent.substring(1)) < navidentSequence;
     }
 
 

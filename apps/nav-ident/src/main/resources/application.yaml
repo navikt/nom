@@ -17,6 +17,8 @@ app:
     timeoutInMillis: 2500
   redis:
     rnrClientTokenCacheName: rnrClientTokenCache
+  navident:
+    sequence:  ${NAVIDENT_SEQUENCE:168000}
 
 authentication:
   aad:

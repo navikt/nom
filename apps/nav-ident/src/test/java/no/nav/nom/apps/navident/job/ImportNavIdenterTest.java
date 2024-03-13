@@ -202,10 +202,10 @@ A867804,HAE4403,Horisontal,Abakus,27469208996,4403,NAV ARBEID OG YTELSER KRISTIA
         String invalid_navident_1 = "";
         String invalid_navident_2 = "123456";
         String valid_navident_but_sequence_higherthan_168000 = "A223456";
-        assertTrue(importNavIdenter.isValidNavIdentWithSequenceLessThan168000(valid_navident_1));
-        assertFalse(importNavIdenter.isValidNavIdentWithSequenceLessThan168000(invalid_navident_1));
-        assertFalse(importNavIdenter.isValidNavIdentWithSequenceLessThan168000(invalid_navident_2));
-        assertFalse(importNavIdenter.isValidNavIdentWithSequenceLessThan168000(valid_navident_but_sequence_higherthan_168000));
+        assertTrue(importNavIdenter.isValidNavIdentAndHasValidSequenceNumber(valid_navident_1));
+        assertFalse(importNavIdenter.isValidNavIdentAndHasValidSequenceNumber(invalid_navident_1));
+        assertFalse(importNavIdenter.isValidNavIdentAndHasValidSequenceNumber(invalid_navident_2));
+        assertFalse(importNavIdenter.isValidNavIdentAndHasValidSequenceNumber(valid_navident_but_sequence_higherthan_168000));
     }
 
 }
