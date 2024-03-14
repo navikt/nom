@@ -16,6 +16,8 @@ spec:
       value: 'classpath:logback-nais.xml'
     - name: GROUP_ID_NOM_WRITE
       value: '1334a91a-c4e0-409e-a497-3c4453869874'
+    - name: NAVIDENT_SEQUENCE
+      value: 168000
   secureLogs:
     enabled: true
   image: "{{image}}"

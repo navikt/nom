@@ -3,7 +3,6 @@ package no.nav.nom.apps.navident.eventsource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.domain.Navident;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
@@ -15,7 +14,6 @@ import org.springframework.messaging.handler.annotation.Header;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.StreamSupport;
 
 @Configuration
 @RequiredArgsConstructor
@@ -40,8 +38,9 @@ public class EventSourceService {
         try {
             // Update domain model with sourced event
             switch (event.event) {
-                case OPPRETT -> handleCreateEvent(event);   // Knytning lages mellom personid og navident
-                case SLETT -> handleDeleteEvent(event);     // Knytning skal slettes og navident vil ikke være tilgjengelig mer i senere bestillinger. Administrativ funksjon
+                case OPPRETT -> handleCreateEvent(event); // Knytning lages mellom personid og navident
+                case ENDRE -> handleChangeEvent(event); // Knytning endres navident type
+                case SLETT -> handleDeleteEvent(event);  // Knytning skal slettes og navident vil ikke være tilgjengelig mer i senere bestillinger. Administrativ funksjon
                 default -> log.error("Unknown event type %s".formatted(event.event));
             }
         } catch (IllegalSourceEventException e) {
@@ -56,7 +55,7 @@ public class EventSourceService {
 
     private Map<String, String> eksisterendePersonider = new HashMap<>(); // Convenient lookup map for duplikat personid sjekk mot ulik navid
 
-    private void handleCreateEvent(SourceEvent event) {
+    public void handleCreateEvent(SourceEvent event) {
         String navid =  event.payload.navident;
         String personid = event.payload.personid;
         if (eksisterendePersonider.containsKey(personid)) {
@@ -93,6 +92,16 @@ public class EventSourceService {
         log.debug(ident.maskedToString());
     }
 
+    public void handleChangeEvent(SourceEvent event) {
+        String navident = event.payload.navident;
+        if (!navidenter.containsKey(navident)) {
+            throw new IllegalSourceEventException("Finner ingen NavIdent %s. Kan ikke behandle ENDRE SourceEvent", navident);
+        }
+        Navident ident = navidenter.get(navident);
+        ident.setIdentType(event.payload.identType);
+        log.debug("Oppdatert identTye for {}", ident.maskedToString());
+    }
+
     private void handleDeleteEvent(SourceEvent event) {
         String navident = event.payload.navident;
         if (!navidenter.containsKey(navident)) {
@@ -117,5 +126,9 @@ public class EventSourceService {
 
     public boolean finnesNavIdent(String navIdent) {
         return navidenter.containsKey(navIdent);
+    }
+
+    public Navident getsNavIdent(String navIdent) {
+        return navidenter.get(navIdent);
     }
 }
