@@ -1,8 +1,11 @@
 package no.nav.nom.apps.api.ressurs.api.v1.pdlfullmakt;
 
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +33,10 @@ public class PdlFullmaktController {
     }
 
     @PostMapping("/getAnsatt")
+    @Operation(
+        description = "Hent ansatt",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
     public ResponseEntity<AnsattPersonResponse> getAnsatt(@RequestBody AnsattPersonRequest req, Authentication auth) {
         if(!callerIsPdlFullmakt(auth)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
