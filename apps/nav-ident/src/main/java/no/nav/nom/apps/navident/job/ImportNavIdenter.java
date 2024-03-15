@@ -167,26 +167,6 @@ public class ImportNavIdenter {
         return result;
     }
 
-    /*
-    public Map<String, String> readIdentTypeFromResourceFile(final Resource resource) {
-        Map<String, String> identImportedFromFile = new HashMap<>();
-        try {
-            File file = resource.getFile();
-            Scanner sc = new Scanner(file);
-            while (sc.hasNextLine()) {
-                String line = sc.nextLine();
-                String[] kolonner = line.split(",");
-                if (isValidNavIdentAndHasValidSequenceNumber(kolonner[0])){
-                    identImportedFromFile.put(kolonner[0], kolonner[1]);
-                }
-            }
-        } catch (Exception e) {
-            log.error("Feil ved import av ident type fra ressursfil", e);
-        }
-        return identImportedFromFile;
-    }
-    */
-
     public Map<String, String> readIdentTypeFromResourceFile(final InputStream inputStream) {
         Map<String, String> identImportedFromFile = new HashMap<>();
         try {
