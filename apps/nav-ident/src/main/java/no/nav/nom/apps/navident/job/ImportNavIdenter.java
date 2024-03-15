@@ -17,13 +17,12 @@ import no.nav.nom.apps.navident.eventsource.EventType;
 import no.nav.nom.apps.navident.eventsource.SourceEvent;
 import no.nav.nom.apps.navident.eventsource.SourceEventRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.channels.Channels;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -159,20 +158,19 @@ public class ImportNavIdenter {
     /**
      * Importer ident type fra en ressursfil NIK_identType.txt som inneholder en liste over identer med riktig typer med navident_seq høyere enn 168000.
      */
-    public String importIdentTypeFromResourceFile(final Resource resource) {
+    public String importIdentTypeFromResourceFile(final InputStream inputStream) {
         LocalDateTime start = LocalDateTime.now();
-        Map<String, String> identsReadFromFile = readIdentTypeFromResourceFile(resource);
+        Map<String, String> identsReadFromFile = readIdentTypeFromResourceFile(inputStream);
         int totalIdentUpdated = sendEndreEvents(identsReadFromFile);
         String result = "Totalt ident importert fra fil %s av %s. Tid brukt: %s".formatted(totalIdentUpdated, identsReadFromFile.size(), durationAsH24(start));
         log.info(result);
         return result;
     }
 
-    public Map<String, String> readIdentTypeFromResourceFile(final Resource resource) {
+    public Map<String, String> readIdentTypeFromResourceFile(final InputStream inputStream) {
         Map<String, String> identImportedFromFile = new HashMap<>();
         try {
-            File file = resource.getFile();
-            Scanner sc = new Scanner(file);
+            Scanner sc = new Scanner(inputStream);
             while (sc.hasNextLine()) {
                 String line = sc.nextLine();
                 String[] kolonner = line.split(",");

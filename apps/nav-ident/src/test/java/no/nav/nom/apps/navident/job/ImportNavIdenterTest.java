@@ -17,15 +17,16 @@ import org.mockito.Captor;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -161,7 +162,8 @@ A867804,HAE4403,Horisontal,Abakus,27469208996,4403,NAV ARBEID OG YTELSER KRISTIA
             return Navident.builder().navident((String) args[0]).identType(IdentType.STANDARD).build();
         });
 
-        String res = importNavIdenter.importIdentTypeFromResourceFile(new ClassPathResource("NIK_identType-test.txt"));
+        InputStream inputStream = getClass().getResourceAsStream("/NIK_identType-test.txt");
+        String res = importNavIdenter.importIdentTypeFromResourceFile(inputStream);
         assertTrue(res.startsWith("Totalt ident importert fra fil 20 av 20."), res);
 
         verify(producer, times(20)).send(any(), any());
@@ -172,7 +174,8 @@ A867804,HAE4403,Horisontal,Abakus,27469208996,4403,NAV ARBEID OG YTELSER KRISTIA
     @DisplayName("Test do not import navident from a resource file. ")
     void importNoneIdentTypeFromResourceFile () {
         when(eventSourceService.finnesNavIdent(any())).thenReturn(false);
-        String res = importNavIdenter.importIdentTypeFromResourceFile(new ClassPathResource("NIK_identType-test.txt"));
+        InputStream inputStream = getClass().getResourceAsStream("/NIK_identType-test.txt");
+        String res = importNavIdenter.importIdentTypeFromResourceFile(inputStream);
         assertTrue(res.startsWith("Totalt ident importert fra fil 0 av 20."), res);
         verify(producer, times(0)).send(any(), any());
         verify(sourceEventRepository, times(0)).save(any());
@@ -189,7 +192,8 @@ A867804,HAE4403,Horisontal,Abakus,27469208996,4403,NAV ARBEID OG YTELSER KRISTIA
             return Navident.builder().navident((String) args[0]).identType(identType).build();
         });
 
-        String res = importNavIdenter.importIdentTypeFromResourceFile(new ClassPathResource("NIK_identType-test.txt"));
+        InputStream inputStream = getClass().getResourceAsStream("/NIK_identType-test.txt");
+        String res = importNavIdenter.importIdentTypeFromResourceFile(inputStream);
         assertTrue(res.startsWith("Totalt ident importert fra fil 18 av 20."), res);
         verify(producer, times(18)).send(any(), any());
         verify(sourceEventRepository, times(18)).save(any());
@@ -206,6 +210,13 @@ A867804,HAE4403,Horisontal,Abakus,27469208996,4403,NAV ARBEID OG YTELSER KRISTIA
         assertFalse(importNavIdenter.isValidNavIdentAndHasValidSequenceNumber(invalid_navident_1));
         assertFalse(importNavIdenter.isValidNavIdentAndHasValidSequenceNumber(invalid_navident_2));
         assertFalse(importNavIdenter.isValidNavIdentAndHasValidSequenceNumber(valid_navident_but_sequence_higherthan_168000));
+    }
+
+    @Test
+    void test_readIdentTypeFromResourceFile() {
+        InputStream inputStream = getClass().getResourceAsStream("/NIK_identType-test.txt");
+        Map<String, String>  res = importNavIdenter.readIdentTypeFromResourceFile(inputStream);
+        assertTrue(res.size() == 20);
     }
 
 }

@@ -20,8 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
@@ -112,9 +110,8 @@ public class ImportNavIdenterKafkaTest extends SpringBootTestBase {
             return Navident.builder().navident((String) args[0]).identType(IdentType.STANDARD).build();
         });
 
-        Resource resource = new ClassPathResource("NIK_identType-test.txt");
-        importNavIdenter.importIdentTypeFromResourceFile(resource);
-        Map<String, String> fileContents = importNavIdenter.readIdentTypeFromResourceFile(resource);
+        importNavIdenter.importIdentTypeFromResourceFile(getClass().getResourceAsStream("/NIK_identType-test.txt"));
+        Map<String, String> fileContents = importNavIdenter.readIdentTypeFromResourceFile(getClass().getResourceAsStream("/NIK_identType-test.txt"));
         await()
             .atMost(1, SECONDS)
             .pollInterval(10, MILLISECONDS)
