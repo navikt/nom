@@ -163,30 +163,19 @@ public class EksterneRessurserProcessor {
         var orgenhetPaaRessurs = eksternRessurs.orgenhetPaaRessurs();
         var orgenhetPaaRessursNivaa = eksternRessurs.orgenhetPaaRessursNivaa();
 
-        Optional<IOrgenhet> orgenhetByRemedyEnhet = remedyEnhetMapperService
+        IOrgenhet orgenhetByRemedyEnhet = remedyEnhetMapperService
             .findByRemedyEnhetId(remedyEnhet)
             .map(
                 orgenhet -> {
                     log.debug("For navident {} - Fant orgenhet {} for remedyEnhet {}", navident, orgenhet.nomId(), remedyEnhet);
-                    var orgenhetForRemedyenhet = orgenhetService.getById(orgenhet.nomId());
-                    if (orgenhetForRemedyenhet.isPresent() && orgenhet.agressoId().equals("SKATT")) {
-                        // Skatt skal plasseres på nivået under
-                        var underliggende = orgenhetService.findAllUnderliggendeOrgenheter(orgenhet.nomId());
-                        if (underliggende.isEmpty()) {
-                            log.warn("SKATT ({}) har ingen underenheter. Faller tilbake på å bruke orgenhet {}.", orgenhet.nomId(), orgenhetForRemedyenhet.get().getId());
-                        } else if (underliggende.size() == 1) {
-                            orgenhetForRemedyenhet = orgenhetService.getById(underliggende.get(0));
-                            log.debug("For navident {} - Fant underenhet av SKATT: orgenhet {} for remedyEnhet {}", navident, orgenhet.nomId(), remedyEnhet);
-                        } else {
-                            log.warn("For navident {} - Fant flere underenheter for orgenhet SKATT ({}). Faller tilbake på å bruke orgenhet {}.", navident, orgenhet.nomId(), orgenhetForRemedyenhet.get().getId());
-                        }
-                    }
+                    var orgenhetForRemedyenhet = orgenhetService.getById(orgenhet.nomId()).orElse(null);
+                    orgenhetForRemedyenhet = hvisSkattPlasserNederst(orgenhetForRemedyenhet, navident, remedyEnhet);
                     return orgenhetForRemedyenhet;
                 }
             ).orElseGet(
                 () -> {
                     log.info("For navident {} - Fant ikke orgenhet for remedyEnhet {}", navident, remedyEnhet);
-                    return Optional.empty();
+                    return null;
                 }
             );
 
@@ -197,7 +186,7 @@ public class EksterneRessurserProcessor {
                 orgenhetPaaRessurs,
                 remedyEnhet
             );
-            return orgenhetByRemedyEnhet.orElse(null);
+            return orgenhetByRemedyEnhet;
         } else {
             var nomOrgenheterByOrgenhetPaaRessurs = orgenhetService.getByAgressoIdForEnheterMedOrganisering(orgenhetPaaRessurs)
                 .stream()
@@ -211,7 +200,9 @@ public class EksterneRessurserProcessor {
                     orgenhetPaaRessurs,
                     remedyEnhet
                 );
-                return nomOrgenheterByOrgenhetPaaRessurs.get(0);
+                var nomOrgenhetPaaRessurs = nomOrgenheterByOrgenhetPaaRessurs.get(0);
+                nomOrgenhetPaaRessurs = hvisSkattPlasserNederst(nomOrgenhetPaaRessurs, navident, remedyEnhet);
+                return nomOrgenhetPaaRessurs;
             } else if (nomOrgenheterByOrgenhetPaaRessurs.isEmpty()) {
                 log.info(
                     "For navident {} - Fant ikke orgenhet for agressoId/Nivå: {}/{}. Faller tilbake på å bruke remedyEnhet {}.",
@@ -229,8 +220,25 @@ public class EksterneRessurserProcessor {
                     remedyEnhet
                 );
             }
-            return orgenhetByRemedyEnhet.orElse(null);
+            return orgenhetByRemedyEnhet;
         }
+    }
+
+    private IOrgenhet hvisSkattPlasserNederst(IOrgenhet orgenhetForRemedyenhet, String navident, String remedyEnhet) {
+        if (orgenhetForRemedyenhet != null && orgenhetForRemedyenhet.getAgressoId().equals("SKATT")) {
+            // Skatt skal plasseres på nivået under
+            var underliggende = orgenhetService.findAllUnderliggendeOrgenheter(orgenhetForRemedyenhet.getId());
+            if (underliggende.isEmpty()) {
+                log.warn("SKATT ({}) har ingen underenheter. Faller tilbake på å bruke orgenhet {}.", orgenhetForRemedyenhet.getId(), orgenhetForRemedyenhet.getId());
+            } else if (underliggende.size() == 1) {
+                orgenhetForRemedyenhet = orgenhetService.getById(underliggende.get(0)).orElse(null);
+                log.debug("For navident {} - Fant underenhet av SKATT: orgenhet {} for remedyEnhet {}", navident, orgenhetForRemedyenhet.getId(), remedyEnhet);
+            } else {
+                log.warn("For navident {} - Fant flere underenheter for orgenhet SKATT ({}). Faller tilbake på å bruke orgenhet {}.",
+                    navident, orgenhetForRemedyenhet.getId(), orgenhetForRemedyenhet.getId());
+            }
+        }
+        return orgenhetForRemedyenhet;
     }
 
     private void opprettOrgtilknytning(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet, LocalDate gyldigFom, InputMetadata metadata) {
