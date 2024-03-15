@@ -168,7 +168,20 @@ public class EksterneRessurserProcessor {
             .map(
                 orgenhet -> {
                     log.debug("For navident {} - Fant orgenhet {} for remedyEnhet {}", navident, orgenhet.nomId(), remedyEnhet);
-                    return orgenhetService.getById(orgenhet.nomId());
+                    var orgenhetForRemedyenhet = orgenhetService.getById(orgenhet.nomId());
+                    if (orgenhetForRemedyenhet.isPresent() && orgenhet.agressoId().equals("SKATT")) {
+                        // Skatt skal plasseres på nivået under
+                        var underliggende = orgenhetService.findAllUnderliggendeOrgenheter(orgenhet.nomId());
+                        if (underliggende.isEmpty()) {
+                            log.warn("SKATT ({}) har ingen underenheter. Faller tilbake på å bruke orgenhet {}.", orgenhet.nomId(), orgenhetForRemedyenhet.get().getId());
+                        } else if (underliggende.size() == 1) {
+                            orgenhetForRemedyenhet = orgenhetService.getById(underliggende.get(0));
+                            log.debug("For navident {} - Fant underenhet av SKATT: orgenhet {} for remedyEnhet {}", navident, orgenhet.nomId(), remedyEnhet);
+                        } else {
+                            log.warn("For navident {} - Fant flere underenheter for orgenhet SKATT ({}). Faller tilbake på å bruke orgenhet {}.", navident, orgenhet.nomId(), orgenhetForRemedyenhet.get().getId());
+                        }
+                    }
+                    return orgenhetForRemedyenhet;
                 }
             ).orElseGet(
                 () -> {
