@@ -50,6 +50,8 @@ public class RessursStillingProcessor {
     private List<String> manglerSammeEnhetPaStillingOgRessurs = new ArrayList<>();
     private final Unleash unleash;
 
+    private static final boolean DRY_RUN = true; // Vi skrur av faktisk oppdatering en liten stund
+
     public RessursStillingProcessor(OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService, OrgtilknytningCommandService orgtilknytningCommandService,
                                     RessursStillingLoadStatus ressursStillingLoadStatus, RessursStateRepository ressursStateRepository,
                                     NomMastered nomMastered,
@@ -428,6 +430,11 @@ public class RessursStillingProcessor {
      * Altså en stillingPeriode med angivelse av f.eks. ORGNIV3 node '060200' vil da matche en orgtilknytning i nom for ORGENHET '0602002'
      */
     public boolean orgtilknytningEnhetMatcherAgressoId(StillingPeriode stillingPeriode, OrgtilknytningState ot) {
+        if (stillingPeriode.orgenhet() != null) { // Hvis vi har en ORGENHET på stillingPeriode, så matcher vi mot denne
+            log.debug("Navident {} har orgenhet på stillingPeriode fra stillingStrukturerer og bruker denne. {}", ot.navident(), stillingPeriode);
+            return ot.orgEnhetId().equals(stillingPeriode.orgenhet().getId());
+        }
+        log.debug("Navident {} har ikke orgenhet på stillingPeriode og må slå opp på agressoid", ot.navident(), stillingPeriode);
         if (isCurrentPeriod(stillingPeriode)) {
             // For aktiv periode, match mot stilling sin AgressoId, men hvis denne er null - match mot ressursens agressso ID.
             return orgenhetService.getById(
@@ -444,6 +451,11 @@ public class RessursStillingProcessor {
     public String lagNyOrgtilknytning(String navident, String orgenhetId, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
         if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(navident)) {
             log.info("Navident {} er mastered. Vi lager ikke orgtilknytning for denne", navident);
+            return null;
+        }
+
+        if (DRY_RUN) {
+            log.debug("DRY_RUN: Lager ikke ny orgtilknytning for Navident {} til orgenhet {} - {}", navident, orgenhetId, stillingPeriode);
             return null;
         }
 
@@ -469,6 +481,12 @@ public class RessursStillingProcessor {
     public void endreOrgtilknytningGyldigFOM(OrgtilknytningState originalOrgtilknytning, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
         if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(originalOrgtilknytning.navident())) {
             log.info("Navident {} er mastered. Vi endrer ikke orgtilknytning for denne", originalOrgtilknytning.navident());
+            return;
+        }
+
+        if (DRY_RUN) {
+            log.debug("DRY_RUN: Endrer ikke ny orgtilknytning GyldigFOM for Navident {} til orgenhet {} - {}", originalOrgtilknytning.navident(),
+                originalOrgtilknytning.orgEnhetId(), stillingPeriode);
             return;
         }
 
@@ -509,6 +527,12 @@ public class RessursStillingProcessor {
 
         if (originalOrgtilknytning.gyldigFom().plusDays(1).isAfter(stillingPeriode.gyldigTom())) {
             log.error("Endring av sluttdato på orgtilknytning for Navident {} er ikke gyldig. Sluttdato må være etter startdato", originalOrgtilknytning.navident());
+            return;
+        }
+
+        if (DRY_RUN) {
+            log.debug("DRY_RUN: Endrer ikke ny orgtilknytning GyldigTOM for Navident {} til orgenhet {} - {}", originalOrgtilknytning.navident(),
+                originalOrgtilknytning.orgEnhetId(), stillingPeriode);
             return;
         }
 
@@ -560,6 +584,11 @@ public class RessursStillingProcessor {
             return;
         }
 
+        if (DRY_RUN) {
+            log.debug("DRY_RUN: Setter ikke orgtilknytning sluttdato for Navident {} til ot fid {} - {}", navident, fid, stillingPeriode);
+            return;
+        }
+
         OrgtilknytningEvent.AdditionalAgressoData additionalData = new OrgtilknytningEvent.AdditionalAgressoData(
             stillingPeriode.stilling().toString(),
             stillingPerioderAsString
@@ -583,6 +612,11 @@ public class RessursStillingProcessor {
     private void endreOrgtilknytningDagligOppfolging(String fid, String navident, boolean erDagligOppfolging, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
         if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(navident)) {
             log.info("Navident {} er mastered. Vi endrer ikke Daglig oppfølging for denne", navident);
+            return;
+        }
+
+        if (DRY_RUN) {
+            log.debug("DRY_RUN: Endrer ikke orgtilknytning daglig oppfølging for Navident {} og ot fid {} - {}", navident, fid, stillingPeriode);
             return;
         }
 
@@ -611,6 +645,12 @@ public class RessursStillingProcessor {
     public void fjernOrgtilknytning(OrgtilknytningState originalOrgtilknytning) {
         if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(originalOrgtilknytning.navident())) {
             log.info("Navident {} er mastered. Vi endrer ikke orgtilknytning for denne", originalOrgtilknytning.navident());
+            return;
+        }
+
+        if (DRY_RUN) {
+            log.debug("DRY_RUN: Fjerner ikke orgtilknytning for Navident {} til orgenhet {} - ot fid {}", originalOrgtilknytning.navident(),
+                originalOrgtilknytning.orgEnhetId(), originalOrgtilknytning.fid());
             return;
         }
 
