@@ -55,14 +55,14 @@ public class AdminController {
             }
     )
     @GetMapping("/importerNavIdenter")
-    @PreAuthorize("hasRole('ROLE_${group.id.nom.write}')")
+    @PreAuthorize("hasRole('ROLE_NOM_WRITE')")
     public String importerNavIdenter(@RequestParam String bucketObjectName, @RequestParam(required = false) boolean kunLes) {
         logger.info("Starter NavIdent innlesning. kunLes={}", kunLes);
         return importNavIdenter.fromBucketObject(bucketObjectName, kunLes);
     }
 
     @GetMapping("/importerNavIdenterFraResursFil")
-    @PreAuthorize("hasRole('ROLE_${group.id.nom.write}')")
+    @PreAuthorize("hasRole('ROLE_NOM_WRITE')")
     public String importIdentTypeFromResourceFile() {
         logger.info("Starter NavIdent innlesning fra resursfil");
         if (unleash.isEnabled(UNLEASH_PRODUSERE_ENDRE_NAV_IDENT_MELDINGER)){
