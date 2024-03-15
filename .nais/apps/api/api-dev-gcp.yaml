@@ -138,6 +138,9 @@ spec:
         - application: pdl-fullmakt
           namespace: pdl
           cluster: dev-fss
+        - application: repr-fullmakt
+          namespace: repr
+          cluster: dev-fss
         - application: oppgavestyring-ressurs-synkronisering
           namespace: oppgavehandtering
           cluster: dev-gcp
