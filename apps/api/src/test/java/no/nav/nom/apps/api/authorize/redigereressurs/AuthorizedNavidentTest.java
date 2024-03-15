@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = AuthorizedNavident.class)
 class AuthorizedNavidentTest extends MockBasisTestOrganisering {
-
     @MockBean
     AuthorizeCommandService authorizeCommandService;
     @MockBean
@@ -154,8 +153,72 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
 
         boolean kanRedigereD100001 = authorizedNavident.kanBrukerRedigereRessurs("HR", "D100001");
         boolean kanRedigereE100001 = authorizedNavident.kanBrukerRedigereRessurs("HR", "E100001");
-        // Assert
+
         assertTrue(kanRedigereD100001, "Leder D har ikke auth til å redigere ressurs D100001");
         assertFalse(kanRedigereE100001, "Leder D har auth til å redigere ressurs E100001");
+    }
+
+    @Test
+    @DisplayName("Verifiser at Leder B har auth til å opprette ressurs i orgenhet B, B1 og B11")
+    void test_0017() {
+        boolean kanOppretteForEnhetB = authorizedNavident.kanBrukerOppretteRessurs("B", "B");
+        boolean kanOppretteForEnhetB1 = authorizedNavident.kanBrukerOppretteRessurs("B", "B1");
+        boolean kanOppretteForEnhetB11 = authorizedNavident.kanBrukerOppretteRessurs("B", "B11");
+
+        assertTrue(kanOppretteForEnhetB, "Leder B har ikke auth til å opprette ressurs i enhet B");
+        assertTrue(kanOppretteForEnhetB1, "Leder B har ikke auth til å opprette ressurs i enhet B1");
+        assertTrue(kanOppretteForEnhetB11, "Leder B har ikke auth til å opprette ressurs i enhet B11");
+    }
+
+    @Test
+    @DisplayName("Verifiser at Leder C har auth til å opprette ressurs i orgenhet C, C1, C11, C2 og C22")
+    void test_0018() {
+        boolean kanOppretteForEnhetC = authorizedNavident.kanBrukerOppretteRessurs("C", "C");
+        boolean kanOppretteForEnhetC1 = authorizedNavident.kanBrukerOppretteRessurs("C", "C1");
+        boolean kanOppretteForEnhetC11 = authorizedNavident.kanBrukerOppretteRessurs("C", "C11");
+        boolean kanOppretteForEnhetC2 = authorizedNavident.kanBrukerOppretteRessurs("C", "C2");
+        boolean kanOppretteForEnhetC22 = authorizedNavident.kanBrukerOppretteRessurs("C", "C22");
+
+        assertTrue(kanOppretteForEnhetC, "Leder C har ikke auth til å opprette ressurs i enhet C");
+        assertTrue(kanOppretteForEnhetC1, "Leder C har ikke auth til å opprette ressurs i enhet C1");
+        assertTrue(kanOppretteForEnhetC11, "Leder C har ikke auth til å opprette ressurs i enhet C11");
+        assertTrue(kanOppretteForEnhetC2, "Leder C har ikke auth til å opprette ressurs i enhet C2");
+        assertTrue(kanOppretteForEnhetC22, "Leder C har ikke auth til å opprette ressurs i enhet C22");
+    }
+
+    @Test
+    @DisplayName("Verifiser at Leder C3 har auth til å opprette ressurs i orgenhet C11 men ikke i C1 og C22")
+    void test_0019() {
+        boolean kanOppretteForEnhetC11 = authorizedNavident.kanBrukerOppretteRessurs("C3", "C11");
+        boolean kanOppretteForEnhetC1 = authorizedNavident.kanBrukerOppretteRessurs("C3", "C1");
+        boolean kanOppretteForEnhetC22 = authorizedNavident.kanBrukerOppretteRessurs("C3", "C22");
+
+        assertTrue(kanOppretteForEnhetC11, "Leder C har ikke auth til å opprette ressurs i enhet C11");
+        assertFalse(kanOppretteForEnhetC1, "Leder C har auth til å opprette ressurs i enhet C1");
+        assertFalse(kanOppretteForEnhetC22, "Leder C har auth til å opprette ressurs i enhet C22");
+    }
+
+    @Test
+    @DisplayName("Verifiser at Leder A ikke har auth til å opprette ressurs i orgenhet B11, C1 og C22")
+    void test_0020() {
+        boolean kanOppretteForEnhetB11 = authorizedNavident.kanBrukerOppretteRessurs("A", "B11");
+        boolean kanOppretteForEnhetC1 = authorizedNavident.kanBrukerOppretteRessurs("A", "C1");
+        boolean kanOppretteForEnhetC22 = authorizedNavident.kanBrukerOppretteRessurs("A", "C22");
+
+        assertFalse(kanOppretteForEnhetB11, "Leder A har auth til å opprette ressurs i enhet B11");
+        assertFalse(kanOppretteForEnhetC1, "Leder A har auth til å opprette ressurs i enhet C1");
+        assertFalse(kanOppretteForEnhetC22, "Leder A har auth til å opprette ressurs i enhet C22");
+    }
+
+    @Test
+    @DisplayName("Verifiser at delegert leder HR har auth til å opprette ressurs i D1 men ikke i E1")
+    void test_0021() {
+        when(delegertLederStateRepository.aktiveDelegeringerForOrgenheterTilNavident("HR")).thenReturn(List.of("D"));
+
+        boolean kanOppretteForEnhetD1 = authorizedNavident.kanBrukerOppretteRessurs("HR", "D1");
+        boolean kanOppretteForEnhetE1 = authorizedNavident.kanBrukerRedigereRessurs("HR", "E1");
+
+        assertTrue(kanOppretteForEnhetD1, "Delegert leder HR har ikke auth til å opprette ressurs i enhet D1");
+        assertFalse(kanOppretteForEnhetE1, "Delegert leder HR auth til å opprette ressurs i enhet E1");
     }
 }

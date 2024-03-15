@@ -33,7 +33,7 @@ import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNa
 @RestController
 @Slf4j
 @RequestMapping("/api/app/authorizedRessursRedigering")
-@PreAuthorize("hasAuthority('MUTATE_RESSURS')")
+@PreAuthorize("hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')")
 public class AuthorizedNavidentController {
 
     private final AuthorizedNavident authorizedNavident;
@@ -48,9 +48,18 @@ public class AuthorizedNavidentController {
         description = "om current bruker har tilgang til å redigere ressurs",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @GetMapping("isAuthorizedFor/{navident}")
-    boolean isAuthorizedFor(@PathVariable String navident) {
+    @GetMapping("isAuthorizedForNavident/{navident}")
+    boolean isAuthorizedForNavident(@PathVariable String navident) {
         return authResolver.kanRedigereRessurs(navident);
+    }
+
+    @Operation(
+        description = "om current bruker har tilgang til å opprette ressurser i angitt orgenhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping("isAuthorizedForOrgenhet/{orgenhetId}")
+    boolean isAuthorizedForOrgenhet(@PathVariable String orgenhetId) {
+        return authResolver.kanOppretteRessurs(orgenhetId);
     }
 
     @Operation(

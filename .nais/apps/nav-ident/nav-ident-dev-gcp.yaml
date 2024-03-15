@@ -18,6 +18,8 @@ spec:
       value: 'c5752f26-105a-460f-a538-1859273f5057'
     - name: NAVIDENT_SEQUENCE
       value: '850000'
+  envFrom:
+    - secret: nav-ident-unleash-api-token
   secureLogs:
     enabled: true
   image: "{{image}}"
@@ -97,6 +99,7 @@ spec:
         - application: nav-ident-redis
       external:
         - host: pdl-api.dev-fss-pub.nais.io
+        - host: teamorg-unleash-api.nav.cloud.nais.io
 ---
 
 apiVersion: "nais.io/v1alpha1"

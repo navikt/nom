@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 
+import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
@@ -44,13 +45,15 @@ public class RessursController {
     private final static Logger log = LoggerFactory.getLogger(RessursController.class);
     public static final String UNLEASH_EDIT_RESSURS = "nom.ressurs.edit-external";
     private final RessursRestService ressursRestService;
+    private final AuthResolver authResolver;
     private final Unleash unleash;
 
     public RessursController(
-        RessursRestService ressursRestService,
-        Unleash unleash
+            RessursRestService ressursRestService, AuthResolver authResolver,
+            Unleash unleash
     ) {
         this.ressursRestService = ressursRestService;
+        this.authResolver = authResolver;
         this.unleash = unleash;
     }
 
@@ -81,6 +84,9 @@ public class RessursController {
     )
     public ResponseEntity<OpprettRessursResponse> opprettRessurs(
         @RequestBody OpprettRessursRequest request) {
+        if (!authResolver.kanOppretteRessurs(request.orgEnhetId())) {
+            throw new AccessDeniedException("Ikke tilgang til å opprette ressurs for angitt orgenhet");
+        }
         return ResponseEntity.ok(toResponse(ressursRestService.createRessursAndNotify(request)));
     }
 
@@ -98,6 +104,10 @@ public class RessursController {
     public ResponseEntity<StandardResponse> avvikleRessurs(
         @PathVariable String fid,
         @RequestBody AvvikleRessursRequest request) {
+        if (!authResolver.kanRedigereRessurs(ressursRestService.findRessursByFid(fid).state().navident())) {
+            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
+        }
+
         if (!unleash.isEnabled(UNLEASH_EDIT_RESSURS)) {
             throw new AccessDeniedException("Endring av ressurs er blokkert");
         }
@@ -120,6 +130,10 @@ public class RessursController {
         @PathVariable String navident,
         @RequestBody UpdateVisningsnavnRequest updateVisningsnavnRequest
     ) {
+        if (!authResolver.kanRedigereRessurs(navident)) {
+            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
+        }
+
         if (!unleash.isEnabled(UNLEASH_EDIT_RESSURS)) {
             throw new AccessDeniedException("Endring av ressurs er blokkert");
         }
@@ -214,6 +228,10 @@ public class RessursController {
         @PathVariable String fid,
         @RequestBody UpdateFysiskeBrukerstederRequest updateFysiskeBrukerstederRequest
     ) {
+        if (!authResolver.kanRedigereRessurs(ressursRestService.findRessursByFid(fid).state().navident())) {
+            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
+        }
+
         if (!unleash.isEnabled(UNLEASH_EDIT_RESSURS)) {
             throw new AccessDeniedException("Endring av ressurs er blokkert");
         }

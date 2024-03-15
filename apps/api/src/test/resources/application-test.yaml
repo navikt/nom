@@ -25,7 +25,7 @@ app:
         scopes: ["TEAMCAT"]
       nomUiClient:
         client-id: nomUiClient
-        scopes: ["QUERY_PERSON", "MUTATE_RESSURS", "NOM_UI_APP"]
+        scopes: ["QUERY_PERSON", "NOM_UI_APP"]
       nomRemedyIntegrasjonClient:
         client-id: nomRemedyIntegrasjonClient
         scopes: ["NOM_REMEDY_INTEGRASJON_APP"]

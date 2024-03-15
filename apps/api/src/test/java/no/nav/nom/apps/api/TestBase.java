@@ -291,4 +291,10 @@ public abstract class TestBase {
         return validToken(claims);
     }
 
+    protected String queryPdlFullmaktClientToken() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("azp_name", "dev-fss:pdl:pdl-fullmakt");
+        return validToken(claims);
+    }
+
 }

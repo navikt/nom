@@ -437,6 +437,5 @@ public class RessursRestService {
         }
         validateFysiskeBrukerstederExists(Set.of(request.fysiskBrukerstedNr()));
         validateOrgtilknytningTypeSektorCombination(request.tilknytningtype(), request.sektor());
-
     }
 }

@@ -58,7 +58,7 @@ export interface LeggTilOrgtilknytningRequest {
   /** @format date */
   gyldigTom?: string;
   orgEnhetId: string;
-  orgtilknytningType?: Tilknytningtype;
+  tilknytningtype?: Tilknytningtype;
 }
 
 export interface LeggTilOrgtilknytningRequestOld {
@@ -79,7 +79,7 @@ export enum NomNivaa {
 }
 
 export interface OppdaterOrgtilknytningerForRessursRequest {
-  endredeOrgtilknytninger: EndreOrgtilknytningRequest[];
+  eksisterendeOrgtilknytninger: EndreOrgtilknytningRequest[];
   nyeOrgtilknytninger: LeggTilOrgtilknytningRequest[];
   setRessursSluttdato: boolean;
   setRessursStartdato: boolean;
@@ -88,7 +88,7 @@ export interface OppdaterOrgtilknytningerForRessursRequest {
 export interface OpprettRessursRequest {
   ansettelsesType: AnsettelsesType;
   fysiskBrukerstedNr: string;
-  orgEnhetId?: string;
+  orgEnhetId: string;
   personident: string;
   sektor: Sektor;
   /** @format date */
@@ -256,7 +256,7 @@ export enum TelefonType {
 
 export enum Tilknytningtype {
   KONSULENT = "KONSULENT",
-  EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER"
+  EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER",
 }
 
 export interface UpdateFysiskeBrukerstederRequest {
