@@ -297,4 +297,10 @@ public abstract class TestBase {
         return validToken(claims);
     }
 
+    protected String queryOmadaClientToken() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("azp_name", "queryOmadaClient");
+        return validToken(claims);
+    }
+
 }
