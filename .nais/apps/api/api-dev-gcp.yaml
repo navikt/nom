@@ -201,6 +201,9 @@ spec:
         - application: prim-brukerstyring-test
           namespace: pim
           cluster: dev-gcp
+        - application: idm-kafka-omada-integration
+          namespace: idm
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
