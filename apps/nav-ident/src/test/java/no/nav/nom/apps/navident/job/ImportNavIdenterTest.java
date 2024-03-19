@@ -137,7 +137,7 @@ A867804,HAE4403,Horisontal,Abakus,27469208996,4403,NAV ARBEID OG YTELSER KRISTIA
     }
 
     @Test
-//    @Disabled
+    @Disabled
     @SneakyThrows
     @DisplayName("Manual import of local file. ")
     void importManuallyLocalFile() {
