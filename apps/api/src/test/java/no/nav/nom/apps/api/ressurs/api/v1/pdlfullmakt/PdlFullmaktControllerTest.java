@@ -35,7 +35,7 @@ public class PdlFullmaktControllerTest extends RestTestBase {
             .uri("/api/v1/pdlfullmakt/getAnsatt")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(queryPdlFullmaktClientToken());
+                httpHeaders.setBearerAuth(queryReprFullmaktClientToken());
             })
             .bodyValue(request)
             .exchange()
@@ -64,7 +64,7 @@ public class PdlFullmaktControllerTest extends RestTestBase {
 
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(queryPdlFullmaktClientToken());
+                httpHeaders.setBearerAuth(queryReprFullmaktClientToken());
             })
             .bodyValue(request)
             .exchange()

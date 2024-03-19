@@ -38,7 +38,7 @@ public class PdlFullmaktController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     public ResponseEntity<AnsattPersonResponse> getAnsatt(@RequestBody AnsattPersonRequest req, Authentication auth) {
-        if(!callerIsPdlFullmakt(auth)){
+        if (!callerMatchesAllowedApps(auth)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         log.info("mottatt kall mot /getAnsattStatus");
@@ -56,16 +56,30 @@ public class PdlFullmaktController {
         return ResponseEntity.ok(ansattPersonResponse);
     }
 
-    private boolean callerIsPdlFullmakt(Authentication auth) {
-        var x = auth.getCredentials();
-        if(!(x instanceof Jwt)){
+    private boolean callerMatchesAllowedApps(Authentication auth) {
+        var matchReprFullmakt = callerMatches(auth, "repr","repr-fullmakt");
+
+        var matchPdlFullmakt = callerMatches(auth, "pdl","pdl-fullmakt");
+        if(matchPdlFullmakt){
+            // TODO pdl-fullmakt skal bytte navn til repr fullmakt, så når denne loggmeldingen
+            // ikke lengre forekommer, kan koden endres til å kun sjekke for repr-fullmakt
+            log.info("konsument pdl-fullmakt er fortsatt aktiv");
+        }
+
+        return matchReprFullmakt || matchPdlFullmakt;
+    }
+
+    private boolean callerMatches(Authentication auth, String namespace, String appname) {
+        var creds = auth.getCredentials();
+        if(!(creds instanceof Jwt)){
             return false;
         }
-        var claims = ((Jwt) x).getClaims();
+        var claims = ((Jwt) creds).getClaims();
         var azpName = claims.get("azp_name").toString();
 
-        return matchAzpString(azpName,"pdl","pdl-fullmakt");
+        return matchAzpString(azpName,namespace,appname);
     }
+
 
     private boolean matchAzpString(String input, String namespace, String appname){
         var azpStringElements = input.split(":");
