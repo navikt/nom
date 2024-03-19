@@ -137,19 +137,23 @@ A867804,HAE4403,Horisontal,Abakus,27469208996,4403,NAV ARBEID OG YTELSER KRISTIA
     }
 
     @Test
-    @Disabled
+//    @Disabled
     @SneakyThrows
     @DisplayName("Manual import of local file. ")
     void importManuallyLocalFile() {
-        Path path = Paths.get("/Users/g155033/Documents/atom/Remedy_preprod_20230207.csv");
+        Path path = Paths.get("/Users/g155033/Documents/atom/Remedy_eksport_fra_produksjon_utf8.csv");
 
         BufferedReader br = Files.newBufferedReader(path);
         String res = importNavIdenter.importFromReader(br, false);
 
-        verify(producer, times(25107)).send(any(), any());
-        verify(sourceEventRepository, times(25107)).save(any());
+        // 495 stk  => Lest navIdent '{}' fra importlinje er tom: {}
+        // 1330 stk => Navident '{}' allerede importert på samme personid
 
-        assertTrue(res.startsWith("Totalt importert 25107 av 124461"), res);
+
+        verify(producer, times(67661)).send(any(), any());
+        verify(sourceEventRepository, times(67661)).save(any());
+
+        assertTrue(res.startsWith("Totalt importert 67661 av 145447"), res);
     }
 
     @Test

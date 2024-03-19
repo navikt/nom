@@ -92,7 +92,7 @@ public class ImportNavIdenter {
 
     // NAV-ID,Person id,Bruker id,Fornavn,Etternavn,Enhets-ID,Enhet,Status,Sektor,I permisjon?,I permisjon dato,Reg. dato,Tiltredelsesdato,Status-History.Slettet.TIME
     public void importTestNavIdent(String importLine, boolean kunLes) {
-        log.debug("line: {}", importLine);
+        log.debug(LogConfig.SECURE_LOGS, "line: {}", importLine);
         var kolonner = importLine.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1); // Split på komma, ignorer komma i "
         if (kolonner.length < 3) {
             log.error(LogConfig.SECURE_LOGS, "importLine kan ikke splittes på ',': {}", importLine);
@@ -103,20 +103,24 @@ public class ImportNavIdenter {
         var status = kolonner[7];
         var sektor = kolonner[8];
 
-        if (!status.equals("Aktiv")) {
-            if (!status.equals("Slettet")) {
-                log.info(LogConfig.SECURE_LOGS, "Skipping - men status != Slettet. => {}: {}", status, importLine);
-            }
-            log.debug("Skipping rad uten status Aktiv");
-            skippedLines++;
+        if (navIdent.length() == 0) {
+            log.error(LogConfig.SECURE_LOGS, "Lest navIdent '{}' fra importlinje er tom: {}", navIdent, importLine);
             return;
         }
-        if (navIdent.length() != 7) {
-            log.error(LogConfig.SECURE_LOGS, "Lest navIdent '{}' fra importlinje er ikke 7 tegn: {}", navIdent, importLine);
+
+        // Check length 7 and starts with letter, rest is digits
+        if (navIdent.length() != 7 || !navIdent.matches("[A-Z]\\d+")){
+            log.error(LogConfig.SECURE_LOGS, "Lest navIdent '{}' fra importlinje er ikke gyldig: {}", navIdent, importLine);
             return;
         }
-        if (finnesAllerede(navIdent)) {
+
+        if (finnesNavidentAllerede(navIdent)) {
             log.error(LogConfig.SECURE_LOGS, "Lest navIdent '{}' fra importlinje finnes i fra før: {}", navIdent, importLine);
+            return;
+        }
+
+        if (finnesPersonidentAllerede(personIdent)) {
+            log.error(LogConfig.SECURE_LOGS, "Lest personident '{}' fra importlinje finnes i fra før på annen Navident: {}", navIdent, importLine);
             return;
         }
 
@@ -141,7 +145,7 @@ public class ImportNavIdenter {
             .payload(
                 EventPayload.builder()
                     .navident(navIdent)
-                    .identType(parse(sektor))
+                    .identType(IdentType.STANDARD)
                     .personid(personIdent)
                     .build()
             ).build();
@@ -222,15 +226,18 @@ public class ImportNavIdenter {
         switch (identType) {
             case "NAV Statlig":
             case "NAV Kommunalt":
-            case "Eksternt":
                 return IdentType.STANDARD;
             default:
                 throw new RuntimeException("Ukjent ident type %s".formatted(identType));
         }
     }
 
-    private boolean finnesAllerede(String navIdent) {
+    private boolean finnesNavidentAllerede(String navIdent) {
         return eventSourceService.finnesNavIdent(navIdent);
+    }
+
+    private boolean finnesPersonidentAllerede(String personIdent) {
+        return eventSourceService.finnesPersonident(personIdent);
     }
 
     private String durationAsH24(LocalDateTime start) {

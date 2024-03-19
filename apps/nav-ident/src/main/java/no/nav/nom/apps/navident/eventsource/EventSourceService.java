@@ -128,6 +128,10 @@ public class EventSourceService {
         return navidenter.containsKey(navIdent);
     }
 
+    public boolean finnesPersonident(String personident) {
+        return navidenter.values().stream().anyMatch(navident -> personident.equals(navident.getGjeldendePersonid()));
+    }
+
     public Navident getsNavIdent(String navIdent) {
         return navidenter.get(navIdent);
     }
