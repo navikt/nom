@@ -70,7 +70,7 @@ public class PdlFullmaktControllerTest extends RestTestBase {
             .exchange()
             .expectStatus().is2xxSuccessful()
             .expectBody(AnsattPersonResponse.class)
-            .isEqualTo(new AnsattPersonResponse(new AnsattPersonResponse.AnsattPerson("testNavIdent",startDato.toString(),sluttDato.toString())));
+            .isEqualTo(new AnsattPersonResponse(new AnsattPersonResponse.AnsattPerson("testNavIdent",startDato.toString(),sluttDato.toString(),Sektor.NAV_STATLIG)));
 
 
     }

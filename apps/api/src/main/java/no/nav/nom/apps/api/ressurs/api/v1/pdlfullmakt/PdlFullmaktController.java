@@ -49,7 +49,8 @@ public class PdlFullmaktController {
         var ansattPersonResponse = ressursStateRepository.findByPersonident(fnr)
             .map(it -> new AnsattPersonResponse(new AnsattPersonResponse.AnsattPerson(it.navident(),
                 it.startdato().map(LocalDate::toString).orElse(null),
-                it.sluttdato().map(LocalDate::toString).orElse(null)
+                it.sluttdato().map(LocalDate::toString).orElse(null),
+                it.sektor()
             )))
             .orElse(new AnsattPersonResponse(null));
         return ResponseEntity.ok(ansattPersonResponse);
