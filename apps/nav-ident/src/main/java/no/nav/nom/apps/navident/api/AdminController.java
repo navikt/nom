@@ -37,7 +37,11 @@ public class AdminController {
     }
 
     @Operation(
-            description = "Importer NavIdenter. One-off job for å importere navidenter og personidenter fra Remedy",
+            description = "IKKE Kjør denne i Swagger - Swagger poster automatisk retry når det tar tid uten at respons kommer.\n " +
+                "Bruk heller curl:\n" +
+                "curl -X 'GET' 'https://nav-ident.intern.nav.no/admin/importerNavIdenter?bucketObjectName=Remedy_eksport_fra_produksjon_utf8.csv&kunLes=true' " +
+                "  -H 'accept: */*' -H 'Authorization: Bearer $TOKEN'\n" +
+                "Importer NavIdenter. One-off job for å importere navidenter og personidenter fra Remedy",
             security = @SecurityRequirement(name = SwaggerConfig.SECURITY_SCHEME_CONFIGURATION_NAME)
     )
     @ApiResponses(
