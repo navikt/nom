@@ -68,14 +68,14 @@ public class EventSourceService {
 
         Navident ident = null;
         if (navidenter.containsKey(navid)) {
-            log.info("Navident {} finnes ifra før. Denne eventen erstatter tidligere info", navid);
+            log.debug("Navident {} finnes ifra før. Denne eventen erstatter tidligere info", navid);
 
             ident = navidenter.get(navid).clone();
             ident.setGjeldendePersonid(personid);  // ASSUMPTION!! Siste personid i eventsource benyttes som gjeldende
             if (!ident.getAllePersonider().contains(personid)) {
                 ident.addPersonid(personid);
             } else {
-                log.info("Personid finnes ifra før på denne navidenten {}. Denne eventen endrer kanskje kun på gjeldendeIdent info", navid);
+                log.debug("Personid finnes ifra før på denne navidenten {}. Denne eventen endrer kanskje kun på gjeldendeIdent info", navid);
             }
         } else {
             ident = Navident
