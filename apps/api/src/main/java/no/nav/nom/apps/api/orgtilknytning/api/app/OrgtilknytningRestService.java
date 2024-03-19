@@ -533,7 +533,7 @@ public class OrgtilknytningRestService {
     public static void validateOrgtilknytningTypeSektorCombination(Tilknytningtype tilknytningtype, Sektor sektor) {
 
         Map<Sektor, List<Tilknytningtype>> allowedOrgtilknytningTypeForSektorMap = Map.of(
-            Sektor.EKSTERN, List.of(Tilknytningtype.KONSULENT),
+            Sektor.EKSTERN, List.of(Tilknytningtype.KONSULENT, Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER),
             Sektor.NAV_KOMMUNAL, emptyList(),
             Sektor.NAV_STATLIG, emptyList()
         );
