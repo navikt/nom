@@ -9,11 +9,13 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningC
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -34,6 +36,8 @@ public class EksterneRessurserProcessor {
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final NomMastered nomMastered;
     private final Unleash unleash;
+
+    private static final String UNLEASH_OPPDATER_TILKNYTNINGSTYPE_FOR_EKSTERNE =  "nom.orgtilknytning-eksterne.oppdater-tilknytningstype";
 
     public EksterneRessurserProcessor(
             RemedyEnhetMapperService remedyEnhetMapperService, OrgtilknytningService orgtilknytningService,
@@ -104,6 +108,9 @@ public class EksterneRessurserProcessor {
                 .get();
             if (harSammeSluttdato(eksternRessurs, sisteEksisterendeOrgtilknytning) && erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {
                 log.debug("Ekstern ressurs {} har eksisterende orgtilknytning som ikke trenger endring", eksternRessurs.navident());
+                // Oppdater evt tilknytningstypen - hvis denne er ikke er korrekt
+                settTypeEksternSamarbeidspartnerHvisSkatt(sisteEksisterendeOrgtilknytning, metadata);
+                settTypeKonsulentHvisIkkeSkatt(sisteEksisterendeOrgtilknytning, metadata);
             } else {
                 if (erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {
                     // Sluttdato er endret, endre sluttdato på eksisterende orgtilknytning - ingen flere endringer påkrevd.
@@ -225,7 +232,7 @@ public class EksterneRessurserProcessor {
     }
 
     private IOrgenhet hvisSkattPlasserNederst(IOrgenhet orgenhetForRemedyenhet, String navident, String remedyEnhet) {
-        if (orgenhetForRemedyenhet != null && orgenhetForRemedyenhet.getAgressoId().equals("SKATT")) {
+        if (erSkatteetatenNiv0Enhet(orgenhetForRemedyenhet)) {
             // Skatt skal plasseres på nivået under
             var underliggende = orgenhetService.findAllUnderliggendeOrgenheter(orgenhetForRemedyenhet.getId());
             if (underliggende.isEmpty()) {
@@ -239,6 +246,14 @@ public class EksterneRessurserProcessor {
             }
         }
         return orgenhetForRemedyenhet;
+    }
+
+    private boolean erSkatteetatenNiv0Enhet(IOrgenhet orgenhetForRemedyenhet) {
+        return orgenhetForRemedyenhet != null && orgenhetForRemedyenhet.getAgressoId().equals("SKATT");
+    }
+
+    private boolean erUnderSkatteetatenNiv0Enhet(IOrgenhet orgenhet) {
+        return erSkatteetatenNiv0Enhet(orgenhet) || orgenhetService.getByFid(orgenhet.getOverordnetOrgEnhetFid().orElse(null)).map(this::erSkatteetatenNiv0Enhet).orElse(false);
     }
 
     private void opprettOrgtilknytning(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet, LocalDate gyldigFom, InputMetadata metadata) {
@@ -287,6 +302,12 @@ public class EksterneRessurserProcessor {
         log.debug("Lager EndreDagligOppfolgingOrgtilknytning event: {}", endreDagligOppfolgingOrgtilknytning);
 
         orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(fid, endreDagligOppfolgingOrgtilknytning);
+
+        if (erUnderSkatteetatenNiv0Enhet(orgenhet)) {
+            settTilknytningtype(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER, fid, eksternRessurs.navident(), metadata);
+        } else {
+            settTilknytningtype(Tilknytningtype.KONSULENT, fid, eksternRessurs.navident(), metadata);
+        }
     }
 
 
@@ -308,6 +329,9 @@ public class EksterneRessurserProcessor {
         log.debug("Lager EndreOrgtilknytningDato event for fid {}:\n {}", orgtilknytning.fid(), endreOrgtilknytningDato);
 
         orgtilknytningCommandService.endreOrgtilknytningDato(orgtilknytning.fid(), endreOrgtilknytningDato);
+
+        settTypeEksternSamarbeidspartnerHvisSkatt(orgtilknytning, metadata);
+        settTypeKonsulentHvisIkkeSkatt(orgtilknytning, metadata);
     }
 
     private void avsluttOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
@@ -329,6 +353,26 @@ public class EksterneRessurserProcessor {
         orgtilknytningCommandService.avvikleOrgtilknytning(orgtilknytning.fid(), avvikleOrgtilknytning);
     }
 
+    private void settTilknytningtype(Tilknytningtype type, String orgtilknytningFid, String navident, InputMetadata metadata) {
+        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(navident)) {
+            log.info("Navident {} er mastered. Vi avslutter ikke orgtilknytning for denne", navident);
+            return;
+        }
+
+        var endreTilknytningsType =  new EndreTilknytningtypeCommand(
+            orgtilknytningFid,
+            Optional.of(type),
+            metadata
+        );
+
+        log.debug("Endrer tilknytningstype til {} for navident {}. (Lagring skrudd på: {})", type, navident, unleash.isEnabled(UNLEASH_OPPDATER_TILKNYTNINGSTYPE_FOR_EKSTERNE));
+
+        if (unleash.isEnabled(UNLEASH_OPPDATER_TILKNYTNINGSTYPE_FOR_EKSTERNE)) {
+            orgtilknytningCommandService.endreTilknytningtype(endreTilknytningsType);
+        }
+    }
+
+
     private void fjernEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
         if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(orgtilknytning.navident())) {
             log.info("Navident {} er mastered. Vi fjerner ikke orgtilknytning for denne", orgtilknytning.navident());
@@ -347,5 +391,32 @@ public class EksterneRessurserProcessor {
         log.debug("Lager FjernOrgtilknytning event for fid {}:\n {}", orgtilknytning.fid(), fjernOrgtilknytning);
 
         orgtilknytningCommandService.fjernOrgtilknytning(orgtilknytning.fid(), fjernOrgtilknytning);
+    }
+
+
+    private void settTypeKonsulentHvisIkkeSkatt(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
+        if (erTypeKonsulent(orgtilknytning)) return; // Er allerede konsulent
+
+        IOrgenhet orgenhet = orgenhetService.getById(orgtilknytning.orgEnhetId()).orElse(null);
+        if (!erUnderSkatteetatenNiv0Enhet(orgenhet)) { // Hvis ikke under 'skatteetaten' så er det Konsulent
+            settTilknytningtype(Tilknytningtype.KONSULENT, orgtilknytning.fid(), orgtilknytning.navident(), metadata);
+        }
+    }
+
+    private void settTypeEksternSamarbeidspartnerHvisSkatt(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
+        if (erTypeEksternSamarbeispartner(orgtilknytning)) return; // Er allerede ekstern samarbeidspartner
+
+        IOrgenhet orgenhet = orgenhetService.getById(orgtilknytning.orgEnhetId()).orElse(null);
+        if (erUnderSkatteetatenNiv0Enhet(orgenhet)) {
+            settTilknytningtype(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER, orgtilknytning.fid(), orgtilknytning.navident(), metadata);
+        }
+    }
+
+    private static boolean erTypeEksternSamarbeispartner(OrgtilknytningState orgtilknytning) {
+        return Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER.equals(orgtilknytning.orgtilknytningType().orElse(null));
+    }
+
+    private static boolean erTypeKonsulent(OrgtilknytningState orgtilknytning) {
+        return Tilknytningtype.KONSULENT.equals(orgtilknytning.orgtilknytningType().orElse(null));
     }
 }
