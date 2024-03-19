@@ -115,7 +115,7 @@ public class ImportNavIdenter {
         }
 
         if (finnesNavidentAllerede(navIdent)) {
-            log.error(LogConfig.SECURE_LOGS, "Lest navIdent '{}' fra importlinje finnes i fra før: {}", navIdent, importLine);
+            log.info("Lest navIdent '{}' fra importlinje finnes i fra før", navIdent);
             return;
         }
 
