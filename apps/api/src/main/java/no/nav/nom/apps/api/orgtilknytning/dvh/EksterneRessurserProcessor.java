@@ -39,8 +39,6 @@ public class EksterneRessurserProcessor {
     private final NomMastered nomMastered;
     private final Unleash unleash;
 
-    private static final String UNLEASH_OPPDATER_TILKNYTNINGSTYPE_FOR_EKSTERNE =  "nom.orgtilknytning-eksterne.oppdater-tilknytningstype";
-
     public EksterneRessurserProcessor(
             RemedyEnhetMapperService remedyEnhetMapperService, OrgtilknytningService orgtilknytningService,
             OrgenhetService orgenhetService, OrganiseringStateRepository organiseringStateRepository,
@@ -368,11 +366,9 @@ public class EksterneRessurserProcessor {
             metadata
         );
 
-        log.debug("Endrer tilknytningstype til {} for navident {}. (Lagring skrudd på: {})", type, navident, unleash.isEnabled(UNLEASH_OPPDATER_TILKNYTNINGSTYPE_FOR_EKSTERNE));
+        log.debug("Endrer tilknytningstype til {} for navident {}.", type, navident);
 
-        if (unleash.isEnabled(UNLEASH_OPPDATER_TILKNYTNINGSTYPE_FOR_EKSTERNE)) {
-            orgtilknytningCommandService.endreTilknytningtype(endreTilknytningsType);
-        }
+        orgtilknytningCommandService.endreTilknytningtype(endreTilknytningsType);
     }
 
 

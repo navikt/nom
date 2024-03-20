@@ -55,7 +55,7 @@
     </appender>
 
 <!-- NOM loggers -->
-    <logger name="no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserProcessor" level="debug" />
+<!--    <logger name="no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserProcessor" level="debug" />-->
 <!--    <logger name="no.nav.nom.apps.api.orgtilknytning" level="debug" />-->
 <!--    <logger name="no.nav.nom" level="debug" />-->
 <!--    <logger name="no.nav.nom.apps.api.common.security" level="trace"/>-->
