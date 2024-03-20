@@ -152,5 +152,3 @@ enum TilknytningType {
     KONSULENT,
     EKSTERN_SAMARBEIDSPARTNER
 }
-
-scalar Date @specifiedBy(url: "https://tools.ietf.org/html/rfc3339")
