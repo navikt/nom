@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.dvh.dvhdiff;
 
 import no.nav.nom.apps.api.DvhRessursUtils;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
-import no.nav.nom.apps.api.dvh.DvhTestBase;
+import no.nav.nom.apps.api.dvh.OldDvhTestBase;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.contract.nom.Sektor;
@@ -34,7 +34,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @DisplayName("dvh-diffing")
-public class RessursEndringFraDvhTest extends DvhTestBase {
+public class RessursEndringFraDvhTest extends OldDvhTestBase {
 
     @SpyBean
     private KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate;
