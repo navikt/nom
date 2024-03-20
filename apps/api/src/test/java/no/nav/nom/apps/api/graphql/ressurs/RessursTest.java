@@ -53,7 +53,7 @@ class RessursTest extends RessursTestBase {
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
         assertEquals(ressursState.navident(), outputRessurs.getNavIdent());
-        assertEquals(ressursState.personident(), outputRessurs.getPersonIdent());
+        assertEquals(sladdetPersonident(ressursState.personident()), outputRessurs.getPersonIdent());
     }
 
     @Test
@@ -96,7 +96,7 @@ class RessursTest extends RessursTestBase {
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
         assertEquals(ressurs.navident(), outputRessurs.getNavIdent());
-        assertEquals(ressurs.personident(), outputRessurs.getPersonIdent());
+        assertEquals(sladdetPersonident(ressurs.personident()), outputRessurs.getPersonIdent());
     }
 
     @Test
@@ -181,7 +181,7 @@ class RessursTest extends RessursTestBase {
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
         assertEquals(ressursState.navident(), outputRessurs.getNavIdent());
-        assertEquals(ressursState.personident(), outputRessurs.getPersonIdent());
+        assertEquals(sladdetPersonident(ressursState.personident()), outputRessurs.getPersonIdent());
         assertEquals(ressursState.sluttdato().orElseThrow(), outputRessurs.getSluttdato());
     }
 
@@ -210,7 +210,7 @@ class RessursTest extends RessursTestBase {
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
         assertEquals(ressursState.navident(), outputRessurs.getNavIdent());
-        assertEquals(ressursState.personident(), outputRessurs.getPersonIdent());
+        assertEquals(sladdetPersonident(ressursState.personident()), outputRessurs.getPersonIdent());
         assertEquals(ressursState.startdato().orElseThrow(), outputRessurs.getStartdato());
     }
 
@@ -218,8 +218,8 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Kan hente fulle navn fra PDL")
     void scenarioNavn1() {
-        createRessursHendelseEventSource("3");
-        createRessursHendelseEventSource("4");
+        var r1 = createRessursHendelseEventSource("3");
+        var r2 = createRessursHendelseEventSource("4");
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent3", "testPersonIdent4");
 
@@ -228,15 +228,16 @@ class RessursTest extends RessursTestBase {
         final var ressurser = response.path("ressurser").entityList(JsonNode.class).get();
         assertEquals(2, ressurser.size());
 
-        pdlUtils.assertNavn(ressurser.get(0).get("ressurs").get("personIdent").textValue(), ressurser.get(0).get("ressurs").get("person").get("navn"));
-        pdlUtils.assertNavn(ressurser.get(1).get("ressurs").get("personIdent").textValue(), ressurser.get(1).get("ressurs").get("person").get("navn"));
+        // assertions krever samme rekkefølge i respons som i event-source
+        pdlUtils.assertNavn(r1.personident(), ressurser.get(0).get("ressurs").get("person").get("navn"));
+        pdlUtils.assertNavn(r2.personident(), ressurser.get(1).get("ressurs").get("person").get("navn"));
     }
 
     @Test
     @DisplayName("Kan hente navn uten mellomnavn fra PDL")
     void scenarioNavn2() {
-        createRessursHendelseEventSource("3");
-        createRessursHendelseEventSource("4");
+        var r3 = createRessursHendelseEventSource("3");
+        var r4 = createRessursHendelseEventSource("4");
 
         pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
 
@@ -245,8 +246,9 @@ class RessursTest extends RessursTestBase {
         final var ressurser = response.path("ressurser").entityList(JsonNode.class).get();
         assertEquals(2, ressurser.size());
 
-        pdlUtils.assertNavn(ressurser.get(0).get("ressurs").get("personIdent").textValue(), ressurser.get(0).get("ressurs").get("person").get("navn"));
-        pdlUtils.assertNavn(ressurser.get(1).get("ressurs").get("personIdent").textValue(), ressurser.get(1).get("ressurs").get("person").get("navn"));
+        // assertions krever samme rekkefølge i respons som i event-source
+        pdlUtils.assertNavn(r3.personident(), ressurser.get(0).get("ressurs").get("person").get("navn"));
+        pdlUtils.assertNavn(r4.personident(), ressurser.get(1).get("ressurs").get("person").get("navn"));
     }
 
     @Test
@@ -490,6 +492,10 @@ class RessursTest extends RessursTestBase {
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
         assertEquals(ressursState.navident(), outputRessurs.get("navident").textValue());
         assertEquals(outputRessurs.get("telefon").get(0).get("nummer").textValue(), telefonNummer);
+    }
+
+    private String sladdetPersonident(String personident){
+        return personident.replaceFirst(".{5}$","*****");
     }
 
 

@@ -12,11 +12,13 @@ public class MappingUtils {
     public static Ressurs toRessurs(RessursState ressursState) {
         final var sektor = singletonList(ressursState.sektor());
 
+        var sladdetPersonIdent = ressursState.personident().replaceFirst(".{5}$","*****");
+
         return Ressurs.builder()
                 .navident(ressursState.navident())
                 .navIdent(ressursState.navident())
-                .personident(ressursState.personident())
-                .personIdent(ressursState.personident())
+                .personident(sladdetPersonIdent)
+                .personIdent(sladdetPersonIdent)
                 .ressurstype(sektor)
                 .sektor(sektor)
                 .startdato(ressursState.startdato().orElse(null))
