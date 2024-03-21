@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.teamcat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.SneakyThrows;
+import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
@@ -21,6 +22,7 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
@@ -60,6 +62,8 @@ public class TeamcatControllerTest extends RestTestBase {
     @MockBean
     private OrgEnhetMapper orgEnhetMapper;
 
+    @Autowired
+    TestTokensGenerator testTokensGenerator;
 
     private Optional<RessursState> createRessursState(String navident) {
         RessursState ressursState = new RessursState(
@@ -330,7 +334,7 @@ public class TeamcatControllerTest extends RestTestBase {
     private String teamcatClientToken() {
         Map<String, Object> claims = new HashMap<>();
         claims.put("azp_name", "teamcatClient");
-        return validToken(claims);
+        return testTokensGenerator.validToken(claims);
     }
 
 }

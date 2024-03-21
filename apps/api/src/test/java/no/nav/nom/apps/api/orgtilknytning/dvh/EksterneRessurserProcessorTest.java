@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import io.getunleash.Unleash;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
@@ -32,6 +33,8 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
     @Mock
     OrgtilknytningService orgtilknytningService;
     @Mock
+    OrganiseringStateRepository organiseringStateRepository;
+    @Mock
     OrgenhetService orgenhetService;
     @Mock
     NomMastered nomMastered;
@@ -50,6 +53,7 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
             remedyEnhetMapperService,
             orgtilknytningService,
             orgenhetService,
+            organiseringStateRepository,
             orgtilknytningCommandService,
             nomMastered,
             unleash

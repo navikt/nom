@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.ressurs.api.app;
 
 import lombok.SneakyThrows;
 import lombok.val;
+import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
@@ -29,6 +30,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -73,6 +75,9 @@ public class RessursControllerTest extends RestTestBase {
     @MockBean
     private AuthResolver authResolver;
 
+    @Autowired
+    TestTokensGenerator testToken;
+
     @BeforeEach
     void setMockExpectations(){
         when(authResolver.kanRedigereRessurs(any())).thenReturn(true);
@@ -102,7 +107,7 @@ public class RessursControllerTest extends RestTestBase {
                 .queryParam("sluttdato", LocalDate.now())
                 .build()
             )
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomWriteGroupAndNomUiAzpToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
             .exchange()
             .expectStatus().isOk()
             .expectBodyList(RessursState.class)
@@ -120,7 +125,7 @@ public class RessursControllerTest extends RestTestBase {
     @MethodSource("skal_bare_opprette_eksterne_ressurser_input")
     void skal_bare_opprette_eksterne_ressurser(Sektor sektor) {
         postOpprettRessursRequest(
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             opprettRessursRequest().toBuilder().sektor(sektor).build()
         )
             .expectStatus().isBadRequest()
@@ -179,7 +184,7 @@ public class RessursControllerTest extends RestTestBase {
             .thenReturn(ressursState());
 
         postOpprettRessursRequest(
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             request
         )
             .expectStatus().is2xxSuccessful()
@@ -198,7 +203,7 @@ public class RessursControllerTest extends RestTestBase {
     void skal_ikke_opprette_ekstern_ressurs_uten_sluttDato() {
 
         postOpprettRessursRequest(
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             opprettRessursRequest().toBuilder()
                 .sluttDato(Optional.empty()).build()
         )
@@ -221,7 +226,7 @@ public class RessursControllerTest extends RestTestBase {
         when(authResolver.kanOppretteRessurs(any())).thenReturn(false);
 
         postOpprettRessursRequest(
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             opprettRessursRequest().toBuilder()
                 .sluttDato(Optional.empty()).build()
         )
@@ -243,7 +248,7 @@ public class RessursControllerTest extends RestTestBase {
 
         postUpdateVisningsnavnRequest(
             existingRessurs.navident(),
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             updateVisningsnavnRequest
         )
             .expectStatus().isOk();
@@ -273,7 +278,7 @@ public class RessursControllerTest extends RestTestBase {
 
         postUpdateVisningsnavnRequest(
             existingRessurs.navident(),
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             updateVisningsnavnRequest
         )
             .expectStatus().isForbidden();
@@ -308,7 +313,7 @@ public class RessursControllerTest extends RestTestBase {
             )
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteGroupAndNomUiAzpToken());
+                httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp());
             })
             .bodyValue(request)
             .exchange()
@@ -354,7 +359,7 @@ public class RessursControllerTest extends RestTestBase {
             )
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteGroupAndNomUiAzpToken());
+                httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp());
             })
             .bodyValue(request)
             .exchange()
@@ -379,7 +384,7 @@ public class RessursControllerTest extends RestTestBase {
 
         postUpdateVisningsnavnRequest(
             existingRessurs.navident(),
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             updateVisningsnavnRequest
         )
             .expectStatus().isBadRequest();
@@ -409,7 +414,7 @@ public class RessursControllerTest extends RestTestBase {
 
         webTestClient.get()
             .uri(endpointPath)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomWriteGroupAndNomUiAzpToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
             .exchange()
             .expectStatus().isOk()
             .expectBody()
@@ -443,7 +448,7 @@ public class RessursControllerTest extends RestTestBase {
 
         webTestClient.get()
             .uri(endpointPath)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomAdminUserToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
             .exchange()
             .expectStatus().isOk()
             .expectBody()
@@ -472,7 +477,7 @@ public class RessursControllerTest extends RestTestBase {
 
         webTestClient.get()
             .uri(endpointPath)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomRemedyIntegrasjonAzpToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomRemedyIntegrasjonAzp()))
             .exchange()
             .expectStatus().isOk()
             .expectBody()
@@ -507,7 +512,7 @@ public class RessursControllerTest extends RestTestBase {
             )
         )).thenReturn(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());
 
-        postUpdateFysiskeBrukerstederRequest(existingRessurs.fid(), nomWriteGroupAndNomUiAzpToken(), updateFysiskeBrukerstederRequest)
+        postUpdateFysiskeBrukerstederRequest(existingRessurs.fid(), testToken.nomWriteGroupAndNomUiAzp(), updateFysiskeBrukerstederRequest)
             .expectStatus().isOk();
 
         var oppdaterFysiskeBrukerstederCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterFysiskeBrukerstederCommand.class);
@@ -544,7 +549,7 @@ public class RessursControllerTest extends RestTestBase {
             )
         )).thenReturn(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());
 
-        postUpdateFysiskeBrukerstederRequest(existingRessurs.fid(), nomWriteGroupAndNomUiAzpToken(), updateFysiskeBrukerstederRequest)
+        postUpdateFysiskeBrukerstederRequest(existingRessurs.fid(), testToken.nomWriteGroupAndNomUiAzp(), updateFysiskeBrukerstederRequest)
             .expectStatus().isForbidden();
     }
 
@@ -558,7 +563,7 @@ public class RessursControllerTest extends RestTestBase {
 
         when(ressursStateRepository.findByFid(existingRessurs.fid())).thenReturn(Optional.of(existingRessurs));
 
-        postUpdateFysiskeBrukerstederRequest(existingRessurs.fid(), nomWriteGroupAndNomUiAzpToken(), updateFysiskeBrukerstederRequest)
+        postUpdateFysiskeBrukerstederRequest(existingRessurs.fid(), testToken.nomWriteGroupAndNomUiAzp(), updateFysiskeBrukerstederRequest)
             .expectStatus().isBadRequest()
             .expectBody(StandardResponse.class)
             .isEqualTo(StandardResponse.builder().message(expectedMessage).build());

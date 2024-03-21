@@ -354,7 +354,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         final var outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {}).get(0);
 
         assertEquals(ressurs.navident(), outputLeder.getRessurs().getNavIdent());
-        assertEquals(ressurs.personident(), outputLeder.getRessurs().getPersonIdent());
+        assertEquals(ressurs.personident().replaceFirst(".{5}$","*****"), outputLeder.getRessurs().getPersonIdent());
     }
 
     @Test
@@ -445,7 +445,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         final var outputRessurs = outputKoblinger.get(0).getRessurs();
         assertEquals(ressurs.navident(), outputRessurs.getNavIdent());
-        assertEquals(ressurs.personident(), outputRessurs.getPersonIdent());
+        assertEquals(sladdetPersonident(ressurs.personident()), outputRessurs.getPersonIdent());
     }
 
     @Test
@@ -500,6 +500,10 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         return organisasjonsenhetResult.stream()
             .filter(e -> e.getId().equals(id))
             .findFirst();
+    }
+
+    private String sladdetPersonident(String personident){
+        return personident.replaceFirst(".{5}$","*****");
     }
 
 }

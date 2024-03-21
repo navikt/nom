@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.ressurs.api.v1.remedy;
 
 import lombok.SneakyThrows;
 import lombok.val;
+import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
@@ -19,6 +20,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +43,9 @@ public class RemedyControllerTest extends RestTestBase {
 
     @MockBean
     protected RessursStateRepository ressursStateRepository;
+
+    @Autowired
+    TestTokensGenerator testToken;
 
     private Optional<RessursState> createRessursState(String personident, NavnDTO navn) {
         RessursState ressursState = new RessursState(
@@ -87,7 +92,7 @@ public class RemedyControllerTest extends RestTestBase {
             .uri("/api/v1/remedy/finnRessurs")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(queryPersonClientToken());
+                httpHeaders.setBearerAuth(testToken.queryPersonClient());
             })
             .bodyValue(request)
             .exchange()
@@ -109,7 +114,7 @@ public class RemedyControllerTest extends RestTestBase {
             .uri("/api/v1/remedy/finnRessurs")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(queryPersonClientToken());
+                httpHeaders.setBearerAuth(testToken.queryPersonClient());
             })
             .bodyValue(request)
             .exchange()
@@ -148,7 +153,7 @@ public class RemedyControllerTest extends RestTestBase {
             .uri("/api/v1/remedy/opprettRessurs")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(mutateRessursClientToken());
+                httpHeaders.setBearerAuth(testToken.mutateRessursClient());
             })
             .bodyValue(request)
             .exchange()
@@ -204,7 +209,7 @@ public class RemedyControllerTest extends RestTestBase {
             .uri("/api/v1/remedy/opprettRessurs")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(mutateRessursClientToken());
+                httpHeaders.setBearerAuth(testToken.mutateRessursClient());
             })
             .bodyValue(request)
             .exchange()
@@ -283,7 +288,7 @@ public class RemedyControllerTest extends RestTestBase {
             .uri("/api/v1/remedy/opprettRessurs")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(mutateRessursClientToken());
+                httpHeaders.setBearerAuth(testToken.mutateRessursClient());
             })
             .bodyValue(request)
             .exchange()

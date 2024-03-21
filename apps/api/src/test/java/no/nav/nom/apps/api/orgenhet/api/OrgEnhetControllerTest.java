@@ -1,4 +1,5 @@
 package no.nav.nom.apps.api.orgenhet.api;
+import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -23,6 +25,9 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
     @MockBean
     OrgEnhetCommandService orgEnhetCommandService;
+
+    @Autowired
+    TestTokensGenerator testToken;
 
     @Captor
     ArgumentCaptor<EndreOrgEnhetsType> endreOrgEnhetsTypeArgumentCaptor;
@@ -46,7 +51,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
         orgEnhetStateRepository.putEventAggregate(existingOrgEnhet);
 
-        postOrgenhetType(nomAdminUserToken(), setOrgEnhetsTypeRequest)
+        postOrgenhetType(testToken.nomAdminUser(), setOrgEnhetsTypeRequest)
             .expectStatus().isOk();
 
         verify(orgEnhetCommandService, times(1))
@@ -72,7 +77,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .orgEnhetsType(existingOrgenhetsType)
             .build();
 
-        postOrgenhetType(nomAdminUserToken(), requestBody)
+        postOrgenhetType(testToken.nomAdminUser(), requestBody)
             .expectStatus().isOk();
 
         verify(orgEnhetCommandService, times(0)).endreOrgEnhetsType(any(), any());
@@ -81,7 +86,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
     @Test
     public void should_return_404_when_org_enhet_not_found() {
 
-        postOrgenhetType(nomAdminUserToken(), setOrgEnhetsTypeRequest())
+        postOrgenhetType(testToken.nomAdminUser(), setOrgEnhetsTypeRequest())
             .expectStatus().isNotFound();
 
         verify(orgEnhetCommandService, times(0))
@@ -91,7 +96,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
     @Test
     public void should_return_403_for_users_without_access() {
-        postOrgenhetType(noScopesUserToken(), setOrgEnhetsTypeRequest())
+        postOrgenhetType(testToken.noScopesUser(), setOrgEnhetsTypeRequest())
             .expectStatus().isForbidden();
     }
 

@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
@@ -33,20 +34,20 @@ public class EksterneRessurserProcessor {
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgtilknytningService orgtilknytningService;
     private final OrgenhetService orgenhetService;
+    private final OrganiseringStateRepository organiseringStateRepository;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final NomMastered nomMastered;
     private final Unleash unleash;
 
-    private static final String UNLEASH_OPPDATER_TILKNYTNINGSTYPE_FOR_EKSTERNE =  "nom.orgtilknytning-eksterne.oppdater-tilknytningstype";
-
     public EksterneRessurserProcessor(
             RemedyEnhetMapperService remedyEnhetMapperService, OrgtilknytningService orgtilknytningService,
-            OrgenhetService orgenhetService,
+            OrgenhetService orgenhetService, OrganiseringStateRepository organiseringStateRepository,
             OrgtilknytningCommandService orgtilknytningCommandService, NomMastered nomMastered, Unleash unleash
     ) {
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.orgtilknytningService = orgtilknytningService;
         this.orgenhetService = orgenhetService;
+        this.organiseringStateRepository = organiseringStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.nomMastered = nomMastered;
         this.unleash = unleash;
@@ -110,7 +111,6 @@ public class EksterneRessurserProcessor {
                 log.debug("Ekstern ressurs {} har eksisterende orgtilknytning som ikke trenger endring", eksternRessurs.navident());
                 // Oppdater evt tilknytningstypen - hvis denne er ikke er korrekt
                 settTypeEksternSamarbeidspartnerHvisSkatt(sisteEksisterendeOrgtilknytning, metadata);
-                settTypeKonsulentHvisIkkeSkatt(sisteEksisterendeOrgtilknytning, metadata);
             } else {
                 if (erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {
                     // Sluttdato er endret, endre sluttdato på eksisterende orgtilknytning - ingen flere endringer påkrevd.
@@ -253,7 +253,11 @@ public class EksterneRessurserProcessor {
     }
 
     private boolean erUnderSkatteetatenNiv0Enhet(IOrgenhet orgenhet) {
-        return erSkatteetatenNiv0Enhet(orgenhet) || orgenhetService.getByFid(orgenhet.getOverordnetOrgEnhetFid().orElse(null)).map(this::erSkatteetatenNiv0Enhet).orElse(false);
+        var organisering = organiseringStateRepository.findActiveById(orgenhet.getId());
+        if (organisering.isEmpty()) {
+            return false;
+        }
+        return erSkatteetatenNiv0Enhet(orgenhet) || orgenhetService.getById(organisering.get().idOver()).map(this::erSkatteetatenNiv0Enhet).orElse(false);
     }
 
     private void opprettOrgtilknytning(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet, LocalDate gyldigFom, InputMetadata metadata) {
@@ -305,8 +309,6 @@ public class EksterneRessurserProcessor {
 
         if (erUnderSkatteetatenNiv0Enhet(orgenhet)) {
             settTilknytningtype(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER, fid, eksternRessurs.navident(), metadata);
-        } else {
-            settTilknytningtype(Tilknytningtype.KONSULENT, fid, eksternRessurs.navident(), metadata);
         }
     }
 
@@ -331,7 +333,6 @@ public class EksterneRessurserProcessor {
         orgtilknytningCommandService.endreOrgtilknytningDato(orgtilknytning.fid(), endreOrgtilknytningDato);
 
         settTypeEksternSamarbeidspartnerHvisSkatt(orgtilknytning, metadata);
-        settTypeKonsulentHvisIkkeSkatt(orgtilknytning, metadata);
     }
 
     private void avsluttOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
@@ -365,11 +366,9 @@ public class EksterneRessurserProcessor {
             metadata
         );
 
-        log.debug("Endrer tilknytningstype til {} for navident {}. (Lagring skrudd på: {})", type, navident, unleash.isEnabled(UNLEASH_OPPDATER_TILKNYTNINGSTYPE_FOR_EKSTERNE));
+        log.debug("Endrer tilknytningstype til {} for navident {}.", type, navident);
 
-        if (unleash.isEnabled(UNLEASH_OPPDATER_TILKNYTNINGSTYPE_FOR_EKSTERNE)) {
-            orgtilknytningCommandService.endreTilknytningtype(endreTilknytningsType);
-        }
+        orgtilknytningCommandService.endreTilknytningtype(endreTilknytningsType);
     }
 
 
@@ -393,18 +392,8 @@ public class EksterneRessurserProcessor {
         orgtilknytningCommandService.fjernOrgtilknytning(orgtilknytning.fid(), fjernOrgtilknytning);
     }
 
-
-    private void settTypeKonsulentHvisIkkeSkatt(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
-        if (erTypeKonsulent(orgtilknytning)) return; // Er allerede konsulent
-
-        IOrgenhet orgenhet = orgenhetService.getById(orgtilknytning.orgEnhetId()).orElse(null);
-        if (!erUnderSkatteetatenNiv0Enhet(orgenhet)) { // Hvis ikke under 'skatteetaten' så er det Konsulent
-            settTilknytningtype(Tilknytningtype.KONSULENT, orgtilknytning.fid(), orgtilknytning.navident(), metadata);
-        }
-    }
-
     private void settTypeEksternSamarbeidspartnerHvisSkatt(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
-        if (erTypeEksternSamarbeispartner(orgtilknytning)) return; // Er allerede ekstern samarbeidspartner
+        if (erTypeEksternSamarbeidspartner(orgtilknytning)) return; // Er allerede ekstern samarbeidspartner
 
         IOrgenhet orgenhet = orgenhetService.getById(orgtilknytning.orgEnhetId()).orElse(null);
         if (erUnderSkatteetatenNiv0Enhet(orgenhet)) {
@@ -412,11 +401,7 @@ public class EksterneRessurserProcessor {
         }
     }
 
-    private static boolean erTypeEksternSamarbeispartner(OrgtilknytningState orgtilknytning) {
+    private static boolean erTypeEksternSamarbeidspartner(OrgtilknytningState orgtilknytning) {
         return Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER.equals(orgtilknytning.orgtilknytningType().orElse(null));
-    }
-
-    private static boolean erTypeKonsulent(OrgtilknytningState orgtilknytning) {
-        return Tilknytningtype.KONSULENT.equals(orgtilknytning.orgtilknytningType().orElse(null));
     }
 }

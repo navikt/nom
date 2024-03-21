@@ -18,7 +18,7 @@ public class TlfFraDvhTest extends DvhTestBase {
         stubTlfFromString(tlfDvhPayload);
         stubResourcesFromString(resourceInitDvhPayload);
 
-        loadFromDvh();
+        dvhRestConsumer.loadTlfFromDvh();
 
         var tlfList1 = this.dvhRepository.getTelefonNrListByNavIdent("A123123");
         assertThat(tlfList1.get(0).getNummer()).isEqualTo("4711220033");
@@ -39,8 +39,7 @@ public class TlfFraDvhTest extends DvhTestBase {
         stubTlfFromString(tlfDvhPayload);
         stubResourcesFromString(resourceInitDvhPayload);
 
-        loadFromDvh();
-
+        dvhRestConsumer.loadTlfFromDvh();
 
         val resourceList = this.ressursStateRepository.getAll();
         for (val r : resourceList) {

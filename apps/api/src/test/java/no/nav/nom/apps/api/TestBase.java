@@ -105,9 +105,7 @@ public abstract class TestBase {
     @MockBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
-    public static String LOGGED_IN_USER_NAVIDENT = "A321321";
-    public static String OAUTH_VALID_AUDIENCE = "test";
-    public static String OAUTH_VALID_ISSUER = "aad";
+
 
     @BeforeEach
     void reset() {
@@ -223,93 +221,5 @@ public abstract class TestBase {
         ressursStateList.forEach(r -> ressursStateRepository.putEventAggregate(r));
     }
 
-    protected String generateToken(String issuer, Map<String, Object>  claims, String audience) {
-        return mockOAuth2Server.issueToken(
-            issuer,
-            "clientId",
-            new DefaultOAuth2TokenCallback(
-                "aad",
-                "subjectId",
-                JOSEObjectType.JWT.getType(),
-                List.of(audience),
-                claims,
-                3600
-            )
-        ).serialize();
-    }
-
-    protected String validToken(Map<String, Object> claims) {
-        return generateToken(OAUTH_VALID_ISSUER, claims, OAUTH_VALID_AUDIENCE);
-    }
-
-
-
-    protected String nomAdminUserToken() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("NAVident", LOGGED_IN_USER_NAVIDENT);
-        claims.put("groups", List.of("nomAdminGroup"));
-        claims.put("azp_name", "nomUiClient");
-        return validToken(claims);
-    }
-
-    protected String nomWriteGroupAndNomUiAzpToken() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("NAVident", LOGGED_IN_USER_NAVIDENT);
-        claims.put("groups", List.of("nomWriteGroup"));
-        claims.put("azp_name", "nomUiClient");
-        return validToken(claims);
-    }
-
-    protected String nomRemedyIntegrasjonAzpToken() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("azp_name", "nomRemedyIntegrasjonClient");
-        return validToken(claims);
-    }
-
-    protected String noScopesUserToken() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("NAVident", LOGGED_IN_USER_NAVIDENT);
-        claims.put("azp_name", "some-app");
-        return validToken(claims);
-    }
-
-    protected String queryPersonClientToken() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("azp_name", "queryPersonClient");
-        return validToken(claims);
-    }
-
-    protected String queryPersonClientToken_withDifferentSubAndOidAttributes() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("azp_name", "queryPersonClient");
-        // different values of sub and oid attributes in the token indicates that the token is ContextToken For an UserPrincipal
-        claims.put("sub", "subject");
-        claims.put("oid", "object");
-        return validToken(claims);
-    }
-
-    protected String mutateRessursClientToken() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("azp_name", "mutateRessursClient");
-        return validToken(claims);
-    }
-
-    protected String noScopesClientToken() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("azp_name", "noScopesClient");
-        return validToken(claims);
-    }
-
-    protected String queryReprFullmaktClientToken() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("azp_name", "dev-fss:repr:repr-fullmakt");
-        return validToken(claims);
-    }
-
-    protected String queryOmadaClientToken() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("azp_name", "queryOmadaClient");
-        return validToken(claims);
-    }
 
 }

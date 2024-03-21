@@ -53,6 +53,7 @@ public class OrgTilknytningResolver {
             .erDagligOppfolging(orgtilknytning.erDagligOppfolging())
             .gyldigFom(orgtilknytning.gyldigFom())
             .gyldigTom(orgtilknytning.gyldigTom().orElse(null))
+            .tilknytningType(orgtilknytning.orgtilknytningType().orElse(null))
             .build();
     }
 }
