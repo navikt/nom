@@ -1,7 +1,9 @@
 package no.nav.nom.apps.api.pdl;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.apps.api.common.security.OnBehalfOfTokenRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,9 @@ import java.util.Optional;
 
 @Service
 public class PdlClient {
+
+    private final Unleash unleash;
+    public static final String UNLEASH_USE_ONBEHALF_OF_TOKEN_IN_PDLCLIENT = "nom.pdlclient.useOnBehalfOfToken";
 
     private static final Logger logger = LoggerFactory.getLogger(PdlClient.class);
     private final static String PDL_HENT_PERSON_QUERY = // language=graphql
@@ -41,11 +46,16 @@ public class PdlClient {
         }
         """;
     private final HttpGraphQlClient graphQlClient;
+    private final OnBehalfOfTokenRepository onBehalfOfTokenRepository;
+
+    private final String pdlScope;
 
     @Autowired
     public PdlClient(
         AppProperties appProperties,
-        OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager
+        OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager,
+        OnBehalfOfTokenRepository onBehalfOfTokenRepository,
+        Unleash unleash
     ) {
         final var pdlProperties = appProperties.clients().pdl();
 
@@ -59,9 +69,38 @@ public class PdlClient {
                 headers.add("behandlingsnummer", pdlProperties.behandlingsnummer());
             })
             .build();
+
+        this.onBehalfOfTokenRepository = onBehalfOfTokenRepository;
+        this.pdlScope = pdlProperties.aadScope();
+        this.unleash = unleash;
     }
 
     public Optional<Person> hentPerson(String personIdent) {
+        if (unleash.isEnabled(UNLEASH_USE_ONBEHALF_OF_TOKEN_IN_PDLCLIENT)){
+            String authToken = onBehalfOfTokenRepository.getTokenFromSpringAuthenticationContext();
+            if(authToken == null) {
+                logger.error("Fikk ingen auth token fra tokenRepository. Skipper oppslag mot PDL");
+                return Optional.empty();
+            }
+
+            // if the context token is for a user principal, we need to get the onBehalfOfToken for the user
+            if(onBehalfOfTokenRepository.isContextTokenForAnUserPrincipal(authToken)) {
+                String onBehalfOfToken = onBehalfOfTokenRepository.getOnbehalfofTokenFor(pdlScope);
+                if(onBehalfOfToken == null) {
+                    logger.error("Fikk ingen onBehalfOfToken fra tokenRepository. Skipper oppslag mot PDL");
+                    return Optional.empty();
+                } else {
+                    // use a graphql client with the onBehalfOfToken
+                    var mutatedGraphqlClientWithOnBehalfOfToken = graphQlClient.mutate().headers(headers -> headers.setBearerAuth(onBehalfOfToken)).build();
+                    return hentPerson(mutatedGraphqlClientWithOnBehalfOfToken, personIdent);
+                }
+            }
+            // if the context token is not for a user principal, we can use the service token directly from oAuth2AuthorizedClientManager
+        }
+        return hentPerson(graphQlClient, personIdent);
+    }
+
+    private Optional<Person> hentPerson(HttpGraphQlClient graphQlClient, String personIdent) {
         return graphQlClient.document(PDL_HENT_PERSON_QUERY)
             .variable("ident", personIdent)
             .execute()

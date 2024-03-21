@@ -279,6 +279,15 @@ public abstract class TestBase {
         return validToken(claims);
     }
 
+    protected String queryPersonClientToken_withDifferentSubAndOidAttributes() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("azp_name", "queryPersonClient");
+        // different values of sub and oid attributes in the token indicates that the token is ContextToken For an UserPrincipal
+        claims.put("sub", "subject");
+        claims.put("oid", "object");
+        return validToken(claims);
+    }
+
     protected String mutateRessursClientToken() {
         Map<String, Object> claims = new HashMap<>();
         claims.put("azp_name", "mutateRessursClient");
