@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.api.app;
 
+import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOverlapException;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
@@ -27,6 +28,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -64,6 +66,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     @MockBean
     private AuthResolver authResolver;
+
+    @Autowired
+    TestTokensGenerator testToken;
 
     @Captor
     ArgumentCaptor<String> stringArgumentCaptor;
@@ -113,7 +118,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .uri("/app/orgtilknytninger")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(noScopesUserToken());
+                httpHeaders.setBearerAuth(testToken.noScopesUser());
             })
             .exchange()
             .expectStatus().is2xxSuccessful()
@@ -147,7 +152,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             )
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(noScopesUserToken());
+                httpHeaders.setBearerAuth(testToken.noScopesUser());
             })
             .exchange()
             .expectStatus().is2xxSuccessful()
@@ -177,7 +182,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .build();
 
         postEndreOrgtilknytningDatoRequest(
-            orgtilknytningToUpdate.fid(), nomWriteGroupAndNomUiAzpToken(), endreOrgtilknytningDatoRequest
+            orgtilknytningToUpdate.fid(), testToken.nomWriteGroupAndNomUiAzp(), endreOrgtilknytningDatoRequest
         ).expectStatus().is2xxSuccessful();
 
         verify(
@@ -221,7 +226,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .build();
 
         postEndreOrgtilknytningDatoRequest(
-            orgtilknytningToUpdate.fid(), nomWriteGroupAndNomUiAzpToken(), endreOrgtilknytningDatoRequest
+            orgtilknytningToUpdate.fid(), testToken.nomWriteGroupAndNomUiAzp(), endreOrgtilknytningDatoRequest
         ).expectStatus().is2xxSuccessful();
 
         var oppdaterSluttdatoCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterSluttdatoCommand.class);
@@ -268,7 +273,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .build();
 
         postEndreOrgtilknytningDatoRequest(
-            orgtilknytningToUpdate.fid(), nomWriteGroupAndNomUiAzpToken(), endreOrgtilknytningDatoRequest
+            orgtilknytningToUpdate.fid(), testToken.nomWriteGroupAndNomUiAzp(), endreOrgtilknytningDatoRequest
         ).expectStatus().is2xxSuccessful();
 
         verify(
@@ -312,7 +317,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .build();
 
         postEndreOrgtilknytningDatoRequest(
-            orgtilknytningToChange.fid(), nomWriteGroupAndNomUiAzpToken(), endreOrgtilknytningDatoRequest
+            orgtilknytningToChange.fid(), testToken.nomWriteGroupAndNomUiAzp(), endreOrgtilknytningDatoRequest
         ).expectStatus().isEqualTo(HttpStatus.CONFLICT)
             .expectBody()
             .jsonPath("message")
@@ -362,7 +367,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .build();
 
         postEndreOrgtilknytningDatoRequest(
-            dagligOppfolgingToChange.fid(), nomWriteGroupAndNomUiAzpToken(), endreOrgtilknytningDatoRequest
+            dagligOppfolgingToChange.fid(), testToken.nomWriteGroupAndNomUiAzp(), endreOrgtilknytningDatoRequest
         ).expectStatus().isEqualTo(HttpStatus.CONFLICT)
             .expectBody()
             .jsonPath("message")
@@ -398,7 +403,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .build();
 
         postEndreOrgtilknytningDatoRequest(
-            orgtilknytningToUpdate.fid(), nomWriteGroupAndNomUiAzpToken(), endreOrgtilknytningDatoRequest
+            orgtilknytningToUpdate.fid(), testToken.nomWriteGroupAndNomUiAzp(), endreOrgtilknytningDatoRequest
         ).expectStatus().isBadRequest();
 
         verify(
@@ -424,7 +429,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         ));
 
         postEndreOrgtilknytningDatoRequest(
-            orgtilknytningToUpdate.fid(), nomWriteGroupAndNomUiAzpToken(), endreOrgtilknytningDatoRequest()
+            orgtilknytningToUpdate.fid(), testToken.nomWriteGroupAndNomUiAzp(), endreOrgtilknytningDatoRequest()
         ).expectStatus().isBadRequest();
     }
 
@@ -433,7 +438,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     void test_update_orgtilknytning_forbidden() {
 
         postEndreOrgtilknytningDatoRequest(
-            "some-fid", noScopesUserToken(), endreOrgtilknytningDatoRequest()
+            "some-fid", testToken.noScopesUser(), endreOrgtilknytningDatoRequest()
         ).expectStatus().isForbidden();
     }
 
@@ -446,7 +451,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
 
         postEndreOrgtilknytningDatoRequest(
-            orgtilknytningToUpdate.fid(), nomWriteGroupAndNomUiAzpToken(), endreOrgtilknytningDatoRequest()
+            orgtilknytningToUpdate.fid(), testToken.nomWriteGroupAndNomUiAzp(), endreOrgtilknytningDatoRequest()
         ).expectStatus().isForbidden();
     }
 
@@ -470,7 +475,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         postEndreTilknytningtypeRequest(
             orgtilknytningToUpdate.fid(),
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             endreTilknytningtypeRequest
         ).expectStatus().is2xxSuccessful();
 
@@ -504,7 +509,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         postEndreTilknytningtypeRequest(
             orgtilknytningToUpdate.fid(),
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             endreTilknytningtypeRequest()
         ).expectStatus().isBadRequest();
     }
@@ -515,7 +520,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         postEndreTilknytningtypeRequest(
             "some-fid",
-            noScopesUserToken(),
+            testToken.noScopesUser(),
             endreTilknytningtypeRequest()
         ).expectStatus().isForbidden();
     }
@@ -528,7 +533,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var orgtilknytningToUpdate = orgtilknytningState();
         saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
 
-        postEndreTilknytningtypeRequest(orgtilknytningToUpdate.fid(), nomWriteGroupAndNomUiAzpToken(),endreTilknytningtypeRequest())
+        postEndreTilknytningtypeRequest(orgtilknytningToUpdate.fid(), testToken.nomWriteGroupAndNomUiAzp(),endreTilknytningtypeRequest())
             .expectStatus().isForbidden();
     }
 
@@ -558,7 +563,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .erDagligOppfolging(Optional.of(erDagligOppfolging))
             .build();
 
-        postLeggTilOrgtilknytningRequest(nomWriteGroupAndNomUiAzpToken(), leggTilOrgtilknytningRequest)
+        postLeggTilOrgtilknytningRequest(testToken.nomWriteGroupAndNomUiAzp(), leggTilOrgtilknytningRequest)
             .expectStatus().is2xxSuccessful();
 
         verify(
@@ -638,7 +643,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .setRessursSluttdato(Optional.of(true))
             .build();
 
-        postLeggTilOrgtilknytningRequest(nomWriteGroupAndNomUiAzpToken(), leggTilOrgtilknytningRequest)
+        postLeggTilOrgtilknytningRequest(testToken.nomWriteGroupAndNomUiAzp(), leggTilOrgtilknytningRequest)
             .expectStatus().is2xxSuccessful();
 
         var oppdaterSluttdatoCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterSluttdatoCommand.class);
@@ -676,7 +681,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .setRessursSluttdato(setRessursSluttdato)
             .build();
 
-        postLeggTilOrgtilknytningRequest(nomWriteGroupAndNomUiAzpToken(), leggTilOrgtilknytningRequest)
+        postLeggTilOrgtilknytningRequest(testToken.nomWriteGroupAndNomUiAzp(), leggTilOrgtilknytningRequest)
             .expectStatus().is2xxSuccessful();
 
         verify(ressursCommadService, times(0))
@@ -720,7 +725,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 ).build()
         ));
 
-        postLeggTilOrgtilknytningRequest(nomWriteGroupAndNomUiAzpToken(), leggTilOrgtilknytningRequest)
+        postLeggTilOrgtilknytningRequest(testToken.nomWriteGroupAndNomUiAzp(), leggTilOrgtilknytningRequest)
             .expectStatus().is2xxSuccessful();
 
         verify(ressursCommadService, times(0))
@@ -739,7 +744,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .orgEnhetId(orgenhet.id())
             .build();
 
-        postLeggTilOrgtilknytningRequest(nomWriteGroupAndNomUiAzpToken(), leggTilOrgtilknytningRequest)
+        postLeggTilOrgtilknytningRequest(testToken.nomWriteGroupAndNomUiAzp(), leggTilOrgtilknytningRequest)
             .expectStatus().isBadRequest();
 
         verify(
@@ -768,7 +773,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .orgEnhetId(orgEnhetId)
             .build();
 
-        postLeggTilOrgtilknytningRequest(nomWriteGroupAndNomUiAzpToken(), leggTilOrgtilknytningRequest)
+        postLeggTilOrgtilknytningRequest(testToken.nomWriteGroupAndNomUiAzp(), leggTilOrgtilknytningRequest)
             .expectStatus().isBadRequest();
 
         verify(
@@ -809,7 +814,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .gyldigTom(Optional.of(LocalDate.now().plusMonths(6)))
             .build();
 
-        postLeggTilOrgtilknytningRequest(nomWriteGroupAndNomUiAzpToken(), leggTilOrgtilknytningRequest)
+        postLeggTilOrgtilknytningRequest(testToken.nomWriteGroupAndNomUiAzp(), leggTilOrgtilknytningRequest)
             .expectStatus().isEqualTo(HttpStatus.CONFLICT);
 
         verify(
@@ -855,7 +860,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             orgEnhetForExistingDagligOppfolging.toBuilder().id(leggTilOrgtilknytningRequest.orgEnhetId()).build()
         ));
 
-        postLeggTilOrgtilknytningRequest(nomWriteGroupAndNomUiAzpToken(), leggTilOrgtilknytningRequest)
+        postLeggTilOrgtilknytningRequest(testToken.nomWriteGroupAndNomUiAzp(), leggTilOrgtilknytningRequest)
             .expectStatus().isEqualTo(HttpStatus.CONFLICT)
             .expectBody()
             .jsonPath("message")
@@ -916,7 +921,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(remedyEnhetMapperService.findByNomId(existingOrgtilknytning.orgEnhetId()))
             .thenReturn(Optional.of(RemedyEnhet.builder().remedyEnhetId("newRemedyEnhet").build()));
 
-        postLeggTilOrgtilknytningRequest(nomWriteGroupAndNomUiAzpToken(), leggTilOrgtilknytningRequest)
+        postLeggTilOrgtilknytningRequest(testToken.nomWriteGroupAndNomUiAzp(), leggTilOrgtilknytningRequest)
             .expectStatus().isEqualTo(HttpStatus.BAD_REQUEST)
             .expectBody()
             .jsonPath("message")
@@ -943,7 +948,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .orgEnhetId(orgenhet.id())
             .build();
 
-        postLeggTilOrgtilknytningRequest(nomWriteGroupAndNomUiAzpToken(), leggTilOrgtilknytningRequest)
+        postLeggTilOrgtilknytningRequest(testToken.nomWriteGroupAndNomUiAzp(), leggTilOrgtilknytningRequest)
             .expectStatus().isForbidden();
     }
 
@@ -962,7 +967,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             )
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(noScopesUserToken());
+                httpHeaders.setBearerAuth(testToken.noScopesUser());
             })
             .exchange()
             .expectStatus().is2xxSuccessful()
@@ -987,7 +992,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             )
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(noScopesUserToken());
+                httpHeaders.setBearerAuth(testToken.noScopesUser());
             })
             .exchange()
             .expectStatus().is4xxClientError();
@@ -1029,7 +1034,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         postOppdaterOrgtilknytningerForRessursRequest(
             tilknyttetRessurs.navident(),
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             oppdaterOrgtilknytningerForRessursRequest
         )
             .expectStatus().is2xxSuccessful();
@@ -1119,7 +1124,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         postOppdaterOrgtilknytningerForRessursRequest(
             tilknyttetRessurs.navident(),
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             oppdaterOrgtilknytningerForRessursRequest
         )
             .expectStatus().is2xxSuccessful();
@@ -1199,7 +1204,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         postOppdaterOrgtilknytningerForRessursRequest(
             tilknyttetRessurs.navident(),
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             oppdaterOrgtilknytningerForRessursRequest
         )
             .expectStatus().is2xxSuccessful();
@@ -1266,7 +1271,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .nyeOrgtilknytninger(List.of(leggTilDagligOppfolgingOrgtilknytningWithTilknytningtypeRequest))
             .build();
 
-        postOppdaterOrgtilknytningerForRessursRequest(tilknyttetRessurs.navident(),nomWriteGroupAndNomUiAzpToken(),oppdaterOrgtilknytningerForRessursRequest)
+        postOppdaterOrgtilknytningerForRessursRequest(tilknyttetRessurs.navident(),testToken.nomWriteGroupAndNomUiAzp(),oppdaterOrgtilknytningerForRessursRequest)
             .expectStatus().isForbidden();
     }
 
@@ -1277,7 +1282,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         postOppdaterOrgtilknytningerForRessursRequest(
             "whatever",
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             oppdaterOrgtilknytningerForRessursRequest
         ).expectStatus().isBadRequest();
     }
@@ -1355,7 +1360,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         postOppdaterOrgtilknytningerForRessursRequest(
             tilknyttetRessurs.navident(),
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             oppdaterOrgtilknytningerForRessursRequest
         ).expectStatus().isBadRequest();
     }

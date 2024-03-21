@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.dvh.dvhdiff;
+package no.nav.nom.apps.api.ressurs.implementations.dvh;
 
 import no.nav.nom.apps.api.DvhRessursUtils;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;

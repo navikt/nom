@@ -2,24 +2,37 @@ package no.nav.nom.apps.api.graphql;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import no.nav.nom.apps.api.TestBase;
+import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureGraphQlTester;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.graphql.test.tester.HttpGraphQlTester;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.util.StreamUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
+
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.emptyMap;
 
 @AutoConfigureGraphQlTester
+@ActiveProfiles("test")
+@SpringBootTest(
+    classes = TestConfig.class,
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+)
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-public abstract class GraphQLTestBase extends TestBase {
+public abstract class GraphQLTestBase  {
 
     private final static Duration TIMEOUT_DURATION = Duration.of(5, SECONDS);
 
@@ -33,6 +46,12 @@ public abstract class GraphQLTestBase extends TestBase {
 
     @Autowired
     DvhStartupLoadMonitor dvhStartupLoadMonitor;
+
+    @Autowired
+    protected ResourceLoader resourceLoader;
+
+    @Autowired
+    TestTokensGenerator testToken;
 
     @BeforeEach
     protected void setup() {
@@ -64,16 +83,27 @@ public abstract class GraphQLTestBase extends TestBase {
 
     @SneakyThrows
     protected GraphQlTester.Response postForResource(String resource, Map<String, Object> vars) {
-        return postForResource(resource, nomAdminUserToken(), vars);
+        return postForResource(resource, testToken.nomAdminUser(), vars);
     }
 
     @SneakyThrows
     protected GraphQlTester.Response postForResourceWithoutAzp(String resource) {
-        return postForResource(resource, noScopesUserToken(), emptyMap());
+        return postForResource(resource, testToken.noScopesUser(), emptyMap());
     }
 
     @BeforeEach
     protected void resetClientResponseTimeout() {
         this.responseTimeout.set(TIMEOUT_DURATION);
+    }
+
+    protected String loadResourceFromClasspath(String location) throws IOException {
+        Resource resource = resourceLoader.getResource("classpath:" + location);
+        return loadResource(resource);
+    }
+
+    private String loadResource(Resource resource) throws IOException {
+        try (InputStream inputStream = resource.getInputStream()) {
+            return StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+        }
     }
 }

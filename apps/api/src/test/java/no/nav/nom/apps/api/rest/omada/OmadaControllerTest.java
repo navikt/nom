@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.rest.omada;
 
+import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
@@ -13,6 +14,7 @@ import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Collections;
@@ -46,6 +48,8 @@ class OmadaControllerTest extends RestTestBase {
     @MockBean
     private DvhRepository dvhRepositoryMock;
 
+    @Autowired
+    TestTokensGenerator testToken;
 
     @Test
     @DisplayName("Henter informasjon Omada trenger for orgEnhet")
@@ -65,7 +69,7 @@ class OmadaControllerTest extends RestTestBase {
 
         webTestClient.get()
             .uri("/api/v1/omada/orgEnhet/{id}", NOM_ID)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(queryOmadaClientToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.queryOmadaClient()))
             .exchange()
             .expectStatus().isOk()
             .expectBody(OmadaOrgEnhetInfoDTO.class)
@@ -93,7 +97,7 @@ class OmadaControllerTest extends RestTestBase {
 
         webTestClient.get()
             .uri("/api/v1/omada/orgEnhet/{id}", NOM_ID)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(queryOmadaClientToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.queryOmadaClient()))
             .exchange()
             .expectStatus().isNotFound();
     }
@@ -116,7 +120,7 @@ class OmadaControllerTest extends RestTestBase {
 
         webTestClient.get()
             .uri("/api/v1/omada/orgEnhet/{id}", NOM_ID)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(queryOmadaClientToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.queryOmadaClient()))
             .exchange()
             .expectStatus().isOk()
             .expectBody(OmadaOrgEnhetInfoDTO.class)
@@ -135,7 +139,7 @@ class OmadaControllerTest extends RestTestBase {
 
         webTestClient.get()
             .uri("/api/v1/omada/telefonnummer/{navIdent}", NAVIDENT)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(queryOmadaClientToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.queryOmadaClient()))
             .exchange()
             .expectStatus().isOk();
     }
@@ -149,7 +153,7 @@ class OmadaControllerTest extends RestTestBase {
 
         webTestClient.get()
             .uri("/api/v1/omada/telefonnummer/{navIdent}", NAVIDENT)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(queryOmadaClientToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.queryOmadaClient()))
             .exchange()
             .expectStatus().isOk()
             .expectBody(OmadaRessursTelefonDTO.class)
@@ -164,7 +168,7 @@ class OmadaControllerTest extends RestTestBase {
 
         webTestClient.get()
             .uri("/api/v1/omada/telefonnummer/{navIdent}", NAVIDENT)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(queryOmadaClientToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.queryOmadaClient()))
             .exchange()
             .expectStatus().isNotFound();
     }

@@ -9,9 +9,11 @@ import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
 import lombok.val;
+import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
 import java.util.Date;
@@ -20,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.requireNonNullElse;
+import static no.nav.nom.apps.api.TestTokensGenerator.LOGGED_IN_USER_NAVIDENT;
+import static no.nav.nom.apps.api.TestTokensGenerator.OAUTH_VALID_AUDIENCE;
+import static no.nav.nom.apps.api.TestTokensGenerator.OAUTH_VALID_ISSUER;
 
 @DisplayName("GraphQL.Sikkerhet")
 class SecurityTest extends SecurityTestBase {
@@ -29,6 +34,8 @@ class SecurityTest extends SecurityTestBase {
     private static final String ressursResource = "ressurs/scenario1.graphql";
     private static final String ressurserResource = "ressurs/scenario3.graphql";
 
+    @Autowired
+    TestTokensGenerator testTokensGenerator;
 
     @Test
     @SneakyThrows
@@ -74,7 +81,7 @@ class SecurityTest extends SecurityTestBase {
 
         var invalidIssuerValue = "invalidIssuer";
 
-        testToken(generateToken(invalidIssuerValue, claims, OAUTH_VALID_AUDIENCE));
+        testToken(testTokensGenerator.generateToken(invalidIssuerValue, claims, OAUTH_VALID_AUDIENCE));
     }
 
     @Test
@@ -86,7 +93,7 @@ class SecurityTest extends SecurityTestBase {
 
         var invalidAudienceValue = "invalidAudience";
 
-        testToken(generateToken(OAUTH_VALID_ISSUER, claims, invalidAudienceValue));
+        testToken(testTokensGenerator.generateToken(OAUTH_VALID_ISSUER, claims, invalidAudienceValue));
     }
 
     @Test
@@ -119,7 +126,7 @@ class SecurityTest extends SecurityTestBase {
         Map<String, Object> claims = new HashMap<>();
         claims.put("NAVident", LOGGED_IN_USER_NAVIDENT);
         claims.put("nbf", Date.from(Instant.now().plusSeconds(60 * 60)));
-        val futureNbfToken = validToken(claims);
+        val futureNbfToken = testTokensGenerator.validToken(claims);
 
         testToken(futureNbfToken);
     }

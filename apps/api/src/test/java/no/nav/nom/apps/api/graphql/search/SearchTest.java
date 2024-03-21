@@ -5,7 +5,7 @@ import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.common.OrgEnhetStateBuilder;
 import no.nav.nom.apps.api.common.RessursStateBuilder;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.graphql.GraphQLTestBase;
+import no.nav.nom.apps.api.graphql.OldGraphQLTestBase;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -34,7 +34,7 @@ import static org.hamcrest.Matchers.not;
 
 @DisplayName("GraphQL.Search")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-public class SearchTest extends GraphQLTestBase {
+public class SearchTest extends OldGraphQLTestBase {
 
     @Autowired
     private DvhRestConsumer dvhRestConsumer;
