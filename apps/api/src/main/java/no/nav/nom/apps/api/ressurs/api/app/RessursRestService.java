@@ -169,6 +169,8 @@ public class RessursRestService {
             throw new InvalidSektorException("Kun eksterne ressurser kan endres");
         }
 
+        validateIngenMellomromEtternavn(updateVisningsnavnRequest.etternavn());
+
         var oppdaterPersonaliaCommand = new OppdaterPersonaliaCommand(
             ressursState.fid(),
             new Visningsnavn(updateVisningsnavnRequest.fornavn(), updateVisningsnavnRequest.mellomnavn(), updateVisningsnavnRequest.etternavn())
@@ -435,7 +437,15 @@ public class RessursRestService {
         if (request.sluttDato().isEmpty()) {
             throw new IllegalArgumentException("Sluttdato må oppgis for opprettelse av ekstern ressurs");
         }
+
+        validateIngenMellomromEtternavn(request.visningsetternavn());
         validateFysiskeBrukerstederExists(Set.of(request.fysiskBrukerstedNr()));
         validateOrgtilknytningTypeSektorCombination(request.tilknytningtype(), request.sektor());
+    }
+
+    private void validateIngenMellomromEtternavn(String visningsetternavn) {
+        if(visningsetternavn.contains(" ") || !visningsetternavn.matches("^(\\S+)$")){
+            throw new IllegalArgumentException("Etternavn kan ikke inneholde linjeskift, mellomrom o.l");
+        }
     }
 }

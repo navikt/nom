@@ -168,5 +168,8 @@ function VisningsnavnForm({
 const navnValidationSchema = yup.object({
   visningsfornavn: yup.string().required("Obligatorisk"),
   visningsmellomnavn: yup.string().optional(),
-  visningsetternavn: yup.string().required("Obligatorisk"),
+  visningsetternavn: yup
+    .string()
+    .required("Obligatorisk")
+    .matches(/^\S+$/, "Etternavn kan ikke inneholde mellomrom"),
 });

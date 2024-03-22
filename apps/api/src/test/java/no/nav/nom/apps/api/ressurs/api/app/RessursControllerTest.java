@@ -35,6 +35,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.Assert;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -133,6 +135,38 @@ public class RessursControllerTest extends RestTestBase {
             .isEqualTo(StandardResponse.builder()
                 .message(InvalidSektorException.actionNotAllowedForSektor(sektor).getMessage())
                 .build()
+            );
+    }
+
+    @Test
+    void skal_ikke_opprette_ressurs_med_feilformatert_etternavn() {
+        postOpprettRessursRequest(
+            testToken.nomWriteGroupAndNomUiAzp(),
+            opprettRessursRequest().toBuilder().sektor(Sektor.EKSTERN).visningsetternavn("har mellomrom")
+                .sluttDato(Optional.of(LocalDate.now().plusDays(10)))
+                .startDato(LocalDate.now().plusDays(10)
+                ).build()
+        )
+            .expectStatus().isBadRequest()
+            .expectBody(String.class).value(it ->
+                Assert.isTrue(it.contains("Etternavn kan ikke inneholde"),"Uventet feilmelding")
+            );
+    }
+
+    @Test
+    void skal_ikke_oppdatere_ressurs_med_feilformatert_etternavn() {
+
+        when(ressursStateRepository.findByNavident(any()))
+            .thenReturn(Optional.of(RessursState.builder().sektor(Sektor.EKSTERN).build()));
+
+        postUpdateVisningsnavnRequest(
+            "navident",
+            testToken.nomWriteGroupAndNomUiAzp(),
+            new UpdateVisningsnavnRequest("fornavn",null,"har mellomrom")
+        )
+            .expectStatus().isBadRequest()
+            .expectBody(String.class).value(it ->
+                Assert.isTrue(it.contains("Etternavn kan ikke inneholde"),"Uventet feilmelding")
             );
     }
 
