@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Button, Heading, Modal } from "@navikt/ds-react";
+import { Button, Modal } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError, AxiosResponse } from "axios";
@@ -109,11 +109,6 @@ export function ConfirmStep() {
       onClose={onClose}
       open
     >
-      <Modal.Header>
-        <Heading level="1" size="medium" spacing>
-          Bekreft registrering
-        </Heading>
-      </Modal.Header>
       <Modal.Body
         css={css`
           display: flex;

@@ -126,7 +126,7 @@ function VisningsnavnForm({
         onSubmit={handleSubmit((values) =>
           navigate({
             to: "/ressurs/create/$step",
-            params: { step: "3" },
+            params: { step: "2" },
             search: (oldSearch) => ({ ...oldSearch, ...values }),
           }),
         )}
