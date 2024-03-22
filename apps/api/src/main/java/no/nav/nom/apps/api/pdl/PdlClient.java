@@ -79,7 +79,7 @@ public class PdlClient {
         if (unleash.isEnabled(UNLEASH_USE_ONBEHALF_OF_TOKEN_IN_PDLCLIENT)){
             String authToken = onBehalfOfTokenRepository.getTokenFromSpringAuthenticationContext();
             if(authToken == null) {
-                logger.error("Fikk ingen auth token fra tokenRepository. Skipper oppslag mot PDL");
+                logger.error("Unable to get auth token from authentication context. SKipping lookup to PDL");
                 return Optional.empty();
             }
 
@@ -87,15 +87,17 @@ public class PdlClient {
             if(onBehalfOfTokenRepository.isContextTokenForAnUserPrincipal(authToken)) {
                 String onBehalfOfToken = onBehalfOfTokenRepository.getOnbehalfofTokenFor(pdlScope);
                 if(onBehalfOfToken == null) {
-                    logger.error("Fikk ingen onBehalfOfToken fra tokenRepository. Skipper oppslag mot PDL");
+                    logger.error("Unable to get or generate onBehalfOfToken. SKipping lookup to PDL");
                     return Optional.empty();
                 } else {
                     // use a graphql client with the onBehalfOfToken
+                    logger.info("The context token is a user principal. OnBehalfOf token will be used for PDL lookup");
                     var mutatedGraphqlClientWithOnBehalfOfToken = graphQlClient.mutate().headers(headers -> headers.setBearerAuth(onBehalfOfToken)).build();
                     return hentPerson(mutatedGraphqlClientWithOnBehalfOfToken, personIdent);
                 }
             }
             // if the context token is not for a user principal, we can use the service token directly from oAuth2AuthorizedClientManager
+            logger.info("The context token is not for a user principal. Service token will be used for PDL lookup");
         }
         return hentPerson(graphQlClient, personIdent);
     }
