@@ -17,6 +17,7 @@ import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
+import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
@@ -24,7 +25,6 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysis
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
-import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
@@ -37,6 +37,7 @@ import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -247,58 +248,50 @@ public class RessursRestService {
         return ressursLedereResolver.ledere(navident);
     }
 
-    public RessursState createRessursAndNotify(
-        OpprettRessursRequest request
-    ) {
+    public RessursState createRessursAndNotify(OpprettRessursRequest request) {
         validateOpprettRessursRequest(request);
 
-        return ressursStateRepository.findByPersonident(request.personident()).orElseGet(() -> {
-            final var createdRessurs = createRessurs(request);
+        final var eksistingRessurs = ressursStateRepository.findByPersonident(request.personident());
 
-            try {
-                ressursOpprettetEmailService.notifyByEmail(createdRessurs.navident(), request.orgEnhetId());
-            } catch (RessursOpprettetEmailException exception) {
-                //TODO: consider handling exception if email sending is important
-                logger.warn("Epost varsling om opprettelse av ressurs til orgenhet leder feilet. {}", exception.getMessage());
-            }
+        if (eksistingRessurs.isPresent() && isActive(eksistingRessurs.get())) {
+            throw new ResponseStatusException(
+                HttpStatusCode.valueOf(409),
+                String.format("Det finnes allerede en aktiv ressurs med personident %s", request.personident())
+            );
+        }
 
-            return createdRessurs;
-        });
+        final var navident = eksistingRessurs.isPresent() ? Optional.of(eksistingRessurs.get().navident()) : Optional.<String>empty();
+        final var createdRessurs = createRessurs(request, navident);
+
+        try {
+            ressursOpprettetEmailService.notifyByEmail(createdRessurs.navident(), request.orgEnhetId());
+        } catch (RessursOpprettetEmailException exception) {
+            //TODO: consider handling exception if email sending is important
+            logger.warn("Epost varsling om opprettelse av ressurs til orgenhet leder feilet. {}", exception.getMessage());
+        }
+
+        return createdRessurs;
     }
 
-    private RessursState createRessurs(OpprettRessursRequest request) {
+    private boolean isActive(RessursState ressursState) {
+        return ressursState.startdato().isPresent() &&
+            !ressursState.startdato().get().isAfter(LocalDate.now()) &&
+            !(ressursState.sluttdato().isPresent() && ressursState.sluttdato().get().isBefore(LocalDate.now()));
+    }
 
-        final var opprettNavidentResponse = nikClient.opprettNavidentOnBehalfOfUser(
-            OpprettNavidentRequest.builder()
-                .personid(request.personident())
-                .identPrefix(request.visningsetternavn().substring(0, 1))
-                .identType("STANDARD")
-                .build()
-        );
+    private RessursState createRessurs(OpprettRessursRequest request, Optional<String> eksisterendeNavident) {
+        final var navident = eksisterendeNavident.orElseGet(() -> createNavident(request));
 
-        if (!opprettNavidentResponse.getStatusCode().is2xxSuccessful()) {
-            throw new ResponseStatusException(
-                opprettNavidentResponse.getStatusCode(),
-                Optional.ofNullable(opprettNavidentResponse.getBody())
-                    .map(OpprettNavidentResponse::getFeilmelding)
-                    .orElse("NIK connection error")
-            );
-        }
+        return createRessurs(request, navident);
+    }
 
-        if (opprettNavidentResponse.getBody() != null && opprettNavidentResponse.getBody().getFeilmelding() != null) {
-            throw new ResponseStatusException(
-                opprettNavidentResponse.getStatusCode(),
-                opprettNavidentResponse.getBody().getFeilmelding()
-            );
-        }
+    private RessursState createRessurs(OpprettRessursRequest request, String navident) {
 
         final var pdlPerson = pdlClient.hentPerson(request.personident());
 
         if (request.visningsmellomnavn() != null && request.visningsmellomnavn().isBlank()) {
             request = request.toBuilder().visningsmellomnavn(null).build();
         }
-
-        logger.debug("createRessurs for {} - {}", opprettNavidentResponse.getBody().getNavident(), request.visningsetternavn());
 
         var metaData = new InputMetadata(
             "REST-API",
@@ -312,7 +305,7 @@ public class RessursRestService {
 
         final var opprettRessursCommand = new OpprettRessursCommand(
             request.personident(),
-            opprettNavidentResponse.getBody().getNavident(),
+            navident,
             pdlPerson,
             request.sektor(),
             new Visningsnavn(
@@ -389,6 +382,37 @@ public class RessursRestService {
         } catch (ExecutionException | TimeoutException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String createNavident(OpprettRessursRequest request) {
+        final var opprettNavidentResponse = nikClient.opprettNavidentOnBehalfOfUser(
+            OpprettNavidentRequest.builder()
+                .personid(request.personident())
+                .identPrefix(request.visningsetternavn().substring(0, 1))
+                .identType("STANDARD")
+                .build()
+        );
+
+        if (!opprettNavidentResponse.getStatusCode().is2xxSuccessful()) {
+            throw new ResponseStatusException(
+                opprettNavidentResponse.getStatusCode(),
+                Optional.ofNullable(opprettNavidentResponse.getBody())
+                    .map(OpprettNavidentResponse::getFeilmelding)
+                    .orElse("NIK connection error")
+            );
+        }
+
+        if (opprettNavidentResponse.getBody() != null && opprettNavidentResponse.getBody().getFeilmelding() != null) {
+            throw new ResponseStatusException(
+                opprettNavidentResponse.getStatusCode(),
+                opprettNavidentResponse.getBody().getFeilmelding()
+            );
+        }
+
+        logger.debug("createRessurs for {} - {}", opprettNavidentResponse.getBody().getNavident(), request.visningsetternavn());
+
+        return opprettNavidentResponse.getBody().getNavident();
+
     }
 
     public void avvikleRessurs(String fid, AvvikleRessursRequest request) {
