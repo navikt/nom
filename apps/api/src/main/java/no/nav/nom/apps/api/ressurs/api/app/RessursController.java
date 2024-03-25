@@ -15,6 +15,7 @@ import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
+import no.nav.nom.apps.api.ressurs.api.exceptions.DuplicateRessursException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
@@ -272,6 +273,15 @@ public class RessursController {
     public ResponseEntity<StandardResponse> handleNotFound(RuntimeException exception) {
         return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
+            .body(StandardResponse.builder().message(exception.getMessage()).build());
+    }
+
+    @ExceptionHandler({
+        DuplicateRessursException.class,
+    })
+    public ResponseEntity<StandardResponse> handleConflict(RuntimeException exception) {
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
             .body(StandardResponse.builder().message(exception.getMessage()).build());
     }
 
