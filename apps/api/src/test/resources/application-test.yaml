@@ -54,6 +54,7 @@ spring:
   kafka:
     security:
       protocol: PLAINTEXT
+    bootstrap-servers: ${KAFKA_BROKERS}
   security:
     oauth2:
       resourceserver:

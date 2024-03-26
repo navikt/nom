@@ -14,7 +14,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import java.time.Duration;
 
 @Configuration
-public class ressursStateListenerConfig {
+public class RessursStateListenerConfig {
     @Bean
     ConsumerFactory<String, RessursState> ressursStateConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
         final var jsonDeserializer = new JsonDeserializer<>(RessursState.class, objectMapper);

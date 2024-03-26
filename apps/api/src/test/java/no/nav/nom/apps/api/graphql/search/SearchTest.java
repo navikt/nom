@@ -53,7 +53,7 @@ public class SearchTest extends OldGraphQLTestBase {
         var r1 = new RessursStateBuilder(1).navident("testNavIdent").personident("testPersonIdent1").build();
         var r2 = new RessursStateBuilder(2).navident("testAnnenNav").personident("testPersonIdent2").build();
 
-        List.of(r1,r2).forEach(this::createRessursHendelseEventSource);
+        List.of(r1,r2).forEach(kafkaUtils::createRessursHendelseEventSource);
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
 
@@ -73,7 +73,7 @@ public class SearchTest extends OldGraphQLTestBase {
     public void scenario2() {
         var e1 = new OrgEnhetStateBuilder(1).navn("testid").build();
         var e2 = new OrgEnhetStateBuilder(2).navn("testid2").build();
-        List.of(e1, e2).forEach(this::createOrgenhetHendelseEventSource);
+        List.of(e1, e2).forEach(kafkaUtils::createOrgenhetHendelseEventSource);
 
         luceneService.addInvalidatedEntitiesToIndex();
 
@@ -93,7 +93,7 @@ public class SearchTest extends OldGraphQLTestBase {
 
         var mocknavn = "testenhet";
         var e1 = new OrgEnhetStateBuilder(1).navn(mocknavn).build();
-        createOrgenhetHendelseEventSource(e1);
+        kafkaUtils.createOrgenhetHendelseEventSource(e1);
         luceneService.addInvalidatedEntitiesToIndex();
 
         final var response = postForResource("search/scenario3.graphql");
@@ -111,8 +111,8 @@ public class SearchTest extends OldGraphQLTestBase {
         var r2 = new RessursStateBuilder(2).visningsnavn("test1", "etternavn").build();
         var e1 = new OrgEnhetStateBuilder(1).navn("testenhet").build();
 
-        List.of(r1,r2).forEach(this::createRessursHendelseEventSource);
-        List.of(e1).forEach(this::createOrgenhetHendelseEventSource);
+        List.of(r1,r2).forEach(kafkaUtils::createRessursHendelseEventSource);
+        List.of(e1).forEach(kafkaUtils::createOrgenhetHendelseEventSource);
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
 
@@ -133,8 +133,8 @@ public class SearchTest extends OldGraphQLTestBase {
     @Test
     @DisplayName("Søk på navn etter ressurs via lucene-wrapper")
     public void scenario51() {
-        createRessursHendelseEventSource("1");
-        createRessursHendelseEventSource("2");
+        kafkaUtils.createRessursHendelseEventSource("1");
+        kafkaUtils.createRessursHendelseEventSource("2");
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
         dvhRestConsumer.loadRessurserOgOrgEnheter();
@@ -149,11 +149,11 @@ public class SearchTest extends OldGraphQLTestBase {
     @Test
     @DisplayName("Søk på navn etter orgenhet via lucene-wrapper")
     public void scenario61() {
-        createRessursHendelseEventSource("1");
-        createRessursHendelseEventSource("2");
+        kafkaUtils.createRessursHendelseEventSource("1");
+        kafkaUtils.createRessursHendelseEventSource("2");
 
-        createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(1).navn("NAV City").build());
-        createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(2).navn("Not-to-find").build());
+        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(1).navn("NAV City").build());
+        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(2).navn("Not-to-find").build());
 
         luceneService.addInvalidatedEntitiesToIndex();
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
@@ -169,8 +169,8 @@ public class SearchTest extends OldGraphQLTestBase {
     public void scenario52() {
         final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavn").build();
 
-        createRessursHendelseEventSource("1");
-        createRessursHendelseEventSource("2");
+        kafkaUtils.createRessursHendelseEventSource("1");
+        kafkaUtils.createRessursHendelseEventSource("2");
 
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
         dvhRestConsumer.loadRessurserOgOrgEnheter();
@@ -191,10 +191,10 @@ public class SearchTest extends OldGraphQLTestBase {
     public void scenario71() {
         var passedDate = LocalDate.now().minusMonths(1L);
 
-        createRessursHendelseEventSource("1");
-        createRessursHendelseEventSource("2");
-        createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(3).navn("test 3").gyldigTom(Optional.of(passedDate)).build());
-        createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(4).navn("test 4").build());
+        kafkaUtils.createRessursHendelseEventSource("1");
+        kafkaUtils.createRessursHendelseEventSource("2");
+        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(3).navn("test 3").gyldigTom(Optional.of(passedDate)).build());
+        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(4).navn("test 4").build());
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
         luceneService.addInvalidatedEntitiesToIndex();
@@ -231,8 +231,8 @@ public class SearchTest extends OldGraphQLTestBase {
         var e2 = new OrgEnhetStateBuilder(2).navn("fornavnet").build();
         var e3 = new OrgEnhetStateBuilder(3).navn("fornavn").build();
 
-        List.of(e1, e2, e3).forEach(this::createOrgenhetHendelseEventSource);
-        List.of(r1).forEach(this::createRessursHendelseEventSource);
+        List.of(e1, e2, e3).forEach(kafkaUtils::createOrgenhetHendelseEventSource);
+        List.of(r1).forEach(kafkaUtils::createRessursHendelseEventSource);
 
         luceneService.addInvalidatedEntitiesToIndex();
 

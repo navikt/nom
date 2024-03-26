@@ -17,7 +17,7 @@ public class PersonTest extends OldGraphQLTestBase {
     @SneakyThrows
     @DisplayName("Kan hente fulle navn fra PDL for person som er ressurs")
     void scenario12() {
-        RessursState ressurs = createRessursHendelseEventSource("3");
+        RessursState ressurs = kafkaUtils.createRessursHendelseEventSource("3");
         pdlUtils.addPersonToPdlResponse(true, ressurs.personident());
 
         final var response = postForResource("person/scenario1.graphql", singletonMap("fnr", ressurs.personident()));

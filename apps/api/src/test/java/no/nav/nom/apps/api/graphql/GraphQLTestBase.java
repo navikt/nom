@@ -1,19 +1,32 @@
 package no.nav.nom.apps.api.graphql;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.getunleash.Unleash;
 import lombok.SneakyThrows;
+import no.nav.nom.apps.api.KafkaUtils;
+import no.nav.nom.apps.api.MockOAuth2ServerInitializer;
 import no.nav.nom.apps.api.TestTokensGenerator;
+import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
+import no.nav.nom.apps.api.graphql.controller.GraphQLOrgEnhetController;
+import no.nav.nom.apps.api.graphql.controller.GraphQLPersonController;
+import no.nav.nom.apps.api.graphql.controller.GraphQLRessursController;
+import no.nav.nom.apps.api.graphql.controller.GraphQLSearchController;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.pdlutils.PdlUtils;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureGraphQlTester;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.graphql.test.tester.ExecutionGraphQlServiceTester;
 import org.springframework.graphql.test.tester.GraphQlTester;
-import org.springframework.graphql.test.tester.HttpGraphQlTester;
-import org.springframework.http.HttpHeaders;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
@@ -25,24 +38,21 @@ import java.util.Map;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.emptyMap;
 
-@AutoConfigureGraphQlTester
 @ActiveProfiles("test")
-@SpringBootTest(
-    classes = TestConfig.class,
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
-)
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-public abstract class GraphQLTestBase  {
+@ContextConfiguration(classes = GraphqlTestConfig.class, initializers = MockOAuth2ServerInitializer.class)
+@EmbeddedKafka(partitions = 1,  topics = {"org.nom.intern-ressurs-state"},  controlledShutdown = true)
+@AutoConfigureWireMock(port = 0)
+@GraphQlTest(controllers = {GraphQLRessursController.class, GraphQLPersonController.class, GraphQLOrgEnhetController.class, GraphQLSearchController.class})
+public class GraphQLTestBase  {
 
     private final static Duration TIMEOUT_DURATION = Duration.of(5, SECONDS);
-
     private final ThreadLocal<Duration> responseTimeout = ThreadLocal.withInitial(() -> TIMEOUT_DURATION);
 
     @Autowired
-    HttpGraphQlTester graphQlTester;
+    ExecutionGraphQlServiceTester executionGraphQlServiceTester;
 
     @Autowired
-    protected ObjectMapper objectMapper;
+    public ObjectMapper objectMapper;
 
     @Autowired
     DvhStartupLoadMonitor dvhStartupLoadMonitor;
@@ -51,11 +61,39 @@ public abstract class GraphQLTestBase  {
     protected ResourceLoader resourceLoader;
 
     @Autowired
-    TestTokensGenerator testToken;
+    protected TestTokensGenerator testToken;
+
+    @Autowired
+    protected KafkaUtils kafkaUtils;
+
+    @Autowired
+    protected PdlUtils pdlUtils;
+
+    @Autowired
+    protected Unleash unleash;
+
+    @Autowired
+    protected DvhRepository dvhRepository;
+
+    @Autowired
+    protected OrgEnhetStateRepository orgEnhetStateRepository;
+
+    @Autowired
+    protected OrganiseringStateRepository organiseringStateRepository;
+
+    @Autowired
+    RessursStateRepository ressursStateRepository;
 
     @BeforeEach
     protected void setup() {
         dvhStartupLoadMonitor.setCompleted();
+        pdlUtils.reset();
+        kafkaUtils.clearKafka();
+
+        dvhRepository.clearRepository();
+        orgEnhetStateRepository.clear();
+        organiseringStateRepository.clear();
+        ressursStateRepository.clear();
     }
 
     @SneakyThrows
@@ -65,12 +103,10 @@ public abstract class GraphQLTestBase  {
 
     @SneakyThrows
     public GraphQlTester.Response postForResource(String resource, String token, Map<String, Object> vars) {
-        final var client = graphQlTester.mutate()
-                .webTestClient(builder -> builder.responseTimeout(responseTimeout.get()))
-                .headers(httpHeaders -> httpHeaders.add(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-                .build(); // Build the correct client
-
-        var query = client.document(loadResourceFromClasspath(resource)); // Load the resource
+        var query = executionGraphQlServiceTester
+            .mutate().responseTimeout(responseTimeout.get())
+            .build()
+            .document(loadResourceFromClasspath(resource)); // Load the resource
         vars.forEach(query::variable); // Load variables into the query
 
         return query.execute();

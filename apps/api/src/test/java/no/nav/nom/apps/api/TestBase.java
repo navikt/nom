@@ -1,8 +1,6 @@
 package no.nav.nom.apps.api;
 
-import com.nimbusds.jose.JOSEObjectType;
 import io.getunleash.Unleash;
-import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
 import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
@@ -11,13 +9,10 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStat
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
-import no.nav.nom.contract.nom.Sektor;
-import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
-import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,12 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -105,8 +95,6 @@ public abstract class TestBase {
     @MockBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
-
-
     @BeforeEach
     void reset() {
         dvhRepository.clearRepository();
@@ -152,57 +140,7 @@ public abstract class TestBase {
         }
     }
 
-    protected RessursState createRessursHendelseEventSource(String suffix) {
-        final var ressursState = new RessursState(
-            PrefixedUlidCreator.createRessursUlid(),
-            "testPersonIdent" + suffix,
-            "testNavIdent" + suffix,
-            Sektor.NAV_STATLIG,
-            new Visningsnavn(
-                "fornavn" + suffix,
-                Optional.of("mellomnavn" + suffix),
-                "etternavn" + suffix
-            ),
-            null,
-                Optional.of(LocalDate.now()),
-            null,
-            Collections.emptyList()
-        );
 
-        createRessursHendelseEventSource(ressursState);
-
-        return ressursState;
-    }
-
-    protected OrgEnhetState createOrgenhetHendelseEventSource(String suffix) {
-        final var orgEnhetState = new OrgEnhetState(
-            PrefixedUlidCreator.createOrgEnhetUlid(),
-            "testOrgenhetId" + suffix,
-            "testOrgenhetNavn" + suffix,
-            LocalDate.now(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.of("0000000".substring(0, 7 - suffix.length()) + suffix),
-            Optional.of("ORGENHET"),
-            Optional.empty()
-        );
-
-        createOrgenhetHendelseEventSource(orgEnhetState);
-
-        return orgEnhetState;
-    }
-
-    protected void createRessursHendelseEventSource(RessursState ressursState) {
-        kafkaUtils.sendRessurs(ressursState.fid(), ressursState);
-    }
-
-    protected void createOrgenhetHendelseEventSource(OrgEnhetState orgEnhetState) {
-        kafkaUtils.sendOrgenhet(orgEnhetState.fid(), orgEnhetState);
-    }
 
     protected void saveOrgtilknytninger(List<OrgtilknytningState> orgtilknytningStateList) {
         orgtilknytningStateList.forEach(o -> orgtilknytningStateRepository.putEventAggregate(o.fid(), o));

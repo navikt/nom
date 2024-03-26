@@ -1,11 +1,14 @@
 package no.nav.nom.apps.api;
 
+import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
+import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
-import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.admin.RecordsToDelete;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
@@ -23,7 +26,10 @@ import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -38,7 +44,7 @@ public class KafkaUtils {
 
     private final EmbeddedKafkaBroker embeddedKafkaBroker;
 
-    private final AdminClient adminClient;
+    private final Admin adminClient;
 
     @SpyBean
     final RessursStateListener ressursStateListener;
@@ -59,7 +65,8 @@ public class KafkaUtils {
         OrgEnhetStateListener orgEnhetStateListener,
         @Value("${app.kafka.ressurs.stateTopic}") String ressursStateTopic,
         @Value("${app.kafka.orgEnhet.stateTopic}") String orgEnhetStateTopic,
-        AdminClient adminClient, NomMasteredRessursListener nomMasteredRessursListener
+        Admin adminClient,
+        NomMasteredRessursListener nomMasteredRessursListener
     ) {
         this.embeddedKafkaBroker = embeddedKafkaBroker;
 
@@ -74,6 +81,7 @@ public class KafkaUtils {
         this.orgEnhetStateKafkaTemplate = orgEnhetStateKafkaTemplate();
     }
 
+
     public synchronized void sendRessurs(String key, RessursState ressursState) {
         CountDownLatch latch = new CountDownLatch(1);
 
@@ -86,7 +94,7 @@ public class KafkaUtils {
 
         ressursStateKafkaTemplate.sendDefault(key, ressursState);
         try {
-            if (!latch.await(900, TimeUnit.SECONDS)) {
+            if (!latch.await(1, TimeUnit.SECONDS)) {
                 throw new RuntimeException("Invocation of kafka onMessage never occoured or never exited");
             }
         } catch (InterruptedException e) {
@@ -114,6 +122,59 @@ public class KafkaUtils {
         }
     }
 
+
+    public RessursState createRessursHendelseEventSource(String suffix) {
+        final var ressursState = new RessursState(
+            PrefixedUlidCreator.createRessursUlid(),
+            "testPersonIdent" + suffix,
+            "testNavIdent" + suffix,
+            Sektor.NAV_STATLIG,
+            new Visningsnavn(
+                "fornavn" + suffix,
+                Optional.of("mellomnavn" + suffix),
+                "etternavn" + suffix
+            ),
+            null,
+            Optional.of(LocalDate.now()),
+            null,
+            Collections.emptyList()
+        );
+
+        createRessursHendelseEventSource(ressursState);
+
+        return ressursState;
+    }
+
+
+    public OrgEnhetState createOrgenhetHendelseEventSource(String suffix) {
+        final var orgEnhetState = new OrgEnhetState(
+            PrefixedUlidCreator.createOrgEnhetUlid(),
+            "testOrgenhetId" + suffix,
+            "testOrgenhetNavn" + suffix,
+            LocalDate.now(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of("0000000".substring(0, 7 - suffix.length()) + suffix),
+            Optional.of("ORGENHET"),
+            Optional.empty()
+        );
+
+        createOrgenhetHendelseEventSource(orgEnhetState);
+
+        return orgEnhetState;
+    }
+
+    public void createRessursHendelseEventSource(RessursState ressursState) {
+        sendRessurs(ressursState.fid(), ressursState);
+    }
+
+    public void createOrgenhetHendelseEventSource(OrgEnhetState orgEnhetState) {
+        sendOrgenhet(orgEnhetState.fid(), orgEnhetState);
+    }
 
     public void clearKafka() {
         try {

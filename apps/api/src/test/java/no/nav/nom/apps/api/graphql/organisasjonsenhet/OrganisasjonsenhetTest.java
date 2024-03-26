@@ -2,10 +2,14 @@ package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
+import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.graphql.GraphQLTestBase;
 import no.nav.nom.apps.api.organisering.OrganiseringConfig;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
@@ -30,16 +34,25 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+// TODO: Integrasjonstest - plasser og navngi riktig
+
 @DisplayName("GraphQL.HentEnhet")
-class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
-
-    // TODO: Wait for answer on https://github.com/spring-projects/spring-graphql/issues/506 to add support for optional arguments using ProjectedPayload
-
-    @Autowired
-    private ObjectMapper objectMapper;
+class OrganisasjonsenhetTest extends GraphQLTestBase {
 
     @Autowired
     private DvhRestConsumer dvhRestConsumer;
+
+    @Autowired
+    public DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;
+
+    @Autowired
+    protected OrgEnhetStateRepository orgEnhetStateRepository;
+
+    @Autowired
+    protected OrganiseringStateRepository organiseringStateRepository;
+
+    @Autowired
+    OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @Test
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql med id parameter")
@@ -339,7 +352,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
-        RessursState ressurs = createRessursHendelseEventSource("");
+        RessursState ressurs = kafkaUtils.createRessursHendelseEventSource("");
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
@@ -383,8 +396,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     void scenario34() {
         final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
-        RessursState ressurs = createRessursHendelseEventSource("");
-        createRessursHendelseEventSource("1"); // Trenger ressurs med navIdent "testNavIdent1" pga. orgTilknytning som "lekker inn" fra annen test
+        RessursState ressurs = kafkaUtils.createRessursHendelseEventSource("");
+        kafkaUtils.createRessursHendelseEventSource("1"); // Trenger ressurs med navIdent "testNavIdent1" pga. orgTilknytning som "lekker inn" fra annen test
 
         pdlUtils.addPersonToPdlResponse(true, ressurs.personident());
         dvhRestConsumer.loadRessurserOgOrgEnheter();
@@ -413,7 +426,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
-        RessursState ressurs = createRessursHendelseEventSource("");
+        RessursState ressurs = kafkaUtils.createRessursHendelseEventSource("");
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
@@ -473,7 +486,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
-        RessursState ressurs = createRessursHendelseEventSource("");
+        RessursState ressurs = kafkaUtils.createRessursHendelseEventSource("");
         pdlUtils.addPersonToPdlResponse(true, ressurs.personident());
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
