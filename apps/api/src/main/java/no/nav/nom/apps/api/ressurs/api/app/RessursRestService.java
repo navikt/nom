@@ -378,6 +378,8 @@ public class RessursRestService {
                 );
             }
 
+            logger.debug("createRessurs for {} - {}", navident, request.visningsetternavn());
+
             return opprettetRessurs;
         } catch (ExecutionException | TimeoutException | InterruptedException e) {
             throw new RuntimeException(e);
@@ -408,8 +410,6 @@ public class RessursRestService {
                 opprettNavidentResponse.getBody().getFeilmelding()
             );
         }
-
-        logger.debug("createRessurs for {} - {}", opprettNavidentResponse.getBody().getNavident(), request.visningsetternavn());
 
         return opprettNavidentResponse.getBody().getNavident();
 
