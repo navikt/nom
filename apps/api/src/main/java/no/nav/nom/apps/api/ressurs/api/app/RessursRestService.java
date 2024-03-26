@@ -16,6 +16,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.Oppret
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
+import no.nav.nom.apps.api.ressurs.api.exceptions.DuplicateRessursException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
@@ -254,8 +255,7 @@ public class RessursRestService {
         final var eksistingRessurs = ressursStateRepository.findByPersonident(request.personident());
 
         if (eksistingRessurs.isPresent() && isActive(eksistingRessurs.get())) {
-            throw new ResponseStatusException(
-                HttpStatusCode.valueOf(409),
+            throw new DuplicateRessursException(
                 String.format("Det finnes allerede en aktiv ressurs med personident %s", request.personident())
             );
         }
