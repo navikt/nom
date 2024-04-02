@@ -274,7 +274,53 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LeggTilOrgtilknytningRequest"
+                "$ref": "#/components/schemas/LeggTilOrgtilknytningRequestOld"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Orgtilknytning"
+        ]
+      }
+    },
+    "/app/orgtilknytninger/forRessurs/{navident}": {
+      "post": {
+        "description": "Sender inn komplett øyeblikksbilde av hvordan alle orgtilknytningene til en ressurs skal se ut",
+        "operationId": "updateOrgtilknytninger",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "navident",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OppdaterOrgtilknytningerForRessursRequest"
               }
             }
           },
@@ -885,6 +931,9 @@
         }
       },
       "EndreOrgtilknytningDatoRequest": {
+        "required": [
+          "gyldigFom"
+        ],
         "type": "object",
         "properties": {
           "gyldigFom": {
@@ -894,6 +943,36 @@
           "gyldigTom": {
             "type": "string",
             "format": "date"
+          },
+          "setRessursSluttdato": {
+            "type": "boolean"
+          }
+        }
+      },
+      "EndreOrgtilknytningRequest": {
+        "required": [
+          "erDagligOppfolging",
+          "fid",
+          "gyldigFom"
+        ],
+        "type": "object",
+        "properties": {
+          "erDagligOppfolging": {
+            "type": "boolean"
+          },
+          "fid": {
+            "type": "string"
+          },
+          "gyldigFom": {
+            "type": "string",
+            "format": "date"
+          },
+          "gyldigTom": {
+            "type": "string",
+            "format": "date"
+          },
+          "tilknytningtype": {
+            "$ref": "#/components/schemas/Tilknytningtype"
           }
         }
       },
@@ -932,6 +1011,33 @@
       },
       "LeggTilOrgtilknytningRequest": {
         "required": [
+          "erDagligOppfolging",
+          "gyldigFom",
+          "orgEnhetId"
+        ],
+        "type": "object",
+        "properties": {
+          "erDagligOppfolging": {
+            "type": "boolean"
+          },
+          "gyldigFom": {
+            "type": "string",
+            "format": "date"
+          },
+          "gyldigTom": {
+            "type": "string",
+            "format": "date"
+          },
+          "orgEnhetId": {
+            "type": "string"
+          },
+          "tilknytningtype": {
+            "$ref": "#/components/schemas/Tilknytningtype"
+          }
+        }
+      },
+      "LeggTilOrgtilknytningRequestOld": {
+        "required": [
           "gyldigFom",
           "navident",
           "orgEnhetId"
@@ -954,6 +1060,9 @@
           },
           "orgEnhetId": {
             "type": "string"
+          },
+          "setRessursSluttdato": {
+            "type": "boolean"
           }
         }
       },
@@ -965,10 +1074,40 @@
           "ARBEIDSOMRAADE"
         ]
       },
+      "OppdaterOrgtilknytningerForRessursRequest": {
+        "required": [
+          "eksisterendeOrgtilknytninger",
+          "nyeOrgtilknytninger",
+          "setRessursSluttdato",
+          "setRessursStartdato"
+        ],
+        "type": "object",
+        "properties": {
+          "eksisterendeOrgtilknytninger": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EndreOrgtilknytningRequest"
+            }
+          },
+          "nyeOrgtilknytninger": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeggTilOrgtilknytningRequest"
+            }
+          },
+          "setRessursSluttdato": {
+            "type": "boolean"
+          },
+          "setRessursStartdato": {
+            "type": "boolean"
+          }
+        }
+      },
       "OpprettRessursRequest": {
         "required": [
           "ansettelsesType",
           "fysiskBrukerstedNr",
+          "orgEnhetId",
           "personident",
           "sektor",
           "startDato",
@@ -1442,7 +1581,8 @@
       "Tilknytningtype": {
         "type": "string",
         "enum": [
-          "KONSULENT"
+          "KONSULENT",
+          "EKSTERN_SAMARBEIDSPARTNER"
         ]
       },
       "UpdateFysiskeBrukerstederRequest": {
