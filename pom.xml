@@ -56,6 +56,7 @@
         <netty.version>4.1.107.Final</netty.version> <!-- https://github.com/navikt/nom/security/dependabot/90 + https://github.com/navikt/nom/security/dependabot/89 -->
         <zookeeper.version>3.9.2</zookeeper.version> <!-- https://github.com/navikt/nom/security/dependabot/91 -->
         <json-path.version>2.9.0</json-path.version> <!-- https://github.com/navikt/nom/security/dependabot/107 -->
+        <spring-security.version>6.2.3</spring-security.version> <!-- https://github.com/navikt/nom/security/dependabot/122 -->
 
         <!-- Override av andre transient dependencies -->
         <orgjson.version>20240303</orgjson.version>  <!-- https://github.com/navikt/nom/security/dependabot/92 -->
