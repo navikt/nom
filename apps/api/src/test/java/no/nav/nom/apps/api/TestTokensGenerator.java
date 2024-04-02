@@ -76,6 +76,15 @@ public class TestTokensGenerator {
         return validToken(claims);
     }
 
+    public String queryPersonClient_withDifferentSubAndOidAttributes() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("azp_name", "queryPersonClient");
+        // different values of sub and oid attributes in the token indicates that the token is ContextToken For an UserPrincipal
+        claims.put("sub", "subject");
+        claims.put("oid", "object");
+        return validToken(claims);
+    }
+
     public String mutateRessursClient() {
         Map<String, Object> claims = new HashMap<>();
         claims.put("azp_name", "mutateRessursClient");
@@ -99,5 +108,7 @@ public class TestTokensGenerator {
         claims.put("azp_name", "queryOmadaClient");
         return validToken(claims);
     }
+
+
 
 }

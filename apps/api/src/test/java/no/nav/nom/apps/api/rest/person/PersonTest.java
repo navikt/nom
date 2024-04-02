@@ -6,12 +6,25 @@ import lombok.val;
 import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
+import java.io.IOException;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 public class PersonTest extends RestTestBase {
+
+    @BeforeEach
+    @SneakyThrows
+    public void setUp() throws IOException {
+        // Always enable features for tests
+        when(unleash.isEnabled(any())).thenReturn(true);
+    }
 
     @Autowired
     TestTokensGenerator testToken;
@@ -27,7 +40,7 @@ public class PersonTest extends RestTestBase {
             .uri("/api/v1/person/getPerson")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(testToken.queryPersonClient());
+                httpHeaders.setBearerAuth(testToken.queryPersonClient_withDifferentSubAndOidAttributes());
             })
             .bodyValue(new PdlPersonRequest(personident))
             .exchange()
