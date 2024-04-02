@@ -46,7 +46,7 @@ public class OnBehalfOfTokenRepository {
     public String getOnbehalfofTokenFor(String scope) {
         String assertion = ((JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication()).getToken().getTokenValue();
         val signedJwt = cachedAadTokensByUserAndScope.get(assertion + scope);
-        return String.format("%s", isValidToken(signedJwt) ? signedJwt : refreshOnbehalfofTokenFor(assertion, scope));
+        return String.format("%s", isValidToken(signedJwt) ? signedJwt.serialize() : refreshOnbehalfofTokenFor(assertion, scope).serialize());
     }
 
     @SneakyThrows

@@ -46,6 +46,7 @@ public class PdlClient {
         }
         """;
     private final HttpGraphQlClient graphQlClient;
+    private final HttpGraphQlClient graphQlClientWithoutOAuthFilter;
     private final OnBehalfOfTokenRepository onBehalfOfTokenRepository;
 
     private final String pdlScope;
@@ -62,6 +63,15 @@ public class PdlClient {
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("pdl");
         this.graphQlClient = HttpGraphQlClient.builder(WebClient.builder().filter(oAuth2Filter))
+            .url(pdlProperties.baseUrl() + "/graphql")
+            .headers(headers -> {
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                headers.add("Tema", pdlProperties.tema());
+                headers.add("behandlingsnummer", pdlProperties.behandlingsnummer());
+            })
+            .build();
+
+        this.graphQlClientWithoutOAuthFilter = HttpGraphQlClient.builder(WebClient.builder())
             .url(pdlProperties.baseUrl() + "/graphql")
             .headers(headers -> {
                 headers.setContentType(MediaType.APPLICATION_JSON);
@@ -92,7 +102,10 @@ public class PdlClient {
                 } else {
                     // use a graphql client with the onBehalfOfToken
                     logger.info("The context token is a user principal. OnBehalfOf token will be used for PDL lookup");
-                    var mutatedGraphqlClientWithOnBehalfOfToken = graphQlClient.mutate().headers(headers -> headers.setBearerAuth(onBehalfOfToken)).build();
+                    var mutatedGraphqlClientWithOnBehalfOfToken = graphQlClientWithoutOAuthFilter
+                        .mutate()
+                        .headers(headers -> headers.setBearerAuth(onBehalfOfToken))
+                        .build();
                     return hentPerson(mutatedGraphqlClientWithOnBehalfOfToken, personIdent);
                 }
             }
