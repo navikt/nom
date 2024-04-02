@@ -2,7 +2,7 @@
 import type { AxiosResponse } from "axios";
 import axios from "axios";
 
-const CACHE_FOR = {
+export const CACHE_FOR = {
   aMinute: 1000 * 60,
   anHour: 1000 * 60 * 60,
   aDay: 1000 * 60 * 60 * 24,
@@ -18,11 +18,42 @@ import type {
   Person,
   Ressurs,
   RessursLeder,
+  SessionInfoResponse,
   UpdateFysiskeBrukerstederRequest,
 } from "~/types/api-models";
 
+const NOM_API_BASE_PATH = "/frackend/nom-api";
+const NOM_REMEDY_INTEGRATION_API_BASE_PATH = "/frackend/nom-remedy-integrasjon";
+
+/**
+ * Intercept errors that are 401.
+ * This assumes that Wonderwall is the service giving 401 errors when there is no active session.
+ * Requests are in those cases short-circuited by Wonderwall. https://docs.nais.io/security/auth/wonderwall/?h=wonderwa#11-redirect-after-login
+ * When Wonderwall respons with 401 it also supplies a location header that will take the user to login page and be redirected to where they were: /oauth2/login?redirect=${currentPath}
+ *
+ * To make this work there are a few caveats:
+ * 1. autologin must be enabled
+ * 2. All requests to Frackend must be ignored by autologin
+ * 3. Except the route that serves the SPA. In our case this is the fallback "*" route.
+ *
+ * See this thread for additional context: https://nav-it.slack.com/archives/C5KUST8N6/p1694767530593689
+ */
+axios.interceptors.response.use(undefined, (error) => {
+  if (error.response.status === 401) {
+    window.location.assign(error.response.headers.location);
+  }
+  return Promise.reject(error);
+});
+
+/**
+ * Anbefalt lesing for react-query key factory pattern: https://tkdodo.eu/blog/effective-react-query-keys
+ */
 export const ressurserGraphqlKeys = {
   all: ["ALLE_RESSURSER_GRAPHQL"] as const,
+};
+
+export const sessionKeys = {
+  all: ["SESSION"] as const,
 };
 
 export const ressurserKeys = {
@@ -79,7 +110,7 @@ export const getAlleRessurserGraphql = {
   queryFn: async () =>
     (
       await axios.post<RessurserWithMetadataGraphqlResponseWrapper>(
-        "/nom-api/graphql",
+        `${NOM_API_BASE_PATH}/graphql`,
         {
           operationName: "HentAlleRessurser",
           query: `
@@ -133,8 +164,11 @@ export const getAlleRessurserGraphql = {
 export const getRessurs = {
   queryKey: (navident: string) => ressurserKeys.id(navident),
   queryFn: async (navident: string) =>
-    (await axios.get<Ressurs>(`/nom-api/app/ressurser/byNavident/${navident}`))
-      .data,
+    (
+      await axios.get<Ressurs>(
+        `${NOM_API_BASE_PATH}/app/ressurser/byNavident/${navident}`,
+      )
+    ).data,
 };
 
 export const getRessurserForOrgenhet = {
@@ -151,7 +185,17 @@ export const getLedereForRessurs = {
   queryFn: async (navident: string) =>
     (
       await axios.get<RessursLeder[]>(
-        `/nom-api/app/ressurser/lederFor/${navident}`,
+        `${NOM_API_BASE_PATH}/app/ressurser/lederFor/${navident}`,
+      )
+    ).data,
+};
+
+export const getSession = {
+  queryKey: () => sessionKeys.all,
+  queryFn: async () =>
+    (
+      await axios.get<SessionInfoResponse>(
+        `${NOM_API_BASE_PATH}/app/sessioninfo`,
       )
     ).data,
 };
@@ -159,7 +203,7 @@ export const getLedereForRessurs = {
 export const getAllOrgEnheter = {
   queryKey: orgEnheterKeys.all,
   queryFn: async () =>
-    (await axios.get<OrgEnhet[]>("/nom-api/app/orgenheter")).data,
+    (await axios.get<OrgEnhet[]>(`${NOM_API_BASE_PATH}/app/orgenheter`)).data,
   gcTime: CACHE_FOR.anHour,
   staleTime: CACHE_FOR.aMinute * 5,
 };
@@ -167,14 +211,21 @@ export const getAllOrgEnheter = {
 export const getOrgEnhet = {
   queryKey: (orgEnhetId: string) => orgEnheterKeys.id(orgEnhetId),
   queryFn: async (orgEnhetId: string) =>
-    (await axios.get<OrgEnhet>(`/nom-api/app/orgenheter/${orgEnhetId}`)).data,
+    (
+      await axios.get<OrgEnhet>(
+        `${NOM_API_BASE_PATH}/app/orgenheter/${orgEnhetId}`,
+      )
+    ).data,
 };
 
 export const getOrgEnheterLedetAv = {
   queryKey: (navident: string) => orgEnheterKeys.ledetAv(navident),
   queryFn: async (navident: string) =>
-    (await axios.get<OrgEnhet[]>(`/nom-api/app/orgenheter/ledetAv/${navident}`))
-      .data,
+    (
+      await axios.get<OrgEnhet[]>(
+        `${NOM_API_BASE_PATH}/app/orgenheter/ledetAv/${navident}`,
+      )
+    ).data,
 };
 
 export const getOrgTilknytninger = {
@@ -182,7 +233,7 @@ export const getOrgTilknytninger = {
   queryFn: async (navident: string) =>
     (
       await axios.get<OrgtilknytningState[]>(
-        `/nom-api/app/orgtilknytninger?navident=${navident}`,
+        `${NOM_API_BASE_PATH}/app/orgtilknytninger?navident=${navident}`,
       )
     ).data,
 };
@@ -192,7 +243,7 @@ export const getPerson = {
   queryFn: async (personident: string) =>
     (
       await axios.post<GetPersonRequest, AxiosResponse<Person>>(
-        "/nom-api/app/person",
+        `${NOM_API_BASE_PATH}/app/person`,
         { personident },
       )
     ).data,
@@ -207,7 +258,7 @@ export const getTeamcatMemberships = {
 export const getRessursEvents = {
   queryFn: async ({ pageParam }: { pageParam: number }) =>
     (
-      await axios.get("/nom-api/app/ressurser/read-topic", {
+      await axios.get(`${NOM_API_BASE_PATH}/app/ressurser/read-topic`, {
         params: {
           partition: 0,
           maxRecords: 50,
@@ -220,7 +271,7 @@ export const getRessursEvents = {
 export const getOrgEnhetEvents = {
   queryFn: async ({ pageParam }: { pageParam: number }) =>
     (
-      await axios.get("/nom-api/app/orgenheter/read-topic", {
+      await axios.get(`${NOM_API_BASE_PATH}/app/orgenheter/read-topic`, {
         params: {
           partition: 0,
           maxRecords: 50,
@@ -235,7 +286,7 @@ export const updateNavnForRessurs = async (
   updateNavnForRessursRequest: unknown,
 ) => {
   await axios.post<unknown, AxiosResponse<unknown>>(
-    `/nom-api/app/ressurser/${navident}/navn`,
+    `${NOM_API_BASE_PATH}/app/ressurser/${navident}/navn`,
     updateNavnForRessursRequest,
   );
   await hopeForKafkaStateToUpdate();
@@ -246,7 +297,7 @@ export const updateOrgtilknytningDato = async (
   endreOrgtilknytningDatoRequest: EndreOrgtilknytningDatoRequest,
 ) => {
   await axios.post<EndreOrgtilknytningDatoRequest, AxiosResponse<unknown>>(
-    `/nom-api/app/orgtilknytninger/${fid}/dato`,
+    `${NOM_API_BASE_PATH}/app/orgtilknytninger/${fid}/dato`,
     endreOrgtilknytningDatoRequest,
   );
   await hopeForKafkaStateToUpdate();
@@ -256,7 +307,7 @@ export const leggTilOrgtilknytning = async (
   leggTilOrgtilknytningRequest: LeggTilOrgtilknytningRequestOld,
 ) => {
   await axios.post<LeggTilOrgtilknytningRequestOld, AxiosResponse<unknown>>(
-    `/nom-api/app/orgtilknytninger`,
+    `${NOM_API_BASE_PATH}/app/orgtilknytninger`,
     leggTilOrgtilknytningRequest,
   );
   await hopeForKafkaStateToUpdate();
@@ -268,7 +319,7 @@ export const avvikleRessurs = async (
 ) =>
   (
     await axios.post<AvvikleRessursRequest, AxiosResponse<unknown>>(
-      `/nom-api/app/ressurser/${fid}/avvikle`,
+      `${NOM_API_BASE_PATH}/app/ressurser/${fid}/avvikle`,
       avvikleRessursRequest,
     )
   ).data;
@@ -279,7 +330,7 @@ export const getUnderliggendeOrgenheter = {
   queryFn: async (parentId: string): Promise<string[]> =>
     (
       await axios.get<string[]>(
-        `/nom-api/app/orgenheter/underliggende/${parentId}`,
+        `${NOM_API_BASE_PATH}/app/orgenheter/underliggende/${parentId}`,
       )
     ).data,
 };
@@ -290,7 +341,7 @@ export const getFysiskeBrukersteder = {
   queryFn: async () =>
     (
       await axios.get<FysiskBrukersted[]>(
-        "/nom-remedy-integrasjon/api/fysiskebrukersteder",
+        `${NOM_REMEDY_INTEGRATION_API_BASE_PATH}/api/fysiskebrukersteder`,
       )
     ).data,
 };
@@ -300,7 +351,7 @@ export const updateFysiskeBrukersteder = async (
   updateFysiskeBrukerstederRequest: UpdateFysiskeBrukerstederRequest,
 ) => {
   await axios.post<unknown, AxiosResponse<unknown>>(
-    `/nom-api/app/ressurser/${fid}/fysiskebrukersteder`,
+    `${NOM_API_BASE_PATH}/app/ressurser/${fid}/fysiskebrukersteder`,
     updateFysiskeBrukerstederRequest,
   );
   await hopeForKafkaStateToUpdate();
