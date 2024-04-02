@@ -100,10 +100,9 @@
             <artifactId>postgresql</artifactId>
         </dependency>
         <dependency>
-            <!-- previously named com.vladmihalcea:hibernate-types-55 -->
             <!-- now https://github.com/vladmihalcea/hypersistence-utils -->
             <groupId>io.hypersistence</groupId>
-            <artifactId>hypersistence-utils-hibernate-62</artifactId>
+            <artifactId>hypersistence-utils-hibernate-63</artifactId>
         </dependency>
         <dependency>
             <groupId>com.github.f4b6a3</groupId>
