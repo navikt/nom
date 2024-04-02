@@ -36,9 +36,9 @@ import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -175,7 +175,10 @@ public class RessursRestService {
 
         var oppdaterPersonaliaCommand = new OppdaterPersonaliaCommand(
             ressursState.fid(),
-            new Visningsnavn(updateVisningsnavnRequest.fornavn(), updateVisningsnavnRequest.mellomnavn(), updateVisningsnavnRequest.etternavn())
+            new Visningsnavn(
+                updateVisningsnavnRequest.fornavn().trim(),
+                updateVisningsnavnRequest.mellomnavn().map(StringUtils::trimToNull),
+                updateVisningsnavnRequest.etternavn())
         );
 
         var inputMetadata = new InputMetadata("REST", "updateRessursNavn", updateVisningsnavnRequest, new Origination(
@@ -309,8 +312,8 @@ public class RessursRestService {
             pdlPerson,
             request.sektor(),
             new Visningsnavn(
-                request.visningsfornavn(),
-                Optional.ofNullable(request.visningsmellomnavn()),
+                request.visningsfornavn().trim(),
+                Optional.ofNullable(StringUtils.trimToNull(request.visningsmellomnavn())),
                 request.visningsetternavn()
             ),
             metaData,
