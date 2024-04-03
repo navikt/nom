@@ -252,7 +252,7 @@ export const getPerson = {
 export const getTeamcatMemberships = {
   queryKey: (navident: string) => teamcatMembershipsKeys.navident(navident),
   queryFn: async (navident: string) =>
-    (await axios.get(`/teamcat/member/membership/${navident}`)).data,
+    (await axios.get(`/frackend/teamcat/member/membership/${navident}`)).data,
 };
 
 export const getRessursEvents = {

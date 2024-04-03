@@ -136,7 +136,7 @@ async function performSearch(
   }
 `;
 
-  const result = await axios.post("/nom-api/graphql", {
+  const result = await axios.post("/frackend/nom-api/graphql", {
     operationName: "search",
     query: searchQuery,
     variables: {

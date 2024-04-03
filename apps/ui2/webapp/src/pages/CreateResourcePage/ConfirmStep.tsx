@@ -81,7 +81,10 @@ export function ConfirmStep() {
         fysiskBrukerstedNr,
         tilknytningtype,
       };
-      return axios.post("/nom-api/app/ressurser", opprettRessursRequest);
+      return axios.post(
+        "/frackend/nom-api/app/ressurser",
+        opprettRessursRequest,
+      );
     },
 
     onSuccess: (opprettRessursResponse) => {

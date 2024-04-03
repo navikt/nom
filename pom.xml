@@ -33,7 +33,7 @@
         <gcp.libraries-bom.version>26.34.0</gcp.libraries-bom.version>
         <springdoc.version>2.3.0</springdoc.version>
         <springdoc-openapi-security.version>1.7.0</springdoc-openapi-security.version>
-        <hypersistence-utils-hibernate-62.version>3.7.3</hypersistence-utils-hibernate-62.version>
+        <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
         <graphql-extended-scalars.version>21.0</graphql-extended-scalars.version>
         <unleash.version>9.2.0</unleash.version>
         <opencsv.version>5.9</opencsv.version>
@@ -53,9 +53,9 @@
 
         <!-- Override spring-boot-dependencies version -->
             <!-- note - local precedence import in utils-common, api, proxy, nom-ressurser, Unit4, nav-ident, og streams appene -->
-        <netty.version>4.1.107.Final</netty.version> <!-- https://github.com/navikt/nom/security/dependabot/90 + https://github.com/navikt/nom/security/dependabot/89 -->
         <zookeeper.version>3.9.2</zookeeper.version> <!-- https://github.com/navikt/nom/security/dependabot/91 -->
         <json-path.version>2.9.0</json-path.version> <!-- https://github.com/navikt/nom/security/dependabot/107 -->
+        <spring-security.version>6.2.3</spring-security.version> <!-- https://github.com/navikt/nom/security/dependabot/122 -->
 
         <!-- Override av andre transient dependencies -->
         <orgjson.version>20240303</orgjson.version>  <!-- https://github.com/navikt/nom/security/dependabot/92 -->
@@ -63,7 +63,6 @@
         <commons-compress.version>1.26.1</commons-compress.version> <!-- https://github.com/navikt/nom/security/dependabot/88 -->
         <httpclient.version>4.5.14</httpclient.version> <!-- https://github.com/navikt/nom/security/dependabot/94 -->
         <bcpkix-jdk18on.version>1.77</bcpkix-jdk18on.version> <!-- https://github.com/navikt/nom/security/dependabot/95 -->
-        <reactor-netty-http.version>1.1.15</reactor-netty-http.version>
 
         <postgresql.version>42.7.2</postgresql.version> <!-- https://github.com/navikt/nom/security/dependabot/110 -->
     </properties>
@@ -149,8 +148,8 @@
                 <!-- previously named com.vladmihalcea:hibernate-types-55 -->
                 <!-- now https://github.com/vladmihalcea/hypersistence-utils -->
                 <groupId>io.hypersistence</groupId>
-                <artifactId>hypersistence-utils-hibernate-62</artifactId>
-                <version>${hypersistence-utils-hibernate-62.version}</version>
+                <artifactId>hypersistence-utils-hibernate-63</artifactId>
+                <version>${hypersistence-utils-hibernate-63.version}</version>
             </dependency>
 
             <dependency>
@@ -299,12 +298,6 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>${httpclient.version}</version>    <!-- https://github.com/navikt/nom/security/dependabot/94 -->
-            </dependency>
-
-            <dependency>
-                <groupId>io.projectreactor.netty</groupId>
-                <artifactId>reactor-netty-http</artifactId>
-                <version>${reactor-netty-http.version}</version> <!-- https://github.com/navikt/nom/security/dependabot/97 -->
             </dependency>
 
             <dependency> <!-- Påkrevd for mac M1  -->
