@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader;
+import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.person.api.dto.FolkeregisterPerson;
 import no.nav.nom.apps.api.person.api.dto.Person;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
@@ -24,11 +24,12 @@ import java.util.Optional;
 public class PersonController {
 
     private final RessursStateRepository ressursStateRepository;
-    private final PersonBatchLoader personBatchLoader;
+    private final PdlClient pdlClient;
 
-    public PersonController(RessursStateRepository ressursStateRepository, PersonBatchLoader personBatchLoader) {
+    public PersonController(RessursStateRepository ressursStateRepository,
+                            PdlClient pdlClient) {
         this.ressursStateRepository = ressursStateRepository;
-        this.personBatchLoader = personBatchLoader;
+        this.pdlClient = pdlClient;
     }
 
     @PostMapping
@@ -41,7 +42,7 @@ public class PersonController {
     })
     public ResponseEntity<Person> findPerson(@RequestBody GetPersonRequest getPersonRequest) {
         var personident = getPersonRequest.getPersonident();
-        var folkeregisterPerson = resolveFrom(personident);
+        var folkeregisterPerson = getPerson(personident);
         if (folkeregisterPerson.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -54,16 +55,15 @@ public class PersonController {
         return ResponseEntity.ok(person);
     }
 
-    private Optional<FolkeregisterPerson> resolveFrom(String personident) {
-        return fetchFolkeregisterPerson(personident)
-            .map(no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson::getNavn)
-            .map(ressursNavn -> new FolkeregisterPerson.RessursNavn(ressursNavn.getFornavn(), ressursNavn.getMellomnavn(), ressursNavn.getEtternavn()))
-            .map(FolkeregisterPerson::new);
+    private Optional<FolkeregisterPerson> getPerson(String personident) {
+        var person = pdlClient.hentPerson(personident);
+        return person.map(value -> new FolkeregisterPerson(
+                new FolkeregisterPerson.RessursNavn(
+                        value.getFornavn(),
+                        value.getMellomnavn(),
+                        value.getEtternavn()
+                )
+        ));
     }
 
-    private Optional<no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson> fetchFolkeregisterPerson(String personident) {
-        var dataFetcher = personBatchLoader.loadSingle(personident, String::valueOf).block();
-
-        return (!dataFetcher.hasErrors() && dataFetcher.getData() != null) ? Optional.of(dataFetcher.getData()) : Optional.empty();
-    }
 }
