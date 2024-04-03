@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Button, Heading, Modal } from "@navikt/ds-react";
+import { Button, Modal } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError, AxiosResponse } from "axios";
@@ -82,7 +82,10 @@ export function ConfirmStep() {
         fysiskBrukerstedNr,
         tilknytningtype,
       };
-      return axios.post("/nom-api/app/ressurser", opprettRessursRequest);
+      return axios.post(
+        "/frackend/nom-api/app/ressurser",
+        opprettRessursRequest,
+      );
     },
 
     onSuccess: (opprettRessursResponse) => {

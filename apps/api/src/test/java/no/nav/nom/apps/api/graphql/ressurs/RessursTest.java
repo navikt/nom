@@ -47,20 +47,20 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Leser inn med graphql navIdent parameter")
     void scenario11() {
-        RessursState ressursState = createRessursHendelseEventSource("");
+        RessursState ressursState = kafkaUtils.createRessursHendelseEventSource("");
 
         final var response = postForResource("ressurs/scenario1.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
         assertEquals(ressursState.navident(), outputRessurs.getNavIdent());
-        assertEquals(ressursState.personident(), outputRessurs.getPersonIdent());
+        assertEquals(sladdetPersonident(ressursState.personident()), outputRessurs.getPersonIdent());
     }
 
     @Test
     @DisplayName("Leser inn med graphql navIdent og personIdent parameter bulk")
     void scenario112() {
-        createRessursHendelseEventSource("1");
-        createRessursHendelseEventSource("2");
+        kafkaUtils.createRessursHendelseEventSource("1");
+        kafkaUtils.createRessursHendelseEventSource("2");
 
         final var response = postForResource("ressurs/scenario12.graphql")
             .path("ressurser")
@@ -90,21 +90,21 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Leser inn med graphql personIdent parameter")
     void scenario12() {
-        RessursState ressurs = createRessursHendelseEventSource("");
+        RessursState ressurs = kafkaUtils.createRessursHendelseEventSource("");
 
         final var response = postForResource("ressurs/scenario2.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
         assertEquals(ressurs.navident(), outputRessurs.getNavIdent());
-        assertEquals(ressurs.personident(), outputRessurs.getPersonIdent());
+        assertEquals(sladdetPersonident(ressurs.personident()), outputRessurs.getPersonIdent());
     }
 
     @Test
     @DisplayName("Leser inn med graphql uten parameter bulk")
     void scenario13() {
-        createRessursHendelseEventSource("1");
-        createRessursHendelseEventSource("2");
-        createRessursHendelseEventSource("3");
+        kafkaUtils.createRessursHendelseEventSource("1");
+        kafkaUtils.createRessursHendelseEventSource("2");
+        kafkaUtils.createRessursHendelseEventSource("3");
 
         final var response = postForResource("ressurs/scenario3.graphql");
 
@@ -115,7 +115,7 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Kan hente ut kobling for ressurs")
     void scenario21() {
-        final var ressursState = createRessursHendelseEventSource("2");
+        final var ressursState = kafkaUtils.createRessursHendelseEventSource("2");
         final var enhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").build();
         dvhOrgenhetMockUtils.addToResponse(enhet);
         dvhRestConsumer.loadRessurserOgOrgEnheter();
@@ -148,7 +148,7 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Kobling er tom liste om kobling for person ikke finnes")
     void scenario22() {
-        createRessursHendelseEventSource("3");
+        kafkaUtils.createRessursHendelseEventSource("3");
 
         final var response = postForResource("ressurs/scenario22.graphql");
 
@@ -175,13 +175,13 @@ class RessursTest extends RessursTestBase {
             Collections.emptyList()
         );
 
-        createRessursHendelseEventSource(ressursState);
+        kafkaUtils.createRessursHendelseEventSource(ressursState);
 
         final var response = postForResource("ressurs/scenario1.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
         assertEquals(ressursState.navident(), outputRessurs.getNavIdent());
-        assertEquals(ressursState.personident(), outputRessurs.getPersonIdent());
+        assertEquals(sladdetPersonident(ressursState.personident()), outputRessurs.getPersonIdent());
         assertEquals(ressursState.sluttdato().orElseThrow(), outputRessurs.getSluttdato());
     }
 
@@ -204,13 +204,13 @@ class RessursTest extends RessursTestBase {
             Collections.emptyList()
         );
 
-        createRessursHendelseEventSource(ressursState);
+        kafkaUtils.createRessursHendelseEventSource(ressursState);
 
         final var response = postForResource("ressurs/scenario1.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
         assertEquals(ressursState.navident(), outputRessurs.getNavIdent());
-        assertEquals(ressursState.personident(), outputRessurs.getPersonIdent());
+        assertEquals(sladdetPersonident(ressursState.personident()), outputRessurs.getPersonIdent());
         assertEquals(ressursState.startdato().orElseThrow(), outputRessurs.getStartdato());
     }
 
@@ -218,8 +218,8 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Kan hente fulle navn fra PDL")
     void scenarioNavn1() {
-        createRessursHendelseEventSource("3");
-        createRessursHendelseEventSource("4");
+        var r1 = kafkaUtils.createRessursHendelseEventSource("3");
+        var r2 = kafkaUtils.createRessursHendelseEventSource("4");
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent3", "testPersonIdent4");
 
@@ -228,15 +228,16 @@ class RessursTest extends RessursTestBase {
         final var ressurser = response.path("ressurser").entityList(JsonNode.class).get();
         assertEquals(2, ressurser.size());
 
-        pdlUtils.assertNavn(ressurser.get(0).get("ressurs").get("personIdent").textValue(), ressurser.get(0).get("ressurs").get("person").get("navn"));
-        pdlUtils.assertNavn(ressurser.get(1).get("ressurs").get("personIdent").textValue(), ressurser.get(1).get("ressurs").get("person").get("navn"));
+        // assertions krever samme rekkefølge i respons som i event-source
+        pdlUtils.assertNavn(r1.personident(), ressurser.get(0).get("ressurs").get("person").get("navn"));
+        pdlUtils.assertNavn(r2.personident(), ressurser.get(1).get("ressurs").get("person").get("navn"));
     }
 
     @Test
     @DisplayName("Kan hente navn uten mellomnavn fra PDL")
     void scenarioNavn2() {
-        createRessursHendelseEventSource("3");
-        createRessursHendelseEventSource("4");
+        var r3 = kafkaUtils.createRessursHendelseEventSource("3");
+        var r4 = kafkaUtils.createRessursHendelseEventSource("4");
 
         pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
 
@@ -245,15 +246,16 @@ class RessursTest extends RessursTestBase {
         final var ressurser = response.path("ressurser").entityList(JsonNode.class).get();
         assertEquals(2, ressurser.size());
 
-        pdlUtils.assertNavn(ressurser.get(0).get("ressurs").get("personIdent").textValue(), ressurser.get(0).get("ressurs").get("person").get("navn"));
-        pdlUtils.assertNavn(ressurser.get(1).get("ressurs").get("personIdent").textValue(), ressurser.get(1).get("ressurs").get("person").get("navn"));
+        // assertions krever samme rekkefølge i respons som i event-source
+        pdlUtils.assertNavn(r3.personident(), ressurser.get(0).get("ressurs").get("person").get("navn"));
+        pdlUtils.assertNavn(r4.personident(), ressurser.get(1).get("ressurs").get("person").get("navn"));
     }
 
     @Test
     @DisplayName("Hente navn hvor PDL er utilgjengelig")
     void scenarioNavn3() {
-        createRessursHendelseEventSource("3");
-        createRessursHendelseEventSource("4");
+        kafkaUtils.createRessursHendelseEventSource("3");
+        kafkaUtils.createRessursHendelseEventSource("4");
 
         pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
         stubFor(post("/graphql").willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
@@ -270,8 +272,8 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Hente navn hvor PDL er gir feil og manglende respons")
     void scenarioNavn4() {
-        createRessursHendelseEventSource("3");
-        createRessursHendelseEventSource("4");
+        kafkaUtils.createRessursHendelseEventSource("3");
+        kafkaUtils.createRessursHendelseEventSource("4");
 
         pdlUtils.addErrorToPdlResponse("testPersonIdent3", "bad_request");
         pdlUtils.addErrorToPdlResponse("testPersonIdent4", "not_found");
@@ -289,9 +291,9 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Kan hente email fra AD og visningsnavn")
     void scenario745() {
-        final var ressurs1 = createRessursHendelseEventSource("1");
-        final var ressurs2 = createRessursHendelseEventSource("2");
-        final var ressurs3 = createRessursHendelseEventSource("3");
+        final var ressurs1 = kafkaUtils.createRessursHendelseEventSource("1");
+        final var ressurs2 = kafkaUtils.createRessursHendelseEventSource("2");
+        final var ressurs3 = kafkaUtils.createRessursHendelseEventSource("3");
 
         final var response = postForResource("ressurs/scenario8.graphql");
         MatcherAssert.assertThat(response, GraphQLMatchers.hasErrors());
@@ -316,7 +318,7 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Hente enheter ressurs er leder for")
     void scenario35() {
-        createRessursHendelseEventSource("");
+        kafkaUtils.createRessursHendelseEventSource("");
         var enhet = DvhOrgEnhetMock.getBuilderWithDefault()
             .ORGENHET_KODE("testId1")
             .ORGNODE_NIV("ORGENHET")
@@ -351,8 +353,8 @@ class RessursTest extends RessursTestBase {
             .ORGNODE_NIV("ORGENHET")
             .build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
-        final var ressursState1 = createRessursHendelseEventSource("1");
-        final var ressursState2 = createRessursHendelseEventSource("2");
+        final var ressursState1 = kafkaUtils.createRessursHendelseEventSource("1");
+        final var ressursState2 = kafkaUtils.createRessursHendelseEventSource("2");
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
@@ -384,9 +386,9 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Hente leder for ressurs som er leder av sin enhet")
     void scenario37() {
-        createRessursHendelseEventSource("1");   // Oppretter ressursen "testNavIdent1"
-        createRessursHendelseEventSource("2");
-        final var ressursState4 = createRessursHendelseEventSource("4");   // Oppretter ressursen "testNavIdent4"
+        kafkaUtils.createRessursHendelseEventSource("1");   // Oppretter ressursen "testNavIdent1"
+        kafkaUtils.createRessursHendelseEventSource("2");
+        final var ressursState4 = kafkaUtils.createRessursHendelseEventSource("4");   // Oppretter ressursen "testNavIdent4"
         final var ressursLederForDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
             .ORGENHET_KODE("testId5").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build(); // Oppretter orgEnhet 5
         final var lederenErPaDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
@@ -432,9 +434,9 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Ikke tillate henting av personNr uten riktig gruppemedlemskap")
     void scenario51() {
-        createRessursHendelseEventSource("1");
-        createRessursHendelseEventSource("2");
-        createRessursHendelseEventSource("4");
+        kafkaUtils.createRessursHendelseEventSource("1");
+        kafkaUtils.createRessursHendelseEventSource("2");
+        kafkaUtils.createRessursHendelseEventSource("4");
         final var ressursLederForDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
             .ORGENHET_KODE("testId5").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         final var lederenErPaDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
@@ -455,7 +457,7 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Kan slå opp ressurs ved eksakt telefonnummer")
     void scenario52() {
-        RessursState ressursState = createRessursHendelseEventSource("1");
+        RessursState ressursState = kafkaUtils.createRessursHendelseEventSource("1");
 
         String telefonNummer = "4712345678";
         DvhTelefon mockDvhTelefon = new DvhTelefon();
@@ -475,7 +477,7 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Kan slå opp ressurs ved telefonnummer uten landskode")
     void scenario53() {
-        RessursState ressursState = createRessursHendelseEventSource("1");
+        RessursState ressursState = kafkaUtils.createRessursHendelseEventSource("1");
 
         String telefonNummer = "4712345678";
         DvhTelefon mockDvhTelefon = new DvhTelefon();
@@ -490,6 +492,10 @@ class RessursTest extends RessursTestBase {
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
         assertEquals(ressursState.navident(), outputRessurs.get("navident").textValue());
         assertEquals(outputRessurs.get("telefon").get(0).get("nummer").textValue(), telefonNummer);
+    }
+
+    private String sladdetPersonident(String personident){
+        return personident.replaceFirst(".{5}$","*****");
     }
 
 

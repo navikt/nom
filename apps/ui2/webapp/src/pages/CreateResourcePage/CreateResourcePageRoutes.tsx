@@ -29,10 +29,10 @@ export function CreateRessursPage() {
 
   let StepComponent;
   if (stepIdAsNumber === 1) {
-    StepComponent = <SektorStep />;
+    StepComponent = <PersonopplysningerStep />;
   }
   if (stepIdAsNumber === 2) {
-    StepComponent = <PersonopplysningerStep />;
+    StepComponent = <SektorStep />;
   }
   if (stepIdAsNumber === 3) {
     StepComponent = <OrganisasjonstilknytningStep />;

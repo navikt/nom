@@ -17,6 +17,8 @@ app:
     timeoutInMillis: 2500
   redis:
     rnrClientTokenCacheName: rnrClientTokenCache
+  navident:
+    sequence:  ${NAVIDENT_SEQUENCE:168000}
 
 authentication:
   aad:
@@ -97,6 +99,11 @@ management:
 server:
   shutdown: graceful
 
+unleash:
+  endpoint:
+    url: ${UNLEASH_SERVER_API_URL}/api
+  api-key: ${UNLEASH_SERVER_API_TOKEN}
+
 ---
 spring:
   config:
@@ -130,3 +137,4 @@ app:
 PDL_CLIENT_ID: prod-fss.pdl.pdl-api
 PDL_BASE_URL: https://pdl-api.prod-fss-pub.nais.io
 REDIS_HOST: nav-ident-redis.org.svc.cluster.local
+NAVIDENT_SEQUENCE: 168000

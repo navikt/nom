@@ -50,7 +50,7 @@ export function SektorStep() {
           event.preventDefault();
           navigate({
             to: "/ressurs/create/$step",
-            params: { step: "2" },
+            params: { step: "3" },
             search: (oldSearch) => ({
               ...oldSearch,
               sektor: selectedSektor,

@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
@@ -9,11 +10,13 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningC
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -31,18 +34,20 @@ public class EksterneRessurserProcessor {
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgtilknytningService orgtilknytningService;
     private final OrgenhetService orgenhetService;
+    private final OrganiseringStateRepository organiseringStateRepository;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final NomMastered nomMastered;
     private final Unleash unleash;
 
     public EksterneRessurserProcessor(
             RemedyEnhetMapperService remedyEnhetMapperService, OrgtilknytningService orgtilknytningService,
-            OrgenhetService orgenhetService,
+            OrgenhetService orgenhetService, OrganiseringStateRepository organiseringStateRepository,
             OrgtilknytningCommandService orgtilknytningCommandService, NomMastered nomMastered, Unleash unleash
     ) {
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.orgtilknytningService = orgtilknytningService;
         this.orgenhetService = orgenhetService;
+        this.organiseringStateRepository = organiseringStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.nomMastered = nomMastered;
         this.unleash = unleash;
@@ -104,6 +109,8 @@ public class EksterneRessurserProcessor {
                 .get();
             if (harSammeSluttdato(eksternRessurs, sisteEksisterendeOrgtilknytning) && erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {
                 log.debug("Ekstern ressurs {} har eksisterende orgtilknytning som ikke trenger endring", eksternRessurs.navident());
+                // Oppdater evt tilknytningstypen - hvis denne er ikke er korrekt
+                settTypeEksternSamarbeidspartnerHvisSkatt(sisteEksisterendeOrgtilknytning, metadata);
             } else {
                 if (erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {
                     // Sluttdato er endret, endre sluttdato på eksisterende orgtilknytning - ingen flere endringer påkrevd.
@@ -163,17 +170,19 @@ public class EksterneRessurserProcessor {
         var orgenhetPaaRessurs = eksternRessurs.orgenhetPaaRessurs();
         var orgenhetPaaRessursNivaa = eksternRessurs.orgenhetPaaRessursNivaa();
 
-        Optional<IOrgenhet> orgenhetByRemedyEnhet = remedyEnhetMapperService
+        IOrgenhet orgenhetByRemedyEnhet = remedyEnhetMapperService
             .findByRemedyEnhetId(remedyEnhet)
             .map(
                 orgenhet -> {
                     log.debug("For navident {} - Fant orgenhet {} for remedyEnhet {}", navident, orgenhet.nomId(), remedyEnhet);
-                    return orgenhetService.getById(orgenhet.nomId());
+                    var orgenhetForRemedyenhet = orgenhetService.getById(orgenhet.nomId()).orElse(null);
+                    orgenhetForRemedyenhet = hvisSkattPlasserNederst(orgenhetForRemedyenhet, navident, remedyEnhet);
+                    return orgenhetForRemedyenhet;
                 }
             ).orElseGet(
                 () -> {
                     log.info("For navident {} - Fant ikke orgenhet for remedyEnhet {}", navident, remedyEnhet);
-                    return Optional.empty();
+                    return null;
                 }
             );
 
@@ -184,7 +193,7 @@ public class EksterneRessurserProcessor {
                 orgenhetPaaRessurs,
                 remedyEnhet
             );
-            return orgenhetByRemedyEnhet.orElse(null);
+            return orgenhetByRemedyEnhet;
         } else {
             var nomOrgenheterByOrgenhetPaaRessurs = orgenhetService.getByAgressoIdForEnheterMedOrganisering(orgenhetPaaRessurs)
                 .stream()
@@ -198,7 +207,9 @@ public class EksterneRessurserProcessor {
                     orgenhetPaaRessurs,
                     remedyEnhet
                 );
-                return nomOrgenheterByOrgenhetPaaRessurs.get(0);
+                var nomOrgenhetPaaRessurs = nomOrgenheterByOrgenhetPaaRessurs.get(0);
+                nomOrgenhetPaaRessurs = hvisSkattPlasserNederst(nomOrgenhetPaaRessurs, navident, remedyEnhet);
+                return nomOrgenhetPaaRessurs;
             } else if (nomOrgenheterByOrgenhetPaaRessurs.isEmpty()) {
                 log.info(
                     "For navident {} - Fant ikke orgenhet for agressoId/Nivå: {}/{}. Faller tilbake på å bruke remedyEnhet {}.",
@@ -216,8 +227,37 @@ public class EksterneRessurserProcessor {
                     remedyEnhet
                 );
             }
-            return orgenhetByRemedyEnhet.orElse(null);
+            return orgenhetByRemedyEnhet;
         }
+    }
+
+    private IOrgenhet hvisSkattPlasserNederst(IOrgenhet orgenhetForRemedyenhet, String navident, String remedyEnhet) {
+        if (erSkatteetatenNiv0Enhet(orgenhetForRemedyenhet)) {
+            // Skatt skal plasseres på nivået under
+            var underliggende = orgenhetService.findAllUnderliggendeOrgenheter(orgenhetForRemedyenhet.getId());
+            if (underliggende.isEmpty()) {
+                log.warn("SKATT ({}) har ingen underenheter. Faller tilbake på å bruke orgenhet {}.", orgenhetForRemedyenhet.getId(), orgenhetForRemedyenhet.getId());
+            } else if (underliggende.size() == 1) {
+                orgenhetForRemedyenhet = orgenhetService.getById(underliggende.get(0)).orElse(null);
+                log.debug("For navident {} - Fant underenhet av SKATT: orgenhet {} for remedyEnhet {}", navident, orgenhetForRemedyenhet.getId(), remedyEnhet);
+            } else {
+                log.warn("For navident {} - Fant flere underenheter for orgenhet SKATT ({}). Faller tilbake på å bruke orgenhet {}.",
+                    navident, orgenhetForRemedyenhet.getId(), orgenhetForRemedyenhet.getId());
+            }
+        }
+        return orgenhetForRemedyenhet;
+    }
+
+    private boolean erSkatteetatenNiv0Enhet(IOrgenhet orgenhetForRemedyenhet) {
+        return orgenhetForRemedyenhet != null && orgenhetForRemedyenhet.getAgressoId().equals("SKATT");
+    }
+
+    private boolean erUnderSkatteetatenNiv0Enhet(IOrgenhet orgenhet) {
+        var organisering = organiseringStateRepository.findActiveById(orgenhet.getId());
+        if (organisering.isEmpty()) {
+            return false;
+        }
+        return erSkatteetatenNiv0Enhet(orgenhet) || orgenhetService.getById(organisering.get().idOver()).map(this::erSkatteetatenNiv0Enhet).orElse(false);
     }
 
     private void opprettOrgtilknytning(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet, LocalDate gyldigFom, InputMetadata metadata) {
@@ -266,6 +306,10 @@ public class EksterneRessurserProcessor {
         log.debug("Lager EndreDagligOppfolgingOrgtilknytning event: {}", endreDagligOppfolgingOrgtilknytning);
 
         orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(fid, endreDagligOppfolgingOrgtilknytning);
+
+        if (erUnderSkatteetatenNiv0Enhet(orgenhet)) {
+            settTilknytningtype(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER, fid, eksternRessurs.navident(), metadata);
+        }
     }
 
 
@@ -287,6 +331,8 @@ public class EksterneRessurserProcessor {
         log.debug("Lager EndreOrgtilknytningDato event for fid {}:\n {}", orgtilknytning.fid(), endreOrgtilknytningDato);
 
         orgtilknytningCommandService.endreOrgtilknytningDato(orgtilknytning.fid(), endreOrgtilknytningDato);
+
+        settTypeEksternSamarbeidspartnerHvisSkatt(orgtilknytning, metadata);
     }
 
     private void avsluttOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
@@ -308,6 +354,24 @@ public class EksterneRessurserProcessor {
         orgtilknytningCommandService.avvikleOrgtilknytning(orgtilknytning.fid(), avvikleOrgtilknytning);
     }
 
+    private void settTilknytningtype(Tilknytningtype type, String orgtilknytningFid, String navident, InputMetadata metadata) {
+        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(navident)) {
+            log.info("Navident {} er mastered. Vi avslutter ikke orgtilknytning for denne", navident);
+            return;
+        }
+
+        var endreTilknytningsType =  new EndreTilknytningtypeCommand(
+            orgtilknytningFid,
+            Optional.of(type),
+            metadata
+        );
+
+        log.debug("Endrer tilknytningstype til {} for navident {}.", type, navident);
+
+        orgtilknytningCommandService.endreTilknytningtype(endreTilknytningsType);
+    }
+
+
     private void fjernEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
         if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(orgtilknytning.navident())) {
             log.info("Navident {} er mastered. Vi fjerner ikke orgtilknytning for denne", orgtilknytning.navident());
@@ -326,5 +390,18 @@ public class EksterneRessurserProcessor {
         log.debug("Lager FjernOrgtilknytning event for fid {}:\n {}", orgtilknytning.fid(), fjernOrgtilknytning);
 
         orgtilknytningCommandService.fjernOrgtilknytning(orgtilknytning.fid(), fjernOrgtilknytning);
+    }
+
+    private void settTypeEksternSamarbeidspartnerHvisSkatt(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
+        if (erTypeEksternSamarbeidspartner(orgtilknytning)) return; // Er allerede ekstern samarbeidspartner
+
+        IOrgenhet orgenhet = orgenhetService.getById(orgtilknytning.orgEnhetId()).orElse(null);
+        if (erUnderSkatteetatenNiv0Enhet(orgenhet)) {
+            settTilknytningtype(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER, orgtilknytning.fid(), orgtilknytning.navident(), metadata);
+        }
+    }
+
+    private static boolean erTypeEksternSamarbeidspartner(OrgtilknytningState orgtilknytning) {
+        return Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER.equals(orgtilknytning.orgtilknytningType().orElse(null));
     }
 }

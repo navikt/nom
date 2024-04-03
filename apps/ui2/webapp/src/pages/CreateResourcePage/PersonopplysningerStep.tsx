@@ -137,7 +137,7 @@ function VisningsnavnForm({
         onSubmit={handleSubmit((values) =>
           navigate({
             to: "/ressurs/create/$step",
-            params: { step: "3" },
+            params: { step: "2" },
             search: (oldSearch) => ({ ...oldSearch, ...values }),
           }),
         )}
@@ -179,5 +179,8 @@ function VisningsnavnForm({
 const navnValidationSchema = yup.object({
   visningsfornavn: yup.string().required("Obligatorisk"),
   visningsmellomnavn: yup.string().optional(),
-  visningsetternavn: yup.string().required("Obligatorisk"),
+  visningsetternavn: yup
+    .string()
+    .required("Obligatorisk")
+    .matches(/^\S+$/, "Etternavn kan ikke inneholde mellomrom"),
 });

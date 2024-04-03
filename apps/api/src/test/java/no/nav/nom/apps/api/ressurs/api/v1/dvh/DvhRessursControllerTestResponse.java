@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.ressurs.api.v1.dvh;
 
+import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
@@ -37,6 +38,9 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
     @Autowired
     OrgtilknytningStateRepository orgtilknytningStateRepository;
 
+    @Autowired
+    TestTokensGenerator testToken;
+
     @Test
     @DisplayName("Test Rest endepunktet til DvhRessursController.nomMasteredRessurser()")
     public void test_001() {
@@ -44,7 +48,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
             .uri("/api/v1/dvh/nom-mastered-ressurser")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(queryPersonClientToken());
+                httpHeaders.setBearerAuth(testToken.queryPersonClient());
             })
             .exchange()
             .expectStatus().is2xxSuccessful()
@@ -56,7 +60,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
             .uri("/api/v1/dvh/nom-mastered-ressurser")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(queryPersonClientToken());
+                httpHeaders.setBearerAuth(testToken.queryPersonClient());
             })
             .exchange()
             .returnResult(String.class).getResponseBody().blockFirst();

@@ -51,6 +51,7 @@ public class RestTestBase extends MockBasisTestOrganisering {
     private static final String OAUTH_VALID_AUDIENCE = "test";
     private static final String OAUTH_VALID_ISSUER = "aad";
     private static final String NOM_WRITE_GROUP = "nomWriteGroup";
+    private static final String NOM_ADMIN_GROUP = "nomAdminGroup";
 
     @BeforeEach
     public void setUnleashUseNewAuth() {
@@ -74,7 +75,7 @@ public class RestTestBase extends MockBasisTestOrganisering {
     protected String invalidAudienceToken() {
         Map<String, Object> claims = new HashMap<>();
         claims.put("NAVident", "B");
-        claims.put("azp_name", "some-app");
+        claims.put("azp_name", "nomUiClient");
         return generateToken(claims, "invalid-audience");
     }
 
@@ -82,7 +83,7 @@ public class RestTestBase extends MockBasisTestOrganisering {
         Map<String, Object> claims = new HashMap<>();
         claims.put("NAVident", "B");
         claims.put("groups", List.of(NOM_WRITE_GROUP));
-        claims.put("azp_name", "some-app");
+        claims.put("azp_name", "nomUiClient");
         return validToken(claims);
     }
 
@@ -90,7 +91,7 @@ public class RestTestBase extends MockBasisTestOrganisering {
     protected String vanligUserToken_Leder_B() {
         Map<String, Object> claims = new HashMap<>();
         claims.put("NAVident", "B");
-        claims.put("azp_name", "some-app");
+        claims.put("azp_name", "nomUiClient");
         return validToken(claims);
     }
 
@@ -98,7 +99,7 @@ public class RestTestBase extends MockBasisTestOrganisering {
         Map<String, Object> claims = new HashMap<>();
         claims.put("NAVident", "A");
         claims.put("groups", List.of(NOM_WRITE_GROUP));
-        claims.put("azp_name", "some-app");
+        claims.put("azp_name", "nomUiClient");
         return validToken(claims);
     }
 
@@ -106,14 +107,22 @@ public class RestTestBase extends MockBasisTestOrganisering {
         Map<String, Object> claims = new HashMap<>();
         claims.put("NAVident", "HR");
         claims.put("groups", List.of(NOM_WRITE_GROUP));
-        claims.put("azp_name", "some-app");
+        claims.put("azp_name", "nomUiClient");
         return validToken(claims);
     }
 
     protected String vanligUserToken_DelegertLeder_HR() {
         Map<String, Object> claims = new HashMap<>();
         claims.put("NAVident", "HR");
-        claims.put("azp_name", "some-app");
+        claims.put("azp_name", "nomUiClient");
+        return validToken(claims);
+    }
+
+    protected String nomAdminUserToken() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("NAVident", "WHOEVER");
+        claims.put("groups", List.of(NOM_ADMIN_GROUP));
+        claims.put("azp_name", "nomUiClient");
         return validToken(claims);
     }
 
@@ -124,7 +133,7 @@ public class RestTestBase extends MockBasisTestOrganisering {
     protected String generateToken(Map<String, Object>  claims, String audience) {
         return mockOAuth2Server.issueToken(
             OAUTH_VALID_ISSUER,
-            "clientId",
+            "nomUiClient",
             new DefaultOAuth2TokenCallback(
                 "aad",
                 "subjectId",

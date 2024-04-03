@@ -35,7 +35,8 @@ public record AppProperties(
     public record Pdl(
             String tema,
             String behandlingsnummer,
-            String baseUrl
+            String baseUrl,
+            String aadScope
     ) {}
 
     public record Nik(

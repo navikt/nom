@@ -26,7 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class OnBehalfOfTokenRepository {
-
     private static final String AAD_GRANT_TYPE_OBO = "urn:ietf:params:oauth:grant-type:jwt-bearer";
     private static final String AAD_TOKEN_USE = "on_behalf_of";
     private static final String AAD_CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
@@ -47,7 +46,7 @@ public class OnBehalfOfTokenRepository {
     public String getOnbehalfofTokenFor(String scope) {
         String assertion = ((JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication()).getToken().getTokenValue();
         val signedJwt = cachedAadTokensByUserAndScope.get(assertion + scope);
-        return String.format("%s", isValidToken(signedJwt) ? signedJwt : refreshOnbehalfofTokenFor(assertion, scope));
+        return String.format("%s", isValidToken(signedJwt) ? signedJwt.serialize() : refreshOnbehalfofTokenFor(assertion, scope).serialize());
     }
 
     @SneakyThrows
@@ -102,4 +101,22 @@ public class OnBehalfOfTokenRepository {
     private boolean isValidToken(SignedJWT signedJwt) {
         return signedJwt != null && signedJwt.getJWTClaimsSet().getExpirationTime().after(Date.from(Instant.now().plusSeconds(20)));
     }
+
+    @SneakyThrows
+    public boolean isContextTokenForAnUserPrincipal(String token) {
+        SignedJWT jwt = SignedJWT.parse(token);
+        String oid = jwt.getJWTClaimsSet().getStringClaim("oid");
+        String sub = jwt.getJWTClaimsSet().getStringClaim("sub");
+        return oid != null && sub != null && !oid.equals(sub);
+    }
+
+    @SneakyThrows
+    public String getTokenFromSpringAuthenticationContext() {
+        final var auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            return auth.getToken().getTokenValue();
+        }
+        return null;
+    }
+
 }

@@ -46,8 +46,8 @@ public class LederForRessursTest extends RessursTestBase {
 
         dvhOrgenhetMockUtils.createEmptyResponse(); // Ikke bruke Wiremock-responser fra JSON-konfig
 
-        var ressurs = createRessursHendelseEventSource("1");   // Oppretter ressursen med ID "testNavIdent1"
-        var leder = createRessursHendelseEventSource("2");     // Oppretter leder med ID "testNavIdent2"
+        var ressurs = kafkaUtils.createRessursHendelseEventSource("1");   // Oppretter ressursen med ID "testNavIdent1"
+        var leder = kafkaUtils.createRessursHendelseEventSource("2");     // Oppretter leder med ID "testNavIdent2"
 
 
         var ressursSinNedersteEnhet = DvhOrgEnhetMock.getBuilderWithDefault()
@@ -143,8 +143,8 @@ public class LederForRessursTest extends RessursTestBase {
 
         dvhOrgenhetMockUtils.createEmptyResponse(); // Ikke bruke Wiremock-responser fra JSON-konfig
 
-        RessursState ressurs = createRessursHendelseEventSource("1");   // Oppretter ressursen med ID "testNavIdent1"
-        RessursState leder = createRessursHendelseEventSource("2");     // Oppretter leder med ID "testNavIdent2"
+        RessursState ressurs = kafkaUtils.createRessursHendelseEventSource("1");   // Oppretter ressursen med ID "testNavIdent1"
+        RessursState leder = kafkaUtils.createRessursHendelseEventSource("2");     // Oppretter leder med ID "testNavIdent2"
 
 
         DvhOrgEnhetMock ressursSinNedersteEnhet = DvhOrgEnhetMock.getBuilderWithDefault()

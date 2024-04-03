@@ -1,0 +1,199 @@
+package no.nav.nom.apps.api.graphql;
+
+import io.getunleash.Unleash;
+import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
+import no.nav.nom.apps.api.KafkaUtils;
+import no.nav.nom.apps.api.TestTokensGenerator;
+import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
+import no.nav.nom.apps.api.clients.ad.AdClient;
+import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
+import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.apps.api.common.EmbeddeKafkaAdminClient;
+import no.nav.nom.apps.api.common.LocalConfiguration;
+import no.nav.nom.apps.api.common.NomProxyRestClient;
+import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.dvh.DvhService;
+import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
+import no.nav.nom.apps.api.graphql.common.config.ExceptionhandlerConfig;
+import no.nav.nom.apps.api.graphql.common.config.GraphQLConfig;
+import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader;
+import no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader;
+import no.nav.nom.apps.api.graphql.common.metrics.GraphQLFieldConsumptionCounter;
+import no.nav.nom.apps.api.graphql.common.resolver.FolkeregisterPersonResolver;
+import no.nav.nom.apps.api.graphql.controller.GraphQLOrgEnhetController;
+import no.nav.nom.apps.api.graphql.controller.GraphQLPersonController;
+import no.nav.nom.apps.api.graphql.controller.GraphQLRessursController;
+import no.nav.nom.apps.api.graphql.controller.GraphQLSearchController;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetKoblingResolver;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrganiseringResolver;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
+import no.nav.nom.apps.api.graphql.person.PersonResolver;
+import no.nav.nom.apps.api.graphql.ressurs.OrgTilknytningResolver;
+import no.nav.nom.apps.api.graphql.ressurs.RessursPropertyResolver;
+import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
+import no.nav.nom.apps.api.graphql.ressurs.TelefonResolver;
+import no.nav.nom.apps.api.graphql.search.SearchResolver;
+import no.nav.nom.apps.api.lucenesearch.LuceneService;
+import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
+import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetEventProducer;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
+import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationRepository;
+import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
+import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
+import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
+import no.nav.nom.apps.api.pdlutils.PdlUtils;
+import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
+import no.nav.nom.apps.api.ressurs.api.app.RessursLedereResolver;
+import no.nav.nom.apps.api.ressurs.eventsourcing.metadata.RessursMetadataRepositoryImpl;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursEventKafkaConfig;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursEventProducer;
+import no.nav.nom.apps.api.ressurs.eventsourcing.recoverybackup.RessursEventSourceRepository;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListenerConfig;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepositoryImpl;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
+import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
+import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
+import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
+import no.nav.nom.libs.utils.common.platform.LeaderElection;
+import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+
+@Import({
+    DvhRestConsumer.class
+    , DvhRepository.class
+    , DvhService.class
+    , RessursStateRepositoryImpl.class
+    , RessursStateListener.class
+    , RessursStateListenerConfig.class
+    , DvhOrgenhetsLast.class
+    , RessursCommadService.class
+    , RessursEventProducer.class
+    , RessursEventKafkaConfig.class
+    , OrgEnhetIdGenerator.class
+    , OrgenhetService.class
+    , OrgEnhetStateRepository.class
+    , OrganiseringStateRepository.class
+    , OrgtilknytningStateRepository.class
+    , OrgtilknytningService.class
+    , RessursHendelseForEventsourceService.class
+    , RessursMetadataRepositoryImpl.class
+    , DvhStartupLoadMonitor.class
+    , TestTokensGenerator.class
+    , KafkaUtils.class
+    , ValidationService.class
+    , NomProxyClient.class
+    , NomProxyRestClient.class
+    , PdlUtils.class
+    , LocalConfiguration.class
+    , GraphQLOrgEnhetController.class
+    , GraphQLPersonController.class
+    , GraphQLRessursController.class
+    , GraphQLSearchController.class
+    , OrgEnhetResolver.class
+    , OrgEnhetKoblingResolver.class
+    , OrganiseringResolver.class
+    , no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver.class
+    , no.nav.nom.apps.api.graphql.ressurs.LederResolver.class
+    , RemedyEnhetIdResolver.class
+    , PersonResolver.class
+    , FolkeregisterPersonResolver.class
+    , PersonBatchLoader.class
+    , RessursResolver.class
+    , RessursPropertyResolver.class
+    , ActiveDirectoryRessursBatchLoader.class
+    , TelefonResolver.class
+    , RessursLedereResolver.class
+    , OrgTilknytningResolver.class
+    , SearchResolver.class
+    , GraphQLConfig.class
+    , ExceptionhandlerConfig.class
+    , DvhOrgEnhetMockUtils.class
+    , KafkaAutoConfiguration.class
+    , EmbeddeKafkaAdminClient.class
+    , LeaderElection.class
+})
+@EnableConfigurationProperties(value = AppProperties.class)
+@EnableKafka
+public class GraphqlTestConfig {
+    @MockBean
+    OrgEnhetEventProducer orgEnhetEventProducer;
+
+    @MockBean
+    OrgEnhetCommandService orgEnhetCommandService;
+
+    @MockBean
+    KafkaTopicReader kafkaTopicReader;
+
+    @MockBean
+    OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
+
+    @MockBean
+    OrgtilknytningStateListener orgtilknytningStateListener;
+
+    @MockBean
+    OrgEnhetStateListener orgEnhetStateListener;
+
+    @MockBean
+    RessursEventSourceRepository ressursEventSourceRepository;
+
+    @MockBean
+    NomMastered nomMastered;
+
+    @MockBean
+    ValidationRepository validationRepository;
+
+    @MockBean
+    NomMasteredRessursListener nomMasteredRessursListener;
+
+    @MockBean
+    OrgEnhetTypeHandler orgEnhetTypeHandler;
+
+    @MockBean
+    RessursStillingLoader ressursStillingLoader;
+
+    @MockBean
+    EksterneRessurserLoader eksterneRessurserLoader;
+
+    @MockBean
+    KommunaleRessurserLoader kommunaleRessurserLoader;
+
+    @MockBean
+    OrganiseringService organiseringService;
+
+    @MockBean
+    AuthorizedNavident authorizedNavident;
+
+    @MockBean
+    RemedyEnhetMapperService remedyEnhetMapperService;
+
+    @MockBean
+    GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
+
+    @MockBean
+    AdClient adClient;
+
+    @MockBean
+    LuceneService luceneService;
+
+    @MockBean
+    Unleash unleash;
+}

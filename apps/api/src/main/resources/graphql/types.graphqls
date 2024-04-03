@@ -87,6 +87,7 @@ type RessursOrgTilknytning {
     erDagligOppfolging: Boolean
     gyldigFom: Date!
     gyldigTom: Date
+    tilknytningType: TilknytningType
 }
 
 enum Retning {
@@ -145,4 +146,9 @@ enum OrgEnhetsType {
     NAV_KONTOR
     TILTAK
     NAV_OKONOMITJENESTE
+}
+
+enum TilknytningType {
+    KONSULENT,
+    EKSTERN_SAMARBEIDSPARTNER
 }

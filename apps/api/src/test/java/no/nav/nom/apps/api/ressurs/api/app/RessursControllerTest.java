@@ -2,6 +2,8 @@ package no.nav.nom.apps.api.ressurs.api.app;
 
 import lombok.SneakyThrows;
 import lombok.val;
+import no.nav.nom.apps.api.TestTokensGenerator;
+import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
@@ -28,10 +30,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.Assert;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -69,8 +74,16 @@ public class RessursControllerTest extends RestTestBase {
     @MockBean
     private RessursStateRepository ressursStateRepository;
 
+    @MockBean
+    private AuthResolver authResolver;
+
+    @Autowired
+    TestTokensGenerator testToken;
+
     @BeforeEach
-    void enableFeatureFlag(){
+    void setMockExpectations(){
+        when(authResolver.kanRedigereRessurs(any())).thenReturn(true);
+        when(authResolver.kanOppretteRessurs(any())).thenReturn(true);
         when(unleash.isEnabled(UNLEASH_EDIT_RESSURS)).thenReturn(true);
     }
 
@@ -96,7 +109,7 @@ public class RessursControllerTest extends RestTestBase {
                 .queryParam("sluttdato", LocalDate.now())
                 .build()
             )
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomWriteGroupAndNomUiAzpToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
             .exchange()
             .expectStatus().isOk()
             .expectBodyList(RessursState.class)
@@ -113,9 +126,8 @@ public class RessursControllerTest extends RestTestBase {
     @ParameterizedTest(name = "Skal ikke opprette ressurs i sektor {0}")
     @MethodSource("skal_bare_opprette_eksterne_ressurser_input")
     void skal_bare_opprette_eksterne_ressurser(Sektor sektor) {
-
         postOpprettRessursRequest(
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             opprettRessursRequest().toBuilder().sektor(sektor).build()
         )
             .expectStatus().isBadRequest()
@@ -123,6 +135,38 @@ public class RessursControllerTest extends RestTestBase {
             .isEqualTo(StandardResponse.builder()
                 .message(InvalidSektorException.actionNotAllowedForSektor(sektor).getMessage())
                 .build()
+            );
+    }
+
+    @Test
+    void skal_ikke_opprette_ressurs_med_feilformatert_etternavn() {
+        postOpprettRessursRequest(
+            testToken.nomWriteGroupAndNomUiAzp(),
+            opprettRessursRequest().toBuilder().sektor(Sektor.EKSTERN).visningsetternavn("har mellomrom")
+                .sluttDato(Optional.of(LocalDate.now().plusDays(10)))
+                .startDato(LocalDate.now().plusDays(10)
+                ).build()
+        )
+            .expectStatus().isBadRequest()
+            .expectBody(String.class).value(it ->
+                Assert.isTrue(it.contains("Etternavn kan ikke inneholde"),"Uventet feilmelding")
+            );
+    }
+
+    @Test
+    void skal_ikke_oppdatere_ressurs_med_feilformatert_etternavn() {
+
+        when(ressursStateRepository.findByNavident(any()))
+            .thenReturn(Optional.of(RessursState.builder().sektor(Sektor.EKSTERN).build()));
+
+        postUpdateVisningsnavnRequest(
+            "navident",
+            testToken.nomWriteGroupAndNomUiAzp(),
+            new UpdateVisningsnavnRequest("fornavn",null,"har mellomrom")
+        )
+            .expectStatus().isBadRequest()
+            .expectBody(String.class).value(it ->
+                Assert.isTrue(it.contains("Etternavn kan ikke inneholde"),"Uventet feilmelding")
             );
     }
 
@@ -174,7 +218,7 @@ public class RessursControllerTest extends RestTestBase {
             .thenReturn(ressursState());
 
         postOpprettRessursRequest(
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             request
         )
             .expectStatus().is2xxSuccessful()
@@ -193,7 +237,7 @@ public class RessursControllerTest extends RestTestBase {
     void skal_ikke_opprette_ekstern_ressurs_uten_sluttDato() {
 
         postOpprettRessursRequest(
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             opprettRessursRequest().toBuilder()
                 .sluttDato(Optional.empty()).build()
         )
@@ -212,6 +256,18 @@ public class RessursControllerTest extends RestTestBase {
     }
 
     @Test
+    void opprette_ressurs_skal_gi_forbidden_nar_bruker_ikke_er_leder_for_enhet() {
+        when(authResolver.kanOppretteRessurs(any())).thenReturn(false);
+
+        postOpprettRessursRequest(
+            testToken.nomWriteGroupAndNomUiAzp(),
+            opprettRessursRequest().toBuilder()
+                .sluttDato(Optional.empty()).build()
+        )
+            .expectStatus().isForbidden();
+    }
+
+    @Test
     void skal_kunne_endre_navn_for_eksterne() {
         var existingRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
@@ -221,14 +277,12 @@ public class RessursControllerTest extends RestTestBase {
             .thenReturn(Optional.of(existingRessurs));
 
         var updateVisningsnavnRequest = new UpdateVisningsnavnRequest(
-            "Erik",
-            Optional.of("Ten"),
-            "Haag"
+            "Erik", Optional.of("Ten"), "Haag"
         );
 
         postUpdateVisningsnavnRequest(
             existingRessurs.navident(),
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             updateVisningsnavnRequest
         )
             .expectStatus().isOk();
@@ -242,6 +296,26 @@ public class RessursControllerTest extends RestTestBase {
             .matches(oppdaterPersonaliaCommand -> oppdaterPersonaliaCommand.visningsnavn().equals(
                 new Visningsnavn(updateVisningsnavnRequest.fornavn(), updateVisningsnavnRequest.mellomnavn(), updateVisningsnavnRequest.etternavn())
             ));
+    }
+
+    @Test
+    void endre_navn_for_eksterne_skal_gi_forbidden_nar_bruker_ikke_er_leder_for_ressurs() {
+        when(authResolver.kanRedigereRessurs(any())).thenReturn(false);
+
+        var existingRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN)
+            .build();
+
+        var updateVisningsnavnRequest = new UpdateVisningsnavnRequest(
+            "Erik", Optional.of("Ten"), "Haag"
+        );
+
+        postUpdateVisningsnavnRequest(
+            existingRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            updateVisningsnavnRequest
+        )
+            .expectStatus().isForbidden();
     }
 
     @Test
@@ -273,7 +347,7 @@ public class RessursControllerTest extends RestTestBase {
             )
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteGroupAndNomUiAzpToken());
+                httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp());
             })
             .bodyValue(request)
             .exchange()
@@ -286,6 +360,44 @@ public class RessursControllerTest extends RestTestBase {
 
         assertThat(opphorRessursCommandArgumentCaptor.getValue())
             .matches(opphorRessursCommand -> opphorRessursCommand.fid().equals(ressursSomSkalAvvikles.fid()));
+    }
+
+    @Test
+    void avvikle_ressurs_skal_gi_forbidden_nar_bruker_ikke_er_leder_for_ressurs() {
+        when(authResolver.kanRedigereRessurs(any())).thenReturn(false);
+
+        var ressursSomSkalAvvikles = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+
+        when(ressursStateRepository.findByFid(ressursSomSkalAvvikles.fid()))
+            .thenReturn(Optional.of(ressursSomSkalAvvikles));
+
+        var existingOrgtilknytninger = List.of(
+            orgtilknytningState().toBuilder().navident(ressursSomSkalAvvikles.navident()).build(),
+            orgtilknytningState().toBuilder()
+                .navident(ressursSomSkalAvvikles.navident())
+                .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
+                .build()
+        );
+
+        saveOrgtilknytninger(existingOrgtilknytninger);
+
+        var request = new AvvikleRessursRequest(
+            LocalDate.now().plusMonths(1)
+        );
+
+        webTestClient.post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/ressurser/{fid}/avvikle")
+                .build(ressursSomSkalAvvikles.fid())
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp());
+            })
+            .bodyValue(request)
+            .exchange()
+            .expectStatus().isForbidden();
     }
 
     @Test
@@ -306,7 +418,7 @@ public class RessursControllerTest extends RestTestBase {
 
         postUpdateVisningsnavnRequest(
             existingRessurs.navident(),
-            nomWriteGroupAndNomUiAzpToken(),
+            testToken.nomWriteGroupAndNomUiAzp(),
             updateVisningsnavnRequest
         )
             .expectStatus().isBadRequest();
@@ -336,7 +448,7 @@ public class RessursControllerTest extends RestTestBase {
 
         webTestClient.get()
             .uri(endpointPath)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomWriteGroupAndNomUiAzpToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
             .exchange()
             .expectStatus().isOk()
             .expectBody()
@@ -370,7 +482,7 @@ public class RessursControllerTest extends RestTestBase {
 
         webTestClient.get()
             .uri(endpointPath)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomAdminUserToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
             .exchange()
             .expectStatus().isOk()
             .expectBody()
@@ -399,7 +511,7 @@ public class RessursControllerTest extends RestTestBase {
 
         webTestClient.get()
             .uri(endpointPath)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomRemedyIntegrasjonAzpToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomRemedyIntegrasjonAzp()))
             .exchange()
             .expectStatus().isOk()
             .expectBody()
@@ -418,6 +530,42 @@ public class RessursControllerTest extends RestTestBase {
 
     @Test
     void skal_oppdatere_fysiske_brukersteder(){
+        var existingRessurs = ressursState()
+            .toBuilder()
+            .fysiskeBrukersteder(null)
+            .build();
+
+        var updateFysiskeBrukerstederRequest = UpdateFysiskeBrukerstederRequest.builder()
+            .primaryFysiskBrukersted("fyrstikken-id")
+            .fysiskeBrukersteder(Set.of("fyrstikken-id"))
+            .build();
+
+        when(ressursStateRepository.findByFid(existingRessurs.fid())).thenReturn(Optional.of(existingRessurs));
+        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(argThat(l ->
+                new HashSet<>(l).equals(updateFysiskeBrukerstederRequest.fysiskeBrukersteder())
+            )
+        )).thenReturn(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());
+
+        postUpdateFysiskeBrukerstederRequest(existingRessurs.fid(), testToken.nomWriteGroupAndNomUiAzp(), updateFysiskeBrukerstederRequest)
+            .expectStatus().isOk();
+
+        var oppdaterFysiskeBrukerstederCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterFysiskeBrukerstederCommand.class);
+        verify(ressursCommadService, times(1))
+            .oppdaterFysiskeBrukerstederCommand(oppdaterFysiskeBrukerstederCommandArgumentCaptor.capture(), any());
+
+        assertThat(oppdaterFysiskeBrukerstederCommandArgumentCaptor.getValue())
+            .usingRecursiveComparison()
+            .isEqualTo(OppdaterFysiskeBrukerstederCommand.builder()
+                .fid(existingRessurs.fid())
+                .primaryFysiskBrukersted(updateFysiskeBrukerstederRequest.primaryFysiskBrukersted())
+                .fysiskeBrukersteder(updateFysiskeBrukerstederRequest.fysiskeBrukersteder())
+                .build()
+            );
+    }
+
+    @Test
+    void oppdatere_fysiske_brukersteder_skal_gi_forbidden_nar_bruker_ikke_er_leder_for_ressurs() {
+        when(authResolver.kanRedigereRessurs(any())).thenReturn(false);
 
         var existingRessurs = ressursState()
             .toBuilder()
@@ -435,28 +583,21 @@ public class RessursControllerTest extends RestTestBase {
             )
         )).thenReturn(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());
 
-        postUpdateFysiskeBrukerstederRequest(existingRessurs.fid(), nomWriteGroupAndNomUiAzpToken(), updateFysiskeBrukerstederRequest)
-            .expectStatus().isOk();
-
-        var oppdaterFysiskeBrukerstederCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterFysiskeBrukerstederCommand.class);
-        verify(ressursCommadService, times(1))
-            .oppdaterFysiskeBrukerstederCommand(oppdaterFysiskeBrukerstederCommandArgumentCaptor.capture(), any());
-
-        assertThat(oppdaterFysiskeBrukerstederCommandArgumentCaptor.getValue())
-            .usingRecursiveComparison()
-            .isEqualTo(OppdaterFysiskeBrukerstederCommand.builder()
-                .fid(existingRessurs.fid())
-                .primaryFysiskBrukersted(updateFysiskeBrukerstederRequest.primaryFysiskBrukersted())
-                .fysiskeBrukersteder(updateFysiskeBrukerstederRequest.fysiskeBrukersteder())
-                .build()
-            );
+        postUpdateFysiskeBrukerstederRequest(existingRessurs.fid(), testToken.nomWriteGroupAndNomUiAzp(), updateFysiskeBrukerstederRequest)
+            .expectStatus().isForbidden();
     }
 
     @ParameterizedTest(name = "updateFysiskeBrukersteder should give 400 with message '{1}'")
     @MethodSource("testUpdateFysiskeBrukerstederBadRequestInput")
     void testUpdateFysiskeBrukerstederBadRequest(UpdateFysiskeBrukerstederRequest updateFysiskeBrukerstederRequest, String expectedMessage){
+        var existingRessurs = ressursState()
+            .toBuilder()
+            .fysiskeBrukersteder(null)
+            .build();
 
-        postUpdateFysiskeBrukerstederRequest("some-fid", nomWriteGroupAndNomUiAzpToken(), updateFysiskeBrukerstederRequest)
+        when(ressursStateRepository.findByFid(existingRessurs.fid())).thenReturn(Optional.of(existingRessurs));
+
+        postUpdateFysiskeBrukerstederRequest(existingRessurs.fid(), testToken.nomWriteGroupAndNomUiAzp(), updateFysiskeBrukerstederRequest)
             .expectStatus().isBadRequest()
             .expectBody(StandardResponse.class)
             .isEqualTo(StandardResponse.builder().message(expectedMessage).build());
@@ -488,6 +629,7 @@ public class RessursControllerTest extends RestTestBase {
             .visningsmellomnavn("whatever")
             .visningsetternavn("whatever")
             .sektor(Sektor.EKSTERN)
+            .orgEnhetId("whatever")
             .ansettelsesType(AnsettelsesType.FAST)
             .fysiskBrukerstedNr("whatever")
             .tilknytningtype(Tilknytningtype.KONSULENT)

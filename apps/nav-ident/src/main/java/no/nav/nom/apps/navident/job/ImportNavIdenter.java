@@ -9,6 +9,7 @@ import com.google.cloud.storage.StorageOptions;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.navident.common.LogConfig;
+import no.nav.nom.apps.navident.domain.Navident;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.apps.navident.eventsource.EventPayload;
 import no.nav.nom.apps.navident.eventsource.EventSourceService;
@@ -21,11 +22,13 @@ import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.channels.Channels;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 @Service
 @Slf4j
@@ -37,6 +40,9 @@ public class ImportNavIdenter {
     private String gsProjectId;
     @Value("${app.kafka.topic.eventsource.name}")
     private String eventSourceTopic;
+    @Value("${app.navident.sequence}")
+    private int navidentSequence;
+
     private final SourceEventRepository sourceEventRepository;
     private final EventSourceService eventSourceService;
 
@@ -86,7 +92,7 @@ public class ImportNavIdenter {
 
     // NAV-ID,Person id,Bruker id,Fornavn,Etternavn,Enhets-ID,Enhet,Status,Sektor,I permisjon?,I permisjon dato,Reg. dato,Tiltredelsesdato,Status-History.Slettet.TIME
     public void importTestNavIdent(String importLine, boolean kunLes) {
-        log.debug("line: {}", importLine);
+        log.debug(LogConfig.SECURE_LOGS, "line: {}", importLine);
         var kolonner = importLine.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1); // Split på komma, ignorer komma i "
         if (kolonner.length < 3) {
             log.error(LogConfig.SECURE_LOGS, "importLine kan ikke splittes på ',': {}", importLine);
@@ -97,20 +103,24 @@ public class ImportNavIdenter {
         var status = kolonner[7];
         var sektor = kolonner[8];
 
-        if (!status.equals("Aktiv")) {
-            if (!status.equals("Slettet")) {
-                log.info(LogConfig.SECURE_LOGS, "Skipping - men status != Slettet. => {}: {}", status, importLine);
-            }
-            log.debug("Skipping rad uten status Aktiv");
-            skippedLines++;
+        if (navIdent.length() == 0) {
+            log.error(LogConfig.SECURE_LOGS, "Lest navIdent '{}' fra importlinje er tom: {}", navIdent, importLine);
             return;
         }
-        if (navIdent.length() != 7) {
-            log.error(LogConfig.SECURE_LOGS, "Lest navIdent '{}' fra importlinje er ikke 7 tegn: {}", navIdent, importLine);
+
+        // Check length 7 and starts with letter, rest is digits
+        if (navIdent.length() != 7 || !navIdent.matches("[A-Z]\\d+")){
+            log.error(LogConfig.SECURE_LOGS, "Lest navIdent '{}' fra importlinje er ikke gyldig: {}", navIdent, importLine);
             return;
         }
-        if (finnesAllerede(navIdent)) {
-            log.error(LogConfig.SECURE_LOGS, "Lest navIdent '{}' fra importlinje finnes i fra før: {}", navIdent, importLine);
+
+        if (finnesNavidentAllerede(navIdent)) {
+            log.info("Lest navIdent '{}' fra importlinje finnes i fra før", navIdent);
+            return;
+        }
+
+        if (finnesPersonidentAllerede(personIdent)) {
+            log.error(LogConfig.SECURE_LOGS, "Lest personident '{}' fra importlinje finnes i fra før på annen Navident: {}", navIdent, importLine);
             return;
         }
 
@@ -135,7 +145,7 @@ public class ImportNavIdenter {
             .payload(
                 EventPayload.builder()
                     .navident(navIdent)
-                    .identType(parse(sektor))
+                    .identType(IdentType.STANDARD)
                     .personid(personIdent)
                     .build()
             ).build();
@@ -148,19 +158,86 @@ public class ImportNavIdenter {
         }
     }
 
+
+    /**
+     * Importer ident type fra en ressursfil NIK_identType.txt som inneholder en liste over identer med riktig typer med navident_seq høyere enn 168000.
+     */
+    public String importIdentTypeFromResourceFile(final InputStream inputStream) {
+        LocalDateTime start = LocalDateTime.now();
+        Map<String, String> identsReadFromFile = readIdentTypeFromResourceFile(inputStream);
+        int totalIdentUpdated = sendEndreEvents(identsReadFromFile);
+        String result = "Totalt ident importert fra fil %s av %s. Tid brukt: %s".formatted(totalIdentUpdated, identsReadFromFile.size(), durationAsH24(start));
+        log.info(result);
+        return result;
+    }
+
+    public Map<String, String> readIdentTypeFromResourceFile(final InputStream inputStream) {
+        Map<String, String> identImportedFromFile = new HashMap<>();
+        try {
+            Scanner sc = new Scanner(inputStream);
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine();
+                String[] kolonner = line.split(",");
+                if (isValidNavIdentAndHasValidSequenceNumber(kolonner[0])){
+                    identImportedFromFile.put(kolonner[0], kolonner[1]);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Feil ved import av ident type fra ressursfil", e);
+        }
+        return identImportedFromFile;
+    }
+
+    public int sendEndreEvents(Map<String, String> navIdents) {
+        int totalIdentUpdated = 0;
+        for (Map.Entry<String, String> entry : navIdents.entrySet()) {
+            if(eventSourceService.finnesNavIdent(entry.getKey())){
+                Navident navIdent = eventSourceService.getsNavIdent(entry.getKey());
+                if (!navIdent.getIdentType().name().equals(entry.getValue())) {
+                    sendEndreEvent(navIdent, entry.getValue());
+                    totalIdentUpdated++;
+                }
+            }
+        }
+        return totalIdentUpdated;
+    }
+
+    private void sendEndreEvent(Navident navIdent, String identType) {
+        SourceEvent sourceEvent = SourceEvent.builder()
+                .event(EventType.ENDRE)
+                .payload(
+                        EventPayload.builder()
+                                .navident(navIdent.getNavident())
+                                .personid(navIdent.getGjeldendePersonid())
+                                .identType(IdentType.valueOf(identType))
+                                .build()
+                ).build();
+        sourceEventRepository.save(sourceEvent);
+        producer.send(eventSourceTopic, sourceEvent);
+        log.debug(LogConfig.SECURE_LOGS, "Persisted SourceEvent posted: %s".formatted(sourceEvent.maskedToString()));
+    }
+
+    public boolean isValidNavIdentAndHasValidSequenceNumber(String navIdent) {
+        return navIdent.length() == 7 && Integer.parseInt(navIdent.substring(1)) < navidentSequence;
+    }
+
+
     private IdentType parse(String identType) {
         switch (identType) {
             case "NAV Statlig":
             case "NAV Kommunalt":
-            case "Eksternt":
                 return IdentType.STANDARD;
             default:
                 throw new RuntimeException("Ukjent ident type %s".formatted(identType));
         }
     }
 
-    private boolean finnesAllerede(String navIdent) {
+    private boolean finnesNavidentAllerede(String navIdent) {
         return eventSourceService.finnesNavIdent(navIdent);
+    }
+
+    private boolean finnesPersonidentAllerede(String personIdent) {
+        return eventSourceService.finnesPersonident(personIdent);
     }
 
     private String durationAsH24(LocalDateTime start) {

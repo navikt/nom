@@ -15,7 +15,7 @@ spec:
     - name: LOGGING_CONFIG
       value: 'classpath:logback-nais.xml'
     - name: JDK_JAVA_OPTIONS
-      value: "-Xms1024m -Xmx8192m"
+      value: "-Xms4g -Xmx12g"
   envFrom:
     - secret: nom-api-unleash-api-token
   image: "{{image}}"
@@ -45,9 +45,9 @@ spec:
   resources:
     requests:
       cpu: 300m
-      memory: 1024Mi
+      memory: 4Gi
     limits:
-      memory: 10240Mi
+      memory: 14Gi
   leaderElection: true
   prometheus:
     enabled: true
@@ -138,6 +138,9 @@ spec:
         - application: pdl-fullmakt
           namespace: pdl
           cluster: dev-fss
+        - application: repr-fullmakt
+          namespace: repr
+          cluster: dev-fss
         - application: oppgavestyring-ressurs-synkronisering
           namespace: oppgavehandtering
           cluster: dev-gcp
@@ -197,6 +200,15 @@ spec:
           cluster: dev-gcp
         - application: prim-brukerstyring-test
           namespace: pim
+          cluster: dev-gcp
+        - application: idm-kafka-omada-integration
+          namespace: idm
+          cluster: dev-gcp
+        - application: shout-out-api
+          namespace: shout-out
+          cluster: dev-gcp
+        - application: shout-out-sync-service
+          namespace: shout-out
           cluster: dev-gcp
     outbound:
       rules:

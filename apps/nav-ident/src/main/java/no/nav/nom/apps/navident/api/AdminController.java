@@ -1,5 +1,6 @@
 package no.nav.nom.apps.navident.api;
 
+import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,14 +26,22 @@ public class AdminController {
 
     public final static String BASE_URL = "/admin";
     private final static Logger logger = LoggerFactory.getLogger(AdminController.class);
+    public static final String NAV_IDENT_RESURS_FILE = "/NIK_identType.txt";
     private final ImportNavIdenter importNavIdenter;
+    private final Unleash unleash;
+    public static final String UNLEASH_PRODUSERE_ENDRE_NAV_IDENT_MELDINGER = "nom.nav_ident.enable_edit_topics";
 
-    public AdminController(ImportNavIdenter importNavIdenter) {
+    public AdminController(ImportNavIdenter importNavIdenter, Unleash unleash) {
         this.importNavIdenter = importNavIdenter;
+        this.unleash = unleash;
     }
 
     @Operation(
-            description = "Importer NavIdenter. One-off job for å importere navidenter og personidenter fra Remedy",
+            description = "IKKE Kjør denne i Swagger - Swagger poster automatisk retry når det tar tid uten at respons kommer.\n " +
+                "Bruk heller curl:\n" +
+                "curl -X 'GET' 'https://nav-ident.intern.nav.no/admin/importerNavIdenter?bucketObjectName=Remedy_eksport_fra_produksjon_utf8.csv&kunLes=true' " +
+                "  -H 'accept: */*' -H 'Authorization: Bearer $TOKEN'\n" +
+                "Importer NavIdenter. One-off job for å importere navidenter og personidenter fra Remedy",
             security = @SecurityRequirement(name = SwaggerConfig.SECURITY_SCHEME_CONFIGURATION_NAME)
     )
     @ApiResponses(
@@ -49,9 +58,23 @@ public class AdminController {
             }
     )
     @GetMapping("/importerNavIdenter")
-    @PreAuthorize("hasRole('ROLE_${group.id.nom.write}')")
+    @PreAuthorize("hasRole('ROLE_NOM_WRITE')")
     public String importerNavIdenter(@RequestParam String bucketObjectName, @RequestParam(required = false) boolean kunLes) {
         logger.info("Starter NavIdent innlesning. kunLes={}", kunLes);
         return importNavIdenter.fromBucketObject(bucketObjectName, kunLes);
     }
+
+    @GetMapping("/importerNavIdenterFraResursFil")
+    @PreAuthorize("hasRole('ROLE_NOM_WRITE')")
+    public String importIdentTypeFromResourceFile() {
+        logger.info("Starter NavIdent innlesning fra resursfil");
+        if (unleash.isEnabled(UNLEASH_PRODUSERE_ENDRE_NAV_IDENT_MELDINGER)){
+            return importNavIdenter.importIdentTypeFromResourceFile(getClass().getResourceAsStream(NAV_IDENT_RESURS_FILE));
+        }
+        else {
+            return "Feature flag " + UNLEASH_PRODUSERE_ENDRE_NAV_IDENT_MELDINGER + " er ikke aktivert";
+        }
+    }
+
+
 }

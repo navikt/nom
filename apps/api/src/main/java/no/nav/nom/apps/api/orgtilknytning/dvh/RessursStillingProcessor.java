@@ -428,6 +428,11 @@ public class RessursStillingProcessor {
      * Altså en stillingPeriode med angivelse av f.eks. ORGNIV3 node '060200' vil da matche en orgtilknytning i nom for ORGENHET '0602002'
      */
     public boolean orgtilknytningEnhetMatcherAgressoId(StillingPeriode stillingPeriode, OrgtilknytningState ot) {
+        if (stillingPeriode.orgenhet() != null) { // Hvis vi har en ORGENHET på stillingPeriode, så matcher vi mot denne
+            log.debug("Navident {} har orgenhet på stillingPeriode fra stillingStrukturerer og bruker denne. {}", ot.navident(), stillingPeriode);
+            return ot.orgEnhetId().equals(stillingPeriode.orgenhet().getId());
+        }
+        log.debug("Navident {} har ikke orgenhet på stillingPeriode og må slå opp på agressoid", ot.navident(), stillingPeriode);
         if (isCurrentPeriod(stillingPeriode)) {
             // For aktiv periode, match mot stilling sin AgressoId, men hvis denne er null - match mot ressursens agressso ID.
             return orgenhetService.getById(

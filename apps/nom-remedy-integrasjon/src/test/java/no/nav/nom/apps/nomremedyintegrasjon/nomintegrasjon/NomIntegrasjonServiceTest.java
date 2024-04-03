@@ -5,6 +5,8 @@ import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEvent;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
@@ -206,13 +208,13 @@ public class NomIntegrasjonServiceTest extends TestBase {
             Arguments.of(
                 ressursSluttetEvent,
                 DelayedEvent.builder()
-                    .delayedUntil(futureDate)
+                    .delayedUntil(futureDate.plusDays(1))
                     .event(ressursSluttetEvent).build()
             ),
             Arguments.of(
                 ressursSluttdatoOppdatertEventV1,
                 DelayedEvent.builder()
-                    .delayedUntil(futureDate)
+                    .delayedUntil(futureDate.plusDays(1))
                     .event(ressursSluttdatoOppdatertEventV1).build()
             )
         );
@@ -350,7 +352,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
             orgtilknytningDagligOppfolgingEndretEventData().toBuilder()
                 .navident(existingRessurs.getNavident())
                 .dagligOppfolging(true)
-                .gyldigFom(LocalDate.now().plusDays(1))
+                .gyldigFom(LocalDate.now())
                 .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
                 .orgEnhetId("new-orgenhet")
                 .build()
@@ -422,6 +424,204 @@ public class NomIntegrasjonServiceTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Should delay remedy update for OrgtilknytningDagligOppfolgingEndretEventV1")
+    void testShouldDelayUpdateForOrgtilknytningDagligOppfolgingEndretEventV1() {
+        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+
+        var orgtilknytningDagligOppfolgingEndretEventV1 = orgtilknytningDagligOppfolgingEndretEventV1(
+            orgtilknytningDagligOppfolgingEndretEventData().toBuilder()
+                .navident(existingRessurs.getNavident())
+                .gyldigFom(LocalDate.now().plusDays(1))
+                .orgEnhetId("new-orgenhet")
+                .build()
+        );
+        nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
+        assertThat(delayedEventRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("Should delay remedy update for OrgtilknytningDatoEndretEventV2")
+    void testShouldDelayUpdateForOrgtilknytningDatoEndretEventV2 () {
+        var orgtilknytningDatoEndretEventV2 = orgtilknytningDatoEndretEventV2(
+            orgtilknytningDatoEndretEventData().toBuilder()
+                .gyldigFom(LocalDate.now().plusDays(1))
+                .build());
+
+        when(nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid())).thenReturn(orgtilknytningState());
+
+        nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDatoEndretEventV2);
+
+        assertThat(delayedEventRepository.findAll()).hasSize(1);
+        assertThat(nomIntegrasjonRepository.findAll()).hasSize(0);
+    }
+
+    @Test
+    @DisplayName("Should update for delayed OrgtilknytningDagligOppfolgingEndretEventV1")
+    void testShouldUpdateForDelayedOrgtilknytningDagligOppfolgingEndretEventV1() {
+        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+        var orgtilknytning = orgtilknytningState();
+        var orgtilknytningEvent = orgtilknytningDagligOppfolgingEndretEventV1(
+            orgtilknytningDagligOppfolgingEndretEventData().toBuilder()
+                .navident(existingRessurs.getNavident())
+                .orgEnhetId(orgtilknytning.getOrgEnhetId())
+                .gyldigTom(Optional.of(orgtilknytning.getGyldigTom()))
+                .build()
+        );
+
+        delayedEventRepository.save(
+            DelayedEvent.builder()
+                .delayedEventId(UUID.randomUUID())
+                .delayedUntil(LocalDate.now())
+                .event(orgtilknytningEvent)
+                .build());
+
+        when(nomApiClient.getOrgtilknytning(orgtilknytningEvent.getFid())).thenReturn(orgtilknytning);
+        when(nomApiClient.getRessursByNavident(existingRessurs.getNavident())).thenReturn(existingRessurs);
+        when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(orgtilknytning));
+        when(nomApiClient.getOrgEnhet(orgtilknytning.getOrgEnhetId())).thenReturn(orgenhet());
+
+        nomIntegrasjonService.triggerDelayedEvents();
+
+        assertThat(nomIntegrasjonRepository.findAll()).hasSize(1);
+        assertThat(delayedEventRepository.findAll()).hasSize(0);
+    }
+
+    @Test
+    @DisplayName("Should update for delayed OrgtilknytningDatoEndretEventV2")
+    void testShouldUpdateForDelayedOrgtilknytningDatoEndretEventV2() {
+        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+        var orgtilknytning = orgtilknytningState();
+        var orgtilknytningEvent = orgtilknytningDatoEndretEventV2(
+            orgtilknytningDatoEndretEventData().toBuilder()
+                .gyldigTom(Optional.of(orgtilknytning.getGyldigTom()))
+                .build()
+        );
+
+        delayedEventRepository.save(
+            DelayedEvent.builder()
+                .delayedEventId(UUID.randomUUID())
+                .delayedUntil(LocalDate.now())
+                .event(orgtilknytningEvent)
+                .build());
+
+        when(nomApiClient.getOrgtilknytning(orgtilknytningEvent.getFid())).thenReturn(orgtilknytning);
+        when(nomApiClient.getRessursByNavident(existingRessurs.getNavident())).thenReturn(existingRessurs);
+        when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(orgtilknytning));
+        when(nomApiClient.getOrgEnhet(orgtilknytning.getOrgEnhetId())).thenReturn(orgenhet());
+
+        nomIntegrasjonService.triggerDelayedEvents();
+
+        assertThat(nomIntegrasjonRepository.findAll()).hasSize(1);
+        assertThat(delayedEventRepository.findAll()).hasSize(0);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("testShouldNotUpdateOrgtilknytningDolEventInput")
+    @DisplayName("Should not update remedy for delayed OrgtilknytningDagligOppfolgingEndretEventV1")
+    void testShouldNotUpdateForDelayedOrgtilknytningDagligOppfolgingEndretEventV1(
+        DelayedEvent delayedEvent, OrgtilknytningState orgtilknytning, Ressurs existingRessurs
+    ) {
+        var orgtilknytningDolEvent = (OrgtilknytningDagligOppfolgingEndretEventV1)delayedEvent.getEvent();
+        delayedEventRepository.save(delayedEvent);
+
+        when(nomApiClient.getOrgtilknytning(orgtilknytningDolEvent.getFid())).thenReturn(orgtilknytning);
+
+        nomIntegrasjonService.triggerDelayedEvents();
+
+        assertThat(delayedEventRepository.findAll()).hasSize(0);
+        assertThat(delayedEventRepository.findAll()).hasSize(0);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("testShouldNotUpdateOrgtilknytningEventInput")
+    @DisplayName("Should not update remedy for delayed OrgtilknytningDatoEndretEventV2")
+    void testShouldNotUpdateForDelayedOrgtilknytningEndretEventV1(
+        DelayedEvent delayedEvent, OrgtilknytningState orgtilknytning, Ressurs existingRessurs
+    ) {
+        var orgtilknytningDolEvent = (OrgtilknytningDatoEndretEventV2)delayedEvent.getEvent();
+        delayedEventRepository.save(delayedEvent);
+
+        when(nomApiClient.getOrgtilknytning(orgtilknytningDolEvent.getFid())).thenReturn(orgtilknytning);
+
+        nomIntegrasjonService.triggerDelayedEvents();
+
+        assertThat(delayedEventRepository.findAll()).hasSize(0);
+        assertThat(delayedEventRepository.findAll()).hasSize(0);
+    }
+
+    private static Stream<Arguments> testShouldNotUpdateOrgtilknytningDolEventInput() {
+        var orgtilknytning = orgtilknytningState();
+        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+
+        return Stream.of(
+            Arguments.of(
+                DelayedEvent.builder()
+                    .delayedEventId(UUID.randomUUID())
+                    .delayedUntil(LocalDate.now())
+                    .event(
+                        orgtilknytningDagligOppfolgingEndretEventV1(
+                            orgtilknytningDagligOppfolgingEndretEventData().toBuilder()
+                                .navident(existingRessurs.getNavident())
+                                .orgEnhetId(orgtilknytning.getOrgEnhetId())
+                                .gyldigTom(Optional.of(orgtilknytning.getGyldigTom().plusDays(1)))
+                                .build()))
+                    .build(),
+                orgtilknytning,
+                existingRessurs
+            ),
+            Arguments.of(
+                DelayedEvent.builder()
+                    .delayedEventId(UUID.randomUUID())
+                    .delayedUntil(LocalDate.now())
+                    .event(
+                        orgtilknytningDagligOppfolgingEndretEventV1(
+                            orgtilknytningDagligOppfolgingEndretEventData().toBuilder()
+                                .navident(existingRessurs.getNavident())
+                                .orgEnhetId(orgtilknytning.getOrgEnhetId())
+                                .gyldigTom(Optional.of(orgtilknytning.getGyldigTom().minusDays(1)))
+                                .build()))
+                    .build(),
+                orgtilknytning,
+                existingRessurs
+            )
+        );
+    }
+
+    private static Stream<Arguments> testShouldNotUpdateOrgtilknytningEventInput() {
+        var orgtilknytning = orgtilknytningState();
+        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+
+        return Stream.of(
+            Arguments.of(
+                DelayedEvent.builder()
+                    .delayedEventId(UUID.randomUUID())
+                    .delayedUntil(LocalDate.now())
+                    .event(
+                        orgtilknytningDatoEndretEventV2(
+                            orgtilknytningDatoEndretEventData().toBuilder()
+                                .gyldigTom(Optional.of(orgtilknytning.getGyldigTom().plusDays(1)))
+                                .build()))
+                    .build(),
+                orgtilknytning,
+                existingRessurs
+            ),
+            Arguments.of(
+                DelayedEvent.builder()
+                    .delayedEventId(UUID.randomUUID())
+                    .delayedUntil(LocalDate.now())
+                    .event(
+                        orgtilknytningDatoEndretEventV2(
+                            orgtilknytningDatoEndretEventData().toBuilder()
+                                .gyldigTom(Optional.of(orgtilknytning.getGyldigTom().minusDays(1)))
+                                .build()))
+                    .build(),
+                orgtilknytning,
+                existingRessurs
+            )
+        );
+    }
+
+    @Test
     @DisplayName("Should write new entity with correctly updated values for OrgtilknytningDatoEndretEventV2")
     void testShouldUpdateForOrgtilknytningDatoEndretEventV2() {
 
@@ -433,7 +633,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
 
         var orgtilknytningDatoEndretEventV2 = orgtilknytningDatoEndretEventV2(
             orgtilknytningDatoEndretEventData().toBuilder()
-                .gyldigFom(dagligOppfolgingOrgtilknytning.getGyldigFom().plusDays(1))
+                .gyldigFom(dagligOppfolgingOrgtilknytning.getGyldigFom())
                 .gyldigTom(Optional.of(dagligOppfolgingOrgtilknytning.getGyldigTom().plusDays(1)))
                 .build()
         );

@@ -91,9 +91,9 @@ const htmlForGqlGraphiql = `<!DOCTYPE html>
 <div id="graphiql">Loading...</div>
 <script>
     const params = new URLSearchParams(window.location.search);
-    const path = params.get("path") || "/nom-api/graphql";
+    const path = params.get("path") || "/frackend/nom-api/graphql";
     const url = location.protocol + "//" + location.host + path;
-    const wsPath = params.get("wsPath") || "/nom-api/graphql";
+    const wsPath = params.get("wsPath") || "/frackend/nom-api/graphql";
     const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
     const subscriptionUrl = wsProtocol + "//" + location.host + wsPath;
     const gqlFetcher = GraphiQL.createFetcher({'url': url, 'subscriptionUrl': subscriptionUrl});

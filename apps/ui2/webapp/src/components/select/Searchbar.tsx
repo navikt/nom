@@ -116,7 +116,7 @@ async function performSearch(searchString: string): Promise<SearchResultRaw[]> {
     statusSelection: "ALLE",
   };
 
-  const result = await axios.post("/nom-api/graphql", {
+  const result = await axios.post("/frackend/nom-api/graphql", {
     operationName: "search",
     query: searchQuery,
     variables: {
@@ -149,7 +149,7 @@ async function queryForRessurs(
       }
     }`;
 
-  const result = await axios.post("/nom-api/graphql", {
+  const result = await axios.post("/frackend/nom-api/graphql", {
     operationName: "ressurs",
     query: ressursQuery,
     variables: {

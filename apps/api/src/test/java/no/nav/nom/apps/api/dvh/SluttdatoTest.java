@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 
 @DisplayName("Dvh.Sluttdato")
-public class SluttdatoTest extends DvhTestBase {
+public class SluttdatoTest {
 
     @Test
     @SneakyThrows

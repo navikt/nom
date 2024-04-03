@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.graphql.ressurs.OrgTilknytningResolver;
 import no.nav.nom.apps.api.graphql.ressurs.RessursPropertyResolver;
 import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
 import no.nav.nom.apps.api.graphql.ressurs.TelefonResolver;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -19,6 +20,7 @@ import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.RessursWithMetadataResult;
 import no.nav.nom.contract.nom.api.graphql.Telefon;
+import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
@@ -27,6 +29,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,6 +47,8 @@ public class GraphQLRessursController {
     private final FolkeregisterPersonResolver personResolver;
     private final GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
 
+    private final RessursStateRepository ressursStateRepository;
+
     @Autowired
     public GraphQLRessursController(
             RessursResolver ressursResolver,
@@ -52,7 +57,8 @@ public class GraphQLRessursController {
             LederResolver lederResolver,
             GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter,
             OrgTilknytningResolver orgTilknytningResolver,
-            FolkeregisterPersonResolver personResolver
+            FolkeregisterPersonResolver personResolver,
+            RessursStateRepository ressursStateRepository
     ) {
         this.ressursResolver = ressursResolver;
         this.propertyResolver = propertyResolver;
@@ -61,6 +67,7 @@ public class GraphQLRessursController {
         this.graphQLFieldConsumptionCounter = graphQLFieldConsumptionCounter;
         this.orgTilknytningResolver = orgTilknytningResolver;
         this.personResolver = personResolver;
+        this.ressursStateRepository = ressursStateRepository;
     }
 
     @PreAuthorize(
@@ -129,7 +136,10 @@ public class GraphQLRessursController {
 
     @BatchMapping(typeName = "Ressurs", field = "folkeregisterPerson")
     public Mono<Map<Ressurs, DataFetcherResult<FolkeregisterPerson>>> folkeregisterPerson(List<Ressurs> ressurser) {
-        return personResolver.folkeregisterPerson(ressurser, Ressurs::getPersonIdent);
+        // personidenter blir sladdet i ressurs resolver, mens usladdet personident må brukes videre for å slå opp i PDL.
+        // derfor slår vi opp usladdete personidenter fra en annen kilde
+        var lookedupRessursPersonIdentMap = getLookedupRessursPersonIdentMap(ressurser);
+        return personResolver.folkeregisterPerson(ressurser, (Ressurs res) -> lookedupRessursPersonIdentMap.get(res));
     }
 
     @BatchMapping(typeName = "Ressurs", field = "epost")
@@ -140,6 +150,16 @@ public class GraphQLRessursController {
     @BatchMapping(typeName = "Ressurs", field = "telefon")
     public Mono<Map<Ressurs, List<Telefon>>> telefon(List<Ressurs> ressurser) {
         return Mono.fromSupplier(() -> telefonResolver.load(ressurser));
+    }
+
+
+    private Map<Ressurs, String> getLookedupRessursPersonIdentMap(List<Ressurs> ressurser) {
+        var ressursPersonIdentMap = new HashMap<Ressurs,String>(ressurser.size());
+        for(Ressurs r : ressurser){
+            var lookedUpPersonident = ressursStateRepository.findByNavident(r.getNavIdent(), RessursState::personident);
+            ressursPersonIdentMap.put(r, lookedUpPersonident.orElse(null));
+        }
+        return ressursPersonIdentMap;
     }
 
 }

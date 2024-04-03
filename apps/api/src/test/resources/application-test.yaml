@@ -25,7 +25,7 @@ app:
         scopes: ["TEAMCAT"]
       nomUiClient:
         client-id: nomUiClient
-        scopes: ["QUERY_PERSON", "MUTATE_RESSURS", "NOM_UI_APP"]
+        scopes: ["QUERY_PERSON", "NOM_UI_APP"]
       nomRemedyIntegrasjonClient:
         client-id: nomRemedyIntegrasjonClient
         scopes: ["NOM_REMEDY_INTEGRASJON_APP"]
@@ -54,6 +54,7 @@ spring:
   kafka:
     security:
       protocol: PLAINTEXT
+    bootstrap-servers: ${KAFKA_BROKERS}
   security:
     oauth2:
       resourceserver:
@@ -80,3 +81,5 @@ spring:
 
 UNLEASH_SERVER_API_URL: https://unleash.nais.io/api
 UNLEASH_SERVER_API_TOKEN: some-token
+
+PDL_API_SCOPE: test

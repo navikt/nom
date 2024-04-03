@@ -1,28 +1,36 @@
 package no.nav.nom.apps.navident.job;
 
+import io.getunleash.Unleash;
 import lombok.SneakyThrows;
 import no.nav.nom.apps.navident.SpringBootTestBase;
+import no.nav.nom.apps.navident.domain.Navident;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.apps.navident.eventsource.EventSourceService;
 import no.nav.nom.apps.navident.eventsource.SourceEvent;
 import no.nav.nom.apps.navident.eventsource.SourceEventRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,6 +51,15 @@ class ImportNavIdenterTest extends SpringBootTestBase {
 
     @Captor
     ArgumentCaptor<SourceEvent> eventCaptor;
+
+    @MockBean
+    protected Unleash unleash;
+
+    @BeforeEach
+    public void setUp() throws IOException {
+        // Always enable features for tests
+        when(unleash.isEnabled(any())).thenReturn(true);
+    }
 
     @Test()
     @SneakyThrows
@@ -124,15 +141,86 @@ A867804,HAE4403,Horisontal,Abakus,27469208996,4403,NAV ARBEID OG YTELSER KRISTIA
     @SneakyThrows
     @DisplayName("Manual import of local file. ")
     void importManuallyLocalFile() {
-        Path path = Paths.get("/Users/g155033/Documents/atom/Remedy_preprod_20230207.csv");
+        Path path = Paths.get("/Users/g155033/Documents/atom/Remedy_eksport_fra_produksjon_utf8.csv");
 
         BufferedReader br = Files.newBufferedReader(path);
         String res = importNavIdenter.importFromReader(br, false);
 
-        verify(producer, times(25107)).send(any(), any());
-        verify(sourceEventRepository, times(25107)).save(any());
+        // 495 stk  => Lest navIdent '{}' fra importlinje er tom: {}
+        // 1330 stk => Navident '{}' allerede importert på samme personid
 
-        assertTrue(res.startsWith("Totalt importert 25107 av 124461"), res);
+
+        verify(producer, times(67661)).send(any(), any());
+        verify(sourceEventRepository, times(67661)).save(any());
+
+        assertTrue(res.startsWith("Totalt importert 67661 av 145447"), res);
+    }
+
+    @Test
+    @DisplayName("Test import all navident from a resource file. ")
+    void importAllIdentTypeFromResourceFile () {
+        when(eventSourceService.finnesNavIdent(any())).thenReturn(true);
+        when(eventSourceService.getsNavIdent(anyString())).thenAnswer((Answer<Navident>) invocationOnMock -> {
+            Object[] args = invocationOnMock.getArguments();
+            //mocking Navident that already exists and with standard ident type
+            return Navident.builder().navident((String) args[0]).identType(IdentType.STANDARD).build();
+        });
+
+        InputStream inputStream = getClass().getResourceAsStream("/NIK_identType-test.txt");
+        String res = importNavIdenter.importIdentTypeFromResourceFile(inputStream);
+        assertTrue(res.startsWith("Totalt ident importert fra fil 20 av 20."), res);
+
+        verify(producer, times(20)).send(any(), any());
+        verify(sourceEventRepository, times(20)).save(any());
+    }
+
+    @Test
+    @DisplayName("Test do not import navident from a resource file. ")
+    void importNoneIdentTypeFromResourceFile () {
+        when(eventSourceService.finnesNavIdent(any())).thenReturn(false);
+        InputStream inputStream = getClass().getResourceAsStream("/NIK_identType-test.txt");
+        String res = importNavIdenter.importIdentTypeFromResourceFile(inputStream);
+        assertTrue(res.startsWith("Totalt ident importert fra fil 0 av 20."), res);
+        verify(producer, times(0)).send(any(), any());
+        verify(sourceEventRepository, times(0)).save(any());
+    }
+
+    @Test
+    @DisplayName("Test import some navident from a resource file. ")
+    void importSomeIdentTypeFromResourceFile () {
+        when(eventSourceService.finnesNavIdent(any())).thenReturn(true);
+        when(eventSourceService.getsNavIdent(anyString())).thenAnswer((Answer<Navident>) invocationOnMock -> {
+            Object[] args = invocationOnMock.getArguments();
+            //mocking such that Navident that starts with *11 as unknown ident type
+            IdentType identType = (((String) args[0]).substring(1).startsWith("11"))? IdentType.UKJENT : IdentType.STANDARD;
+            return Navident.builder().navident((String) args[0]).identType(identType).build();
+        });
+
+        InputStream inputStream = getClass().getResourceAsStream("/NIK_identType-test.txt");
+        String res = importNavIdenter.importIdentTypeFromResourceFile(inputStream);
+        assertTrue(res.startsWith("Totalt ident importert fra fil 18 av 20."), res);
+        verify(producer, times(18)).send(any(), any());
+        verify(sourceEventRepository, times(18)).save(any());
+    }
+
+    @Test
+    @DisplayName("Test that navident is valid")
+    void test_isValidNavIdentWithSequenceLessThan168000 () {
+        String valid_navident_1 = "A123456";
+        String invalid_navident_1 = "";
+        String invalid_navident_2 = "123456";
+        String valid_navident_but_sequence_higherthan_168000 = "A223456";
+        assertTrue(importNavIdenter.isValidNavIdentAndHasValidSequenceNumber(valid_navident_1));
+        assertFalse(importNavIdenter.isValidNavIdentAndHasValidSequenceNumber(invalid_navident_1));
+        assertFalse(importNavIdenter.isValidNavIdentAndHasValidSequenceNumber(invalid_navident_2));
+        assertFalse(importNavIdenter.isValidNavIdentAndHasValidSequenceNumber(valid_navident_but_sequence_higherthan_168000));
+    }
+
+    @Test
+    void test_readIdentTypeFromResourceFile() {
+        InputStream inputStream = getClass().getResourceAsStream("/NIK_identType-test.txt");
+        Map<String, String>  res = importNavIdenter.readIdentTypeFromResourceFile(inputStream);
+        assertTrue(res.size() == 20);
     }
 
 }

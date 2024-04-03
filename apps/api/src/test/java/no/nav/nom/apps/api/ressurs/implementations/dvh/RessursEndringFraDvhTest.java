@@ -1,9 +1,8 @@
-package no.nav.nom.apps.api.dvh.dvhdiff;
+package no.nav.nom.apps.api.ressurs.implementations.dvh;
 
 import no.nav.nom.apps.api.DvhRessursUtils;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
-import no.nav.nom.apps.api.dvh.DvhTestBase;
-import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
+import no.nav.nom.apps.api.dvh.OldDvhTestBase;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
@@ -34,7 +33,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @DisplayName("dvh-diffing")
-public class RessursEndringFraDvhTest extends DvhTestBase {
+public class RessursEndringFraDvhTest extends OldDvhTestBase {
 
     @SpyBean
     private KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate;
@@ -87,7 +86,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
     @Test
     @DisplayName("Prøver ikke opprette hvis eksisterende Ressurs")
     public void test2() {
-        RessursState existingRessurs = createRessursHendelseEventSource("");
+        RessursState existingRessurs = kafkaUtils.createRessursHendelseEventSource("");
 
         dvhRessursUtils.addToResponse(
                 new DvhRessursUtils.RessursMock(
@@ -147,7 +146,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         loadFromDvh();
 
 
-        createRessursHendelseEventSource(
+        kafkaUtils.createRessursHendelseEventSource(
                 new RessursState(
                         PrefixedUlidCreator.createRessursUlid(),
                         "12345678901",
@@ -221,7 +220,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
             Collections.emptyList()
         );
 
-        createRessursHendelseEventSource(ressursv1);
+        kafkaUtils.createRessursHendelseEventSource(ressursv1);
 
         dvhRessursUtils.createEmptyResponse();
 
@@ -279,7 +278,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
             Collections.emptyList()
         );
 
-        createRessursHendelseEventSource(ressursv1);
+        kafkaUtils.createRessursHendelseEventSource(ressursv1);
 
         dvhRessursUtils.createEmptyResponse();
 
@@ -352,7 +351,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
 
         loadFromDvh();
 
-        createRessursHendelseEventSource(
+        kafkaUtils.createRessursHendelseEventSource(
             new RessursState(
                 PrefixedUlidCreator.createRessursUlid(),
                 "12345678901",
@@ -414,7 +413,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
 
         loadFromDvh();
 
-        createRessursHendelseEventSource(
+        kafkaUtils.createRessursHendelseEventSource(
             new RessursState(
                 PrefixedUlidCreator.createRessursUlid(),
                 "12345678901",
@@ -488,7 +487,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
             Collections.emptyList()
         );
 
-        createRessursHendelseEventSource(ressursv1);
+        kafkaUtils.createRessursHendelseEventSource(ressursv1);
 
         dvhRessursUtils.createEmptyResponse();
 
@@ -549,7 +548,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
             Collections.emptyList()
         );
 
-        createRessursHendelseEventSource(ressursv1);
+        kafkaUtils.createRessursHendelseEventSource(ressursv1);
 
         dvhRessursUtils.createEmptyResponse();
 
@@ -612,7 +611,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
             Collections.emptyList()
         );
 
-        createRessursHendelseEventSource(ressursv1);
+        kafkaUtils.createRessursHendelseEventSource(ressursv1);
 
         dvhRessursUtils.createEmptyResponse();
 
@@ -693,7 +692,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
             Collections.emptyList()
         );
 
-        createRessursHendelseEventSource(ressursv1);
+        kafkaUtils.createRessursHendelseEventSource(ressursv1);
 
         dvhRessursUtils.createEmptyResponse();
 

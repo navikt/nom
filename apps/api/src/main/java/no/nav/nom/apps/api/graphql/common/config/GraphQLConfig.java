@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.graphql.execution.RuntimeWiringConfigurer;
 
 @Configuration(proxyBeanMethods = false)
-class GraphQLConfig implements RuntimeWiringConfigurer {
+public class GraphQLConfig implements RuntimeWiringConfigurer {
 
     @Override
     public void configure(RuntimeWiring.Builder builder) {

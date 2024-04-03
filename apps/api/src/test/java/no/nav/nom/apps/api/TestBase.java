@@ -1,8 +1,6 @@
 package no.nav.nom.apps.api;
 
-import com.nimbusds.jose.JOSEObjectType;
 import io.getunleash.Unleash;
-import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
 import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
@@ -11,13 +9,10 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStat
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
-import no.nav.nom.contract.nom.Sektor;
-import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
-import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,12 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -105,10 +95,6 @@ public abstract class TestBase {
     @MockBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
-    public static String LOGGED_IN_USER_NAVIDENT = "A321321";
-    public static String OAUTH_VALID_AUDIENCE = "test";
-    public static String OAUTH_VALID_ISSUER = "aad";
-
     @BeforeEach
     void reset() {
         dvhRepository.clearRepository();
@@ -154,57 +140,7 @@ public abstract class TestBase {
         }
     }
 
-    protected RessursState createRessursHendelseEventSource(String suffix) {
-        final var ressursState = new RessursState(
-            PrefixedUlidCreator.createRessursUlid(),
-            "testPersonIdent" + suffix,
-            "testNavIdent" + suffix,
-            Sektor.NAV_STATLIG,
-            new Visningsnavn(
-                "fornavn" + suffix,
-                Optional.of("mellomnavn" + suffix),
-                "etternavn" + suffix
-            ),
-            null,
-                Optional.of(LocalDate.now()),
-            null,
-            Collections.emptyList()
-        );
 
-        createRessursHendelseEventSource(ressursState);
-
-        return ressursState;
-    }
-
-    protected OrgEnhetState createOrgenhetHendelseEventSource(String suffix) {
-        final var orgEnhetState = new OrgEnhetState(
-            PrefixedUlidCreator.createOrgEnhetUlid(),
-            "testOrgenhetId" + suffix,
-            "testOrgenhetNavn" + suffix,
-            LocalDate.now(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.of("0000000".substring(0, 7 - suffix.length()) + suffix),
-            Optional.of("ORGENHET"),
-            Optional.empty()
-        );
-
-        createOrgenhetHendelseEventSource(orgEnhetState);
-
-        return orgEnhetState;
-    }
-
-    protected void createRessursHendelseEventSource(RessursState ressursState) {
-        kafkaUtils.sendRessurs(ressursState.fid(), ressursState);
-    }
-
-    protected void createOrgenhetHendelseEventSource(OrgEnhetState orgEnhetState) {
-        kafkaUtils.sendOrgenhet(orgEnhetState.fid(), orgEnhetState);
-    }
 
     protected void saveOrgtilknytninger(List<OrgtilknytningState> orgtilknytningStateList) {
         orgtilknytningStateList.forEach(o -> orgtilknytningStateRepository.putEventAggregate(o.fid(), o));
@@ -223,72 +159,5 @@ public abstract class TestBase {
         ressursStateList.forEach(r -> ressursStateRepository.putEventAggregate(r));
     }
 
-    protected String generateToken(String issuer, Map<String, Object>  claims, String audience) {
-        return mockOAuth2Server.issueToken(
-            issuer,
-            "clientId",
-            new DefaultOAuth2TokenCallback(
-                "aad",
-                "subjectId",
-                JOSEObjectType.JWT.getType(),
-                List.of(audience),
-                claims,
-                3600
-            )
-        ).serialize();
-    }
-
-    protected String validToken(Map<String, Object> claims) {
-        return generateToken(OAUTH_VALID_ISSUER, claims, OAUTH_VALID_AUDIENCE);
-    }
-
-
-
-    protected String nomAdminUserToken() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("NAVident", LOGGED_IN_USER_NAVIDENT);
-        claims.put("groups", List.of("nomAdminGroup"));
-        claims.put("azp_name", "nomUiClient");
-        return validToken(claims);
-    }
-
-    protected String nomWriteGroupAndNomUiAzpToken() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("NAVident", LOGGED_IN_USER_NAVIDENT);
-        claims.put("groups", List.of("nomWriteGroup"));
-        claims.put("azp_name", "nomUiClient");
-        return validToken(claims);
-    }
-
-    protected String nomRemedyIntegrasjonAzpToken() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("azp_name", "nomRemedyIntegrasjonClient");
-        return validToken(claims);
-    }
-
-    protected String noScopesUserToken() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("NAVident", LOGGED_IN_USER_NAVIDENT);
-        claims.put("azp_name", "some-app");
-        return validToken(claims);
-    }
-
-    protected String queryPersonClientToken() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("azp_name", "queryPersonClient");
-        return validToken(claims);
-    }
-
-    protected String mutateRessursClientToken() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("azp_name", "mutateRessursClient");
-        return validToken(claims);
-    }
-
-    protected String noScopesClientToken() {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("azp_name", "noScopesClient");
-        return validToken(claims);
-    }
 
 }

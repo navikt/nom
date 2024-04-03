@@ -5,7 +5,7 @@ const getCookieValue = (name: string): string =>
   document.cookie.match("(^|;)\\s*" + name + "\\s*=\\s*([^;]+)")?.pop() || "";
 
 const httpLink = createHttpLink({
-  uri: "/nom-api/graphql",
+  uri: "/frackend/nom-api/graphql",
 });
 
 const csrfLink = setContext((_, { headers }) => {

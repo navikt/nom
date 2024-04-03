@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-public class RessursMetadataReposotoryImpl implements RessursMetadataRepository {
+public class RessursMetadataRepositoryImpl implements RessursMetadataRepository {
 
     private Map<String, Event.Metadata> opprettetMetadataByNavident = new ConcurrentHashMap<>();
     private Map<String, MetadataWithType> endringMetadataByNavident = new ConcurrentHashMap<>();
