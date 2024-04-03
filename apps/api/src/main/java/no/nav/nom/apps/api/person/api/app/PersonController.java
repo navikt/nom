@@ -57,13 +57,13 @@ public class PersonController {
 
     private Optional<FolkeregisterPerson> getPerson(String personident) {
         var person = pdlClient.hentPerson(personident);
-        return person.map(value -> Optional.of(new FolkeregisterPerson(
-            new FolkeregisterPerson.RessursNavn(
-                value.getFornavn(),
-                value.getMellomnavn(),
-                value.getEtternavn()
-            )
-        ))).orElse(Optional.empty());
+        return person.map(value -> new FolkeregisterPerson(
+                new FolkeregisterPerson.RessursNavn(
+                        value.getFornavn(),
+                        value.getMellomnavn(),
+                        value.getEtternavn()
+                )
+        ));
     }
 
 }
