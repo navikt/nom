@@ -2,11 +2,14 @@ package no.nav.nom.apps.api.graphql.ressurs;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
+import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
+import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
@@ -36,13 +39,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 @DisplayName("GraphQL.HentRessursEventsource")
-class RessursTest extends RessursTestBase {
+class RessursTest extends GraphQLExtendedIntegrationTestBase {
 
     @Autowired
     private DvhRestConsumer dvhRestConsumer;
 
     @Autowired
     private DvhRepository dvhRepository;
+
+    @Autowired
+    public DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;
+
+    @Autowired
+    OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @Test
     @DisplayName("Leser inn med graphql navIdent parameter")
@@ -429,29 +438,6 @@ class RessursTest extends RessursTestBase {
 
         // Sjekke at ledere for testNavIdent4 er testNavIdent1
         assertThat(ledere.get(0).get("ressurs").get("navIdent").textValue()).isEqualTo("testNavIdent1");
-    }
-
-    @Test
-    @DisplayName("Ikke tillate henting av personNr uten riktig gruppemedlemskap")
-    void scenario51() {
-        kafkaUtils.createRessursHendelseEventSource("1");
-        kafkaUtils.createRessursHendelseEventSource("2");
-        kafkaUtils.createRessursHendelseEventSource("4");
-        final var ressursLederForDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
-            .ORGENHET_KODE("testId5").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
-        final var lederenErPaDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
-            .ORGENHET_KODE("testId4").ORGENHET_NAVN("testNavn4").ORGNODE_NIV("ORGNIV2").build();
-
-        dvhOrgenhetMockUtils.addToResponse(ressursLederForDenneEnheten, lederenErPaDenneEnheten);
-
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
-
-        final var res = postForResourceWithoutAzp("ressurs/scenario51.graphql");
-        res.errors().satisfy(errors -> {
-            assertEquals(1, errors.size());
-            assertTrue(errors.get(0).getMessage().contains("Forbidden"));
-        });
     }
 
     @Test

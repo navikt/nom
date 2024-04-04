@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.graphql.GraphQLTestBase;
+import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
 import no.nav.nom.apps.api.organisering.OrganiseringConfig;
 import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
 // TODO: Integrasjonstest - plasser og navngi riktig
 
 @DisplayName("GraphQL.HentEnhet")
-class OrganisasjonsenhetTest extends GraphQLTestBase {
+class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
 
     @Autowired
     private DvhRestConsumer dvhRestConsumer;

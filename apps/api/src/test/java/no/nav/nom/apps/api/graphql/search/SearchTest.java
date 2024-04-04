@@ -2,9 +2,11 @@ package no.nav.nom.apps.api.graphql.search;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
+import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
 import no.nav.nom.apps.api.common.OrgEnhetStateBuilder;
 import no.nav.nom.apps.api.common.RessursStateBuilder;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
 import no.nav.nom.apps.api.graphql.OldGraphQLTestBase;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
@@ -33,14 +35,17 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 
 @DisplayName("GraphQL.Search")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-public class SearchTest extends OldGraphQLTestBase {
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+public class SearchTest extends GraphQLExtendedIntegrationTestBase {
 
     @Autowired
     private DvhRestConsumer dvhRestConsumer;
 
     @Autowired
     private LuceneService luceneService;
+
+    @Autowired
+    DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;
 
     @BeforeEach
     void clearLucene() {

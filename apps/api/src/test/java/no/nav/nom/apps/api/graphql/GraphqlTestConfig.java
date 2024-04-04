@@ -36,6 +36,7 @@ import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
 import no.nav.nom.apps.api.graphql.ressurs.TelefonResolver;
 import no.nav.nom.apps.api.graphql.search.SearchResolver;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
+import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
 import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
 import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
@@ -78,32 +79,8 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 
 @Import({
-    DvhRestConsumer.class
-    , DvhRepository.class
-    , DvhService.class
-    , RessursStateRepositoryImpl.class
-    , RessursStateListener.class
-    , RessursStateListenerConfig.class
-    , DvhOrgenhetsLast.class
-    , RessursCommadService.class
-    , RessursEventProducer.class
-    , RessursEventKafkaConfig.class
-    , OrgEnhetIdGenerator.class
-    , OrgenhetService.class
-    , OrgEnhetStateRepository.class
-    , OrganiseringStateRepository.class
-    , OrgtilknytningStateRepository.class
-    , OrgtilknytningService.class
-    , RessursHendelseForEventsourceService.class
-    , RessursMetadataRepositoryImpl.class
-    , DvhStartupLoadMonitor.class
-    , TestTokensGenerator.class
-    , KafkaUtils.class
-    , ValidationService.class
+     TestTokensGenerator.class
     , NomProxyClient.class
-    , NomProxyRestClient.class
-    , PdlUtils.class
-    , LocalConfiguration.class
     , GraphQLOrgEnhetController.class
     , GraphQLPersonController.class
     , GraphQLRessursController.class
@@ -120,80 +97,16 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
     , RessursResolver.class
     , RessursPropertyResolver.class
     , ActiveDirectoryRessursBatchLoader.class
+    , AdClient.class
     , TelefonResolver.class
     , RessursLedereResolver.class
     , OrgTilknytningResolver.class
     , SearchResolver.class
     , GraphQLConfig.class
     , ExceptionhandlerConfig.class
-    , DvhOrgEnhetMockUtils.class
-    , KafkaAutoConfiguration.class
-    , EmbeddeKafkaAdminClient.class
-    , LeaderElection.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
-@EnableKafka
 public class GraphqlTestConfig {
     @MockBean
-    OrgEnhetEventProducer orgEnhetEventProducer;
-
-    @MockBean
-    OrgEnhetCommandService orgEnhetCommandService;
-
-    @MockBean
-    KafkaTopicReader kafkaTopicReader;
-
-    @MockBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
-
-    @MockBean
-    OrgtilknytningStateListener orgtilknytningStateListener;
-
-    @MockBean
-    OrgEnhetStateListener orgEnhetStateListener;
-
-    @MockBean
-    RessursEventSourceRepository ressursEventSourceRepository;
-
-    @MockBean
-    NomMastered nomMastered;
-
-    @MockBean
-    ValidationRepository validationRepository;
-
-    @MockBean
-    NomMasteredRessursListener nomMasteredRessursListener;
-
-    @MockBean
-    OrgEnhetTypeHandler orgEnhetTypeHandler;
-
-    @MockBean
-    RessursStillingLoader ressursStillingLoader;
-
-    @MockBean
-    EksterneRessurserLoader eksterneRessurserLoader;
-
-    @MockBean
-    KommunaleRessurserLoader kommunaleRessurserLoader;
-
-    @MockBean
-    OrganiseringService organiseringService;
-
-    @MockBean
-    AuthorizedNavident authorizedNavident;
-
-    @MockBean
-    RemedyEnhetMapperService remedyEnhetMapperService;
-
-    @MockBean
-    GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
-
-    @MockBean
-    AdClient adClient;
-
-    @MockBean
-    LuceneService luceneService;
-
-    @MockBean
-    Unleash unleash;
 }

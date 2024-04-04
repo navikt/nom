@@ -3,9 +3,13 @@ package no.nav.nom.apps.api.graphql.ressurs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
+import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMock;
+import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
 import no.nav.nom.apps.api.organisering.OrganiseringConfig;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.DisplayName;
@@ -20,11 +24,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @DisplayName("GraphQL.HentLederForRessursFlereNivaer")
-public class LederForRessursTest extends RessursTestBase {
+public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
 
     @Autowired
     private DvhRestConsumer dvhRestConsumer;
 
+    @Autowired
+    public DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;
+
+    @Autowired
+    public DvhOrganiseringMockUtils dvhOrganiseringMockUtils;
+
+    @Autowired
+    OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @Test
     @DisplayName("Hente leder gjennom flere nivåer for ressurs som er leder av sin enhet ")

@@ -39,11 +39,11 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.emptyMap;
 
 @ActiveProfiles("test")
-@ContextConfiguration(classes = GraphqlTestConfig.class, initializers = MockOAuth2ServerInitializer.class)
-@EmbeddedKafka(partitions = 1,  topics = {"org.nom.intern-ressurs-state"},  controlledShutdown = true)
+@ContextConfiguration(classes = { GraphqlTestConfig.class, GraphQLExtendedIntegrationTestConfig.class },  initializers = MockOAuth2ServerInitializer.class)
+@EmbeddedKafka(partitions = 1,  topics = {"org.nom.intern-ressurs-state", "org.nom.intern-orgenhet-state"},  controlledShutdown = true)
 @AutoConfigureWireMock(port = 0)
 @GraphQlTest(controllers = {GraphQLRessursController.class, GraphQLPersonController.class, GraphQLOrgEnhetController.class, GraphQLSearchController.class})
-public class GraphQLTestBase  {
+public class GraphQLExtendedIntegrationTestBase {
 
     private final static Duration TIMEOUT_DURATION = Duration.of(5, SECONDS);
     private final ThreadLocal<Duration> responseTimeout = ThreadLocal.withInitial(() -> TIMEOUT_DURATION);

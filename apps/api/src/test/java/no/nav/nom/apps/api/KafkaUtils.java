@@ -94,7 +94,7 @@ public class KafkaUtils {
 
         ressursStateKafkaTemplate.sendDefault(key, ressursState);
         try {
-            if (!latch.await(1, TimeUnit.SECONDS)) {
+            if (!latch.await(5, TimeUnit.SECONDS)) {
                 throw new RuntimeException("Invocation of kafka onMessage never occoured or never exited");
             }
         } catch (InterruptedException e) {
@@ -114,7 +114,7 @@ public class KafkaUtils {
 
         this.orgEnhetStateKafkaTemplate.sendDefault(key, orgEnhetState);
         try {
-            if (!latch.await(900, TimeUnit.SECONDS)) {
+            if (!latch.await(5, TimeUnit.SECONDS)) {
                 throw new RuntimeException("Invocation of kafka onMessage never occoured or never exited");
             }
         } catch (InterruptedException e) {

@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.graphql.person;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.SneakyThrows;
-import no.nav.nom.apps.api.graphql.OldGraphQLTestBase;
+import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,7 @@ import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("GraphQL.SøkPerson")
-public class PersonTest extends OldGraphQLTestBase {
+public class PersonTest extends GraphQLExtendedIntegrationTestBase {
 
     @Test
     @SneakyThrows
