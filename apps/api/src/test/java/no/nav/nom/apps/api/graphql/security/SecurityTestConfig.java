@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.graphql.security;
 
-import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter;
 import no.nav.nom.apps.api.common.security.AppGrantedAuthoritiesProperties;
@@ -20,7 +19,6 @@ import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 
 @Import({
 //    WebsocketSourceConfiguration.class,

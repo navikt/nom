@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.organisering;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.nom.apps.api.TestBase;
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
@@ -36,7 +36,6 @@ import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
@@ -51,7 +50,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class OrganiseringTest extends TestBase {
+public class OrganiseringTest extends OrganiseringTestBase {
 
     private static final String TOPIC = "org.nom.organisering-eventsource";
 
@@ -68,7 +67,8 @@ public class OrganiseringTest extends TestBase {
     @MockBean
     private OrgenhetService orgenhetService;
 
-
+    @MockBean
+    Unleash unleash;
 
     @Autowired
     private OrganiseringStateRepository organiseringStateRepository;
@@ -85,6 +85,8 @@ public class OrganiseringTest extends TestBase {
         when(unleash.isEnabled(any())).thenReturn(true);
 
         dvhOrganiseringMockUtils.clearResponse();
+
+        organiseringStateRepository.clear();
 
         Map<String, Object> consumerProps = new HashMap<>(KafkaTestUtils
             .consumerProps("consumerGroup", "false", embeddedKafkaBroker));
@@ -512,8 +514,10 @@ public class OrganiseringTest extends TestBase {
         assertThat(terminateMessage.gyldigTom()).isEqualTo(LocalDate.now());
         var terminateMessageMetadata = (Event.Metadata) terminateFirstOrganiseringRecord.value().getMetadata();
         var rawData = terminateMessageMetadata.inputMetadata().inputInterfaceMethodArguments();
-        assertThat(((LinkedHashMap<?, ?>) rawData).get("fid")).isEqualTo(fid_organisering1);
-        assertThat(((LinkedHashMap<?, ?>) rawData).get("id")).isEqualTo(orgeEnhetState.id());
+        //noinspection unchecked
+        assertThat(((scala.collection.immutable.HashMap<String, String>) rawData).get("fid").get()).isEqualTo(fid_organisering1);
+        //noinspection unchecked
+        assertThat(((scala.collection.immutable.HashMap<String, String>) rawData).get("id").get()).isEqualTo(orgeEnhetState.id());
     }
 
 

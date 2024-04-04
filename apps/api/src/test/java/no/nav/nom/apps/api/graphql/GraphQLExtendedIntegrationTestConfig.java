@@ -3,10 +3,7 @@ package no.nav.nom.apps.api.graphql;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
 import no.nav.nom.apps.api.KafkaUtils;
-import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
-import no.nav.nom.apps.api.clients.ad.AdClient;
-import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.EmbeddeKafkaAdminClient;
 import no.nav.nom.apps.api.common.LocalConfiguration;
@@ -15,26 +12,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.DvhService;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
-import no.nav.nom.apps.api.graphql.common.config.ExceptionhandlerConfig;
-import no.nav.nom.apps.api.graphql.common.config.GraphQLConfig;
-import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader;
-import no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader;
 import no.nav.nom.apps.api.graphql.common.metrics.GraphQLFieldConsumptionCounter;
-import no.nav.nom.apps.api.graphql.common.resolver.FolkeregisterPersonResolver;
-import no.nav.nom.apps.api.graphql.controller.GraphQLOrgEnhetController;
-import no.nav.nom.apps.api.graphql.controller.GraphQLPersonController;
-import no.nav.nom.apps.api.graphql.controller.GraphQLRessursController;
-import no.nav.nom.apps.api.graphql.controller.GraphQLSearchController;
-import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetKoblingResolver;
-import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
-import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrganiseringResolver;
-import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
-import no.nav.nom.apps.api.graphql.person.PersonResolver;
-import no.nav.nom.apps.api.graphql.ressurs.OrgTilknytningResolver;
-import no.nav.nom.apps.api.graphql.ressurs.RessursPropertyResolver;
-import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
-import no.nav.nom.apps.api.graphql.ressurs.TelefonResolver;
-import no.nav.nom.apps.api.graphql.search.SearchResolver;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
 import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
@@ -58,7 +36,6 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStat
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
-import no.nav.nom.apps.api.ressurs.api.app.RessursLedereResolver;
 import no.nav.nom.apps.api.ressurs.eventsourcing.metadata.RessursMetadataRepositoryImpl;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursEventKafkaConfig;
@@ -71,14 +48,12 @@ import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventso
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
-import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 
 @Import({
     DvhRestConsumer.class
@@ -164,9 +139,6 @@ public class GraphQLExtendedIntegrationTestConfig {
 
     @MockBean
     GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
-
-//    @MockBean
-//    LuceneService luceneService;
 
     @MockBean
     Unleash unleash;
