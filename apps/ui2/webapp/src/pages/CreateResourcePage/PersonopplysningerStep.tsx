@@ -56,7 +56,7 @@ function CreateResourceForm({ personident }: { personident: string }) {
     return (
       <Alert variant="error">
         {hentPersonQuery.error.response?.status === 404
-          ? "Ingen resultater for søket"
+          ? "Ingen resultater for søket. Det må hånteres manuelt."
           : "En teknisk feil forhindret søket"}
       </Alert>
     );
