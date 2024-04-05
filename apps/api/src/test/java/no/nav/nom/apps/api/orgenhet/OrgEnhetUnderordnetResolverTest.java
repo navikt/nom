@@ -1,6 +1,6 @@
 package no.nav.nom.apps.api.orgenhet;
 
-import no.nav.nom.apps.api.TestBase;
+import no.nav.nom.apps.api.organisering.OrgEnhetTestBase;
 import no.nav.nom.apps.api.organisering.OrganiseringConfig;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
@@ -17,7 +17,7 @@ import static no.nav.nom.apps.api.common.TestData.organiseringState;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-public class OrgEnhetUnderordnetResolverTest extends TestBase {
+public class OrgEnhetUnderordnetResolverTest extends OrgEnhetTestBase {
 
     @Autowired
     private OrgEnhetUnderordnetResolver orgEnhetUnderordnetResolver;

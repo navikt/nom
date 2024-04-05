@@ -3,8 +3,8 @@ package no.nav.nom.apps.api.orgenhet;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
-import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.organisering.OrgEnhetTestBase;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
@@ -28,13 +28,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class OrgEnhetTest extends TestBase {
+public class OrgEnhetTest extends OrgEnhetTestBase {
 
     @Autowired
     private DvhRestConsumer dvhRestConsumer;
 
     @Autowired
     private OrgEnhetStateRepository orgEnhetStateRepository;
+
     @Autowired
     private OrgenhetService orgenhetService;
 

@@ -1,7 +1,5 @@
 package no.nav.nom.apps.api.authorize.eventsourcing;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.eventsourcing.state.DelegertLederEventListener;
 import no.nav.nom.contract.nom.eventsource.Event;
@@ -26,15 +24,11 @@ public class KafkaTestBase {
     @Autowired
     DelegertLederEventListener delegertLederEventListener;
 
-    @Autowired
-    ObjectMapper objectMapper;
-
     private Phaser phaser;
     private final AtomicInteger countMessagesReceived = new AtomicInteger();
 
     @BeforeEach
     void setup() {
-        objectMapper.registerModule(new JavaTimeModule());
         phaser = new Phaser(1);
         delegertLederEventListener.register(new BasicSendReceiveDelegertLederEventsTest.messageReceivedVisitor());
         countMessagesReceived.set(0);

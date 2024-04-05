@@ -1,6 +1,6 @@
 package no.nav.nom.apps.api.orgenhet;
 
-import no.nav.nom.apps.api.TestBase;
+import no.nav.nom.apps.api.organisering.OrgEnhetTestBase;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
-public class OrgEnhetTypeHandlerTest extends TestBase {
+public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
 
     @Autowired
     private OrgEnhetStateRepository orgEnhetStateRepository;

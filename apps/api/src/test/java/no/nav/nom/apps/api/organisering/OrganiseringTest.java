@@ -36,6 +36,7 @@ import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
@@ -514,10 +515,8 @@ public class OrganiseringTest extends OrganiseringTestBase {
         assertThat(terminateMessage.gyldigTom()).isEqualTo(LocalDate.now());
         var terminateMessageMetadata = (Event.Metadata) terminateFirstOrganiseringRecord.value().getMetadata();
         var rawData = terminateMessageMetadata.inputMetadata().inputInterfaceMethodArguments();
-        //noinspection unchecked
-        assertThat(((scala.collection.immutable.HashMap<String, String>) rawData).get("fid").get()).isEqualTo(fid_organisering1);
-        //noinspection unchecked
-        assertThat(((scala.collection.immutable.HashMap<String, String>) rawData).get("id").get()).isEqualTo(orgeEnhetState.id());
+        assertThat(((LinkedHashMap<?, ?>) rawData).get("fid")).isEqualTo(fid_organisering1);
+        assertThat(((LinkedHashMap<?, ?>) rawData).get("id")).isEqualTo(orgeEnhetState.id());
     }
 
 

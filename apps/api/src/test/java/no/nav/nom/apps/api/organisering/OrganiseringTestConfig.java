@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.organisering;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
@@ -33,6 +32,7 @@ import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventso
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -56,11 +56,11 @@ import org.springframework.kafka.annotation.EnableKafka;
     , OrganiseringEventProducer.class
     , KafkaProperties.class
     , LocalConfiguration.class
-    , ObjectMapper.class
     , LeaderElection.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 @EnableKafka
+@AutoConfigureJson
 public class OrganiseringTestConfig {
     @MockBean
     OrganiseringEventSourceRepository organiseringEventSourceRepository;
