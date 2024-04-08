@@ -4,7 +4,6 @@ import { Alert, BodyShort, Loader, TextField } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -41,22 +40,7 @@ function CreateResourceForm({ personident }: { personident: string }) {
     retry: false,
   });
 
-  const navigate = useNavigate();
-
   const person = hentPersonQuery.data;
-
-  useEffect(() => {
-    if (person?.navident) {
-      navigate({
-        to: "/ressurs/create/$step",
-        params: { step: "2" },
-        search: (oldSearch) => ({
-          ...oldSearch,
-          navident: person.navident,
-        }),
-      });
-    }
-  }, [person?.navident, navigate]);
 
   if (hentPersonQuery.isLoading) {
     return (
