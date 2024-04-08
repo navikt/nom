@@ -10,7 +10,7 @@ export function ContainerWithHighlightedTop({
   icon,
 }: {
   children: ReactNode;
-  title: string;
+  title: string | ReactNode;
   icon: string;
 }) {
   return (

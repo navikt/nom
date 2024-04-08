@@ -65,7 +65,6 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
               color: var(--a-surface-success-hover);
               font-size: var(--a-spacing-8);
             `}
-            title="a11y-title"
           />{" "}
           Medarbeideren er nå registrert i NOM
         </div>
