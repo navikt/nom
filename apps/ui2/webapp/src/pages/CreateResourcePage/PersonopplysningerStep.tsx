@@ -67,7 +67,7 @@ function CreateResourceForm({ personident }: { personident: string }) {
   if (person) {
     return (
       <>
-        {person?.navident && (
+        {person.navident && (
           <Alert variant="info">
             Medarbeideren har jobbet i NAV tidligere og vil beholde sin
             tidligere NAV-ident <b>{person.navident}</b>

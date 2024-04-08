@@ -141,7 +141,7 @@ export function ConfirmStep() {
             label="Sektor"
             value={sektor && SektorNameMapping[sektor]}
           />
-          {navident && <LabelWithValue label="NAV-ident" value={navident} />}
+          <LabelWithValue label="NAV-ident" value={navident} />
           <LabelWithValue
             label="Tilknytningtype"
             value={

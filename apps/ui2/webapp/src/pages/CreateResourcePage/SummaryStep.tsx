@@ -1,6 +1,13 @@
 import { css } from "@emotion/react";
-import { CheckmarkCircleFillIcon } from "@navikt/aksel-icons";
-import { Alert, BodyShort, Link, LinkPanel, Loader } from "@navikt/ds-react";
+import { CheckmarkCircleFillIcon, ChevronRightIcon } from "@navikt/aksel-icons";
+import {
+  Alert,
+  BodyShort,
+  HStack,
+  Label,
+  Link,
+  Loader,
+} from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 
@@ -53,35 +60,23 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
     <ContainerWithHighlightedTop
       icon={opprettRessursIcon}
       title={
-        <div
-          css={css`
-            display: flex;
-            align-items: center;
-            gap: var(--a-spacing-4);
-          `}
-        >
+        <HStack gap="4">
           <CheckmarkCircleFillIcon
             css={css`
               color: var(--a-surface-success-hover);
-              font-size: var(--a-spacing-8);
+              font-size: var(--a-font-size-heading-xlarge);
             `}
-          />{" "}
+          />
           Medarbeideren er nå registrert i NOM
-        </div>
+        </HStack>
       }
     >
-      <div
-        css={css`
-          display: flex;
-          flex-direction: column;
-          gap: var(--a-spacing-2);
-        `}
-      >
+      <HStack gap="2">
         <BodyShort>
           Medarbeideren er nå registrert i NOM og NAV-ident{" "}
           <b>{ressurs.navident}</b> er opprettet for{" "}
           <b>{formatVisningsnavn(ressurs.visningsnavn)}</b>.
-        </BodyShort>{" "}
+        </BodyShort>
         <BodyShort>
           For å fullføre opprettelsen må leder eller identadministrator også gi
           tilganger i Identrutinen i Remedy.
@@ -99,37 +94,54 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
           tilgjengelig der. Personen selv eller andre kontaktpersoner kan også
           legge inn informasjon i Teamkatalogen.
         </BodyShort>
-      </div>
-      <LinkPanel
-        border
-        css={css`
-          width: 60%;
-          margin: auto;
-        `}
+      </HStack>
+      <PanelLink
         href="https://it-hjelpa.adeo.no/arsys/home"
-      >
-        <LinkPanel.Title>Gi tilganger i Remedy</LinkPanel.Title>
-      </LinkPanel>
-      <LinkPanel
-        border
-        css={css`
-          width: 60%;
-          margin: auto;
-        `}
+        label="Gi tilganger i Remedy"
+      />
+      <PanelLink
         href={`/ressurs/${ressurs.navident}`}
-      >
-        <LinkPanel.Title>Gå til profilsiden</LinkPanel.Title>
-      </LinkPanel>
-      <LinkPanel
-        border
-        css={css`
-          width: 60%;
-          margin: auto;
-        `}
-        href="/"
-      >
-        <LinkPanel.Title>Gå tilbake til forsiden</LinkPanel.Title>
-      </LinkPanel>
+        label="Gå til profilsiden"
+      />
+      <PanelLink href="/" label="Gå tilbake til forsiden" />
     </ContainerWithHighlightedTop>
+  );
+}
+
+function PanelLink({ label, href }: { label: string; href: string }) {
+  return (
+    <Link
+      css={css`
+        width: 60%;
+        margin: auto;
+        padding: var(--a-spacing-4);
+        border: 1px solid var(--a-border-default);
+        text-decoration: none;
+        font-size: var(--a-font-size-heading-medium);
+        color: var(--a-text-default);
+        justify-content: space-between;
+
+        :hover,
+        :active {
+          color: var(--a-text-action-hover);
+          border: 1px solid var(--a-border-action-hover);
+          text-decoration: underline;
+          box-shadow: var(--a-shadow-small);
+          background: unset;
+        }
+      `}
+      href={href}
+    >
+      <Label
+        css={css`
+          cursor: pointer;
+          font-size: inherit;
+          line-height: inherit;
+        `}
+      >
+        {label}
+      </Label>
+      <ChevronRightIcon />
+    </Link>
   );
 }
