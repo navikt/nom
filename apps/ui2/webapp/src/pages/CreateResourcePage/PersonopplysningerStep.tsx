@@ -43,8 +43,8 @@ function CreateResourceForm({ personident }: { personident: string }) {
   const person = hentPersonQuery.data;
 
   const hentRessursQuery = useQuery({
-    queryKey: getRessurs.queryKey(person?.navident),
-    queryFn: () => getRessurs.queryFn(person?.navident),
+    queryKey: getRessurs.queryKey(person?.navident ?? ""),
+    queryFn: () => getRessurs.queryFn(person?.navident ?? ""),
   });
 
   const ressurs = hentRessursQuery.data;
@@ -71,7 +71,7 @@ function CreateResourceForm({ personident }: { personident: string }) {
     );
   }
 
-  if (!isBeforePresent(new Date(ressurs?.sluttdato))) {
+  if (!isBeforePresent(new Date(ressurs?.sluttdato ?? ""))) {
     return (
       <Alert variant="error">
         Denne personen finnes allerede som aktiv medarbeider med NAV-ident{" "}
