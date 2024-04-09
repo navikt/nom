@@ -13,6 +13,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.Avvikl
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
@@ -63,6 +64,7 @@ public class RessursRestService {
     private final static Logger logger = LoggerFactory.getLogger(RessursRestService.class);
 
     private final RessursStateRepository ressursStateRepository;
+    private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final RessursCommadService ressursCommadService;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final OrgtilknytningRestService orgtilknytningRestService;
@@ -78,6 +80,7 @@ public class RessursRestService {
 
     public RessursRestService(
         RessursStateRepository ressursStateRepository,
+        OrgtilknytningStateRepository orgtilknytningStateRepository,
         RessursCommadService ressursCommadService,
         OrgtilknytningCommandService orgtilknytningCommandService,
         OrgtilknytningRestService orgtilknytningRestService,
@@ -91,6 +94,7 @@ public class RessursRestService {
         NomMastered nomMastered
     ) {
         this.ressursStateRepository = ressursStateRepository;
+        this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.ressursCommadService = ressursCommadService;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.orgtilknytningRestService = orgtilknytningRestService;
@@ -255,16 +259,15 @@ public class RessursRestService {
     public RessursState createRessursAndNotify(OpprettRessursRequest request) {
         validateOpprettRessursRequest(request);
 
-        final var eksistingRessurs = ressursStateRepository.findByPersonident(request.personident());
+        final var existingRessurs = ressursStateRepository.findByPersonident(request.personident());
 
-        if (eksistingRessurs.isPresent() && isActive(eksistingRessurs.get())) {
+        if (existingRessurs.isPresent() && isActive(existingRessurs.get())) {
             throw new DuplicateRessursException(
                 String.format("Det finnes allerede en aktiv ressurs med personident %s", request.personident())
             );
         }
 
-        final var navident = eksistingRessurs.isPresent() ? Optional.of(eksistingRessurs.get().navident()) : Optional.<String>empty();
-        final var createdRessurs = createRessurs(request, navident);
+        final var createdRessurs = createRessurs(request, existingRessurs);
 
         try {
             ressursOpprettetEmailService.notifyByEmail(createdRessurs.navident(), request.orgEnhetId());
@@ -277,19 +280,14 @@ public class RessursRestService {
     }
 
     private boolean isActive(RessursState ressursState) {
-        return ressursState.startdato().isPresent() &&
-            !ressursState.startdato().get().isAfter(LocalDate.now()) &&
-            !(ressursState.sluttdato().isPresent() && ressursState.sluttdato().get().isBefore(LocalDate.now()));
+        return orgtilknytningStateRepository.findByNavident(ressursState.navident()).stream()
+            .anyMatch(state -> !state.gyldigTom().isPresent() || state.gyldigTom().get().isBefore(LocalDate.now()));
     }
 
-    private RessursState createRessurs(OpprettRessursRequest request, Optional<String> eksisterendeNavident) {
-        final var navident = eksisterendeNavident.orElseGet(() -> createNavident(request));
 
-        return createRessurs(request, navident);
-    }
-
-    private RessursState createRessurs(OpprettRessursRequest request, String navident) {
-
+    private RessursState createRessurs(OpprettRessursRequest request, Optional<RessursState> existingRessurs) {
+        final var navident = existingRessurs.isPresent() ? existingRessurs.get().navident() : createNavident(request);
+        final var startdato = existingRessurs.isPresent() ? existingRessurs.get().startdato().orElse(null) : request.startDato();
         final var pdlPerson = pdlClient.hentPerson(request.personident());
 
         if (request.visningsmellomnavn() != null && request.visningsmellomnavn().isBlank()) {
@@ -317,7 +315,7 @@ public class RessursRestService {
                 request.visningsetternavn()
             ),
             metaData,
-            request.startDato(),
+            startdato,
             Optional.ofNullable(request.orgEnhetId())
                 .flatMap(orgEnhetStateRepository::findById)
                 .flatMap(OrgEnhetState::agressoId)
