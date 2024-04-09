@@ -7,7 +7,7 @@ import type { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import { getPerson } from "~/api/react-query-endpoints";
+import { getPerson, getRessurs } from "~/api/react-query-endpoints";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { FolkeregisterPersonInfo } from "~/pages/CreateResourcePage/components/FolkeregisterPersonInfo";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
@@ -15,7 +15,7 @@ import { SearchForPerson } from "~/pages/CreateResourcePage/components/SearchFor
 import { fullwidthRow } from "~/resources/NomStyles";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import type { FolkeregisterPerson, Person } from "~/types/api-models";
-import { capitalizeName } from "~/utils";
+import { capitalizeName, isBeforePresent } from "~/utils";
 
 export function PersonopplysningerStep() {
   const { personident } = useSearch({
@@ -42,6 +42,13 @@ function CreateResourceForm({ personident }: { personident: string }) {
 
   const person = hentPersonQuery.data;
 
+  const hentRessursQuery = useQuery({
+    queryKey: getRessurs.queryKey(person?.navident),
+    queryFn: () => getRessurs.queryFn(person?.navident),
+  });
+
+  const ressurs = hentRessursQuery.data;
+
   if (hentPersonQuery.isLoading) {
     return (
       <Loader
@@ -60,6 +67,15 @@ function CreateResourceForm({ personident }: { personident: string }) {
         {hentPersonQuery.error.response?.status === 404
           ? "Ingen resultater for søket. Det må hånteres manuelt."
           : "En teknisk feil forhindret søket"}
+      </Alert>
+    );
+  }
+
+  if (!isBeforePresent(new Date(ressurs?.sluttdato))) {
+    return (
+      <Alert variant="error">
+        En ressurs med dette personnummeret har allerede et aktivt
+        ansettelsesforhold.
       </Alert>
     );
   }
