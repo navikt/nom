@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Alert, BodyShort, Loader, TextField } from "@navikt/ds-react";
+import { Alert, BodyShort, Link, Loader, TextField } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
@@ -74,8 +74,12 @@ function CreateResourceForm({ personident }: { personident: string }) {
   if (!isBeforePresent(new Date(ressurs?.sluttdato))) {
     return (
       <Alert variant="error">
-        En ressurs med dette personnummeret har allerede et aktivt
-        ansettelsesforhold.
+        Denne personen finnes allerede som aktiv medarbeider med NAV-ident{" "}
+        <b>{ressurs?.navident}</b>. For å gjøre endringer, gå til{" "}
+        <Link href={`/ressurs/${ressurs?.navident}`}>
+          medarbeiderens profilside
+        </Link>
+        .
       </Alert>
     );
   }
