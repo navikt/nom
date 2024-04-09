@@ -281,7 +281,7 @@ public class RessursRestService {
 
     private boolean isActive(RessursState ressursState) {
         return orgtilknytningStateRepository.findByNavident(ressursState.navident()).stream()
-            .anyMatch(state -> !state.gyldigTom().isPresent() || state.gyldigTom().get().isBefore(LocalDate.now()));
+            .anyMatch(state -> !(state.gyldigTom().isPresent() && state.gyldigTom().get().isBefore(LocalDate.now())));
     }
 
 
