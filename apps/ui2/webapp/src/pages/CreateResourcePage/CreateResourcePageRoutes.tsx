@@ -21,8 +21,8 @@ export function CreateRessursPage() {
   const stepIdAsNumber = Number(step);
 
   const steps = [
-    "Sektor",
     "Personopplysninger",
+    "Sektor",
     "Organisasjonstilknytning",
     "Oppsummering",
   ];

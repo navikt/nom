@@ -25,6 +25,7 @@ export function ConfirmStep() {
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
   const {
     personident,
+    navident,
     visningsfornavn,
     visningsetternavn,
     visningsmellomnavn,
@@ -119,10 +120,15 @@ export function ConfirmStep() {
           gap: var(--a-spacing-9);
         `}
       >
-        <span>
-          Ved å bekrefte disse detaljene oppretter du en NAV-ident, og personen
-          blir registrert som medarbeider i NAV.
-        </span>
+        <div>
+          <span>
+            Ved å bekrefte disse detaljene vil personen blir registrert som
+            medarbeider i NOM.{" "}
+          </span>
+          {navident && (
+            <span>NAV-ident blir videreført fra tidligere arbeidsforhold.</span>
+          )}
+        </div>
         <div
           css={css`
             display: grid;
@@ -135,6 +141,7 @@ export function ConfirmStep() {
             label="Sektor"
             value={sektor && SektorNameMapping[sektor]}
           />
+          <LabelWithValue label="NAV-ident" value={navident} />
           <LabelWithValue
             label="Tilknytningtype"
             value={

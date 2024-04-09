@@ -1,15 +1,20 @@
 import { css } from "@emotion/react";
-import { ExternalLinkIcon } from "@navikt/aksel-icons";
-import { Alert, BodyShort, Button, Link, Loader } from "@navikt/ds-react";
+import { CheckmarkCircleFillIcon, ChevronRightIcon } from "@navikt/aksel-icons";
+import {
+  Alert,
+  BodyShort,
+  HStack,
+  Label,
+  Link,
+  Loader,
+} from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
-import { Link as ReactRouterLink, useSearch } from "@tanstack/react-router";
+import { useSearch } from "@tanstack/react-router";
 
 import { getRessurs } from "~/api/react-query-endpoints";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
-import { ReceiptRessurs } from "~/pages/ResourcePage/RessursComponents/ReceiptRessurs";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import type { Ressurs } from "~/types/api-models";
-import { AnsettelsesType, Sektor } from "~/types/api-models";
 import { formatVisningsnavn, isInDevelopment } from "~/utils";
 
 export function SummaryStep() {
@@ -47,127 +52,96 @@ export function SummaryStep() {
 }
 
 function Receipt({ ressurs }: { ressurs: Ressurs }) {
-  return (
-    <ContainerWithHighlightedTop
-      icon={opprettRessursIcon}
-      title="Medarbeideren er nå registrert i NOM"
-    >
-      <ReceiptRessurs ressurs={ressurs} />
-      {ressurs.sektor === Sektor.NAV_STATLIG ? (
-        <StatligInstructions ressurs={ressurs} />
-      ) : (
-        <EksternInstructions ressurs={ressurs} />
-      )}
-
-      <ReactRouterLink
-        css={css`
-          align-self: center;
-        `}
-        params={{}}
-        search={{}}
-        to={"/"}
-      >
-        <Link as="span">Gå tilbake til forsiden</Link>
-      </ReactRouterLink>
-    </ContainerWithHighlightedTop>
-  );
-}
-
-function StatligInstructions({ ressurs }: { ressurs: Ressurs }) {
-  return (
-    <>
-      <InformationText ressurs={ressurs} />
-      <div
-        css={css`
-          display: flex;
-          gap: var(--a-spacing-4);
-          justify-content: center;
-        `}
-      >
-        <RemedyLink />
-        <Unit4Link />
-      </div>
-    </>
-  );
-}
-
-function EksternInstructions({ ressurs }: { ressurs: Ressurs }) {
-  return (
-    <>
-      <InformationText ressurs={ressurs} />
-      <RemedyLink />
-    </>
-  );
-}
-
-function InformationText({ ressurs }: { ressurs: Ressurs }) {
   const teamcatBaseUrl = isInDevelopment()
     ? "https://teamkatalog.ekstern.dev.nav.no"
     : "https://teamkatalog.nav.no";
 
   return (
-    <>
-      <BodyShort>
-        Medarbeideren er nå registrert i NOM og NAV-ident {ressurs.navident} er
-        opprettet for {formatVisningsnavn(ressurs.visningsnavn)}. For å fullføre
-        opprettelsen må det også gis tilganger i identrutina i Remedy. Leder
-        eller identadministrator kan gjøre dette.
-      </BodyShort>
-      <BodyShort>
-        Du kan også legge inn teamtilhørighet i{" "}
-        <Link href={teamcatBaseUrl} target="_blank">
-          Teamkatalogen
-        </Link>
-      </BodyShort>
-    </>
+    <ContainerWithHighlightedTop
+      icon={opprettRessursIcon}
+      title={
+        <HStack gap="4">
+          <CheckmarkCircleFillIcon
+            css={css`
+              color: var(--a-surface-success-hover);
+              font-size: var(--a-font-size-heading-xlarge);
+            `}
+          />
+          Medarbeideren er nå registrert i NOM
+        </HStack>
+      }
+    >
+      <HStack gap="2">
+        <BodyShort>
+          Medarbeideren er nå registrert i NOM og NAV-ident{" "}
+          <b>{ressurs.navident}</b> er opprettet for{" "}
+          <b>{formatVisningsnavn(ressurs.visningsnavn)}</b>.
+        </BodyShort>
+        <BodyShort>
+          For å fullføre opprettelsen må leder eller identadministrator også gi
+          tilganger i Identrutinen i Remedy.
+        </BodyShort>
+        <BodyShort>
+          E-postadresse opprettes automatisk og blir synlig på medarbeiderens
+          profilside når den er klar.
+        </BodyShort>
+        <BodyShort>
+          Du kan også legge inn teamtilhørighet i{" "}
+          <Link href={teamcatBaseUrl} target="_blank">
+            Teamkatalogen
+          </Link>
+          , men det kan ta opp til to virkedager før personen vil bli
+          tilgjengelig der. Personen selv eller andre kontaktpersoner kan også
+          legge inn informasjon i Teamkatalogen.
+        </BodyShort>
+      </HStack>
+      <PanelLink
+        href="https://it-hjelpa.adeo.no/arsys/home"
+        label="Gi tilganger i Remedy"
+      />
+      <PanelLink
+        href={`/ressurs/${ressurs.navident}`}
+        label="Gå til profilsiden"
+      />
+      <PanelLink href="/" label="Gå tilbake til forsiden" />
+    </ContainerWithHighlightedTop>
   );
 }
 
-function Unit4Link() {
-  const { navident, ansettelsesType } = useSearch({
-    from: "/ressurs/create/$step",
-  });
-
-  const navidentWithoutFirstLetter = navident?.slice(1);
-  const unit4BaseUrl = isInDevelopment()
-    ? "https://agresso.test.local/agrt01"
-    : "https://agresso.adeo.no/agresso";
-
+function PanelLink({ label, href }: { label: string; href: string }) {
   return (
-    <Button
-      as="a"
+    <Link
       css={css`
-        width: max-content;
-      `}
-      href={`${unit4BaseUrl}/Default.aspx?&accessId=003316&attribute_id=S108&client=HR&personId=${navidentWithoutFirstLetter}&PersonellType=${
-        ansettelsesType === AnsettelsesType.FAST ? "F" : "M"
-      }`}
-      icon={<ExternalLinkIcon aria-hidden />}
-      iconPosition="right"
-      rel="noopener noreferrer"
-      target="_blank"
-      variant="primary"
-    >
-      Registrer lønnsopplysninger i Unit4
-    </Button>
-  );
-}
+        width: 60%;
+        margin: auto;
+        padding: var(--a-spacing-4);
+        border: 1px solid var(--a-border-default);
+        text-decoration: none;
+        font-size: var(--a-font-size-heading-medium);
+        color: var(--a-text-default);
+        justify-content: space-between;
 
-function RemedyLink() {
-  return (
-    <Button
-      as="a"
-      css={css`
-        width: max-content;
+        :hover,
+        :active {
+          color: var(--a-text-action-hover);
+          border: 1px solid var(--a-border-action-hover);
+          text-decoration: underline;
+          box-shadow: var(--a-shadow-small);
+          background: unset;
+        }
       `}
-      href="https://it-hjelpa.adeo.no/arsys/home"
-      icon={<ExternalLinkIcon aria-hidden />}
-      iconPosition="right"
-      rel="noopener noreferrer"
-      target="_blank"
-      variant="primary"
+      href={href}
     >
-      Gi tilganger i Remedy
-    </Button>
+      <Label
+        css={css`
+          cursor: pointer;
+          font-size: inherit;
+          line-height: inherit;
+        `}
+      >
+        {label}
+      </Label>
+      <ChevronRightIcon />
+    </Link>
   );
 }
