@@ -110,7 +110,7 @@ public class EksterneRessurserProcessor {
             if (harSammeSluttdato(eksternRessurs, sisteEksisterendeOrgtilknytning) && erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {
                 log.debug("Ekstern ressurs {} har eksisterende orgtilknytning som ikke trenger endring", eksternRessurs.navident());
                 // Oppdater evt tilknytningstypen - hvis denne er ikke er korrekt
-                settTypeEksternSamarbeidspartnerHvisSkatt(sisteEksisterendeOrgtilknytning, metadata);
+                settTypeEksternSamarbeidspartnerHvisSkattEllerRiksrevisjon(sisteEksisterendeOrgtilknytning, metadata);
             } else {
                 if (erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {
                     // Sluttdato er endret, endre sluttdato på eksisterende orgtilknytning - ingen flere endringer påkrevd.
@@ -283,6 +283,14 @@ public class EksterneRessurserProcessor {
         return erSkatteetatenNiv0Enhet(orgenhet) || orgenhetService.getById(organisering.get().idOver()).map(this::erSkatteetatenNiv0Enhet).orElse(false);
     }
 
+    private boolean erUnderRiksrevisjonNiv0Enhet(IOrgenhet orgenhet) {
+        var organisering = organiseringStateRepository.findActiveById(orgenhet.getId());
+        if (organisering.isEmpty()) {
+            return false;
+        }
+        return erRiksrevisjonNiv0Enhet(orgenhet) || orgenhetService.getById(organisering.get().idOver()).map(this::erRiksrevisjonNiv0Enhet).orElse(false);
+    }
+
     private void opprettOrgtilknytning(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet, LocalDate gyldigFom, InputMetadata metadata) {
         if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(eksternRessurs.navident())) {
             log.info("Navident {} er mastered. Vi lager ikke orgtilknytning for denne", eksternRessurs.navident());
@@ -330,7 +338,7 @@ public class EksterneRessurserProcessor {
 
         orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(fid, endreDagligOppfolgingOrgtilknytning);
 
-        if (erUnderSkatteetatenNiv0Enhet(orgenhet)) {
+        if (erUnderSkatteetatenNiv0Enhet(orgenhet) || erUnderRiksrevisjonNiv0Enhet(orgenhet)) {
             settTilknytningtype(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER, fid, eksternRessurs.navident(), metadata);
         }
     }
@@ -355,7 +363,7 @@ public class EksterneRessurserProcessor {
 
         orgtilknytningCommandService.endreOrgtilknytningDato(orgtilknytning.fid(), endreOrgtilknytningDato);
 
-        settTypeEksternSamarbeidspartnerHvisSkatt(orgtilknytning, metadata);
+        settTypeEksternSamarbeidspartnerHvisSkattEllerRiksrevisjon(orgtilknytning, metadata);
     }
 
     private void avsluttOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
@@ -415,11 +423,12 @@ public class EksterneRessurserProcessor {
         orgtilknytningCommandService.fjernOrgtilknytning(orgtilknytning.fid(), fjernOrgtilknytning);
     }
 
-    private void settTypeEksternSamarbeidspartnerHvisSkatt(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
+    private void settTypeEksternSamarbeidspartnerHvisSkattEllerRiksrevisjon(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
         if (erTypeEksternSamarbeidspartner(orgtilknytning)) return; // Er allerede ekstern samarbeidspartner
 
         IOrgenhet orgenhet = orgenhetService.getById(orgtilknytning.orgEnhetId()).orElse(null);
-        if (erUnderSkatteetatenNiv0Enhet(orgenhet)) {
+        // sett Tilknytningtype til EksternSamarbeidspartner, hvis Skatt eller Riksrevisjon
+        if (erUnderSkatteetatenNiv0Enhet(orgenhet) || erUnderRiksrevisjonNiv0Enhet(orgenhet)) {
             settTilknytningtype(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER, orgtilknytning.fid(), orgtilknytning.navident(), metadata);
         }
     }
