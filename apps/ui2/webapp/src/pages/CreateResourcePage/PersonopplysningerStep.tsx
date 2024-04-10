@@ -59,7 +59,7 @@ function CreateResourceForm({ personident }: { personident: string }) {
           isAfterPresent(new Date(orgtilknytning.gyldigTom))),
     );
 
-  if (hentPersonQuery.isLoading) {
+  if (hentPersonQuery.isLoading || hentOrgtilknytningerQuery.isLoading) {
     return (
       <Loader
         css={css`
