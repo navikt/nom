@@ -255,12 +255,12 @@ public class EksterneRessurserProcessor {
             // Riksrevisjon skal plasseres på nivået under
             var underliggende = orgenhetService.findAllUnderliggendeOrgenheter(orgenhetForRemedyenhet.getId());
             if (underliggende.isEmpty()) {
-                log.warn("RIKSREVISJ ({}) har ingen underenheter. Faller tilbake på å bruke orgenhet {}.", orgenhetForRemedyenhet.getId(), orgenhetForRemedyenhet.getId());
+                log.warn("RIKSREVISJON ({}) har ingen underenheter. Faller tilbake på å bruke orgenhet {}.", orgenhetForRemedyenhet.getId(), orgenhetForRemedyenhet.getId());
             } else if (underliggende.size() == 1) {
                 orgenhetForRemedyenhet = orgenhetService.getById(underliggende.get(0)).orElse(null);
-                log.debug("For navident {} - Fant underenhet av RIKSREVISJ: orgenhet {} for remedyEnhet {}", navident, orgenhetForRemedyenhet.getId(), remedyEnhet);
+                log.debug("For navident {} - Fant underenhet av RIKSREVISJON: orgenhet {} for remedyEnhet {}", navident, orgenhetForRemedyenhet.getId(), remedyEnhet);
             } else {
-                log.warn("For navident {} - Fant flere underenheter for orgenhet RIKSREVISJ ({}). Faller tilbake på å bruke orgenhet {}.",
+                log.warn("For navident {} - Fant flere underenheter for orgenhet RIKSREVISJON ({}). Faller tilbake på å bruke orgenhet {}.",
                     navident, orgenhetForRemedyenhet.getId(), orgenhetForRemedyenhet.getId());
             }
         }
@@ -272,7 +272,7 @@ public class EksterneRessurserProcessor {
     }
 
     private boolean erRiksrevisjonNiv0Enhet(IOrgenhet orgenhetForRemedyenhet) {
-        return orgenhetForRemedyenhet != null && orgenhetForRemedyenhet.getAgressoId().equals("RIKSREVISJ");
+        return orgenhetForRemedyenhet != null && orgenhetForRemedyenhet.getAgressoId().equals("RIKSREVISJON");
     }
 
     private boolean erUnderSkatteetatenNiv0Enhet(IOrgenhet orgenhet) {
