@@ -110,7 +110,7 @@ public class EksterneRessurserProcessor {
             if (harSammeSluttdato(eksternRessurs, sisteEksisterendeOrgtilknytning) && erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {
                 log.debug("Ekstern ressurs {} har eksisterende orgtilknytning som ikke trenger endring", eksternRessurs.navident());
                 // Oppdater evt tilknytningstypen - hvis denne er ikke er korrekt
-                settTypeEksternSamarbeidspartnerHvisSkatt(sisteEksisterendeOrgtilknytning, metadata);
+                settTypeEksternSamarbeidspartnerHvisSkattEllerRiksrevisjon(sisteEksisterendeOrgtilknytning, metadata);
             } else {
                 if (erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {
                     // Sluttdato er endret, endre sluttdato på eksisterende orgtilknytning - ingen flere endringer påkrevd.
@@ -177,6 +177,7 @@ public class EksterneRessurserProcessor {
                     log.debug("For navident {} - Fant orgenhet {} for remedyEnhet {}", navident, orgenhet.nomId(), remedyEnhet);
                     var orgenhetForRemedyenhet = orgenhetService.getById(orgenhet.nomId()).orElse(null);
                     orgenhetForRemedyenhet = hvisSkattPlasserNederst(orgenhetForRemedyenhet, navident, remedyEnhet);
+                    orgenhetForRemedyenhet = hvisRiksrevisjonPlasserNederst(orgenhetForRemedyenhet, navident, remedyEnhet);
                     return orgenhetForRemedyenhet;
                 }
             ).orElseGet(
@@ -209,6 +210,7 @@ public class EksterneRessurserProcessor {
                 );
                 var nomOrgenhetPaaRessurs = nomOrgenheterByOrgenhetPaaRessurs.get(0);
                 nomOrgenhetPaaRessurs = hvisSkattPlasserNederst(nomOrgenhetPaaRessurs, navident, remedyEnhet);
+                nomOrgenhetPaaRessurs = hvisRiksrevisjonPlasserNederst(nomOrgenhetPaaRessurs, navident, remedyEnhet);
                 return nomOrgenhetPaaRessurs;
             } else if (nomOrgenheterByOrgenhetPaaRessurs.isEmpty()) {
                 log.info(
@@ -248,8 +250,29 @@ public class EksterneRessurserProcessor {
         return orgenhetForRemedyenhet;
     }
 
+    private IOrgenhet hvisRiksrevisjonPlasserNederst(IOrgenhet orgenhetForRemedyenhet, String navident, String remedyEnhet) {
+        if (erRiksrevisjonNiv0Enhet(orgenhetForRemedyenhet)) {
+            // Riksrevisjon skal plasseres på nivået under
+            var underliggende = orgenhetService.findAllUnderliggendeOrgenheter(orgenhetForRemedyenhet.getId());
+            if (underliggende.isEmpty()) {
+                log.warn("RIKSREVISJON ({}) har ingen underenheter. Faller tilbake på å bruke orgenhet {}.", orgenhetForRemedyenhet.getId(), orgenhetForRemedyenhet.getId());
+            } else if (underliggende.size() == 1) {
+                orgenhetForRemedyenhet = orgenhetService.getById(underliggende.get(0)).orElse(null);
+                log.debug("For navident {} - Fant underenhet av RIKSREVISJON: orgenhet {} for remedyEnhet {}", navident, orgenhetForRemedyenhet.getId(), remedyEnhet);
+            } else {
+                log.warn("For navident {} - Fant flere underenheter for orgenhet RIKSREVISJON ({}). Faller tilbake på å bruke orgenhet {}.",
+                    navident, orgenhetForRemedyenhet.getId(), orgenhetForRemedyenhet.getId());
+            }
+        }
+        return orgenhetForRemedyenhet;
+    }
+
     private boolean erSkatteetatenNiv0Enhet(IOrgenhet orgenhetForRemedyenhet) {
         return orgenhetForRemedyenhet != null && orgenhetForRemedyenhet.getAgressoId().equals("SKATT");
+    }
+
+    private boolean erRiksrevisjonNiv0Enhet(IOrgenhet orgenhetForRemedyenhet) {
+        return orgenhetForRemedyenhet != null && orgenhetForRemedyenhet.getAgressoId().equals("RIKSREVISJON");
     }
 
     private boolean erUnderSkatteetatenNiv0Enhet(IOrgenhet orgenhet) {
@@ -258,6 +281,14 @@ public class EksterneRessurserProcessor {
             return false;
         }
         return erSkatteetatenNiv0Enhet(orgenhet) || orgenhetService.getById(organisering.get().idOver()).map(this::erSkatteetatenNiv0Enhet).orElse(false);
+    }
+
+    private boolean erUnderRiksrevisjonNiv0Enhet(IOrgenhet orgenhet) {
+        var organisering = organiseringStateRepository.findActiveById(orgenhet.getId());
+        if (organisering.isEmpty()) {
+            return false;
+        }
+        return erRiksrevisjonNiv0Enhet(orgenhet) || orgenhetService.getById(organisering.get().idOver()).map(this::erRiksrevisjonNiv0Enhet).orElse(false);
     }
 
     private void opprettOrgtilknytning(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet, LocalDate gyldigFom, InputMetadata metadata) {
@@ -307,7 +338,7 @@ public class EksterneRessurserProcessor {
 
         orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(fid, endreDagligOppfolgingOrgtilknytning);
 
-        if (erUnderSkatteetatenNiv0Enhet(orgenhet)) {
+        if (erUnderSkatteetatenNiv0Enhet(orgenhet) || erUnderRiksrevisjonNiv0Enhet(orgenhet)) {
             settTilknytningtype(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER, fid, eksternRessurs.navident(), metadata);
         }
     }
@@ -332,7 +363,7 @@ public class EksterneRessurserProcessor {
 
         orgtilknytningCommandService.endreOrgtilknytningDato(orgtilknytning.fid(), endreOrgtilknytningDato);
 
-        settTypeEksternSamarbeidspartnerHvisSkatt(orgtilknytning, metadata);
+        settTypeEksternSamarbeidspartnerHvisSkattEllerRiksrevisjon(orgtilknytning, metadata);
     }
 
     private void avsluttOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
@@ -392,11 +423,12 @@ public class EksterneRessurserProcessor {
         orgtilknytningCommandService.fjernOrgtilknytning(orgtilknytning.fid(), fjernOrgtilknytning);
     }
 
-    private void settTypeEksternSamarbeidspartnerHvisSkatt(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
+    private void settTypeEksternSamarbeidspartnerHvisSkattEllerRiksrevisjon(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
         if (erTypeEksternSamarbeidspartner(orgtilknytning)) return; // Er allerede ekstern samarbeidspartner
 
         IOrgenhet orgenhet = orgenhetService.getById(orgtilknytning.orgEnhetId()).orElse(null);
-        if (erUnderSkatteetatenNiv0Enhet(orgenhet)) {
+        // sett Tilknytningtype til EksternSamarbeidspartner, hvis Skatt eller Riksrevisjon
+        if (erUnderSkatteetatenNiv0Enhet(orgenhet) || erUnderRiksrevisjonNiv0Enhet(orgenhet)) {
             settTilknytningtype(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER, orgtilknytning.fid(), orgtilknytning.navident(), metadata);
         }
     }
