@@ -616,9 +616,9 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
           >
             {!isEkstern && (
               <HelpText title="Hvorfor er dette utilgjengelig?">
-                Statlige ressurser kan ikke opprettes eller endres i NOM på
-                dette tidspunktet. Disse kan endres i tråd med gjeldende rutiner
-                i Identrutina og Unit4.
+                Statlige og kommunale ansatte kan ikke opprettes eller endres i
+                NOM på dette tidspunktet. Disse kan endres i tråd med gjeldende
+                rutiner i Identrutina og Unit4.
               </HelpText>
             )}
 
