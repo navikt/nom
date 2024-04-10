@@ -15,7 +15,7 @@ import { SearchForPerson } from "~/pages/CreateResourcePage/components/SearchFor
 import { fullwidthRow } from "~/resources/NomStyles";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import type { FolkeregisterPerson, Person } from "~/types/api-models";
-import { capitalizeName, isAfterPresent, isBeforePresent } from "~/utils";
+import { capitalizeName, isPresentOrAfter, isPresentOrBefore } from "~/utils";
 
 export function PersonopplysningerStep() {
   const { personident } = useSearch({
@@ -54,9 +54,9 @@ function CreateResourceForm({ personident }: { personident: string }) {
     orgtilknytninger &&
     orgtilknytninger.some(
       (orgtilknytning) =>
-        isBeforePresent(new Date(orgtilknytning.gyldigFom)) &&
+        isPresentOrBefore(new Date(orgtilknytning.gyldigFom)) &&
         (!orgtilknytning.gyldigTom ||
-          isAfterPresent(new Date(orgtilknytning.gyldigTom))),
+          isPresentOrAfter(new Date(orgtilknytning.gyldigTom))),
     );
 
   if (hentPersonQuery.isLoading || hentOrgtilknytningerQuery.isLoading) {
@@ -100,7 +100,7 @@ function CreateResourceForm({ personident }: { personident: string }) {
         {person.navident && (
           <Alert variant="info">
             Medarbeideren har jobbet i NAV tidligere og vil beholde sin
-            tidligere NAV-ident <b>{person.navident}</b>
+            tidligere NAV-ident <b>{person.navident}</b>.
           </Alert>
         )}
         <FolkeregisterPersonInfo

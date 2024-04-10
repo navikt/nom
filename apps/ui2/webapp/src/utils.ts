@@ -4,6 +4,7 @@ import {
   formatISO,
   isAfter,
   isBefore,
+  isToday,
   isWithinInterval,
 } from "date-fns";
 import { maxTime, minTime } from "date-fns/constants";
@@ -114,6 +115,14 @@ export function isAfterPresent(date: Date) {
   const endOfToday = endOfDay(new Date());
 
   return isAfter(endOfDate, endOfToday);
+}
+
+export function isPresentOrBefore(date: Date) {
+  return isToday(date) || isBeforePresent(date);
+}
+
+export function isPresentOrAfter(date: Date) {
+  return isToday(date) || isAfterPresent(date);
 }
 
 export function isDateAfterOtherDates(
