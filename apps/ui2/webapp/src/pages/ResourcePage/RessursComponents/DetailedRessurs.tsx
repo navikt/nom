@@ -12,6 +12,7 @@ import {
   ExpansionCard,
   Heading,
   HelpText,
+  HStack,
   Label,
   Link,
   Tag,
@@ -33,6 +34,7 @@ import {
   getOrgTilknytninger,
   getTeamcatMemberships,
 } from "~/api/react-query-endpoints";
+import { useHasWriteAccess } from "~/api/useGetSession";
 import { Divider } from "~/components/Divider";
 import { LabelWithValue } from "~/components/LabelWithValue";
 import { UserImage } from "~/components/UserImage";
@@ -498,6 +500,15 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
     select: (ledere) => ledere.find((leder) => leder.erDagligOppfolging)?.leder,
   }).data;
 
+  const hasWriteAccess = useHasWriteAccess();
+  const { editPersonopplysninger, editOrgtilknytning, addOrgtilknytning } =
+    useSearch({
+      from: "/ressurs/$id",
+    });
+  const isEkstern = ressurs.sektor === Sektor.EKSTERN;
+  const isEditing =
+    editPersonopplysninger || editOrgtilknytning || addOrgtilknytning;
+
   return (
     <div
       css={css`
@@ -595,21 +606,38 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
           navn={formatVisningsnavn(ressurs.visningsnavn)}
           size="126px"
         />
-        <EditButtonWrapper ressurs={ressurs}>
-          <Button
-            icon={<PencilIcon aria-hidden />}
-            onClick={() =>
-              navigate({
-                search: { editPersonopplysninger: true },
-                params: (previous) => previous,
-              })
-            }
-            size="small"
-            variant="secondary"
+
+        {hasWriteAccess && !isEditing && (
+          <HStack
+            css={css`
+              align-items: center;
+            `}
+            gap="2"
           >
-            Endre personopplysninger
-          </Button>
-        </EditButtonWrapper>
+            {!isEkstern && (
+              <HelpText title="Hvorfor er dette utilgjengelig?">
+                Statlige ressurser kan ikke opprettes eller endres i NOM på
+                dette tidspunktet. Disse kan endres i tråd med gjeldende rutiner
+                i Identrutina og Unit4.
+              </HelpText>
+            )}
+
+            <Button
+              disabled={!isEkstern}
+              icon={<PencilIcon aria-hidden />}
+              onClick={() =>
+                navigate({
+                  search: { editPersonopplysninger: true },
+                  params: (previous) => previous,
+                })
+              }
+              size="small"
+              variant="secondary"
+            >
+              Endre personopplysninger
+            </Button>
+          </HStack>
+        )}
       </div>
     </div>
   );
