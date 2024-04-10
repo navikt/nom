@@ -7,7 +7,7 @@ import type { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import { getPerson, getRessurs } from "~/api/react-query-endpoints";
+import { getOrgTilknytninger, getPerson } from "~/api/react-query-endpoints";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { FolkeregisterPersonInfo } from "~/pages/CreateResourcePage/components/FolkeregisterPersonInfo";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
@@ -15,7 +15,7 @@ import { SearchForPerson } from "~/pages/CreateResourcePage/components/SearchFor
 import { fullwidthRow } from "~/resources/NomStyles";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import type { FolkeregisterPerson, Person } from "~/types/api-models";
-import { capitalizeName, isBeforePresent } from "~/utils";
+import { capitalizeName, isAfterPresent, isBeforePresent } from "~/utils";
 
 export function PersonopplysningerStep() {
   const { personident } = useSearch({
@@ -42,12 +42,22 @@ function CreateResourceForm({ personident }: { personident: string }) {
 
   const person = hentPersonQuery.data;
 
-  const hentRessursQuery = useQuery({
-    queryKey: getRessurs.queryKey(person?.navident ?? ""),
-    queryFn: () => getRessurs.queryFn(person?.navident ?? ""),
+  const hentOrgtilknytningerQuery = useQuery({
+    queryKey: getOrgTilknytninger.queryKey(person?.navident ?? ""),
+    queryFn: () => getOrgTilknytninger.queryFn(person?.navident ?? ""),
   });
 
-  const ressurs = hentRessursQuery.data;
+  const orgtilknytninger = hentOrgtilknytningerQuery.data;
+
+  const erAktiv =
+    person &&
+    orgtilknytninger &&
+    orgtilknytninger.some(
+      (orgtilknytning) =>
+        isBeforePresent(new Date(orgtilknytning.gyldigFom)) &&
+        (!orgtilknytning.gyldigTom ||
+          isAfterPresent(new Date(orgtilknytning.gyldigTom))),
+    );
 
   if (hentPersonQuery.isLoading) {
     return (
@@ -71,12 +81,12 @@ function CreateResourceForm({ personident }: { personident: string }) {
     );
   }
 
-  if (!isBeforePresent(new Date(ressurs?.sluttdato ?? ""))) {
+  if (erAktiv) {
     return (
       <Alert variant="error">
         Denne personen finnes allerede som aktiv medarbeider med NAV-ident{" "}
-        <b>{ressurs?.navident}</b>. For å gjøre endringer, gå til{" "}
-        <Link href={`/ressurs/${ressurs?.navident}`}>
+        <b>{person?.navident}</b>. For å gjøre endringer, gå til{" "}
+        <Link href={`/ressurs/${person?.navident}`}>
           medarbeiderens profilside
         </Link>
         .
