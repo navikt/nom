@@ -1,13 +1,13 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Alert, BodyShort, Loader, TextField } from "@navikt/ds-react";
+import { Alert, BodyShort, Link, Loader, TextField } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import { getPerson } from "~/api/react-query-endpoints";
+import { getOrgTilknytninger, getPerson } from "~/api/react-query-endpoints";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { FolkeregisterPersonInfo } from "~/pages/CreateResourcePage/components/FolkeregisterPersonInfo";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
@@ -15,7 +15,7 @@ import { SearchForPerson } from "~/pages/CreateResourcePage/components/SearchFor
 import { fullwidthRow } from "~/resources/NomStyles";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import type { FolkeregisterPerson, Person } from "~/types/api-models";
-import { capitalizeName } from "~/utils";
+import { capitalizeName, isPresentOrAfter, isPresentOrBefore } from "~/utils";
 
 export function PersonopplysningerStep() {
   const { personident } = useSearch({
@@ -42,7 +42,24 @@ function CreateResourceForm({ personident }: { personident: string }) {
 
   const person = hentPersonQuery.data;
 
-  if (hentPersonQuery.isLoading) {
+  const hentOrgtilknytningerQuery = useQuery({
+    queryKey: getOrgTilknytninger.queryKey(person?.navident ?? ""),
+    queryFn: () => getOrgTilknytninger.queryFn(person?.navident ?? ""),
+  });
+
+  const orgtilknytninger = hentOrgtilknytningerQuery.data;
+
+  const erAktiv =
+    person &&
+    orgtilknytninger &&
+    orgtilknytninger.some(
+      (orgtilknytning) =>
+        isPresentOrBefore(new Date(orgtilknytning.gyldigFom)) &&
+        (!orgtilknytning.gyldigTom ||
+          isPresentOrAfter(new Date(orgtilknytning.gyldigTom))),
+    );
+
+  if (hentPersonQuery.isLoading || hentOrgtilknytningerQuery.isLoading) {
     return (
       <Loader
         css={css`
@@ -64,13 +81,26 @@ function CreateResourceForm({ personident }: { personident: string }) {
     );
   }
 
+  if (erAktiv) {
+    return (
+      <Alert variant="error">
+        Denne personen finnes allerede som aktiv medarbeider med NAV-ident{" "}
+        <b>{person?.navident}</b>. For å gjøre endringer, gå til{" "}
+        <Link href={`/ressurs/${person?.navident}`}>
+          medarbeiderens profilside
+        </Link>
+        .
+      </Alert>
+    );
+  }
+
   if (person) {
     return (
       <>
         {person.navident && (
           <Alert variant="info">
             Medarbeideren har jobbet i NAV tidligere og vil beholde sin
-            tidligere NAV-ident <b>{person.navident}</b>
+            tidligere NAV-ident <b>{person.navident}</b>.
           </Alert>
         )}
         <FolkeregisterPersonInfo
