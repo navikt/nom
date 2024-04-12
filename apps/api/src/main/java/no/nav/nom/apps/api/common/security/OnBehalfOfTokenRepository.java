@@ -102,21 +102,4 @@ public class OnBehalfOfTokenRepository {
         return signedJwt != null && signedJwt.getJWTClaimsSet().getExpirationTime().after(Date.from(Instant.now().plusSeconds(20)));
     }
 
-    @SneakyThrows
-    public boolean isContextTokenForAnUserPrincipal(String token) {
-        SignedJWT jwt = SignedJWT.parse(token);
-        String oid = jwt.getJWTClaimsSet().getStringClaim("oid");
-        String sub = jwt.getJWTClaimsSet().getStringClaim("sub");
-        return oid != null && sub != null && !oid.equals(sub);
-    }
-
-    @SneakyThrows
-    public String getTokenFromSpringAuthenticationContext() {
-        final var auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null) {
-            return auth.getToken().getTokenValue();
-        }
-        return null;
-    }
-
 }

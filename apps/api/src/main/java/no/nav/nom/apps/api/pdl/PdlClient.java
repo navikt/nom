@@ -1,9 +1,7 @@
 package no.nav.nom.apps.api.pdl;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.common.AppProperties;
-import no.nav.nom.apps.api.common.security.OnBehalfOfTokenRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +19,6 @@ import java.util.Optional;
 
 @Service
 public class PdlClient {
-
-    private final Unleash unleash;
-    public static final String UNLEASH_USE_ONBEHALF_OF_TOKEN_IN_PDLCLIENT = "nom.pdlclient.useOnBehalfOfToken";
-
     private static final Logger logger = LoggerFactory.getLogger(PdlClient.class);
     private final static String PDL_HENT_PERSON_QUERY = // language=graphql
         """
@@ -46,17 +40,11 @@ public class PdlClient {
         }
         """;
     private final HttpGraphQlClient graphQlClient;
-    private final HttpGraphQlClient graphQlClientWithoutOAuthFilter;
-    private final OnBehalfOfTokenRepository onBehalfOfTokenRepository;
-
-    private final String pdlScope;
 
     @Autowired
     public PdlClient(
         AppProperties appProperties,
-        OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager,
-        OnBehalfOfTokenRepository onBehalfOfTokenRepository,
-        Unleash unleash
+        OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager
     ) {
         final var pdlProperties = appProperties.clients().pdl();
 
@@ -70,52 +58,9 @@ public class PdlClient {
                 headers.add("behandlingsnummer", pdlProperties.behandlingsnummer());
             })
             .build();
-
-        this.graphQlClientWithoutOAuthFilter = HttpGraphQlClient.builder(WebClient.builder())
-            .url(pdlProperties.baseUrl() + "/graphql")
-            .headers(headers -> {
-                headers.setContentType(MediaType.APPLICATION_JSON);
-                headers.add("Tema", pdlProperties.tema());
-                headers.add("behandlingsnummer", pdlProperties.behandlingsnummer());
-            })
-            .build();
-
-        this.onBehalfOfTokenRepository = onBehalfOfTokenRepository;
-        this.pdlScope = pdlProperties.aadScope();
-        this.unleash = unleash;
     }
 
     public Optional<Person> hentPerson(String personIdent) {
-        if (unleash.isEnabled(UNLEASH_USE_ONBEHALF_OF_TOKEN_IN_PDLCLIENT)){
-            String authToken = onBehalfOfTokenRepository.getTokenFromSpringAuthenticationContext();
-            if(authToken == null) {
-                logger.error("Unable to get auth token from authentication context. SKipping lookup to PDL");
-                return Optional.empty();
-            }
-
-            // if the context token is for a user principal, we need to get the onBehalfOfToken for the user
-            if(onBehalfOfTokenRepository.isContextTokenForAnUserPrincipal(authToken)) {
-                String onBehalfOfToken = onBehalfOfTokenRepository.getOnbehalfofTokenFor(pdlScope);
-                if(onBehalfOfToken == null) {
-                    logger.error("Unable to get or generate onBehalfOfToken. SKipping lookup to PDL");
-                    return Optional.empty();
-                } else {
-                    // use a graphql client with the onBehalfOfToken
-                    logger.info("The context token is a user principal. OnBehalfOf token will be used for PDL lookup");
-                    var mutatedGraphqlClientWithOnBehalfOfToken = graphQlClientWithoutOAuthFilter
-                        .mutate()
-                        .headers(headers -> headers.setBearerAuth(onBehalfOfToken))
-                        .build();
-                    return hentPerson(mutatedGraphqlClientWithOnBehalfOfToken, personIdent);
-                }
-            }
-            // if the context token is not for a user principal, we can use the service token directly from oAuth2AuthorizedClientManager
-            logger.info("The context token is not for a user principal. Service token will be used for PDL lookup");
-        }
-        return hentPerson(graphQlClient, personIdent);
-    }
-
-    private Optional<Person> hentPerson(HttpGraphQlClient graphQlClient, String personIdent) {
         return graphQlClient.document(PDL_HENT_PERSON_QUERY)
             .variable("ident", personIdent)
             .execute()
