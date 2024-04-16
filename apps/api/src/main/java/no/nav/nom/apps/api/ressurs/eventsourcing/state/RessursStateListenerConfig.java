@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.ressurs.eventsourcing.state;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +24,7 @@ public class RessursStateListenerConfig {
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, RessursState> ressursStateKafkaListenerContainerFactory(ConsumerFactory<String, RessursState> consumerFactory) {
+    ConcurrentKafkaListenerContainerFactory<String, RessursState> ressursStateKafkaListenerContainerFactory(@Qualifier("ressursStateConsumerFactory") ConsumerFactory<String, RessursState> consumerFactory) {
         final var factory = new ConcurrentKafkaListenerContainerFactory<String, RessursState>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);

@@ -31,6 +31,10 @@
             <groupId>no.nav.nom</groupId>
             <artifactId>lucene-wrapper-nomdomain</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>nom-state</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

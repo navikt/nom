@@ -57,10 +57,13 @@ public class RessursStateAutoconfigurationTest {
     void test_all_beans_present_if_state_ressurs_enabled() {
         contextRunner
             .withUserConfiguration(TestMockBeans.class)
+            .withPropertyValues("nom.libs.state.ressurs.enabled=true")
             .run(
                 context -> {
                     assertThat(context).hasSingleBean(NomStateRessursListener.class);
                     assertThat(context).hasSingleBean(RessursStateRepository.class);
+                    assertThat(context).hasBean("nomStateRessursConsumerFactory");
+                    assertThat(context).hasBean("nomStateRessursKafkaListenerContainerFactory");
                 }
             );
     }

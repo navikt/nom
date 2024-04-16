@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
@@ -12,6 +13,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
@@ -36,13 +39,14 @@ public class RessursStateAutoconfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
     RessursStateRepository nomStateRessursRepository() {
         return new RessursStateRepositoryImpl();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
     NomStateRessursListener nomStateRessursListener(
         @Value("${app.nom-state.kafka.ressurs.state-topic}") String stateTopic,
         RessursStateRepository ressursStateRepository,
@@ -54,8 +58,7 @@ public class RessursStateAutoconfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
     ConsumerFactory<String, RessursState> nomStateRessursConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
         final var jsonDeserializer = new JsonDeserializer<>(RessursState.class, objectMapper);
 
@@ -63,8 +66,8 @@ public class RessursStateAutoconfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    ConcurrentKafkaListenerContainerFactory<String, RessursState> nomStateRessursKafkaListenerContainerFactory(ConsumerFactory<String, RessursState> consumerFactory) {
+    @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
+    ConcurrentKafkaListenerContainerFactory<String, RessursState> nomStateRessursKafkaListenerContainerFactory(@Qualifier("nomStateRessursConsumerFactory") ConsumerFactory<String, RessursState> consumerFactory) {
         final var factory = new ConcurrentKafkaListenerContainerFactory<String, RessursState>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);
@@ -81,7 +84,7 @@ public class RessursStateAutoconfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
     public String ressursStateListenerId(@Value("${app.nom-state.kafka.ressurs.listener-id}") String listenerId) {
         if (isLocal()) {
             return listenerId + "-" + Math.abs(new Random().nextInt());
@@ -99,7 +102,7 @@ public class RessursStateAutoconfiguration {
             super(ConfigurationPhase.REGISTER_BEAN);
         }
 
-        @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled", havingValue = "true", matchIfMissing = true)
+        @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
         static class isEnabled {}
     }
 }
