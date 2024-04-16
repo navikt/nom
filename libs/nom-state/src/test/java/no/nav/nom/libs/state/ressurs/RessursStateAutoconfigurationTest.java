@@ -1,0 +1,67 @@
+package no.nav.nom.libs.state.ressurs;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingListener;
+import org.springframework.boot.logging.LogLevel;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.StandardEnvironment;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class RessursStateAutoconfigurationTest {
+
+    @Configuration
+    static class TestMockBeans {
+        @Bean
+        KafkaProperties kafkaProperties() {
+            return new KafkaProperties();
+        }
+
+        @Bean
+        ObjectMapper objectMapper() {
+            return new ObjectMapper();
+        }
+
+        @Bean
+        Environment environment() {
+            return new StandardEnvironment();
+        }
+    }
+
+    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+        .withConfiguration(AutoConfigurations.of(RessursStateAutoconfiguration.class))
+        .withPropertyValues("app.name=ressurs-state-test-app")
+        .withInitializer(ConditionEvaluationReportLoggingListener.forLogLevel(LogLevel.INFO));
+
+    @Test
+    void test_no_beans_present_if_state_ressurs_disabled() {
+        contextRunner
+            .withPropertyValues("nom.libs.state.ressurs.enabled=false")
+            .run(
+                context -> {
+                    assertThat(context).doesNotHaveBean(NomStateRessursListener.class);
+                    assertThat(context).doesNotHaveBean(RessursStateRepository.class);
+                    assertThat(context).doesNotHaveBean("nomStateRessursConsumerFactory");
+                    assertThat(context).doesNotHaveBean("nomStateRessursKafkaListenerContainerFactory");
+                }
+            );
+    }
+
+    @Test
+    void test_all_beans_present_if_state_ressurs_enabled() {
+        contextRunner
+            .withUserConfiguration(TestMockBeans.class)
+            .run(
+                context -> {
+                    assertThat(context).hasSingleBean(NomStateRessursListener.class);
+                    assertThat(context).hasSingleBean(RessursStateRepository.class);
+                }
+            );
+    }
+}

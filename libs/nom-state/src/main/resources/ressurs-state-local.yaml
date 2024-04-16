@@ -1,0 +1,7 @@
+app:
+  nom-state:
+    kafka:
+      ressurs:
+        listener-id: nomStateRessursListener_${Math.random.int}
+
+

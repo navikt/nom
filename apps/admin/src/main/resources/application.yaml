@@ -1,15 +1,28 @@
 app:
   name: ${NAIS_APP_NAME:nom-admin}
-  kafka-topics:
+#  kafka-topics:
 #    ressurs-eventsource:
 #      topic-name: org.nom.ressurs-eventsource
 #      auto-startup: true
 #    orgtilknytning-eventsource:
 #      topic-name: org.nom.orgtilknytning-eventsource
 #      auto-startup: true
-  clients:
-    nom-api:
-      url: ${NOM_API_URL}
+#  clients:
+#    nom-api:
+#      url: ${NOM_API_URL}
+
+#  nom-state:
+#    kafka:
+#      ressurs:
+#        state-topic: org.nom.intern-ressurs-state
+#        listener-id: nomStateRessursListener_${HOSTNAME}
+
+
+nom:
+  libs:
+    state:
+      ressurs:
+        enabled: true
 
 management:
   endpoint:
@@ -22,50 +35,29 @@ management:
       base-path: /internal
       exposure:
         include: prometheus, info, health, metrics, loggers, mappings
+
 spring:
   kafka:
-    client-id: ${HOSTNAME}
+    security.protocol: SSL
+    ssl:
+      key-store-type: PKCS12
+      key-store-location: file:${KAFKA_KEYSTORE_PATH}
+      key-store-password: ${KAFKA_CREDSTORE_PASSWORD}
+      trust-store-type: JKS
+      trust-store-location: file:${KAFKA_TRUSTSTORE_PATH}
+      trust-store-password: ${KAFKA_CREDSTORE_PASSWORD}
     bootstrap-servers: ${KAFKA_BROKERS}
-    security:
-      protocol: SSL
-    properties:
-      security.protocol: SSL
-      ssl:
-        keystore:
-          type: PKCS12
-          location: ${KAFKA_KEYSTORE_PATH}
-          password: ${KAFKA_CREDSTORE_PASSWORD}
-        truststore:
-          location: ${KAFKA_TRUSTSTORE_PATH}
-          password: ${KAFKA_CREDSTORE_PASSWORD}
+    admin:
+      client-id: ${HOSTNAME}
     consumer:
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      max-poll-records: 1000
       auto-offset-reset: earliest
-#      properties:
-#        spring.json.trusted.packages: 'no.nav.nom.contract.nom.eventsource'
+      enable-auto-commit: false
       group-id: ${HOSTNAME}
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${azure.issuer-uri}
-          audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
-      client:
-        registration:
-          nom-api:
-            provider: azure
-            client-id: ${AZURE_APP_CLIENT_ID}
-            client-secret: ${AZURE_APP_CLIENT_SECRET}
-            authorization-grant-type: client_credentials
-            scope:
-              - ${NOM_API_SCOPE}
-        provider:
-          azure:
-            issuer-uri: ${azure.issuer-uri}
+    listener:
+      missing-topics-fatal: true
+    client-id: ${HOSTNAME}
 
-azure:
-  issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
 
 unleash:
   endpoint:

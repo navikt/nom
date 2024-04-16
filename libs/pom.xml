@@ -19,6 +19,7 @@
         <module>utils-test</module>
         <module>lucene-wrapper</module>
         <module>utils-common</module>
+        <module>nom-state</module>
     </modules>
 
 

@@ -1,0 +1,10 @@
+{
+  "properties": [
+    {
+      "name": "nom.libs.state.ressurs.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable/disable ressurs state autoconfiguration.",
+      "defaultValue": true
+    }
+  ]
+}

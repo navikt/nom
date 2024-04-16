@@ -110,6 +110,12 @@
 
             <dependency>
                 <groupId>no.nav.nom</groupId>
+                <artifactId>nom-state</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.nom</groupId>
                 <artifactId>lucene-wrapper-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
