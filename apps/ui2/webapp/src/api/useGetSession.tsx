@@ -5,7 +5,7 @@ import { UserRoles } from "~/types/api-models";
 
 export function useGetSession() {
   return useQuery({
-    queryKey: getSession.queryKey(),
+    queryKey: getSession.queryKey,
     queryFn: getSession.queryFn,
     gcTime: CACHE_FOR.anHour,
     staleTime: CACHE_FOR.anHour,

@@ -1,32 +1,45 @@
 package no.nav.nom.apps.api.authorize.redigereressurs.api;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
 import no.nav.nom.apps.api.authorize.eventsourcing.state.DelegertLederStateRepository;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
 public class AuthorizedNavidentControllerTest extends RestTestBase {
-    private static final String API_URL ="/api/app/authorizedRessursRedigering";
+    private static final String API_URL ="/app/authorizedRessursRedigering";
 
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     AuthorizedNavident authorizedNavident;
     @MockBean
     AuthorizeCommandService authorizeCommandService;
     @MockBean
     DelegertLederStateRepository delegertLederStateRepository;
+
+    @BeforeEach
+    public void enableLederTilgangToggle() {
+        when(unleash.isEnabled(AuthorizedNavidentController.UNLEASH_DELEGER_TILGANG)).thenReturn(true);
+    }
 
     @Test
     @DisplayName("Godkjenne NOM-WRITE user token hvor leder er leder for aktuell ressurs for 'isAuthorizedForNavident'")
@@ -163,4 +176,52 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
             .andDo(print())
             .andExpect(status().isOk());
     }
+
+    @Test
+    @DisplayName("Verifiser at gyldigTom må være med i requesten")
+    public void test_0015() throws Exception {
+        var request = LederTilgangForOrgenhetRequest.builder().orgenhetId("a").delegertTilNavident("b").build();
+
+
+        mockMvc.perform(post(API_URL + "/addDelegatedAuthorization")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                .header("Authorization", "Bearer " + nomAdminUserToken()))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Verifiser at gyldigTom ikke kan være i fortiden")
+    public void test_0016() throws Exception {
+        var request = LederTilgangForOrgenhetRequest.builder()
+            .orgenhetId("a")
+            .delegertTilNavident("b")
+            .gyldigTom(LocalDate.now().minusDays(1))
+            .build();
+
+
+        mockMvc.perform(post(API_URL + "/addDelegatedAuthorization")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                .header("Authorization", "Bearer " + nomAdminUserToken()))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Verifiser gyldig request")
+    public void test_0017() throws Exception {
+        var request = LederTilgangForOrgenhetRequest.builder()
+            .orgenhetId("B")
+            .delegertTilNavident("HR")
+            .gyldigTom(LocalDate.now().plusDays(1))
+            .build();
+
+
+        mockMvc.perform(post(API_URL + "/addDelegatedAuthorization")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                .header("Authorization", "Bearer " + nomWriteUserToken_Leder_B()))
+            .andExpect(status().isOk());
+    }
+
 }

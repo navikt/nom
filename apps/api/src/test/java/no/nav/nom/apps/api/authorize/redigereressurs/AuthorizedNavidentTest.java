@@ -2,11 +2,13 @@ package no.nav.nom.apps.api.authorize.redigereressurs;
 
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
 import no.nav.nom.apps.api.authorize.eventsourcing.state.DelegertLederStateRepository;
+import no.nav.nom.apps.api.authorize.redigereressurs.api.LederTilgangForOrgenhetRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.Assert.assertThrows;
@@ -89,12 +91,17 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
         assertTrue(kanRedigereE100001, "Leder D har ikke auth til å redigere ressurs E100001");
     }
 
+    private LederTilgangForOrgenhetRequest getDefaultRequest() {
+        return LederTilgangForOrgenhetRequest.builder().orgenhetId("UKJENT").delegertTilNavident("HR").gyldigTom(LocalDate.now()).build();
+    }
 
     @Test
     @DisplayName("Verifiser at Leder A ikke har auth til å delegere rettighet til ressurs HR for enhet D1")
     void test_0009() {
         Exception exception = assertThrows(NotAuthorizedToDelegateLeder.class, () ->
-            authorizedNavident.addDelegertLederRolleForOrgenhet("A", "HR", "D1")
+            authorizedNavident.addLederTilgangForOrgenhet(
+                "A",
+                getDefaultRequest().toBuilder().orgenhetId("D1").delegertTilNavident("HR").build())
         );
     }
 
@@ -102,7 +109,9 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
     @DisplayName("Verifiser at man ikke kan delegere rettighet til ressurs-redigering for enhet som ikke finnes")
     void test_0010() {
         Exception exception = assertThrows(IllegalArgumentException.class, () ->
-            authorizedNavident.addDelegertLederRolleForOrgenhet("A", "HR", "UKJENT")
+            authorizedNavident.addLederTilgangForOrgenhet(
+                "A",
+                getDefaultRequest().toBuilder().orgenhetId("UKJENT").delegertTilNavident("HR").build())
         );
     }
 
@@ -110,7 +119,9 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
     @DisplayName("Verifiser at man ikke kan delegere rettighet til ressurs-redigering for enhet som ikke er arb.område eller lavere")
     void test_0011() {
         Exception exception = assertThrows(IllegalArgumentException.class, () ->
-            authorizedNavident.addDelegertLederRolleForOrgenhet("A", "HR", "A")
+            authorizedNavident.addLederTilgangForOrgenhet(
+                "A",
+                getDefaultRequest().toBuilder().orgenhetId("A").delegertTilNavident("HR").build())
         );
     }
 
@@ -118,7 +129,9 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
     @DisplayName("Verifiser at man ikke kan delegere rettighet til ressurs-redigering for ressurs som ikke er aktiv")
     void test_0012() {
         Exception exception = assertThrows(IllegalArgumentException.class, () ->
-            authorizedNavident.addDelegertLederRolleForOrgenhet("D", "INGEN_ANSATT", "D1")
+            authorizedNavident.addLederTilgangForOrgenhet(
+                "D",
+                getDefaultRequest().toBuilder().delegertTilNavident("INGEN_ANSATT").build())
         );
     }
 
@@ -126,24 +139,21 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
     @DisplayName("Verifiser at man ikke kan delegere rettighet til seg selv")
     void test_0013() {
         Exception exception = assertThrows(IllegalArgumentException.class, () ->
-            authorizedNavident.addDelegertLederRolleForOrgenhet("D", "D", "D1")
+            authorizedNavident.addLederTilgangForOrgenhet("D",
+                getDefaultRequest().toBuilder().delegertTilNavident("D").build())
         );
     }
 
     @Test
     @DisplayName("Verifiser at man kan delegere rettighet til sin egen enhet")
     void test_0014() {
-        boolean delegert = authorizedNavident.addDelegertLederRolleForOrgenhet("D", "HR", "D");
-
-        assertTrue(delegert, "Leder D Kunne ikke delegere rettighet til ressurs HR for enhet D");
+        authorizedNavident.sjekkParametereForAddLederTilgang("D", getDefaultRequest().toBuilder().orgenhetId("D").delegertTilNavident("HR").build());
     }
 
     @Test
     @DisplayName("Verifiser at man kan delegere rettighet til enhet under sin egen")
     void test_0015() {
-        boolean delegert = authorizedNavident.addDelegertLederRolleForOrgenhet("D", "HR", "D1");
-
-        assertTrue(delegert, "Leder D Kunne ikke delegere rettighet til ressurs HR for enhet D1");
+        authorizedNavident.sjekkParametereForAddLederTilgang("D", getDefaultRequest().toBuilder().orgenhetId("D1").delegertTilNavident("HR").build());
     }
 
     @Test

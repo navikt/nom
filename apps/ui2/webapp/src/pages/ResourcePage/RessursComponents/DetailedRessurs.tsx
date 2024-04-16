@@ -30,7 +30,7 @@ import React, { useState } from "react";
 import {
   getLedereForRessurs,
   getOrgEnhet,
-  getOrgEnheterLedetAv,
+  getOrgEnheterLedetAvOptions,
   getOrgTilknytninger,
   getTeamcatMemberships,
 } from "~/api/react-query-endpoints";
@@ -402,10 +402,7 @@ function OrganisationHierarchyTree({
 
 function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
   const lederForOrgenheter =
-    useQuery({
-      queryKey: getOrgEnheterLedetAv.queryKey(ressurs.navident),
-      queryFn: () => getOrgEnheterLedetAv.queryFn(ressurs.navident),
-    }).data ?? [];
+    useQuery(getOrgEnheterLedetAvOptions(ressurs.navident)).data ?? [];
 
   if (lederForOrgenheter.length === 0) {
     return <></>;

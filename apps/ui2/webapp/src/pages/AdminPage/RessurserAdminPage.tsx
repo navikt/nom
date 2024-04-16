@@ -33,6 +33,7 @@ import {
   getAlleRessurserGraphql,
   getUnderliggendeOrgenheter,
 } from "~/api/react-query-endpoints";
+import { Pluralize } from "~/components/Pluralize";
 import {
   BasicSelect,
   SelectLayoutWrapper,
@@ -358,23 +359,6 @@ function ExtraRowContent({ content }: { content: ReactNode[] }) {
       </Popover>
     </>
   );
-}
-
-function Pluralize({
-  numberOfElements,
-  singleForm,
-  pluralForm,
-}: {
-  numberOfElements: number;
-  singleForm?: ReactNode;
-  pluralForm?: ReactNode;
-}) {
-  if (numberOfElements === 1) {
-    return singleForm;
-  }
-  if (numberOfElements > 1) {
-    return pluralForm;
-  }
 }
 
 function RessursFilter() {

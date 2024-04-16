@@ -8,10 +8,14 @@ export const CACHE_FOR = {
   aDay: 1000 * 60 * 60 * 24,
 };
 
+import { queryOptions } from "@tanstack/react-query";
+
 import type {
   AvvikleRessursRequest,
   EndreOrgtilknytningDatoRequest,
   GetPersonRequest,
+  LederTilgang,
+  LederTilgangForOrgenhetRequest,
   LeggTilOrgtilknytningRequestOld,
   OrgEnhet,
   OrgtilknytningState,
@@ -54,6 +58,12 @@ export const ressurserGraphqlKeys = {
 
 export const sessionKeys = {
   all: ["SESSION"] as const,
+};
+
+export const tilgangerKeys = {
+  me: ["TILGANGER"] as const,
+  delegerte: (navident: string) => [...tilgangerKeys.me, navident] as const,
+  delegerteByUser: () => [...tilgangerKeys.me, "DELEGERT_AV_MEG"] as const,
 };
 
 export const ressurserKeys = {
@@ -191,7 +201,7 @@ export const getLedereForRessurs = {
 };
 
 export const getSession = {
-  queryKey: () => sessionKeys.all,
+  queryKey: sessionKeys.all,
   queryFn: async () =>
     (
       await axios.get<SessionInfoResponse>(
@@ -218,15 +228,17 @@ export const getOrgEnhet = {
     ).data,
 };
 
-export const getOrgEnheterLedetAv = {
-  queryKey: (navident: string) => orgEnheterKeys.ledetAv(navident),
-  queryFn: async (navident: string) =>
-    (
-      await axios.get<OrgEnhet[]>(
-        `${NOM_API_BASE_PATH}/app/orgenheter/ledetAv/${navident}`,
-      )
-    ).data,
-};
+export function getOrgEnheterLedetAvOptions(navident: string) {
+  return queryOptions({
+    queryKey: orgEnheterKeys.ledetAv(navident),
+    queryFn: async () =>
+      (
+        await axios.get<OrgEnhet[]>(
+          `${NOM_API_BASE_PATH}/app/orgenheter/ledetAv/${navident}`,
+        )
+      ).data,
+  });
+}
 
 export const getOrgTilknytninger = {
   queryKey: (navident: string) => orgtilknytningerKeys.navident(navident),
@@ -292,6 +304,24 @@ export const updateNavnForRessurs = async (
   await hopeForKafkaStateToUpdate();
 };
 
+export const addDelegering = async (
+  request: LederTilgangForOrgenhetRequest,
+) => {
+  await axios.post<LederTilgangForOrgenhetRequest>(
+    `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/addDelegatedAuthorization`,
+    request,
+  );
+};
+
+export const fornyDelegering = async (
+  request: LederTilgangForOrgenhetRequest,
+) => {
+  await axios.post<LederTilgangForOrgenhetRequest>(
+    `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/renewDelegatedAuthorization`,
+    request,
+  );
+};
+
 export const updateOrgtilknytningDato = async (
   fid: string,
   endreOrgtilknytningDatoRequest: EndreOrgtilknytningDatoRequest,
@@ -346,6 +376,30 @@ export const getFysiskeBrukersteder = {
     ).data,
 };
 
+export function getTilgangerDelegertTilMegOptions() {
+  return queryOptions({
+    queryKey: tilgangerKeys.me,
+    queryFn: async () =>
+      (
+        await axios.get<LederTilgang[]>(
+          `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/getLederTilgangerDelegertTilMeg`,
+        )
+      ).data,
+  });
+}
+
+export function getTilgangerDelegertByUserOptions() {
+  return queryOptions({
+    queryKey: tilgangerKeys.delegerteByUser(),
+    queryFn: async () =>
+      (
+        await axios.get<LederTilgang[]>(
+          `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/getDelegerteLederTilgangerAvUser`,
+        )
+      ).data,
+  });
+}
+
 export const updateFysiskeBrukersteder = async (
   fid: string,
   updateFysiskeBrukerstederRequest: UpdateFysiskeBrukerstederRequest,
@@ -357,6 +411,32 @@ export const updateFysiskeBrukersteder = async (
   await hopeForKafkaStateToUpdate();
 };
 
+export const searchRessurser = {
+  /*
+   NOTE 22 Mar 2023 (Johannes Moskvil): This key function is not meant to be used as a function for the query itself.
+   Since the query is for a search term, caching it makes little sense.
+   It can however be useful to manually put the independent search result in the ressurs cache by its navident.
+  */
+  getKeyForNavident: (navident: string) => ressurserKeys.id(navident),
+  queryFn: async (searchTerm: string) =>
+    (
+      await axios.post<
+        GraphQlResponse<
+          "searchRessurs",
+          { visningsnavn: string; navident: string }[]
+        >
+      >(`${NOM_API_BASE_PATH}/graphql`, {
+        query: `
+        query SokRessurser($searchTerm: String!) {
+          searchRessurs(term: $searchTerm, filter: {sektorSelection: IKKE_EKSTERN, statusSelection: AKTIV}){
+            visningsnavn, navident
+          }
+        }`,
+        variables: { searchTerm },
+      })
+    ).data.data.searchRessurs,
+};
+
 async function hopeForKafkaStateToUpdate() {
   await new Promise((r) => setTimeout(r, 1000));
 }
@@ -364,6 +444,12 @@ async function hopeForKafkaStateToUpdate() {
 type RessurserWithMetadataGraphqlResponseWrapper = {
   data: {
     ressurserWithMetadata: RessursWithMetadata[];
+  };
+};
+
+export type GraphQlResponse<QueryKey extends string, ResponseType> = {
+  data: {
+    [key in QueryKey]: ResponseType;
   };
 };
 

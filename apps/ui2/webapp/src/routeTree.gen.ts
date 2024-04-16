@@ -11,6 +11,7 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as TilgangerImport } from './routes/tilganger'
 import { Route as AdminImport } from './routes/admin'
 import { Route as IndexImport } from './routes/index'
 import { Route as RessursIdImport } from './routes/ressurs.$id'
@@ -23,6 +24,11 @@ import { Route as AdminHistoryOrgenheterImport } from './routes/admin.history-or
 import { Route as RessursCreateStepImport } from './routes/ressurs.create.$step'
 
 // Create/Update Routes
+
+const TilgangerRoute = TilgangerImport.update({
+  path: '/tilganger',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const AdminRoute = AdminImport.update({
   path: '/admin',
@@ -86,6 +92,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminImport
       parentRoute: typeof rootRoute
     }
+    '/tilganger': {
+      preLoaderRoute: typeof TilgangerImport
+      parentRoute: typeof rootRoute
+    }
     '/admin/history-orgenheter': {
       preLoaderRoute: typeof AdminHistoryOrgenheterImport
       parentRoute: typeof AdminImport
@@ -131,6 +141,7 @@ export const routeTree = rootRoute.addChildren([
     AdminOrgenheterRoute,
     AdminRessurserRoute,
   ]),
+  TilgangerRoute,
   OrgIdRoute,
   RessursTerminateIdRoute,
   RessursIdRoute,

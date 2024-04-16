@@ -5,10 +5,13 @@ import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandServ
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.AvsluttDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.FornyDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.OpprettDelegertAuthorization;
+import no.nav.nom.apps.api.authorize.eventsourcing.state.LederTilgang;
 import no.nav.nom.apps.api.authorize.eventsourcing.state.DelegertLederStateRepository;
+import no.nav.nom.apps.api.authorize.redigereressurs.api.LederTilgangForOrgenhetRequest;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
+import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
@@ -29,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
 /**
  *  Denne tjenesten inneholder alle som har til å redigere ressurser under gitt orgenhet i hierarkiet.
@@ -68,6 +73,14 @@ public class AuthorizedNavident {
         this.dvhRepository = dvhRepository;
     }
 
+    public List<LederTilgang> getLederTilgangerForUser() {
+        return delegertLederStateRepository.findByNavident(getAuthenticatedNavIdent());
+    }
+
+    public List<LederTilgang> getLederTilgangGittAvBruker() {
+        return delegertLederStateRepository.findDelegertAvNavident(getAuthenticatedNavIdent());
+    }
+
     public boolean kanBrukerRedigereRessurs(String navident, String ressursNavident) {
         Set<String> orgenhetIder = new HashSet<>();
         synchronized (this) {
@@ -98,49 +111,41 @@ public class AuthorizedNavident {
         return orgenhetIder.stream().anyMatch(orgenhetId -> alleEnheterIHierarkiFra(orgenhetId).contains(opprettesIOrgenhetId));
     }
 
-    public boolean addDelegertLederRolleForOrgenhet(String leder, String delegertLeder, String orgenhetId) {
-        var inputMetadata = new InputMetadata("AuthorizedNavident", "addDelegertLederRolleForOrgenhet",
-            Map.of("leder", leder, "delegertLeder", delegertLeder, "orgenhetId", orgenhetId),
-            new Origination("nom-api", "nom-api")
+
+    public boolean addLederTilgangForOrgenhet(String leder, LederTilgangForOrgenhetRequest request) {
+        sjekkParametereForAddLederTilgang(leder, request);
+
+        var inputMetadata = new InputMetadata("REST", "addDelegatedAuthorization",
+            request,
+            new Origination(getAuthenticatedNavIdent(), SecurityUtil.getAuthenticatedAzpName())
         );
-        return addDelegertLederRolleForOrgenhet(leder, delegertLeder, orgenhetId, inputMetadata);
-    }
-
-    public boolean addDelegertLederRolleForOrgenhet(String leder, String delegertLeder, String orgenhetId, InputMetadata inputMetadata) {
-        sjekkParametereForAddRemoveDelegertLeder(leder, delegertLeder, orgenhetId);
-
-        if (delegertLederStateRepository.erOrgenhetDelegertTilNavident(orgenhetId, delegertLeder)) {
-            return false;
-        }
 
         OpprettDelegertAuthorization opprettDelegertAuthorization = OpprettDelegertAuthorization.builder()
             .av(leder)
-            .til(delegertLeder)
-            .forOrgenhet(orgenhetId)
+            .til(request.delegertTilNavident())
+            .forOrgenhet(request.orgenhetId())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(LocalDate.now().plusYears(1))
+            .gyldigTom(request.gyldigTom())
             .inputMetadata(inputMetadata)
             .build();
 
         authorizeCommandService.opprettDelegertAuthorization(opprettDelegertAuthorization);
         return true;
     }
-    public boolean removeDelegertLederRolleForOrgenhet(String leder, String delegertLeder, String orgenhetId) {
-        var inputMetadata = new InputMetadata("AuthorizedNavident", "removeDelegertLederRolleForOrgenhet",
-            Map.of("leder", leder, "delegertLeder", delegertLeder, "orgenhetId", orgenhetId),
-            new Origination("nom-api", "nom-api")
-        );
-        return removeDelegertLederRolleForOrgenhet(leder, delegertLeder, orgenhetId, inputMetadata);
-    }
 
-    public boolean removeDelegertLederRolleForOrgenhet(String leder, String delegertLeder, String orgenhetId, InputMetadata inputMetadata) {
-        sjekkParametereForAddRemoveDelegertLeder(leder, delegertLeder, orgenhetId);
+    public boolean removeLederTilgangForOrgenhet(String leder, String delegertLeder, String orgenhetId) {
+        sjekkParametereDelegertLeder(leder, delegertLeder, orgenhetId);
 
-        var opprinneligDelegering = delegertLederStateRepository.delegertLederRolleForOrgenhetOgNavident(orgenhetId, delegertLeder);
+        var opprinneligDelegering = delegertLederStateRepository.lederTilgangForOrgenhetOgNavident(orgenhetId, delegertLeder);
         if (opprinneligDelegering.isEmpty()) {
             log.warn("Fant ingen delegert leder rolle for orgenhet {} og navident {}. Kan ikke avsluttes", orgenhetId, delegertLeder);
             return false;
         }
+
+        var inputMetadata = new InputMetadata("AuthorizedNavident", "removeLederTilgangForOrgenhet",
+            Map.of("leder", leder, "delegertLeder", delegertLeder, "orgenhetId", orgenhetId),
+            new Origination("nom-api", "nom-api")
+        );
 
         AvsluttDelegertAuthorization avsluttDelegertAuthorization = AvsluttDelegertAuthorization.builder()
             .av(leder)
@@ -149,43 +154,47 @@ public class AuthorizedNavident {
             .gyldigFom(opprinneligDelegering.get().gyldigFom())
             .opprinneligGyldigTom(opprinneligDelegering.get().gyldigTom())
             .nyGyldigTom(LocalDate.now().minusDays(1))
+            .inputMetadata(inputMetadata)
             .build();
 
         authorizeCommandService.avsluttDelegertAuthorization(opprinneligDelegering.get().fid(), avsluttDelegertAuthorization);
         return true;
     }
 
-    public boolean renewDelegertLederRolleForOrgenhet(String leder, String delegertLeder, String orgenhetId) {
-        var inputMetadata = new InputMetadata("AuthorizedNavident", "renewDelegertLederRolleForOrgenhet",
-            Map.of("leder", leder, "delegertLeder", delegertLeder, "orgenhetId", orgenhetId),
-            new Origination("nom-api", "nom-api")
+    public boolean renewLederTilgangForOrgenhet(String leder, LederTilgangForOrgenhetRequest request) {
+        sjekkParametereDelegertLeder(leder, request.delegertTilNavident(), request.orgenhetId());
+
+        var inputMetadata = new InputMetadata("REST", "renewLederTilgangForOrgenhet",
+            request,
+            new Origination(getAuthenticatedNavIdent(), SecurityUtil.getAuthenticatedAzpName())
         );
-        return renewDelegertLederRolleForOrgenhet(leder, delegertLeder, orgenhetId, inputMetadata);
-    }
 
-    public boolean renewDelegertLederRolleForOrgenhet(String leder, String delegertLeder, String orgenhetId, InputMetadata inputMetadata) {
-        sjekkParametereForAddRemoveDelegertLeder(leder, delegertLeder, orgenhetId);
-
-        var opprinneligDelegering = delegertLederStateRepository.delegertLederRolleForOrgenhetOgNavident(orgenhetId, delegertLeder);
+        var opprinneligDelegering = delegertLederStateRepository.lederTilgangForOrgenhetOgNavident(request.orgenhetId(), request.delegertTilNavident());
         if (opprinneligDelegering.isEmpty()) {
-            log.warn("Fant ingen delegert leder rolle for orgenhet {} og navident {}. Kan ikke fornyes", orgenhetId, delegertLeder);
+            log.warn("Fant ingen delegert leder rolle for orgenhet {} og navident {}. Kan ikke fornyes", request.orgenhetId(), request.delegertTilNavident());
             return false;
         }
 
         FornyDelegertAuthorization fornyDelegertAuthorization = FornyDelegertAuthorization.builder()
             .av(leder)
-            .til(delegertLeder)
-            .forOrgenhet(orgenhetId)
+            .til(request.delegertTilNavident())
+            .forOrgenhet(request.orgenhetId())
             .gyldigFom(opprinneligDelegering.get().gyldigFom())
             .opprinneligGyldigTom(opprinneligDelegering.get().gyldigTom())
-            .nyGyldigTom(LocalDate.now().plusYears(1))
+            .nyGyldigTom(request.gyldigTom())
             .inputMetadata(inputMetadata)
             .build();
 
+        authorizeCommandService.fornyDelegertAuthorization(opprinneligDelegering.get().fid(), fornyDelegertAuthorization);
         return true;
     }
 
-    private void sjekkParametereForAddRemoveDelegertLeder(String leder, String delegertLeder, String orgenhetId) {
+    public void sjekkParametereForAddLederTilgang(String leder, LederTilgangForOrgenhetRequest request) {
+        sjekkParametereDelegertLeder(leder, request.delegertTilNavident(), request.orgenhetId());
+        sjekkOmOrgenhetAlleredeDelegertTilNavident(request);
+    }
+
+    public void sjekkParametereDelegertLeder(String leder, String delegertLeder, String orgenhetId) {
         if (leder == null || delegertLeder == null || orgenhetId == null) {
             throw new IllegalArgumentException("Leder, delegert leder og orgenhetId kan ikke være null");
         }
@@ -211,6 +220,12 @@ public class AuthorizedNavident {
 
         if (!harLederDelegeringsRettForOrgenhet(leder, orgenhetId)) {
             throw new NotAuthorizedToDelegateLeder("Leder " + leder + " har ikke rett til å delegere eller endre delegert leder rettighet for ressurs-redigering tilhørende orgenhet " + orgenhetId);
+        }
+    }
+
+    public void sjekkOmOrgenhetAlleredeDelegertTilNavident(LederTilgangForOrgenhetRequest request) {
+        if (delegertLederStateRepository.erOrgenhetDelegertTilNavident(request.orgenhetId(), request.delegertTilNavident())) {
+            throw new IllegalArgumentException("Delegert leder " + request.delegertTilNavident() + " er allerede aktiv for orgenhet " + request.orgenhetId());
         }
     }
 

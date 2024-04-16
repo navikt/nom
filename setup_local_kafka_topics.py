@@ -31,7 +31,7 @@ def reset_streams_application(streams_application_id):
 
 
 def create_topic(topic: str):
-    if(not topic):
+    if not topic:
         print(f"Invalid topic {topic} will not be created")
         return
     else:
@@ -77,7 +77,10 @@ def create_topics_for_nom_entities(nom_entity_filter: list, recreate: bool):
         "hendelser": EntityTopics(
             state_topic="org.nom.api-hendelser-v1",
             streams_application_id="api-hendelser-v1"
-        )
+        ),
+        "authorize": EntityTopics(
+            event_source_topic="org.nom.nom-authorize-eventsource",
+        ),
     }
 
     for entity, entity_topics in entity_topics_map.items():

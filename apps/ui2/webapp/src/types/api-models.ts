@@ -19,6 +19,25 @@ export interface AvvikleRessursRequest {
   sluttDato: string;
 }
 
+export interface LederTilgangForOrgenhetRequest {
+  delegertTilNavident: string;
+  /** @format date */
+  gyldigTom: string;
+  orgenhetId: string;
+}
+
+export interface LederTilgang {
+  active?: boolean;
+  av: string;
+  fid: string;
+  /** @format date */
+  gyldigFom: string;
+  /** @format date */
+  gyldigTom: string;
+  orgenhetId: string;
+  til: string;
+}
+
 export interface EndreOrgtilknytningDatoRequest {
   /** @format date */
   gyldigFom: string;

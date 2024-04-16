@@ -1,5 +1,6 @@
 import "@navikt/ds-css";
 import "./designSystemOverrides.css";
+import "~/types/yupUtility";
 
 import { ApolloProvider } from "@apollo/client";
 import { css } from "@emotion/react";
