@@ -34,7 +34,7 @@
         <springdoc.version>2.5.0</springdoc.version>
         <springdoc-openapi-security.version>1.8.0</springdoc-openapi-security.version>
         <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
-        <graphql-extended-scalars.version>21.0</graphql-extended-scalars.version>
+        <graphql-extended-scalars.version>22.0</graphql-extended-scalars.version>
         <unleash.version>9.2.0</unleash.version>
         <opencsv.version>5.9</opencsv.version>
         <apache.common.csv.version>1.10.0</apache.common.csv.version>
