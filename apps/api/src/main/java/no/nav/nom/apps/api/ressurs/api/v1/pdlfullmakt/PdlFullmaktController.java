@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -47,7 +47,8 @@ public class PdlFullmaktController {
             return ResponseEntity.ok(new AnsattPersonResponse(null));
         }
         var ansattPersonResponse = ressursStateRepository.findByPersonident(fnr)
-            .map(it -> new AnsattPersonResponse(new AnsattPersonResponse.AnsattPerson(it.navident(),
+            .map(it -> new AnsattPersonResponse(new AnsattPersonResponse.AnsattPerson(
+                it.navident(),
                 it.startdato().map(LocalDate::toString).orElse(null),
                 it.sluttdato().map(LocalDate::toString).orElse(null),
                 it.sektor()
@@ -57,10 +58,10 @@ public class PdlFullmaktController {
     }
 
     private boolean callerMatchesAllowedApps(Authentication auth) {
-        var matchReprFullmakt = callerMatches(auth, "repr","repr-fullmakt");
+        var matchReprFullmakt = callerMatches(auth, "repr", "repr-fullmakt");
 
-        var matchPdlFullmakt = callerMatches(auth, "pdl","pdl-fullmakt");
-        if(matchPdlFullmakt){
+        var matchPdlFullmakt = callerMatches(auth, "pdl", "pdl-fullmakt");
+        if (matchPdlFullmakt) {
             // TODO pdl-fullmakt skal bytte navn til repr fullmakt, så når denne loggmeldingen
             // ikke lengre forekommer, kan koden endres til å kun sjekke for repr-fullmakt
             log.info("konsument pdl-fullmakt er fortsatt aktiv");
@@ -71,19 +72,19 @@ public class PdlFullmaktController {
 
     private boolean callerMatches(Authentication auth, String namespace, String appname) {
         var creds = auth.getCredentials();
-        if(!(creds instanceof Jwt)){
+        if (!(creds instanceof Jwt)) {
             return false;
         }
         var claims = ((Jwt) creds).getClaims();
         var azpName = claims.get("azp_name").toString();
 
-        return matchAzpString(azpName,namespace,appname);
+        return matchAzpString(azpName, namespace, appname);
     }
 
 
-    private boolean matchAzpString(String input, String namespace, String appname){
+    private boolean matchAzpString(String input, String namespace, String appname) {
         var azpStringElements = input.split(":");
-        if(azpStringElements.length != 3){
+        if (azpStringElements.length != 3) {
             return false;
         }
         var isMatch = azpStringElements[0].matches("((prod)|(dev))-((fss)|(gcp))");

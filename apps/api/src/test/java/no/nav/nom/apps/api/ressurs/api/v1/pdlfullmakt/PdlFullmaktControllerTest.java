@@ -3,7 +3,7 @@ package no.nav.nom.apps.api.ressurs.api.v1.pdlfullmakt;
 import lombok.SneakyThrows;
 import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;

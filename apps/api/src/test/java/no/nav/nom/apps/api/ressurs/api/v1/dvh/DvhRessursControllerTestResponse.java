@@ -2,17 +2,18 @@ package no.nav.nom.apps.api.ressurs.api.v1.dvh;
 
 import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
@@ -236,7 +237,7 @@ class RessursStateRepositoryFake implements RessursStateRepository {
     }
 
     @Override
-    public void putEventAggregate(RessursState ressursEventData) {throw new NotImplementedException();   }
+    public void update(RessursState ressursEventData) {throw new NotImplementedException();   }
 
     @Override
     public void clear() {

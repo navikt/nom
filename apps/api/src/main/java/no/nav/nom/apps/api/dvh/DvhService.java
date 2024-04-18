@@ -1,14 +1,12 @@
 package no.nav.nom.apps.api.dvh;
 
-import io.getunleash.Unleash;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -24,44 +22,53 @@ import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class DvhService {
 
     private final DvhRepository dvhRepository;
     private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
 
+    public DvhService(
+        DvhRepository dvhRepository,
+        RessursStateRepository ressursStateRepository,
+        OrgenhetService orgenhetService
+    ) {
+        this.dvhRepository = dvhRepository;
+        this.ressursStateRepository = ressursStateRepository;
+        this.orgenhetService = orgenhetService;
+    }
+
     public void saveLedere(List<DvhLeder> ledere) {
         val cachedEnheter =
             orgenhetService.getAllEnheter().stream()
-                    .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId)).values().stream()
-                    .map(orgenheter -> orgenheter.stream()
-                            .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
-                            .max(Comparator.comparing(IOrgenhet::getGyldigFom))
-                        )
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(Collectors.toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
+                .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId)).values().stream()
+                .map(orgenheter -> orgenheter.stream()
+                    .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
+                    .max(Comparator.comparing(IOrgenhet::getGyldigFom))
+                )
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
 
         final var enhetAndRessursMissing = new LinkedList<DvhLeder>();
         final var enhetMissing = new LinkedList<DvhLeder>();
         final var ressursMissing = new LinkedList<DvhLeder>();
 
         dvhRepository.saveLedere(
-                ledere.stream()
-                        .filter(l -> {
-                            val enhet = cachedEnheter.get(l.getOrgEnhetNr() + "-" + l.getOrgenhetNavn() + "-" + l.getOrgNiv());
-                            val ressurs = ressursStateRepository.findByNavident(l.getNavIdent());
-                            if (enhet == null && ressurs.isEmpty()) {
-                                enhetAndRessursMissing.add(l);
-                            } else if (enhet == null) {
-                                enhetMissing.add(l);
-                            } else if (ressurs.isEmpty()) {
-                                ressursMissing.add(l);
-                            }
-                            return enhet != null && ressurs.isPresent();
-                        })
-                        .toList()
+            ledere.stream()
+                .filter(l -> {
+                    val enhet = cachedEnheter.get(l.getOrgEnhetNr() + "-" + l.getOrgenhetNavn() + "-" + l.getOrgNiv());
+                    val ressurs = ressursStateRepository.findByNavident(l.getNavIdent());
+                    if (enhet == null && ressurs.isEmpty()) {
+                        enhetAndRessursMissing.add(l);
+                    } else if (enhet == null) {
+                        enhetMissing.add(l);
+                    } else if (ressurs.isEmpty()) {
+                        ressursMissing.add(l);
+                    }
+                    return enhet != null && ressurs.isPresent();
+                })
+                .toList()
         );
 
         log.info(enhetAndRessursMissing.size() + " leder koblinger hvor ressurs og enhet mangler");
@@ -75,9 +82,9 @@ public class DvhService {
                 .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId))
                 .values().stream()
                 .map(orgenheter -> orgenheter.stream()
-                        .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
-                        .max(Comparator.comparing(IOrgenhet::getGyldigFom))
-                    )
+                    .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
+                    .max(Comparator.comparing(IOrgenhet::getGyldigFom))
+                )
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
@@ -94,9 +101,17 @@ public class DvhService {
                         o.uniqueAgressoIdUnder()
                     );
                 } else if (overEnhet == null) {
-                    log.info("Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Overenhet mangler", o.uniqueAgressoIdOver(), o.uniqueAgressoIdUnder());
+                    log.info(
+                        "Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Overenhet mangler",
+                        o.uniqueAgressoIdOver(),
+                        o.uniqueAgressoIdUnder()
+                    );
                 } else if (underEnhet == null) {
-                    log.info("Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Underenhet mangler", o.uniqueAgressoIdOver(), o.uniqueAgressoIdUnder());
+                    log.info(
+                        "Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Underenhet mangler",
+                        o.uniqueAgressoIdOver(),
+                        o.uniqueAgressoIdUnder()
+                    );
                 } else {
                     return true;
                 }
@@ -106,8 +121,8 @@ public class DvhService {
 
         dvhRepository.saveOrganiseringer(organiseringerToSave);
 
-        var overEnheter = dvhRepository.getOrganiseringer().stream().map( o -> cachedEnheter.get(o.uniqueAgressoIdOver())).toList();
-        var underEnheter = dvhRepository.getOrganiseringer().stream().map( o -> cachedEnheter.get(o.uniqueAgressoIdUnder())).toList();
+        var overEnheter = dvhRepository.getOrganiseringer().stream().map(o -> cachedEnheter.get(o.uniqueAgressoIdOver())).toList();
+        var underEnheter = dvhRepository.getOrganiseringer().stream().map(o -> cachedEnheter.get(o.uniqueAgressoIdUnder())).toList();
 
         // Add alle overEnheter og underEnheter to organiserteEnheter og behold unike enheter
         var organiserteEnheter = Stream.concat(overEnheter.stream(), underEnheter.stream())

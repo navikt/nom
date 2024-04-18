@@ -3,7 +3,6 @@ package no.nav.nom.apps.api.lucenesearch;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgenhetFilter;
@@ -15,6 +14,7 @@ import no.nav.nom.libs.lucenewrapper.search.QueryFilter;
 import no.nav.nom.libs.lucenewrapper.search.QueryFilterContext;
 import no.nav.nom.libs.lucenewrapper.search.SearchResult;
 import no.nav.nom.libs.lucenewrapper.search.WrappedLucene;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -47,8 +47,9 @@ public class LuceneService {
 
     private final boolean isLocal;
 
-    public LuceneService(RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService, Environment environment,
-                         DvhStartupLoadMonitor dvhStartupLoadMonitor
+    public LuceneService(
+        RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService, Environment environment,
+        DvhStartupLoadMonitor dvhStartupLoadMonitor
     ) {
         this.orgenhetService = orgenhetService;
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
@@ -66,10 +67,10 @@ public class LuceneService {
 
     @Scheduled(initialDelayString = "PT30S", fixedDelayString = "PT30S")
     public void addInvalidatedEntitiesToIndex() {
-        if(!dvhStartupLoadMonitor.hasCompleted()) {
+        if (!dvhStartupLoadMonitor.hasCompleted()) {
             log.info("Lucene indexing waiting for initial DVH load to complete.");
         }
-        while ( !dvhStartupLoadMonitor.hasCompleted() ) { // Wait on initial DVH load to complete
+        while (!dvhStartupLoadMonitor.hasCompleted()) { // Wait on initial DVH load to complete
             try {
                 Thread.sleep(5_000);
             } catch (Exception ignored) {
@@ -87,20 +88,21 @@ public class LuceneService {
 
         // ressurser
         {
-            final var navidentsToIndex =  grabAndResetNavidentInvalidationList();
+            final var navidentsToIndex = grabAndResetNavidentInvalidationList();
             final var luceneRessursStream = navidentsToIndex.stream()
                 .map(ressursStateRepository::findByNavident)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 // Indexer kun ressurser til søk kun for de med vanlig personnummer - Fjerner type 'Nav Ukjent' ressurser slik som https://nom.nav.no/ressurs/U165173
-                .filter( ressurs -> ressurs.personident().length() == 11 || isLocal) // Unntatt ved lokalkjøring eller test run
-                .map(ressurs -> new LuceneRessurs(ressurs.navident(),
+                .filter(ressurs -> ressurs.personident().length() == 11 || isLocal) // Unntatt ved lokalkjøring eller test run
+                .map(ressurs -> new LuceneRessurs(
+                        ressurs.navident(),
                         ressurs.visningsnavn().getFormattedVisningsnavn(),
                         "tlf-nr",
                         "epost",
                         ressurs.sluttdato().map(date -> date.isAfter(LocalDate.now())).orElse(true),
                         ressurs.sektor().toString()
-                        )
+                    )
                 );
 
             wrappedLucene.upsertEntities(luceneRessursStream, LuceneRessurs.class);
@@ -108,17 +110,16 @@ public class LuceneService {
 
         {
             final var luceneOrgEnhetStream = grabAndResetOrgenhetInvalidationList().stream()
-                    .map(orgenhetService::getById)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .map(orgenhet -> new LuceneOrgEnhet(
-                            orgenhet.getId(),
-                            orgenhet.getNavn(),
-                            orgenhet.getNomNivaa().map(NomNivaa::name).orElse(null),
-                            orgenhet.getOrgNiv(),
-                            orgenhet.getGyldigTom()
-                    ));
-
+                .map(orgenhetService::getById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(orgenhet -> new LuceneOrgEnhet(
+                    orgenhet.getId(),
+                    orgenhet.getNavn(),
+                    orgenhet.getNomNivaa().map(NomNivaa::name).orElse(null),
+                    orgenhet.getOrgNiv(),
+                    orgenhet.getGyldigTom()
+                ));
 
 
             wrappedLucene.upsertEntities(luceneOrgEnhetStream, LuceneOrgEnhet.class);
@@ -189,6 +190,7 @@ public class LuceneService {
     public List<SearchResult> searchOrgenhet(String term, LuceneOrgenhetFilter filter) {
         return search(term, filter, WrappedLucene.DEFAULT_RESULT_SIZE, false);
     }
+
     public List<SearchResult> searchOrgenhet(String term, LuceneOrgenhetFilter filter, Integer resultLimit) {
         return search(term, filter, resultLimit, false);
     }

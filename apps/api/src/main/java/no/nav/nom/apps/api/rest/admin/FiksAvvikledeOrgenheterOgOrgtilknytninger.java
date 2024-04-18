@@ -7,10 +7,10 @@ import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,8 +30,9 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
     private final OrgtilknytningService orgtilknytningService;
     private final RessursStateRepository ressursStateRepository;
 
-    public FiksAvvikledeOrgenheterOgOrgtilknytninger(OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService,
-                                                     RessursStateRepository ressursStateRepository
+    public FiksAvvikledeOrgenheterOgOrgtilknytninger(
+        RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService,
+        OrgtilknytningService orgtilknytningService
     ) {
         this.orgenhetService = orgenhetService;
         this.orgtilknytningService = orgtilknytningService;
@@ -43,7 +44,10 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @GetMapping()
-    public String korrigereAvvikledeEnheterOgOrgtilknytninger(@RequestParam(defaultValue = "false") boolean performUpdate, @RequestParam(defaultValue = "false") boolean inkluderEksterne) {
+    public String korrigereAvvikledeEnheterOgOrgtilknytninger(
+        @RequestParam(defaultValue = "false") boolean performUpdate,
+        @RequestParam(defaultValue = "false") boolean inkluderEksterne
+    ) {
         StringBuffer output = new StringBuffer();
 
         // Finn alle orgtilknytninger til orgenhet som er avsluttet eller ikke er i hierarkiet
@@ -52,7 +56,7 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
         List<IOrgenhet> ikkeAktiveEnheter = orgenhetService.getAllEnheter().stream().filter(o -> !aktiveEnheterIds.contains(o.getId())).toList();
         List<String> ikkeAktiveEnheterIds = ikkeAktiveEnheter.stream().map(IOrgenhet::getId).toList();
 
-        List<RessursState> aktuellaktive= ressursStateRepository.getAll().stream()
+        List<RessursState> aktuellaktive = ressursStateRepository.getAll().stream()
             .filter(r -> inkluderEksterne || !r.sektor().equals(Sektor.EKSTERN))
             .filter(r -> r.sluttdato().isEmpty() || r.sluttdato().get().isAfter(LocalDate.now().minusYears(1)))
             .toList();
@@ -63,7 +67,9 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
             .filter(ot -> ikkeAktiveEnheterIds.contains(ot.orgEnhetId()) && aktiveNavidenter.contains(ot.navident()))
             .filter(ot -> ot.gyldigTom().isEmpty() || ot.gyldigTom().get().isAfter(LocalDate.now()))
             .toList();
-        List<String> aktiveOrgtilknytningerTilIkkeAktiveEnheterFids = aktiveOrgtilknytningerTilIkkeAktiveEnheter.stream().map(OrgtilknytningState::fid).toList();
+        List<String> aktiveOrgtilknytningerTilIkkeAktiveEnheterFids = aktiveOrgtilknytningerTilIkkeAktiveEnheter.stream()
+            .map(OrgtilknytningState::fid)
+            .toList();
 
         List<String> aktuelleNavidenter = aktiveOrgtilknytningerTilIkkeAktiveEnheter.stream().map(OrgtilknytningState::navident).toList();
 
@@ -81,7 +87,11 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
                 .filter(ot -> ot.navident().equals(navident))
                 .forEach(ot -> {
                     output.append(aktiveOrgtilknytningerTilIkkeAktiveEnheterFids.contains(ot.fid()) ? "  *" : "   ");
-                    output.append("    %s  =>  %s - %s\n".formatted(getEnhetText(ot.orgEnhetId()), ot.gyldigFom(), ot.gyldigTom().isEmpty() ? " " : ot.gyldigTom().get()));
+                    output.append("    %s  =>  %s - %s\n".formatted(
+                        getEnhetText(ot.orgEnhetId()),
+                        ot.gyldigFom(),
+                        ot.gyldigTom().isEmpty() ? " " : ot.gyldigTom().get()
+                    ));
                 });
         });
 

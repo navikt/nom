@@ -13,10 +13,10 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.SlettRessursCommand;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.flywaydb.core.internal.util.HtmlUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +40,10 @@ public class ManuelleRessursEvtsrcMeldinger {
     private final RessursCommadService ressursCommadService;
     private final RessursStateRepository ressursStateRepository;
 
-    public ManuelleRessursEvtsrcMeldinger(RessursCommadService ressursCommadService, RessursStateRepository ressursStateRepository) {
+    public ManuelleRessursEvtsrcMeldinger(
+        RessursCommadService ressursCommadService,
+        RessursStateRepository ressursStateRepository
+    ) {
         this.ressursCommadService = ressursCommadService;
         this.ressursStateRepository = ressursStateRepository;
     }
@@ -72,7 +75,7 @@ public class ManuelleRessursEvtsrcMeldinger {
 
         var ressursState = ressursStateRepository.findByFid(fid);
         if (ressursState.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " +  HtmlUtils.htmlEncode(fid));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + HtmlUtils.htmlEncode(fid));
         }
 
         if (!"CONFIRM".equals(confirm)) {
@@ -136,7 +139,7 @@ public class ManuelleRessursEvtsrcMeldinger {
 
         var ressursState = ressursStateRepository.findByFid(fid);
         if (ressursState.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " +  HtmlUtils.htmlEncode(fid));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + HtmlUtils.htmlEncode(fid));
         }
 
         if (!"CONFIRM".equals(confirm)) {
@@ -199,7 +202,7 @@ public class ManuelleRessursEvtsrcMeldinger {
 
         var ressursState = ressursStateRepository.findByFid(fid);
         if (ressursState.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " +  HtmlUtils.htmlEncode(fid));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + HtmlUtils.htmlEncode(fid));
         }
 
         if (!"CONFIRM".equals(confirm)) {
@@ -211,13 +214,15 @@ public class ManuelleRessursEvtsrcMeldinger {
                 ));
         }
 
-        if (mellomnavn != null && mellomnavn.isBlank()) mellomnavn = null;
+        if (mellomnavn != null && mellomnavn.isBlank()) {
+            mellomnavn = null;
+        }
 
         ressursCommadService.oppdaterPersonaliaEvent(
             new OppdaterPersonaliaCommand(
                 HtmlUtils.htmlEncode(fid),
                 new Visningsnavn(fornavn, Optional.ofNullable(mellomnavn), etternavn)
-                ),
+            ),
             new InputMetadata(
                 "/api/admin/manuelleEvtsrcMeldinger",
                 "oppdaterPersonaliaForRessurs",

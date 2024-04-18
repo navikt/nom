@@ -1,8 +1,8 @@
 package no.nav.nom.apps.api.graphql.person;
 
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.api.graphql.PersonResult;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -30,11 +30,11 @@ public class PersonResolver {
 
     public static PersonResult fromRessurs(RessursState ressurs) {
         return PersonResult.builder()
-                .personident(ressurs.personident())
-                .personIdent(ressurs.personident())
-                .nomId(ressurs.fid())
-                .navident(ressurs.navident())
-                .navIdent(ressurs.navident())
-                .build();
+            .personident(ressurs.personident())
+            .personIdent(ressurs.personident())
+            .nomId(ressurs.fid())
+            .navident(ressurs.navident())
+            .navIdent(ressurs.navident())
+            .build();
     }
 }

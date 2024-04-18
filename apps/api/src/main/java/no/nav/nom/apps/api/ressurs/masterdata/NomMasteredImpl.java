@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.ressurs.masterdata;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,10 @@ public class NomMasteredImpl implements NomMastered {
     final RessursStateRepository ressursStateRepository;
     final KafkaTemplate<String, LocalDateTime> nomMasteredRessursProducerTemplate;
 
-    public NomMasteredImpl(RessursStateRepository ressursStateRepository, KafkaTemplate<String, LocalDateTime> nomMasteredRessursProducerTemplate) {
+    public NomMasteredImpl(
+        RessursStateRepository ressursStateRepository,
+        KafkaTemplate<String, LocalDateTime> nomMasteredRessursProducerTemplate
+    ) {
         this.ressursStateRepository = ressursStateRepository;
         this.nomMasteredRessursProducerTemplate = nomMasteredRessursProducerTemplate;
     }

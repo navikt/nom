@@ -8,11 +8,11 @@ import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRep
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -37,12 +37,13 @@ public class DvhRessursRestService {
     private final OrganiseringStateRepository organiseringStateRepository;
     private final Unleash unleash;
 
-    public DvhRessursRestService(NomMastered nomMastered,
-                                 RessursStateRepository ressursStateRepository,
-                                 OrgtilknytningService orgtilknytningService,
-                                 OrgenhetService orgenhetService,
-                                 RemedyEnhetIdResolver remedyEnhetIdResolver,
-                                 DvhRepository dvhRepository, OrganiseringStateRepository organiseringStateRepository, Unleash unleash
+    public DvhRessursRestService(
+        NomMastered nomMastered,
+        RessursStateRepository ressursStateRepository,
+        OrgtilknytningService orgtilknytningService,
+        OrgenhetService orgenhetService,
+        RemedyEnhetIdResolver remedyEnhetIdResolver,
+        DvhRepository dvhRepository, OrganiseringStateRepository organiseringStateRepository, Unleash unleash
     ) {
         this.nomMastered = nomMastered;
         this.ressursStateRepository = ressursStateRepository;

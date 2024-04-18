@@ -105,7 +105,7 @@ public class NomStateRessursListener {
 
         log.debug("Idle event received for listener {}. Waiting for listener {}", event.getListenerId(), listenerId);
         if (event.getListenerId().startsWith(listenerId)) {
-            log.info("All SourceEvents has now been read on startup. Number of Ressurser: {}", ressursStateRepository.count());
+            log.info("All SourceEvents has now been read on startup. Number of Ressurser: {} in [{}]", ressursStateRepository.count(), ressursStateRepository);
             hasReadToEndOnStartup.set(true);
         }
     }

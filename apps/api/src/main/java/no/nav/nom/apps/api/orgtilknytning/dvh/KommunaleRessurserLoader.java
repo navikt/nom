@@ -1,26 +1,26 @@
-    package no.nav.nom.apps.api.orgtilknytning.dvh;
+package no.nav.nom.apps.api.orgtilknytning.dvh;
 
-    import com.fasterxml.jackson.databind.JsonNode;
-    import lombok.extern.slf4j.Slf4j;
-    import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
-    import no.nav.nom.apps.api.common.AppProperties;
-    import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
-    import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.ShadowOrgtilknytningerKommunaleRepository;
-    import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
-    import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
-    import no.nav.nom.contract.nom.Sektor;
-    import no.nav.nom.contract.nom.state.OrgtilknytningState;
-    import no.nav.nom.contract.nom.state.RessursState;
-    import org.springframework.beans.factory.annotation.Value;
-    import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.databind.JsonNode;
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
+import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.ShadowOrgtilknytningerKommunaleRepository;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
+import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
-    import java.time.Duration;
-    import java.time.LocalDate;
-    import java.time.LocalDateTime;
-    import java.util.List;
-    import java.util.Map;
-    import java.util.concurrent.ConcurrentHashMap;
-    import java.util.stream.StreamSupport;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
@@ -34,9 +34,13 @@ public class KommunaleRessurserLoader {
     private ShadowOrgtilknytningerKommunaleRepository shadowOrgtilknytningerKommunaleRepository;
     private final RessursStateRepository ressursStateRepository;
 
-    public KommunaleRessurserLoader(NomProxyClient nomProxyClient, AppProperties appProperties, KommunaleRessurserProcessor kommunaleRessurserProcessor,
-                                    @Value("${app.dvh-load.nom-kommunale-ressurser-respons-navn}") String kommunaleRessurserResponseNode,
-                                    RessursStillingLoader ressursStillingLoader, RessursStillingStrukturerer ressursStillingStrukturerer, ShadowOrgtilknytningerKommunaleRepository shadowOrgtilknytningerKommunaleRepository, RessursStateRepository ressursStateRepository
+    public KommunaleRessurserLoader(
+        NomProxyClient nomProxyClient, AppProperties appProperties, KommunaleRessurserProcessor kommunaleRessurserProcessor,
+        @Value("${app.dvh-load.nom-kommunale-ressurser-respons-navn}") String kommunaleRessurserResponseNode,
+        RessursStillingLoader ressursStillingLoader,
+        RessursStillingStrukturerer ressursStillingStrukturerer,
+        ShadowOrgtilknytningerKommunaleRepository shadowOrgtilknytningerKommunaleRepository,
+        RessursStateRepository ressursStateRepository
     ) {
         this.nomProxyClient = nomProxyClient;
         this.appProperties = appProperties;
@@ -62,7 +66,7 @@ public class KommunaleRessurserLoader {
         log.info("{} kommunale ressurser med U4 stillinger", stillingPerioderPerNavident.size());
 
         Map<String, OrgtilknytningState> tmpKommunaleOrgtilknytninger = new ConcurrentHashMap<>();
-        dvhKommunaleRessurser.forEach( r -> {
+        dvhKommunaleRessurser.forEach(r -> {
             var tmpOT = kommunaleRessurserProcessor.process(r, stillingPerioderPerNavident.get(r.getNavIdent()));
             if (tmpOT.isPresent()) {
                 tmpKommunaleOrgtilknytninger.put(r.getNavIdent(), tmpOT.get());
@@ -71,7 +75,11 @@ public class KommunaleRessurserLoader {
 
         shadowOrgtilknytningerKommunaleRepository.resetWithNewData(tmpKommunaleOrgtilknytninger);
 
-        log.info("last og behandling av kommunale ressurser og orgtilknytninger. Har laget {} temporære kommunale Orgtilknytninger. Tok {}", tmpKommunaleOrgtilknytninger.size(), durationAsH24(start));
+        log.info(
+            "last og behandling av kommunale ressurser og orgtilknytninger. Har laget {} temporære kommunale Orgtilknytninger. Tok {}",
+            tmpKommunaleOrgtilknytninger.size(),
+            durationAsH24(start)
+        );
     }
 
     private List<String> getAktiveKommunaleNavidenter() {
@@ -87,7 +95,7 @@ public class KommunaleRessurserLoader {
     private Map<String, List<StillingPeriode>> loadStillinger(List<String> kommunaleNavidenter) {
         List<DvhRessursStilling> kommunaleRessursStilllinger =
             ressursStillingLoader.load().stream()
-                .filter( rs -> rs.getNavident().isPresent() && kommunaleNavidenter.contains(rs.getNavident().get()))
+                .filter(rs -> rs.getNavident().isPresent() && kommunaleNavidenter.contains(rs.getNavident().get()))
                 .toList();
 
         return ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(kommunaleRessursStilllinger);
@@ -121,6 +129,6 @@ public class KommunaleRessurserLoader {
 
     private String durationAsH24(LocalDateTime start) {
         Duration duration = Duration.between(start, LocalDateTime.now());
-        return  "%02d:%02d:%02d".formatted(duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart());
+        return "%02d:%02d:%02d".formatted(duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart());
     }
 }

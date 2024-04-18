@@ -15,6 +15,8 @@ public interface RessursStateRepository {
 
     Optional<RessursState> findByNavident(String navident);
 
+    <T> Optional<T> findByNavident(String navIdent, Function<RessursState, T> withMapper);
+
     Collection<RessursState> getAll();
 
     Collection<RessursState> getAllBareEksterne();

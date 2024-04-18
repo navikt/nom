@@ -8,10 +8,10 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.utils.common.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,10 +40,10 @@ public class RessursLedereResolver {
     private final Unleash unleash;
 
     public RessursLedereResolver(
-            DvhRepository dvhRepository,
-            RessursStateRepository ressursStateRepository,
-            OrgenhetService orgenhetService,
-            OrgtilknytningService orgtilknytningService, OrganiseringStateRepository organiseringStateRepository, Unleash unleash
+        DvhRepository dvhRepository,
+        RessursStateRepository ressursStateRepository,
+        OrgenhetService orgenhetService,
+        OrgtilknytningService orgtilknytningService, OrganiseringStateRepository organiseringStateRepository, Unleash unleash
     ) {
         this.dvhRepository = dvhRepository;
         this.ressursStateRepository = ressursStateRepository;
@@ -154,7 +154,7 @@ public class RessursLedereResolver {
             .collect(Collectors.toList());
     }
 
-    private RessursState ressursWithObfuscatedPersonNr(RessursState ressurs){
+    private RessursState ressursWithObfuscatedPersonNr(RessursState ressurs) {
         var obfuscatedPersonIdent = ressurs.personident().replaceFirst(".{5}$", "*****");
         return ressurs.toBuilder().personident(obfuscatedPersonIdent).build();
     }
