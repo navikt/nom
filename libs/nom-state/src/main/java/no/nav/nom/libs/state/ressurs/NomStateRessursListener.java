@@ -6,6 +6,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.event.EventListener;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.PartitionOffset;
+import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.kafka.event.ListenerContainerIdleEvent;
 
 import java.util.Collections;
@@ -29,10 +31,10 @@ public class NomStateRessursListener {
     private final List<Visitor> visitors = new CopyOnWriteArrayList<>();
 
     public NomStateRessursListener(
-            String stateTopic,
-            RessursStateRepository ressursStateRepository,
-            String listenerId,
-            KafkaProperties kafkaProperties
+        String stateTopic,
+        RessursStateRepository ressursStateRepository,
+        String listenerId,
+        KafkaProperties kafkaProperties
     ) {
         this.stateTopic = stateTopic;
         this.ressursStateRepository = ressursStateRepository;
@@ -47,15 +49,18 @@ public class NomStateRessursListener {
 
     public interface Visitor {
         String visitorName();
+
         void visit(RessursState ressursState);
     }
 
     @KafkaListener(
-            id = "#{ressursStateListenerId.toString()}",
-            containerFactory = "nomStateRessursKafkaListenerContainerFactory",
-            topics = "${app.nom-state.kafka.ressurs.state-topic}"
+        id = "#{ressursStateListenerId.toString()}",
+        containerFactory = "nomStateRessursKafkaListenerContainerFactory",
+        topicPartitions = @TopicPartition(
+            topic = "${app.nom-state.kafka.ressurs.state-topic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
+        )
     )
-    public void onMessage(ConsumerRecords<String, RessursState> records){
+    public void onMessage(ConsumerRecords<String, RessursState> records) {
         if (!started) {
             log.info("Kafka RessursState listener starting. {} visitors registered: {}", visitors.size(), visitorsToString());
             started = true;
@@ -91,7 +96,7 @@ public class NomStateRessursListener {
         return completableFuture;
     }
 
-    public void removeWait(String fid){
+    public void removeWait(String fid) {
         waitingMapByFid.remove(fid);
     }
 
@@ -101,7 +106,9 @@ public class NomStateRessursListener {
 
     @EventListener
     public void hasReadToEndOnStartupEventHandler(ListenerContainerIdleEvent event) {
-        if (hasReadToEndOnStartup.get()) return;
+        if (hasReadToEndOnStartup.get()) {
+            return;
+        }
 
         log.debug("Idle event received for listener {}. Waiting for listener {}", event.getListenerId(), listenerId);
         if (event.getListenerId().startsWith(listenerId)) {

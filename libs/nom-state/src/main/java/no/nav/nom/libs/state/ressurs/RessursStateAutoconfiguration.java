@@ -28,6 +28,7 @@ import java.util.Random;
 @AutoConfiguration
 @Conditional(RessursStateAutoconfiguration.RessursStateEnabledCondition.class)
 public class RessursStateAutoconfiguration {
+    private static final int IDLE_EVENT_IN_SECONDS = 5;
     final Environment environment;
 
     public RessursStateAutoconfiguration(Environment environment) {
@@ -74,7 +75,7 @@ public class RessursStateAutoconfiguration {
         final var factory = new ConcurrentKafkaListenerContainerFactory<String, RessursState>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);
-        factory.getContainerProperties().setIdleEventInterval(10 * 1000L);
+        factory.getContainerProperties().setIdleEventInterval(IDLE_EVENT_IN_SECONDS * 1000L);
 
         // If authentication towards kafka broker topic fails, retry every 10s
         factory.setContainerCustomizer(container -> {
