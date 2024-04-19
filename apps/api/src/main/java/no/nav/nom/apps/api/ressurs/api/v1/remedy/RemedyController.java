@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.ressurs.api.v1.remedy;
 
-import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -16,13 +15,13 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.rest.dto.NavnDTO;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -51,7 +50,9 @@ public class RemedyController {
     private final RessursCommadService ressursCommadService;
 
     public RemedyController(
-        RessursStateRepository ressursStateRepository, PdlClient pdlClient, NIKClient nikClient, RessursCommadService ressursCommadService) {
+        RessursStateRepository ressursStateRepository,
+        PdlClient pdlClient, NIKClient nikClient, RessursCommadService ressursCommadService
+    ) {
         this.ressursStateRepository = ressursStateRepository;
         this.pdlClient = pdlClient;
         this.nikClient = nikClient;

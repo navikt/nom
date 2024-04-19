@@ -15,10 +15,10 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.ShadowOrgtilknytningerKommunaleRepository;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrganiseringState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.IOUtils;
@@ -55,9 +55,10 @@ public class OmadaUttrekk {
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     public OmadaUttrekk(
-            RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService,
-            OrgtilknytningService orgtilknytningService, ShadowOrgtilknytningerKommunaleRepository shadowOrgtilknytningerKommunaleRepository,
-            RemedyEnhetIdResolver remedyEnhetIdResolver, DvhRepository dvhRepository, OrganiseringStateRepository organiseringStateRepository, Unleash unleash
+        RessursStateRepository ressursStateRepository,
+        OrgenhetService orgenhetService,
+        OrgtilknytningService orgtilknytningService, ShadowOrgtilknytningerKommunaleRepository shadowOrgtilknytningerKommunaleRepository,
+        RemedyEnhetIdResolver remedyEnhetIdResolver, DvhRepository dvhRepository, OrganiseringStateRepository organiseringStateRepository, Unleash unleash
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
@@ -127,7 +128,7 @@ public class OmadaUttrekk {
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
             orgtilknytningService.getAll()
-                .stream().filter( ot -> !ot.orgEnhetId().equals(EXCLUDE_ORG_ENHET))
+                .stream().filter(ot -> !ot.orgEnhetId().equals(EXCLUDE_ORG_ENHET))
                 .forEach(kobling -> {
                     try {
                         printer.printRecord(
@@ -145,7 +146,7 @@ public class OmadaUttrekk {
                         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
                     }
 
-            });
+                });
 
             return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
         }
@@ -167,7 +168,7 @@ public class OmadaUttrekk {
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
             shadowOrgtilknytningerKommunaleRepository.getAll()
-                .stream().filter( ot -> !ot.orgEnhetId().equals(EXCLUDE_ORG_ENHET))
+                .stream().filter(ot -> !ot.orgEnhetId().equals(EXCLUDE_ORG_ENHET))
                 .forEach(kobling -> {
                     try {
                         printer.printRecord(
@@ -256,35 +257,35 @@ public class OmadaUttrekk {
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
             orgenhetService.getAllEnheter()
-                .stream().filter( oe -> !oe.getId().equals(EXCLUDE_ORG_ENHET))
+                .stream().filter(oe -> !oe.getId().equals(EXCLUDE_ORG_ENHET))
                 .forEach(orgenhet -> {
-                try {
-                    printer.printRecord(
-                        orgenhet.getId(),
-                        orgenhet.getAgressoId(),
-                        orgenhet.getOrgNiv(),
-                        orgenhet.getAgressoOrgenhetType(),
-                        orgenhet.getNavn(),
-                        orgenhet.getGyldigFom().format(dateTimeFormatter),
-                        orgenhet.getGyldigTom().map(dateTimeFormatter::format).orElse(""),
-                        dvhRepository.getLedere().stream()
-                            .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
-                                .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
-                            .findAny()
-                            .map(DvhLeder::getNavIdent)
-                            .orElse(""),
-                        orgenhet.getNomNivaa().map(NomNivaa::name).orElse(""),
-                        orgenhet.getOrgEnhetsType().map(OrgEnhetsType::name).orElse(""),
-                        orgenhet.endedOnStartDate() ? "" : // Hvis enhet er avsluttet samme dag som den er opprettet, så er den ikke i organiseringen
-                            useNewOrganisering ? getOrgenhetOverUsingNewOrganisering(orgenhet) : getOrgenhetOver(orgenhet),
-                        remedyEnhetIdResolver.remedyEnhetId(orgenhet)
-                    );
-                    writer.close();
-                } catch (IOException e) {
-                    log.error("Error writing to CSV", e);
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
-                }
-            });
+                    try {
+                        printer.printRecord(
+                            orgenhet.getId(),
+                            orgenhet.getAgressoId(),
+                            orgenhet.getOrgNiv(),
+                            orgenhet.getAgressoOrgenhetType(),
+                            orgenhet.getNavn(),
+                            orgenhet.getGyldigFom().format(dateTimeFormatter),
+                            orgenhet.getGyldigTom().map(dateTimeFormatter::format).orElse(""),
+                            dvhRepository.getLedere().stream()
+                                .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
+                                    .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
+                                .findAny()
+                                .map(DvhLeder::getNavIdent)
+                                .orElse(""),
+                            orgenhet.getNomNivaa().map(NomNivaa::name).orElse(""),
+                            orgenhet.getOrgEnhetsType().map(OrgEnhetsType::name).orElse(""),
+                            orgenhet.endedOnStartDate() ? "" : // Hvis enhet er avsluttet samme dag som den er opprettet, så er den ikke i organiseringen
+                                useNewOrganisering ? getOrgenhetOverUsingNewOrganisering(orgenhet) : getOrgenhetOver(orgenhet),
+                            remedyEnhetIdResolver.remedyEnhetId(orgenhet)
+                        );
+                        writer.close();
+                    } catch (IOException e) {
+                        log.error("Error writing to CSV", e);
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
+                    }
+                });
 
             return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
         }

@@ -26,8 +26,8 @@ import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.OldRessursStateRepositoryImpl;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepositoryImpl;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -43,7 +43,7 @@ import org.springframework.kafka.annotation.EnableKafka;
     , DvhRepository.class
     , DvhService.class
     , DvhOrgenhetsLast.class
-    , RessursStateRepositoryImpl.class
+    , OldRessursStateRepositoryImpl.class
     , ValidationService.class
     , NomProxyClient.class
     , NomProxyRestClient.class

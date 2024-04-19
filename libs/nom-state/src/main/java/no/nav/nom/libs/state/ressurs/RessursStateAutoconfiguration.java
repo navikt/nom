@@ -13,11 +13,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
@@ -31,14 +28,14 @@ import java.util.Random;
 @AutoConfiguration
 @Conditional(RessursStateAutoconfiguration.RessursStateEnabledCondition.class)
 public class RessursStateAutoconfiguration {
+    private static final int IDLE_EVENT_IN_SECONDS = 5;
     final Environment environment;
 
     public RessursStateAutoconfiguration(Environment environment) {
         this.environment = environment;
     }
 
-    @Bean
-    @ConditionalOnMissingBean
+    @Bean(name = "nomStateRessursRepository")
     @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
     RessursStateRepository nomStateRessursRepository() {
         return new RessursStateRepositoryImpl();
@@ -47,9 +44,16 @@ public class RessursStateAutoconfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
+    RessursStateRepository ressursRepository() {
+        return new RessursStateRepositoryImpl();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
     NomStateRessursListener nomStateRessursListener(
         @Value("${app.nom-state.kafka.ressurs.state-topic}") String stateTopic,
-        RessursStateRepository ressursStateRepository,
+        @Qualifier("nomStateRessursRepository") RessursStateRepository ressursStateRepository,
         String ressursStateListenerId,
         KafkaProperties kafkaProperties
     ) {
@@ -71,7 +75,7 @@ public class RessursStateAutoconfiguration {
         final var factory = new ConcurrentKafkaListenerContainerFactory<String, RessursState>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);
-        factory.getContainerProperties().setIdleEventInterval(10*1000L);
+        factory.getContainerProperties().setIdleEventInterval(IDLE_EVENT_IN_SECONDS * 1000L);
 
         // If authentication towards kafka broker topic fails, retry every 10s
         factory.setContainerCustomizer(container -> {

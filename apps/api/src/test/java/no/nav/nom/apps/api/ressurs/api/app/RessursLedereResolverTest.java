@@ -10,7 +10,7 @@ import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;

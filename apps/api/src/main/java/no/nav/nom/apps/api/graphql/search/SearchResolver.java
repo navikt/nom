@@ -5,12 +5,12 @@ import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearchFilter;
 import no.nav.nom.apps.api.graphql.common.projections.RessursSearchFilter;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneRessurs;
 import no.nav.nom.libs.lucenewrapper.search.SearchResult;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;

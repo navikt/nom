@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.ressurs.masterdata;
 
 import no.nav.nom.apps.api.TestBase;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

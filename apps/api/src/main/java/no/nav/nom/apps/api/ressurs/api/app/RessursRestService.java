@@ -27,7 +27,6 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysis
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
@@ -37,6 +36,7 @@ import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,7 +182,8 @@ public class RessursRestService {
             new Visningsnavn(
                 updateVisningsnavnRequest.fornavn().trim(),
                 updateVisningsnavnRequest.mellomnavn().map(StringUtils::trimToNull),
-                updateVisningsnavnRequest.etternavn())
+                updateVisningsnavnRequest.etternavn()
+            )
         );
 
         var inputMetadata = new InputMetadata("REST", "updateRessursNavn", updateVisningsnavnRequest, new Origination(
@@ -469,7 +470,7 @@ public class RessursRestService {
     }
 
     private void validateIngenMellomromEtternavn(String visningsetternavn) {
-        if(visningsetternavn.contains(" ") || !visningsetternavn.matches("^(\\S+)$")){
+        if (visningsetternavn.contains(" ") || !visningsetternavn.matches("^(\\S+)$")) {
             throw new IllegalArgumentException("Etternavn kan ikke inneholde linjeskift, mellomrom o.l");
         }
     }

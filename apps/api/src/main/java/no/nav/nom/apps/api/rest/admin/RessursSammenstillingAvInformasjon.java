@@ -15,13 +15,13 @@ import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingStrukturerer;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -57,12 +57,19 @@ public class RessursSammenstillingAvInformasjon {
     private Map<String, NomOrgenhet> mapAvNomOrgenhetPerOrgenhetId = new HashMap<>();
 
     public RessursSammenstillingAvInformasjon(
-            RessursStateRepository ressursStateRepository, OrgtilknytningService orgtilknytningService, OrgenhetService orgenhetService,
-            RemedyEnhetIdResolver remedyEnhetIdResolver, OrganiseringStateRepository organiseringStateRepository, NomProxyClient nomProxyClient, AppProperties appProperties,
-            @Value("${app.dvh-load.nom-ressurser-stillinger-respons-navn}") String ressursStillingerResponseNode,
-            @Value("${app.dvh-load.nom-kommunale-ressurser-respons-navn}") String kommunaleRessurserResponseNode,
-            RessursStillingStrukturerer ressursStillingStrukturerer,
-            NomMastered nomMastered, AsyncAdminRunStatus asyncAdminRunStatus, LeaderElection leaderElection
+        RessursStateRepository ressursStateRepository,
+        OrgtilknytningService orgtilknytningService,
+        OrgenhetService orgenhetService,
+        RemedyEnhetIdResolver remedyEnhetIdResolver,
+        OrganiseringStateRepository organiseringStateRepository,
+        NomProxyClient nomProxyClient,
+        AppProperties appProperties,
+        @Value("${app.dvh-load.nom-ressurser-stillinger-respons-navn}") String ressursStillingerResponseNode,
+        @Value("${app.dvh-load.nom-kommunale-ressurser-respons-navn}") String kommunaleRessurserResponseNode,
+        RessursStillingStrukturerer ressursStillingStrukturerer,
+        NomMastered nomMastered,
+        AsyncAdminRunStatus asyncAdminRunStatus,
+        LeaderElection leaderElection
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningService = orgtilknytningService;
@@ -100,7 +107,9 @@ public class RessursSammenstillingAvInformasjon {
         asyncAdminRunStatus.runEnded(RESSURS_SAMMENSTILLING);
     }
 
-    public List<RessursSammenstilling> runResult() { return runResult; }
+    public List<RessursSammenstilling> runResult() {
+        return runResult;
+    }
 
     private List<RessursSammenstilling> getNomRessursInfo(String sektor, String navidenter, boolean bareAktive) {
         var ressursStream = bareAktive ?
@@ -143,20 +152,27 @@ public class RessursSammenstillingAvInformasjon {
 
         Map<String, DvhRessursStillingData> dvhRessurserData = dvhRessurseStillinger.stream()
             .filter(dvhRessursStilling -> dvhRessursStilling.getNavident().isPresent() && navidenterINom.contains(dvhRessursStilling.getNavident().get()))
-            .collect(Collectors.toMap( r -> r.getNavident().get(),
+            .collect(Collectors.toMap(
+                r -> r.getNavident().get(),
                 r -> new DvhRessursStillingData(r, getOrgenhetPaaRessurs(r)),
-                (r1, r2) -> r2));
+                (r1, r2) -> r2
+            ));
 
-        dvhRessurserData.forEach( (navident, dvhRessursStillingData) -> {
+        dvhRessurserData.forEach((navident, dvhRessursStillingData) -> {
             var sp = stillingPerioderPerNavident.get(navident);
-            dvhRessursStillingData.stillingPerioder = ( sp == null ?  Collections.emptyList() :
-                    sp.stream()
-                        .map(s -> new DvhRessursStillingPeriode(s, getNomOrgenhet(s.orgenhet())))
-                        .toList()
-                );
+            dvhRessursStillingData.stillingPerioder = (sp == null ? Collections.emptyList() :
+                sp.stream()
+                    .map(s -> new DvhRessursStillingPeriode(s, getNomOrgenhet(s.orgenhet())))
+                    .toList()
+            );
         });
 
-        log.info("Lastet {} DVH stillingperioder for  {} ressurser fra DVH [{}]", stillingePerioder, stillingPerioderPerNavident.size(), appProperties.clients().nomProxy().ressursStillingerPath());
+        log.info(
+            "Lastet {} DVH stillingperioder for  {} ressurser fra DVH [{}]",
+            stillingePerioder,
+            stillingPerioderPerNavident.size(),
+            appProperties.clients().nomProxy().ressursStillingerPath()
+        );
         return dvhRessurserData;
     }
 
@@ -191,8 +207,9 @@ public class RessursSammenstillingAvInformasjon {
         String url = isKommunale ? appProperties.clients().nomProxy().kommunaleRessurserPath() : appProperties.clients().nomProxy().ansatteBucketsPath();
 
         var jsonRessurser = dvhExchange(url);
-        var dvhRessurser = StreamSupport.stream(jsonRessurser.get(isKommunale ? kommunaleRessurserResponseNode : "NOM_ANSATTE_BUCKETS_v2Response").spliterator(), true)
-            .map( r -> new DvhRessurs(r, isKommunale))
+        var dvhRessurser = StreamSupport.stream(jsonRessurser.get(isKommunale ? kommunaleRessurserResponseNode : "NOM_ANSATTE_BUCKETS_v2Response")
+                .spliterator(), true)
+            .map(r -> new DvhRessurs(r, isKommunale))
             .distinct()
             .toList();
         return dvhRessurser;
@@ -210,7 +227,7 @@ public class RessursSammenstillingAvInformasjon {
         var orgenhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
             dvhRessurs.getOrgenhetPaaRessurs(),
             dvhRessurs.getOrgenhetPaaRessursNiva(),
-            dvhRessurs.getOrgenhetPaaRessursBeskrivelse ()
+            dvhRessurs.getOrgenhetPaaRessursBeskrivelse()
         );
         return orgenhet.map(this::getNomOrgenhet).orElse(null);
     }
@@ -219,12 +236,14 @@ public class RessursSammenstillingAvInformasjon {
         // Uten navn - slå opp på kun AgressoId og Nivå
         var orgenhet = dvhRessursStilling.getStillingOrgenhetNavn() == null
             ? orgenhetService.getEnhetByAgressoIdAndOrgniv(
-                dvhRessursStilling.getRessursAgressoId().orElse(null),
-                dvhRessursStilling.getRessursOrgenhetNiv().orElse(null))
+            dvhRessursStilling.getRessursAgressoId().orElse(null),
+            dvhRessursStilling.getRessursOrgenhetNiv().orElse(null)
+        )
             : orgenhetService.getEnhetByAgressoIdNivaAndName(
-                dvhRessursStilling.getRessursAgressoId().orElse(null),
-                dvhRessursStilling.getRessursOrgenhetNiv().orElse(null),
-                dvhRessursStilling.getStillingOrgenhetNavn());
+            dvhRessursStilling.getRessursAgressoId().orElse(null),
+            dvhRessursStilling.getRessursOrgenhetNiv().orElse(null),
+            dvhRessursStilling.getStillingOrgenhetNavn()
+        );
         return orgenhet.map(this::getNomOrgenhet).orElse(null);
     }
 
@@ -248,8 +267,8 @@ public class RessursSammenstillingAvInformasjon {
     }
 
     private IOrgenhet getOverodnetOrgenhet(IOrgenhet orgenhet) {
-        var overodnet =  organiseringStateRepository.getOrganiseringerContainingId(orgenhet.getId()).stream()
-            .filter( organisering -> organisering.id().equals(orgenhet.getId()))  // Kun organisering hvor denne enhet er underenhet
+        var overodnet = organiseringStateRepository.getOrganiseringerContainingId(orgenhet.getId()).stream()
+            .filter(organisering -> organisering.id().equals(orgenhet.getId()))  // Kun organisering hvor denne enhet er underenhet
             .sorted(Comparator.comparing(OrganiseringState::gyldigFom).reversed())  // Sorter på gyldigFom, nyere først
             .findFirst()// Plukk den nyeste
             .flatMap(o -> orgenhetService.getById(o.idOver())).orElse(null);
@@ -321,7 +340,7 @@ public class RessursSammenstillingAvInformasjon {
 
     @Data
     @AllArgsConstructor
-    static class DvhRessursStillingData{
+    static class DvhRessursStillingData {
         LocalDate u4StartDato;
         LocalDate u4Sluttdato;
         String orgenhetPaaRessursAgressoId;
@@ -329,6 +348,7 @@ public class RessursSammenstillingAvInformasjon {
         String remedyEnhetIdPaaRessurs;
         NomOrgenhet nomOrgenhetPaaRessurs;
         List<DvhRessursStillingPeriode> stillingPerioder;
+
         DvhRessursStillingData(DvhRessursStilling dvhRessursStilling, NomOrgenhet nomOrgenhetPaaRessurs) {
             this(
                 dvhRessursStilling.getRessursAgressoDatoFom(),
@@ -369,7 +389,7 @@ public class RessursSammenstillingAvInformasjon {
         String nomRemedyEnhetId,
         String OverodnetOrgenhetId,
         String OverodnetOrgenhetNavn
-    ){
+    ) {
         NomOrgenhet(IOrgenhet orgenhet, IOrgenhet overordnetOrgenhet, String nomRemedyEnhetId) {
             this(
                 orgenhet.getFid(),
@@ -388,7 +408,7 @@ public class RessursSammenstillingAvInformasjon {
         NomOrgenhet orgenhet,
         LocalDate GyldigFom,
         LocalDate GyldigTom
-    ){}
+    ) {}
 
 }
 

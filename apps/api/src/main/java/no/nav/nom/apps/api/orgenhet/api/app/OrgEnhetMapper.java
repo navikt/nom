@@ -8,9 +8,9 @@ import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Component;
 
 import java.text.Collator;
@@ -53,10 +53,10 @@ public class OrgEnhetMapper {
 
         Collator norwegianCollator = Collator.getInstance(new Locale("no", "NO"));
         var underordnedeOrgEnhetIds = underordnetResolver.findUnderordnedeOrgEnheter(orgEnhet.getFid())
-                .stream()
-                .sorted(Comparator.comparing(OrgEnhetState::navn, norwegianCollator))
-                .map(OrgEnhetState::id)
-                .toList();
+            .stream()
+            .sorted(Comparator.comparing(OrgEnhetState::navn, norwegianCollator))
+            .map(OrgEnhetState::id)
+            .toList();
 
         return new OrgEnhet(
             orgEnhet.getId(),

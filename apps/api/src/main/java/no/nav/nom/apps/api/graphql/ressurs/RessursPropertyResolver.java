@@ -3,9 +3,9 @@ package no.nav.nom.apps.api.graphql.ressurs;
 import graphql.execution.DataFetcherResult;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +25,8 @@ public class RessursPropertyResolver {
     private final boolean sendDummydata;
 
     public RessursPropertyResolver(
-            ActiveDirectoryRessursBatchLoader activeDirectoryRessursBatchLoader, Environment env, RessursStateRepository ressursStateRepository
+        ActiveDirectoryRessursBatchLoader activeDirectoryRessursBatchLoader, Environment env,
+        RessursStateRepository ressursStateRepository
     ) {
         this.adRessursBatchLoader = activeDirectoryRessursBatchLoader;
         this.ressursStateRepository = ressursStateRepository;

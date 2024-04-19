@@ -8,7 +8,7 @@ import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRep
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrganiseringState;

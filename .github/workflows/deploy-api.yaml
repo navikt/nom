@@ -8,6 +8,7 @@ on:
     paths:
       - 'apps/api/**'
       - 'libs/utils-common/**'
+      - 'libs/nom-state/**'
       - '.nais/apps/api/api*.yaml'
       - '.github/*/deploy-api.yaml'
       - 'apps/pom.xml'

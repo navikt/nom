@@ -38,6 +38,12 @@ public class RessursStateRepositoryImpl implements RessursStateRepository {
     }
 
     @Override
+    public <T> Optional<T> findByNavident(String navIdent, Function<RessursState, T> withMapper) {
+        return findByNavident(navIdent)
+            .map(withMapper);
+    }
+
+    @Override
     public Collection<RessursState> getAll() {
         return ressursByNavident.values();
     }

@@ -12,7 +12,6 @@ import lombok.val;
 import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.graphql.OldGraphQLTestBase;
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
-import org.junit.Ignore;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

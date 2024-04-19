@@ -41,9 +41,9 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursEventKafkaConfig;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursEventProducer;
 import no.nav.nom.apps.api.ressurs.eventsourcing.recoverybackup.RessursEventSourceRepository;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.OldRessursStateRepositoryImpl;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListenerConfig;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepositoryImpl;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
@@ -59,7 +59,7 @@ import org.springframework.kafka.annotation.EnableKafka;
     DvhRestConsumer.class
     , DvhRepository.class
     , DvhService.class
-    , RessursStateRepositoryImpl.class
+    , OldRessursStateRepositoryImpl.class
     , RessursStateListener.class
     , RessursStateListenerConfig.class
     , DvhOrgenhetsLast.class

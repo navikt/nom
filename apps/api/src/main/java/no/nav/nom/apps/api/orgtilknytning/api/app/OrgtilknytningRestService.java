@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOverlapException;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
@@ -16,7 +17,6 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreO
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
-import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
@@ -24,15 +24,15 @@ import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
-import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -137,7 +137,7 @@ public class OrgtilknytningRestService {
             );
         }
 
-        if( oppdaterOrgtilknytningerForRessursRequest.setRessursStartdato()) {
+        if (oppdaterOrgtilknytningerForRessursRequest.setRessursStartdato()) {
             oppdaterRessursStartdato(
                 tilknyttetRessurs,
                 oppdaterOrgtilknytningerForRessursRequest
@@ -153,7 +153,7 @@ public class OrgtilknytningRestService {
             .map(LeggTilOrgtilknytningRequest::gyldigFom);
 
         var nyMinimumStartdato = Stream.concat(endredeFomDatoer, nyeFomDatoer).reduce(LocalDate.MAX, (it, acc) -> it.isBefore(acc) ? it : acc);
-        if(nyMinimumStartdato != LocalDate.MAX && !nyMinimumStartdato.equals(tilknyttetRessurs.startdato().orElse(null))){
+        if (nyMinimumStartdato != LocalDate.MAX && !nyMinimumStartdato.equals(tilknyttetRessurs.startdato().orElse(null))) {
             ressursCommadService.oppdaterRessursStartdatoEvent(
                 new OppdaterStartdatoCommand(tilknyttetRessurs.fid(), nyMinimumStartdato),
                 getInputMetadataOppdaterOrgtilknytningerForRessurs(request)
@@ -335,13 +335,13 @@ public class OrgtilknytningRestService {
     private void oppdaterRessursSluttdato(
         RessursState tilknyttetRessurs, OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest
     ) {
-         // Samler alle gyldigTom i endredeOrgtilknytninger g nyeOrgtilknytninger og finner max verdi. null, dvs ingen sluttdato, ansees som høyeste verdi.
+        // Samler alle gyldigTom i endredeOrgtilknytninger g nyeOrgtilknytninger og finner max verdi. null, dvs ingen sluttdato, ansees som høyeste verdi.
         var newSluttdato = Stream.of(
-            oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().stream()
-                .map(EndreOrgtilknytningRequest::gyldigTom),
-            oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().stream()
-                .map(LeggTilOrgtilknytningRequest::gyldigTom)
-        )
+                oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().stream()
+                    .map(EndreOrgtilknytningRequest::gyldigTom),
+                oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().stream()
+                    .map(LeggTilOrgtilknytningRequest::gyldigTom)
+            )
             .flatMap(Function.identity())
             .max(Comparator.comparing(
                 gyldigTom -> Optional.ofNullable(gyldigTom).orElse(LocalDate.MAX))

@@ -13,11 +13,11 @@ import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.api.app.RessursLedereResolver;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -76,9 +76,9 @@ public class TeamcatController {
     }
 
 
-    private String determineAvdelingNavnByEnhet(IOrgenhet inputEnhet, PerRequestCache perRequestCache){
+    private String determineAvdelingNavnByEnhet(IOrgenhet inputEnhet, PerRequestCache perRequestCache) {
         var maybeCachedResult = perRequestCache.getNameIfCached(inputEnhet.getId());
-        if(maybeCachedResult != null){
+        if (maybeCachedResult != null) {
             return maybeCachedResult;
         }
 
@@ -122,7 +122,7 @@ public class TeamcatController {
 
             }
         }
-        perRequestCache.putEnhetToName(inputEnhet.getId(),out);
+        perRequestCache.putEnhetToName(inputEnhet.getId(), out);
         return out;
     }
 
@@ -150,7 +150,12 @@ public class TeamcatController {
 
     private TeamcatRessursDTO getTeamcatRessursDTO(String navident, RessursState ressurs, Map<String, AdRessurs> adResource, PerRequestCache perRequestCache) {
 
-        var oeId = orgtilknytningService.getByNavIdent(navident).stream().filter(OrgtilknytningState::erDagligOppfolging).findFirst().map(OrgtilknytningState::orgEnhetId).orElse(null);
+        var oeId = orgtilknytningService.getByNavIdent(navident)
+            .stream()
+            .filter(OrgtilknytningState::erDagligOppfolging)
+            .findFirst()
+            .map(OrgtilknytningState::orgEnhetId)
+            .orElse(null);
         var lederNavident = ressursLedereResolver.ledere(navident)
             .stream()
             .filter(RessursLeder::erDagligOppfolging)
@@ -172,8 +177,8 @@ public class TeamcatController {
         );
     }
 
-    private TeamcatRessursDTO getTeamcatRessursDTO(String navident, RessursState ressurs, Map<String, AdRessurs> adResource){
-        return getTeamcatRessursDTO(navident,ressurs,adResource,new PerRequestCache());
+    private TeamcatRessursDTO getTeamcatRessursDTO(String navident, RessursState ressurs, Map<String, AdRessurs> adResource) {
+        return getTeamcatRessursDTO(navident, ressurs, adResource, new PerRequestCache());
     }
 
 
@@ -256,7 +261,7 @@ public class TeamcatController {
     public ResponseEntity<TeamcatOrgenhetDTO> enhet(@PathVariable("id") String id) {
         var enhetMaybe = this.orgenhetService.getById(id);
 
-        if(enhetMaybe.isEmpty()){
+        if (enhetMaybe.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         var enhet = enhetMaybe.get();
@@ -271,14 +276,15 @@ public class TeamcatController {
 
     }
 
-    private static class PerRequestCache{
+    private static class PerRequestCache {
 
-        private final HashMap<Object,String> enhetToName = new HashMap<>();
+        private final HashMap<Object, String> enhetToName = new HashMap<>();
+
         public void putEnhetToName(String orgenhetId, String out) {
-            this.enhetToName.put(orgenhetId,out);
+            this.enhetToName.put(orgenhetId, out);
         }
 
-        public String getNameIfCached(String orgenhetId){
+        public String getNameIfCached(String orgenhetId) {
             return this.enhetToName.get(orgenhetId);
         }
     }

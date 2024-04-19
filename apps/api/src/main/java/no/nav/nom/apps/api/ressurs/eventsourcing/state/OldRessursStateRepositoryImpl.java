@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.ressurs.eventsourcing.state;
 
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -13,8 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Service
-public class RessursStateRepositoryImpl implements RessursStateRepository {
+@Service("oldRessursStateRepository")
+public class OldRessursStateRepositoryImpl implements RessursStateRepository {
     private final Map<String, RessursState> ressursByFid = new ConcurrentHashMap<>();
     private final Map<String, RessursState> ressursByPersonident = new ConcurrentHashMap<>();
     private final Map<String, RessursState> ressursByNavident = new ConcurrentHashMap<>();
@@ -77,7 +78,7 @@ public class RessursStateRepositoryImpl implements RessursStateRepository {
     }
 
     @Override
-    public void putEventAggregate(RessursState ressursEventData) {
+    public void update(RessursState ressursEventData) {
         ressursByFid.put(ressursEventData.fid(), ressursEventData);
         ressursByPersonident.put(ressursEventData.personident(), ressursEventData);
         ressursByNavident.put(ressursEventData.navident(), ressursEventData);

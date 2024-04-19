@@ -10,11 +10,11 @@ import no.nav.nom.apps.api.graphql.common.exception.OpprettRessursException;
 import no.nav.nom.apps.api.graphql.common.projections.RessursSearch;
 import no.nav.nom.apps.api.graphql.common.projections.RessurserSearch;
 import no.nav.nom.apps.api.ressurs.eventsourcing.metadata.RessursMetadataRepository;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.RessursWithMetadataResult;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -33,9 +33,9 @@ public class RessursResolver {
     private final DvhRepository dvhRepository;
 
     RessursResolver(
-            RessursStateRepository ressursStateRepository,
-            RessursMetadataRepository ressursMetadataRepository,
-            DvhRepository dvhRepository
+        RessursStateRepository ressursStateRepository,
+        RessursMetadataRepository ressursMetadataRepository,
+        DvhRepository dvhRepository
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.ressursMetadataRepository = ressursMetadataRepository;
@@ -65,13 +65,13 @@ public class RessursResolver {
             results = ressursStateRepository.getAll().stream().map(Result::from);
         } else {
             results = Stream.concat(
-                    search.resolveNavidenter().stream().map(ident -> new Result(ident, ressursStateRepository.findByNavident(ident).orElse(null))),
-                    search.resolvePersonidenter().stream().map(ident -> new Result(ident, ressursStateRepository.findByPersonident(ident).orElse(null)))
+                search.resolveNavidenter().stream().map(ident -> new Result(ident, ressursStateRepository.findByNavident(ident).orElse(null))),
+                search.resolvePersonidenter().stream().map(ident -> new Result(ident, ressursStateRepository.findByPersonident(ident).orElse(null)))
             );
         }
         return results
-                .map(res -> new RessursResult(res.isEmpty() ? null : MappingUtils.toRessurs(res.ressurs), res.id))
-                .toList();
+            .map(res -> new RessursResult(res.isEmpty() ? null : MappingUtils.toRessurs(res.ressurs), res.id))
+            .toList();
     }
 
     public List<RessursWithMetadataResult> ressurserWithMetadata() {
@@ -106,8 +106,8 @@ public class RessursResolver {
     }
 
     private record Result(
-            String id,
-            RessursState ressurs
+        String id,
+        RessursState ressurs
     ) {
         public boolean isEmpty() {
             return ressurs == null;

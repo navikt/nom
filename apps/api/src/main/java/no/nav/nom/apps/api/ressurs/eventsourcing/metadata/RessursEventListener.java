@@ -1,9 +1,9 @@
 package no.nav.nom.apps.api.ressurs.eventsourcing.metadata;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.utils.common.kafka.KafkaUtils;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -48,19 +48,26 @@ public class RessursEventListener {
         StreamSupport.stream(records.spliterator(), false).forEachOrdered(this::process);
 
         KafkaUtils.verifyUpToDate(consumer, eventSourceTopic, initialLoadComplete,
-            () -> log.info("Kafka RessursEvent listener initial load finished. Metadata for {} ressurser retrieved", ressursMetadataRepository.countOpprettelseMetadata())
+            () -> log.info(
+                "Kafka RessursEvent listener initial load finished. Metadata for {} ressurser retrieved",
+                ressursMetadataRepository.countOpprettelseMetadata()
+            )
         );
     }
 
     private void process(ConsumerRecord<String, RessursEvent> record) {
         if (RessursOpprettetEventV1.class.isInstance(record.value())) {
-            var key = ((RessursOpprettetEventV1)record.value()).getRessursOpprettetAdditionalData().navident().get();
+            var key = ((RessursOpprettetEventV1) record.value()).getRessursOpprettetAdditionalData().navident().get();
 
             ressursMetadataRepository.saveOpprettelseMetadata(key, record.value().getMetadata());
         }
 
         ressursStateRepository.findByFid(record.value().getFid()).ifPresent(
-            ressurs -> ressursMetadataRepository.saveEndringMetadata(ressurs.navident(), record.value().getMetadata(), record.value().getClass().getSimpleName())
+            ressurs -> ressursMetadataRepository.saveEndringMetadata(
+                ressurs.navident(),
+                record.value().getMetadata(),
+                record.value().getClass().getSimpleName()
+            )
         );
     }
 }
