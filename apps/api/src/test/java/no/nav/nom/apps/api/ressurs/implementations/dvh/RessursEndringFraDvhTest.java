@@ -4,6 +4,7 @@ import no.nav.nom.apps.api.DvhRessursUtils;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.OldDvhTestBase;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
@@ -161,7 +162,8 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
                         Optional.empty(),
                         Optional.empty(),
                     null,
-                    Collections.emptyList()
+                    Collections.emptyList(),
+                    IdentType.STANDARD
                 )
         );
 
@@ -219,7 +221,8 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
                 Optional.empty(),
                 Optional.empty(),
             null,
-            Collections.emptyList()
+            Collections.emptyList(),
+            IdentType.STANDARD
         );
 
         kafkaUtils.createRessursHendelseEventSource(ressursv1);
@@ -278,7 +281,8 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
                 Optional.empty(),
                 Optional.empty(),
             null,
-            Collections.emptyList()
+            Collections.emptyList(),
+            IdentType.STANDARD
         );
 
         kafkaUtils.createRessursHendelseEventSource(ressursv1);
@@ -369,7 +373,8 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
                 Optional.empty(),
                 Optional.empty(),
                 null,
-                Collections.emptyList()
+                Collections.emptyList(),
+                IdentType.STANDARD
             )
         );
 
@@ -432,7 +437,8 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
                 Optional.empty(),
                 Optional.empty(),
                 null,
-                Collections.emptyList()
+                Collections.emptyList(),
+                IdentType.STANDARD
             )
         );
 
@@ -490,7 +496,8 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
             Optional.empty(),
             Optional.empty(),
             null,
-            Collections.emptyList()
+            Collections.emptyList(),
+            IdentType.STANDARD
         );
 
         kafkaUtils.createRessursHendelseEventSource(ressursv1);
@@ -552,7 +559,8 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
             Optional.empty(),
             Optional.empty(),
             null,
-            Collections.emptyList()
+            Collections.emptyList(),
+            IdentType.STANDARD
         );
 
         kafkaUtils.createRessursHendelseEventSource(ressursv1);
@@ -616,7 +624,8 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
             Optional.empty(),
             Optional.empty(),
             null,
-            Collections.emptyList()
+            Collections.emptyList(),
+            IdentType.STANDARD
         );
 
         kafkaUtils.createRessursHendelseEventSource(ressursv1);
@@ -698,7 +707,8 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
             Optional.empty(),
             Optional.empty(),
             null,
-            Collections.emptyList()
+            Collections.emptyList(),
+            IdentType.STANDARD
         );
 
         kafkaUtils.createRessursHendelseEventSource(ressursv1);

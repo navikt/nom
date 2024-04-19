@@ -14,6 +14,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessur
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.apps.api.rest.dto.NavnDTO;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -62,7 +63,8 @@ public class RemedyControllerTest extends RestTestBase {
             Optional.of(LocalDate.now().plusDays(10)),
             Optional.empty(),
             null,
-            Collections.emptyList()
+            Collections.emptyList(),
+            IdentType.STANDARD
         );
         return Optional.of(ressursState);
     }
@@ -190,7 +192,8 @@ public class RemedyControllerTest extends RestTestBase {
                 Optional.empty(),
                 Optional.empty(), Optional.empty(),
                 null,
-                Collections.emptyList()
+                Collections.emptyList(),
+                IdentType.STANDARD
             ));
 
         OpprettRessursRequest request = OpprettRessursRequest.builder()
@@ -257,7 +260,8 @@ public class RemedyControllerTest extends RestTestBase {
             Optional.empty(),
             Optional.empty(),
             null,
-            Collections.emptyList()
+            Collections.emptyList(),
+            IdentType.STANDARD
         )));
 
         when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
@@ -271,7 +275,8 @@ public class RemedyControllerTest extends RestTestBase {
                 Optional.empty(),
                 Optional.empty(),
                 null,
-                Collections.emptyList()
+                Collections.emptyList(),
+                IdentType.STANDARD
             ));
 
         OpprettRessursRequest request = OpprettRessursRequest.builder()

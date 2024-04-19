@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -101,7 +102,8 @@ class RessursStillingLoaderTest extends TestBase {
                 Optional.empty(),
                 null,
                 null,
-                Collections.emptyList()
+                Collections.emptyList(),
+                IdentType.STANDARD
             )));
         when(ressursStateRepository.findByNavident("H554433"))
             .thenReturn(Optional.of(new RessursState(
@@ -114,7 +116,8 @@ class RessursStillingLoaderTest extends TestBase {
                 Optional.empty(),
                 null,
                 null,
-                Collections.emptyList()
+                Collections.emptyList(),
+                IdentType.STANDARD
             )));
     }
 

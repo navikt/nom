@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.apps.api.rest.RestTestBase;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -93,7 +94,8 @@ public class PdlFullmaktControllerTest extends RestTestBase {
             Optional.of(slutt),
             Optional.of(start),
             null,
-            Collections.emptyList()
+            Collections.emptyList(),
+            IdentType.STANDARD
         );
         return Optional.of(ressursState);
     }

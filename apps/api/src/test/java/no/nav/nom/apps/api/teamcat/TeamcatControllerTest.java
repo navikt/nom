@@ -14,6 +14,7 @@ import no.nav.nom.apps.api.ressurs.api.app.RessursLedereResolver;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.ad.AdRessurs;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -80,7 +81,8 @@ public class TeamcatControllerTest extends RestTestBase {
             Optional.of(LocalDate.now().plusDays(10)),
             Optional.empty(),
             null,
-            Collections.emptyList()
+            Collections.emptyList(),
+            IdentType.STANDARD
         );
         return  Optional.of(ressursState);
     }

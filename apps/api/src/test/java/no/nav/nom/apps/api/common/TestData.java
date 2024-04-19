@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.common;
 
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -55,7 +56,9 @@ public class TestData {
             Optional.empty(),
             Optional.empty(),
             null,
-            Collections.emptyList()
+            Collections.emptyList(),
+            IdentType.STANDARD
+
         );
     }
 
