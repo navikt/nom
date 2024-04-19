@@ -3,6 +3,7 @@ package no.nav.nom.apps.streams.internal.ressurs.eventsrcToState;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
@@ -10,13 +11,16 @@ import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Grouped;
+import org.apache.kafka.streams.kstream.KeyValueMapper;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Component;
@@ -32,42 +36,76 @@ class EventsrcToState {
     private final static Logger log = LoggerFactory.getLogger(EventsrcToState.class);
 
     public EventsrcToState(
-            @Value("${app.kafka.eventsourceTopic}") String eventsourceTopic,
-            @Value("${app.kafka.stateTopic}") String stateTopic,
-            ObjectMapper objectMapper,
-            JsonSerde<Object> objectSerde,
-            StreamsBuilder streamsBuilder
+        @Value("${app.kafka.eventsourceTopic}") String eventsourceTopic,
+        @Value("${app.kafka.stateTopic}") String stateTopic,
+        @Value("${app.kafka.navidentTopic}") String navidentTopic,
+        ObjectMapper objectMapper,
+        JsonSerde<Object> objectSerde,
+        @Qualifier("jsonSerde") JsonSerde<Object> jsonSerde,
+        StreamsBuilder streamsBuilder
     ) {
         final var stringSerde = Serdes.String();
         final var eventSerde = objectSerde.copyWithType(RessursEvent.class);
+        final var jsonSerde2 = jsonSerde.copyWithType(ObjectNode.class);
 
-        streamsBuilder.stream(eventsourceTopic, Consumed.with(stringSerde, eventSerde))
-                .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))
-                .aggregate(
-                        objectMapper::createObjectNode,
-                        (key, event, state) -> {
-                            if (event instanceof RessursTekniskSlettetEventV1) {
-                                state.put("TOMBSTONE", true);
-                                // return null; // Create TOMBSTONE - should skip mapValues and get forwarded directly to output stream. -
-                                // (See https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Stream+Usage+Patterns#KafkaStreamUsagePatterns-Howtomanagethesizeofstatestoresusingtombstones?)
-                                // NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
-                            } else {
-                                state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
-                                if (event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data) {
-                                    if (data.navident().isPresent()) {
-                                        state.put("navident", data.navident().get());
-                                    }
-                                    if (data.startdato().isPresent()) {
-                                        state.put("startdato", data.startdato().get().toString());
-                                    }
-                                }
+        var groupedObjects = streamsBuilder.stream(eventsourceTopic, Consumed.with(stringSerde, eventSerde))
+            .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))
+            .aggregate(
+                objectMapper::createObjectNode,
+                (key, event, state) -> {
+                    if (event instanceof RessursTekniskSlettetEventV1) {
+                        state.put("TOMBSTONE", true);
+                        // return null; // Create TOMBSTONE - should skip mapValues and get forwarded directly to output stream. -
+                        // (See https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Stream+Usage+Patterns#KafkaStreamUsagePatterns-Howtomanagethesizeofstatestoresusingtombstones?)
+                        // NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
+                    } else {
+                        state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                        state.put("fid",event.getFid()); // store this for later retrieval
+                        if (event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data) {
+                            if (data.navident().isPresent()) {
+                                state.put("navident", data.navident().get());
                             }
-                            return state;
-                        },
-                        Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
-                )
-                .mapValues(this::toRessursState)
-                .toStream().to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(RessursState.class)));
+                            if (data.startdato().isPresent()) {
+                                state.put("startdato", data.startdato().get().toString());
+                            }
+                        }
+                    }
+                    return state;
+                },
+                Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
+            );
+
+        var byNavIdentGroupedObjects = groupedObjects.toStream()
+            .filter((k,v) -> v != null)
+            .groupBy((k,v) -> v.get("navident").asText(), Grouped.with(stringSerde,jsonSerde2))
+            .aggregate(
+                objectMapper::createObjectNode,
+                (k,v,x) -> v,
+                Materialized.with(stringSerde,jsonSerde2)
+            );
+
+        var identType = streamsBuilder.stream(navidentTopic,Consumed.with(stringSerde, jsonSerde2))
+            .groupBy((k, v) -> v.get("payload").get("navident").asText(),
+                Grouped.with(stringSerde, jsonSerde2))
+            .aggregate(
+                () -> "",
+                (key, event, state) -> event.get("payload").get("identType").asText(),
+                Materialized.with(stringSerde,stringSerde)
+            );
+
+        var withIdentTypeByNavident = byNavIdentGroupedObjects.leftJoin(identType, (a,b) -> {
+                a.put("identType",b);
+                return a;
+            });
+
+        var withIdentTypeByFid = withIdentTypeByNavident.toStream().groupBy((k,v) -> v.get("fid").asText(), Grouped.with(stringSerde,jsonSerde2))
+            .aggregate(
+                objectMapper::createObjectNode,
+                (key, value, aggregate) -> value,
+                Materialized.with(stringSerde,jsonSerde2));
+
+        withIdentTypeByFid.mapValues(this::toRessursState)
+            .toStream().to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(RessursState.class)));
     }
 
     public RessursState toRessursState(String fid, JsonNode eventStateAggregate) {
@@ -81,6 +119,8 @@ class EventsrcToState {
 
             var fysiskBrukerstedList = new ArrayList<String>();
             eventStateAggregate.withArray("fysiskeBrukersteder").elements().forEachRemaining(e -> fysiskBrukerstedList.add(e.asText()));
+
+            var identTypeFromJson = parseNullableFromJson(eventStateAggregate,"identType");
 
             return new RessursState(
                     fid,
@@ -96,7 +136,9 @@ class EventsrcToState {
                     Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "sluttdato", LocalDate::parse)),
                     Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "startdato", LocalDate::parse)),
                     Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "primaryFysiskBrukersted")),
-                    fysiskBrukerstedList
+                    fysiskBrukerstedList,
+
+                identTypeFromJson != null ? IdentType.valueOf(identTypeFromJson) : null
             );
         } catch (Exception e) {
             log.error("Error mapping to RessursState", e);
