@@ -17,7 +17,7 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
     - name: REMEDY_DATASOURCE_URL
-      value: jdbc:oracle:thin:@//a01dbfl050.adeo.no:1521/remedyp
+      value: jdbc:oracle:thin:@//dmv09-scan.adeo.no:1521/remedy_q2_ha
     - name: NOM_API_URL
       value: https://nom-api.intern.nav.no/
     - name: NOM_API_SCOPE
