@@ -11,6 +11,7 @@ import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
+import no.nav.nom.contract.nom.eventsource.RessursPrimaryTelefonnummerOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.generated.model.OrgEnhet;
 import no.nav.nom.generated.model.OrgtilknytningState;
@@ -46,6 +47,7 @@ import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursFysiskeBruker
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursOpprettetAdditionalData;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursOpprettetEventData;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursPersonaliaOppdatertV1;
+import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursPrimaryTelefonnummerOppdatertV1;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursSluttdatoOppdatertEventV1;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursSluttetEventV1;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitalizeNavn;
@@ -93,6 +95,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
         var orgEnhetId = "some-orgenhet";
         var remedyEnhetId = "some-remedy-id";
         var fysiskBrukerstedNr = "0123";
+        var primaryTelefonnnummer = "12345678";
 
         var ressursOpprettetEventV1 = new RessursOpprettetEventV1(
             UUID.randomUUID().toString(),
@@ -100,6 +103,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 .personident(personident)
                 .visningsnavn(new Visningsnavn(fornavn, Optional.empty(), etternavn))
                 .sektor(Sektor.EKSTERN)
+                .primaryTelefonnummer(Optional.of(primaryTelefonnnummer))
                 .build(),
             inputMetadata().toBuilder()
                 .origination(new Origination(initiatedBy, ""))
@@ -140,6 +144,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .sektor(2)
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(startDato))
                     .utlopsdato(epochSecondsNorwegianTimeEndOfDay(sluttDato))
+                    .mobil(primaryTelefonnnummer)
                     .build()
             ));
 
@@ -259,6 +264,49 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .sektor(2)
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
                     .utlopsdato(epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()))
+                    .mobil(existingRessurs.getPrimaryTelefonnummer())
+                    .build()
+
+            ));
+    }
+
+    @Test
+    @DisplayName("Should write new entity with correctly updated values for RessursPrimaryTelefonnummerOppdatertV1")
+    void testShouldUpdateForRessursPrimaryTelefonnummerOppdatertV1() {
+        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+        var dagligOppfolgingOrgtilknytning = orgtilknytningState().erDagligOppfolging(true);
+        var dagligOppfolgingOrgenhet = orgenhet();
+
+        var ressursPrimaryTelefonnummerOppdatertV1 = ressursPrimaryTelefonnummerOppdatertV1(
+            new RessursPrimaryTelefonnummerOppdatertEventV1.PrimaryTelefonnummerOppdatertEventData("87654321")
+        );
+
+        when(nomApiClient.getRessursByFid(ressursPrimaryTelefonnummerOppdatertV1.getFid())).thenReturn(existingRessurs);
+        when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(dagligOppfolgingOrgtilknytning));
+        when(nomApiClient.getOrgEnhet(dagligOppfolgingOrgtilknytning.getOrgEnhetId())).thenReturn(dagligOppfolgingOrgenhet);
+
+        nomIntegrasjonService.handleRessursEvent(ressursPrimaryTelefonnummerOppdatertV1);
+
+        var newNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
+
+        assertThat(newNomIntegrasjonEntityForNavident)
+            .usingRecursiveComparison()
+            .isEqualTo(Optional.of(
+                NomIntegrasjonEntity.builder()
+                    .entryId(fifteenCharLengthZeroPaddedNumber(0L))
+                    .entryBestiller(ressursPrimaryTelefonnummerOppdatertV1.getMetadata().inputMetadata().origination().initiatedBy())
+                    .entryOperasjon("Ny")
+                    .entryStatus("Ubehandlet")
+                    .enhetsId(dagligOppfolgingOrgenhet.getRemedyEnhetId())
+                    .etternavn(capitalizeNavn(existingRessurs.getVisningsnavn().getEtternavn()))
+                    .fodselsnummer(existingRessurs.getPersonident())
+                    .fornavn(capitalizeNavn(existingRessurs.getVisningsnavn().getFornavn()))
+                    .fysiskBrukerstedId(existingRessurs.getPrimaryFysiskBrukersted())
+                    .navId(existingRessurs.getNavident())
+                    .sektor(2)
+                    .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
+                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()))
+                    .mobil(ressursPrimaryTelefonnummerOppdatertV1.getMobilnummerOppdatertEventData().primaryTelefonnummer())
                     .build()
 
             ));
@@ -334,6 +382,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .sektor(2)
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
                     .utlopsdato(epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()))
+                    .mobil(existingRessurs.getPrimaryTelefonnummer())
                     .build()
             ));
     }
@@ -390,6 +439,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .utlopsdato(epochSecondsNorwegianTimeEndOfDay(
                         orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom().orElseThrow())
                     )
+                    .mobil(existingRessurs.getPrimaryTelefonnummer())
                     .build()
             ));
     }
@@ -676,6 +726,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .utlopsdato(epochSecondsNorwegianTimeEndOfDay(
                         orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigTom().orElseThrow())
                     )
+                    .mobil(ressurs().getPrimaryTelefonnummer())
                     .build()
             ));
     }

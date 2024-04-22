@@ -149,6 +149,7 @@ public class EventsrcToStateTest {
                         null,
                         "etternavn"
                 ),
+                Optional.empty(),
                 Collections.emptyList(),
                 null
         );
@@ -180,6 +181,7 @@ public class EventsrcToStateTest {
                         Optional.empty(),
                         "etternavn"
                 ),
+                Optional.empty(),
                 Optional.empty(),
                 additionalData.startdato(),
                 Optional.empty(),
@@ -269,6 +271,7 @@ public class EventsrcToStateTest {
                 Optional.empty(),
                 "etternavn"
             ),
+            Optional.empty(),
             List.of("2011"),
             "2011"
         );
@@ -299,6 +302,7 @@ public class EventsrcToStateTest {
             ressursOpprettetAdditionalData.navident().get(),
             ressursOpprettetEventData.sektor(),
             ressursOpprettetEventData.visningsnavn(),
+            Optional.empty(),
             Optional.empty(),
             ressursOpprettetAdditionalData.startdato(),
             Optional.ofNullable(ressursOpprettetEventData.primaryFysiskBrukersted()),

@@ -12,7 +12,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreT
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
@@ -56,7 +56,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     private OrgtilknytningCommandService orgtilknytningCommandService;
 
     @MockBean
-    private RessursCommadService ressursCommadService;
+    private RessursCommandService ressursCommandService;
 
     @MockBean
     private RessursStateListener ressursStateListener;
@@ -202,7 +202,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 endreOrgtilknytningDato.gyldigTom().equals(endreOrgtilknytningDatoRequest.gyldigTom())
             );
 
-        verify(ressursCommadService, times(0)).oppdaterRessursSluttdatoEvent(any());
+        verify(ressursCommandService, times(0)).oppdaterRessursSluttdatoEvent(any());
     }
 
     @Test
@@ -232,7 +232,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var oppdaterSluttdatoCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterSluttdatoCommand.class);
 
         verify(
-            ressursCommadService,
+            ressursCommandService,
             times(1)
         ).oppdaterRessursSluttdatoEvent(
             oppdaterSluttdatoCommandArgumentCaptor.capture()
@@ -277,7 +277,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         ).expectStatus().is2xxSuccessful();
 
         verify(
-            ressursCommadService,
+            ressursCommandService,
             times(0)
         ).oppdaterRessursSluttdatoEvent(
             any()
@@ -648,7 +648,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         var oppdaterSluttdatoCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterSluttdatoCommand.class);
 
-        verify(ressursCommadService, times(1))
+        verify(ressursCommandService, times(1))
             .oppdaterRessursSluttdatoEvent(oppdaterSluttdatoCommandArgumentCaptor.capture());
 
         assertThat(oppdaterSluttdatoCommandArgumentCaptor.getValue())
@@ -684,7 +684,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         postLeggTilOrgtilknytningRequest(testToken.nomWriteGroupAndNomUiAzp(), leggTilOrgtilknytningRequest)
             .expectStatus().is2xxSuccessful();
 
-        verify(ressursCommadService, times(0))
+        verify(ressursCommandService, times(0))
             .oppdaterRessursSluttdatoEvent(any());
     }
 
@@ -728,7 +728,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         postLeggTilOrgtilknytningRequest(testToken.nomWriteGroupAndNomUiAzp(), leggTilOrgtilknytningRequest)
             .expectStatus().is2xxSuccessful();
 
-        verify(ressursCommadService, times(0))
+        verify(ressursCommandService, times(0))
             .oppdaterRessursSluttdatoEvent(any());
     }
 
@@ -1040,8 +1040,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .expectStatus().is2xxSuccessful();
 
         verify(orgtilknytningCommandService, times(1)).endreOrgtilknytningDato(any());
-        verify(ressursCommadService, times(1)).oppdaterRessursStartdatoEvent(oppdaterStartdatoCommandArgumentCaptor.capture(), any());
-        verify(ressursCommadService, times(1)).oppdaterRessursSluttdatoEvent(oppdaterSluttdatoCommandArgumentCaptor.capture());
+        verify(ressursCommandService, times(1)).oppdaterRessursStartdatoEvent(oppdaterStartdatoCommandArgumentCaptor.capture(), any());
+        verify(ressursCommandService, times(1)).oppdaterRessursSluttdatoEvent(oppdaterSluttdatoCommandArgumentCaptor.capture());
 
         assertThat(oppdaterStartdatoCommandArgumentCaptor.getValue())
             .matches(oppdaterStartdatoCommand -> oppdaterStartdatoCommand.startdato().equals(newStartdato))

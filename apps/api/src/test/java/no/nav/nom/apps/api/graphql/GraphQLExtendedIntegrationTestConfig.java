@@ -37,7 +37,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStat
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.metadata.RessursMetadataRepositoryImpl;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursEventKafkaConfig;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursEventProducer;
 import no.nav.nom.apps.api.ressurs.eventsourcing.recoverybackup.RessursEventSourceRepository;
@@ -63,7 +63,7 @@ import org.springframework.kafka.annotation.EnableKafka;
     , RessursStateListener.class
     , RessursStateListenerConfig.class
     , DvhOrgenhetsLast.class
-    , RessursCommadService.class
+    , RessursCommandService.class
     , RessursEventProducer.class
     , RessursEventKafkaConfig.class
     , OrgEnhetIdGenerator.class

@@ -11,6 +11,7 @@ public record RessursState(
         String personident,
         String navident,
         Visningsnavn visningsnavn,
+        Optional<String> primaryTelefonnummer,
         Sektor sektor,
         Optional<List<Orgtilknytning>> orgtilknytninger,
         Optional<LocalDate> startdato,

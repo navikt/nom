@@ -10,6 +10,7 @@
       "etternavn": "string",
       "fornavn": "string",
       "mellomnavn": "string"
-    }
+    },
+    "primaryTelefonnummer": "string"
   }
 ]

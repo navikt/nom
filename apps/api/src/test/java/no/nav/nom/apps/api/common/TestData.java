@@ -53,6 +53,7 @@ public class TestData {
             new Visningsnavn("Nav", Optional.empty(), "Navesen"),
             Optional.empty(),
             Optional.empty(),
+            Optional.empty(),
             null,
             Collections.emptyList()
         );

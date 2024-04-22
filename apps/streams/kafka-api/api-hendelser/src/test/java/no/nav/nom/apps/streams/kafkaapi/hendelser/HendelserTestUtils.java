@@ -136,6 +136,7 @@ public class HendelserTestUtils {
                 Optional.empty(),
                 "etternavn"
             ),
+            Optional.empty(),
             List.of("fysiskBrukersted1", "fysiskBrukersted2"),
             "fysiskBrukersted1"
         );

@@ -134,6 +134,7 @@ public class KafkaUtils {
                 Optional.of("mellomnavn" + suffix),
                 "etternavn" + suffix
             ),
+            Optional.empty(),
             null,
             Optional.of(LocalDate.now()),
             null,

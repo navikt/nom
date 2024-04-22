@@ -15,6 +15,7 @@ public record OpprettRessursRequest(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String visningsfornavn,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) String visningsmellomnavn,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String visningsetternavn,
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) String primaryTelefonnummer,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Sektor sektor,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String orgEnhetId,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate startDato,

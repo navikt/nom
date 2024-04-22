@@ -18,6 +18,7 @@ import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
+import no.nav.nom.contract.nom.eventsource.RessursPrimaryTelefonnummerOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttdatoOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.generated.model.OrgtilknytningState;
@@ -105,6 +106,8 @@ public class NomIntegrasjonService {
         } else if (ressursEvent instanceof RessursFysiskeBrukerstederOppdatertEventV1 ressursFysiskeBrukerstederOppdatertEventV1
             && isFidEksternRessurs(ressursEvent.getFid())) {
             updateRessursFysiskeBrukersteder(ressursFysiskeBrukerstederOppdatertEventV1);
+        } else if (ressursEvent instanceof RessursPrimaryTelefonnummerOppdatertEventV1 ressursPrimaryTelefonnummerOppdatertEventV1 && isFidEksternRessurs(ressursEvent.getFid())) {
+            updateRessursTelefonnummer(ressursPrimaryTelefonnummerOppdatertEventV1);
         }
     }
 
@@ -398,6 +401,7 @@ public class NomIntegrasjonService {
                 .map(Utils::epochSecondsNorwegianTimeNoon)
                 .orElseThrow(() -> RequiredValueMissingException.forField("tiltredelsesdato")))
             .utlopsdato(epochSecondsNorwegianTimeEndOfDay(sluttDato))
+            .mobil(ressursOpprettetEventData.primaryTelefonnummer().orElse(null))
             .build();
 
         saveNewNomIntegrasjonEntity(
@@ -452,6 +456,28 @@ public class NomIntegrasjonService {
         );
     }
 
+    private void updateRessursTelefonnummer(RessursPrimaryTelefonnummerOppdatertEventV1 ressursPrimaryTelefonnummerOppdatertEventV1) {
+        logger.info(
+            "Updating remedy data for {} with fid {}",
+            ressursPrimaryTelefonnummerOppdatertEventV1.getClass().getSimpleName(),
+            ressursPrimaryTelefonnummerOppdatertEventV1.getFid()
+        );
+
+        var ressursState = nomApiClient.getRessursByFid(ressursPrimaryTelefonnummerOppdatertEventV1.getFid());
+        var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
+
+        var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
+            .mobil(ressursPrimaryTelefonnummerOppdatertEventV1
+                .getMobilnummerOppdatertEventData()
+                .primaryTelefonnummer())
+            .build();
+
+        saveNewNomIntegrasjonEntity(
+            newNomIntegrasjonEntity,
+            ressursPrimaryTelefonnummerOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy()
+        );
+    }
+
     private NomIntegrasjonEntity nomIntegrasjonEntityFromNomData(Ressurs ressurs) {
 
         var dagligOppfolgningOrgTilknytning = nomApiClient.getOrgtilknytningerForNavident(ressurs.getNavident()).stream()
@@ -475,6 +501,7 @@ public class NomIntegrasjonService {
             .utlopsdato(
                 dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getGyldigTom).map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null)
             )
+            .mobil(ressurs.getPrimaryTelefonnummer())
             .build();
     }
 

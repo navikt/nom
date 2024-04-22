@@ -7,7 +7,7 @@ import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
@@ -39,7 +39,7 @@ public class RemedyControllerTest extends RestTestBase {
     private NIKClient nikClient;
 
     @MockBean
-    private RessursCommadService ressursCommadService;
+    private RessursCommandService ressursCommandService;
 
     @MockBean
     protected RessursStateRepository ressursStateRepository;
@@ -58,6 +58,7 @@ public class RemedyControllerTest extends RestTestBase {
                 Optional.of(navn.getMellomnavn()),
                 navn.getEtternavn()
             ),
+            Optional.empty(),
             Optional.of(LocalDate.now().plusDays(10)),
             Optional.empty(),
             null,
@@ -179,13 +180,14 @@ public class RemedyControllerTest extends RestTestBase {
                     .navident(navident)
                     .build()));
 
-        when(ressursCommadService.createRessursSync(any(OpprettRessursCommand.class)))
+        when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
             .thenReturn(new RessursState(
                 "fid",
                 personident,
                 navident,
                 Sektor.EKSTERN,
                 new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
+                Optional.empty(),
                 Optional.empty(), Optional.empty(),
                 null,
                 Collections.emptyList()
@@ -253,17 +255,19 @@ public class RemedyControllerTest extends RestTestBase {
             new Visningsnavn("Opprinnelig_fornavn", Optional.empty(), "Opprinnelig_etternavn"),
             Optional.empty(),
             Optional.empty(),
+            Optional.empty(),
             null,
             Collections.emptyList()
         )));
 
-        when(ressursCommadService.createRessursSync(any(OpprettRessursCommand.class)))
+        when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
             .thenReturn(new RessursState(
                 "fid",
                 gml_personident,
                 navident,
                 Sektor.NAV_STATLIG,
                 new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
+                Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
                 null,
@@ -306,10 +310,10 @@ public class RemedyControllerTest extends RestTestBase {
             new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn())
         );
 
-        Mockito.verify(ressursCommadService).oppdaterPersonidentCommand(
+        Mockito.verify(ressursCommandService).oppdaterPersonidentCommand(
             eq(expectedOppdaterPersonidentCommand), any()
         );
-        Mockito.verify(ressursCommadService).oppdaterPersonaliaEvent(
+        Mockito.verify(ressursCommandService).oppdaterPersonaliaEvent(
             eq(expectedOppdaterPersonaliaCommand), any()
         );
     }

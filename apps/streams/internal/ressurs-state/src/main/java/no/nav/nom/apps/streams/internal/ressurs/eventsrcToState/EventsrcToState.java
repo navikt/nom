@@ -92,6 +92,7 @@ class EventsrcToState {
                             Optional.ofNullable(parseNullableFromJson(visningsnavn, "mellomnavn")),
                             visningsnavn.get("etternavn").asText()
                     ),
+                    Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "primaryTelefonnummer")),
                     Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "sluttdato", LocalDate::parse)),
                     Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "startdato", LocalDate::parse)),
                     Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "primaryFysiskBrukersted")),

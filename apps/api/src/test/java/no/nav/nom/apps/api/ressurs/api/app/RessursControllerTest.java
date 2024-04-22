@@ -10,8 +10,9 @@ import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPrimaryTelefonnummerCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
@@ -36,7 +37,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.Assert;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -66,7 +66,7 @@ public class RessursControllerTest extends RestTestBase {
     private NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient;
 
     @MockBean
-    private RessursCommadService ressursCommadService;
+    private RessursCommandService ressursCommandService;
 
     @MockBean
     private OrgtilknytningCommandService orgtilknytningCommandService;
@@ -183,6 +183,7 @@ public class RessursControllerTest extends RestTestBase {
         String personident = "12345678910";
         String navident = "x123456";
         val navn = pdlUtils.mockSinglePersonResponse();
+        String primaryTelefonnummer = "12345678";
 
         when(nikClient.opprettNavidentOnBehalfOfUser(
             eq(OpprettNavidentRequest.builder()
@@ -202,6 +203,7 @@ public class RessursControllerTest extends RestTestBase {
             .visningsfornavn(navn.getFornavn())
             .visningsmellomnavn(navn.getMellomnavn())
             .visningsetternavn(navn.getEtternavn())
+            .primaryTelefonnummer(primaryTelefonnummer)
             .sektor(Sektor.EKSTERN)
             .startDato(LocalDate.now())
             .sluttDato(Optional.of(LocalDate.now().plusMonths(1)))
@@ -214,7 +216,7 @@ public class RessursControllerTest extends RestTestBase {
         when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
             .thenReturn(Set.of(request.fysiskBrukerstedNr()));
 
-        when(ressursCommadService.createRessursSync(any(OpprettRessursCommand.class)))
+        when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
             .thenReturn(ressursState());
 
         postOpprettRessursRequest(
@@ -224,8 +226,8 @@ public class RessursControllerTest extends RestTestBase {
             .expectStatus().is2xxSuccessful()
             .expectBody(OpprettRessursResponse.class);
 
-        verify(ressursCommadService, times(1)).createRessursSync(any());
-        verify(ressursCommadService, times(1)).avsluttRessursEvent(any(), any());
+        verify(ressursCommandService, times(1)).createRessursSync(any());
+        verify(ressursCommandService, times(1)).avsluttRessursEvent(any(), any());
 
         verify(orgtilknytningCommandService, times(1)).opprettOrgtilknytning(any());
         verify(orgtilknytningCommandService, times(1)).avvikleOrgtilknytning(any(), any());
@@ -247,8 +249,8 @@ public class RessursControllerTest extends RestTestBase {
             .isEqualTo("Sluttdato må oppgis for opprettelse av ekstern ressurs");
 
 
-        verify(ressursCommadService, times(0)).createRessursSync(any());
-        verify(ressursCommadService, times(0)).avsluttRessursEvent(any(), any());
+        verify(ressursCommandService, times(0)).createRessursSync(any());
+        verify(ressursCommandService, times(0)).avsluttRessursEvent(any(), any());
 
         verify(orgtilknytningCommandService, times(0)).opprettOrgtilknytning(any());
         verify(orgtilknytningCommandService, times(0)).avvikleOrgtilknytning(any(), any());
@@ -288,7 +290,7 @@ public class RessursControllerTest extends RestTestBase {
             .expectStatus().isOk();
 
         var oppdaterPersonaliaCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterPersonaliaCommand.class);
-        verify(ressursCommadService, times(1))
+        verify(ressursCommandService, times(1))
             .oppdaterPersonaliaEvent(oppdaterPersonaliaCommandArgumentCaptor.capture(), any());
 
         assertThat(oppdaterPersonaliaCommandArgumentCaptor.getValue())
@@ -355,7 +357,7 @@ public class RessursControllerTest extends RestTestBase {
 
         var opphorRessursCommandArgumentCaptor = ArgumentCaptor.forClass(OpphorRessursCommand.class);
 
-        verify(ressursCommadService, times(1)).avsluttRessursEvent(opphorRessursCommandArgumentCaptor.capture(), any());
+        verify(ressursCommandService, times(1)).avsluttRessursEvent(opphorRessursCommandArgumentCaptor.capture(), any());
         verify(orgtilknytningCommandService, times(1)).avvikleOrgtilknytning(any(), any());
 
         assertThat(opphorRessursCommandArgumentCaptor.getValue())
@@ -423,7 +425,36 @@ public class RessursControllerTest extends RestTestBase {
         )
             .expectStatus().isBadRequest();
 
-        verify(ressursCommadService, times(0)).oppdaterPersonaliaEvent(any(), any());
+        verify(ressursCommandService, times(0)).oppdaterPersonaliaEvent(any(), any());
+    }
+
+    @Test
+    void skal_kunne_endre_telefonnummer_ekstern() {
+        var existingRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN)
+            .build();
+
+        when(ressursStateRepository.findByNavident(existingRessurs.navident()))
+            .thenReturn(Optional.of(existingRessurs));
+
+        var updatePrimaryTelefonnummer = new UpdatePrimarytelefonnummer(
+            "12345678"
+        );
+
+        postUpdatePrimaryTelefonnummerRequest(
+            existingRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            updatePrimaryTelefonnummer
+        )
+            .expectStatus().isOk();
+
+        var oppdaterMobilnummerCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterPrimaryTelefonnummerCommand.class);
+        verify(ressursCommandService, times(1))
+            .oppdatertPrimaryTelefonnummer(oppdaterMobilnummerCommandArgumentCaptor.capture(), any());
+
+        assertThat(oppdaterMobilnummerCommandArgumentCaptor.getValue())
+            .matches(oppdaterPersonaliaCommand -> oppdaterPersonaliaCommand.fid().equals(existingRessurs.fid()))
+            .matches(oppdaterPersonaliaCommand -> oppdaterPersonaliaCommand.primaryTelefonnummer().equals(updatePrimaryTelefonnummer.nummer()));
     }
 
 
@@ -436,6 +467,7 @@ public class RessursControllerTest extends RestTestBase {
 
         var ressursState = ressursState().toBuilder()
             .personident(personident)
+            .primaryTelefonnummer(Optional.of("12345678"))
             .primaryFysiskBrukersted(Optional.of("1234"))
             .fysiskeBrukersteder(List.of("1234"))
             .build();
@@ -550,7 +582,7 @@ public class RessursControllerTest extends RestTestBase {
             .expectStatus().isOk();
 
         var oppdaterFysiskeBrukerstederCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterFysiskeBrukerstederCommand.class);
-        verify(ressursCommadService, times(1))
+        verify(ressursCommandService, times(1))
             .oppdaterFysiskeBrukerstederCommand(oppdaterFysiskeBrukerstederCommandArgumentCaptor.capture(), any());
 
         assertThat(oppdaterFysiskeBrukerstederCommandArgumentCaptor.getValue())
@@ -628,6 +660,7 @@ public class RessursControllerTest extends RestTestBase {
             .visningsfornavn("whatever")
             .visningsmellomnavn("whatever")
             .visningsetternavn("whatever")
+            .primaryTelefonnummer("whatever")
             .sektor(Sektor.EKSTERN)
             .orgEnhetId("whatever")
             .ansettelsesType(AnsettelsesType.FAST)
@@ -649,6 +682,22 @@ public class RessursControllerTest extends RestTestBase {
                 httpHeaders.setBearerAuth(accessToken);
             })
             .bodyValue(updateVisningsnavnRequest)
+            .exchange();
+    }
+
+    private WebTestClient.ResponseSpec postUpdatePrimaryTelefonnummerRequest(
+        String navident, String accessToken, UpdatePrimarytelefonnummer updatePrimarytelefonnummer
+    ) {
+        return webTestClient.post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/ressurser/{navident}/telefonnummer")
+                .build(navident)
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(accessToken);
+            })
+            .bodyValue(updatePrimarytelefonnummer)
             .exchange();
     }
 

@@ -147,6 +147,7 @@ class KafkaRessursListenerTest {
                                 Optional.empty(),
                                 "VisningsEtternavn"
                         ),
+                    Optional.empty(),
                     List.of("2021"),
                     "2021"
                 ),

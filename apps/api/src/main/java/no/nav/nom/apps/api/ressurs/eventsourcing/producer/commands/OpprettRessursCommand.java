@@ -15,6 +15,7 @@ public record OpprettRessursCommand(
     Optional<Person> pdlPerson,
     Sektor sektor,
     Visningsnavn visningsnavn,
+    Optional<String> primaryTelefonnummer,
     InputMetadata inputMetadata,
     LocalDate startdato,
     String orgEnhetId,

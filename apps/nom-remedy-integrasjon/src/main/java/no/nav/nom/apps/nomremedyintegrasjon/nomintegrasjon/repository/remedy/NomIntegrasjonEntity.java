@@ -65,4 +65,7 @@ public class NomIntegrasjonEntity {
     @Column(name = "UTLOPSDATO")
     private Long utlopsdato;
 
+    @Column(name = "MOBIL")
+    private String mobil;
+
 }

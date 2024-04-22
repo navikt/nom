@@ -144,6 +144,34 @@ public class RessursController {
         return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
     }
 
+    @PostMapping("{navident}/telefonnummer")
+    @Operation(
+        description = "Endrer telefonnummer for en ressurs",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200"),
+    })
+    @PreAuthorize(
+        "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
+    )
+    public ResponseEntity<StandardResponse> updatePrimarytelefonnummer(
+        @PathVariable String navident,
+        @RequestBody UpdatePrimarytelefonnummer updatePrimarytelefonnummer
+    ) {
+        if (!authResolver.kanRedigereRessurs(navident)) {
+            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
+        }
+
+        if (!unleash.isEnabled(UNLEASH_EDIT_RESSURS)) {
+            throw new AccessDeniedException("Endring av ressurs er blokkert");
+        }
+
+        ressursRestService.updateRessursPrimaryTelefonnummer(navident, updatePrimarytelefonnummer);
+
+        return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
+    }
+
     @GetMapping("/byNavident/{navident}")
     @Operation(
         description = "Henter ressurs med navident",

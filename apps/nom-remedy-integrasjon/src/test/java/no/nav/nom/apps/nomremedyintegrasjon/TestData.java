@@ -9,6 +9,7 @@ import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
+import no.nav.nom.contract.nom.eventsource.RessursPrimaryTelefonnummerOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttdatoOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -52,6 +53,7 @@ public class TestData {
             new Visningsnavn(
                 "Fornavn", Optional.empty(), "Etternavn"
             ),
+            Optional.of("12345678"),
             List.of("2021"),
             "2021"
         );
@@ -85,6 +87,14 @@ public class TestData {
         return new RessursPersonaliaOppdatertV1(
             UUID.randomUUID().toString(),
             personaliaOppdatertEventData,
+            inputMetadata()
+        );
+    }
+
+    public static RessursPrimaryTelefonnummerOppdatertEventV1 ressursPrimaryTelefonnummerOppdatertV1(RessursPrimaryTelefonnummerOppdatertEventV1.PrimaryTelefonnummerOppdatertEventData primaryTelefonnummerOppdatertEventData) {
+        return new RessursPrimaryTelefonnummerOppdatertEventV1(
+            UUID.randomUUID().toString(),
+            primaryTelefonnummerOppdatertEventData,
             inputMetadata()
         );
     }
@@ -203,6 +213,7 @@ public class TestData {
             .sektor(2)
             .tiltredelsesdato(epochSecondsNorwegianTimeNoon(LocalDate.now()))
             .utlopsdato(epochSecondsNorwegianTimeEndOfDay(LocalDate.now().plusMonths(1)))
+            .mobil("12345678")
             .build();
     }
 
@@ -219,6 +230,7 @@ public class TestData {
                 .fornavn("fornavn")
                 .etternavn("etternavn")
             )
+            .primaryTelefonnummer("12345678")
             .primaryFysiskBrukersted("1234")
             .sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
     }

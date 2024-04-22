@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.SlettRessursCommand;
@@ -37,14 +37,14 @@ import java.util.Optional;
 @PreAuthorize("hasAuthority('ADMIN')")
 public class ManuelleRessursEvtsrcMeldinger {
 
-    private final RessursCommadService ressursCommadService;
+    private final RessursCommandService ressursCommandService;
     private final RessursStateRepository ressursStateRepository;
 
     public ManuelleRessursEvtsrcMeldinger(
-        RessursCommadService ressursCommadService,
+        RessursCommandService ressursCommandService,
         RessursStateRepository ressursStateRepository
     ) {
-        this.ressursCommadService = ressursCommadService;
+        this.ressursCommandService = ressursCommandService;
         this.ressursStateRepository = ressursStateRepository;
     }
 
@@ -87,7 +87,7 @@ public class ManuelleRessursEvtsrcMeldinger {
                 ));
         }
 
-        ressursCommadService.slettRessursCommand(
+        ressursCommandService.slettRessursCommand(
             new SlettRessursCommand(fid),
             new InputMetadata(
                 "/api/admin/manuelleEvtsrcMeldinger",
@@ -151,7 +151,7 @@ public class ManuelleRessursEvtsrcMeldinger {
                 ));
         }
 
-        ressursCommadService.oppdaterPersonidentCommand(
+        ressursCommandService.oppdaterPersonidentCommand(
             new OppdaterPersonidentCommand(fid, nyPersonident),
             new InputMetadata(
                 "/api/admin/manuelleEvtsrcMeldinger",
@@ -218,7 +218,7 @@ public class ManuelleRessursEvtsrcMeldinger {
             mellomnavn = null;
         }
 
-        ressursCommadService.oppdaterPersonaliaEvent(
+        ressursCommandService.oppdaterPersonaliaEvent(
             new OppdaterPersonaliaCommand(
                 HtmlUtils.htmlEncode(fid),
                 new Visningsnavn(fornavn, Optional.ofNullable(mellomnavn), etternavn)

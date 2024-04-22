@@ -11,6 +11,219 @@
     }
   ],
   "paths": {
+    "/app/authorizedRessursRedigering/addDelegatedAuthorization": {
+      "post": {
+        "description": "Deleger tilgang til å redigere ressurs til en annen bruker",
+        "operationId": "addDelegatedAuthorization",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LederTilgangForOrgenhetRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Controller metode for å verifisere redigere ressurs tilgang og administrere delegerering av tilganger"
+        ]
+      }
+    },
+    "/app/authorizedRessursRedigering/getDelegerteLederTilgangerAvUser": {
+      "get": {
+        "operationId": "getLederTilgangGittAvBruker",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LederTilgang"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Controller metode for å verifisere redigere ressurs tilgang og administrere delegerering av tilganger"
+        ]
+      }
+    },
+    "/app/authorizedRessursRedigering/getLederTilgangerDelegertTilMeg": {
+      "get": {
+        "operationId": "getLederTilgangerForUser",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LederTilgang"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Controller metode for å verifisere redigere ressurs tilgang og administrere delegerering av tilganger"
+        ]
+      }
+    },
+    "/app/authorizedRessursRedigering/isAuthorizedForNavident/{navident}": {
+      "get": {
+        "description": "om current bruker har tilgang til å redigere ressurs",
+        "operationId": "isAuthorizedForNavident",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "navident",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Controller metode for å verifisere redigere ressurs tilgang og administrere delegerering av tilganger"
+        ]
+      }
+    },
+    "/app/authorizedRessursRedigering/isAuthorizedForOrgenhet/{orgenhetId}": {
+      "get": {
+        "description": "om current bruker har tilgang til å opprette ressurser i angitt orgenhet",
+        "operationId": "isAuthorizedForOrgenhet",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgenhetId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Controller metode for å verifisere redigere ressurs tilgang og administrere delegerering av tilganger"
+        ]
+      }
+    },
+    "/app/authorizedRessursRedigering/removeDelegatedAuthorization/{navidentDelegertLeder}": {
+      "get": {
+        "description": "Fjern tilgang til å redigere ressurs for gitt bruker",
+        "operationId": "removeDelegatedAuthorization",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "navidentDelegertLeder",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orgenhet",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Controller metode for å verifisere redigere ressurs tilgang og administrere delegerering av tilganger"
+        ]
+      }
+    },
+    "/app/authorizedRessursRedigering/renewDelegatedAuthorization": {
+      "post": {
+        "description": "Forny tilgang til å redigere ressurs til en annen bruker",
+        "operationId": "renewDelegatedAuthorization",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LederTilgangForOrgenhetRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Controller metode for å verifisere redigere ressurs tilgang og administrere delegerering av tilganger"
+        ]
+      }
+    },
     "/app/orgenheter": {
       "get": {
         "description": "Henter alle orgenheter",
@@ -883,6 +1096,52 @@
         ]
       }
     },
+    "/app/ressurser/{navident}/telefonnummer": {
+      "post": {
+        "description": "Endrer telefonnummer for en ressurs",
+        "operationId": "updatePrimarytelefonnummer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "navident",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePrimarytelefonnummer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      }
+    },
     "/app/sessioninfo": {
       "get": {
         "operationId": "sessioninfo",
@@ -1009,6 +1268,62 @@
       "JsonNode": {
         "type": "object"
       },
+      "LederTilgang": {
+        "required": [
+          "av",
+          "fid",
+          "gyldigFom",
+          "gyldigTom",
+          "orgenhetId",
+          "til"
+        ],
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "av": {
+            "type": "string"
+          },
+          "fid": {
+            "type": "string"
+          },
+          "gyldigFom": {
+            "type": "string",
+            "format": "date"
+          },
+          "gyldigTom": {
+            "type": "string",
+            "format": "date"
+          },
+          "orgenhetId": {
+            "type": "string"
+          },
+          "til": {
+            "type": "string"
+          }
+        }
+      },
+      "LederTilgangForOrgenhetRequest": {
+        "required": [
+          "delegertTilNavident",
+          "gyldigTom",
+          "orgenhetId"
+        ],
+        "type": "object",
+        "properties": {
+          "delegertTilNavident": {
+            "type": "string"
+          },
+          "gyldigTom": {
+            "type": "string",
+            "format": "date"
+          },
+          "orgenhetId": {
+            "type": "string"
+          }
+        }
+      },
       "LeggTilOrgtilknytningRequest": {
         "required": [
           "erDagligOppfolging",
@@ -1127,6 +1442,9 @@
             "type": "string"
           },
           "personident": {
+            "type": "string"
+          },
+          "primaryTelefonnummer": {
             "type": "string"
           },
           "sektor": {
@@ -1384,6 +1702,9 @@
           "primaryFysiskBrukersted": {
             "type": "string"
           },
+          "primaryTelefonnummer": {
+            "type": "string"
+          },
           "sektor": {
             "$ref": "#/components/schemas/Sektor"
           },
@@ -1482,6 +1803,9 @@
             "type": "string"
           },
           "primaryFysiskBrukersted": {
+            "type": "string"
+          },
+          "primaryTelefonnummer": {
             "type": "string"
           },
           "sektor": {
@@ -1604,6 +1928,14 @@
           }
         }
       },
+      "UpdatePrimarytelefonnummer": {
+        "type": "object",
+        "properties": {
+          "nummer": {
+            "type": "string"
+          }
+        }
+      },
       "UpdateVisningsnavnRequest": {
         "type": "object",
         "properties": {
@@ -1648,6 +1980,7 @@
       "BearerAuth": {
         "bearerFormat": "JWT",
         "description": "Bearer token",
+        "in": "header",
         "scheme": "bearer",
         "type": "http"
       }

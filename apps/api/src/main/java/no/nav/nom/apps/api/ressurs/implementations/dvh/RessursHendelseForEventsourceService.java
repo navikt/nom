@@ -3,7 +3,7 @@ package no.nav.nom.apps.api.ressurs.implementations.dvh;
 import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
@@ -37,17 +37,17 @@ import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
 @Service
 public class RessursHendelseForEventsourceService {
     private final RessursStateRepository ressursStateRepository;
-    private final RessursCommadService ressursCommadService;
+    private final RessursCommandService ressursCommandService;
 
     private final NomMastered nomMastered;
     private final Unleash unleash;
 
     public RessursHendelseForEventsourceService(
         RessursStateRepository ressursStateRepository,
-        RessursCommadService ressursCommadService, NomMastered nomMastered, Unleash unleash
+        RessursCommandService ressursCommandService, NomMastered nomMastered, Unleash unleash
     ) {
         this.ressursStateRepository = ressursStateRepository;
-        this.ressursCommadService = ressursCommadService;
+        this.ressursCommandService = ressursCommandService;
         this.nomMastered = nomMastered;
         this.unleash = unleash;
     }
@@ -111,13 +111,13 @@ public class RessursHendelseForEventsourceService {
         if (skipDueToNomMastered(ressurs.getNavIdent())) {
             return null;
         }
-
-        return Map.entry(ressurs, ressursCommadService.createRessursEvent(new OpprettRessursCommand(
+        return Map.entry(ressurs, ressursCommandService.createRessursEvent(new OpprettRessursCommand(
             ressurs.getPersonIdent(),
             ressurs.getNavIdent(),
             Optional.empty(),
             DvhRessurs.toSektor(ressurs.getRemedyAnsattType()),
             toVisningsnavn(ressurs),
+            null,
             createInputMetadata(ressurs.getRawData()),
             null,
             null,
@@ -179,7 +179,7 @@ public class RessursHendelseForEventsourceService {
             return;
         }
 
-        ressursCommadService.avsluttRessursEvent(new OpphorRessursCommand(fid, dvhRessurs.getSluttdato()), createInputMetadata(dvhRessurs.getRawData()));
+        ressursCommandService.avsluttRessursEvent(new OpphorRessursCommand(fid, dvhRessurs.getSluttdato()), createInputMetadata(dvhRessurs.getRawData()));
     }
 
     private void ressursStartet(String fid, DvhRessurs dvhRessurs) {
@@ -187,7 +187,7 @@ public class RessursHendelseForEventsourceService {
             return;
         }
 
-        ressursCommadService.endreStartRessursEvent(new OppdaterStartdatoCommand(fid, dvhRessurs.getStartDato()), createInputMetadata(dvhRessurs.getRawData()));
+        ressursCommandService.endreStartRessursEvent(new OppdaterStartdatoCommand(fid, dvhRessurs.getStartDato()), createInputMetadata(dvhRessurs.getRawData()));
     }
 
     private boolean skipDueToNomMastered(String navident) {
@@ -203,7 +203,7 @@ public class RessursHendelseForEventsourceService {
             return;
         }
 
-        ressursCommadService.oppdaterPersonaliaEvent(
+        ressursCommandService.oppdaterPersonaliaEvent(
             new OppdaterPersonaliaCommand(fid, toVisningsnavn(dvhRessurs)),
             createInputMetadata(dvhRessurs.getRawData())
         );
@@ -214,7 +214,7 @@ public class RessursHendelseForEventsourceService {
             return;
         }
 
-        ressursCommadService.oppdaterSektorEvent(
+        ressursCommandService.oppdaterSektorEvent(
             new OppdaterSektorCommand(fid, DvhRessurs.toSektor(dvhRessurs.getRemedyAnsattType())),
             createInputMetadata(dvhRessurs.getRawData())
         );
@@ -225,14 +225,14 @@ public class RessursHendelseForEventsourceService {
             return;
         }
 
-        ressursCommadService.oppdaterPersonidentCommand(
+        ressursCommandService.oppdaterPersonidentCommand(
             new OppdaterPersonidentCommand(fid, dvhRessurs.getPersonIdent()),
             createInputMetadata(dvhRessurs.getRawData())
         );
     }
 
     private void ressursEndretFysiskBrukersted(String fid, DvhRessurs dvhRessurs) {
-        ressursCommadService.oppdaterFysiskeBrukerstederCommand(
+        ressursCommandService.oppdaterFysiskeBrukerstederCommand(
             OppdaterFysiskeBrukerstederCommand.builder()
                 .fid(fid)
                 .primaryFysiskBrukersted(dvhRessurs.getFysiskBrukersted())

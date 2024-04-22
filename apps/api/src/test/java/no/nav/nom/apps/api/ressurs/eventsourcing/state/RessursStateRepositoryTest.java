@@ -17,7 +17,7 @@ class RessursStateRepositoryTest {
     @Test
     @DisplayName("Test remove RessursStateFor fid")
     void test_001() {
-        RessursState stateToDelete = new RessursState("FID_1", "123", "A000001", Sektor.NAV_STATLIG, null, null, null, null, Collections.emptyList());
+        RessursState stateToDelete = new RessursState("FID_1", "123", "A000001", Sektor.NAV_STATLIG, null, null, null, null, null, Collections.emptyList());
 
         ressursStateRepository.update(stateToDelete);
 
@@ -35,8 +35,8 @@ class RessursStateRepositoryTest {
     @Test
     @DisplayName("Test remove RessursStateFor fid hvor det er to ulike fid for samme navident, forskjellig personident")
     void test_002() {
-        RessursState originalState = new RessursState("FID_1", "123", "A000001", Sektor.NAV_STATLIG, null, null, null, null, Collections.emptyList());
-        RessursState duplicateStateToDelete = new RessursState("FID_2", "321", "A000001", Sektor.NAV_STATLIG, null, null, null, null, Collections.emptyList());
+        RessursState originalState = new RessursState("FID_1", "123", "A000001", Sektor.NAV_STATLIG, null, null, null, null, null, Collections.emptyList());
+        RessursState duplicateStateToDelete = new RessursState("FID_2", "321", "A000001", Sektor.NAV_STATLIG, null, null, null, null, null, Collections.emptyList());
 
         ressursStateRepository.update(originalState);
         ressursStateRepository.update(duplicateStateToDelete); // This takes over as RessursByNavident state
@@ -62,8 +62,8 @@ class RessursStateRepositoryTest {
     @Test
     @DisplayName("Test remove RessursStateFor fid hvor det er to ulike fid for samme navident og samme personident")
     void test_003() {
-        RessursState originalState = new RessursState("FID_1", "123", "A000001", Sektor.NAV_STATLIG, null, null, null, null, Collections.emptyList());
-        RessursState duplicateStateToDelete = new RessursState("FID_2", "123", "A000001", Sektor.NAV_STATLIG, null, null, null, null, Collections.emptyList());
+        RessursState originalState = new RessursState("FID_1", "123", "A000001", Sektor.NAV_STATLIG, null, null, null, null, null, Collections.emptyList());
+        RessursState duplicateStateToDelete = new RessursState("FID_2", "123", "A000001", Sektor.NAV_STATLIG, null, null, null, null, null, Collections.emptyList());
 
         ressursStateRepository.update(originalState);
         ressursStateRepository.update(duplicateStateToDelete); // This takes over as RessursByNavident state

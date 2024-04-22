@@ -1,5 +1,6 @@
 package no.nav.nom.contract.nom.state;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,8 +19,14 @@ public record RessursState(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String navident,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Sektor sektor,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Visningsnavn visningsnavn,
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<String> primaryTelefonnummer,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> sluttdato,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> startdato,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<String> primaryFysiskBrukersted,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<String> fysiskeBrukersteder
-) {}
+) {
+    @JsonIgnore
+    public boolean isEkstern() {
+        return this.sektor().equals(Sektor.EKSTERN);
+    }
+}

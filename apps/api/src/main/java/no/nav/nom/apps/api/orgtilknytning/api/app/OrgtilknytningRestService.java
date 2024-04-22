@@ -21,7 +21,7 @@ import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
@@ -59,7 +59,7 @@ public class OrgtilknytningRestService {
 
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
-    private final RessursCommadService ressursCommadService;
+    private final RessursCommandService ressursCommandService;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final RessursStateRepository ressursStateRepository;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
@@ -68,14 +68,14 @@ public class OrgtilknytningRestService {
     public OrgtilknytningRestService(
         OrgtilknytningStateRepository orgtilknytningStateRepository,
         OrgtilknytningCommandService orgtilknytningCommandService,
-        RessursCommadService ressursCommadService, OrgEnhetStateRepository orgEnhetStateRepository,
+        RessursCommandService ressursCommandService, OrgEnhetStateRepository orgEnhetStateRepository,
         RessursStateRepository ressursStateRepository,
         RemedyEnhetMapperService remedyEnhetMapperService,
         NomMastered nomMastered
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
-        this.ressursCommadService = ressursCommadService;
+        this.ressursCommandService = ressursCommandService;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.remedyEnhetMapperService = remedyEnhetMapperService;
@@ -154,7 +154,7 @@ public class OrgtilknytningRestService {
 
         var nyMinimumStartdato = Stream.concat(endredeFomDatoer, nyeFomDatoer).reduce(LocalDate.MAX, (it, acc) -> it.isBefore(acc) ? it : acc);
         if (nyMinimumStartdato != LocalDate.MAX && !nyMinimumStartdato.equals(tilknyttetRessurs.startdato().orElse(null))) {
-            ressursCommadService.oppdaterRessursStartdatoEvent(
+            ressursCommandService.oppdaterRessursStartdatoEvent(
                 new OppdaterStartdatoCommand(tilknyttetRessurs.fid(), nyMinimumStartdato),
                 getInputMetadataOppdaterOrgtilknytningerForRessurs(request)
             );
@@ -348,7 +348,7 @@ public class OrgtilknytningRestService {
             );
 
         if (!newSluttdato.equals(tilknyttetRessurs.sluttdato())) {
-            ressursCommadService.oppdaterRessursSluttdatoEvent(
+            ressursCommandService.oppdaterRessursSluttdatoEvent(
                 OppdaterSluttdatoCommand.builder()
                     .fid(tilknyttetRessurs.fid())
                     .sluttdato(newSluttdato)
@@ -477,7 +477,7 @@ public class OrgtilknytningRestService {
 
             if (maxGyldigTomOnExistingOrgtilknytningerIsBeforeNewGyldigTom && tilknyttetRessursSluttdatoNotEqualToNewGyldigTom) {
 
-                ressursCommadService.oppdaterRessursSluttdatoEvent(
+                ressursCommandService.oppdaterRessursSluttdatoEvent(
                     new OppdaterSluttdatoCommand(
                         tilknyttetRessurs.fid(),
                         endreOrgtilknytningDatoRequest.gyldigTom(),
@@ -616,7 +616,7 @@ public class OrgtilknytningRestService {
 
             if (maxGyldigTomOnExistingOrgtilknytningerIsBeforeNewGyldigTom && tilknyttetRessursSluttdatoNotEqualToNewGyldigTom) {
 
-                ressursCommadService.oppdaterRessursSluttdatoEvent(
+                ressursCommandService.oppdaterRessursSluttdatoEvent(
                     new OppdaterSluttdatoCommand(
                         tilknyttetRessurs.fid(),
                         leggTilOrgtilknytningRequest.gyldigTom(),

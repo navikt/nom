@@ -64,6 +64,7 @@ class RessursStillingStrukturererTest extends TestBase {
                 null,
                 Optional.empty(),
                 Optional.empty(),
+                Optional.empty(),
                 null,
                 Collections.emptyList()
             )));
@@ -74,6 +75,7 @@ class RessursStillingStrukturererTest extends TestBase {
                 navident_B002002,
                 Sektor.NAV_STATLIG,
                 null,
+                Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
                 null,
@@ -311,6 +313,7 @@ class RessursStillingStrukturererTest extends TestBase {
                 navid_3,
                 Sektor.NAV_STATLIG,
                 null,
+                Optional.empty(),
                 Optional.of(ressursSluttdato),
                 Optional.empty(),
                 null,

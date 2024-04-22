@@ -318,6 +318,7 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
                 Optional.empty(),
                 "etternavn"
             ),
+            Optional.empty(),
             List.of("2021"),
             "2021"
         );
@@ -433,6 +434,7 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
             data.personident(),
             additionalData.navident().orElse("MANGLENDE_NAVIDENT"),
             data.visningsnavn(),
+            Optional.empty(),
             data.sektor(),
             Optional.empty(),
             additionalData.startdato(),
@@ -446,6 +448,7 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
             ressursState.personident(),
             ressursState.navident(),
             visningsnavn,
+            ressursState.primaryTelefonnummer(),
             ressursState.sektor(),
             ressursState.orgtilknytninger(),
             ressursState.startdato(),
@@ -459,6 +462,7 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
             ressursState.personident(),
             ressursState.navident(),
             ressursState.visningsnavn(),
+            ressursState.primaryTelefonnummer(),
             ressursState.sektor(),
             ressursState.orgtilknytninger(),
             ressursState.startdato(),
@@ -539,6 +543,7 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
             ressursState.personident(),
             ressursState.navident(),
             ressursState.visningsnavn(),
+            ressursState.primaryTelefonnummer(),
             ressursState.sektor(),
             Optional.ofNullable(copy.isEmpty() ? null : copy),
             ressursState.startdato(),

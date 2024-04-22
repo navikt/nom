@@ -143,6 +143,7 @@ class EventsrcToState {
                             Optional.ofNullable(visningsnavn.hasNonNull("mellomnavn") ? visningsnavn.get("mellomnavn").asText() : null),
                             visningsnavn.get("etternavn").asText()
                     ),
+                    Optional.ofNullable(eventStateAggregate.hasNonNull("primaryTelefonnummer") ? eventStateAggregate.get("primaryTelefonnummer").asText() : null),
                     Sektor.valueOf(eventStateAggregate.get("sektor").asText()),
                     orgtilknytninger,
                     Optional.ofNullable(eventStateAggregate.hasNonNull("startdato") ? LocalDate.parse(eventStateAggregate.get("startdato").asText()) : null),

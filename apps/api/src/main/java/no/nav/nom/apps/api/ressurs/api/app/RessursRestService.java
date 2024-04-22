@@ -22,8 +22,9 @@ import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPrimaryTelefonnummerCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
@@ -57,6 +58,7 @@ import static no.nav.nom.apps.api.common.DateUtils.validateChronologicalDates;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
 import static no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService.validateOrgtilknytningTypeSektorCombination;
+import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 @Service
 public class RessursRestService {
@@ -65,7 +67,7 @@ public class RessursRestService {
 
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
-    private final RessursCommadService ressursCommadService;
+    private final RessursCommandService ressursCommandService;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final OrgtilknytningRestService orgtilknytningRestService;
     private final NIKClient nikClient;
@@ -81,7 +83,7 @@ public class RessursRestService {
     public RessursRestService(
         RessursStateRepository ressursStateRepository,
         OrgtilknytningStateRepository orgtilknytningStateRepository,
-        RessursCommadService ressursCommadService,
+        RessursCommandService ressursCommandService,
         OrgtilknytningCommandService orgtilknytningCommandService,
         OrgtilknytningRestService orgtilknytningRestService,
         NIKClient nikClient,
@@ -95,7 +97,7 @@ public class RessursRestService {
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
-        this.ressursCommadService = ressursCommadService;
+        this.ressursCommandService = ressursCommandService;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.orgtilknytningRestService = orgtilknytningRestService;
         this.nikClient = nikClient;
@@ -159,6 +161,7 @@ public class RessursRestService {
         return new Ressurs(
             ressursState.toBuilder()
                 .personident(personident)
+                .primaryTelefonnummer(ressursState.isEkstern() ? ressursState.primaryTelefonnummer() : Optional.empty())
                 .primaryFysiskBrukersted(showFysiskBrukerstedAndPersonident ? ressursState.primaryFysiskBrukersted() : Optional.empty())
                 .fysiskeBrukersteder(showFysiskBrukerstedAndPersonident ? ressursState.fysiskeBrukersteder() : Collections.emptyList())
                 .build(),
@@ -171,7 +174,7 @@ public class RessursRestService {
     public void updateRessursNavn(String navident, UpdateVisningsnavnRequest updateVisningsnavnRequest) {
         var ressursState = findRessursStateByNavident(navident);
 
-        if (ressursState.sektor() != Sektor.EKSTERN) {
+        if (!ressursState.isEkstern()) {
             throw new InvalidSektorException("Kun eksterne ressurser kan endres");
         }
 
@@ -191,7 +194,28 @@ public class RessursRestService {
             SecurityUtil.getAuthenticatedAzpName()
         ));
 
-        ressursCommadService.oppdaterPersonaliaEvent(oppdaterPersonaliaCommand, inputMetadata);
+        ressursCommandService.oppdaterPersonaliaEvent(oppdaterPersonaliaCommand, inputMetadata);
+        nomMastered.markRessursAsMasteredInNom(navident);
+    }
+
+    public void updateRessursPrimaryTelefonnummer(String navident, UpdatePrimarytelefonnummer updatePrimarytelefonnummer) {
+        var ressursState = findRessursStateByNavident(navident);
+
+        if (!ressursState.isEkstern()) {
+            throw new InvalidSektorException("Kun eksterne ressurser kan endres");
+        }
+
+        var oppdaterMobilnummerCommand = new OppdaterPrimaryTelefonnummerCommand(
+            ressursState.fid(),
+            updatePrimarytelefonnummer.nummer()
+        );
+
+        var inputMetadata = new InputMetadata("REST", "updateRessursMobilnummer", updatePrimarytelefonnummer, new Origination(
+            getAuthenticatedNavIdent(),
+            SecurityUtil.getAuthenticatedAzpName()
+        ));
+
+        ressursCommandService.oppdatertPrimaryTelefonnummer(oppdaterMobilnummerCommand, inputMetadata);
         nomMastered.markRessursAsMasteredInNom(navident);
     }
 
@@ -214,7 +238,7 @@ public class RessursRestService {
 
         if (requestContainsNewValues) {
 
-            ressursCommadService.oppdaterFysiskeBrukerstederCommand(
+            ressursCommandService.oppdaterFysiskeBrukerstederCommand(
                 OppdaterFysiskeBrukerstederCommand.builder()
                     .fid(ressursState.fid())
                     .primaryFysiskBrukersted(updateFysiskeBrukerstederRequest.primaryFysiskBrukersted())
@@ -312,9 +336,10 @@ public class RessursRestService {
             request.sektor(),
             new Visningsnavn(
                 request.visningsfornavn().trim(),
-                Optional.ofNullable(StringUtils.trimToNull(request.visningsmellomnavn())),
+                Optional.ofNullable(trimToNull(request.visningsmellomnavn())),
                 request.visningsetternavn()
             ),
+            Optional.ofNullable(trimToNull(request.primaryTelefonnummer())),
             metaData,
             startdato,
             Optional.ofNullable(request.orgEnhetId())
@@ -327,12 +352,12 @@ public class RessursRestService {
 
 
         try {
-            RessursState opprettetRessurs = ressursCommadService.createRessursSync(opprettRessursCommand);
+            RessursState opprettetRessurs = ressursCommandService.createRessursSync(opprettRessursCommand);
             nomMastered.markRessursAsMasteredInNom(opprettetRessurs.navident());
 
             // If ressurs is EKSTERN we fire a separate "avsluttRessursEvent" so that other systems, such as skjerming, know the ressurs already has a sluttDato.
             if (request.sektor() == Sektor.EKSTERN && request.sluttDato().isPresent()) {
-                ressursCommadService.avsluttRessursEvent(
+                ressursCommandService.avsluttRessursEvent(
                     new OpphorRessursCommand(opprettetRessurs.fid(), request.sluttDato().get()),
                     metaData
                 );
@@ -429,7 +454,7 @@ public class RessursRestService {
             )
         );
 
-        ressursCommadService.avsluttRessursEvent(
+        ressursCommandService.avsluttRessursEvent(
             new OpphorRessursCommand(fid, request.sluttDato()),
             metaData
         );

@@ -98,6 +98,7 @@ class RessursStillingLoaderTest extends TestBase {
                 Sektor.NAV_STATLIG,
                 null,
                 Optional.empty(),
+                Optional.empty(),
                 null,
                 null,
                 Collections.emptyList()
@@ -109,6 +110,7 @@ class RessursStillingLoaderTest extends TestBase {
                 "H554433",
                 Sektor.NAV_STATLIG,
                 null,
+                Optional.empty(),
                 Optional.empty(),
                 null,
                 null,

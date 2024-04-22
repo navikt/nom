@@ -15,6 +15,7 @@ public class RessursStateBuilder {
     private String navident;
     private Sektor sektor;
     private Visningsnavn visningsnavn;
+    private Optional<String> primaryTelefonnummer;
     private Optional<LocalDate> sluttdato;
 
     private Optional<LocalDate> startdato;
@@ -44,6 +45,11 @@ public class RessursStateBuilder {
 
     public RessursStateBuilder visningsnavn(Visningsnavn visningsnavn) {
         this.visningsnavn = visningsnavn;
+        return this;
+    }
+
+    public RessursStateBuilder primaryTelefonnummer(Optional<String> primaryTelefonnummer) {
+        this.primaryTelefonnummer = primaryTelefonnummer;
         return this;
     }
 
@@ -84,6 +90,7 @@ public class RessursStateBuilder {
             null,
             "etternavn" + suffix
         );
+        this.primaryTelefonnummer = Optional.empty();
         this.sluttdato = Optional.empty();
         this.startdato = Optional.empty();
         this.primaryFysiskBrukersted = Optional.empty();
@@ -92,7 +99,7 @@ public class RessursStateBuilder {
     }
 
     public RessursState build() {
-        return new RessursState(fid, personident, navident, sektor, visningsnavn, sluttdato, startdato, primaryFysiskBrukersted, fysiskeBrukersteder);
+        return new RessursState(fid, personident, navident, sektor, visningsnavn, primaryTelefonnummer, sluttdato, startdato, primaryFysiskBrukersted, fysiskeBrukersteder);
     }
 
 }

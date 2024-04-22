@@ -89,6 +89,7 @@ public class PdlFullmaktControllerTest extends RestTestBase {
                 Optional.of("kanskje"),
                 "etter"
             ),
+            Optional.empty(),
             Optional.of(slutt),
             Optional.of(start),
             null,

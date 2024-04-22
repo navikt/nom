@@ -176,6 +176,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
             null,
             Optional.empty(),
             Optional.empty(),
+            Optional.empty(),
             null,
             Collections.emptyList()
         )));
@@ -259,6 +260,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
                 navident,
                 Sektor.NAV_STATLIG,
                 new Visningsnavn("Ola", Optional.empty(), "Normann"),
+                Optional.empty(),
                 Optional.of(ressursSluttDato),
                 Optional.empty(),
                 null,
@@ -327,6 +329,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
                 navident,
                 Sektor.NAV_STATLIG,
                 new Visningsnavn("Ola", Optional.empty(), "Normann"),
+                Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
                 null,

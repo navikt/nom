@@ -36,6 +36,7 @@ public class RessursOpprettetEventV1 extends RessursEvent {
         String personident,
         Sektor sektor,
         Visningsnavn visningsnavn,
+        Optional<String> primaryTelefonnummer,
         List<String> fysiskeBrukersteder,
         String primaryFysiskBrukersted
     ) implements Data {}

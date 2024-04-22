@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.ressurs.eventsourcing.producer;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPrimaryTelefonnummerCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
@@ -15,6 +16,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursPrimaryTelefonnummerOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonidentOppdatertV1;
@@ -38,13 +40,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 @Service
-public class RessursCommadService {
+public class RessursCommandService {
 
-    private final Logger log = LoggerFactory.getLogger(RessursCommadService.class);
+    private final Logger log = LoggerFactory.getLogger(RessursCommandService.class);
     private final RessursEventProducer eventProducer;
     private final RessursStateListener ressursStateListener;
 
-    public RessursCommadService(
+    public RessursCommandService(
         RessursEventProducer eventProducer,
         RessursStateListener ressursStateListener
     ) {
@@ -103,6 +105,17 @@ public class RessursCommadService {
         ));
     }
 
+    public CompletableFuture<SendResult<String, RessursEvent>> oppdatertPrimaryTelefonnummer(
+        OppdaterPrimaryTelefonnummerCommand oppdaterPrimaryTelefonnummerCommand,
+        InputMetadata inputMetadata
+    ) {
+        return eventProducer.sendMessage(new RessursPrimaryTelefonnummerOppdatertEventV1(
+            oppdaterPrimaryTelefonnummerCommand.fid(),
+            new RessursPrimaryTelefonnummerOppdatertEventV1.PrimaryTelefonnummerOppdatertEventData(oppdaterPrimaryTelefonnummerCommand.primaryTelefonnummer()),
+            inputMetadata
+        ));
+    }
+
     public CompletableFuture<SendResult<String, RessursEvent>> oppdaterSektorEvent(OppdaterSektorCommand oppdaterSektorCommand, InputMetadata inputMetadata) {
         return eventProducer.sendMessage(new RessursSektorOppdatertV1(
             oppdaterSektorCommand.fid(),
@@ -121,6 +134,7 @@ public class RessursCommadService {
                 opprettRessursCommand.personident(),
                 opprettRessursCommand.sektor(),
                 opprettRessursCommand.visningsnavn(),
+                opprettRessursCommand.primaryTelefonnummer(),
                 opprettRessursCommand.fysiskbrukerStedNr() == null ? Collections.emptyList() : List.of(opprettRessursCommand.fysiskbrukerStedNr()),
                 opprettRessursCommand.fysiskbrukerStedNr()
             ),
@@ -134,6 +148,7 @@ public class RessursCommadService {
                         pdlPerson.getMellomnavn(),
                         pdlPerson.getEtternavn()
                     )),
+
                 opprettRessursCommand.pdlPerson().map(Person::getFoedselsdato),
                 Optional.ofNullable(opprettRessursCommand.startdato()),
                 Optional.ofNullable(opprettRessursCommand.orgEnhetId()),

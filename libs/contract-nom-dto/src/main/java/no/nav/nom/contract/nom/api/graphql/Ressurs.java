@@ -24,4 +24,5 @@ public class Ressurs {
     String etternavn;
     String visningsNavn;
     String visningsnavn;
+    String primaryTelefon;
 }

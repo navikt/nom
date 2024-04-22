@@ -178,6 +178,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
                 Optional.of("mellomnavn"),
                 "etternavn"
             ),
+            Optional.empty(),
             Optional.of(LocalDate.now().plusDays(10)),
             Optional.empty(),
             null,
@@ -207,6 +208,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
                 Optional.of("mellomnavn"),
                 "etternavn"
             ),
+            Optional.empty(),
             Optional.of(LocalDate.now().plusDays(10)),
             Optional.of(LocalDate.now().minusDays(10)),
             null,

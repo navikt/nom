@@ -11,7 +11,7 @@ import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.pdl.Person;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
@@ -47,16 +47,16 @@ public class RemedyController {
     private final RessursStateRepository ressursStateRepository;
     private final PdlClient pdlClient;
     private final NIKClient nikClient;
-    private final RessursCommadService ressursCommadService;
+    private final RessursCommandService ressursCommandService;
 
     public RemedyController(
         RessursStateRepository ressursStateRepository,
-        PdlClient pdlClient, NIKClient nikClient, RessursCommadService ressursCommadService
+        PdlClient pdlClient, NIKClient nikClient, RessursCommandService ressursCommandService
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.pdlClient = pdlClient;
         this.nikClient = nikClient;
-        this.ressursCommadService = ressursCommadService;
+        this.ressursCommandService = ressursCommandService;
     }
 
     @PostMapping("/finnRessurs")
@@ -163,7 +163,7 @@ public class RemedyController {
             // Endre personident på eksisterende ressurs
             var eksisterendeRessurs = funnetRessurs.get();
 
-            ressursCommadService.oppdaterPersonidentCommand(
+            ressursCommandService.oppdaterPersonidentCommand(
                 new OppdaterPersonidentCommand(
                     eksisterendeRessurs.fid(),
                     request.getPersonident()
@@ -173,7 +173,7 @@ public class RemedyController {
 
             // Hvis personalia/visningsnavn er endret, gjør en endre personalia også.
             if (!visningsnavnEquals(request, eksisterendeRessurs)) {
-                ressursCommadService.oppdaterPersonaliaEvent(
+                ressursCommandService.oppdaterPersonaliaEvent(
                     new OppdaterPersonaliaCommand(
                         eksisterendeRessurs.fid(),
                         new Visningsnavn(request.getFornavn(), Optional.ofNullable(request.getMellomnavn()), request.getEtternavn())
@@ -193,7 +193,6 @@ public class RemedyController {
         }
 
         Optional<Person> pdlPerson = pdlClient.hentPerson(request.getPersonident());
-
         try {
             final var opprettRessursCommand = new OpprettRessursCommand(
                 request.getPersonident(),
@@ -201,6 +200,7 @@ public class RemedyController {
                 pdlPerson,
                 Sektor.valueOf(request.getSektor()),
                 new Visningsnavn(request.getFornavn(), Optional.ofNullable(request.getMellomnavn()), request.getEtternavn()),
+                Optional.empty(),
                 metadataFromRequest,
                 null,
                 null,
@@ -208,7 +208,7 @@ public class RemedyController {
                 null
             );
 
-            return from(ressursCommadService.createRessursSync(opprettRessursCommand));
+            return from(ressursCommandService.createRessursSync(opprettRessursCommand));
         } catch (Exception exception) {
             log.warn("Unhandled exception during creation of ressurs: " + exception.getMessage(), exception);
             return createErrorResponse(INTERNAL_SERVER_ERROR, "Intern feil inntraff");

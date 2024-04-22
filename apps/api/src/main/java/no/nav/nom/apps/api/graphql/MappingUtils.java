@@ -27,6 +27,7 @@ public class MappingUtils {
                 .etternavn(ressursState.visningsnavn().etternavn())
                 .visningsNavn(ressursState.visningsnavn().getFormattedVisningsnavn())
                 .visningsnavn(ressursState.visningsnavn().getFormattedVisningsnavn())
+                .primaryTelefon(ressursState.primaryTelefonnummer().orElse(null))
                 .build();
     }
 
