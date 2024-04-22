@@ -275,6 +275,13 @@ public class EksterneRessurserProcessor {
             // Helfo Oslo og Helfo Hovedkontor skal plasseres på Helfo (som has AgressoId EH00001 i prod)
             List<IOrgenhet> listOfOrgenhetForRemedyenhet = orgenhetService.matchByAgressoId("EH00001");
             if (!listOfOrgenhetForRemedyenhet.isEmpty()) {
+                // Det kan hende at det finnes flere enn en Helfo orgenheter med AgressoId EH00001, da velger vi den som har navn 'Helfo'
+                if(listOfOrgenhetForRemedyenhet.size() > 1) {
+                    log.warn("Det finnes flere orgenheter med AgressoId EH00001");
+                    listOfOrgenhetForRemedyenhet = listOfOrgenhetForRemedyenhet.stream()
+                        .filter(orgenhet -> orgenhet.getNavn().equals("Helfo"))
+                        .toList();
+                }
                 orgenhetForRemedyenhet = listOfOrgenhetForRemedyenhet.get(0);
                 log.debug("For navident {} - Fant Helfo orgenhet {} for remedyEnhet {}", navident, orgenhetForRemedyenhet.getId(), remedyEnhet);
             } else {
