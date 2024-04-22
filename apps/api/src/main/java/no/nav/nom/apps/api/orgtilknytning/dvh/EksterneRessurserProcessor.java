@@ -32,6 +32,9 @@ import java.util.Optional;
 @Service
 public class EksterneRessurserProcessor {
 
+    public static final String ORGENHET_NAVN_HELFO = "Helfo";
+    public static final String ORGENHET_NAVN_HELFO_ANSATTE = "Helfo ansatte";
+
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgtilknytningService orgtilknytningService;
     private final OrgenhetService orgenhetService;
@@ -179,7 +182,7 @@ public class EksterneRessurserProcessor {
                     var orgenhetForRemedyenhet = orgenhetService.getById(orgenhet.nomId()).orElse(null);
                     orgenhetForRemedyenhet = hvisSkattPlasserNederst(orgenhetForRemedyenhet, navident, remedyEnhet);
                     orgenhetForRemedyenhet = hvisRiksrevisjonPlasserNederst(orgenhetForRemedyenhet, navident, remedyEnhet);
-                    orgenhetForRemedyenhet = hvisHelfoOsloEllerHovedkontorPlasserPaaHelfo(orgenhetForRemedyenhet, navident, remedyEnhet);
+                    orgenhetForRemedyenhet = hvisHelfoOsloEllerAndreStedeterPlasserPaaHelfo(orgenhetForRemedyenhet, navident, remedyEnhet);
                     return orgenhetForRemedyenhet;
                 }
             ).orElseGet(
@@ -213,7 +216,7 @@ public class EksterneRessurserProcessor {
                 var nomOrgenhetPaaRessurs = nomOrgenheterByOrgenhetPaaRessurs.get(0);
                 nomOrgenhetPaaRessurs = hvisSkattPlasserNederst(nomOrgenhetPaaRessurs, navident, remedyEnhet);
                 nomOrgenhetPaaRessurs = hvisRiksrevisjonPlasserNederst(nomOrgenhetPaaRessurs, navident, remedyEnhet);
-                nomOrgenhetPaaRessurs = hvisHelfoOsloEllerHovedkontorPlasserPaaHelfo(nomOrgenhetPaaRessurs, navident, remedyEnhet);
+                nomOrgenhetPaaRessurs = hvisHelfoOsloEllerAndreStedeterPlasserPaaHelfo(nomOrgenhetPaaRessurs, navident, remedyEnhet);
                 return nomOrgenhetPaaRessurs;
             } else if (nomOrgenheterByOrgenhetPaaRessurs.isEmpty()) {
                 log.info(
@@ -270,8 +273,8 @@ public class EksterneRessurserProcessor {
         return orgenhetForRemedyenhet;
     }
 
-    private IOrgenhet hvisHelfoOsloEllerHovedkontorPlasserPaaHelfo(IOrgenhet orgenhetForRemedyenhet, String navident, String remedyEnhet) {
-        if (erHelfoOsloEllerHelfoHovedkontor(orgenhetForRemedyenhet)) {
+    private IOrgenhet hvisHelfoOsloEllerAndreStedeterPlasserPaaHelfo(IOrgenhet orgenhetForRemedyenhet, String navident, String remedyEnhet) {
+        if (erHelfoOsloEllerHelfoHovedkontor(orgenhetForRemedyenhet) || erHelfoAnsatteOrgenhet(orgenhetForRemedyenhet)) {
             // Helfo Oslo og Helfo Hovedkontor skal plasseres på Helfo (som has AgressoId EH00001 i prod)
             List<IOrgenhet> listOfOrgenhetForRemedyenhet = orgenhetService.matchByAgressoId("EH00001");
             if (!listOfOrgenhetForRemedyenhet.isEmpty()) {
@@ -279,7 +282,7 @@ public class EksterneRessurserProcessor {
                 if(listOfOrgenhetForRemedyenhet.size() > 1) {
                     log.warn("Det finnes flere orgenheter med AgressoId EH00001");
                     listOfOrgenhetForRemedyenhet = listOfOrgenhetForRemedyenhet.stream()
-                        .filter(orgenhet -> orgenhet.getNavn().equals("Helfo"))
+                        .filter(orgenhet -> orgenhet.getNavn().equals(ORGENHET_NAVN_HELFO))
                         .toList();
                 }
                 orgenhetForRemedyenhet = listOfOrgenhetForRemedyenhet.get(0);
@@ -300,7 +303,13 @@ public class EksterneRessurserProcessor {
     }
 
     private boolean erHelfoOsloEllerHelfoHovedkontor(IOrgenhet orgenhetForRemedyenhet) {
-        return orgenhetForRemedyenhet != null && (orgenhetForRemedyenhet.getAgressoId().equals("231000") || orgenhetForRemedyenhet.getAgressoId().equals("230000"));
+        return orgenhetForRemedyenhet != null &&
+            (orgenhetForRemedyenhet.getAgressoId().equals("231000") || orgenhetForRemedyenhet.getAgressoId().equals("230000"));
+    }
+
+    private boolean erHelfoAnsatteOrgenhet(IOrgenhet orgenhetForRemedyenhet) {
+        return orgenhetForRemedyenhet != null &&
+            (orgenhetForRemedyenhet.getAgressoId().equals("EH00001") && orgenhetForRemedyenhet.getNavn().equals(ORGENHET_NAVN_HELFO_ANSATTE));
     }
 
     private boolean erHelfoNiv0Enhet(IOrgenhet orgenhetForRemedyenhet) {
