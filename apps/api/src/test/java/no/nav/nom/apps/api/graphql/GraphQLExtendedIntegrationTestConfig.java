@@ -48,6 +48,8 @@ import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventso
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
+import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
+import no.nav.nom.libs.state.ressurs.RessursStateAutoconfiguration;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -92,6 +94,9 @@ import org.springframework.kafka.annotation.EnableKafka;
 @EnableConfigurationProperties(value = AppProperties.class)
 @EnableKafka
 public class GraphQLExtendedIntegrationTestConfig {
+    @MockBean
+    NomStateRessursListener nomStateRessursListener;
+
     @MockBean
     OrgEnhetEventProducer orgEnhetEventProducer;
 

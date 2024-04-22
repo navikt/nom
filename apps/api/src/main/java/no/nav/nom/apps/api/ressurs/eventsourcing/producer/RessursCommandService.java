@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.ressurs.eventsourcing.producer;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
@@ -26,6 +27,7 @@ import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursStartDatoOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.support.SendResult;
@@ -39,19 +41,25 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static no.nav.nom.apps.api.ressurs.eventsourcing.state.ToggledRessursStateRepository.UNLEASH_USE_NEW_RESSURS_STATE_REPOSITORY;
+
 @Service
 public class RessursCommandService {
 
     private final Logger log = LoggerFactory.getLogger(RessursCommandService.class);
     private final RessursEventProducer eventProducer;
     private final RessursStateListener ressursStateListener;
+    private final NomStateRessursListener nomStateRessursListener;
+    private final Unleash unleash;
 
     public RessursCommandService(
         RessursEventProducer eventProducer,
-        RessursStateListener ressursStateListener
+        RessursStateListener ressursStateListener, NomStateRessursListener nomStateRessursListener, Unleash unleash
     ) {
         this.eventProducer = eventProducer;
         this.ressursStateListener = ressursStateListener;
+        this.nomStateRessursListener = nomStateRessursListener;
+        this.unleash = unleash;
     }
 
     public CompletableFuture<SendResult<String, RessursEvent>> createRessursEvent(OpprettRessursCommand opprettRessursCommand) {
@@ -61,13 +69,19 @@ public class RessursCommandService {
 
     public RessursState createRessursSync(OpprettRessursCommand opprettRessursCommand) throws ExecutionException, InterruptedException, TimeoutException {
         final var fid = PrefixedUlidCreator.createRessursUlid();
-        final var response = ressursStateListener.waitForAggregate(fid);
+        final var response = unleash.isEnabled(UNLEASH_USE_NEW_RESSURS_STATE_REPOSITORY) ?
+            nomStateRessursListener.waitForStateAfterEventCreation(fid) :
+            ressursStateListener.waitForAggregate(fid);
         createRessurs(fid, opprettRessursCommand);
 
         try {
             return response.get(10, TimeUnit.SECONDS);
         } catch (Exception e) {
-            ressursStateListener.removeWait(fid);
+            if (unleash.isEnabled(UNLEASH_USE_NEW_RESSURS_STATE_REPOSITORY)) {
+                nomStateRessursListener.removeWait(fid);
+            } else {
+                ressursStateListener.removeWait(fid);
+            }
             log.error("Error waiting for ressurs to be created ", e);
             throw e;
         }
@@ -204,11 +218,14 @@ public class RessursCommandService {
         ));
     }
 
-    public CompletableFuture<SendResult<String, RessursEvent>> oppdaterRessursStartdatoEvent(OppdaterStartdatoCommand oppdaterStartdatoCommand, InputMetadata inputMetadata) {
+    public CompletableFuture<SendResult<String, RessursEvent>> oppdaterRessursStartdatoEvent(
+        OppdaterStartdatoCommand oppdaterStartdatoCommand,
+        InputMetadata inputMetadata
+    ) {
         return eventProducer.sendMessage(new RessursStartDatoOppdatertV1(
-            oppdaterStartdatoCommand.fid(),
-            new RessursStartDatoOppdatertV1.StartDatoOppdatertEventData(oppdaterStartdatoCommand.startdato())
-            ,inputMetadata
+                oppdaterStartdatoCommand.fid(),
+                new RessursStartDatoOppdatertV1.StartDatoOppdatertEventData(oppdaterStartdatoCommand.startdato())
+                , inputMetadata
             )
         );
     }

@@ -20,6 +20,7 @@ import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -60,6 +61,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     @MockBean
     private RessursStateListener ressursStateListener;
+
+    @MockBean
+    private NomStateRessursListener nomStateRessursListener;
 
     @MockBean
     private RemedyEnhetMapperService remedyEnhetMapperService;
