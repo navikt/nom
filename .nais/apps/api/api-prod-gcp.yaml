@@ -46,9 +46,9 @@ spec:
   resources:
     requests:
       cpu: 300m
-      memory: 4Gi
+      memory: 12Gi
     limits:
-      memory: 14Gi
+      memory: 20Gi
   leaderElection: true
   prometheus:
     enabled: true
