@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
@@ -37,6 +38,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -489,9 +491,32 @@ public class SanityCheck {
     )
     @GetMapping(value = "/listNAVOrgenheterUtenLeder")
     public String listNAVOrgenheterUtenLeder() {
-        // TODO
-        return "";
+        StringBuffer result = new StringBuffer();
+        var alleEnheter = orgenhetService.getAllEnheterMedOrganisering().stream().toList(); // Aktive enheter i organisasjonstreet
+        List<IOrgenhet> alleOrgEnheterUtenLeder = new ArrayList<>();
+        for (IOrgenhet orgenhet : alleEnheter) {
+            List<DvhLeder> leaders = dvhRepository.getLederByAgressoIdAndNivAndNavn(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn())
+                .stream()
+                .filter(Objects::nonNull)
+                .toList();
+            if (leaders.isEmpty()) {
+                alleOrgEnheterUtenLeder.add(orgenhet);
+            }
+        }
+
+        alleOrgEnheterUtenLeder.forEach(oe ->
+            result.append(oe.getId())
+                .append(";")
+                .append(oe.getUniqueAgressoId())
+                .append(";")
+                .append(oe.getGyldigFom())
+                .append(";")
+                .append(oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "")
+                .append("\n")
+        );
+        return result.toString();
     }
+
 
     private int findArbeidsomraadeCountInHierarkiAbove(IOrgenhet orgenhet) {
         boolean isArbOmr = NomNivaa.ARBEIDSOMRAADE.equals(orgenhet.getNomNivaa().orElse(null));
