@@ -478,6 +478,21 @@ public class SanityCheck {
         return result.toString();
     }
 
+    @Operation(
+        description = "List orgenher i NAV orghierarkiet som ikke har leder",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/listNAVOrgenheterUtenLeder")
+    public String listNAVOrgenheterUtenLeder() {
+        // TODO
+        return "";
+    }
+
     private int findArbeidsomraadeCountInHierarkiAbove(IOrgenhet orgenhet) {
         boolean isArbOmr = NomNivaa.ARBEIDSOMRAADE.equals(orgenhet.getNomNivaa().orElse(null));
         AtomicInteger countAbove = new AtomicInteger();
