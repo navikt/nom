@@ -20,6 +20,7 @@ import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
+import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
@@ -50,6 +51,8 @@ public class DvhTestConfig {
     NomProxyRestClient nomProxyRestClient;
     @MockBean
     RessursStateListener ressursStateListener;
+    @MockBean
+    NomStateRessursListener nomStateRessursListener;
     @MockBean
     OrgtilknytningStateListener orgtilknytningStateListener;
     @MockBean

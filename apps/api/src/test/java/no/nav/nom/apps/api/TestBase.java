@@ -48,7 +48,7 @@ import static org.mockito.Mockito.when;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @Testcontainers
-@EmbeddedKafka(partitions = 1, topics = {"nom-state-v1", "org.nom.ressurs-state-v1", "org.nom.orgenhet-state-v1", "org.nom.nom-mastered-ressurs", "org.nom.organisering-eventsource"}, controlledShutdown = false)
+@EmbeddedKafka(partitions = 1, topics = {"nom-state-v1", "org.nom.ressurs-state-v1", "org.nom.orgenhet-state-v1", "org.nom.nom-mastered-ressurs", "org.nom.organisering-eventsource"}, controlledShutdown = true)
 @ContextConfiguration(initializers = {MockOAuth2ServerInitializer.class})
 @AutoConfigureWireMock(port = 0)
 public abstract class TestBase {

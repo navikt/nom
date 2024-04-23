@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.ressurs.eventsourcing.state;
 
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -39,19 +40,21 @@ public class RessursStateListener {
     private final Admin adminClient;
     private final KafkaProperties kafkaProperties;
     private final LuceneService luceneService;
+    private final Unleash unleash;
 
     public RessursStateListener(
-        @Value("${app.kafka.ressurs.stateTopic}") String stateTopic,
-        @Qualifier("oldRessursStateRepository") RessursStateRepository ressursStateRepository,
-        Admin adminClient, LuceneService luceneService,
-        KafkaAdmin admin,
-        KafkaProperties kafkaProperties
+            @Value("${app.kafka.ressurs.stateTopic}") String stateTopic,
+            @Qualifier("oldRessursStateRepository") RessursStateRepository ressursStateRepository,
+            Admin adminClient, LuceneService luceneService,
+            KafkaAdmin admin,
+            KafkaProperties kafkaProperties, Unleash unleash
     ) {
         this.stateTopic = stateTopic;
         this.ressursStateRepository = ressursStateRepository;
         this.adminClient = adminClient;
         this.kafkaProperties = kafkaProperties;
         this.luceneService = luceneService;
+        this.unleash = unleash;
     }
 
     @KafkaListener(
@@ -79,7 +82,9 @@ public class RessursStateListener {
             ressursStateRepository.remove(key);
         } else {
             ressursStateRepository.update(ressursState);
-            this.luceneService.invalidateRessurs(ressursState.navident());
+            if (!unleash.isEnabled(LuceneService.UNLEASH_USE_NEW_RESSURS_STATE_LISTENER)) {
+                this.luceneService.invalidateRessurs(ressursState.navident());
+            }
         }
         if (waitingMapByFid.containsKey(key)) {
             waitingMapByFid.remove(key).complete(ressursState);

@@ -86,13 +86,13 @@ public class NomStateRessursListener {
         }
         if (waitingMapByFid.containsKey(key)) {
             waitingMapByFid.remove(key).complete(ressursState);
-            log.info("Done waiting for FID in NomStateRessursListener: {}", key);
+            log.debug("Done waiting for FID in NomStateRessursListener: {}", key);
         }
         notifyVisitors(ressursState);
     }
 
     public CompletableFuture<RessursState> waitForStateAfterEventCreation(String fid) {
-        log.info("Waiting for FID in NomStateRessursListener: {}", fid);
+        log.debug("Waiting for FID in NomStateRessursListener: {}", fid);
         final CompletableFuture<RessursState> completableFuture = new CompletableFuture<>();
         waitingMapByFid.put(fid, completableFuture);
         return completableFuture;

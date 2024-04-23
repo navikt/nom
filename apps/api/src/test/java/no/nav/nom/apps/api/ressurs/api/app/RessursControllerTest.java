@@ -16,6 +16,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPrima
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
+import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
@@ -73,6 +74,9 @@ public class RessursControllerTest extends RestTestBase {
 
     @MockBean
     private RessursStateRepository ressursStateRepository;
+
+    @MockBean
+    NomStateRessursListener nomStateRessursListener;
 
     @MockBean
     private AuthResolver authResolver;

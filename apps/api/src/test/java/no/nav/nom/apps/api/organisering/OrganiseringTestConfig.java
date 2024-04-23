@@ -29,6 +29,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStat
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.OldRessursStateRepositoryImpl;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
+import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -67,6 +68,9 @@ public class OrganiseringTestConfig {
 
     @MockBean
     RessursStateListener ressursStateListener;
+
+    @MockBean
+    NomStateRessursListener nomStateRessursListener;
 
     @MockBean
     OrgtilknytningStateListener orgtilknytningStateListener;
