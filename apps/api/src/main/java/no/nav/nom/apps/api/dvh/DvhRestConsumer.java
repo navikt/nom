@@ -139,10 +139,10 @@ public class DvhRestConsumer {
         List<Integer> runHours = Arrays.asList(5, 10, 16, 22);
         if (runHours.contains(LocalDateTime.now().getHour())) {
             log.info("Kjører schedulert oppdatering fra DVH da timen {} er i runHours {}", LocalDateTime.now().getHour(), runHours);
-            return true;
+            return false;
         }
         log.info("Skipper schedulert oppdatering fra DVH da timen {} er ikke er i runHours {}", LocalDateTime.now().getHour(), runHours);
-        return false;
+        return true;
     }
 
     public void loadRessurserOgOrgEnheter() {
