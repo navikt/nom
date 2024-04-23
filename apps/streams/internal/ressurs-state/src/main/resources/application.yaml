@@ -2,7 +2,7 @@ app:
   kafka:
     eventsourceTopic: org.nom.ressurs-eventsource
     stateTopic: org.nom.intern-ressurs-state
-    navidentTopic: org.nom.navident
+    navidentTopic: org.nav-ident
 
 spring:
   kafka:
