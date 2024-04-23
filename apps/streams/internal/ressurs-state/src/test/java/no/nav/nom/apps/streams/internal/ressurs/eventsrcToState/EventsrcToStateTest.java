@@ -39,7 +39,7 @@ import java.util.*;
 public class EventsrcToStateTest {
     private ObjectMapper objectMapper = configureObjectMapper();
     private TestInputTopic<String, RessursEvent> inputTopic;
-    private TestInputTopic<String, JsonNode> identTopic;
+    private TestInputTopic<String, String> identTopic;
     private TestOutputTopic<String, RessursState> outputTopic;
 
     @BeforeEach
@@ -60,9 +60,9 @@ public class EventsrcToStateTest {
                 );
     }
 
-    private ObjectNode navidentToIdentTypeObject(String navident, IdentType identType) {
+    private String navidentToIdentTypeObject(String navident, IdentType identType) {
         var payload = objectMapper.createObjectNode().put("navident", navident).put("identType", identType.toString());
-        return objectMapper.createObjectNode().putPOJO("payload",payload);
+        return objectMapper.createObjectNode().putPOJO("payload",payload).toString();
     }
 
     @Test
@@ -352,7 +352,7 @@ public class EventsrcToStateTest {
         TopologyTestDriver topologyTestDriver = new TopologyTestDriver(topology, new Properties());
 
         inputTopic = topologyTestDriver.createInputTopic("inputTopic", new StringSerializer(), objectSerde.copyWithType(RessursEvent.class).serializer());
-        identTopic = topologyTestDriver.createInputTopic("identTopic", new StringSerializer(), objectSerde.copyWithType(JsonNode.class).serializer());
+        identTopic = topologyTestDriver.createInputTopic("identTopic", new StringSerializer(), new StringSerializer());
 
         final var ressursStateSerde = objectSerde.copyWithType(RessursState.class);
         ressursStateSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());

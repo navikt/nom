@@ -1,5 +1,6 @@
 package no.nav.nom.apps.streams.internal.ressurs.eventsrcToState;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -84,7 +85,14 @@ class EventsrcToState {
                 Materialized.with(stringSerde,jsonSerde2)
             );
 
-        var identType = streamsBuilder.stream(navidentTopic,Consumed.with(stringSerde, jsonSerde2))
+        var identType = streamsBuilder.stream(navidentTopic,Consumed.with(stringSerde, stringSerde))
+            .mapValues(v -> {
+                try {
+                    return objectMapper.readValue(v,ObjectNode.class);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            })
             .groupBy((k, v) -> v.get("payload").get("navident").asText(),
                 Grouped.with(stringSerde, jsonSerde2))
             .aggregate(
