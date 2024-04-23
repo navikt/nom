@@ -21,6 +21,8 @@ class KafkaConfig {
         final var objectSerde = new JsonSerde<>(Object.class, objectMapper);
         objectSerde.deserializer().addTrustedPackages(Event.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());
+        objectSerde.deserializer().addTrustedPackages("no.nav.nom.apps.navident.eventsource"); // Problemer med import på tvers av pakker
+
         return objectSerde;
     }
     @Bean
