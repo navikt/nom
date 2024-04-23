@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,6 +76,10 @@ public class DvhRestConsumer {
     @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
     public void scheduledOppdateringFraDvh() {
         log.info("Starter schedulert oppdatering fra DVH");
+        if (skipScheduledRunIfDuringDvhUpdate()) {
+            return;
+        }
+        
         LocalDateTime start = LocalDateTime.now();
 
         while (!isInitialStateReady()) { // Wait on startup until state topics are read
@@ -119,6 +124,25 @@ public class DvhRestConsumer {
         }
 
         log.info("Ferdig med schedulert oppdatering fra DVH. Tok {}", durationAsH24(start));
+    }
+
+    private boolean skipScheduledRunIfDuringDvhUpdate() {
+        // Vill alltid kjøres på deploy
+        if (!dvhStartupLoadMonitor.hasCompleted()) {
+            log.info("Oppstartsinnlesning - kan ikke skippe schedulert oppdatering");
+            return false;
+        }
+        // Dvh oppdateres ifølge Henrik ca. 02.00. 14.00 og 18.00.
+        // Har observert inkonsistens i periodene 01:30-03:00, 12:30-15:00, og 17:00-18:30
+        // Velger å kun kjøre i timene 22, 05, 10 og 16
+        // Kan kjøres manuelt fra Swagger/admin
+        List<Integer> runHours = Arrays.asList(5, 10, 16, 22);
+        if (runHours.contains(LocalDateTime.now().getHour())) {
+            log.info("Kjører schedulert oppdatering fra DVH da timen {} er i runHours {}", LocalDateTime.now().getHour(), runHours);
+            return true;
+        }
+        log.info("Skipper schedulert oppdatering fra DVH da timen {} er ikke er i runHours {}", LocalDateTime.now().getHour(), runHours);
+        return false;
     }
 
     public void loadRessurserOgOrgEnheter() {
