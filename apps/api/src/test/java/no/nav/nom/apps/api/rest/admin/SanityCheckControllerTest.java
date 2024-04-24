@@ -45,8 +45,8 @@ public class SanityCheckControllerTest extends RestTestBase {
     private DvhRepository dvhRepositoryMock;
 
     @Test
-    @DisplayName("Henter orgenheter uten leder i NAV hierarkiet")
-    void test_listNAVOrgenheterUtenLeder_no_leaders() {
+    @DisplayName("Henter orgenheter uten leder og tom NAV hierarkiet")
+    void test_listNAVOrgenheterUtenLeder_no_leaders_no_hierarchy() {
 
         when(orgenhetServiceMock.getAllEnheterMedOrganisering())
             .thenReturn(Collections.emptyList());
@@ -59,6 +59,27 @@ public class SanityCheckControllerTest extends RestTestBase {
             .expectStatus().isOk()
             .expectBody(String.class)
             .value(result -> assertThat(result).isNull());
+    }
+
+    @Test
+    @DisplayName("Henter orgenheter uten leder og NAV hierarkiet")
+    void test_listNAVOrgenheterUtenLeder_no_leaders_with_hierarchy() {
+
+        when(orgenhetServiceMock.getAllEnheterMedOrganisering())
+            .thenReturn(getMockEnheterMedOrganisering());
+        when(dvhRepositoryMock.getLederByAgressoIdAndNivAndNavn(any(), any(), any()))
+            .thenReturn(Collections.emptyList());
+        webTestClient.get()
+            .uri("/api/admin/SanityCheck/listNAVOrgenheterUtenLeder")
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(String.class)
+            .value(result -> {
+                assertThat(result).isNotNull();
+                assertThat(result.contains(ORG_ENHET_NAVN_B)).isTrue();
+                assertThat(result.contains(ORG_ENHET_NAVN_A)).isTrue();
+             });
     }
 
     @Test
