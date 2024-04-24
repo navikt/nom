@@ -12,11 +12,9 @@ import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Grouped;
-import org.apache.kafka.streams.kstream.KeyValueMapper;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
 import org.slf4j.Logger;
@@ -86,13 +84,7 @@ class EventsrcToState {
             );
 
         var identType = streamsBuilder.stream(navidentTopic,Consumed.with(stringSerde, stringSerde))
-            .mapValues(v -> {
-                try {
-                    return objectMapper.readValue(v,ObjectNode.class);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            })
+            .mapValues(v -> navidentTopicValueToJson(v,objectMapper))
             .groupBy((k, v) -> v.get("payload").get("navident").asText(),
                 Grouped.with(stringSerde, jsonSerde2))
             .aggregate(
@@ -114,6 +106,20 @@ class EventsrcToState {
 
         withIdentTypeByFid.mapValues(this::toRessursState)
             .toStream().to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(RessursState.class)));
+    }
+
+    private static ObjectNode navidentTopicValueToJson(String value, ObjectMapper objectMapper) {
+        try {
+            var parsedObjNode =  objectMapper.readValue(value,ObjectNode.class);
+            var payload = parsedObjNode.get("payload");
+            var hasExpectedFields = payload.has("identType") && payload.has("navident");
+            if(!hasExpectedFields){
+                throw new RuntimeException("JSON fra navident topic hadde ikke-forventede felter");
+            }
+            return parsedObjNode;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Feil ved JSON parsing fra navident topic");
+        }
     }
 
     public RessursState toRessursState(String fid, JsonNode eventStateAggregate) {
