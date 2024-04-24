@@ -62,7 +62,7 @@ public class SanityCheckControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Henter orgenheter uten leder i NAV hierarkiet")
+    @DisplayName("Henter orgenheter med leder i NAV hierarkiet")
     void test_listNAVOrgenheterUtenLeder_with_leaders() throws JsonProcessingException {
         when(orgenhetServiceMock.getAllEnheterMedOrganisering())
             .thenReturn(getMockEnheterMedOrganisering());
