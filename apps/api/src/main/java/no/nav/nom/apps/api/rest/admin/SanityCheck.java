@@ -39,9 +39,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.util.stream.Collectors.groupingBy;
 import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
 
 @Tag(name = "Admin for å kjøre en sanity check på data")
@@ -518,6 +520,32 @@ public class SanityCheck {
     }
 
 
+    @Operation(
+        description = "Valider ressurs som har sluttet, men står som leder på orgEnhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/sluttetRessursMedLederRollePaaOrgEnhet")
+    public List<EnhtetMedRessursSomHarSluttetOgErLederSanityCheckResponse> validerRessursMedLederRollePaaOrgEnhet() {
+        var alleEnheter = orgenhetService.getAllEnheterMedOrganisering().stream().toList(); // Aktive enheter i organisasjonstreet
+        var alleRessurserWithSluttDatoBeforeToday = ressursStateRepository.findAllWithSluttdatoBeforeToday();
+        Map<RessursState, List<IOrgenhet>> alleOrgEnheterMedLederSomHarSluttet = new HashMap<>();
+        for (IOrgenhet orgenhet : alleEnheter) {
+            validerEnhetsledereSomHarSluttet(orgenhet, alleRessurserWithSluttDatoBeforeToday).ifPresent(ressursState -> {
+                if (!alleOrgEnheterMedLederSomHarSluttet.containsKey(ressursState)) {
+                    alleOrgEnheterMedLederSomHarSluttet.computeIfAbsent(ressursState, org -> new ArrayList<>()).add(orgenhet);
+                } else {
+                    alleOrgEnheterMedLederSomHarSluttet.get(ressursState).add(orgenhet);
+                }
+            });
+        }
+        return EnhtetMedRessursSomHarSluttetOgErLederSanityCheckResponse.from(alleOrgEnheterMedLederSomHarSluttet);
+    }
+
     private int findArbeidsomraadeCountInHierarkiAbove(IOrgenhet orgenhet) {
         boolean isArbOmr = NomNivaa.ARBEIDSOMRAADE.equals(orgenhet.getNomNivaa().orElse(null));
         AtomicInteger countAbove = new AtomicInteger();
@@ -845,6 +873,13 @@ public class SanityCheck {
 
     private List<RessursState> ressurserIkkeBlandtNavIdenter(List<RessursState> ressurser, List<String> navIdenter) {
         return ressurser.stream().filter(r -> !navIdenter.contains(r.navident())).toList();
+    }
+
+    private Optional<RessursState> validerEnhetsledereSomHarSluttet(IOrgenhet orgenhet, Map<String, RessursState> alleRessurserWithSluttDatoBeforeToday) {
+        return dvhRepository.getLederByAgressoIdAndNivAndNavn(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn()).stream()
+            .map(leder -> alleRessurserWithSluttDatoBeforeToday.get(leder.getNavIdent()))
+            .filter(Objects::nonNull)
+            .findFirst();
     }
 }
 

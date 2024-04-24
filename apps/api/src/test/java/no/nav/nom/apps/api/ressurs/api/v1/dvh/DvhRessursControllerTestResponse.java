@@ -237,6 +237,15 @@ class RessursStateRepositoryFake implements RessursStateRepository {
     }
 
     @Override
+    public Map<String, RessursState> findAllWithSluttdatoBeforeToday() {
+        return ressursByNavident.values().stream()
+            .filter(ressurs -> ressurs.sluttdato().isPresent())
+            .filter(ressurs -> ressurs.sluttdato().get().isBefore(LocalDate.now()))
+            .collect(Collectors.toMap(RessursState::navident, ressurs -> ressurs));
+    }
+
+
+    @Override
     public void update(RessursState ressursEventData) {throw new NotImplementedException();   }
 
     @Override

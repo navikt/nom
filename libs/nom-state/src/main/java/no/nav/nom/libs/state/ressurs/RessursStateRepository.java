@@ -29,6 +29,8 @@ public interface RessursStateRepository {
 
     Map<String, RessursState> findByNavidentBulk(List<String> navIdenter);
 
+    Map<String, RessursState> findAllWithSluttdatoBeforeToday();
+
     void update(RessursState ressursEventData);
 
     void clear();

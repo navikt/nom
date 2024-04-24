@@ -5,6 +5,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +76,14 @@ public class OldRessursStateRepositoryImpl implements RessursStateRepository {
         return ressursByNavident.entrySet().stream()
             .filter(entry -> navIdenter.contains(entry.getKey()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @Override
+    public Map<String, RessursState> findAllWithSluttdatoBeforeToday() {
+        return ressursByNavident.values().stream()
+            .filter(ressurs -> ressurs.sluttdato().isPresent())
+            .filter(ressurs -> ressurs.sluttdato().get().isBefore(LocalDate.now()))
+            .collect(Collectors.toMap(RessursState::navident, ressurs -> ressurs));
     }
 
     @Override

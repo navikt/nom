@@ -124,6 +124,16 @@ public class ToggledRessursStateRepository implements RessursStateRepository {
     }
 
     @Override
+    public Map<String, RessursState> findAllWithSluttdatoBeforeToday() {
+        if (unleash.isEnabled(UNLEASH_USE_NEW_RESSURS_STATE_REPOSITORY)) {
+            return nomStateRessursRepository.findAllWithSluttdatoBeforeToday();
+        } else {
+            return oldRessursStateRepository.findAllWithSluttdatoBeforeToday();
+        }
+    }
+
+
+    @Override
     public void update(RessursState ressursEventData) {
         throw new RuntimeException("ERROR! Call to update() in ToggledRessursStateRepository - should not be called on implemented beans directly");
     }

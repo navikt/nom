@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.RessursState;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +76,14 @@ public class RessursStateRepositoryImpl implements RessursStateRepository {
         return ressursByNavident.entrySet().stream()
             .filter(entry -> navIdenter.contains(entry.getKey()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @Override
+    public Map<String, RessursState> findAllWithSluttdatoBeforeToday() {
+        return ressursByNavident.values().stream()
+            .filter(ressurs -> ressurs.sluttdato().isPresent())
+            .filter(ressurs -> ressurs.sluttdato().get().isBefore(LocalDate.now()))
+            .collect(Collectors.toMap(RessursState::navident, ressurs -> ressurs));
     }
 
     @Override
