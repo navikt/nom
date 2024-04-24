@@ -490,7 +490,7 @@ public class SanityCheck {
         }
     )
     @GetMapping(value = "/listNAVOrgenheterUtenLeder")
-    public String listNAVOrgenheterUtenLeder() {
+    public String listOrgenheterUtenLeder() {
         StringBuffer result = new StringBuffer();
         var alleEnheter = orgenhetService.getAllEnheterMedOrganisering().stream().toList(); // Aktive enheter i organisasjonstreet
         List<IOrgenhet> alleOrgEnheterUtenLeder = new ArrayList<>();
