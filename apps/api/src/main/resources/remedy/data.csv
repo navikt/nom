@@ -295,8 +295,8 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 202800;2028;ORGNIV3;Båtsfjord;Beholdt;;;JA;202800;ORGNIV3;leggInn;
 203000;2030;ORGNIV3;Sør-Varanger;Beholdt;;;JA;203000;ORGNIV3;leggInn;
 2096100;2096;AGRESSOORGENHET;Troms og Finnmark Arbeidsrådgivning;Beholdt;;;JA;2096100;ORGENHET;leggInn;
-210300;2103;ORGNIV3;;Vikafossen;;;Avventer;210300;;leggInn;Denne skal ikke ha en orgEnhet, da folk til Vikafossen kommer fra ulike orgEnheter og vi skal ikke vite hvor de kommer fra. Må tas inn senere helhetlig når vi støtter opprettelse av Vikafossen.
-230000;2300;ORGNIV3;HELFO Hovedkontor;Beholdt;;;JA;230000;ORGNIV3;leggInn;
+210300;2103;ORGNIV3;;Vikafossen;;;Avventer;210300;;fe178t;24.04.2024 - lagt inn mapping til riktig nomId
+230000;2300;ORGNIV3;HELFO Hovedkontor;Beholdt;;;JA;230000;ORGNIV3;hu192a;24.04.2024 - lagt inn mapping til nomId
 231000;2310;ORGNIV3;HELFO Oslo;Beholdt;;;JA;231000;ORGNIV3;leggInn;norgEnhet er under avvikling. MEN det er 23 aktive nav-identer på 2310 i HRRES_RESSURS
 239000;2390;ORGNIV3;;FEIL, se kommentar;;;Avventer;239000;;leggInn;Representerer HELSEDIR. orgEnhet her er antagelig lagt inn av Rune og Co og ikke reell. Antagelig må vi håndtere disse siden. Disse skal antagelig bare opprettes i NOM, og ikke inn i U4.
 8101111;2810;AGRESSOORGENHET;Sekretariatet;Opp til ORGNIV2;8101;ga846n;JA;8101;ORGNIV2;ga846n;Kun 1 enhet nedover
@@ -389,7 +389,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 1696100;5773;AGRESSOORGENHET;Trøndelag Rådgivningstjeneste;Opp til ORGNIV3;169610;hy609j;JA;169610;ORGNIV3;hy609j;
 SKATT;9401;ORGNIV0;;Beholdt, MEN;;;JA;SKATT;ORGNIV0;leggInn;
 945100;9451;ORGNIV3;;TODO, se kommentar;;;NEI;945100;;leggInn;"9451 er ""Sentralt frikjøpte tillitsvalgte"". orgEnhet finnes ikke"
-RIKSREVISJON;9504;ORGNIV0;;TODO, se kommentar;;;Avventer;RIKSREVISJON;;leggInn;"Finnes ikke i NOM, finnes i NORG under navnet ""Riksrevisjonen"". Skal antagelig inn på sikt, men finnes p.t. ikke som orgEnhet. Tas ikke inn i første om gang."
+RIKSREVISJON;9504;ORGNIV0;;TODO, se kommentar;;;Avventer;RIKSREVISJON;;va981f;24.04.2024 lagt inn mapping til riktig nomId
 999900;9999;ORGNIV3;;TODO, se kommentar;;;NEI;999900;;leggInn;"Finnes ikke i NOM, finnes i NORG under navnet ""Andre eksterne"""
 ;4292;;Klageinstans Midt-Norge;Manglet i uttrekket;721050;se331z;JA;721050;ORGNIV3;se331z;
 ;4295;;Klageinstans Nord;Manglet i uttrekket;721190;me103b;JA;721190;ORGNIV3;me103b;
