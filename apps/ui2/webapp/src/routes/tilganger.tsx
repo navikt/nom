@@ -178,6 +178,11 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     },
   });
 
+  const onCloseCard = () => {
+    methods.reset();
+    setEdit(false);
+  };
+
   return (
     <FormProvider {...methods}>
       <VStack
@@ -230,7 +235,7 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             <>
               <Button
                 key="end-edit"
-                onClick={() => setEdit(false)}
+                onClick={onCloseCard}
                 size="small"
                 type="button"
                 variant="secondary"
@@ -332,7 +337,7 @@ function AddDelegationFields() {
     <VStack gap="4">
       <Heading size="xsmall">Deleger til:</Heading>
       <NavidentSelectFormPart
-        label="Navident"
+        label="Søk opp medarbeider"
         name="newTilgang.delegertTilNavident"
       />
       <DatePicker {...gyldigTomDatePicker.datepickerProps}>
