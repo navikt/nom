@@ -502,7 +502,7 @@ abstract public class MockBasisTestOrganisering {
 
     @Getter
     @Builder
-    private static class MockOrgenhet implements IOrgenhet {
+    public static class MockOrgenhet implements IOrgenhet {
         String fid;
         String id;
         String agressoId;
