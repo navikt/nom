@@ -46,14 +46,14 @@ public class SanityCheckControllerTest extends RestTestBase {
 
     @Test
     @DisplayName("Henter orgenheter uten leder og tom NAV hierarkiet")
-    void test_listNAVOrgenheterUtenLeder_no_leaders_no_hierarchy() {
+    void test_listOrgenheterUtenLeder_no_leaders_no_hierarchy() {
 
         when(orgenhetServiceMock.getAllEnheterMedOrganisering())
             .thenReturn(Collections.emptyList());
         when(dvhRepositoryMock.getLederByAgressoIdAndNivAndNavn(any(), any(), any()))
             .thenReturn(Collections.emptyList());
         webTestClient.get()
-            .uri("/api/admin/SanityCheck/listNAVOrgenheterUtenLeder")
+            .uri("/api/admin/SanityCheck/listOrgenheterUtenLeder")
             .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
             .exchange()
             .expectStatus().isOk()
@@ -63,14 +63,14 @@ public class SanityCheckControllerTest extends RestTestBase {
 
     @Test
     @DisplayName("Henter orgenheter uten leder og NAV hierarkiet")
-    void test_listNAVOrgenheterUtenLeder_no_leaders_with_hierarchy() {
+    void test_listOrgenheterUtenLeder_no_leaders_with_hierarchy() {
 
         when(orgenhetServiceMock.getAllEnheterMedOrganisering())
             .thenReturn(getMockEnheterMedOrganisering());
         when(dvhRepositoryMock.getLederByAgressoIdAndNivAndNavn(any(), any(), any()))
             .thenReturn(Collections.emptyList());
         webTestClient.get()
-            .uri("/api/admin/SanityCheck/listNAVOrgenheterUtenLeder")
+            .uri("/api/admin/SanityCheck/listOrgenheterUtenLeder")
             .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
             .exchange()
             .expectStatus().isOk()
@@ -84,7 +84,7 @@ public class SanityCheckControllerTest extends RestTestBase {
 
     @Test
     @DisplayName("Henter orgenheter med leder i NAV hierarkiet")
-    void test_listNAVOrgenheterUtenLeder_with_leaders() throws JsonProcessingException {
+    void test_listOrgenheterUtenLeder_with_leaders() throws JsonProcessingException {
         when(orgenhetServiceMock.getAllEnheterMedOrganisering())
             .thenReturn(getMockEnheterMedOrganisering());
         // simulate that orgenhet B has a leader
@@ -92,7 +92,7 @@ public class SanityCheckControllerTest extends RestTestBase {
             .thenReturn(getMockLeaders());
 
         webTestClient.get()
-            .uri("/api/admin/SanityCheck/listNAVOrgenheterUtenLeder")
+            .uri("/api/admin/SanityCheck/listOrgenheterUtenLeder")
             .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
             .exchange()
             .expectStatus().isOk()

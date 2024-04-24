@@ -489,7 +489,7 @@ public class SanityCheck {
             @ApiResponse(responseCode = "200", description = "Success")
         }
     )
-    @GetMapping(value = "/listNAVOrgenheterUtenLeder")
+    @GetMapping(value = "/listOrgenheterUtenLeder")
     public String listOrgenheterUtenLeder() {
         StringBuffer result = new StringBuffer();
         var alleEnheter = orgenhetService.getAllEnheterMedOrganisering().stream().toList(); // Aktive enheter i organisasjonstreet
