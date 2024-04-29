@@ -6,10 +6,14 @@ import { ApolloProvider } from "@apollo/client";
 import { css } from "@emotion/react";
 import { getWebInstrumentations, initializeFaro } from "@grafana/faro-web-sdk";
 import { TracingInstrumentation } from "@grafana/faro-web-tracing";
-import { Alert, Loader } from "@navikt/ds-react";
+import { Alert, Box, Heading, Loader } from "@navikt/ds-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { createRouter, RouterProvider } from "@tanstack/react-router";
+import {
+  createRouteMask,
+  createRouter,
+  RouterProvider,
+} from "@tanstack/react-router";
 import React, { type ReactNode, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Toaster } from "react-hot-toast";
@@ -40,12 +44,34 @@ if (process.env.NODE_ENV === "production") {
 
 const queryClient = new QueryClient();
 
-// TODO not found route
+/**
+ * Hide search params when creating ressurs
+ */
+const sensitiveDataMask = createRouteMask({
+  routeTree,
+  from: "/ressurs/create/$step",
+  to: "/ressurs/create/$step",
+  search: undefined,
+});
+
 const router = createRouter({
   routeTree,
+  routeMasks: [sensitiveDataMask],
   context: {
     queryClient,
   },
+  defaultNotFoundComponent: () => (
+    <Box
+      css={css`
+        text-align: center;
+        padding: var(--a-spacing-8);
+      `}
+    >
+      <Heading level="1" size="large" spacing>
+        Beklager, vi fant ikke siden
+      </Heading>
+    </Box>
+  ),
   defaultPreload: "intent",
   // Since we're using React Query, we don't want loader calls to ever be stale
   // This will ensure that the loader is always called when the route is preloaded or visited
