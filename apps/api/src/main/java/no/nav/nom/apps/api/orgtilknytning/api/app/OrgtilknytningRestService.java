@@ -321,6 +321,16 @@ public class OrgtilknytningRestService {
             );
         }
 
+        if (ressursStateRepository.findByNavident(navident).get().sektor().equals(Sektor.NAV_KOMMUNAL)) {
+            orgtilknytningCommandService.endreTilknytningtype(
+                EndreTilknytningtypeCommand.builder()
+                    .fid(opprettetOrgtilknytningFid)
+                    .tilknytningtype(Optional.of(Tilknytningtype.INGEN))
+                    .inputMetadata(inputMetadata)
+                    .build()
+            );
+        }
+
         if (Optional.ofNullable(leggTilOrgtilknytningRequest.tilknytningtype()).isPresent()) {
             orgtilknytningCommandService.endreTilknytningtype(
                 EndreTilknytningtypeCommand.builder()
