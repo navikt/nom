@@ -8,10 +8,12 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningC
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -575,7 +577,20 @@ public class RessursStillingProcessor {
         );
 
         loggCommand(navident, command);
-        return orgtilknytningCommandService.opprettOrgtilknytning(command);
+
+        var orgtilknytningFid = orgtilknytningCommandService.opprettOrgtilknytning(command);
+
+        if (ressursStateRepository.findByNavident(navident).get().sektor() == Sektor.NAV_KOMMUNAL) {
+            orgtilknytningCommandService.endreTilknytningtype(
+                EndreTilknytningtypeCommand.builder()
+                    .fid(orgtilknytningFid)
+                    .tilknytningtype(Optional.of(Tilknytningtype.INGEN))
+                    .inputMetadata(metadata)
+                    .build()
+            );
+        }
+
+        return orgtilknytningFid;
     }
 
     public void endreOrgtilknytningGyldigFOM(OrgtilknytningState originalOrgtilknytning, StillingPeriode stillingPeriode, String stillingPerioderAsString) {

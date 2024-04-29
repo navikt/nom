@@ -7,7 +7,6 @@ import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.contract.nom.Sektor;
@@ -15,7 +14,7 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
-import org.junit.Ignore;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -104,6 +103,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
 
         // Ingen ekststerende orgtilknytninger
         when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
+        svarAtAlleNavidenterErStatlig(navident);
 
         ressursStillingProcessor.process(navident, stillingPerioder);
 
@@ -207,6 +207,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
 
         // Ingen ekststerende orgtilknytninger
         when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
+        svarAtAlleNavidenterErStatlig(navident);
 
         ressursStillingProcessor.process(navident, stillingPerioder);
 
@@ -412,7 +413,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
 
         // Ingen ekststerende orgtilknytninger
         when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
-
+        svarAtAlleNavidenterErStatlig(navident);
         //Unleash flagg ikke satt og ident er mastret
         when(nomMastered.isMastered(any())).thenReturn(true);
         when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(false);
@@ -461,6 +462,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
 
         // Ingen ekststerende orgtilknytninger
         when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
+        svarAtAlleNavidenterErStatlig(navident);
 
         //Unleash flagg satt og ident ikke er mastret
         when(nomMastered.isMastered(any())).thenReturn(false);
@@ -508,7 +510,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
 
         // Ingen ekststerende orgtilknytninger
         when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
-
+        svarAtAlleNavidenterErStatlig(navident);
         //Unleash flagg satt og ident ikke er mastret
         when(nomMastered.isMastered(any())).thenReturn(true);
         when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(true);
@@ -545,7 +547,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
 
         // Ingen ekststerende orgtilknytninger
         when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
-
+        svarAtAlleNavidenterErStatlig(navident);
 
         //Unleash flagg ikke satt og ident er mastret
         when(nomMastered.isMastered(any())).thenReturn(true);
@@ -598,6 +600,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
 
         // Ingen ekststerende orgtilknytninger
         when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
+        svarAtAlleNavidenterErStatlig(navident);
 
         //Unleash flagg satt og ident ikke er mastret
         when(nomMastered.isMastered(any())).thenReturn(false);
