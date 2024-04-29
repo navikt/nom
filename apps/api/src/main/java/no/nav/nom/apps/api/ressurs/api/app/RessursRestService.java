@@ -355,22 +355,44 @@ public class RessursRestService {
             RessursState opprettetRessurs = ressursCommandService.createRessursSync(opprettRessursCommand);
             nomMastered.markRessursAsMasteredInNom(opprettetRessurs.navident());
 
-            // If ressurs is EKSTERN we fire a separate "avsluttRessursEvent" so that other systems, such as skjerming, know the ressurs already has a sluttDato.
-            if (request.sektor() == Sektor.EKSTERN && request.sluttDato().isPresent()) {
+            var orgTilknytningFid = orgtilknytningCommandService.opprettOrgtilknytning(
+                new OpprettOrgtilknytning(
+                    opprettetRessurs.navident(),
+                    request.orgEnhetId(),
+                    request.startDato(),
+                    metaData,
+                    null
+                )
+            );
+
+            orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(
+                orgTilknytningFid,
+                new EndreDagligOppfolgingOrgtilknytning(
+                    opprettetRessurs.navident(),
+                    request.orgEnhetId(),
+                    request.startDato(),
+                    request.sluttDato(),
+                    true,
+                    metaData,
+                    null
+                )
+            );
+
+            orgtilknytningCommandService.endreTilknytningtype(
+                new EndreTilknytningtypeCommand(
+                    orgTilknytningFid,
+                    Optional.of(request.tilknytningtype()),
+                    metaData
+                )
+            );
+
+            // If sluttdato is present we fire a separate "avsluttRessursEvent" so that other systems, such as skjerming, know the ressurs already has a sluttDato.
+            if (request.sluttDato().isPresent()) {
                 ressursCommandService.avsluttRessursEvent(
                     new OpphorRessursCommand(opprettetRessurs.fid(), request.sluttDato().get()),
                     metaData
                 );
 
-                var orgTilknytningFid = orgtilknytningCommandService.opprettOrgtilknytning(
-                    new OpprettOrgtilknytning(
-                        opprettetRessurs.navident(),
-                        request.orgEnhetId(),
-                        request.startDato(),
-                        metaData,
-                        null
-                    )
-                );
 
                 orgtilknytningCommandService.avvikleOrgtilknytning(
                     orgTilknytningFid,
@@ -380,27 +402,6 @@ public class RessursRestService {
                         request.sluttDato().get(),
                         metaData,
                         null
-                    )
-                );
-
-                orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(
-                    orgTilknytningFid,
-                    new EndreDagligOppfolgingOrgtilknytning(
-                        opprettetRessurs.navident(),
-                        request.orgEnhetId(),
-                        request.startDato(),
-                        request.sluttDato(),
-                        true,
-                        metaData,
-                        null
-                    )
-                );
-
-                orgtilknytningCommandService.endreTilknytningtype(
-                    new EndreTilknytningtypeCommand(
-                        orgTilknytningFid,
-                        Optional.of(request.tilknytningtype()),
-                        metaData
                     )
                 );
             }
@@ -481,17 +482,32 @@ public class RessursRestService {
     }
 
     private void validateOpprettRessursRequest(OpprettRessursRequest request) {
-        if (request.sektor() != Sektor.EKSTERN) {
-            throw InvalidSektorException.actionNotAllowedForSektor(request.sektor());
-        }
-        validateChronologicalDates(request.startDato(), request.sluttDato().orElse(null));
-        if (request.sluttDato().isEmpty()) {
-            throw new IllegalArgumentException("Sluttdato må oppgis for opprettelse av ekstern ressurs");
+        switch (request.sektor()) {
+            case EKSTERN -> validateOpprettEksternRessursRequest(request);
+            case NAV_KOMMUNAL -> validateOpprettKommunalRessursRequest(request);
+            case NAV_STATLIG -> validateOpprettStatligRessursRequest(request);
         }
 
+        validateChronologicalDates(request.startDato(), request.sluttDato().orElse(null));
         validateIngenMellomromEtternavn(request.visningsetternavn());
         validateFysiskeBrukerstederExists(Set.of(request.fysiskBrukerstedNr()));
         validateOrgtilknytningTypeSektorCombination(request.tilknytningtype(), request.sektor());
+    }
+
+    private void validateOpprettEksternRessursRequest(OpprettRessursRequest request) {
+        if (request.sluttDato().isEmpty()) {
+            throw new IllegalArgumentException("Sluttdato må oppgis for opprettelse av ekstern ressurs");
+        }
+    }
+
+    private void validateOpprettKommunalRessursRequest(OpprettRessursRequest request) {
+        // Add validation constraints as necessary
+    }
+
+    private void validateOpprettStatligRessursRequest(OpprettRessursRequest request) {
+        if (request.sektor() == Sektor.NAV_STATLIG) {
+            throw InvalidSektorException.actionNotAllowedForSektor(request.sektor());
+        }
     }
 
     private void validateIngenMellomromEtternavn(String visningsetternavn) {

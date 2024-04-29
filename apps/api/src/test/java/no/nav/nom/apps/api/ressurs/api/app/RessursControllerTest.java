@@ -127,17 +127,16 @@ public class RessursControllerTest extends RestTestBase {
 
     }
 
-    @ParameterizedTest(name = "Skal ikke opprette ressurs i sektor {0}")
-    @MethodSource("skal_bare_opprette_eksterne_ressurser_input")
-    void skal_bare_opprette_eksterne_ressurser(Sektor sektor) {
+    @Test
+    void skal_ikke_kunne_opprette_statlig_ressurs() {
         postOpprettRessursRequest(
             testToken.nomWriteGroupAndNomUiAzp(),
-            opprettRessursRequest().toBuilder().sektor(sektor).build()
+            opprettRessursRequest().toBuilder().sektor(Sektor.NAV_STATLIG).build()
         )
             .expectStatus().isBadRequest()
             .expectBody(StandardResponse.class)
             .isEqualTo(StandardResponse.builder()
-                .message(InvalidSektorException.actionNotAllowedForSektor(sektor).getMessage())
+                .message(InvalidSektorException.actionNotAllowedForSektor(Sektor.NAV_STATLIG).getMessage())
                 .build()
             );
     }
@@ -172,13 +171,6 @@ public class RessursControllerTest extends RestTestBase {
             .expectBody(String.class).value(it ->
                 Assert.isTrue(it.contains("Etternavn kan ikke inneholde"),"Uventet feilmelding")
             );
-    }
-
-    private static Stream<Arguments> skal_bare_opprette_eksterne_ressurser_input(){
-        return Stream.of(
-            Arguments.of(Sektor.NAV_STATLIG),
-            Arguments.of(Sektor.NAV_KOMMUNAL)
-        );
     }
 
     @Test
@@ -259,6 +251,61 @@ public class RessursControllerTest extends RestTestBase {
         verify(orgtilknytningCommandService, times(0)).opprettOrgtilknytning(any());
         verify(orgtilknytningCommandService, times(0)).avvikleOrgtilknytning(any(), any());
         verify(orgtilknytningCommandService, times(0)).endreDagligOppfolgingOrgtilknytning(any(), any());
+    }
+
+    @Test
+    @SneakyThrows
+    void skal_opprette_kommunal_ressurs() {
+        String personident = "12345678910";
+        String navident = "x123456";
+        val navn = pdlUtils.mockSinglePersonResponse();
+        String primaryTelefonnummer = "12345678";
+
+        when(nikClient.opprettNavidentOnBehalfOfUser(
+            eq(OpprettNavidentRequest.builder()
+                .personid(personident)
+                .identPrefix(navn.getEtternavn().substring(0, 1))
+                .identType("STANDARD")
+                .build())
+        )).thenReturn(ResponseEntity.ok(
+            OpprettNavidentResponse.builder()
+                .navident(navident)
+                .build()));
+
+        when(pdlClient.hentPerson(eq(personident))).thenReturn(Optional.empty());
+
+        var request = opprettRessursRequest().toBuilder()
+            .personident(personident)
+            .visningsfornavn(navn.getFornavn())
+            .visningsmellomnavn(navn.getMellomnavn())
+            .visningsetternavn(navn.getEtternavn())
+            .primaryTelefonnummer(primaryTelefonnummer)
+            .sektor(Sektor.NAV_KOMMUNAL)
+            .startDato(LocalDate.now())
+            .sluttDato(Optional.empty())
+            .tilknytningtype(Tilknytningtype.INGEN)
+            .ansettelsesType(null)
+            .fysiskBrukerstedNr("")
+            .orgEnhetId("")
+            .build();
+
+        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+            .thenReturn(Set.of(request.fysiskBrukerstedNr()));
+
+        when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
+            .thenReturn(ressursState());
+
+        postOpprettRessursRequest(
+            testToken.nomWriteGroupAndNomUiAzp(),
+            request
+        )
+            .expectStatus().is2xxSuccessful()
+            .expectBody(OpprettRessursResponse.class);
+
+        verify(ressursCommandService, times(1)).createRessursSync(any());
+
+        verify(orgtilknytningCommandService, times(1)).opprettOrgtilknytning(any());
+        verify(orgtilknytningCommandService, times(1)).endreDagligOppfolgingOrgtilknytning(any(), any());
     }
 
     @Test
