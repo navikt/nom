@@ -1906,7 +1906,8 @@
         "type": "string",
         "enum": [
           "KONSULENT",
-          "EKSTERN_SAMARBEIDSPARTNER"
+          "EKSTERN_SAMARBEIDSPARTNER",
+          "INGEN"
         ]
       },
       "UpdateFysiskeBrukerstederRequest": {

@@ -113,7 +113,7 @@ public class EksterneRessurserProcessor {
                 .get();
             if (harSammeSluttdato(eksternRessurs, sisteEksisterendeOrgtilknytning) && erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {
                 log.debug("Ekstern ressurs {} har eksisterende orgtilknytning som ikke trenger endring", eksternRessurs.navident());
-                // Oppdater evt tilknytningstypen - hvis denne er ikke er korrekt
+                // Oppdater evt tilknytningtypen - hvis denne er ikke er korrekt
                 settTypeEksternSamarbeidspartnerHvisSkattRiksrevisjonEllerHelfo(sisteEksisterendeOrgtilknytning, metadata);
             } else {
                 if (erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {
@@ -440,15 +440,15 @@ public class EksterneRessurserProcessor {
             return;
         }
 
-        var endreTilknytningsType =  new EndreTilknytningtypeCommand(
+        var endreTilknytningtype =  new EndreTilknytningtypeCommand(
             orgtilknytningFid,
             Optional.of(type),
             metadata
         );
 
-        log.debug("Endrer tilknytningstype til {} for navident {}.", type, navident);
+        log.debug("Endrer tilknytningtype til {} for navident {}.", type, navident);
 
-        orgtilknytningCommandService.endreTilknytningtype(endreTilknytningsType);
+        orgtilknytningCommandService.endreTilknytningtype(endreTilknytningtype);
     }
 
 

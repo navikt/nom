@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.springframework.stereotype.Service;
 
@@ -70,7 +71,7 @@ public class KommunaleRessurserProcessor {
                 true,
                 startDatoPaaTmpOT,
                 Optional.ofNullable(sluttDatoPaaTmpOT),
-                Optional.empty()
+                Optional.of(Tilknytningtype.INGEN)
             );
             return Optional.of(ot);
         }

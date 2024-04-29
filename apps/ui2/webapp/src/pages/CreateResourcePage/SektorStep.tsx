@@ -1,12 +1,8 @@
 import { css } from "@emotion/react";
-import { Alert, Radio, RadioGroup } from "@navikt/ds-react";
-import { useNavigate } from "@tanstack/react-router";
+import { Alert, Radio, RadioGroup, Select } from "@navikt/ds-react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 
-import {
-  BasicSelect,
-  SelectLayoutWrapper,
-} from "~/components/select/CustomSelectComponents";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
@@ -21,21 +17,20 @@ export const SektorNameMapping = {
 export const TilknytningtypeNameMapping = {
   [Tilknytningtype.KONSULENT]: "Konsulent (standard)",
   [Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER]: "Ekstern samarbeidspartner",
+  [Tilknytningtype.INGEN]: "Ingen",
 };
 
 export function SektorStep() {
-  const [selectedSektor, setSelectedSektor] = useState(Sektor.EKSTERN);
+  const { sektor, tilknytningtype } = useSearch({
+    from: "/ressurs/create/$step",
+  });
+  const [selectedSektor, setSelectedSektor] = useState(
+    sektor ?? Sektor.EKSTERN,
+  );
   const [selectedTilknytningtype, setSelectedTilknytningtype] = useState(
-    Tilknytningtype.KONSULENT,
+    tilknytningtype ?? Tilknytningtype.KONSULENT,
   );
   const navigate = useNavigate();
-
-  const tilknytningtypeOptions = Object.values(Tilknytningtype).map(
-    (tilknytningtype) => ({
-      label: TilknytningtypeNameMapping[tilknytningtype],
-      value: tilknytningtype,
-    }),
-  );
 
   return (
     <ContainerWithHighlightedTop icon={opprettRessursIcon} title="Sektor">
@@ -48,13 +43,20 @@ export function SektorStep() {
       <form
         onSubmit={(event) => {
           event.preventDefault();
+
+          // TilknytningsType gir ikke mening for kommunale, derfor vises ikke dette som et valg i gui, og i state lagrer vi dette som "INGEN"
+          const tilknytningtype =
+            selectedSektor === Sektor.NAV_KOMMUNAL
+              ? Tilknytningtype.INGEN
+              : selectedTilknytningtype;
+
           navigate({
             to: "/ressurs/create/$step",
             params: { step: "3" },
             search: (oldSearch) => ({
               ...oldSearch,
               sektor: selectedSektor,
-              tilknytningtype: selectedTilknytningtype,
+              tilknytningtype,
             }),
           });
         }}
@@ -78,22 +80,26 @@ export function SektorStep() {
             {`${SektorNameMapping[Sektor.NAV_KOMMUNAL]} (Ikke tilgjengelig ennå)`}
           </Radio>
         </RadioGroup>
-        <SelectLayoutWrapper
-          htmlFor="tilknytningtype"
-          label="Velg hvilken kategori medarbeideren tilhører innenfor denne sektoren"
-        >
-          <BasicSelect
-            inputId="tilknytningtype"
-            isClearable={false}
-            onChange={(option) =>
-              option && setSelectedTilknytningtype(option.value)
+        {selectedSektor === Sektor.NAV_KOMMUNAL ? undefined : (
+          <Select
+            label="Velg hvilken kategori medarbeideren tilhører innenfor denne sektoren"
+            onChange={(event) =>
+              setSelectedTilknytningtype(event.target.value as Tilknytningtype)
             }
-            options={tilknytningtypeOptions}
-            value={tilknytningtypeOptions.find(
-              (option) => option.value === selectedTilknytningtype,
-            )}
-          />
-        </SelectLayoutWrapper>
+            value={selectedTilknytningtype}
+          >
+            <option value={Tilknytningtype.KONSULENT}>
+              {TilknytningtypeNameMapping[Tilknytningtype.KONSULENT]}
+            </option>
+            <option value={Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER}>
+              {
+                TilknytningtypeNameMapping[
+                  Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER
+                ]
+              }
+            </option>
+          </Select>
+        )}
         <NavigationButtons />
       </form>
     </ContainerWithHighlightedTop>

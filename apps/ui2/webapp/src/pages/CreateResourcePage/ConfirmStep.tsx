@@ -3,10 +3,9 @@ import { Button, Modal } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError, AxiosResponse } from "axios";
-import axios from "axios";
 import { format } from "date-fns";
 
-import { getOrgEnhet } from "~/api/react-query-endpoints";
+import { createRessurs, getOrgEnhet } from "~/api/react-query-endpoints";
 import { ApiResponseError } from "~/components/ApiResponseError";
 import { LabelWithValue } from "~/components/LabelWithValue";
 import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
@@ -68,8 +67,7 @@ export function ConfirmStep() {
     void
   >({
     mutationFn: () => {
-      // TODO: better type safety here
-      const opprettRessursRequest: Partial<OpprettRessursRequest> = {
+      const opprettRessursRequest = {
         personident,
         visningsfornavn,
         visningsetternavn,
@@ -82,10 +80,11 @@ export function ConfirmStep() {
         fysiskBrukerstedNr,
         tilknytningtype,
       };
-      return axios.post(
-        "/frackend/nom-api/app/ressurser",
-        opprettRessursRequest,
-      );
+
+      // TODO: better type safety here.
+      // We assume that each step has verified that these values exist.
+      // Using a type assertion here is cheating, ideally we would use something like zod/yup to parse and validate the data instead.
+      return createRessurs(opprettRessursRequest as OpprettRessursRequest);
     },
 
     onSuccess: (opprettRessursResponse) => {

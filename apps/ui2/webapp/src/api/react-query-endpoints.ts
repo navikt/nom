@@ -17,6 +17,8 @@ import type {
   LederTilgang,
   LederTilgangForOrgenhetRequest,
   LeggTilOrgtilknytningRequestOld,
+  OpprettRessursRequest,
+  OpprettRessursResponse,
   OrgEnhet,
   OrgtilknytningState,
   Person,
@@ -409,6 +411,13 @@ export const updateFysiskeBrukersteder = async (
     updateFysiskeBrukerstederRequest,
   );
   await hopeForKafkaStateToUpdate();
+};
+
+export const createRessurs = async (request: OpprettRessursRequest) => {
+  return axios.post<unknown, AxiosResponse<OpprettRessursResponse>>(
+    `${NOM_API_BASE_PATH}/app/ressurser`,
+    request,
+  );
 };
 
 export const searchRessurser = {

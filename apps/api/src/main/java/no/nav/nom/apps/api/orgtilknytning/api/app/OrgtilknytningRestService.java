@@ -534,7 +534,7 @@ public class OrgtilknytningRestService {
 
         Map<Sektor, List<Tilknytningtype>> allowedOrgtilknytningTypeForSektorMap = Map.of(
             Sektor.EKSTERN, List.of(Tilknytningtype.KONSULENT, Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER),
-            Sektor.NAV_KOMMUNAL, emptyList(),
+            Sektor.NAV_KOMMUNAL, List.of(Tilknytningtype.INGEN),
             Sektor.NAV_STATLIG, emptyList()
         );
 
