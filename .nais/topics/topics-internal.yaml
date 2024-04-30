@@ -26,39 +26,39 @@ spec:
     - team: org
       application: org-kafka-manager
       access: read
-    - team: org
-      application: nom-unit4
-      access: read
+#    - team: org
+#      application: nom-unit4
+#      access: read
     - team: org
       application: nom-remedy-integrasjon
       access: read
     - team: org
       application: nom-kafka-api-hendelser
       access: read
-
----
-
-apiVersion: kafka.nais.io/v1
-kind: Topic
-metadata:
-  annotations:
-    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
-  name: nom.ressurs-eventsource-dlt
-  namespace: org
-  labels:
-    team: org
-spec:
-  pool: {{kafka-pool}}
-  config:
-    minimumInSyncReplicas: 1
-    partitions: 1
-    replication: 3
-    retentionBytes: -1
-    retentionHours: -1
-  acl:
-    - team: org
-      application: nom-unit4
-      access: readwrite
+#
+#---
+#
+#apiVersion: kafka.nais.io/v1
+#kind: Topic
+#metadata:
+#  annotations:
+#    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
+#  name: nom.ressurs-eventsource-dlt
+#  namespace: org
+#  labels:
+#    team: org
+#spec:
+#  pool: {{kafka-pool}}
+#  config:
+#    minimumInSyncReplicas: 1
+#    partitions: 1
+#    replication: 3
+#    retentionBytes: -1
+#    retentionHours: -1
+#  acl:
+#    - team: org
+#      application: nom-unit4
+#      access: readwrite
 
 ---
 
