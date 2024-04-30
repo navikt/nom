@@ -1004,6 +1004,48 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} support updating null (= max date) dato for ressurs")
+    void test_update_orgtilknytninger_for_ressurs_handle_null_dato() {
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .build();
+
+        saveOrgtilknytninger(List.of(existingOrgtilknytning));
+
+        var newStartdato = existingOrgtilknytning.gyldigFom().plusMonths(1);
+        LocalDate newSluttdato = null;
+
+        var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
+            .gyldigFom(
+                newStartdato
+            )
+            .gyldigTom(newSluttdato)
+            .build();
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(endreOrgtilknytningRequest))
+            .nyeOrgtilknytninger(Collections.emptyList())
+            .setRessursStartdato(true)
+            .setRessursSluttdato(true)
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().is2xxSuccessful();
+    }
+
+
+    @Test
     @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} support updating startdato and sluttdato for ressurs")
     void test_update_orgtilknytninger_for_ressurs_start_and_sluttdato() {
         var tilknyttetRessurs = ressursState().toBuilder()

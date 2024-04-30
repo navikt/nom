@@ -353,9 +353,8 @@ public class OrgtilknytningRestService {
                     .map(LeggTilOrgtilknytningRequest::gyldigTom)
             )
             .flatMap(Function.identity())
-            .max(Comparator.comparing(
-                gyldigTom -> Optional.ofNullable(gyldigTom).orElse(LocalDate.MAX))
-            );
+            .map(gyldigTom -> Optional.ofNullable(gyldigTom).orElse(LocalDate.MAX))
+            .max(Comparator.naturalOrder());
 
         if (!newSluttdato.equals(tilknyttetRessurs.sluttdato())) {
             ressursCommandService.oppdaterRessursSluttdatoEvent(
