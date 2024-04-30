@@ -128,7 +128,7 @@ def setup_secrets(apps_filter: list, env: str, fss_included: bool):
     gcp_spring_apps = [
         AppInfo("api", "nom-api", "nom", uses_unleash=True),
         AppInfo("nav-ident", "nav-ident", "org"),
-        AppInfo("unit4", "nom-unit4", "org", uses_unleash=True)
+        # AppInfo("unit4", "nom-unit4", "org", uses_unleash=True)
     ]
 
     fss_spring_apps = [

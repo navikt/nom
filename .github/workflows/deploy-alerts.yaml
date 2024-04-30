@@ -119,24 +119,24 @@ jobs:
           CLUSTER: prod-gcp
           RESOURCE: .nais/alerts/prod/ui-alerts.yaml
 
-  apply-nom-unit4-alerts:
-    name: Apply nom-unit4 alerts to cluster
-    permissions:
-      contents: "read"
-      id-token: "write"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy to dev
-        uses: nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: dev-gcp
-          RESOURCE: .nais/alerts/dev/unit4-alerts.yaml
-
-      - name: Deploy to prod
-        uses: nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: prod-gcp
-          RESOURCE: .nais/alerts/prod/unit4-alerts.yaml
+#  apply-nom-unit4-alerts:
+#    name: Apply nom-unit4 alerts to cluster
+#    permissions:
+#      contents: "read"
+#      id-token: "write"
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Deploy to dev
+#        uses: nais/deploy/actions/deploy@v2
+#        env:
+#          CLUSTER: dev-gcp
+#          RESOURCE: .nais/alerts/dev/unit4-alerts.yaml
+#
+#      - name: Deploy to prod
+#        uses: nais/deploy/actions/deploy@v2
+#        env:
+#          CLUSTER: prod-gcp
+#          RESOURCE: .nais/alerts/prod/unit4-alerts.yaml
