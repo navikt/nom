@@ -54,6 +54,8 @@ public class OmadaUttrekk {
     private final Unleash unleash;
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
+    public static final String UNLEASH_FOR_OMADA_EXPORT_ADD_STARTDATO = "nom.omada.uttrekk.add_startdato";
+
     public OmadaUttrekk(
         RessursStateRepository ressursStateRepository,
         OrgenhetService orgenhetService,
@@ -83,29 +85,58 @@ public class OmadaUttrekk {
     public @ResponseBody byte[] exportRessurs() throws IOException {
         StringWriter writer = new StringWriter();
 
-        final var cSVFormat = getCSVFormat("nomId", "navident", "fornavn", "mellomnavn", "etternavn", "visningsnavn", "sektor", "sluttdato");
+        var addStartdatoFeatureFlag = unleash.isEnabled(UNLEASH_FOR_OMADA_EXPORT_ADD_STARTDATO,false);
+        if(addStartdatoFeatureFlag) {
+            final var cSVFormat = getCSVFormat("nomId", "navident", "fornavn", "mellomnavn", "etternavn", "visningsnavn", "sektor", "sluttdato","startdato");
 
-        try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
-            ressursStateRepository.getAll().forEach(ressurs -> {
-                try {
-                    printer.printRecord(
-                        ressurs.fid(),
-                        ressurs.navident(),
-                        ressurs.visningsnavn().fornavn(),
-                        ressurs.visningsnavn().mellomnavn().orElse(""),
-                        ressurs.visningsnavn().etternavn(),
-                        ressurs.visningsnavn().getFormattedVisningsnavn(),
-                        ressurs.sektor(),
-                        ressurs.sluttdato().map(dateTimeFormatter::format).orElse("")
-                    );
+            try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
+                ressursStateRepository.getAll().forEach(ressurs -> {
+                    try {
+                        printer.printRecord(
+                            ressurs.fid(),
+                            ressurs.navident(),
+                            ressurs.visningsnavn().fornavn(),
+                            ressurs.visningsnavn().mellomnavn().orElse(""),
+                            ressurs.visningsnavn().etternavn(),
+                            ressurs.visningsnavn().getFormattedVisningsnavn(),
+                            ressurs.sektor(),
+                            ressurs.sluttdato().map(dateTimeFormatter::format).orElse(""),
+                            ressurs.startdato().map(dateTimeFormatter::format).orElse("")
+                        );
 
-                    writer.close();
-                } catch (IOException e) {
-                    log.error("Error writing to CSV", e);
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
-                }
-            });
-            return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
+                        writer.close();
+                    } catch (IOException e) {
+                        log.error("Error writing to CSV", e);
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
+                    }
+                });
+                return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
+            }
+        }else {
+            final var cSVFormat = getCSVFormat("nomId", "navident", "fornavn", "mellomnavn", "etternavn", "visningsnavn", "sektor", "sluttdato");
+
+            try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
+                ressursStateRepository.getAll().forEach(ressurs -> {
+                    try {
+                        printer.printRecord(
+                            ressurs.fid(),
+                            ressurs.navident(),
+                            ressurs.visningsnavn().fornavn(),
+                            ressurs.visningsnavn().mellomnavn().orElse(""),
+                            ressurs.visningsnavn().etternavn(),
+                            ressurs.visningsnavn().getFormattedVisningsnavn(),
+                            ressurs.sektor(),
+                            ressurs.sluttdato().map(dateTimeFormatter::format).orElse("")
+                        );
+
+                        writer.close();
+                    } catch (IOException e) {
+                        log.error("Error writing to CSV", e);
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
+                    }
+                });
+                return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
+            }
         }
     }
 
