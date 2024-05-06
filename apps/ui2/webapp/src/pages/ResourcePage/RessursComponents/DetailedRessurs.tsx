@@ -502,7 +502,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
     useSearch({
       from: "/ressurs/$id",
     });
-  const isEkstern = ressurs.sektor === Sektor.EKSTERN;
+  const ressursCanBeEdited = ressurs.sektor !== Sektor.NAV_STATLIG;
   const isEditing =
     editPersonopplysninger || editOrgtilknytning || addOrgtilknytning;
 
@@ -611,16 +611,16 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
             `}
             gap="2"
           >
-            {!isEkstern && (
+            {!ressursCanBeEdited && (
               <HelpText title="Hvorfor er dette utilgjengelig?">
-                Statlige og kommunale ansatte kan ikke opprettes eller endres i
-                NOM på dette tidspunktet. Disse kan endres i tråd med gjeldende
-                rutiner i Identrutina og Unit4.
+                Statlige ansatte kan ikke opprettes eller endres i NOM på dette
+                tidspunktet. Disse kan endres i tråd med gjeldende rutiner i
+                Identrutina og Unit4.
               </HelpText>
             )}
 
             <Button
-              disabled={!isEkstern}
+              disabled={!ressursCanBeEdited}
               icon={<PencilIcon aria-hidden />}
               onClick={() =>
                 navigate({

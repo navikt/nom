@@ -438,7 +438,7 @@ public class OrgtilknytningRestService {
             .orElseThrow(() -> RessursNotFoundException.navident(orgtilknytning.navident()));
 
 
-        if (!tilknyttetRessurs.sektor().equals(Sektor.EKSTERN)) {
+        if (tilknyttetRessurs.sektor() == Sektor.NAV_STATLIG) {
             throw InvalidSektorException.actionNotAllowedForSektor(tilknyttetRessurs.sektor());
         }
 
@@ -512,7 +512,7 @@ public class OrgtilknytningRestService {
         var tilknyttetRessurs = ressursStateRepository.findByNavident(orgtilknytning.navident())
             .orElseThrow(() -> RessursNotFoundException.navident(orgtilknytning.navident()));
 
-        if (tilknyttetRessurs.sektor() != Sektor.EKSTERN) {
+        if (tilknyttetRessurs.sektor() == Sektor.NAV_STATLIG) {
             throw InvalidSektorException.actionNotAllowedForSektor(tilknyttetRessurs.sektor());
         }
 

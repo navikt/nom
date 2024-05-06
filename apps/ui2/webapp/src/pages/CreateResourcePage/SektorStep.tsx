@@ -76,8 +76,8 @@ export function SektorStep() {
           <Radio disabled value={Sektor.NAV_STATLIG}>
             {`${SektorNameMapping[Sektor.NAV_STATLIG]} (Ikke tilgjengelig ennå)`}
           </Radio>
-          <Radio disabled value={Sektor.NAV_KOMMUNAL}>
-            {`${SektorNameMapping[Sektor.NAV_KOMMUNAL]} (Ikke tilgjengelig ennå)`}
+          <Radio value={Sektor.NAV_KOMMUNAL}>
+            {SektorNameMapping[Sektor.NAV_KOMMUNAL]}
           </Radio>
         </RadioGroup>
         {selectedSektor === Sektor.NAV_KOMMUNAL ? undefined : (

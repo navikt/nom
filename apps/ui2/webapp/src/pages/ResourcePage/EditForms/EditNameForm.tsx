@@ -21,7 +21,7 @@ export function EditNameForm({ ressurs }: { ressurs: Ressurs }) {
 
   const defaultValues = {
     fornavn: ressurs.visningsnavn.fornavn,
-    mellomnavn: ressurs.visningsnavn.mellomnavn,
+    mellomnavn: ressurs.visningsnavn.mellomnavn ?? undefined,
     etternavn: ressurs.visningsnavn.etternavn,
   };
 

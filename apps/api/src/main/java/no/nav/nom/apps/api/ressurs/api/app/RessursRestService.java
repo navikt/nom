@@ -174,8 +174,8 @@ public class RessursRestService {
     public void updateRessursNavn(String navident, UpdateVisningsnavnRequest updateVisningsnavnRequest) {
         var ressursState = findRessursStateByNavident(navident);
 
-        if (!ressursState.isEkstern()) {
-            throw new InvalidSektorException("Kun eksterne ressurser kan endres");
+        if (ressursState.sektor() == Sektor.NAV_STATLIG) {
+            throw InvalidSektorException.actionNotAllowedForSektor(Sektor.NAV_STATLIG);
         }
 
         validateIngenMellomromEtternavn(updateVisningsnavnRequest.etternavn());
@@ -201,8 +201,8 @@ public class RessursRestService {
     public void updateRessursPrimaryTelefonnummer(String navident, UpdatePrimarytelefonnummer updatePrimarytelefonnummer) {
         var ressursState = findRessursStateByNavident(navident);
 
-        if (!ressursState.isEkstern()) {
-            throw new InvalidSektorException("Kun eksterne ressurser kan endres");
+        if (ressursState.sektor() == Sektor.NAV_STATLIG) {
+            throw InvalidSektorException.actionNotAllowedForSektor(Sektor.NAV_STATLIG);
         }
 
         var oppdaterMobilnummerCommand = new OppdaterPrimaryTelefonnummerCommand(
