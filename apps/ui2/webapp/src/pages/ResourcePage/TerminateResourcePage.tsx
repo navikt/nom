@@ -10,7 +10,6 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { addYears, isBefore, subDays } from "date-fns";
 import React from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -42,12 +41,7 @@ export function TerminateResourcePage() {
     },
     resolver: yupResolver(
       yup.object({
-        sluttDato: yup
-          .string()
-          .required("Obligatorisk")
-          .test("ensure-max-1-year", "Må være under et år frem i tid", (v) =>
-            isBefore(new Date(v), subDays(addYears(new Date(), 1), 1)),
-          ),
+        sluttDato: yup.string().max1YearInTheFuture().required("Obligatorisk"),
       }),
     ),
   });

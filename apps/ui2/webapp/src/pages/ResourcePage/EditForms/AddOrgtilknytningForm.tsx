@@ -93,6 +93,7 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
             defaultSluttDato={formatDateWithoutTimezone(
               subDays(addYears(new Date(), 1), 1),
             )}
+            sektor={ressurs.sektor}
           />
           <SetRessursSluttdatoFormPart
             enabled={

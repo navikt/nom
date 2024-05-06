@@ -1,8 +1,8 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Alert, BodyShort, Link, Loader, TextField } from "@navikt/ds-react";
+import { Alert, BodyShort, Loader, TextField } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -86,7 +86,7 @@ function CreateResourceForm({ personident }: { personident: string }) {
       <Alert variant="error">
         Denne personen finnes allerede som aktiv medarbeider med NAV-ident{" "}
         <b>{person?.navident}</b>. For å gjøre endringer, gå til{" "}
-        <Link href={`/ressurs/${person?.navident}`}>
+        <Link to={`/ressurs/${person?.navident}`}>
           medarbeiderens profilside
         </Link>
         .

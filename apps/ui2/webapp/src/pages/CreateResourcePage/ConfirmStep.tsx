@@ -18,6 +18,7 @@ import type {
   OpprettRessursRequest,
   OpprettRessursResponse,
 } from "~/types/api-models";
+import { Tilknytningtype } from "~/types/api-models";
 import { DATE_FORMATS, formatVisningsnavn } from "~/utils";
 
 export function ConfirmStep() {
@@ -147,7 +148,10 @@ export function ConfirmStep() {
           <LabelWithValue
             label="Tilknytningtype"
             value={
-              tilknytningtype && TilknytningtypeNameMapping[tilknytningtype]
+              tilknytningtype &&
+              (tilknytningtype === Tilknytningtype.INGEN
+                ? undefined
+                : TilknytningtypeNameMapping[tilknytningtype])
             }
           />
           <LabelWithValue

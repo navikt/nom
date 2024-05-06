@@ -1,15 +1,8 @@
 import { css } from "@emotion/react";
 import { CheckmarkCircleFillIcon, ChevronRightIcon } from "@navikt/aksel-icons";
-import {
-  Alert,
-  BodyShort,
-  HStack,
-  Label,
-  Link,
-  Loader,
-} from "@navikt/ds-react";
+import { Alert, BodyShort, HStack, Label, Loader } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
-import { useSearch } from "@tanstack/react-router";
+import { Link, useSearch } from "@tanstack/react-router";
 
 import { getRessurs } from "~/api/react-query-endpoints";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
@@ -56,6 +49,9 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
     ? "https://teamkatalog.ekstern.dev.nav.no"
     : "https://teamkatalog.nav.no";
 
+  // Inntil vi vet bedre hvem som trenger å se denne teksten (f.eks antagelser fra hierarkiet) så skrur vi den av for nå. For majoriteten vil den heller være forvirrende
+  const showTeamcatInstructions = false;
+
   return (
     <ContainerWithHighlightedTop
       icon={opprettRessursIcon}
@@ -85,21 +81,23 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
           E-postadresse opprettes automatisk og blir synlig på medarbeiderens
           profilside når den er klar.
         </BodyShort>
-        <BodyShort>
-          Du kan også legge inn teamtilhørighet i{" "}
-          <Link href={teamcatBaseUrl} target="_blank">
-            Teamkatalogen
-          </Link>
-          , men det kan ta opp til to virkedager før personen vil bli
-          tilgjengelig der. Personen selv eller andre kontaktpersoner kan også
-          legge inn informasjon i Teamkatalogen.
-        </BodyShort>
+        {showTeamcatInstructions ? (
+          <BodyShort>
+            Du kan også legge inn teamtilhørighet i{" "}
+            <Link href={teamcatBaseUrl} target="_blank">
+              Teamkatalogen
+            </Link>
+            , men det kan ta opp til to virkedager før personen vil bli
+            tilgjengelig der. Personen selv eller andre kontaktpersoner kan også
+            legge inn informasjon i Teamkatalogen.
+          </BodyShort>
+        ) : undefined}
       </HStack>
-      {/*TODO: disse burde ikke være hrefs, men bruker Routeren sine lenker slik at det ikke gjøres en sidenavigasjon og hele siden må lastes på nytt.*/}
       <PanelLink
         href="https://it-hjelpa.adeo.no/arsys/home"
         label="Gi tilganger i Remedy"
       />
+      {/*TODO: disse burde ikke være hrefs, men bruker Routeren sine lenker slik at det ikke gjøres en sidenavigasjon og hele siden må lastes på nytt.*/}
       <PanelLink
         href={`/ressurs/${ressurs.navident}`}
         label="Gå til profilsiden"
@@ -113,6 +111,7 @@ function PanelLink({ label, href }: { label: string; href: string }) {
   return (
     <Link
       css={css`
+        display: flex;
         width: 60%;
         margin: auto;
         padding: var(--a-spacing-4);
@@ -131,7 +130,7 @@ function PanelLink({ label, href }: { label: string; href: string }) {
           background: unset;
         }
       `}
-      href={href}
+      to={href}
     >
       <Label
         css={css`

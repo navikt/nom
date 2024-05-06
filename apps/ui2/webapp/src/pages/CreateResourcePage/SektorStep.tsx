@@ -35,9 +35,9 @@ export function SektorStep() {
   return (
     <ContainerWithHighlightedTop icon={opprettRessursIcon} title="Sektor">
       <Alert variant="info">
-        For øyeblikket kan du kun bruke NOM til å opprette eksterne konsulenter.
-        Statlig og kommunalt ansatte opprettes i Remedy. Dette gjelder også
-        roboter, Vikafossen og utenlandske konsulenter.
+        For øyeblikket kan du kun bruke NOM til å opprette eksterne konsulenter
+        og kommunalt ansatte. Statlig ansatte opprettes i Remedy som tidligere.
+        Dette gjelder også roboter, Vikafossen og utenlandske konsulenter.
       </Alert>
 
       <form
@@ -73,11 +73,11 @@ export function SektorStep() {
           <Radio value={Sektor.EKSTERN}>
             {SektorNameMapping[Sektor.EKSTERN]}
           </Radio>
-          <Radio disabled value={Sektor.NAV_STATLIG}>
-            {`${SektorNameMapping[Sektor.NAV_STATLIG]} (Ikke tilgjengelig ennå)`}
-          </Radio>
           <Radio value={Sektor.NAV_KOMMUNAL}>
             {SektorNameMapping[Sektor.NAV_KOMMUNAL]}
+          </Radio>
+          <Radio disabled value={Sektor.NAV_STATLIG}>
+            {`${SektorNameMapping[Sektor.NAV_STATLIG]} (Ikke tilgjengelig ennå)`}
           </Radio>
         </RadioGroup>
         {selectedSektor === Sektor.NAV_KOMMUNAL ? undefined : (

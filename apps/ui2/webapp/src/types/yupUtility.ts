@@ -25,7 +25,7 @@ yup.addMethod(yup.string, "futureOrPresent", function () {
 yup.addMethod(yup.string, "max1YearInTheFuture", function () {
   return this.test(
     "ensure-max-1-year",
-    "Kan ikke settes lenger enn 1 år frem i tid",
+    "Må være under et år frem i tid fra dagens dato",
     function (dateString) {
       if (!dateString) {
         return true;

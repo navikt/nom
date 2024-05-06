@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
+  Alert,
   BodyShort,
   Checkbox,
   DatePicker,
@@ -10,7 +11,7 @@ import {
   useDatepicker,
 } from "@navikt/ds-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { addYears, isBefore, subDays } from "date-fns";
+import { addYears, subDays } from "date-fns";
 import { useEffect, useState } from "react";
 import {
   Controller,
@@ -44,11 +45,19 @@ export function OrganisasjonstilknytningStep() {
       icon={opprettRessursIcon}
       title="Organisasjonstilknytninger"
     >
-      {sektor === Sektor.NAV_STATLIG ? (
-        <CreateStatligRessurs />
-      ) : (
-        <CreateEksternRessurs />
-      )}
+      {(() => {
+        switch (sektor) {
+          case Sektor.NAV_KOMMUNAL: {
+            return <CreateKommunaleRessurs />;
+          }
+          case Sektor.EKSTERN: {
+            return <CreateEksternRessurs />;
+          }
+          case Sektor.NAV_STATLIG: {
+            return <CreateStatligRessurs />;
+          }
+        }
+      })()}
     </ContainerWithHighlightedTop>
   );
 }
@@ -127,37 +136,12 @@ function CreateStatligRessurs() {
   );
 }
 
-const statligValidationSchema = yup.object({
-  orgEnhetId: yup.string().required("Obligatorisk"),
-  gyldigFom: yup.string().required("Obligatorisk"),
-  ansettelsesType: yup
-    .mixed<AnsettelsesType>()
-    .oneOf(Object.values(AnsettelsesType))
-    .required("Obligatorisk"),
-});
-
-export const eksternPeriodeValidationSchema = yup.object().shape({
-  gyldigFom: yup.string().required("Obligatorisk"),
-  gyldigTom: yup
-    .string()
-    .required("Obligatorisk")
-    .test("ensure-max-1-year", "Må være under et år frem i tid", (v) =>
-      isBefore(new Date(v), subDays(addYears(new Date(), 1), 1)),
-    ),
-  setRessursSluttdato: yup.boolean(),
-});
-
-export const eksternValidationSchema = eksternPeriodeValidationSchema.concat(
-  yup.object().shape({
-    orgEnhetId: yup.string().required("Obligatorisk"),
-  }),
-);
-
 function CreateEksternRessurs() {
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
-  const { orgEnhetId, gyldigFom, gyldigTom, fysiskBrukerstedNr } = useSearch({
-    from: "/ressurs/create/$step",
-  });
+  const { orgEnhetId, gyldigFom, gyldigTom, fysiskBrukerstedNr, sektor } =
+    useSearch({
+      from: "/ressurs/create/$step",
+    });
 
   const methods = useForm({
     defaultValues: {
@@ -168,15 +152,15 @@ function CreateEksternRessurs() {
     },
 
     resolver: yupResolver(
-      eksternValidationSchema.concat(
-        yup.object().shape({
-          fysiskBrukerstedNr: yup.string().required("Obligatorisk"),
-        }),
-      ),
+      eksternValidationSchema.concat(fysiskBrukerstedNrSchema),
     ),
   });
 
   const { handleSubmit } = methods;
+
+  if (sektor === undefined) {
+    return <Alert variant="error">Mangler informasjon om sektor</Alert>;
+  }
 
   return (
     <FormProvider {...methods}>
@@ -197,6 +181,7 @@ function CreateEksternRessurs() {
           }
           defaultStartDato={gyldigFom}
           erDagligOppfolgingLockedToTrue
+          sektor={sektor}
         />
         <FysiskBrukerstedSelectFormPart />
         <NavigationButtons />
@@ -205,19 +190,147 @@ function CreateEksternRessurs() {
   );
 }
 
+function CreateKommunaleRessurs() {
+  const navigate = useNavigate({ from: "/ressurs/create/$step" });
+  const { orgEnhetId, gyldigFom, gyldigTom, fysiskBrukerstedNr, sektor } =
+    useSearch({
+      from: "/ressurs/create/$step",
+    });
+
+  const methods = useForm({
+    defaultValues: {
+      orgEnhetId: orgEnhetId,
+      gyldigFom: undefined,
+      gyldigTom: undefined,
+      fysiskBrukerstedNr: fysiskBrukerstedNr,
+    },
+
+    resolver: yupResolver(
+      kommunalValidationSchema.concat(fysiskBrukerstedNrSchema),
+    ),
+  });
+
+  const { handleSubmit } = methods;
+
+  if (sektor === undefined) {
+    return <Alert variant="error">Mangler informasjon om sektor</Alert>;
+  }
+
+  return (
+    <FormProvider {...methods}>
+      <form
+        css={defaultFormStyle}
+        onSubmit={handleSubmit((values) =>
+          navigate({
+            to: "/ressurs/create/$step",
+            params: { step: "9" },
+            search: (oldSearch) => ({ ...oldSearch, ...values }),
+          }),
+        )}
+      >
+        <OrganisasjonstilknytningInnerForm
+          defaultSluttDato={gyldigTom}
+          defaultStartDato={gyldigFom}
+          erDagligOppfolgingLockedToTrue
+          sektor={sektor}
+        />
+        <FysiskBrukerstedSelectFormPart />
+        <NavigationButtons />
+      </form>
+    </FormProvider>
+  );
+}
+
+const fysiskBrukerstedNrSchema = yup.object().shape({
+  fysiskBrukerstedNr: yup.string().required("Obligatorisk"),
+});
+
+const orgEnhetIdSchema = yup.object().shape({
+  orgEnhetId: yup.string().required("Obligatorisk"),
+});
+
+const statligValidationSchema = yup.object({
+  orgEnhetId: yup.string().required("Obligatorisk"),
+  gyldigFom: yup.string().required("Obligatorisk"),
+  ansettelsesType: yup
+    .mixed<AnsettelsesType>()
+    .oneOf(Object.values(AnsettelsesType))
+    .required("Obligatorisk"),
+});
+
+const kommunalPeriodeValidationSchema = yup.object().shape({
+  gyldigFom: yup.string().required("Obligatorisk"),
+  gyldigTom: yup.string().optional(),
+});
+
+const kommunalValidationSchema =
+  kommunalPeriodeValidationSchema.concat(orgEnhetIdSchema);
+
+export const eksternPeriodeValidationSchema = yup.object().shape({
+  gyldigFom: yup.string().required("Obligatorisk"),
+  gyldigTom: yup.string().max1YearInTheFuture().required("Obligatorisk"),
+  setRessursSluttdato: yup.boolean(),
+});
+
+export const eksternValidationSchema =
+  eksternPeriodeValidationSchema.concat(orgEnhetIdSchema);
+
 export function OrganisasjonstilknytningInnerForm({
   defaultStartDato,
   defaultSluttDato,
+  sektor,
   erDagligOppfolgingLockedToTrue = false,
 }: {
   defaultStartDato?: string;
   defaultSluttDato?: string;
+  sektor: Sektor;
   erDagligOppfolgingLockedToTrue?: boolean;
+}) {
+  const { setValue, watch } = useFormContext();
+
+  const [erDagligOppfolgingChecked, setErDagligOppfolgingChecked] = useState(
+    erDagligOppfolgingLockedToTrue,
+  );
+
+  return (
+    <>
+      <InnerOrgEnhetSelect />
+      {watch("orgEnhetId") ? (
+        <Checkbox
+          checked={erDagligOppfolgingChecked}
+          disabled={erDagligOppfolgingLockedToTrue}
+          onChange={(event) => {
+            setErDagligOppfolgingChecked(event.target.checked);
+            setValue("erDagligOppfolging", event.target.checked);
+          }}
+        >
+          <BodyShort>
+            Denne lederen har ansvar for den daglige oppfølgingen av
+            medarbeideren
+          </BodyShort>
+        </Checkbox>
+      ) : undefined}
+      <Orgtilknytningsvarighet
+        defaultSluttDato={defaultSluttDato}
+        defaultStartDato={defaultStartDato}
+        sektor={sektor}
+      />
+    </>
+  );
+}
+
+function Orgtilknytningsvarighet({
+  defaultStartDato,
+  defaultSluttDato,
+  sektor,
+}: {
+  defaultStartDato?: string;
+  defaultSluttDato?: string;
+  sektor: Sektor;
 }) {
   const {
     setValue,
     formState: { errors },
-    watch,
   } = useFormContext();
 
   useEffect(() => {
@@ -244,77 +357,57 @@ export function OrganisasjonstilknytningInnerForm({
     defaultSelected: defaultSluttDato ? new Date(defaultSluttDato) : undefined,
   });
 
-  const [erDagligOppfolgingChecked, setErDagligOppfolgingChecked] = useState(
-    erDagligOppfolgingLockedToTrue,
-  );
-
   return (
-    <>
-      <InnerOrgEnhetSelect />
-      {watch("orgEnhetId") ? (
-        <Checkbox
-          checked={erDagligOppfolgingChecked}
-          disabled={erDagligOppfolgingLockedToTrue}
-          onChange={(event) => {
-            setErDagligOppfolgingChecked(event.target.checked);
-            setValue("erDagligOppfolging", event.target.checked);
-          }}
-        >
-          <BodyShort>
-            Denne lederen har ansvar for den daglige oppfølgingen av
-            medarbeideren
-          </BodyShort>
-        </Checkbox>
-      ) : undefined}
-      <div
-        css={css(
-          fullwidthRow,
-          css`
-            margin-top: var(--a-spacing-8);
-          `,
-        )}
-      >
-        <FullWidthDatePickerWrapper>
-          <DatePicker {...startDatePicker.datepickerProps}>
-            <DatePicker.Input
-              {...startDatePicker.inputProps}
-              error={errors.gyldigFom?.message?.toString()}
-              label={
-                <span
-                  css={css`
-                    height: 24px;
-                  `}
-                >
-                  Startdato (første arbeidsdag)
-                </span>
-              }
-            />
-          </DatePicker>
-        </FullWidthDatePickerWrapper>
-        <FullWidthDatePickerWrapper>
-          <DatePicker {...sluttDatePicker.datepickerProps}>
-            <DatePicker.Input
-              {...sluttDatePicker.inputProps}
-              error={errors.gyldigTom?.message?.toString()}
-              label={
-                <span
-                  css={css`
-                    display: inline-flex;
-                    gap: var(--a-spacing-2);
-                  `}
-                >
-                  Sluttdato
+    <div
+      css={css(
+        fullwidthRow,
+        css`
+          margin-top: var(--a-spacing-8);
+        `,
+      )}
+    >
+      <FullWidthDatePickerWrapper>
+        <DatePicker {...startDatePicker.datepickerProps}>
+          <DatePicker.Input
+            {...startDatePicker.inputProps}
+            error={errors.gyldigFom?.message?.toString()}
+            label={
+              <span
+                css={css`
+                  height: 24px;
+                `}
+              >
+                Startdato (første arbeidsdag)
+              </span>
+            }
+          />
+        </DatePicker>
+      </FullWidthDatePickerWrapper>
+      <FullWidthDatePickerWrapper>
+        <DatePicker {...sluttDatePicker.datepickerProps}>
+          <DatePicker.Input
+            {...sluttDatePicker.inputProps}
+            error={errors.gyldigTom?.message?.toString()}
+            label={
+              <span
+                css={css`
+                  display: inline-flex;
+                  gap: var(--a-spacing-2);
+                `}
+              >
+                Sluttdato
+                {sektor === Sektor.EKSTERN ? (
                   <HelpText strategy="fixed">
                     Bruk datoen for normal avvikling av avtalen. Opsjoner skal
                     ikke beregnes med her.
                   </HelpText>
-                </span>
-              }
-            />
-          </DatePicker>
-        </FullWidthDatePickerWrapper>
-      </div>
-    </>
+                ) : undefined}
+              </span>
+            }
+          />
+        </DatePicker>
+      </FullWidthDatePickerWrapper>
+    </div>
   );
 }
 
