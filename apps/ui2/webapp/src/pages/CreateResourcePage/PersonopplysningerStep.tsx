@@ -120,7 +120,12 @@ function VisningsnavnForm({
   folkeregisterPerson: FolkeregisterPerson;
 }) {
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
-  const { visningsfornavn, visningsmellomnavn, visningsetternavn } = useSearch({
+  const {
+    visningsfornavn,
+    visningsmellomnavn,
+    visningsetternavn,
+    primaryTelefonnummer,
+  } = useSearch({
     from: "/ressurs/create/$step",
   });
 
@@ -135,6 +140,7 @@ function VisningsnavnForm({
       visningsetternavn:
         visningsetternavn ||
         capitalizeName(folkeregisterPerson?.navn.etternavn ?? ""),
+      primaryTelefonnummer: primaryTelefonnummer ?? "",
     },
     resolver: yupResolver(navnValidationSchema),
   });
@@ -184,13 +190,33 @@ function VisningsnavnForm({
             {...register("visningsetternavn")}
           />
         </div>
+        <TextField
+          {...register("primaryTelefonnummer")}
+          autoComplete="off"
+          css={css`
+            max-width: 350px;
+            margin-top: var(--a-spacing-4);
+          `}
+          description="Telefonnummer er valgfritt"
+          error={errors.primaryTelefonnummer?.message}
+          label="Telefonnummer"
+        />
         <NavigationButtons />
       </form>
     </>
   );
 }
 
-const navnValidationSchema = yup.object({
+const navnValidationSchema = yup.object().shape({
+  primaryTelefonnummer: yup
+    .string()
+    .test("length", "Må være 8 siffer", (nummer) => {
+      if (nummer?.length === 0) {
+        return true;
+      }
+
+      return nummer?.length === 8;
+    }),
   visningsfornavn: yup.string().required("Obligatorisk"),
   visningsmellomnavn: yup.string().optional(),
   visningsetternavn: yup

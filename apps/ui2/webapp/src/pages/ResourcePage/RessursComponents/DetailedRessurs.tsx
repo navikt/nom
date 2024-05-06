@@ -46,6 +46,7 @@ import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrap
 import { EditFysiskeBrukerstederForm } from "~/pages/ResourcePage/EditForms/EditFysiskeBrukerstederForm";
 import { EditNameForm } from "~/pages/ResourcePage/EditForms/EditNameForm";
 import { EditOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/EditOrgtilknytningForm";
+import { EditPhoneNumber } from "~/pages/ResourcePage/EditForms/EditPhoneNumber";
 import { blueTopBorder } from "~/resources/NomStyles";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
@@ -464,26 +465,25 @@ function Name({ ressurs }: { ressurs: Ressurs }) {
 }
 
 function Telephone({ ressurs }: { ressurs: Ressurs }) {
-  // TODO: Edit telephone is not implemented in backend yet
-  /*
-   const { edit } = useSearch({ from: "/ressurs/$id" });
+  const { editPersonopplysninger } = useSearch({ from: "/ressurs/$id" });
 
-   if (edit) {
-     return (
-       <>
-         <span>Telefon:</span>
-         <EditPhoneNumber ressurs={ressurs} />
-       </>
-     );
-   }
-  */
+  if (editPersonopplysninger) {
+    return (
+      <>
+        <span>Telefon:</span>
+        <EditPhoneNumber ressurs={ressurs} />
+      </>
+    );
+  }
+
+  const telefonnummere = ressurs.primaryTelefonnummer
+    ? [{ nummer: ressurs.primaryTelefonnummer }, ...ressurs.telefoner]
+    : ressurs.telefoner;
 
   return (
     <LabelWithValue
       label="Telefon"
-      value={ressurs.telefoner
-        .map(({ nummer }) => formatTlf(nummer))
-        .join(", ")}
+      value={telefonnummere.map(({ nummer }) => formatTlf(nummer)).join(", ")}
     />
   );
 }

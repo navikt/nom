@@ -34,6 +34,7 @@ export function ConfirmStep() {
     gyldigTom,
     orgEnhetId,
     fysiskBrukerstedNr,
+    primaryTelefonnummer,
     tilknytningtype,
   } = useSearch({ from: "/ressurs/create/$step" });
 
@@ -77,6 +78,7 @@ export function ConfirmStep() {
         startDato: gyldigFom,
         sluttDato: gyldigTom,
         orgEnhetId,
+        primaryTelefonnummer,
         fysiskBrukerstedNr,
         tilknytningtype,
       };
@@ -136,6 +138,7 @@ export function ConfirmStep() {
           `}
         >
           <LabelWithValue label="Navn" value={formattedName} />
+          <LabelWithValue label="Telefonnummer" value={primaryTelefonnummer} />
           <LabelWithValue
             label="Sektor"
             value={sektor && SektorNameMapping[sektor]}

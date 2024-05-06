@@ -95,6 +95,7 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
           legge inn informasjon i Teamkatalogen.
         </BodyShort>
       </HStack>
+      {/*TODO: disse burde ikke være hrefs, men bruker Routeren sine lenker slik at det ikke gjøres en sidenavigasjon og hele siden må lastes på nytt.*/}
       <PanelLink
         href="https://it-hjelpa.adeo.no/arsys/home"
         label="Gi tilganger i Remedy"

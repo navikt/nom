@@ -147,7 +147,6 @@ export const eksternPeriodeValidationSchema = yup.object().shape({
   setRessursSluttdato: yup.boolean(),
 });
 
-// eslint-disable-next-line unicorn/prefer-spread
 export const eksternValidationSchema = eksternPeriodeValidationSchema.concat(
   yup.object().shape({
     orgEnhetId: yup.string().required("Obligatorisk"),
@@ -169,7 +168,6 @@ function CreateEksternRessurs() {
     },
 
     resolver: yupResolver(
-      // eslint-disable-next-line unicorn/prefer-spread
       eksternValidationSchema.concat(
         yup.object().shape({
           fysiskBrukerstedNr: yup.string().required("Obligatorisk"),

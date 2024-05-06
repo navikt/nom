@@ -19,25 +19,6 @@ export interface AvvikleRessursRequest {
   sluttDato: string;
 }
 
-export interface LederTilgangForOrgenhetRequest {
-  delegertTilNavident: string;
-  /** @format date */
-  gyldigTom: string;
-  orgenhetId: string;
-}
-
-export interface LederTilgang {
-  active?: boolean;
-  av: string;
-  fid: string;
-  /** @format date */
-  gyldigFom: string;
-  /** @format date */
-  gyldigTom: string;
-  orgenhetId: string;
-  til: string;
-}
-
 export interface EndreOrgtilknytningDatoRequest {
   /** @format date */
   gyldigFom: string;
@@ -69,6 +50,25 @@ export interface GetPersonRequest {
 }
 
 export type JsonNode = object;
+
+export interface LederTilgang {
+  active?: boolean;
+  av: string;
+  fid: string;
+  /** @format date */
+  gyldigFom: string;
+  /** @format date */
+  gyldigTom: string;
+  orgenhetId: string;
+  til: string;
+}
+
+export interface LederTilgangForOrgenhetRequest {
+  delegertTilNavident: string;
+  /** @format date */
+  gyldigTom: string;
+  orgenhetId: string;
+}
 
 export interface LeggTilOrgtilknytningRequest {
   erDagligOppfolging: boolean;
@@ -109,6 +109,7 @@ export interface OpprettRessursRequest {
   fysiskBrukerstedNr: string;
   orgEnhetId: string;
   personident: string;
+  primaryTelefonnummer?: string;
   sektor: Sektor;
   /** @format date */
   sluttDato?: string;
@@ -200,6 +201,7 @@ export interface Ressurs {
   navident: string;
   personident: string;
   primaryFysiskBrukersted?: string;
+  primaryTelefonnummer?: string;
   sektor: Sektor;
   /** @format date */
   sluttdato?: string;
@@ -233,6 +235,7 @@ export interface RessursState {
   navident: string;
   personident: string;
   primaryFysiskBrukersted?: string;
+  primaryTelefonnummer?: string;
   sektor: Sektor;
   /** @format date */
   sluttdato?: string;
@@ -276,13 +279,17 @@ export enum TelefonType {
 export enum Tilknytningtype {
   KONSULENT = "KONSULENT",
   EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER",
-  INGEN = "INGEN"
+  INGEN = "INGEN",
 }
 
 export interface UpdateFysiskeBrukerstederRequest {
   /** @uniqueItems true */
   fysiskeBrukersteder: string[];
   primaryFysiskBrukersted: string;
+}
+
+export interface UpdatePrimarytelefonnummer {
+  nummer?: string;
 }
 
 export interface UpdateVisningsnavnRequest {

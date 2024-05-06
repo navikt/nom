@@ -1,6 +1,7 @@
 const IGNORED_UNICORN_RULES = {
     "unicorn/filename-case": "off",
     "unicorn/no-null": "off",
+    "unicorn/prefer-spread": "off"
 };
 
 // eslint-disable-next-line unicorn/prefer-module,no-undef

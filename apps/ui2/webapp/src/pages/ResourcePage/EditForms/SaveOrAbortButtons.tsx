@@ -12,7 +12,6 @@ export function SaveOrAbortButtons({ isLoading }: { isLoading: boolean }) {
       css={css`
         display: flex;
         justify-content: flex-end;
-        margin-top: var(--a-spacing-4);
         gap: var(--a-spacing-6);
       `}
     >

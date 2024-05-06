@@ -71,6 +71,7 @@ export function CreateRessursPage() {
 
 const commonValidationSchema = yup.object({
   personident: yup.string().required("Obligatorisk"),
+  primaryTelefonnummer: yup.string().optional(),
   visningsfornavn: yup.string().required("Obligatorisk"),
   visningsmellomnavn: yup.string().optional(),
   visningsetternavn: yup.string().required("Obligatorisk"),
@@ -91,7 +92,6 @@ const commonValidationSchema = yup.object({
     .required("Obligatorisk"),
 });
 
-// eslint-disable-next-line unicorn/prefer-spread
 const statligValidationSchema = commonValidationSchema.concat(
   yup.object({
     gyldigTom: yup.string().optional(),
@@ -115,6 +115,7 @@ export function validateCreateRessursSearch(
     ansettelsesType: (search.ansettelsesType as AnsettelsesType) ?? undefined,
     fysiskBrukerstedNr: String(search.fysiskBrukerstedNr ?? ""),
     tilknytningtype: (search.tilknytningtype as Tilknytningtype) ?? undefined,
+    primaryTelefonnummer: String(search.primaryTelefonnummer ?? ""),
   };
 }
 

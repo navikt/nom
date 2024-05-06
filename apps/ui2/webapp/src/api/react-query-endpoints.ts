@@ -26,6 +26,7 @@ import type {
   RessursLeder,
   SessionInfoResponse,
   UpdateFysiskeBrukerstederRequest,
+  UpdatePrimarytelefonnummer,
 } from "~/types/api-models";
 
 const NOM_API_BASE_PATH = "/frackend/nom-api";
@@ -416,6 +417,16 @@ export const updateFysiskeBrukersteder = async (
 export const createRessurs = async (request: OpprettRessursRequest) => {
   return axios.post<unknown, AxiosResponse<OpprettRessursResponse>>(
     `${NOM_API_BASE_PATH}/app/ressurser`,
+    request,
+  );
+};
+
+export const updateTelefonnummer = async (
+  navident: string,
+  request: UpdatePrimarytelefonnummer,
+) => {
+  return axios.post<unknown, AxiosResponse<UpdatePrimarytelefonnummer>>(
+    `${NOM_API_BASE_PATH}/app/ressurser/${navident}/telefonnummer`,
     request,
   );
 };

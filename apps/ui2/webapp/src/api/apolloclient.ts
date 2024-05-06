@@ -20,7 +20,6 @@ const csrfLink = setContext((_, { headers }) => {
 });
 
 export const apolloClient = new ApolloClient({
-  // eslint-disable-next-line unicorn/prefer-spread -- csrfLink is not an array but a class
   link: csrfLink.concat(httpLink),
   cache: new InMemoryCache(),
   defaultOptions: {
