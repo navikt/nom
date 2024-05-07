@@ -208,15 +208,7 @@ function VisningsnavnForm({
 }
 
 const navnValidationSchema = yup.object().shape({
-  primaryTelefonnummer: yup
-    .string()
-    .test("length", "Må være 8 siffer", (nummer) => {
-      if (nummer?.length === 0) {
-        return true;
-      }
-
-      return nummer?.length === 8;
-    }),
+  primaryTelefonnummer: yup.string().optionalPhoneNumber(),
   visningsfornavn: yup.string().required("Obligatorisk"),
   visningsmellomnavn: yup.string().optional(),
   visningsetternavn: yup

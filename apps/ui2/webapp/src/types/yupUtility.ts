@@ -5,6 +5,7 @@ declare module "yup" {
   interface StringSchema {
     futureOrPresent(): StringSchema;
     max1YearInTheFuture(): StringSchema;
+    optionalPhoneNumber(): StringSchema;
   }
 }
 
@@ -32,6 +33,20 @@ yup.addMethod(yup.string, "max1YearInTheFuture", function () {
       }
 
       return isBefore(new Date(dateString), addYears(new Date(), 1));
+    },
+  );
+});
+
+yup.addMethod(yup.string, "optionalPhoneNumber", function () {
+  return this.test(
+    "optional-phone-number",
+    "Må være 8 siffer",
+    function (nummer) {
+      if (nummer?.length === 0) {
+        return true;
+      }
+
+      return nummer?.length === 8;
     },
   );
 });

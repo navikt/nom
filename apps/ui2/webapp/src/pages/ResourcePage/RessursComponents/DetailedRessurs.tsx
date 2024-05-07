@@ -2,7 +2,6 @@ import { css } from "@emotion/react";
 import {
   Buldings3Icon,
   PencilIcon,
-  PersonIcon,
   PersonSuitIcon,
   ReceptionIcon,
   XMarkIcon,
@@ -11,8 +10,6 @@ import {
   Button,
   ExpansionCard,
   Heading,
-  HelpText,
-  HStack,
   Label,
   Link,
   Tag,
@@ -23,36 +20,26 @@ import {
   useNavigate,
   useSearch,
 } from "@tanstack/react-router";
-import capitalize from "lodash/capitalize";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
 
 import {
-  getLedereForRessurs,
   getOrgEnhet,
   getOrgEnheterLedetAvOptions,
   getOrgTilknytninger,
   getTeamcatMemberships,
 } from "~/api/react-query-endpoints";
-import { useHasWriteAccess } from "~/api/useGetSession";
 import { Divider } from "~/components/Divider";
-import { LabelWithValue } from "~/components/LabelWithValue";
-import { UserImage } from "~/components/UserImage";
-import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
-import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { AddOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/AddOrgtilknytningForm";
 import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
-import { EditFysiskeBrukerstederForm } from "~/pages/ResourcePage/EditForms/EditFysiskeBrukerstederForm";
-import { EditNameForm } from "~/pages/ResourcePage/EditForms/EditNameForm";
 import { EditOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/EditOrgtilknytningForm";
-import { EditPhoneNumber } from "~/pages/ResourcePage/EditForms/EditPhoneNumber";
+import { EditPersonOpplysninger } from "~/pages/ResourcePage/EditForms/EditPersonOpplysninger";
+import { PersonOpplysninger } from "~/pages/ResourcePage/RessursComponents/PersonOpplysninger";
 import { blueTopBorder } from "~/resources/NomStyles";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
-import { Sektor } from "~/types/api-models";
 import {
   formatDisplayDate,
-  formatTlf,
   formatVisningsnavn,
   isAfterPresent,
   isBeforePresent,
@@ -445,217 +432,16 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
   );
 }
 
-function Name({ ressurs }: { ressurs: Ressurs }) {
-  const { editPersonopplysninger } = useSearch({ from: "/ressurs/$id" });
-
-  if (editPersonopplysninger) {
-    return <EditNameForm ressurs={ressurs} />;
-  }
-  return (
-    <Heading
-      css={css`
-        margin-bottom: var(--a-spacing-8);
-      `}
-      level="1"
-      size="large"
-    >
-      {formatVisningsnavn(ressurs.visningsnavn)}
-    </Heading>
-  );
-}
-
-function Telephone({ ressurs }: { ressurs: Ressurs }) {
-  const { editPersonopplysninger } = useSearch({ from: "/ressurs/$id" });
-
-  if (editPersonopplysninger) {
-    return (
-      <>
-        <span>Telefon:</span>
-        <EditPhoneNumber ressurs={ressurs} />
-      </>
-    );
-  }
-
-  const telefonnummere = ressurs.primaryTelefonnummer
-    ? [{ nummer: ressurs.primaryTelefonnummer }, ...ressurs.telefoner]
-    : ressurs.telefoner;
-
-  return (
-    <LabelWithValue
-      label="Telefon"
-      value={telefonnummere.map(({ nummer }) => formatTlf(nummer)).join(", ")}
-    />
-  );
-}
-
 function SummarySection({ ressurs }: { ressurs: Ressurs }) {
-  const navigate = useNavigate();
-
-  const dagligLeder = useQuery({
-    queryKey: getLedereForRessurs.queryKey(ressurs.navident),
-    queryFn: () => getLedereForRessurs.queryFn(ressurs.navident),
-    select: (ledere) => ledere.find((leder) => leder.erDagligOppfolging)?.leder,
-  }).data;
-
-  const hasWriteAccess = useHasWriteAccess();
-  const { editPersonopplysninger, editOrgtilknytning, addOrgtilknytning } =
-    useSearch({
-      from: "/ressurs/$id",
-    });
-  const ressursCanBeEdited = ressurs.sektor !== Sektor.NAV_STATLIG;
-  const isEditing =
-    editPersonopplysninger || editOrgtilknytning || addOrgtilknytning;
-
-  return (
-    <div
-      css={css`
-        display: flex;
-        justify-content: space-between;
-        align-items: stretch;
-        flex-wrap: wrap-reverse;
-        gap: var(--a-spacing-4);
-      `}
-    >
-      <div>
-        <Name ressurs={ressurs} />
-        <Heading
-          css={css`
-            margin-bottom: var(--a-spacing-6);
-          `}
-          level="2"
-          size="small"
-        >
-          <PersonIcon />
-          <span>Kort fortalt</span>
-        </Heading>
-        <div
-          css={css`
-            display: grid;
-            grid-template-columns: max-content 1fr;
-            gap: var(--a-spacing-2) var(--a-spacing-4);
-          `}
-        >
-          <LabelWithValue label="NAV-ident" value={ressurs.navident} />
-          <LabelWithValue
-            label="Startdato"
-            value={formatDisplayDate(ressurs.startdato)}
-          />
-          {ressurs.sluttdato && ressurs.sektor === Sektor.EKSTERN ? (
-            <LabelWithValue
-              label="Sluttdato"
-              value={formatDisplayDate(ressurs.sluttdato)}
-            />
-          ) : undefined}
-          <LabelWithValue
-            label="Sektor"
-            value={SektorNameMapping[ressurs.sektor]}
-          />
-          <LabelWithValue label="E-post" value={ressurs.epost} />
-          <Telephone ressurs={ressurs} />
-          {dagligLeder ? (
-            <>
-              <span>Leder:</span>
-              <div
-                css={css`
-                  display: flex;
-                  gap: var(--a-spacing-2);
-                `}
-              >
-                <ReactRouterLink
-                  params={{ id: dagligLeder.navident }}
-                  search={{}}
-                  to="/ressurs/$id"
-                >
-                  <Link as="span">
-                    {formatVisningsnavn(dagligLeder.visningsnavn)}
-                  </Link>
-                </ReactRouterLink>
-
-                {dagligLeder && (
-                  <>
-                    <span>-</span>
-                    <span>Daglig oppfølging</span>
-                    <HelpText title="Hva er daglig leder">
-                      Denne lederen har det daglige ansvaret for
-                      sykefraværsoppfølging, godkjenning i MinWinTid, og har
-                      tilgang til den ansatte i Læringsportalen.
-                    </HelpText>
-                  </>
-                )}
-              </div>
-            </>
-          ) : undefined}
-          <FysiskBrukersted ressurs={ressurs} />
-        </div>
-      </div>
-      <div
-        css={css`
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          gap: var(--a-spacing-4);
-          align-items: flex-end;
-        `}
-      >
-        <UserImage
-          includeInstructionsWhenNotFound
-          navident={ressurs.navident}
-          navn={formatVisningsnavn(ressurs.visningsnavn)}
-          size="126px"
-        />
-
-        {hasWriteAccess && !isEditing && (
-          <HStack
-            css={css`
-              align-items: center;
-            `}
-            gap="2"
-          >
-            {!ressursCanBeEdited && (
-              <HelpText title="Hvorfor er dette utilgjengelig?">
-                Statlige ansatte kan ikke opprettes eller endres i NOM på dette
-                tidspunktet. Disse kan endres i tråd med gjeldende rutiner i
-                Identrutina og Unit4.
-              </HelpText>
-            )}
-
-            <Button
-              disabled={!ressursCanBeEdited}
-              icon={<PencilIcon aria-hidden />}
-              onClick={() =>
-                navigate({
-                  search: { editPersonopplysninger: true },
-                  params: (previous) => previous,
-                })
-              }
-              size="small"
-              variant="secondary"
-            >
-              Endre personopplysninger
-            </Button>
-          </HStack>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {
-  const { editPersonopplysninger } = useSearch({ from: "/ressurs/$id" });
-  const fysiskBrukersted = useFysiskBrukersted(ressurs.primaryFysiskBrukersted);
+  const { editPersonopplysninger } = useSearch({
+    from: "/ressurs/$id",
+  });
 
   if (editPersonopplysninger) {
-    return <EditFysiskeBrukerstederForm ressurs={ressurs} />;
+    return <EditPersonOpplysninger ressurs={ressurs} />;
   }
 
-  return (
-    <LabelWithValue
-      label="Fysisk brukersted"
-      value={
-        fysiskBrukersted ? capitalize(fysiskBrukersted.brukerstedNavn) : "-"
-      }
-    />
-  );
+  return <PersonOpplysninger ressurs={ressurs} />;
 }
 
 function TeamCatSection({ navident }: { navident: string }) {
