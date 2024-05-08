@@ -4,6 +4,7 @@ import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -138,7 +139,8 @@ public class KafkaUtils {
             null,
             Optional.of(LocalDate.now()),
             null,
-            Collections.emptyList()
+            Collections.emptyList(),
+            IdentType.STANDARD
         );
 
         createRessursHendelseEventSource(ressursState);

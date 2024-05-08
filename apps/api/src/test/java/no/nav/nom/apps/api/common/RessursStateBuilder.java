@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.common;
 
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -99,7 +100,7 @@ public class RessursStateBuilder {
     }
 
     public RessursState build() {
-        return new RessursState(fid, personident, navident, sektor, visningsnavn, primaryTelefonnummer, sluttdato, startdato, primaryFysiskBrukersted, fysiskeBrukersteder);
+        return new RessursState(fid, personident, navident, sektor, visningsnavn, primaryTelefonnummer, sluttdato, startdato, primaryFysiskBrukersted, fysiskeBrukersteder, IdentType.STANDARD);
     }
 
 }

@@ -1,10 +1,13 @@
 package no.nav.nom.apps.streams.internal.ressurs.eventsrcToState;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
@@ -28,6 +31,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.kafka.support.serializer.JsonSerde;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -35,6 +39,7 @@ import java.util.*;
 public class EventsrcToStateTest {
     private ObjectMapper objectMapper = configureObjectMapper();
     private TestInputTopic<String, RessursEvent> inputTopic;
+    private TestInputTopic<String, String> identTopic;
     private TestOutputTopic<String, RessursState> outputTopic;
 
     @BeforeEach
@@ -46,6 +51,7 @@ public class EventsrcToStateTest {
     @DisplayName("RessursOpprettetEventV1 oppretter RessursState i output topic")
     public void test11() {
 
+        identTopic.pipeInput(navidentToIdentTypeObject("navident", IdentType.STANDARD));
         final RessursState expectedOpprettetRessurs = opprettRessurs();
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
@@ -54,10 +60,16 @@ public class EventsrcToStateTest {
                 );
     }
 
+    private String navidentToIdentTypeObject(String navident, IdentType identType) {
+        var payload = objectMapper.createObjectNode().put("navident", navident).put("identType", identType.toString());
+        return objectMapper.createObjectNode().putPOJO("payload",payload).toString();
+    }
+
     @Test
     @DisplayName("Merger RessursSluttet event merges sammen inn i state")
     public void test21() {
 
+        identTopic.pipeInput(navidentToIdentTypeObject("navident", IdentType.STANDARD));
         final RessursState opprettetRessurs = opprettRessurs();
 
         final RessursSluttetEventV1.RessursSluttetEventData sluttetEventData = new RessursSluttetEventV1.RessursSluttetEventData(LocalDate.now());
@@ -86,6 +98,7 @@ public class EventsrcToStateTest {
     @DisplayName("Merger PersonopplysningerEndret event merges sammen inn i state")
     public void test31() {
 
+        identTopic.pipeInput(navidentToIdentTypeObject("navident", IdentType.STANDARD));
         final RessursState opprettetRessurs = opprettRessurs();
 
         final RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData personaliaOppdatertEventData = new RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData(
@@ -119,6 +132,7 @@ public class EventsrcToStateTest {
     @DisplayName("RessursTekniskSlettetEventV1 lager tombstone/null RessursState i output topic")
     public void test41() {
 
+        identTopic.pipeInput(navidentToIdentTypeObject("navident", IdentType.STANDARD));
         final RessursState opprettetRessurs = opprettRessurs();
 
         final RessursEvent slettEvent = new RessursTekniskSlettetEventV1(
@@ -172,22 +186,23 @@ public class EventsrcToStateTest {
         );
 
         final RessursState expectedOpprettet = new RessursState(
-                fid,
-                eventData.personident(),
-                additionalData.navident().get(),
-                eventData.sektor(),
-                new Visningsnavn(
-                        "fornavn",
-                        Optional.empty(),
-                        "etternavn"
-                ),
+            fid,
+            eventData.personident(),
+            additionalData.navident().get(),
+            eventData.sektor(),
+            new Visningsnavn(
+                "fornavn",
                 Optional.empty(),
-                Optional.empty(),
-                additionalData.startdato(),
-                Optional.empty(),
-                Collections.emptyList()
+                "etternavn"
+            ),
+            Optional.empty(),
+            Optional.empty(),additionalData.startdato(),
+            Optional.empty(),
+            Collections.emptyList(),
+            IdentType.STANDARD
         );
 
+        identTopic.pipeInput(navidentToIdentTypeObject("navident", IdentType.STANDARD));
         inputTopic.pipeInput(UUID.randomUUID().toString(), opprettEvent);
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
@@ -200,6 +215,7 @@ public class EventsrcToStateTest {
     @DisplayName("Merger RessursFysiskeBrukerstederOppdatertEventV1 event merges sammen inn i state")
     public void testRessursFysiskeBrukerstederOppdatertEventV1() {
 
+        identTopic.pipeInput(navidentToIdentTypeObject("navident", IdentType.STANDARD));
         final RessursState opprettetRessurs = opprettRessurs();
 
         final RessursFysiskeBrukerstederOppdatertEventV1.RessursFysiskeBrukerstederOppdatertEventData ressursFysiskeBrukerstederOppdatertEventData =
@@ -233,6 +249,7 @@ public class EventsrcToStateTest {
     @DisplayName("Merger RessursSluttdatoOppdatertEventV1 event merges sammen inn i state")
     public void testRessursSluttdatoOppdatertEventV1() {
 
+        identTopic.pipeInput(navidentToIdentTypeObject("navident", IdentType.STANDARD));
         final RessursState opprettetRessurs = opprettRessurs();
 
         final RessursSluttdatoOppdatertEventV1.RessursSluttdatoOppdatertEventData ressursSluttdatoOppdatertEventData =
@@ -294,6 +311,7 @@ public class EventsrcToStateTest {
 
         );
 
+        identTopic.pipeInput(navidentToIdentTypeObject("navident", IdentType.STANDARD));
         inputTopic.pipeInput(UUID.randomUUID().toString(), event);
 
         return new RessursState(
@@ -306,7 +324,8 @@ public class EventsrcToStateTest {
             Optional.empty(),
             ressursOpprettetAdditionalData.startdato(),
             Optional.ofNullable(ressursOpprettetEventData.primaryFysiskBrukersted()),
-            ressursOpprettetEventData.fysiskeBrukersteder()
+            ressursOpprettetEventData.fysiskeBrukersteder(),
+            IdentType.STANDARD
         );
 
     }
@@ -315,13 +334,16 @@ public class EventsrcToStateTest {
         KafkaConfig kafkaConfig = new KafkaConfig();
         final StreamsBuilder streamsBuilder = new StreamsBuilder();
         final var objectSerde = kafkaConfig.objectSerde(objectMapper);
-
+        final var jsonSerde = kafkaConfig.jsonSerde(objectMapper);
+//        kafkaConfig.
 
         new EventsrcToState(
             "inputTopic",
             "outputTopic",
+            "identTopic",
             objectMapper,
             objectSerde,
+            jsonSerde,
             streamsBuilder
         );
 
@@ -330,6 +352,7 @@ public class EventsrcToStateTest {
         TopologyTestDriver topologyTestDriver = new TopologyTestDriver(topology, new Properties());
 
         inputTopic = topologyTestDriver.createInputTopic("inputTopic", new StringSerializer(), objectSerde.copyWithType(RessursEvent.class).serializer());
+        identTopic = topologyTestDriver.createInputTopic("identTopic", new StringSerializer(), new StringSerializer());
 
         final var ressursStateSerde = objectSerde.copyWithType(RessursState.class);
         ressursStateSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());

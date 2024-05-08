@@ -131,8 +131,8 @@ public class RessursHendelseForEventsourceService {
             return;
         }
 
-        ressursState.sluttdato().ifPresentOrElse((s) -> {
-            if (!s.equals(dvhRessurs.getSluttdato())) {
+        ressursState.sluttdato().ifPresentOrElse((stateSluttdato) -> {
+            if (!stateSluttdato.equals(dvhRessurs.getSluttdato())) {
                 ressursSluttet(ressursState.fid(), dvhRessurs);
             }
         }, () -> {
@@ -141,8 +141,8 @@ public class RessursHendelseForEventsourceService {
             }
         });
 
-        ressursState.startdato().ifPresentOrElse((s) -> {
-            if (!s.equals(dvhRessurs.getStartDato())) {
+        ressursState.startdato().ifPresentOrElse((stateStartdato) -> {
+            if (!stateStartdato.equals(dvhRessurs.getStartDato())) {
                 ressursStartet(ressursState.fid(), dvhRessurs);
             }
         }, () -> {

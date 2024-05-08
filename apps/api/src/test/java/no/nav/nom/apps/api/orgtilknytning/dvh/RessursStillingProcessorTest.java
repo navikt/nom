@@ -9,6 +9,7 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -178,7 +179,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
             Optional.empty(),
             Optional.empty(),
             null,
-            Collections.emptyList()
+            Collections.emptyList(),
+            IdentType.STANDARD
         )));
     }
 
@@ -265,7 +267,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
                 Optional.of(ressursSluttDato),
                 Optional.empty(),
                 null,
-                Collections.emptyList()
+                Collections.emptyList(),
+                IdentType.STANDARD
             ))
         );
 
@@ -334,7 +337,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
                 Optional.empty(),
                 Optional.empty(),
                 null,
-                Collections.emptyList()
+                Collections.emptyList(),
+                IdentType.STANDARD
             ))
         );
         ressursStillingProcessor.process(navident, stillingPerioder);

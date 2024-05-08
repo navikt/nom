@@ -1,6 +1,7 @@
 package no.nav.nom.apps.streams.internal.ressurs.eventsrcToState;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler;
@@ -21,6 +22,12 @@ class KafkaConfig {
         objectSerde.deserializer().addTrustedPackages(Event.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());
         return objectSerde;
+    }
+    @Bean
+    public JsonSerde<Object> jsonSerde(ObjectMapper objectMapper){
+        final var jsonSerde = new JsonSerde<>(Object.class, objectMapper);
+        jsonSerde.deserializer().addTrustedPackages(ObjectNode.class.getPackageName());
+        return jsonSerde;
     }
 
     @Bean

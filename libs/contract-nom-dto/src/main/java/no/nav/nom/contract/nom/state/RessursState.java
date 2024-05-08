@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import io.swagger.v3.oas.annotations.media.Schema;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 
@@ -23,7 +24,8 @@ public record RessursState(
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> sluttdato,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> startdato,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<String> primaryFysiskBrukersted,
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<String> fysiskeBrukersteder
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<String> fysiskeBrukersteder,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, defaultValue = "STANDARD") IdentType identType
 ) {
     @JsonIgnore
     public boolean isEkstern() {

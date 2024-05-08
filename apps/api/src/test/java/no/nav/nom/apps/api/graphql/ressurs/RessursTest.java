@@ -8,6 +8,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.contract.nom.Sektor;
@@ -182,7 +183,8 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
             Optional.of(LocalDate.now().plusDays(10)),
             Optional.empty(),
             null,
-            Collections.emptyList()
+            Collections.emptyList(),
+            IdentType.STANDARD
         );
 
         kafkaUtils.createRessursHendelseEventSource(ressursState);
@@ -212,7 +214,8 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
             Optional.of(LocalDate.now().plusDays(10)),
             Optional.of(LocalDate.now().minusDays(10)),
             null,
-            Collections.emptyList()
+            Collections.emptyList(),
+            IdentType.STANDARD
         );
 
         kafkaUtils.createRessursHendelseEventSource(ressursState);
