@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
+import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -68,10 +69,7 @@ class EventsrcToState {
                                 state.put("startdato", data.startdato().get().toString());
                             }
                         }
-                        if(!state.has("fysiskeBrukersteder") || (state.get("fysiskeBrukersteder") == null) || !state.get("fysiskeBrukersteder").isArray()) {
-                            log.info("Legger til 'fysiskeBrukersteder' felt for ressurs-state fid " + event.getFid());
-                            state.putArray("fysiskeBrukersteder");
-                        }
+                        leggTilFysiskBrukerstedArrayIfMissing(event, state);
                     }
                     return state;
                 },
@@ -110,6 +108,15 @@ class EventsrcToState {
 
         withIdentTypeByFid.mapValues(this::toRessursState)
             .toStream().to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(RessursState.class)));
+    }
+
+    private static void leggTilFysiskBrukerstedArrayIfMissing(RessursEvent event, ObjectNode state) {
+        if(!state.has("fysiskeBrukersteder") || (state.get("fysiskeBrukersteder") == null) || !state.get("fysiskeBrukersteder").isArray()) {
+            if (event instanceof RessursFysiskeBrukerstederOppdatertEventV1) {
+                log.warn("Legger til 'fysiskeBrukersteder' felt for ressurs-state fid " + event.getFid());
+            }
+            state.putArray("fysiskeBrukersteder");
+        }
     }
 
     private static ObjectNode navidentTopicValueToJson(String value, ObjectMapper objectMapper) {
