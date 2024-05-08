@@ -68,10 +68,8 @@ class EventsrcToState {
                                 state.put("startdato", data.startdato().get().toString());
                             }
                         }
-                        if(!state.has("fysiskeBrukersteder") || !state.get("fysiskeBrukersteder").isArray()) {
-                            if(!state.get("fysiskeBrukersteder").isArray()) {
-                                log.warn("feltet 'fysiskeBrukersteder' var definert, men var ikke et array som forventet. fid: " + event.getFid());
-                            }
+                        if(!state.has("fysiskeBrukersteder") || (state.get("fysiskeBrukersteder") == null) || !state.get("fysiskeBrukersteder").isArray()) {
+                            log.info("Legger til 'fysiskeBrukersteder' felt for ressurs-state fid " + event.getFid());
                             state.putArray("fysiskeBrukersteder");
                         }
                     }
