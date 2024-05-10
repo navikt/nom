@@ -210,6 +210,9 @@ spec:
         - application: shout-out-sync-service
           namespace: shout-out
           cluster: dev-gcp
+        - application: brev-administrasjon-q2
+          namespace: isa
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
