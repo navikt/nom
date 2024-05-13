@@ -12,6 +12,7 @@ import { Footer, footerHeight } from "~/components/Footer";
 import { headerHeight, NavHeader } from "~/components/NavHeader";
 import PilotBanner, { pilotBannerHeight } from "~/components/PilotBanner";
 import { PrefetchUsefulAdminQueries } from "~/components/PrefetchUsefulQueries";
+import { TestBanner } from "~/components/TestBanner";
 
 export const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ export const Route = createRootRouteWithContext<{
           <TanStackRouterDevtools position="bottom-right" />
         </React.Suspense>
         <ScrollRestoration />
+        <TestBanner />
         <NavHeader />
         <PilotBanner />
         <div
