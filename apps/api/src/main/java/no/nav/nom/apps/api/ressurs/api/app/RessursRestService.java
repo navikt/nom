@@ -26,6 +26,8 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPrimaryTelefonnummerCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
@@ -46,6 +48,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -54,6 +57,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.DateUtils.validateChronologicalDates;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
@@ -292,7 +296,8 @@ public class RessursRestService {
             );
         }
 
-        final var createdRessurs = createRessurs(request, existingRessurs);
+        final var createdRessurs = existingRessurs.map(ressursState -> reactivateRessurs(request, ressursState))
+            .orElseGet(() -> createRessurs(request, existingRessurs));
 
         try {
             ressursOpprettetEmailService.notifyByEmail(createdRessurs.navident(), request.orgEnhetId());
@@ -315,7 +320,7 @@ public class RessursRestService {
         final var startdato = existingRessurs.isPresent() ? existingRessurs.get().startdato().orElse(null) : request.startDato();
         final var pdlPerson = pdlClient.hentPerson(request.personident());
 
-        if (request.visningsmellomnavn() != null && request.visningsmellomnavn().isBlank()) {
+        if (!isNull(request.visningsmellomnavn()) && request.visningsmellomnavn().isBlank()) {
             request = request.toBuilder().visningsmellomnavn(null).build();
         }
 
@@ -412,6 +417,118 @@ public class RessursRestService {
         } catch (ExecutionException | TimeoutException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private RessursState reactivateRessurs(OpprettRessursRequest request, RessursState existingRessurs) {
+
+        final var reaktivertRessurs = existingRessurs.toBuilder()
+            .visningsnavn(
+                new Visningsnavn(
+                    request.visningsfornavn(),
+                    Optional.ofNullable(request.visningsmellomnavn()),
+                    request.visningsetternavn()
+                ))
+            .primaryTelefonnummer(Optional.ofNullable(request.primaryTelefonnummer()))
+            .sektor(request.sektor())
+            .sluttdato(request.sluttDato())
+            .primaryFysiskBrukersted(Optional.ofNullable(request.fysiskBrukerstedNr()))
+            .build();
+
+        var metadata = new InputMetadata(
+            "REST-API",
+            "opprettRessurs",
+            request,
+            new Origination(
+                getAuthenticatedNavIdent(),
+                SecurityUtil.getAuthenticatedAzpName()
+            )
+        );
+
+        nomMastered.markRessursAsMasteredInNom(existingRessurs.navident());
+
+        var orgTilknytningFid = orgtilknytningCommandService.opprettOrgtilknytning(
+            new OpprettOrgtilknytning(
+                existingRessurs.navident(),
+                request.orgEnhetId(),
+                request.startDato(),
+                metadata,
+                null
+            )
+        );
+
+        orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(
+            orgTilknytningFid,
+            new EndreDagligOppfolgingOrgtilknytning(
+                existingRessurs.navident(),
+                request.orgEnhetId(),
+                request.startDato(),
+                request.sluttDato(),
+                true,
+                metadata,
+                null
+            )
+        );
+
+        orgtilknytningCommandService.endreTilknytningtype(
+            new EndreTilknytningtypeCommand(
+                orgTilknytningFid,
+                Optional.of(request.tilknytningtype()),
+                metadata
+            )
+        );
+
+        // If sluttdato is present we fire a separate "avsluttRessursEvent" so that other systems, such as skjerming, know the ressurs already has a sluttDato.
+        if (request.sluttDato().isPresent()) {
+            ressursCommandService.avsluttRessursEvent(
+                new OpphorRessursCommand(existingRessurs.fid(), request.sluttDato().get()),
+                metadata
+            );
+
+            orgtilknytningCommandService.avvikleOrgtilknytning(
+                orgTilknytningFid,
+                new AvvikleOrgtilknytning(
+                    existingRessurs.navident(),
+                    request.orgEnhetId(),
+                    request.sluttDato().get(),
+                    metadata,
+                    null
+                )
+            );
+        }
+
+        if (!existingRessurs.visningsnavn().getFormattedVisningsnavn().equals(reaktivertRessurs.visningsnavn().getFormattedVisningsnavn()))
+            ressursCommandService.oppdaterPersonaliaEvent(
+                new OppdaterPersonaliaCommand(existingRessurs.fid(), reaktivertRessurs.visningsnavn()),
+                metadata
+            );
+
+        if (reaktivertRessurs.primaryTelefonnummer().isPresent() && !existingRessurs.primaryTelefonnummer().equals(reaktivertRessurs.primaryTelefonnummer()))
+            ressursCommandService.oppdatertPrimaryTelefonnummer(
+                new OppdaterPrimaryTelefonnummerCommand(existingRessurs.fid(), reaktivertRessurs.primaryTelefonnummer().get()),
+                metadata
+            );
+
+        if (!reaktivertRessurs.sektor().name().equals(existingRessurs.sektor().name()))
+            ressursCommandService.oppdaterSektorEvent(
+                new OppdaterSektorCommand(existingRessurs.fid(),request.sektor()),
+                metadata
+            );
+
+        if (reaktivertRessurs.primaryFysiskBrukersted().isPresent() && existingRessurs.primaryFysiskBrukersted().isPresent()) {
+            if (!reaktivertRessurs.primaryFysiskBrukersted().get().equals(existingRessurs.primaryFysiskBrukersted().get()))
+                ressursCommandService.oppdaterFysiskeBrukerstederCommand(
+                    new OppdaterFysiskeBrukerstederCommand(
+                        reaktivertRessurs.fid(),
+                        new HashSet<>(existingRessurs.fysiskeBrukersteder()),
+                        reaktivertRessurs.primaryFysiskBrukersted().get()
+                    ),
+                    metadata
+                );
+        }
+
+        logger.debug("createRessurs for {} - {}", reaktivertRessurs.navident(), request.visningsetternavn());
+
+        return reaktivertRessurs;
     }
 
     private String createNavident(OpprettRessursRequest request) {

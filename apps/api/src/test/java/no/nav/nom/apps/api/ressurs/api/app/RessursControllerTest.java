@@ -8,6 +8,7 @@ import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
@@ -224,6 +225,84 @@ public class RessursControllerTest extends RestTestBase {
 
         verify(ressursCommandService, times(1)).createRessursSync(any());
         verify(ressursCommandService, times(1)).avsluttRessursEvent(any(), any());
+
+        verify(orgtilknytningCommandService, times(1)).opprettOrgtilknytning(any());
+        verify(orgtilknytningCommandService, times(1)).avvikleOrgtilknytning(any(), any());
+        verify(orgtilknytningCommandService, times(1)).endreDagligOppfolgingOrgtilknytning(any(), any());
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Skal reaktivere sluttet ekstern ressurs")
+    void skal_reaktivere_ekstern_ressurs() {
+        String personident = "12345678910";
+        String navident = "x123456";
+        val navn = pdlUtils.mockSinglePersonResponse();
+        String primaryTelefonnummer = "12345678";
+
+        /*when(nikClient.opprettNavidentOnBehalfOfUser(
+            eq(OpprettNavidentRequest.builder()
+                .personid(personident)
+                .identPrefix(navn.getEtternavn().substring(0, 1))
+                .identType("STANDARD")
+                .build())
+        )).thenReturn(ResponseEntity.ok(
+            OpprettNavidentResponse.builder()
+                .navident(navident)
+                .build()));*/
+
+        when(pdlClient.hentPerson(eq(personident))).thenReturn(Optional.empty());
+
+        var request = opprettRessursRequest().toBuilder()
+            .personident(personident)
+            .visningsfornavn(navn.getFornavn())
+            .visningsmellomnavn("")
+            .visningsetternavn(navn.getEtternavn())
+            .primaryTelefonnummer(primaryTelefonnummer)
+            .sektor(Sektor.EKSTERN)
+            .startDato(LocalDate.now())
+            .sluttDato(Optional.of(LocalDate.now().plusMonths(1)))
+            .tilknytningtype(Tilknytningtype.KONSULENT)
+            .ansettelsesType(null)
+            .fysiskBrukerstedNr("")
+            .orgEnhetId("")
+            .build();
+
+        RessursState existingRessurs = RessursState.builder()
+            .fid("Ressurs-XvSgpsGRF")
+            .personident(request.personident())
+            .navident(navident)
+            .sektor(Sektor.NAV_STATLIG)
+            .visningsnavn(
+                new Visningsnavn(
+                    request.visningsfornavn(),
+                    Optional.of("YEP"),
+                    request.visningsetternavn()
+            ))
+            .primaryTelefonnummer(Optional.of("87654321"))
+            .sluttdato(Optional.of(LocalDate.MIN))
+            .startdato(Optional.of(LocalDate.MIN.plusYears(1)))
+            .primaryFysiskBrukersted(Optional.of("2700"))
+            .fysiskeBrukersteder(List.of())
+            .build();
+
+        when(ressursStateRepository.findByPersonident(request.personident())).thenReturn(Optional.of(existingRessurs));
+
+        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+            .thenReturn(Set.of(request.fysiskBrukerstedNr()));
+
+        postOpprettRessursRequest(
+            testToken.nomWriteGroupAndNomUiAzp(),
+            request
+        )
+            .expectStatus().is2xxSuccessful()
+            .expectBody(OpprettRessursResponse.class);
+
+        verify(ressursCommandService, times(1)).avsluttRessursEvent(any(), any());
+        verify(ressursCommandService, times(1)).oppdaterPersonaliaEvent(any(), any());
+        verify(ressursCommandService, times(1)).oppdatertPrimaryTelefonnummer(any(), any());
+        verify(ressursCommandService, times(1)).oppdaterSektorEvent(any(), any());
+        verify(ressursCommandService, times(1)).oppdaterSektorEvent(any(), any());
 
         verify(orgtilknytningCommandService, times(1)).opprettOrgtilknytning(any());
         verify(orgtilknytningCommandService, times(1)).avvikleOrgtilknytning(any(), any());
