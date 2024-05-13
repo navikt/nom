@@ -1,13 +1,16 @@
+import { HelpText, HStack } from "@navikt/ds-react";
 import React from "react";
 
 export function LabelWithValue({
   label,
   value,
   wrapped = false,
+  helpText,
 }: {
   label: string;
   value: string | null | undefined;
   wrapped?: boolean;
+  helpText?: string;
 }) {
   if (!value) {
     return <></>;
@@ -16,7 +19,7 @@ export function LabelWithValue({
   if (wrapped) {
     return (
       <span>
-        {label}: <b>{value}</b>
+        {label}: <ValueView helpText={helpText} value={value} />
       </span>
     );
   }
@@ -24,7 +27,20 @@ export function LabelWithValue({
   return (
     <>
       <span>{label}:</span>
-      <b>{value}</b>
+      <ValueView helpText={helpText} value={value} />
     </>
   );
+}
+
+function ValueView({ value, helpText }: { value: string; helpText?: string }) {
+  if (helpText) {
+    return (
+      <HStack gap="2">
+        <b>{value}</b>
+        <HelpText>{helpText}</HelpText>
+      </HStack>
+    );
+  }
+
+  return <b>{value}</b>;
 }

@@ -355,9 +355,9 @@ function OrganisationHierarchyTree({
         </ExpansionCard.Description>
       </ExpansionCard.Header>
       <ExpansionCard.Content>
-        {gyldigFom && <span>Startdato: {formatDisplayDate(gyldigFom)}</span>}
+        {gyldigFom && <span>Fra og med: {formatDisplayDate(gyldigFom)}</span>}
         <br />
-        {gyldigTom && <span>Sluttdato: {formatDisplayDate(gyldigTom)}</span>}
+        {gyldigTom && <span>Til og med: {formatDisplayDate(gyldigTom)}</span>}
         <Divider size="small" />
         <CompactOrganisasjonHierarki orgEnhet={orgEnhet} ressurs={ressurs} />
         <div

@@ -133,6 +133,7 @@ export function Navident({ ressurs }: { ressurs: Ressurs }) {
 export function StartDato({ ressurs }: { ressurs: Ressurs }) {
   return (
     <LabelWithValue
+      helpText="Første arbeidsdag medarbeideren jobbet for NAV. Datoen kan være fra tidligere arbeidsforhold i NAV. (Historiske startdatoer fra noen år tilbake kan avvike noe fra den faktiske første arbeidsdagen. Datoen vil da vanligvis representere dagen NAV-identen ble opprettet.) "
       label="Startdato"
       value={formatDisplayDate(ressurs.startdato)}
     />
@@ -143,6 +144,7 @@ export function SluttDato({ ressurs }: { ressurs: Ressurs }) {
   if (ressurs.sluttdato && ressurs.sektor === Sektor.EKSTERN) {
     return (
       <LabelWithValue
+        helpText="Siste arbeidsdag medarbeideren jobbet i NAV."
         label="Sluttdato"
         value={formatDisplayDate(ressurs.sluttdato)}
       />
