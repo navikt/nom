@@ -9,6 +9,8 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.Avvikl
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
+import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -165,6 +167,8 @@ class RessursStillingProcessorTestUtilityMetoder {
     @Test
     @DisplayName("Test opprett ny orgTilknytning")
     public void test_004() {
+        when(ressursStateRepository.findByNavident("A000001")).thenReturn(Optional.of(RessursState.builder().navident("A000001").sektor(Sektor.NAV_STATLIG).build()));
+
         StillingPeriode stillingPeriode = new StillingPeriode(
             new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.of("0123456"), "ENHET_1", Optional.of("0123456"), Optional.of("ORGENHET")),
             LocalDate.now(), null,

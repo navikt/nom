@@ -580,7 +580,7 @@ public class RessursStillingProcessor {
 
         var orgtilknytningFid = orgtilknytningCommandService.opprettOrgtilknytning(command);
 
-        if (ressursStateRepository.findByNavident(navident).get().sektor() == Sektor.NAV_KOMMUNAL) {
+        if (ressursStateRepository.findByNavident(navident).get().isKommunal()) {
             orgtilknytningCommandService.endreTilknytningtype(
                 EndreTilknytningtypeCommand.builder()
                     .fid(orgtilknytningFid)

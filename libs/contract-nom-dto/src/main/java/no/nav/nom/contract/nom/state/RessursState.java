@@ -31,4 +31,10 @@ public record RessursState(
     public boolean isEkstern() {
         return this.sektor().equals(Sektor.EKSTERN);
     }
+    @JsonIgnore
+    public boolean isStatlig() {
+        return this.sektor().equals(Sektor.NAV_STATLIG);
+    }
+    @JsonIgnore
+    public boolean isKommunal() { return this.sektor().equals(Sektor.NAV_KOMMUNAL); }
 }
