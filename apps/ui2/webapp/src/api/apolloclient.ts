@@ -2,7 +2,9 @@ import { ApolloClient, createHttpLink, InMemoryCache } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 
 const getCookieValue = (name: string): string =>
-  document.cookie.match("(^|;)\\s*" + name + "\\s*=\\s*([^;]+)")?.pop() || "";
+  document.cookie
+    .match(String.raw`(^|;)\s*` + name + String.raw`\s*=\s*([^;]+)`)
+    ?.pop() || "";
 
 const httpLink = createHttpLink({
   uri: "/frackend/nom-api/graphql",

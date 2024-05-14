@@ -85,46 +85,79 @@ const RessursCreateStepRoute = RessursCreateStepImport.update({
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
     '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
     '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
       preLoaderRoute: typeof AdminImport
       parentRoute: typeof rootRoute
     }
     '/tilganger': {
+      id: '/tilganger'
+      path: '/tilganger'
+      fullPath: '/tilganger'
       preLoaderRoute: typeof TilgangerImport
       parentRoute: typeof rootRoute
     }
     '/admin/history-orgenheter': {
+      id: '/admin/history-orgenheter'
+      path: '/history-orgenheter'
+      fullPath: '/admin/history-orgenheter'
       preLoaderRoute: typeof AdminHistoryOrgenheterImport
       parentRoute: typeof AdminImport
     }
     '/admin/history-ressurser': {
+      id: '/admin/history-ressurser'
+      path: '/history-ressurser'
+      fullPath: '/admin/history-ressurser'
       preLoaderRoute: typeof AdminHistoryRessurserImport
       parentRoute: typeof AdminImport
     }
     '/admin/orgenheter': {
+      id: '/admin/orgenheter'
+      path: '/orgenheter'
+      fullPath: '/admin/orgenheter'
       preLoaderRoute: typeof AdminOrgenheterImport
       parentRoute: typeof AdminImport
     }
     '/admin/ressurser': {
+      id: '/admin/ressurser'
+      path: '/ressurser'
+      fullPath: '/admin/ressurser'
       preLoaderRoute: typeof AdminRessurserImport
       parentRoute: typeof AdminImport
     }
     '/org/$id': {
+      id: '/org/$id'
+      path: '/org/$id'
+      fullPath: '/org/$id'
       preLoaderRoute: typeof OrgIdImport
       parentRoute: typeof rootRoute
     }
     '/ressurs-terminate/$id': {
+      id: '/ressurs-terminate/$id'
+      path: '/ressurs-terminate/$id'
+      fullPath: '/ressurs-terminate/$id'
       preLoaderRoute: typeof RessursTerminateIdImport
       parentRoute: typeof rootRoute
     }
     '/ressurs/$id': {
+      id: '/ressurs/$id'
+      path: '/ressurs/$id'
+      fullPath: '/ressurs/$id'
       preLoaderRoute: typeof RessursIdImport
       parentRoute: typeof rootRoute
     }
     '/ressurs/create/$step': {
+      id: '/ressurs/create/$step'
+      path: '/ressurs/create/$step'
+      fullPath: '/ressurs/create/$step'
       preLoaderRoute: typeof RessursCreateStepImport
       parentRoute: typeof rootRoute
     }
@@ -133,19 +166,19 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren([
+export const routeTree = rootRoute.addChildren({
   IndexRoute,
-  AdminRoute.addChildren([
+  AdminRoute: AdminRoute.addChildren({
     AdminHistoryOrgenheterRoute,
     AdminHistoryRessurserRoute,
     AdminOrgenheterRoute,
     AdminRessurserRoute,
-  ]),
+  }),
   TilgangerRoute,
   OrgIdRoute,
   RessursTerminateIdRoute,
   RessursIdRoute,
   RessursCreateStepRoute,
-])
+})
 
 /* prettier-ignore-end */
