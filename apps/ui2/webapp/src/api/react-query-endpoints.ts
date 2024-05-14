@@ -425,10 +425,11 @@ export const updateTelefonnummer = async (
   navident: string,
   request: UpdatePrimarytelefonnummer,
 ) => {
-  return axios.post<unknown, AxiosResponse<UpdatePrimarytelefonnummer>>(
+  await axios.post<unknown, AxiosResponse<UpdatePrimarytelefonnummer>>(
     `${NOM_API_BASE_PATH}/app/ressurser/${navident}/telefonnummer`,
     request,
   );
+  await hopeForKafkaStateToUpdate();
 };
 
 export const searchRessurser = {
