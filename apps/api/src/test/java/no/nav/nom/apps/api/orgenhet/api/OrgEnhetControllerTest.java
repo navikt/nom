@@ -49,7 +49,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .orgEnhetsType(OrgEnhetsType.ARBEIDSLIVSSENTER)
             .build();
 
-        orgEnhetStateRepository.putEventAggregate(existingOrgEnhet);
+        orgEnhetStateRepository.update(existingOrgEnhet);
 
         postOrgenhetType(testToken.nomAdminUser(), setOrgEnhetsTypeRequest)
             .expectStatus().isOk();
@@ -70,7 +70,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .orgEnhetsType(Optional.of(existingOrgenhetsType))
             .build();
 
-        orgEnhetStateRepository.putEventAggregate(existingOrgEnhet);
+        orgEnhetStateRepository.update(existingOrgEnhet);
 
         var requestBody = setOrgEnhetsTypeRequest().toBuilder()
             .nomId(existingOrgEnhet.id())

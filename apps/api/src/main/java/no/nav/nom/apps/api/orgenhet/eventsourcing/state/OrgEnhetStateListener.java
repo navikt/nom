@@ -1,13 +1,16 @@
 package no.nav.nom.apps.api.orgenhet.eventsourcing.state;
 
 
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.utils.common.kafka.KafkaUtils;
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -22,28 +25,32 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.StreamSupport;
 
+import static no.nav.nom.apps.api.orgenhet.eventsourcing.state.ToggledOrgEnhetStateRepository.UNLEASH_USE_NEW_ORGENHET_STATE_REPOSITORY;
+
 @Slf4j
 @Service
 public class OrgEnhetStateListener {
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final String stateTopic;
-    private final OrgEnhetStateRepository orgEnhetStateService;
+    private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final Admin adminClient;
     private final KafkaProperties kafkaProperties;
     private final LuceneService luceneService;
+    private final Unleash unleash;
 
     public OrgEnhetStateListener(
         @Value("${app.kafka.orgEnhet.stateTopic}") String stateTopic,
-        OrgEnhetStateRepository orgEnhetStateService,
+        @Qualifier("oldOrgEnhetStateRepository") OrgEnhetStateRepository orgEnhetStateRepository,
         Admin adminClient, LuceneService luceneService,
         KafkaAdmin admin,
-        KafkaProperties kafkaProperties
+        KafkaProperties kafkaProperties, Unleash unleash
     ) {
         this.stateTopic = stateTopic;
-        this.orgEnhetStateService = orgEnhetStateService;
+        this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.adminClient = adminClient;
         this.kafkaProperties = kafkaProperties;
         this.luceneService = luceneService;
+        this.unleash = unleash;
     }
 
     @KafkaListener(
@@ -56,11 +63,13 @@ public class OrgEnhetStateListener {
     public void onMessage(ConsumerRecords<String, OrgEnhetState> records, Consumer<String, String> consumer) {
         StreamSupport.stream(records.spliterator(), false).forEach(it -> {
             var orgEnhetState = it.value();
-            orgEnhetStateService.putEventAggregate(orgEnhetState);
-            this.luceneService.invalidateOrgenhet(orgEnhetState.id());
+            orgEnhetStateRepository.update(orgEnhetState);
+            if (!unleash.isEnabled(UNLEASH_USE_NEW_ORGENHET_STATE_REPOSITORY)) {
+                this.luceneService.invalidateOrgenhet(orgEnhetState.id());
+            }
         });
 
-        KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka OrgEnhetState listener initial load finished - {} OrgEnheter", orgEnhetStateService.count()));
+        KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka OrgEnhetState listener initial load finished - {} OrgEnheter", orgEnhetStateRepository.count()));
     }
 
     public boolean initloadComplete() {

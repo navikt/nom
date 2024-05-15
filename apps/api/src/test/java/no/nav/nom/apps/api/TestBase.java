@@ -4,13 +4,14 @@ import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
 import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +20,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.kafka.test.context.EmbeddedKafka;
@@ -88,6 +87,7 @@ public abstract class TestBase {
     protected Unleash unleash;
 
     @Autowired
+    @Qualifier("oldOrgEnhetStateRepository")
     protected OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
@@ -151,7 +151,7 @@ public abstract class TestBase {
     }
 
     protected void saveOrgenheter(List<OrgEnhetState> orgEnhetStateList) {
-        orgEnhetStateList.forEach(o -> orgEnhetStateRepository.putEventAggregate(o));
+        orgEnhetStateList.forEach(o -> orgEnhetStateRepository.update(o));
     }
 
     protected void clearOrgtilknytninger() {

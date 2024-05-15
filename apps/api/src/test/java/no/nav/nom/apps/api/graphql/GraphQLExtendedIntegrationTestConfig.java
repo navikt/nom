@@ -24,7 +24,7 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetEventProducer
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListenerConfig;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationRepository;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationService;
@@ -48,8 +48,9 @@ import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventso
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
+import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
-import no.nav.nom.libs.state.ressurs.RessursStateAutoconfiguration;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -70,7 +71,7 @@ import org.springframework.kafka.annotation.EnableKafka;
     , RessursEventKafkaConfig.class
     , OrgEnhetIdGenerator.class
     , OrgenhetService.class
-    , OrgEnhetStateRepository.class
+    , OldOrgEnhetStateRepositoryImpl.class
     , OrgEnhetStateListener.class
     , OrgEnhetStateListenerConfig.class
     , OrganiseringStateRepository.class
@@ -96,6 +97,8 @@ import org.springframework.kafka.annotation.EnableKafka;
 public class GraphQLExtendedIntegrationTestConfig {
     @MockBean
     NomStateRessursListener nomStateRessursListener;
+    @MockBean
+    NomStateOrgEnhetListener nomStateOrgEnhetListener;
 
     @MockBean
     OrgEnhetEventProducer orgEnhetEventProducer;

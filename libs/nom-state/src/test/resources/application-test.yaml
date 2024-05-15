@@ -1,0 +1,3 @@
+nom.libs.state.ressurs.enabled: true
+nom.libs.state.orgenhet.enabled: true
+nom.libs.state.idle-event-interval-seconds: 1

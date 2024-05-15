@@ -6,7 +6,7 @@ import no.nav.nom.apps.api.KafkaUtils;
 import no.nav.nom.apps.api.MockOAuth2ServerInitializer;
 import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTestConfig;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,7 +36,7 @@ public class OrgEnhetTestBase {
     public OrganiseringStateRepository organiseringStateRepository;
 
     @Autowired
-    public OrgEnhetStateRepository orgEnhetStateRepository;
+    public OldOrgEnhetStateRepositoryImpl orgEnhetStateRepository;
 
     @Autowired
     KafkaUtils kafkaUtils;

@@ -11,10 +11,10 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -38,7 +38,7 @@ public class DvhOrgenhetsLast {
     private final ObjectMapper objectMapper;
     private final ValidationService validationService;
     private final NomProxyRestClient nomProxyRestClient;
-    private final OrgEnhetStateRepository orgEnhetStateService;
+    private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrgEnhetCommandService orgEnhetCommandService;
     private final OrgEnhetIdGenerator orgEnhetIdGenerator;
 
@@ -111,7 +111,7 @@ public class DvhOrgenhetsLast {
 
             parsedEnheter.forEach((key, value) -> value.stream().sorted(Comparator.comparing(IOrgenhet::getGyldigFom).reversed())
                 .forEach(parsedEnhet -> {
-                    val stateEnheterPerUniqueAgressoId = orgEnhetStateService.findAllByUniqueAgressoId(parsedEnhet.getUniqueAgressoId());
+                    val stateEnheterPerUniqueAgressoId = orgEnhetStateRepository.findAllByUniqueAgressoId(parsedEnhet.getUniqueAgressoId());
                     val stateEnheterMatchingDvhParsedEnhet = stateEnheterPerUniqueAgressoId.stream()
                             .filter(p ->
                                     isOverlapping(parsedEnhet,
@@ -171,7 +171,7 @@ public class DvhOrgenhetsLast {
         // Parkerte orgenheter som har ikke stillinger ble filtrert bort, men skal fjernes fra State om de er der fra før
         validations.get(ValidationType.PARKED_WITHOUT_STILLINGER)
             .forEach(orgenhetV2 -> {
-                    val stateEnheterPerUniqueAgressoId = orgEnhetStateService.findAllByUniqueAgressoId(orgenhetV2.getUniqueAgressoId());
+                    val stateEnheterPerUniqueAgressoId = orgEnhetStateRepository.findAllByUniqueAgressoId(orgenhetV2.getUniqueAgressoId());
                     stateEnheterPerUniqueAgressoId
                         .stream()
                         .filter(orgEnhetState -> orgEnhetState.gyldigTom().map(gyldigTom -> gyldigTom.isBefore(LocalDate.now())).orElse(false))
@@ -186,7 +186,7 @@ public class DvhOrgenhetsLast {
 
         validations.get(ValidationType.PARKED_INVALID_PERIOD)
             .forEach(orgenhetV2 -> {
-                    val stateEnheterPerUniqueAgressoId = orgEnhetStateService.findAllByUniqueAgressoId(orgenhetV2.getUniqueAgressoId());
+                    val stateEnheterPerUniqueAgressoId = orgEnhetStateRepository.findAllByUniqueAgressoId(orgenhetV2.getUniqueAgressoId());
                     stateEnheterPerUniqueAgressoId
                         .stream()
                         .filter(orgEnhetState -> orgEnhetState.gyldigTom().map(gyldigTom -> gyldigTom.isBefore(LocalDate.now())).orElse(false))

@@ -196,9 +196,9 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
         OrgEnhetState ledersEnhetState = toOrgEnhetStateWithId(3, ledersEnhet);
 
         // Streams-app er ikke aktiv, så må legge manuelt inn i repository
-        orgEnhetStateRepository.putEventAggregate(ressursSinNedersteEnhetState);
-        orgEnhetStateRepository.putEventAggregate(ressursSinOvreEnhetState);
-        orgEnhetStateRepository.putEventAggregate(ledersEnhetState);
+        orgEnhetStateRepository.update(ressursSinNedersteEnhetState);
+        orgEnhetStateRepository.update(ressursSinOvreEnhetState);
+        orgEnhetStateRepository.update(ledersEnhetState);
 
 
         dvhOrganiseringMockUtils.clearResponse(); // Ikke bruke responser i JSON-filer
@@ -237,7 +237,7 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
     }
 
     private void addToOrgEnhetStateRepository(int idSuffix, DvhOrgEnhetMock dvhOrgEnhetMock) {
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(
             dvhOrgEnhetMock,
             idSuffix,
             String.valueOf(dvhOrgEnhetMock.getORGENHET_FRA_PERIODE()),

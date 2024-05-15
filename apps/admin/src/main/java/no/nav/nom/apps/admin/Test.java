@@ -24,7 +24,7 @@ public class Test {
     }
 
     private NomStateRessursListener.Visitor getVisitor(String name) {
-        return new NomStateRessursListener.Visitor() {
+        return new NomStateRessursListener.Visitor<RessursState>() {
             int count = 0;
 
             @Override

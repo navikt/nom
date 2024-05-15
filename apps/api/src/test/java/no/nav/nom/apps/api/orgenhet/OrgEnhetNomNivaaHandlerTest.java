@@ -3,7 +3,7 @@ package no.nav.nom.apps.api.orgenhet;
 import no.nav.nom.apps.api.organisering.OrgEnhetTestBase;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreNomNivaa;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -45,7 +45,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
     OrgEnhetUnderordnetResolver orgEnhetUnderordnetResolver;
 
     @Autowired
-    private OrgEnhetStateRepository orgEnhetStateRepository;
+    private OldOrgEnhetStateRepositoryImpl orgEnhetStateRepository;
 
     @Autowired
     private OrgEnhetNomNivaaHandler orgEnhetNomNivaaHandler;
@@ -73,7 +73,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
             .orgEnhetsType(Optional.of(orgEnhetsTypeDifferentFrom(orgEnhetsType)))
             .build();
 
-        orgEnhetStateRepository.putEventAggregate(orgEnhetState);
+        orgEnhetStateRepository.update(orgEnhetState);
 
         when(orgEnhetOverordnetResolver.findOverordnetOrgEnhet(orgEnhetState))
             .thenReturn(Optional.of(overordnetOrgEnhetState));
@@ -127,7 +127,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
                 .orgEnhetsType(Optional.of(orgEnhetsType))
                     .build();
 
-        orgEnhetStateRepository.putEventAggregate(orgEnhetState);
+        orgEnhetStateRepository.update(orgEnhetState);
 
         when(orgEnhetOverordnetResolver.findOverordnetOrgEnhet(eq(orgEnhetState)))
             .thenReturn(
@@ -193,7 +193,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
             .orgEnhetsType(Optional.of(orgEnhetsType))
             .build();
 
-        orgEnhetStateRepository.putEventAggregate(targetOrgEnhetState);
+        orgEnhetStateRepository.update(targetOrgEnhetState);
 
         when(orgEnhetOverordnetResolver.findOverordnetOrgEnhet(eq(targetOrgEnhetState)))
             .thenReturn(
@@ -253,7 +253,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
         when(orgEnhetOverordnetResolver.findOverordnetOrgEnhet(eq(orgeEnhetState)))
             .thenReturn(Optional.empty());
 
-        orgEnhetStateRepository.putEventAggregate(orgeEnhetState);
+        orgEnhetStateRepository.update(orgeEnhetState);
 
         orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdate(
             orgeEnhetState,

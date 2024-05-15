@@ -54,17 +54,17 @@ public class OrgEnhetUnderordnetResolverTest extends OrgEnhetTestBase {
         organiseringStateRepository.putEventAggregate(organiseringUnderordnet2);
         organiseringStateRepository.putEventAggregate(organiseringUnderordnet3);
 
-        orgEnhetStateRepository.putEventAggregate(orgEnhetState().toBuilder().id(idUnderordnet1)
+        orgEnhetStateRepository.update(orgEnhetState().toBuilder().id(idUnderordnet1)
             .gyldigFom(LocalDate.now().minusDays(20))
             .gyldigTom(Optional.of(LocalDate.now().plusDays(5)))
             .build());
 
-        orgEnhetStateRepository.putEventAggregate(orgEnhetState().toBuilder().id(idUnderordnet2)
+        orgEnhetStateRepository.update(orgEnhetState().toBuilder().id(idUnderordnet2)
             .gyldigFom(LocalDate.now().minusDays(20))
             .gyldigTom(Optional.of(LocalDate.now().plusDays(0)))
             .build());
 
-        orgEnhetStateRepository.putEventAggregate(orgEnhetState().toBuilder().id(idUnderordnet3)
+        orgEnhetStateRepository.update(orgEnhetState().toBuilder().id(idUnderordnet3)
             .gyldigFom(LocalDate.now().minusDays(20))
             .gyldigTom(Optional.of(LocalDate.now().plusDays(1)))
             .build());
@@ -109,7 +109,7 @@ public class OrgEnhetUnderordnetResolverTest extends OrgEnhetTestBase {
         organiseringStateRepository.putEventAggregate(organiseringUnderordnet1);
         organiseringStateRepository.putEventAggregate(organiseringUnderordnet2);
 
-        orgEnhetStateRepository.putEventAggregate(orgEnhetState().toBuilder().id(idUnderordnet)
+        orgEnhetStateRepository.update(orgEnhetState().toBuilder().id(idUnderordnet)
             .gyldigFom(LocalDate.now().minusDays(20))
             .gyldigTom(Optional.of(LocalDate.now().plusDays(0)))
             .build());
@@ -139,13 +139,13 @@ public class OrgEnhetUnderordnetResolverTest extends OrgEnhetTestBase {
 
         organiseringStateRepository.putEventAggregate(organiseringOrgEnhet);
 
-        orgEnhetStateRepository.putEventAggregate(orgEnhetState().toBuilder()
+        orgEnhetStateRepository.update(orgEnhetState().toBuilder()
             .id(idOrgEnhet)
             .gyldigFom(LocalDate.now().minusDays(20))
             .gyldigTom(Optional.of(LocalDate.now().minusDays(2)))
             .build());
 
-        orgEnhetStateRepository.putEventAggregate(orgEnhetState().toBuilder().id(idOrgEnhetOver).build());
+        orgEnhetStateRepository.update(orgEnhetState().toBuilder().id(idOrgEnhetOver).build());
 
         OrgEnhetState orgEnhetOver = orgEnhetState().toBuilder().id(idOrgEnhetOver).build();
         List<OrgEnhetState> underordnedeOrgEnheter = orgEnhetUnderordnetResolver.findUnderordnedeOrgEnheter(orgEnhetOver);
@@ -168,12 +168,12 @@ public class OrgEnhetUnderordnetResolverTest extends OrgEnhetTestBase {
 
         organiseringStateRepository.putEventAggregate(organiseringOrgEnhet);
 
-        orgEnhetStateRepository.putEventAggregate(orgEnhetState().toBuilder()
+        orgEnhetStateRepository.update(orgEnhetState().toBuilder()
             .id(idOrgEnhet)
             .gyldigFom(LocalDate.now().minusDays(20))
             .build());
 
-        orgEnhetStateRepository.putEventAggregate(orgEnhetState().toBuilder().id(idOrgEnhetOver).build());
+        orgEnhetStateRepository.update(orgEnhetState().toBuilder().id(idOrgEnhetOver).build());
 
         OrgEnhetState orgEnhetOver = orgEnhetState().toBuilder().id(idOrgEnhetOver).build();
         List<OrgEnhetState> underordnedeOrgEnheter = orgEnhetUnderordnetResolver.findUnderordnedeOrgEnheter(orgEnhetOver);

@@ -28,7 +28,6 @@ import java.util.Random;
 @AutoConfiguration
 @Conditional(RessursStateAutoconfiguration.RessursStateEnabledCondition.class)
 public class RessursStateAutoconfiguration {
-    private static final int IDLE_EVENT_IN_SECONDS = 5;
     final Environment environment;
 
     public RessursStateAutoconfiguration(Environment environment) {
@@ -52,30 +51,35 @@ public class RessursStateAutoconfiguration {
     @ConditionalOnMissingBean
     @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
     NomStateRessursListener nomStateRessursListener(
-        @Value("${app.nom-state.kafka.ressurs.state-topic}") String stateTopic,
+        @Value("${nom.libs.state.ressurs.state-topic}") String stateTopic,
         @Qualifier("nomStateRessursRepository") RessursStateRepository ressursStateRepository,
-        String ressursStateListenerId,
-        KafkaProperties kafkaProperties
+        String ressursStateListenerId
     ) {
         log.info("Registering NomStateRessursListener with stateTopic: {}, listenerId: {}", stateTopic, ressursStateListenerId);
-        return new NomStateRessursListener(stateTopic, ressursStateRepository, ressursStateListenerId, kafkaProperties);
+        return new NomStateRessursListener(stateTopic, ressursStateRepository, ressursStateListenerId);
     }
 
     @Bean
+    @ConditionalOnMissingBean(name = "nomStateRessursConsumerFactory") // NOTE: May be removed when old ConsumerFactory in nom-api is deleted.
     @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
     ConsumerFactory<String, RessursState> nomStateRessursConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        final var jsonDeserializer = new JsonDeserializer<>(RessursState.class, objectMapper);
-
-        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonDeserializer);
+        return new DefaultKafkaConsumerFactory<>(
+            properties.buildConsumerProperties(),
+            new StringDeserializer(),
+            new JsonDeserializer<>(RessursState.class, objectMapper)
+        );
     }
 
     @Bean
     @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
-    ConcurrentKafkaListenerContainerFactory<String, RessursState> nomStateRessursKafkaListenerContainerFactory(@Qualifier("nomStateRessursConsumerFactory") ConsumerFactory<String, RessursState> consumerFactory) {
+    ConcurrentKafkaListenerContainerFactory<String, RessursState> nomStateRessursKafkaListenerContainerFactory(
+        @Qualifier("nomStateRessursConsumerFactory") ConsumerFactory<String, RessursState> consumerFactory,
+        @Value("${nom.libs.state.idle-event-interval-seconds}") int idleEventIntervalSeconds
+    ) {
         final var factory = new ConcurrentKafkaListenerContainerFactory<String, RessursState>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);
-        factory.getContainerProperties().setIdleEventInterval(IDLE_EVENT_IN_SECONDS * 1000L);
+        factory.getContainerProperties().setIdleEventInterval(idleEventIntervalSeconds * 1000L);
 
         // If authentication towards kafka broker topic fails, retry every 10s
         factory.setContainerCustomizer(container -> {
@@ -89,7 +93,7 @@ public class RessursStateAutoconfiguration {
 
     @Bean
     @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
-    public String ressursStateListenerId(@Value("${app.nom-state.kafka.ressurs.listener-id}") String listenerId) {
+    public String ressursStateListenerId(@Value("${nom.libs.state.ressurs.listener-id}") String listenerId) {
         if (isLocal()) {
             return listenerId + "-" + Math.abs(new Random().nextInt());
         }

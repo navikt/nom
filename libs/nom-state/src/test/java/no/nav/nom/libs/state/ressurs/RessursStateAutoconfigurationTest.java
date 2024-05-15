@@ -36,7 +36,6 @@ public class RessursStateAutoconfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
         .withConfiguration(AutoConfigurations.of(RessursStateAutoconfiguration.class))
-        .withPropertyValues("app.name=ressurs-state-test-app")
         .withInitializer(ConditionEvaluationReportLoggingListener.forLogLevel(LogLevel.INFO));
 
     @Test
@@ -58,6 +57,7 @@ public class RessursStateAutoconfigurationTest {
         contextRunner
             .withUserConfiguration(TestMockBeans.class)
             .withPropertyValues("nom.libs.state.ressurs.enabled=true")
+            .withPropertyValues("nom.libs.state.idle-event-interval-seconds=5")
             .run(
                 context -> {
                     assertThat(context).hasSingleBean(NomStateRessursListener.class);

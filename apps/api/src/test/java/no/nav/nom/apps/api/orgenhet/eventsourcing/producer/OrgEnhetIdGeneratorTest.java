@@ -1,8 +1,9 @@
 package no.nav.nom.apps.api.orgenhet.eventsourcing.producer;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -31,7 +32,7 @@ public class OrgEnhetIdGeneratorTest {
 //            log.info("Generert id: {}", id);
             assertTrue(id.matches(idRegex), "No match: %s".formatted(id));
             assertFalse(orgEnhetStateService.findByFid(id).isPresent());
-            orgEnhetStateService.putEventAggregate(newOrgEnhet(id));
+            orgEnhetStateService.update(newOrgEnhet(id));
         }
     }
 

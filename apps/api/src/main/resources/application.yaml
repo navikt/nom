@@ -47,11 +47,8 @@ app:
     nom-ressurser-stillinger-respons-navn: "NOM_RESSURS_STILLINGERResponse"
     nom-kommunale-ressurser-respons-navn: "NOM_KOMMUNALE_V1Response"
 
-nom:
-  libs:
-    state:
-      ressurs:
-        enabled: true
+nom.libs.state.ressurs.enabled: true
+nom.libs.state.orgenhet.enabled: true
 
 authentication:
   aad:

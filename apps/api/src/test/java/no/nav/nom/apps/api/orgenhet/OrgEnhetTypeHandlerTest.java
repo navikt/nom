@@ -3,7 +3,7 @@ package no.nav.nom.apps.api.orgenhet;
 import no.nav.nom.apps.api.organisering.OrgEnhetTestBase;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
 
     @Autowired
-    private OrgEnhetStateRepository orgEnhetStateRepository;
+    private OldOrgEnhetStateRepositoryImpl orgEnhetStateRepository;
 
     @Autowired
     private OrgEnhetTypeHandler orgEnhetTypeHandler;
@@ -84,7 +84,7 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
                     .agressoOrgenhetType(Optional.of(agressoOrgenhetType))
                     .build()
             )
-            .forEach(orgEnhetState -> orgEnhetStateRepository.putEventAggregate(orgEnhetState));
+            .forEach(orgEnhetState -> orgEnhetStateRepository.update(orgEnhetState));
 
         orgEnhetTypeHandler.updateOrgEnhetsTypeForLeafs();
 
@@ -125,7 +125,7 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
         );
 
         Stream.of(nonLeafNodes, leafNodes).flatMap(List::stream)
-            .forEach(orgEnhetState -> orgEnhetStateRepository.putEventAggregate(orgEnhetState));
+            .forEach(orgEnhetState -> orgEnhetStateRepository.update(orgEnhetState));
 
         orgEnhetTypeHandler.updateOrgEnhetsTypeForLeafs();
 
@@ -146,7 +146,7 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
             .orgEnhetsType(Optional.of(OrgEnhetsType.FYLKE))
             .build();
 
-        orgEnhetStateRepository.putEventAggregate(orgEnhetWithCorrectOrgenhetType);
+        orgEnhetStateRepository.update(orgEnhetWithCorrectOrgenhetType);
 
         orgEnhetTypeHandler.updateOrgEnhetsTypeForLeafs();
 
@@ -164,7 +164,7 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
             .orgEnhetsType(Optional.of(OrgEnhetsType.NAV_KONTOR))
             .build();
 
-        orgEnhetStateRepository.putEventAggregate(orgEnhetWithCorrectOrgenhetType);
+        orgEnhetStateRepository.update(orgEnhetWithCorrectOrgenhetType);
 
         orgEnhetTypeHandler.updateOrgEnhetsTypeForLeafs();
 
@@ -193,7 +193,7 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
         var overordnetOrgEnhet = orgEnhetStateBuilderWithDefaultValues();
 
         Stream.of(List.of(overordnetOrgEnhet), changedOrgenhetAndSiblings).flatMap(List::stream)
-                .forEach(orgEnhetState -> orgEnhetStateRepository.putEventAggregate(orgEnhetState));
+                .forEach(orgEnhetState -> orgEnhetStateRepository.update(orgEnhetState));
 
         changedOrgenhetAndSiblings.forEach(orgEnhetState ->
             when(orgEnhetOverordnetResolver.findOverordnetOrgEnhet(orgEnhetState)).thenReturn(Optional.of(overordnetOrgEnhet))
@@ -225,7 +225,7 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
             .build();
 
         Stream.of(List.of(changedOrgenhet), List.of(overordnetOrgEnhet)).flatMap(List::stream)
-            .forEach(orgEnhetState -> orgEnhetStateRepository.putEventAggregate(orgEnhetState));
+            .forEach(orgEnhetState -> orgEnhetStateRepository.update(orgEnhetState));
 
         when(orgEnhetOverordnetResolver.findOverordnetOrgEnhet(changedOrgenhet)).thenReturn(Optional.of(overordnetOrgEnhet));
 
@@ -258,7 +258,7 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
             .build();
 
         Stream.of(changedOrgenhetAndSiblings, List.of(overordnetOrgEnhet)).flatMap(List::stream)
-            .forEach(orgEnhetState -> orgEnhetStateRepository.putEventAggregate(orgEnhetState));
+            .forEach(orgEnhetState -> orgEnhetStateRepository.update(orgEnhetState));
 
         changedOrgenhetAndSiblings.forEach(orgEnhetState ->
             when(orgEnhetOverordnetResolver.findOverordnetOrgEnhet(orgEnhetState)).thenReturn(Optional.of(overordnetOrgEnhet))
@@ -292,7 +292,7 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
             .orgEnhetsType(Optional.of(OrgEnhetsType.DIR)).build();
 
         Stream.of(changedOrgenhetAndSiblings, List.of(overordnetOrgEnhet)).flatMap(List::stream)
-            .forEach(orgEnhetState -> orgEnhetStateRepository.putEventAggregate(orgEnhetState));
+            .forEach(orgEnhetState -> orgEnhetStateRepository.update(orgEnhetState));
 
         changedOrgenhetAndSiblings.forEach(orgEnhetState ->
             when(orgEnhetOverordnetResolver.findOverordnetOrgEnhet(orgEnhetState)).thenReturn(Optional.of(overordnetOrgEnhet))

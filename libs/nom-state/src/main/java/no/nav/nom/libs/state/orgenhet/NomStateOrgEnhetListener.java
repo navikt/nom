@@ -1,0 +1,40 @@
+package no.nav.nom.libs.state.orgenhet;
+
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.libs.state.common.AbstractNomStateListener;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.PartitionOffset;
+import org.springframework.kafka.annotation.TopicPartition;
+
+@Slf4j
+public class NomStateOrgEnhetListener extends AbstractNomStateListener<OrgEnhetState> {
+    private final OrgEnhetStateRepository orgEnhetStateRepository;
+
+    public NomStateOrgEnhetListener(String stateTopic, OrgEnhetStateRepository orgEnhetStateRepository, String listenerId) {
+        super(stateTopic, listenerId);
+        this.orgEnhetStateRepository = orgEnhetStateRepository;
+    }
+
+    @KafkaListener(
+        id = "#{orgEnhetStateListenerId}",
+        containerFactory = "nomStateOrgEnhetKafkaListenerContainerFactory",
+        topicPartitions = @TopicPartition(
+            topic = "${nom.libs.state.orgenhet.state-topic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
+        )
+    )
+    public void onMessage(ConsumerRecords<String, OrgEnhetState> records) {
+        super.onMessage(records);
+    }
+
+    @Override
+    protected void registerMessageWithState(String key, OrgEnhetState orgEnhetState) {
+        orgEnhetStateRepository.update(orgEnhetState);
+    }
+
+    @Override
+    protected void doneReadToEndOnStartup() {
+        log.info("Number of OrgEnhets FID's read on startup: {}", orgEnhetStateRepository.count());
+    }
+}

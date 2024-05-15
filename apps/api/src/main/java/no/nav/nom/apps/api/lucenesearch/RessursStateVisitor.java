@@ -9,14 +9,12 @@ import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.lucenesearch.LuceneService.UNLEASH_USE_NEW_RESSURS_STATE_LISTENER;
 
 @Component
-public class RessursStateVisitor implements NomStateRessursListener.Visitor{
+public class RessursStateVisitor implements NomStateRessursListener.Visitor<RessursState>{
     private final LuceneService luceneService;
-    private final NomStateRessursListener nomStateRessursListener;
     private final Unleash unleash;
 
     public RessursStateVisitor(LuceneService luceneService, NomStateRessursListener nomStateRessursListener, Unleash unleash) {
         this.luceneService = luceneService;
-        this.nomStateRessursListener = nomStateRessursListener;
         this.unleash = unleash;
 
         nomStateRessursListener.register(this);

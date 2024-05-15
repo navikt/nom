@@ -23,7 +23,7 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.recoverybackup.OrgEnhetEventSourceRepository;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListenerConfig;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationRepository;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationService;
@@ -32,6 +32,8 @@ import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
+import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
@@ -55,7 +57,7 @@ import org.springframework.kafka.annotation.EnableKafka;
     , ValidationService.class
     , NomProxyClient.class
     , NomProxyRestClient.class
-    , OrgEnhetStateRepository.class
+    , OldOrgEnhetStateRepositoryImpl.class
     , OrganiseringStateRepository.class
     , OrgenhetService.class
     , OrgEnhetCommandService.class
@@ -68,7 +70,6 @@ import org.springframework.kafka.annotation.EnableKafka;
     , OrgEnhetOverordnetResolver.class
     , OrgEnhetUnderordnetResolver.class
     , OrgEnhetNomNivaaHandler.class
-
     , DvhStartupLoadMonitor.class
     , KafkaUtils.class
     , KafkaAutoConfiguration.class
@@ -91,6 +92,8 @@ public class OrgEnhetTestConfig {
 
     @MockBean
     NomStateRessursListener nomStateRessursListener;
+    @MockBean
+    NomStateOrgEnhetListener nomStateOrgEnhetListener;
 
     @MockBean
     OrgtilknytningStateListener orgtilknytningStateListener;

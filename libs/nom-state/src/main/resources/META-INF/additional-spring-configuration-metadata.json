@@ -3,8 +3,17 @@
     {
       "name": "nom.libs.state.ressurs.enabled",
       "type": "java.lang.Boolean",
-      "description": "Enable/disable ressurs state autoconfiguration.",
-      "defaultValue": true
+      "description": "Enable/disable ressurs state autoconfiguration."
+    },
+    {
+      "name": "nom.libs.state.orgenhet.enabled",
+      "type": "java.lang.String",
+      "description": "Enable/disable ressurs state autoconfiguration."
+    },
+    {
+      "name": "nom.libs.state.idle-event-interval-seconds",
+      "type": "java.lang.String",
+      "description": "Idle tid på kafka meldinger før idle event sendes."
     }
   ]
 }

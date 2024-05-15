@@ -5,7 +5,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
@@ -15,6 +15,7 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -59,7 +60,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
     @BeforeEach
     public void init() {
         MockitoAnnotations.openMocks(this);
-        orgEnhetStateRepository = new OrgEnhetStateRepository();
+        orgEnhetStateRepository = new OldOrgEnhetStateRepositoryImpl();
         orgenhetService = new OrgenhetService(orgEnhetStateRepository, orgEnhetCommandService, new DvhRepository(), kafkaTopicReader,
             unleash,
             organiseringStateRepository
@@ -641,9 +642,9 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
     private void settOppStandardEnheter() {
         final Optional<LocalDate> EMPTY_DATE = Optional.empty();
         orgEnhetStateRepository.clear();
-        orgEnhetStateRepository.putEventAggregate(lagEnhet("FID_1", "a001bc", "ENHET_1", LocalDate.of(2020, 1, 1), EMPTY_DATE, "AGRID_1"));
-        orgEnhetStateRepository.putEventAggregate(lagEnhet("FID_2", "a002bc", "ENHET_2", LocalDate.of(2020, 1, 1), EMPTY_DATE, "AGRID_2"));
-        orgEnhetStateRepository.putEventAggregate(lagEnhet(
+        orgEnhetStateRepository.update(lagEnhet("FID_1", "a001bc", "ENHET_1", LocalDate.of(2020, 1, 1), EMPTY_DATE, "AGRID_1"));
+        orgEnhetStateRepository.update(lagEnhet("FID_2", "a002bc", "ENHET_2", LocalDate.of(2020, 1, 1), EMPTY_DATE, "AGRID_2"));
+        orgEnhetStateRepository.update(lagEnhet(
             "FID_3",
             "a003bc",
             "ENHET_3_AVSLUTTET",
@@ -651,7 +652,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
             LocalDate.of(2022, 12, 31),
             "AGRID_3"
         ));
-        orgEnhetStateRepository.putEventAggregate(lagEnhet(
+        orgEnhetStateRepository.update(lagEnhet(
             "FID_4",
             "a004bc",
             "ENHET_3_NYTT_NAVN",

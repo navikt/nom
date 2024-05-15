@@ -1,6 +1,6 @@
 package no.nav.nom.apps.api.orgenhet.eventsourcing.producer;
 
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;

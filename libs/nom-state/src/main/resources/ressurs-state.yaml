@@ -1,8 +1,6 @@
-app:
-  nom-state:
-    kafka:
+nom:
+  libs:
+    state:
       ressurs:
         state-topic: org.nom.intern-ressurs-state
         listener-id: nomStateRessursListener_${HOSTNAME:dummy}
-
-

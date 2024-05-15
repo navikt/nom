@@ -8,7 +8,6 @@ import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
 import no.nav.nom.apps.api.organisering.OrganiseringConfig;
 import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
@@ -16,9 +15,11 @@ import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -46,6 +47,7 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
     public DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;
 
     @Autowired
+    @Qualifier("oldOrgEnhetStateRepository")
     protected OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
@@ -66,7 +68,7 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         final var evAgg = dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE())));
-        orgEnhetStateRepository.putEventAggregate(evAgg);
+        orgEnhetStateRepository.update(evAgg);
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -95,7 +97,7 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))));
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -123,7 +125,7 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))));
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -146,7 +148,7 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))));
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -183,11 +185,11 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, String.valueOf(mockedEnhet1.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet1.getORGENHET_TIL_PERIODE()))));
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, String.valueOf(mockedEnhet2.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet2.getORGENHET_TIL_PERIODE()))));
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet3, 3, String.valueOf(mockedEnhet3.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet3.getORGENHET_TIL_PERIODE()))));
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet4, 4, String.valueOf(mockedEnhet4.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet4.getORGENHET_TIL_PERIODE()))));
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet5, 5, String.valueOf(mockedEnhet5.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet5.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, String.valueOf(mockedEnhet1.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet1.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, String.valueOf(mockedEnhet2.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet2.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet3, 3, String.valueOf(mockedEnhet3.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet3.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet4, 4, String.valueOf(mockedEnhet4.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet4.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet5, 5, String.valueOf(mockedEnhet5.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet5.getORGENHET_TIL_PERIODE()))));
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -206,9 +208,9 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet1, 1, String.valueOf(mockEnhet1.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet1.getORGENHET_TIL_PERIODE()))));
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet2, 2, String.valueOf(mockEnhet2.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet2.getORGENHET_TIL_PERIODE()))));
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet3, 3, String.valueOf(mockEnhet3.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet3.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet1, 1, String.valueOf(mockEnhet1.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet1.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet2, 2, String.valueOf(mockEnhet2.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet2.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet3, 3, String.valueOf(mockEnhet3.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet3.getORGENHET_TIL_PERIODE()))));
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -244,9 +246,9 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
         var orgStateUnder = dvhOrgenhetMockUtils.dvhMockToState(mockEnhetUnder, 2, String.valueOf(mockEnhetUnder.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhetUnder.getORGENHET_TIL_PERIODE())));
         var orgState = dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 3, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE())));
 
-        orgEnhetStateRepository.putEventAggregate(orgStateOver);
-        orgEnhetStateRepository.putEventAggregate(orgStateUnder);
-        orgEnhetStateRepository.putEventAggregate(orgState);
+        orgEnhetStateRepository.update(orgStateOver);
+        orgEnhetStateRepository.update(orgStateUnder);
+        orgEnhetStateRepository.update(orgState);
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -285,8 +287,8 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet1, 1, String.valueOf(mockEnhet1.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet1.getORGENHET_TIL_PERIODE()))));
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet2, 2, String.valueOf(mockEnhet2.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet2.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet1, 1, String.valueOf(mockEnhet1.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet1.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet2, 2, String.valueOf(mockEnhet2.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet2.getORGENHET_TIL_PERIODE()))));
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -321,8 +323,8 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
         var orgStateOver = dvhOrgenhetMockUtils.dvhMockToState(mockEnhetOver, 2, String.valueOf(mockEnhetOver.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhetOver.getORGENHET_TIL_PERIODE())));
         var orgStateUnder = dvhOrgenhetMockUtils.dvhMockToState(DvhOrgEnhetMock.getBuilderWithDefault().build(), 3, String.valueOf(mockEnhetOver.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhetOver.getORGENHET_TIL_PERIODE())));
 
-        orgEnhetStateRepository.putEventAggregate(orgState);
-        orgEnhetStateRepository.putEventAggregate(orgStateOver);
+        orgEnhetStateRepository.update(orgState);
+        orgEnhetStateRepository.update(orgStateOver);
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -358,7 +360,7 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -379,7 +381,7 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -404,7 +406,7 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -431,7 +433,7 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
 
         orgtilknytningStateRepository.putEventAggregate(
             "FID_1",
@@ -471,7 +473,7 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 42, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 42, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
         //        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario42.graphql");
@@ -492,7 +494,7 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
 
         //        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 

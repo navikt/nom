@@ -18,7 +18,7 @@ import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationRepository;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationService;
@@ -29,6 +29,8 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStat
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.OldRessursStateRepositoryImpl;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
+import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -48,7 +50,7 @@ import org.springframework.kafka.annotation.EnableKafka;
     , ValidationService.class
     , NomProxyClient.class
     , NomProxyRestClient.class
-    , OrgEnhetStateRepository.class
+    , OldOrgEnhetStateRepositoryImpl.class
     , OrgEnhetIdGenerator.class
     , DvhStartupLoadMonitor.class
     , OrganiseringStateRepository.class
@@ -71,6 +73,8 @@ public class OrganiseringTestConfig {
 
     @MockBean
     NomStateRessursListener nomStateRessursListener;
+    @MockBean
+    NomStateOrgEnhetListener nomStateOrgEnhetListener;
 
     @MockBean
     OrgtilknytningStateListener orgtilknytningStateListener;

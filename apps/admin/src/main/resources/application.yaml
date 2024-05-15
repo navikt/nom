@@ -18,11 +18,8 @@ app:
 #        listener-id: nomStateRessursListener_${HOSTNAME}
 
 
-nom:
-  libs:
-    state:
-      ressurs:
-        enabled: true
+nom.libs.state.ressurs.enabled: true
+nom.libs.state.orgenhet.enabled: true
 
 management:
   endpoint:

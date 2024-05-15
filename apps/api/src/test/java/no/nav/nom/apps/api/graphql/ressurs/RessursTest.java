@@ -132,7 +132,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test get methods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(
             enhet,
             1,
             String.valueOf(enhet.getORGENHET_FRA_PERIODE()),
@@ -343,7 +343,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(
             enhet,
             1,
             String.valueOf(enhet.getORGENHET_FRA_PERIODE()),
@@ -374,7 +374,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(
             mockedEnhet,
             1,
             String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()),
@@ -412,13 +412,13 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(
             ressursLederForDenneEnheten,
             1,
             String.valueOf(ressursLederForDenneEnheten.getORGENHET_FRA_PERIODE()),
             Optional.of(String.valueOf(ressursLederForDenneEnheten.getORGENHET_TIL_PERIODE()))
         ));   // orgEnhet 5 får ID 1
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(
             lederenErPaDenneEnheten,
             2,// orgEnhet 4 får ID 2
             String.valueOf(lederenErPaDenneEnheten.getORGENHET_FRA_PERIODE()),

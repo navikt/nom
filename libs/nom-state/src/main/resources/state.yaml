@@ -1,0 +1,4 @@
+nom:
+  libs:
+    state:
+      idle-event-interval-seconds: 5
