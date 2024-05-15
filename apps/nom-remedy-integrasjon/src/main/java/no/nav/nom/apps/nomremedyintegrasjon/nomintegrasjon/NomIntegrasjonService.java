@@ -193,14 +193,14 @@ public class NomIntegrasjonService {
         var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
 
         var gyldigTom = orgtilknytningDatoEndretEventData.gyldigTom()
-            .orElseThrow(() -> new RequiredValueMissingException("Missing value for 'utlopsdato'"));
+            .orElse(null);
 
         var remedyEnhetIdForOrgenhet = getRemedyEnhetId(orgtilknytningState.getOrgEnhetId());
 
         var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
             .enhetsId(remedyEnhetIdForOrgenhet)
             .tiltredelsesdato(epochSecondsNorwegianTimeNoon(orgtilknytningDatoEndretEventData.gyldigFom()))
-            .utlopsdato(epochSecondsNorwegianTimeEndOfDay(gyldigTom))
+            .utlopsdato(isNull(gyldigTom) ? null : epochSecondsNorwegianTimeEndOfDay(gyldigTom))
             .build();
 
         saveNewNomIntegrasjonEntity(
@@ -606,10 +606,6 @@ public class NomIntegrasjonService {
         if (nomIntegrasjonEntity.getTiltredelsesdato() == null) {
             throw RequiredValueMissingException.forField("tiltredelsesdato");
         }
-        if (nomIntegrasjonEntity.getUtlopsdato() == null) {
-            throw RequiredValueMissingException.forField("utlopsdato");
-        }
-
     }
 
     private String getRemedyEnhetId(String orgEnhetId) {
