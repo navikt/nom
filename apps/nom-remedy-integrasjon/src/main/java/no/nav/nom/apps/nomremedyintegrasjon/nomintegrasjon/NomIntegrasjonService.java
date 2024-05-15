@@ -220,12 +220,12 @@ public class NomIntegrasjonService {
         var newRemedyEnhetId = getRemedyEnhetId(orgtilknytningDagligOppfolgingEndretEventData.orgEnhetId());
 
         var gyldigTom = orgtilknytningDagligOppfolgingEndretEventData.gyldigTom()
-            .orElseThrow(() -> RequiredValueMissingException.forField("sluttDato"));
+            .orElse(null);
 
         var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
             .enhetsId(newRemedyEnhetId)
             .tiltredelsesdato(epochSecondsNorwegianTimeNoon(orgtilknytningDagligOppfolgingEndretEventData.gyldigFom()))
-            .utlopsdato(epochSecondsNorwegianTimeEndOfDay(gyldigTom))
+            .utlopsdato(isNull(gyldigTom) ? null : epochSecondsNorwegianTimeEndOfDay(gyldigTom))
             .build();
 
         saveNewNomIntegrasjonEntity(
