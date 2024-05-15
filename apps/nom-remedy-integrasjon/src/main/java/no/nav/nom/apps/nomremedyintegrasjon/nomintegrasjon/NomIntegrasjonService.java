@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.util.Objects.isNull;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitalizeNavn;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeEndOfDay;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeNoon;
@@ -395,7 +396,7 @@ public class NomIntegrasjonService {
 
         var sluttDato = Optional.ofNullable((String) inputInterfaceMethodArguments.get("sluttDato"))
             .map(LocalDate::parse)
-            .orElseThrow(() -> RequiredValueMissingException.forField("sluttDato"));
+            .orElse(null);
 
         var fysiskBrukerstedNr = Optional.ofNullable((String) inputInterfaceMethodArguments.get("fysiskBrukerstedNr"))
             .orElseThrow(() -> RequiredValueMissingException.forField("fysiskBrukerstedNr"));
@@ -411,7 +412,7 @@ public class NomIntegrasjonService {
             .tiltredelsesdato(ressursOpprettetAdditionalData.startdato()
                 .map(Utils::epochSecondsNorwegianTimeNoon)
                 .orElseThrow(() -> RequiredValueMissingException.forField("tiltredelsesdato")))
-            .utlopsdato(epochSecondsNorwegianTimeEndOfDay(sluttDato))
+            .utlopsdato(isNull(sluttDato) ? null : epochSecondsNorwegianTimeEndOfDay(sluttDato))
             .mobil(ressursOpprettetEventData.primaryTelefonnummer().orElse(null))
             .build();
 
