@@ -30,7 +30,7 @@ public class NomStateOrgtilknytningListener extends AbstractNomStateListener<Org
 
     @Override
     protected void registerMessageWithState(String key, OrgtilknytningState orgtilknytningState) {
-        orgtilknytningStateRepository.update(orgtilknytningState);
+        orgtilknytningStateRepository.update(key, orgtilknytningState);
     }
 
     @Override

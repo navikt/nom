@@ -54,9 +54,9 @@ public class OrgtilknytningStateRepositoryImpl implements OrgtilknytningStateRep
     }
 
     @Override
-    public void update(OrgtilknytningState newOrgtilknytningState) {
+    public void update(String fid, OrgtilknytningState newOrgtilknytningState) {
         if (newOrgtilknytningState == null) {
-            removeFromState(newOrgtilknytningState.fid());
+            removeFromState(fid);
         } else {
             addToState(newOrgtilknytningState);
         }

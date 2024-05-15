@@ -437,6 +437,7 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
         orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
 
         orgtilknytningStateRepository.update(
+            "FID_1",
             orgtilknytningState().toBuilder()
                 .fid("FID_1")
                 .navident(ressurs.navident())

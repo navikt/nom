@@ -86,7 +86,7 @@ public class ToggledOrgtilknytningStateRepository implements OrgtilknytningState
     }
 
     @Override
-    public void update(OrgtilknytningState newOrgtilknytningState) {
+    public void update(String fid, OrgtilknytningState newOrgtilknytningState) {
         throw new RuntimeException("ERROR! Call to update() in ToggledOrgEnhetStateRepository - should not be called on implemented beans directly");
     }
 

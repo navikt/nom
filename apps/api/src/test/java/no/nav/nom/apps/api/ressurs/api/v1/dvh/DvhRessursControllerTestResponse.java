@@ -74,6 +74,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
     @BeforeEach
     public void setup() {
         orgtilknytningStateRepository.update(
+            "OT_FID_1",
             OrgtilknytningState.builder()
                 .fid("OT_FID_1")
                 .navident("A000001")
@@ -84,6 +85,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
                 .build());
 
         orgtilknytningStateRepository.update(
+            "OT_FID_2",
             OrgtilknytningState.builder()
                 .fid("OT_FID_2")
                 .navident("A000002")
@@ -94,6 +96,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
                 .build());
 
         orgtilknytningStateRepository.update(
+            "OT_FID_3",
             OrgtilknytningState.builder()
                 .fid("OT_FID_3")
                 .navident("A000002")
@@ -104,6 +107,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
                 .build());
 
         orgtilknytningStateRepository.update(
+            "OT_FID_4",
             OrgtilknytningState.builder()
                 .fid("OT_FID_4")
                 .navident("A000003")
@@ -114,6 +118,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
                 .build());
 
         orgtilknytningStateRepository.update(
+            "OT_FID5",
             OrgtilknytningState.builder()
                 .fid("OT_FID5")
                 .navident("A000003")
@@ -124,6 +129,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
                 .build());
 
         orgtilknytningStateRepository.update(
+            "OT_FID6",
             OrgtilknytningState.builder()
                 .fid("OT_FID6")
                 .navident("A000004")

@@ -141,6 +141,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
             Optional.of(String.valueOf(enhet.getORGENHET_TIL_PERIODE()))
         ));
         orgtilknytningStateRepository.update(
+            "FID_1",
             orgtilknytningState().toBuilder()
                 .fid("FID_1")
                 .navident(ressursState.navident())
@@ -382,6 +383,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
             Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))
         ));
         orgtilknytningStateRepository.update(
+            "FID_1",
             orgtilknytningState().toBuilder()
                 .fid("FID_1")
                 .navident(ressursState2.navident())
@@ -427,6 +429,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
 
         // Lagrer orgTilknytning for testNavIdent4 til orgEnhet ID_2 (testId4)
         orgtilknytningStateRepository.update(
+            "FID_1",
             orgtilknytningState().toBuilder()
                 .fid("FID_1")
                 .navident(ressursState4.navident())

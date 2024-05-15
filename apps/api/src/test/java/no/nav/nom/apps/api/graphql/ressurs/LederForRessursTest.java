@@ -110,6 +110,7 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
 
         // Knytte ressurs til org. enhet på laveste nivå
         orgtilknytningStateRepository.update(
+            "FID_1",
             orgtilknytningState().toBuilder()
                 .fid("FID_1")
                 .navident(ressurs.navident())
@@ -211,6 +212,7 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
 
         // Knytte ressurs til org. enhet på laveste nivå
         orgtilknytningStateRepository.update(
+            "FID_1",
             orgtilknytningState().toBuilder()
                 .fid("FID_1")
                 .navident(ressurs.navident())

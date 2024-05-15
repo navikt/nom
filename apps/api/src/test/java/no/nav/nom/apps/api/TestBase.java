@@ -148,7 +148,7 @@ public abstract class TestBase {
 
 
     protected void saveOrgtilknytninger(List<OrgtilknytningState> orgtilknytningStateList) {
-        orgtilknytningStateList.forEach(o -> orgtilknytningStateRepository.update(o));
+        orgtilknytningStateList.forEach(o -> orgtilknytningStateRepository.update(o.fid(), o));
     }
 
     protected void saveOrgenheter(List<OrgEnhetState> orgEnhetStateList) {

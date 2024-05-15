@@ -20,7 +20,7 @@ public interface OrgtilknytningStateRepository {
 
     int count();
 
-    void update(OrgtilknytningState newOrgtilknytningState);
+    void update(String fid, OrgtilknytningState newOrgtilknytningState);
 
     void clear();
 }
