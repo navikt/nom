@@ -274,8 +274,8 @@ public class EksterneRessurserProcessor {
     }
 
     private IOrgenhet hvisHelfoOsloEllerAndreStedeterPlasserPaaHelfo(IOrgenhet orgenhetForRemedyenhet, String navident, String remedyEnhet) {
-        if (erHelfoOsloEllerHelfoHovedkontor(orgenhetForRemedyenhet) || erHelfoAnsatteOrgenhet(orgenhetForRemedyenhet)) {
-            // Helfo Oslo og Helfo Hovedkontor skal plasseres på Helfo (som has AgressoId EH00001 i prod)
+        // Helfo Niv0, Helfo Oslo og Helfo Hovedkontor skal plasseres på Helfo (som has AgressoId EH00001 i prod)
+        if (erHelfoNiv0Enhet(orgenhetForRemedyenhet) || erHelfoOsloEllerHelfoHovedkontor(orgenhetForRemedyenhet) || erHelfoAnsatteOrgenhet(orgenhetForRemedyenhet)) {
             List<IOrgenhet> listOfOrgenhetForRemedyenhet = orgenhetService.matchByAgressoId("EH00001");
             if (!listOfOrgenhetForRemedyenhet.isEmpty()) {
                 // Det kan hende at det finnes flere enn en Helfo orgenheter med AgressoId EH00001, da velger vi den som har navn 'Helfo'
