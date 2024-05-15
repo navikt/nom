@@ -9,12 +9,13 @@ import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMock;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
 import no.nav.nom.apps.api.organisering.OrganiseringConfig;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Optional;
 
@@ -36,6 +37,7 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
     public DvhOrganiseringMockUtils dvhOrganiseringMockUtils;
 
     @Autowired
+    @Qualifier("oldOrgtilknytningStateRepository")
     OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @Test
@@ -107,8 +109,7 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
         );
 
         // Knytte ressurs til org. enhet på laveste nivå
-        orgtilknytningStateRepository.putEventAggregate(
-            "FID_1",
+        orgtilknytningStateRepository.update(
             orgtilknytningState().toBuilder()
                 .fid("FID_1")
                 .navident(ressurs.navident())
@@ -209,8 +210,7 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
         );
 
         // Knytte ressurs til org. enhet på laveste nivå
-        orgtilknytningStateRepository.putEventAggregate(
-            "FID_1",
+        orgtilknytningStateRepository.update(
             orgtilknytningState().toBuilder()
                 .fid("FID_1")
                 .navident(ressurs.navident())

@@ -46,7 +46,7 @@ public class KafkaTestFactoryConfiguration {
 
     @Bean
     KafkaTemplate<String, OrgEnhetState> orgEnhetStateProducerTemplate(
-        ProducerFactory<String, OrgEnhetState> orgEnhetStateProducerFactory, @Value("${app.nom-state.kafka.orgenhet.state-topic}") String eventsourceTopic
+        ProducerFactory<String, OrgEnhetState> orgEnhetStateProducerFactory, @Value("${nom.libs.state.orgenhet.state-topic}") String eventsourceTopic
     ) {
         final var eventsourceTemplate = new KafkaTemplate<>(orgEnhetStateProducerFactory);
         eventsourceTemplate.setDefaultTopic(eventsourceTopic);

@@ -3,4 +3,4 @@ nom:
     state:
       orgenhet:
         state-topic: org.nom.intern-orgenhet-state
-        listener-id: nomStateOrgenhetListener_${HOSTNAME:dummy}
+        listener-id: nomStateOrgEnhetListener_${HOSTNAME:dummy}

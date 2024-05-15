@@ -3,12 +3,13 @@ package no.nav.nom.apps.api.orgtilknytning.eventsourcing.state;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
-import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.utils.common.kafka.KafkaUtils;
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -35,7 +36,7 @@ public class OrgtilknytningStateListener {
 
     public OrgtilknytningStateListener(
         @Value("${app.kafka.orgtilknytning.state-topic}") String stateTopic,
-        OrgtilknytningStateRepository orgtilknytningStateService,
+        @Qualifier("oldOrgtilknytningStateRepository") OrgtilknytningStateRepository orgtilknytningStateService,
         Admin adminClient, LuceneService luceneService,
         KafkaAdmin admin,
         KafkaProperties kafkaProperties
@@ -56,7 +57,7 @@ public class OrgtilknytningStateListener {
     )
     public void onMessage(ConsumerRecords<String, OrgtilknytningState> records, Consumer<String, String> consumer) {
         StreamSupport.stream(records.spliterator(), false)
-            .forEach( it -> orgtilknytningStateService.putEventAggregate(it.key(), it.value())); //,it.timestamp();
+            .forEach( it -> orgtilknytningStateService.update(it.value())); //,it.timestamp();
 
         KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka OrgtilknytningState listener initial load finished - {} Orgtilknytninger", orgtilknytningStateService.count()));
     }

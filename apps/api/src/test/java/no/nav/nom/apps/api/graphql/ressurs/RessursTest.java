@@ -10,17 +10,18 @@ import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
@@ -52,6 +53,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
     public DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;
 
     @Autowired
+    @Qualifier("oldOrgtilknytningStateRepository")
     OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @Test
@@ -138,8 +140,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
             String.valueOf(enhet.getORGENHET_FRA_PERIODE()),
             Optional.of(String.valueOf(enhet.getORGENHET_TIL_PERIODE()))
         ));
-        orgtilknytningStateRepository.putEventAggregate(
-            "FID_1",
+        orgtilknytningStateRepository.update(
             orgtilknytningState().toBuilder()
                 .fid("FID_1")
                 .navident(ressursState.navident())
@@ -380,8 +381,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
             String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()),
             Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))
         ));
-        orgtilknytningStateRepository.putEventAggregate(
-            "FID_1",
+        orgtilknytningStateRepository.update(
             orgtilknytningState().toBuilder()
                 .fid("FID_1")
                 .navident(ressursState2.navident())
@@ -426,8 +426,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
         ));
 
         // Lagrer orgTilknytning for testNavIdent4 til orgEnhet ID_2 (testId4)
-        orgtilknytningStateRepository.putEventAggregate(
-            "FID_1",
+        orgtilknytningStateRepository.update(
             orgtilknytningState().toBuilder()
                 .fid("FID_1")
                 .navident(ressursState4.navident())

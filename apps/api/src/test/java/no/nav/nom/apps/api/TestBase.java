@@ -5,13 +5,13 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
 import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
 import org.junit.jupiter.api.BeforeEach;
@@ -94,6 +94,7 @@ public abstract class TestBase {
     protected OrganiseringStateRepository organiseringStateRepository;
 
     @Autowired
+    @Qualifier("oldOrgtilknytningStateRepository")
     protected OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @MockBean
@@ -147,7 +148,7 @@ public abstract class TestBase {
 
 
     protected void saveOrgtilknytninger(List<OrgtilknytningState> orgtilknytningStateList) {
-        orgtilknytningStateList.forEach(o -> orgtilknytningStateRepository.putEventAggregate(o.fid(), o));
+        orgtilknytningStateList.forEach(o -> orgtilknytningStateRepository.update(o));
     }
 
     protected void saveOrgenheter(List<OrgEnhetState> orgEnhetStateList) {
@@ -155,8 +156,7 @@ public abstract class TestBase {
     }
 
     protected void clearOrgtilknytninger() {
-        orgtilknytningStateRepository.getAll()
-            .forEach(o -> orgtilknytningStateRepository.putEventAggregate(o.fid(), null));
+        orgtilknytningStateRepository.clear();
     }
 
     protected void saveRessurser(List<RessursState> ressursStateList) {

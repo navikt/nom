@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.orgtilknytning;
 
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;

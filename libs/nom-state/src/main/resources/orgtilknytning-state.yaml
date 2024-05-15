@@ -1,0 +1,6 @@
+nom:
+  libs:
+    state:
+      orgtilknytning:
+        state-topic: org.nom.intern-orgtilknytning-state
+        listener-id: nomStateOrgtilknytningListener_${HOSTNAME:dummy}

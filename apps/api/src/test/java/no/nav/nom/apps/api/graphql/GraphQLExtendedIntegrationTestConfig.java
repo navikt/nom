@@ -32,8 +32,8 @@ import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OldOrgtilknytningStateRepositoryImpl;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.metadata.RessursMetadataRepositoryImpl;
@@ -50,6 +50,7 @@ import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
@@ -75,7 +76,7 @@ import org.springframework.kafka.annotation.EnableKafka;
     , OrgEnhetStateListener.class
     , OrgEnhetStateListenerConfig.class
     , OrganiseringStateRepository.class
-    , OrgtilknytningStateRepository.class
+    , OldOrgtilknytningStateRepositoryImpl.class
     , OrgtilknytningService.class
     , RessursHendelseForEventsourceService.class
     , RessursMetadataRepositoryImpl.class
@@ -99,6 +100,8 @@ public class GraphQLExtendedIntegrationTestConfig {
     NomStateRessursListener nomStateRessursListener;
     @MockBean
     NomStateOrgEnhetListener nomStateOrgEnhetListener;
+    @MockBean
+    NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
 
     @MockBean
     OrgEnhetEventProducer orgEnhetEventProducer;

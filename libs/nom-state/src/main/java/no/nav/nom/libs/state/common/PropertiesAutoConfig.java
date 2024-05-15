@@ -36,4 +36,14 @@ public class PropertiesAutoConfig {
             log.debug("loading orgenhet-state.yaml");
         }
     }
+
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnProperty(value = "nom.libs.state.orgtilknytning.enabled")
+    @PropertySource(value = "orgtilknytning-state.yaml", factory = YamlPropertySourceFactory.class)
+    public static class OrgtilknytningStateConfig {
+        public OrgtilknytningStateConfig() {
+            log.debug("loading orgtilknytning-state.yaml");
+        }
+    }
 }

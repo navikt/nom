@@ -49,6 +49,7 @@ app:
 
 nom.libs.state.ressurs.enabled: true
 nom.libs.state.orgenhet.enabled: true
+nom.libs.state.orgtilknytning.enabled: true
 
 authentication:
   aad:

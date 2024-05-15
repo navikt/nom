@@ -34,6 +34,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStat
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
@@ -94,6 +95,8 @@ public class OrgEnhetTestConfig {
     NomStateRessursListener nomStateRessursListener;
     @MockBean
     NomStateOrgEnhetListener nomStateOrgEnhetListener;
+    @MockBean
+    NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
 
     @MockBean
     OrgtilknytningStateListener orgtilknytningStateListener;

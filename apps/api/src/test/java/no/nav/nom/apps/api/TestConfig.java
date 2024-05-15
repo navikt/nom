@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api;
 
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -20,5 +21,10 @@ class TestConfig {
     @Primary
     public OrgEnhetStateRepository orgEnhetStateRepository(@Qualifier("oldOrgEnhetStateRepository") OrgEnhetStateRepository orgEnhetStateRepository) {
         return orgEnhetStateRepository;
+    }
+    @Bean
+    @Primary
+    public OrgtilknytningStateRepository orgtilknytningStateRepository(@Qualifier("oldOrgtilknytningStateRepository") OrgtilknytningStateRepository orgtilknytningStateRepository) {
+        return orgtilknytningStateRepository;
     }
 }

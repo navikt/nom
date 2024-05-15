@@ -1,18 +1,19 @@
 package no.nav.nom.apps.api.ressurs.api.v1.dvh;
 
 import no.nav.nom.apps.api.TestTokensGenerator;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
@@ -37,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class DvhRessursControllerTestResponse extends RestTestBase {
 
     @Autowired
+    @Qualifier("oldOrgtilknytningStateRepository")
     OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @Autowired
@@ -71,7 +73,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
 
     @BeforeEach
     public void setup() {
-        orgtilknytningStateRepository.putEventAggregate("OT_FID_1",
+        orgtilknytningStateRepository.update(
             OrgtilknytningState.builder()
                 .fid("OT_FID_1")
                 .navident("A000001")
@@ -81,7 +83,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
                 .erDagligOppfolging(true)
                 .build());
 
-        orgtilknytningStateRepository.putEventAggregate("OT_FID_2",
+        orgtilknytningStateRepository.update(
             OrgtilknytningState.builder()
                 .fid("OT_FID_2")
                 .navident("A000002")
@@ -91,7 +93,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
                 .erDagligOppfolging(true)
                 .build());
 
-        orgtilknytningStateRepository.putEventAggregate("OT_FID_3",
+        orgtilknytningStateRepository.update(
             OrgtilknytningState.builder()
                 .fid("OT_FID_3")
                 .navident("A000002")
@@ -101,7 +103,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
                 .erDagligOppfolging(true)
                 .build());
 
-        orgtilknytningStateRepository.putEventAggregate("OT_FID_4",
+        orgtilknytningStateRepository.update(
             OrgtilknytningState.builder()
                 .fid("OT_FID_4")
                 .navident("A000003")
@@ -111,7 +113,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
                 .erDagligOppfolging(true)
                 .build());
 
-        orgtilknytningStateRepository.putEventAggregate("OT_FID5",
+        orgtilknytningStateRepository.update(
             OrgtilknytningState.builder()
                 .fid("OT_FID5")
                 .navident("A000003")
@@ -121,7 +123,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
                 .erDagligOppfolging(false)
                 .build());
 
-        orgtilknytningStateRepository.putEventAggregate("OT_FID6",
+        orgtilknytningStateRepository.update(
             OrgtilknytningState.builder()
                 .fid("OT_FID6")
                 .navident("A000004")

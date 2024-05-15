@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.orgtilknytning.eventsourcing.state;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +27,7 @@ public class OrgtilknytningStateListenerConfig {
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, OrgtilknytningState> orgtilknytningStateKafkaListenerContainerFactory(ConsumerFactory<String, OrgtilknytningState> consumerFactory) {
+    ConcurrentKafkaListenerContainerFactory<String, OrgtilknytningState> orgtilknytningStateKafkaListenerContainerFactory(@Qualifier("orgtilknytningStateConsumerFactory") ConsumerFactory<String, OrgtilknytningState> consumerFactory) {
         final var factory = new ConcurrentKafkaListenerContainerFactory<String, OrgtilknytningState>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);

@@ -8,7 +8,12 @@
     {
       "name": "nom.libs.state.orgenhet.enabled",
       "type": "java.lang.String",
-      "description": "Enable/disable ressurs state autoconfiguration."
+      "description": "Enable/disable orgenhet state autoconfiguration."
+    },
+    {
+      "name": "nom.libs.state.orgtilknytning.enabled",
+      "type": "java.lang.String",
+      "description": "Enable/disable orgtilknytning state autoconfiguration."
     },
     {
       "name": "nom.libs.state.idle-event-interval-seconds",

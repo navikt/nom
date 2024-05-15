@@ -24,6 +24,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
+import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -57,9 +58,10 @@ public class DvhRestConsumer {
     private final NomProxyClient nomProxyClient;
     private final RessursStateListener ressursStateListener;
     private final NomStateRessursListener nomStateRessursListener;
-    private final NomStateOrgEnhetListener nomStateOrgEnhetListener;
     private final OrgtilknytningStateListener orgtilknytningStateListener;
+    private final NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
     private final OrgEnhetStateListener orgEnhetStateListener;
+    private final NomStateOrgEnhetListener nomStateOrgEnhetListener;
     private final RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
     private final LeaderElection leaderElection;
     private final DvhOrgenhetsLast dvhOrgenhetsLast;
@@ -322,9 +324,12 @@ public class DvhRestConsumer {
     }
 
     private boolean isInitialStateReady() {
-        return ressursStateListener.initloadComplete() && orgtilknytningStateListener.initloadComplete()
+        return ressursStateListener.initloadComplete()
+            && orgtilknytningStateListener.initloadComplete()
             && orgEnhetStateListener.initloadComplete()
-            && nomStateRessursListener.hasReadToEndOnStartup() && nomStateOrgEnhetListener.hasReadToEndOnStartup();
+            && nomStateRessursListener.hasReadToEndOnStartup()
+            && nomStateOrgEnhetListener.hasReadToEndOnStartup()
+            && nomStateOrgtilknytningListener.hasReadToEndOnStartup();
     }
 
     private String durationAsH24(LocalDateTime start) {
