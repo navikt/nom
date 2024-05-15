@@ -34,6 +34,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitalizeNavn;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeEndOfDay;
@@ -87,11 +88,11 @@ public class NomIntegrasjonService {
     public void handleRessursEvent(RessursEvent ressursEvent) {
 
         if (ressursEvent instanceof RessursOpprettetEventV1 ressursOpprettetEventV1
-            && ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().equals(Sektor.EKSTERN)) {
+            && ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().kanOppretteRessurs()) {
             createRessurs(ressursOpprettetEventV1);
 
         } else if (ressursEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1
-            && isFidEksternRessurs(ressursEvent.getFid())
+            && isFidEksternEllerKommunalRessurs(ressursEvent.getFid())
         ) {
             handleRessursSluttetEventV1(ressursSluttetEventV1);
 
@@ -99,14 +100,15 @@ public class NomIntegrasjonService {
             handleRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
 
         } else if (ressursEvent instanceof RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertV1
-            && isFidEksternRessurs(ressursEvent.getFid())
+            && isFidEksternEllerKommunalRessurs(ressursEvent.getFid())
         ) {
             updateRessursPersonalia(ressursPersonaliaOppdatertV1);
 
         } else if (ressursEvent instanceof RessursFysiskeBrukerstederOppdatertEventV1 ressursFysiskeBrukerstederOppdatertEventV1
-            && isFidEksternRessurs(ressursEvent.getFid())) {
+            && isFidEksternEllerKommunalRessurs(ressursEvent.getFid())) {
             updateRessursFysiskeBrukersteder(ressursFysiskeBrukerstederOppdatertEventV1);
-        } else if (ressursEvent instanceof RessursPrimaryTelefonnummerOppdatertEventV1 ressursPrimaryTelefonnummerOppdatertEventV1 && isFidEksternRessurs(ressursEvent.getFid())) {
+        } else if (ressursEvent instanceof RessursPrimaryTelefonnummerOppdatertEventV1 ressursPrimaryTelefonnummerOppdatertEventV1
+            && isFidEksternEllerKommunalRessurs(ressursEvent.getFid())) {
             updateRessursTelefonnummer(ressursPrimaryTelefonnummerOppdatertEventV1);
         }
     }
@@ -115,11 +117,11 @@ public class NomIntegrasjonService {
 
         if (orgtilknytningEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1
             && orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().dagligOppfolging()
-            && isNavidentEksternRessurs(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().navident())) {
+            && isNavidentEksternEllerKommunalRessurs(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().navident())) {
 
             handleOrgtilknytningDagligOppfolgingEndretEvent(orgtilknytningDagligOppfolgingEndretEventV1);
         } else if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2
-            && isOrgtilknytningEksternAndDagligOppfolgning(orgtilknytningDatoEndretEventV2.getFid())) {
+            && isOrgtilknytningEksternEllerKommunalAndDagligOppfolgning(orgtilknytningDatoEndretEventV2.getFid())) {
 
             handleOrgtilknytningDatoEndretEvent(orgtilknytningDatoEndretEventV2);
         }
@@ -127,11 +129,15 @@ public class NomIntegrasjonService {
 
     private void handleOrgtilknytningDagligOppfolgingEndretEvent(OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
         if (orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom().isAfter(LocalDate.now())) {
-            logger.info("Delaying remedy update for OrgtilknytningDagligOppfolgingEndretEventV1 with fid {}", orgtilknytningDagligOppfolgingEndretEventV1.getFid());
+            logger.info(
+                "Delaying remedy update for OrgtilknytningDagligOppfolgingEndretEventV1 with fid {}",
+                orgtilknytningDagligOppfolgingEndretEventV1.getFid()
+            );
 
             delayEventUpdate(
                 orgtilknytningDagligOppfolgingEndretEventV1,
-                orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom());
+                orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom()
+            );
         } else {
             updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
         }
@@ -143,7 +149,8 @@ public class NomIntegrasjonService {
 
             delayEventUpdate(
                 orgtilknytningDatoEndretEventV2,
-                orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom());
+                orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom()
+            );
         } else {
             updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
         }
@@ -289,7 +296,10 @@ public class NomIntegrasjonService {
     }
 
     private void handleDelayedRessursSluttdatoOppdatertEventV1(RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
-        logger.info("Handling delayed %s with fid %s".formatted(ressursSluttdatoOppdatertEventV1.getClass().getSimpleName(), ressursSluttdatoOppdatertEventV1.getFid()));
+        logger.info("Handling delayed %s with fid %s".formatted(
+            ressursSluttdatoOppdatertEventV1.getClass().getSimpleName(),
+            ressursSluttdatoOppdatertEventV1.getFid()
+        ));
 
         var ressursState = nomApiClient.getRessursByFid(ressursSluttdatoOppdatertEventV1.getFid());
 
@@ -325,10 +335,11 @@ public class NomIntegrasjonService {
             return;
         }
 
-        var ressurserWithSluttdato = nomApiClient.getRessurser(
-            no.nav.nom.generated.model.Sektor.EKSTERN,
-            sluttdato
-        );
+        var ressurserWithSluttdato =
+            Stream.concat(
+                nomApiClient.getRessurser(no.nav.nom.generated.model.Sektor.EKSTERN, sluttdato).stream(),
+                nomApiClient.getRessurser(no.nav.nom.generated.model.Sektor.NAV_KOMMUNAL, sluttdato).stream()
+            ).toList();
 
         var ressurserToDeleteFromRemedy = ressurserWithSluttdato.stream()
             .filter(ressurs -> nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(ressurs.getNavident())
@@ -505,20 +516,22 @@ public class NomIntegrasjonService {
             .build();
     }
 
-    private boolean isNavidentEksternRessurs(String navident) {
-        return nomApiClient.getRessursByNavident(navident).getSektor()
-            .equals(no.nav.nom.generated.model.Sektor.EKSTERN);
+    private boolean isNavidentEksternEllerKommunalRessurs(String navident) {
+        var ressursSektor = nomApiClient.getRessursByNavident(navident).getSektor();
+        return ressursSektor.equals(no.nav.nom.generated.model.Sektor.EKSTERN)
+            || ressursSektor.equals(no.nav.nom.generated.model.Sektor.NAV_KOMMUNAL);
     }
 
-    private boolean isFidEksternRessurs(String fid) {
-        return nomApiClient.getRessursByFid(fid).getSektor()
-            .equals(no.nav.nom.generated.model.Sektor.EKSTERN);
+    private boolean isFidEksternEllerKommunalRessurs(String fid) {
+        var ressursSektor = nomApiClient.getRessursByFid(fid).getSektor();
+        return ressursSektor.equals(no.nav.nom.generated.model.Sektor.EKSTERN)
+            || ressursSektor.equals(no.nav.nom.generated.model.Sektor.NAV_KOMMUNAL);
     }
 
-    private boolean isOrgtilknytningEksternAndDagligOppfolgning(String orgtilknytningFid) {
+    private boolean isOrgtilknytningEksternEllerKommunalAndDagligOppfolgning(String orgtilknytningFid) {
         var orgtilknytning = nomApiClient.getOrgtilknytning(orgtilknytningFid);
 
-        return orgtilknytning.getErDagligOppfolging() && isNavidentEksternRessurs(orgtilknytning.getNavident());
+        return orgtilknytning.getErDagligOppfolging() && isNavidentEksternEllerKommunalRessurs(orgtilknytning.getNavident());
     }
 
     protected void saveNewNomIntegrasjonEntity(NomIntegrasjonEntity newNomIntegrasjonEntity, String initiatedByNavident) {
@@ -562,6 +575,7 @@ public class NomIntegrasjonService {
                     && latestEntityForNavident.getSektor().equals(newNomIntegrasjonEntity.getSektor())
                     && latestEntityForNavident.getTiltredelsesdato().equals(newNomIntegrasjonEntity.getTiltredelsesdato())
                     && latestEntityForNavident.getUtlopsdato().equals(newNomIntegrasjonEntity.getUtlopsdato())
+                    && latestEntityForNavident.getMobil().equals(newNomIntegrasjonEntity.getMobil())
             ))
             .orElse(true);
     }

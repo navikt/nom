@@ -81,10 +81,49 @@ public class NomIntegrasjonServiceTest extends TestBase {
             );
     }
 
-    @Test
+    @ParameterizedTest(name = "Test should create ressurs for non NAV_STATLIG sektor")
+    @MethodSource(value = "testShouldHandleRessursOpprettetEventIfNonStatligInput")
     @DisplayName("Should create new entry with correct data for RessursOpprettetEventV1")
-    void testShouldCreateForRessursOpprettetEventV1() {
+    void testShouldCreateForRessursOpprettetEventV1(RessursOpprettetEventV1 ressursOpprettetEventV1) {
+        var remedyEnhetId = "some-remedy-id";
+        var fysiskBrukerstedNr = "0123";
+        var sluttDato = LocalDate.of(2024, 12, 12);
 
+        var ressursOpprettetEventData = ressursOpprettetEventV1.getRessursOpprettetEventData();
+        var ressursOpprettetAdditionalData = ressursOpprettetEventV1.getRessursOpprettetAdditionalData();
+        var inputMetadata = ressursOpprettetEventV1.getMetadata();
+
+        when(nomApiClient.getOrgEnhet(ressursOpprettetAdditionalData.orgEnhet().get()))
+            .thenReturn(new OrgEnhet().remedyEnhetId(remedyEnhetId));
+
+        nomIntegrasjonService.handleRessursEvent(ressursOpprettetEventV1);
+
+        var nomIntegrasjonEntry = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(ressursOpprettetAdditionalData.navident().get());
+
+        assertThat(nomIntegrasjonEntry)
+            .usingRecursiveComparison()
+            .isEqualTo(Optional.of(
+                NomIntegrasjonEntity.builder()
+                    .entryId(fifteenCharLengthZeroPaddedNumber(0L))
+                    .entryBestiller(inputMetadata.inputMetadata().origination().initiatedBy())
+                    .entryOperasjon("Ny")
+                    .entryStatus("Ubehandlet")
+                    .enhetsId(remedyEnhetId)
+                    .etternavn(capitalizeNavn(ressursOpprettetEventData.visningsnavn().etternavn()))
+                    .fodselsnummer(ressursOpprettetEventData.personident())
+                    .fornavn(capitalizeNavn(ressursOpprettetEventData.visningsnavn().fornavn()))
+                    .fysiskBrukerstedId(fysiskBrukerstedNr)
+                    .navId(ressursOpprettetAdditionalData.navident().get())
+                    .sektor(nomSektorToRemedyCode(ressursOpprettetEventV1.getRessursOpprettetEventData().sektor()))
+                    .tiltredelsesdato(epochSecondsNorwegianTimeNoon(ressursOpprettetAdditionalData.startdato().get()))
+                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(sluttDato))
+                    .mobil(ressursOpprettetEventData.primaryTelefonnummer().get())
+                    .build()
+            ));
+
+    }
+
+    private static Stream<Arguments> testShouldHandleRessursOpprettetEventIfNonStatligInput() {
         var navident = "X123456";
         var initiatedBy = "Z123456";
         var etternavn = "etternavn";
@@ -93,7 +132,6 @@ public class NomIntegrasjonServiceTest extends TestBase {
         var startDato = LocalDate.of(2023, 12, 12);
         var sluttDato = LocalDate.of(2024, 12, 12);
         var orgEnhetId = "some-orgenhet";
-        var remedyEnhetId = "some-remedy-id";
         var fysiskBrukerstedNr = "0123";
         var primaryTelefonnnummer = "12345678";
 
@@ -115,39 +153,25 @@ public class NomIntegrasjonServiceTest extends TestBase {
 
                 .build(),
             ressursOpprettetAdditionalData().toBuilder()
+                .orgEnhet(Optional.of(orgEnhetId))
                 .navident(Optional.of(navident))
                 .startdato(Optional.of(startDato))
                 .build()
         );
-
-        when(nomApiClient.getOrgEnhet(orgEnhetId))
-            .thenReturn(new OrgEnhet().remedyEnhetId(remedyEnhetId));
-
-        nomIntegrasjonService.handleRessursEvent(ressursOpprettetEventV1);
-
-        var nomIntegrasjonEntry = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(navident);
-
-        assertThat(nomIntegrasjonEntry)
-            .usingRecursiveComparison()
-            .isEqualTo(Optional.of(
-                NomIntegrasjonEntity.builder()
-                    .entryId(fifteenCharLengthZeroPaddedNumber(0L))
-                    .entryBestiller(initiatedBy)
-                    .entryOperasjon("Ny")
-                    .entryStatus("Ubehandlet")
-                    .enhetsId(remedyEnhetId)
-                    .etternavn(capitalizeNavn(etternavn))
-                    .fodselsnummer(personident)
-                    .fornavn(capitalizeNavn(fornavn))
-                    .fysiskBrukerstedId(fysiskBrukerstedNr)
-                    .navId(navident)
-                    .sektor(2)
-                    .tiltredelsesdato(epochSecondsNorwegianTimeNoon(startDato))
-                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(sluttDato))
-                    .mobil(primaryTelefonnnummer)
-                    .build()
-            ));
-
+        return Stream.of(
+            Arguments.of(new RessursOpprettetEventV1(
+                UUID.randomUUID().toString(),
+                ressursOpprettetEventV1.getRessursOpprettetEventData().toBuilder().sektor(Sektor.EKSTERN).build(),
+                ressursOpprettetEventV1.getMetadata(),
+                ressursOpprettetEventV1.getRessursOpprettetAdditionalData()
+            )),
+            Arguments.of(new RessursOpprettetEventV1(
+                UUID.randomUUID().toString(),
+                ressursOpprettetEventV1.getRessursOpprettetEventData().toBuilder().sektor(Sektor.NAV_KOMMUNAL).build(),
+                ressursOpprettetEventV1.getMetadata(),
+                ressursOpprettetEventV1.getRessursOpprettetAdditionalData()
+            ))
+        );
     }
 
     @ParameterizedTest(name = "{0}")
@@ -312,8 +336,8 @@ public class NomIntegrasjonServiceTest extends TestBase {
             ));
     }
 
-    @ParameterizedTest(name = "Should not handle RessursEvent if ressurs is not EKSTERN")
-    @MethodSource("testShouldNotHandleRessursEventIfNotEksternInput")
+    @ParameterizedTest(name = "Should not handle RessursEvent if ressurs is NAV_STATLIG")
+    @MethodSource("testShouldNotHandleRessursEventIfStatligInput")
     void testShouldNotHandleRessursEventIfNotEkstern(RessursEvent ressursEvent) {
 
         when(nomApiClient.getRessursByFid(ressursEvent.getFid()))
@@ -324,17 +348,11 @@ public class NomIntegrasjonServiceTest extends TestBase {
         assertThat(nomIntegrasjonRepository.findAll()).isEmpty();
     }
 
-    private static Stream<Arguments> testShouldNotHandleRessursEventIfNotEksternInput() {
+    private static Stream<Arguments> testShouldNotHandleRessursEventIfStatligInput() {
         return Stream.of(
             Arguments.of(new RessursOpprettetEventV1(
                 UUID.randomUUID().toString(),
                 ressursOpprettetEventData().toBuilder().sektor(Sektor.NAV_STATLIG).build(),
-                inputMetadata(),
-                ressursOpprettetAdditionalData()
-            )),
-            Arguments.of(new RessursOpprettetEventV1(
-                UUID.randomUUID().toString(),
-                ressursOpprettetEventData().toBuilder().sektor(Sektor.NAV_KOMMUNAL).build(),
                 inputMetadata(),
                 ressursOpprettetAdditionalData()
             )),
@@ -896,5 +914,17 @@ public class NomIntegrasjonServiceTest extends TestBase {
             Arguments.of("010000000000000", "010000000000001"),
             Arguments.of(null, "000000000000000")
         );
+    }
+
+    private Integer nomSektorToRemedyCode(no.nav.nom.generated.model.Sektor sektor) {
+        return nomSektorToRemedyCode(Sektor.valueOf(sektor.getValue()));
+    }
+
+    private Integer nomSektorToRemedyCode(Sektor sektor) {
+        return switch (sektor) {
+            case NAV_STATLIG -> 0;
+            case NAV_KOMMUNAL -> 1;
+            case EKSTERN -> 2;
+        };
     }
 }
