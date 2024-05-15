@@ -78,11 +78,13 @@ export function SearchBar() {
 }
 
 async function searchRessurs(inputValue: string) {
-  if (inputValue.length < RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT) {
+  // Se bort ifra NAV når man søker
+  const newSearchTerm = inputValue.toLowerCase().replace("nav ", "");
+  if (newSearchTerm.length < RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT) {
     return [];
   }
 
-  return await createOptions(inputValue);
+  return await createOptions(newSearchTerm);
 }
 
 async function performSearch(searchString: string): Promise<SearchResultRaw[]> {
