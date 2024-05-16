@@ -32,11 +32,17 @@ export function NavigationButtons() {
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
   return (
     <div css={navigationButtonCss}>
-      <Button size="small" type="submit" variant="primary">
+      <Button
+        data-cy="neste-button"
+        size="small"
+        type="submit"
+        variant="primary"
+      >
         Neste
       </Button>
       {step !== "1" && (
         <Button
+          data-cy="forrige-button"
           onClick={() =>
             navigate({
               to: "/ressurs/create/$step",
@@ -52,6 +58,7 @@ export function NavigationButtons() {
         </Button>
       )}
       <Button
+        data-cy="avbryt-button"
         onClick={() => navigate({ to: "/" })}
         size="small"
         type="button"

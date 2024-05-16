@@ -45,6 +45,7 @@ function CreateResourceForm({ personident }: { personident: string }) {
   const hentOrgtilknytningerQuery = useQuery({
     queryKey: getOrgTilknytninger.queryKey(person?.navident ?? ""),
     queryFn: () => getOrgTilknytninger.queryFn(person?.navident ?? ""),
+    enabled: !!person?.navident,
   });
 
   const orgtilknytninger = hentOrgtilknytningerQuery.data;
@@ -170,6 +171,7 @@ function VisningsnavnForm({
         <div css={fullwidthRow}>
           <TextField
             autoComplete="off"
+            data-cy="fornavn-textfield"
             error={errors.visningsfornavn?.message}
             label="Fornavn"
             type="text"
@@ -177,6 +179,7 @@ function VisningsnavnForm({
           />
           <TextField
             autoComplete="off"
+            data-cy="mellomnavn-textfield"
             error={errors.visningsmellomnavn?.message}
             label="Mellomnavn"
             type="text"
@@ -184,6 +187,7 @@ function VisningsnavnForm({
           />
           <TextField
             autoComplete="off"
+            data-cy="etternavn-textfield"
             error={errors.visningsetternavn?.message}
             label="Etternavn"
             type="text"
@@ -197,6 +201,7 @@ function VisningsnavnForm({
             max-width: 350px;
             margin-top: var(--a-spacing-4);
           `}
+          data-cy="telefon-textfield"
           description="Telefonnummer er valgfritt"
           error={errors.primaryTelefonnummer?.message}
           label="Telefonnummer"

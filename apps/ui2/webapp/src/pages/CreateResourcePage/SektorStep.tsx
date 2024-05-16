@@ -65,6 +65,7 @@ export function SektorStep() {
           css={css`
             margin-bottom: var(--a-spacing-4);
           `}
+          data-cy="sektor-radio"
           legend="Velg hvilken sektor medarbeideren skal tilhøre"
           name="sektor"
           onChange={(value) => setSelectedSektor(value)}
@@ -83,6 +84,7 @@ export function SektorStep() {
         {selectedSektor === Sektor.NAV_KOMMUNAL ? undefined : (
           <Select
             label="Velg hvilken kategori medarbeideren tilhører innenfor denne sektoren"
+            name="tilknytningtype"
             onChange={(event) =>
               setSelectedTilknytningtype(event.target.value as Tilknytningtype)
             }

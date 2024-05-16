@@ -66,7 +66,7 @@ export function formatDateWithoutTimezone(date: Date) {
   return formatISO(date, { representation: "date" });
 }
 
-export function formatDisplayDate(date?: string) {
+export function formatDisplayDate(date?: string | Date) {
   if (!date) {
     return "";
   }

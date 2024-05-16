@@ -187,6 +187,7 @@ export function ConfirmStep() {
       </Modal.Body>
       <Modal.Footer>
         <Button
+          data-cy="opprett-medarbeider-button"
           loading={opprettRessursMutation.isPending}
           onClick={() => opprettRessursMutation.mutate()}
           type="button"

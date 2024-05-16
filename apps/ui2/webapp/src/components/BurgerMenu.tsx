@@ -25,6 +25,7 @@ export function BurgerMenu() {
     <Dropdown>
       <Button
         as={Dropdown.Toggle}
+        data-cy="menu-button"
         icon={<MenuHamburgerIcon />}
         size="medium"
         variant="secondary"
@@ -59,6 +60,7 @@ export function BurgerMenu() {
           </Dropdown.Menu.List.Item>
           {hasWriteAccess && (
             <Dropdown.Menu.List.Item
+              data-cy="opprettRessurs-button"
               onClick={() =>
                 navigate({ to: "/ressurs/create/$step", params: { step: "1" } })
               }
