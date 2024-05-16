@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -567,16 +568,16 @@ public class NomIntegrasjonService {
     private boolean nomIntegrasjonEntityProvidesNewDataFromNom(NomIntegrasjonEntity newNomIntegrasjonEntity) {
         return nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(newNomIntegrasjonEntity.getNavId())
             .map(latestEntityForNavident -> !(
-                latestEntityForNavident.getEnhetsId().equals(newNomIntegrasjonEntity.getEnhetsId())
-                    && latestEntityForNavident.getEtternavn().equals(newNomIntegrasjonEntity.getEtternavn())
-                    && latestEntityForNavident.getFodselsnummer().equals(newNomIntegrasjonEntity.getFodselsnummer())
-                    && latestEntityForNavident.getFornavn().equals(newNomIntegrasjonEntity.getFornavn())
-                    && latestEntityForNavident.getFysiskBrukerstedId().equals(newNomIntegrasjonEntity.getFysiskBrukerstedId())
-                    && latestEntityForNavident.getNavId().equals(newNomIntegrasjonEntity.getNavId())
-                    && latestEntityForNavident.getSektor().equals(newNomIntegrasjonEntity.getSektor())
-                    && latestEntityForNavident.getTiltredelsesdato().equals(newNomIntegrasjonEntity.getTiltredelsesdato())
-                    && latestEntityForNavident.getUtlopsdato().equals(newNomIntegrasjonEntity.getUtlopsdato())
-                    && latestEntityForNavident.getMobil().equals(newNomIntegrasjonEntity.getMobil())
+                Objects.equals(latestEntityForNavident.getEnhetsId(), newNomIntegrasjonEntity.getEnhetsId())
+                    && Objects.equals(latestEntityForNavident.getEtternavn(), newNomIntegrasjonEntity.getEtternavn())
+                    && Objects.equals(latestEntityForNavident.getFodselsnummer(), newNomIntegrasjonEntity.getFodselsnummer())
+                    && Objects.equals(latestEntityForNavident.getFornavn(), newNomIntegrasjonEntity.getFornavn())
+                    && Objects.equals(latestEntityForNavident.getFysiskBrukerstedId(), newNomIntegrasjonEntity.getFysiskBrukerstedId())
+                    && Objects.equals(latestEntityForNavident.getNavId(), newNomIntegrasjonEntity.getNavId())
+                    && Objects.equals(latestEntityForNavident.getSektor(), newNomIntegrasjonEntity.getSektor())
+                    && Objects.equals(latestEntityForNavident.getTiltredelsesdato(), newNomIntegrasjonEntity.getTiltredelsesdato())
+                    && Objects.equals(latestEntityForNavident.getUtlopsdato(), newNomIntegrasjonEntity.getUtlopsdato())
+                    && Objects.equals(latestEntityForNavident.getMobil(), newNomIntegrasjonEntity.getMobil())
             ))
             .orElse(true);
     }
