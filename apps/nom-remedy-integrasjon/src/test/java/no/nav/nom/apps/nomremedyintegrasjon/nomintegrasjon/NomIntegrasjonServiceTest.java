@@ -57,6 +57,7 @@ import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.fifteenC
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.formatFornavnWithMellomnavn;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 public class NomIntegrasjonServiceTest extends TestBase {
@@ -87,7 +88,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
     void testShouldCreateForRessursOpprettetEventV1(RessursOpprettetEventV1 ressursOpprettetEventV1) {
         var remedyEnhetId = "some-remedy-id";
         var fysiskBrukerstedNr = "0123";
-        var sluttDato = LocalDate.of(2024, 12, 12);
+        var sluttDato = ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().equals(Sektor.NAV_KOMMUNAL) ? null : LocalDate.of(2024, 12, 12);
 
         var ressursOpprettetEventData = ressursOpprettetEventV1.getRessursOpprettetEventData();
         var ressursOpprettetAdditionalData = ressursOpprettetEventV1.getRessursOpprettetAdditionalData();
@@ -116,7 +117,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .navId(ressursOpprettetAdditionalData.navident().get())
                     .sektor(nomSektorToRemedyCode(ressursOpprettetEventV1.getRessursOpprettetEventData().sektor()))
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(ressursOpprettetAdditionalData.startdato().get()))
-                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(sluttDato))
+                    .utlopsdato(sluttDato == null ? null : epochSecondsNorwegianTimeEndOfDay(sluttDato))
                     .mobil(ressursOpprettetEventData.primaryTelefonnummer().get())
                     .build()
             ));
@@ -145,12 +146,6 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 .build(),
             inputMetadata().toBuilder()
                 .origination(new Origination(initiatedBy, ""))
-                .inputInterfaceMethodArguments(Map.of(
-                    "orgEnhetId", orgEnhetId,
-                    "sluttDato", sluttDato.toString(),
-                    "fysiskBrukerstedNr", fysiskBrukerstedNr
-                ))
-
                 .build(),
             ressursOpprettetAdditionalData().toBuilder()
                 .orgEnhet(Optional.of(orgEnhetId))
@@ -162,13 +157,20 @@ public class NomIntegrasjonServiceTest extends TestBase {
             Arguments.of(new RessursOpprettetEventV1(
                 UUID.randomUUID().toString(),
                 ressursOpprettetEventV1.getRessursOpprettetEventData().toBuilder().sektor(Sektor.EKSTERN).build(),
-                ressursOpprettetEventV1.getMetadata(),
+                ressursOpprettetEventV1.getMetadata().inputMetadata().toBuilder().inputInterfaceMethodArguments(Map.of(
+                    "orgEnhetId", orgEnhetId,
+                    "sluttDato", sluttDato.toString(),
+                    "fysiskBrukerstedNr", fysiskBrukerstedNr
+                )).build(),
                 ressursOpprettetEventV1.getRessursOpprettetAdditionalData()
             )),
             Arguments.of(new RessursOpprettetEventV1(
                 UUID.randomUUID().toString(),
                 ressursOpprettetEventV1.getRessursOpprettetEventData().toBuilder().sektor(Sektor.NAV_KOMMUNAL).build(),
-                ressursOpprettetEventV1.getMetadata(),
+                ressursOpprettetEventV1.getMetadata().inputMetadata().toBuilder().inputInterfaceMethodArguments(Map.of(
+                    "orgEnhetId", orgEnhetId,
+                    "fysiskBrukerstedNr", fysiskBrukerstedNr
+                )).build(),
                 ressursOpprettetEventV1.getRessursOpprettetAdditionalData()
             ))
         );
