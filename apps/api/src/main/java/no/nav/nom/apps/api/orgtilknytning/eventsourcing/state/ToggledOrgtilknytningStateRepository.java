@@ -87,11 +87,11 @@ public class ToggledOrgtilknytningStateRepository implements OrgtilknytningState
 
     @Override
     public void update(String fid, OrgtilknytningState newOrgtilknytningState) {
-        throw new RuntimeException("ERROR! Call to update() in ToggledOrgEnhetStateRepository - should not be called on implemented beans directly");
+        throw new RuntimeException("ERROR! Call to update() in ToggledOrgtilknytningStateRepository - should not be called on implemented beans directly");
     }
 
     @Override
     public void clear() {
-        throw new RuntimeException("ERROR! Call to clear() in ToggledOrgEnhetStateRepository - should not be called on implemented beans directly");
+        throw new RuntimeException("ERROR! Call to clear() in ToggledOrgtilknytningStateRepository - should not be called on implemented beans directly");
     }
 }

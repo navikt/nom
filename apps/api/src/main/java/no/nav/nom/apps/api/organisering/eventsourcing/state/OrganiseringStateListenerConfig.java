@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.organisering.eventsourcing.state;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +28,7 @@ public class OrganiseringStateListenerConfig {
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, OrganiseringState> organiseringStateKafkaListenerContainerFactory(ConsumerFactory<String, OrganiseringState> consumerFactory) {
+    ConcurrentKafkaListenerContainerFactory<String, OrganiseringState> organiseringStateKafkaListenerContainerFactory(@Qualifier("organiseringStateConsumerFactory") ConsumerFactory<String, OrganiseringState> consumerFactory) {
         final var factory = new ConcurrentKafkaListenerContainerFactory<String, OrganiseringState>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);

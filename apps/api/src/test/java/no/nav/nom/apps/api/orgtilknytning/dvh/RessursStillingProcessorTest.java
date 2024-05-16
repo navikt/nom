@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
@@ -15,6 +14,7 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;

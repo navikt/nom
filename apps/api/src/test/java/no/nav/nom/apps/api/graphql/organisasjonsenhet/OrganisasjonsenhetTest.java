@@ -7,13 +7,13 @@ import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
 import no.nav.nom.apps.api.organisering.OrganiseringConfig;
-import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -51,6 +51,7 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
     protected OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
+    @Qualifier("oldOrganiseringStateRepository")
     protected OrganiseringStateRepository organiseringStateRepository;
 
     @Autowired
@@ -254,8 +255,8 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         // Same as above - need to create state manually
-        organiseringStateRepository.putEventAggregate(orgEnhetStateToOrganiseringState(1, orgState, orgStateOver));
-        organiseringStateRepository.putEventAggregate(orgEnhetStateToOrganiseringState(2, orgStateUnder, orgState));
+        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(1, orgState, orgStateOver));
+        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(2, orgStateUnder, orgState));
 
 
         final var response = postForResource("organisasjonsenhet/scenario3.graphql");
@@ -330,8 +331,8 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         // Same as above - need to create state manually
-        organiseringStateRepository.putEventAggregate(orgEnhetStateToOrganiseringState(1, orgState, orgStateOver));
-        organiseringStateRepository.putEventAggregate(orgEnhetStateToOrganiseringState(2, orgStateUnder, orgState));
+        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(1, orgState, orgStateOver));
+        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(2, orgStateUnder, orgState));
 
 
         final var response = postForResource("organisasjonsenhet/scenario33.graphql");

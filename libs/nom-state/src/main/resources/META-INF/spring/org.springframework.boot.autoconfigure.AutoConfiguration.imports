@@ -1,4 +1,5 @@
 no.nav.nom.libs.state.ressurs.RessursStateAutoconfiguration
 no.nav.nom.libs.state.orgenhet.OrgEnhetStateAutoconfiguration
 no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateAutoconfiguration
+no.nav.nom.libs.state.organisering.OrganiseringStateAutoconfiguration
 no.nav.nom.libs.state.common.PropertiesAutoConfig

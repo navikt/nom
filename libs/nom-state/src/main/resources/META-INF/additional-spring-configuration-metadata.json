@@ -16,6 +16,11 @@
       "description": "Enable/disable orgtilknytning state autoconfiguration."
     },
     {
+      "name": "nom.libs.state.organisering.enabled",
+      "type": "java.lang.String",
+      "description": "Enable/disable organisering state autoconfiguration."
+    },
+    {
       "name": "nom.libs.state.idle-event-interval-seconds",
       "type": "java.lang.String",
       "description": "Idle tid på kafka meldinger før idle event sendes."

@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
@@ -20,6 +19,7 @@ import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

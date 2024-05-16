@@ -2,8 +2,8 @@ package no.nav.nom.apps.api.orgenhet;
 
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

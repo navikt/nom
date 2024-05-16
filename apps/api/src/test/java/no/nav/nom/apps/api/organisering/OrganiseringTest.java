@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OldOrganiseringStateRepositoryImpl;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.contract.nom.eventsource.Event;
@@ -15,6 +15,7 @@ import no.nav.nom.contract.nom.eventsource.OrganiseringOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrganiseringOpprettetEventV1.OrganiseringOpprettetEventData;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.AfterEach;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
@@ -72,6 +74,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
     Unleash unleash;
 
     @Autowired
+    @Qualifier("oldOrganiseringStateRepository")
     private OrganiseringStateRepository organiseringStateRepository;
 
     BlockingQueue<ConsumerRecord<String, OrganiseringEvent>> recordsQueue;
@@ -169,7 +172,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
 
         // The organisering is now present in the state
         OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgeEnhetState, orgeEnhetStateOver, LocalDate.now(), Optional.empty());
-        organiseringStateRepository.putEventAggregate(organiseringState);
+        organiseringStateRepository.update(organiseringState);
 
         // No longer receive organisering from DVH
         dvhOrganiseringMockUtils.clearResponse();
@@ -209,7 +212,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
 
         // The organisering is now present in the state
         OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgeEnhetState, orgeEnhetStateOver, LocalDate.now(), Optional.empty());
-        organiseringStateRepository.putEventAggregate(organiseringState);
+        organiseringStateRepository.update(organiseringState);
 
         // 2. No longer receive organisering from DVH
         dvhOrganiseringMockUtils.clearResponse();
@@ -218,10 +221,10 @@ public class OrganiseringTest extends OrganiseringTestBase {
 
         // 3. The gyldigTom date of organisering present in the state is NOT anymore in the future
         var newGyldigTom = LocalDate.now().minusDays(5);
-        var organiseringState_absluttet = organiseringState.toBuilder()
+        var organiseringState_avsluttet = organiseringState.toBuilder()
             .gyldigTom(Optional.of(newGyldigTom))
             .build();
-        organiseringStateRepository.putEventAggregate(organiseringState_absluttet);
+        organiseringStateRepository.putEventAggregate(organiseringState_avsluttet);
 
         // Change organisering from DVH. Organisering is same as the one received in step 1, but it will have new fid
         dvhOrganiseringMockUtils.clearResponse();
@@ -273,7 +276,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
 
         // Organisering is now available from OrganiseringStateRepository
         OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgEnhetState, orgEnhetStateOver, LocalDate.now(), Optional.empty());
-        organiseringStateRepository.putEventAggregate(organiseringState);
+        organiseringStateRepository.update(organiseringState);
 
         // Change organisering from DVH
         var mockedOrganisering_modified = mockedOrganisering.toBuilder()
@@ -334,11 +337,11 @@ public class OrganiseringTest extends OrganiseringTestBase {
         // oppdatere organiseringByFid map i OrganiseringStateRepository
         OrganiseringState organiseringState3 = getOrganiseringState("organisering_3", orgEnhet3, overEnhetTilOrgEnhet3, LocalDate.now().minusDays(1), Optional.empty());
 
-        organiseringStateRepository.putEventAggregate(organiseringState3);
+        organiseringStateRepository.update(organiseringState3);
 
         OrganiseringState organiseringState2 = getOrganiseringState("organisering_2", orgEnhet2.id(), organisering2.getORGNODE_NAVN(), orgEnhet3.id(),
             organisering2.getORGNODE_NAVN_OVER(), LocalDate.now().minusDays(1), Optional.empty());
-        organiseringStateRepository.putEventAggregate(organiseringState2);
+        organiseringStateRepository.update(organiseringState2);
 
         // New node 4 gets 3 as parent and node 2 is moved and gets 4 as new parent
         var organisering4 = getMockedOrganisering("4", "Navn_4", "Niva_4", "3", "Navn_3", "Niva_3");
@@ -409,7 +412,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         // oppdatere state
         OrganiseringState organiseringState3 = getOrganiseringState("organisering_3", orgEnhet3.id(), organisering3.getORGNODE_NAVN(),
             overEnhetTilOrgEnhet3.id(), organisering3.getORGNODE_NAVN_OVER(), LocalDate.now().minusDays(1), Optional.empty());
-        organiseringStateRepository.putEventAggregate(organiseringState3);
+        organiseringStateRepository.update(organiseringState3);
 
         dvhOrganiseringMockUtils.clearResponse();
 
@@ -476,7 +479,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         // The organisering is now present in the state
         String fid_organisering1 = "organisering_1";
         OrganiseringState organiseringState = getOrganiseringState(fid_organisering1, orgeEnhetState, orgeEnhetStateOver, LocalDate.now(), Optional.empty());
-        organiseringStateRepository.putEventAggregate(organiseringState);
+        organiseringStateRepository.update(organiseringState);
 
         dvhOrganiseringMockUtils.clearResponse();
 

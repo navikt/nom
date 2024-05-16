@@ -12,9 +12,8 @@ import no.nav.nom.apps.api.graphql.controller.GraphQLOrgEnhetController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLPersonController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLRessursController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLSearchController;
-import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -82,9 +81,11 @@ public class GraphQLExtendedIntegrationTestBase {
     protected OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
+    @Qualifier("oldOrganiseringStateRepository")
     protected OrganiseringStateRepository organiseringStateRepository;
 
     @Autowired
+    @Qualifier("oldRessursStateRepository")
     RessursStateRepository ressursStateRepository;
 
     @BeforeEach

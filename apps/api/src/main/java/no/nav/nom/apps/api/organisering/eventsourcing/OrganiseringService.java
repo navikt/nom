@@ -7,12 +7,12 @@ import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEvent
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.AvsluttOrganiseringCmd;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.EndreOrganiseringCmd;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettOrganiseringCmd;
-import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrganiseringState;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -132,7 +132,10 @@ public class OrganiseringService {
             dvhOrganisering.getOrgNivUnder(),
             dvhOrganisering.getNavnUnder()
         );
-        return organiseringStateRepository.findFidByAgressoIdNivaAndName(orgEnhet);
+        if (orgEnhet.isEmpty()) {
+            return Optional.empty();
+        }
+        return organiseringStateRepository.findById(orgEnhet.get().getId());
     }
 
     public List<OrganiseringState> organiseringerInStateNotInDvhOrganiseringer(

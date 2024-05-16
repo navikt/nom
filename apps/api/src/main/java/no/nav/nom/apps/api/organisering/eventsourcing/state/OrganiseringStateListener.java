@@ -2,9 +2,11 @@ package no.nav.nom.apps.api.organisering.eventsourcing.state;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.state.OrganiseringState;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.utils.common.kafka.KafkaUtils;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.PartitionOffset;
@@ -27,7 +29,7 @@ public class OrganiseringStateListener {
 
     public OrganiseringStateListener(
         @Value("${app.kafka.organisering.stateTopic}") String stateTopic,
-        OrganiseringStateRepository repository
+        @Qualifier("oldOrganiseringStateRepository") OrganiseringStateRepository repository
     ) {
         this.stateTopic = stateTopic;
         this.repository = repository;
@@ -42,12 +44,7 @@ public class OrganiseringStateListener {
     )
     public void onMessage(ConsumerRecords<String, OrganiseringState> records, Consumer<String, String> consumer) {
         StreamSupport.stream(records.spliterator(), false).forEach(it -> {
-            var organiseringState = it.value();
-            if(organiseringState.gyldigTom().isPresent() && organiseringState.gyldigTom().get().isBefore(LocalDate.now())){
-                repository.removeEventAggregate(organiseringState);
-            } else {
-                repository.putEventAggregate(organiseringState);
-            }
+            repository.update(it.value());
         });
 
         KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete,

@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api;
 
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -26,5 +27,11 @@ class TestConfig {
     @Primary
     public OrgtilknytningStateRepository orgtilknytningStateRepository(@Qualifier("oldOrgtilknytningStateRepository") OrgtilknytningStateRepository orgtilknytningStateRepository) {
         return orgtilknytningStateRepository;
+    }
+
+    @Bean
+    @Primary
+    public OrganiseringStateRepository organiseringStateRepository(@Qualifier("oldOrganiseringStateRepository") OrganiseringStateRepository organiseringStateRepository) {
+        return organiseringStateRepository;
     }
 }

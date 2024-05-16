@@ -13,7 +13,7 @@ import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventProducer;
 import no.nav.nom.apps.api.organisering.eventsourcing.recoverybackup.OrganiseringEventSourceRepository;
-import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OldOrganiseringStateRepositoryImpl;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
@@ -29,8 +29,8 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStat
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.OldRessursStateRepositoryImpl;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
+import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
-import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
@@ -54,7 +54,7 @@ import org.springframework.kafka.annotation.EnableKafka;
     , OldOrgEnhetStateRepositoryImpl.class
     , OrgEnhetIdGenerator.class
     , DvhStartupLoadMonitor.class
-    , OrganiseringStateRepository.class
+    , OldOrganiseringStateRepositoryImpl.class
     , OrganiseringService.class
     , OrganiseringEventCommandService.class
     , OrganiseringEventProducer.class
@@ -78,6 +78,8 @@ public class OrganiseringTestConfig {
     NomStateOrgEnhetListener nomStateOrgEnhetListener;
     @MockBean
     NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
+    @MockBean
+    NomStateOrganiseringListener nomStateOrganiseringListener;
 
     @MockBean
     OrgtilknytningStateListener orgtilknytningStateListener;

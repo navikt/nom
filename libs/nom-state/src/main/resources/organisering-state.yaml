@@ -1,0 +1,6 @@
+nom:
+  libs:
+    state:
+      organisering:
+        state-topic: org.nom.intern-organisering-state
+        listener-id: nomStateOrganiseringListener_${HOSTNAME:dummy}

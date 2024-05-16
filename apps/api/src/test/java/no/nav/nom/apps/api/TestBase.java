@@ -3,13 +3,12 @@ package no.nav.nom.apps.api;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
-import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -91,6 +90,7 @@ public abstract class TestBase {
     protected OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
+    @Qualifier("oldOrganiseringStateRepository")
     protected OrganiseringStateRepository organiseringStateRepository;
 
     @Autowired

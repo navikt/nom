@@ -225,8 +225,8 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
 
 
         // Samme som over - må lagre organisering state manuelt
-        organiseringStateRepository.putEventAggregate(orgEnhetStateToOrganiseringState(1, ressursSinNedersteEnhetState, ressursSinOvreEnhetState));
-        organiseringStateRepository.putEventAggregate(orgEnhetStateToOrganiseringState(2, ressursSinOvreEnhetState, ledersEnhetState));
+        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(1, ressursSinNedersteEnhetState, ressursSinOvreEnhetState));
+        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(2, ressursSinOvreEnhetState, ledersEnhetState));
 
 
         final var response = postForResource("ressurs/leder_over_rekursivt.graphql");

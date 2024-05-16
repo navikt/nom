@@ -1,6 +1,5 @@
-package no.nav.nom.apps.api.organisering.eventsourcing.state;
+package no.nav.nom.libs.state.organisering;
 
-import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Service
-public class OrganiseringStateRepository {
+public class OrganiseringStateRepositoryImpl implements OrganiseringStateRepository {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -73,14 +72,17 @@ public class OrganiseringStateRepository {
         }
     }
 
+    @Override
     public Optional<OrganiseringState> findByFid(String fid) {
         return Optional.ofNullable(organiseringByFid.get(fid));
     }
 
+    @Override
     public Optional<OrganiseringState> findActiveByFid(String fid) {
         return getActiveOrganisering().containsKey(fid) ? Optional.ofNullable(getActiveOrganisering().get(fid)) : Optional.empty();
     }
 
+    @Override
     public Optional<OrganiseringState> findActiveById(String id) {
         var organisering = organiseringById.get(id);
 
@@ -91,19 +93,28 @@ public class OrganiseringStateRepository {
         }
     }
 
-    public Optional<OrganiseringState> findFidByAgressoIdNivaAndName(Optional<IOrgenhet> orgEnhet) {
-        return orgEnhet.flatMap(iOrgenhet -> organiseringByFid.values()
-            .stream()
-            .filter(organiseringState -> organiseringState.id().equals(iOrgenhet.getId()))
-            .findFirst());
+    @Override
+    public Optional<OrganiseringState> findById(String id) {
+        return Optional.ofNullable(organiseringById.get(id));
     }
 
+    @Override
     public void clear() {
         organiseringByFid.clear();
         organiseringById.clear();
         allOrganiseringerContainingId.clear();
     }
 
+    @Override
+    public void update(OrganiseringState organiseringState) {
+        if(organiseringState.gyldigTom() != null && organiseringState.gyldigTom().isPresent() && organiseringState.gyldigTom().get().isBefore(LocalDate.now())){
+            removeEventAggregate(organiseringState);
+        } else {
+            putEventAggregate(organiseringState);
+        }
+    }
+
+    @Override
     public void putEventAggregate(OrganiseringState organiseringState) {
         organiseringByFid.put(organiseringState.fid(), organiseringState);
         organiseringById.put(organiseringState.id(), organiseringState);
@@ -111,6 +122,7 @@ public class OrganiseringStateRepository {
         putOrUpdateAllOrganiseringer(organiseringState);
     }
 
+    @Override
     public void removeEventAggregate(OrganiseringState organiseringState) {
         organiseringByFid.remove(organiseringState.fid());
         organiseringById.forEach((key, value) -> {
@@ -133,56 +145,59 @@ public class OrganiseringStateRepository {
         }));
     }
 
+    @Override
     public int count() {
         return organiseringByFid.size();
     }
 
+    @Override
     public void logRepositoryState() {
         logger.debug("organiseringByFid: {} organiseringById: {} allOrganiseringerContainingId: {} Aktive organiseringer: {}", organiseringByFid.size(), organiseringById.size(), allOrganiseringerContainingId.size(), getActiveOrganisering().size());
 
         // Note: detailed information about organiseringByFid, organiseringById and allOrganiseringerContainingId is logged at TRACE level
-       try {
-           StringBuilder message = new StringBuilder("Diff: difference_organiseringByFid_organiseringById ");
-           for (String fid: organiseringByFid.keySet()) {
-               OrganiseringState organiseringState = organiseringByFid.get(fid);
-               String id = organiseringState.id();
-               if(!organiseringById.containsKey(id)) {
-                   message.append(" id: ").append(id).append(" in organiseringByFid is not in organiseringById ");
-               }
-           }
-           logger.trace(message.toString());
+        try {
+            StringBuilder message = new StringBuilder("Diff: difference_organiseringByFid_organiseringById ");
+            for (String fid: organiseringByFid.keySet()) {
+                OrganiseringState organiseringState = organiseringByFid.get(fid);
+                String id = organiseringState.id();
+                if(!organiseringById.containsKey(id)) {
+                    message.append(" id: ").append(id).append(" in organiseringByFid is not in organiseringById ");
+                }
+            }
+            logger.trace(message.toString());
 
-           StringBuilder message1 = new StringBuilder("Diff: difference_allOrganiseringerContainingId_organiseringById ");
-           for (String id: allOrganiseringerContainingId.keySet()) {
-               if(!organiseringById.containsKey(id)) {
-                   message1.append(" id: ").append(id).append(" in allOrganiseringerContainingId is not in organiseringById ");
-               }
-           }
-           logger.trace(message1.toString());
+            StringBuilder message1 = new StringBuilder("Diff: difference_allOrganiseringerContainingId_organiseringById ");
+            for (String id: allOrganiseringerContainingId.keySet()) {
+                if(!organiseringById.containsKey(id)) {
+                    message1.append(" id: ").append(id).append(" in allOrganiseringerContainingId is not in organiseringById ");
+                }
+            }
+            logger.trace(message1.toString());
 
-           StringBuilder message2= new StringBuilder("Diff: difference_allOrganiseringerContainingId_organiseringByFid ");
-           for (String id: organiseringById.keySet()) {
-               int count = 0;
-               List<String> fids = new ArrayList<>();
-               for (String fid: organiseringByFid.keySet()) {
-                     OrganiseringState organiseringState = organiseringByFid.get(fid);
-                     if(organiseringState.id().equals(id)) {
-                          count ++;
-                         fids.add(fid);
-                     }
-               }
-               if(count > 1) {
-                   message2.append(" id: ").append(id).append(" in organiseringById duplicate in organiseringByFid ").append(fids);
-               }
-           }
-           logger.trace(message2.toString());
+            StringBuilder message2= new StringBuilder("Diff: difference_allOrganiseringerContainingId_organiseringByFid ");
+            for (String id: organiseringById.keySet()) {
+                int count = 0;
+                List<String> fids = new ArrayList<>();
+                for (String fid: organiseringByFid.keySet()) {
+                    OrganiseringState organiseringState = organiseringByFid.get(fid);
+                    if(organiseringState.id().equals(id)) {
+                        count ++;
+                        fids.add(fid);
+                    }
+                }
+                if(count > 1) {
+                    message2.append(" id: ").append(id).append(" in organiseringById duplicate in organiseringByFid ").append(fids);
+                }
+            }
+            logger.trace(message2.toString());
 
         } catch (Exception e) {
-           // trace logging errors
-           logger.trace(e.getLocalizedMessage());
+            // trace logging errors
+            logger.trace(e.getLocalizedMessage());
         }
     }
 
+    @Override
     public Map<String, OrganiseringState> getActiveOrganisering() {
         // either terminating date is not present of it is today or later
         return organiseringByFid.entrySet().stream()
@@ -190,10 +205,12 @@ public class OrganiseringStateRepository {
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    @Override
     public List<OrganiseringState> getOrganiseringer() {
         return getActiveOrganisering().values().stream().toList();
     }
 
+    @Override
     public List<OrganiseringState> getOrganiseringerContainingId(String id) {
         var organiseringerWithId = allOrganiseringerContainingId.get(id);
 

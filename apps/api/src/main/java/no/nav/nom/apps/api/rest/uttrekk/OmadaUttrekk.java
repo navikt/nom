@@ -10,7 +10,6 @@ import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
-import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
@@ -18,6 +17,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.ShadowOrgtilknytni
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrganiseringState;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;

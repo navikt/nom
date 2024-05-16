@@ -49,10 +49,10 @@ public class OrgEnhetUnderordnetResolverTest extends OrgEnhetTestBase {
             .idOver(idOrgEnhet)
             .build();
 
-        organiseringStateRepository.putEventAggregate(organiseringOrgEnhet);
-        organiseringStateRepository.putEventAggregate(organiseringUnderordnet1);
-        organiseringStateRepository.putEventAggregate(organiseringUnderordnet2);
-        organiseringStateRepository.putEventAggregate(organiseringUnderordnet3);
+        organiseringStateRepository.update(organiseringOrgEnhet);
+        organiseringStateRepository.update(organiseringUnderordnet1);
+        organiseringStateRepository.update(organiseringUnderordnet2);
+        organiseringStateRepository.update(organiseringUnderordnet3);
 
         orgEnhetStateRepository.update(orgEnhetState().toBuilder().id(idUnderordnet1)
             .gyldigFom(LocalDate.now().minusDays(20))
@@ -105,9 +105,9 @@ public class OrgEnhetUnderordnetResolverTest extends OrgEnhetTestBase {
             .idOver(idOrgEnhet)
             .build();
 
-        organiseringStateRepository.putEventAggregate(organiseringOrgEnhet);
-        organiseringStateRepository.putEventAggregate(organiseringUnderordnet1);
-        organiseringStateRepository.putEventAggregate(organiseringUnderordnet2);
+        organiseringStateRepository.update(organiseringOrgEnhet);
+        organiseringStateRepository.update(organiseringUnderordnet1);
+        organiseringStateRepository.update(organiseringUnderordnet2);
 
         orgEnhetStateRepository.update(orgEnhetState().toBuilder().id(idUnderordnet)
             .gyldigFom(LocalDate.now().minusDays(20))
@@ -137,7 +137,7 @@ public class OrgEnhetUnderordnetResolverTest extends OrgEnhetTestBase {
             .idOver(idOrgEnhetOver)
             .build();
 
-        organiseringStateRepository.putEventAggregate(organiseringOrgEnhet);
+        organiseringStateRepository.update(organiseringOrgEnhet);
 
         orgEnhetStateRepository.update(orgEnhetState().toBuilder()
             .id(idOrgEnhet)
@@ -166,7 +166,7 @@ public class OrgEnhetUnderordnetResolverTest extends OrgEnhetTestBase {
             .idOver(idOrgEnhetOver)
             .build();
 
-        organiseringStateRepository.putEventAggregate(organiseringOrgEnhet);
+        organiseringStateRepository.update(organiseringOrgEnhet);
 
         orgEnhetStateRepository.update(orgEnhetState().toBuilder()
             .id(idOrgEnhet)

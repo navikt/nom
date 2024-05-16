@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -18,7 +21,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 @RequiredArgsConstructor
 public class DvhOrganiseringMockUtils {
 
-    private final List<DvhOrganiseringMock> response = new LinkedList<>();
+    private final List<DvhOrganiseringMock> response = new CopyOnWriteArrayList<>();
     private final ObjectMapper objectMapper;
 
     public void addToResponse(DvhOrganiseringMock... organiseringer) throws JsonProcessingException {
