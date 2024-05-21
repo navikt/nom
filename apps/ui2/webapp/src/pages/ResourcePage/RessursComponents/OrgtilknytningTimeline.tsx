@@ -1,20 +1,21 @@
 import { css } from "@emotion/react";
 import { CheckmarkCircleFillIcon } from "@navikt/aksel-icons";
 import { Timeline } from "@navikt/ds-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { addYears, max, min } from "date-fns";
 import { maxTime } from "date-fns/constants";
 import React from "react";
 
-import { getOrgEnhetListe } from "~/api/react-query-endpoints";
+import { getOrgEnhet } from "~/api/react-query-endpoints";
 import type { OrgtilknytningState } from "~/types/api-models";
+import { formatDisplayDate } from "~/utils";
 
 export function OrgtilknytningTimeline({
   orgtilknytninger,
 }: {
   orgtilknytninger: Partial<OrgtilknytningState>[];
 }) {
-  const idListe = [
+  const orgenhetIdListe = [
     ...new Set(
       orgtilknytninger.flatMap(
         (orgtilknytning) => orgtilknytning.orgEnhetId || [],
@@ -22,13 +23,14 @@ export function OrgtilknytningTimeline({
     ),
   ];
 
-  const orgEnheterQuery = useQuery({
-    queryKey: getOrgEnhetListe.queryKey(idListe),
-    queryFn: () => getOrgEnhetListe.queryFn(idListe),
-  });
-
   // TODO: ønsket sortering?
-  const orgenheter = orgEnheterQuery.data ?? [];
+  const orgenheter = useQueries({
+    queries: orgenhetIdListe.map((id) => ({
+      queryKey: getOrgEnhet.queryKey(id),
+      queryFn: () => getOrgEnhet.queryFn(id),
+    })),
+    combine: (results) => results.flatMap((r) => r.data ?? []),
+  });
 
   const dateWhenGyldigTomNotSet = addYears(new Date(), 2);
 
@@ -75,11 +77,6 @@ export function OrgtilknytningTimeline({
 
                   return (
                     <Timeline.Period
-                      children={
-                        orgtilknytning.gyldigFom +
-                        " - " +
-                        orgtilknytning.gyldigTom
-                      }
                       end={
                         new Date(
                           orgtilknytning.gyldigTom ?? dateWhenGyldigTomNotSet,
@@ -94,7 +91,9 @@ export function OrgtilknytningTimeline({
                       start={new Date(orgtilknytning.gyldigFom)}
                       status="success"
                       statusLabel="Testlabel"
-                    />
+                    >
+                      {`${formatDisplayDate(orgtilknytning.gyldigFom)} - ${formatDisplayDate(orgtilknytning.gyldigTom)}`}
+                    </Timeline.Period>
                   );
                 })}
             </Timeline.Row>

@@ -234,15 +234,6 @@ export const getOrgEnhet = {
     ).data,
 };
 
-export const getOrgEnhetListe = {
-  queryKey: (orgEnhetListe: string[]) =>
-    orgEnheterKeys.orgEnhetListe(orgEnhetListe),
-  queryFn: async (orgEnhetListe: string[]) =>
-    await Promise.all(
-      orgEnhetListe.map((orgEnhetId) => getOrgEnhet.queryFn(orgEnhetId)),
-    ),
-};
-
 export function getOrgEnheterLedetAvOptions(navident: string) {
   return queryOptions({
     queryKey: orgEnheterKeys.ledetAv(navident),

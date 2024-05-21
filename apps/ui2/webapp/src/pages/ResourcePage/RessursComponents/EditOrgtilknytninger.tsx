@@ -19,7 +19,7 @@ import {
   Label,
   useDatepicker,
 } from "@navikt/ds-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { addYears, isBefore } from "date-fns";
@@ -41,7 +41,6 @@ import {
 } from "~/api/generated/graphql_generated";
 import {
   getOrgEnhet,
-  getOrgEnhetListe,
   getOrgTilknytninger,
   oppdaterOrgtilknytningerForRessurs,
 } from "~/api/react-query-endpoints";
@@ -70,21 +69,21 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
     queryFn: () => getOrgTilknytninger.queryFn(ressurs.navident),
   });
 
-  const orgtilknytninger = ressursOrgtilknytningerQuery.data;
+  const orgtilknytninger = ressursOrgtilknytningerQuery.data ?? [];
 
   const orgenhetIdListe = [
-    ...(new Set(orgtilknytninger?.map((item) => item.orgEnhetId)) ?? []),
+    ...new Set(orgtilknytninger.map((item) => item.orgEnhetId)),
   ];
 
-  const orgenheterQuery = useQuery({
-    queryKey: getOrgEnhetListe.queryKey(orgenhetIdListe),
-    queryFn: () => getOrgEnhetListe.queryFn(orgenhetIdListe),
-    enabled: orgenhetIdListe.length > 0,
+  const hentedeOrgenheter = useQueries({
+    queries: orgenhetIdListe.map((id) => ({
+      queryKey: getOrgEnhet.queryKey(id),
+      queryFn: () => getOrgEnhet.queryFn(id),
+    })),
+    combine: (results) => results.flatMap((r) => r.data ?? []),
   });
 
-  const hentedeOrgenheter = orgenheterQuery.data;
-
-  if (!hentedeOrgenheter || !orgtilknytninger) {
+  if (orgtilknytninger.length === 0) {
     return <></>;
   }
 
