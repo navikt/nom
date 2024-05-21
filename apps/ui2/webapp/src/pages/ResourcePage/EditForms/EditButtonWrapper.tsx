@@ -14,15 +14,11 @@ export function EditButtonWrapper({
   children: ReactNode;
 }) {
   const hasWriteAccess = useHasWriteAccess();
-  const { editPersonopplysninger, editOrgtilknytning, addOrgtilknytning } =
-    useSearch({
-      from: "/ressurs/$id",
-    });
+  const { editPersonopplysninger } = useSearch({
+    from: "/ressurs/$id",
+  });
   const ressursCanBeEdited = ressurs.sektor !== Sektor.NAV_STATLIG;
-  const isEditing =
-    editPersonopplysninger || editOrgtilknytning || addOrgtilknytning;
-
-  if (!hasWriteAccess || !ressursCanBeEdited || isEditing) {
+  if (!hasWriteAccess || !ressursCanBeEdited || editPersonopplysninger) {
     return <></>;
   }
 

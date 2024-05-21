@@ -31,15 +31,12 @@ import {
 } from "~/api/react-query-endpoints";
 import { Divider } from "~/components/Divider";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
-import { AddOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/AddOrgtilknytningForm";
 import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
-import { EditOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/EditOrgtilknytningForm";
 import { EditPersonOpplysninger } from "~/pages/ResourcePage/EditForms/EditPersonOpplysninger";
 import { EditOrgtilknytninger } from "~/pages/ResourcePage/RessursComponents/EditOrgtilknytninger";
 import { PersonOpplysninger } from "~/pages/ResourcePage/RessursComponents/PersonOpplysninger";
 import { blueTopBorder } from "~/resources/NomStyles";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
-import { Sektor } from "~/types/api-models";
 import {
   formatDisplayDate,
   formatVisningsnavn,
@@ -109,11 +106,6 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
 
   const orgtilknytninger = orgtilknytningerQuery.data ?? [];
 
-  const { editPersonopplysninger, editOrgtilknytning, addOrgtilknytning } =
-    useSearch({
-      from: "/ressurs/$id",
-    });
-
   const navigate = useNavigate();
 
   if (orgtilknytninger.length === 0) {
@@ -139,10 +131,6 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
       isAfterPresent(new Date(orgTilknytning.gyldigFom)),
   );
 
-  const ressursCanBeEdited = ressurs.sektor !== Sektor.NAV_STATLIG;
-  const isEditing =
-    editPersonopplysninger || editOrgtilknytning || addOrgtilknytning;
-
   return (
     <>
       <Divider noMargins />
@@ -164,7 +152,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
             <Buldings3Icon />
             Organisatorisk tilhørighet
           </Heading>
-          {ressursCanBeEdited && !isEditing && (
+          <EditButtonWrapper ressurs={ressurs}>
             <Button
               icon={<PencilIcon aria-hidden />}
               onClick={() =>
@@ -178,24 +166,16 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
             >
               Endre
             </Button>
-          )}
+          </EditButtonWrapper>
         </div>
 
-        <AddOrgtilknytningForm ressurs={ressurs} />
-        {activeOrgtilknytninger.map((orgTilknytning) =>
-          editOrgtilknytning === orgTilknytning.fid ? (
-            <EditOrgtilknytningForm
-              key={orgTilknytning.fid}
-              orgtilknytning={orgTilknytning}
-            />
-          ) : (
-            <OrganisationHierarchyTree
-              key={orgTilknytning.fid}
-              orgTilknytning={orgTilknytning}
-              ressurs={ressurs}
-            />
-          ),
-        )}
+        {activeOrgtilknytninger.map((orgTilknytning) => (
+          <OrganisationHierarchyTree
+            key={orgTilknytning.fid}
+            orgTilknytning={orgTilknytning}
+            ressurs={ressurs}
+          />
+        ))}
         <FutureOrgTilknytninger
           futureOrgTilknytninger={futureOrgTilknytninger}
           ressurs={ressurs}
@@ -215,8 +195,6 @@ function FutureOrgTilknytninger({
   futureOrgTilknytninger: OrgtilknytningState[];
   ressurs: Ressurs;
 }) {
-  const { editOrgtilknytning } = useSearch({ from: "/ressurs/$id" });
-
   if (futureOrgTilknytninger.length === 0) {
     return <></>;
   }
@@ -226,20 +204,13 @@ function FutureOrgTilknytninger({
       <Heading level="2" size="xsmall">
         Fremtidige org.tilknytninger
       </Heading>
-      {futureOrgTilknytninger.map((orgTilknytning) =>
-        editOrgtilknytning === orgTilknytning.fid ? (
-          <EditOrgtilknytningForm
-            key={orgTilknytning.fid}
-            orgtilknytning={orgTilknytning}
-          />
-        ) : (
-          <OrganisationHierarchyTree
-            key={orgTilknytning.fid}
-            orgTilknytning={orgTilknytning}
-            ressurs={ressurs}
-          />
-        ),
-      )}
+      {futureOrgTilknytninger.map((orgTilknytning) => (
+        <OrganisationHierarchyTree
+          key={orgTilknytning.fid}
+          orgTilknytning={orgTilknytning}
+          ressurs={ressurs}
+        />
+      ))}
     </>
   );
 }
@@ -403,31 +374,6 @@ function OrganisationHierarchyTree({
         {gyldigTom && <span>Til og med: {formatDisplayDate(gyldigTom)}</span>}
         <Divider size="small" />
         <CompactOrganisasjonHierarki orgEnhet={orgEnhet} ressurs={ressurs} />
-        {/*Jeg lar dette stå midlertidig for å kunne kjapt gå tilbake hvis det trengs, men knappen skal egentlig bort*/}
-        {/*<div*/}
-        {/*  css={css`*/}
-        {/*    display: flex;*/}
-        {/*    justify-content: flex-end;*/}
-        {/*    margin-top: var(--a-spacing-6);*/}
-        {/*  `}*/}
-        {/*>*/}
-        {/*  */}
-        {/*  <EditButtonWrapper ressurs={ressurs}>*/}
-        {/*    <Button*/}
-        {/*      icon={<PencilIcon aria-hidden />}*/}
-        {/*      onClick={() =>*/}
-        {/*        navigate({*/}
-        {/*          search: { editOrgtilknytning: fid },*/}
-        {/*          params: (previous) => previous,*/}
-        {/*        })*/}
-        {/*      }*/}
-        {/*      size="small"*/}
-        {/*      variant="secondary"*/}
-        {/*    >*/}
-        {/*      Endre*/}
-        {/*    </Button>*/}
-        {/*  </EditButtonWrapper>*/}
-        {/*</div>*/}
       </ExpansionCard.Content>
     </ExpansionCard>
   );
