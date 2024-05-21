@@ -91,6 +91,7 @@ public class NomIntegrasjonService {
 
         if (ressursEvent instanceof RessursOpprettetEventV1 ressursOpprettetEventV1
             && ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().kanOppretteRessurs()) {
+            logger.debug("Handling RessursOpprettetEventV1: {}", ressursOpprettetEventV1);
             createRessurs(ressursOpprettetEventV1);
 
         } else if (ressursEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1
@@ -541,6 +542,7 @@ public class NomIntegrasjonService {
         validateThatRequiredValuesAreSet(newNomIntegrasjonEntity);
 
         if (nomIntegrasjonEntityProvidesNewDataFromNom(newNomIntegrasjonEntity)) {
+            logger.debug("Saving new nom integrasjon {}", newNomIntegrasjonEntity);
             nomIntegrasjonRepository.save(
                 newNomIntegrasjonEntity.toBuilder()
                     .entryId(nextId())
@@ -550,7 +552,6 @@ public class NomIntegrasjonService {
                     .build()
             );
         }
-
     }
 
     private void markRessursForDeletion(String navident, String initiatedBy) {
@@ -606,6 +607,10 @@ public class NomIntegrasjonService {
         }
         if (nomIntegrasjonEntity.getTiltredelsesdato() == null) {
             throw RequiredValueMissingException.forField("tiltredelsesdato");
+        }
+
+        if (nomIntegrasjonEntity.getSektor() == 2 && nomIntegrasjonEntity.getUtlopsdato() == null) {
+            throw RequiredValueMissingException.forField("utløpsdato");
         }
     }
 
