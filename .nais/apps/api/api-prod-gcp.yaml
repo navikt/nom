@@ -180,6 +180,9 @@ spec:
         - application: shout-out-sync-service
           namespace: shout-out
           cluster: prod-gcp
+        - application: gosys-oppgavebehandling-api
+          namespace: oppgavehandtering
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident

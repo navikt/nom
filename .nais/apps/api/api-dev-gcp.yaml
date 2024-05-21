@@ -213,6 +213,9 @@ spec:
         - application: brev-administrasjon-q2
           namespace: isa
           cluster: dev-gcp
+        - application: gosys-oppgavebehandling-api
+          namespace: oppgavehandtering
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
