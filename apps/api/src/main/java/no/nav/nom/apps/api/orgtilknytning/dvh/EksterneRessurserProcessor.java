@@ -34,6 +34,7 @@ public class EksterneRessurserProcessor {
 
     public static final String ORGENHET_NAVN_HELFO = "Helfo";
     public static final String ORGENHET_NAVN_HELFO_ANSATTE = "Helfo ansatte";
+    public static final String ORGENHET_NAVN_VIKAFOSSEN = "Vikafossen";
 
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgtilknytningService orgtilknytningService;
@@ -184,6 +185,7 @@ public class EksterneRessurserProcessor {
                     orgenhetForRemedyenhet = hvisSkattPlasserNederst(orgenhetForRemedyenhet, navident, remedyEnhet);
                     orgenhetForRemedyenhet = hvisRiksrevisjonPlasserNederst(orgenhetForRemedyenhet, navident, remedyEnhet);
                     orgenhetForRemedyenhet = hvisHelfoOsloEllerAndreStedeterPlasserPaaHelfo(orgenhetForRemedyenhet, navident, remedyEnhet);
+                    orgenhetForRemedyenhet = hvisVikafossenPlasserPaaVikafossen(orgenhetForRemedyenhet, remedyEnhet);
                     return orgenhetForRemedyenhet;
                 }
             ).orElseGet(
@@ -218,6 +220,7 @@ public class EksterneRessurserProcessor {
                 nomOrgenhetPaaRessurs = hvisSkattPlasserNederst(nomOrgenhetPaaRessurs, navident, remedyEnhet);
                 nomOrgenhetPaaRessurs = hvisRiksrevisjonPlasserNederst(nomOrgenhetPaaRessurs, navident, remedyEnhet);
                 nomOrgenhetPaaRessurs = hvisHelfoOsloEllerAndreStedeterPlasserPaaHelfo(nomOrgenhetPaaRessurs, navident, remedyEnhet);
+                nomOrgenhetPaaRessurs = hvisVikafossenPlasserPaaVikafossen(nomOrgenhetPaaRessurs, remedyEnhet);
                 return nomOrgenhetPaaRessurs;
             } else if (nomOrgenheterByOrgenhetPaaRessurs.isEmpty()) {
                 log.info(
@@ -253,6 +256,13 @@ public class EksterneRessurserProcessor {
                 log.warn("For navident {} - Fant flere underenheter for orgenhet SKATT ({}). Faller tilbake på å bruke orgenhet {}.",
                     navident, orgenhetForRemedyenhet.getId(), orgenhetForRemedyenhet.getId());
             }
+        }
+        return orgenhetForRemedyenhet;
+    }
+
+    private IOrgenhet hvisVikafossenPlasserPaaVikafossen(IOrgenhet orgenhetForRemedyenhet, String remedyEnhet){
+        if(remedyEnhet.equals("2103")){
+            orgenhetForRemedyenhet = orgenhetService.getEnhetByAgressoIdAndOrgniv(ORGENHET_NAVN_VIKAFOSSEN,"ORGENHET").orElse(null);
         }
         return orgenhetForRemedyenhet;
     }
@@ -341,6 +351,10 @@ public class EksterneRessurserProcessor {
         return erHelfoNiv0Enhet(orgenhet) || orgenhetService.getById(organisering.get().idOver()).map(this::erHelfoNiv0Enhet).orElse(false);
     }
 
+    private boolean erVikafossenEnhet(IOrgenhet orgenhet){
+        return orgenhet != null && orgenhet.getAgressoId().equals(ORGENHET_NAVN_VIKAFOSSEN);
+    }
+
     private void opprettOrgtilknytning(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet, LocalDate gyldigFom, InputMetadata metadata) {
         if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(eksternRessurs.navident())) {
             log.info("Navident {} er mastered. Vi lager ikke orgtilknytning for denne", eksternRessurs.navident());
@@ -390,6 +404,8 @@ public class EksterneRessurserProcessor {
 
         if (erUnderSkatteetatenNiv0Enhet(orgenhet) || erUnderRiksrevisjonNiv0Enhet(orgenhet) || erUnderHelfoNiv0Enhet(orgenhet)) {
             settTilknytningtype(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER, fid, eksternRessurs.navident(), metadata);
+        } else if (erVikafossenEnhet(orgenhet)) {
+            settTilknytningtype(Tilknytningtype.INGEN, fid, eksternRessurs.navident(), metadata);
         }
     }
 
