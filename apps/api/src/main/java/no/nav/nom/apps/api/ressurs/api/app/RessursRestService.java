@@ -164,7 +164,7 @@ public class RessursRestService {
         return new Ressurs(
             ressursState.toBuilder()
                 .personident(personident)
-                .primaryTelefonnummer(ressursState.isEkstern() ? ressursState.primaryTelefonnummer() : Optional.empty())
+                .primaryTelefonnummer(getPrimaryTelefonnummerOrFromTelefonList(ressursState, telefoner))
                 .primaryFysiskBrukersted(showFysiskBrukerstedAndPersonident ? ressursState.primaryFysiskBrukersted() : Optional.empty())
                 .fysiskeBrukersteder(showFysiskBrukerstedAndPersonident ? ressursState.fysiskeBrukersteder() : Collections.emptyList())
                 .build(),
@@ -172,6 +172,12 @@ public class RessursRestService {
             epost.orElse(null),
             nomMastered.isMastered(ressursState.navident())
         );
+    }
+
+    private static Optional<String> getPrimaryTelefonnummerOrFromTelefonList(RessursState ressursState, List<Ressurs.Telefon> telefoner) {
+        if (ressursState.primaryTelefonnummer().isPresent()) return ressursState.primaryTelefonnummer();
+        if (!isNull(telefoner) && !telefoner.isEmpty()) return Optional.of(telefoner.get(0).nummer());
+        return Optional.empty();
     }
 
     public void updateRessursNavn(String navident, UpdateVisningsnavnRequest updateVisningsnavnRequest) {

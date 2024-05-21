@@ -91,7 +91,6 @@ public class NomIntegrasjonService {
 
         if (ressursEvent instanceof RessursOpprettetEventV1 ressursOpprettetEventV1
             && ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().kanOppretteRessurs()) {
-            logger.info("Handling RessursOpprettetEventV1: {}", ressursOpprettetEventV1);
             createRessurs(ressursOpprettetEventV1);
 
         } else if (ressursEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1
