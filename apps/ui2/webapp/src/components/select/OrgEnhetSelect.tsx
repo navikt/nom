@@ -14,8 +14,10 @@ type OrgEnheterFromSearch = NonNullable<
 >;
 
 export function OrgEnhetSelectFormPart({
+  name,
   orgEnheter,
 }: {
+  name: string;
   orgEnheter: OrgEnheterFromSearch;
 }) {
   const { control } = useFormContext();
@@ -23,7 +25,7 @@ export function OrgEnhetSelectFormPart({
   return (
     <Controller
       control={control}
-      name="orgEnhetId"
+      name={name}
       render={({ field, fieldState }) => (
         <OrgEnhetSelect
           error={fieldState.error}
@@ -41,7 +43,7 @@ export function OrgEnhetSelectFormPart({
   );
 }
 
-function OrgEnhetSelect({
+export function OrgEnhetSelect({
   onChange,
   orgEnheter,
   label,

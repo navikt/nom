@@ -17,6 +17,7 @@ import type {
   LederTilgang,
   LederTilgangForOrgenhetRequest,
   LeggTilOrgtilknytningRequestOld,
+  OppdaterOrgtilknytningerForRessursRequest,
   OpprettRessursRequest,
   OpprettRessursResponse,
   OrgEnhet,
@@ -83,6 +84,8 @@ export const orgEnheterKeys = {
   id: (id: string) => [...orgEnheterKeys.all, id] as const,
   ledetAv: (navident: string) =>
     [...ressurserKeys.all, "LEDET_AV", navident] as const,
+  orgEnhetListe: (orgEnhetIder: string[]) =>
+    [...ressurserKeys.all, "ORGENHET_LISTE", orgEnhetIder] as const,
 };
 
 export const orgtilknytningerKeys = {
@@ -231,6 +234,15 @@ export const getOrgEnhet = {
     ).data,
 };
 
+export const getOrgEnhetListe = {
+  queryKey: (orgEnhetListe: string[]) =>
+    orgEnheterKeys.orgEnhetListe(orgEnhetListe),
+  queryFn: async (orgEnhetListe: string[]) =>
+    await Promise.all(
+      orgEnhetListe.map((orgEnhetId) => getOrgEnhet.queryFn(orgEnhetId)),
+    ),
+};
+
 export function getOrgEnheterLedetAvOptions(navident: string) {
   return queryOptions({
     queryKey: orgEnheterKeys.ledetAv(navident),
@@ -354,6 +366,20 @@ export const avvikleRessurs = async (
     await axios.post<AvvikleRessursRequest, AxiosResponse<unknown>>(
       `${NOM_API_BASE_PATH}/app/ressurser/${fid}/avvikle`,
       avvikleRessursRequest,
+    )
+  ).data;
+
+export const oppdaterOrgtilknytningerForRessurs = async (
+  navident: string,
+  oppdaterOrgtilknytningerRequest: OppdaterOrgtilknytningerForRessursRequest,
+) =>
+  (
+    await axios.post<
+      OppdaterOrgtilknytningerForRessursRequest,
+      AxiosResponse<unknown>
+    >(
+      `${NOM_API_BASE_PATH}/app/orgtilknytninger/forRessurs/${navident}`,
+      oppdaterOrgtilknytningerRequest,
     )
   ).data;
 

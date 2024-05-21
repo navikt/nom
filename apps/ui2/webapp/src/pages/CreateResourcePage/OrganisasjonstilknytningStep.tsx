@@ -433,7 +433,7 @@ function InnerOrgEnhetSelect() {
 
   return (
     <>
-      <OrgEnhetSelectFormPart orgEnheter={orgEnheter} />
+      <OrgEnhetSelectFormPart name="orgEnhetId" orgEnheter={orgEnheter} />
       {selectedOrgEnhet ? (
         <div
           css={css`

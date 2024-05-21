@@ -35,9 +35,11 @@ import { AddOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/AddOrgtilk
 import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
 import { EditOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/EditOrgtilknytningForm";
 import { EditPersonOpplysninger } from "~/pages/ResourcePage/EditForms/EditPersonOpplysninger";
+import { EditOrgtilknytninger } from "~/pages/ResourcePage/RessursComponents/EditOrgtilknytninger";
 import { PersonOpplysninger } from "~/pages/ResourcePage/RessursComponents/PersonOpplysninger";
 import { blueTopBorder } from "~/resources/NomStyles";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
+import { Sektor } from "~/types/api-models";
 import {
   formatDisplayDate,
   formatVisningsnavn,
@@ -48,6 +50,8 @@ import {
 } from "~/utils";
 
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
+  const { editOrgtilknytninger } = useSearch({ from: "/ressurs/$id" });
+
   return (
     <div
       css={[
@@ -71,21 +75,27 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
         blueTopBorder,
       ]}
     >
-      <SummarySection ressurs={ressurs} />
-      <LeaderForSection ressurs={ressurs} />
-      <OrgTilknytningSection ressurs={ressurs} />
-      <TeamCatSection navident={ressurs.navident} />
-      <TerminateButton ressurs={ressurs} />
-      {ressurs.isNomMastered && (
-        <Tag
-          css={css`
-            width: fit-content;
-          `}
-          size="small"
-          variant="alt1"
-        >
-          Opprettet/endret i NOM
-        </Tag>
+      {editOrgtilknytninger ? (
+        <EditOrgtilknytninger ressurs={ressurs} />
+      ) : (
+        <>
+          <SummarySection ressurs={ressurs} />
+          <LeaderForSection ressurs={ressurs} />
+          <OrgTilknytningSection ressurs={ressurs} />
+          <TeamCatSection navident={ressurs.navident} />
+          <TerminateButton ressurs={ressurs} />
+          {ressurs.isNomMastered && (
+            <Tag
+              css={css`
+                width: fit-content;
+              `}
+              size="small"
+              variant="alt1"
+            >
+              Opprettet/endret i NOM
+            </Tag>
+          )}
+        </>
       )}
     </div>
   );
@@ -99,7 +109,12 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
 
   const orgtilknytninger = orgtilknytningerQuery.data ?? [];
 
-  const { editOrgtilknytning } = useSearch({ from: "/ressurs/$id" });
+  const { editPersonopplysninger, editOrgtilknytning, addOrgtilknytning } =
+    useSearch({
+      from: "/ressurs/$id",
+    });
+
+  const navigate = useNavigate();
 
   if (orgtilknytninger.length === 0) {
     return <></>;
@@ -124,13 +139,13 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
       isAfterPresent(new Date(orgTilknytning.gyldigFom)),
   );
 
+  const ressursCanBeEdited = ressurs.sektor !== Sektor.NAV_STATLIG;
+  const isEditing =
+    editPersonopplysninger || editOrgtilknytning || addOrgtilknytning;
+
   return (
     <>
       <Divider noMargins />
-      <Heading level="2" size="small">
-        <Buldings3Icon />
-        Organisatorisk tilhørighet
-      </Heading>
       <div
         css={css`
           display: flex;
@@ -138,6 +153,34 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
           gap: var(--a-spacing-4);
         `}
       >
+        <div
+          css={css`
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--a-spacing-4);
+          `}
+        >
+          <Heading level="2" size="small">
+            <Buldings3Icon />
+            Organisatorisk tilhørighet
+          </Heading>
+          {ressursCanBeEdited && !isEditing && (
+            <Button
+              icon={<PencilIcon aria-hidden />}
+              onClick={() =>
+                navigate({
+                  search: { editOrgtilknytninger: true },
+                  params: (previous) => previous,
+                })
+              }
+              size="small"
+              variant="secondary"
+            >
+              Endre
+            </Button>
+          )}
+        </div>
+
         <AddOrgtilknytningForm ressurs={ressurs} />
         {activeOrgtilknytninger.map((orgTilknytning) =>
           editOrgtilknytning === orgTilknytning.fid ? (
@@ -291,7 +334,7 @@ function OrganisationHierarchyTree({
 
   const orgEnhet = orgEnhetQuery.data;
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   if (!orgEnhet) {
     return <></>;
@@ -299,7 +342,7 @@ function OrganisationHierarchyTree({
 
   const orgEnhetLeder = orgEnhet.ledere[0];
 
-  const { gyldigTom, gyldigFom, erDagligOppfolging, fid } = orgTilknytning;
+  const { gyldigTom, gyldigFom, erDagligOppfolging } = orgTilknytning;
 
   const startsInTheFuture = gyldigFom && isAfterPresent(new Date(gyldigFom));
 
@@ -360,29 +403,31 @@ function OrganisationHierarchyTree({
         {gyldigTom && <span>Til og med: {formatDisplayDate(gyldigTom)}</span>}
         <Divider size="small" />
         <CompactOrganisasjonHierarki orgEnhet={orgEnhet} ressurs={ressurs} />
-        <div
-          css={css`
-            display: flex;
-            justify-content: flex-end;
-            margin-top: var(--a-spacing-6);
-          `}
-        >
-          <EditButtonWrapper ressurs={ressurs}>
-            <Button
-              icon={<PencilIcon aria-hidden />}
-              onClick={() =>
-                navigate({
-                  search: { editOrgtilknytning: fid },
-                  params: (previous) => previous,
-                })
-              }
-              size="small"
-              variant="secondary"
-            >
-              Endre
-            </Button>
-          </EditButtonWrapper>
-        </div>
+        {/*Jeg lar dette stå midlertidig for å kunne kjapt gå tilbake hvis det trengs, men knappen skal egentlig bort*/}
+        {/*<div*/}
+        {/*  css={css`*/}
+        {/*    display: flex;*/}
+        {/*    justify-content: flex-end;*/}
+        {/*    margin-top: var(--a-spacing-6);*/}
+        {/*  `}*/}
+        {/*>*/}
+        {/*  */}
+        {/*  <EditButtonWrapper ressurs={ressurs}>*/}
+        {/*    <Button*/}
+        {/*      icon={<PencilIcon aria-hidden />}*/}
+        {/*      onClick={() =>*/}
+        {/*        navigate({*/}
+        {/*          search: { editOrgtilknytning: fid },*/}
+        {/*          params: (previous) => previous,*/}
+        {/*        })*/}
+        {/*      }*/}
+        {/*      size="small"*/}
+        {/*      variant="secondary"*/}
+        {/*    >*/}
+        {/*      Endre*/}
+        {/*    </Button>*/}
+        {/*  </EditButtonWrapper>*/}
+        {/*</div>*/}
       </ExpansionCard.Content>
     </ExpansionCard>
   );
@@ -397,10 +442,10 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
   }
 
   /*
-   Leder høyt oppe i hierarkiet er ofte leder i flere "like" orgEnheter.
-   Her antas det at første forekomst av navn for en orgEnhet er den høyest i hierarkiet.
-   Se https://jira.adeo.no/browse/ORG-1437 for flere detaljer.
-  */
+     Leder høyt oppe i hierarkiet er ofte leder i flere "like" orgEnheter.
+     Her antas det at første forekomst av navn for en orgEnhet er den høyest i hierarkiet.
+     Se https://jira.adeo.no/browse/ORG-1437 for flere detaljer.
+    */
   const uniqLederFor = uniqBy(lederForOrgenheter, (orgEnhet) => orgEnhet.navn);
 
   return (

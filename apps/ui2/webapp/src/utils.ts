@@ -1,11 +1,14 @@
 import {
+  addDays,
   endOfDay,
   format,
   formatISO,
   isAfter,
   isBefore,
+  isSameDay,
   isToday,
   isWithinInterval,
+  subDays,
 } from "date-fns";
 import { maxTime, minTime } from "date-fns/constants";
 
@@ -123,6 +126,22 @@ export function isPresentOrBefore(date: Date) {
 
 export function isPresentOrAfter(date: Date) {
   return isToday(date) || isAfterPresent(date);
+}
+
+export function isSameDateOrAfter(checkDate: Date, compareDate: Date) {
+  return isSameDay(checkDate, compareDate) || isAfter(checkDate, compareDate);
+}
+
+export function isSameDateOrBefore(checkDate: Date, compareDate: Date) {
+  return isSameDay(checkDate, compareDate) || isBefore(checkDate, compareDate);
+}
+
+export function isNextDate(checkDate: Date, compareDate: Date) {
+  return isSameDay(checkDate, addDays(compareDate, 1));
+}
+
+export function isPreviousDate(checkDate: Date, compareDate: Date) {
+  return isSameDay(checkDate, subDays(compareDate, 1));
 }
 
 export function isDateAfterOtherDates(

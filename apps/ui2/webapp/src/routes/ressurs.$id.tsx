@@ -10,14 +10,16 @@ export const Route = createFileRoute("/ressurs/$id")({
     editPersonopplysninger?: boolean;
     editOrgtilknytning?: string;
     addOrgtilknytning?: boolean;
+    editOrgtilknytninger?: boolean;
   } => {
     // validate and parse the search params into a typed state
     return {
-      addOrgtilknytning: Boolean(search.addOrgtilknytning),
-      editPersonopplysninger: Boolean(search.editPersonopplysninger),
+      addOrgtilknytning: search.addOrgtilknytning ? true : undefined,
+      editPersonopplysninger: search.editPersonopplysninger ? true : undefined,
       editOrgtilknytning: search.editOrgtilknytning
         ? String(search.editOrgtilknytning)
         : undefined,
+      editOrgtilknytninger: search.editOrgtilknytninger ? true : undefined,
     };
   },
 });

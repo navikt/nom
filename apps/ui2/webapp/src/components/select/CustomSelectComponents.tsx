@@ -144,6 +144,7 @@ export function SelectLayoutWrapper({
         css={css`
           display: flex;
           gap: var(--a-spacing-2);
+          align-items: center;
         `}
         htmlFor={htmlFor}
       >

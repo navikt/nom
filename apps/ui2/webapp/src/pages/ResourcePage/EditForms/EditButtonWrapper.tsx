@@ -18,11 +18,11 @@ export function EditButtonWrapper({
     useSearch({
       from: "/ressurs/$id",
     });
-  const isEkstern = ressurs.sektor === Sektor.EKSTERN;
+  const ressursCanBeEdited = ressurs.sektor !== Sektor.NAV_STATLIG;
   const isEditing =
     editPersonopplysninger || editOrgtilknytning || addOrgtilknytning;
 
-  if (!hasWriteAccess || !isEkstern || isEditing) {
+  if (!hasWriteAccess || !ressursCanBeEdited || isEditing) {
     return <></>;
   }
 
