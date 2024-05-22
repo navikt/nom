@@ -46,7 +46,9 @@ yup.addMethod(yup.string, "optionalPhoneNumber", function () {
         return true;
       }
 
-      return nummer?.length === 8;
+      const enkelTelefonnummerRegex = /^\d{8}$/;
+
+      return enkelTelefonnummerRegex.test(nummer ?? "");
     },
   );
 });
