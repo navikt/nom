@@ -33,7 +33,7 @@ public class Test {
             }
 
             @Override
-            public void visit(RessursState ressursState) {
+            public void visit(String key, RessursState ressursState) {
                 count++;
                 if (count % 10000 == 0)
                     log.info("Visitor {} visited with ressursState nr {}: {}", name, count, ressursState);

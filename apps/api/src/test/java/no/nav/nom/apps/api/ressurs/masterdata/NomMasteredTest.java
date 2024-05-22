@@ -1,14 +1,18 @@
 package no.nav.nom.apps.api.ressurs.masterdata;
 
 import no.nav.nom.apps.api.TestBase;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.testcontainers.shaded.org.checkerframework.checker.units.qual.A;
 
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -23,6 +27,10 @@ class NomMasteredTest extends TestBase {
     @Autowired
     NomMastered nomMastered;
 
+    @Autowired
+    @Qualifier("OldNomMasteredRepository")
+    MasteredRessursStateRepository masteredRessursStateRepository;
+
     @MockBean
     RessursStateRepository ressursStateRepository;
 
@@ -31,7 +39,7 @@ class NomMasteredTest extends TestBase {
     void test_001() {
         assertFalse(nomMastered.markRessursAsMasteredInNom("UNKNOWN"));
 
-        assertEquals(0, nomMastered.count());
+        assertEquals(0, masteredRessursStateRepository.count());
     }
 
     @Test
@@ -39,7 +47,7 @@ class NomMasteredTest extends TestBase {
     void test_002() {
         assertTrue(markRessursAsMastered(Ressurs_A000001.navident()));
 
-        assertEquals(1, nomMastered.count());
+        assertEquals(1, masteredRessursStateRepository.count());
         assertTrue(nomMastered.isMastered(Ressurs_A000001.navident()));
     }
 
@@ -48,18 +56,18 @@ class NomMasteredTest extends TestBase {
     void test_010() {
         assertTrue(markRessursAsMastered(Ressurs_A000001.navident()));
 
-        assertEquals(1, nomMastered.count());
+        assertEquals(1, masteredRessursStateRepository.count());
         assertTrue(nomMastered.isMastered(Ressurs_A000001.navident()));
 
         assertTrue(unmarkRessursAsMastered(Ressurs_A000001.navident()));
 
-        assertEquals(0, nomMastered.count());
+        assertEquals(0, masteredRessursStateRepository.count());
         assertFalse(nomMastered.isMastered(Ressurs_A000001.navident()));
     }
 
     @BeforeEach
     void setUp() {
-        nomMastered.clear();
+        masteredRessursStateRepository.clear();
         when(ressursStateRepository.findByNavident(Ressurs_A000001.navident())).thenReturn(Optional.of(Ressurs_A000001));
     }
 

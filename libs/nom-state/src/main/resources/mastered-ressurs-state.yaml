@@ -1,0 +1,6 @@
+nom:
+  libs:
+    state:
+      mastered-ressurs:
+        state-topic: org.nom.nom-mastered-ressurs
+        listener-id: nomStateMasteredRessursListener_${HOSTNAME:dummy}

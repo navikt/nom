@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.ressurs.masterdata;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +31,7 @@ public class NomMasteredRessursKafkaConfig {
     }
 
     @Bean
-    KafkaTemplate<String, LocalDateTime>  nomMasteredRessursProducerTemplate(
+    KafkaTemplate<String, LocalDateTime> nomMasteredRessursProducerTemplate(
         ProducerFactory<String, LocalDateTime> nomMasteredRessursProducerFactory,
         @Value("${app.kafka.ressurs.nomMasteredRessursTopic}") String nomMasteredRessursTopic
     ) {
@@ -48,7 +49,9 @@ public class NomMasteredRessursKafkaConfig {
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, LocalDateTime> nomMasteredRessursKafkaListenerContainerFactory(ConsumerFactory<String, LocalDateTime> consumerFactory) {
+    ConcurrentKafkaListenerContainerFactory<String, LocalDateTime> nomMasteredRessursKafkaListenerContainerFactory(
+        @Qualifier("nomMasteredRessursConsumerFactory") ConsumerFactory<String, LocalDateTime> consumerFactory
+    ) {
         final var factory = new ConcurrentKafkaListenerContainerFactory<String, LocalDateTime>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);

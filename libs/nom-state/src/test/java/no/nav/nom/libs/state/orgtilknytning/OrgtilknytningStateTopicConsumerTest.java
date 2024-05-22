@@ -98,8 +98,8 @@ public class OrgtilknytningStateTopicConsumerTest {
         }
 
         @Override
-        public void visit(OrgtilknytningState orgtilknytningState) {
-            log.info("Visitor received message: {}", orgtilknytningState);
+        public void visit(String fid, OrgtilknytningState orgtilknytningState) {
+            log.info("Visitor received message: {}-{}", fid, orgtilknytningState);
             alleMeldingerLest.countDown();
         }
     };

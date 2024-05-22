@@ -97,8 +97,8 @@ public class OrgEnhetStateTopicConsumerTest {
         }
 
         @Override
-        public void visit(OrgEnhetState orgEnhetState) {
-            log.info("Visitor received message: {}", orgEnhetState);
+        public void visit(String fid, OrgEnhetState orgEnhetState) {
+            log.info("Visitor received message: {}-{}", fid, orgEnhetState);
             alleMeldingerLest.countDown();
         }
     };

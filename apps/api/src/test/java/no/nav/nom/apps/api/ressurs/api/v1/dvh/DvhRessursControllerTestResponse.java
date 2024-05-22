@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.ressurs.api.v1.dvh;
 
 import no.nav.nom.apps.api.TestTokensGenerator;
-import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -9,12 +9,12 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
@@ -40,6 +40,9 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
     @Autowired
     @Qualifier("oldOrgtilknytningStateRepository")
     OrgtilknytningStateRepository orgtilknytningStateRepository;
+
+    @Autowired
+    MasteredRessursStateRepository masteredRessursStateRepository;
 
     @Autowired
     TestTokensGenerator testToken;
@@ -138,6 +141,10 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
                 .gyldigTom(Optional.empty())
                 .erDagligOppfolging(true)
                 .build());
+
+        masteredRessursStateRepository.update("A000001", LocalDateTime.now());
+        masteredRessursStateRepository.update("A000002", LocalDateTime.now());
+        masteredRessursStateRepository.update("A000003", LocalDateTime.now());
     }
 }
 
@@ -263,56 +270,4 @@ class RessursStateRepositoryFake implements RessursStateRepository {
 
     @Override
     public void remove(String fid) { throw new NotImplementedException();   }
-}
-
-@Profile("DvhRessursControllerTest-FAKES")
-@Primary
-@Component
-class NomMasteredFake implements NomMastered {
-    private final Map<String, LocalDateTime> fakedMasteredNavidenter = Map.of(
-        "A000001", LocalDateTime.now(),
-        "A000002", LocalDateTime.now(),
-        "A000003", LocalDateTime.now()
-    );
-
-    @Override
-    public boolean markRessursAsMasteredInNom(String navident) {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public boolean unmarkRessursAsMasteredInNom(String navident) {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public int count() {
-        return fakedMasteredNavidenter.size();
-    }
-
-    @Override
-    public boolean isMastered(String navident) {
-        return fakedMasteredNavidenter.containsKey(navident);
-    }
-
-    @Override
-    public List<String> navidenter() {
-        return fakedMasteredNavidenter.keySet().stream().toList();
-    }
-
-
-    @Override
-    public void updateRessursAsMasteredInNomFromKafka(String navident, LocalDateTime since) {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public void removeRessursAsMasteredInNomFromKafka(String navident) {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public void clear() {
-        throw new NotImplementedException();
-    }
 }

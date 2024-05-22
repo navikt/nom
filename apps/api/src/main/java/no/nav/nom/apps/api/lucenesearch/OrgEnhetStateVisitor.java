@@ -27,7 +27,7 @@ public class OrgEnhetStateVisitor implements NomStateRessursListener.Visitor<Org
     }
 
     @Override
-    public void visit(OrgEnhetState orgEnhetState) {
+    public void visit(String key, OrgEnhetState orgEnhetState) {
         if (!isNull(orgEnhetState) && unleash.isEnabled(UNLEASH_USE_NEW_ORGENHET_STATE_REPOSITORY)) {
             luceneService.invalidateOrgenhet(orgEnhetState.id());
         }

@@ -21,6 +21,11 @@
       "description": "Enable/disable organisering state autoconfiguration."
     },
     {
+      "name": "nom.libs.state.mastered-ressurs.enabled",
+      "type": "java.lang.String",
+      "description": "Enable/disable mastered state autoconfiguration."
+    },
+    {
       "name": "nom.libs.state.idle-event-interval-seconds",
       "type": "java.lang.String",
       "description": "Idle tid på kafka meldinger før idle event sendes."

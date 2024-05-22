@@ -7,12 +7,13 @@ import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
-import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class DvhRessursRestService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final NomMastered nomMastered;
+    private final MasteredRessursStateRepository masteredRessursStateRepository;
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningService orgtilknytningService;
     private final OrgenhetService orgenhetService;
@@ -38,7 +40,7 @@ public class DvhRessursRestService {
     private final Unleash unleash;
 
     public DvhRessursRestService(
-        NomMastered nomMastered,
+        NomMastered nomMastered, MasteredRessursStateRepository masteredRessursStateRepository,
         RessursStateRepository ressursStateRepository,
         OrgtilknytningService orgtilknytningService,
         OrgenhetService orgenhetService,
@@ -46,6 +48,7 @@ public class DvhRessursRestService {
         DvhRepository dvhRepository, OrganiseringStateRepository organiseringStateRepository, Unleash unleash
     ) {
         this.nomMastered = nomMastered;
+        this.masteredRessursStateRepository = masteredRessursStateRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningService = orgtilknytningService;
         this.orgenhetService = orgenhetService;
@@ -57,7 +60,7 @@ public class DvhRessursRestService {
 
     public List<DvhRessursDTO> nomMasteredRessurser() {
         return ressursStateRepository
-            .findByNavidentBulk(nomMastered.navidenter()).values().stream()
+            .findByNavidentBulk(masteredRessursStateRepository.navidenter()).values().stream()
             .map(this::toDTO)
             .toList();
     }
