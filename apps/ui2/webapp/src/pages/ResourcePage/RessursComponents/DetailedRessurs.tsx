@@ -86,6 +86,7 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
               css={css`
                 width: fit-content;
               `}
+              data-cy="nom-mastered-tag"
               size="small"
               variant="alt1"
             >

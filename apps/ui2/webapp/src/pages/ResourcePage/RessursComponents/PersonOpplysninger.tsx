@@ -93,6 +93,7 @@ function EditButton({ ressurs }: { ressurs: Ressurs }) {
       )}
 
       <Button
+        data-cy="endre-personopplysninger-button"
         disabled={!ressursCanBeEdited}
         icon={<PencilIcon aria-hidden />}
         onClick={() =>
