@@ -43,3 +43,7 @@ jobs:
       - name: Check for typescript errors
         working-directory: apps/ui2/webapp
         run: npm run check-types
+
+      - name: Run tests
+        working-directory: apps/ui2/webapp
+        run: npm run test

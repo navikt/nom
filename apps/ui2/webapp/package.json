@@ -9,6 +9,7 @@
     "build": "tsc && vite build",
     "check-types": "tsc --noemit",
     "cy:open": "cypress open",
+    "test": "vitest",
     "preview": "vite preview",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
     "stylelint": "stylelint '**/*.{tsx,css}'",
@@ -71,6 +72,7 @@
     "stylelint-config-standard": "36.0.0",
     "swagger-typescript-api": "13.0.3",
     "typescript": "5.4.5",
-    "vite": "5.2.11"
+    "vite": "5.2.11",
+    "vitest": "1.6.0"
   }
 }
