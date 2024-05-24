@@ -5,10 +5,10 @@ import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.email.EmailClient;
 import no.nav.nom.apps.api.clients.email.EmailMessage;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.graphql.MappingUtils;
+import no.nav.nom.apps.api.graphql.common.exception.LederNotFoundException;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
 import no.nav.nom.contract.ad.AdRessurs;
-import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
-import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class RessursOpprettetEmailService {
@@ -30,21 +29,22 @@ public class RessursOpprettetEmailService {
     private final AdClient adClient;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final RessursStateRepository ressursStateRepository;
-    private final LederResolver lederResolver;
+
+    private final DvhRepository dvhRepository;
 
     public RessursOpprettetEmailService(
         EmailClient emailClient,
         AdClient adClient,
         OrgEnhetStateRepository orgEnhetStateRepository,
         RessursStateRepository ressursStateRepository,
-        DvhRepository dvhRepository,
-        LederResolver lederResolver
-    ) {
+        LederResolver lederResolver,
+        DvhRepository dvhRepository
+        ) {
         this.emailClient = emailClient;
         this.adClient = adClient;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.ressursStateRepository = ressursStateRepository;
-        this.lederResolver = lederResolver;
+        this.dvhRepository = dvhRepository;
     }
 
     public void notifyByEmail(String navident, String orgenhetId) {
@@ -56,11 +56,11 @@ public class RessursOpprettetEmailService {
             .orElseThrow(() -> new RessursOpprettetEmailException("Fant ikke orgenhet med gitt id"));
 
         // get leaders using lederResolver
-        List<OrgEnhetsLeder> leaders = lederResolver.leder(OrgEnhet.builder()
-                .agressoId(orgEnhet.agressoId().get())
-                .orgNiv(orgEnhet.agressoOrgNivaa().get())
-                .navn(orgEnhet.navn())
-                .build());
+        List<String> leaders = dvhRepository.getLederByAgressoIdAndNivAndNavn(orgEnhet.agressoId().get(), orgEnhet.agressoOrgNivaa().get(), orgEnhet.navn())
+            .stream()
+            .map(leder -> tilOrgEnhetsLederNavIdents(ressursStateRepository.findByNavident(leder.getNavIdent(), MappingUtils::toRessurs)
+                .orElseThrow(LederNotFoundException::new)))
+            .toList();
 
         // throw exception if no leaders are found
         if(leaders.isEmpty()) {
@@ -68,11 +68,11 @@ public class RessursOpprettetEmailService {
         }
 
         // else send email to all leaders
-        var orgEnhetsLeders = leaders.stream()
-            .map(OrgEnhetsLeder::getRessurs)
-            .map(Ressurs::getNavident)
-            .collect(Collectors.toSet());
-        composeAndSendEmail(opprettetRessurs, orgEnhetsLeders, orgEnhet.navn());
+        composeAndSendEmail(opprettetRessurs, Set.copyOf(leaders), orgEnhet.navn());
+    }
+
+    private String tilOrgEnhetsLederNavIdents(Ressurs leder) {
+        return leder.getNavIdent();
     }
 
     private void composeAndSendEmail(RessursState opprettetRessurs, Set<String> recipientNavidents, String orgenhetName) {
