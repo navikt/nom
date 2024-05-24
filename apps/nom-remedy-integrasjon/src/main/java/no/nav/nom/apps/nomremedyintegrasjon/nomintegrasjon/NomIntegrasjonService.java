@@ -119,7 +119,8 @@ public class NomIntegrasjonService {
 
         if (orgtilknytningEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1
             && orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().dagligOppfolging()
-            && isNavidentEksternEllerKommunalRessurs(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().navident())) {
+            && isNavidentEksternEllerKommunalRessurs(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData()
+            .navident())) {
 
             handleOrgtilknytningDagligOppfolgingEndretEvent(orgtilknytningDagligOppfolgingEndretEventV1);
         } else if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2
@@ -130,7 +131,8 @@ public class NomIntegrasjonService {
     }
 
     private void handleOrgtilknytningDagligOppfolgingEndretEvent(OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
-        if (orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom().isAfter(LocalDate.now())) {
+        if (orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom().isAfter(LocalDate.now())
+            && sjekkAktivOrgTilknytning(orgtilknytningDagligOppfolgingEndretEventV1)) {
             logger.info(
                 "Delaying remedy update for OrgtilknytningDagligOppfolgingEndretEventV1 with fid {}",
                 orgtilknytningDagligOppfolgingEndretEventV1.getFid()
@@ -146,7 +148,8 @@ public class NomIntegrasjonService {
     }
 
     private void handleOrgtilknytningDatoEndretEvent(OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
-        if (orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom().isAfter(LocalDate.now())) {
+        if (orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom().isAfter(LocalDate.now()) && sjekkAktivOrgTilknytning(
+            orgtilknytningDatoEndretEventV2)) {
             logger.info("Delaying remedy update for OrgtilknytningDatoEndretEventV2 with fid {}", orgtilknytningDatoEndretEventV2.getFid());
 
             delayEventUpdate(
@@ -156,6 +159,23 @@ public class NomIntegrasjonService {
         } else {
             updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
         }
+    }
+
+    private boolean sjekkAktivOrgTilknytning(OrgtilknytningEvent orgtilknytningEvent) {
+        if (orgtilknytningEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
+            return nomApiClient.getOrgtilknytningerForNavident(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData()
+                    .navident()).stream()
+                .anyMatch(NomIntegrasjonService::orgtilknytningIsActiveOnCurrentDate);
+        }
+        if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
+            var orgtilknytning = nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid());
+            return orgtilknytningIsActiveOnCurrentDate(orgtilknytning);
+        }
+        return false;
+    }
+
+    private static boolean orgtilknytningIsActiveOnCurrentDate(OrgtilknytningState orgtilknytningState) {
+        return !orgtilknytningState.getGyldigFom().isAfter(LocalDate.now()) && !orgtilknytningState.getGyldigTom().isBefore(LocalDate.now());
     }
 
     private void handleDelayedOrgtiknytning(OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
@@ -492,14 +512,13 @@ public class NomIntegrasjonService {
     }
 
     private NomIntegrasjonEntity nomIntegrasjonEntityFromNomData(Ressurs ressurs) {
-
         var dagligOppfolgningOrgTilknytning = nomApiClient.getOrgtilknytningerForNavident(ressurs.getNavident()).stream()
             .filter(orgtilknytningState -> isActive(orgtilknytningState.getGyldigFom(), orgtilknytningState.getGyldigTom()))
             .filter(OrgtilknytningState::getErDagligOppfolging)
             .findFirst();
 
         return NomIntegrasjonEntity.builder()
-            .enhetsId(getRemedyEnhetId(dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getOrgEnhetId).orElse(null)))
+            .enhetsId(dagligOppfolgningOrgTilknytning.map(orgtilknytningState -> getRemedyEnhetId(orgtilknytningState.getOrgEnhetId())).orElse(null))
             .etternavn(capitalizeNavn(ressurs.getVisningsnavn().getEtternavn()))
             .fodselsnummer(ressurs.getPersonident())
             .fornavn(capitalizeNavn(

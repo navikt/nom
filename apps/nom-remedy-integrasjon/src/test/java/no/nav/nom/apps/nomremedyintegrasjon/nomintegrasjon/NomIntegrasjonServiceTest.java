@@ -57,7 +57,6 @@ import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.fifteenC
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.formatFornavnWithMellomnavn;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 public class NomIntegrasjonServiceTest extends TestBase {
@@ -505,6 +504,15 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 .orgEnhetId("new-orgenhet")
                 .build()
         );
+
+        when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident()))
+            .thenReturn(List.of(orgtilknytningState()
+                .navident(existingRessurs.getNavident())
+                .orgEnhetId("old-orgenhet")
+                .gyldigFom(LocalDate.now().minusDays(1))
+                .gyldigTom(LocalDate.now())
+            ));
+
         nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
         assertThat(delayedEventRepository.findAll()).hasSize(1);
     }
@@ -517,7 +525,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 .gyldigFom(LocalDate.now().plusDays(1))
                 .build());
 
-        when(nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid())).thenReturn(orgtilknytningState());
+        when(nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid())).thenReturn(orgtilknytningState().gyldigFom(LocalDate.now().minusDays(1)).gyldigTom(LocalDate.now()));
 
         nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDatoEndretEventV2);
 
@@ -916,10 +924,6 @@ public class NomIntegrasjonServiceTest extends TestBase {
             Arguments.of("010000000000000", "010000000000001"),
             Arguments.of(null, "000000000000000")
         );
-    }
-
-    private Integer nomSektorToRemedyCode(no.nav.nom.generated.model.Sektor sektor) {
-        return nomSektorToRemedyCode(Sektor.valueOf(sektor.getValue()));
     }
 
     private Integer nomSektorToRemedyCode(Sektor sektor) {
