@@ -125,8 +125,9 @@ public class EksterneRessurserProcessor {
                         endreSluttdatoPaaEksisterendeOrgtilknytning(sisteEksisterendeOrgtilknytning, eksternRessurs.remedySlutt(), metadata);
                     }
                 } else {
-                    if (eksternRessurs.remedySlutt() != null && LocalDate.now().isAfter(eksternRessurs.remedySlutt())) {
-                        // Hvis sluttdato er før dagens dato, avslutt eksisterende
+                    if (eksternRessurs.remedySlutt() != null && LocalDate.now().isAfter(eksternRessurs.remedySlutt())
+                        && !harSammeSluttdato(eksternRessurs, sisteEksisterendeOrgtilknytning)) {
+                        // Hvis sluttdato er før dagens dato og ulik eksisterende, avslutt eksisterende
                         avsluttOrgtilknytning(sisteEksisterendeOrgtilknytning, eksternRessurs.remedySlutt(), metadata);
                     } else if (sisteEksisterendeOrgtilknytning.gyldigFom().isBefore(LocalDate.now())) {
                         // Hvis startdato på eksisterende er før dagens dato, avslutt eksisterende med sluttdato i går og opprett ny med startdato i dag
