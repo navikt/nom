@@ -9,6 +9,7 @@ import lombok.val;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
@@ -73,6 +74,8 @@ public class DvhRestConsumer {
     private final KommunaleRessurserLoader kommunaleRessurserLoader;
     private final AuthorizedNavident authorizedNavident;
 
+    private final ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState;
+
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
     private final Unleash unleash;
 
@@ -107,6 +110,7 @@ public class DvhRestConsumer {
         loadTlfFromDvh();
 
         updateShadowOrgtilknytningerForKommunaleFromDvh();
+        manuelleRessurserOgLedereTilState.oppdater();
 
         authorizedNavident.oppdaterLedereForOrgenheter();
 

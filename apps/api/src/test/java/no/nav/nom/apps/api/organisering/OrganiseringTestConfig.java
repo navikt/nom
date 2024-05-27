@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.LocalConfiguration;
 import no.nav.nom.apps.api.common.NomProxyRestClient;
+import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.DvhService;
@@ -110,5 +111,8 @@ public class OrganiseringTestConfig {
 
     @MockBean
     AuthorizedNavident authorizedNavident;
+
+    @MockBean
+    ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState;
 }
 
