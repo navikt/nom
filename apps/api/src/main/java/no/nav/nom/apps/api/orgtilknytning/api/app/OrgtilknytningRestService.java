@@ -357,6 +357,9 @@ public class OrgtilknytningRestService {
             .max(Comparator.naturalOrder());
 
         if (!newSluttdato.equals(tilknyttetRessurs.sluttdato())) {
+            if (newSluttdato.isPresent() &&  newSluttdato.get().equals(LocalDate.MAX)) {
+                newSluttdato = Optional.empty();
+            }
             ressursCommandService.oppdaterRessursSluttdatoEvent(
                 OppdaterSluttdatoCommand.builder()
                     .fid(tilknyttetRessurs.fid())
