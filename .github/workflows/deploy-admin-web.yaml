@@ -28,6 +28,8 @@ jobs:
       - name: Install webapp dependencies
         working-directory: apps/admin-web/webapp
         run: npm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
       - name: Build webapp
         working-directory: apps/admin-web/webapp
