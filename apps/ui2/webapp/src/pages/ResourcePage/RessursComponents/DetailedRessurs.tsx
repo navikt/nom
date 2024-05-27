@@ -7,6 +7,7 @@ import {
   XMarkIcon,
 } from "@navikt/aksel-icons";
 import {
+  BodyLong,
   Button,
   ExpansionCard,
   Heading,
@@ -109,10 +110,6 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
 
   const navigate = useNavigate();
 
-  if (orgtilknytninger.length === 0) {
-    return <></>;
-  }
-
   const activeOrgtilknytninger = orgtilknytninger.filter((orgTilknytning) =>
     isGyldighetsPeriodeActive(
       orgTilknytning.gyldigFom,
@@ -155,6 +152,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
           </Heading>
           <EditButtonWrapper ressurs={ressurs}>
             <Button
+              data-cy="endre-orgtilknytninger-button"
               icon={<PencilIcon aria-hidden />}
               onClick={() =>
                 navigate({
@@ -169,6 +167,13 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
             </Button>
           </EditButtonWrapper>
         </div>
+
+        {orgtilknytninger.length === 0 ? (
+          <BodyLong>
+            Medarbeideren er ikke registrert på en organisasjonsenhet. Klikk
+            endre for å legge til.
+          </BodyLong>
+        ) : undefined}
 
         {activeOrgtilknytninger.map((orgTilknytning) => (
           <OrganisationHierarchyTree

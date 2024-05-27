@@ -83,10 +83,6 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
     combine: (results) => results.flatMap((r) => r.data ?? []),
   });
 
-  if (orgtilknytninger.length === 0) {
-    return <></>;
-  }
-
   return (
     <div>
       <Heading
@@ -129,6 +125,8 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
   );
 }
 
+const defaultNyOrgtilknytning = { erDagligOppfolging: false, orgEnhetId: "" };
+
 function OrgtilknytningForm({
   orgtilknytninger,
   hentedeOrgenheter,
@@ -141,11 +139,15 @@ function OrgtilknytningForm({
   const navigate = useNavigate();
   const hasWriteAccess = useHasWriteAccess();
 
+  // Hvis det ikke finnes noen orgtilknytninger, legger vi til en ny en by default.
+  const defaultOrgtilknytninger =
+    orgtilknytninger.length > 0 ? orgtilknytninger : [defaultNyOrgtilknytning];
+
   const methods = useForm<{
     mappedeOrgtilknytninger: Partial<OrgtilknytningState>[];
   }>({
     defaultValues: {
-      mappedeOrgtilknytninger: orgtilknytninger,
+      mappedeOrgtilknytninger: defaultOrgtilknytninger,
     },
     // @ts-expect-error -- Type inferred fra resolver er typen etter submit der flere felter er required, men under utfylling av formet vil flere verdier kunne være undefined. Derfor bruker vi heller eksplisitt type til UseForm
     resolver: yupResolver(formValuesSchema),
@@ -216,10 +218,7 @@ function OrgtilknytningForm({
             <Button
               icon={<PlusCircleIcon />}
               onClick={() => {
-                prepend({
-                  erDagligOppfolging: false,
-                  orgEnhetId: "",
-                });
+                prepend(defaultNyOrgtilknytning);
               }}
               size="small"
               type="button"
