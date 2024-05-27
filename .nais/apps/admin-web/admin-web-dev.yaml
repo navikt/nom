@@ -35,6 +35,7 @@ spec:
           cluster: dev-gcp
   ingresses:
     - https://nom-admin.ansatt.dev.nav.no
+    - https://nom-admin.intern.dev.nav.no
   replicas:
     min: 1
     max: 1
