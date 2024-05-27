@@ -1,0 +1,44 @@
+name: "verify: admin-web"
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'apps/admin-web/webapp/**'
+      - '.github/*/verify-admin-web.yaml'
+
+jobs:
+  verify:
+    name: Verify there are no lint or typescript errors
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          registry-url: https://npm.pkg.github.com/
+          scope: '@navikt'
+          cache-dependency-path: apps/admin-web/webapp
+      - name: Install dependencies
+        working-directory: apps/admin-web/webapp
+        run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+
+
+      - name: Run ESLint
+        if: ${{ !cancelled() }}
+        working-directory: apps/admin-web/webapp
+        run: npm run lint
+
+      - name: Run stylelint
+        if: ${{ !cancelled() }}
+        working-directory: apps/admin-web/webapp
+        run: npm run stylelint
+
+      - name: Check for typescript errors
+        if: ${{ !cancelled() }}
+        working-directory: apps/admin-web/webapp
+        run: npm run check-types
