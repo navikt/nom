@@ -7,7 +7,6 @@ import no.nav.nom.apps.api.clients.email.EmailMessage;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.common.exception.LederNotFoundException;
-import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -37,7 +36,6 @@ public class RessursOpprettetEmailService {
         AdClient adClient,
         OrgEnhetStateRepository orgEnhetStateRepository,
         RessursStateRepository ressursStateRepository,
-        LederResolver lederResolver,
         DvhRepository dvhRepository
         ) {
         this.emailClient = emailClient;
@@ -102,19 +100,20 @@ public class RessursOpprettetEmailService {
 
     private String getFormattetEmailBody(String resursName, String navIdent, String orgenhetName) {
         return String.format(
-            "Hei!\n" +
-            "\n" +
-            "%s er nå blitt opprettet som medarbeider i NOM, og blitt tildelt NAV-ident: %s. Personen er blitt tilknyttet %s.\n" +
-            "\n" +
-            "Du finner informasjon om personen på https://nom.nav.no/ressurs/%s\n" +
-            "\n" +
-            "Du mottar denne e-posten fordi du har opprettet en medarbeider i NOM, eller fordi du er leder for en medarbeider som er blitt opprettet i NOM.\n" +
-            "\n" +
-            "For spørsmål eller tilbakemeldinger, kontakt oss: mugunthan.dharmadas@nav.no;line.eeg-larsen@nav.no. NOM er i pilotfase, og både ris og ros gir oss verdifulle tilbakemeldinger. Ved feil, kan også Porten benyttes: https://jira.adeo.no/plugins/servlet/desk/portal/581/create/5166.\n" +
-            "\n" +
-            "Dette er en autogenerert e-post fra NAV organisasjonsmaster (NOM - https://nom.nav.no/). Du kan ikke svare på denne e-posten.\n" +
-            "\n" +
-            "__", resursName, navIdent, orgenhetName, navIdent);
+                """
+                        Hei!
+
+                        %s er nå blitt opprettet som medarbeider i NOM, og blitt tildelt NAV-ident: %s. Personen er blitt tilknyttet %s.
+
+                        Du finner informasjon om personen på https://nom.nav.no/ressurs/%s
+
+                        Du mottar denne e-posten fordi du har opprettet en medarbeider i NOM, eller fordi du er leder for en medarbeider som er blitt opprettet i NOM.
+
+                        For spørsmål eller tilbakemeldinger, kontakt oss (mugunthan.dharmadas@nav.no;line.eeg-larsen@nav.no). NOM er i pilotfase, og både ris og ros gir oss verdifulle tilbakemeldinger. Ved feil, kan også Porten benyttes: https://jira.adeo.no/plugins/servlet/desk/portal/581/create/5166.
+
+                        Dette er en autogenerert e-post fra NAV organisasjonsmaster (NOM). Du kan ikke svare på denne e-posten.
+
+                        __""", resursName, navIdent, orgenhetName, navIdent);
     }
 
 }
