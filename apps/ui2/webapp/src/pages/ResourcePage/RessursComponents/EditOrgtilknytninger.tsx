@@ -19,10 +19,10 @@ import {
   Label,
   useDatepicker,
 } from "@navikt/ds-react";
-import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { addYears, isBefore } from "date-fns";
+import { addYears } from "date-fns";
 import partition from "lodash/partition";
 import React from "react";
 import {
@@ -48,11 +48,10 @@ import { useHasWriteAccess } from "~/api/useGetSession";
 import { ApiResponseError } from "~/components/ApiResponseError";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { showToast } from "~/hooks/showToast";
-import { etEllerAnnet } from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import { dolValidering } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { OrgtilknytningTimeline } from "~/pages/ResourcePage/RessursComponents/OrgtilknytningTimeline";
 import type {
   OppdaterOrgtilknytningerForRessursRequest,
-  OrgEnhet,
   OrgtilknytningState,
   Ressurs,
 } from "~/types/api-models";
@@ -61,6 +60,7 @@ import {
   formatDateWithoutTimezone,
   formatDisplayDate,
   formatVisningsnavn,
+  isSameDateOrAfter,
 } from "~/utils";
 
 export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
@@ -70,18 +70,6 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
   });
 
   const orgtilknytninger = ressursOrgtilknytningerQuery.data ?? [];
-
-  const orgenhetIdListe = [
-    ...new Set(orgtilknytninger.map((item) => item.orgEnhetId)),
-  ];
-
-  const hentedeOrgenheter = useQueries({
-    queries: orgenhetIdListe.map((id) => ({
-      queryKey: getOrgEnhet.queryKey(id),
-      queryFn: () => getOrgEnhet.queryFn(id),
-    })),
-    combine: (results) => results.flatMap((r) => r.data ?? []),
-  });
 
   return (
     <div>
@@ -117,7 +105,6 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
       </Heading>
 
       <OrgtilknytningForm
-        hentedeOrgenheter={hentedeOrgenheter}
         orgtilknytninger={orgtilknytninger}
         ressurs={ressurs}
       />
@@ -129,11 +116,9 @@ const defaultNyOrgtilknytning = { erDagligOppfolging: false, orgEnhetId: "" };
 
 function OrgtilknytningForm({
   orgtilknytninger,
-  hentedeOrgenheter,
   ressurs,
 }: {
   orgtilknytninger: Partial<OrgtilknytningState>[];
-  hentedeOrgenheter: OrgEnhet[];
   ressurs: Ressurs;
 }) {
   const navigate = useNavigate();
@@ -192,7 +177,7 @@ function OrgtilknytningForm({
       <form
         autoComplete="false"
         onSubmit={handleSubmit((data) => {
-          const validation = etEllerAnnet(
+          const validation = dolValidering(
             data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
           );
           if (
@@ -277,20 +262,7 @@ function OrgtilknytningForm({
                 />
               </HStack>
 
-              <BodyLong
-                css={css`
-                  margin-top: var(--a-spacing-6);
-                `}
-              >
-                Leder:{" "}
-                <b>
-                  {formatVisningsnavn(
-                    hentedeOrgenheter?.find(
-                      (orgenhet) => orgenhet?.id === field?.orgEnhetId,
-                    )?.ledere[0]?.visningsnavn,
-                  ) ?? ""}
-                </b>
-              </BodyLong>
+              <LederLabel index={index} />
 
               <Checkbox
                 css={css`
@@ -437,6 +409,28 @@ function EditOrgilkntyningFormPart({ index }: { index: number }) {
   );
 }
 
+function LederLabel({ index }: { index: number }) {
+  const { watch } = useFormContext();
+  const field = watch(`mappedeOrgtilknytninger.${index}`);
+
+  const orgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(field.orgEnhetId as string),
+    queryFn: () => getOrgEnhet.queryFn(field.orgEnhetId as string),
+  });
+
+  const lederNavn = orgEnhetQuery.data?.ledere[0]?.visningsnavn;
+
+  return (
+    <BodyLong
+      css={css`
+        margin-top: var(--a-spacing-6);
+      `}
+    >
+      Leder: <b>{lederNavn ? formatVisningsnavn(lederNavn) : ""}</b>
+    </BodyLong>
+  );
+}
+
 function FormDateWrapper({
   name,
   defaultDate,
@@ -533,7 +527,7 @@ function IllegalDolCombinationAlert() {
   }
 
   const orgtilknytninger = watch(`mappedeOrgtilknytninger`);
-  const { dolGaps, dolOverlaps } = etEllerAnnet(orgtilknytninger ?? []);
+  const { dolGaps, dolOverlaps } = dolValidering(orgtilknytninger ?? []);
 
   if (dolGaps.length === 0 && dolOverlaps.length === 0) {
     return <></>;
@@ -602,49 +596,6 @@ function IllegalDolCombinationAlert() {
   );
 }
 
-const orgtilknytningSchema = yup.object().shape({
-  fid: yup.string(),
-  erDagligOppfolging: yup.boolean().required(),
-  gyldigFom: yup.string().required("Obligatorisk"),
-  gyldigTom: yup
-    .string()
-    .test({
-      name: "gyldigTom-required",
-      message: "Obligatorisk",
-      test: function (value, context) {
-        const ressursSektor = context?.options?.context?.ressursSektor;
-
-        return ressursSektor !== Sektor.EKSTERN || !!value;
-      },
-    })
-    .test({
-      name: "gyldigTom-required",
-      message: "Må være under ett år frem i tid fra dagens dato",
-      test: function (value, context) {
-        const ressursSektor = context?.options?.context?.ressursSektor;
-
-        return (
-          ressursSektor !== Sektor.EKSTERN ||
-          isBefore(new Date(value ?? ""), addYears(new Date(), 1))
-        );
-      },
-    })
-    .test({
-      name: "gyldigTom-after-fom",
-      message: "Må være etter fra og med-dato",
-      test: function (value, context) {
-        const gyldigFom = context.parent.gyldigFom;
-
-        return !gyldigFom || !value || new Date(value) >= new Date(gyldigFom);
-      },
-    }),
-  orgEnhetId: yup.string().required("Obligatorisk"),
-});
-
-const formValuesSchema = yup.object().shape({
-  mappedeOrgtilknytninger: yup.array().of(orgtilknytningSchema).required(),
-});
-
 function lagOppdaterOrgtilknytningerRequest(
   orgtilknytninger: OrgtilknytningEtterValidering[],
 ): OppdaterOrgtilknytningerForRessursRequest {
@@ -678,3 +629,68 @@ export type OrgtilknytningEtterValidering = yup.InferType<
   typeof orgtilknytningSchema
 > &
   Partial<OrgtilknytningState>;
+
+const orgtilknytningSchema = yup.object().shape({
+  fid: yup.string(),
+  erDagligOppfolging: yup.boolean().required(),
+  gyldigFom: yup
+    .string()
+    .required("Obligatorisk")
+    .test({
+      name: "gyldigFom-maks-tid",
+      test: function (value, context) {
+        return validateMaxTime(value, context);
+      },
+    }),
+  gyldigTom: yup
+    .string()
+    .test({
+      name: "gyldigTom-required",
+      message: "Obligatorisk",
+      test: function (value, context) {
+        const ressursSektor = context?.options?.context?.ressursSektor;
+
+        return ressursSektor !== Sektor.EKSTERN || !!value;
+      },
+    })
+    .test({
+      name: "gyldigTom-maks-tid",
+      test: function (value, context) {
+        return validateMaxTime(value, context);
+      },
+    })
+    .test({
+      name: "gyldigTom-etter-fom",
+      message: "Må være etter fra og med-dato",
+      test: function (value, context) {
+        const gyldigFom = context.parent.gyldigFom;
+
+        return !gyldigFom || !value || new Date(value) >= new Date(gyldigFom);
+      },
+    }),
+  orgEnhetId: yup.string().required("Obligatorisk"),
+});
+
+const formValuesSchema = yup.object().shape({
+  mappedeOrgtilknytninger: yup.array().of(orgtilknytningSchema).required(),
+});
+
+const validateMaxTime = (
+  value: string | undefined,
+  context: yup.TestContext<yup.AnyObject>,
+) => {
+  const ressursSektor = context?.options?.context?.ressursSektor;
+
+  const maxDate = addYears(
+    new Date(),
+    ressursSektor === Sektor.EKSTERN ? 1 : 5,
+  );
+
+  if (isSameDateOrAfter(new Date(value ?? ""), maxDate)) {
+    return context.createError({
+      message: `Må være under ${ressursSektor === Sektor.EKSTERN ? "ett" : "fem"} år frem i tid fra dagens dato`,
+    });
+  }
+
+  return true;
+};

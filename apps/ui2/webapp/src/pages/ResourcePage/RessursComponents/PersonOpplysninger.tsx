@@ -83,7 +83,7 @@ function EditButton({ ressurs }: { ressurs: Ressurs }) {
   const ressursCanBeEdited = ressurs.sektor !== Sektor.NAV_STATLIG;
 
   return (
-    <HStack gap="2">
+    <HStack align="center" gap="2">
       {!ressursCanBeEdited && (
         <HelpText title="Hvorfor er dette utilgjengelig?">
           Statlige ansatte kan ikke opprettes eller endres i NOM på dette

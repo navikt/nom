@@ -72,7 +72,7 @@ export function SearchBar() {
       onChange={(selectedOption) =>
         selectedOption && navigate(selectedOption.navigationOptions)
       }
-      placeholder="Søk etter medarbeider eller organisasjonsenheter"
+      placeholder="Søk etter medarbeider eller organisasjonsenhet"
     />
   );
 }
