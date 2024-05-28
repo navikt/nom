@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.ressurs.email;
 
+import freemarker.template.TemplateException;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.email.EmailClient;
@@ -15,12 +16,19 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import freemarker.template.Configuration;
 
+
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
 public class RessursOpprettetEmailService {
+
+    private static final String OPPRETTELSE_VARSEL_TEMPLATE = "opprettelse-varsel.ftlh";
 
     private final Logger log = LoggerFactory.getLogger(RessursOpprettetEmailService.class);
 
@@ -28,21 +36,23 @@ public class RessursOpprettetEmailService {
     private final AdClient adClient;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final RessursStateRepository ressursStateRepository;
-
     private final DvhRepository dvhRepository;
+    private final Configuration freemarkerConfig;
 
     public RessursOpprettetEmailService(
         EmailClient emailClient,
         AdClient adClient,
         OrgEnhetStateRepository orgEnhetStateRepository,
         RessursStateRepository ressursStateRepository,
-        DvhRepository dvhRepository
+        DvhRepository dvhRepository,
+        Configuration freemarkerConfig
         ) {
         this.emailClient = emailClient;
         this.adClient = adClient;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.dvhRepository = dvhRepository;
+        this.freemarkerConfig = freemarkerConfig;
     }
 
     public void notifyByEmail(String navident, String orgenhetId) {
@@ -62,7 +72,7 @@ public class RessursOpprettetEmailService {
 
         // throw exception if no leaders are found
         if(leaders.isEmpty()) {
-            throw new RessursOpprettetEmailException("Fant ikke leder for orgenhet");
+            throw new RessursOpprettetEmailException("Fant ikke leder for orgenhet " + orgenhetId);
         }
 
         // else send email to all leaders
@@ -95,10 +105,21 @@ public class RessursOpprettetEmailService {
 
         } catch (ADResponseException e) {
             throw new RessursOpprettetEmailException("Fant ikke leder epost adresse for leder");
+        } catch (IOException | TemplateException e) {
+            throw new RessursOpprettetEmailException("Feil ved generering av epost innhold");
         }
     }
 
-    private String getFormattetEmailBody(String resursName, String navIdent, String orgenhetName) {
+    public String getFormattetEmailBody(String resursName, String navIdent, String orgenhetName) throws IOException, TemplateException {
+        var stringWriter = new StringWriter();
+        var model = Map.of(
+            "resursName", resursName,
+            "navIdent", navIdent,
+            "orgenhetName", orgenhetName);
+        freemarkerConfig.getTemplate(OPPRETTELSE_VARSEL_TEMPLATE).process(model, stringWriter);
+        return stringWriter.getBuffer().toString();
+
+        /*
         return String.format(
                 """
                         Hei!
@@ -114,6 +135,7 @@ public class RessursOpprettetEmailService {
                         Dette er en autogenerert e-post fra NAV organisasjonsmaster (NOM). Du kan ikke svare på denne e-posten.
 
                         __""", resursName, navIdent, orgenhetName, navIdent);
+         */
     }
 
 }
