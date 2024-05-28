@@ -143,6 +143,7 @@ public class OrgtilknytningRestService {
                 oppdaterOrgtilknytningerForRessursRequest
             );
         }
+        nomMastered.markRessursAsMasteredInNom(navident);
     }
 
     private void oppdaterRessursStartdato(RessursState tilknyttetRessurs, OppdaterOrgtilknytningerForRessursRequest request) {
