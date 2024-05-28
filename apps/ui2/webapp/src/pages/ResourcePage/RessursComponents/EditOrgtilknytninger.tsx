@@ -24,7 +24,8 @@ import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { addYears } from "date-fns";
 import partition from "lodash/partition";
-import React from "react";
+import React, { useRef } from "react";
+import type { SubmitErrorHandler, SubmitHandler } from "react-hook-form";
 import {
   FormProvider,
   useFieldArray,
@@ -152,6 +153,8 @@ function OrgtilknytningForm({
     name: "mappedeOrgtilknytninger",
   });
 
+  const references = useRef<(HTMLDivElement | null)[]>([]);
+
   const oppdaterOrgtilknytningerMutation = useMutation<
     unknown,
     AxiosError<Error>,
@@ -169,29 +172,54 @@ function OrgtilknytningForm({
     },
   });
 
+  const onValid: SubmitHandler<{
+    mappedeOrgtilknytninger: Partial<OrgtilknytningState>[];
+  }> = (data) => {
+    const validation = dolValidering(
+      data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+    );
+
+    if (
+      validation.dolOverlaps.length === 0 &&
+      validation.dolGaps.length === 0
+    ) {
+      oppdaterOrgtilknytningerMutation.mutate(
+        lagOppdaterOrgtilknytningerRequest(
+          data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+        ),
+      );
+    }
+  };
+
+  const onInvalid:
+    | SubmitErrorHandler<{
+        mappedeOrgtilknytninger: Partial<OrgtilknytningState>[];
+      }>
+    | undefined = (errorList) => {
+    if (errorList?.mappedeOrgtilknytninger?.length) {
+      for (
+        let index = 0;
+        index < errorList.mappedeOrgtilknytninger.length;
+        index++
+      ) {
+        if (errorList.mappedeOrgtilknytninger[index]) {
+          references.current[index]?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+
+          break;
+        }
+      }
+    }
+  };
+
   return (
     <FormProvider {...methods}>
       <OrgtilknytningTimeline
         orgtilknytninger={watch("mappedeOrgtilknytninger")}
       />
-      <form
-        autoComplete="false"
-        onSubmit={handleSubmit((data) => {
-          const validation = dolValidering(
-            data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
-          );
-          if (
-            validation.dolOverlaps.length === 0 &&
-            validation.dolGaps.length === 0
-          ) {
-            oppdaterOrgtilknytningerMutation.mutate(
-              lagOppdaterOrgtilknytningerRequest(
-                data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
-              ),
-            );
-          }
-        })}
-      >
+      <form autoComplete="false" onSubmit={handleSubmit(onValid, onInvalid)}>
         {hasWriteAccess && (
           <div
             css={css`
@@ -225,6 +253,7 @@ function OrgtilknytningForm({
                 border: 1px solid var(--a-border-subtle);
               `}
               key={field.id}
+              ref={(element) => (references.current[index] = element)}
             >
               {field.fid ? (
                 <EditOrgilkntyningFormPart index={index} />
