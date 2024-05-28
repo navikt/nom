@@ -128,7 +128,7 @@ export function findPeriodOverlaps(
 }
 
 // TODO: Sikkert lurt å skrive jest-tester for denne funksjonaliteten, deretter refaktorere litt
-export function etEllerAnnet(
+export function dolValidering(
   orgtilknytninger: OrgtilknytningEtterValidering[],
 ) {
   const dolOrgtilknytninger = orgtilknytninger.filter(

@@ -42,6 +42,8 @@ app:
       backoff-duration-millis: 2000
     nom-remedy-integrasjon:
       base-url: ${NOM_REMEDY_INTEGRASJON_BASEURL}
+  manuelle-ressurser-og-ledere:
+    enabled: false
 
   dvh-load:
     nom-ressurser-stillinger-respons-navn: "NOM_RESSURS_STILLINGERResponse"
@@ -255,6 +257,21 @@ app:
       ansatte-buckets-path: /proxy/dvh/json/Hr/NOM3_Dev/NOM_ANSATTE_BUCKETS_v2
       tlf-path: /proxy/dvh/json/Hr/NOM2_Dev/NOM_TLF_v1
       org-hierarki-path: /proxy/dvh/json/Hr/NOM2_Dev/NOM_HRORG_HIERARKI2_v2
+  manuelle-ressurser-og-ledere:
+    enabled: false
+    ressurser:
+      - navident: N852930         # fredfull.nitrogen@trygdeetaten.no - Leder av ty960s - 855140-Teknisk brukerstøtte og verktøy-ORGNIV3
+        orgtilknytning: ta755b    # 8551400-Teknisk brukerstøtte og verktøy-ORGENHET
+      - navident: F869325         # kald.floy@trygdeetaten.no - Leder av na664h - 8551401-Teknisk brukerstøtte og verktøy 1-ORGENHET - Har N852930 som leder
+        orgtilknytning: na664h    # 8551401-Teknisk brukerstøtte og verktøy 1-ORGENHET
+      - navident: F850744         # lei.frukt@trygdeetaten.no - Har NOM-WRITE-DELEGERT tilgang - Har F869325 som leder
+        orgtilknytning: na664h    # 8551401-Teknisk brukerstøtte og verktøy 1-ORGENHET
+      - navident: F873959         # gjestfri.folk@trygdeetaten.no - Har IKKE NOM-WRITE-DELEGERT tilgang - Har F869325 som leder
+    ledere:
+      - navident: N852930
+        orgenhet: ty960s
+      - navident: F869325
+        orgenhet: na664h
 
 NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
 NIK_API_SCOPE: api://dev-gcp.org.nav-ident/.default

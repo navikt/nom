@@ -72,7 +72,7 @@ export function SearchBar() {
       onChange={(selectedOption) =>
         selectedOption && navigate(selectedOption.navigationOptions)
       }
-      placeholder="Søk etter medarbeider eller organisasjonsenheter"
+      placeholder="Søk etter medarbeider eller organisasjonsenhet"
     />
   );
 }
@@ -131,6 +131,27 @@ async function performSearch(searchString: string): Promise<SearchResultRaw[]> {
   return result.data.data.search;
 }
 
+async function queryForOrgenhet(
+  orgenhetId: string,
+): Promise<SearchResultRaw[]> {
+  const orgenhetQuery = `query orgEnhet($orgenhetId: String) {
+    orgEnhet(where: {id: $orgenhetId}){
+      __typename
+      id
+      navn
+    }
+  }`;
+  const result = await axios.post("/frackend/nom-api/graphql", {
+    operationName: "orgEnhet",
+    query: orgenhetQuery,
+    variables: {
+      orgenhetId: orgenhetId,
+    },
+  });
+
+  return [result.data.data.orgEnhet];
+}
+
 async function queryForRessurs(
   navident: string | null,
   telefonNummer: string | null,
@@ -164,20 +185,30 @@ async function queryForRessurs(
 }
 
 async function createOptions(inputValue: string): Promise<SearchOption[]> {
-  // Får bedre resultat av en eller annen grunn når man tar termene i single-quotes
-  const wrappedInputValue = "'" + inputValue + "'";
-
-  const navident = /^[A-Za-z]\d{6}$/.test(inputValue)
+  const lookupNavident = /^[A-Za-z]\d{6}$/.test(inputValue)
     ? inputValue.toUpperCase()
     : null;
-  const telefonNummer = /^\d{8,}$/.test(inputValue.replaceAll(/\s/g, ""))
+  const lookupTelefon = /^\d{8,}$/.test(inputValue.replaceAll(/\s/g, ""))
     ? inputValue.replaceAll(/\s/g, "")
     : null;
 
-  const searchResults =
-    navident || telefonNummer
-      ? await queryForRessurs(navident, telefonNummer)
-      : await performSearch(wrappedInputValue);
+  const lookupOrgenhetId = /^[A-Za-z]{2}\d{3}[A-Za-z]$/.test(inputValue)
+    ? inputValue
+    : null;
+
+  const searchResults = await (async function DO() {
+    if (lookupNavident || lookupTelefon) {
+      return await queryForRessurs(lookupNavident, lookupTelefon);
+    }
+    if (lookupOrgenhetId) {
+      return await queryForOrgenhet(inputValue);
+    }
+
+    // fritekst søk på navn
+    // Får bedre resultat av en eller annen grunn når man tar termene i single-quotes
+    const wrappedInputValue = "'" + inputValue + "'";
+    return performSearch(wrappedInputValue);
+  })();
 
   return searchResults.map((r) => {
     switch (r.__typename) {

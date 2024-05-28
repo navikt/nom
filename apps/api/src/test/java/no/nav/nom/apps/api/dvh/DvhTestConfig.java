@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.NomProxyRestClient;
+import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
 import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
@@ -88,4 +89,6 @@ public class DvhTestConfig {
     DvhStartupLoadMonitor dvhStartupLoadMonitor;
     @MockBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
+    @MockBean
+    ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState;
 }

@@ -4,9 +4,9 @@ import {
   PencilIcon,
   PersonSuitIcon,
   ReceptionIcon,
-  XMarkIcon,
 } from "@navikt/aksel-icons";
 import {
+  BodyLong,
   Button,
   ExpansionCard,
   Heading,
@@ -29,6 +29,7 @@ import {
   getOrgTilknytninger,
   getTeamcatMemberships,
 } from "~/api/react-query-endpoints";
+import { useHasAdminAccess } from "~/api/useGetSession";
 import { Divider } from "~/components/Divider";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
@@ -48,6 +49,8 @@ import {
 
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   const { editOrgtilknytninger } = useSearch({ from: "/ressurs/$id" });
+
+  const hasAdminAccess = useHasAdminAccess();
 
   return (
     <div
@@ -81,11 +84,12 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
           <OrgTilknytningSection ressurs={ressurs} />
           <TeamCatSection navident={ressurs.navident} />
           <TerminateButton ressurs={ressurs} />
-          {ressurs.isNomMastered && (
+          {ressurs.isNomMastered && hasAdminAccess && (
             <Tag
               css={css`
                 width: fit-content;
               `}
+              data-cy="nom-mastered-tag"
               size="small"
               variant="alt1"
             >
@@ -107,10 +111,6 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
   const orgtilknytninger = orgtilknytningerQuery.data ?? [];
 
   const navigate = useNavigate();
-
-  if (orgtilknytninger.length === 0) {
-    return <></>;
-  }
 
   const activeOrgtilknytninger = orgtilknytninger.filter((orgTilknytning) =>
     isGyldighetsPeriodeActive(
@@ -154,6 +154,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
           </Heading>
           <EditButtonWrapper ressurs={ressurs}>
             <Button
+              data-cy="endre-orgtilknytninger-button"
               icon={<PencilIcon aria-hidden />}
               onClick={() =>
                 navigate({
@@ -168,6 +169,13 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
             </Button>
           </EditButtonWrapper>
         </div>
+
+        {orgtilknytninger.length === 0 ? (
+          <BodyLong>
+            Medarbeideren er ikke registrert på en organisasjonsenhet. Klikk
+            endre for å legge til.
+          </BodyLong>
+        ) : undefined}
 
         {activeOrgtilknytninger.map((orgTilknytning) => (
           <OrganisationHierarchyTree
@@ -489,17 +497,7 @@ function TerminateButton({ ressurs }: { ressurs: Ressurs }) {
         to="/ressurs-terminate/$id"
       >
         <Button
-          css={css`
-            --ac-button-secondary-border: var(--a-red-500);
-            --ac-button-secondary-text: var(--a-red-500);
-            --ac-button-secondary-hover-text: var(--a-red-500);
-            --ac-button-secondary-hover-bg: var(--a-red-50);
-
-            :active {
-              --ac-button-secondary-active-bg: var(--a-red-500);
-            }
-          `}
-          icon={<XMarkIcon aria-hidden />}
+          icon={<PencilIcon aria-hidden />}
           size="small"
           type="button"
           variant="secondary"

@@ -1,0 +1,94 @@
+name: 'deploy: nom-admin-web'
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - '.github/workflows/deploy-admin-web.yaml'
+      - 'apps/admin-web/**'
+      - '.nais/apps/admin-web/**'
+  workflow_dispatch:
+
+jobs:
+  build-app-docker:
+    name: "Build app and push docker image to GAR"
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: https://npm.pkg.github.com/
+          scope: '@navikt'
+
+      - name: Install webapp dependencies
+        working-directory: apps/admin-web/webapp
+        run: npm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+
+      - name: Build webapp
+        working-directory: apps/admin-web/webapp
+        run: npm run build
+
+      - name: Copy webapp dist into public directory of frackend
+        working-directory: apps/admin-web/webapp
+        run: cp -r dist/ ../frackend/public
+
+      - name: Install frackend dependencies
+        working-directory: apps/admin-web/frackend
+        run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+
+      - name: Build frackend
+        working-directory: apps/admin-web/frackend
+        run: npm run build
+
+      - name: Build and push Docker image
+        uses: nais/docker-build-push@v0
+        id: docker-push
+        with:
+          team: org
+          image_suffix: nom-admin-web
+          docker_context: apps/admin-web/frackend
+          dockerfile: apps/admin-web/frackend/Dockerfile
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+    outputs:
+      image: ${{ steps.docker-push.outputs.image }}
+
+  deploy-dev:
+    name: Deploy dev-gcp
+    permissions:
+      contents: "read"
+      id-token: "write"
+    needs: build-app-docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/apps/admin-web/admin-web-dev.yaml
+          VAR: image=${{needs.build-app-docker.outputs.image}}
+
+  deploy-prod:
+    name: Deploy prod-gcp
+    permissions:
+      contents: "read"
+      id-token: "write"
+    needs: build-app-docker
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/apps/admin-web/admin-web-prod.yaml
+          VAR: image=${{needs.build-app-docker.outputs.image}}

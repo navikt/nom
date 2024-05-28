@@ -12,7 +12,6 @@ import {
 export function FysiskBrukerstedSelectFormPart({
   name = "fysiskBrukerstedNr",
   description,
-  defaultValue,
 }: {
   name?: string;
   description?: string;
@@ -28,7 +27,6 @@ export function FysiskBrukerstedSelectFormPart({
       name={name}
       render={({ field, fieldState }) => (
         <FysiskBrukerstedSelect
-          defaultValue={defaultValue}
           description={description}
           error={fieldState.error}
           fysiskeBrukersteder={fysiskeBrukersteder}
@@ -36,7 +34,7 @@ export function FysiskBrukerstedSelectFormPart({
           value={field.value}
         />
       )}
-    ></Controller>
+    />
   );
 }
 
@@ -46,25 +44,18 @@ function FysiskBrukerstedSelect({
   onChange,
   error,
   value,
-  defaultValue,
 }: {
   fysiskeBrukersteder: FysiskBrukersted[];
-  onChange: (s: string | undefined) => void;
-  description?: string;
+  onChange: (s: string | null) => void;
   error?: FieldError;
+  description?: string;
   value?: string;
-  defaultValue?: FysiskBrukersted;
 }) {
   const options = fysiskeBrukersteder.map((fysiskBrukersted) =>
     fysiskBrukerstedOption(fysiskBrukersted),
   );
 
-  const defaultOption = defaultValue
-    ? fysiskBrukerstedOption(defaultValue)
-    : null;
-
   const currentOption = options.find((option) => option.value === value);
-
   return (
     <SelectLayoutWrapper
       description={description}
@@ -76,9 +67,9 @@ function FysiskBrukerstedSelect({
     >
       <BasicSelect
         inputId="Fysisk brukersted"
-        onChange={(option) => onChange(option?.value)}
+        onChange={(option) => onChange(option?.value ?? null)}
         options={options}
-        value={currentOption ?? defaultOption}
+        value={currentOption ?? null}
       />
     </SelectLayoutWrapper>
   );

@@ -44,6 +44,18 @@ public class DvhRepository {
         this.updateListeners();
     }
 
+    public void updateLeder(DvhLeder nyLeder) {
+        var orginalLederForEnhet = ledere.stream().filter(l -> l.getOrgEnhetNr().equals(nyLeder.getOrgEnhetNr()) && l.getOrgNiv().equals(nyLeder.getOrgNiv())).findFirst();
+        List<DvhLeder> nyLedereList = new ArrayList<>(ledere);
+        if (orginalLederForEnhet.isPresent()) {
+            nyLedereList.remove(orginalLederForEnhet.get());
+            log.info("bytter ut leder [{}] med [{}]", orginalLederForEnhet, nyLeder);
+        }
+        nyLedereList.add(nyLeder);
+        saveLedere(nyLedereList);
+    }
+
+
     protected void saveOrganiseringer(List<DvhOrganisering> organiseringer) {
         this.organiseringer = organiseringer;
         updateListeners();

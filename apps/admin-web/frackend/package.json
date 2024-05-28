@@ -1,0 +1,35 @@
+{
+  "name": "nom-admin-frackend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "check-types": "tsc --noemit",
+    "lint": "eslint --ext .js,.ts, .",
+    "lint:fix": "eslint --fix --ext .js,.ts, ."
+  },
+  "author": "NAV",
+  "license": "MIT",
+  "dependencies": {
+    "@navikt/backend-for-frontend-utils": "0.7.3",
+    "@navikt/nav-dekoratoren-moduler": "2.1.6",
+    "@navikt/oasis": "3.3.0",
+    "cookie-parser": "1.4.6",
+    "express": "4.19.2",
+    "http-proxy-middleware": "3.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "7.10.0",
+    "eslint": "8.57.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-prettier": "5.1.3",
+    "eslint-plugin-react": "7.34.1",
+    "eslint-plugin-simple-import-sort": "12.1.0",
+    "eslint-plugin-unicorn": "53.0.0",
+    "prettier": "3.2.5",
+    "typescript": "5.4.5"
+  }
+}

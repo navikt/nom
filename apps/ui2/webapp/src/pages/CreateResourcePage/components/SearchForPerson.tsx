@@ -32,7 +32,7 @@ export function SearchForPerson() {
             data-cy="fnr-search"
             error={error?.message}
             hideLabel={false}
-            label="Fyll inn personnummer/D-nummer så finner vi personen i Folkeregisteret."
+            label="Fyll inn fødselsnummer/D-nummer, så finner vi personen i Folkeregisteret"
             onChange={(newValue) => onChange(newValue)}
             onClear={() => {
               reset({ personident: "" });

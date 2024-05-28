@@ -35,7 +35,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 
 @DisplayName("GraphQL.Search")
-//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class SearchTest extends GraphQLExtendedIntegrationTestBase {
 
     @Autowired

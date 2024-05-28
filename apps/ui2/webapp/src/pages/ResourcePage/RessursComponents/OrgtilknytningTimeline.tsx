@@ -2,8 +2,7 @@ import { css } from "@emotion/react";
 import { CheckmarkCircleFillIcon } from "@navikt/aksel-icons";
 import { Timeline } from "@navikt/ds-react";
 import { useQueries } from "@tanstack/react-query";
-import { addYears, max, min } from "date-fns";
-import { maxTime } from "date-fns/constants";
+import { addMonths, addYears, subMonths } from "date-fns";
 import React from "react";
 
 import { getOrgEnhet } from "~/api/react-query-endpoints";
@@ -32,21 +31,7 @@ export function OrgtilknytningTimeline({
     combine: (results) => results.flatMap((r) => r.data ?? []),
   });
 
-  const dateWhenGyldigTomNotSet = addYears(new Date(), 2);
-
-  const earliestDate = min(
-    orgtilknytninger.map((tilknytning) =>
-      tilknytning.gyldigFom ? new Date(tilknytning.gyldigFom) : maxTime,
-    ),
-  );
-
-  const latestDate = max(
-    orgtilknytninger.map((tilknytning) =>
-      tilknytning.gyldigTom
-        ? new Date(tilknytning.gyldigTom)
-        : dateWhenGyldigTomNotSet,
-    ),
-  );
+  const dateWhenGyldigTomNotSet = addYears(new Date(), 5);
 
   return (
     <div
@@ -57,7 +42,10 @@ export function OrgtilknytningTimeline({
         border: 1px solid var(--a-border-subtle);
       `}
     >
-      <Timeline endDate={latestDate} startDate={earliestDate}>
+      <Timeline
+        endDate={addMonths(new Date(), 10)}
+        startDate={subMonths(new Date(), 2)}
+      >
         <Timeline.Pin date={new Date()}>
           <p>I dag</p>
         </Timeline.Pin>

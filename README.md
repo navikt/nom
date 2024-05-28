@@ -66,3 +66,6 @@ I tillegg kan du filtrere hvilke entiteter du ønsker å opprette eller resette
 ```shell
 python setup_local_kafka_topics.py --entites=orgenhet,ressurs --recreate
 ```
+
+## Kode generert av GitHub Copilot
+Dette repoet bruker GitHub Copilot til å generere kode.

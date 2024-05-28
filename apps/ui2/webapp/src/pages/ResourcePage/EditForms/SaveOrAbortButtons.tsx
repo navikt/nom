@@ -16,6 +16,7 @@ export function SaveOrAbortButtons({ isLoading }: { isLoading: boolean }) {
       `}
     >
       <Button
+        data-cy="avbryt-button"
         onClick={() => navigate({ search: {}, params: (previous) => previous })}
         size="small"
         type="button"
@@ -24,6 +25,7 @@ export function SaveOrAbortButtons({ isLoading }: { isLoading: boolean }) {
         Avbryt
       </Button>
       <Button
+        data-cy="lagre-button"
         icon={<FloppydiskIcon aria-hidden />}
         loading={isLoading}
         size="small"

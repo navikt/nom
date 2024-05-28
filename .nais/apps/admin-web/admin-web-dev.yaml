@@ -1,0 +1,73 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "nom-admin-web"
+  namespace: "org"
+  labels:
+    team: "org"
+spec:
+  image: "{{image}}"
+  port: 8080
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: true
+      singlePageApplication: true
+      claims:
+        groups:
+          - id: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # AD gruppe NOM-ADMIN
+        extra:
+          - NAVident
+          - azp_name
+      tenant: trygdeetaten.no
+      replyURLs:
+        - http://localhost:8080/oauth2/callback
+    sidecar:
+      enabled: true
+      autoLogin: true
+      autoLoginIgnorePaths:
+        - "/frackend/*"
+  accessPolicy:
+    outbound:
+      rules:
+        - application: nom-admin-api
+          namespace: nom
+          cluster: dev-gcp
+  ingresses:
+    - https://nom-admin.ansatt.dev.nav.no
+    - https://nom-admin.intern.dev.nav.no
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      memory: 512Mi
+  liveness:
+    path: /internal/health/liveness
+    initialDelay: 10
+    periodSeconds: 5
+    failureThreshold: 30
+  readiness:
+    path: /internal/health/readiness
+    initialDelay: 10
+    periodSeconds: 5
+    failureThreshold: 30
+  prometheus:
+    enabled: true
+    path: internal/prometheus
+  env:
+    - name: NODE_ENV
+      value: "production"
+    - name: EXPRESS_HOST
+      value: "::"
+    - name: EXPRESS_PORT
+      value: "8080"
+    - name: NOM_ADMIN_API_URL
+      value: http://nom-admin-api.nom.svc.cluster.local
+    - name: NOM_ADMIN_API_SCOPE
+      value: api://dev-gcp.nom.nom-admin-api/.default
+

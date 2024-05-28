@@ -95,12 +95,12 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
       </HStack>
       <PanelLink
         href="https://it-hjelpa.adeo.no/arsys/home"
-        label="Gi tilganger i Remedy"
+        label="Gi tilganger i Identrutinen"
       />
       {/*TODO: disse burde ikke være hrefs, men bruker Routeren sine lenker slik at det ikke gjøres en sidenavigasjon og hele siden må lastes på nytt.*/}
       <PanelLink
         href={`/ressurs/${ressurs.navident}`}
-        label="Gå til profilsiden"
+        label="Vis medarbeiderens profil"
       />
       <PanelLink href="/" label="Gå tilbake til forsiden" />
     </ContainerWithHighlightedTop>
