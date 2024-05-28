@@ -9,6 +9,7 @@
 
 <!-- NOM loggers -->
 <!--    <logger name="no.nav.nom" level="debug" />-->
+    <logger name="no.nav.nom.apps.api.rest.sessioninfo" level="debug" />
 <!--    <logger name="no.nav.nom.apps.api.common.security" level="trace"/>-->
 <!--    <logger name="no.nav.nom.apps.api.graphql.common.SecurityUtil" level="trace"/>-->
 
