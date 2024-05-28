@@ -27,7 +27,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPrima
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
-import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import no.nav.nom.contract.nom.Sektor;

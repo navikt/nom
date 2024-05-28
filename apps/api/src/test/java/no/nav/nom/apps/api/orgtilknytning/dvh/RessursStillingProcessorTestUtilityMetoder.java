@@ -12,7 +12,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.Oppret
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
-import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +22,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.internal.matchers.Any;
 
 import java.time.LocalDate;
 import java.util.Optional;

@@ -15,7 +15,7 @@ import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingStrukturerer;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
-import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrganiseringState;

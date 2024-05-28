@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Slf4j
 @Service
 public class ManuelleRessurserOgLedereTilState {
@@ -39,12 +41,20 @@ public class ManuelleRessurserOgLedereTilState {
         if (cfg.enabled()) {
             log.info("Oppdaterer manuelle ressurser og ledere");
             cfg.ressurser().forEach(r -> {
-                nomStateRessursRepository.update(r.asState());
-                nomStateOrgtilknytningRepository.update(r.orgtilknytningFid(), r.asOrgtilknytningState());
-                luceneService.invalidateRessurs(r.navident());
+                if (r.navident() != null && r.orgtilknytning() != null) {
+                    nomStateRessursRepository.update(r.asState());
+                    nomStateOrgtilknytningRepository.update(r.orgtilknytningFid(), r.asOrgtilknytningState());
+                    luceneService.invalidateRessurs(r.navident());
+                } else {
+                    log.warn("Manuell ressurs mangler navident eller orgtilknytning: {}", r);
+                }
             });
             cfg.ledere().forEach(l -> {
-                dvhRepository.updateLeder(l.asDvhLeder(orgenhetService));
+                if (l.navident() != null && l.orgenhet() != null) {
+                    dvhRepository.updateLeder(l.asDvhLeder(orgenhetService));
+                } else {
+                    log.warn("Manuell leder mangler navident eller orgenhet: {}", l);
+                }
             });
         }
     }

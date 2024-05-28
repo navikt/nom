@@ -26,7 +26,7 @@ public class RessursStateVisitor implements NomStateRessursListener.Visitor<Ress
     }
 
     @Override
-    public void visit(RessursState ressursState) {
+    public void visit(String key, RessursState ressursState) {
         if (!isNull(ressursState) && unleash.isEnabled(UNLEASH_USE_NEW_RESSURS_STATE_LISTENER)) {
             luceneService.invalidateRessurs(ressursState.navident());
         }

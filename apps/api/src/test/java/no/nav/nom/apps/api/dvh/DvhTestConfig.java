@@ -27,6 +27,7 @@ import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
+import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -61,6 +62,8 @@ public class DvhTestConfig {
     NomStateOrgEnhetListener nomStateOrgEnhetListener;
     @MockBean
     NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
+    @MockBean
+    NomStateMasteredRessursListener nomStateMasteredRessursListener;
     @MockBean
     OrgtilknytningStateListener orgtilknytningStateListener;
     @MockBean

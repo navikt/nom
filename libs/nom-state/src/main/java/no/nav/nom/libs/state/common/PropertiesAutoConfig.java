@@ -18,6 +18,7 @@ public class PropertiesAutoConfig {
         }
     }
 
+
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
     @PropertySource(value = "ressurs-state.yaml", factory = YamlPropertySourceFactory.class)
@@ -36,6 +37,7 @@ public class PropertiesAutoConfig {
         }
     }
 
+
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnProperty(value = "nom.libs.state.orgtilknytning.enabled")
     @PropertySource(value = "orgtilknytning-state.yaml", factory = YamlPropertySourceFactory.class)
@@ -51,6 +53,15 @@ public class PropertiesAutoConfig {
     public static class OrganiseringStateConfig {
         public OrganiseringStateConfig() {
             log.debug("loading organisering-state.yaml");
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnProperty(value = "nom.libs.state.mastered-ressurs.enabled")
+    @PropertySource(value = "mastered-ressurs-state.yaml", factory = YamlPropertySourceFactory.class)
+    public static class MasteredRessursStateConfig {
+        public MasteredRessursStateConfig() {
+            log.debug("loading mastered-ressurs-state.yaml");
         }
     }
 }

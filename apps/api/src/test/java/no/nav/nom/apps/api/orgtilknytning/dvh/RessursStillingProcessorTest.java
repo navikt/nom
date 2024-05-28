@@ -6,7 +6,7 @@ import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
-import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;

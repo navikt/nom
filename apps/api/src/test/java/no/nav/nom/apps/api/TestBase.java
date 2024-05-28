@@ -12,6 +12,7 @@ import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateRepository;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,6 +97,10 @@ public abstract class TestBase {
     @Autowired
     @Qualifier("oldOrgtilknytningStateRepository")
     protected OrgtilknytningStateRepository orgtilknytningStateRepository;
+
+    @Autowired
+    @Qualifier("OldNomMasteredRepository")
+    protected MasteredRessursStateRepository masteredRessursStateRepository;
 
     @MockBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;

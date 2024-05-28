@@ -120,8 +120,8 @@ public class RessursStateTopicConsumerTest {
         }
 
         @Override
-        public void visit(RessursState ressursState) {
-            log.info("Visitor received message: {}", ressursState);
+        public void visit(String fid, RessursState ressursState) {
+            log.info("Visitor received message: {}-{}", fid, ressursState);
             alleMeldingerLest.countDown();
         }
     };

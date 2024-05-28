@@ -24,7 +24,7 @@ public abstract class AbstractNomStateListener<T> {
     private final AtomicBoolean hasReadToEndOnStartup = new AtomicBoolean(false);
     private boolean started = false;
     private final List<Visitor<T>> visitors = new CopyOnWriteArrayList<>();
-    private final Map<String, CompletableFuture<T>> waitingMapByFid = Collections.synchronizedMap(new HashMap<>());
+    private final Map<String, CompletableFuture<T>> waitingMapByKey = Collections.synchronizedMap(new HashMap<>());
     private final AtomicInteger consumedMessages = new AtomicInteger(0);
 
     private final String reflectedClassTypeName = ((Class<?>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0]).getSimpleName();
@@ -44,27 +44,27 @@ public abstract class AbstractNomStateListener<T> {
         });
     }
 
-    private void processMessage(String key, T stateObject) {
+    private void processMessage(String key, T value) {
         if (!started) {
             log.info("Kafka listener starting - [{}]. {} visitors registered: {}", listenerId, visitors.size(), visitorsToString());
             started = true;
         }
 
-        registerMessageWithState(key, (T) stateObject);
+        registerMessageWithState(key, (T) value);
 
-        if (waitingMapByFid.containsKey(key)) {
-            waitingMapByFid.remove(key).complete(stateObject);
-            log.debug("Done waiting for FID in listener: {}", key);
+        if (waitingMapByKey.containsKey(key)) {
+            waitingMapByKey.remove(key).complete(value);
+            log.debug("Done waiting for event key in listener: {}", key);
         }
 
-        notifyVisitors(stateObject);
+        notifyVisitors(key, value);
         consumedMessages.incrementAndGet();
     }
 
     public interface Visitor<T> {
         String visitorName();
 
-        void visit(T stateObject);
+        void visit(String key, T stateObject);
     }
 
     public void register(Visitor<T> visitor) {
@@ -76,19 +76,19 @@ public abstract class AbstractNomStateListener<T> {
         return visitors.stream().map(Visitor::visitorName).reduce((a, b) -> a + ", " + b).orElse("none");
     }
 
-    private void notifyVisitors(T stateObject) {
-        visitors.forEach(v -> v.visit(stateObject));
+    private void notifyVisitors(String key, T stateObject) {
+        visitors.forEach(v -> v.visit(key, stateObject));
     }
 
-    public CompletableFuture<T> waitForStateAfterEventCreation(String fid) {
-        log.debug("Waiting for FID in {}}: {}", listenerId, fid);
+    public CompletableFuture<T> waitForStateAfterEventCreation(String key) {
+        log.debug("Waiting for FID in {}}: {}", listenerId, key);
         final CompletableFuture<T> completableFuture = new CompletableFuture<>();
-        waitingMapByFid.put(fid, completableFuture);
+        waitingMapByKey.put(key, completableFuture);
         return completableFuture;
     }
 
     public void removeWait(String fid) {
-        waitingMapByFid.remove(fid);
+        waitingMapByKey.remove(fid);
     }
 
     public boolean hasReadToEndOnStartup() {

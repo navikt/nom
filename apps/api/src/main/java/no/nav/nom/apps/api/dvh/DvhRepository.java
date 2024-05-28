@@ -50,9 +50,11 @@ public class DvhRepository {
         if (orginalLederForEnhet.isPresent()) {
             nyLedereList.remove(orginalLederForEnhet.get());
             log.info("bytter ut leder [{}] med [{}]", orginalLederForEnhet, nyLeder);
+            nyLedereList.add(nyLeder);
+            saveLedere(nyLedereList);
+        } else {
+            log.error("Fant ikke original leder objekt for orgenhet {}", nyLeder.getOrgEnhetNr());
         }
-        nyLedereList.add(nyLeder);
-        saveLedere(nyLedereList);
     }
 
 

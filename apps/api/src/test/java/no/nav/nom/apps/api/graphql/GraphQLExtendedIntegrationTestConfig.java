@@ -46,13 +46,14 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.state.OldRessursStateRepository
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListenerConfig;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
-import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
+import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -105,6 +106,8 @@ public class GraphQLExtendedIntegrationTestConfig {
     NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
     @MockBean
     NomStateOrganiseringListener nomStateOrganiseringListener;
+    @MockBean
+    NomStateMasteredRessursListener nomStateMasteredRessursListener;
 
     @MockBean
     OrgEnhetEventProducer orgEnhetEventProducer;
