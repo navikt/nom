@@ -258,7 +258,7 @@ app:
       tlf-path: /proxy/dvh/json/Hr/NOM2_Dev/NOM_TLF_v1
       org-hierarki-path: /proxy/dvh/json/Hr/NOM2_Dev/NOM_HRORG_HIERARKI2_v2
   manuelle-ressurser-og-ledere:
-    enabled: false
+    enabled: true
     ressurser:
       - navident: N852930         # fredfull.nitrogen@trygdeetaten.no - Leder av ty960s - 855140-Teknisk brukerstøtte og verktøy-ORGNIV3
         orgtilknytning: ta755b    # 8551400-Teknisk brukerstøtte og verktøy-ORGENHET
