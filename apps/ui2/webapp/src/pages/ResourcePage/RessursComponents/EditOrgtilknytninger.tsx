@@ -24,7 +24,7 @@ import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { addYears } from "date-fns";
 import partition from "lodash/partition";
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import type { SubmitErrorHandler, SubmitHandler } from "react-hook-form";
 import {
   FormProvider,
@@ -139,6 +139,10 @@ function OrgtilknytningForm({
     resolver: yupResolver(formValuesSchema),
     context: { ressursSektor: ressurs.sektor },
   });
+
+  useEffect(() => {
+    methods.reset({ mappedeOrgtilknytninger: orgtilknytninger });
+  }, [orgtilknytninger.length]);
 
   const {
     register,
@@ -422,6 +426,7 @@ function EditOrgilkntyningFormPart({ index }: { index: number }) {
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(field.orgEnhetId as string),
     queryFn: () => getOrgEnhet.queryFn(field.orgEnhetId as string),
+    enabled: !!field.orgEnhetId,
   });
 
   return (
@@ -445,6 +450,7 @@ function LederLabel({ index }: { index: number }) {
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(field.orgEnhetId as string),
     queryFn: () => getOrgEnhet.queryFn(field.orgEnhetId as string),
+    enabled: !!field.orgEnhetId,
   });
 
   const lederNavn = orgEnhetQuery.data?.ledere[0]?.visningsnavn;

@@ -258,7 +258,7 @@ app:
       tlf-path: /proxy/dvh/json/Hr/NOM2_Dev/NOM_TLF_v1
       org-hierarki-path: /proxy/dvh/json/Hr/NOM2_Dev/NOM_HRORG_HIERARKI2_v2
   manuelle-ressurser-og-ledere:
-    enabled: false
+    enabled: true
     ressurser:
       - navident: N852930         # fredfull.nitrogen@trygdeetaten.no - Leder av ty960s - 855140-Teknisk brukerstøtte og verktøy-ORGNIV3
         orgtilknytning: ta755b    # 8551400-Teknisk brukerstøtte og verktøy-ORGENHET
@@ -267,6 +267,7 @@ app:
       - navident: F850744         # lei.frukt@trygdeetaten.no - Har NOM-WRITE-DELEGERT tilgang - Har F869325 som leder
         orgtilknytning: na664h    # 8551401-Teknisk brukerstøtte og verktøy 1-ORGENHET
       - navident: F873959         # gjestfri.folk@trygdeetaten.no - Har IKKE NOM-WRITE-DELEGERT tilgang - Har F869325 som leder
+        orgtilknytning: na664h    # 8551401-Teknisk brukerstøtte og verktøy 1-ORGENHET
     ledere:
       - navident: N852930
         orgenhet: ty960s
@@ -285,7 +286,8 @@ NOM_PROXY_API_SCOPE: api://dev-fss.nom.nom-proxy/.default
 NOM_REMEDY_INTEGRASJON_BASEURL: "https://nom-remedy-integrasjon.dev-fss-pub.nais.io"
 NOM_REMEDY_INTEGRASJON_API_SCOPE: api://dev-fss.org.nom-remedy-integrasjon/.default
 
-NOM_WRITE_GROUPID: "c5752f26-105a-460f-a538-1859273f5057"
+NOM_DELEGERT_GROUPID: "e9cd9267-9baf-4078-abb8-7251c4313d32" # 0000-GA-NOM-WRITE-DELEGERT
+NOM_WRITE_GROUPID: "42d11885-1e29-4fc4-9eed-1b339c2c8e36" # 0000-GA-NOM-WRITE-LEDER
 NOM_ADMIN_GROUPID: "9e0e2958-df7a-4376-83f3-9bcbec1f2650"
 
 --- # This is the same as having an application-prod.yaml file
