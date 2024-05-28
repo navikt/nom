@@ -118,24 +118,6 @@ public class RessursOpprettetEmailService {
             "orgenhetName", orgenhetName);
         freemarkerConfig.getTemplate(OPPRETTELSE_VARSEL_TEMPLATE).process(model, stringWriter);
         return stringWriter.getBuffer().toString();
-
-        /*
-        return String.format(
-                """
-                        Hei!
-
-                        %s er nå blitt opprettet som medarbeider i NOM, og blitt tildelt NAV-ident: %s. Personen er blitt tilknyttet %s.
-
-                        Du finner informasjon om personen på https://nom.nav.no/ressurs/%s
-
-                        Du mottar denne e-posten fordi du har opprettet en medarbeider i NOM, eller fordi du er leder for en medarbeider som er blitt opprettet i NOM.
-
-                        For spørsmål eller tilbakemeldinger, kontakt oss (mugunthan.dharmadas@nav.no;line.eeg-larsen@nav.no). NOM er i pilotfase, og både ris og ros gir oss verdifulle tilbakemeldinger. Ved feil, kan også Porten benyttes: https://jira.adeo.no/plugins/servlet/desk/portal/581/create/5166.
-
-                        Dette er en autogenerert e-post fra NAV organisasjonsmaster (NOM). Du kan ikke svare på denne e-posten.
-
-                        __""", resursName, navIdent, orgenhetName, navIdent);
-         */
     }
 
 }
