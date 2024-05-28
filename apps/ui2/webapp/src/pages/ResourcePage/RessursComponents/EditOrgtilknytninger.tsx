@@ -24,8 +24,8 @@ import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { addYears } from "date-fns";
 import partition from "lodash/partition";
-import React, { useEffect, useRef } from "react";
-import type { SubmitErrorHandler, SubmitHandler } from "react-hook-form";
+import React, { useEffect } from "react";
+import type { SubmitHandler } from "react-hook-form";
 import {
   FormProvider,
   useFieldArray,
@@ -157,8 +157,6 @@ function OrgtilknytningForm({
     name: "mappedeOrgtilknytninger",
   });
 
-  const references = useRef<(HTMLDivElement | null)[]>([]);
-
   const oppdaterOrgtilknytningerMutation = useMutation<
     unknown,
     AxiosError<Error>,
@@ -195,35 +193,15 @@ function OrgtilknytningForm({
     }
   };
 
-  const onInvalid:
-    | SubmitErrorHandler<{
-        mappedeOrgtilknytninger: Partial<OrgtilknytningState>[];
-      }>
-    | undefined = (errorList) => {
-    if (errorList?.mappedeOrgtilknytninger?.length) {
-      for (
-        let index = 0;
-        index < errorList.mappedeOrgtilknytninger.length;
-        index++
-      ) {
-        if (errorList.mappedeOrgtilknytninger[index]) {
-          references.current[index]?.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-
-          break;
-        }
-      }
-    }
-  };
-
   return (
     <FormProvider {...methods}>
       <OrgtilknytningTimeline
         orgtilknytninger={watch("mappedeOrgtilknytninger")}
       />
-      <form autoComplete="false" onSubmit={handleSubmit(onValid, onInvalid)}>
+      <form
+        autoComplete="false"
+        onSubmit={handleSubmit(onValid, scrollFirstErrorIntoView)}
+      >
         {hasWriteAccess && (
           <div
             css={css`
@@ -257,7 +235,6 @@ function OrgtilknytningForm({
                 border: 1px solid var(--a-border-subtle);
               `}
               key={field.id}
-              ref={(element) => (references.current[index] = element)}
             >
               {field.fid ? (
                 <EditOrgilkntyningFormPart index={index} />
@@ -728,4 +705,11 @@ const validateMaxTime = (
   }
 
   return true;
+};
+
+const scrollFirstErrorIntoView = () => {
+  document.querySelector(".navds-error-message")?.scrollIntoView({
+    behavior: "smooth",
+    block: "center",
+  });
 };
