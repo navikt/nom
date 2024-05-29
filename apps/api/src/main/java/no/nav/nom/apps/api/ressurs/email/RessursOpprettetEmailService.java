@@ -15,20 +15,27 @@ import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import freemarker.template.Configuration;
-
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
 public class RessursOpprettetEmailService {
-
     private static final String OPPRETTELSE_VARSEL_TEMPLATE = "opprettelse-varsel.ftlh";
+    public static final String NAVIDENT = "NAVident";
 
     private final Logger log = LoggerFactory.getLogger(RessursOpprettetEmailService.class);
 
@@ -79,14 +86,14 @@ public class RessursOpprettetEmailService {
         composeAndSendEmail(opprettetRessurs, Set.copyOf(leaders), orgEnhet.navn());
     }
 
-    private String tilOrgEnhetsLederNavIdents(Ressurs leder) {
-        return leder.getNavIdent();
-    }
-
     private void composeAndSendEmail(RessursState opprettetRessurs, Set<String> recipientNavidents, String orgenhetName) {
         try {
-            var adRessurser = adClient.getAdRessurser(recipientNavidents);
+            Set<String> updatedRecipientNavidents = appendAuthenticatedUserToRecipientNavIdents(recipientNavidents);
+            var adRessurser = adClient.getAdRessurser(updatedRecipientNavidents);
             var recipientList = adRessurser.getRessurser().stream().map(AdRessurs::getEmail).toList();
+
+            // add Line and Renate to the recipient list for testing purposes. This will be deleted later when tests are confirmed
+            recipientList = appendAdditionalRecipientsEmails(recipientList, getAdditionalRecipientsEmails());
 
             String subject = String.format("Ressurs opprettet %s (%s)",
                 opprettetRessurs.visningsnavn().getFormattedVisningsnavn(), opprettetRessurs.navident()
@@ -120,6 +127,43 @@ public class RessursOpprettetEmailService {
         return stringWriter.getBuffer().toString();
     }
 
+    private String tilOrgEnhetsLederNavIdents(Ressurs leder) {
+        return leder.getNavIdent();
+    }
+
+    public Set<String> appendAuthenticatedUserToRecipientNavIdents(Set<String> recipientNavIdents) {
+        List<String> updatedRecipientsNavIdents = new ArrayList<>(recipientNavIdents);
+        String navIdentOfAuthenticatedUser = getAuthenticatedNavIdent();
+        if(!navIdentOfAuthenticatedUser.isEmpty() && !recipientNavIdents.contains(navIdentOfAuthenticatedUser)){
+            updatedRecipientsNavIdents.add(navIdentOfAuthenticatedUser);
+        }
+        return Set.copyOf(updatedRecipientsNavIdents);
+    }
+
+    public static String getAuthenticatedNavIdent() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return getNavIdent(authentication).orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Couldn't find %s in Claims of authenticated user", NAVIDENT)));
+    }
+
+    public static Optional<String> getNavIdent(Authentication authentication) {
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        return Optional.ofNullable(jwt.getClaimAsString(NAVIDENT));
+    }
+
+    public List<String> appendAdditionalRecipientsEmails(List<String> recipients, List<String> additionalRecipients) {
+        List<String> updatedRecipients = new ArrayList<>(recipients);
+        updatedRecipients.addAll(additionalRecipients);
+        return Collections.unmodifiableList(updatedRecipients);
+    }
+
+    private List<String> getAdditionalRecipientsEmails() {
+        // add Line and Renate for testing purposes. This will be deleted later when tests are confirmed
+        List<String> additionalRecipients = new ArrayList<>();
+        additionalRecipients.add("Line.Eeg-Larsen@nav.no");
+        additionalRecipients.add("Linn.Renate.Fredriksen@nav.no");
+        return additionalRecipients;
+    }
 }
 
 
