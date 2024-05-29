@@ -29,7 +29,7 @@ import {
   getOrgTilknytninger,
   getTeamcatMemberships,
 } from "~/api/react-query-endpoints";
-import { useHasAdminAccess } from "~/api/useGetSession";
+import { useHasWriteAccess } from "~/api/useGetSession";
 import { Divider } from "~/components/Divider";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
@@ -50,7 +50,7 @@ import {
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   const { editOrgtilknytninger } = useSearch({ from: "/ressurs/$id" });
 
-  const hasAdminAccess = useHasAdminAccess();
+  const hasWriteAccess = useHasWriteAccess();
 
   return (
     <div
@@ -84,7 +84,7 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
           <OrgTilknytningSection ressurs={ressurs} />
           <TeamCatSection navident={ressurs.navident} />
           <TerminateButton ressurs={ressurs} />
-          {ressurs.isNomMastered && hasAdminAccess && (
+          {ressurs.isNomMastered && hasWriteAccess && (
             <Tag
               css={css`
                 width: fit-content;
@@ -435,8 +435,9 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
   const { editPersonopplysninger } = useSearch({
     from: "/ressurs/$id",
   });
+  const hasWriteAccess = useHasWriteAccess();
 
-  if (editPersonopplysninger) {
+  if (editPersonopplysninger && hasWriteAccess) {
     return <EditPersonOpplysninger ressurs={ressurs} />;
   }
 
@@ -497,6 +498,7 @@ function TerminateButton({ ressurs }: { ressurs: Ressurs }) {
         to="/ressurs-terminate/$id"
       >
         <Button
+          data-cy="avslutt-medarbeider-button"
           icon={<PencilIcon aria-hidden />}
           size="small"
           type="button"
