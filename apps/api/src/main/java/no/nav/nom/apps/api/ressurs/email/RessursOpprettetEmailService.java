@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.ressurs.email;
 
 import freemarker.template.TemplateException;
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.email.EmailClient;
@@ -36,6 +37,7 @@ import java.util.Set;
 public class RessursOpprettetEmailService {
     private static final String OPPRETTELSE_VARSEL_TEMPLATE = "opprettelse-varsel.ftlh";
     public static final String NAVIDENT = "NAVident";
+    public static final String UNLEASH_INFORM_ADDITIONAL_EMAIL_RECIPIENTS = "nom.ressurs-create.inform_additional_recipients";
 
     private final Logger log = LoggerFactory.getLogger(RessursOpprettetEmailService.class);
 
@@ -45,6 +47,7 @@ public class RessursOpprettetEmailService {
     private final RessursStateRepository ressursStateRepository;
     private final DvhRepository dvhRepository;
     private final Configuration freemarkerConfig;
+    private final Unleash unleash;
 
     public RessursOpprettetEmailService(
         EmailClient emailClient,
@@ -52,14 +55,16 @@ public class RessursOpprettetEmailService {
         OrgEnhetStateRepository orgEnhetStateRepository,
         RessursStateRepository ressursStateRepository,
         DvhRepository dvhRepository,
-        Configuration freemarkerConfig
-        ) {
+        Configuration freemarkerConfig,
+        Unleash unleash
+    ) {
         this.emailClient = emailClient;
         this.adClient = adClient;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.dvhRepository = dvhRepository;
         this.freemarkerConfig = freemarkerConfig;
+        this.unleash = unleash;
     }
 
     public void notifyByEmail(String navident, String orgenhetId) {
@@ -92,8 +97,10 @@ public class RessursOpprettetEmailService {
             var adRessurser = adClient.getAdRessurser(updatedRecipientNavidents);
             var recipientList = adRessurser.getRessurser().stream().map(AdRessurs::getEmail).toList();
 
-            // add Line and Renate to the recipient list for testing purposes. This will be deleted later when tests are confirmed
-            recipientList = appendAdditionalRecipientsEmails(recipientList, getAdditionalRecipientsEmails());
+            if (unleash.isEnabled(UNLEASH_INFORM_ADDITIONAL_EMAIL_RECIPIENTS)) {
+                // add Line and Renate to the recipient list for testing purposes.
+                recipientList = appendAdditionalRecipientsEmails(recipientList, getAdditionalRecipientsEmails());
+            }
 
             String subject = String.format("Ressurs opprettet %s (%s)",
                 opprettetRessurs.visningsnavn().getFormattedVisningsnavn(), opprettetRessurs.navident()
