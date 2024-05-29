@@ -17,6 +17,7 @@ import {
   HelpText,
   HStack,
   Label,
+  Modal,
   useDatepicker,
 } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -24,7 +25,7 @@ import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { addYears } from "date-fns";
 import partition from "lodash/partition";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import {
   FormProvider,
@@ -72,6 +73,8 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
 
   const orgtilknytninger = ressursOrgtilknytningerQuery.data ?? [];
 
+  const reference = useRef<HTMLDialogElement>(null);
+
   return (
     <div>
       <Heading
@@ -109,6 +112,8 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
         orgtilknytninger={orgtilknytninger}
         ressurs={ressurs}
       />
+
+      {/*<BekreftModal ref={reference} />*/}
     </div>
   );
 }
@@ -185,10 +190,25 @@ function OrgtilknytningForm({
       validation.dolOverlaps.length === 0 &&
       validation.dolGaps.length === 0
     ) {
-      oppdaterOrgtilknytningerMutation.mutate(
-        lagOppdaterOrgtilknytningerRequest(
-          data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
-        ),
+      console.log("Would save");
+
+      // oppdaterOrgtilknytningerMutation.mutate(
+      //   lagOppdaterOrgtilknytningerRequest(
+      //     data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+      //   ),
+      // );
+    }
+  };
+
+  const modalReference = useRef<HTMLDialogElement>(null);
+  const formReference = useRef<HTMLFormElement>(null);
+
+  const handleSubmitClick = () => {
+    if (2 === 2) {
+      modalReference.current?.showModal();
+    } else {
+      formReference.current?.dispatchEvent(
+        new Event("submit", { cancelable: true, bubbles: true }),
       );
     }
   };
@@ -201,6 +221,7 @@ function OrgtilknytningForm({
       <form
         autoComplete="false"
         onSubmit={handleSubmit(onValid, scrollFirstErrorIntoView)}
+        ref={formReference}
       >
         {hasWriteAccess && (
           <div
@@ -316,8 +337,9 @@ function OrgtilknytningForm({
 
           <Button
             icon={<FloppydiskIcon aria-hidden />}
+            onClick={handleSubmitClick}
             size="small"
-            type="submit"
+            type="button"
           >
             Lagre
           </Button>
@@ -332,6 +354,36 @@ function OrgtilknytningForm({
 
           <ApiResponseError error={oppdaterOrgtilknytningerMutation.error} />
         </div>
+
+        <Button
+          onClick={() => modalReference.current?.showModal()}
+          type="button"
+        >
+          Åpne modal
+        </Button>
+
+        <Modal header={{ heading: "Bekreft" }} ref={modalReference}>
+          <Modal.Body>
+            <BodyLong>Er du sikker?</BodyLong>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              icon={<FloppydiskIcon aria-hidden />}
+              size="small"
+              type="submit"
+            >
+              Lagre
+            </Button>
+            <Button
+              onClick={() => modalReference.current?.close()}
+              size="small"
+              type="button"
+              variant="secondary"
+            >
+              Avbryt
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </form>
     </FormProvider>
   );
@@ -605,6 +657,47 @@ function IllegalDolCombinationAlert() {
         )}
       </div>
     </Alert>
+  );
+}
+
+function BekreftModal({ ref }: { ref: React.RefObject<HTMLDialogElement> }) {
+  return (
+    <Modal
+      header={{ heading: "Overskrift" }}
+      onClose={() => ref.current?.close()}
+      open
+      ref={ref}
+    >
+      <Modal.Body>
+        <BodyLong>
+          Culpa aliquip ut cupidatat laborum minim quis ex in aliqua. Qui
+          incididunt dolor do ad ut. Incididunt eiusmod nostrud deserunt duis
+          laborum. Proident aute culpa qui nostrud velit adipisicing minim.
+          Consequat aliqua aute dolor do sit Lorem nisi mollit velit. Aliqua
+          exercitation non minim minim pariatur sunt laborum ipsum. Exercitation
+          nostrud est laborum magna non non aliqua qui esse.
+        </BodyLong>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={() => ref.current?.close()} type="button">
+          Primær
+        </Button>
+        <Button
+          onClick={() => ref.current?.close()}
+          type="button"
+          variant="secondary"
+        >
+          Sekundær
+        </Button>
+        <Button
+          onClick={() => ref.current?.close()}
+          type="button"
+          variant="tertiary"
+        >
+          Tertiær
+        </Button>
+      </Modal.Footer>
+    </Modal>
   );
 }
 
