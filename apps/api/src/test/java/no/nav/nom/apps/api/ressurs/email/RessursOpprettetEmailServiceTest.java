@@ -83,7 +83,7 @@ public class RessursOpprettetEmailServiceTest {
     }
 
     @Test
-    void test_appendAuthenticatedUserToRecipientsList() throws JOSEException, ParseException {
+    void test_appendAuthenticatedUserToRecipientsList() {
         List<String> recipientNavIdents = new ArrayList<>();
         recipientNavIdents.add("A123456");
         recipientNavIdents.add("B123456");
