@@ -25,6 +25,7 @@ import type { AxiosError } from "axios";
 import { addYears } from "date-fns";
 import partition from "lodash/partition";
 import React, { useEffect } from "react";
+import type { SubmitHandler } from "react-hook-form";
 import {
   FormProvider,
   useFieldArray,
@@ -173,6 +174,25 @@ function OrgtilknytningForm({
     },
   });
 
+  const onValid: SubmitHandler<{
+    mappedeOrgtilknytninger: Partial<OrgtilknytningState>[];
+  }> = (data) => {
+    const validation = dolValidering(
+      data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+    );
+
+    if (
+      validation.dolOverlaps.length === 0 &&
+      validation.dolGaps.length === 0
+    ) {
+      oppdaterOrgtilknytningerMutation.mutate(
+        lagOppdaterOrgtilknytningerRequest(
+          data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+        ),
+      );
+    }
+  };
+
   return (
     <FormProvider {...methods}>
       <OrgtilknytningTimeline
@@ -180,21 +200,7 @@ function OrgtilknytningForm({
       />
       <form
         autoComplete="false"
-        onSubmit={handleSubmit((data) => {
-          const validation = dolValidering(
-            data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
-          );
-          if (
-            validation.dolOverlaps.length === 0 &&
-            validation.dolGaps.length === 0
-          ) {
-            oppdaterOrgtilknytningerMutation.mutate(
-              lagOppdaterOrgtilknytningerRequest(
-                data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
-              ),
-            );
-          }
-        })}
+        onSubmit={handleSubmit(onValid, scrollFirstErrorIntoView)}
       >
         {hasWriteAccess && (
           <div
@@ -699,4 +705,11 @@ const validateMaxTime = (
   }
 
   return true;
+};
+
+const scrollFirstErrorIntoView = () => {
+  document.querySelector(".navds-error-message")?.scrollIntoView({
+    behavior: "smooth",
+    block: "center",
+  });
 };
