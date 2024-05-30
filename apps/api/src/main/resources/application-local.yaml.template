@@ -36,6 +36,8 @@ app:
       nom-admin:
         group-id: "${NOM_ADMIN_GROUPID}"
         scopes: ["ADMIN"]
+  manuelle-ressurser-og-ledere:
+    enabled: false
 
 # DB. Bruk cloud-proxy mot miljø, eller kjør postgres lokalt
 
