@@ -1,3 +1,0 @@
-image: ${{needs.build-app-docker.outputs.image}}
-ingresses:
-  - https://${{github.event.number}}-nom-ui2.ekstern.dev.nav.no

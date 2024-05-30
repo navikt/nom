@@ -42,10 +42,9 @@ spec:
         - application: org-token-tool
           namespace: org
           cluster: dev-gcp
-  ingresses: # kommer som env-var fra github actions
-  {{#each ingresses as |ingress|}}
-    - "{{ingress}}"
-  {{/each}}
+  ingresses:
+    - https://nom-ui2.intern.dev.nav.no
+    - https://nom.ekstern.dev.nav.no
   replicas:
     min: 1
     max: 1
