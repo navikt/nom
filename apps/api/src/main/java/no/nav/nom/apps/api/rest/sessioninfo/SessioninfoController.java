@@ -25,7 +25,8 @@ public class SessioninfoController {
     @Autowired
     public SessioninfoController(Environment env) {
         this.claimToRoleMap = Map.of(
-            env.getRequiredProperty("authentication.groups.nomDelegert"), UserRoles.ROLE_DELEGERT,
+            env.getRequiredProperty("authentication.groups.nomDelegert"), UserRoles.ROLE_WRITE,
+            env.getRequiredProperty("authentication.groups.nomLeder"), UserRoles.ROLE_WRITE,
             env.getRequiredProperty("authentication.groups.nomWrite"), UserRoles.ROLE_WRITE,
             env.getRequiredProperty("authentication.groups.nomAdmin"), UserRoles.ROLE_ADMIN
         );
@@ -41,6 +42,7 @@ public class SessioninfoController {
         var userRoles = principal.getClaimAsStringList("groups").stream()
             .map(group -> claimToRoleMap.getOrDefault(group, null))
             .filter(Objects::nonNull)
+            .distinct()
             .toList();
 
         return new SessionInfoResponse(
@@ -52,7 +54,6 @@ public class SessioninfoController {
 
     @Schema(enumAsRef = true)
     public enum UserRoles {
-        ROLE_DELEGERT,
         ROLE_WRITE,
         ROLE_ADMIN
     }
