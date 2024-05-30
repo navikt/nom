@@ -37,10 +37,10 @@ import java.util.Set;
 public class RessursOpprettetEmailService {
     private static final String OPPRETTELSE_VARSEL_TEMPLATE = "opprettelse-varsel.ftlh";
     public static final String NAVIDENT = "NAVident";
-    public static final String UNLEASH_INFORM_ADDITIONAL_EMAIL_RECIPIENTS = "nom.ressurs-create.inform_additional_recipients";
+    public static final String UNLEASH_INFORM_ADDITIONAL_RECIPIENTS = "nom.ressurs-create.inform_additional_recipients";
+    public static final String UNLEASH_INFORM_LEDER = "nom.ressurs-create.inform_leader";
 
     private final Logger log = LoggerFactory.getLogger(RessursOpprettetEmailService.class);
-
     private final EmailClient emailClient;
     private final AdClient adClient;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
@@ -87,18 +87,18 @@ public class RessursOpprettetEmailService {
             throw new RessursOpprettetEmailException("Fant ikke leder for orgenhet " + orgenhetId);
         }
 
-        // else send email to all leaders
-        composeAndSendEmail(opprettetRessurs, Set.copyOf(leaders), orgEnhet.navn());
+        // compose and send email to all recipients
+        Set <String> recipientNavidents = unleash.isEnabled(UNLEASH_INFORM_LEDER) ? Set.copyOf(leaders) : Set.of();
+        recipientNavidents = appendAuthenticatedUserToRecipientNavIdents(Set.copyOf(recipientNavidents));
+        composeAndSendEmail(opprettetRessurs, recipientNavidents, orgEnhet.navn());
     }
 
     private void composeAndSendEmail(RessursState opprettetRessurs, Set<String> recipientNavidents, String orgenhetName) {
         try {
-            Set<String> updatedRecipientNavidents = appendAuthenticatedUserToRecipientNavIdents(recipientNavidents);
-            var adRessurser = adClient.getAdRessurser(updatedRecipientNavidents);
+            var adRessurser = adClient.getAdRessurser(recipientNavidents);
             var recipientList = adRessurser.getRessurser().stream().map(AdRessurs::getEmail).toList();
 
-            if (unleash.isEnabled(UNLEASH_INFORM_ADDITIONAL_EMAIL_RECIPIENTS)) {
-                // add Line and Renate to the recipient list for testing purposes.
+            if (unleash.isEnabled(UNLEASH_INFORM_ADDITIONAL_RECIPIENTS)) {
                 recipientList = appendAdditionalRecipientsEmails(recipientList, getAdditionalRecipientsEmails());
             }
 
