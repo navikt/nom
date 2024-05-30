@@ -112,8 +112,6 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
         orgtilknytninger={orgtilknytninger}
         ressurs={ressurs}
       />
-
-      {/*<BekreftModal ref={reference} />*/}
     </div>
   );
 }
@@ -204,7 +202,7 @@ function OrgtilknytningForm({
   const formReference = useRef<HTMLFormElement>(null);
 
   const handleSubmitClick = () => {
-    if (2 === 2) {
+    if (trengerBekreftelse(watch("mappedeOrgtilknytninger"))) {
       modalReference.current?.showModal();
     } else {
       formReference.current?.dispatchEvent(
@@ -362,28 +360,30 @@ function OrgtilknytningForm({
           Åpne modal
         </Button>
 
-        <Modal header={{ heading: "Bekreft" }} ref={modalReference}>
-          <Modal.Body>
-            <BodyLong>Er du sikker?</BodyLong>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button
-              icon={<FloppydiskIcon aria-hidden />}
-              size="small"
-              type="submit"
-            >
-              Lagre
-            </Button>
-            <Button
-              onClick={() => modalReference.current?.close()}
-              size="small"
-              type="button"
-              variant="secondary"
-            >
-              Avbryt
-            </Button>
-          </Modal.Footer>
-        </Modal>
+        <BekreftModal ref={modalReference} />
+
+        {/*<Modal header={{ heading: "Bekreft" }} ref={modalReference}>*/}
+        {/*  <Modal.Body>*/}
+        {/*    <BodyLong>Er du sikker?</BodyLong>*/}
+        {/*  </Modal.Body>*/}
+        {/*  <Modal.Footer>*/}
+        {/*    <Button*/}
+        {/*      icon={<FloppydiskIcon aria-hidden />}*/}
+        {/*      size="small"*/}
+        {/*      type="submit"*/}
+        {/*    >*/}
+        {/*      Lagre*/}
+        {/*    </Button>*/}
+        {/*    <Button*/}
+        {/*      onClick={() => modalReference.current?.close()}*/}
+        {/*      size="small"*/}
+        {/*      type="button"*/}
+        {/*      variant="secondary"*/}
+        {/*    >*/}
+        {/*      Avbryt*/}
+        {/*    </Button>*/}
+        {/*  </Modal.Footer>*/}
+        {/*</Modal>*/}
       </form>
     </FormProvider>
   );
@@ -662,43 +662,42 @@ function IllegalDolCombinationAlert() {
 
 function BekreftModal({ ref }: { ref: React.RefObject<HTMLDialogElement> }) {
   return (
-    <Modal
-      header={{ heading: "Overskrift" }}
-      onClose={() => ref.current?.close()}
-      open
-      ref={ref}
-    >
+    <Modal header={{ heading: "Bekreft" }} ref={ref}>
       <Modal.Body>
-        <BodyLong>
-          Culpa aliquip ut cupidatat laborum minim quis ex in aliqua. Qui
-          incididunt dolor do ad ut. Incididunt eiusmod nostrud deserunt duis
-          laborum. Proident aute culpa qui nostrud velit adipisicing minim.
-          Consequat aliqua aute dolor do sit Lorem nisi mollit velit. Aliqua
-          exercitation non minim minim pariatur sunt laborum ipsum. Exercitation
-          nostrud est laborum magna non non aliqua qui esse.
-        </BodyLong>
+        <BodyLong>Er du sikker?</BodyLong>
       </Modal.Body>
       <Modal.Footer>
-        <Button onClick={() => ref.current?.close()} type="button">
-          Primær
+        <Button
+          icon={<FloppydiskIcon aria-hidden />}
+          size="small"
+          type="submit"
+        >
+          Lagre
         </Button>
         <Button
           onClick={() => ref.current?.close()}
+          size="small"
           type="button"
           variant="secondary"
         >
-          Sekundær
-        </Button>
-        <Button
-          onClick={() => ref.current?.close()}
-          type="button"
-          variant="tertiary"
-        >
-          Tertiær
+          Avbryt
         </Button>
       </Modal.Footer>
     </Modal>
   );
+}
+
+function trengerBekreftelse(data: Partial<OrgtilknytningState>[]) {
+  console.log(data);
+
+  const alleOrgtilknytningerTom = !data.some(
+    (orgtilknytning) => orgtilknytning.gyldigTom === undefined,
+  );
+
+  console.log("Alle orgtilknytninger TOM:");
+  console.log(alleOrgtilknytningerTom);
+
+  return false;
 }
 
 function lagOppdaterOrgtilknytningerRequest(
