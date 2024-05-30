@@ -3,8 +3,7 @@ name: 'deploy: nom-ui2'
 on:
   push:
     branches:
-      - 'main'
-      - 'dev/*'
+      - '*'
     paths:
       - '.github/workflows/deploy-ui2.yaml'
       - 'apps/ui2/**'
@@ -21,6 +20,7 @@ jobs:
     permissions:
       contents: "read"
       id-token: "write"
+    if: startsWith(github.ref, 'refs/heads/uideploy') || startsWith(github.ref, 'refs/heads/dev') || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -65,12 +65,13 @@ jobs:
     outputs:
       image: ${{ steps.docker-push.outputs.image }}
 
-  deploy-dev:
+  deploy-dev-branch-ingress:
     name: Deploy dev-gcp
     permissions:
       contents: "read"
       id-token: "write"
     needs: build-app-docker
+    if: startsWith(github.ref, 'refs/heads/uideploy')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -78,7 +79,23 @@ jobs:
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/apps/ui2/ui2-dev.yaml
-          VAR: image=${{needs.build-app-docker.outputs.image}}
+          VAR: image=${{needs.build-app-docker.outputs.image}};ingress=https://${{github.event.number}}-nom-ui2.ekstern.dev.nav.no
+
+  deploy-dev:
+    name: Deploy dev-gcp
+    permissions:
+      contents: "read"
+      id-token: "write"
+    needs: build-app-docker
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/apps/ui2/ui2-dev.yaml
+          VAR: image=${{needs.build-app-docker.outputs.image}};ingress=https://nom-ui2.intern.dev.nav.no,https://nom.ekstern.dev.nav.no
 
   deploy-prod:
     name: Deploy prod-gcp
