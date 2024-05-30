@@ -147,13 +147,13 @@ public class RessursOpprettetEmailService {
         return Set.copyOf(updatedRecipientsNavIdents);
     }
 
-    public static String getAuthenticatedNavIdent() {
+    private static String getAuthenticatedNavIdent() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return getNavIdent(authentication).orElseThrow(
             () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Couldn't find %s in Claims of authenticated user", NAVIDENT)));
     }
 
-    public static Optional<String> getNavIdent(Authentication authentication) {
+    private static Optional<String> getNavIdent(Authentication authentication) {
         Jwt jwt = (Jwt) authentication.getPrincipal();
         return Optional.ofNullable(jwt.getClaimAsString(NAVIDENT));
     }
