@@ -70,14 +70,15 @@ public class RessursOpprettetEmailServiceTest {
 
         List<String> additionalRecipients = new ArrayList<>();
         additionalRecipients.add("b@c.com");
+        additionalRecipients.add("a1@b.com");
+        additionalRecipients.add("A1@b.com");
 
         List<String> updatedList = ressursOpprettetEmailService.appendAdditionalRecipientsEmails(recipients, additionalRecipients);
         assertThat(recipients.size()).isEqualTo(2);
-        assertThat(additionalRecipients.size()).isEqualTo(1);
+        assertThat(additionalRecipients.size()).isEqualTo(3);
         assertThat(updatedList.size()).isEqualTo(3);
 
         assertThat(updatedList.containsAll(recipients)).isTrue();
-        assertThat(updatedList.containsAll(additionalRecipients)).isTrue();
     }
 
     @Test

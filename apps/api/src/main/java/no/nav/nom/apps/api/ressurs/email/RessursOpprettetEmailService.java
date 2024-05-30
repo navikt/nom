@@ -160,7 +160,12 @@ public class RessursOpprettetEmailService {
 
     public List<String> appendAdditionalRecipientsEmails(List<String> recipients, List<String> additionalRecipients) {
         List<String> updatedRecipients = new ArrayList<>(recipients);
-        updatedRecipients.addAll(additionalRecipients);
+        for (String additionalRecipient : additionalRecipients) {
+            // ignore cases in the email address
+            if (!updatedRecipients.contains(additionalRecipient) && !updatedRecipients.contains(additionalRecipient.toLowerCase())) {
+                updatedRecipients.add(additionalRecipient);
+            }
+        }
         return Collections.unmodifiableList(updatedRecipients);
     }
 
