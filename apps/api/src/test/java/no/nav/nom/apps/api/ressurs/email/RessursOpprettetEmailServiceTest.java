@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.ressurs.email;
 
-import com.nimbusds.jose.JOSEException;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.Configuration;
@@ -19,7 +18,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
