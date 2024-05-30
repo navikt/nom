@@ -242,6 +242,12 @@ app:
         client-id: "18c1d86b-4635-461c-8718-62c130087211"
         scopes: ["TEAMCAT"]
     groups:
+      nom-leder:
+        group-id: "${NOM_LEDER_GROUPID}"
+        scopes: ["MUTATE_RESSURS"]
+      nom-delegert:
+        group-id: "${NOM_DELEGERT_GROUPID}"
+        scopes: ["MUTATE_RESSURS"]
       nom-write:
         group-id: "${NOM_WRITE_GROUPID}"
         scopes: ["MUTATE_RESSURS", "QUERY_PERSON"]
@@ -319,6 +325,12 @@ app:
         client-id: "f1931989-7a09-496c-8e2d-111b56faa242"
         scopes: ["TEAMCAT"]
     groups:
+      nom-leder:
+        group-id: "${NOM_LEDER_GROUPID}"
+        scopes: ["MUTATE_RESSURS"]
+      nom-delegert:
+        group-id: "${NOM_DELEGERT_GROUPID}"
+        scopes: ["MUTATE_RESSURS"]
       write:
         group-id: "${NOM_WRITE_GROUPID}"
         scopes: ["MUTATE_RESSURS"]
