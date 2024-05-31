@@ -399,10 +399,10 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
     static final IOrgenhet ORGENHET_VIKAFOSSEN = new OrgEnhet(
         new OrgEnhetState("FID_ENHET_VIKAFOSSEN", "ORGENHET_VIKAFOSSEN", "ENHET VIKAFOSSEN", LocalDate.of(2022, 1, 1),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("8000100-ENHET VIKAFOSSEN-ORGENHET"), Optional.of("Vikafossen"), Optional.of("ORGENHET"), Optional.empty()
+            Optional.of("8000100-ENHET VIKAFOSSEN-ORGENHET"), Optional.of("EV00001"), Optional.of("ORGENHET"), Optional.empty()
         )
     );
 
     static final RemedyEnhet REMEDY_ENHET_1234 = new RemedyEnhet("1234", "8000100", "ORGENHET", "ORGENHET_A");
-    static final RemedyEnhet REMEDY_ENHET_2103 = new RemedyEnhet("2103", "Vikafossen", "ORGENHET", "VIKAFOSSEN");
+    static final RemedyEnhet REMEDY_ENHET_2103 = new RemedyEnhet("2103", "EV00001", "ORGENHET", "VIKAFOSSEN");
 }
