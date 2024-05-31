@@ -83,8 +83,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 052900;0529;ORGNIV3;Vestre Toten;Beholdt;;;JA;052900;ORGNIV3;leggInn;
 053200;0532;ORGNIV3;Jevnaker;Beholdt;;;JA;053200;ORGNIV3;leggInn;
 053400;0534;ORGNIV3;Hadeland;Beholdt;;;JA;053400;ORGNIV3;leggInn;
-053600;0536;ORGNIV3;Søndre Land;Beholdt;;;JA;053600;ORGNIV3;leggInn;
-053800;0538;ORGNIV3;Nordre Land;Beholdt;;;JA;053800;ORGNIV3;leggInn;
+053800;0538;ORGNIV3;Land;Beholdt;;;JA;053800;ORGNIV3;leggInn;
 054250;0542;ORGNIV3;Valdres;Beholdt;;;JA;054250;ORGNIV3;leggInn;
 0587000;0587;AGRESSOORGENHET;Innlandet Tiltak;;;;JA;058700;ORGNIV4;ry301g;13.07.23: Flyttet mapping fra jy896y til overliggende, ry301g, slik at alle underliggende skal arve remedyEnhet
 068010;0600;ORGNIV3;Vest-Viken Region;Opp til ORGNIV2;R06;;JA;R06;ORGNIV2;leggInn;Testet på leder i underliggende enhet som ikke har egen remedyEnhet. Vedkommendes trygdeident er på XXX0600
@@ -384,7 +383,6 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 160300;5701;ORGNIV3;Falkenborg;Beholdt;;;JA;160300;ORGNIV3;leggInn;
 160500;5702;ORGNIV3;Lerkendal;Beholdt;;;JA;160500;ORGNIV3;leggInn;
 162400;5703;ORGNIV3;Indre Fosen;Beholdt;;;JA;162400;ORGNIV3;leggInn;
-1687000;5771;AGRESSOORGENHET;Trøndelag Tiltak;Opp til ORGNIV3;168700;fu609w;JA;168700;ORGNIV3;fu609w;
 1699000;5772;AGRESSOORGENHET;Trøndelag Arbeidslivssenter stab;Opp til ORGNIV3;169900;vy201a;JA;169900;ORGNIV3;vy201a;
 1696100;5773;AGRESSOORGENHET;Trøndelag Rådgivningstjeneste;Opp til ORGNIV3;169610;hy609j;JA;169610;ORGNIV3;hy609j;
 SKATT;9401;ORGNIV0;;Beholdt, MEN;;;JA;SKATT;ORGNIV0;leggInn;
