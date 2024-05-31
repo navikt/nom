@@ -9,7 +9,9 @@ import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -363,6 +365,30 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
             .erDagligOppfolging(true);
     }
 
+    @Test
+    @DisplayName("Ressures med remedyenhet vikafossen plasseres på orgenhet vikafossen")
+    public void test_013() {
+        DvhEksternRessurs ekstern = new DvhEksternRessurs("payload", "A000001", "2103", "IGNORER_AGRESSO_ID", "ORGENHET", tomorrow, inTwoMonths, true);
+
+        var mockPreviousOrgtilknytning = OrgtilknytningState.builder()
+            .navident("A000001")
+            .orgEnhetId(ORGENHET_A.getId())
+            .gyldigTom(Optional.empty())
+            .gyldigFom(LocalDate.now())
+            .build();
+
+        when(orgenhetService.getEnhetByAgressoIdAndOrgniv(ORGENHET_VIKAFOSSEN.getAgressoId(), "ORGENHET")).thenReturn(Optional.of(ORGENHET_VIKAFOSSEN));
+        when(orgtilknytningService.getByNavIdent("A000001")).thenReturn(List.of(mockPreviousOrgtilknytning));
+        when(orgenhetService.getAllEnheterMedOrganisering()).thenReturn(List.of(ORGENHET_VIKAFOSSEN, ORGENHET_A));
+        when(remedyEnhetMapperService.findByRemedyEnhetId(REMEDY_ENHET_2103.remedyEnhetId())).thenReturn(Optional.of(REMEDY_ENHET_2103));
+
+        eksterneRessurserProcessor.process(ekstern);
+
+        assertOrgtilknytning(CMD.FJERNET).forNavident("A000001").tilEnhet(ORGENHET_A.getId());
+
+        assertOrgtilknytning(CMD.OPPRETTET).forNavident("A000001").tilEnhet(ORGENHET_VIKAFOSSEN.getId());
+    }
+
     static final IOrgenhet ORGENHET_A = new OrgEnhet(
         new OrgEnhetState("FID_ENHET_A", "ORGENHET_A", "ENHET A", LocalDate.of(2022, 1, 1),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
@@ -370,5 +396,13 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
         )
     );
 
+    static final IOrgenhet ORGENHET_VIKAFOSSEN = new OrgEnhet(
+        new OrgEnhetState("FID_ENHET_VIKAFOSSEN", "ORGENHET_VIKAFOSSEN", "ENHET VIKAFOSSEN", LocalDate.of(2022, 1, 1),
+            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+            Optional.of("8000100-ENHET VIKAFOSSEN-ORGENHET"), Optional.of("Vikafossen"), Optional.of("ORGENHET"), Optional.empty()
+        )
+    );
+
     static final RemedyEnhet REMEDY_ENHET_1234 = new RemedyEnhet("1234", "8000100", "ORGENHET", "ORGENHET_A");
+    static final RemedyEnhet REMEDY_ENHET_2103 = new RemedyEnhet("2103", "Vikafossen", "ORGENHET", "VIKAFOSSEN");
 }
