@@ -76,7 +76,7 @@ jobs:
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/apps/ui2/ui2-dev.yaml
-          VAR: image=${{needs.build-app-docker.outputs.image}},ingress=https://${{ github.event.number }}-nom.ekstern.dev.nav.no
+          VAR: image=${{needs.build-app-docker.outputs.image}},ingress=https://${{ github.event.pull_request.id }}-nom.ekstern.dev.nav.no
 
   create-link-to-app:
     permissions:
@@ -89,4 +89,4 @@ jobs:
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            URL for testing av frontend: https://${{ github.event.number }}-nom.ekstern.dev.nav.no
+            URL for testing av frontend: https://${{ github.event.pull_request.id }}-nom.ekstern.dev.nav.no
