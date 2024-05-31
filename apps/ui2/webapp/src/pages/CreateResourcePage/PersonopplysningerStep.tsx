@@ -206,7 +206,7 @@ function VisningsnavnForm({
           error={errors.primaryTelefonnummer?.message}
           label="Telefonnummer"
         />
-        <NavigationButtons />
+        <NavigationButtons goBackCallback={() => {}} />
       </form>
     </>
   );

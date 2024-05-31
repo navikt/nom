@@ -32,6 +32,24 @@ export function SektorStep() {
   );
   const navigate = useNavigate();
 
+  const saveValuesAndNavigate = (step: string) => {
+    // TilknytningsType gir ikke mening for kommunale, derfor vises ikke dette som et valg i gui, og i state lagrer vi dette som "INGEN"
+    const tilknytningtype =
+      selectedSektor === Sektor.NAV_KOMMUNAL
+        ? Tilknytningtype.INGEN
+        : selectedTilknytningtype;
+
+    navigate({
+      to: "/ressurs/create/$step",
+      params: { step },
+      search: (oldSearch) => ({
+        ...oldSearch,
+        sektor: selectedSektor,
+        tilknytningtype,
+      }),
+    });
+  };
+
   return (
     <ContainerWithHighlightedTop icon={opprettRessursIcon} title="Sektor">
       <Alert variant="info">
@@ -43,22 +61,7 @@ export function SektorStep() {
       <form
         onSubmit={(event) => {
           event.preventDefault();
-
-          // TilknytningsType gir ikke mening for kommunale, derfor vises ikke dette som et valg i gui, og i state lagrer vi dette som "INGEN"
-          const tilknytningtype =
-            selectedSektor === Sektor.NAV_KOMMUNAL
-              ? Tilknytningtype.INGEN
-              : selectedTilknytningtype;
-
-          navigate({
-            to: "/ressurs/create/$step",
-            params: { step: "3" },
-            search: (oldSearch) => ({
-              ...oldSearch,
-              sektor: selectedSektor,
-              tilknytningtype,
-            }),
-          });
+          saveValuesAndNavigate("3");
         }}
       >
         <RadioGroup
@@ -102,7 +105,7 @@ export function SektorStep() {
             </option>
           </Select>
         )}
-        <NavigationButtons />
+        <NavigationButtons goBackCallback={() => saveValuesAndNavigate("1")} />
       </form>
     </ContainerWithHighlightedTop>
   );
