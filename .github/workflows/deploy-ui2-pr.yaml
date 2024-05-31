@@ -67,6 +67,7 @@ jobs:
     permissions:
       contents: "read"
       id-token: "write"
+      pull-requests: "read"
     needs: build-app-docker
     runs-on: ubuntu-latest
     steps:
@@ -75,11 +76,11 @@ jobs:
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/apps/ui2/ui2-dev.yaml
-          VAR: image=${{needs.build-app-docker.outputs.image}},ingress=https://${{github.event.number}}-nom.ekstern.dev.nav.no
+          VAR: image=${{needs.build-app-docker.outputs.image}},ingress=https://${{ github.event.number }}-nom.ekstern.dev.nav.no
 
   create-link-to-app:
     permissions:
-      pull-requests: 'write'
+      pull-requests: "write"
     needs: deploy-dev-pr-branch
     name: Opprett lenke til testapplikasjon for PR
     runs-on: ubuntu-latest
@@ -88,4 +89,4 @@ jobs:
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            URL for testing av frontend: https://${{github.event.number}}-nom.ekstern.dev.nav.no
+            URL for testing av frontend: https://${{ github.event.number }}-nom.ekstern.dev.nav.no
