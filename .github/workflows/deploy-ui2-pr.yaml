@@ -1,4 +1,4 @@
-name: 'deploy: nom-ui2-pr'
+name: 'deploy: nom-ui2-dev-pr'
 
 on:
   pull_request:
@@ -105,7 +105,7 @@ jobs:
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
-          RESOURCE: .nais/apps/ui2/ui2-pr.yaml
+          RESOURCE: .nais/apps/ui2/ui2-dev-pr.yaml
           VAR: image=${{needs.build-app-docker.outputs.image}},ingress=https://${{github.event.number}}-nom.ekstern.dev.nav.no
 
   create-link-to-app:
