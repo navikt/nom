@@ -1,0 +1,91 @@
+name: 'deploy: nom-ui2-pr'
+
+on:
+  pull_request:
+    branches:
+      - 'uideploy/*'
+    paths:
+      - '*'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: apps
+
+jobs:
+  build-app-docker:
+    name: "Build app and push docker image to GAR"
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: https://npm.pkg.github.com/
+          scope: '@navikt'
+
+      - name: Install webapp dependencies
+        working-directory: apps/ui2/webapp
+        run: npm install
+
+      - name: Build webapp
+        working-directory: apps/ui2/webapp
+        run: npm run build
+
+      - name: Copy webapp dist into public directory of frackend
+        working-directory: apps/ui2/webapp
+        run: cp -r dist/ ../frackend/public
+
+      - name: Install frackend dependencies
+        working-directory: apps/ui2/frackend
+        run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+
+      - name: Build frackend
+        working-directory: apps/ui2/frackend
+        run: npm run build
+
+      - name: Build and push Docker image
+        uses: nais/docker-build-push@v0
+        id: docker-push
+        with:
+          team: org
+          image_suffix: nom-ui2
+          docker_context: apps/ui2/frackend
+          dockerfile: apps/ui2/frackend/Dockerfile
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+    outputs:
+      image: ${{ steps.docker-push.outputs.image }}
+
+  deploy-dev-pr-branch:
+    name: Deploy dev-gcp-pr-branch
+    permissions:
+      contents: "read"
+      id-token: "write"
+    needs: build-app-docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/apps/ui2/ui2-dev.yaml
+          VAR: image=${{needs.build-app-docker.outputs.image}},ingress=https://${{github.event.number}}-nom.ekstern.dev.nav.no
+
+  create-link-to-app:
+    permissions:
+      pull-requests: 'write'
+    needs: deploy-dev-pr-branch
+    name: Opprett lenke til testapplikasjon for PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Opprett lenke til testapplikasjon
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            URL for testing av frontend: https://${{github.event.number}}-nom.ekstern.dev.nav.no
