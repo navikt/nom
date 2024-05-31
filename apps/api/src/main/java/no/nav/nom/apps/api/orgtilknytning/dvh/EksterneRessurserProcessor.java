@@ -34,7 +34,8 @@ public class EksterneRessurserProcessor {
 
     public static final String ORGENHET_NAVN_HELFO = "Helfo";
     public static final String ORGENHET_NAVN_HELFO_ANSATTE = "Helfo ansatte";
-    public static final String ORGENHET_NAVN_VIKAFOSSEN = "Vikafossen";
+    public static final String ORGENHET_NAVN_VIKAFOSSEN = "VikaFossen";
+    public static final String ORGENHET_AGRESSOID_VIKAFOSSEN = "EV00001";
 
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgtilknytningService orgtilknytningService;
@@ -262,7 +263,7 @@ public class EksterneRessurserProcessor {
 
     private IOrgenhet hvisVikafossenPlasserPaaVikafossen(IOrgenhet orgenhetForRemedyenhet, String remedyEnhet){
         if(remedyEnhet.equals("2103")){
-            orgenhetForRemedyenhet = orgenhetService.getEnhetByAgressoIdAndOrgniv(ORGENHET_NAVN_VIKAFOSSEN,"ORGENHET").orElse(null);
+            orgenhetForRemedyenhet = orgenhetService.getEnhetByAgressoIdAndOrgniv(ORGENHET_AGRESSOID_VIKAFOSSEN,"ORGENHET").orElse(null);
         }
         return orgenhetForRemedyenhet;
     }
