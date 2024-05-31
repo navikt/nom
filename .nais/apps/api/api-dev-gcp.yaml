@@ -76,6 +76,9 @@ spec:
         - application: nom-ui2
           namespace: org
           cluster: dev-gcp
+        - application: nom-ui2-pr-deploy
+          namespace: org
+          cluster: dev-gcp
         - application: team-catalog-frackend
           namespace: org
         - application: org-ekstern-proxy
