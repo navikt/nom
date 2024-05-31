@@ -42,7 +42,8 @@ spec:
         - application: org-token-tool
           namespace: org
           cluster: dev-gcp
-  ingress: "{{ingress}}"
+  ingresses:
+    - {{ingress}}
   replicas:
     min: 1
     max: 1
