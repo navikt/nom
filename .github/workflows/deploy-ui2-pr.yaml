@@ -67,6 +67,7 @@ jobs:
     permissions:
       contents: "read"
       id-token: "write"
+      pull-requests: "read"
     needs: build-app-docker
     runs-on: ubuntu-latest
     steps:
@@ -79,7 +80,7 @@ jobs:
 
   create-link-to-app:
     permissions:
-      pull-requests: 'write'
+      pull-requests: "write"
     needs: deploy-dev-pr-branch
     name: Opprett lenke til testapplikasjon for PR
     runs-on: ubuntu-latest
