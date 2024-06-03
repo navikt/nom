@@ -54,6 +54,7 @@ nom.libs.state.orgenhet.enabled: true
 nom.libs.state.orgtilknytning.enabled: true
 nom.libs.state.organisering.enabled: true
 nom.libs.state.mastered-ressurs.enabled: true
+nom.libs.state.delegert-leder.enabled: true
 
 authentication:
   aad:

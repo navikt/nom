@@ -105,6 +105,12 @@ spec:
         - application: modia-robot-api
           namespace: personoversikt
           cluster: prod-fss
+        - application: modiacontextholder
+          namespace: personoversikt
+          cluster: prod-gcp
+        - application: modiacontextholder
+          namespace: personoversikt
+          cluster: prod-fss
         - application: pdl-fullmakt
           namespace: pdl
           cluster: prod-fss
