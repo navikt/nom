@@ -227,6 +227,9 @@ spec:
         - application: gosys-oppgavebehandling-api
           namespace: oppgavehandtering
           cluster: dev-gcp
+        - application: gosys-oppgavebehandling-api-q1
+          namespace: oppgavehandtering
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
