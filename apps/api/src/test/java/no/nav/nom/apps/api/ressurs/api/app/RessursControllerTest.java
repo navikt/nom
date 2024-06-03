@@ -8,7 +8,6 @@ import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
@@ -41,6 +40,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.Assert;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -239,17 +239,6 @@ public class RessursControllerTest extends RestTestBase {
         String navident = "x123456";
         val navn = pdlUtils.mockSinglePersonResponse();
         String primaryTelefonnummer = "12345678";
-
-        /*when(nikClient.opprettNavidentOnBehalfOfUser(
-            eq(OpprettNavidentRequest.builder()
-                .personid(personident)
-                .identPrefix(navn.getEtternavn().substring(0, 1))
-                .identType("STANDARD")
-                .build())
-        )).thenReturn(ResponseEntity.ok(
-            OpprettNavidentResponse.builder()
-                .navident(navident)
-                .build()));*/
 
         when(pdlClient.hentPerson(eq(personident))).thenReturn(Optional.empty());
 
@@ -591,7 +580,7 @@ public class RessursControllerTest extends RestTestBase {
     @ParameterizedTest(name = "GET {0}")
     @DisplayName("Skjuler sensitiv data for vanlige brukere")
     @MethodSource("getRessursPathsTestInput")
-    void skalSkjuleSensitivDataForVanligeBrukerer(String endpointPath) {
+    void skalSkjuleSensitivDataForVanligeBrukere(String endpointPath) {
 
         var personident = "01010154321";
 
@@ -601,6 +590,8 @@ public class RessursControllerTest extends RestTestBase {
             .primaryFysiskBrukersted(Optional.of("1234"))
             .fysiskeBrukersteder(List.of("1234"))
             .build();
+
+        when(authResolver.kanRedigereRessurs(anyString())).thenReturn(false);
 
         when(ressursStateRepository.findByNavident(anyString()))
             .thenReturn(Optional.of(ressursState));
@@ -621,6 +612,79 @@ public class RessursControllerTest extends RestTestBase {
             .jsonPath("fysiskeBrukersteder")
             .isEmpty();
 
+    }
+
+    @ParameterizedTest(name = "GET {0}")
+    @DisplayName("Skjuler ikke sensitiv data på seg selv")
+    @MethodSource("getRessursPathsTestInput")
+    void skalIkkeSkjuleSensitivDataForOppslagPaaSegSelv(String endpointPath) {
+
+        var personident = "01010154321";
+
+        var ressursState = ressursState().toBuilder()
+            .personident(personident)
+            .navident(TestTokensGenerator.LOGGED_IN_USER_NAVIDENT)
+            .primaryTelefonnummer(Optional.of("12345678"))
+            .primaryFysiskBrukersted(Optional.of("1234"))
+            .fysiskeBrukersteder(new ArrayList<>(List.of("1234")))
+            .build();
+
+        when(authResolver.kanRedigereRessurs(anyString())).thenReturn(false);
+
+        when(ressursStateRepository.findByNavident(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        when(ressursStateRepository.findByFid(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        webTestClient.get()
+            .uri(endpointPath)
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("personident")
+            .isEqualTo(personident)
+            .jsonPath("primaryFysiskBrukersted")
+            .isEqualTo(ressursState.primaryFysiskBrukersted().get())
+            .jsonPath("fysiskeBrukersteder")
+            .isEqualTo(ressursState.fysiskeBrukersteder());
+    }
+
+    @ParameterizedTest(name = "GET {0}")
+    @DisplayName("Skjuler ikke brukersted, men personident for leder til ressurs")
+    @MethodSource("getRessursPathsTestInput")
+    void skalSkjulePersonIdentMenIkkeFysiskbrukerstedForLeder(String endpointPath) {
+
+        var personident = "01010154321";
+
+        var ressursState = ressursState().toBuilder()
+            .personident(personident)
+            .primaryTelefonnummer(Optional.of("12345678"))
+            .primaryFysiskBrukersted(Optional.of("1234"))
+            .fysiskeBrukersteder(new ArrayList<>(List.of("1234")))
+            .build();
+
+        when(authResolver.kanRedigereRessurs(anyString())).thenReturn(true);
+
+        when(ressursStateRepository.findByNavident(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        when(ressursStateRepository.findByFid(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        webTestClient.get()
+            .uri(endpointPath)
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("personident")
+            .isEqualTo(personident.replaceFirst(".{5}$", "*****"))
+            .jsonPath("primaryFysiskBrukersted")
+            .isEqualTo(ressursState.primaryFysiskBrukersted().get())
+            .jsonPath("fysiskeBrukersteder")
+            .isEqualTo(ressursState.fysiskeBrukersteder());
     }
 
 
