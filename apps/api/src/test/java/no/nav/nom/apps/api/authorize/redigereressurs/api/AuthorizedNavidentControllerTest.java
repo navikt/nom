@@ -1,9 +1,8 @@
 package no.nav.nom.apps.api.authorize.redigereressurs.api;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
-import no.nav.nom.apps.api.authorize.eventsourcing.state.DelegertLederStateRepository;
+import no.nav.nom.apps.api.authorize.eventsourcing.state.OldDelegertLederStateRepositoryImpl;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +33,7 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
     @MockBean
     AuthorizeCommandService authorizeCommandService;
     @MockBean
-    DelegertLederStateRepository delegertLederStateRepository;
+    OldDelegertLederStateRepositoryImpl delegertLederStateRepository;
 
     @BeforeEach
     public void enableLederTilgangToggle() {

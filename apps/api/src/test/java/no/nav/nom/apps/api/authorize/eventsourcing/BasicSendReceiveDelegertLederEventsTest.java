@@ -5,7 +5,7 @@ import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandServ
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.AvsluttDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.FornyDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.OpprettDelegertAuthorization;
-import no.nav.nom.apps.api.authorize.eventsourcing.state.DelegertLederStateRepository;
+import no.nav.nom.apps.api.authorize.eventsourcing.state.OldDelegertLederStateRepositoryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ public class BasicSendReceiveDelegertLederEventsTest extends KafkaTestBase {
     AuthorizeCommandService authorizeCommandService;
 
     @Autowired
-    DelegertLederStateRepository delegertLederStateRepository;
+    OldDelegertLederStateRepositoryImpl delegertLederStateRepository;
 
     @BeforeEach
     public void resetDomain() {

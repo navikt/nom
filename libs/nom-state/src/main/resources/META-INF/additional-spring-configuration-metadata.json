@@ -23,7 +23,12 @@
     {
       "name": "nom.libs.state.mastered-ressurs.enabled",
       "type": "java.lang.String",
-      "description": "Enable/disable mastered state autoconfiguration."
+      "description": "Enable/disable mastered-ressurs state autoconfiguration."
+    },
+    {
+      "name": "nom.libs.state.delegert-leder.enabled",
+      "type": "java.lang.String",
+      "description": "Enable/disable delegert-leder state autoconfiguration."
     },
     {
       "name": "nom.libs.state.idle-event-interval-seconds",

@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 @EnableKafka
 public class OrganiseringStateTopicConsumerTest {
 
-    private CountDownLatch alleMeldingerLest = new CountDownLatch(1);
+    private CountDownLatch alleMeldingerLest;
 
     @Autowired
     NomStateOrganiseringListener nomStateOrganiseringListener;
@@ -56,6 +56,8 @@ public class OrganiseringStateTopicConsumerTest {
     @Test
     @DisplayName("Test that we can consume messages from org.nom.intern-organisering-state")
     public void testConsumeMessages() throws InterruptedException {
+        setMessageCount(1);
+
         sendOrganiseringState(
             "FID_1",
             OrganiseringState.builder()
@@ -85,7 +87,6 @@ public class OrganiseringStateTopicConsumerTest {
             nomStateOrganiseringListener.register(msgVisitor);
             registeredVisitor = true;
         }
-        resetLatch();
     }
 
     AbstractNomStateListener.Visitor<OrganiseringState> msgVisitor = new NomStateOrganiseringListener.Visitor<OrganiseringState>() {
@@ -101,8 +102,8 @@ public class OrganiseringStateTopicConsumerTest {
         }
     };
 
-    public void resetLatch() {
-        alleMeldingerLest = new CountDownLatch(1);
+    public void setMessageCount(int count) {
+        alleMeldingerLest = new CountDownLatch(count);
     }
 
     private SendResult<String, OrganiseringState> sendOrganiseringState(String key, OrganiseringState organiseringState) {

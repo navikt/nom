@@ -5,8 +5,8 @@ import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandServ
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.AvsluttDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.FornyDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.OpprettDelegertAuthorization;
-import no.nav.nom.apps.api.authorize.eventsourcing.state.LederTilgang;
-import no.nav.nom.apps.api.authorize.eventsourcing.state.DelegertLederStateRepository;
+import no.nav.nom.contract.nom.state.LederTilgangState;
+import no.nav.nom.apps.api.authorize.eventsourcing.state.OldDelegertLederStateRepositoryImpl;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.LederTilgangForOrgenhetRequest;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.DvhRepository;
@@ -50,7 +50,7 @@ public class AuthorizedNavident {
     Map<String, HashSet<String>> lederForOrgenhet = new ConcurrentHashMap<>();
     // Delegert lederskap. Delegert leder for orgenhet, og alle underliggende enheter
     private final AuthorizeCommandService authorizeCommandService;
-    private final DelegertLederStateRepository delegertLederStateRepository;
+    private final OldDelegertLederStateRepositoryImpl delegertLederStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final OrganiseringStateRepository organiseringStateRepository;
     private final RessursStateRepository ressursStateRepository;
@@ -58,7 +58,7 @@ public class AuthorizedNavident {
     private final DvhRepository dvhRepository;
 
     public AuthorizedNavident(
-            AuthorizeCommandService authorizeCommandService, DelegertLederStateRepository delegertLederStateRepository,
+            AuthorizeCommandService authorizeCommandService, OldDelegertLederStateRepositoryImpl delegertLederStateRepository,
             OrgtilknytningStateRepository orgtilknytningStateRepository,
             OrganiseringStateRepository organiseringStateRepository, RessursStateRepository ressursStateRepository,
             OrgenhetService orgenhetService,
@@ -73,11 +73,11 @@ public class AuthorizedNavident {
         this.dvhRepository = dvhRepository;
     }
 
-    public List<LederTilgang> getLederTilgangerForUser() {
+    public List<LederTilgangState> getLederTilgangerForUser() {
         return delegertLederStateRepository.findByNavident(getAuthenticatedNavIdent());
     }
 
-    public List<LederTilgang> getLederTilgangGittAvBruker() {
+    public List<LederTilgangState> getLederTilgangGittAvBruker() {
         return delegertLederStateRepository.findDelegertAvNavident(getAuthenticatedNavIdent());
     }
 
