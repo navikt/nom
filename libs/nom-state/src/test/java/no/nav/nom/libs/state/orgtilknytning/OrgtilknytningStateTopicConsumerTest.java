@@ -58,6 +58,8 @@ public class OrgtilknytningStateTopicConsumerTest {
     @Test
     @DisplayName("Test that we can consume messages from org.nom.intern-orgtilknytning-state")
     public void testConsumeMessages() throws InterruptedException {
+        setMessageCount(1);
+
         sendOrgtilknytningState(
             "FID_1",
             OrgtilknytningState.builder()
@@ -88,7 +90,6 @@ public class OrgtilknytningStateTopicConsumerTest {
             nomStateOrgtilknytningListener.register(msgVisitor);
             registeredVisitor = true;
         }
-        resetLatch();
     }
 
     AbstractNomStateListener.Visitor<OrgtilknytningState> msgVisitor = new NomStateOrgtilknytningListener.Visitor<OrgtilknytningState>() {
@@ -104,8 +105,8 @@ public class OrgtilknytningStateTopicConsumerTest {
         }
     };
 
-    public void resetLatch() {
-        alleMeldingerLest = new CountDownLatch(1);
+    public void setMessageCount(int count) {
+        alleMeldingerLest = new CountDownLatch(count);
     }
 
     private SendResult<String, OrgtilknytningState> sendOrgtilknytningState(String key, OrgtilknytningState orgtilknytningState) {

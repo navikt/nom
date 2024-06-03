@@ -1,0 +1,6 @@
+nom:
+  libs:
+    state:
+      delegert-leder:
+        state-topic: org.nom.nom-authorize-eventsource
+        listener-id: nomStateDelegertLederListener_${HOSTNAME:dummy}
