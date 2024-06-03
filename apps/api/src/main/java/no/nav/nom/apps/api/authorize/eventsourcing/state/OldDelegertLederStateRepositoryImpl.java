@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-@Service
+@Service("oldDelegertLederStateRepository")
 @Slf4j
 // Kan ha flere like delegeringer for samme navident og enhet, men med forskjellige datoperioder
 public class OldDelegertLederStateRepositoryImpl implements DelegertLederStateRepository {
