@@ -360,16 +360,19 @@ public class RessursStillingStrukturerer {
                             stillingPeriode.gyldigFom(),
                             nomEnheter.get(0).getGyldigFom().minusDays(1)
                         );
-                        if(!tidligereNomEnherer.isEmpty()){
-                            log.warn(
-                                "Klippet før stillingperioden for navident {} fra {} til {} for orgenhet {}",
-                                navident,
-                                stillingPeriode.gyldigFom(),
-                                nomEnheter.get(0).getGyldigFom().minusDays(1),
-                                orgenheterToString(tidligereNomEnherer)
-                            );
-                            // Fikser inkonsistens i stillingperioden
-                            if (unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
+
+                        log.debug(
+                            "Klippet før stillingperioden for navident {} fra {} til {} for orgenhet {}. nomEnheter: {}, stillingPeriode: {}",
+                            navident,
+                            stillingPeriode.gyldigFom(),
+                            nomEnheter.get(0).getGyldigFom().minusDays(1),
+                            orgenheterToString(tidligereNomEnherer),
+                            nomEnheter,
+                            stillingPeriode
+                        );
+
+                        // Fikser inkonsistens i stillingperioden
+                        if(!tidligereNomEnherer.isEmpty() && unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
                                 // NOTE: kanskje vi må legge til alle hvis tigligereNomEnherer.size() > 1
                                 perioderGruppertMedOrgenhet.add(
                                     new StillingPeriode(
@@ -379,7 +382,6 @@ public class RessursStillingStrukturerer {
                                         tidligereNomEnherer.get(0)
                                     )
                                 );
-                            }
                         }
                     } else if (stillingPeriode.gyldigTom().isAfter(nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE))) {
                         log.debug(
@@ -405,16 +407,19 @@ public class RessursStillingStrukturerer {
                                 stillingPeriode.gyldigTom()
                             );
                         }
-                        if (!seinereNomEnherer.isEmpty()){
-                            log.warn(
-                                "Klippet etter stillingperioden for navident {} fra {} til {} for orgenhet {}",
-                                navident,
-                                nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
-                                stillingPeriode.gyldigTom(),
-                                orgenheterToString(seinereNomEnherer)
-                            );
-                            if (unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
-                                // Fikser inkonsistens i stillingperioden
+
+                        log.debug(
+                            "Klippet etter stillingperioden for navident {} fra {} til {} for orgenhet {}. nomEnheter: {}, stillingPeriode: {}",
+                            navident,
+                            nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
+                            stillingPeriode.gyldigTom(),
+                            orgenheterToString(seinereNomEnherer),
+                            nomEnheter,
+                            stillingPeriode
+                        );
+
+                        // Fikser inkonsistens i stillingperioden
+                        if (!seinereNomEnherer.isEmpty() && unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
                                 // NOTE: kanskje vi må legge til alle hvis seinereNomEnherer.size() > 1
                                 perioderGruppertMedOrgenhet.add(
                                     new StillingPeriode(
@@ -424,7 +429,6 @@ public class RessursStillingStrukturerer {
                                         seinereNomEnherer.get(0)
                                     )
                                 );
-                            }
                         }
                     } else {
                         perioderGruppertMedOrgenhet.add(new StillingPeriode(stillingPeriode, nomEnheter.get(0)));
