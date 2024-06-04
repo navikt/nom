@@ -367,7 +367,7 @@ public class RessursStillingStrukturerer {
                             stillingPeriode.gyldigFom(),
                             nomEnheter.get(0).getGyldigFom().minusDays(1),
                             orgenheterToString(tidligereNomEnherer),
-                            nomEnheter,
+                            orgenheterToString(nomEnheter),
                             stillingPeriode
                         );
 
@@ -414,7 +414,7 @@ public class RessursStillingStrukturerer {
                             nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
                             stillingPeriode.gyldigTom(),
                             orgenheterToString(seinereNomEnherer),
-                            nomEnheter,
+                            orgenheterToString(nomEnheter),
                             stillingPeriode
                         );
 
