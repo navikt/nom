@@ -368,7 +368,7 @@ public class RessursStillingStrukturerer {
                             orgenheterToString(tidligereNomEnherer),
                             orgenheterToString(nomEnheter),
                             stillingPeriode,
-                            tidligereNomEnherer
+                            orgenheterToString(tidligereNomEnherer)
                         );
 
                         // Fikser inkonsistens i stillingperioden
@@ -415,7 +415,7 @@ public class RessursStillingStrukturerer {
                             orgenheterToString(seinereNomEnherer),
                             orgenheterToString(nomEnheter),
                             stillingPeriode,
-                            seinereNomEnherer
+                            orgenheterToString(seinereNomEnherer)
                         );
 
                         // Fikser inkonsistens i stillingperioden
