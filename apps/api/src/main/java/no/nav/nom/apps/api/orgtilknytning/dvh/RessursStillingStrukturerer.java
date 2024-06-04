@@ -362,13 +362,14 @@ public class RessursStillingStrukturerer {
                         );
 
                         log.debug(
-                            "Klippet før stillingperioden for navident {} fra {} til {} for orgenhet {}. nomEnheter: {}, stillingPeriode: {}",
+                            "Klippet før stillingperioden for navident {} fra {} til {} for orgenhet {}. nomEnheter: {}, stillingPeriode: {}, tidligereNomEnherer: {}",
                             navident,
                             stillingPeriode.gyldigFom(),
                             nomEnheter.get(0).getGyldigFom().minusDays(1),
                             orgenheterToString(tidligereNomEnherer),
                             orgenheterToString(nomEnheter),
-                            stillingPeriode
+                            stillingPeriode,
+                            tidligereNomEnherer
                         );
 
                         // Fikser inkonsistens i stillingperioden
@@ -409,13 +410,14 @@ public class RessursStillingStrukturerer {
                         }
 
                         log.debug(
-                            "Klippet etter stillingperioden for navident {} fra {} til {} for orgenhet {}. nomEnheter: {}, stillingPeriode: {}",
+                            "Klippet etter stillingperioden for navident {} fra {} til {} for orgenhet {}. nomEnheter: {}, stillingPeriode: {}, seinereNomEnherer: {}",
                             navident,
                             nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
                             stillingPeriode.gyldigTom(),
                             orgenheterToString(seinereNomEnherer),
                             orgenheterToString(nomEnheter),
-                            stillingPeriode
+                            stillingPeriode,
+                            seinereNomEnherer
                         );
 
                         // Fikser inkonsistens i stillingperioden
