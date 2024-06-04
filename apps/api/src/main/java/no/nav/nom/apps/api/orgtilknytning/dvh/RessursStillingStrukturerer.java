@@ -370,6 +370,7 @@ public class RessursStillingStrukturerer {
                             );
                             // Fikser inkonsistens i stillingperioden
                             if (unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
+                                // NOTE: kanskje vi må legge til alle hvis tigligereNomEnherer.size() > 1
                                 perioderGruppertMedOrgenhet.add(
                                     new StillingPeriode(
                                         stillingPeriode.stilling(),
@@ -414,6 +415,7 @@ public class RessursStillingStrukturerer {
                             );
                             if (unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
                                 // Fikser inkonsistens i stillingperioden
+                                // NOTE: kanskje vi må legge til alle hvis seinereNomEnherer.size() > 1
                                 perioderGruppertMedOrgenhet.add(
                                     new StillingPeriode(
                                         stillingPeriode.stilling(),
