@@ -354,9 +354,8 @@ public class RessursStillingStrukturerer {
                         );
 
                         // forsøker på å finne korrekt tidligere enhet for den samme agressoid’en
-                        List<IOrgenhet> tidligereNomEnherer = finnNomEnheterForIdOgNavn(
+                        List<IOrgenhet> tidligereNomEnherer = finnNomEnheterForId(
                             stillingPeriode.stilling().agressoId().get(),
-                            stillingPeriode.stilling().enhetNavn(),
                             stillingPeriode.gyldigFom(),
                             nomEnheter.get(0).getGyldigFom().minusDays(1)
                         );
@@ -401,9 +400,8 @@ public class RessursStillingStrukturerer {
                         // forsøker på å finne korrekt seinere enhet for den samme agressoid’en
                         List<IOrgenhet> seinereNomEnherer = Collections.emptyList();
                         if(nomEnheter.get(0).getGyldigTom().isPresent()){
-                            seinereNomEnherer =  finnNomEnheterForIdOgNavn(
+                            seinereNomEnherer =  finnNomEnheterForId(
                                 stillingPeriode.stilling().agressoId().get(),
-                                stillingPeriode.stilling().enhetNavn(),
                                 nomEnheter.get(0).getGyldigTom().get().plusDays(1),
                                 stillingPeriode.gyldigTom()
                             );
