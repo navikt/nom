@@ -68,6 +68,11 @@ spec:
   prometheus:
     enabled: true
     path: internal/prometheus
+  spec:
+    observability:
+      autoInstrumentation:
+        enabled: true
+        runtime: nodejs
   env:
     - name: NODE_ENV
       value: "production"
