@@ -59,7 +59,7 @@ spec:
     enabled: true
     path: internal/prometheus
   observability:
-    autoInstrument:
+    autoInstrumentation:
       enabled: true
       runtime: java
   gcp:
