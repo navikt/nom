@@ -1,9 +1,8 @@
 package no.nav.nom.apps.api.authorize.redigereressurs.api;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
-import no.nav.nom.apps.api.authorize.eventsourcing.state.DelegertLederStateRepository;
+import no.nav.nom.apps.api.authorize.eventsourcing.state.OldDelegertLederStateRepositoryImpl;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +33,7 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
     @MockBean
     AuthorizeCommandService authorizeCommandService;
     @MockBean
-    DelegertLederStateRepository delegertLederStateRepository;
+    OldDelegertLederStateRepositoryImpl delegertLederStateRepository;
 
     @BeforeEach
     public void enableLederTilgangToggle() {
@@ -191,20 +190,31 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Verifiser at gyldigTom ikke kan være i fortiden")
+    @DisplayName("Verifiser at gyldigTom ikke kan være lenger bak i fortiden enn i går")
     public void test_0016() throws Exception {
         var request = LederTilgangForOrgenhetRequest.builder()
-            .orgenhetId("a")
-            .delegertTilNavident("b")
-            .gyldigTom(LocalDate.now().minusDays(1))
+            .orgenhetId("B")
+            .delegertTilNavident("HR")
+            .gyldigTom(LocalDate.now().minusDays(2))
             .build();
-
 
         mockMvc.perform(post(API_URL + "/addDelegatedAuthorization")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
-                .header("Authorization", "Bearer " + nomAdminUserToken()))
+                .header("Authorization", "Bearer " + nomWriteUserToken_Leder_B()))
             .andExpect(status().isBadRequest());
+
+        request = LederTilgangForOrgenhetRequest.builder()
+            .orgenhetId("B")
+            .delegertTilNavident("HR")
+            .gyldigTom(LocalDate.now().minusDays(1))
+            .build();
+
+        mockMvc.perform(post(API_URL + "/addDelegatedAuthorization")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                .header("Authorization", "Bearer " + nomWriteUserToken_Leder_B()))
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -216,12 +226,24 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
             .gyldigTom(LocalDate.now().plusDays(1))
             .build();
 
-
         mockMvc.perform(post(API_URL + "/addDelegatedAuthorization")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
                 .header("Authorization", "Bearer " + nomWriteUserToken_Leder_B()))
             .andExpect(status().isOk());
+    }
+
+
+    @Test
+    @DisplayName("Verifiser at man ikke kan delegere til Eksterne")
+    public void test_0018() throws Exception {
+        var request = LederTilgangForOrgenhetRequest.builder().orgenhetId("B").delegertTilNavident("EKSTERN").gyldigTom(LocalDate.now().plusMonths(2)).build();
+
+        mockMvc.perform(post(API_URL + "/addDelegatedAuthorization")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                .header("Authorization", "Bearer " + nomAdminUserToken()))
+            .andExpect(status().isBadRequest());
     }
 
 }

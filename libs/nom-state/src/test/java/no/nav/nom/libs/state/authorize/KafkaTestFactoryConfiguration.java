@@ -1,0 +1,64 @@
+package no.nav.nom.libs.state.authorize;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import no.nav.nom.contract.nom.eventsource.AuthorizationEvent;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.core.*;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.kafka.test.EmbeddedKafkaBroker;
+import org.springframework.kafka.test.utils.KafkaTestUtils;
+
+import java.time.LocalDateTime;
+
+@Configuration
+public class KafkaTestFactoryConfiguration {
+
+    @Autowired
+    EmbeddedKafkaBroker embeddedKafka;
+
+    ObjectMapper objectMapper = configureObjectMapper();
+
+    @Bean
+    ConsumerFactory<String, AuthorizationEvent> nomStateDelegertLederConsumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(
+            KafkaTestUtils.producerProps(embeddedKafka),
+            new StringDeserializer(),
+            new JsonDeserializer<>(AuthorizationEvent.class, objectMapper)
+        );
+    }
+
+    @Bean
+    ProducerFactory<String, AuthorizationEvent> delegertLederStateProducerFactory() {
+        return new DefaultKafkaProducerFactory<>(KafkaTestUtils.producerProps(embeddedKafka), new StringSerializer(), new JsonSerializer<>(objectMapper));
+    }
+
+    @Bean
+    KafkaTemplate<String, AuthorizationEvent> delegertLederStateProducerTemplate(
+        ProducerFactory<String, AuthorizationEvent> delegertLederStateProducerFactory, @Value("${nom.libs.state.delegert-leder.state-topic}") String eventsourceTopic
+    ) {
+        final var eventsourceTemplate = new KafkaTemplate<>(delegertLederStateProducerFactory);
+        eventsourceTemplate.setDefaultTopic(eventsourceTopic);
+
+        return eventsourceTemplate;
+    }
+
+    private static ObjectMapper configureObjectMapper() {
+        final var objectMapper = new ObjectMapper();
+
+        return objectMapper.findAndRegisterModules()
+            .registerModule(new ParameterNamesModule())
+            .registerModule(new Jdk8Module())
+            .registerModule(new JavaTimeModule())
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+    }
+}

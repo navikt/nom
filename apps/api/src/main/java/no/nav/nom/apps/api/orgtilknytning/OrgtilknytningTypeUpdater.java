@@ -23,6 +23,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserProcessor.ORGENHET_AGRESSOID_VIKAFOSSEN;
+
 @Component
 public class OrgtilknytningTypeUpdater {
 
@@ -64,7 +66,7 @@ public class OrgtilknytningTypeUpdater {
             .map(RessursState::navident)
             .collect(Collectors.toSet());
 
-        var vikafossenOrgenhet = orgenhetService.getEnhetByAgressoIdAndOrgniv("VIKAFOSSEN","ORGENHET").orElseThrow(() -> new RuntimeException("Kunne ikke finne vikafossen enhet via agresso-id"));
+        var vikafossenOrgenhet = orgenhetService.getEnhetByAgressoIdAndOrgniv(ORGENHET_AGRESSOID_VIKAFOSSEN,"ORGENHET").orElseThrow(() -> new RuntimeException("Kunne ikke finne vikafossen enhet via agresso-id"));
 
 
         var orgtilknytningerTilVikafossen = orgtilknytningService.getByNavidenter(aktiveEksterneNavidenter, Function.identity())

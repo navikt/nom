@@ -1,11 +1,10 @@
-package no.nav.nom.apps.api.authorize.eventsourcing.state;
+package no.nav.nom.contract.nom.state;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import no.nav.nom.apps.api.common.DateUtils;
 
 import java.time.LocalDate;
 
-public record LederTilgang(
+public record LederTilgangState(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String fid,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String til,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String av,
@@ -14,6 +13,7 @@ public record LederTilgang(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate gyldigTom
 ) {
     public boolean isActive() {
-        return DateUtils.isPeriodActive(gyldigFom, gyldigTom);
+        return (gyldigFom == null || gyldigFom.minusDays(1).isBefore(LocalDate.now())) &&
+            (gyldigTom == null || gyldigTom.plusDays(1).isAfter(LocalDate.now()));
     }
 }

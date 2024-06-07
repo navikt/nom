@@ -64,4 +64,13 @@ public class PropertiesAutoConfig {
             log.debug("loading mastered-ressurs-state.yaml");
         }
     }
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnProperty(value = "nom.libs.state.delegert-leder.enabled")
+    @PropertySource(value = "delegert-leder-state.yaml", factory = YamlPropertySourceFactory.class)
+    public static class DelegertLederStateConfig {
+        public DelegertLederStateConfig() {
+            log.debug("loading delegert-leder-state.yaml");
+        }
+    }
 }

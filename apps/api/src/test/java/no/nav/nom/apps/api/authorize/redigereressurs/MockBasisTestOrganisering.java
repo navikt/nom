@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -489,7 +490,19 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_HR")
             .personident("HR")
             .navident("HR")
-            .sektor(null)
+            .sektor(Sektor.NAV_STATLIG)
+            .visningsnavn(null)
+            .sluttdato(Optional.empty())
+            .startdato(Optional.of(LocalDate.now().minusYears(1)))
+            .primaryFysiskBrukersted(Optional.empty())
+            .fysiskeBrukersteder(List.of("D1"))
+            .build();
+
+        var ekstern = RessursState.builder()
+            .fid("FID_EKSTERN")
+            .personident("EKSTERN")
+            .navident("EKSTERN")
+            .sektor(Sektor.EKSTERN)
             .visningsnavn(null)
             .sluttdato(Optional.empty())
             .startdato(Optional.of(LocalDate.now().minusYears(1)))
@@ -498,6 +511,7 @@ abstract public class MockBasisTestOrganisering {
             .build();
 
         lenient().when(ressursStateRepository.findByNavident("HR")).thenReturn(Optional.of(hr));
+        lenient().when(ressursStateRepository.findByNavident("EKSTERN")).thenReturn(Optional.of(ekstern));
     }
 
     @Getter

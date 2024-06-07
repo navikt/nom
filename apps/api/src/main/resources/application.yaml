@@ -278,11 +278,15 @@ app:
         orgtilknytning: na664h    # 8551401-Teknisk brukerstøtte og verktøy 1-ORGENHET
       - navident: F873959         # gjestfri.folk@trygdeetaten.no - Har IKKE NOM-WRITE-DELEGERT tilgang - Har F869325 som leder
         orgtilknytning: na664h    # 8551401-Teknisk brukerstøtte og verktøy 1-ORGENHET
+      - navident: T168579         # Støtte for PRIM/ Christian Prestvik
+        orgtilknytning: ke793y    # ref: https://nav-it.slack.com/archives/G01F99D2AHX/p1717488133154109
     ledere:
       - navident: N852930
         orgenhet: ty960s
       - navident: F869325
         orgenhet: na664h
+      - navident: T168579       # Støtte for PRIM/ Christian Prestvik
+        orgenhet: ke793y        # ref: https://nav-it.slack.com/archives/G01F99D2AHX/p1717488133154109
 
 NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
 NIK_API_SCOPE: api://dev-gcp.org.nav-ident/.default

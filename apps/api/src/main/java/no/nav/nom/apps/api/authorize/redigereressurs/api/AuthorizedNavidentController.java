@@ -10,7 +10,7 @@ import jakarta.validation.Valid;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
-import no.nav.nom.apps.api.authorize.eventsourcing.state.LederTilgang;
+import no.nav.nom.contract.nom.state.LederTilgangState;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
@@ -69,12 +69,12 @@ public class AuthorizedNavidentController {
     }
 
     @GetMapping("getLederTilgangerDelegertTilMeg")
-    List<LederTilgang> getLederTilgangerForUser() {
+    List<LederTilgangState> getLederTilgangerForUser() {
         return authorizedNavident.getLederTilgangerForUser();
     }
 
     @GetMapping("getDelegerteLederTilgangerAvUser")
-    List<LederTilgang> getLederTilgangGittAvBruker() {
+    List<LederTilgangState> getLederTilgangGittAvBruker() {
         return authorizedNavident.getLederTilgangGittAvBruker();
     }
 

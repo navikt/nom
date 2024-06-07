@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
@@ -29,20 +30,26 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isHistoricPerio
 @Component
 @Slf4j
 public class RessursStillingStrukturerer {
+
+    public static final String UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS = "nom.ressurs-stilling-strukturer.fiks_inkonsistens";
+
     private final OrgenhetService orgenhetService;
     private final RessursStillingLoadStatus ressursStillingLoadStatus;
     private final RessursStateRepository ressursStateRepository;
     private final Environment environment;
+    private final Unleash unleash;
 
     public RessursStillingStrukturerer(
         OrgenhetService orgenhetService, RessursStillingLoadStatus ressursStillingLoadStatus,
         RessursStateRepository ressursStateRepository,
-        Environment environment
+        Environment environment,
+        Unleash unleash
     ) {
         this.orgenhetService = orgenhetService;
         this.ressursStillingLoadStatus = ressursStillingLoadStatus;
         this.ressursStateRepository = ressursStateRepository;
         this.environment = environment;
+        this.unleash = unleash;
     }
 
     public Map<String, List<DvhRessursStilling>> grupperPerNavident(List<DvhRessursStilling> ressursStillinger) {
@@ -345,6 +352,37 @@ public class RessursStillingStrukturerer {
                                 nomEnheter.get(0)
                             )
                         );
+
+                        // forsøker på å finne korrekt tidligere enhet for den samme agressoid’en
+                        List<IOrgenhet> tidligereNomEnherer = finnNomEnheterForId(
+                            stillingPeriode.stilling().agressoId().get(),
+                            stillingPeriode.gyldigFom(),
+                            nomEnheter.get(0).getGyldigFom().minusDays(1)
+                        );
+
+                        log.debug(
+                            "Klippet før stillingperioden for navident {} fra {} til {} for orgenhet {}. nomEnheter: {}, stillingPeriode: {}, tidligereNomEnherer: {}",
+                            navident,
+                            stillingPeriode.gyldigFom(),
+                            nomEnheter.get(0).getGyldigFom().minusDays(1),
+                            orgenheterToString(tidligereNomEnherer),
+                            orgenheterToString(nomEnheter),
+                            stillingPeriode,
+                            orgenheterToString(tidligereNomEnherer)
+                        );
+
+                        // Fikser inkonsistens i stillingperioden
+                        if(!tidligereNomEnherer.isEmpty() && unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
+                                // NOTE: kanskje vi må legge til alle hvis tigligereNomEnherer.size() > 1
+                                perioderGruppertMedOrgenhet.add(
+                                    new StillingPeriode(
+                                        stillingPeriode.stilling(),
+                                        stillingPeriode.gyldigFom(),
+                                        nomEnheter.get(0).getGyldigFom().minusDays(1),
+                                        tidligereNomEnherer.get(0)
+                                    )
+                                );
+                        }
                     } else if (stillingPeriode.gyldigTom().isAfter(nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE))) {
                         log.debug(
                             "Stillingperioden for navident {} slutter etter kjent orgenhets gyldighetsperiode. Må begrense stillingPeriodens gyldighet til å være innenfor",
@@ -358,6 +396,40 @@ public class RessursStillingStrukturerer {
                                 nomEnheter.get(0)
                             )
                         );
+
+                        // forsøker på å finne korrekt seinere enhet for den samme agressoid’en
+                        List<IOrgenhet> seinereNomEnherer = Collections.emptyList();
+                        if(nomEnheter.get(0).getGyldigTom().isPresent()){
+                            seinereNomEnherer =  finnNomEnheterForId(
+                                stillingPeriode.stilling().agressoId().get(),
+                                nomEnheter.get(0).getGyldigTom().get().plusDays(1),
+                                stillingPeriode.gyldigTom()
+                            );
+                        }
+
+                        log.debug(
+                            "Klippet etter stillingperioden for navident {} fra {} til {} for orgenhet {}. nomEnheter: {}, stillingPeriode: {}, seinereNomEnherer: {}",
+                            navident,
+                            nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
+                            stillingPeriode.gyldigTom(),
+                            orgenheterToString(seinereNomEnherer),
+                            orgenheterToString(nomEnheter),
+                            stillingPeriode,
+                            orgenheterToString(seinereNomEnherer)
+                        );
+
+                        // Fikser inkonsistens i stillingperioden
+                        if (!seinereNomEnherer.isEmpty() && unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
+                                // NOTE: kanskje vi må legge til alle hvis seinereNomEnherer.size() > 1
+                                perioderGruppertMedOrgenhet.add(
+                                    new StillingPeriode(
+                                        stillingPeriode.stilling(),
+                                        nomEnheter.get(0).getGyldigTom().get().plusDays(1),
+                                        stillingPeriode.gyldigTom(),
+                                        seinereNomEnherer.get(0)
+                                    )
+                                );
+                        }
                     } else {
                         perioderGruppertMedOrgenhet.add(new StillingPeriode(stillingPeriode, nomEnheter.get(0)));
                     }

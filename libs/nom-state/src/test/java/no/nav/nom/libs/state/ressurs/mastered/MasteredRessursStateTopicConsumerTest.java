@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @EnableKafka
 public class MasteredRessursStateTopicConsumerTest {
 
-    private CountDownLatch alleMeldingerLest = new CountDownLatch(1);
+    private CountDownLatch alleMeldingerLest;
 
     @Autowired
     NomStateMasteredRessursListener nomStateMasteredRessursListener;
@@ -63,6 +63,8 @@ public class MasteredRessursStateTopicConsumerTest {
     @Test
     @DisplayName("Test that we can consume messages from org.nom.nom-mastered-ressurs")
     public void testConsumeMessages() throws InterruptedException {
+        setMessageCount(3);
+
         sendMasteredRessursState(
             "A000001",
             LocalDateTime.now()
@@ -100,7 +102,6 @@ public class MasteredRessursStateTopicConsumerTest {
             nomStateMasteredRessursListener.register(msgVisitor);
             registeredVisitor = true;
         }
-        resetLatch();
     }
 
     NomStateMasteredRessursListener.Visitor msgVisitor = new NomStateMasteredRessursListener.Visitor<LocalDateTime>() {
@@ -116,8 +117,8 @@ public class MasteredRessursStateTopicConsumerTest {
         }
     };
 
-    public void resetLatch() {
-        alleMeldingerLest = new CountDownLatch(1);
+    public void setMessageCount(int count) {
+        alleMeldingerLest = new CountDownLatch(count);
     }
 
     private SendResult<String, LocalDateTime> sendMasteredRessursState(String navident, LocalDateTime since) {
