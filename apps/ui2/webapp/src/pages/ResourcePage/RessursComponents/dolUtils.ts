@@ -6,6 +6,7 @@ import {
   isPresentOrAfter,
   isSameDateOrAfter,
   isSameDateOrBefore,
+  todayWithoutTimezone,
 } from "~/utils";
 
 export function findPeriodGaps(
@@ -135,20 +136,23 @@ export function dolValidering(
     (tilknytning) => tilknytning.erDagligOppfolging,
   );
 
-  const fremtidigeTilknytninger = dolOrgtilknytninger.filter((tilknytning) =>
-    tilknytning.gyldigTom
-      ? isPresentOrAfter(new Date(tilknytning.gyldigTom))
-      : true,
+  const fremtidigeDolTilknytninger = dolOrgtilknytninger.filter(
+    (tilknytning) =>
+      tilknytning.gyldigTom
+        ? isPresentOrAfter(new Date(tilknytning.gyldigTom))
+        : true,
   );
-  const stigendeFremtidigeTilknytninger = sortBy(
-    fremtidigeTilknytninger,
+  const stigendeFremtidigeDolTilknytninger = sortBy(
+    fremtidigeDolTilknytninger,
     (orgtilknytning) => new Date(orgtilknytning.gyldigFom),
   );
 
-  const dolPeriods = stigendeFremtidigeTilknytninger.map((tilknytning) => {
+  const today = todayWithoutTimezone();
+
+  const dolPeriods = stigendeFremtidigeDolTilknytninger.map((tilknytning) => {
     return {
-      fom: isBefore(new Date(tilknytning.gyldigFom), new Date())
-        ? new Date()
+      fom: isBefore(new Date(tilknytning.gyldigFom), today)
+        ? today
         : new Date(tilknytning.gyldigFom),
       tom: tilknytning.gyldigTom ? new Date(tilknytning.gyldigTom) : undefined,
     };
@@ -160,9 +164,6 @@ export function dolValidering(
   let earliestTilknytningDate: Date | undefined;
   let latestTilknytningDate: Date | undefined = new Date(0);
 
-  let earliestDolDate: Date | undefined;
-  let latestDolDate: Date | undefined = new Date(0);
-
   orgtilknytninger
     .filter((tilknytning) => {
       return tilknytning.gyldigTom
@@ -170,7 +171,6 @@ export function dolValidering(
         : true;
     })
     .map((tilknytning) => {
-      const today = new Date();
       const cappedTom = isBefore(new Date(tilknytning.gyldigFom), today)
         ? today
         : new Date(tilknytning.gyldigFom);
@@ -192,49 +192,60 @@ export function dolValidering(
       }
     });
 
-  stigendeFremtidigeTilknytninger.map((tilknytning) => {
-    const today = new Date();
-    const cappedTom = isBefore(new Date(tilknytning.gyldigFom), today)
-      ? today
-      : new Date(tilknytning.gyldigFom);
+  let earliestDolDate: Date | undefined;
+  let latestDolDate: Date | undefined = new Date(0);
 
-    earliestDolDate =
-      !earliestDolDate || isBefore(cappedTom, earliestDolDate)
-        ? cappedTom
-        : earliestDolDate;
+  if (dolPeriods.length > 0) {
+    stigendeFremtidigeDolTilknytninger.map((tilknytning) => {
+      const cappedTom = isBefore(new Date(tilknytning.gyldigFom), today)
+        ? today
+        : new Date(tilknytning.gyldigFom);
 
-    if (tilknytning.gyldigTom && latestDolDate) {
-      latestDolDate = isAfter(new Date(tilknytning.gyldigTom), latestDolDate)
-        ? new Date(tilknytning.gyldigTom)
-        : latestDolDate;
-    } else {
-      latestDolDate = undefined;
+      earliestDolDate =
+        !earliestDolDate || isBefore(cappedTom, earliestDolDate)
+          ? cappedTom
+          : earliestDolDate;
+
+      if (tilknytning.gyldigTom && latestDolDate) {
+        latestDolDate = isAfter(new Date(tilknytning.gyldigTom), latestDolDate)
+          ? new Date(tilknytning.gyldigTom)
+          : latestDolDate;
+      } else {
+        latestDolDate = undefined;
+      }
+    });
+
+    if (
+      earliestTilknytningDate &&
+      earliestDolDate &&
+      isBefore(earliestTilknytningDate, earliestDolDate)
+    ) {
+      dolGaps.unshift({
+        fom: earliestTilknytningDate,
+        tom: subDays(earliestDolDate, 1),
+      });
     }
-  });
 
-  if (
-    earliestTilknytningDate &&
-    earliestDolDate &&
-    isBefore(earliestTilknytningDate, earliestDolDate)
-  ) {
-    dolGaps.unshift({
-      fom: earliestTilknytningDate,
-      tom: subDays(earliestDolDate, 1),
-    });
-  }
-
-  if (!latestTilknytningDate && latestDolDate) {
-    dolGaps.push({ fom: addDays(latestDolDate, 1), tom: undefined });
-  } else if (latestTilknytningDate && !latestDolDate) {
-    dolGaps.push({
-      fom: addDays(latestTilknytningDate, 1),
-      tom: undefined,
-    });
-  } else if (isAfter(latestTilknytningDate, latestDolDate)) {
-    dolGaps.push({
-      fom: addDays(latestDolDate, 1),
-      tom: latestTilknytningDate,
-    });
+    if (!latestTilknytningDate && latestDolDate) {
+      dolGaps.push({ fom: addDays(latestDolDate, 1), tom: undefined });
+    } else if (latestTilknytningDate && !latestDolDate) {
+      dolGaps.push({
+        fom: addDays(latestTilknytningDate, 1),
+        tom: undefined,
+      });
+    } else if (isAfter(latestTilknytningDate, latestDolDate)) {
+      dolGaps.push({
+        fom: addDays(latestDolDate, 1),
+        tom: latestTilknytningDate,
+      });
+    }
+  } else {
+    if (earliestTilknytningDate) {
+      dolGaps.push({
+        fom: earliestTilknytningDate,
+        tom: latestTilknytningDate ?? undefined,
+      });
+    }
   }
 
   return { dolGaps, dolOverlaps: findPeriodOverlaps(dolPeriods) };
