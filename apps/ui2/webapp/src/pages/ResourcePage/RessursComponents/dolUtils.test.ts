@@ -15,82 +15,82 @@ describe("findPeriodGaps", () => {
   });
 
   test("Sjekk at én orgtilknytning gir ingen gaps", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-31"),
     };
 
-    const periodObject = [period1];
+    const perioder = [periode1];
 
-    expect(findPeriodGaps(periodObject)).toEqual([]);
+    expect(findPeriodGaps(perioder)).toEqual([]);
   });
 
   test("Sjekk at to perioder med opphold gir riktig gap", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-31"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-03-01"),
       tom: new Date("2023-03-31"),
     };
 
-    const periodObject = [period1, period2];
+    const perioder = [periode1, periode2];
 
-    expect(findPeriodGaps(periodObject)).toEqual([
+    expect(findPeriodGaps(perioder)).toEqual([
       { fom: new Date("2023-02-01"), tom: new Date("2023-02-28") },
     ]);
   });
 
   test("Sjekk at rekkefølge ikke har noe å si", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-03-01"),
       tom: new Date("2023-03-31"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-31"),
     };
 
-    const periodObject = [period1, period2];
+    const perioder = [periode1, periode2];
 
-    expect(findPeriodGaps(periodObject)).toEqual([
+    expect(findPeriodGaps(perioder)).toEqual([
       { fom: new Date("2023-02-01"), tom: new Date("2023-02-28") },
     ]);
   });
 
   test("Sjekk at perioder inntil hverandre ikke gir gaps", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-10"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-01-11"),
       tom: new Date("2023-01-20"),
     };
 
-    const periodObject = [period1, period2];
+    const perioder = [periode1, periode2];
 
-    expect(findPeriodGaps(periodObject)).toEqual([]);
+    expect(findPeriodGaps(perioder)).toEqual([]);
   });
 
   test("Sjekk at én dags opphold gir riktig gap", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-10"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-01-12"),
       tom: new Date("2023-01-20"),
     };
 
-    const periodObject = [period1, period2];
+    const perioder = [periode1, periode2];
 
-    expect(findPeriodGaps(periodObject)).toEqual([
+    expect(findPeriodGaps(perioder)).toEqual([
       {
         fom: new Date("2023-01-11"),
         tom: new Date("2023-01-11"),
@@ -99,108 +99,108 @@ describe("findPeriodGaps", () => {
   });
 
   test("Sjekk at overlappende perioder ikke påvirker gaps", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-31"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-03-01"),
       tom: new Date("2023-03-31"),
     };
 
-    const period3 = {
+    const periode3 = {
       fom: new Date("2022-12-01"),
       tom: new Date("2023-01-10"),
     };
 
-    const periodObject = [period1, period2, period3];
+    const perioder = [periode1, periode2, periode3];
 
-    expect(findPeriodGaps(periodObject)).toEqual([
+    expect(findPeriodGaps(perioder)).toEqual([
       { fom: new Date("2023-02-01"), tom: new Date("2023-02-28") },
     ]);
   });
 
   test("Sjekk at flere perioder uten opphold gir ingen gaps", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-10"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-01-20"),
       tom: new Date("2023-01-31"),
     };
 
-    const period3 = {
+    const periode3 = {
       fom: new Date("2022-01-05"),
       tom: new Date("2023-01-25"),
     };
 
-    const periodObject = [period1, period2, period3];
+    const perioder = [periode1, periode2, periode3];
 
-    expect(findPeriodGaps(periodObject)).toEqual([]);
+    expect(findPeriodGaps(perioder)).toEqual([]);
   });
 
   test("Sjekk at flere opphold mellom perioder gir flere gaps", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-10"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-01-20"),
       tom: new Date("2023-01-30"),
     };
 
-    const period3 = {
+    const periode3 = {
       fom: new Date("2023-02-10"),
       tom: new Date("2023-02-20"),
     };
 
-    const periodObject = [period1, period2, period3];
+    const perioder = [periode1, periode2, periode3];
 
-    expect(findPeriodGaps(periodObject)).toEqual([
+    expect(findPeriodGaps(perioder)).toEqual([
       { fom: new Date("2023-01-11"), tom: new Date("2023-01-19") },
       { fom: new Date("2023-01-31"), tom: new Date("2023-02-09") },
     ]);
   });
 
   test("Sjekk at flere perioder inntil hverandre ikke gir gaps", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-10"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-01-11"),
       tom: new Date("2023-01-20"),
     };
 
-    const period3 = {
+    const periode3 = {
       fom: new Date("2023-01-21"),
       tom: new Date("2023-01-31"),
     };
 
-    const periodObject = [period1, period2, period3];
+    const perioder = [periode1, periode2, periode3];
 
-    expect(findPeriodGaps(periodObject)).toEqual([]);
+    expect(findPeriodGaps(perioder)).toEqual([]);
   });
 
   test("Sjekk at langt opphold fungerer som forventet", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2021-01-01"),
       tom: new Date("2021-01-31"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2024-01-01"),
       tom: new Date("2024-01-31"),
     };
 
-    const periodObject = [period1, period2];
+    const perioder = [periode1, periode2];
 
-    expect(findPeriodGaps(periodObject)).toEqual([
+    expect(findPeriodGaps(perioder)).toEqual([
       {
         fom: new Date("2021-02-01"),
         tom: new Date("2023-12-31"),
@@ -209,40 +209,40 @@ describe("findPeriodGaps", () => {
   });
 
   test("Sjekk at udefinert slutt behandles som å vare på ubestemt tid", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-02-01"),
       tom: new Date("2023-02-28"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-03-01"),
       tom: new Date("2023-03-31"),
     };
 
-    const period3 = {
+    const periode3 = {
       fom: new Date("2023-01-01"),
       tom: undefined,
     };
 
-    const periodObject = [period1, period2, period3];
+    const perioder = [periode1, periode2, periode3];
 
-    expect(findPeriodGaps(periodObject)).toEqual([]);
+    expect(findPeriodGaps(perioder)).toEqual([]);
   });
 
   test("Sjekk at to perioder uten slutt gir ingen gaps", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: undefined,
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-02-01"),
       tom: undefined,
     };
 
-    const periodObject = [period1, period2];
+    const perioder = [periode1, periode2];
 
-    expect(findPeriodGaps(periodObject)).toEqual([]);
+    expect(findPeriodGaps(perioder)).toEqual([]);
   });
 });
 
@@ -252,48 +252,48 @@ describe("findPeriodOverlaps", () => {
   });
 
   test("Sjekk at én orgtilknytning gir ingen overlaps", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-31"),
     };
 
-    const periodObject = [period1];
+    const perioder = [periode1];
 
-    expect(findPeriodOverlaps(periodObject)).toEqual([]);
+    expect(findPeriodOverlaps(perioder)).toEqual([]);
   });
 
   test("Sjekk at perioder med overlapp gir riktig overlap", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-15"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-01-10"),
       tom: new Date("2023-01-25"),
     };
 
-    const periodObject = [period1, period2];
+    const perioder = [periode1, periode2];
 
-    expect(findPeriodOverlaps(periodObject)).toEqual([
+    expect(findPeriodOverlaps(perioder)).toEqual([
       { fom: new Date("2023-01-10"), tom: new Date("2023-01-15") },
     ]);
   });
 
   test("Sjekk at to like perioder har gir overlapp", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-31"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-31"),
     };
 
-    const periodObject = [period1, period2];
+    const perioder = [periode1, periode2];
 
-    expect(findPeriodOverlaps(periodObject)).toEqual([
+    expect(findPeriodOverlaps(perioder)).toEqual([
       {
         fom: new Date("2023-01-01"),
         tom: new Date("2023-01-31"),
@@ -302,53 +302,53 @@ describe("findPeriodOverlaps", () => {
   });
 
   test("Sjekk at rekkefølge ikke har noe å si", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-10"),
       tom: new Date("2023-01-25"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-15"),
     };
 
-    const periodObject = [period1, period2];
+    const perioder = [periode1, periode2];
 
-    expect(findPeriodOverlaps(periodObject)).toEqual([
+    expect(findPeriodOverlaps(perioder)).toEqual([
       { fom: new Date("2023-01-10"), tom: new Date("2023-01-15") },
     ]);
   });
 
   test("Sjekk at perioder inntil hverandre ikke gir overlap", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-15"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-01-16"),
       tom: new Date("2023-01-25"),
     };
 
-    const periodObject = [period1, period2];
+    const perioder = [periode1, periode2];
 
-    expect(findPeriodOverlaps(periodObject)).toEqual([]);
+    expect(findPeriodOverlaps(perioder)).toEqual([]);
   });
 
   test("Sjekk at to perioder som slutter og starter på samme dag gir overlap", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-15"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-01-15"),
       tom: new Date("2023-01-25"),
     };
 
-    const periodObject = [period1, period2];
+    const perioder = [periode1, periode2];
 
-    expect(findPeriodOverlaps(periodObject)).toEqual([
+    expect(findPeriodOverlaps(perioder)).toEqual([
       {
         fom: new Date("2023-01-15"),
         tom: new Date("2023-01-15"),
@@ -357,29 +357,29 @@ describe("findPeriodOverlaps", () => {
   });
 
   test("Sjekk at opphold ikke påvirker overlapp", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-20"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-01-10"),
       tom: new Date("2023-01-15"),
     };
 
-    const period3 = {
+    const periode3 = {
       fom: new Date("2023-02-01"),
       tom: new Date("2023-02-20"),
     };
 
-    const period4 = {
+    const periode4 = {
       fom: new Date("2023-02-10"),
       tom: new Date("2023-02-15"),
     };
 
-    const periodObject = [period1, period2, period3, period4];
+    const perioder = [periode1, periode2, periode3, periode4];
 
-    expect(findPeriodOverlaps(periodObject)).toEqual([
+    expect(findPeriodOverlaps(perioder)).toEqual([
       {
         fom: new Date("2023-01-10"),
         tom: new Date("2023-01-15"),
@@ -392,24 +392,24 @@ describe("findPeriodOverlaps", () => {
   });
 
   test("Sjekk at flere tilfeller av overlapp blir slått sammen", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-15"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-01-10"),
       tom: new Date("2023-01-25"),
     };
 
-    const period3 = {
+    const periode3 = {
       fom: new Date("2023-01-05"),
       tom: new Date("2023-01-20"),
     };
 
-    const periodObject = [period1, period2, period3];
+    const perioder = [periode1, periode2, periode3];
 
-    expect(findPeriodOverlaps(periodObject)).toEqual([
+    expect(findPeriodOverlaps(perioder)).toEqual([
       {
         fom: new Date("2023-01-05"),
         tom: new Date("2023-01-20"),
@@ -418,24 +418,24 @@ describe("findPeriodOverlaps", () => {
   });
 
   test("Sjekk at flere separate overlapp gir riktig overlaps", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-31"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-01-05"),
       tom: new Date("2023-01-10"),
     };
 
-    const period3 = {
+    const periode3 = {
       fom: new Date("2023-01-15"),
       tom: new Date("2023-01-20"),
     };
 
-    const periodObject = [period1, period2, period3];
+    const perioder = [periode1, periode2, periode3];
 
-    expect(findPeriodOverlaps(periodObject)).toEqual([
+    expect(findPeriodOverlaps(perioder)).toEqual([
       {
         fom: new Date("2023-01-05"),
         tom: new Date("2023-01-10"),
@@ -448,34 +448,34 @@ describe("findPeriodOverlaps", () => {
   });
 
   test("Sjekk at mer komplekse overlapp gir riktig overlaps", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-31"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-01-05"),
       tom: new Date("2023-01-10"),
     };
 
-    const period3 = {
+    const periode3 = {
       fom: new Date("2023-01-05"),
       tom: new Date("2023-01-15"),
     };
 
-    const period4 = {
+    const periode4 = {
       fom: new Date("2023-01-20"),
       tom: new Date("2023-02-15"),
     };
 
-    const period5 = {
+    const periode5 = {
       fom: new Date("2023-02-10"),
       tom: new Date("2023-02-25"),
     };
 
-    const periodObject = [period1, period2, period3, period4, period5];
+    const perioder = [periode1, periode2, periode3, periode4, periode5];
 
-    expect(findPeriodOverlaps(periodObject)).toEqual([
+    expect(findPeriodOverlaps(perioder)).toEqual([
       {
         fom: new Date("2023-01-05"),
         tom: new Date("2023-01-15"),
@@ -492,19 +492,19 @@ describe("findPeriodOverlaps", () => {
   });
 
   test("Sjekk at udefinert slutt behandles som å vare på ubestemt tid", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-02-01"),
       tom: new Date("2023-02-28"),
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-01-01"),
       tom: undefined,
     };
 
-    const periodObject = [period1, period2];
+    const perioder = [periode1, periode2];
 
-    expect(findPeriodOverlaps(periodObject)).toEqual([
+    expect(findPeriodOverlaps(perioder)).toEqual([
       {
         fom: new Date("2023-02-01"),
         tom: new Date("2023-02-28"),
@@ -513,19 +513,19 @@ describe("findPeriodOverlaps", () => {
   });
 
   test("Sjekk at to perioder uten slutt gir overlap uten slutt", () => {
-    const period1 = {
+    const periode1 = {
       fom: new Date("2023-01-01"),
       tom: undefined,
     };
 
-    const period2 = {
+    const periode2 = {
       fom: new Date("2023-02-01"),
       tom: undefined,
     };
 
-    const periodObject = [period1, period2];
+    const perioder = [periode1, periode2];
 
-    expect(findPeriodOverlaps(periodObject)).toEqual([
+    expect(findPeriodOverlaps(perioder)).toEqual([
       {
         fom: new Date("2023-02-01"),
         tom: undefined,
@@ -619,6 +619,7 @@ describe("dolValidation", () => {
       gyldigFom: "2025-01-01",
       gyldigTom: "2025-02-28",
     };
+
     const orgtilknytning2: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "1",
@@ -641,6 +642,7 @@ describe("dolValidation", () => {
       gyldigFom: "2025-01-01",
       gyldigTom: "2025-02-28",
     };
+
     const orgtilknytning2: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "1",
@@ -663,12 +665,14 @@ describe("dolValidation", () => {
       gyldigFom: "2025-01-01",
       gyldigTom: "2025-02-28",
     };
+
     const orgtilknytning2: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "1",
       gyldigFom: "2025-02-01",
       gyldigTom: "2025-03-31",
     };
+
     const orgtilknytning3: OrgtilknytningEtterValidering = {
       erDagligOppfolging: false,
       orgEnhetId: "2",
@@ -698,6 +702,7 @@ describe("dolValidation", () => {
       gyldigFom: "2025-01-01",
       gyldigTom: "2025-04-30",
     };
+
     const orgtilknytning2: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "1",
@@ -723,6 +728,7 @@ describe("dolValidation", () => {
       gyldigFom: "2025-01-01",
       gyldigTom: undefined,
     };
+
     const orgtilknytning2: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "1",
@@ -748,6 +754,7 @@ describe("dolValidation", () => {
       gyldigFom: "2025-01-01",
       gyldigTom: undefined,
     };
+
     const orgtilknytning2: OrgtilknytningEtterValidering = {
       erDagligOppfolging: false,
       orgEnhetId: "1",
@@ -770,6 +777,7 @@ describe("dolValidation", () => {
       gyldigFom: "2023-01-01",
       gyldigTom: "2023-01-31",
     };
+
     const orgtilknytning2: OrgtilknytningEtterValidering = {
       erDagligOppfolging: false,
       orgEnhetId: "1",
@@ -792,6 +800,7 @@ describe("dolValidation", () => {
       gyldigFom: "2023-01-01",
       gyldigTom: "2023-01-31",
     };
+
     const orgtilknytning2: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "1",
@@ -843,6 +852,7 @@ describe("dolValidation", () => {
         addMonths(todayWithoutTimezone(), 1),
       ),
     };
+
     const orgtilknytning2: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "1",
@@ -878,6 +888,7 @@ describe("dolValidation", () => {
         addMonths(todayWithoutTimezone(), 1),
       ),
     };
+
     const orgtilknytning2: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "1",
@@ -888,6 +899,7 @@ describe("dolValidation", () => {
         addMonths(todayWithoutTimezone(), 1),
       ),
     };
+
     const orgtilknytning3: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "2",
@@ -898,6 +910,7 @@ describe("dolValidation", () => {
         addMonths(todayWithoutTimezone(), 3),
       ),
     };
+
     const orgtilknytning4: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "3",
