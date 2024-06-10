@@ -320,6 +320,7 @@ function OrgtilknytningForm({
           </Button>
 
           <Button
+            data-cy="lagre-button"
             icon={<FloppydiskIcon aria-hidden />}
             size="small"
             type="submit"
@@ -482,6 +483,7 @@ function FormDateWrapper({
   return (
     <DatePicker {...datePickerProperties.datepickerProps}>
       <DatePicker.Input
+        data-cy={label.replaceAll(" ", "-")}
         error={error}
         ref={field.ref}
         {...datePickerProperties.inputProps}
