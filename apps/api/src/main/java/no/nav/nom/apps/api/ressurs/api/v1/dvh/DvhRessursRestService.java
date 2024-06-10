@@ -97,7 +97,8 @@ public class DvhRessursRestService {
             orgtilknytningState.orgEnhetId(),
             orgtilknytningState.gyldigFom(),
             orgtilknytningState.gyldigTom().orElse(null),
-            orgtilknytningState.erDagligOppfolging()
+            orgtilknytningState.erDagligOppfolging(),
+            orgtilknytningState.fid()
         );
     }
 
