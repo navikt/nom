@@ -1,5 +1,6 @@
 import { css } from "@emotion/react";
 import {
+  KeyVerticalFillIcon,
   MenuHamburgerIcon,
   PersonFillIcon,
   PersonPlusFillIcon,
@@ -67,6 +68,15 @@ export function BurgerMenu() {
             >
               <PersonPlusFillIcon color="black" fontSize="24px" />
               <span>Opprett medarbeider</span>
+            </Dropdown.Menu.List.Item>
+          )}
+          {hasWriteAccess && (
+            <Dropdown.Menu.List.Item
+              data-cy="tilganger-button"
+              onClick={() => navigate({ to: "/tilganger" })}
+            >
+              <KeyVerticalFillIcon color="black" fontSize="24px" />
+              <span>Tilganger</span>
             </Dropdown.Menu.List.Item>
           )}
           {hasAdminAccess && (

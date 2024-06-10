@@ -1,18 +1,21 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Buildings3Icon } from "@navikt/aksel-icons";
+import { Buildings3Icon, PlusCircleIcon } from "@navikt/aksel-icons";
 import {
   Button,
   DatePicker,
   Heading,
   HStack,
+  Table,
   useDatepicker,
   VStack,
 } from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { isSameDay, subDays } from "date-fns";
+import sortBy from "lodash/sortBy";
 import React, { useState } from "react";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
+import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import {
@@ -23,6 +26,7 @@ import {
   getSession,
   getTilgangerDelegertByUserOptions,
   getTilgangerDelegertTilMegOptions,
+  tilgangerKeys,
 } from "~/api/react-query-endpoints";
 import ContentWrapper from "~/components/ContentWrapper";
 import { NavidentNameLookup } from "~/components/NavidentNameLookup";
@@ -30,8 +34,16 @@ import { PageBanner } from "~/components/PageBanner";
 import { Pluralize } from "~/components/Pluralize";
 import { NavidentSelectFormPart } from "~/components/select/NavidentSelect";
 import { blueTopBorder } from "~/resources/NomStyles";
-import type { LederTilgang, OrgEnhet } from "~/types/api-models";
-import { formatDateWithoutTimezone, formatDisplayDate } from "~/utils";
+import type {
+  LederTilgang,
+  LederTilgangForOrgenhetRequest,
+  OrgEnhet,
+} from "~/types/api-models";
+import {
+  formatDateWithoutTimezone,
+  formatDisplayDate,
+  isSameDateOrAfter,
+} from "~/utils";
 
 export const Route = createFileRoute("/tilganger")({
   component: TilgangerPage,
@@ -132,11 +144,19 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const tilgangerDelegertAvMeg =
     useQuery({
       ...getTilgangerDelegertByUserOptions(),
-      select: (tilganger) =>
-        tilganger.filter((tilgang) => tilgang.orgenhetId === orgEnhet.id),
+      select: (tilganger) => {
+        const relevanteTilganger = tilganger.filter(
+          (tilgang) => tilgang.orgenhetId === orgEnhet.id,
+        );
+        const aktiveTilganger = relevanteTilganger.filter((tilgang) =>
+          isSameDateOrAfter(new Date(tilgang.gyldigTom), new Date()),
+        );
+        return sortBy(aktiveTilganger, "gyldigTom");
+      },
     }).data ?? [];
 
   const methods = useForm({
+    shouldUnregister: true,
     resolver: yupResolver(tilgangSchema),
   });
 
@@ -147,11 +167,17 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   >({
     mutationFn: async (values) => {
       const promises = Object.entries(values)
-        .filter(
-          ([, formData]) =>
-            Object.values(formData).length > 0 &&
-            !Object.values(formData).some((v) => !v),
-        )
+        .filter(([fid, formData]) => {
+          const originalTilgang = tilgangerDelegertAvMeg.find(
+            (tilgang) => tilgang.fid === fid,
+          );
+
+          // Send kun endre request der hvor gyldigTom forandret seg. For nye tilganger vil den alltid være endret (standard undefined)
+          return !isSameDay(
+            new Date(originalTilgang?.gyldigTom ?? ""),
+            new Date(formData.gyldigTom),
+          );
+        })
         .map(([key, formData]) => {
           return key === "newTilgang"
             ? addDelegering({
@@ -213,16 +239,44 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               singleForm="person"
             />
           </Heading>
-          {tilgangerDelegertAvMeg.map((tilgang) => (
-            <Delegasjon edit={edit} key={tilgang.fid} tilgang={tilgang} />
-          ))}
+          <Table>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell
+                  css={css`
+                    width: 300px;
+                  `}
+                  scope="col"
+                >
+                  Navn
+                </Table.HeaderCell>
+                <Table.HeaderCell scope="col">
+                  Gyldig til og med
+                </Table.HeaderCell>
+                <Table.HeaderCell
+                  css={css`
+                    width: 200px;
+                  `}
+                />
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {tilgangerDelegertAvMeg.map((tilgang) =>
+                edit ? (
+                  <TilgangRowEditable key={tilgang.fid} tilgang={tilgang} />
+                ) : (
+                  <TilgangRowReadOnly key={tilgang.fid} tilgang={tilgang} />
+                ),
+              )}
+              {edit ? <AddTilgangRow /> : undefined}
+            </Table.Body>
+          </Table>
           <span>
             Redigeringstilgangen gjelder for alle underliggende
             organisasjonsenheter
           </span>
         </VStack>
 
-        {edit ? <AddDelegationFields /> : undefined}
         {/*Normally you only use keys for arrays in react, but toggling buttons like this causes the form to submit even though it has type="button"*/}
         {/*This is a React peculiarity: https://github.com/facebook/react/issues/25089*/}
         <HStack
@@ -234,6 +288,7 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
           {edit ? (
             <>
               <Button
+                data-cy="avbryt-tilganger"
                 key="end-edit"
                 onClick={onCloseCard}
                 size="small"
@@ -243,6 +298,7 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
                 Avbryt
               </Button>
               <Button
+                data-cy="submit-tilganger"
                 key="submit-button"
                 loading={isPending}
                 size="small"
@@ -254,6 +310,7 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             </>
           ) : (
             <Button
+              data-cy="rediger-tilganger"
               key="start-edit"
               onClick={() => setEdit(true)}
               size="small"
@@ -269,88 +326,157 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   );
 }
 
-function Delegasjon({
-  tilgang,
-  edit,
-}: {
-  edit: boolean;
-  tilgang: LederTilgang;
-}) {
-  const {
-    setValue,
-    formState: { errors },
-  } = useFormContext();
+function TilgangRowEditable({ tilgang }: { tilgang: LederTilgang }) {
+  const queryClient = useQueryClient();
+  const { field, fieldState } = useController({
+    name: `${tilgang.fid}.gyldigTom`,
+    defaultValue: tilgang.gyldigTom,
+  });
 
   const gyldigTomDatePicker = useDatepicker({
+    defaultSelected: new Date(tilgang.gyldigTom),
     onDateChange: (date) => {
-      setValue(
-        `${tilgang.til}.gyldigTom`,
-        date ? formatDateWithoutTimezone(date) : "",
-      );
+      field.onChange(date ? formatDateWithoutTimezone(date) : "");
+    },
+  });
+
+  const slettTilgangMutation = useMutation<
+    unknown,
+    unknown,
+    LederTilgangForOrgenhetRequest
+  >({
+    mutationFn: async (values) => fornyDelegering(values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: tilgangerKeys.me });
     },
   });
 
   return (
-    <HStack gap="4" key={tilgang.fid}>
-      <span>Delegert til:</span>
-      <b>
+    <Table.Row>
+      <Table.DataCell>
         <NavidentNameLookup navident={tilgang.til} />
-      </b>
-
-      {edit ? (
+      </Table.DataCell>
+      <Table.DataCell align="right">
         <DatePicker {...gyldigTomDatePicker.datepickerProps}>
           <DatePicker.Input
+            data-cy="gyldig-tom-datepicker"
             {...gyldigTomDatePicker.inputProps}
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
-            error={errors[tilgang.til]?.gyldigTom?.message?.toString()}
-            label="Gyldig til og med:"
+            error={fieldState.error?.message?.toString()}
+            hideLabel
+            label="Gyldig til og med"
+            ref={field.ref}
             size="small"
           />
         </DatePicker>
-      ) : (
-        <>
-          <span>Gyldig t.o.m</span>
-          <b>{formatDisplayDate(tilgang.gyldigTom)}</b>
-        </>
-      )}
-    </HStack>
+      </Table.DataCell>
+      <Table.DataCell align="right">
+        <Button
+          data-cy="slett-tilgang-button"
+          loading={slettTilgangMutation.isPending}
+          onClick={() =>
+            slettTilgangMutation.mutate({
+              delegertTilNavident: tilgang.til,
+              gyldigTom: formatDateWithoutTimezone(subDays(new Date(), 1)), // Sette dato til igår anses som å slette tilgang
+              orgenhetId: tilgang.orgenhetId,
+            })
+          }
+          size="small"
+          type="button"
+          variant="secondary"
+        >
+          Slett
+        </Button>
+      </Table.DataCell>
+    </Table.Row>
   );
 }
 
-function AddDelegationFields() {
-  const {
-    setValue,
-    formState: { errors },
-  } = useFormContext();
+function TilgangRowReadOnly({ tilgang }: { tilgang: LederTilgang }) {
+  return (
+    <Table.Row>
+      <Table.DataCell>
+        <NavidentNameLookup navident={tilgang.til} />
+      </Table.DataCell>
+      <Table.DataCell>
+        <b>{formatDisplayDate(tilgang.gyldigTom)}</b>
+      </Table.DataCell>
+      <Table.DataCell />
+    </Table.Row>
+  );
+}
+
+function AddTilgangRow() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (!isOpen) {
+    return (
+      <Table.Row>
+        <Table.DataCell colSpan={3}>
+          <Button
+            data-cy="legg-til-tilgang-button"
+            icon={<PlusCircleIcon />}
+            onClick={() => setIsOpen(true)}
+            size="small"
+            variant="secondary"
+          >
+            Legg til ny tilgang
+          </Button>
+        </Table.DataCell>
+      </Table.Row>
+    );
+  }
+
+  return <ActiveAddTilgangRow onClose={() => setIsOpen(false)} />;
+}
+
+function ActiveAddTilgangRow({ onClose }: { onClose: () => void }) {
+  const { field, fieldState } = useController({
+    name: "newTilgang.gyldigTom",
+  });
 
   const gyldigTomDatePicker = useDatepicker({
     onDateChange: (date) => {
-      setValue(
-        `newTilgang.gyldigTom`,
-        date ? formatDateWithoutTimezone(date) : "",
-      );
+      field.onChange(date ? formatDateWithoutTimezone(date) : "");
     },
   });
 
   return (
-    <VStack gap="4">
-      <Heading size="xsmall">Deleger til:</Heading>
-      <NavidentSelectFormPart
-        label="Søk opp medarbeider"
-        name="newTilgang.delegertTilNavident"
-      />
-      <DatePicker {...gyldigTomDatePicker.datepickerProps}>
-        <DatePicker.Input
-          {...gyldigTomDatePicker.inputProps}
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          error={errors.newTilgang?.gyldigTom?.message?.toString()}
-          label="Gyldig til og med:"
-          size="small"
+    <Table.Row
+      css={css`
+        td {
+          vertical-align: top;
+        }
+      `}
+    >
+      <Table.DataCell>
+        <NavidentSelectFormPart
+          label="Søk opp medarbeider"
+          name="newTilgang.delegertTilNavident"
         />
-      </DatePicker>
-    </VStack>
+      </Table.DataCell>
+      <Table.DataCell>
+        <DatePicker {...gyldigTomDatePicker.datepickerProps}>
+          <DatePicker.Input
+            {...gyldigTomDatePicker.inputProps}
+            data-cy="newTilgang-gyldigTom-datepicker"
+            error={fieldState.error?.message?.toString()}
+            label="Gyldig til og med"
+            ref={field.ref}
+            size="small"
+          />
+        </DatePicker>
+      </Table.DataCell>
+      <Table.DataCell align="right">
+        <Button
+          data-cy="fjern-ny-tilgang-button"
+          onClick={onClose}
+          size="small"
+          variant="secondary"
+        >
+          Fjern
+        </Button>
+      </Table.DataCell>
+    </Table.Row>
   );
 }
 
@@ -363,19 +489,19 @@ const tilgangSchema = yup.lazy((values) => {
   return yup.object().shape(Object.fromEntries(dynamicKeysToSchema));
 });
 
-export const newTilgangSchema = yup
-  .object({
-    delegertTilNavident: yup.string(),
-    gyldigTom: yup.string().when("delegertTilNavident", {
-      is: (delegertTilNavident: string) => !!delegertTilNavident,
-      // eslint-disable-next-line unicorn/no-thenable
-      then: (schema) =>
-        schema.required("Må oppgis").futureOrPresent().max1YearInTheFuture(),
-      otherwise: (schema) => schema.optional(),
-    }),
-  })
-  .optional();
+const newTilgangSchema = yup.object({
+  delegertTilNavident: yup.string().required("Må oppgis"),
+  gyldigTom: yup
+    .string()
+    .required("Må oppgis")
+    .futureOrPresent()
+    .max1YearInTheFuture(),
+});
 
 const renewTilgangSchema = yup.object({
-  gyldigTom: yup.string().futureOrPresent().max1YearInTheFuture(),
+  gyldigTom: yup
+    .string()
+    .required("Må oppgis")
+    .futureOrPresent()
+    .max1YearInTheFuture(),
 });

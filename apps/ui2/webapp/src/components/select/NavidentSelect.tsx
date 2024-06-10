@@ -36,12 +36,13 @@ export function NavidentSelectFormPart({
   return (
     <Controller
       name={name}
-      render={({ field }) => {
+      render={({ field, fieldState }) => {
         const selectedOption = alleOptions?.find(
           (option) => option?.value === field.value,
         );
         return (
           <UNSAFE_Combobox
+            error={fieldState.error?.message?.toString()}
             filteredOptions={optionsQuery.data ?? []}
             label={label}
             onChange={(event) =>
