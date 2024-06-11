@@ -120,6 +120,14 @@ export function isTodayOrAfter(date: Date) {
   return isToday(date) || isAfter(date, todayWithoutTimezone());
 }
 
+export function isPresentOrBefore(date: Date) {
+  return isToday(date) || isBefore(date, todayWithoutTimezone());
+}
+
+export function isPresentOrAfter(date: Date) {
+  return isToday(date) || isAfter(date, todayWithoutTimezone());
+}
+
 export function isBeforeToday(date: Date) {
   return !isTodayOrAfter(date);
 }
