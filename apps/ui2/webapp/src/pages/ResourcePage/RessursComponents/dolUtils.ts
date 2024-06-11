@@ -192,11 +192,6 @@ export function dolValidering(
 
     if (!latestTilknytningDate && latestDolDate) {
       dolGaps.push({ fom: addDays(latestDolDate, 1), tom: undefined });
-    } else if (latestTilknytningDate && !latestDolDate) {
-      dolGaps.push({
-        fom: addDays(latestTilknytningDate, 1),
-        tom: undefined,
-      });
     } else if (isAfter(latestTilknytningDate, latestDolDate)) {
       dolGaps.push({
         fom: addDays(latestDolDate, 1),
