@@ -41,8 +41,8 @@ import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 import {
   formatDisplayDate,
   formatVisningsnavn,
-  isAfterPresent,
-  isBeforePresent,
+  isAfterToday,
+  isBeforeToday,
   isGyldighetsPeriodeActive,
   isInDevelopment,
 } from "~/utils";
@@ -122,13 +122,13 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
   const expiredOrgTilknytninger = orgtilknytninger.filter(
     (orgTilknytning) =>
       orgTilknytning.gyldigTom &&
-      isBeforePresent(new Date(orgTilknytning.gyldigTom)),
+      isBeforeToday(new Date(orgTilknytning.gyldigTom)),
   );
 
   const futureOrgTilknytninger = orgtilknytninger.filter(
     (orgTilknytning) =>
       orgTilknytning.gyldigFom &&
-      isAfterPresent(new Date(orgTilknytning.gyldigFom)),
+      isAfterToday(new Date(orgTilknytning.gyldigFom)),
   );
 
   return (
@@ -323,7 +323,7 @@ function OrganisationHierarchyTree({
 
   const { gyldigTom, gyldigFom, erDagligOppfolging } = orgTilknytning;
 
-  const startsInTheFuture = gyldigFom && isAfterPresent(new Date(gyldigFom));
+  const startsInTheFuture = gyldigFom && isAfterToday(new Date(gyldigFom));
 
   return (
     <ExpansionCard
