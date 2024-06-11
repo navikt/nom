@@ -193,6 +193,9 @@ spec:
         - application: gosys-oppgavebehandling-api
           namespace: oppgavehandtering
           cluster: prod-gcp
+        - application: kabin-api
+          namespace: klage
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
