@@ -10,6 +10,7 @@ import {
   RadioGroup,
   useDatepicker,
 } from "@navikt/ds-react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { addYears, subDays } from "date-fns";
 import pickBy from "lodash/pickBy";
@@ -29,6 +30,7 @@ import {
   ResultLimit,
   useSearchOrgenheterQuery,
 } from "~/api/generated/graphql_generated";
+import { harLederTilgangForOrgenhetOptions } from "~/api/react-query-endpoints";
 import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
 import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBrukerstedSelect";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
@@ -356,23 +358,34 @@ export function OrganisasjonstilknytningInnerForm({
     erDagligOppfolgingLockedToTrue,
   );
 
+  const hasWriteAccessForOrgenhet =
+    useQuery(harLederTilgangForOrgenhetOptions(watch("orgEnhetId"))).data ??
+    false;
+
   return (
     <>
       <InnerOrgEnhetSelect />
       {watch("orgEnhetId") ? (
-        <Checkbox
-          checked={erDagligOppfolgingChecked}
-          disabled={erDagligOppfolgingLockedToTrue}
-          onChange={(event) => {
-            setErDagligOppfolgingChecked(event.target.checked);
-            setValue("erDagligOppfolging", event.target.checked);
-          }}
-        >
-          <BodyShort>
-            Denne lederen har ansvar for den daglige oppfølgingen av
-            medarbeideren
-          </BodyShort>
-        </Checkbox>
+        <>
+          {hasWriteAccessForOrgenhet ? undefined : (
+            <Alert variant="error">
+              Du har ikke tilgang til å opprette medarbeidere i denne enheten.
+            </Alert>
+          )}
+          <Checkbox
+            checked={erDagligOppfolgingChecked}
+            disabled={erDagligOppfolgingLockedToTrue}
+            onChange={(event) => {
+              setErDagligOppfolgingChecked(event.target.checked);
+              setValue("erDagligOppfolging", event.target.checked);
+            }}
+          >
+            <BodyShort>
+              Denne lederen har ansvar for den daglige oppfølgingen av
+              medarbeideren
+            </BodyShort>
+          </Checkbox>
+        </>
       ) : undefined}
       <Orgtilknytningsvarighet
         defaultSluttDato={defaultSluttDato}

@@ -319,6 +319,32 @@ export const addDelegering = async (
   );
 };
 
+export function harLederTilgangForOrgenhetOptions(orgenhetId: string) {
+  return queryOptions({
+    queryKey: ["TILGANG", "ORGENHET", orgenhetId],
+    queryFn: async () =>
+      (
+        await axios.get<boolean>(
+          `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/isAuthorizedForOrgenhet/${orgenhetId}`,
+        )
+      ).data,
+    enabled: !!orgenhetId,
+  });
+}
+
+export function harLederTilgangForNavidentOptions(navident: string) {
+  return queryOptions({
+    queryKey: ["TILGANG", "NAVIDENT", navident],
+    queryFn: async () =>
+      (
+        await axios.get<boolean>(
+          `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/isAuthorizedForNavident/${navident}`,
+        )
+      ).data,
+    enabled: !!navident,
+  });
+}
+
 export const fornyDelegering = async (
   request: LederTilgangForOrgenhetRequest,
 ) => {

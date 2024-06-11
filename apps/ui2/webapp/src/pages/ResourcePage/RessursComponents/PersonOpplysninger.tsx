@@ -14,8 +14,10 @@ import capitalize from "lodash/capitalize";
 import uniqBy from "lodash/uniqBy";
 import React from "react";
 
-import { getLedereForRessurs } from "~/api/react-query-endpoints";
-import { useHasWriteAccess } from "~/api/useGetSession";
+import {
+  getLedereForRessurs,
+  harLederTilgangForNavidentOptions,
+} from "~/api/react-query-endpoints";
 import { LabelWithValue } from "~/components/LabelWithValue";
 import { UserImage } from "~/components/UserImage";
 import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
@@ -75,9 +77,10 @@ export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
 function EditButton({ ressurs }: { ressurs: Ressurs }) {
   const navigate = useNavigate();
 
-  const hasWriteAccess = useHasWriteAccess();
+  const hasWriteAccessForRessurs =
+    useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
 
-  if (!hasWriteAccess) {
+  if (!hasWriteAccessForRessurs) {
     return;
   }
 
