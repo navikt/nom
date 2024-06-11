@@ -1,5 +1,4 @@
 import {
-  addDays,
   endOfDay,
   format,
   formatISO,
@@ -8,7 +7,6 @@ import {
   isSameDay,
   isToday,
   isWithinInterval,
-  subDays,
 } from "date-fns";
 import { maxTime, minTime } from "date-fns/constants";
 
@@ -69,8 +67,12 @@ export function formatDateWithoutTimezone(date: Date) {
   return formatISO(date, { representation: "date" });
 }
 
+export function dateWithoutTimezone(date: Date) {
+  return new Date(formatDateWithoutTimezone(date));
+}
+
 export function todayWithoutTimezone() {
-  return new Date(formatDateWithoutTimezone(new Date()));
+  return dateWithoutTimezone(new Date());
 }
 
 export function formatDisplayDate(date?: string | Date) {
@@ -110,26 +112,28 @@ export function isGyldighetsPeriodeActive(
   }
 }
 
-export function isBeforePresent(date: Date) {
-  const endOfDate = endOfDay(date);
-  const endOfToday = endOfDay(new Date());
-
-  return isBefore(endOfDate, endOfToday);
+export function isTodayOrBefore(date: Date) {
+  return isToday(date) || isBefore(date, todayWithoutTimezone());
 }
 
-export function isAfterPresent(date: Date) {
-  const endOfDate = endOfDay(date);
-  const endOfToday = endOfDay(new Date());
-
-  return isAfter(endOfDate, endOfToday);
+export function isTodayOrAfter(date: Date) {
+  return isToday(date) || isAfter(date, todayWithoutTimezone());
 }
 
 export function isPresentOrBefore(date: Date) {
-  return isToday(date) || isBeforePresent(date);
+  return isTodayOrBefore(date);
 }
 
 export function isPresentOrAfter(date: Date) {
-  return isToday(date) || isAfterPresent(date);
+  return isTodayOrAfter(date);
+}
+
+export function isBeforeToday(date: Date) {
+  return !isTodayOrAfter(date);
+}
+
+export function isAfterToday(date: Date) {
+  return !isTodayOrBefore(date);
 }
 
 export function isSameDateOrAfter(checkDate: Date, compareDate: Date) {
@@ -140,24 +144,10 @@ export function isSameDateOrBefore(checkDate: Date, compareDate: Date) {
   return isSameDay(checkDate, compareDate) || isBefore(checkDate, compareDate);
 }
 
-export function isNextDate(checkDate: Date, compareDate: Date) {
-  return isSameDay(checkDate, addDays(compareDate, 1));
+export function earliestDate(date1: Date, date2: Date) {
+  return isSameDateOrBefore(date1, date2) ? date1 : date2;
 }
 
-export function isPreviousDate(checkDate: Date, compareDate: Date) {
-  return isSameDay(checkDate, subDays(compareDate, 1));
-}
-
-export function isDateAfterOtherDates(
-  date?: string,
-  otherDates?: Array<string | undefined>,
-) {
-  const maxDate = new Date(maxTime);
-  const compareDate = date ? new Date(date) : maxDate;
-
-  return (
-    otherDates
-      ?.map((otherDate) => (otherDate ? new Date(otherDate) : maxDate))
-      .every((otherDate) => isAfter(compareDate, otherDate)) ?? true
-  );
+export function latestDate(date1: Date, date2: Date) {
+  return isSameDateOrAfter(date1, date2) ? date1 : date2;
 }

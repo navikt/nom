@@ -280,7 +280,7 @@ describe("findPeriodOverlaps", () => {
     ]);
   });
 
-  test("Sjekk at to like perioder har gir overlapp", () => {
+  test("Sjekk at to like perioder gir overlap", () => {
     const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-31"),
@@ -391,7 +391,7 @@ describe("findPeriodOverlaps", () => {
     ]);
   });
 
-  test("Sjekk at flere tilfeller av overlapp blir slått sammen", () => {
+  test("Sjekk at overlappende overlapp blir slått sammen", () => {
     const periode1 = {
       fom: new Date("2023-01-01"),
       tom: new Date("2023-01-15"),
@@ -405,6 +405,32 @@ describe("findPeriodOverlaps", () => {
     const periode3 = {
       fom: new Date("2023-01-05"),
       tom: new Date("2023-01-20"),
+    };
+
+    const perioder = [periode1, periode2, periode3];
+
+    expect(findPeriodOverlaps(perioder)).toEqual([
+      {
+        fom: new Date("2023-01-05"),
+        tom: new Date("2023-01-20"),
+      },
+    ]);
+  });
+
+  test("Sjekk at helt overlappende overlapp blir slått sammen", () => {
+    const periode1 = {
+      fom: new Date("2023-01-01"),
+      tom: new Date("2023-01-31"),
+    };
+
+    const periode2 = {
+      fom: new Date("2023-01-05"),
+      tom: new Date("2023-01-20"),
+    };
+
+    const periode3 = {
+      fom: new Date("2023-01-10"),
+      tom: new Date("2023-01-15"),
     };
 
     const perioder = [periode1, periode2, periode3];
