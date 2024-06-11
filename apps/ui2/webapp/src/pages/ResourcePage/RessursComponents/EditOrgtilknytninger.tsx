@@ -214,6 +214,7 @@ function OrgtilknytningForm({
             `}
           >
             <Button
+              data-cy="legg-til-ny-orgtilknytninger-button"
               icon={<PlusCircleIcon />}
               onClick={() => {
                 prepend(defaultNyOrgtilknytning, {
