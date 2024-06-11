@@ -11,6 +11,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink, useNavigate } from "@tanstack/react-router";
 import capitalize from "lodash/capitalize";
+import uniqBy from "lodash/uniqBy";
 import React from "react";
 
 import { getLedereForRessurs } from "~/api/react-query-endpoints";
@@ -181,10 +182,14 @@ export function TelefonNummere({ ressurs }: { ressurs: Ressurs }) {
     ? [{ nummer: ressurs.primaryTelefonnummer }, ...ressurs.telefoner]
     : ressurs.telefoner;
 
+  const uniqueTelefonnummere = uniqBy(telefonnummere, "nummer");
+
   return (
     <LabelWithValue
       label="Telefon"
-      value={telefonnummere.map(({ nummer }) => formatTlf(nummer)).join(", ")}
+      value={uniqueTelefonnummere
+        .map(({ nummer }) => formatTlf(nummer))
+        .join(", ")}
     />
   );
 }
