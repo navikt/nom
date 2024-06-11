@@ -53,6 +53,10 @@ spec:
   prometheus:
     enabled: true
     path: /internal/prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   kafka:
     pool: nav-prod
   secureLogs:
@@ -188,6 +192,9 @@ spec:
           cluster: prod-gcp
         - application: gosys-oppgavebehandling-api
           namespace: oppgavehandtering
+          cluster: prod-gcp
+        - application: kabin-api
+          namespace: klage
           cluster: prod-gcp
     outbound:
       rules:

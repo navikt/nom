@@ -152,7 +152,7 @@ async function queryForOrgenhet(
   return [result.data.data.orgEnhet];
 }
 
-async function queryForRessurs(
+export async function queryForRessurs(
   navident: string | null,
   telefonNummer: string | null,
 ): Promise<SearchResultRaw[]> {
@@ -184,7 +184,7 @@ async function queryForRessurs(
   return [result.data.data.ressurs];
 }
 
-async function createOptions(inputValue: string): Promise<SearchOption[]> {
+export async function commonSearch(inputValue: string) {
   const lookupNavident = /^[A-Za-z]\d{6}$/.test(inputValue)
     ? inputValue.toUpperCase()
     : null;
@@ -196,19 +196,21 @@ async function createOptions(inputValue: string): Promise<SearchOption[]> {
     ? inputValue
     : null;
 
-  const searchResults = await (async function DO() {
-    if (lookupNavident || lookupTelefon) {
-      return await queryForRessurs(lookupNavident, lookupTelefon);
-    }
-    if (lookupOrgenhetId) {
-      return await queryForOrgenhet(inputValue);
-    }
+  if (lookupNavident || lookupTelefon) {
+    return await queryForRessurs(lookupNavident, lookupTelefon);
+  }
+  if (lookupOrgenhetId) {
+    return await queryForOrgenhet(inputValue);
+  }
 
-    // fritekst søk på navn
-    // Får bedre resultat av en eller annen grunn når man tar termene i single-quotes
-    const wrappedInputValue = "'" + inputValue + "'";
-    return performSearch(wrappedInputValue);
-  })();
+  // fritekst søk på navn
+  // Får bedre resultat av en eller annen grunn når man tar termene i single-quotes
+  const wrappedInputValue = "'" + inputValue + "'";
+  return performSearch(wrappedInputValue);
+}
+
+async function createOptions(inputValue: string): Promise<SearchOption[]> {
+  const searchResults = await commonSearch(inputValue);
 
   return searchResults.map((r) => {
     switch (r.__typename) {

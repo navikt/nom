@@ -39,6 +39,13 @@ spec:
       allowAllUsers: true
   kafka:
     pool: nav-prod
+  prometheus:
+    enabled: true
+    path: internal/prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   envFrom:
     - secret: nom-unit4-api-credentials
     - secret: nom-unit4-unleash-api-token

@@ -69,6 +69,10 @@ export function formatDateWithoutTimezone(date: Date) {
   return formatISO(date, { representation: "date" });
 }
 
+export function todayWithoutTimezone() {
+  return new Date(formatDateWithoutTimezone(new Date()));
+}
+
 export function formatDisplayDate(date?: string | Date) {
   if (!date) {
     return "";

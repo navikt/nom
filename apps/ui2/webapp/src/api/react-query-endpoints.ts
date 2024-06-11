@@ -449,32 +449,6 @@ export const updateTelefonnummer = async (
   await hopeForKafkaStateToUpdate();
 };
 
-export const searchRessurser = {
-  /*
-   NOTE 22 Mar 2023 (Johannes Moskvil): This key function is not meant to be used as a function for the query itself.
-   Since the query is for a search term, caching it makes little sense.
-   It can however be useful to manually put the independent search result in the ressurs cache by its navident.
-  */
-  getKeyForNavident: (navident: string) => ressurserKeys.id(navident),
-  queryFn: async (searchTerm: string) =>
-    (
-      await axios.post<
-        GraphQlResponse<
-          "searchRessurs",
-          { visningsnavn: string; navident: string }[]
-        >
-      >(`${NOM_API_BASE_PATH}/graphql`, {
-        query: `
-        query SokRessurser($searchTerm: String!) {
-          searchRessurs(term: $searchTerm, filter: {sektorSelection: IKKE_EKSTERN, statusSelection: AKTIV}){
-            visningsnavn, navident
-          }
-        }`,
-        variables: { searchTerm },
-      })
-    ).data.data.searchRessurs,
-};
-
 async function hopeForKafkaStateToUpdate() {
   await new Promise((r) => setTimeout(r, 1000));
 }

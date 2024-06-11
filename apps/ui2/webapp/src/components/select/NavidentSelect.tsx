@@ -4,7 +4,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Controller } from "react-hook-form";
 
-import { CACHE_FOR, searchRessurser } from "~/api/react-query-endpoints";
+import { CACHE_FOR } from "~/api/react-query-endpoints";
+import { commonSearch } from "~/components/select/Searchbar";
 
 const RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT = 3;
 
@@ -36,12 +37,13 @@ export function NavidentSelectFormPart({
   return (
     <Controller
       name={name}
-      render={({ field }) => {
+      render={({ field, fieldState }) => {
         const selectedOption = alleOptions?.find(
           (option) => option?.value === field.value,
         );
         return (
           <UNSAFE_Combobox
+            error={fieldState.error?.message?.toString()}
             filteredOptions={optionsQuery.data ?? []}
             label={label}
             onChange={(event) =>
@@ -65,10 +67,21 @@ const searchNomRessurser = async (searchTerm: string) => {
     return [];
   }
 
-  const response = await searchRessurser.queryFn(searchTerm);
+  const response = await commonSearch(searchTerm);
 
-  return response.map(({ visningsnavn, navident }) => ({
-    value: navident,
-    label: visningsnavn,
-  }));
+  return response.flatMap((r) => {
+    switch (r.__typename) {
+      case "Ressurs": {
+        return [
+          {
+            value: r.navident,
+            label: r.visningsnavn,
+          },
+        ];
+      }
+      case "OrgEnhet": {
+        return [];
+      }
+    }
+  });
 };
