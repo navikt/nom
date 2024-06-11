@@ -18,6 +18,8 @@ spec:
       value: 'c5752f26-105a-460f-a538-1859273f5057'
     - name: NAVIDENT_SEQUENCE
       value: '850000'
+    - name: JDK_JAVA_OPTIONS
+      value: "-Xms1g -Xmx2g"
   envFrom:
     - secret: nav-ident-unleash-api-token
   secureLogs:
@@ -50,10 +52,10 @@ spec:
     failureThreshold: 5
   resources:
     limits:
-      memory: 512Mi
+      memory: 3Gi
     requests:
       cpu: 200m
-      memory: 256Mi
+      memory: 1Gi
 
   prometheus:
     enabled: true
