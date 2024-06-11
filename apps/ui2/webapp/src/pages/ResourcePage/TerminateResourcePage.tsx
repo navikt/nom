@@ -1,7 +1,6 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
-  Alert,
   BodyLong,
   Button,
   DatePicker,
@@ -99,10 +98,6 @@ export function TerminateResourcePage() {
                   sluttdato.
                 </BodyLong>
                 <SluttDatoPicker />
-                <Alert variant="info">
-                  Husk at ved oppføring i Teamkatalogen, må medarbeideren også
-                  fjernes fra teamlisten der.
-                </Alert>
                 <ApiResponseError error={avvikleRessursMutation.error} />
                 <HStack gap="8" justify="end">
                   <Button
