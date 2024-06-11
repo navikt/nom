@@ -172,8 +172,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
 
         {orgtilknytninger.length === 0 ? (
           <BodyLong>
-            Medarbeideren er ikke registrert på en organisasjonsenhet. Klikk
-            endre for å legge til.
+            Medarbeideren er ikke registrert på en organisasjonsenhet.
           </BodyLong>
         ) : undefined}
 
