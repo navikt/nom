@@ -214,7 +214,6 @@ function OrgtilknytningForm({
             `}
           >
             <Button
-              data-cy="legg-til-ny-orgtilknytninger-button"
               icon={<PlusCircleIcon />}
               onClick={() => {
                 prepend(defaultNyOrgtilknytning, {
@@ -367,7 +366,9 @@ function NewOrgtilknytningFormPart({
           justify-content: space-between;
         `}
       >
-        <Heading size="medium">Legg til ny organisasjonstilknytning</Heading>
+        <Heading data-cy="ny-orgtilknytning-header" size="medium">
+          Legg til ny organisasjonstilknytning
+        </Heading>
 
         <Button
           icon={<MinusCircleIcon />}
