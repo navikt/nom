@@ -25,7 +25,7 @@ import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { addYears } from "date-fns";
 import partition from "lodash/partition";
-import React, { useEffect, useRef } from "react";
+import React, { forwardRef, useEffect, useRef } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { useController } from "react-hook-form";
 import {
@@ -73,8 +73,6 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
   });
 
   const orgtilknytninger = ressursOrgtilknytningerQuery.data ?? [];
-
-  const reference = useRef<HTMLDialogElement>(null);
 
   return (
     <div>
@@ -191,8 +189,8 @@ function OrgtilknytningForm({
     );
 
     if (
-      validation.dolOverlaps.length === 0 &&
-      validation.dolGaps.length === 0
+      validation.dolGaps.length === 0 &&
+      validation.dolOverlaps.length === 0
     ) {
       console.log("Would save");
 
@@ -208,7 +206,18 @@ function OrgtilknytningForm({
   const formReference = useRef<HTMLFormElement>(null);
 
   const handleSubmitClick = () => {
-    if (trengerBekreftelse(watch("mappedeOrgtilknytninger"))) {
+    const oppdaterteOrgtilknytninger = watch(
+      "mappedeOrgtilknytninger",
+    ) as OrgtilknytningEtterValidering[];
+    const { dolGaps, dolOverlaps } = dolValidering(
+      oppdaterteOrgtilknytninger ?? [],
+    );
+
+    if (
+      dolOverlaps.length === 0 &&
+      dolGaps.length === 0 &&
+      trengerBekreftelse(oppdaterteOrgtilknytninger)
+    ) {
       modalReference.current?.showModal();
     } else {
       formReference.current?.dispatchEvent(
@@ -222,7 +231,11 @@ function OrgtilknytningForm({
       <OrgtilknytningTimeline
         orgtilknytninger={watch("mappedeOrgtilknytninger")}
       />
-      <form autoComplete="false" onSubmit={handleSubmit(onValid)}>
+      <form
+        autoComplete="false"
+        onSubmit={handleSubmit(onValid)}
+        ref={formReference}
+      >
         {hasWriteAccess && (
           <div
             css={css`
@@ -364,30 +377,31 @@ function OrgtilknytningForm({
           Åpne modal
         </Button>
 
-        <BekreftModal ref={modalReference} />
+        {/*<BekreftModal ref={modalReference} />*/}
 
-        {/*<Modal header={{ heading: "Bekreft" }} ref={modalReference}>*/}
-        {/*  <Modal.Body>*/}
-        {/*    <BodyLong>Er du sikker?</BodyLong>*/}
-        {/*  </Modal.Body>*/}
-        {/*  <Modal.Footer>*/}
-        {/*    <Button*/}
-        {/*      icon={<FloppydiskIcon aria-hidden />}*/}
-        {/*      size="small"*/}
-        {/*      type="submit"*/}
-        {/*    >*/}
-        {/*      Lagre*/}
-        {/*    </Button>*/}
-        {/*    <Button*/}
-        {/*      onClick={() => modalReference.current?.close()}*/}
-        {/*      size="small"*/}
-        {/*      type="button"*/}
-        {/*      variant="secondary"*/}
-        {/*    >*/}
-        {/*      Avbryt*/}
-        {/*    </Button>*/}
-        {/*  </Modal.Footer>*/}
-        {/*</Modal>*/}
+        <Modal header={{ heading: "Bekreft" }} ref={modalReference}>
+          <Modal.Body>
+            <BodyLong>Er du sikker?</BodyLong>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              icon={<FloppydiskIcon aria-hidden />}
+              onClick={() => modalReference.current?.close()}
+              size="small"
+              type="submit"
+            >
+              Lagre
+            </Button>
+            <Button
+              onClick={() => modalReference.current?.close()}
+              size="small"
+              type="button"
+              variant="secondary"
+            >
+              Avbryt
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </form>
     </FormProvider>
   );
@@ -596,7 +610,7 @@ function IllegalDolCombinationAlert() {
     return <></>;
   }
 
-  const orgtilknytninger = watch(`mappedeOrgtilknytninger`);
+  const orgtilknytninger = watch("mappedeOrgtilknytninger");
   const { dolGaps, dolOverlaps } = dolValidering(orgtilknytninger ?? []);
 
   if (dolGaps.length === 0 && dolOverlaps.length === 0) {
@@ -694,16 +708,16 @@ function BekreftModal({ ref }: { ref: React.RefObject<HTMLDialogElement> }) {
 }
 
 function trengerBekreftelse(data: Partial<OrgtilknytningState>[]) {
-  console.log(data);
+  if (
+    data.some(
+      (orgtilknytning) =>
+        !orgtilknytning.gyldigFom || !orgtilknytning.orgEnhetId,
+    )
+  ) {
+    return false;
+  }
 
-  const alleOrgtilknytningerTom = !data.some(
-    (orgtilknytning) => orgtilknytning.gyldigTom === undefined,
-  );
-
-  console.log("Alle orgtilknytninger TOM:");
-  console.log(alleOrgtilknytningerTom);
-
-  return false;
+  return !data.some((orgtilknytning) => orgtilknytning.gyldigTom === undefined);
 }
 
 function lagOppdaterOrgtilknytningerRequest(
