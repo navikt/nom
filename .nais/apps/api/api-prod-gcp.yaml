@@ -106,6 +106,9 @@ spec:
         - application: modiapersonoversikt-api
           namespace: personoversikt
           cluster: prod-fss
+        - application: modiapersonoversikt-api
+          namespace: personoversikt
+          cluster: prod-gcp
         - application: modia-robot-api
           namespace: personoversikt
           cluster: prod-fss
