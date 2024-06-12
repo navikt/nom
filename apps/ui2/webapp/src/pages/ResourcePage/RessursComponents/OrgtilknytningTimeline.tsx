@@ -67,7 +67,7 @@ export function OrgtilknytningTimeline({
                     <Timeline.Period
                       end={
                         new Date(
-                          orgtilknytning.gyldigTom ?? dateWhenGyldigTomNotSet,
+                          orgtilknytning.gyldigTom || dateWhenGyldigTomNotSet,
                         )
                       }
                       icon={

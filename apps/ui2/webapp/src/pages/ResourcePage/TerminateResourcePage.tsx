@@ -1,17 +1,19 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
-  Alert,
   BodyLong,
   Button,
   DatePicker,
+  HStack,
   useDatepicker,
 } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
+import { isAfter } from "date-fns";
+import { maxTime } from "date-fns/constants";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import { avvikleRessurs, getRessurs } from "~/api/react-query-endpoints";
@@ -41,22 +43,22 @@ export function TerminateResourcePage() {
     },
     resolver: yupResolver(
       yup.object({
-        sluttDato: yup.string().max1YearInTheFuture().required("Obligatorisk"),
+        sluttDato: yup
+          .string()
+          .max1YearInTheFuture()
+          .required("Obligatorisk")
+          .test(
+            "sluttDato-etter-startDato",
+            "Sluttdato kan ikke være før startdato",
+            (sluttDato) => {
+              return isAfter(sluttDato, ressurs?.startdato ?? maxTime);
+            },
+          ),
       }),
     ),
   });
 
-  const {
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = methods;
-
-  const sluttDatoDatepicker = useDatepicker({
-    onDateChange: (date) => {
-      setValue("sluttDato", date ? formatDateWithoutTimezone(date) : "");
-    },
-  });
+  const { handleSubmit } = methods;
 
   const avvikleRessursMutation = useMutation<
     unknown,
@@ -78,87 +80,94 @@ export function TerminateResourcePage() {
     <>
       <PageBanner text="Medarbeider slutter" />
       <ContentWrapper>
-        <form
-          onSubmit={handleSubmit((values) =>
-            avvikleRessursMutation.mutate(values),
-          )}
-        >
-          {ressurs && (
-            <ContainerWithHighlightedTop
-              icon={fjernRessursIcon}
-              title="Medarbeider slutter"
-            >
-              <RessursCard ressurs={ressurs} />
-              <BodyLong>
-                Ved å sette en endelig sluttdato for en medarbeider i NOM vil
-                medarbeideren bli registrert som sluttet i NAV på angitt
-                sluttdato.
-              </BodyLong>
-              <div
-                css={css`
-                  display: flex;
-                  gap: var(--a-spacing-8);
-                `}
+        <FormProvider {...methods}>
+          <form
+            onSubmit={handleSubmit((values) =>
+              avvikleRessursMutation.mutate(values),
+            )}
+          >
+            {ressurs && (
+              <ContainerWithHighlightedTop
+                icon={fjernRessursIcon}
+                title="Medarbeider slutter"
               >
-                <FullWidthDatePickerWrapper>
-                  <DatePicker {...sluttDatoDatepicker.datepickerProps}>
-                    <DatePicker.Input
-                      {...sluttDatoDatepicker.inputProps}
-                      error={errors.sluttDato?.message?.toString()}
-                      label="Sluttdato (Siste arbeidsdag)"
-                    />
-                  </DatePicker>
-                </FullWidthDatePickerWrapper>
-                <Button
-                  css={css`
-                    margin-top: var(--a-spacing-10);
-                    min-width: fit-content;
-                    height: fit-content;
-                  `}
-                  onClick={() => {
-                    sluttDatoDatepicker.setSelected(new Date());
-                  }}
-                  size="small"
-                  type="button"
-                  variant="tertiary"
-                >
-                  Velg datoen i dag
-                </Button>
-              </div>
-              <Alert variant="info">
-                Husk at ved oppføring i Teamkatalogen, må medarbeideren også
-                fjernes fra teamlisten der.
-              </Alert>
-              <ApiResponseError error={avvikleRessursMutation.error} />
-              <div
-                css={css`
-                  display: flex;
-                  justify-content: flex-end;
-                  gap: var(--a-spacing-8);
-                `}
-              >
-                <Button
-                  onClick={() =>
-                    navigate({ params: { id }, to: "/ressurs/$id" })
-                  }
-                  size="small"
-                  type="button"
-                  variant="secondary"
-                >
-                  Avbryt
-                </Button>
-                <Button
-                  loading={avvikleRessursMutation.isPending}
-                  size="small"
-                  type="submit"
-                >
-                  {ressurs.sluttdato ? "Oppdater" : "Bekreft"} sluttdato
-                </Button>
-              </div>
-            </ContainerWithHighlightedTop>
-          )}
-        </form>
+                <RessursCard ressurs={ressurs} />
+                <BodyLong>
+                  Ved å sette en endelig sluttdato for en medarbeider i NOM vil
+                  medarbeideren bli registrert som sluttet i NAV på angitt
+                  sluttdato.
+                </BodyLong>
+                <SluttDatoPicker />
+                <ApiResponseError error={avvikleRessursMutation.error} />
+                <HStack gap="8" justify="end">
+                  <Button
+                    onClick={() =>
+                      navigate({ params: { id }, to: "/ressurs/$id" })
+                    }
+                    size="small"
+                    type="button"
+                    variant="secondary"
+                  >
+                    Avbryt
+                  </Button>
+                  <Button
+                    data-cy="submit-sluttdato-button"
+                    loading={avvikleRessursMutation.isPending}
+                    size="small"
+                    type="submit"
+                  >
+                    {ressurs.sluttdato ? "Oppdater" : "Bekreft"} sluttdato
+                  </Button>
+                </HStack>
+              </ContainerWithHighlightedTop>
+            )}
+          </form>
+        </FormProvider>
       </ContentWrapper>
     </>
+  );
+}
+
+function SluttDatoPicker() {
+  const { field, fieldState } = useController({
+    name: "sluttDato",
+  });
+
+  const sluttDatoDatepicker = useDatepicker({
+    onDateChange: (date) => {
+      field.onChange(date ? formatDateWithoutTimezone(date) : "");
+    },
+  });
+
+  return (
+    <HStack gap="8">
+      <FullWidthDatePickerWrapper>
+        <DatePicker {...sluttDatoDatepicker.datepickerProps}>
+          <DatePicker.Input
+            data-cy="sluttDato-picker"
+            {...sluttDatoDatepicker.inputProps}
+            error={fieldState.error?.message?.toString()}
+            label="Sluttdato (Siste arbeidsdag)"
+            ref={field.ref}
+          />
+        </DatePicker>
+      </FullWidthDatePickerWrapper>
+      <Button
+        css={css`
+          margin-top: var(--a-spacing-10);
+          min-width: fit-content;
+          height: fit-content;
+        `}
+        data-cy="velg-dagens-dato-button"
+        onClick={() => {
+          sluttDatoDatepicker.setSelected(new Date());
+        }}
+        size="small"
+        type="button"
+        variant="tertiary"
+      >
+        Velg datoen i dag
+      </Button>
+    </HStack>
   );
 }

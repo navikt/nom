@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.nik.NIKClient;
@@ -59,6 +60,7 @@ import java.util.stream.Collectors;
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.DateUtils.validateChronologicalDates;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
 import static no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService.validateOrgtilknytningTypeSektorCombination;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
@@ -82,6 +84,7 @@ public class RessursRestService {
     private final RessursLedereResolver ressursLedereResolver;
     private final KafkaTopicReader kafkaTopicReader;
     private final NomMastered nomMastered;
+    private final AuthResolver authResolver;
 
     public RessursRestService(
         RessursStateRepository ressursStateRepository,
@@ -96,7 +99,8 @@ public class RessursRestService {
         RessursContactDetailsResolver ressursContactDetailsResolver,
         RessursLedereResolver ressursLedereResolver,
         KafkaTopicReader kafkaTopicReader,
-        NomMastered nomMastered
+        NomMastered nomMastered,
+        AuthResolver authResolver
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -112,6 +116,7 @@ public class RessursRestService {
         this.ressursContactDetailsResolver = ressursContactDetailsResolver;
         this.ressursLedereResolver = ressursLedereResolver;
         this.nomMastered = nomMastered;
+        this.authResolver = authResolver;
     }
 
     public List<RessursState> findRessurser(RessursFilter ressursFilter) {
@@ -151,27 +156,34 @@ public class RessursRestService {
 
     private Ressurs hideSensitiveDataAndEnrichRessursStateWithDvhData(RessursState ressursState) {
 
-        var showFysiskBrukerstedAndPersonident = loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
-            loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP);
+        var showPersonident = loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
+            loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP) ||
+            getAuthenticatedNavIdent().equals(ressursState.navident());
+
+        var showFysiskBrukerSted = loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
+            loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP) ||
+            authResolver.kanRedigereRessurs(ressursState.navident()) ||
+            getAuthenticatedNavIdent().equals(ressursState.navident());
 
         var telefoner = ressursContactDetailsResolver.fetchTelefoner(ressursState.navident());
         var epost = ressursContactDetailsResolver.fetchEmail(ressursState.navident());
 
-        var personident = showFysiskBrukerstedAndPersonident
+        var personident = showPersonident
             ? ressursState.personident()
             : ressursState.personident().replaceFirst(".{5}$", "*****");
 
-        return new Ressurs(
+        var ressurs = new Ressurs(
             ressursState.toBuilder()
                 .personident(personident)
                 .primaryTelefonnummer(getPrimaryTelefonnummerOrFromTelefonList(ressursState, telefoner))
-                .primaryFysiskBrukersted(showFysiskBrukerstedAndPersonident ? ressursState.primaryFysiskBrukersted() : Optional.empty())
-                .fysiskeBrukersteder(showFysiskBrukerstedAndPersonident ? ressursState.fysiskeBrukersteder() : Collections.emptyList())
+                .primaryFysiskBrukersted(showFysiskBrukerSted ? ressursState.primaryFysiskBrukersted() : Optional.empty())
+                .fysiskeBrukersteder(showFysiskBrukerSted ? ressursState.fysiskeBrukersteder() : Collections.emptyList())
                 .build(),
             telefoner,
             epost.orElse(null),
             nomMastered.isMastered(ressursState.navident())
         );
+        return ressurs;
     }
 
     private static Optional<String> getPrimaryTelefonnummerOrFromTelefonList(RessursState ressursState, List<Ressurs.Telefon> telefoner) {

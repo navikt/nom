@@ -11,13 +11,13 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.apps.api.rest.dto.NavnDTO;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -29,9 +29,11 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 public class RemedyControllerTest extends RestTestBase {
@@ -209,6 +211,58 @@ public class RemedyControllerTest extends RestTestBase {
             .navident(navident)
             .navn(navn)
             .build();
+
+        webTestClient.post()
+            .uri("/api/v1/remedy/opprettRessurs")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(testToken.mutateRessursClient());
+            })
+            .bodyValue(request)
+            .exchange()
+            .expectStatus().is2xxSuccessful()
+            .expectBody(RessursDTO.class)
+            .isEqualTo(expected);
+
+        Mockito.verify(nikClient).opprettNavident(
+            eq(OpprettNavidentRequest.builder().personid(personident).build())
+        );
+    }
+
+    @Test
+    @SneakyThrows
+    void skal_opprette_ressurs_sync_failer() {
+        String personident = "12345678910";
+        String navident = "x123456";
+        val navn = pdlUtils.mockSinglePersonResponse();
+
+        when(nikClient.opprettNavident(
+            eq(OpprettNavidentRequest.builder()
+                .personid(personident)
+                .build())
+        ))
+            .thenReturn(ResponseEntity.ok(
+                OpprettNavidentResponse.builder()
+                    .navident(navident)
+                    .build()));
+
+        doAnswer(invocationOnMock -> new TimeoutException()).when(ressursCommandService).createRessursSync(any(OpprettRessursCommand.class));
+
+        OpprettRessursRequest request = OpprettRessursRequest.builder()
+            .personident(personident)
+            .etternavn(navn.getFornavn())
+            .fornavn(navn.getEtternavn())
+            .sektor(Sektor.EKSTERN.name())
+            .build();
+
+        RessursDTO expected = RessursDTO.builder()
+            .status("500")
+            .personident(null)
+            .navident(null)
+            .navn(null)
+            .feilmelding("Intern feil inntraff")
+            .build();
+
 
         webTestClient.post()
             .uri("/api/v1/remedy/opprettRessurs")

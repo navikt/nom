@@ -29,7 +29,7 @@ import {
   getOrgTilknytninger,
   getTeamcatMemberships,
 } from "~/api/react-query-endpoints";
-import { useHasAdminAccess } from "~/api/useGetSession";
+import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
 import { Divider } from "~/components/Divider";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
@@ -41,8 +41,8 @@ import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 import {
   formatDisplayDate,
   formatVisningsnavn,
-  isAfterPresent,
-  isBeforePresent,
+  isAfterToday,
+  isBeforeToday,
   isGyldighetsPeriodeActive,
   isInDevelopment,
 } from "~/utils";
@@ -122,13 +122,13 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
   const expiredOrgTilknytninger = orgtilknytninger.filter(
     (orgTilknytning) =>
       orgTilknytning.gyldigTom &&
-      isBeforePresent(new Date(orgTilknytning.gyldigTom)),
+      isBeforeToday(new Date(orgTilknytning.gyldigTom)),
   );
 
   const futureOrgTilknytninger = orgtilknytninger.filter(
     (orgTilknytning) =>
       orgTilknytning.gyldigFom &&
-      isAfterPresent(new Date(orgTilknytning.gyldigFom)),
+      isAfterToday(new Date(orgTilknytning.gyldigFom)),
   );
 
   return (
@@ -172,8 +172,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
 
         {orgtilknytninger.length === 0 ? (
           <BodyLong>
-            Medarbeideren er ikke registrert på en organisasjonsenhet. Klikk
-            endre for å legge til.
+            Medarbeideren er ikke registrert på en organisasjonsenhet.
           </BodyLong>
         ) : undefined}
 
@@ -323,7 +322,7 @@ function OrganisationHierarchyTree({
 
   const { gyldigTom, gyldigFom, erDagligOppfolging } = orgTilknytning;
 
-  const startsInTheFuture = gyldigFom && isAfterPresent(new Date(gyldigFom));
+  const startsInTheFuture = gyldigFom && isAfterToday(new Date(gyldigFom));
 
   return (
     <ExpansionCard
@@ -435,8 +434,9 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
   const { editPersonopplysninger } = useSearch({
     from: "/ressurs/$id",
   });
+  const hasWriteAccess = useHasWriteAccess();
 
-  if (editPersonopplysninger) {
+  if (editPersonopplysninger && hasWriteAccess) {
     return <EditPersonOpplysninger ressurs={ressurs} />;
   }
 
@@ -497,6 +497,7 @@ function TerminateButton({ ressurs }: { ressurs: Ressurs }) {
         to="/ressurs-terminate/$id"
       >
         <Button
+          data-cy="avslutt-medarbeider-button"
           icon={<PencilIcon aria-hidden />}
           size="small"
           type="button"

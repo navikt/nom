@@ -28,8 +28,10 @@ import no.nav.nom.contract.nom.eventsource.RessursStartDatoOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
@@ -68,6 +70,7 @@ public class RessursCommandService {
     }
 
     public RessursState createRessursSync(OpprettRessursCommand opprettRessursCommand) throws ExecutionException, InterruptedException, TimeoutException {
+        boolean exceptionThrown = false;
         final var fid = PrefixedUlidCreator.createRessursUlid();
         final var response = unleash.isEnabled(UNLEASH_USE_NEW_RESSURS_STATE_REPOSITORY) ?
             nomStateRessursListener.waitForStateAfterEventCreation(fid) :
@@ -77,13 +80,18 @@ public class RessursCommandService {
         try {
             return response.get(10, TimeUnit.SECONDS);
         } catch (Exception e) {
+            exceptionThrown = true;
             if (unleash.isEnabled(UNLEASH_USE_NEW_RESSURS_STATE_REPOSITORY)) {
                 nomStateRessursListener.removeWait(fid);
             } else {
                 ressursStateListener.removeWait(fid);
             }
-            log.error("Error waiting for ressurs to be created ", e);
+            log.error("Error waiting for ressurs to be created", e);
             throw e;
+        } finally {
+            if (exceptionThrown) {
+                slettRessursCommand(new SlettRessursCommand(fid), opprettRessursCommand.inputMetadata());
+            }
         }
     }
 

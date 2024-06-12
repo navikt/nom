@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.authorize.eventsourcing.state;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.contract.nom.eventsource.AuthorizationEvent;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +26,7 @@ public class DelegertLederKafkaListenerConfig {
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, AuthorizationEvent> delegertLederKafkaListenerContainerFactory(ConsumerFactory<String, AuthorizationEvent> consumerFactory) {
+    ConcurrentKafkaListenerContainerFactory<String, AuthorizationEvent> delegertLederKafkaListenerContainerFactory(@Qualifier("delegertLederConsumerFactory") ConsumerFactory<String, AuthorizationEvent> consumerFactory) {
         final var factory = new ConcurrentKafkaListenerContainerFactory<String, AuthorizationEvent>();
         factory.setConsumerFactory(consumerFactory);
 //        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);

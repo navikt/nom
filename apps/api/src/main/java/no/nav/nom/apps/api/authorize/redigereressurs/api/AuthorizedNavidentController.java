@@ -10,7 +10,7 @@ import jakarta.validation.Valid;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
-import no.nav.nom.apps.api.authorize.eventsourcing.state.LederTilgang;
+import no.nav.nom.contract.nom.state.LederTilgangState;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
@@ -36,7 +36,6 @@ import java.util.Optional;
 @RestController
 @Slf4j
 @RequestMapping("/app/authorizedRessursRedigering")
-@PreAuthorize("hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')")
 public class AuthorizedNavidentController {
 
     private final AuthorizedNavident authorizedNavident;
@@ -55,8 +54,10 @@ public class AuthorizedNavidentController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @GetMapping("isAuthorizedForNavident/{navident}")
+    @PreAuthorize("hasAuthority('NOM_UI_APP')")
     boolean isAuthorizedForNavident(@PathVariable String navident) {
         return authResolver.kanRedigereRessurs(navident);
+
     }
 
     @Operation(
@@ -64,17 +65,20 @@ public class AuthorizedNavidentController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @GetMapping("isAuthorizedForOrgenhet/{orgenhetId}")
+    @PreAuthorize("hasAuthority('NOM_UI_APP')")
     boolean isAuthorizedForOrgenhet(@PathVariable String orgenhetId) {
         return authResolver.kanOppretteRessurs(orgenhetId);
     }
 
     @GetMapping("getLederTilgangerDelegertTilMeg")
-    List<LederTilgang> getLederTilgangerForUser() {
+    @PreAuthorize("hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')")
+    List<LederTilgangState> getLederTilgangerForUser() {
         return authorizedNavident.getLederTilgangerForUser();
     }
 
     @GetMapping("getDelegerteLederTilgangerAvUser")
-    List<LederTilgang> getLederTilgangGittAvBruker() {
+    @PreAuthorize("hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')")
+    List<LederTilgangState> getLederTilgangGittAvBruker() {
         return authorizedNavident.getLederTilgangGittAvBruker();
     }
 
@@ -83,6 +87,7 @@ public class AuthorizedNavidentController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @PostMapping("addDelegatedAuthorization")
+    @PreAuthorize("hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')")
     void addDelegatedAuthorization(@Valid @RequestBody LederTilgangForOrgenhetRequest request) {
         if (!unleash.isEnabled(UNLEASH_DELEGER_TILGANG)) {
             throw new AccessDeniedException("Metode er feature togglet av");
@@ -102,6 +107,7 @@ public class AuthorizedNavidentController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @GetMapping("removeDelegatedAuthorization/{navidentDelegertLeder}")
+    @PreAuthorize("hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')")
     void removeDelegatedAuthorization(@PathVariable String navidentDelegertLeder, @RequestParam(name = "orgenhet") String orgenhetId) {
         if (!unleash.isEnabled(UNLEASH_DELEGER_TILGANG)) {
             throw new AccessDeniedException("Metode er feature togglet av");
@@ -120,6 +126,7 @@ public class AuthorizedNavidentController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @PostMapping("renewDelegatedAuthorization")
+    @PreAuthorize("hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')")
     void renewDelegatedAuthorization(@RequestBody @Valid LederTilgangForOrgenhetRequest request) {
         if (!unleash.isEnabled(UNLEASH_DELEGER_TILGANG)) {
             throw new AccessDeniedException("Metode er feature togglet av");

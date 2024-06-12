@@ -1,5 +1,6 @@
 import { css } from "@emotion/react";
 import { Label } from "@navikt/ds-react";
+import { forwardRef } from "react";
 import type { FieldError } from "react-hook-form";
 import { Controller, useFormContext } from "react-hook-form";
 import type { OptionProps } from "react-select";
@@ -36,6 +37,7 @@ export function OrgEnhetSelectFormPart({
           label="Organisasjonsenhet"
           onChange={field.onChange}
           orgEnheter={orgEnheter}
+          ref={field.ref}
           value={field.value}
         />
       )}
@@ -43,39 +45,42 @@ export function OrgEnhetSelectFormPart({
   );
 }
 
-export function OrgEnhetSelect({
-  onChange,
-  orgEnheter,
-  label,
-  description,
-  value,
-  error,
-  helpText,
-}: {
-  orgEnheter: OrgEnheterFromSearch;
-  onChange: (s: string | undefined) => void;
-  value?: string;
-  description?: string;
-  label: string;
-  error?: FieldError;
-  helpText?: string;
-}) {
-  const options = orgEnheter.map((orgEnhet) => ({
-    value: orgEnhet.id,
-    label: orgEnhet.navn,
-    id: orgEnhet.id,
-  }));
-  const currentValue = options.find((option) => option.value === value);
-
-  return (
-    <SelectLayoutWrapper
-      description={description}
-      error={error}
-      helpText={helpText}
-      htmlFor={label}
-      label={label}
-    >
-      {/*
+export const OrgEnhetSelect = forwardRef(
+  (
+    {
+      onChange,
+      orgEnheter,
+      label,
+      description,
+      value,
+      error,
+      helpText,
+    }: {
+      orgEnheter: OrgEnheterFromSearch;
+      onChange: (s: string | undefined) => void;
+      value?: string;
+      description?: string;
+      label: string;
+      error?: FieldError;
+      helpText?: string;
+    },
+    reference,
+  ) => {
+    const options = orgEnheter.map((orgEnhet) => ({
+      value: orgEnhet.id,
+      label: orgEnhet.navn,
+      id: orgEnhet.id,
+    }));
+    const currentValue = options.find((option) => option.value === value);
+    return (
+      <SelectLayoutWrapper
+        description={description}
+        error={error}
+        helpText={helpText}
+        htmlFor={label}
+        label={label}
+      >
+        {/*
         Even though this is not an Async search, there is a good reason why this AsyncSearch> is used instead of BaseSelect.
         Presently there are over 1000 orgenheter. These are all fetched at once and input to this component simply filters that list.
         The default filter function from react-select is pretty neat, however, the base implementation of Select calls that filter function waaay too many times!
@@ -83,29 +88,31 @@ export function OrgEnhetSelect({
         That means that every mouseEnter, mouseExit, mouseMove and so on, will trigger the filter function for 1000+ elements, every, single, time... which is quite excessive.
         By instead using the AsyncSearch we can get better control over when the filter function is called to dramatically improve performance.
       */}
-      <AsyncSearch
-        components={{ Option: OptionWithIds }}
-        css={[
-          error &&
-            css`
-              border-color: var(--a-border-danger);
-              box-shadow: 0 0 0 1px var(--a-border-danger);
-            `,
-        ]}
-        inputId={label}
-        loadOptions={search(options)}
-        noOptionsMessage={({ inputValue }) =>
-          inputValue.length === 0
-            ? "Skriv minst 1 tegn for å søke"
-            : `Fant ingen resultater for "${inputValue}"`
-        }
-        onChange={(option) => onChange(option?.value)}
-        placeholder="Søk etter navn på organisasjonsenhet"
-        value={currentValue ?? null}
-      />
-    </SelectLayoutWrapper>
-  );
-}
+        <AsyncSearch
+          components={{ Option: OptionWithIds }}
+          css={[
+            error &&
+              css`
+                border-color: var(--a-border-danger);
+                box-shadow: 0 0 0 1px var(--a-border-danger);
+              `,
+          ]}
+          inputId={label}
+          loadOptions={search(options)}
+          noOptionsMessage={({ inputValue }) =>
+            inputValue.length === 0
+              ? "Skriv minst 1 tegn for å søke"
+              : `Fant ingen resultater for "${inputValue}"`
+          }
+          onChange={(option) => onChange(option?.value)}
+          placeholder="Søk etter navn på organisasjonsenhet"
+          ref={reference}
+          value={currentValue ?? null}
+        />
+      </SelectLayoutWrapper>
+    );
+  },
+);
 
 const search =
   (options: { value: string; label: string; id: string }[]) =>

@@ -2,8 +2,8 @@
 <configuration>
     <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <includeMdcKeyName>Nav-Consumer-Id</includeMdcKeyName>
-            <includeMdcKeyName>Nav-Call-Id</includeMdcKeyName>
+            <includeMdcKeyName>trace_id</includeMdcKeyName>
+            <includeMdcKeyName>span_id</includeMdcKeyName>
             <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
                 <exclude>java\.util\.concurrent\..*</exclude>
                 <exclude>org\.apache\.catalina\..*</exclude>

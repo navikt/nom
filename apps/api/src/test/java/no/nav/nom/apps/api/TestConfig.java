@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api;
 
+import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
@@ -40,5 +41,11 @@ class TestConfig {
     @Primary
     public MasteredRessursStateRepository masteredRessursStateRepository(@Qualifier("OldNomMasteredRepository") MasteredRessursStateRepository masteredRessursStateRepository) {
         return masteredRessursStateRepository;
+    }
+
+    @Bean
+    @Primary
+    public DelegertLederStateRepository delegertLederStateRepository(@Qualifier("oldDelegertLederStateRepository") DelegertLederStateRepository delegertLederStateRepository) {
+        return delegertLederStateRepository;
     }
 }

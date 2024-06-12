@@ -5,6 +5,7 @@ import no.nav.nom.contract.nom.eventsource.DelegertAuthorizationAvsluttetEventV1
 import no.nav.nom.contract.nom.eventsource.DelegertAuthorizationFornyetEventV1;
 import no.nav.nom.contract.nom.eventsource.DelegertAuthorizationOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.state.LederTilgangState;
 import no.nav.nom.libs.utils.common.kafka.KafkaUtils;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,11 +31,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class DelegertLederEventListener {
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final String evtTopic;
-    private final DelegertLederStateRepository delegertLederStateRepository;
+    private final OldDelegertLederStateRepositoryImpl delegertLederStateRepository;
 
     private final List<Visitor> visitors = new CopyOnWriteArrayList<>();
 
-    public DelegertLederEventListener(@Value("${app.kafka.authorize.eventsource-topic}") String evtTopic, DelegertLederStateRepository delegertLederStateRepository) {
+    public DelegertLederEventListener(@Value("${app.kafka.authorize.eventsource-topic}") String evtTopic, OldDelegertLederStateRepositoryImpl delegertLederStateRepository) {
         this.evtTopic = evtTopic;
         this.delegertLederStateRepository = delegertLederStateRepository;
     }
@@ -68,23 +69,23 @@ public class DelegertLederEventListener {
 
     private void process(DelegertAuthorizationOpprettetEventV1 opprettet) {
         var eventData = (DelegertAuthorizationOpprettetEventV1.DelegertAuthorizationOpprettetEventData)opprettet.getData();
-        var newState = new LederTilgang(opprettet.getFid(), eventData.til(), eventData.av(), eventData.forOrgenhet(), eventData.gyldigFom(), eventData.gyldigTom());
+        var newState = new LederTilgangState(opprettet.getFid(), eventData.til(), eventData.av(), eventData.forOrgenhet(), eventData.gyldigFom(), eventData.gyldigTom());
 
-        delegertLederStateRepository.createDelegering(newState);
+        delegertLederStateRepository.update(newState);
     }
 
     private void process(DelegertAuthorizationFornyetEventV1 fornyet) {
         var eventData = (DelegertAuthorizationFornyetEventV1.DelegertAuthorizationFornyetEventData)fornyet.getData();
-        var newState = new LederTilgang(fornyet.getFid(), eventData.til(), eventData.av(), eventData.forOrgenhet(), eventData.gyldigFom(), eventData.nyGyldigTom());
+        var newState = new LederTilgangState(fornyet.getFid(), eventData.til(), eventData.av(), eventData.forOrgenhet(), eventData.gyldigFom(), eventData.nyGyldigTom());
 
-        delegertLederStateRepository.updateDelegering(newState);
+        delegertLederStateRepository.update(newState);
     }
 
     private void process(DelegertAuthorizationAvsluttetEventV1 avsluttet){
         var eventData = (DelegertAuthorizationAvsluttetEventV1.DelegertAuthorizationAvsluttetEventData)avsluttet.getData();
-        var newState = new LederTilgang(avsluttet.getFid(), eventData.til(), eventData.av(), eventData.forOrgenhet(), eventData.gyldigFom(), eventData.nyGyldigTom());
+        var newState = new LederTilgangState(avsluttet.getFid(), eventData.til(), eventData.av(), eventData.forOrgenhet(), eventData.gyldigFom(), eventData.nyGyldigTom());
 
-        delegertLederStateRepository.updateDelegering(newState);
+        delegertLederStateRepository.update(newState);
     }
 
     public boolean initloadComplete() {

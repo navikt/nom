@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import { BodyShort, ErrorMessage, HelpText, Label } from "@navikt/ds-react";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
+import { forwardRef } from "react";
 import type { FieldError } from "react-hook-form";
 import type {
   CSSObjectWithLabel,
@@ -71,27 +72,38 @@ const commonSelectOverwriteStyles = {
   }),
 };
 
-export function AsyncSearch<
+type AsyncSearch = <
   Option,
   IsMulti extends boolean = false,
   Group extends GroupBase<Option> = GroupBase<Option>,
->(properties: AsyncProps<Option, IsMulti, Group>) {
-  return (
-    <AsyncSelect
-      cacheOptions
-      css={commonSelectCss}
-      isClearable
-      loadingMessage={() => "Søker..."}
-      menuPortalTarget={document.body}
-      styles={{
-        ...commonSelectOverwriteStyles,
-        dropdownIndicator: (base) => ({ ...base, display: "none" }),
-      }}
-      {...properties}
-      components={{ MenuList: CustomMenuList, ...properties.components }}
-    />
-  );
-}
+>(
+  properties: AsyncProps<Option, IsMulti, Group> & { ref?: unknown },
+) => ReactElement;
+
+export const AsyncSearch = forwardRef(
+  <Option, IsMulti extends boolean, Group extends GroupBase<Option>>(
+    properties: AsyncProps<Option, IsMulti, Group>,
+    reference?: unknown,
+  ) => {
+    return (
+      <AsyncSelect
+        cacheOptions
+        css={commonSelectCss}
+        isClearable
+        loadingMessage={() => "Søker..."}
+        menuPortalTarget={document.body}
+        // @ts-expect-error -- gidder ikke
+        ref={reference}
+        styles={{
+          ...commonSelectOverwriteStyles,
+          dropdownIndicator: (base) => ({ ...base, display: "none" }),
+        }}
+        {...properties}
+        components={{ MenuList: CustomMenuList, ...properties.components }}
+      />
+    );
+  },
+) as AsyncSearch;
 
 /**
  * Limit the number of items in the displayed list to 30 to help performance.

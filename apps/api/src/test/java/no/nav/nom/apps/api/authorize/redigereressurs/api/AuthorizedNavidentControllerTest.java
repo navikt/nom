@@ -1,9 +1,8 @@
 package no.nav.nom.apps.api.authorize.redigereressurs.api;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
-import no.nav.nom.apps.api.authorize.eventsourcing.state.DelegertLederStateRepository;
+import no.nav.nom.apps.api.authorize.eventsourcing.state.OldDelegertLederStateRepositoryImpl;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +33,7 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
     @MockBean
     AuthorizeCommandService authorizeCommandService;
     @MockBean
-    DelegertLederStateRepository delegertLederStateRepository;
+    OldDelegertLederStateRepositoryImpl delegertLederStateRepository;
 
     @BeforeEach
     public void enableLederTilgangToggle() {
@@ -60,15 +59,15 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
             .andExpect(content().string("false"));
     }
 
-    @Test
-    @DisplayName("Avvise vanlig user token selv om leder er leder for aktuell ressurs for 'isAuthorizedForNavident'")
-    public void test_0003() throws Exception {
-        String navident = "B110001";
-        mockMvc.perform(get(API_URL + "/isAuthorizedForNavident/" + navident).header("Authorization", "Bearer " + vanligUserToken_Leder_B()))
-            .andDo(print())
-            .andExpect(status().isForbidden());
-    }
-
+//    @Test
+//    @DisplayName("Avvise vanlig user token selv om leder er leder for aktuell ressurs for 'isAuthorizedForNavident'")
+//    public void test_0003() throws Exception {
+//        String navident = "B110001";
+//        mockMvc.perform(get(API_URL + "/isAuthorizedForNavident/" + navident).header("Authorization", "Bearer " + vanligUserToken_Leder_B()))
+//            .andDo(print())
+//            .andExpect(status().isForbidden());
+//    }
+//
     @Test
     @DisplayName("Avvise invalid audiens token for user selv om leder er leder for aktuell ressurs for 'isAuthorizedForNavident'")
     public void test_0004() throws Exception {
@@ -89,16 +88,16 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
             .andExpect(status().isOk());
     }
 
-    @Test
-    @DisplayName("Avvise vanlig user token hvor selv om bruker er delegert leder for aktuell ressurs for 'isAuthorizedForNavident'")
-    public void test_0006() throws Exception {
-        when(delegertLederStateRepository.aktiveDelegeringerForOrgenheterTilNavident("HR")).thenReturn(List.of("D"));
-
-        String navident = "D100001";
-        mockMvc.perform(get(API_URL + "/isAuthorizedForNavident/" + navident).header("Authorization", "Bearer " + vanligUserToken_DelegertLeder_HR()))
-            .andDo(print())
-            .andExpect(status().isForbidden());
-    }
+//    @Test
+//    @DisplayName("Avvise vanlig user token hvor selv om bruker er delegert leder for aktuell ressurs for 'isAuthorizedForNavident'")
+//    public void test_0006() throws Exception {
+//        when(delegertLederStateRepository.aktiveDelegeringerForOrgenheterTilNavident("HR")).thenReturn(List.of("D"));
+//
+//        String navident = "D100001";
+//        mockMvc.perform(get(API_URL + "/isAuthorizedForNavident/" + navident).header("Authorization", "Bearer " + vanligUserToken_DelegertLeder_HR()))
+//            .andDo(print())
+//            .andExpect(status().isForbidden());
+//    }
 
     @Test
     @DisplayName("Godkjenne NOM_ADMIN user token for 'isAuthorizedForNavident'")
@@ -128,14 +127,14 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
             .andExpect(content().string("false"));
     }
 
-    @Test
-    @DisplayName("Avvise vanlig user token selv om leder er leder for aktuell enhet for 'isAuthorizedForOrgenhet'")
-    public void test_0010() throws Exception {
-        String orgenhetId = "B11";
-        mockMvc.perform(get(API_URL + "/isAuthorizedForNavident/" + orgenhetId).header("Authorization", "Bearer " + vanligUserToken_Leder_B()))
-            .andDo(print())
-            .andExpect(status().isForbidden());
-    }
+//    @Test
+//    @DisplayName("Avvise vanlig user token selv om leder er leder for aktuell enhet for 'isAuthorizedForOrgenhet'")
+//    public void test_0010() throws Exception {
+//        String orgenhetId = "B11";
+//        mockMvc.perform(get(API_URL + "/isAuthorizedForOrgenhet/" + orgenhetId).header("Authorization", "Bearer " + vanligUserToken_Leder_B()))
+//            .andDo(print())
+//            .andExpect(status().isForbidden());
+//    }
 
     @Test
     @DisplayName("Avvise invalid audiens token for user selv om leder er leder for aktuell enhet for 'isAuthorizedForOrgenhet'")
@@ -157,16 +156,16 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
             .andExpect(status().isOk());
     }
 
-    @Test
-    @DisplayName("Avvise vanlig user token hvor selv om bruker er delegert leder for aktuell enhet for 'isAuthorizedForOrgenhet'")
-    public void test_0013() throws Exception {
-        when(delegertLederStateRepository.aktiveDelegeringerForOrgenheterTilNavident("HR")).thenReturn(List.of("D"));
-
-        String orgenhetId = "D1";
-        mockMvc.perform(get(API_URL + "/isAuthorizedForNavident/" + orgenhetId).header("Authorization", "Bearer " + vanligUserToken_DelegertLeder_HR()))
-            .andDo(print())
-            .andExpect(status().isForbidden());
-    }
+//    @Test
+//    @DisplayName("Avvise vanlig user token hvor selv om bruker er delegert leder for aktuell enhet for 'isAuthorizedForOrgenhet'")
+//    public void test_0013() throws Exception {
+//        when(delegertLederStateRepository.aktiveDelegeringerForOrgenheterTilNavident("HR")).thenReturn(List.of("D"));
+//
+//        String orgenhetId = "D1";
+//        mockMvc.perform(get(API_URL + "/isAuthorizedForNavident/" + orgenhetId).header("Authorization", "Bearer " + vanligUserToken_DelegertLeder_HR()))
+//            .andDo(print())
+//            .andExpect(status().isForbidden());
+//    }
 
     @Test
     @DisplayName("Godkjenne NOM_ADMIN user token for 'isAuthorizedForOrgenhet'")
@@ -191,20 +190,31 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Verifiser at gyldigTom ikke kan være i fortiden")
+    @DisplayName("Verifiser at gyldigTom ikke kan være lenger bak i fortiden enn i går")
     public void test_0016() throws Exception {
         var request = LederTilgangForOrgenhetRequest.builder()
-            .orgenhetId("a")
-            .delegertTilNavident("b")
-            .gyldigTom(LocalDate.now().minusDays(1))
+            .orgenhetId("B")
+            .delegertTilNavident("HR")
+            .gyldigTom(LocalDate.now().minusDays(2))
             .build();
-
 
         mockMvc.perform(post(API_URL + "/addDelegatedAuthorization")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
-                .header("Authorization", "Bearer " + nomAdminUserToken()))
+                .header("Authorization", "Bearer " + nomWriteUserToken_Leder_B()))
             .andExpect(status().isBadRequest());
+
+        request = LederTilgangForOrgenhetRequest.builder()
+            .orgenhetId("B")
+            .delegertTilNavident("HR")
+            .gyldigTom(LocalDate.now().minusDays(1))
+            .build();
+
+        mockMvc.perform(post(API_URL + "/addDelegatedAuthorization")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                .header("Authorization", "Bearer " + nomWriteUserToken_Leder_B()))
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -216,7 +226,6 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
             .gyldigTom(LocalDate.now().plusDays(1))
             .build();
 
-
         mockMvc.perform(post(API_URL + "/addDelegatedAuthorization")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
@@ -224,4 +233,16 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
             .andExpect(status().isOk());
     }
 
+
+    @Test
+    @DisplayName("Verifiser at man ikke kan delegere til Eksterne")
+    public void test_0018() throws Exception {
+        var request = LederTilgangForOrgenhetRequest.builder().orgenhetId("B").delegertTilNavident("EKSTERN").gyldigTom(LocalDate.now().plusMonths(2)).build();
+
+        mockMvc.perform(post(API_URL + "/addDelegatedAuthorization")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                .header("Authorization", "Bearer " + nomAdminUserToken()))
+            .andExpect(status().isBadRequest());
+    }
 }

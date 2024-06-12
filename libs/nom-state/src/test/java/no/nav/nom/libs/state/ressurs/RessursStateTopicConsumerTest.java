@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 @EnableKafka
 public class RessursStateTopicConsumerTest {
 
-    private CountDownLatch alleMeldingerLest = new CountDownLatch(1);
+    private CountDownLatch alleMeldingerLest;
 
     @Autowired
     NomStateRessursListener nomStateRessursListener;
@@ -63,6 +63,7 @@ public class RessursStateTopicConsumerTest {
     @Test
     @DisplayName("Test that we can consume messages from org.nom.intern-ressurs-state")
     public void testConsumeMessages() throws InterruptedException {
+        setMessageCount(2);
         sendRessursState(
             "FID_1",
             RessursState.builder()
@@ -110,7 +111,6 @@ public class RessursStateTopicConsumerTest {
             nomStateRessursListener.register(msgVisitor);
             registeredVisitor = true;
         }
-        resetLatch();
     }
 
     NomStateRessursListener.Visitor msgVisitor = new NomStateRessursListener.Visitor<RessursState>() {
@@ -126,8 +126,8 @@ public class RessursStateTopicConsumerTest {
         }
     };
 
-    public void resetLatch() {
-        alleMeldingerLest = new CountDownLatch(1);
+    public void setMessageCount(int count) {
+        alleMeldingerLest = new CountDownLatch(count);
     }
 
     private SendResult<String, RessursState> sendRessursState(String key, RessursState ressursState) {

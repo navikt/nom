@@ -14,5 +14,5 @@ import java.time.LocalDate;
 public record LederTilgangForOrgenhetRequest(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String delegertTilNavident,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String orgenhetId,
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) @NotNull @FutureOrPresent LocalDate gyldigTom
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) @NotNull LocalDate gyldigTom
 ) { }

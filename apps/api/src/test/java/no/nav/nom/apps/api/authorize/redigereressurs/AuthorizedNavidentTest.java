@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.authorize.redigereressurs;
 
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
-import no.nav.nom.apps.api.authorize.eventsourcing.state.DelegertLederStateRepository;
+import no.nav.nom.apps.api.authorize.eventsourcing.state.OldDelegertLederStateRepositoryImpl;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.LederTilgangForOrgenhetRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
     @MockBean
     AuthorizeCommandService authorizeCommandService;
     @MockBean
-    DelegertLederStateRepository delegertLederStateRepository;
+    OldDelegertLederStateRepositoryImpl delegertLederStateRepository;
 
     @Test
     @DisplayName("Verifiser at Leder B har auth til å redigere ressurser B110001 og B110002")

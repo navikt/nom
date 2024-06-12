@@ -15,7 +15,7 @@ import { SearchForPerson } from "~/pages/CreateResourcePage/components/SearchFor
 import { fullwidthRow } from "~/resources/NomStyles";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import type { FolkeregisterPerson, Person } from "~/types/api-models";
-import { capitalizeName, isPresentOrAfter, isPresentOrBefore } from "~/utils";
+import { capitalizeName, isTodayOrAfter, isTodayOrBefore } from "~/utils";
 
 export function PersonopplysningerStep() {
   const { personident } = useSearch({
@@ -55,9 +55,9 @@ function CreateResourceForm({ personident }: { personident: string }) {
     orgtilknytninger &&
     orgtilknytninger.some(
       (orgtilknytning) =>
-        isPresentOrBefore(new Date(orgtilknytning.gyldigFom)) &&
+        isTodayOrBefore(new Date(orgtilknytning.gyldigFom)) &&
         (!orgtilknytning.gyldigTom ||
-          isPresentOrAfter(new Date(orgtilknytning.gyldigTom))),
+          isTodayOrAfter(new Date(orgtilknytning.gyldigTom))),
     );
 
   if (hentPersonQuery.isLoading || hentOrgtilknytningerQuery.isLoading) {
@@ -206,7 +206,7 @@ function VisningsnavnForm({
           error={errors.primaryTelefonnummer?.message}
           label="Telefonnummer"
         />
-        <NavigationButtons />
+        <NavigationButtons goBackCallback={() => {}} />
       </form>
     </>
   );

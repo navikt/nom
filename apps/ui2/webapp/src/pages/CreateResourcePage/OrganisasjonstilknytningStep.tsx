@@ -10,12 +10,15 @@ import {
   RadioGroup,
   useDatepicker,
 } from "@navikt/ds-react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { addYears, subDays } from "date-fns";
+import pickBy from "lodash/pickBy";
 import { useEffect, useState } from "react";
 import {
   Controller,
   FormProvider,
+  useController,
   useForm,
   useFormContext,
 } from "react-hook-form";
@@ -27,6 +30,7 @@ import {
   ResultLimit,
   useSearchOrgenheterQuery,
 } from "~/api/generated/graphql_generated";
+import { harLederTilgangForOrgenhetOptions } from "~/api/react-query-endpoints";
 import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
 import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBrukerstedSelect";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
@@ -62,6 +66,7 @@ export function OrganisasjonstilknytningStep() {
   );
 }
 
+// TODO: må refaktoreres når den tid kommer
 function CreateStatligRessurs() {
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
   const { ansettelsesType, orgEnhetId, gyldigFom } = useSearch({
@@ -82,6 +87,25 @@ function CreateStatligRessurs() {
     control,
     formState: { errors },
   } = methods;
+
+  const navigerTilbake = async () => {
+    const values = methods.watch();
+
+    const validValues = pickBy(values, (value, key) => {
+      try {
+        statligValidationSchema.validateSyncAt(key, { [key]: value });
+        return true;
+      } catch {
+        return false;
+      }
+    });
+
+    navigate({
+      to: "/ressurs/create/$step",
+      params: { step: "2" },
+      search: (oldSearch) => ({ ...oldSearch, ...validValues }),
+    });
+  };
 
   useEffect(() => {
     if (gyldigFom) {
@@ -130,7 +154,7 @@ function CreateStatligRessurs() {
             label="Startdato (første arbeidsdag)"
           />
         </DatePicker>
-        <NavigationButtons />
+        <NavigationButtons goBackCallback={navigerTilbake} />
       </form>
     </FormProvider>
   );
@@ -162,6 +186,27 @@ function CreateEksternRessurs() {
     return <Alert variant="error">Mangler informasjon om sektor</Alert>;
   }
 
+  const navigerTilbake = async () => {
+    const values = methods.watch();
+
+    const validValues = pickBy(values, (value, key) => {
+      try {
+        eksternValidationSchema
+          .concat(fysiskBrukerstedNrSchema)
+          .validateSyncAt(key, { [key]: value });
+        return true;
+      } catch {
+        return false;
+      }
+    });
+
+    navigate({
+      to: "/ressurs/create/$step",
+      params: { step: "2" },
+      search: (oldSearch) => ({ ...oldSearch, ...validValues }),
+    });
+  };
+
   return (
     <FormProvider {...methods}>
       <form
@@ -184,7 +229,7 @@ function CreateEksternRessurs() {
           sektor={sektor}
         />
         <FysiskBrukerstedSelectFormPart />
-        <NavigationButtons />
+        <NavigationButtons goBackCallback={navigerTilbake} />
       </form>
     </FormProvider>
   );
@@ -212,6 +257,27 @@ function CreateKommunaleRessurs() {
 
   const { handleSubmit } = methods;
 
+  const navigerTilbake = async () => {
+    const values = methods.watch();
+
+    const validValues = pickBy(values, (value, key) => {
+      try {
+        kommunalValidationSchema
+          .concat(fysiskBrukerstedNrSchema)
+          .validateSyncAt(key, { [key]: value });
+        return true;
+      } catch {
+        return false;
+      }
+    });
+
+    navigate({
+      to: "/ressurs/create/$step",
+      params: { step: "2" },
+      search: (oldSearch) => ({ ...oldSearch, ...validValues }),
+    });
+  };
+
   if (sektor === undefined) {
     return <Alert variant="error">Mangler informasjon om sektor</Alert>;
   }
@@ -235,7 +301,7 @@ function CreateKommunaleRessurs() {
           sektor={sektor}
         />
         <FysiskBrukerstedSelectFormPart />
-        <NavigationButtons />
+        <NavigationButtons goBackCallback={navigerTilbake} />
       </form>
     </FormProvider>
   );
@@ -292,23 +358,34 @@ export function OrganisasjonstilknytningInnerForm({
     erDagligOppfolgingLockedToTrue,
   );
 
+  const hasWriteAccessForOrgenhet =
+    useQuery(harLederTilgangForOrgenhetOptions(watch("orgEnhetId"))).data ??
+    false;
+
   return (
     <>
       <InnerOrgEnhetSelect />
       {watch("orgEnhetId") ? (
-        <Checkbox
-          checked={erDagligOppfolgingChecked}
-          disabled={erDagligOppfolgingLockedToTrue}
-          onChange={(event) => {
-            setErDagligOppfolgingChecked(event.target.checked);
-            setValue("erDagligOppfolging", event.target.checked);
-          }}
-        >
-          <BodyShort>
-            Denne lederen har ansvar for den daglige oppfølgingen av
-            medarbeideren
-          </BodyShort>
-        </Checkbox>
+        <>
+          {hasWriteAccessForOrgenhet ? undefined : (
+            <Alert variant="error">
+              Du har ikke tilgang til å opprette medarbeidere i denne enheten.
+            </Alert>
+          )}
+          <Checkbox
+            checked={erDagligOppfolgingChecked}
+            disabled={erDagligOppfolgingLockedToTrue}
+            onChange={(event) => {
+              setErDagligOppfolgingChecked(event.target.checked);
+              setValue("erDagligOppfolging", event.target.checked);
+            }}
+          >
+            <BodyShort>
+              Denne lederen har ansvar for den daglige oppfølgingen av
+              medarbeideren
+            </BodyShort>
+          </Checkbox>
+        </>
       ) : undefined}
       <Orgtilknytningsvarighet
         defaultSluttDato={defaultSluttDato}
@@ -328,32 +405,39 @@ function Orgtilknytningsvarighet({
   defaultSluttDato?: string;
   sektor: Sektor;
 }) {
-  const {
-    setValue,
-    formState: { errors },
-  } = useFormContext();
+  const gyldigFomController = useController({
+    name: "gyldigFom",
+  });
+
+  const gyldigTomController = useController({
+    name: "gyldigTom",
+  });
 
   useEffect(() => {
     if (defaultStartDato) {
-      setValue("gyldigFom", defaultStartDato);
+      gyldigFomController.field.onChange(defaultStartDato);
     }
   }, [defaultStartDato]);
 
   useEffect(() => {
     if (defaultSluttDato) {
-      setValue("gyldigTom", defaultSluttDato);
+      gyldigTomController.field.onChange(defaultSluttDato);
     }
   }, [defaultSluttDato]);
 
   const startDatePicker = useDatepicker({
     onDateChange: (date) =>
-      setValue("gyldigFom", date ? formatDateWithoutTimezone(date) : ""),
+      gyldigFomController.field.onChange(
+        date ? formatDateWithoutTimezone(date) : "",
+      ),
     defaultSelected: defaultStartDato ? new Date(defaultStartDato) : undefined,
   });
 
   const sluttDatePicker = useDatepicker({
     onDateChange: (date) =>
-      setValue("gyldigTom", date ? formatDateWithoutTimezone(date) : ""),
+      gyldigTomController.field.onChange(
+        date ? formatDateWithoutTimezone(date) : "",
+      ),
     defaultSelected: defaultSluttDato ? new Date(defaultSluttDato) : undefined,
   });
 
@@ -370,7 +454,7 @@ function Orgtilknytningsvarighet({
         <DatePicker {...startDatePicker.datepickerProps}>
           <DatePicker.Input
             {...startDatePicker.inputProps}
-            error={errors.gyldigFom?.message?.toString()}
+            error={gyldigFomController.fieldState.error?.message?.toString()}
             label={
               <span
                 css={css`
@@ -380,6 +464,7 @@ function Orgtilknytningsvarighet({
                 Startdato (første arbeidsdag)
               </span>
             }
+            ref={gyldigFomController.field.ref}
           />
         </DatePicker>
       </FullWidthDatePickerWrapper>
@@ -387,7 +472,8 @@ function Orgtilknytningsvarighet({
         <DatePicker {...sluttDatePicker.datepickerProps}>
           <DatePicker.Input
             {...sluttDatePicker.inputProps}
-            error={errors.gyldigTom?.message?.toString()}
+            data-cy="sluttDato-picker"
+            error={gyldigTomController.fieldState.error?.message?.toString()}
             label={
               <span
                 css={css`
@@ -404,6 +490,7 @@ function Orgtilknytningsvarighet({
                 ) : undefined}
               </span>
             }
+            ref={gyldigTomController.field.ref}
           />
         </DatePicker>
       </FullWidthDatePickerWrapper>

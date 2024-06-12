@@ -27,6 +27,7 @@ import { addYears } from "date-fns";
 import partition from "lodash/partition";
 import React, { useEffect, useRef } from "react";
 import type { SubmitHandler } from "react-hook-form";
+import { useController } from "react-hook-form";
 import {
   FormProvider,
   useFieldArray,
@@ -116,7 +117,12 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
   );
 }
 
-const defaultNyOrgtilknytning = { erDagligOppfolging: false, orgEnhetId: "" };
+const defaultNyOrgtilknytning = {
+  erDagligOppfolging: false,
+  orgEnhetId: "",
+  gyldigFom: "",
+  gyldigTom: "",
+};
 
 function OrgtilknytningForm({
   orgtilknytninger,
@@ -216,11 +222,7 @@ function OrgtilknytningForm({
       <OrgtilknytningTimeline
         orgtilknytninger={watch("mappedeOrgtilknytninger")}
       />
-      <form
-        autoComplete="false"
-        onSubmit={handleSubmit(onValid, scrollFirstErrorIntoView)}
-        ref={formReference}
-      >
+      <form autoComplete="false" onSubmit={handleSubmit(onValid)}>
         {hasWriteAccess && (
           <div
             css={css`
@@ -232,7 +234,9 @@ function OrgtilknytningForm({
             <Button
               icon={<PlusCircleIcon />}
               onClick={() => {
-                prepend(defaultNyOrgtilknytning);
+                prepend(defaultNyOrgtilknytning, {
+                  focusIndex: 0,
+                });
               }}
               size="small"
               type="button"
@@ -510,11 +514,13 @@ function FormDateWrapper({
   triggerOthers?: string[];
   labelHelpText?: string | undefined;
 }) {
-  const { setValue, trigger } = useFormContext();
-
+  const { trigger } = useFormContext();
+  const { field } = useController({
+    name,
+  });
   const datePickerProperties = useDatepicker({
     onDateChange: async (date) => {
-      setValue(name, date ? formatDateWithoutTimezone(date) : undefined);
+      field.onChange(date ? formatDateWithoutTimezone(date) : undefined);
       await trigger(name);
       if (triggerOthers) {
         triggerOthers.map((otherField) => {
@@ -524,11 +530,11 @@ function FormDateWrapper({
     },
     defaultSelected: defaultDate ? new Date(defaultDate) : undefined,
   });
-
   return (
     <DatePicker {...datePickerProperties.datepickerProps}>
       <DatePicker.Input
         error={error}
+        ref={field.ref}
         {...datePickerProperties.inputProps}
         label={
           <div
@@ -737,6 +743,7 @@ export type OrgtilknytningEtterValidering = yup.InferType<
 const orgtilknytningSchema = yup.object().shape({
   fid: yup.string(),
   erDagligOppfolging: yup.boolean().required(),
+  orgEnhetId: yup.string().required("Obligatorisk"),
   gyldigFom: yup
     .string()
     .required("Obligatorisk")
@@ -772,7 +779,6 @@ const orgtilknytningSchema = yup.object().shape({
         return !gyldigFom || !value || new Date(value) >= new Date(gyldigFom);
       },
     }),
-  orgEnhetId: yup.string().required("Obligatorisk"),
 });
 
 const formValuesSchema = yup.object().shape({
@@ -797,11 +803,4 @@ const validateMaxTime = (
   }
 
   return true;
-};
-
-const scrollFirstErrorIntoView = () => {
-  document.querySelector(".navds-error-message")?.scrollIntoView({
-    behavior: "smooth",
-    block: "center",
-  });
 };

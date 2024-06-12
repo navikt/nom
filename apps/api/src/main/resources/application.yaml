@@ -54,6 +54,7 @@ nom.libs.state.orgenhet.enabled: true
 nom.libs.state.orgtilknytning.enabled: true
 nom.libs.state.organisering.enabled: true
 nom.libs.state.mastered-ressurs.enabled: true
+nom.libs.state.delegert-leder.enabled: true
 
 authentication:
   aad:
@@ -61,9 +62,10 @@ authentication:
     clientId: ${AZURE_APP_CLIENT_ID}
     jwk: ${AZURE_APP_JWK}
   groups:
-    nomDelegert: ${NOM_DELEGERT_GROUPID:nomDelegertGroup}
-    nomWrite: ${NOM_WRITE_GROUPID:nomWriteGroup}
-    nomAdmin: ${NOM_ADMIN_GROUPID:nomAdminGroup}
+    nomDelegert: ${NOM_DELEGERT_GROUPID:nomDelegertGroup} # Den nye 0000-GA-NOM-WRITE-DELEGERT
+    nomLeder: ${NOM_LEDER_GROUPID:nomLederGroup}          # Den nye 0000-GA-NOM-WRITE-LEDER
+    nomWrite: ${NOM_WRITE_GROUPID:nomWriteGroup}      # Gamle nom-write gruppen
+    nomAdmin: ${NOM_ADMIN_GROUPID:nomAdminGroup}      #gamle nom-admin gruppen
 
 server:
   shutdown: graceful
@@ -241,6 +243,12 @@ app:
         client-id: "18c1d86b-4635-461c-8718-62c130087211"
         scopes: ["TEAMCAT"]
     groups:
+      nom-leder:
+        group-id: "${NOM_LEDER_GROUPID}"
+        scopes: ["MUTATE_RESSURS"]
+      nom-delegert:
+        group-id: "${NOM_DELEGERT_GROUPID}"
+        scopes: ["MUTATE_RESSURS"]
       nom-write:
         group-id: "${NOM_WRITE_GROUPID}"
         scopes: ["MUTATE_RESSURS", "QUERY_PERSON"]
@@ -270,11 +278,15 @@ app:
         orgtilknytning: na664h    # 8551401-Teknisk brukerstøtte og verktøy 1-ORGENHET
       - navident: F873959         # gjestfri.folk@trygdeetaten.no - Har IKKE NOM-WRITE-DELEGERT tilgang - Har F869325 som leder
         orgtilknytning: na664h    # 8551401-Teknisk brukerstøtte og verktøy 1-ORGENHET
+      - navident: T168579         # Støtte for PRIM/ Christian Prestvik
+        orgtilknytning: ke793y    # ref: https://nav-it.slack.com/archives/G01F99D2AHX/p1717488133154109
     ledere:
       - navident: N852930
         orgenhet: ty960s
       - navident: F869325
         orgenhet: na664h
+      - navident: T168579       # Støtte for PRIM/ Christian Prestvik
+        orgenhet: ke793y        # ref: https://nav-it.slack.com/archives/G01F99D2AHX/p1717488133154109
 
 NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
 NIK_API_SCOPE: api://dev-gcp.org.nav-ident/.default
@@ -289,7 +301,7 @@ NOM_REMEDY_INTEGRASJON_BASEURL: "https://nom-remedy-integrasjon.dev-fss-pub.nais
 NOM_REMEDY_INTEGRASJON_API_SCOPE: api://dev-fss.org.nom-remedy-integrasjon/.default
 
 NOM_DELEGERT_GROUPID: "42d11885-1e29-4fc4-9eed-1b339c2c8e36" # 0000-GA-NOM-WRITE-DELEGERT
-#NOM_WRITE_GROUPID: "e9cd9267-9baf-4078-abb8-7251c4313d32" # 0000-GA-NOM-WRITE-LEDER
+NOM_LEDER_GROUPID: "e9cd9267-9baf-4078-abb8-7251c4313d32" # 0000-GA-NOM-WRITE-LEDER
 NOM_WRITE_GROUPID: "c5752f26-105a-460f-a538-1859273f5057" # nom-write
 NOM_ADMIN_GROUPID: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # nom-admin
 
@@ -318,6 +330,12 @@ app:
         client-id: "f1931989-7a09-496c-8e2d-111b56faa242"
         scopes: ["TEAMCAT"]
     groups:
+      nom-leder:
+        group-id: "${NOM_LEDER_GROUPID}"
+        scopes: ["MUTATE_RESSURS"]
+      nom-delegert:
+        group-id: "${NOM_DELEGERT_GROUPID}"
+        scopes: ["MUTATE_RESSURS"]
       write:
         group-id: "${NOM_WRITE_GROUPID}"
         scopes: ["MUTATE_RESSURS"]
@@ -336,6 +354,8 @@ PDL_API_SCOPE: api://prod-fss.pdl.pdl-api/.default
 NOM_PROXY_BASEURL: "https://nom-proxy.prod-fss-pub.nais.io"
 NOM_PROXY_API_SCOPE: api://prod-fss.nom.nom-proxy/.default
 
+NOM_DELEGERT_GROUPID: "b32023b5-4644-4b52-b6fc-bbb7723b8fbf" # 0000-GA-NOM-WRITE-DELEGERT
+NOM_LEDER_GROUPID: "f267e0a5-1ef6-4ef1-9303-4543b34f3b05" # 0000-GA-NOM-WRITE-LEDER
 NOM_WRITE_GROUPID: "1334a91a-c4e0-409e-a497-3c4453869874"
 NOM_ADMIN_GROUPID: "2d91b26c-d412-440b-9122-0fafc594db89"
 

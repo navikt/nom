@@ -182,3 +182,65 @@ export const routeTree = rootRoute.addChildren({
 })
 
 /* prettier-ignore-end */
+
+/* ROUTE_MANIFEST_START
+{
+  "routes": {
+    "__root__": {
+      "filePath": "__root.tsx",
+      "children": [
+        "/",
+        "/admin",
+        "/tilganger",
+        "/org/$id",
+        "/ressurs-terminate/$id",
+        "/ressurs/$id",
+        "/ressurs/create/$step"
+      ]
+    },
+    "/": {
+      "filePath": "index.tsx"
+    },
+    "/admin": {
+      "filePath": "admin.tsx",
+      "children": [
+        "/admin/history-orgenheter",
+        "/admin/history-ressurser",
+        "/admin/orgenheter",
+        "/admin/ressurser"
+      ]
+    },
+    "/tilganger": {
+      "filePath": "tilganger.tsx"
+    },
+    "/admin/history-orgenheter": {
+      "filePath": "admin.history-orgenheter.tsx",
+      "parent": "/admin"
+    },
+    "/admin/history-ressurser": {
+      "filePath": "admin.history-ressurser.tsx",
+      "parent": "/admin"
+    },
+    "/admin/orgenheter": {
+      "filePath": "admin.orgenheter.tsx",
+      "parent": "/admin"
+    },
+    "/admin/ressurser": {
+      "filePath": "admin.ressurser.tsx",
+      "parent": "/admin"
+    },
+    "/org/$id": {
+      "filePath": "org.$id.tsx"
+    },
+    "/ressurs-terminate/$id": {
+      "filePath": "ressurs-terminate.$id.tsx"
+    },
+    "/ressurs/$id": {
+      "filePath": "ressurs.$id.tsx"
+    },
+    "/ressurs/create/$step": {
+      "filePath": "ressurs.create.$step.tsx"
+    }
+  }
+}
+ROUTE_MANIFEST_END */

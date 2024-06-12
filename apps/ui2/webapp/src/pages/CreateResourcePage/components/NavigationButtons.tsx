@@ -27,7 +27,11 @@ export const navigationButtonCss = css`
   }
 `;
 
-export function NavigationButtons() {
+export function NavigationButtons({
+  goBackCallback,
+}: {
+  goBackCallback: () => void;
+}) {
   const { step } = useParams({ from: "/ressurs/create/$step" });
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
   return (
@@ -43,13 +47,7 @@ export function NavigationButtons() {
       {step !== "1" && (
         <Button
           data-cy="forrige-button"
-          onClick={() =>
-            navigate({
-              to: "/ressurs/create/$step",
-              params: { step: String(Number(step) - 1) },
-              search: (oldSearch) => oldSearch,
-            })
-          }
+          onClick={goBackCallback}
           size="small"
           type="button"
           variant="secondary"

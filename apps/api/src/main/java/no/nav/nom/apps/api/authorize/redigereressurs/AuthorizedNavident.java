@@ -5,8 +5,8 @@ import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandServ
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.AvsluttDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.FornyDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.OpprettDelegertAuthorization;
-import no.nav.nom.apps.api.authorize.eventsourcing.state.LederTilgang;
-import no.nav.nom.apps.api.authorize.eventsourcing.state.DelegertLederStateRepository;
+import no.nav.nom.contract.nom.state.LederTilgangState;
+import no.nav.nom.apps.api.authorize.eventsourcing.state.OldDelegertLederStateRepositoryImpl;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.LederTilgangForOrgenhetRequest;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.DvhRepository;
@@ -18,6 +18,7 @@ import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrganiseringState;
+import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -50,7 +51,7 @@ public class AuthorizedNavident {
     Map<String, HashSet<String>> lederForOrgenhet = new ConcurrentHashMap<>();
     // Delegert lederskap. Delegert leder for orgenhet, og alle underliggende enheter
     private final AuthorizeCommandService authorizeCommandService;
-    private final DelegertLederStateRepository delegertLederStateRepository;
+    private final OldDelegertLederStateRepositoryImpl delegertLederStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final OrganiseringStateRepository organiseringStateRepository;
     private final RessursStateRepository ressursStateRepository;
@@ -58,7 +59,7 @@ public class AuthorizedNavident {
     private final DvhRepository dvhRepository;
 
     public AuthorizedNavident(
-            AuthorizeCommandService authorizeCommandService, DelegertLederStateRepository delegertLederStateRepository,
+            AuthorizeCommandService authorizeCommandService, OldDelegertLederStateRepositoryImpl delegertLederStateRepository,
             OrgtilknytningStateRepository orgtilknytningStateRepository,
             OrganiseringStateRepository organiseringStateRepository, RessursStateRepository ressursStateRepository,
             OrgenhetService orgenhetService,
@@ -73,11 +74,11 @@ public class AuthorizedNavident {
         this.dvhRepository = dvhRepository;
     }
 
-    public List<LederTilgang> getLederTilgangerForUser() {
+    public List<LederTilgangState> getLederTilgangerForUser() {
         return delegertLederStateRepository.findByNavident(getAuthenticatedNavIdent());
     }
 
-    public List<LederTilgang> getLederTilgangGittAvBruker() {
+    public List<LederTilgangState> getLederTilgangGittAvBruker() {
         return delegertLederStateRepository.findDelegertAvNavident(getAuthenticatedNavIdent());
     }
 
@@ -134,7 +135,7 @@ public class AuthorizedNavident {
     }
 
     public boolean removeLederTilgangForOrgenhet(String leder, String delegertLeder, String orgenhetId) {
-        sjekkParametereDelegertLeder(leder, delegertLeder, orgenhetId);
+        sjekkParametereDelegertLeder(leder, delegertLeder, orgenhetId, LocalDate.now());
 
         var opprinneligDelegering = delegertLederStateRepository.lederTilgangForOrgenhetOgNavident(orgenhetId, delegertLeder);
         if (opprinneligDelegering.isEmpty()) {
@@ -162,7 +163,7 @@ public class AuthorizedNavident {
     }
 
     public boolean renewLederTilgangForOrgenhet(String leder, LederTilgangForOrgenhetRequest request) {
-        sjekkParametereDelegertLeder(leder, request.delegertTilNavident(), request.orgenhetId());
+        sjekkParametereDelegertLeder(leder, request.delegertTilNavident(), request.orgenhetId(), request.gyldigTom());
 
         var inputMetadata = new InputMetadata("REST", "renewLederTilgangForOrgenhet",
             request,
@@ -190,11 +191,22 @@ public class AuthorizedNavident {
     }
 
     public void sjekkParametereForAddLederTilgang(String leder, LederTilgangForOrgenhetRequest request) {
-        sjekkParametereDelegertLeder(leder, request.delegertTilNavident(), request.orgenhetId());
+        sjekkParametereDelegertLeder(leder, request.delegertTilNavident(), request.orgenhetId(), request.gyldigTom());
         sjekkOmOrgenhetAlleredeDelegertTilNavident(request);
     }
 
-    public void sjekkParametereDelegertLeder(String leder, String delegertLeder, String orgenhetId) {
+    private void sjekkGyldigTomDato(LocalDate localDate) {
+        if (localDate == null) {
+            throw new IllegalArgumentException("Gyldig tom dato kan ikke være null");
+        }
+        if (localDate.isBefore(LocalDate.now().minusDays(1))) {
+            throw new IllegalArgumentException("Gyldig tom dato kan ikke være før gårsdagens dato");
+        }
+    }
+
+    public void sjekkParametereDelegertLeder(String leder, String delegertLeder, String orgenhetId, LocalDate gyldigTom) {
+        sjekkGyldigTomDato(gyldigTom);
+
         if (leder == null || delegertLeder == null || orgenhetId == null) {
             throw new IllegalArgumentException("Leder, delegert leder og orgenhetId kan ikke være null");
         }
@@ -202,6 +214,10 @@ public class AuthorizedNavident {
         if (!erRessursAktiv(delegertLeder)) {
             throw new IllegalArgumentException("Kan ikke delegere rediger-ressurs rettighet til navident "
                 + delegertLeder + " da denne ikke finnes eller ikke er aktiv");
+        }
+
+        if (erEkstern(delegertLeder)) {
+            throw new IllegalArgumentException("Eksterne medarbeidere kan ikke få delegert tilgang til å redigere.");
         }
 
         if (leder.equals(delegertLeder)) {
@@ -234,6 +250,12 @@ public class AuthorizedNavident {
         var ressurs = ressursStateRepository.findByNavident(delegertLeder).get();
         return DateUtils.isPeriodActive(ressurs.startdato().orElse(LocalDate.now()), ressurs.sluttdato().orElse(null));
     }
+
+    private boolean erEkstern(String delegertLeder) {
+        var ident = ressursStateRepository.findByNavident(delegertLeder);
+        return ident.isPresent() && ident.get().isEkstern();
+    }
+
 
     public boolean harLederDelegeringsRettForOrgenhet(String leder, String orgenhetId) {
         return lederForOrgenhet.containsKey(leder)
