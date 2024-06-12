@@ -29,7 +29,7 @@ import {
   getOrgTilknytninger,
   getTeamcatMemberships,
 } from "~/api/react-query-endpoints";
-import { useHasWriteAccess } from "~/api/useGetSession";
+import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
 import { Divider } from "~/components/Divider";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
@@ -50,7 +50,7 @@ import {
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   const { editOrgtilknytninger } = useSearch({ from: "/ressurs/$id" });
 
-  const hasWriteAccess = useHasWriteAccess();
+  const hasAdminAccess = useHasAdminAccess();
 
   return (
     <div
@@ -84,7 +84,7 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
           <OrgTilknytningSection ressurs={ressurs} />
           <TeamCatSection navident={ressurs.navident} />
           <TerminateButton ressurs={ressurs} />
-          {ressurs.isNomMastered && hasWriteAccess && (
+          {ressurs.isNomMastered && hasAdminAccess && (
             <Tag
               css={css`
                 width: fit-content;
