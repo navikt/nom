@@ -8,8 +8,8 @@
             <OnMatch>DENY</OnMatch>
         </filter>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <includeMdcKeyName>Nav-Consumer-Id</includeMdcKeyName>
-            <includeMdcKeyName>Nav-Call-Id</includeMdcKeyName>
+            <includeMdcKeyName>trace_id</includeMdcKeyName>
+            <includeMdcKeyName>span_id</includeMdcKeyName>
             <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
                 <exclude>java\.util\.concurrent\..*</exclude>
                 <exclude>org\.apache\.catalina\..*</exclude>
@@ -41,8 +41,8 @@
         </filter>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <!-- Add MDC-keys always as it removes the pattern if the MDC does not contain a value for the key -->
-            <includeMdcKeyName>Nav-Consumer-Id</includeMdcKeyName>
-            <includeMdcKeyName>Nav-Call-Id</includeMdcKeyName>
+            <includeMdcKeyName>trace_id</includeMdcKeyName>
+            <includeMdcKeyName>span_id</includeMdcKeyName>
             <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
                 <exclude>java\.util\.concurrent\..*</exclude>
                 <exclude>org\.apache\.catalina\..*</exclude>

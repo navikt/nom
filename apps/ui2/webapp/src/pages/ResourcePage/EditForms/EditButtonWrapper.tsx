@@ -1,8 +1,9 @@
+import { useQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import React from "react";
 
-import { useHasWriteAccess } from "~/api/useGetSession";
+import { harLederTilgangForNavidentOptions } from "~/api/react-query-endpoints";
 import type { Ressurs } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
 
@@ -13,12 +14,18 @@ export function EditButtonWrapper({
   ressurs: Ressurs;
   children: ReactNode;
 }) {
-  const hasWriteAccess = useHasWriteAccess();
+  const hasWriteAccessForRessurs =
+    useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
+
   const { editPersonopplysninger } = useSearch({
     from: "/ressurs/$id",
   });
   const ressursCanBeEdited = ressurs.sektor !== Sektor.NAV_STATLIG;
-  if (!hasWriteAccess || !ressursCanBeEdited || editPersonopplysninger) {
+  if (
+    !hasWriteAccessForRessurs ||
+    !ressursCanBeEdited ||
+    editPersonopplysninger
+  ) {
     return <></>;
   }
 

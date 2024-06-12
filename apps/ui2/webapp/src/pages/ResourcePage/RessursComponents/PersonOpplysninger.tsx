@@ -11,10 +11,13 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink, useNavigate } from "@tanstack/react-router";
 import capitalize from "lodash/capitalize";
+import uniqBy from "lodash/uniqBy";
 import React from "react";
 
-import { getLedereForRessurs } from "~/api/react-query-endpoints";
-import { useHasWriteAccess } from "~/api/useGetSession";
+import {
+  getLedereForRessurs,
+  harLederTilgangForNavidentOptions,
+} from "~/api/react-query-endpoints";
 import { LabelWithValue } from "~/components/LabelWithValue";
 import { UserImage } from "~/components/UserImage";
 import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
@@ -74,9 +77,10 @@ export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
 function EditButton({ ressurs }: { ressurs: Ressurs }) {
   const navigate = useNavigate();
 
-  const hasWriteAccess = useHasWriteAccess();
+  const hasWriteAccessForRessurs =
+    useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
 
-  if (!hasWriteAccess) {
+  if (!hasWriteAccessForRessurs) {
     return;
   }
 
@@ -181,10 +185,14 @@ export function TelefonNummere({ ressurs }: { ressurs: Ressurs }) {
     ? [{ nummer: ressurs.primaryTelefonnummer }, ...ressurs.telefoner]
     : ressurs.telefoner;
 
+  const uniqueTelefonnummere = uniqBy(telefonnummere, "nummer");
+
   return (
     <LabelWithValue
       label="Telefon"
-      value={telefonnummere.map(({ nummer }) => formatTlf(nummer)).join(", ")}
+      value={uniqueTelefonnummere
+        .map(({ nummer }) => formatTlf(nummer))
+        .join(", ")}
     />
   );
 }

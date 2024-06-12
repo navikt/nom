@@ -5,7 +5,7 @@ import React from "react";
 import { getRessurs } from "~/api/react-query-endpoints";
 import { DetailedRessurs } from "~/pages/ResourcePage/RessursComponents/DetailedRessurs";
 import { RessursCard } from "~/pages/ResourcePage/RessursComponents/RessursCard";
-import { isBeforePresent } from "~/utils";
+import { isBeforeToday } from "~/utils";
 
 import ContentWrapper from "../../components/ContentWrapper";
 
@@ -20,7 +20,7 @@ export const ResourcePage = () => {
   const ressurs = ressursQuery.data;
 
   const hasQuit =
-    ressurs?.sluttdato && isBeforePresent(new Date(ressurs.sluttdato));
+    ressurs?.sluttdato && isBeforeToday(new Date(ressurs.sluttdato));
 
   return (
     <ContentWrapper>

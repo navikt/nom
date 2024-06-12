@@ -58,6 +58,10 @@ spec:
   prometheus:
     enabled: true
     path: internal/prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: nodejs
   env:
     - name: NODE_ENV
       value: "production"
@@ -65,7 +69,7 @@ spec:
       value: "::"
     - name: EXPRESS_PORT
       value: "8080"
-    - name: NOM_API_URL
+    - name: NOM_ADMIN_API_URL
       value: http://nom-admin-api.nom.svc.cluster.local
-    - name: NOM_API_SCOPE
+    - name: NOM_ADMIN_API_SCOPE
       value: api://prod-gcp.nom.nom-admin-api/.default

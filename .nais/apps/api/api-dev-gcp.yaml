@@ -52,6 +52,10 @@ spec:
   prometheus:
     enabled: true
     path: /internal/prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   kafka:
     pool: nav-dev
   secureLogs:
@@ -134,6 +138,9 @@ spec:
         - application: modiapersonoversikt-api-q1
           namespace: personoversikt
           cluster: dev-fss
+        - application: modiapersonoversikt-api
+          namespace: personoversikt
+          cluster: dev-gcp
         - application: modia-robot-api
           namespace: personoversikt
           cluster: dev-fss
@@ -229,6 +236,9 @@ spec:
           cluster: dev-gcp
         - application: gosys-oppgavebehandling-api-q1
           namespace: oppgavehandtering
+          cluster: dev-gcp
+        - application: kabin-api
+          namespace: klage
           cluster: dev-gcp
     outbound:
       rules:

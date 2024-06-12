@@ -26,7 +26,7 @@ import { getAllOrgEnheter, orgEnheterKeys } from "~/api/react-query-endpoints";
 import { showToast } from "~/hooks/showToast";
 import type { OrgEnhet, SetOrgEnhetsTypeRequest } from "~/types/api-models";
 import { NomNivaa, OrgEnhetsType } from "~/types/api-models";
-import { isAfterPresent } from "~/utils";
+import { isAfterToday } from "~/utils";
 
 type AdminFilter = {
   id?: string;
@@ -73,7 +73,7 @@ export function OrgEnheterAdminPage() {
       ?.filter((oe) => oe.ledere.length > 0)
       .filter(
         (oe) =>
-          oe.gyldigTom === undefined || isAfterPresent(new Date(oe.gyldigTom)),
+          oe.gyldigTom === undefined || isAfterToday(new Date(oe.gyldigTom)),
       ) ?? [];
 
   if (getAllOrgEnheterQuery.isLoading) {
