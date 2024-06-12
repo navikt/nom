@@ -245,5 +245,4 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
                 .header("Authorization", "Bearer " + nomAdminUserToken()))
             .andExpect(status().isBadRequest());
     }
-
 }
