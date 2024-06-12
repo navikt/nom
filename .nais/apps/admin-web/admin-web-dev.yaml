@@ -30,8 +30,8 @@ spec:
   accessPolicy:
     outbound:
       rules:
-        - application: nom-admin-api
-          namespace: nom
+        - application: nom-admin
+          namespace: org
           cluster: dev-gcp
   ingresses:
     - https://nom-admin.ansatt.dev.nav.no
@@ -71,7 +71,7 @@ spec:
     - name: EXPRESS_PORT
       value: "8080"
     - name: NOM_ADMIN_API_URL
-      value: http://nom-admin-api.nom.svc.cluster.local
+      value: http://nom-admin.org.svc.cluster.local
     - name: NOM_ADMIN_API_SCOPE
-      value: api://dev-gcp.nom.nom-admin-api/.default
+      value: api://dev-gcp.org.nom-admin/.default
 

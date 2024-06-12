@@ -1,0 +1,20 @@
+name: 'verify: admin'
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'apps/admin/**'
+      - 'libs/utils-common/**'
+      - 'libs/contract-nom-dto/**'
+      - 'libs/nom-state/**'
+      - '.github/*/verify-admin.yaml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
+
+jobs:
+  verify:
+    uses: ./.github/workflows/verify-spring-app.yml
+    with:
+      maven-project: admin
