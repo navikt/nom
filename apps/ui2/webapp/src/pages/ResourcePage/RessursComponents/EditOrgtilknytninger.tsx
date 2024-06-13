@@ -122,6 +122,8 @@ const defaultNyOrgtilknytning = {
   gyldigTom: "",
 };
 
+declare type BekreftModalProperties = {};
+
 function OrgtilknytningForm({
   orgtilknytninger,
   ressurs,
@@ -377,31 +379,7 @@ function OrgtilknytningForm({
           Åpne modal
         </Button>
 
-        {/*<BekreftModal ref={modalReference} />*/}
-
-        <Modal header={{ heading: "Bekreft" }} ref={modalReference}>
-          <Modal.Body>
-            <BodyLong>Er du sikker?</BodyLong>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button
-              icon={<FloppydiskIcon aria-hidden />}
-              onClick={() => modalReference.current?.close()}
-              size="small"
-              type="submit"
-            >
-              Lagre
-            </Button>
-            <Button
-              onClick={() => modalReference.current?.close()}
-              size="small"
-              type="button"
-              variant="secondary"
-            >
-              Avbryt
-            </Button>
-          </Modal.Footer>
-        </Modal>
+        <BekreftModal ref={modalReference} />
       </form>
     </FormProvider>
   );
@@ -680,32 +658,34 @@ function IllegalDolCombinationAlert() {
   );
 }
 
-function BekreftModal({ ref }: { ref: React.RefObject<HTMLDialogElement> }) {
-  return (
-    <Modal header={{ heading: "Bekreft" }} ref={ref}>
-      <Modal.Body>
-        <BodyLong>Er du sikker?</BodyLong>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button
-          icon={<FloppydiskIcon aria-hidden />}
-          size="small"
-          type="submit"
-        >
-          Lagre
-        </Button>
-        <Button
-          onClick={() => ref.current?.close()}
-          size="small"
-          type="button"
-          variant="secondary"
-        >
-          Avbryt
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  );
-}
+const BekreftModal = forwardRef<HTMLDialogElement, BekreftModalProperties>(
+  (properties, reference) => {
+    return (
+      <Modal header={{ heading: "Bekreft" }} ref={reference}>
+        <Modal.Body>
+          <BodyLong>Er du sikker?</BodyLong>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            icon={<FloppydiskIcon aria-hidden />}
+            size="small"
+            type="submit"
+          >
+            Lagre
+          </Button>
+          <Button
+            onClick={() => reference?.current?.close()}
+            size="small"
+            type="button"
+            variant="secondary"
+          >
+            Avbryt
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    );
+  },
+);
 
 function trengerBekreftelse(data: Partial<OrgtilknytningState>[]) {
   if (
