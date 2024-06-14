@@ -155,13 +155,21 @@ function VisningsnavnForm({
   return (
     <>
       <form
-        onSubmit={handleSubmit((values) =>
+        onSubmit={handleSubmit((values) => {
+          const nummerUtenSpaces = values.primaryTelefonnummer?.replaceAll(
+            " ",
+            "",
+          );
           navigate({
             to: "/ressurs/create/$step",
             params: { step: "2" },
-            search: (oldSearch) => ({ ...oldSearch, ...values }),
-          }),
-        )}
+            search: (oldSearch) => ({
+              ...oldSearch,
+              ...values,
+              primaryTelefonnummer: nummerUtenSpaces,
+            }),
+          });
+        })}
       >
         <b>Visningnavn</b>
         <BodyShort spacing>

@@ -64,7 +64,7 @@ export function EditPersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
         )
       ) {
         const updateTelefonPromise = updateTelefonnummer(ressurs.navident, {
-          nummer: values.primaryTelefonnummer,
+          nummer: values.primaryTelefonnummer?.replaceAll(" ", ""),
         });
         promises = [...promises, updateTelefonPromise];
       }
