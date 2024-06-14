@@ -25,6 +25,7 @@ import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { addYears } from "date-fns";
 import partition from "lodash/partition";
+import type { MutableRefObject } from "react";
 import React, { forwardRef, useEffect, useRef } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { useController } from "react-hook-form";
@@ -122,7 +123,10 @@ const defaultNyOrgtilknytning = {
   gyldigTom: "",
 };
 
-declare type BekreftModalProperties = {};
+declare type BekreftModalProperties = {
+  senesteTomDato: string | undefined;
+  navn: string;
+};
 
 function OrgtilknytningForm({
   orgtilknytninger,
@@ -194,13 +198,11 @@ function OrgtilknytningForm({
       validation.dolGaps.length === 0 &&
       validation.dolOverlaps.length === 0
     ) {
-      console.log("Would save");
-
-      // oppdaterOrgtilknytningerMutation.mutate(
-      //   lagOppdaterOrgtilknytningerRequest(
-      //     data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
-      //   ),
-      // );
+      oppdaterOrgtilknytningerMutation.mutate(
+        lagOppdaterOrgtilknytningerRequest(
+          data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+        ),
+      );
     }
   };
 
@@ -215,11 +217,9 @@ function OrgtilknytningForm({
       oppdaterteOrgtilknytninger ?? [],
     );
 
-    if (
-      dolOverlaps.length === 0 &&
-      dolGaps.length === 0 &&
-      trengerBekreftelse(oppdaterteOrgtilknytninger)
-    ) {
+    const senesteTomDato = senesteTom(oppdaterteOrgtilknytninger);
+
+    if (dolOverlaps.length === 0 && dolGaps.length === 0 && !!senesteTomDato) {
       modalReference.current?.showModal();
     } else {
       formReference.current?.dispatchEvent(
@@ -372,14 +372,11 @@ function OrgtilknytningForm({
           <ApiResponseError error={oppdaterOrgtilknytningerMutation.error} />
         </div>
 
-        <Button
-          onClick={() => modalReference.current?.showModal()}
-          type="button"
-        >
-          Åpne modal
-        </Button>
-
-        <BekreftModal ref={modalReference} />
+        <BekreftModal
+          navn={formatVisningsnavn(ressurs.visningsnavn)}
+          ref={modalReference}
+          senesteTomDato={senesteTom(watch("mappedeOrgtilknytninger"))}
+        />
       </form>
     </FormProvider>
   );
@@ -659,11 +656,41 @@ function IllegalDolCombinationAlert() {
 }
 
 const BekreftModal = forwardRef<HTMLDialogElement, BekreftModalProperties>(
-  (properties, reference) => {
+  ({ senesteTomDato, navn }, reference) => {
+    const formatertDato = formatDisplayDate(senesteTomDato);
+
+    const typedReference =
+      reference as MutableRefObject<HTMLDialogElement | null>;
+
     return (
-      <Modal header={{ heading: "Bekreft" }} ref={reference}>
+      <Modal
+        header={{ heading: "Bekreft endringer" }}
+        ref={reference}
+        width="548px"
+      >
         <Modal.Body>
-          <BodyLong>Er du sikker?</BodyLong>
+          <HStack gap="6">
+            <BodyLong>
+              Du har nå satt siste sluttdato på medarbeiderens
+              organisasjonstilknytning(er) til {formatertDato}, og det er ikke
+              registrert noen ny tilknytning etter denne datoen.
+            </BodyLong>
+            <BodyLong>
+              <b>
+                Dette innebærer at etter {formatertDato} vil {navn} ikke lenger
+                være registrert som medarbeider i NAV.
+              </b>
+            </BodyLong>
+            <BodyLong>
+              Hvis dette ikke er korrekt, må det legges inn en ny tilknytning.
+              Du kan gå tilbake og gjøre dette nå, eller så kan du eller noen
+              andre gjøre dette senere, men før sluttdatoen {formatertDato}.
+            </BodyLong>
+            <BodyLong>
+              Hvis dette er korrekt, kan du bekrefte endringen ved å trykke på{" "}
+              <b>Bekreft endring</b>.
+            </BodyLong>
+          </HStack>
         </Modal.Body>
         <Modal.Footer>
           <Button
@@ -671,15 +698,15 @@ const BekreftModal = forwardRef<HTMLDialogElement, BekreftModalProperties>(
             size="small"
             type="submit"
           >
-            Lagre
+            Bekreft endring
           </Button>
           <Button
-            onClick={() => reference?.current?.close()}
+            onClick={() => typedReference?.current?.close()}
             size="small"
             type="button"
             variant="secondary"
           >
-            Avbryt
+            Tilbake
           </Button>
         </Modal.Footer>
       </Modal>
@@ -687,17 +714,32 @@ const BekreftModal = forwardRef<HTMLDialogElement, BekreftModalProperties>(
   },
 );
 
-function trengerBekreftelse(data: Partial<OrgtilknytningState>[]) {
+function senesteTom(orgtilknytninger: Partial<OrgtilknytningState>[]) {
   if (
-    data.some(
+    orgtilknytninger.some(
       (orgtilknytning) =>
         !orgtilknytning.gyldigFom || !orgtilknytning.orgEnhetId,
     )
   ) {
-    return false;
+    return;
   }
 
-  return !data.some((orgtilknytning) => orgtilknytning.gyldigTom === undefined);
+  let latestGyldigTom: string | undefined;
+  for (const orgtilknytning of orgtilknytninger) {
+    if (orgtilknytning.gyldigTom === undefined) {
+      return;
+    }
+    if (
+      latestGyldigTom === undefined ||
+      (orgtilknytning.gyldigTom &&
+        latestGyldigTom &&
+        orgtilknytning.gyldigTom > latestGyldigTom)
+    ) {
+      latestGyldigTom = orgtilknytning.gyldigTom;
+    }
+  }
+
+  return latestGyldigTom;
 }
 
 function lagOppdaterOrgtilknytningerRequest(
