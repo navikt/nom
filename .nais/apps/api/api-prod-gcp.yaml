@@ -67,8 +67,10 @@ spec:
       allowAllUsers: true
       claims:
         groups:
-          - id: "1334a91a-c4e0-409e-a497-3c4453869874"
-          - id: "2d91b26c-d412-440b-9122-0fafc594db89"
+          - id: "1334a91a-c4e0-409e-a497-3c4453869874" # nom-write
+          - id: "2d91b26c-d412-440b-9122-0fafc594db89" # nom-admin
+          - id: "b32023b5-4644-4b52-b6fc-bbb7723b8fbf" # 0000-GA-NOM-WRITE-DELEGERT
+          - id: "f267e0a5-1ef6-4ef1-9303-4543b34f3b05" # 0000-GA-NOM-WRITE-LEDER
         extra:
           - azp_name
           - NAVident
