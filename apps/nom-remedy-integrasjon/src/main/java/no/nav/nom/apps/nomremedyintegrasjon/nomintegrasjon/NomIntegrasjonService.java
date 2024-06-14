@@ -142,7 +142,7 @@ public class NomIntegrasjonService {
                 orgtilknytningDagligOppfolgingEndretEventV1,
                 orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom()
             );
-        } else {
+        } else if (!isOrgtilknytningHistorical(orgtilknytningDagligOppfolgingEndretEventV1)) {
             updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
         }
     }
@@ -156,9 +156,21 @@ public class NomIntegrasjonService {
                 orgtilknytningDatoEndretEventV2,
                 orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom()
             );
-        } else {
+        } else if (!isOrgtilknytningHistorical(orgtilknytningDatoEndretEventV2)) {
             updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
         }
+    }
+
+    private static boolean isOrgtilknytningHistorical(OrgtilknytningEvent orgtilknytningEvent) {
+        if (orgtilknytningEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1
+            && orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom().isPresent()) {
+            return orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom().get().isBefore(LocalDate.now());
+        }
+        if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2
+            && orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigTom().isPresent()) {
+            return orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigTom().get().isBefore(LocalDate.now());
+        }
+        return false;
     }
 
     private boolean sjekkAktivOrgTilknytning(OrgtilknytningEvent orgtilknytningEvent) {

@@ -57,7 +57,9 @@ export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
           <SluttDato ressurs={ressurs} />
           <Epost ressurs={ressurs} />
           <DagligLeder ressurs={ressurs} />
-          <FysiskBrukersted ressurs={ressurs} />
+          {ressurs.primaryFysiskBrukersted && (
+            <FysiskBrukersted ressurs={ressurs} />
+          )}
           <TelefonNummere ressurs={ressurs} />
         </div>
       </VStack>

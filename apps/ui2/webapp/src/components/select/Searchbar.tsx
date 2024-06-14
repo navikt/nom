@@ -7,6 +7,9 @@ import axios from "axios";
 import type { OptionProps } from "react-select";
 import { components } from "react-select";
 
+import { useHasAdminAccess } from "~/api/useGetSession";
+import { isInDevelopment } from "~/utils";
+
 import { AsyncSearch } from "./CustomSelectComponents";
 
 const RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT = 3;
@@ -57,13 +60,14 @@ const OptionWithTag = (properties: OptionProps<SearchOption, false>) => {
 
 export function SearchBar() {
   const navigate = useNavigate();
+  const hasAdminAccess = useHasAdminAccess();
 
   return (
     <AsyncSearch
       components={{ Option: OptionWithTag }}
       controlShouldRenderValue={false}
       isClearable={false}
-      loadOptions={searchRessurs}
+      loadOptions={(s) => searchIfEnoughInput(s, hasAdminAccess)}
       noOptionsMessage={({ inputValue }: { inputValue: string }) =>
         inputValue.length < RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT
           ? "Du må skrive minst 3 tegn for å søke"
@@ -77,14 +81,14 @@ export function SearchBar() {
   );
 }
 
-async function searchRessurs(inputValue: string) {
+async function searchIfEnoughInput(inputValue: string, hasAdmin: boolean) {
   // Se bort ifra NAV når man søker
   const newSearchTerm = inputValue.toLowerCase().replace("nav ", "");
   if (newSearchTerm.length < RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT) {
     return [];
   }
 
-  return await createOptions(newSearchTerm);
+  return await createOptions(newSearchTerm, hasAdmin);
 }
 
 async function performSearch(searchString: string): Promise<SearchResultRaw[]> {
@@ -184,7 +188,10 @@ export async function queryForRessurs(
   return [result.data.data.ressurs];
 }
 
-export async function commonSearch(inputValue: string) {
+export async function commonSearch(
+  inputValue: string,
+  rawResultFilter: (srr: SearchResultRaw) => boolean = () => true,
+) {
   const lookupNavident = /^[A-Za-z]\d{6}$/.test(inputValue)
     ? inputValue.toUpperCase()
     : null;
@@ -206,11 +213,27 @@ export async function commonSearch(inputValue: string) {
   // fritekst søk på navn
   // Får bedre resultat av en eller annen grunn når man tar termene i single-quotes
   const wrappedInputValue = "'" + inputValue + "'";
-  return performSearch(wrappedInputValue);
+  const searchResults = await performSearch(wrappedInputValue);
+  return searchResults.filter((element) => rawResultFilter(element));
 }
 
-async function createOptions(inputValue: string): Promise<SearchOption[]> {
-  const searchResults = await commonSearch(inputValue);
+function notVikafossenEnhetPredicate(searchResultRaw: SearchResultRaw) {
+  const nomIdVikafossen = new Set(["ru664y", "fe178t"]);
+  return !(
+    searchResultRaw.__typename === "OrgEnhet" &&
+    nomIdVikafossen.has(searchResultRaw.id)
+  );
+}
+
+async function createOptions(
+  inputValue: string,
+  hasAdmin: boolean,
+): Promise<SearchOption[]> {
+  const skalFiltrereBortVikafossen = !hasAdmin && !isInDevelopment();
+  const filterToUse = skalFiltrereBortVikafossen
+    ? notVikafossenEnhetPredicate
+    : () => true;
+  const searchResults = await commonSearch(inputValue, filterToUse);
 
   return searchResults.map((r) => {
     switch (r.__typename) {
