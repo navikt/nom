@@ -386,11 +386,18 @@ function OrganisationHierarchyTree({
   );
 }
 
+const nomIdVikafossen = new Set(["ru664y", "fe178t"]);
+
 function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
+  const hasAdminAccess = useHasAdminAccess();
   const lederForOrgenheter =
     useQuery(getOrgEnheterLedetAvOptions(ressurs.navident)).data ?? [];
 
-  if (lederForOrgenheter.length === 0) {
+  const lederForOrgenheterFiltrert = hasAdminAccess
+    ? lederForOrgenheter
+    : lederForOrgenheter.filter((enh) => !nomIdVikafossen.has(enh.id));
+
+  if (lederForOrgenheterFiltrert.length === 0) {
     return <></>;
   }
 
@@ -399,7 +406,10 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
      Her antas det at første forekomst av navn for en orgEnhet er den høyest i hierarkiet.
      Se https://jira.adeo.no/browse/ORG-1437 for flere detaljer.
     */
-  const uniqLederFor = uniqBy(lederForOrgenheter, (orgEnhet) => orgEnhet.navn);
+  const uniqLederFor = uniqBy(
+    lederForOrgenheterFiltrert,
+    (orgEnhet) => orgEnhet.navn,
+  );
 
   return (
     <>
