@@ -8,6 +8,7 @@ import type { OptionProps } from "react-select";
 import { components } from "react-select";
 
 import { useHasAdminAccess } from "~/api/useGetSession";
+import { isInDevelopment } from "~/utils";
 
 import { AsyncSearch } from "./CustomSelectComponents";
 
@@ -216,14 +217,22 @@ export async function commonSearch(
   return searchResults.filter((element) => rawResultFilter(element));
 }
 
+function notVikafossenEnhetPredicate(searchResultRaw: SearchResultRaw) {
+  const nomIdVikafossen = new Set(["ru664y", "fe178t"]);
+  return !(
+    searchResultRaw.__typename === "OrgEnhet" &&
+    nomIdVikafossen.has(searchResultRaw.id)
+  );
+}
+
 async function createOptions(
   inputValue: string,
   hasAdmin: boolean,
 ): Promise<SearchOption[]> {
-  const filterToUse = hasAdmin
-    ? () => true
-    : (s: SearchResultRaw) =>
-        !(s.__typename === "OrgEnhet" && s.id === "ru664y");
+  const skalFiltrereBortVikafossen = !hasAdmin && !isInDevelopment();
+  const filterToUse = skalFiltrereBortVikafossen
+    ? notVikafossenEnhetPredicate
+    : () => true;
   const searchResults = await commonSearch(inputValue, filterToUse);
 
   return searchResults.map((r) => {

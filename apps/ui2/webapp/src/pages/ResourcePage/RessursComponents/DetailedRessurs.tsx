@@ -393,9 +393,10 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
   const lederForOrgenheter =
     useQuery(getOrgEnheterLedetAvOptions(ressurs.navident)).data ?? [];
 
-  const lederForOrgenheterFiltrert = hasAdminAccess
-    ? lederForOrgenheter
-    : lederForOrgenheter.filter((enh) => !nomIdVikafossen.has(enh.id));
+  const lederForOrgenheterFiltrert =
+    hasAdminAccess || isInDevelopment()
+      ? lederForOrgenheter
+      : lederForOrgenheter.filter((enh) => !nomIdVikafossen.has(enh.id));
 
   if (lederForOrgenheterFiltrert.length === 0) {
     return <></>;
