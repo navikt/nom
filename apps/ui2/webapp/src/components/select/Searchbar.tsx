@@ -7,8 +7,9 @@ import axios from "axios";
 import type { OptionProps } from "react-select";
 import { components } from "react-select";
 
+import { useHasAdminAccess } from "~/api/useGetSession";
+
 import { AsyncSearch } from "./CustomSelectComponents";
-import {useHasAdminAccess} from "~/api/useGetSession";
 
 const RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT = 3;
 
