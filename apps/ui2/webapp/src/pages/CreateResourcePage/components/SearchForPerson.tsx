@@ -18,7 +18,7 @@ export function SearchForPerson() {
           params: (previous) => previous,
           search: (oldSearch) => ({
             ...oldSearch,
-            personident: values.personident,
+            personident: values.personident?.replaceAll(" ", ""),
           }),
         }),
       )}
@@ -43,7 +43,8 @@ export function SearchForPerson() {
         )}
         rules={{
           validate: (value) =>
-            value?.length === 11 || "Fødselsnummer må inneholde 11 siffer",
+            value?.replaceAll(" ", "").length === 11 ||
+            "Fødselsnummer må inneholde 11 siffer",
         }}
       />
     </form>
