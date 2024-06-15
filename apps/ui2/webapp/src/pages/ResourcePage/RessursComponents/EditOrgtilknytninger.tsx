@@ -65,6 +65,7 @@ import {
   formatDisplayDate,
   formatVisningsnavn,
   isSameDateOrAfter,
+  isTodayOrAfter,
 } from "~/utils";
 
 export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
@@ -657,40 +658,33 @@ function IllegalDolCombinationAlert() {
 
 const BekreftModal = forwardRef<HTMLDialogElement, BekreftModalProperties>(
   ({ senesteTomDato, navn }, reference) => {
-    const formatertDato = formatDisplayDate(senesteTomDato);
+    if (!senesteTomDato) {
+      return <></>;
+    }
 
     const typedReference =
       reference as MutableRefObject<HTMLDialogElement | null>;
 
+    const formatertDato = formatDisplayDate(senesteTomDato);
+
     return (
       <Modal
-        header={{ heading: "Bekreft endringer" }}
+        css={css`
+          padding: var(--a-spacing-6);
+        `}
+        header={{ heading: "Bekreft endringer", closeButton: false }}
         ref={reference}
         width="548px"
       >
         <Modal.Body>
-          <HStack gap="6">
-            <BodyLong>
-              Du har nå satt siste sluttdato på medarbeiderens
-              organisasjonstilknytning(er) til {formatertDato}, og det er ikke
-              registrert noen ny tilknytning etter denne datoen.
-            </BodyLong>
-            <BodyLong>
-              <b>
-                Dette innebærer at etter {formatertDato} vil {navn} ikke lenger
-                være registrert som medarbeider i NAV.
-              </b>
-            </BodyLong>
-            <BodyLong>
-              Hvis dette ikke er korrekt, må det legges inn en ny tilknytning.
-              Du kan gå tilbake og gjøre dette nå, eller så kan du eller noen
-              andre gjøre dette senere, men før sluttdatoen {formatertDato}.
-            </BodyLong>
-            <BodyLong>
-              Hvis dette er korrekt, kan du bekrefte endringen ved å trykke på{" "}
-              <b>Bekreft endring</b>.
-            </BodyLong>
-          </HStack>
+          {isTodayOrAfter(new Date(senesteTomDato)) ? (
+            <BekreftModalInnholdTomIFremtiden
+              dato={formatertDato}
+              navn={navn}
+            />
+          ) : (
+            <BekreftModalInnholdTomIFortiden dato={formatertDato} navn={navn} />
+          )}
         </Modal.Body>
         <Modal.Footer>
           <Button
@@ -713,6 +707,74 @@ const BekreftModal = forwardRef<HTMLDialogElement, BekreftModalProperties>(
     );
   },
 );
+
+function BekreftModalInnholdTomIFremtiden({
+  navn,
+  dato,
+}: {
+  navn: string;
+  dato: string;
+}) {
+  return (
+    <HStack gap="6">
+      <BodyLong>
+        Du har nå satt siste sluttdato på medarbeiderens
+        organisasjonstilknytning(er) til {dato}, og det er ikke registrert noen
+        ny tilknytning etter denne datoen.
+      </BodyLong>
+      <BodyLong>
+        <b>
+          Dette innebærer at etter {dato} vil {navn} ikke lenger være registrert
+          som medarbeider i NAV.
+        </b>
+      </BodyLong>
+      <BodyLong>
+        Hvis dette ikke er korrekt, må det legges inn en ny tilknytning. Du kan
+        gå tilbake og gjøre dette nå, eller så kan du eller noen andre gjøre
+        dette senere, men senest sluttdatoen {dato}.
+      </BodyLong>
+      <BodyLong>
+        Hvis dette er korrekt, kan du bekrefte endringen ved å trykke på{" "}
+        <b>Bekreft endring</b>.
+      </BodyLong>
+    </HStack>
+  );
+}
+
+function BekreftModalInnholdTomIFortiden({
+  navn,
+  dato,
+}: {
+  navn: string;
+  dato: string;
+}) {
+  return (
+    <Alert variant="warning">
+      <HStack gap="6">
+        <BodyLong>
+          Du har nå satt siste sluttdato på medarbeiderens
+          organisasjonstilknytning(er) til {dato}, og det er ikke registrert
+          noen ny tilknytning etter denne datoen.
+        </BodyLong>
+        <BodyLong>
+          <b>
+            Siden dette er før dagens dato, innebærer det at fra og med i dag
+            vil {navn} ikke lenger være registrert som medarbeider i NAV, og
+            alle tilganger for medarbeideren vil bli fjernet.
+          </b>
+        </BodyLong>
+        <BodyLong>
+          Hvis dette ikke er korrekt, må det legges inn en ny tilknytning. Du
+          kan gå tilbake og gjøre dette nå.
+        </BodyLong>
+        <BodyLong>
+          Hvis dette er korrekt, kan du bekrefte endringen ved å trykke på{" "}
+          <b>Bekreft endring</b>, som vil registrere medarbeideren som sluttet.
+        </BodyLong>
+      </HStack>
+    </Alert>
+  );
+}
 
 function senesteTom(orgtilknytninger: Partial<OrgtilknytningState>[]) {
   if (
