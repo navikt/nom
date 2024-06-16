@@ -464,6 +464,42 @@ public class NomIntegrasjonServiceTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Should write new entity with correctly updated values for OrgtilknytningDagligOppfolgingEndretEventV1")
+    void testShouldNotSendEventToRemedyTable() {
+
+        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+        var previousDagligOppfolgingOrgtilknytning = orgtilknytningState()
+            .gyldigFom(LocalDate.now().minusYears(1))
+            .gyldigTom(LocalDate.now().minusMonths(2));
+        var previousDagligOppfolgingOrgenhet = orgenhet();
+
+        var newDagligOppfolgningRemedyEnhetId = "new-remedy-enhet-id";
+
+        var orgtilknytningDagligOppfolgingEndretEventV1 = orgtilknytningDagligOppfolgingEndretEventV1(
+            orgtilknytningDagligOppfolgingEndretEventData().toBuilder()
+                .navident(existingRessurs.getNavident())
+                .dagligOppfolging(true)
+                .gyldigFom(LocalDate.now().minusYears(1))
+                .gyldigTom(Optional.of(LocalDate.now().minusMonths(1)))
+                .orgEnhetId("new-orgenhet")
+                .build()
+        );
+
+        when(nomApiClient.getRessursByNavident(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().navident())).thenReturn(existingRessurs);
+        when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(previousDagligOppfolgingOrgtilknytning));
+        when(nomApiClient.getOrgEnhet(previousDagligOppfolgingOrgtilknytning.getOrgEnhetId())).thenReturn(previousDagligOppfolgingOrgenhet);
+
+        when(nomApiClient.getOrgEnhet(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().orgEnhetId()))
+            .thenReturn(new OrgEnhet().remedyEnhetId(newDagligOppfolgningRemedyEnhetId));
+
+        nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
+
+        var newNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
+
+        assertThat(newNomIntegrasjonEntityForNavident).isEmpty();
+    }
+
+    @Test
     @DisplayName("Should skip handling OrgtilknytningDagligOppfolgingEndretEventV1 if ressurs is not EKSTERN")
     void testSkipUpdateForOrgtilknytningDagligOppfolgingEndretEventV1IfRessursIsNotEkstern() {
 

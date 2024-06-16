@@ -67,10 +67,10 @@ spec:
       tenant: trygdeetaten.no
       claims:
         groups:
-          - id: "c5752f26-105a-460f-a538-1859273f5057"
-          - id: "9e0e2958-df7a-4376-83f3-9bcbec1f2650"
-          - id: "e9cd9267-9baf-4078-abb8-7251c4313d32"
-          - id: "42d11885-1e29-4fc4-9eed-1b339c2c8e36"
+          - id: "c5752f26-105a-460f-a538-1859273f5057" # nom-write
+          - id: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # nom-admin
+          - id: "e9cd9267-9baf-4078-abb8-7251c4313d32" # 0000-GA-NOM-WRITE-LEDER
+          - id: "42d11885-1e29-4fc4-9eed-1b339c2c8e36" # 0000-GA-NOM-WRITE-DELEGERT
         extra:
           - azp_name
           - NAVident

@@ -48,9 +48,11 @@ yup.addMethod(yup.string, "optionalPhoneNumber", function () {
         return true;
       }
 
+      const nummerUtenSpaces = nummer?.replaceAll(" ", "");
+
       const enkelTelefonnummerRegex = /^\d{8}$/;
 
-      return enkelTelefonnummerRegex.test(nummer ?? "");
+      return enkelTelefonnummerRegex.test(nummerUtenSpaces ?? "");
     },
   );
 });
