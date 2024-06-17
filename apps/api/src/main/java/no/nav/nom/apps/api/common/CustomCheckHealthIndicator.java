@@ -4,7 +4,6 @@ import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
-import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
@@ -29,7 +28,6 @@ public class CustomCheckHealthIndicator extends AvailabilityStateHealthIndicator
 
     private final OrgEnhetStateListener orgEnhetStateListener;
     private final OrgtilknytningStateListener orgtilknytningStateListener;
-    private final NomMasteredRessursListener nomMasteredRessursListener;
     private final LuceneService luceneService;
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
 
@@ -43,7 +41,6 @@ public class CustomCheckHealthIndicator extends AvailabilityStateHealthIndicator
         NomStateDelegertLederListener nomStateDelegertLederListener,
         OrgEnhetStateListener orgEnhetStateListener,
         OrgtilknytningStateListener orgtilknytningStateListener,
-        NomMasteredRessursListener nomMasteredRessursListener,
         LuceneService luceneService, DvhStartupLoadMonitor dvhStartupLoadMonitor
     ) {
         super(availability, ReadinessState.class, (statusMappings) -> {
@@ -58,14 +55,13 @@ public class CustomCheckHealthIndicator extends AvailabilityStateHealthIndicator
         this.nomStateDelegertLederListener = nomStateDelegertLederListener;
         this.orgEnhetStateListener = orgEnhetStateListener;
         this.orgtilknytningStateListener = orgtilknytningStateListener;
-        this.nomMasteredRessursListener = nomMasteredRessursListener;
         this.luceneService = luceneService;
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
     }
 
     @Override
     protected AvailabilityState getState(ApplicationAvailability applicationAvailability) {
-        if (orgEnhetStateListener.initloadComplete() && nomMasteredRessursListener.initloadComplete() &&
+        if (orgEnhetStateListener.initloadComplete() &&
             dvhStartupLoadMonitor.hasCompleted() && luceneService.initLoadComplete() &&
             orgtilknytningStateListener.initloadComplete() &&
             // Nye Listeners under:

@@ -30,10 +30,4 @@ class TestConfig {
     public OrganiseringStateRepository organiseringStateRepository(@Qualifier("oldOrganiseringStateRepository") OrganiseringStateRepository organiseringStateRepository) {
         return organiseringStateRepository;
     }
-
-    @Bean
-    @Primary
-    public MasteredRessursStateRepository masteredRessursStateRepository(@Qualifier("OldNomMasteredRepository") MasteredRessursStateRepository masteredRessursStateRepository) {
-        return masteredRessursStateRepository;
-    }
 }

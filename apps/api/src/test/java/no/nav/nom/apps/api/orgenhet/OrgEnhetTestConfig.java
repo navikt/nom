@@ -39,7 +39,6 @@ import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
-import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
@@ -129,9 +128,6 @@ public class OrgEnhetTestConfig {
 
     @MockBean
     NomMastered nomMastered;
-
-    @MockBean
-    NomMasteredRessursListener nomMasteredRessursListener;
 
     @MockBean
     LuceneService luceneService;

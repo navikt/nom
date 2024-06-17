@@ -1,9 +1,7 @@
 package no.nav.nom.apps.api;
 
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
-import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
-import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -11,6 +9,7 @@ import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.common.AbstractNomStateListener;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
+import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.admin.RecordsToDelete;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -52,7 +51,7 @@ public class KafkaUtils {
     final NomStateRessursListener nomStateRessursListener;
 
     @SpyBean
-    public final NomMasteredRessursListener nomMasteredRessursListener;
+    final NomStateMasteredRessursListener nomStateMasteredRessursListener;
 
     @SpyBean
     final OrgEnhetStateListener orgEnhetStateListener;
@@ -67,14 +66,14 @@ public class KafkaUtils {
         @Value("${app.kafka.ressurs.stateTopic}") String ressursStateTopic,
         @Value("${app.kafka.orgEnhet.stateTopic}") String orgEnhetStateTopic,
         Admin adminClient, NomStateRessursListener nomStateRessursListener,
-        NomMasteredRessursListener nomMasteredRessursListener
+        NomStateMasteredRessursListener nomStateMasteredRessursListener
     ) {
         this.embeddedKafkaBroker = embeddedKafkaBroker;
         this.nomStateRessursListener = nomStateRessursListener;
 
         this.ressursStateTopic = ressursStateTopic;
         this.adminClient = adminClient;
-        this.nomMasteredRessursListener = nomMasteredRessursListener;
+        this.nomStateMasteredRessursListener = nomStateMasteredRessursListener;
         this.ressursStateKafkaTemplate = ressursStateKafkaTemplate();
 
         this.orgEnhetStateListener = orgEnhetStateListener;

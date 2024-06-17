@@ -40,27 +40,4 @@ public class NomMasteredRessursKafkaConfig {
 
         return eventsourceTemplate;
     }
-
-    @Bean
-    ConsumerFactory<String, LocalDateTime> nomMasteredRessursConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        final var jsonDeserializer = new JsonDeserializer<>(LocalDateTime.class, objectMapper);
-
-        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonDeserializer);
-    }
-
-    @Bean
-    ConcurrentKafkaListenerContainerFactory<String, LocalDateTime> nomMasteredRessursKafkaListenerContainerFactory(
-        @Qualifier("nomMasteredRessursConsumerFactory") ConsumerFactory<String, LocalDateTime> consumerFactory
-    ) {
-        final var factory = new ConcurrentKafkaListenerContainerFactory<String, LocalDateTime>();
-        factory.setConsumerFactory(consumerFactory);
-        factory.setBatchListener(true);
-
-        // If authentication towards kafka broker topic fails, retry every 10s
-        factory.setContainerCustomizer(container ->
-            container.getContainerProperties().setAuthExceptionRetryInterval(Duration.ofSeconds(10))
-        );
-
-        return factory;
-    }
 }
