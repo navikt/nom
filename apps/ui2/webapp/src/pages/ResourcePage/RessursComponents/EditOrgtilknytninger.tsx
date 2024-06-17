@@ -23,7 +23,7 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { addYears } from "date-fns";
+import { addYears, isBefore } from "date-fns";
 import partition from "lodash/partition";
 import type { MutableRefObject } from "react";
 import React, { forwardRef, useEffect, useRef } from "react";
@@ -65,7 +65,7 @@ import {
   formatDisplayDate,
   formatVisningsnavn,
   isSameDateOrAfter,
-  isTodayOrAfter,
+  isTodayOrBefore,
 } from "~/utils";
 
 export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
@@ -293,6 +293,7 @@ function OrgtilknytningForm({
                   }
                   label="Fra og med"
                   name={`mappedeOrgtilknytninger.${index}.gyldigFom`}
+                  triggerOthers={[`mappedeOrgtilknytninger.${index}.gyldigTom`]}
                 />
 
                 <FormDateWrapper
@@ -681,13 +682,13 @@ const BekreftModal = forwardRef<HTMLDialogElement, BekreftModalProperties>(
         width="548px"
       >
         <Modal.Body>
-          {isTodayOrAfter(new Date(senesteTomDato)) ? (
+          {isTodayOrBefore(new Date(senesteTomDato)) ? (
+            <BekreftModalInnholdTomIFortiden dato={formatertDato} navn={navn} />
+          ) : (
             <BekreftModalInnholdTomIFremtiden
               dato={formatertDato}
               navn={navn}
             />
-          ) : (
-            <BekreftModalInnholdTomIFortiden dato={formatertDato} navn={navn} />
           )}
         </Modal.Body>
         <Modal.Footer>
@@ -704,7 +705,7 @@ const BekreftModal = forwardRef<HTMLDialogElement, BekreftModalProperties>(
             type="button"
             variant="secondary"
           >
-            Tilbake
+            Avbryt
           </Button>
         </Modal.Footer>
       </Modal>
@@ -734,8 +735,8 @@ function BekreftModalInnholdTomIFremtiden({
       </BodyLong>
       <BodyLong>
         Hvis dette ikke er korrekt, må det legges inn en ny tilknytning. Du kan
-        gå tilbake og gjøre dette nå, eller så kan du eller noen andre gjøre
-        dette senere, men senest sluttdatoen {dato}.
+        avbryte og gjøre dette nå, eller så kan du eller noen andre gjøre det
+        senere, men senest sluttdatoen {dato}.
       </BodyLong>
       <BodyLong>
         Hvis dette er korrekt, kan du bekrefte endringen ved å trykke på{" "}
@@ -762,18 +763,18 @@ function BekreftModalInnholdTomIFortiden({
         </BodyLong>
         <BodyLong>
           <b>
-            Siden dette er før dagens dato, innebærer det at fra og med i dag
-            vil {navn} ikke lenger være registrert som medarbeider i NAV, og
-            alle tilganger for medarbeideren vil bli fjernet.
+            Dette innebærer at fra i dag vil {navn} ikke lenger være registrert
+            som medarbeider i NAV, og alle tilganger for medarbeideren vil bli
+            fjernet.
           </b>
         </BodyLong>
         <BodyLong>
           Hvis dette ikke er korrekt, må det legges inn en ny tilknytning. Du
-          kan gå tilbake og gjøre dette nå.
+          kan avbryte og gjøre dette nå.
         </BodyLong>
         <BodyLong>
           Hvis dette er korrekt, kan du bekrefte endringen ved å trykke på{" "}
-          <b>Bekreft endring</b>, som vil registrere medarbeideren som sluttet.
+          <b>Bekreft endring</b>.
         </BodyLong>
       </HStack>
     </Alert>
@@ -784,7 +785,13 @@ function senesteTom(orgtilknytninger: Partial<OrgtilknytningState>[]) {
   if (
     orgtilknytninger.some(
       (orgtilknytning) =>
-        !orgtilknytning.gyldigFom || !orgtilknytning.orgEnhetId,
+        !orgtilknytning.gyldigFom ||
+        !orgtilknytning.orgEnhetId ||
+        (orgtilknytning.gyldigTom &&
+          isBefore(
+            new Date(orgtilknytning.gyldigTom),
+            new Date(orgtilknytning.gyldigFom),
+          )),
     )
   ) {
     return;
