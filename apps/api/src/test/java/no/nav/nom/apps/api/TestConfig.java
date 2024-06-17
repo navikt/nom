@@ -42,10 +42,4 @@ class TestConfig {
     public MasteredRessursStateRepository masteredRessursStateRepository(@Qualifier("OldNomMasteredRepository") MasteredRessursStateRepository masteredRessursStateRepository) {
         return masteredRessursStateRepository;
     }
-
-    @Bean
-    @Primary
-    public DelegertLederStateRepository delegertLederStateRepository(@Qualifier("oldDelegertLederStateRepository") DelegertLederStateRepository delegertLederStateRepository) {
-        return delegertLederStateRepository;
-    }
 }

@@ -1,8 +1,8 @@
 package no.nav.nom.apps.api.authorize.redigereressurs;
 
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
-import no.nav.nom.apps.api.authorize.eventsourcing.state.OldDelegertLederStateRepositoryImpl;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.LederTilgangForOrgenhetRequest;
+import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,7 +21,7 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
     @MockBean
     AuthorizeCommandService authorizeCommandService;
     @MockBean
-    OldDelegertLederStateRepositoryImpl delegertLederStateRepository;
+    DelegertLederStateRepository delegertLederStateRepository;
 
     @Test
     @DisplayName("Verifiser at Leder B har auth til å redigere ressurser B110001 og B110002")
