@@ -21,7 +21,6 @@ import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
@@ -58,7 +57,6 @@ public class DvhRestConsumer {
     private final DvhRepository dvhRepository;
     private final DvhService dvhService;
     private final NomProxyClient nomProxyClient;
-    private final RessursStateListener ressursStateListener;
     private final NomStateRessursListener nomStateRessursListener;
     private final OrgtilknytningStateListener orgtilknytningStateListener;
     private final NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
@@ -97,7 +95,7 @@ public class DvhRestConsumer {
                 log.debug("InitialState er ikke klar enda");
                 log.debug(
                     "Ressurs state: {}  Orgtilkn. state: {}  Orgenhet state: {}",
-                    ressursStateListener.initloadComplete(),
+                    nomStateMasteredRessursListener.hasReadToEndOnStartup(),
                     orgtilknytningStateListener.initloadComplete(),
                     orgEnhetStateListener.initloadComplete()
                 );
@@ -330,8 +328,7 @@ public class DvhRestConsumer {
     }
 
     private boolean isInitialStateReady() {
-        return ressursStateListener.initloadComplete()
-            && orgtilknytningStateListener.initloadComplete()
+        return orgtilknytningStateListener.initloadComplete()
             && orgEnhetStateListener.initloadComplete()
             && nomStateRessursListener.hasReadToEndOnStartup()
             && nomStateOrgEnhetListener.hasReadToEndOnStartup()

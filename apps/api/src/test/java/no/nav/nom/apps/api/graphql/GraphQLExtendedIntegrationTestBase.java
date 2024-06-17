@@ -15,6 +15,7 @@ import no.nav.nom.apps.api.graphql.controller.GraphQLSearchController;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateAutoconfiguration;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,10 +41,23 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.emptyMap;
 
 @ActiveProfiles("test")
-@ContextConfiguration(classes = { GraphqlTestConfig.class, GraphQLExtendedIntegrationTestConfig.class },  initializers = MockOAuth2ServerInitializer.class)
+@ContextConfiguration(
+    classes = {
+        GraphqlTestConfig.class,
+        GraphQLExtendedIntegrationTestConfig.class,
+        RessursStateAutoconfiguration.class
+    },
+    initializers = MockOAuth2ServerInitializer.class)
 @EmbeddedKafka(partitions = 1,  topics = {"org.nom.intern-ressurs-state", "org.nom.intern-orgenhet-state"},  controlledShutdown = true)
 @AutoConfigureWireMock(port = 0)
-@GraphQlTest(controllers = {GraphQLRessursController.class, GraphQLPersonController.class, GraphQLOrgEnhetController.class, GraphQLSearchController.class})
+@GraphQlTest(
+    properties = {
+        "nom.libs.state.idle-event-interval-seconds: 1",
+        "nom.libs.state.ressurs.enabled: true",
+        "nom.libs.state.ressurs.state-topic: org.nom.intern-ressurs-state",
+        "nom.libs.state.ressurs.listener-id: nomStateRessursListener_test"
+    }
+    , controllers = {GraphQLRessursController.class, GraphQLPersonController.class, GraphQLOrgEnhetController.class, GraphQLSearchController.class})
 public class GraphQLExtendedIntegrationTestBase {
 
     private final static Duration TIMEOUT_DURATION = Duration.of(5, SECONDS);
@@ -85,7 +99,6 @@ public class GraphQLExtendedIntegrationTestBase {
     protected OrganiseringStateRepository organiseringStateRepository;
 
     @Autowired
-    @Qualifier("oldRessursStateRepository")
     RessursStateRepository ressursStateRepository;
 
     @BeforeEach

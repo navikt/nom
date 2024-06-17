@@ -32,7 +32,6 @@ import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
@@ -89,9 +88,6 @@ public class OrgEnhetTestConfig {
 
     @MockBean
     RessursStateRepository ressursStateRepository;
-
-    @MockBean
-    RessursStateListener ressursStateListener;
 
     @MockBean
     NomStateRessursListener nomStateRessursListener;

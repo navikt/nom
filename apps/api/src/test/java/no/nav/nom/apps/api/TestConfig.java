@@ -15,12 +15,6 @@ import org.springframework.context.annotation.Profile;
 @Import({ApiStarter.class})
 class TestConfig {
     @Bean
-    @Profile("!DvhRessursControllerTest-FAKES")
-    @Primary
-    public RessursStateRepository ressursStateRepository(@Qualifier("oldRessursStateRepository") RessursStateRepository ressursStateRepository) {
-        return ressursStateRepository;
-    }
-    @Bean
     @Primary
     public OrgEnhetStateRepository orgEnhetStateRepository(@Qualifier("oldOrgEnhetStateRepository") OrgEnhetStateRepository orgEnhetStateRepository) {
         return orgEnhetStateRepository;

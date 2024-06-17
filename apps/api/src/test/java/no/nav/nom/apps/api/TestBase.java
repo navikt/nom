@@ -81,7 +81,6 @@ public abstract class TestBase {
     protected KafkaUtils kafkaUtils;
 
     @Autowired
-    @Qualifier("oldRessursStateRepository")
     protected RessursStateRepository ressursStateRepository;
 
     @MockBean

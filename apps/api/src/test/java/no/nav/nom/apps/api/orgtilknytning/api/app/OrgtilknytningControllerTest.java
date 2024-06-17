@@ -15,7 +15,6 @@ import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.Sektor;
@@ -59,8 +58,6 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @MockBean
     private RessursCommandService ressursCommandService;
 
-    @MockBean
-    private RessursStateListener ressursStateListener;
 
     @MockBean
     private NomStateRessursListener nomStateRessursListener;
@@ -100,7 +97,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     @BeforeEach
     void setInitialLoadCompleteAndEnableUnleashAndClearData() {
-        when(ressursStateListener.initloadComplete()).thenReturn(true);
+        when(nomStateRessursListener.hasReadToEndOnStartup()).thenReturn(true);
         when(unleash.isEnabled(any())).thenReturn(true);
         when(authResolver.kanRedigereRessurs(any())).thenReturn(true);
         clearOrgtilknytninger();

@@ -15,6 +15,7 @@ import no.nav.nom.apps.api.dvh.DvhService;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.common.metrics.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
+import no.nav.nom.apps.api.lucenesearch.RessursStateVisitor;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
 import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
 import no.nav.nom.apps.api.organisering.eventsourcing.state.OldOrganiseringStateRepositoryImpl;
@@ -42,9 +43,6 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursEventKafkaConfig;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursEventProducer;
 import no.nav.nom.apps.api.ressurs.eventsourcing.recoverybackup.RessursEventSourceRepository;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.OldRessursStateRepositoryImpl;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListenerConfig;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
@@ -53,6 +51,7 @@ import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
+import no.nav.nom.libs.state.ressurs.RessursStateRepositoryImpl;
 import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
@@ -65,13 +64,12 @@ import org.springframework.kafka.annotation.EnableKafka;
     DvhRestConsumer.class
     , DvhRepository.class
     , DvhService.class
-    , OldRessursStateRepositoryImpl.class
-    , RessursStateListener.class
-    , RessursStateListenerConfig.class
     , DvhOrgenhetsLast.class
     , RessursCommandService.class
     , RessursEventProducer.class
     , RessursEventKafkaConfig.class
+    , RessursStateVisitor.class
+    , NomStateRessursListener.class
     , OrgEnhetIdGenerator.class
     , OrgenhetService.class
     , OldOrgEnhetStateRepositoryImpl.class
@@ -98,8 +96,6 @@ import org.springframework.kafka.annotation.EnableKafka;
 @EnableConfigurationProperties(value = AppProperties.class)
 @EnableKafka
 public class GraphQLExtendedIntegrationTestConfig {
-    @MockBean
-    NomStateRessursListener nomStateRessursListener;
     @MockBean
     NomStateOrgEnhetListener nomStateOrgEnhetListener;
     @MockBean

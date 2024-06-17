@@ -1,14 +1,16 @@
 package no.nav.nom.apps.api;
 
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
+import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.common.AbstractNomStateListener;
+import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.admin.RecordsToDelete;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -38,7 +40,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class KafkaUtils {
-
     private final String ressursStateTopic;
 
     private final String orgenhetStateTopic;
@@ -48,7 +49,7 @@ public class KafkaUtils {
     private final Admin adminClient;
 
     @SpyBean
-    final RessursStateListener ressursStateListener;
+    final NomStateRessursListener nomStateRessursListener;
 
     @SpyBean
     public final NomMasteredRessursListener nomMasteredRessursListener;
@@ -62,16 +63,15 @@ public class KafkaUtils {
     @Autowired
     public KafkaUtils(
         EmbeddedKafkaBroker embeddedKafkaBroker,
-        RessursStateListener ressursStateListener,
         OrgEnhetStateListener orgEnhetStateListener,
         @Value("${app.kafka.ressurs.stateTopic}") String ressursStateTopic,
         @Value("${app.kafka.orgEnhet.stateTopic}") String orgEnhetStateTopic,
-        Admin adminClient,
+        Admin adminClient, NomStateRessursListener nomStateRessursListener,
         NomMasteredRessursListener nomMasteredRessursListener
     ) {
         this.embeddedKafkaBroker = embeddedKafkaBroker;
+        this.nomStateRessursListener = nomStateRessursListener;
 
-        this.ressursStateListener = ressursStateListener;
         this.ressursStateTopic = ressursStateTopic;
         this.adminClient = adminClient;
         this.nomMasteredRessursListener = nomMasteredRessursListener;
@@ -85,18 +85,22 @@ public class KafkaUtils {
 
     public synchronized void sendRessurs(String key, RessursState ressursState) {
         CountDownLatch latch = new CountDownLatch(1);
+        nomStateRessursListener.register(new AbstractNomStateListener.Visitor<RessursState>() {
+            @Override
+            public String visitorName() {
+                return "KafakUtilTestVisitor";
+            }
 
-        Mockito.doAnswer(invocation -> {
-            invocation.callRealMethod();
-            latch.countDown();
-            return null;
-        }).when(ressursStateListener).onMessage(Mockito.any(), Mockito.any());
-
+            @Override
+            public void visit(String key, RessursState stateObject) {
+                latch.countDown();
+            }
+        });
 
         ressursStateKafkaTemplate.sendDefault(key, ressursState);
         try {
             if (!latch.await(5, TimeUnit.SECONDS)) {
-                throw new RuntimeException("Invocation of kafka onMessage never occoured or never exited");
+                throw new RuntimeException("Ressurs state sent on topic is never read");
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

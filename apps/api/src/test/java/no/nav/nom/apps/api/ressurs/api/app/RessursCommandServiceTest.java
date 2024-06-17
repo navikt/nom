@@ -31,7 +31,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 
-import static no.nav.nom.apps.api.ressurs.eventsourcing.state.ToggledRessursStateRepository.UNLEASH_USE_NEW_RESSURS_STATE_REPOSITORY;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
@@ -70,7 +69,6 @@ public class RessursCommandServiceTest {
         CompletableFuture<RessursState> response = new CompletableFuture<>();
         CompletableFuture<SendResult<String, RessursEvent>> sendResultFuture = new CompletableFuture<>();
 
-        when(unleash.isEnabled(UNLEASH_USE_NEW_RESSURS_STATE_REPOSITORY)).thenReturn(true);
         when(nomStateRessursListener.waitForStateAfterEventCreation(anyString())).thenReturn(response);
         when(eventProducer.sendMessage(any())).thenAnswer(invocation -> CompletableFuture.supplyAsync(TimeoutException::new));
         when(eventProducer.sendMessage(any(RessursTekniskSlettetEventV1.class))).thenReturn(sendResultFuture);
