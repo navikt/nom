@@ -1,16 +1,16 @@
 package no.nav.nom.apps.api.authorize.redigereressurs.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
-import no.nav.nom.apps.api.authorize.eventsourcing.state.OldDelegertLederStateRepositoryImpl;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
+import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,7 +33,7 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
     @MockBean
     AuthorizeCommandService authorizeCommandService;
     @MockBean
-    OldDelegertLederStateRepositoryImpl delegertLederStateRepository;
+    DelegertLederStateRepository delegertLederStateRepository;
 
     @BeforeEach
     public void enableLederTilgangToggle() {

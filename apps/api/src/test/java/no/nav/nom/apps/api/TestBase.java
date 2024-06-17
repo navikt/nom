@@ -103,10 +103,6 @@ public abstract class TestBase {
     @Qualifier("OldNomMasteredRepository")
     protected MasteredRessursStateRepository masteredRessursStateRepository;
 
-    @Autowired
-    @Qualifier("oldDelegertLederStateRepository")
-    protected DelegertLederStateRepository delegertLederStateRepository;
-
     @MockBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
