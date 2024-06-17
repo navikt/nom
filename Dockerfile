@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jre as builder
+FROM eclipse-temurin:21-jre as builder
 ARG JAR_PATH
 
 WORKDIR application
