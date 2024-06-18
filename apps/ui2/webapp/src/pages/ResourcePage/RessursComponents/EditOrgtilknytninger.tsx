@@ -731,8 +731,8 @@ function BekreftModalInnholdTomIFremtiden({
       </BodyLong>
       <BodyLong>
         Hvis dette ikke er korrekt, må det legges inn en ny tilknytning. Du kan
-        avbryte og gjøre dette nå, eller så kan du eller noen andre gjøre det
-        senere, men senest sluttdatoen {dato}.
+        trykke på <b>Avbryt</b> og gjøre dette nå, eller så kan du eller noen
+        andre gjøre det senere, men senest sluttdatoen {dato}.
       </BodyLong>
       <BodyLong>
         Hvis dette er korrekt, kan du bekrefte endringen ved å trykke på{" "}
@@ -765,8 +765,8 @@ function BekreftModalInnholdTomIFortiden({
           </b>
         </BodyLong>
         <BodyLong>
-          Hvis dette ikke er korrekt, må det legges inn en ny tilknytning. Du
-          kan avbryte og gjøre dette nå.
+          Hvis dette ikke er korrekt, må du trykke på <b>Avbryt</b> og legge til
+          en ny tilknytning.
         </BodyLong>
         <BodyLong>
           Hvis dette er korrekt, kan du bekrefte endringen ved å trykke på{" "}
