@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+
 @Slf4j
 @Service
 public class RessursStillingLoader {
@@ -57,7 +59,7 @@ public class RessursStillingLoader {
         LocalDateTime start = LocalDateTime.now();
         val jsonRessursStillinger = dvhExchange(appProperties.clients().nomProxy().ressursStillingerPath());
         val listField = jsonRessursStillinger.fields().next();
-        log.debug("Lastet ressursStillinger: Første field: {} med {} ant noder", listField.getKey(), listField.getValue().size());
+        log.debug(SECURE_LOGS, "Lastet ressursStillinger: Første field: {} med {} ant noder", listField.getKey(), listField.getValue().size());
         List<DvhRessursStilling> ressursStillinger = StreamSupport.stream(jsonRessursStillinger.get(ressursStillingerResponseNode).spliterator(), true)
             .map(DvhRessursStilling::new)
             .collect(Collectors.toList());

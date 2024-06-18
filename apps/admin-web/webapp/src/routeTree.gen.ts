@@ -11,13 +11,31 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as SinksImport } from './routes/sinks'
 import { Route as IndexImport } from './routes/index'
+import { Route as SinksRessursImport } from './routes/sinks.ressurs'
+import { Route as SinksOrgenhetImport } from './routes/sinks.orgenhet'
 
 // Create/Update Routes
+
+const SinksRoute = SinksImport.update({
+  path: '/sinks',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const IndexRoute = IndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const SinksRessursRoute = SinksRessursImport.update({
+  path: '/ressurs',
+  getParentRoute: () => SinksRoute,
+} as any)
+
+const SinksOrgenhetRoute = SinksOrgenhetImport.update({
+  path: '/orgenhet',
+  getParentRoute: () => SinksRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -31,12 +49,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/sinks': {
+      id: '/sinks'
+      path: '/sinks'
+      fullPath: '/sinks'
+      preLoaderRoute: typeof SinksImport
+      parentRoute: typeof rootRoute
+    }
+    '/sinks/orgenhet': {
+      id: '/sinks/orgenhet'
+      path: '/orgenhet'
+      fullPath: '/sinks/orgenhet'
+      preLoaderRoute: typeof SinksOrgenhetImport
+      parentRoute: typeof SinksImport
+    }
+    '/sinks/ressurs': {
+      id: '/sinks/ressurs'
+      path: '/ressurs'
+      fullPath: '/sinks/ressurs'
+      preLoaderRoute: typeof SinksRessursImport
+      parentRoute: typeof SinksImport
+    }
   }
 }
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren({ IndexRoute })
+export const routeTree = rootRoute.addChildren({
+  IndexRoute,
+  SinksRoute: SinksRoute.addChildren({ SinksOrgenhetRoute, SinksRessursRoute }),
+})
 
 /* prettier-ignore-end */
 
@@ -46,11 +88,27 @@ export const routeTree = rootRoute.addChildren({ IndexRoute })
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/"
+        "/",
+        "/sinks"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/sinks": {
+      "filePath": "sinks.tsx",
+      "children": [
+        "/sinks/orgenhet",
+        "/sinks/ressurs"
+      ]
+    },
+    "/sinks/orgenhet": {
+      "filePath": "sinks.orgenhet.tsx",
+      "parent": "/sinks"
+    },
+    "/sinks/ressurs": {
+      "filePath": "sinks.ressurs.tsx",
+      "parent": "/sinks"
     }
   }
 }

@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+
 @Slf4j
 @Service
 public class EksterneRessurserLoader {
@@ -39,7 +41,7 @@ public class EksterneRessurserLoader {
 
         val jsonEksterneRessurser = dvhExchange(appProperties.clients().nomProxy().eksterneRessurserPath());
         val listField = jsonEksterneRessurser.fields().next();
-        log.debug("Lastet eksterneRessurser: Første field: {} med {} ant noder", listField.getKey(), listField.getValue().size());
+        log.debug(SECURE_LOGS, "Lastet eksterneRessurser: Første field: {} med {} ant noder", listField.getKey(), listField.getValue().size());
 
         List<DvhEksternRessurs> eksterneRessurser = StreamSupport.stream(jsonEksterneRessurser.get("NOM_EKSTERNE_V1Response").spliterator(), true)
             .map(DvhEksternRessurs::fromJson)

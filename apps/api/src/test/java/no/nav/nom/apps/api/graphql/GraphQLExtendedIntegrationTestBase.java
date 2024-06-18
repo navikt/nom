@@ -14,6 +14,7 @@ import no.nav.nom.apps.api.graphql.controller.GraphQLRessursController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLSearchController;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateAutoconfiguration;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateAutoconfiguration;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -45,7 +46,8 @@ import static java.util.Collections.emptyMap;
     classes = {
         GraphqlTestConfig.class,
         GraphQLExtendedIntegrationTestConfig.class,
-        RessursStateAutoconfiguration.class
+        RessursStateAutoconfiguration.class,
+        OrgEnhetStateAutoconfiguration.class
     },
     initializers = MockOAuth2ServerInitializer.class)
 @EmbeddedKafka(partitions = 1,  topics = {"org.nom.intern-ressurs-state", "org.nom.intern-orgenhet-state"},  controlledShutdown = true)
@@ -55,7 +57,10 @@ import static java.util.Collections.emptyMap;
         "nom.libs.state.idle-event-interval-seconds: 1",
         "nom.libs.state.ressurs.enabled: true",
         "nom.libs.state.ressurs.state-topic: org.nom.intern-ressurs-state",
-        "nom.libs.state.ressurs.listener-id: nomStateRessursListener_test"
+        "nom.libs.state.ressurs.listener-id: nomStateRessursListener_test",
+        "nom.libs.state.orgenhet.enabled: true",
+        "nom.libs.state.orgenhet.state-topic: org.nom.intern-orgenhet-state",
+        "nom.libs.state.orgenhet.listener-id: nomStateOrgenhetListener_test"
     }
     , controllers = {GraphQLRessursController.class, GraphQLPersonController.class, GraphQLOrgEnhetController.class, GraphQLSearchController.class})
 public class GraphQLExtendedIntegrationTestBase {
@@ -91,7 +96,6 @@ public class GraphQLExtendedIntegrationTestBase {
     protected DvhRepository dvhRepository;
 
     @Autowired
-    @Qualifier("oldOrgEnhetStateRepository")
     protected OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired

@@ -4,7 +4,6 @@ import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
@@ -16,6 +15,7 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepositoryImpl;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -60,7 +60,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
     @BeforeEach
     public void init() {
         MockitoAnnotations.openMocks(this);
-        orgEnhetStateRepository = new OldOrgEnhetStateRepositoryImpl();
+        orgEnhetStateRepository = new OrgEnhetStateRepositoryImpl();
         orgenhetService = new OrgenhetService(orgEnhetStateRepository, orgEnhetCommandService, new DvhRepository(), kafkaTopicReader,
             unleash,
             organiseringStateRepository
