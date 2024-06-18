@@ -16,6 +16,8 @@ spec:
       value: 'classpath:logback.xml'
     - name: JDK_JAVA_OPTIONS
       value: "-Xms2g -Xmx8g"
+  envFrom:
+    - secret: nom-api-unleash-api-token
   image: "{{image}}"
   port: 8080
   replicas:

@@ -46,7 +46,6 @@ spring:
       missing-topics-fatal: true
     client-id: ${HOSTNAME}
 
-
 unleash:
   endpoint:
     url: ${UNLEASH_SERVER_API_URL}/api
