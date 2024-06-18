@@ -628,6 +628,7 @@ function Informasjonsboks({ ressursSektor }: { ressursSektor: Sektor }) {
       css={css`
         margin-top: var(--a-spacing-9);
       `}
+      defaultOpen
     >
       <ExpansionCard.Header>
         <HStack align="center" gap="4" wrap={false}>
