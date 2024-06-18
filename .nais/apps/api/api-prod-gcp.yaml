@@ -201,6 +201,9 @@ spec:
         - application: kabin-api
           namespace: klage
           cluster: prod-gcp
+        - application: prim-brukerstyring
+          namespace: pim
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
