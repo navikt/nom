@@ -124,6 +124,13 @@ public class OrgenhetService {
             .toList();
     }
 
+    public List<IOrgenhet> exactMatchByAgressoId(String agressoId) {
+        return orgEnhetStateRepository.getAll().stream()
+            .filter(orgEnhetState -> !orgEnhetState.endedOnStartDate() && orgEnhetState.agressoId().isPresent() && orgEnhetState.agressoId().get().equalsIgnoreCase(agressoId))
+            .map(this::map)
+            .toList();
+    }
+
 
     public List<IOrgenhet> matchByNavn(String navn) {
         return orgEnhetStateRepository.getAll().stream()

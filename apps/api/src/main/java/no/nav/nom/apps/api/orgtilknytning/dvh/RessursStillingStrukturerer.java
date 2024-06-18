@@ -361,11 +361,10 @@ public class RessursStillingStrukturerer {
                         );
 
                         log.debug(
-                            "Klippet før stillingperioden for navident {} fra {} til {} for orgenhet {}. nomEnheter: {}, stillingPeriode: {}, tidligereNomEnherer: {}",
+                            "Klippet før stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, tidligereNomEnherer: {}",
                             navident,
                             stillingPeriode.gyldigFom(),
                             nomEnheter.get(0).getGyldigFom().minusDays(1),
-                            orgenheterToString(tidligereNomEnherer),
                             orgenheterToString(nomEnheter),
                             stillingPeriode,
                             orgenheterToString(tidligereNomEnherer)
@@ -374,14 +373,25 @@ public class RessursStillingStrukturerer {
                         // Fikser inkonsistens i stillingperioden
                         if(!tidligereNomEnherer.isEmpty() && unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
                                 // NOTE: kanskje vi må legge til alle hvis tigligereNomEnherer.size() > 1
-                                perioderGruppertMedOrgenhet.add(
-                                    new StillingPeriode(
-                                        stillingPeriode.stilling(),
-                                        stillingPeriode.gyldigFom(),
-                                        nomEnheter.get(0).getGyldigFom().minusDays(1),
-                                        tidligereNomEnherer.get(0)
-                                    )
-                                );
+                                if(tidligereNomEnherer.size() == 1) {
+                                    perioderGruppertMedOrgenhet.add(
+                                        new StillingPeriode(
+                                            stillingPeriode.stilling(),
+                                            stillingPeriode.gyldigFom(),
+                                            nomEnheter.get(0).getGyldigFom().minusDays(1),
+                                            tidligereNomEnherer.get(0)
+                                        )
+                                    );
+                                } else {
+                                   tidligereNomEnherer.forEach(oe -> perioderGruppertMedOrgenhet.add(
+                                        new StillingPeriode(
+                                            stillingPeriode.stilling(),
+                                            oe.getGyldigFom().isBefore(stillingPeriode.gyldigFom()) ? stillingPeriode.gyldigFom():oe.getGyldigFom(), // if orgEnhets FOM is before stillingFOM, use stillingFOM
+                                            oe.getGyldigTom().orElse(NO_END_DATE), // NOTE - if orgEnhets TOM is not present, use NO_END_DATE - is it correct? or throw exception?
+                                            oe
+                                        )
+                                    ));
+                                }
                         }
                     } else if (stillingPeriode.gyldigTom().isAfter(nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE))) {
                         log.debug(
@@ -408,11 +418,10 @@ public class RessursStillingStrukturerer {
                         }
 
                         log.debug(
-                            "Klippet etter stillingperioden for navident {} fra {} til {} for orgenhet {}. nomEnheter: {}, stillingPeriode: {}, seinereNomEnherer: {}",
+                            "Klippet etter stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, seinereNomEnherer: {}",
                             navident,
                             nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
                             stillingPeriode.gyldigTom(),
-                            orgenheterToString(seinereNomEnherer),
                             orgenheterToString(nomEnheter),
                             stillingPeriode,
                             orgenheterToString(seinereNomEnherer)
@@ -477,7 +486,7 @@ public class RessursStillingStrukturerer {
 
     // Alle ORGENHET enheter med agressoId som overlapper i perioden
     public List<IOrgenhet> finnNomEnheterForId(String agressoId, LocalDate gyldigFom, LocalDate gyldigTom) {
-        return orgenhetService.matchByAgressoId(agressoId).stream()
+        return orgenhetService.exactMatchByAgressoId(agressoId).stream()
             .filter(oe ->
                 "ORGENHET".equals(oe.getOrgNiv()) &&
                     (gyldigTom.isAfter(oe.getGyldigFom().minusDays(1)) && gyldigFom.isBefore(oe.getGyldigTom().orElse(NO_END_DATE.plusDays(1))))
@@ -489,7 +498,7 @@ public class RessursStillingStrukturerer {
 
     // Alle ORGENHET enheter med agressoId og navn som overlapper i perioden
     public List<IOrgenhet> finnNomEnheterForIdOgNavn(String agressoId, String enhetNavn, LocalDate gyldigFom, LocalDate gyldigTom) {
-        return orgenhetService.matchByAgressoId(agressoId).stream()
+        return orgenhetService.exactMatchByAgressoId(agressoId).stream()
             .filter(oe ->
                 "ORGENHET".equals(oe.getOrgNiv()) &&
                     enhetNavn.equals(oe.getNavn()) &&
