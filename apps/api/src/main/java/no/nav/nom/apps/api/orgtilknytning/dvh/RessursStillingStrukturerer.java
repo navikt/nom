@@ -38,6 +38,7 @@ public class RessursStillingStrukturerer {
     private final RessursStateRepository ressursStateRepository;
     private final Environment environment;
     private final Unleash unleash;
+    private static final LocalDate ORGENHET_PERSISTERING_STARTDATO = LocalDate.of(2023, 1, 12);
 
     public RessursStillingStrukturerer(
         OrgenhetService orgenhetService, RessursStillingLoadStatus ressursStillingLoadStatus,
@@ -370,28 +371,39 @@ public class RessursStillingStrukturerer {
                             orgenheterToString(tidligereNomEnherer)
                         );
 
-                        // Fikser inkonsistens i stillingperioden
-                        if(!tidligereNomEnherer.isEmpty() && unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
-                                // NOTE: kanskje vi må legge til alle hvis tigligereNomEnherer.size() > 1
-                                if(tidligereNomEnherer.size() == 1) {
-                                    perioderGruppertMedOrgenhet.add(
-                                        new StillingPeriode(
-                                            stillingPeriode.stilling(),
-                                            stillingPeriode.gyldigFom(),
-                                            nomEnheter.get(0).getGyldigFom().minusDays(1),
-                                            tidligereNomEnherer.get(0)
-                                        )
-                                    );
-                                } else {
-                                   tidligereNomEnherer.forEach(oe -> perioderGruppertMedOrgenhet.add(
-                                        new StillingPeriode(
-                                            stillingPeriode.stilling(),
-                                            oe.getGyldigFom().isBefore(stillingPeriode.gyldigFom()) ? stillingPeriode.gyldigFom():oe.getGyldigFom(), // if orgEnhets FOM is before stillingFOM, use stillingFOM
-                                            oe.getGyldigTom().orElse(NO_END_DATE), // NOTE - if orgEnhets TOM is not present, use NO_END_DATE - is it correct? or throw exception?
-                                            oe
-                                        )
-                                    ));
-                                }
+                        if(tidligereNomEnherer.isEmpty()){
+                            // finner ingen historisk enhet - vi bare logger
+                            log.debug(
+                                "Finner ingen historisk enhet for stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, før persistering av enheter: {}",
+                                navident,
+                                stillingPeriode.gyldigFom(),
+                                nomEnheter.get(0).getGyldigFom().minusDays(1),
+                                orgenheterToString(nomEnheter),
+                                stillingPeriode,
+                                stillingPeriode.gyldigFom().isBefore(ORGENHET_PERSISTERING_STARTDATO)
+                            );
+                        }
+                        else if (unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
+                            // Fikser inkonsistens i stillingperioden
+                             if(tidligereNomEnherer.size() == 1) {
+                                 perioderGruppertMedOrgenhet.add(
+                                     new StillingPeriode(
+                                         stillingPeriode.stilling(),
+                                         stillingPeriode.gyldigFom(),
+                                         nomEnheter.get(0).getGyldigFom().minusDays(1),
+                                         tidligereNomEnherer.get(0)
+                                     )
+                                 );
+                             } else {
+                                 tidligereNomEnherer.forEach(oe -> perioderGruppertMedOrgenhet.add(
+                                     new StillingPeriode(
+                                         stillingPeriode.stilling(),
+                                         oe.getGyldigFom().isBefore(stillingPeriode.gyldigFom()) ? stillingPeriode.gyldigFom():oe.getGyldigFom(), // if orgEnhets FOM is before stillingFOM, use stillingFOM
+                                         oe.getGyldigTom().orElse(NO_END_DATE), // NOTE - if orgEnhets TOM is not present, use NO_END_DATE - is it correct? or throw exception?
+                                         oe
+                                     )
+                                 ));
+                             }
                         }
                     } else if (stillingPeriode.gyldigTom().isAfter(nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE))) {
                         log.debug(
@@ -429,7 +441,7 @@ public class RessursStillingStrukturerer {
 
                         // Fikser inkonsistens i stillingperioden
                         if (!seinereNomEnherer.isEmpty() && unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
-                                // NOTE: kanskje vi må legge til alle hvis seinereNomEnherer.size() > 1
+                                // NOTE: kanskje vi må legge til alle hvis seinereNomEnherer.size() > 1. Denne er ikke så realistisk case?
                                 perioderGruppertMedOrgenhet.add(
                                     new StillingPeriode(
                                         stillingPeriode.stilling(),
