@@ -776,40 +776,6 @@ function BekreftModalInnholdTomIFortiden({
   );
 }
 
-// function senesteTom(orgtilknytninger: Partial<OrgtilknytningState>[]) {
-//   if (
-//     orgtilknytninger.some(
-//       (orgtilknytning) =>
-//         !orgtilknytning.gyldigFom ||
-//         !orgtilknytning.orgEnhetId ||
-//         (orgtilknytning.gyldigTom &&
-//           isBefore(
-//             new Date(orgtilknytning.gyldigTom),
-//             new Date(orgtilknytning.gyldigFom),
-//           )),
-//     )
-//   ) {
-//     return;
-//   }
-//
-//   let latestGyldigTom: string | undefined;
-//   for (const orgtilknytning of orgtilknytninger) {
-//     if (orgtilknytning.gyldigTom === undefined) {
-//       return;
-//     }
-//     if (
-//       latestGyldigTom === undefined ||
-//       (orgtilknytning.gyldigTom &&
-//         latestGyldigTom &&
-//         orgtilknytning.gyldigTom > latestGyldigTom)
-//     ) {
-//       latestGyldigTom = orgtilknytning.gyldigTom;
-//     }
-//   }
-//
-//   return latestGyldigTom;
-// }
-
 function lagOppdaterOrgtilknytningerRequest(
   orgtilknytninger: OrgtilknytningEtterValidering[],
 ): OppdaterOrgtilknytningerForRessursRequest {
