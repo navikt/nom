@@ -47,7 +47,6 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
     public DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;
 
     @Autowired
-    @Qualifier("oldOrgEnhetStateRepository")
     protected OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired

@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.orgenhet.eventsourcing.producer;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.junit.jupiter.api.Test;

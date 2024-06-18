@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.common;
 
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
@@ -26,7 +25,6 @@ public class CustomCheckHealthIndicator extends AvailabilityStateHealthIndicator
     private final NomStateMasteredRessursListener nomStateMasteredRessursListener;
     private final NomStateDelegertLederListener nomStateDelegertLederListener;
 
-    private final OrgEnhetStateListener orgEnhetStateListener;
     private final OrgtilknytningStateListener orgtilknytningStateListener;
     private final LuceneService luceneService;
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
@@ -39,7 +37,6 @@ public class CustomCheckHealthIndicator extends AvailabilityStateHealthIndicator
         NomStateOrgtilknytningListener nomStateOrgtilknytningListener,
         NomStateMasteredRessursListener nomStateMasteredRessursListener,
         NomStateDelegertLederListener nomStateDelegertLederListener,
-        OrgEnhetStateListener orgEnhetStateListener,
         OrgtilknytningStateListener orgtilknytningStateListener,
         LuceneService luceneService, DvhStartupLoadMonitor dvhStartupLoadMonitor
     ) {
@@ -53,7 +50,6 @@ public class CustomCheckHealthIndicator extends AvailabilityStateHealthIndicator
         this.nomStateOrgtilknytningListener = nomStateOrgtilknytningListener;
         this.nomStateMasteredRessursListener = nomStateMasteredRessursListener;
         this.nomStateDelegertLederListener = nomStateDelegertLederListener;
-        this.orgEnhetStateListener = orgEnhetStateListener;
         this.orgtilknytningStateListener = orgtilknytningStateListener;
         this.luceneService = luceneService;
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
@@ -61,8 +57,8 @@ public class CustomCheckHealthIndicator extends AvailabilityStateHealthIndicator
 
     @Override
     protected AvailabilityState getState(ApplicationAvailability applicationAvailability) {
-        if (orgEnhetStateListener.initloadComplete() &&
-            dvhStartupLoadMonitor.hasCompleted() && luceneService.initLoadComplete() &&
+        if (dvhStartupLoadMonitor.hasCompleted() &&
+            luceneService.initLoadComplete() &&
             orgtilknytningStateListener.initloadComplete() &&
             // Nye Listeners under:
             nomStateRessursListener.hasReadToEndOnStartup() &&

@@ -7,7 +7,7 @@ import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.organisering.OrgEnhetTestBase;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
     private DvhRestConsumer dvhRestConsumer;
 
     @Autowired
-    private OldOrgEnhetStateRepositoryImpl orgEnhetStateRepository;
+    private OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
     private OrgenhetService orgenhetService;

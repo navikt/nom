@@ -3,11 +3,11 @@ package no.nav.nom.apps.api.orgenhet;
 import no.nav.nom.apps.api.organisering.OrgEnhetTestBase;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
 
     @Autowired
-    private OldOrgEnhetStateRepositoryImpl orgEnhetStateRepository;
+    private OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
     private OrgEnhetTypeHandler orgEnhetTypeHandler;

@@ -1,13 +1,13 @@
 package no.nav.nom.apps.api;
 
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.common.AbstractNomStateListener;
+import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import org.apache.kafka.clients.admin.Admin;
@@ -16,7 +16,6 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.jetbrains.annotations.NotNull;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -54,7 +53,7 @@ public class KafkaUtils {
     final NomStateMasteredRessursListener nomStateMasteredRessursListener;
 
     @SpyBean
-    final OrgEnhetStateListener orgEnhetStateListener;
+    final NomStateOrgEnhetListener nomStateOrgEnhetListener;
 
     private final KafkaTemplate<String, RessursState> ressursStateKafkaTemplate;
     private final KafkaTemplate<String, OrgEnhetState> orgEnhetStateKafkaTemplate;
@@ -62,7 +61,7 @@ public class KafkaUtils {
     @Autowired
     public KafkaUtils(
         EmbeddedKafkaBroker embeddedKafkaBroker,
-        OrgEnhetStateListener orgEnhetStateListener,
+        NomStateOrgEnhetListener nomStateOrgEnhetListener,
         @Value("${app.kafka.ressurs.stateTopic}") String ressursStateTopic,
         @Value("${app.kafka.orgEnhet.stateTopic}") String orgEnhetStateTopic,
         Admin adminClient, NomStateRessursListener nomStateRessursListener,
@@ -76,7 +75,7 @@ public class KafkaUtils {
         this.nomStateMasteredRessursListener = nomStateMasteredRessursListener;
         this.ressursStateKafkaTemplate = ressursStateKafkaTemplate();
 
-        this.orgEnhetStateListener = orgEnhetStateListener;
+        this.nomStateOrgEnhetListener = nomStateOrgEnhetListener;
         this.orgenhetStateTopic = orgEnhetStateTopic;
         this.orgEnhetStateKafkaTemplate = orgEnhetStateKafkaTemplate();
     }
@@ -84,7 +83,7 @@ public class KafkaUtils {
 
     public synchronized void sendRessurs(String key, RessursState ressursState) {
         CountDownLatch latch = new CountDownLatch(1);
-        nomStateRessursListener.register(new AbstractNomStateListener.Visitor<RessursState>() {
+        nomStateRessursListener.register(new AbstractNomStateListener.Visitor<>() {
             @Override
             public String visitorName() {
                 return "KafakUtilTestVisitor";
@@ -108,13 +107,17 @@ public class KafkaUtils {
 
     public synchronized void sendOrgenhet(String key, OrgEnhetState orgEnhetState) {
         CountDownLatch latch = new CountDownLatch(1);
+        nomStateOrgEnhetListener.register(new AbstractNomStateListener.Visitor<>() {
+            @Override
+            public String visitorName() {
+                return "KafakUtilTestVisitor";
+            }
 
-        Mockito.doAnswer(invocation -> {
-            invocation.callRealMethod();
-            latch.countDown();
-            return null;
-        }).when(this.orgEnhetStateListener).onMessage(Mockito.any(), Mockito.any());
-
+            @Override
+            public void visit(String key, OrgEnhetState stateObject) {
+                latch.countDown();
+            }
+        });
 
         this.orgEnhetStateKafkaTemplate.sendDefault(key, orgEnhetState);
         try {

@@ -8,7 +8,6 @@ import no.nav.nom.apps.api.postgresql.GenericStorage;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
-import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
@@ -94,7 +93,6 @@ public abstract class TestBase {
     protected Unleash unleash;
 
     @Autowired
-    @Qualifier("oldOrgEnhetStateRepository")
     protected OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
