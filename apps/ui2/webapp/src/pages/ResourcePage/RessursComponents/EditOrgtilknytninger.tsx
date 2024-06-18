@@ -3,7 +3,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Buildings3Icon,
   FloppydiskIcon,
-  InformationSquareFillIcon,
   MinusCircleIcon,
   PlusCircleIcon,
 } from "@navikt/aksel-icons";
