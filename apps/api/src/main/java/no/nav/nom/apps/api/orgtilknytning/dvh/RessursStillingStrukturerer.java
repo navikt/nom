@@ -38,8 +38,6 @@ public class RessursStillingStrukturerer {
     private final RessursStateRepository ressursStateRepository;
     private final Environment environment;
     private final Unleash unleash;
-    private static final LocalDate ORGENHET_PERSISTERING_STARTDATO = LocalDate.of(2023, 1, 12);
-
     public RessursStillingStrukturerer(
         OrgenhetService orgenhetService, RessursStillingLoadStatus ressursStillingLoadStatus,
         RessursStateRepository ressursStateRepository,
@@ -374,13 +372,12 @@ public class RessursStillingStrukturerer {
                         if(tidligereNomEnherer.isEmpty()){
                             // finner ingen historisk enhet - vi bare logger
                             log.debug(
-                                "Finner ingen historisk enhet for stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, før persistering av enheter: {}",
+                                "Finner ingen historisk enhet for stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}",
                                 navident,
                                 stillingPeriode.gyldigFom(),
                                 nomEnheter.get(0).getGyldigFom().minusDays(1),
                                 orgenheterToString(nomEnheter),
-                                stillingPeriode,
-                                stillingPeriode.gyldigFom().isBefore(ORGENHET_PERSISTERING_STARTDATO)
+                                stillingPeriode
                             );
                         }
                         else if (unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
