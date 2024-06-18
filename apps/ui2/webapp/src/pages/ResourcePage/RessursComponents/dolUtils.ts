@@ -1,7 +1,9 @@
 import { addDays, isAfter, isBefore, subDays } from "date-fns";
-import sortBy from "lodash/sortBy";
+import orderBy from "lodash/orderBy";
+import sortBy from "lodash/orderBy";
 
 import type { OrgtilknytningEtterValidering } from "~/pages/ResourcePage/RessursComponents/EditOrgtilknytninger";
+import type { OrgtilknytningState } from "~/types/api-models";
 import {
   earliestDate,
   isSameDateOrBefore,
@@ -208,4 +210,27 @@ export function dolValidering(
   }
 
   return { dolGaps, dolOverlaps: findPeriodOverlaps(dolPeriods) };
+}
+
+export function senesteTom(
+  orgtilknytninger: Partial<OrgtilknytningState>[],
+): string | undefined {
+  if (orgtilknytninger.some((orgtilknytning) => !orgtilknytning.gyldigTom)) {
+    return undefined;
+  }
+
+  return orderBy(orgtilknytninger, "gyldigTom", "desc")[0].gyldigTom;
+}
+
+export function validInput(orgtilknytninger: Partial<OrgtilknytningState>[]) {
+  return !orgtilknytninger.some(
+    (orgtilknytning) =>
+      !orgtilknytning.gyldigFom ||
+      !orgtilknytning.orgEnhetId ||
+      (orgtilknytning.gyldigTom &&
+        isBefore(
+          new Date(orgtilknytning.gyldigTom),
+          new Date(orgtilknytning.gyldigFom),
+        )),
+  );
 }

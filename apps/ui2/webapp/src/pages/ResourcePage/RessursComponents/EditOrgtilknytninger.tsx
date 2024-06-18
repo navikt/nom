@@ -23,7 +23,7 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { addYears, isBefore } from "date-fns";
+import { addYears } from "date-fns";
 import partition from "lodash/partition";
 import type { MutableRefObject } from "react";
 import React, { forwardRef, useEffect, useRef } from "react";
@@ -52,7 +52,11 @@ import { useHasWriteAccess } from "~/api/useGetSession";
 import { ApiResponseError } from "~/components/ApiResponseError";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { showToast } from "~/hooks/showToast";
-import { dolValidering } from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import {
+  dolValidering,
+  senesteTom,
+  validInput,
+} from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { OrgtilknytningTimeline } from "~/pages/ResourcePage/RessursComponents/OrgtilknytningTimeline";
 import type {
   OppdaterOrgtilknytningerForRessursRequest,
@@ -122,11 +126,6 @@ const defaultNyOrgtilknytning = {
   orgEnhetId: "",
   gyldigFom: "",
   gyldigTom: "",
-};
-
-declare type BekreftModalProperties = {
-  senesteTomDato: string | undefined;
-  navn: string;
 };
 
 function OrgtilknytningForm({
@@ -214,18 +213,20 @@ function OrgtilknytningForm({
     const oppdaterteOrgtilknytninger = watch(
       "mappedeOrgtilknytninger",
     ) as OrgtilknytningEtterValidering[];
-    const { dolGaps, dolOverlaps } = dolValidering(
-      oppdaterteOrgtilknytninger ?? [],
-    );
+    const { dolGaps, dolOverlaps } = dolValidering(oppdaterteOrgtilknytninger);
 
-    const senesteTomDato = senesteTom(oppdaterteOrgtilknytninger);
-
-    if (dolOverlaps.length === 0 && dolGaps.length === 0 && !!senesteTomDato) {
-      modalReference.current?.showModal();
-    } else {
-      formReference.current?.dispatchEvent(
-        new Event("submit", { cancelable: true, bubbles: true }),
-      );
+    if (
+      validInput(oppdaterteOrgtilknytninger) &&
+      dolOverlaps.length === 0 &&
+      dolGaps.length === 0
+    ) {
+      if (senesteTom(oppdaterteOrgtilknytninger)) {
+        modalReference.current?.showModal();
+      } else {
+        formReference.current?.dispatchEvent(
+          new Event("submit", { cancelable: true, bubbles: true }),
+        );
+      }
     }
   };
 
@@ -657,57 +658,55 @@ function IllegalDolCombinationAlert() {
   );
 }
 
-const BekreftModal = forwardRef<HTMLDialogElement, BekreftModalProperties>(
-  ({ senesteTomDato, navn }, reference) => {
-    if (!senesteTomDato) {
-      return <></>;
-    }
+const BekreftModal = forwardRef<
+  HTMLDialogElement,
+  { senesteTomDato: string | undefined; navn: string }
+>(({ senesteTomDato, navn }, reference) => {
+  if (!senesteTomDato) {
+    return <></>;
+  }
 
-    const typedReference =
-      reference as MutableRefObject<HTMLDialogElement | null>;
+  const formatertDato = formatDisplayDate(senesteTomDato);
 
-    const formatertDato = formatDisplayDate(senesteTomDato);
+  const typedReference =
+    reference as MutableRefObject<HTMLDialogElement | null>;
 
-    return (
-      <Modal
-        css={css`
-          padding: var(--a-spacing-6);
-        `}
-        header={{ heading: "Bekreft endringer", closeButton: false }}
-        ref={reference}
-        width="548px"
-      >
-        <Modal.Body>
-          {isTodayOrBefore(new Date(senesteTomDato)) ? (
-            <BekreftModalInnholdTomIFortiden dato={formatertDato} navn={navn} />
-          ) : (
-            <BekreftModalInnholdTomIFremtiden
-              dato={formatertDato}
-              navn={navn}
-            />
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            icon={<FloppydiskIcon aria-hidden />}
-            size="small"
-            type="submit"
-          >
-            Bekreft endring
-          </Button>
-          <Button
-            onClick={() => typedReference?.current?.close()}
-            size="small"
-            type="button"
-            variant="secondary"
-          >
-            Avbryt
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    );
-  },
-);
+  return (
+    <Modal
+      css={css`
+        padding: var(--a-spacing-6);
+      `}
+      header={{ heading: "Bekreft endringer", closeButton: false }}
+      ref={reference}
+      width="548px"
+    >
+      <Modal.Body>
+        {isTodayOrBefore(new Date(senesteTomDato)) ? (
+          <BekreftModalInnholdTomIFortiden dato={formatertDato} navn={navn} />
+        ) : (
+          <BekreftModalInnholdTomIFremtiden dato={formatertDato} navn={navn} />
+        )}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button
+          icon={<FloppydiskIcon aria-hidden />}
+          size="small"
+          type="submit"
+        >
+          Bekreft endring
+        </Button>
+        <Button
+          onClick={() => typedReference?.current?.close()}
+          size="small"
+          type="button"
+          variant="secondary"
+        >
+          Avbryt
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+});
 
 function BekreftModalInnholdTomIFremtiden({
   navn,
@@ -777,39 +776,39 @@ function BekreftModalInnholdTomIFortiden({
   );
 }
 
-function senesteTom(orgtilknytninger: Partial<OrgtilknytningState>[]) {
-  if (
-    orgtilknytninger.some(
-      (orgtilknytning) =>
-        !orgtilknytning.gyldigFom ||
-        !orgtilknytning.orgEnhetId ||
-        (orgtilknytning.gyldigTom &&
-          isBefore(
-            new Date(orgtilknytning.gyldigTom),
-            new Date(orgtilknytning.gyldigFom),
-          )),
-    )
-  ) {
-    return;
-  }
-
-  let latestGyldigTom: string | undefined;
-  for (const orgtilknytning of orgtilknytninger) {
-    if (orgtilknytning.gyldigTom === undefined) {
-      return;
-    }
-    if (
-      latestGyldigTom === undefined ||
-      (orgtilknytning.gyldigTom &&
-        latestGyldigTom &&
-        orgtilknytning.gyldigTom > latestGyldigTom)
-    ) {
-      latestGyldigTom = orgtilknytning.gyldigTom;
-    }
-  }
-
-  return latestGyldigTom;
-}
+// function senesteTom(orgtilknytninger: Partial<OrgtilknytningState>[]) {
+//   if (
+//     orgtilknytninger.some(
+//       (orgtilknytning) =>
+//         !orgtilknytning.gyldigFom ||
+//         !orgtilknytning.orgEnhetId ||
+//         (orgtilknytning.gyldigTom &&
+//           isBefore(
+//             new Date(orgtilknytning.gyldigTom),
+//             new Date(orgtilknytning.gyldigFom),
+//           )),
+//     )
+//   ) {
+//     return;
+//   }
+//
+//   let latestGyldigTom: string | undefined;
+//   for (const orgtilknytning of orgtilknytninger) {
+//     if (orgtilknytning.gyldigTom === undefined) {
+//       return;
+//     }
+//     if (
+//       latestGyldigTom === undefined ||
+//       (orgtilknytning.gyldigTom &&
+//         latestGyldigTom &&
+//         orgtilknytning.gyldigTom > latestGyldigTom)
+//     ) {
+//       latestGyldigTom = orgtilknytning.gyldigTom;
+//     }
+//   }
+//
+//   return latestGyldigTom;
+// }
 
 function lagOppdaterOrgtilknytningerRequest(
   orgtilknytninger: OrgtilknytningEtterValidering[],
