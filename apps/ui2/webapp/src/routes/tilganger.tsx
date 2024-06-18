@@ -4,7 +4,9 @@ import { Buildings3Icon, PlusCircleIcon } from "@navikt/aksel-icons";
 import {
   Button,
   DatePicker,
+  Detail,
   Heading,
+  HGrid,
   HStack,
   Table,
   useDatepicker,
@@ -224,10 +226,11 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
         onSubmit={methods.handleSubmit((values) => mutate(values))}
       >
         <Heading level="2" size="small">
-          <HStack align="center" gap="2">
+          <HGrid columns={{ md: "max-content 1fr max-content" }} gap="2">
             <Buildings3Icon fontSize="24" />
-            {orgEnhet.navn}
-          </HStack>
+            <span>{orgEnhet.navn}</span>
+            <Detail>{orgEnhet.nomNivaa ?? orgEnhet.orgNiv}</Detail>
+          </HGrid>
         </Heading>
         <VStack gap="4">
           <Heading level="3" size="xsmall">
