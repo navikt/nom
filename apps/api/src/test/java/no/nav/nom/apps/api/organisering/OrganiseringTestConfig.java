@@ -14,7 +14,6 @@ import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventProducer;
 import no.nav.nom.apps.api.organisering.eventsourcing.recoverybackup.OrganiseringEventSourceRepository;
-import no.nav.nom.apps.api.organisering.eventsourcing.state.OldOrganiseringStateRepositoryImpl;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
@@ -53,7 +52,6 @@ import org.springframework.kafka.annotation.EnableKafka;
     , OrgEnhetStateRepositoryImpl.class
     , OrgEnhetIdGenerator.class
     , DvhStartupLoadMonitor.class
-    , OldOrganiseringStateRepositoryImpl.class
     , OrganiseringService.class
     , OrganiseringEventCommandService.class
     , OrganiseringEventProducer.class

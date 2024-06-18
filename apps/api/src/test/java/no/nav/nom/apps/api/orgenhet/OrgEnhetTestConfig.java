@@ -16,7 +16,6 @@ import no.nav.nom.apps.api.dvh.DvhService;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
-import no.nav.nom.apps.api.organisering.eventsourcing.state.OldOrganiseringStateRepositoryImpl;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetEventKafkaConfig;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetEventProducer;
@@ -34,6 +33,7 @@ import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventso
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -55,7 +55,6 @@ import org.springframework.kafka.annotation.EnableKafka;
     , ValidationService.class
     , NomProxyClient.class
     , NomProxyRestClient.class
-    , OldOrganiseringStateRepositoryImpl.class
     , OrgenhetService.class
     , OrgEnhetCommandService.class
     , OrgEnhetEventProducer.class

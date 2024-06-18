@@ -96,7 +96,6 @@ public abstract class TestBase {
     protected OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
-    @Qualifier("oldOrganiseringStateRepository")
     protected OrganiseringStateRepository organiseringStateRepository;
 
     @Autowired
