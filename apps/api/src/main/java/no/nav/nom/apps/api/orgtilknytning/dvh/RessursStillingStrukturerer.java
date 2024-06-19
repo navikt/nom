@@ -394,17 +394,30 @@ public class RessursStillingStrukturerer {
                                      )
                                  );
                              } else {
+                                 var previousOrgenhetFom =  nomEnheter.get(0).getGyldigFom().minusDays(1);
                                  var tidligereNomEnheterReserseSortedByTom = reverseSortNomEnheterByGyldigTom(tidligereNomEnheter);
+                                 for (IOrgenhet oe : tidligereNomEnheterReserseSortedByTom) {
+                                     // hvis previousOrgenhetFom er etter oe.getGyldigTom() - log potensielle hull i perioden
+                                     if(previousOrgenhetFom.isAfter(oe.getGyldigTom().get())){
+                                         log.debug(SECURE_LOGS, "Hull i perioden for navident {} fra {} til {}",
+                                             navident,
+                                             oe.getGyldigTom().get(),
+                                             previousOrgenhetFom);
+                                     }
 
+                                     // stillingsperioder
+                                     var stillingPeriodeTom = oe.getGyldigTom().get().isAfter(previousOrgenhetFom) ? previousOrgenhetFom : oe.getGyldigFom(); // if orgEnhets TOM is after previousOrgenhetFom, use previousOrgenhetFom
+                                     var stillingPeriodeFom = oe.getGyldigFom().isBefore(stillingPeriode.gyldigFom()) ? stillingPeriode.gyldigFom():oe.getGyldigFom(); // if orgEnhets FOM is before stillingFOM, use stillingFOM
 
-                                 tidligereNomEnheter.forEach(oe -> perioderGruppertMedOrgenhet.add(
-                                     new StillingPeriode(
-                                         stillingPeriode.stilling(),
-                                         oe.getGyldigFom().isBefore(stillingPeriode.gyldigFom()) ? stillingPeriode.gyldigFom():oe.getGyldigFom(), // if orgEnhets FOM is before stillingFOM, use stillingFOM
-                                         oe.getGyldigTom().orElse(NO_END_DATE), // NOTE - if orgEnhets TOM is not present, use NO_END_DATE - is it correct? or throw exception?
-                                         oe
-                                     )
-                                 ));
+                                     perioderGruppertMedOrgenhet.add(
+                                         new StillingPeriode(
+                                             stillingPeriode.stilling(),
+                                             stillingPeriodeFom,
+                                             stillingPeriodeTom,
+                                             oe
+                                         ));
+                                     previousOrgenhetFom = stillingPeriodeFom;
+                                 }
                              }
                         }
                     } else if (stillingPeriode.gyldigTom().isAfter(nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE))) {
