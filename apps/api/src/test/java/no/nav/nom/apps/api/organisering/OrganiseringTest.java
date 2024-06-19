@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
@@ -73,7 +72,6 @@ public class OrganiseringTest extends OrganiseringTestBase {
     Unleash unleash;
 
     @Autowired
-    @Qualifier("oldOrganiseringStateRepository")
     private OrganiseringStateRepository organiseringStateRepository;
 
     BlockingQueue<ConsumerRecord<String, OrganiseringEvent>> recordsQueue;

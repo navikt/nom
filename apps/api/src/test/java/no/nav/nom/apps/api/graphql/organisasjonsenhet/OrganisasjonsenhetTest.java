@@ -50,11 +50,9 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
     protected OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
-    @Qualifier("oldOrganiseringStateRepository")
     protected OrganiseringStateRepository organiseringStateRepository;
 
     @Autowired
-    @Qualifier("oldOrgtilknytningStateRepository")
     OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @Test

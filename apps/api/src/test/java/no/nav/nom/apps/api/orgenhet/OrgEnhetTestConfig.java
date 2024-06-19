@@ -16,7 +16,6 @@ import no.nav.nom.apps.api.dvh.DvhService;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
-import no.nav.nom.apps.api.organisering.eventsourcing.state.OldOrganiseringStateRepositoryImpl;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetEventKafkaConfig;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetEventProducer;
@@ -28,7 +27,6 @@ import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
@@ -55,7 +53,6 @@ import org.springframework.kafka.annotation.EnableKafka;
     , ValidationService.class
     , NomProxyClient.class
     , NomProxyRestClient.class
-    , OldOrganiseringStateRepositoryImpl.class
     , OrgenhetService.class
     , OrgEnhetCommandService.class
     , OrgEnhetEventProducer.class
@@ -92,9 +89,6 @@ public class OrgEnhetTestConfig {
     NomStateMasteredRessursListener nomStateMasteredRessursListener;
     @MockBean
     NomStateDelegertLederListener nomStateDelegertLederListener;
-
-    @MockBean
-    OrgtilknytningStateListener orgtilknytningStateListener;
 
     @MockBean
     RessursHendelseForEventsourceService ressursHendelseForEventsourceService;

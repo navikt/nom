@@ -19,7 +19,6 @@ import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
@@ -122,15 +121,15 @@ public class DvhRestConsumer {
         }
 
         if (leaderElection.isLeader()) { // Oppdater state fra dvh - holder at en Pod gjør dette
-            updateOrgtilknytningerStateFromDvh();
-
-            updateOrgtilknytningerForEksterneFromDvh();
-
-            loadRessurserFromDvh();
-
             dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();
 
             orgEnhetTypeHandler.updateOrgEnhetsTypeForLeafs();
+
+            loadRessurserFromDvh();
+
+            updateOrgtilknytningerStateFromDvh();
+
+            updateOrgtilknytningerForEksterneFromDvh();
         }
 
         log.info("Ferdig med schedulert oppdatering fra DVH. Tok {}", durationAsH24(start));
