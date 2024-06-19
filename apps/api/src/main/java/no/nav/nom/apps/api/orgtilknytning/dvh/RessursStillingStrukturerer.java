@@ -355,23 +355,23 @@ public class RessursStillingStrukturerer {
                         );
 
                         // forsøker på å finne korrekt tidligere enhet for den samme agressoid’en
-                        List<IOrgenhet> tidligereNomEnherer = finnNomEnheterForId(
+                        List<IOrgenhet> tidligereNomEnheter = finnNomEnheterForId(
                             stillingPeriode.stilling().agressoId().get(),
                             stillingPeriode.gyldigFom(),
                             nomEnheter.get(0).getGyldigFom().minusDays(1)
                         );
 
                         log.debug(SECURE_LOGS,
-                            "Klippet før stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, tidligereNomEnherer: {}",
+                            "Klippet før stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, tidligereNomEnheter: {}",
                             navident,
                             stillingPeriode.gyldigFom(),
                             nomEnheter.get(0).getGyldigFom().minusDays(1),
                             orgenheterToString(nomEnheter),
                             stillingPeriode,
-                            orgenheterToString(tidligereNomEnherer)
+                            orgenheterToString(tidligereNomEnheter)
                         );
 
-                        if(tidligereNomEnherer.isEmpty()){
+                        if(tidligereNomEnheter.isEmpty()){
                             // finner ingen historisk enhet - vi bare logger
                             log.debug(SECURE_LOGS,
                                 "Finner ingen historisk enhet for stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}",
@@ -384,17 +384,20 @@ public class RessursStillingStrukturerer {
                         }
                         else if (unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
                             // Fikser inkonsistens i stillingperioden
-                             if(tidligereNomEnherer.size() == 1) {
+                             if(tidligereNomEnheter.size() == 1) {
                                  perioderGruppertMedOrgenhet.add(
                                      new StillingPeriode(
                                          stillingPeriode.stilling(),
                                          stillingPeriode.gyldigFom(),
                                          nomEnheter.get(0).getGyldigFom().minusDays(1),
-                                         tidligereNomEnherer.get(0)
+                                         tidligereNomEnheter.get(0)
                                      )
                                  );
                              } else {
-                                 tidligereNomEnherer.forEach(oe -> perioderGruppertMedOrgenhet.add(
+                                 var tidligereNomEnheterReserseSortedByTom = reverseSortNomEnheterByGyldigTom(tidligereNomEnheter);
+
+
+                                 tidligereNomEnheter.forEach(oe -> perioderGruppertMedOrgenhet.add(
                                      new StillingPeriode(
                                          stillingPeriode.stilling(),
                                          oe.getGyldigFom().isBefore(stillingPeriode.gyldigFom()) ? stillingPeriode.gyldigFom():oe.getGyldigFom(), // if orgEnhets FOM is before stillingFOM, use stillingFOM
@@ -440,15 +443,21 @@ public class RessursStillingStrukturerer {
 
                         // Fikser inkonsistens i stillingperioden
                         if (!seinereNomEnherer.isEmpty() && unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
-                                // NOTE: kanskje vi må legge til alle hvis seinereNomEnherer.size() > 1. Denne er ikke så realistisk case?
-                                perioderGruppertMedOrgenhet.add(
-                                    new StillingPeriode(
-                                        stillingPeriode.stilling(),
-                                        nomEnheter.get(0).getGyldigTom().get().plusDays(1),
-                                        stillingPeriode.gyldigTom(),
-                                        seinereNomEnherer.get(0)
-                                    )
-                                );
+                            // NOTE: kanskje vi må legge til alle hvis seinereNomEnherer.size() > 1. Denne er ikke så realistisk case! Logger warning hvis skjer
+                            log.warn(SECURE_LOGS, "Finner flere seinere enheter for stillingperioden for navident {} fra {} til {}. seinereNomEnherer: {}",
+                                navident,
+                                nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
+                                stillingPeriode.gyldigTom(),
+                                orgenheterToString(seinereNomEnherer)
+                            );
+                            perioderGruppertMedOrgenhet.add(
+                                new StillingPeriode(
+                                    stillingPeriode.stilling(),
+                                    nomEnheter.get(0).getGyldigTom().get().plusDays(1),
+                                    stillingPeriode.gyldigTom(),
+                                    seinereNomEnherer.get(0)
+                                )
+                            );
                         }
                     } else {
                         perioderGruppertMedOrgenhet.add(new StillingPeriode(stillingPeriode, nomEnheter.get(0)));
@@ -494,6 +503,19 @@ public class RessursStillingStrukturerer {
         return perioderGruppertMedOrgenhet;
     }
 
+   public List<IOrgenhet>  reverseSortNomEnheterByGyldigTom(List<IOrgenhet> nomEnheter){
+        return nomEnheter.stream().sorted((e1, e2) -> {
+            if (e2.getGyldigTom().isEmpty() && e1.getGyldigTom().isEmpty()) {
+                return 0;
+            } else if(e2.getGyldigTom().isPresent() && e1.getGyldigTom().isEmpty()) {
+                return -1;
+            } else if(e2.getGyldigTom().isEmpty() && e1.getGyldigTom().isPresent()) {
+                return 1;
+            } else {
+                return e2.getGyldigTom().get().compareTo(e1.getGyldigTom().get());
+            }
+        }).collect(Collectors.toList());
+   }
 
     // Alle ORGENHET enheter med agressoId som overlapper i perioden
     public List<IOrgenhet> finnNomEnheterForId(String agressoId, LocalDate gyldigFom, LocalDate gyldigTom) {

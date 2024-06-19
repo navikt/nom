@@ -20,13 +20,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
 import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -484,6 +487,28 @@ class RessursStillingStrukturererTest extends TestBase {
         assertEquals(LocalDate.of(2020, 10, 1), stillingPeriode_6.gyldigFom());
         assertEquals(MAX_DATE, stillingPeriode_6.gyldigTom());
         assertEquals(DagligOppfolging.NEI, stillingPeriode_6.dagligOppfolging());
+    }
+
+    @Test
+    @DisplayName("Test sorting orgenheter by gyldigTom desc")
+    public void testSortOrgenheterDesc(){
+        IOrgenhet enhet1 = getNomEnhet("FID_1", "a123bc", "Enhet_1", LocalDate.of(2019, 1, 1),  LocalDate.of(2019, 1, 1), "AGRID_1");
+        IOrgenhet enhet2 = getNomEnhet("FID_2", "b123bc", "Enhet_2", LocalDate.of(2012, 1, 1),  LocalDate.of(2018, 1, 1), "AGRID_2");
+        IOrgenhet enhet3 = getNomEnhet("FID_3", "c123bc", "Enhet_3", LocalDate.of(2014, 1, 1),  LocalDate.of(2019, 1, 1), "AGRID_3");
+        IOrgenhet enhet4 = getNomEnhet("FID_4", "d123bc", "Enhet_4", LocalDate.of(2016, 1, 1),  LocalDate.of(2020, 1, 1), "AGRID_4");
+
+        List<IOrgenhet> tidligereNomEnheter = new ArrayList<>();
+        Collections.addAll(tidligereNomEnheter, enhet1, enhet2, enhet3, enhet4);
+        assertEquals(tidligereNomEnheter.size(), 4);
+
+        List<IOrgenhet> tidligereNomEnheterReverseSorted_expected = new ArrayList<>();
+        Collections.addAll(tidligereNomEnheterReverseSorted_expected, enhet4, enhet1, enhet3, enhet2);
+
+        List<IOrgenhet> tidligereNomEnheterReverseSorted = ressursStillingStrukturerer.reverseSortNomEnheterByGyldigTom(tidligereNomEnheter);
+        assertEquals(tidligereNomEnheterReverseSorted.size(), 4);
+        assertNotEquals(tidligereNomEnheter, tidligereNomEnheterReverseSorted_expected);
+
+        assertEquals(tidligereNomEnheterReverseSorted, tidligereNomEnheterReverseSorted_expected);
     }
 
     private DvhRessursStilling getTestRessursStilling(String navid, String stillingAgressoId, String stillingOrgenhetNavn, LocalDate from, LocalDate to) {
