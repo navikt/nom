@@ -27,13 +27,11 @@ import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
-import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -91,9 +89,6 @@ public class OrgEnhetTestConfig {
     NomStateMasteredRessursListener nomStateMasteredRessursListener;
     @MockBean
     NomStateDelegertLederListener nomStateDelegertLederListener;
-
-    @MockBean
-    OrgtilknytningStateListener orgtilknytningStateListener;
 
     @MockBean
     RessursHendelseForEventsourceService ressursHendelseForEventsourceService;

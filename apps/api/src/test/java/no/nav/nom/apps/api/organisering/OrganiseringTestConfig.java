@@ -23,7 +23,6 @@ import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
@@ -77,9 +76,6 @@ public class OrganiseringTestConfig {
     NomStateMasteredRessursListener nomStateMasteredRessursListener;
     @MockBean
     NomStateDelegertLederListener nomStateDelegertLederListener;
-
-    @MockBean
-    OrgtilknytningStateListener orgtilknytningStateListener;
 
     @MockBean
     RessursHendelseForEventsourceService ressursHendelseForEventsourceService;

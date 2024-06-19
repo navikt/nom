@@ -8,9 +8,5 @@ import org.springframework.context.annotation.Primary;
 
 @Import({ApiStarter.class})
 class TestConfig {
-    @Bean
-    @Primary
-    public OrgtilknytningStateRepository orgtilknytningStateRepository(@Qualifier("oldOrgtilknytningStateRepository") OrgtilknytningStateRepository orgtilknytningStateRepository) {
-        return orgtilknytningStateRepository;
-    }
+
 }

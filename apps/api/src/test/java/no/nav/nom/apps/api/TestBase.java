@@ -99,7 +99,6 @@ public abstract class TestBase {
     protected OrganiseringStateRepository organiseringStateRepository;
 
     @Autowired
-    @Qualifier("oldOrgtilknytningStateRepository")
     protected OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @Autowired
