@@ -1,25 +1,19 @@
 app:
   name: ${NAIS_APP_NAME:nom-admin}
-#  kafka-topics:
-#    ressurs-eventsource:
-#      topic-name: org.nom.ressurs-eventsource
-#      auto-startup: true
-#    orgtilknytning-eventsource:
-#      topic-name: org.nom.orgtilknytning-eventsource
-#      auto-startup: true
-#  clients:
-#    nom-api:
-#      url: ${NOM_API_URL}
-
-#  nom-state:
-#    kafka:
-#      ressurs:
-#        state-topic: org.nom.intern-ressurs-state
-#        listener-id: nomStateRessursListener_${HOSTNAME}
-
+  kafka:
+    ressurs:
+      eventsourceTopic: org.nom.ressurs-eventsource
+      eventsource-listener-id: nom-admin_ressursEvtsrcListener_${HOSTNAME}
+    orgenhet:
+      eventsourceTopic: org.nom.orgenhet-eventsource
+      eventsource-listener-id: nom-admin_orgenhetEvtsrcListener_${HOSTNAME}
 
 nom.libs.state.ressurs.enabled: true
 nom.libs.state.orgenhet.enabled: true
+nom.libs.state.orgtilknytning.enabled: true
+nom.libs.state.organisering.enabled: true
+nom.libs.state.mastered-ressurs.enabled: true
+nom.libs.state.delegert-leder.enabled: true
 
 management:
   endpoint:
@@ -54,7 +48,6 @@ spring:
     listener:
       missing-topics-fatal: true
     client-id: ${HOSTNAME}
-
 
 unleash:
   endpoint:

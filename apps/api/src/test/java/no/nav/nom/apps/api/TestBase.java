@@ -8,11 +8,11 @@ import no.nav.nom.apps.api.postgresql.GenericStorage;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
-import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateAutoconfiguration;
 import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateRepository;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,8 +44,14 @@ import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
 @SpringBootTest(
-    classes = TestConfig.class,
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+    classes = { TestConfig.class, MasteredRessursStateAutoconfiguration.class },
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = {
+        "nom.libs.state.idle-event-interval-seconds: 1",
+        "nom.libs.state.mastered-ressurs.enabled: true",
+        "nom.libs.state.mastered-ressurs.state-topic: org.nom.nom-mastered-ressurs",
+        "nom.libs.state.mastered-ressurs.listener-id: nomStateMasteredRessursListener__test"
+    }
 )
 @Testcontainers
 @EmbeddedKafka(partitions = 1, topics = {"nom-state-v1", "org.nom.ressurs-state-v1", "org.nom.orgenhet-state-v1", "org.nom.nom-mastered-ressurs", "org.nom.organisering-eventsource"}, controlledShutdown = true)
@@ -81,31 +87,22 @@ public abstract class TestBase {
     protected KafkaUtils kafkaUtils;
 
     @Autowired
-    @Qualifier("oldRessursStateRepository")
     protected RessursStateRepository ressursStateRepository;
 
     @MockBean
     protected Unleash unleash;
 
     @Autowired
-    @Qualifier("oldOrgEnhetStateRepository")
     protected OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
-    @Qualifier("oldOrganiseringStateRepository")
     protected OrganiseringStateRepository organiseringStateRepository;
 
     @Autowired
-    @Qualifier("oldOrgtilknytningStateRepository")
     protected OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @Autowired
-    @Qualifier("OldNomMasteredRepository")
     protected MasteredRessursStateRepository masteredRessursStateRepository;
-
-    @Autowired
-    @Qualifier("oldDelegertLederStateRepository")
-    protected DelegertLederStateRepository delegertLederStateRepository;
 
     @MockBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;

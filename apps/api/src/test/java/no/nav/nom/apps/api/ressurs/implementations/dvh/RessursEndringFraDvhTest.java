@@ -43,9 +43,8 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
 
     @BeforeEach
     public void setup() {
-        // Default mock svar på nomMastered ressurs og Unleash flag
+        // Default mock svar på nomMastered ressurs
         when(nomMastered.isMastered(any())).thenReturn(false);
-        when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(false);
 
         Mockito.reset(ressursEventProducerTemplate);
     }
@@ -313,7 +312,7 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
      ************************************************************************/
 
      @Test
-     @DisplayName("Ansatt som slutter i etterkant trigger sluttet event - når NomMasterd unleash flag er satt og navident er markert")
+     @DisplayName("Ansatt som slutter i etterkant trigger sluttet event - når navident er markert som mastret")
      public void test_104a() {
          final var response = List.of(
              new DvhRessursUtils.RessursMock(
@@ -327,80 +326,15 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
          );
          dvhRessursUtils.addToResponse(response);
 
-         //Unleash flagg satt og ident er mastret
+         //Uident er mastret
          when(nomMastered.isMastered(any())).thenReturn(true);
-         when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(true);
 
          loadFromDvh();
          Mockito.verifyNoInteractions(ressursEventProducerTemplate);
      }
 
     @Test
-    @DisplayName("Ansatt som slutter i etterkant trigger sluttet event - når NomMasterd unleash flag ikke er satt og navident er markert som mastret")
-    public void test_104b() {
-        ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
-
-        final var response = List.of(
-            new DvhRessursUtils.RessursMock(
-                "O123456",
-                "12345678901",
-                "Navn 1",
-                "ENavn 1",
-                "NAV Statlig",
-                LocalDate.parse("2099-12-31")
-            )
-        );
-        dvhRessursUtils.addToResponse(response);
-
-        //Unleash flagg ikke satt og ident er mastret
-        when(nomMastered.isMastered(any())).thenReturn(true);
-        when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(false);
-
-        loadFromDvh();
-
-        kafkaUtils.createRessursHendelseEventSource(
-            new RessursState(
-                PrefixedUlidCreator.createRessursUlid(),
-                "12345678901",
-                "O123456",
-                Sektor.NAV_STATLIG,
-                new Visningsnavn(
-                    "Navn 1",
-                    Optional.empty(),
-                    "ENavn 1"
-                ),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                null,
-                Collections.emptyList(),
-                IdentType.STANDARD
-            )
-        );
-
-        dvhRessursUtils.createEmptyResponse();
-
-        final var response2 = List.of(
-            new DvhRessursUtils.RessursMock(
-                "O123456",
-                "12345678901",
-                "Navn 1",
-                "ENavn 1",
-                "NAV Statlig",
-                LocalDate.now()
-            )
-        );
-        dvhRessursUtils.addToResponse(response2);
-        loadFromDvh();
-
-        Mockito.verify(ressursEventProducerTemplate, Mockito.times(3)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
-
-        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
-        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursSluttetEventV1));
-    }
-
-    @Test
-    @DisplayName("Ansatt som slutter i etterkant trigger sluttet event - når NomMasterd unleash flag er satt og navident ikke er markert som mastret")
+    @DisplayName("Ansatt som slutter i etterkant trigger sluttet event - når navident ikke er markert som mastret")
     public void test_104c() {
         ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
 
@@ -416,9 +350,8 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
         );
         dvhRessursUtils.addToResponse(response);
 
-        //Unleash flagg satt og ident ikke er mastret
+        //ident ikke er mastret
         when(nomMastered.isMastered(any())).thenReturn(false);
-        when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(true);
 
         loadFromDvh();
 
@@ -464,7 +397,7 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
     }
 
     @Test
-    @DisplayName("Ansatt som endrer fornavn PesonopplysningerEndretEvent - når NomMasterd unleash flag er satt og navident er markert som mastret")
+    @DisplayName("Ansatt som endrer fornavn PesonopplysningerEndretEvent - når navident er markert som mastret")
     public void test_105a() {
         ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
 
@@ -516,9 +449,8 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
         );
         dvhRessursUtils.addToResponse(response2);
 
-        //Unleash flagg satt og ident er mastret
+        // ident er mastret
         when(nomMastered.isMastered(any())).thenReturn(true);
-        when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(true);
 
         Mockito.reset(ressursEventProducerTemplate);
 
@@ -526,73 +458,9 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
         Mockito.verifyNoInteractions(ressursEventProducerTemplate);
     }
 
-    @Test
-    @DisplayName("Ansatt som endrer fornavn PesonopplysningerEndretEvent - når NomMasterd unleash flag ikke er satt og navident er markert som mastret")
-    public void test_105b() {
-        ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
-
-        final var response = List.of(
-            new DvhRessursUtils.RessursMock(
-                "O123456",
-                "12345678901",
-                "Navn 1",
-                "ENavn 1",
-                "NAV Statlig",
-                LocalDate.parse("2099-12-31")
-            )
-        );
-        dvhRessursUtils.addToResponse(response);
-        loadFromDvh();
-
-
-        final var ressursv1 = new RessursState(
-            PrefixedUlidCreator.createRessursUlid(),
-            "12345678901",
-            "O123456",
-            Sektor.NAV_STATLIG,
-            new Visningsnavn(
-                "Navn 1",
-                Optional.empty(),
-                "ENavn 1"
-            ),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            null,
-            Collections.emptyList(),
-            IdentType.STANDARD
-        );
-
-        kafkaUtils.createRessursHendelseEventSource(ressursv1);
-
-        dvhRessursUtils.createEmptyResponse();
-
-        final var response2 = List.of(
-            new DvhRessursUtils.RessursMock(
-                "O123456",
-                "12345678901",
-                "Navn 1 ENDRET",
-                ressursv1.visningsnavn().etternavn(),
-                "NAV Statlig",
-                LocalDate.parse("2099-12-31")
-            )
-        );
-        dvhRessursUtils.addToResponse(response2);
-
-        //Unleash flagg ikke satt og ident er mastret
-        when(nomMastered.isMastered(any())).thenReturn(true);
-        when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(false);
-
-        loadFromDvh();
-
-        Mockito.verify(ressursEventProducerTemplate, Mockito.times(3)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
-
-        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
-        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursPersonaliaOppdatertV1));
-    }
 
     @Test
-    @DisplayName("Ansatt som endrer fornavn PesonopplysningerEndretEvent - når NomMasterd unleash flag er satt og navident ikke er markert som mastret")
+    @DisplayName("Ansatt som endrer fornavn PesonopplysningerEndretEvent - når navident ikke er markert som mastret")
     public void test_105c() {
         ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
 
@@ -644,9 +512,8 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
         );
         dvhRessursUtils.addToResponse(response2);
 
-        //Unleash flagg satt og ident ikke er mastret
+        //ident ikke er mastret
         when(nomMastered.isMastered(any())).thenReturn(false);
-        when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(true);
 
         loadFromDvh();
 
@@ -733,6 +600,4 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursSektorOppdatertV1));
     }
-
-
 }

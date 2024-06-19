@@ -5,8 +5,6 @@ import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandServ
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.AvsluttDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.FornyDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.OpprettDelegertAuthorization;
-import no.nav.nom.contract.nom.state.LederTilgangState;
-import no.nav.nom.apps.api.authorize.eventsourcing.state.OldDelegertLederStateRepositoryImpl;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.LederTilgangForOrgenhetRequest;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.DvhRepository;
@@ -17,8 +15,9 @@ import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.state.LederTilgangState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
-import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -51,7 +50,7 @@ public class AuthorizedNavident {
     Map<String, HashSet<String>> lederForOrgenhet = new ConcurrentHashMap<>();
     // Delegert lederskap. Delegert leder for orgenhet, og alle underliggende enheter
     private final AuthorizeCommandService authorizeCommandService;
-    private final OldDelegertLederStateRepositoryImpl delegertLederStateRepository;
+    private final DelegertLederStateRepository delegertLederStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final OrganiseringStateRepository organiseringStateRepository;
     private final RessursStateRepository ressursStateRepository;
@@ -59,7 +58,7 @@ public class AuthorizedNavident {
     private final DvhRepository dvhRepository;
 
     public AuthorizedNavident(
-            AuthorizeCommandService authorizeCommandService, OldDelegertLederStateRepositoryImpl delegertLederStateRepository,
+            AuthorizeCommandService authorizeCommandService, DelegertLederStateRepository delegertLederStateRepository,
             OrgtilknytningStateRepository orgtilknytningStateRepository,
             OrganiseringStateRepository organiseringStateRepository, RessursStateRepository ressursStateRepository,
             OrgenhetService orgenhetService,

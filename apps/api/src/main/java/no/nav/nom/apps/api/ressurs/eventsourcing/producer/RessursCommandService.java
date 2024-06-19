@@ -13,7 +13,6 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStart
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.SlettRessursCommand;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
@@ -28,10 +27,8 @@ import no.nav.nom.contract.nom.eventsource.RessursStartDatoOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
@@ -43,23 +40,20 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static no.nav.nom.apps.api.ressurs.eventsourcing.state.ToggledRessursStateRepository.UNLEASH_USE_NEW_RESSURS_STATE_REPOSITORY;
 
 @Service
 public class RessursCommandService {
 
     private final Logger log = LoggerFactory.getLogger(RessursCommandService.class);
     private final RessursEventProducer eventProducer;
-    private final RessursStateListener ressursStateListener;
     private final NomStateRessursListener nomStateRessursListener;
     private final Unleash unleash;
 
     public RessursCommandService(
         RessursEventProducer eventProducer,
-        RessursStateListener ressursStateListener, NomStateRessursListener nomStateRessursListener, Unleash unleash
+        NomStateRessursListener nomStateRessursListener, Unleash unleash
     ) {
         this.eventProducer = eventProducer;
-        this.ressursStateListener = ressursStateListener;
         this.nomStateRessursListener = nomStateRessursListener;
         this.unleash = unleash;
     }
@@ -72,20 +66,14 @@ public class RessursCommandService {
     public RessursState createRessursSync(OpprettRessursCommand opprettRessursCommand) throws ExecutionException, InterruptedException, TimeoutException {
         boolean exceptionThrown = false;
         final var fid = PrefixedUlidCreator.createRessursUlid();
-        final var response = unleash.isEnabled(UNLEASH_USE_NEW_RESSURS_STATE_REPOSITORY) ?
-            nomStateRessursListener.waitForStateAfterEventCreation(fid) :
-            ressursStateListener.waitForAggregate(fid);
+        final var response = nomStateRessursListener.waitForStateAfterEventCreation(fid);
         createRessurs(fid, opprettRessursCommand);
 
         try {
             return response.get(10, TimeUnit.SECONDS);
         } catch (Exception e) {
             exceptionThrown = true;
-            if (unleash.isEnabled(UNLEASH_USE_NEW_RESSURS_STATE_REPOSITORY)) {
-                nomStateRessursListener.removeWait(fid);
-            } else {
-                ressursStateListener.removeWait(fid);
-            }
+            nomStateRessursListener.removeWait(fid);
             log.error("Error waiting for ressurs to be created", e);
             throw e;
         } finally {

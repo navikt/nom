@@ -29,8 +29,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 @Service
 public class LuceneService {
-    public static final String UNLEASH_USE_NEW_RESSURS_STATE_LISTENER = "nom.ressurs-search.use-new-ressurs-state-listener";
-
     private final WrappedLucene wrappedLucene;
 
     private final RessursStateRepository ressursStateRepository;

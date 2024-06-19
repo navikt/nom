@@ -4,10 +4,9 @@ import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandServ
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeEventKafkaConfig;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeEventProducer;
 import no.nav.nom.apps.api.authorize.eventsourcing.recoverybackup.AuthorizeEventSourceRepository;
-import no.nav.nom.apps.api.authorize.eventsourcing.state.DelegertLederEventListener;
-import no.nav.nom.apps.api.authorize.eventsourcing.state.DelegertLederKafkaListenerConfig;
-import no.nav.nom.apps.api.authorize.eventsourcing.state.OldDelegertLederStateRepositoryImpl;
 import no.nav.nom.apps.api.common.LocalConfiguration;
+import no.nav.nom.libs.state.authorize.DelegertLederStateAutoconfiguration;
+import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -18,9 +17,8 @@ import org.springframework.kafka.annotation.EnableKafka;
     AuthorizeCommandService.class,
     AuthorizeEventProducer.class,
     AuthorizeEventKafkaConfig.class,
-    DelegertLederKafkaListenerConfig.class,
-    DelegertLederEventListener.class,
-    OldDelegertLederStateRepositoryImpl.class,
+    NomStateDelegertLederListener.class,
+    DelegertLederStateAutoconfiguration.class,
     KafkaProperties.class,
     LocalConfiguration.class,
 })

@@ -37,7 +37,6 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
     public DvhOrganiseringMockUtils dvhOrganiseringMockUtils;
 
     @Autowired
-    @Qualifier("oldOrgtilknytningStateRepository")
     OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @Test

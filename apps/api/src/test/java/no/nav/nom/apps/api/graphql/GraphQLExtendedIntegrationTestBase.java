@@ -13,8 +13,12 @@ import no.nav.nom.apps.api.graphql.controller.GraphQLPersonController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLRessursController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLSearchController;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
+import no.nav.nom.libs.state.organisering.OrganiseringStateAutoconfiguration;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateAutoconfiguration;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateAutoconfiguration;
+import no.nav.nom.libs.state.ressurs.RessursStateAutoconfiguration;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,10 +44,35 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.emptyMap;
 
 @ActiveProfiles("test")
-@ContextConfiguration(classes = { GraphqlTestConfig.class, GraphQLExtendedIntegrationTestConfig.class },  initializers = MockOAuth2ServerInitializer.class)
-@EmbeddedKafka(partitions = 1,  topics = {"org.nom.intern-ressurs-state", "org.nom.intern-orgenhet-state"},  controlledShutdown = true)
+@ContextConfiguration(
+    classes = {
+        GraphqlTestConfig.class,
+        GraphQLExtendedIntegrationTestConfig.class,
+        RessursStateAutoconfiguration.class,
+        OrgEnhetStateAutoconfiguration.class,
+        OrganiseringStateAutoconfiguration.class,
+        OrgtilknytningStateAutoconfiguration.class
+    },
+    initializers = MockOAuth2ServerInitializer.class)
+@EmbeddedKafka(partitions = 1,  topics = {"org.nom.intern-ressurs-state", "org.nom.intern-orgenhet-state", "org.nom.intern-organisering-state", "org.nom.intern-orgtilknytning-state"},  controlledShutdown = true)
 @AutoConfigureWireMock(port = 0)
-@GraphQlTest(controllers = {GraphQLRessursController.class, GraphQLPersonController.class, GraphQLOrgEnhetController.class, GraphQLSearchController.class})
+@GraphQlTest(
+    properties = {
+        "nom.libs.state.idle-event-interval-seconds: 1",
+        "nom.libs.state.ressurs.enabled: true",
+        "nom.libs.state.ressurs.state-topic: org.nom.intern-ressurs-state",
+        "nom.libs.state.ressurs.listener-id: nomStateRessursListener_test",
+        "nom.libs.state.orgenhet.enabled: true",
+        "nom.libs.state.orgenhet.state-topic: org.nom.intern-orgenhet-state",
+        "nom.libs.state.orgenhet.listener-id: nomStateOrgenhetListener_test",
+        "nom.libs.state.organisering.enabled: true",
+        "nom.libs.state.organisering.state-topic: org.nom.intern-organisering-state",
+        "nom.libs.state.organisering.listener-id: nomStateOrganiseringListener_test",
+        "nom.libs.state.orgtilknytning.enabled: true",
+        "nom.libs.state.orgtilknytning.state-topic: org.nom.intern-organisering-state",
+        "nom.libs.state.orgtilknytning.listener-id: nomStateOrgtilknytningListener_test"
+    }
+    , controllers = {GraphQLRessursController.class, GraphQLPersonController.class, GraphQLOrgEnhetController.class, GraphQLSearchController.class})
 public class GraphQLExtendedIntegrationTestBase {
 
     private final static Duration TIMEOUT_DURATION = Duration.of(5, SECONDS);
@@ -77,15 +106,12 @@ public class GraphQLExtendedIntegrationTestBase {
     protected DvhRepository dvhRepository;
 
     @Autowired
-    @Qualifier("oldOrgEnhetStateRepository")
     protected OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
-    @Qualifier("oldOrganiseringStateRepository")
     protected OrganiseringStateRepository organiseringStateRepository;
 
     @Autowired
-    @Qualifier("oldRessursStateRepository")
     RessursStateRepository ressursStateRepository;
 
     @BeforeEach

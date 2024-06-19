@@ -2,9 +2,11 @@ package no.nav.nom.apps.api.ressurs.masterdata;
 
 import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.ressurs.NomMastered;
+import no.nav.nom.libs.state.common.AbstractNomStateListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateRepository;
+import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.testcontainers.shaded.org.checkerframework.checker.units.qual.A;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -28,11 +31,16 @@ class NomMasteredTest extends TestBase {
     NomMastered nomMastered;
 
     @Autowired
-    @Qualifier("OldNomMasteredRepository")
     MasteredRessursStateRepository masteredRessursStateRepository;
+
+    @Autowired
+    NomStateMasteredRessursListener nomStateMasteredRessursListener;
 
     @MockBean
     RessursStateRepository ressursStateRepository;
+
+    CountDownLatch latch;
+
 
     @Test
     @DisplayName("MarkRessursAsMastered for unknown ressurs")
@@ -59,6 +67,7 @@ class NomMasteredTest extends TestBase {
         assertEquals(1, masteredRessursStateRepository.count());
         assertTrue(nomMastered.isMastered(Ressurs_A000001.navident()));
 
+        latch = new CountDownLatch(1);
         assertTrue(unmarkRessursAsMastered(Ressurs_A000001.navident()));
 
         assertEquals(0, masteredRessursStateRepository.count());
@@ -69,6 +78,19 @@ class NomMasteredTest extends TestBase {
     void setUp() {
         masteredRessursStateRepository.clear();
         when(ressursStateRepository.findByNavident(Ressurs_A000001.navident())).thenReturn(Optional.of(Ressurs_A000001));
+
+        latch = new CountDownLatch(1);
+        nomStateMasteredRessursListener.register(new AbstractNomStateListener.Visitor<>() {
+            @Override
+            public String visitorName() {
+                return "KafakUtilTestVisitor";
+            }
+
+            @Override
+            public void visit(String key, LocalDateTime stateObject) {
+                latch.countDown();
+            }
+        });
     }
 
     private static final RessursState Ressurs_A000001 =
@@ -79,15 +101,6 @@ class NomMasteredTest extends TestBase {
 
 
     public synchronized boolean markRessursAsMastered(String navident) {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        Mockito.doAnswer(invocation -> {
-            invocation.callRealMethod();
-            latch.countDown();
-            return null;
-        }).when(kafkaUtils.nomMasteredRessursListener).onMessage(Mockito.any(), Mockito.any());
-
-
         boolean result = nomMastered.markRessursAsMasteredInNom(navident);
         try {
             if (!latch.await(3, TimeUnit.SECONDS)) {
@@ -100,15 +113,6 @@ class NomMasteredTest extends TestBase {
     }
 
     public synchronized boolean unmarkRessursAsMastered(String ressursFid) {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        Mockito.doAnswer(invocation -> {
-            invocation.callRealMethod();
-            latch.countDown();
-            return null;
-        }).when(kafkaUtils.nomMasteredRessursListener).onMessage(Mockito.any(), Mockito.any());
-
-
         boolean result = nomMastered.unmarkRessursAsMasteredInNom(ressursFid);
         try {
             if (!latch.await(3, TimeUnit.SECONDS)) {

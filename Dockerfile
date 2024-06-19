@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jre as builder
+FROM eclipse-temurin:21-jre as builder
 ARG JAR_PATH
 
 WORKDIR application
@@ -6,7 +6,7 @@ COPY ${JAR_PATH} app.jar
 
 RUN java -Djarmode=layertools -jar app.jar extract
 
-FROM ghcr.io/navikt/baseimages/temurin:17
+FROM ghcr.io/navikt/baseimages/temurin:21
 LABEL maintainer="Team Org"
 
 # Temporary until temurin base image include updated run-script

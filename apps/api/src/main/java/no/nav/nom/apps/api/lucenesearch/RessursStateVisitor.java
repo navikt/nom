@@ -6,17 +6,13 @@ import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.isNull;
-import static no.nav.nom.apps.api.lucenesearch.LuceneService.UNLEASH_USE_NEW_RESSURS_STATE_LISTENER;
 
 @Component
 public class RessursStateVisitor implements NomStateRessursListener.Visitor<RessursState>{
     private final LuceneService luceneService;
-    private final Unleash unleash;
 
-    public RessursStateVisitor(LuceneService luceneService, NomStateRessursListener nomStateRessursListener, Unleash unleash) {
+    public RessursStateVisitor(LuceneService luceneService, NomStateRessursListener nomStateRessursListener) {
         this.luceneService = luceneService;
-        this.unleash = unleash;
-
         nomStateRessursListener.register(this);
     }
 
@@ -27,7 +23,7 @@ public class RessursStateVisitor implements NomStateRessursListener.Visitor<Ress
 
     @Override
     public void visit(String key, RessursState ressursState) {
-        if (!isNull(ressursState) && unleash.isEnabled(UNLEASH_USE_NEW_RESSURS_STATE_LISTENER)) {
+        if (!isNull(ressursState)) {
             luceneService.invalidateRessurs(ressursState.navident());
         }
     }

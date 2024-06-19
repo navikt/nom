@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+
 @Slf4j
 @Service
 public class EksterneRessurserProcessor {
@@ -62,14 +64,14 @@ public class EksterneRessurserProcessor {
     public void process(DvhEksternRessurs eksternRessurs) {
         var eksisterendeOrgtilknytninger = orgtilknytningService.getByNavIdent(eksternRessurs.navident());
 
-        log.debug("Prosesserer ekstern ressurs {}\n{}", eksternRessurs.navident(), eksternRessurs.payload());
+        log.debug(SECURE_LOGS, "Prosesserer ekstern ressurs {}\n{}", eksternRessurs.navident(), eksternRessurs.payload());
         if (!eksternRessurs.remedyAktiv()) {
             var aktiveOrgtilkntyninger = eksisterendeOrgtilknytninger.stream().filter( o -> o.gyldigTom().isEmpty()).toList();
             if (aktiveOrgtilkntyninger.isEmpty()) {
-                log.debug("Ekstern ressurs {} er ikke aktiv - skipping", eksternRessurs.navident());
+                log.debug(SECURE_LOGS, "Ekstern ressurs {} er ikke aktiv - skipping", eksternRessurs.navident());
                 return;
             } else {
-                log.debug("Ekstern ressurs {} er ikke aktiv - men har orgtilknytninger som må avsluttes", eksternRessurs.navident());
+                log.debug(SECURE_LOGS, "Ekstern ressurs {} er ikke aktiv - men har orgtilknytninger som må avsluttes", eksternRessurs.navident());
                 var meta = new InputMetadata("nom-api BatchJob", "Datavarehus", eksternRessurs, new Origination("nom-api", "nom-api"));
 
                 // hvis aktiv orgtilknytning starter etter RemedySlutt, så fjern den i steden for å avslutte den
@@ -103,7 +105,7 @@ public class EksterneRessurserProcessor {
         InputMetadata metadata = new InputMetadata("nom-api BatchJob", "Datavarehus", eksternRessurs, new Origination("nom-api", "nom-api"));
 
         if (eksisterendeOrgtilknytninger.isEmpty()) {
-            log.debug("Ekstern ressurs {} har ingen orgtilknytninger. Oppretter orgtilknytning med remedy_start som gyldigFom", eksternRessurs.navident());
+            log.debug(SECURE_LOGS, "Ekstern ressurs {} har ingen orgtilknytninger. Oppretter orgtilknytning med remedy_start som gyldigFom", eksternRessurs.navident());
             opprettOrgtilknytning(eksternRessurs, orgenhet, eksternRessurs.remedyStart(), metadata);
         } else {
             // Eneste endring vi forventer fra DVH er endring av remedy_slutt og/eller enhet
@@ -114,7 +116,7 @@ public class EksterneRessurserProcessor {
                 .max(Comparator.comparing(OrgtilknytningState::gyldigFom))
                 .get();
             if (harSammeSluttdato(eksternRessurs, sisteEksisterendeOrgtilknytning) && erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {
-                log.debug("Ekstern ressurs {} har eksisterende orgtilknytning som ikke trenger endring", eksternRessurs.navident());
+                log.debug(SECURE_LOGS, "Ekstern ressurs {} har eksisterende orgtilknytning som ikke trenger endring", eksternRessurs.navident());
                 // Oppdater evt tilknytningtypen - hvis denne er ikke er korrekt
                 settTypeEksternSamarbeidspartnerHvisSkattRiksrevisjonEllerHelfo(sisteEksisterendeOrgtilknytning, metadata);
             } else {
@@ -181,7 +183,7 @@ public class EksterneRessurserProcessor {
             .findByRemedyEnhetId(remedyEnhet)
             .map(
                 orgenhet -> {
-                    log.debug("For navident {} - Fant orgenhet {} for remedyEnhet {}", navident, orgenhet.nomId(), remedyEnhet);
+                    log.debug(SECURE_LOGS, "For navident {} - Fant orgenhet {} for remedyEnhet {}", navident, orgenhet.nomId(), remedyEnhet);
                     var orgenhetForRemedyenhet = orgenhetService.getById(orgenhet.nomId()).orElse(null);
                     orgenhetForRemedyenhet = hvisSkattPlasserNederst(orgenhetForRemedyenhet, navident, remedyEnhet);
                     orgenhetForRemedyenhet = hvisRiksrevisjonPlasserNederst(orgenhetForRemedyenhet, navident, remedyEnhet);
@@ -252,7 +254,7 @@ public class EksterneRessurserProcessor {
                 log.warn("SKATT ({}) har ingen underenheter. Faller tilbake på å bruke orgenhet {}.", orgenhetForRemedyenhet.getId(), orgenhetForRemedyenhet.getId());
             } else if (underliggende.size() == 1) {
                 orgenhetForRemedyenhet = orgenhetService.getById(underliggende.get(0)).orElse(null);
-                log.debug("For navident {} - Fant underenhet av SKATT: orgenhet {} for remedyEnhet {}", navident, orgenhetForRemedyenhet.getId(), remedyEnhet);
+                log.debug(SECURE_LOGS, "For navident {} - Fant underenhet av SKATT: orgenhet {} for remedyEnhet {}", navident, orgenhetForRemedyenhet.getId(), remedyEnhet);
             } else {
                 log.warn("For navident {} - Fant flere underenheter for orgenhet SKATT ({}). Faller tilbake på å bruke orgenhet {}.",
                     navident, orgenhetForRemedyenhet.getId(), orgenhetForRemedyenhet.getId());
@@ -276,7 +278,7 @@ public class EksterneRessurserProcessor {
                 log.warn("RIKSREVISJON ({}) har ingen underenheter. Faller tilbake på å bruke orgenhet {}.", orgenhetForRemedyenhet.getId(), orgenhetForRemedyenhet.getId());
             } else if (underliggende.size() == 1) {
                 orgenhetForRemedyenhet = orgenhetService.getById(underliggende.get(0)).orElse(null);
-                log.debug("For navident {} - Fant underenhet av RIKSREVISJON: orgenhet {} for remedyEnhet {}", navident, orgenhetForRemedyenhet.getId(), remedyEnhet);
+                log.debug(SECURE_LOGS, "For navident {} - Fant underenhet av RIKSREVISJON: orgenhet {} for remedyEnhet {}", navident, orgenhetForRemedyenhet.getId(), remedyEnhet);
             } else {
                 log.warn("For navident {} - Fant flere underenheter for orgenhet RIKSREVISJON ({}). Faller tilbake på å bruke orgenhet {}.",
                     navident, orgenhetForRemedyenhet.getId(), orgenhetForRemedyenhet.getId());
@@ -298,7 +300,7 @@ public class EksterneRessurserProcessor {
                         .toList();
                 }
                 orgenhetForRemedyenhet = listOfOrgenhetForRemedyenhet.get(0);
-                log.debug("For navident {} - Fant Helfo orgenhet {} for remedyEnhet {}", navident, orgenhetForRemedyenhet.getId(), remedyEnhet);
+                log.debug(SECURE_LOGS, "For navident {} - Fant Helfo orgenhet {} for remedyEnhet {}", navident, orgenhetForRemedyenhet.getId(), remedyEnhet);
             } else {
                 log.warn("For navident {} - Fant flere Helfo orgenheter. Faller tilbake på å bruke orgenhet {}.", navident, orgenhetForRemedyenhet.getId());
             }
@@ -357,7 +359,7 @@ public class EksterneRessurserProcessor {
     }
 
     private void opprettOrgtilknytning(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet, LocalDate gyldigFom, InputMetadata metadata) {
-        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(eksternRessurs.navident())) {
+        if (nomMastered.isMastered(eksternRessurs.navident())) {
             log.info("Navident {} er mastered. Vi lager ikke orgtilknytning for denne", eksternRessurs.navident());
             return;
         }
@@ -370,7 +372,7 @@ public class EksterneRessurserProcessor {
             null
         );
 
-        log.debug("Lager OpprettOrgtilknytning event: {}", opprettOrgtilknytning);
+        log.debug(SECURE_LOGS, "Lager OpprettOrgtilknytning event: {}", opprettOrgtilknytning);
 
         String fid = null;
         fid = orgtilknytningCommandService.opprettOrgtilknytning(opprettOrgtilknytning);
@@ -384,7 +386,7 @@ public class EksterneRessurserProcessor {
                 null
             );
 
-            log.debug("Lager AvvikleOrgtilknytning event: {}", avvikleOrgtilknytning);
+            log.debug(SECURE_LOGS, "Lager AvvikleOrgtilknytning event: {}", avvikleOrgtilknytning);
 
             orgtilknytningCommandService.avvikleOrgtilknytning(fid, avvikleOrgtilknytning);
         }
@@ -399,7 +401,7 @@ public class EksterneRessurserProcessor {
             null
         );
 
-        log.debug("Lager EndreDagligOppfolgingOrgtilknytning event: {}", endreDagligOppfolgingOrgtilknytning);
+        log.debug(SECURE_LOGS, "Lager EndreDagligOppfolgingOrgtilknytning event: {}", endreDagligOppfolgingOrgtilknytning);
 
         orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(fid, endreDagligOppfolgingOrgtilknytning);
 
@@ -412,7 +414,7 @@ public class EksterneRessurserProcessor {
 
 
     private void endreSluttdatoPaaEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
-        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(orgtilknytning.navident())) {
+        if (nomMastered.isMastered(orgtilknytning.navident())) {
             log.info("Navident {} er mastered. Vi endrer ikke sluttdato på orgtilknytning for denne", orgtilknytning.navident());
             return;
         }
@@ -426,7 +428,7 @@ public class EksterneRessurserProcessor {
             null
         );
 
-        log.debug("Lager EndreOrgtilknytningDato event for fid {}:\n {}", orgtilknytning.fid(), endreOrgtilknytningDato);
+        log.debug(SECURE_LOGS, "Lager EndreOrgtilknytningDato event for fid {}:\n {}", orgtilknytning.fid(), endreOrgtilknytningDato);
 
         orgtilknytningCommandService.endreOrgtilknytningDato(orgtilknytning.fid(), endreOrgtilknytningDato);
 
@@ -434,7 +436,7 @@ public class EksterneRessurserProcessor {
     }
 
     private void avsluttOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
-        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(orgtilknytning.navident())) {
+        if (nomMastered.isMastered(orgtilknytning.navident())) {
             log.info("Navident {} er mastered. Vi avslutter ikke orgtilknytning for denne", orgtilknytning.navident());
             return;
         }
@@ -447,13 +449,13 @@ public class EksterneRessurserProcessor {
             null
         );
 
-        log.debug("Lager AvvikleOrgtilknytning event for fid {}:\n {}", orgtilknytning.fid(), avvikleOrgtilknytning);
+        log.debug(SECURE_LOGS, "Lager AvvikleOrgtilknytning event for fid {}:\n {}", orgtilknytning.fid(), avvikleOrgtilknytning);
 
         orgtilknytningCommandService.avvikleOrgtilknytning(orgtilknytning.fid(), avvikleOrgtilknytning);
     }
 
     private void settTilknytningtype(Tilknytningtype type, String orgtilknytningFid, String navident, InputMetadata metadata) {
-        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(navident)) {
+        if (nomMastered.isMastered(navident)) {
             log.info("Navident {} er mastered. Vi avslutter ikke orgtilknytning for denne", navident);
             return;
         }
@@ -464,14 +466,14 @@ public class EksterneRessurserProcessor {
             metadata
         );
 
-        log.debug("Endrer tilknytningtype til {} for navident {}.", type, navident);
+        log.debug(SECURE_LOGS, "Endrer tilknytningtype til {} for navident {}.", type, navident);
 
         orgtilknytningCommandService.endreTilknytningtype(endreTilknytningtype);
     }
 
 
     private void fjernEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
-        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(orgtilknytning.navident())) {
+        if (nomMastered.isMastered(orgtilknytning.navident())) {
             log.info("Navident {} er mastered. Vi fjerner ikke orgtilknytning for denne", orgtilknytning.navident());
             return;
         }
@@ -485,7 +487,7 @@ public class EksterneRessurserProcessor {
             null
         );
 
-        log.debug("Lager FjernOrgtilknytning event for fid {}:\n {}", orgtilknytning.fid(), fjernOrgtilknytning);
+        log.debug(SECURE_LOGS, "Lager FjernOrgtilknytning event for fid {}:\n {}", orgtilknytning.fid(), fjernOrgtilknytning);
 
         orgtilknytningCommandService.fjernOrgtilknytning(orgtilknytning.fid(), fjernOrgtilknytning);
     }

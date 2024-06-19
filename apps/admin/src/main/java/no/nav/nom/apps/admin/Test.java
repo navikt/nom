@@ -18,9 +18,9 @@ public class Test {
         this.ressursStateRepository = ressursStateRepository;
         this.nomStateRessursListener = nomStateRessursListener;
 
-        nomStateRessursListener.register(getVisitor("Test visitor 1"));
-        nomStateRessursListener.register(getVisitor("Test visitor 2"));
-        nomStateRessursListener.register(getVisitor("Test visitor 3"));
+//        nomStateRessursListener.register(getVisitor("Test visitor 1"));
+//        nomStateRessursListener.register(getVisitor("Test visitor 2"));
+//        nomStateRessursListener.register(getVisitor("Test visitor 3"));
     }
 
     private NomStateRessursListener.Visitor getVisitor(String name) {

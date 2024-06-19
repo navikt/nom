@@ -38,7 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class DvhRessursControllerTestResponse extends RestTestBase {
 
     @Autowired
-    @Qualifier("oldOrgtilknytningStateRepository")
     OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @Autowired

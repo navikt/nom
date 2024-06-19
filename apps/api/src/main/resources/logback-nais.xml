@@ -55,9 +55,9 @@
     </appender>
 
 <!-- NOM loggers -->
-    <logger name="no.nav.nom.apps.api.rest.sessioninfo" level="debug" />
+<!--    <logger name="no.nav.nom.apps.api.rest.sessioninfo" level="debug" />-->
 <!--    <logger name="no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserProcessor" level="debug" />-->
-    <logger name="no.nav.nom.apps.api.orgtilknytning" level="debug" />
+    <logger name="no.nav.nom.apps.api.orgtilknytning.dvh" level="debug" />
 <!--    <logger name="no.nav.nom" level="debug" />-->
 <!--    <logger name="no.nav.nom.apps.api.common.security" level="trace"/>-->
 <!--    <logger name="no.nav.nom.apps.api.graphql.common.SecurityUtil" level="trace"/>-->
@@ -70,6 +70,10 @@
 <!--    <logger name="org.dataloader" level="trace"/>-->
 <!--    <logger name="org.springframework.graphql" level="trace"/>-->
 <!--    <logger name="org.springframework.boot.autoconfigure.graphql" level="trace"/>-->
+
+
+    <!-- Unleash logger -->
+    <logger name="io.getunleash.event.UnleashSubscriber" level="DEBUG"/>
 
     <!-- Kafka loggers -->
     <logger name="org.apache.kafka" level="WARN"/>

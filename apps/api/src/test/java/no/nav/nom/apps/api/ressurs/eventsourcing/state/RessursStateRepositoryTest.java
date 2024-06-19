@@ -4,6 +4,7 @@ import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepositoryImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RessursStateRepositoryTest {
 
-    RessursStateRepository ressursStateRepository = new OldRessursStateRepositoryImpl();
+    RessursStateRepository ressursStateRepository = new RessursStateRepositoryImpl();
 
     @Test
     @DisplayName("Test remove RessursStateFor fid")

@@ -1,0 +1,44 @@
+name: 'deploy: admin'
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'dev/*'
+    paths:
+      - 'apps/admin/**'
+      - 'libs/utils-common/**'
+      - 'libs/nom-state/**'
+      - '.nais/apps/admin/*.yaml'
+      - '.github/*/deploy-admin.yaml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
+      - 'Dockerfile_distroless'
+  workflow_dispatch:
+    inputs:
+      skip-tests:
+        type: boolean
+        required: false
+        default: false
+        description: Skip tests.
+
+jobs:
+  deploy-spring-app:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    uses: ./.github/workflows/deploy-spring-app.yaml
+    with:
+      maven-project: admin
+      jar-path: apps/admin/target/app.jar
+      image-suffix: nom-admin
+      nais-config-file-path-dev: .nais/apps/admin/admin-dev-gcp.yaml
+      nais-config-file-path-prod: .nais/apps/admin/admin-prod-gcp.yaml
+      unleash-vars-file-path: .nais/apps/admin/unleash-vars.yaml
+      deploy-timeout: 20m
+      skip-tests: ${{ github.event.inputs.skip-tests == 'true'}}
+      dockerfile: Dockerfile_distroless
+    secrets:
+      GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+      NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+

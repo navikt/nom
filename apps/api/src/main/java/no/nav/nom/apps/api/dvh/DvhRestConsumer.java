@@ -15,15 +15,14 @@ import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
+import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
+import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
@@ -58,11 +57,9 @@ public class DvhRestConsumer {
     private final DvhRepository dvhRepository;
     private final DvhService dvhService;
     private final NomProxyClient nomProxyClient;
-    private final RessursStateListener ressursStateListener;
     private final NomStateRessursListener nomStateRessursListener;
-    private final OrgtilknytningStateListener orgtilknytningStateListener;
     private final NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
-    private final OrgEnhetStateListener orgEnhetStateListener;
+    private final NomStateOrganiseringListener nomStateOrganiseringListener;
     private final NomStateOrgEnhetListener nomStateOrgEnhetListener;
     private final NomStateMasteredRessursListener nomStateMasteredRessursListener;
     private final RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
@@ -80,6 +77,7 @@ public class DvhRestConsumer {
 
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
     private final Unleash unleash;
+    private final NomStateDelegertLederListener nomStateDelegertLederListener;
 
 
     @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
@@ -96,10 +94,11 @@ public class DvhRestConsumer {
                 Thread.sleep(5_000);
                 log.debug("InitialState er ikke klar enda");
                 log.debug(
-                    "Ressurs state: {}  Orgtilkn. state: {}  Orgenhet state: {}",
-                    ressursStateListener.initloadComplete(),
-                    orgtilknytningStateListener.initloadComplete(),
-                    orgEnhetStateListener.initloadComplete()
+                    "Ressurs state: {}  Orgtilkn. state: {} Organisering state: {} Orgenhet state: {}",
+                    nomStateMasteredRessursListener.hasReadToEndOnStartup(),
+                    nomStateOrgtilknytningListener.hasReadToEndOnStartup(),
+                    nomStateOrganiseringListener.hasReadToEndOnStartup(),
+                    nomStateOrgEnhetListener.hasReadToEndOnStartup()
                 );
             } catch (Exception logMe) {
                 log.error("Waiting for initialState last feilet", logMe);
@@ -122,15 +121,15 @@ public class DvhRestConsumer {
         }
 
         if (leaderElection.isLeader()) { // Oppdater state fra dvh - holder at en Pod gjør dette
-            updateOrgtilknytningerStateFromDvh();
-
-            updateOrgtilknytningerForEksterneFromDvh();
-
-            loadRessurserFromDvh();
-
             dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();
 
             orgEnhetTypeHandler.updateOrgEnhetsTypeForLeafs();
+
+            loadRessurserFromDvh();
+
+            updateOrgtilknytningerStateFromDvh();
+
+            updateOrgtilknytningerForEksterneFromDvh();
         }
 
         log.info("Ferdig med schedulert oppdatering fra DVH. Tok {}", durationAsH24(start));
@@ -330,13 +329,12 @@ public class DvhRestConsumer {
     }
 
     private boolean isInitialStateReady() {
-        return ressursStateListener.initloadComplete()
-            && orgtilknytningStateListener.initloadComplete()
-            && orgEnhetStateListener.initloadComplete()
-            && nomStateRessursListener.hasReadToEndOnStartup()
+        return  nomStateRessursListener.hasReadToEndOnStartup()
             && nomStateOrgEnhetListener.hasReadToEndOnStartup()
+            && nomStateOrganiseringListener.hasReadToEndOnStartup()
             && nomStateOrgtilknytningListener.hasReadToEndOnStartup()
-            && nomStateMasteredRessursListener.hasReadToEndOnStartup();
+            && nomStateMasteredRessursListener.hasReadToEndOnStartup()
+            && nomStateDelegertLederListener.hasReadToEndOnStartup();
     }
 
     private String durationAsH24(LocalDateTime start) {
