@@ -74,9 +74,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
 
         when(orgtilknytningCommandService.opprettOrgtilknytning(any())).thenReturn("FID_1");
 
-        // Default mock svar på nomMastered ressurs og Unleash flag
+        // Default mock svar på nomMastered ressurs
         when(nomMastered.isMastered(any())).thenReturn(false);
-        when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(false);
 
         settOppStandardEnheter();
     }
@@ -359,7 +358,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
      ************************************************************************/
 
     @Test
-    @DisplayName("Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende orgtilknytning - når NomMasterd unleash flag er satt og navident er markert")
+    @DisplayName("Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende orgtilknytning - når navident er markert")
     public void test_101a() {
         String navident = "A000001";
 
@@ -383,9 +382,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
         // Ingen ekststerende orgtilknytninger
         when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
 
-        //Unleash flagg satt og ident er mastret
+        //ident er mastret
         when(nomMastered.isMastered(any())).thenReturn(true);
-        when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(true);
 
         ressursStillingProcessor.process(navident, stillingPerioder);
 
@@ -394,56 +392,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
 
     @Test
     @DisplayName(
-        "Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende orgtilknytning - når NomMasterd unleash flag ikke er satt og navident er markert som mastret"
-    )
-    public void test_101b() {
-        String navident = "A000001";
-
-        LocalDate startDate = LocalDate.of(2023, 1, 5);
-
-        List<StillingPeriode> stillingPerioder = List.of(
-            new StillingPeriode(
-                new StillingPeriode.StillingAgressoOrgIdOgNavn(
-                    Optional.of("AGRID_1"),     // DVH stillingens enhets agressoId
-                    "ENHET_1",                  // DVH stillingens enhets navn
-                    Optional.of("AGRID_1"),     // DVH ressursens enhets agressoId
-                    Optional.of("ORGENHET")
-                ),   // DVH ressursens agresso orgenhets nivå
-                startDate,                      // Gyldig Fom for den strukturerte stillingen
-                MAX_DATE,                       // Gyldig Tom for den strukturerte stillingen
-                orgenhetService.getByFid("FID_1").get(),
-                StillingPeriode.DagligOppfolging.JA
-            )
-        );
-
-        // Ingen ekststerende orgtilknytninger
-        when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
-        svarAtAlleNavidenterErStatlig(navident);
-        //Unleash flagg ikke satt og ident er mastret
-        when(nomMastered.isMastered(any())).thenReturn(true);
-        when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(false);
-
-        ressursStillingProcessor.process(navident, stillingPerioder);
-
-        String fid =
-            assertOrgtilknytning(CMD.OPPRETTET)
-                .forNavident(navident)
-                .tilEnhet("a001bc")
-                .gyldigFom(startDate)
-                .getFid();
-
-        assertOrgtilknytning(CMD.AVVIKLET, NEVER_INVOKED);
-
-        assertOrgtilknytning(CMD.ENDRE_DAGLIG_OPPFOLGING)
-            .forFid(fid)
-            .forNavident(navident)
-            .tilEnhet("a001bc")
-            .erDagligOppfolging(true);
-    }
-
-    @Test
-    @DisplayName(
-        "Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende orgtilknytning - når NomMasterd unleash flag er satt og navident ikke er markert som mastret"
+        "Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende orgtilknytning - når navident ikke er markert som mastret"
     )
     public void test_101c() {
         String navident = "A000001";
@@ -469,9 +418,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
         when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
         svarAtAlleNavidenterErStatlig(navident);
 
-        //Unleash flagg satt og ident ikke er mastret
+        //ident ikke er mastret
         when(nomMastered.isMastered(any())).thenReturn(false);
-        when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(true);
 
         ressursStillingProcessor.process(navident, stillingPerioder);
 
@@ -491,7 +439,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
     }
 
     @Test
-    @DisplayName("Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende enhet med sluttdato- når NomMasterd unleash flag er satt og navident er markert")
+    @DisplayName("Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende enhet med sluttdato- når navident er markert")
     public void test_103a() {
         String navident = "A000001";
 
@@ -516,9 +464,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
         // Ingen ekststerende orgtilknytninger
         when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
         svarAtAlleNavidenterErStatlig(navident);
-        //Unleash flagg satt og ident ikke er mastret
+        //ident ikke er mastret
         when(nomMastered.isMastered(any())).thenReturn(true);
-        when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(true);
 
         ressursStillingProcessor.process(navident, stillingPerioder);
 
@@ -527,60 +474,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
 
     @Test
     @DisplayName(
-        "Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende enhet med sluttdato- når NomMasterd unleash flag ikke er satt og navident er markert"
-    )
-    public void test_103b() {
-        String navident = "A000001";
-
-        LocalDate startDate = LocalDate.now().minusYears(1);
-        LocalDate endDate = LocalDate.now().plusMonths(2);
-
-        List<StillingPeriode> stillingPerioder = List.of(
-            new StillingPeriode(
-                new StillingPeriode.StillingAgressoOrgIdOgNavn(
-                    Optional.of("AGRID_1"),     // DVH stillingens enhets agressoId
-                    "ENHET_1",                  // DVH stillingens enhets navn
-                    Optional.of("AGRID_1"),     // DVH ressursens enhets agressoId
-                    Optional.of("ORGENHET")
-                ),   // DVH ressursens agresso orgenhets nivå
-                startDate,                          // Gyldig Fom for den strukturerte stillingen
-                endDate,                       // Gyldig Tom for den strukturerte stillingen
-                orgenhetService.getByFid("FID_1").get(),
-                StillingPeriode.DagligOppfolging.JA
-            )
-        );
-
-        // Ingen ekststerende orgtilknytninger
-        when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
-        svarAtAlleNavidenterErStatlig(navident);
-
-        //Unleash flagg ikke satt og ident er mastret
-        when(nomMastered.isMastered(any())).thenReturn(true);
-        when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(false);
-
-        ressursStillingProcessor.process(navident, stillingPerioder);
-
-        String fid =
-            assertOrgtilknytning(CMD.OPPRETTET)
-                .forNavident(navident)
-                .tilEnhet("a001bc")
-                .gyldigFom(startDate)
-                .getFid();
-
-        assertOrgtilknytning(CMD.AVVIKLET)
-            .forFid(fid)
-            .gyldigTom(endDate);
-
-        assertOrgtilknytning(CMD.ENDRE_DAGLIG_OPPFOLGING)
-            .forFid(fid)
-            .forNavident(navident)
-            .tilEnhet("a001bc")
-            .erDagligOppfolging(true);
-    }
-
-    @Test
-    @DisplayName(
-        "Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende enhet med sluttdato- når NomMasterd unleash flag er satt og navident ikke er markert"
+        "Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende enhet med sluttdato- når navident ikke er markert"
     )
     public void test_103c() {
         String navident = "A000001";
@@ -607,9 +501,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
         when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
         svarAtAlleNavidenterErStatlig(navident);
 
-        //Unleash flagg satt og ident ikke er mastret
+        //ident ikke er mastret
         when(nomMastered.isMastered(any())).thenReturn(false);
-        when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(true);
 
         ressursStillingProcessor.process(navident, stillingPerioder);
 

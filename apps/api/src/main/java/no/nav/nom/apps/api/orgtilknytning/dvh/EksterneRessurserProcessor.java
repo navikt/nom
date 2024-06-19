@@ -359,7 +359,7 @@ public class EksterneRessurserProcessor {
     }
 
     private void opprettOrgtilknytning(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet, LocalDate gyldigFom, InputMetadata metadata) {
-        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(eksternRessurs.navident())) {
+        if (nomMastered.isMastered(eksternRessurs.navident())) {
             log.info("Navident {} er mastered. Vi lager ikke orgtilknytning for denne", eksternRessurs.navident());
             return;
         }
@@ -414,7 +414,7 @@ public class EksterneRessurserProcessor {
 
 
     private void endreSluttdatoPaaEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
-        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(orgtilknytning.navident())) {
+        if (nomMastered.isMastered(orgtilknytning.navident())) {
             log.info("Navident {} er mastered. Vi endrer ikke sluttdato på orgtilknytning for denne", orgtilknytning.navident());
             return;
         }
@@ -436,7 +436,7 @@ public class EksterneRessurserProcessor {
     }
 
     private void avsluttOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
-        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(orgtilknytning.navident())) {
+        if (nomMastered.isMastered(orgtilknytning.navident())) {
             log.info("Navident {} er mastered. Vi avslutter ikke orgtilknytning for denne", orgtilknytning.navident());
             return;
         }
@@ -455,7 +455,7 @@ public class EksterneRessurserProcessor {
     }
 
     private void settTilknytningtype(Tilknytningtype type, String orgtilknytningFid, String navident, InputMetadata metadata) {
-        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(navident)) {
+        if (nomMastered.isMastered(navident)) {
             log.info("Navident {} er mastered. Vi avslutter ikke orgtilknytning for denne", navident);
             return;
         }
@@ -473,7 +473,7 @@ public class EksterneRessurserProcessor {
 
 
     private void fjernEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
-        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(orgtilknytning.navident())) {
+        if (nomMastered.isMastered(orgtilknytning.navident())) {
             log.info("Navident {} er mastered. Vi fjerner ikke orgtilknytning for denne", orgtilknytning.navident());
             return;
         }

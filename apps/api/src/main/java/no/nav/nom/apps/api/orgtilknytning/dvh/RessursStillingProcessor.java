@@ -557,7 +557,7 @@ public class RessursStillingProcessor {
     }
 
     public String lagNyOrgtilknytning(String navident, String orgenhetId, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
-        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(navident)) {
+        if (nomMastered.isMastered(navident)) {
             log.info("Navident {} er mastered. Vi lager ikke orgtilknytning for denne", navident);
             return null;
         }
@@ -595,7 +595,7 @@ public class RessursStillingProcessor {
     }
 
     public void endreOrgtilknytningGyldigFOM(OrgtilknytningState originalOrgtilknytning, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
-        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(originalOrgtilknytning.navident())) {
+        if (nomMastered.isMastered(originalOrgtilknytning.navident())) {
             log.info("Navident {} er mastered. Vi endrer ikke orgtilknytning for denne", originalOrgtilknytning.navident());
             return;
         }
@@ -630,7 +630,7 @@ public class RessursStillingProcessor {
     }
 
     public void endreOrgtilknytningGyldigTOM(OrgtilknytningState originalOrgtilknytning, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
-        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(originalOrgtilknytning.navident())) {
+        if (nomMastered.isMastered(originalOrgtilknytning.navident())) {
             log.info("Navident {} er mastered. Vi endrer ikke orgtilknytning for denne", originalOrgtilknytning.navident());
             return;
         }
@@ -687,7 +687,7 @@ public class RessursStillingProcessor {
     }
 
     public void settOrgtilknytningSluttDato(String fid, String navident, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
-        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(navident)) {
+        if (nomMastered.isMastered(navident)) {
             log.info("Navident {} er mastered. Vi endrer ikke orgtilknytning for denne", navident);
             return;
         }
@@ -719,7 +719,7 @@ public class RessursStillingProcessor {
         StillingPeriode stillingPeriode,
         String stillingPerioderAsString
     ) {
-        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(navident)) {
+        if (nomMastered.isMastered(navident)) {
             log.info("Navident {} er mastered. Vi endrer ikke Daglig oppfølging for denne", navident);
             return;
         }
@@ -747,7 +747,7 @@ public class RessursStillingProcessor {
     }
 
     public void fjernOrgtilknytning(OrgtilknytningState originalOrgtilknytning) {
-        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(originalOrgtilknytning.navident())) {
+        if (nomMastered.isMastered(originalOrgtilknytning.navident())) {
             log.info("Navident {} er mastered. Vi endrer ikke orgtilknytning for denne", originalOrgtilknytning.navident());
             return;
         }

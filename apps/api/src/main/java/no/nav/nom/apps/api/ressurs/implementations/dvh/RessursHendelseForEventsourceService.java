@@ -40,16 +40,14 @@ public class RessursHendelseForEventsourceService {
     private final RessursCommandService ressursCommandService;
 
     private final NomMastered nomMastered;
-    private final Unleash unleash;
 
     public RessursHendelseForEventsourceService(
         RessursStateRepository ressursStateRepository,
-        RessursCommandService ressursCommandService, NomMastered nomMastered, Unleash unleash
+        RessursCommandService ressursCommandService, NomMastered nomMastered
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.ressursCommandService = ressursCommandService;
         this.nomMastered = nomMastered;
-        this.unleash = unleash;
     }
 
     public void handterRessursIderFraDvh(List<DvhRessurs> dvhRessurs) {
@@ -191,7 +189,7 @@ public class RessursHendelseForEventsourceService {
     }
 
     private boolean skipDueToNomMastered(String navident) {
-        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(navident)) {
+        if (nomMastered.isMastered(navident)) {
             log.info("Ressurs {} er mastret i NOM så vil ikke behandle endring fra DVH", navident);
             return true;
         }
@@ -232,6 +230,10 @@ public class RessursHendelseForEventsourceService {
     }
 
     private void ressursEndretFysiskBrukersted(String fid, DvhRessurs dvhRessurs) {
+        if (skipDueToNomMastered(dvhRessurs.getNavIdent())) {
+            return;
+        }
+
         ressursCommandService.oppdaterFysiskeBrukerstederCommand(
             OppdaterFysiskeBrukerstederCommand.builder()
                 .fid(fid)
