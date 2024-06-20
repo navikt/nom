@@ -356,6 +356,7 @@ function OrgtilknytningForm({
           </Button>
 
           <Button
+            data-cy="lagre-button"
             icon={<FloppydiskIcon aria-hidden />}
             onClick={handleSubmitClick}
             size="small"
@@ -408,7 +409,9 @@ function NewOrgtilknytningFormPart({
           justify-content: space-between;
         `}
       >
-        <Heading size="medium">Legg til ny organisasjonstilknytning</Heading>
+        <Heading data-cy="ny-orgtilknytning-header" size="medium">
+          Legg til ny organisasjonstilknytning
+        </Heading>
 
         <Button
           icon={<MinusCircleIcon />}
@@ -525,6 +528,7 @@ function FormDateWrapper({
   return (
     <DatePicker {...datePickerProperties.datepickerProps}>
       <DatePicker.Input
+        data-cy={label.replaceAll(" ", "-")}
         error={error}
         ref={field.ref}
         {...datePickerProperties.inputProps}
