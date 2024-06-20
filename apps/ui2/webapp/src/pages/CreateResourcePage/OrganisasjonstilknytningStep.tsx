@@ -459,15 +459,7 @@ function Orgtilknytningsvarighet({
           <DatePicker.Input
             {...startDatePicker.inputProps}
             error={gyldigFomController.fieldState.error?.message?.toString()}
-            label={
-              <span
-                css={css`
-                  height: 24px;
-                `}
-              >
-                Startdato (første arbeidsdag)
-              </span>
-            }
+            label="Startdato (første arbeidsdag)"
             ref={gyldigFomController.field.ref}
           />
         </DatePicker>
@@ -478,22 +470,30 @@ function Orgtilknytningsvarighet({
             {...sluttDatePicker.inputProps}
             data-cy="sluttDato-picker"
             error={gyldigTomController.fieldState.error?.message?.toString()}
-            label={
-              <span
-                css={css`
-                  display: inline-flex;
-                  gap: var(--a-spacing-2);
-                `}
-              >
-                Sluttdato
-                {sektor === Sektor.EKSTERN ? (
-                  <HelpText strategy="fixed">
-                    Bruk datoen for normal avvikling av avtalen. Opsjoner skal
-                    ikke beregnes med her.
-                  </HelpText>
-                ) : undefined}
-              </span>
-            }
+            label={(() => {
+              switch (sektor) {
+                case Sektor.EKSTERN: {
+                  return (
+                    <span
+                      css={css`
+                        display: inline-flex;
+                        gap: var(--a-spacing-2);
+                      `}
+                    >
+                      Sluttdato
+                      <HelpText strategy="fixed">
+                        Bruk datoen for normal avvikling av avtalen. Opsjoner
+                        skal ikke beregnes med her.
+                      </HelpText>
+                    </span>
+                  );
+                }
+                case Sektor.NAV_KOMMUNAL:
+                case Sektor.NAV_STATLIG: {
+                  return "Sluttdato (valgfritt)";
+                }
+              }
+            })()}
             ref={gyldigTomController.field.ref}
           />
         </DatePicker>
