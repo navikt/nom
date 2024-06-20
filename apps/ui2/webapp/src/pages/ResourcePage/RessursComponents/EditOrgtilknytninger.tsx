@@ -729,7 +729,8 @@ function BekreftModalInnholdTomIFremtiden({
       <BodyLong>
         <b>
           Dette innebærer at etter {dato} vil {navn} ikke lenger være registrert
-          som medarbeider i NAV.
+          som medarbeider i NAV, og alle tilganger for medarbeideren vil bli
+          fjernet.
         </b>
       </BodyLong>
       <BodyLong>
