@@ -383,9 +383,11 @@ public class RessursStillingStrukturerer {
                             );
                         }
                         else if (unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
+                            var historiskStillingsPerioder = new ArrayList<StillingPeriode>();
+
                             // Fikser inkonsistens i stillingperioden
                              if(tidligereNomEnheter.size() == 1) {
-                                 perioderGruppertMedOrgenhet.add(
+                                 historiskStillingsPerioder.add(
                                      new StillingPeriode(
                                          stillingPeriode.stilling(),
                                          stillingPeriode.gyldigFom(),
@@ -409,7 +411,7 @@ public class RessursStillingStrukturerer {
                                      var stillingPeriodeTom = oe.getGyldigTom().get().isAfter(previousOrgenhetFom) ? previousOrgenhetFom : oe.getGyldigFom(); // if orgEnhets TOM is after previousOrgenhetFom, use previousOrgenhetFom
                                      var stillingPeriodeFom = oe.getGyldigFom().isBefore(stillingPeriode.gyldigFom()) ? stillingPeriode.gyldigFom():oe.getGyldigFom(); // if orgEnhets FOM is before stillingFOM, use stillingFOM
 
-                                     perioderGruppertMedOrgenhet.add(
+                                     historiskStillingsPerioder.add(
                                          new StillingPeriode(
                                              stillingPeriode.stilling(),
                                              stillingPeriodeFom,
@@ -419,6 +421,17 @@ public class RessursStillingStrukturerer {
                                      previousOrgenhetFom = stillingPeriodeFom;
                                  }
                              }
+
+                            log.debug(SECURE_LOGS,
+                                "Fikser inkonsistens i stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, historiskStillingsPerioder: {}",
+                                navident,
+                                stillingPeriode.gyldigFom(),
+                                nomEnheter.get(0).getGyldigFom().minusDays(1),
+                                orgenheterToString(nomEnheter),
+                                stillingPeriode,
+                                StillingPeriode.toString(historiskStillingsPerioder, true)
+                            );
+                            perioderGruppertMedOrgenhet.addAll(historiskStillingsPerioder);
                         }
                     } else if (stillingPeriode.gyldigTom().isAfter(nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE))) {
                         log.debug(SECURE_LOGS,
@@ -457,20 +470,29 @@ public class RessursStillingStrukturerer {
                         // Fikser inkonsistens i stillingperioden
                         if (!seinereNomEnherer.isEmpty() && unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
                             // NOTE: kanskje vi må legge til alle hvis seinereNomEnherer.size() > 1. Denne er ikke så realistisk case! Logger warning hvis skjer
-                            log.warn(SECURE_LOGS, "Finner flere seinere enheter for stillingperioden for navident {} fra {} til {}. seinereNomEnherer: {}",
-                                navident,
-                                nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
-                                stillingPeriode.gyldigTom(),
-                                orgenheterToString(seinereNomEnherer)
-                            );
-                            perioderGruppertMedOrgenhet.add(
-                                new StillingPeriode(
-                                    stillingPeriode.stilling(),
-                                    nomEnheter.get(0).getGyldigTom().get().plusDays(1),
+                            if(seinereNomEnherer.size() > 1 ) {
+                                log.warn(SECURE_LOGS, "Finner flere seinere enheter for stillingperioden for navident {} fra {} til {}. seinereNomEnherer: {}",
+                                    navident,
+                                    nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
                                     stillingPeriode.gyldigTom(),
-                                    seinereNomEnherer.get(0)
-                                )
-                            );
+                                    orgenheterToString(seinereNomEnherer)
+                                );
+                            } else {
+                                log.debug(SECURE_LOGS, "Fikser inkonsistens i stillingperioden for navident {} fra {} til {}. seinereNomEnherer: {}",
+                                    navident,
+                                    nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
+                                    stillingPeriode.gyldigTom(),
+                                    orgenheterToString(seinereNomEnherer)
+                                );
+                                perioderGruppertMedOrgenhet.add(
+                                    new StillingPeriode(
+                                        stillingPeriode.stilling(),
+                                        nomEnheter.get(0).getGyldigTom().get().plusDays(1),
+                                        stillingPeriode.gyldigTom(),
+                                        seinereNomEnherer.get(0)
+                                    )
+                                );
+                            }
                         }
                     } else {
                         perioderGruppertMedOrgenhet.add(new StillingPeriode(stillingPeriode, nomEnheter.get(0)));
