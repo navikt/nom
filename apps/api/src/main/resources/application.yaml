@@ -36,7 +36,7 @@ app:
       base-url: ${PDL_BASEURL}
       aad-scope: ${PDL_API_SCOPE}
     email:
-      url: https://graph.microsoft.com/v1.0/users/ikke.svar.nom@nav.no/sendMail
+      base-url: https://graph.microsoft.com/v1.0/users/ikke.svar.nom@nav.no/sendMail
       is-enabled: true
       max-attempts: 3
       backoff-duration-millis: 2000
