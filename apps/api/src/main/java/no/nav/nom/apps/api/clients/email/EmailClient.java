@@ -49,7 +49,7 @@ public class EmailClient {
                         webClientResponseException.getStatusCode().value(),
                         webClientResponseException.getResponseBodyAsString()
                     );
-
+                    logger.warn("Sending email fails: " + errorMsg, webClientResponseException);
                     throw new EmailClientUnforseenException(errorMsg);
                 });
         } else {
