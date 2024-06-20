@@ -830,6 +830,7 @@ const orgtilknytningSchema = yup.object().shape({
     }),
   gyldigTom: yup
     .string()
+    .nullable()
     .test({
       name: "gyldigTom-required",
       message: "Obligatorisk",
@@ -861,7 +862,7 @@ const formValuesSchema = yup.object().shape({
 });
 
 const validateMaxTime = (
-  value: string | undefined,
+  value: string | undefined | null,
   context: yup.TestContext<yup.AnyObject>,
 ) => {
   const ressursSektor = context?.options?.context?.ressursSektor;
