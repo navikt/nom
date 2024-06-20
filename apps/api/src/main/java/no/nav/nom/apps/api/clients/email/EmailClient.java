@@ -37,6 +37,9 @@ public class EmailClient {
 
     public Mono<Void> sendEmail(EmailMessage emailMessage) {
         if (emailClientProperties.isEnabled()) {
+            logger.info("Attempting sending email to: {}, url: {}",
+                emailMessage.message().toRecipients(),
+                emailClientProperties.baseUrl());
             return webClient.post()
                 .body(Mono.just(emailMessage), EmailMessage.class)
                 .retrieve()
