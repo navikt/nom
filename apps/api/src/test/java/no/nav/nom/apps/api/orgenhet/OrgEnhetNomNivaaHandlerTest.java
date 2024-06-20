@@ -3,10 +3,10 @@ package no.nav.nom.apps.api.orgenhet;
 import no.nav.nom.apps.api.organisering.OrgEnhetTestBase;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreNomNivaa;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OldOrgEnhetStateRepositoryImpl;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,7 +45,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
     OrgEnhetUnderordnetResolver orgEnhetUnderordnetResolver;
 
     @Autowired
-    private OldOrgEnhetStateRepositoryImpl orgEnhetStateRepository;
+    private OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
     private OrgEnhetNomNivaaHandler orgEnhetNomNivaaHandler;

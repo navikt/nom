@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
+import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.NO_END_DATE;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isCurrentPeriod;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isHistoricPeriod;
@@ -69,11 +70,11 @@ public class RessursStillingStrukturerer {
                 log.error("Har ressursStillinger fra DVH for navident {} som ikke finnes i NOM", navident);
                 return;
             }
-            log.debug("Strukturer ressursStillinger for navident {} til orgtilknytninger", navident);
+            log.debug(SECURE_LOGS, "Strukturer ressursStillinger for navident {} til orgtilknytninger", navident);
             var stillingerGruppert = strukturerNavidentensRessursStillinger(navident, rsList);
             var stillingerMedDagligOppfolging = finnKorrekteDagligOppfolginger(navident, stillingerGruppert);
             if (log.isDebugEnabled()) {
-                log.debug(
+                log.debug(SECURE_LOGS,
                     "Resultat av gruppering og matching til orgenhet for navident {}:\n{}",
                     navident,
                     StillingPeriode.toString(stillingerMedDagligOppfolging, true)
@@ -142,7 +143,7 @@ public class RessursStillingStrukturerer {
                 .distinct()
                 .sorted().toList();
 
-        log.debug(
+        log.debug(SECURE_LOGS,
             "For navident {} sine stillingPerioder\n{}splitter vi på fra/til-datoene: {} / {}",
             navident,
             StillingPeriode.toString(stillingPerioder, true),
@@ -196,14 +197,14 @@ public class RessursStillingStrukturerer {
 
         // Sorter og slå sammen sammenhengende perioder
         grupperteStillinger.forEach((stillingAgressoOrgIdOgNavn, grupperteRessursStillinger) -> {
-            log.debug("For navident {} - Slår sammen for {}", navident, stillingAgressoOrgIdOgNavn);
+            log.debug(SECURE_LOGS, "For navident {} - Slår sammen for {}", navident, stillingAgressoOrgIdOgNavn);
             var sorted = grupperteRessursStillinger.stream().sorted(Comparator.comparing(DvhRessursStilling::getStillingDatoFom)).toList();
             if (log.isDebugEnabled()) {
                 StringBuffer sb = new StringBuffer("Perioder (");
                 sb.append(navident);
                 sb.append("):");
                 sorted.forEach(rs -> sb.append("\n\t%s - %s".formatted(rs.getStillingDatoFom(), rs.getStillingDatoTom())));
-                log.debug(sb.toString());
+                log.debug(SECURE_LOGS, sb.toString());
             }
             LocalDate periodStart = sorted.get(0).getStillingDatoFom();
             LocalDate previousEnd = sorted.get(0).getStillingDatoTom();
@@ -213,7 +214,7 @@ public class RessursStillingStrukturerer {
                 var end = rs.getStillingDatoTom();
 
                 if (ressursSluttdato != null && periodStart.isAfter(ressursSluttdato.minusDays(1))) {
-                    log.debug("""
+                    log.debug(SECURE_LOGS, """
                               DVH ressursStilling for Navident {} starter ({}) på eller etter ressursens sluttdato {}.
                                Ikke behandle flere ressursStillinger for denne navidenten.
                               """, navident, rs.getStillingDatoFom(), ressursSluttdato);
@@ -221,7 +222,7 @@ public class RessursStillingStrukturerer {
                     break; // Ikke bruk de som starter på eller etter Ressursens sluttdato
                 }
                 if (ressursSluttdato != null && end.isAfter(ressursSluttdato)) {
-                    log.debug("""
+                    log.debug(SECURE_LOGS, """
                               DVH ressursStilling for Navident {} har sluttdato ({}) etter ressursens sluttdato {}.
                                Avslutter stillingen på ressursens sluttdato.
                               """, navident, rs.getStillingDatoFom(), ressursSluttdato);
@@ -241,7 +242,7 @@ public class RessursStillingStrukturerer {
                 } else {
                     // Her er det overlapp i datoer på samme stillingAgressoId, stillingOrgenhetNavn og stillingRessursAgressoId
                     // Dette håndterer vi ikke per nå
-                    log.debug(
+                    log.debug(SECURE_LOGS,
                         "Navident {} har overlapp i stillingsdatoer for '{}' -> forrige periode [{} - {}] og denne stillingen [{} - {}]",
                         navident,
                         stillingAgressoOrgIdOgNavn,
@@ -260,7 +261,7 @@ public class RessursStillingStrukturerer {
             }
         });
         if (log.isDebugEnabled()) {
-            log.debug(
+            log.debug(SECURE_LOGS,
                 "DVH Periodene for navident {} er nå gruppert:\n{}",
                 navident,
                 StillingPeriode.toString(
@@ -270,7 +271,7 @@ public class RessursStillingStrukturerer {
                     true
                 )
             );
-            log.debug("Må nå matche til orgenheter, og periodene evt endres ift til dette");
+            log.debug(SECURE_LOGS, "Må nå matche til orgenheter, og periodene evt endres ift til dette");
         }
         // Nå er alle stillingPeriodene gruppert på periode for agressoId.
         // Finn så NOM orgenhet for disse. Hvis gyldig periode for enhet ikke dekker hele perioden for stillingPerioden, så må stillingperioden splittes.
@@ -304,7 +305,7 @@ public class RessursStillingStrukturerer {
                 } else {
                     // Kan ikke finne orgenhet for stillingPeriode siden agressoId tilgjengelig ikke er presis (7-8 tegn lang)
                     if (isHistoricPeriod(stillingPeriode)) { // Ikke så farlig
-                        log.debug(
+                        log.debug(SECURE_LOGS,
                             "StillingPeriode for navident {} er ikke presis nok på historisk stilling/ressurs sin agressoId til å kunne finne NOM enhet denne tilhører. Den vil ikke behandles:\n  {}",
                             navident,
                             stillingPeriode
@@ -322,7 +323,7 @@ public class RessursStillingStrukturerer {
                 if (nomEnheter.size() == 0) {
                     // Klarer ikke finne NOM orgenhet for stillingPeriode/agressoId
                     if (isHistoricPeriod(stillingPeriode)) { // Ikke så farlig
-                        log.debug(
+                        log.debug(SECURE_LOGS,
                             "Klarer ikke finne NOM orgenhet for historisk stillingPeriode/agressoId for navident {}. Den vil ikke behandles:\n\t{}",
                             navident,
                             stillingPeriode
@@ -337,10 +338,10 @@ public class RessursStillingStrukturerer {
                     }
                 } else if (nomEnheter.size() == 1) {
                     // Exact one match
-                    log.debug("StillingPerioden for navident {} matcher en orgenhet: {}", navident, orgenhetToString(nomEnheter.get(0)));
+                    log.debug(SECURE_LOGS, "StillingPerioden for navident {} matcher en orgenhet: {}", navident, orgenhetToString(nomEnheter.get(0)));
                     // Må nå sjekke om stillingPerioden går utover enhetens periode. Hvis så, må enhetens periode brukes, og overskytende stillingsperiode må forkastes.
                     if (stillingPeriode.gyldigFom().isBefore(nomEnheter.get(0).getGyldigFom())) {
-                        log.debug(
+                        log.debug(SECURE_LOGS,
                             "Stillingperioden for navident {} starter før kjent orgenhets gyldighetsperiode. Må begrense stillingPeriodens gyldighet til å være innenfor",
                             navident
                         );
@@ -354,37 +355,86 @@ public class RessursStillingStrukturerer {
                         );
 
                         // forsøker på å finne korrekt tidligere enhet for den samme agressoid’en
-                        List<IOrgenhet> tidligereNomEnherer = finnNomEnheterForId(
+                        List<IOrgenhet> tidligereNomEnheter = finnNomEnheterForExactId(
                             stillingPeriode.stilling().agressoId().get(),
                             stillingPeriode.gyldigFom(),
                             nomEnheter.get(0).getGyldigFom().minusDays(1)
                         );
 
-                        log.debug(
-                            "Klippet før stillingperioden for navident {} fra {} til {} for orgenhet {}. nomEnheter: {}, stillingPeriode: {}, tidligereNomEnherer: {}",
+                        log.debug(SECURE_LOGS,
+                            "Klippet før stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, tidligereNomEnheter: {}",
                             navident,
                             stillingPeriode.gyldigFom(),
                             nomEnheter.get(0).getGyldigFom().minusDays(1),
-                            orgenheterToString(tidligereNomEnherer),
                             orgenheterToString(nomEnheter),
                             stillingPeriode,
-                            orgenheterToString(tidligereNomEnherer)
+                            orgenheterToString(tidligereNomEnheter)
                         );
 
-                        // Fikser inkonsistens i stillingperioden
-                        if(!tidligereNomEnherer.isEmpty() && unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
-                                // NOTE: kanskje vi må legge til alle hvis tigligereNomEnherer.size() > 1
-                                perioderGruppertMedOrgenhet.add(
-                                    new StillingPeriode(
-                                        stillingPeriode.stilling(),
-                                        stillingPeriode.gyldigFom(),
-                                        nomEnheter.get(0).getGyldigFom().minusDays(1),
-                                        tidligereNomEnherer.get(0)
-                                    )
-                                );
+                        if(tidligereNomEnheter.isEmpty()){
+                            // finner ingen historisk enhet - vi bare logger
+                            log.debug(SECURE_LOGS,
+                                "Finner ingen historisk enhet for stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}",
+                                navident,
+                                stillingPeriode.gyldigFom(),
+                                nomEnheter.get(0).getGyldigFom().minusDays(1),
+                                orgenheterToString(nomEnheter),
+                                stillingPeriode
+                            );
+                        }
+                        else if (unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
+                            var historiskStillingsPerioder = new ArrayList<StillingPeriode>();
+
+                            // Fikser inkonsistens i stillingperioden
+                             if(tidligereNomEnheter.size() == 1) {
+                                 historiskStillingsPerioder.add(
+                                     new StillingPeriode(
+                                         stillingPeriode.stilling(),
+                                         stillingPeriode.gyldigFom(),
+                                         nomEnheter.get(0).getGyldigFom().minusDays(1),
+                                         tidligereNomEnheter.get(0)
+                                     )
+                                 );
+                             } else {
+                                 var previousOrgenhetFom =  nomEnheter.get(0).getGyldigFom().minusDays(1);
+                                 var tidligereNomEnheterReserseSortedByTom = reverseSortNomEnheterByGyldigTom(tidligereNomEnheter);
+                                 for (IOrgenhet oe : tidligereNomEnheterReserseSortedByTom) {
+                                     // hvis previousOrgenhetFom er etter oe.getGyldigTom() - log potensielle hull i perioden
+                                     if(previousOrgenhetFom.isAfter(oe.getGyldigTom().get())){
+                                         log.debug(SECURE_LOGS, "Hull i perioden for navident {} fra {} til {}",
+                                             navident,
+                                             oe.getGyldigTom().get(),
+                                             previousOrgenhetFom);
+                                     }
+
+                                     // stillingsperioder
+                                     var stillingPeriodeTom = oe.getGyldigTom().get().isAfter(previousOrgenhetFom) ? previousOrgenhetFom : oe.getGyldigFom(); // if orgEnhets TOM is after previousOrgenhetFom, use previousOrgenhetFom
+                                     var stillingPeriodeFom = oe.getGyldigFom().isBefore(stillingPeriode.gyldigFom()) ? stillingPeriode.gyldigFom():oe.getGyldigFom(); // if orgEnhets FOM is before stillingFOM, use stillingFOM
+
+                                     historiskStillingsPerioder.add(
+                                         new StillingPeriode(
+                                             stillingPeriode.stilling(),
+                                             stillingPeriodeFom,
+                                             stillingPeriodeTom,
+                                             oe
+                                         ));
+                                     previousOrgenhetFom = stillingPeriodeFom;
+                                 }
+                             }
+
+                            log.debug(SECURE_LOGS,
+                                "Fikser inkonsistens i stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, historiskStillingsPerioder: {}",
+                                navident,
+                                stillingPeriode.gyldigFom(),
+                                nomEnheter.get(0).getGyldigFom().minusDays(1),
+                                orgenheterToString(nomEnheter),
+                                stillingPeriode,
+                                StillingPeriode.toString(historiskStillingsPerioder, true)
+                            );
+                            perioderGruppertMedOrgenhet.addAll(historiskStillingsPerioder);
                         }
                     } else if (stillingPeriode.gyldigTom().isAfter(nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE))) {
-                        log.debug(
+                        log.debug(SECURE_LOGS,
                             "Stillingperioden for navident {} slutter etter kjent orgenhets gyldighetsperiode. Må begrense stillingPeriodens gyldighet til å være innenfor",
                             navident
                         );
@@ -400,19 +450,18 @@ public class RessursStillingStrukturerer {
                         // forsøker på å finne korrekt seinere enhet for den samme agressoid’en
                         List<IOrgenhet> seinereNomEnherer = Collections.emptyList();
                         if(nomEnheter.get(0).getGyldigTom().isPresent()){
-                            seinereNomEnherer =  finnNomEnheterForId(
+                            seinereNomEnherer =  finnNomEnheterForExactId(
                                 stillingPeriode.stilling().agressoId().get(),
                                 nomEnheter.get(0).getGyldigTom().get().plusDays(1),
                                 stillingPeriode.gyldigTom()
                             );
                         }
 
-                        log.debug(
-                            "Klippet etter stillingperioden for navident {} fra {} til {} for orgenhet {}. nomEnheter: {}, stillingPeriode: {}, seinereNomEnherer: {}",
+                        log.debug(SECURE_LOGS,
+                            "Klippet etter stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, seinereNomEnherer: {}",
                             navident,
                             nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
                             stillingPeriode.gyldigTom(),
-                            orgenheterToString(seinereNomEnherer),
                             orgenheterToString(nomEnheter),
                             stillingPeriode,
                             orgenheterToString(seinereNomEnherer)
@@ -420,7 +469,21 @@ public class RessursStillingStrukturerer {
 
                         // Fikser inkonsistens i stillingperioden
                         if (!seinereNomEnherer.isEmpty() && unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
-                                // NOTE: kanskje vi må legge til alle hvis seinereNomEnherer.size() > 1
+                            // NOTE: kanskje vi må legge til alle hvis seinereNomEnherer.size() > 1. Denne er ikke så realistisk case! Logger warning hvis skjer
+                            if(seinereNomEnherer.size() > 1 ) {
+                                log.warn(SECURE_LOGS, "Finner flere seinere enheter for stillingperioden for navident {} fra {} til {}. seinereNomEnherer: {}",
+                                    navident,
+                                    nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
+                                    stillingPeriode.gyldigTom(),
+                                    orgenheterToString(seinereNomEnherer)
+                                );
+                            } else {
+                                log.debug(SECURE_LOGS, "Fikser inkonsistens i stillingperioden for navident {} fra {} til {}. seinereNomEnherer: {}",
+                                    navident,
+                                    nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
+                                    stillingPeriode.gyldigTom(),
+                                    orgenheterToString(seinereNomEnherer)
+                                );
                                 perioderGruppertMedOrgenhet.add(
                                     new StillingPeriode(
                                         stillingPeriode.stilling(),
@@ -429,6 +492,7 @@ public class RessursStillingStrukturerer {
                                         seinereNomEnherer.get(0)
                                     )
                                 );
+                            }
                         }
                     } else {
                         perioderGruppertMedOrgenhet.add(new StillingPeriode(stillingPeriode, nomEnheter.get(0)));
@@ -436,7 +500,7 @@ public class RessursStillingStrukturerer {
                 } else {
                     final var nomEnheterString = orgenheterToString(nomEnheter);
                     // Match på flere orgenheter i NOM. Må splitte stillingPerioden...
-                    log.debug("StillingPerioden {} for navident {} matcher flere NOM Orgenheter\t{}", navident, stillingPeriode, nomEnheterString);
+                    log.debug(SECURE_LOGS, "StillingPerioden {} for navident {} matcher flere NOM Orgenheter\t{}", navident, stillingPeriode, nomEnheterString);
                     List<StillingPeriode> nyeStillingPerioder = new ArrayList<>();
                     AtomicReference<LocalDate> nextGyldigFom = new AtomicReference<>(stillingPeriode.gyldigFom());
                     nomEnheter.stream()
@@ -462,7 +526,7 @@ public class RessursStillingStrukturerer {
                                 nextGyldigFom.set(oe.getGyldigTom().orElse(NO_END_DATE).plusDays(1));
                             }
                         });
-                    log.debug(
+                    log.debug(SECURE_LOGS,
                         "For navident {} - Splittet opp i\n\t{}",
                         navident,
                         nyeStillingPerioder.stream().map(StillingPeriode::toString).collect(Collectors.joining("\n\t"))
@@ -474,8 +538,11 @@ public class RessursStillingStrukturerer {
         return perioderGruppertMedOrgenhet;
     }
 
+   public List<IOrgenhet>  reverseSortNomEnheterByGyldigTom(List<IOrgenhet> nomEnheter){
+       return nomEnheter.stream().sorted(Comparator.comparing(oe -> oe.getGyldigTom().orElse(LocalDate.MAX))).collect(Collectors.toList()).reversed();
+   }
 
-    // Alle ORGENHET enheter med agressoId som overlapper i perioden
+    // Alle ORGENHET enheter med matched agressoId som overlapper i perioden
     public List<IOrgenhet> finnNomEnheterForId(String agressoId, LocalDate gyldigFom, LocalDate gyldigTom) {
         return orgenhetService.matchByAgressoId(agressoId).stream()
             .filter(oe ->
@@ -486,8 +553,19 @@ public class RessursStillingStrukturerer {
             .toList();
     }
 
+    // Alle ORGENHET enheter med exact agressoId som overlapper i perioden
+    public List<IOrgenhet> finnNomEnheterForExactId(String agressoId, LocalDate gyldigFom, LocalDate gyldigTom) {
+        return orgenhetService.exactMatchByAgressoId(agressoId).stream()
+            .filter(oe ->
+                "ORGENHET".equals(oe.getOrgNiv()) &&
+                    (gyldigTom.isAfter(oe.getGyldigFom().minusDays(1)) && gyldigFom.isBefore(oe.getGyldigTom().orElse(NO_END_DATE.plusDays(1))))
+            )
+            .filter(oe -> !oe.getGyldigFom().equals(oe.getGyldigTom().orElse(null))) // Ekskluder enheter hvor fra-til dato er lik
+            .toList();
+    }
 
-    // Alle ORGENHET enheter med agressoId og navn som overlapper i perioden
+
+    // Alle ORGENHET enheter med matched agressoId og navn som overlapper i perioden
     public List<IOrgenhet> finnNomEnheterForIdOgNavn(String agressoId, String enhetNavn, LocalDate gyldigFom, LocalDate gyldigTom) {
         return orgenhetService.matchByAgressoId(agressoId).stream()
             .filter(oe ->

@@ -1,8 +1,8 @@
 package no.nav.nom.apps.api.organisering;
 
-import no.nav.nom.apps.api.organisering.eventsourcing.state.OldOrganiseringStateRepositoryImpl;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepositoryImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,7 +23,7 @@ public class OrganiseringStateRepositoryTest {
     @DisplayName("Test removeEventAggregate method")
     void test_removeEventAggregate_one_organiseringState() {
         final String idToFind = "the_id";
-        OrganiseringStateRepository repository = new OldOrganiseringStateRepositoryImpl();
+        OrganiseringStateRepository repository = new OrganiseringStateRepositoryImpl();
 
         // Legg til en organisering
         OrganiseringState organiseringState = OrganiseringState.builder()
@@ -49,7 +49,7 @@ public class OrganiseringStateRepositoryTest {
         final String id_1 = "id_1";
         final String id_2 = "id_2";
         final String id_3 = "id_3";
-        OrganiseringStateRepository repository = new OldOrganiseringStateRepositoryImpl();
+        OrganiseringStateRepository repository = new OrganiseringStateRepositoryImpl();
 
         // Legg til en organisering
         String fid_1 = "fid_1";
@@ -76,7 +76,7 @@ public class OrganiseringStateRepositoryTest {
     @ParameterizedTest(name = "{index} {0}")
     @MethodSource("getOrganiseringStates")
     void test_getActiveOrganisering(String ignoredDescription, OrganiseringState organiseringsState, int expectedNumberOfActiveOrganisering) {
-        OrganiseringStateRepository repository = new OldOrganiseringStateRepositoryImpl();
+        OrganiseringStateRepository repository = new OrganiseringStateRepositoryImpl();
         repository.update(organiseringsState);
 
         assertThat(repository.getActiveOrganisering().size())
@@ -87,7 +87,7 @@ public class OrganiseringStateRepositoryTest {
     @ParameterizedTest(name = "{index} {0}")
     @MethodSource("getOrganiseringStates")
     void shouldGetActiveOrganiseringById(String ignoredDescription, OrganiseringState organiseringsState, int expectedNumberOfActiveOrganisering) {
-        OrganiseringStateRepository repository = new OldOrganiseringStateRepositoryImpl();
+        OrganiseringStateRepository repository = new OrganiseringStateRepositoryImpl();
         repository.update(organiseringsState);
 
         if (expectedNumberOfActiveOrganisering == 0) {
@@ -184,7 +184,7 @@ public class OrganiseringStateRepositoryTest {
     @DisplayName("Id ikke sett før i id-felt gir ny key")
     void should_add_new_key_from_id_if_not_present() {
         final String idToFind = "the_id";
-        OrganiseringStateRepository repository = new OldOrganiseringStateRepositoryImpl();
+        OrganiseringStateRepository repository = new OrganiseringStateRepositoryImpl();
 
         OrganiseringState idInId = OrganiseringState.builder()
             .fid("1")
@@ -203,7 +203,7 @@ public class OrganiseringStateRepositoryTest {
     @DisplayName("Id ikke sett før i idOver-felt gir ny key")
     void should_add_new_key_from_idOver_if_not_present() {
         final String idToFind = "the_id";
-        OrganiseringStateRepository repository = new OldOrganiseringStateRepositoryImpl();
+        OrganiseringStateRepository repository = new OrganiseringStateRepositoryImpl();
 
         OrganiseringState idInIdOver = OrganiseringState.builder()
             .fid("1")
@@ -222,7 +222,7 @@ public class OrganiseringStateRepositoryTest {
     @DisplayName("Id i idOver-felt som allerede finnes som key legger til i liste for key")
     void should_add_to_list_of_existing_key_for_idOver() {
         final String idToFind = "the_id";
-        OrganiseringStateRepository repository = new OldOrganiseringStateRepositoryImpl();
+        OrganiseringStateRepository repository = new OrganiseringStateRepositoryImpl();
 
         OrganiseringState idInId = OrganiseringState.builder()
             .fid("1")
@@ -248,7 +248,7 @@ public class OrganiseringStateRepositoryTest {
     @DisplayName("Id i id-felt som allerede er opprettet som key fra idOver legger til i liste for key")
     void should_add_to_list_of_existing_key_for_id() {
         final String idToFind = "the_id";
-        OrganiseringStateRepository repository = new OldOrganiseringStateRepositoryImpl();
+        OrganiseringStateRepository repository = new OrganiseringStateRepositoryImpl();
 
         // ID mottas først i et idOver-felt
         OrganiseringState idInIdOver = OrganiseringState.builder()
@@ -275,7 +275,7 @@ public class OrganiseringStateRepositoryTest {
     @DisplayName("Id i id-felt som allerede finnes som key fra id-felt oppretter ikke ny key")
     void should_not_create_new_key_for_id_already_in_existing_key() {
         final String idToFind = "the_id";
-        OrganiseringStateRepository repository = new OldOrganiseringStateRepositoryImpl();
+        OrganiseringStateRepository repository = new OrganiseringStateRepositoryImpl();
 
         // ID mottas først en gang i id-felt
         OrganiseringState idToFindInId = OrganiseringState.builder()
@@ -303,7 +303,7 @@ public class OrganiseringStateRepositoryTest {
     void should_not_add_identical_organisering() {
         final String idOver = "id_over";
         final String orgenhetId = "orgenhet_id";
-        OrganiseringStateRepository repository = new OldOrganiseringStateRepositoryImpl();
+        OrganiseringStateRepository repository = new OrganiseringStateRepositoryImpl();
 
         OrganiseringState idToFindInId = OrganiseringState.builder()
             .fid("1")
@@ -332,7 +332,7 @@ public class OrganiseringStateRepositoryTest {
         final String idToFind = "the_id";
         final String differentId1 = "different_id_1";
         final String differentId2 = "different_id_2";
-        OrganiseringStateRepository repository = new OldOrganiseringStateRepositoryImpl();
+        OrganiseringStateRepository repository = new OrganiseringStateRepositoryImpl();
 
         OrganiseringState idInId = OrganiseringState.builder()
             .fid("1")

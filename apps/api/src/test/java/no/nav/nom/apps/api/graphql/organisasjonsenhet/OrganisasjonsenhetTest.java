@@ -47,15 +47,12 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
     public DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;
 
     @Autowired
-    @Qualifier("oldOrgEnhetStateRepository")
     protected OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
-    @Qualifier("oldOrganiseringStateRepository")
     protected OrganiseringStateRepository organiseringStateRepository;
 
     @Autowired
-    @Qualifier("oldOrgtilknytningStateRepository")
     OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @Test

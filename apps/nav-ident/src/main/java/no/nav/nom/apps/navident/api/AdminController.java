@@ -28,12 +28,9 @@ public class AdminController {
     private final static Logger logger = LoggerFactory.getLogger(AdminController.class);
     public static final String NAV_IDENT_RESURS_FILE = "/NIK_identType.txt";
     private final ImportNavIdenter importNavIdenter;
-    private final Unleash unleash;
-    public static final String UNLEASH_PRODUSERE_ENDRE_NAV_IDENT_MELDINGER = "nom.nav_ident.enable_edit_topics";
 
-    public AdminController(ImportNavIdenter importNavIdenter, Unleash unleash) {
+    public AdminController(ImportNavIdenter importNavIdenter) {
         this.importNavIdenter = importNavIdenter;
-        this.unleash = unleash;
     }
 
     @Operation(
@@ -68,12 +65,7 @@ public class AdminController {
     @PreAuthorize("hasRole('ROLE_NOM_WRITE')")
     public String importIdentTypeFromResourceFile() {
         logger.info("Starter NavIdent innlesning fra resursfil");
-        if (unleash.isEnabled(UNLEASH_PRODUSERE_ENDRE_NAV_IDENT_MELDINGER)){
-            return importNavIdenter.importIdentTypeFromResourceFile(getClass().getResourceAsStream(NAV_IDENT_RESURS_FILE));
-        }
-        else {
-            return "Feature flag " + UNLEASH_PRODUSERE_ENDRE_NAV_IDENT_MELDINGER + " er ikke aktivert";
-        }
+        return importNavIdenter.importIdentTypeFromResourceFile(getClass().getResourceAsStream(NAV_IDENT_RESURS_FILE));
     }
 
 

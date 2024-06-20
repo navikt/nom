@@ -18,6 +18,7 @@ import {
   HelpText,
   HStack,
   Label,
+  Modal,
   useDatepicker,
 } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -25,7 +26,8 @@ import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { addYears } from "date-fns";
 import partition from "lodash/partition";
-import React, { useEffect } from "react";
+import type { MutableRefObject } from "react";
+import React, { forwardRef, useEffect, useRef } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import {
   FormProvider,
@@ -51,7 +53,11 @@ import { useHasWriteAccess } from "~/api/useGetSession";
 import { ApiResponseError } from "~/components/ApiResponseError";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { showToast } from "~/hooks/showToast";
-import { dolValidering } from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import {
+  dolValidering,
+  senesteTom,
+  validInput,
+} from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { OrgtilknytningTimeline } from "~/pages/ResourcePage/RessursComponents/OrgtilknytningTimeline";
 import infoikonNOM from "~/resources/infoikonNOM.svg";
 import type {
@@ -65,6 +71,7 @@ import {
   formatDisplayDate,
   formatVisningsnavn,
   isSameDateOrAfter,
+  isTodayOrBefore,
 } from "~/utils";
 
 export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
@@ -190,14 +197,38 @@ function OrgtilknytningForm({
     );
 
     if (
-      validation.dolOverlaps.length === 0 &&
-      validation.dolGaps.length === 0
+      validation.dolGaps.length === 0 &&
+      validation.dolOverlaps.length === 0
     ) {
       oppdaterOrgtilknytningerMutation.mutate(
         lagOppdaterOrgtilknytningerRequest(
           data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
         ),
       );
+    }
+  };
+
+  const modalReference = useRef<HTMLDialogElement>(null);
+  const formReference = useRef<HTMLFormElement>(null);
+
+  const handleSubmitClick = () => {
+    const oppdaterteOrgtilknytninger = watch(
+      "mappedeOrgtilknytninger",
+    ) as OrgtilknytningEtterValidering[];
+    const { dolGaps, dolOverlaps } = dolValidering(oppdaterteOrgtilknytninger);
+
+    if (
+      validInput(oppdaterteOrgtilknytninger) &&
+      dolOverlaps.length === 0 &&
+      dolGaps.length === 0
+    ) {
+      if (senesteTom(oppdaterteOrgtilknytninger)) {
+        modalReference.current?.showModal();
+      } else {
+        formReference.current?.dispatchEvent(
+          new Event("submit", { cancelable: true, bubbles: true }),
+        );
+      }
     }
   };
 
@@ -209,7 +240,11 @@ function OrgtilknytningForm({
 
       <Informasjonsboks ressursSektor={ressurs.sektor} />
 
-      <form autoComplete="false" onSubmit={handleSubmit(onValid)}>
+      <form
+        autoComplete="false"
+        onSubmit={handleSubmit(onValid)}
+        ref={formReference}
+      >
         {hasWriteAccess && (
           <div
             css={css`
@@ -264,6 +299,7 @@ function OrgtilknytningForm({
                   }
                   label="Fra og med"
                   name={`mappedeOrgtilknytninger.${index}.gyldigFom`}
+                  triggerOthers={[`mappedeOrgtilknytninger.${index}.gyldigTom`]}
                 />
 
                 <FormDateWrapper
@@ -325,9 +361,11 @@ function OrgtilknytningForm({
           </Button>
 
           <Button
+            data-cy="lagre-button"
             icon={<FloppydiskIcon aria-hidden />}
+            onClick={handleSubmitClick}
             size="small"
-            type="submit"
+            type="button"
           >
             Lagre
           </Button>
@@ -342,6 +380,12 @@ function OrgtilknytningForm({
 
           <ApiResponseError error={oppdaterOrgtilknytningerMutation.error} />
         </div>
+
+        <BekreftModal
+          navn={formatVisningsnavn(ressurs.visningsnavn)}
+          ref={modalReference}
+          senesteTomDato={senesteTom(watch("mappedeOrgtilknytninger"))}
+        />
       </form>
     </FormProvider>
   );
@@ -370,7 +414,9 @@ function NewOrgtilknytningFormPart({
           justify-content: space-between;
         `}
       >
-        <Heading size="medium">Legg til ny organisasjonstilknytning</Heading>
+        <Heading data-cy="ny-orgtilknytning-header" size="medium">
+          Legg til ny organisasjonstilknytning
+        </Heading>
 
         <Button
           icon={<MinusCircleIcon />}
@@ -487,6 +533,7 @@ function FormDateWrapper({
   return (
     <DatePicker {...datePickerProperties.datepickerProps}>
       <DatePicker.Input
+        data-cy={label.replaceAll(" ", "-")}
         error={error}
         ref={field.ref}
         {...datePickerProperties.inputProps}
@@ -550,7 +597,7 @@ function IllegalDolCombinationAlert() {
     return <></>;
   }
 
-  const orgtilknytninger = watch(`mappedeOrgtilknytninger`);
+  const orgtilknytninger = watch("mappedeOrgtilknytninger");
   const { dolGaps, dolOverlaps } = dolValidering(orgtilknytninger ?? []);
 
   if (dolGaps.length === 0 && dolOverlaps.length === 0) {
@@ -616,6 +663,125 @@ function IllegalDolCombinationAlert() {
           </div>
         )}
       </div>
+    </Alert>
+  );
+}
+
+const BekreftModal = forwardRef<
+  HTMLDialogElement,
+  { senesteTomDato: string | undefined; navn: string }
+>(({ senesteTomDato, navn }, reference) => {
+  if (!senesteTomDato) {
+    return <></>;
+  }
+
+  const formatertDato = formatDisplayDate(senesteTomDato);
+
+  const typedReference =
+    reference as MutableRefObject<HTMLDialogElement | null>;
+
+  return (
+    <Modal
+      css={css`
+        padding: var(--a-spacing-6);
+      `}
+      header={{ heading: "Bekreft endringer", closeButton: false }}
+      ref={reference}
+      width="548px"
+    >
+      <Modal.Body>
+        {isTodayOrBefore(new Date(senesteTomDato)) ? (
+          <BekreftModalInnholdTomIFortiden dato={formatertDato} navn={navn} />
+        ) : (
+          <BekreftModalInnholdTomIFremtiden dato={formatertDato} navn={navn} />
+        )}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button
+          icon={<FloppydiskIcon aria-hidden />}
+          size="small"
+          type="submit"
+        >
+          Bekreft endring
+        </Button>
+        <Button
+          onClick={() => typedReference?.current?.close()}
+          size="small"
+          type="button"
+          variant="secondary"
+        >
+          Avbryt
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+});
+
+function BekreftModalInnholdTomIFremtiden({
+  navn,
+  dato,
+}: {
+  navn: string;
+  dato: string;
+}) {
+  return (
+    <HStack gap="6">
+      <BodyLong>
+        Du har nå satt siste sluttdato på medarbeiderens
+        organisasjonstilknytning(er) til {dato}, og det er ikke registrert noen
+        ny tilknytning etter denne datoen.
+      </BodyLong>
+      <BodyLong>
+        <b>
+          Dette innebærer at etter {dato} vil {navn} ikke lenger være registrert
+          som medarbeider i NAV, og alle tilganger for medarbeideren vil bli
+          fjernet.
+        </b>
+      </BodyLong>
+      <BodyLong>
+        Hvis dette ikke er korrekt, må det legges inn en ny tilknytning. Du kan
+        trykke på <b>Avbryt</b> og gjøre dette nå, eller så kan du eller noen
+        andre gjøre det senere, men senest sluttdatoen {dato}.
+      </BodyLong>
+      <BodyLong>
+        Hvis dette er korrekt, kan du bekrefte endringen ved å trykke på{" "}
+        <b>Bekreft endring</b>.
+      </BodyLong>
+    </HStack>
+  );
+}
+
+function BekreftModalInnholdTomIFortiden({
+  navn,
+  dato,
+}: {
+  navn: string;
+  dato: string;
+}) {
+  return (
+    <Alert variant="warning">
+      <HStack gap="6">
+        <BodyLong>
+          Du har nå satt siste sluttdato på medarbeiderens
+          organisasjonstilknytning(er) til {dato}, og det er ikke registrert
+          noen ny tilknytning etter denne datoen.
+        </BodyLong>
+        <BodyLong>
+          <b>
+            Dette innebærer at fra i dag vil {navn} ikke lenger være registrert
+            som medarbeider i NAV, og alle tilganger for medarbeideren vil bli
+            fjernet.
+          </b>
+        </BodyLong>
+        <BodyLong>
+          Hvis dette ikke er korrekt, må du trykke på <b>Avbryt</b> og legge til
+          en ny tilknytning.
+        </BodyLong>
+        <BodyLong>
+          Hvis dette er korrekt, kan du bekrefte endringen ved å trykke på{" "}
+          <b>Bekreft endring</b>.
+        </BodyLong>
+      </HStack>
     </Alert>
   );
 }

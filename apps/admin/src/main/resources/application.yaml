@@ -4,6 +4,9 @@ app:
     ressurs:
       eventsourceTopic: org.nom.ressurs-eventsource
       eventsource-listener-id: nom-admin_ressursEvtsrcListener_${HOSTNAME}
+    orgenhet:
+      eventsourceTopic: org.nom.orgenhet-eventsource
+      eventsource-listener-id: nom-admin_orgenhetEvtsrcListener_${HOSTNAME}
 
 nom.libs.state.ressurs.enabled: true
 nom.libs.state.orgenhet.enabled: true
@@ -45,7 +48,6 @@ spring:
     listener:
       missing-topics-fatal: true
     client-id: ${HOSTNAME}
-
 
 unleash:
   endpoint:

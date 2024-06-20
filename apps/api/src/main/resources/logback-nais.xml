@@ -26,10 +26,11 @@
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- rollover daily -->
             <fileNamePattern>secure-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
-            <!-- each file should be at most 100MB, keep 15 days worth of history, but at most 2GB -->
-            <maxFileSize>100MB</maxFileSize>
-            <maxHistory>15</maxHistory>
-            <totalSizeCap>2GB</totalSizeCap>
+            <!-- each file should be at most 50MB, keep 1 month worth of history(?), but at most 120MB -->
+            <!-- SecureLogs volume har 128MB limit : https://docs.nais.io/observability/logging/how-to/enable-secure-logs/?h=secure#set-log-rotation -->
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>1</maxHistory>
+            <totalSizeCap>120MB</totalSizeCap>
         </rollingPolicy>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <!-- Deny log messages not having marker SECURE_LOGS -->
@@ -55,9 +56,9 @@
     </appender>
 
 <!-- NOM loggers -->
-    <logger name="no.nav.nom.apps.api.rest.sessioninfo" level="debug" />
+<!--    <logger name="no.nav.nom.apps.api.rest.sessioninfo" level="debug" />-->
 <!--    <logger name="no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserProcessor" level="debug" />-->
-    <logger name="no.nav.nom.apps.api.orgtilknytning" level="debug" />
+    <logger name="no.nav.nom.apps.api.orgtilknytning.dvh" level="debug" />
 <!--    <logger name="no.nav.nom" level="debug" />-->
 <!--    <logger name="no.nav.nom.apps.api.common.security" level="trace"/>-->
 <!--    <logger name="no.nav.nom.apps.api.graphql.common.SecurityUtil" level="trace"/>-->
