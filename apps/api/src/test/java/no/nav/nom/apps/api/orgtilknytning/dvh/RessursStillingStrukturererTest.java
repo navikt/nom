@@ -154,7 +154,7 @@ class RessursStillingStrukturererTest extends TestBase {
         );
 
 
-        when(orgenhetService.exactMatchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
         var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(1, result.size());
         assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom());
@@ -170,7 +170,7 @@ class RessursStillingStrukturererTest extends TestBase {
             getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
-        when(orgenhetService.exactMatchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
         var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(2, result.size());
         assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom());
@@ -188,7 +188,7 @@ class RessursStillingStrukturererTest extends TestBase {
             getTestRessursStilling(navident_A001001, "AGRID_2", "Enhet_2", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
-        when(orgenhetService.exactMatchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
         var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(2, result.size());
         assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId().orElse("NULL"));
@@ -209,7 +209,7 @@ class RessursStillingStrukturererTest extends TestBase {
             getTestRessursStilling(navident_A001001, "AGRID_2", "Enhet_2", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
-        when(orgenhetService.exactMatchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
         var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(2, result.size());
         assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId().orElse("NULL"));
@@ -232,7 +232,7 @@ class RessursStillingStrukturererTest extends TestBase {
             getNomEnhet("FID_2", "x987yz", "SAMME NAVN", LocalDate.of(2000, 6, 1), null, "AGRID_1")
         );
 
-        when(orgenhetService.exactMatchByAgressoId(any())).thenReturn(agrid_1_enheter);
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(agrid_1_enheter);
 
         var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(2, result.size());
@@ -253,7 +253,7 @@ class RessursStillingStrukturererTest extends TestBase {
             getTestRessursStilling(navident_A001001, "AGRID", "Enhet_1", "AGRID_1", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
-        when(orgenhetService.exactMatchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1));
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1));
         var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(1, result.size());
         assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId().orElse("NULL"));
@@ -269,7 +269,7 @@ class RessursStillingStrukturererTest extends TestBase {
 
         IOrgenhet enhet = getNomEnhet("FID_1", "a123bc", "Enhet_1", LocalDate.of(2020, 1, 1), null, "AGRID_1");
 
-        when(orgenhetService.exactMatchByAgressoId(any())).thenReturn(List.of(enhet));
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(enhet));
 
         var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(1, result.size());
@@ -291,7 +291,7 @@ class RessursStillingStrukturererTest extends TestBase {
         IOrgenhet enhet = getNomEnhet("FID_1", "a123bc", "Enhet_1", LocalDate.of(2018, 1, 1), null, "AGRID_1");
         IOrgenhet enhet2 = getNomEnhet("FID_2", "x321yz", "Enhet_1", LocalDate.of(2018, 1, 1), null, "AGRID_1");
 
-        when(orgenhetService.exactMatchByAgressoId(any())).thenReturn(List.of(enhet, enhet2));
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(enhet, enhet2));
 
         var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(1, result.size());
@@ -327,7 +327,7 @@ class RessursStillingStrukturererTest extends TestBase {
                 IdentType.STANDARD
             )));
 
-        when(orgenhetService.exactMatchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
 
         var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navid_3, ressursStillinger);
         assertEquals(1, result.size());
@@ -344,7 +344,7 @@ class RessursStillingStrukturererTest extends TestBase {
             getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", "AGRID_1", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
-        when(orgenhetService.exactMatchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
         var result = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
         assertEquals(1, result.size());
 
@@ -372,7 +372,7 @@ class RessursStillingStrukturererTest extends TestBase {
             getTestRessursStilling(navident_A001001, "AGRID_2", "Enhet_2", "AGRID_2", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
-        when(orgenhetService.exactMatchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
         var result = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
         assertEquals(1, result.size());
 
@@ -411,7 +411,7 @@ class RessursStillingStrukturererTest extends TestBase {
             getTestRessursStilling(navident_A001001, "AGRID_2", "Enhet_2", "AGRID_2", startOfThreeMonthBeforeNow, MAX_DATE)
         );
 
-        when(orgenhetService.exactMatchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
         var result = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
         assertEquals(1, result.size());
 
@@ -450,7 +450,7 @@ class RessursStillingStrukturererTest extends TestBase {
             getTestRessursStilling(navident_A001001, "AGRID_4", "Enhet_4", "AGRID_1", LocalDate.of(2020, 10, 1), MAX_DATE)
         );
 
-        when(orgenhetService.exactMatchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2, dummyEnhet_3, dummyEnhet_4));
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2, dummyEnhet_3, dummyEnhet_4));
         var result = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
         assertEquals(1, result.size());
 

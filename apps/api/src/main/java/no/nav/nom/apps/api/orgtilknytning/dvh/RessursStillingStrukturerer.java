@@ -355,7 +355,7 @@ public class RessursStillingStrukturerer {
                         );
 
                         // forsøker på å finne korrekt tidligere enhet for den samme agressoid’en
-                        List<IOrgenhet> tidligereNomEnheter = finnNomEnheterForId(
+                        List<IOrgenhet> tidligereNomEnheter = finnNomEnheterForExactId(
                             stillingPeriode.stilling().agressoId().get(),
                             stillingPeriode.gyldigFom(),
                             nomEnheter.get(0).getGyldigFom().minusDays(1)
@@ -397,11 +397,7 @@ public class RessursStillingStrukturerer {
                                  );
                              } else {
                                  var previousOrgenhetFom =  nomEnheter.get(0).getGyldigFom().minusDays(1);
-
                                  var tidligereNomEnheterReserseSortedByTom = reverseSortNomEnheterByGyldigTom(tidligereNomEnheter);
-
-                               //  tidligereNomEnheterReserseSortedByTom = tidligereNomEnheter.stream().sorted(Comparator.comparing(oe -> oe.getGyldigTom().orElse(LocalDate.MAX))).collect(Collectors.toList()).reversed();
-
                                  for (IOrgenhet oe : tidligereNomEnheterReserseSortedByTom) {
                                      // hvis previousOrgenhetFom er etter oe.getGyldigTom() - log potensielle hull i perioden
                                      if(previousOrgenhetFom.isAfter(oe.getGyldigTom().get())){
@@ -454,7 +450,7 @@ public class RessursStillingStrukturerer {
                         // forsøker på å finne korrekt seinere enhet for den samme agressoid’en
                         List<IOrgenhet> seinereNomEnherer = Collections.emptyList();
                         if(nomEnheter.get(0).getGyldigTom().isPresent()){
-                            seinereNomEnherer =  finnNomEnheterForId(
+                            seinereNomEnherer =  finnNomEnheterForExactId(
                                 stillingPeriode.stilling().agressoId().get(),
                                 nomEnheter.get(0).getGyldigTom().get().plusDays(1),
                                 stillingPeriode.gyldigTom()
@@ -546,8 +542,19 @@ public class RessursStillingStrukturerer {
        return nomEnheter.stream().sorted(Comparator.comparing(oe -> oe.getGyldigTom().orElse(LocalDate.MAX))).collect(Collectors.toList()).reversed();
    }
 
-    // Alle ORGENHET enheter med agressoId som overlapper i perioden
+    // Alle ORGENHET enheter med matched agressoId som overlapper i perioden
     public List<IOrgenhet> finnNomEnheterForId(String agressoId, LocalDate gyldigFom, LocalDate gyldigTom) {
+        return orgenhetService.matchByAgressoId(agressoId).stream()
+            .filter(oe ->
+                "ORGENHET".equals(oe.getOrgNiv()) &&
+                    (gyldigTom.isAfter(oe.getGyldigFom().minusDays(1)) && gyldigFom.isBefore(oe.getGyldigTom().orElse(NO_END_DATE.plusDays(1))))
+            )
+            .filter(oe -> !oe.getGyldigFom().equals(oe.getGyldigTom().orElse(null))) // Ekskluder enheter hvor fra-til dato er lik
+            .toList();
+    }
+
+    // Alle ORGENHET enheter med exact agressoId som overlapper i perioden
+    public List<IOrgenhet> finnNomEnheterForExactId(String agressoId, LocalDate gyldigFom, LocalDate gyldigTom) {
         return orgenhetService.exactMatchByAgressoId(agressoId).stream()
             .filter(oe ->
                 "ORGENHET".equals(oe.getOrgNiv()) &&
@@ -558,9 +565,9 @@ public class RessursStillingStrukturerer {
     }
 
 
-    // Alle ORGENHET enheter med agressoId og navn som overlapper i perioden
+    // Alle ORGENHET enheter med matched agressoId og navn som overlapper i perioden
     public List<IOrgenhet> finnNomEnheterForIdOgNavn(String agressoId, String enhetNavn, LocalDate gyldigFom, LocalDate gyldigTom) {
-        return orgenhetService.exactMatchByAgressoId(agressoId).stream()
+        return orgenhetService.matchByAgressoId(agressoId).stream()
             .filter(oe ->
                 "ORGENHET".equals(oe.getOrgNiv()) &&
                     enhetNavn.equals(oe.getNavn()) &&
