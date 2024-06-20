@@ -26,7 +26,8 @@
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- rollover daily -->
             <fileNamePattern>secure-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
-            <!-- each file should be at most 100MB, keep 15 days worth of history, but at most 2GB -->
+            <!-- each file should be at most 50MB, keep 1 month worth of history(?), but at most 120MB -->
+            <!-- SecureLogs volume har 128MB limit : https://docs.nais.io/observability/logging/how-to/enable-secure-logs/?h=secure#set-log-rotation -->
             <maxFileSize>50MB</maxFileSize>
             <maxHistory>1</maxHistory>
             <totalSizeCap>120MB</totalSizeCap>
