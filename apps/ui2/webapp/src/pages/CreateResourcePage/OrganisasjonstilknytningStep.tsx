@@ -358,8 +358,12 @@ export function OrganisasjonstilknytningInnerForm({
     erDagligOppfolgingLockedToTrue,
   );
 
+  const hasAccessToOrgenhetQuery = useQuery(
+    harLederTilgangForOrgenhetOptions(watch("orgEnhetId")),
+  );
+  // Antar at man har tilgang mens den er pending, slik at man slipper at Alert'en "popper" midlertidig
   const hasWriteAccessForOrgenhet =
-    useQuery(harLederTilgangForOrgenhetOptions(watch("orgEnhetId"))).data ??
+    (hasAccessToOrgenhetQuery.isPending || hasAccessToOrgenhetQuery.data) ??
     false;
 
   return (
