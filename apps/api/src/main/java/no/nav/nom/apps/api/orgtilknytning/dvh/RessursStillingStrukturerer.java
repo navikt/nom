@@ -397,7 +397,11 @@ public class RessursStillingStrukturerer {
                                  );
                              } else {
                                  var previousOrgenhetFom =  nomEnheter.get(0).getGyldigFom().minusDays(1);
+
                                  var tidligereNomEnheterReserseSortedByTom = reverseSortNomEnheterByGyldigTom(tidligereNomEnheter);
+
+                               //  tidligereNomEnheterReserseSortedByTom = tidligereNomEnheter.stream().sorted(Comparator.comparing(oe -> oe.getGyldigTom().orElse(LocalDate.MAX))).collect(Collectors.toList()).reversed();
+
                                  for (IOrgenhet oe : tidligereNomEnheterReserseSortedByTom) {
                                      // hvis previousOrgenhetFom er etter oe.getGyldigTom() - log potensielle hull i perioden
                                      if(previousOrgenhetFom.isAfter(oe.getGyldigTom().get())){
@@ -539,17 +543,7 @@ public class RessursStillingStrukturerer {
     }
 
    public List<IOrgenhet>  reverseSortNomEnheterByGyldigTom(List<IOrgenhet> nomEnheter){
-        return nomEnheter.stream().sorted((e1, e2) -> {
-            if (e2.getGyldigTom().isEmpty() && e1.getGyldigTom().isEmpty()) {
-                return 0;
-            } else if(e2.getGyldigTom().isPresent() && e1.getGyldigTom().isEmpty()) {
-                return -1;
-            } else if(e2.getGyldigTom().isEmpty() && e1.getGyldigTom().isPresent()) {
-                return 1;
-            } else {
-                return e2.getGyldigTom().get().compareTo(e1.getGyldigTom().get());
-            }
-        }).collect(Collectors.toList());
+       return nomEnheter.stream().sorted(Comparator.comparing(oe -> oe.getGyldigTom().orElse(LocalDate.MAX))).collect(Collectors.toList()).reversed();
    }
 
     // Alle ORGENHET enheter med agressoId som overlapper i perioden

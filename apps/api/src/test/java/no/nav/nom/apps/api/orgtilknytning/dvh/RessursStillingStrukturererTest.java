@@ -492,7 +492,7 @@ class RessursStillingStrukturererTest extends TestBase {
     @Test
     @DisplayName("Test sorting orgenheter by gyldigTom desc")
     public void testSortOrgenheterDesc(){
-        IOrgenhet enhet1 = getNomEnhet("FID_1", "a123bc", "Enhet_1", LocalDate.of(2019, 1, 1),  LocalDate.of(2019, 1, 1), "AGRID_1");
+        IOrgenhet enhet1 = getNomEnhet("FID_1", "a123bc", "Enhet_1", LocalDate.of(2013, 1, 1),  LocalDate.of(2019, 1, 1), "AGRID_1");
         IOrgenhet enhet2 = getNomEnhet("FID_2", "b123bc", "Enhet_2", LocalDate.of(2012, 1, 1),  LocalDate.of(2018, 1, 1), "AGRID_2");
         IOrgenhet enhet3 = getNomEnhet("FID_3", "c123bc", "Enhet_3", LocalDate.of(2014, 1, 1),  LocalDate.of(2019, 1, 1), "AGRID_3");
         IOrgenhet enhet4 = getNomEnhet("FID_4", "d123bc", "Enhet_4", LocalDate.of(2016, 1, 1),  LocalDate.of(2020, 1, 1), "AGRID_4");
@@ -502,7 +502,7 @@ class RessursStillingStrukturererTest extends TestBase {
         assertEquals(tidligereNomEnheter.size(), 4);
 
         List<IOrgenhet> tidligereNomEnheterReverseSorted_expected = new ArrayList<>();
-        Collections.addAll(tidligereNomEnheterReverseSorted_expected, enhet4, enhet1, enhet3, enhet2);
+        Collections.addAll(tidligereNomEnheterReverseSorted_expected, enhet4, enhet3, enhet1, enhet2);
 
         List<IOrgenhet> tidligereNomEnheterReverseSorted = ressursStillingStrukturerer.reverseSortNomEnheterByGyldigTom(tidligereNomEnheter);
         assertEquals(tidligereNomEnheterReverseSorted.size(), 4);
