@@ -6,7 +6,7 @@ import sortBy from "lodash/sortBy";
 import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { getRessurserOptions, searchSchema } from "~/api/queries.ts";
+import { getRessursStatesOptions, searchSchema } from "~/api/queries.ts";
 import type { RessursState } from "~/api-types.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
@@ -37,7 +37,7 @@ function RessursPage() {
   });
 
   const ressurser = useSuspenseQuery({
-    ...getRessurserOptions(search),
+    ...getRessursStatesOptions(search),
     gcTime: Number.POSITIVE_INFINITY,
     staleTime: Number.POSITIVE_INFINITY,
   }).data;

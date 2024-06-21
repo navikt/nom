@@ -6,14 +6,14 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 
-import { getOrgenheterOptions, getRessurserOptions } from "~/api/queries.ts";
+import { getOrgenhetStatesOptions, getRessursStatesOptions } from "~/api/queries.ts";
 
 export const Route = createFileRoute("/state")({
   loaderDeps: ({ search }) => search,
   loader: ({ context, deps }) => {
     // prefetch as much as possible
-    context.queryClient.prefetchQuery(getRessurserOptions(deps));
-    context.queryClient.prefetchQuery(getOrgenheterOptions(deps));
+    context.queryClient.prefetchQuery(getRessursStatesOptions(deps));
+    context.queryClient.prefetchQuery(getOrgenhetStatesOptions(deps));
   },
   component: () => {
     const search = Route.useSearch();

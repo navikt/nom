@@ -61,27 +61,25 @@ export function getOrgenhetEventsOptions(search: searchType) {
   });
 }
 
-export function getRessurserOptions(search: searchType) {
+export function getRessursStatesOptions(search: searchType) {
   return queryOptions({
     queryKey: ["STATE", "RESSURS", search],
     queryFn: async () =>
-      // TODO: udpate path
       (
         await ky.get(
-          `${API_BASE_URL}/sinks/ressurs?${queryString.stringify(search, { skipNull: true })}`,
+          `${API_BASE_URL}/states/ressurs?${queryString.stringify(search, { skipNull: true })}`,
         )
       ).json<RessursState[]>(),
   });
 }
 
-export function getOrgenheterOptions(search: searchType) {
+export function getOrgenhetStatesOptions(search: searchType) {
   return queryOptions({
     queryKey: ["STATE", "ORGENHET", search],
     queryFn: async () =>
-      // TODO: udpate path
       (
         await ky.get(
-          `${API_BASE_URL}/sinks/orgenhet?${queryString.stringify(search, { skipNull: true })}`,
+          `${API_BASE_URL}/states/orgenhet?${queryString.stringify(search, { skipNull: true })}`,
         )
       ).json<OrgEnhetState[]>(),
   });

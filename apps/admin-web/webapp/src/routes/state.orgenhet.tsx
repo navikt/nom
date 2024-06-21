@@ -5,7 +5,7 @@ import sortBy from "lodash/sortBy";
 import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { getOrgenheterOptions, searchSchema } from "~/api/queries.ts";
+import { getOrgenhetStatesOptions, searchSchema } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
 import type { OrgEnhetState } from "~/types.ts";
@@ -35,7 +35,7 @@ function OrgenhetPage() {
   });
 
   const orgenheter = useSuspenseQuery({
-    ...getOrgenheterOptions(search),
+    ...getOrgenhetStatesOptions(search),
     gcTime: Number.POSITIVE_INFINITY,
     staleTime: Number.POSITIVE_INFINITY,
     select: (orgenheter) => orgenheter.slice(0, 100),

@@ -20,7 +20,7 @@ import static no.nav.nom.apps.admin.dto.RessursSearchParams.ressursSearchFilter;
 import static no.nav.nom.apps.admin.utils.safeSubList;
 
 @RestController
-@RequestMapping("/sinks")
+@RequestMapping("/states")
 @PreAuthorize("hasAuthority('ADMIN')")
 public class StateController {
 
