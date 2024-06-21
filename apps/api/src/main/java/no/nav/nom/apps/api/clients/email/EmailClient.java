@@ -45,17 +45,17 @@ public class EmailClient {
                 .retrieve()
                 .bodyToMono(Void.class)
                 .retryWhen(defaultRetry(emailClientProperties.maxAttempts(), emailClientProperties.backoffDurationMillis()))
-                .doOnError(Exception.class, (Exception webClientResponseException) -> {
-                    /*
-                    String errorMsg = String.format(
-                        "POST %s resulted in status %s with body %s",
-                        webClientResponseException.getRequest() != null ? webClientResponseException.getRequest().getURI() : "n/a",
-                        webClientResponseException.getStatusCode().value(),
-                        webClientResponseException.getResponseBodyAsString()
-                    );
-                    */
-                    String errorMsg = webClientResponseException.getMessage();
-                    logger.warn("Sending email fails: ", webClientResponseException.getMessage());
+                .doOnError(Exception.class, (Exception exception) -> {
+                    String errorMsg = exception.getMessage();
+                    if(exception instanceof WebClientResponseException){
+                        errorMsg = String.format(
+                            "POST %s resulted in status %s with body %s",
+                            ((WebClientResponseException) exception).getRequest() != null ? ((WebClientResponseException) exception).getRequest().getURI() : "n/a",
+                            ((WebClientResponseException) exception).getStatusCode().value(),
+                            ((WebClientResponseException) exception).getResponseBodyAsString()
+                        );
+                    }
+                    logger.warn("Sending email fails: {}", errorMsg);
                     throw new EmailClientUnforseenException(errorMsg);
                 });
         } else {
