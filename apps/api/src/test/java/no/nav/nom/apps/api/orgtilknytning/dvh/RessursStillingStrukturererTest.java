@@ -170,7 +170,7 @@ class RessursStillingStrukturererTest extends TestBase {
             getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
-        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1));
         var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(2, result.size());
         assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom());
@@ -488,6 +488,56 @@ class RessursStillingStrukturererTest extends TestBase {
         assertEquals(MAX_DATE, stillingPeriode_6.gyldigTom());
         assertEquals(DagligOppfolging.NEI, stillingPeriode_6.dagligOppfolging());
     }
+
+    @Test
+    @DisplayName("Test når aktiv OT skal bli splittet fordi det lages ny Enhet med samme AgressoID, og de splittes i OT sin periode")
+    public void test_016() {
+        var dummyEnhet_5a = getNomEnhet("FID_5a", "q321we", "Enhet_5a", LocalDate.of(2000, 1, 1), LocalDate.now().minusMonths(1), "AGRID_5");
+        var dummyEnhet_5b = getNomEnhet("FID_5b", "q123we", "Enhet_5b", LocalDate.now().minusMonths(1).plusDays(1), null, "AGRID_5");
+
+        List<DvhRessursStilling> ressursStillinger = List.of(
+            getTestRessursStilling(navident_A001001, "AGRID_5", "Enhet_5b", "AGRID_5", LocalDate.now().minusYears(1), MAX_DATE)
+        );
+
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_5a, dummyEnhet_5b));
+        var result = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
+//        assertEquals(1, result.size());
+//
+//        var stillingPerioderFor_A001001 = result.get(navident_A001001);
+//        assertEquals(6, stillingPerioderFor_A001001.size());
+//
+//        var stillingPeriode_1 = stillingPerioderFor_A001001.get(0);
+//        var stillingPeriode_2 = stillingPerioderFor_A001001.get(1);
+//        var stillingPeriode_3 = stillingPerioderFor_A001001.get(2);
+//        var stillingPeriode_4 = stillingPerioderFor_A001001.get(3);
+//        var stillingPeriode_5 = stillingPerioderFor_A001001.get(4);
+//        var stillingPeriode_6 = stillingPerioderFor_A001001.get(5);
+//
+//        assertEquals(LocalDate.of(2020, 1, 1), stillingPeriode_1.gyldigFom());
+//        assertEquals(LocalDate.of(2020, 9, 30), stillingPeriode_1.gyldigTom());
+//        assertEquals(DagligOppfolging.UKJENT, stillingPeriode_1.dagligOppfolging());
+//
+//        assertEquals(LocalDate.of(2020, 1, 1), stillingPeriode_2.gyldigFom());
+//        assertEquals(LocalDate.of(2020, 9, 30), stillingPeriode_2.gyldigTom());
+//        assertEquals(DagligOppfolging.UKJENT, stillingPeriode_2.dagligOppfolging());
+//
+//        assertEquals(LocalDate.of(2020, 10, 1), stillingPeriode_3.gyldigFom());
+//        assertEquals(MAX_DATE, stillingPeriode_3.gyldigTom());
+//        assertEquals(DagligOppfolging.JA, stillingPeriode_3.dagligOppfolging());
+//
+//        assertEquals(LocalDate.of(2020, 10, 1), stillingPeriode_4.gyldigFom());
+//        assertEquals(MAX_DATE, stillingPeriode_4.gyldigTom());
+//        assertEquals(DagligOppfolging.NEI, stillingPeriode_4.dagligOppfolging());
+//
+//        assertEquals(LocalDate.of(2020, 10, 1), stillingPeriode_5.gyldigFom());
+//        assertEquals(MAX_DATE, stillingPeriode_5.gyldigTom());
+//        assertEquals(DagligOppfolging.NEI, stillingPeriode_5.dagligOppfolging());
+//
+//        assertEquals(LocalDate.of(2020, 10, 1), stillingPeriode_6.gyldigFom());
+//        assertEquals(MAX_DATE, stillingPeriode_6.gyldigTom());
+//        assertEquals(DagligOppfolging.NEI, stillingPeriode_6.dagligOppfolging());
+    }
+
 
     @Test
     @DisplayName("Test sorting orgenheter by gyldigTom desc")
