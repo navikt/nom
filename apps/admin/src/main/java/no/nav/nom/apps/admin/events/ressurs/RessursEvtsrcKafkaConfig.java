@@ -1,8 +1,8 @@
-package no.nav.nom.apps.admin;
+package no.nav.nom.apps.admin.events.ressurs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
+import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -18,22 +18,22 @@ import java.time.Duration;
 @Slf4j
 @Configuration
 @EnableKafka
-public class OrgenhetEvtsrcKafkaConfig {
+public class RessursEvtsrcKafkaConfig {
 
     @Bean
-    ConsumerFactory<String, OrgEnhetEvent> orgenhetEvtsrcConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+    ConsumerFactory<String, RessursEvent> ressursEvtsrcConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
         return new DefaultKafkaConsumerFactory<>(
             properties.buildConsumerProperties(),
             new StringDeserializer(),
-            new JsonDeserializer<>(OrgEnhetEvent.class, objectMapper)
+            new JsonDeserializer<>(RessursEvent.class, objectMapper)
         );
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, OrgEnhetEvent> orgenhetEvtsrcKafkaListenerContainerFactory(
-        ConsumerFactory<String, OrgEnhetEvent> consumerFactory
+    ConcurrentKafkaListenerContainerFactory<String, RessursEvent> ressursEvtsrcKafkaListenerContainerFactory(
+        ConsumerFactory<String, RessursEvent> consumerFactory
     ) {
-        final var factory = new ConcurrentKafkaListenerContainerFactory<String, OrgEnhetEvent>();
+        final var factory = new ConcurrentKafkaListenerContainerFactory<String, RessursEvent>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);
         factory.getContainerProperties().setIdleEventInterval(5 * 1000L);

@@ -13,6 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as SinksImport } from './routes/sinks'
 import { Route as IndexImport } from './routes/index'
+import { Route as SinksTilgangImport } from './routes/sinks.tilgang'
 import { Route as SinksRessursImport } from './routes/sinks.ressurs'
 import { Route as SinksOrgenhetImport } from './routes/sinks.orgenhet'
 
@@ -26,6 +27,11 @@ const SinksRoute = SinksImport.update({
 const IndexRoute = IndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const SinksTilgangRoute = SinksTilgangImport.update({
+  path: '/tilgang',
+  getParentRoute: () => SinksRoute,
 } as any)
 
 const SinksRessursRoute = SinksRessursImport.update({
@@ -70,6 +76,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SinksRessursImport
       parentRoute: typeof SinksImport
     }
+    '/sinks/tilgang': {
+      id: '/sinks/tilgang'
+      path: '/tilgang'
+      fullPath: '/sinks/tilgang'
+      preLoaderRoute: typeof SinksTilgangImport
+      parentRoute: typeof SinksImport
+    }
   }
 }
 
@@ -77,7 +90,11 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren({
   IndexRoute,
-  SinksRoute: SinksRoute.addChildren({ SinksOrgenhetRoute, SinksRessursRoute }),
+  SinksRoute: SinksRoute.addChildren({
+    SinksOrgenhetRoute,
+    SinksRessursRoute,
+    SinksTilgangRoute,
+  }),
 })
 
 /* prettier-ignore-end */
@@ -99,7 +116,8 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "sinks.tsx",
       "children": [
         "/sinks/orgenhet",
-        "/sinks/ressurs"
+        "/sinks/ressurs",
+        "/sinks/tilgang"
       ]
     },
     "/sinks/orgenhet": {
@@ -108,6 +126,10 @@ export const routeTree = rootRoute.addChildren({
     },
     "/sinks/ressurs": {
       "filePath": "sinks.ressurs.tsx",
+      "parent": "/sinks"
+    },
+    "/sinks/tilgang": {
+      "filePath": "sinks.tilgang.tsx",
       "parent": "/sinks"
     }
   }
