@@ -75,8 +75,7 @@ function RessursHistoryPage() {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- events can be of any type */}
-          {ressursEvents.map((ressursEvent: any, index: number) => {
+          {ressursEvents.map((ressursEvent, index) => {
             return (
               <Table.Row key={index}>
                 <Table.DataCell>
@@ -100,8 +99,7 @@ function RessursHistoryPage() {
                   )}
                 </Table.DataCell>
                 <Table.DataCell>
-                  {ressursEvent.metadata.inputMetadata.inputInterfaceMethodName}{" "}
-                  via {ressursEvent.metadata.inputMetadata.inputInterfaceName}
+                  {`Utført av ${ressursEvent.metadata.inputMetadata.origination.initiatedBy} fra ${ressursEvent.metadata.inputMetadata.origination.initiatedFrom}`}
                 </Table.DataCell>
               </Table.Row>
             );

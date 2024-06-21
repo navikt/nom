@@ -83,6 +83,9 @@ spec:
         - application: nom-ui2
           namespace: org
           cluster: prod-gcp
+        - application: nom-admin-web
+          namespace: org
+          cluster: dev-gcp
         - application: team-catalog-frackend
           namespace: org
         - application: org-ekstern-proxy

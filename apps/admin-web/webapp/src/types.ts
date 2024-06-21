@@ -4,7 +4,14 @@ export type Visningsnavn = {
   mellomnavn?: string;
 };
 
-export type KafkaEvent = { metadata: MetaData; [key: string]: unknown };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type KafkaEvent<DATA = any, ADDITIONALDATA = any> = {
+  metadata: MetaData;
+  type: string;
+  fid: string;
+  data: DATA;
+  additionalData: ADDITIONALDATA;
+};
 
 export type MetaData = {
   inputMetadata: InputMetadata;

@@ -14,6 +14,12 @@ export const searchSchema = z.object({
 
 type searchType = z.infer<typeof searchSchema>;
 
+export const CACHE_FOR = {
+  aMinute: 1000 * 60,
+  anHour: 1000 * 60 * 60,
+  aDay: 1000 * 60 * 60 * 24,
+};
+
 export function getRessursEventsOptions(search: searchType) {
   return queryOptions({
     queryKey: ["EVENTS", "RESSURS", search],
