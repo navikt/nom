@@ -23,15 +23,14 @@
 
     <appender name="SECURE_LOGS" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>/secure-logs/secure.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <!-- rollover daily -->
-            <fileNamePattern>secure-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
-            <!-- each file should be at most 50MB, keep 1 month worth of history(?), but at most 120MB -->
-            <!-- SecureLogs volume har 128MB limit : https://docs.nais.io/observability/logging/how-to/enable-secure-logs/?h=secure#set-log-rotation -->
-            <maxFileSize>50MB</maxFileSize>
-            <maxHistory>1</maxHistory>
-            <totalSizeCap>120MB</totalSizeCap>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>/secure-logs/secure.log.%i</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>1</maxIndex>
         </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>50MB</maxFileSize>
+        </triggeringPolicy>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <!-- Deny log messages not having marker SECURE_LOGS -->
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
