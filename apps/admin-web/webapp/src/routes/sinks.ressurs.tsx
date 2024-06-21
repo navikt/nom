@@ -6,6 +6,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { useForm } from "react-hook-form";
 
 import { getRessursEventsOptions, searchSchema } from "~/api/queries.ts";
+import { EventDateRange } from "~/components/EventDateRange.tsx";
 import { JsonModal } from "~/components/JsonModal.tsx";
 import { formatDisplayDatetime, formatVisningsnavn } from "~/utils.ts";
 
@@ -59,16 +60,10 @@ function RessursHistoryPage() {
   });
 
   const ressursEvents = ressursEventsQuery.data ?? [];
-  const latestEvent = ressursEvents[0];
-  const firstEvent = ressursEvents.at(-1);
 
   return (
     <div>
-      <div>
-        Viser {ressursEvents.length} events i perioden{" "}
-        {formatDisplayDatetime(firstEvent?.metadata.createdTimestamp)} -{" "}
-        {formatDisplayDatetime(latestEvent?.metadata.createdTimestamp)}
-      </div>
+      <EventDateRange events={ressursEvents} />
       <Table size="small">
         <Table.Header>
           <Table.Row>

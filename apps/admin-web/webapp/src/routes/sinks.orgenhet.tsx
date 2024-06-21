@@ -6,6 +6,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { useForm } from "react-hook-form";
 
 import { getOrgenhetEventsOptions, searchSchema } from "~/api/queries.ts";
+import { EventDateRange } from "~/components/EventDateRange.tsx";
 import { JsonModal } from "~/components/JsonModal.tsx";
 import { formatDisplayDatetime } from "~/utils.ts";
 
@@ -59,16 +60,10 @@ function OrgenhetHistoryPage() {
   });
 
   const orgEnhetEvents = orgEnhetEventsQuery.data;
-  const latestEvent = orgEnhetEvents[0];
-  const firstEvent = orgEnhetEvents.at(-1);
 
   return (
     <div>
-      <div>
-        Viser {orgEnhetEvents.length} events i perioden{" "}
-        {formatDisplayDatetime(firstEvent?.metadata.createdTimestamp)} -{" "}
-        {formatDisplayDatetime(latestEvent?.metadata.createdTimestamp)}
-      </div>
+      <EventDateRange events={orgEnhetEvents} />
       <Table size="small">
         <Table.Header>
           <Table.Row>

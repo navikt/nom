@@ -21,7 +21,7 @@
     "morgan": "1.10.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "7.10.0",
+    "@typescript-eslint/eslint-plugin": "7.13.1",
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-import": "2.29.1",
@@ -29,7 +29,7 @@
     "eslint-plugin-react": "7.34.1",
     "eslint-plugin-simple-import-sort": "12.1.0",
     "eslint-plugin-unicorn": "53.0.0",
-    "prettier": "3.2.5",
-    "typescript": "5.4.5"
+    "prettier": "3.3.2",
+    "typescript": "5.5.2"
   }
 }

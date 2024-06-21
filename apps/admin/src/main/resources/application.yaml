@@ -7,6 +7,9 @@ app:
     orgenhet:
       eventsourceTopic: org.nom.orgenhet-eventsource
       eventsource-listener-id: nom-admin_orgenhetEvtsrcListener_${HOSTNAME}
+    authorize:
+      eventsourceTopic: org.nom.nom-authorize-eventsource
+      eventsource-listener-id: nom-admin_authorizeEvtsrcListener_${HOSTNAME}
 
 nom.libs.state.ressurs.enabled: true
 nom.libs.state.orgenhet.enabled: true
