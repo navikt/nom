@@ -38,7 +38,6 @@ function OrgenhetPage() {
     ...getOrgenhetStatesOptions(search),
     gcTime: Number.POSITIVE_INFINITY,
     staleTime: Number.POSITIVE_INFINITY,
-    select: (orgenheter) => orgenheter.slice(0, 100),
   }).data;
 
   const handleSort = (sortKey: string | undefined) => {

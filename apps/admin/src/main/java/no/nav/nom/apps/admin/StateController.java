@@ -1,10 +1,7 @@
 package no.nav.nom.apps.admin;
 
-import jakarta.validation.Valid;
-
-import no.nav.nom.apps.admin.dto.EventSearchParams;
+import no.nav.nom.apps.admin.dto.OrgenhetStateSearchParams;
 import no.nav.nom.apps.admin.dto.RessursSearchParams;
-import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
@@ -14,8 +11,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
+import static no.nav.nom.apps.admin.dto.OrgenhetStateSearchParams.orgenhetSearchFilter;
 import static no.nav.nom.apps.admin.dto.RessursSearchParams.ressursSearchFilter;
 import static no.nav.nom.apps.admin.utils.safeSubList;
 
@@ -36,13 +35,16 @@ public class StateController {
     @GetMapping(value = "/ressurs")
     public List<RessursState> getRessurser(@Valid RessursSearchParams ressursSearchParams) {
         int fromOffset = ressursSearchParams. getFromOffset();
-        List<RessursState> events = ressursStateRepository.getAll().stream().filter(ressursSearchFilter(ressursSearchParams)).toList();
+        var events = ressursStateRepository.getAll().stream().filter(ressursSearchFilter(ressursSearchParams)).toList();
 
         return safeSubList(events, fromOffset, fromOffset + 100);
     }
 
     @GetMapping(value = "/orgenhet")
-    public List<OrgEnhetState> getOrgenheter(@Valid EventSearchParams eventSearchParams) {
-        return orgEnhetStateRepository.getAll().stream().toList();
+    public List<OrgEnhetState> getOrgenheter(@Valid OrgenhetStateSearchParams orgenhetStateSearchParams) {
+        int fromOffset = orgenhetStateSearchParams. getFromOffset();
+        var events = orgEnhetStateRepository.getAll().stream().filter(orgenhetSearchFilter(orgenhetStateSearchParams)).toList();
+
+        return safeSubList(events, fromOffset, fromOffset + 100);
     }
 }
