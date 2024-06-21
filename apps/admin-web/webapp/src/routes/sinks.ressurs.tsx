@@ -99,19 +99,23 @@ function RessursHistoryPage() {
                     ressursEvent.metadata?.createdTimestamp,
                   )}
                 </Table.DataCell>
-                <Table.DataCell>
+                <Table.DataCell className="text-medium">
                   Utført av{" "}
-                  <NavidentNameLookup
-                    navident={
-                      ressursEvent.metadata.inputMetadata.origination
-                        .initiatedBy
-                    }
-                  />{" "}
+                  <b>
+                    <NavidentNameLookup
+                      navident={
+                        ressursEvent.metadata.inputMetadata.origination
+                          .initiatedBy
+                      }
+                    />{" "}
+                  </b>
                   fra{" "}
-                  {
-                    ressursEvent.metadata.inputMetadata.origination
-                      .initiatedFrom
-                  }
+                  <b>
+                    {
+                      ressursEvent.metadata.inputMetadata.origination
+                        .initiatedFrom
+                    }
+                  </b>
                 </Table.DataCell>
               </Table.Row>
             );
