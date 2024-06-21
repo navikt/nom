@@ -1,13 +1,13 @@
-import { Alert, Button, Link, Table, TextField } from "@navikt/ds-react";
+import { Alert, Link, Table } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { useForm } from "react-hook-form";
 
 import { getTilgangEventsOptions, searchSchema } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { EventDateRange } from "~/components/EventDateRange.tsx";
+import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
 import { JsonModal } from "~/components/JsonModal.tsx";
 import { NavidentNameLookup } from "~/components/NavidentNameLookup.tsx";
 import { formatDisplayDatetime } from "~/utils.ts";
@@ -18,39 +18,20 @@ export const Route = createFileRoute("/sinks/tilgang")({
     context.queryClient.prefetchQuery(getTilgangEventsOptions(deps));
   },
   validateSearch: searchSchema.parse,
-  component: () => (
-    <>
-      <SearchBar />
-      <ErrorBoundary fallback={<Alert variant="error">Noe gikk galt</Alert>}>
-        <Suspense fallback={<BigLoader />}>
-          <TilgangHistoryPage />
-        </Suspense>
-      </ErrorBoundary>
-    </>
-  ),
+  component: () => {
+    const search = Route.useSearch();
+    return (
+      <>
+        <GenericSearchBar search={search} />
+        <ErrorBoundary fallback={<Alert variant="error">Noe gikk galt</Alert>}>
+          <Suspense fallback={<BigLoader />}>
+            <TilgangHistoryPage />
+          </Suspense>
+        </ErrorBoundary>
+      </>
+    );
+  },
 });
-
-function SearchBar() {
-  const search = Route.useSearch();
-  const methods = useForm({ defaultValues: search });
-  const navigate = useNavigate();
-
-  const submitHandler = methods.handleSubmit((values) => {
-    navigate({
-      search: (prev) => ({ ...prev, ...values }),
-    });
-  });
-
-  return (
-    <form className="flex gap-4 p-6" onSubmit={submitHandler}>
-      <TextField label="Vilkårlig tekst" {...methods.register("filterText")} />
-      <TextField label="Fra offset" {...methods.register("fromOffset")} />
-      <Button className="h-fit mt-8" type="submit">
-        Søk
-      </Button>
-    </form>
-  );
-}
 
 function TilgangHistoryPage() {
   const search = Route.useSearch();
