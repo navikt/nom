@@ -11,13 +11,23 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as StateImport } from './routes/state'
 import { Route as SinksImport } from './routes/sinks'
 import { Route as IndexImport } from './routes/index'
+import { Route as StateIndexImport } from './routes/state.index'
+import { Route as SinksIndexImport } from './routes/sinks.index'
+import { Route as StateRessursImport } from './routes/state.ressurs'
+import { Route as StateOrgenhetImport } from './routes/state.orgenhet'
 import { Route as SinksTilgangImport } from './routes/sinks.tilgang'
 import { Route as SinksRessursImport } from './routes/sinks.ressurs'
 import { Route as SinksOrgenhetImport } from './routes/sinks.orgenhet'
 
 // Create/Update Routes
+
+const StateRoute = StateImport.update({
+  path: '/state',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const SinksRoute = SinksImport.update({
   path: '/sinks',
@@ -27,6 +37,26 @@ const SinksRoute = SinksImport.update({
 const IndexRoute = IndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const StateIndexRoute = StateIndexImport.update({
+  path: '/',
+  getParentRoute: () => StateRoute,
+} as any)
+
+const SinksIndexRoute = SinksIndexImport.update({
+  path: '/',
+  getParentRoute: () => SinksRoute,
+} as any)
+
+const StateRessursRoute = StateRessursImport.update({
+  path: '/ressurs',
+  getParentRoute: () => StateRoute,
+} as any)
+
+const StateOrgenhetRoute = StateOrgenhetImport.update({
+  path: '/orgenhet',
+  getParentRoute: () => StateRoute,
 } as any)
 
 const SinksTilgangRoute = SinksTilgangImport.update({
@@ -62,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SinksImport
       parentRoute: typeof rootRoute
     }
+    '/state': {
+      id: '/state'
+      path: '/state'
+      fullPath: '/state'
+      preLoaderRoute: typeof StateImport
+      parentRoute: typeof rootRoute
+    }
     '/sinks/orgenhet': {
       id: '/sinks/orgenhet'
       path: '/orgenhet'
@@ -83,6 +120,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SinksTilgangImport
       parentRoute: typeof SinksImport
     }
+    '/state/orgenhet': {
+      id: '/state/orgenhet'
+      path: '/orgenhet'
+      fullPath: '/state/orgenhet'
+      preLoaderRoute: typeof StateOrgenhetImport
+      parentRoute: typeof StateImport
+    }
+    '/state/ressurs': {
+      id: '/state/ressurs'
+      path: '/ressurs'
+      fullPath: '/state/ressurs'
+      preLoaderRoute: typeof StateRessursImport
+      parentRoute: typeof StateImport
+    }
+    '/sinks/': {
+      id: '/sinks/'
+      path: '/'
+      fullPath: '/sinks/'
+      preLoaderRoute: typeof SinksIndexImport
+      parentRoute: typeof SinksImport
+    }
+    '/state/': {
+      id: '/state/'
+      path: '/'
+      fullPath: '/state/'
+      preLoaderRoute: typeof StateIndexImport
+      parentRoute: typeof StateImport
+    }
   }
 }
 
@@ -94,6 +159,12 @@ export const routeTree = rootRoute.addChildren({
     SinksOrgenhetRoute,
     SinksRessursRoute,
     SinksTilgangRoute,
+    SinksIndexRoute,
+  }),
+  StateRoute: StateRoute.addChildren({
+    StateOrgenhetRoute,
+    StateRessursRoute,
+    StateIndexRoute,
   }),
 })
 
@@ -106,7 +177,8 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/sinks"
+        "/sinks",
+        "/state"
       ]
     },
     "/": {
@@ -117,7 +189,16 @@ export const routeTree = rootRoute.addChildren({
       "children": [
         "/sinks/orgenhet",
         "/sinks/ressurs",
-        "/sinks/tilgang"
+        "/sinks/tilgang",
+        "/sinks/"
+      ]
+    },
+    "/state": {
+      "filePath": "state.tsx",
+      "children": [
+        "/state/orgenhet",
+        "/state/ressurs",
+        "/state/"
       ]
     },
     "/sinks/orgenhet": {
@@ -131,6 +212,22 @@ export const routeTree = rootRoute.addChildren({
     "/sinks/tilgang": {
       "filePath": "sinks.tilgang.tsx",
       "parent": "/sinks"
+    },
+    "/state/orgenhet": {
+      "filePath": "state.orgenhet.tsx",
+      "parent": "/state"
+    },
+    "/state/ressurs": {
+      "filePath": "state.ressurs.tsx",
+      "parent": "/state"
+    },
+    "/sinks/": {
+      "filePath": "sinks.index.tsx",
+      "parent": "/sinks"
+    },
+    "/state/": {
+      "filePath": "state.index.tsx",
+      "parent": "/state"
     }
   }
 }

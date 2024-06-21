@@ -1,3 +1,4 @@
 /src/vite-env.d.ts
 /dist
 /src/routeTree.gen.ts
+/src/api-types.ts

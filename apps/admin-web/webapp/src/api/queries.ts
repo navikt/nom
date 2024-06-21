@@ -3,7 +3,12 @@ import ky from "ky";
 import queryString from "query-string";
 import { z } from "zod";
 
-import type { KafkaEvent } from "~/types.ts";
+import type { RessursState } from "~/api-types.ts";
+import type {
+  DelegertAuthorizationFelles,
+  KafkaEvent,
+  OrgEnhetState,
+} from "~/types.ts";
 const API_BASE_URL = "/frackend/admin-api";
 
 export const searchSchema = z.object({
@@ -12,7 +17,7 @@ export const searchSchema = z.object({
   fromOffset: z.number().optional().catch(0),
 });
 
-type searchType = z.infer<typeof searchSchema>;
+export type searchType = z.infer<typeof searchSchema>;
 
 export const CACHE_FOR = {
   aMinute: 1000 * 60,
@@ -40,7 +45,7 @@ export function getTilgangEventsOptions(search: searchType) {
         await ky.get(
           `${API_BASE_URL}/sinks/tilgangEvents?${queryString.stringify(search, { skipNull: true })}`,
         )
-      ).json<KafkaEvent[]>(),
+      ).json<KafkaEvent<DelegertAuthorizationFelles>[]>(),
   });
 }
 
@@ -53,5 +58,31 @@ export function getOrgenhetEventsOptions(search: searchType) {
           `${API_BASE_URL}/sinks/orgenhetEvents?${queryString.stringify(search, { skipNull: true })}`,
         )
       ).json<KafkaEvent[]>(),
+  });
+}
+
+export function getRessurserOptions(search: searchType) {
+  return queryOptions({
+    queryKey: ["STATE", "RESSURS", search],
+    queryFn: async () =>
+      // TODO: udpate path
+      (
+        await ky.get(
+          `${API_BASE_URL}/sinks/ressurs?${queryString.stringify(search, { skipNull: true })}`,
+        )
+      ).json<RessursState[]>(),
+  });
+}
+
+export function getOrgenheterOptions(search: searchType) {
+  return queryOptions({
+    queryKey: ["STATE", "ORGENHET", search],
+    queryFn: async () =>
+      // TODO: udpate path
+      (
+        await ky.get(
+          `${API_BASE_URL}/sinks/orgenhet?${queryString.stringify(search, { skipNull: true })}`,
+        )
+      ).json<OrgEnhetState[]>(),
   });
 }

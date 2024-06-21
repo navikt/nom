@@ -6,9 +6,11 @@ import { ErrorBoundary } from "react-error-boundary";
 import { useForm } from "react-hook-form";
 
 import { getTilgangEventsOptions, searchSchema } from "~/api/queries.ts";
+import { BigLoader } from "~/components/BigLoader.tsx";
 import { EventDateRange } from "~/components/EventDateRange.tsx";
 import { JsonModal } from "~/components/JsonModal.tsx";
-import { formatDisplayDatetime, formatVisningsnavn } from "~/utils.ts";
+import { NavidentNameLookup } from "~/components/NavidentNameLookup.tsx";
+import { formatDisplayDatetime } from "~/utils.ts";
 
 export const Route = createFileRoute("/sinks/tilgang")({
   loaderDeps: ({ search }) => search,
@@ -20,7 +22,7 @@ export const Route = createFileRoute("/sinks/tilgang")({
     <>
       <SearchBar />
       <ErrorBoundary fallback={<Alert variant="error">Noe gikk galt</Alert>}>
-        <Suspense fallback="aaa">
+        <Suspense fallback={<BigLoader />}>
           <TilgangHistoryPage />
         </Suspense>
       </ErrorBoundary>
@@ -68,28 +70,32 @@ function TilgangHistoryPage() {
       <Table size="small">
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeader scope="col">Navident</Table.ColumnHeader>
-            <Table.ColumnHeader scope="col">Navn</Table.ColumnHeader>
+            <Table.ColumnHeader scope="col">Fra</Table.ColumnHeader>
+            <Table.ColumnHeader scope="col">Til</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Endring</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Dato</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Opprinnelse</Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- events can be of any type */}
-          {tilgangEvents.map((tilgangEvent: any, index: number) => {
+          {tilgangEvents.map((tilgangEvent, index) => {
             return (
               <Table.Row key={index}>
                 <Table.DataCell>
                   <Link
-                    href={`http://nom.nav.no/tilgang/${tilgangEvent.additionalData?.navident}`}
+                    href={`http://nom.nav.no/ressurs/${tilgangEvent.data.av}`}
                     target="_blank"
                   >
-                    {tilgangEvent.additionalData?.navident}
+                    <NavidentNameLookup navident={tilgangEvent.data.av} />
                   </Link>
                 </Table.DataCell>
                 <Table.DataCell scope="row">
-                  {formatVisningsnavn(tilgangEvent.data?.visningsnavn)}
+                  <Link
+                    href={`http://nom.nav.no/ressurs/${tilgangEvent.data.til}`}
+                    target="_blank"
+                  >
+                    <NavidentNameLookup navident={tilgangEvent.data.til} />
+                  </Link>
                 </Table.DataCell>
 
                 <Table.DataCell>

@@ -1,14 +1,15 @@
-import { Alert, Button, Link, Table, TextField } from "@navikt/ds-react";
+import { Alert, Link, Table } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { useForm } from "react-hook-form";
 
 import { getRessursEventsOptions, searchSchema } from "~/api/queries.ts";
+import { BigLoader } from "~/components/BigLoader.tsx";
 import { EventDateRange } from "~/components/EventDateRange.tsx";
+import { EventOrigination } from "~/components/EventOrigination.tsx";
+import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
 import { JsonModal } from "~/components/JsonModal.tsx";
-import { NavidentNameLookup } from "~/components/NavidentNameLookup.tsx";
 import { formatDisplayDatetime, formatVisningsnavn } from "~/utils.ts";
 
 export const Route = createFileRoute("/sinks/ressurs")({
@@ -17,39 +18,20 @@ export const Route = createFileRoute("/sinks/ressurs")({
     context.queryClient.prefetchQuery(getRessursEventsOptions(deps));
   },
   validateSearch: searchSchema.parse,
-  component: () => (
-    <>
-      <SearchBar />
-      <ErrorBoundary fallback={<Alert variant="error">Noe gikk galt</Alert>}>
-        <Suspense fallback="aaa">
-          <RessursHistoryPage />
-        </Suspense>
-      </ErrorBoundary>
-    </>
-  ),
+  component: () => {
+    const search = Route.useSearch();
+    return (
+      <>
+        <GenericSearchBar search={search} />
+        <ErrorBoundary fallback={<Alert variant="error">Noe gikk galt</Alert>}>
+          <Suspense fallback={<BigLoader />}>
+            <RessursHistoryPage />
+          </Suspense>
+        </ErrorBoundary>
+      </>
+    );
+  },
 });
-
-function SearchBar() {
-  const search = Route.useSearch();
-  const methods = useForm({ defaultValues: search });
-  const navigate = useNavigate();
-
-  const submitHandler = methods.handleSubmit((values) => {
-    navigate({
-      search: (prev) => ({ ...prev, ...values }),
-    });
-  });
-
-  return (
-    <form className="flex gap-4 p-6" onSubmit={submitHandler}>
-      <TextField label="Vilkårlig tekst" {...methods.register("filterText")} />
-      <TextField label="Fra offset" {...methods.register("fromOffset")} />
-      <Button className="h-fit mt-8" type="submit">
-        Søk
-      </Button>
-    </form>
-  );
-}
 
 function RessursHistoryPage() {
   const search = Route.useSearch();
@@ -96,26 +78,11 @@ function RessursHistoryPage() {
                 </Table.DataCell>
                 <Table.DataCell>
                   {formatDisplayDatetime(
-                    ressursEvent.metadata?.createdTimestamp,
+                    ressursEvent.metadata.createdTimestamp,
                   )}
                 </Table.DataCell>
-                <Table.DataCell className="text-medium">
-                  Utført av{" "}
-                  <b>
-                    <NavidentNameLookup
-                      navident={
-                        ressursEvent.metadata.inputMetadata.origination
-                          .initiatedBy
-                      }
-                    />{" "}
-                  </b>
-                  fra{" "}
-                  <b>
-                    {
-                      ressursEvent.metadata.inputMetadata.origination
-                        .initiatedFrom
-                    }
-                  </b>
+                <Table.DataCell>
+                  <EventOrigination metadata={ressursEvent.metadata} />
                 </Table.DataCell>
               </Table.Row>
             );
