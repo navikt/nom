@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { getRessursEventsOptions, searchSchema } from "~/api/queries.ts";
 import { EventDateRange } from "~/components/EventDateRange.tsx";
 import { JsonModal } from "~/components/JsonModal.tsx";
+import { NavidentNameLookup } from "~/components/NavidentNameLookup.tsx";
 import { formatDisplayDatetime, formatVisningsnavn } from "~/utils.ts";
 
 export const Route = createFileRoute("/sinks/ressurs")({
@@ -99,7 +100,18 @@ function RessursHistoryPage() {
                   )}
                 </Table.DataCell>
                 <Table.DataCell>
-                  {`Utført av ${ressursEvent.metadata.inputMetadata.origination.initiatedBy} fra ${ressursEvent.metadata.inputMetadata.origination.initiatedFrom}`}
+                  Utført av{" "}
+                  <NavidentNameLookup
+                    navident={
+                      ressursEvent.metadata.inputMetadata.origination
+                        .initiatedBy
+                    }
+                  />{" "}
+                  fra{" "}
+                  {
+                    ressursEvent.metadata.inputMetadata.origination
+                      .initiatedFrom
+                  }
                 </Table.DataCell>
               </Table.Row>
             );
