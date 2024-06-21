@@ -6,7 +6,9 @@ import { ErrorBoundary } from "react-error-boundary";
 import { useForm } from "react-hook-form";
 
 import { getRessursEventsOptions, searchSchema } from "~/api/queries.ts";
+import { EventDateRange } from "~/components/EventDateRange.tsx";
 import { JsonModal } from "~/components/JsonModal.tsx";
+import { NavidentNameLookup } from "~/components/NavidentNameLookup.tsx";
 import { formatDisplayDatetime, formatVisningsnavn } from "~/utils.ts";
 
 export const Route = createFileRoute("/sinks/ressurs")({
@@ -59,16 +61,10 @@ function RessursHistoryPage() {
   });
 
   const ressursEvents = ressursEventsQuery.data ?? [];
-  const latestEvent = ressursEvents[0];
-  const firstEvent = ressursEvents.at(-1);
 
   return (
     <div>
-      <div>
-        Viser {ressursEvents.length} events i perioden{" "}
-        {formatDisplayDatetime(firstEvent?.metadata.createdTimestamp)} -{" "}
-        {formatDisplayDatetime(latestEvent?.metadata.createdTimestamp)}
-      </div>
+      <EventDateRange events={ressursEvents} />
       <Table size="small">
         <Table.Header>
           <Table.Row>
@@ -80,8 +76,7 @@ function RessursHistoryPage() {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- events can be of any type */}
-          {ressursEvents.map((ressursEvent: any, index: number) => {
+          {ressursEvents.map((ressursEvent, index) => {
             return (
               <Table.Row key={index}>
                 <Table.DataCell>
@@ -104,9 +99,23 @@ function RessursHistoryPage() {
                     ressursEvent.metadata?.createdTimestamp,
                   )}
                 </Table.DataCell>
-                <Table.DataCell>
-                  {ressursEvent.metadata.inputMetadata.inputInterfaceMethodName}{" "}
-                  via {ressursEvent.metadata.inputMetadata.inputInterfaceName}
+                <Table.DataCell className="text-medium">
+                  Utført av{" "}
+                  <b>
+                    <NavidentNameLookup
+                      navident={
+                        ressursEvent.metadata.inputMetadata.origination
+                          .initiatedBy
+                      }
+                    />{" "}
+                  </b>
+                  fra{" "}
+                  <b>
+                    {
+                      ressursEvent.metadata.inputMetadata.origination
+                        .initiatedFrom
+                    }
+                  </b>
                 </Table.DataCell>
               </Table.Row>
             );

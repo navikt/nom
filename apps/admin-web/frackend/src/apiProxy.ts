@@ -17,6 +17,13 @@ export const setupNomAdminApiProxy = (app: Express) =>
     scope: config.proxy.nomAdminApiScope,
   });
 
+export const setupNomApiProxy = (app: Express) =>
+  addProxyHandler(app, {
+    ingoingUrl: "/frackend/api",
+    outgoingUrl: config.proxy.nomApiUrl,
+    scope: config.proxy.nomApiScope,
+  });
+
 export function addProxyHandler(
   server: Express,
   { ingoingUrl, outgoingUrl, scope }: ProxyOptions,

@@ -1,4 +1,4 @@
-package no.nav.nom.apps.admin;
+package no.nav.nom.apps.admin.events.orgenhet;
 
 import lombok.Getter;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;

@@ -33,6 +33,9 @@ spec:
         - application: nom-admin
           namespace: org
           cluster: dev-gcp
+        - application: nom-api
+          namespace: nom
+          cluster: dev-gcp
   ingresses:
     - https://nom-admin.ansatt.dev.nav.no
     - https://nom-admin.intern.dev.nav.no
@@ -74,4 +77,8 @@ spec:
       value: http://nom-admin.org.svc.cluster.local
     - name: NOM_ADMIN_API_SCOPE
       value: api://dev-gcp.org.nom-admin/.default
+    - name: NOM_API_URL
+      value: http://nom-api.nom.svc.cluster.local
+    - name: NOM_API_SCOPE
+      value: api://dev-gcp.nom.nom-api/.default
 

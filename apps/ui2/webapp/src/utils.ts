@@ -151,3 +151,15 @@ export function earliestDate(date1: Date, date2: Date) {
 export function latestDate(date1: Date, date2: Date) {
   return isSameDateOrAfter(date1, date2) ? date1 : date2;
 }
+
+export function promiseIsFulfilled<T>(
+  promise: PromiseSettledResult<T>,
+): promise is PromiseFulfilledResult<T> {
+  return promise.status === "fulfilled";
+}
+
+export function promiseIsRejected<T>(
+  promise: PromiseSettledResult<T>,
+): promise is PromiseRejectedResult {
+  return promise.status === "rejected";
+}

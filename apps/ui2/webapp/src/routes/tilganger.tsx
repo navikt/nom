@@ -14,6 +14,7 @@ import {
 } from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import type { AxiosError } from "axios";
 import { isSameDay, subDays } from "date-fns";
 import sortBy from "lodash/sortBy";
 import React, { useState } from "react";
@@ -30,6 +31,7 @@ import {
   getTilgangerDelegertTilMegOptions,
   tilgangerKeys,
 } from "~/api/react-query-endpoints";
+import { ApiResponseError } from "~/components/ApiResponseError";
 import ContentWrapper from "~/components/ContentWrapper";
 import { NavidentNameLookup } from "~/components/NavidentNameLookup";
 import { PageBanner } from "~/components/PageBanner";
@@ -45,6 +47,8 @@ import {
   formatDateWithoutTimezone,
   formatDisplayDate,
   isSameDateOrAfter,
+  promiseIsFulfilled,
+  promiseIsRejected,
 } from "~/utils";
 
 export const Route = createFileRoute("/tilganger")({
@@ -63,9 +67,7 @@ export const Route = createFileRoute("/tilganger")({
 });
 
 function TilgangerPage() {
-  const { navident } = Route.useLoaderData();
-  const orgenheterLedetAvMeg =
-    useQuery(getOrgEnheterLedetAvOptions(navident)).data ?? [];
+  const { orgenheterLedetAvMeg } = Route.useLoaderData();
 
   const delegertTilMeg =
     useQuery(getTilgangerDelegertTilMegOptions()).data ?? [];
@@ -162,9 +164,9 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     resolver: yupResolver(tilgangSchema),
   });
 
-  const { mutate, isPending } = useMutation<
+  const { mutate, isPending, error } = useMutation<
     unknown,
-    unknown,
+    AxiosError<Error>,
     Record<string, { delegertTilNavident: string; gyldigTom: string }>
   >({
     mutationFn: async (values) => {
@@ -193,7 +195,16 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               });
         });
 
-      return Promise.allSettled(promises);
+      const settledPromises = await Promise.allSettled(promises);
+      // eslint-disable-next-line unicorn/no-array-callback-reference -- when using typeguard the function must be done this way
+      const fulfilled = settledPromises.filter(promiseIsFulfilled);
+      // eslint-disable-next-line unicorn/no-array-callback-reference
+      const rejected = settledPromises.filter(promiseIsRejected);
+
+      if (rejected.length > 0) {
+        throw rejected[0].reason;
+      }
+      return fulfilled;
     },
     onSettled: () => {
       queryClient.invalidateQueries({
@@ -279,6 +290,8 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             organisasjonsenheter
           </span>
         </VStack>
+
+        <ApiResponseError error={error} />
 
         {/*Normally you only use keys for arrays in react, but toggling buttons like this causes the form to submit even though it has type="button"*/}
         {/*This is a React peculiarity: https://github.com/facebook/react/issues/25089*/}

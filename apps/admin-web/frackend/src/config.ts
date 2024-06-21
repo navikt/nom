@@ -11,6 +11,8 @@ const azureAd = {
 const proxy = {
   nomAdminApiScope: requireEnvironment("NOM_ADMIN_API_SCOPE"),
   nomAdminApiUrl: requireEnvironment("NOM_ADMIN_API_URL"),
+  nomApiScope: requireEnvironment("NOM_API_SCOPE"),
+  nomApiUrl: requireEnvironment("NOM_API_URL"),
 };
 
 const app = {

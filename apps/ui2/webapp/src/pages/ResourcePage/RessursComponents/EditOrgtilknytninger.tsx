@@ -356,6 +356,7 @@ function OrgtilknytningForm({
           </Button>
 
           <Button
+            data-cy="lagre-button"
             icon={<FloppydiskIcon aria-hidden />}
             onClick={handleSubmitClick}
             size="small"
@@ -408,7 +409,9 @@ function NewOrgtilknytningFormPart({
           justify-content: space-between;
         `}
       >
-        <Heading size="medium">Legg til ny organisasjonstilknytning</Heading>
+        <Heading data-cy="ny-orgtilknytning-header" size="medium">
+          Legg til ny organisasjonstilknytning
+        </Heading>
 
         <Button
           icon={<MinusCircleIcon />}
@@ -525,6 +528,7 @@ function FormDateWrapper({
   return (
     <DatePicker {...datePickerProperties.datepickerProps}>
       <DatePicker.Input
+        data-cy={label.replaceAll(" ", "-")}
         error={error}
         ref={field.ref}
         {...datePickerProperties.inputProps}
@@ -725,7 +729,8 @@ function BekreftModalInnholdTomIFremtiden({
       <BodyLong>
         <b>
           Dette innebærer at etter {dato} vil {navn} ikke lenger være registrert
-          som medarbeider i NAV.
+          som medarbeider i NAV, og alle tilganger for medarbeideren vil bli
+          fjernet.
         </b>
       </BodyLong>
       <BodyLong>
@@ -825,6 +830,7 @@ const orgtilknytningSchema = yup.object().shape({
     }),
   gyldigTom: yup
     .string()
+    .nullable()
     .test({
       name: "gyldigTom-required",
       message: "Obligatorisk",
@@ -856,7 +862,7 @@ const formValuesSchema = yup.object().shape({
 });
 
 const validateMaxTime = (
-  value: string | undefined,
+  value: string | undefined | null,
   context: yup.TestContext<yup.AnyObject>,
 ) => {
   const ressursSektor = context?.options?.context?.ressursSektor;

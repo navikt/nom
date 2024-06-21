@@ -37,19 +37,25 @@ public class EmailClient {
 
     public Mono<Void> sendEmail(EmailMessage emailMessage) {
         if (emailClientProperties.isEnabled()) {
+            logger.info("Attempting sending email to: {}, url: {}",
+                emailMessage.message().toRecipients(),
+                emailClientProperties.baseUrl());
             return webClient.post()
                 .body(Mono.just(emailMessage), EmailMessage.class)
                 .retrieve()
                 .bodyToMono(Void.class)
                 .retryWhen(defaultRetry(emailClientProperties.maxAttempts(), emailClientProperties.backoffDurationMillis()))
-                .doOnError(WebClientResponseException.class, (WebClientResponseException webClientResponseException) -> {
+                .doOnError(Exception.class, (Exception webClientResponseException) -> {
+                    /*
                     String errorMsg = String.format(
                         "POST %s resulted in status %s with body %s",
                         webClientResponseException.getRequest() != null ? webClientResponseException.getRequest().getURI() : "n/a",
                         webClientResponseException.getStatusCode().value(),
                         webClientResponseException.getResponseBodyAsString()
                     );
-
+                    */
+                    String errorMsg = webClientResponseException.getMessage();
+                    logger.warn("Sending email fails: ", webClientResponseException.getMessage());
                     throw new EmailClientUnforseenException(errorMsg);
                 });
         } else {
