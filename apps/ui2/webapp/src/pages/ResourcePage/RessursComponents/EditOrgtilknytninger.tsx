@@ -13,6 +13,7 @@ import {
   Button,
   Checkbox,
   DatePicker,
+  ExpansionCard,
   Heading,
   HelpText,
   HStack,
@@ -28,9 +29,9 @@ import partition from "lodash/partition";
 import type { MutableRefObject } from "react";
 import React, { forwardRef, useEffect, useRef } from "react";
 import type { SubmitHandler } from "react-hook-form";
-import { useController } from "react-hook-form";
 import {
   FormProvider,
+  useController,
   useFieldArray,
   useForm,
   useFormContext,
@@ -58,6 +59,7 @@ import {
   validInput,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { OrgtilknytningTimeline } from "~/pages/ResourcePage/RessursComponents/OrgtilknytningTimeline";
+import infoikonNOM from "~/resources/infoikonNOM.svg";
 import type {
   OppdaterOrgtilknytningerForRessursRequest,
   OrgtilknytningState,
@@ -235,6 +237,9 @@ function OrgtilknytningForm({
       <OrgtilknytningTimeline
         orgtilknytninger={watch("mappedeOrgtilknytninger")}
       />
+
+      <Informasjonsboks ressursSektor={ressurs.sektor} />
+
       <form
         autoComplete="false"
         onSubmit={handleSubmit(onValid)}
@@ -778,6 +783,65 @@ function BekreftModalInnholdTomIFortiden({
         </BodyLong>
       </HStack>
     </Alert>
+  );
+}
+
+function Informasjonsboks({ ressursSektor }: { ressursSektor: Sektor }) {
+  return (
+    <ExpansionCard
+      aria-label="Veiledning for utfylling"
+      css={css`
+        margin-top: var(--a-spacing-9);
+      `}
+      defaultOpen
+    >
+      <ExpansionCard.Header>
+        <HStack align="center" gap="4" wrap={false}>
+          <div
+            css={css`
+              display: flex;
+              justify-content: center;
+            `}
+          >
+            <img alt="informasjonsboks" height="48px" src={infoikonNOM} />
+          </div>
+          <div
+            css={css`
+              .navds-expansioncard__title--medium {
+                margin-top: unset;
+              }
+            `}
+          >
+            <ExpansionCard.Title>Veiledning for utfylling</ExpansionCard.Title>
+          </div>
+        </HStack>
+      </ExpansionCard.Header>
+      <ExpansionCard.Content>
+        <InnholdInformasjonsboks ressursSektor={ressursSektor} />
+      </ExpansionCard.Content>
+    </ExpansionCard>
+  );
+}
+
+function InnholdInformasjonsboks({ ressursSektor }: { ressursSektor: Sektor }) {
+  return (
+    <ul>
+      <li>
+        {ressursSektor === Sektor.EKSTERN
+          ? "Du må fylle inn sluttdato, men sluttdato må være mindre enn ett år frem i tid fra dagens dato."
+          : "Du trenger ikke fylle inn sluttdato på fast ansatte."}
+      </li>
+      <li>
+        Medarbeideren må ha en organisasjonstilknytning og en leder med daglig
+        oppfølging for å være registrert som medarbeider i NAV. Perioder med
+        tilknytning og daglig oppfølging må derfor ligge inntil hverandre uten
+        avbrekk i tid.
+      </li>
+      <li>
+        Leder med ansvar for daglig oppfølging kan ikke ha overlappende
+        tidsperioder.
+      </li>
+    </ul>
   );
 }
 
