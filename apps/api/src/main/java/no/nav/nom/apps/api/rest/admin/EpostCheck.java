@@ -41,7 +41,7 @@ public class EpostCheck {
     public String sendEmail(@RequestParam List<String> ids) {
         List<String> recipientList = ids.stream().map(id -> id + "@nav.no").toList();
         EmailMessage message = new EmailMessage("subject", "body", recipientList);
-        emailClient.sendEmail(message);
+        emailClient.sendEmail(message).subscribe();
         return "Email sent to: " + recipientList;
     }
 }
