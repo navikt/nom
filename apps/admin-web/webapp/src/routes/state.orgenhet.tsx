@@ -1,14 +1,13 @@
-import { Alert, Link, type SortState, Table } from "@navikt/ds-react";
+import { Alert, Link, Table } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link as TanStackLink } from "@tanstack/react-router";
-import sortBy from "lodash/sortBy";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { getOrgenhetStatesOptions, searchSchema } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
-import type { OrgEnhetState } from "~/types.ts";
+import { useTableSort } from "~/hooks/useTableSort.ts";
 
 export const Route = createFileRoute("/state/orgenhet")({
   validateSearch: searchSchema.parse,
@@ -29,10 +28,6 @@ export const Route = createFileRoute("/state/orgenhet")({
 
 function OrgenhetPage() {
   const search = Route.useSearch();
-  const [sort, setSort] = useState<SortState>({
-    orderBy: "navident",
-    direction: "ascending",
-  });
 
   const orgenheter = useSuspenseQuery({
     ...getOrgenhetStatesOptions(search),
@@ -40,23 +35,7 @@ function OrgenhetPage() {
     staleTime: Number.POSITIVE_INFINITY,
   }).data;
 
-  const handleSort = (sortKey: string | undefined) => {
-    if (sortKey) {
-      setSort({
-        orderBy: sortKey,
-        direction:
-          sort && sortKey === sort.orderBy && sort.direction === "ascending"
-            ? "descending"
-            : "ascending",
-      });
-    } else {
-      setSort({ orderBy: "id", direction: "none" });
-    }
-  };
-
-  const sortedOrgenheter = sort
-    ? sortOrgEnheter({ orgenheter, sort })
-    : orgenheter;
+  const { data, sort, handleSort } = useTableSort(orgenheter, "id");
 
   return (
     <Table
@@ -101,7 +80,7 @@ function OrgenhetPage() {
         </Table.Row>
       </Table.Header>
       <Table.Body>
-        {sortedOrgenheter.map((orgEnhet) => {
+        {data.map((orgEnhet) => {
           return (
             <Table.Row key={orgEnhet.fid}>
               <Table.HeaderCell scope="row">
@@ -135,19 +114,4 @@ function OrgenhetPage() {
       </Table.Body>
     </Table>
   );
-}
-
-function sortOrgEnheter({
-  orgenheter,
-  sort,
-}: {
-  orgenheter: OrgEnhetState[];
-  sort: SortState;
-}) {
-  const { orderBy, direction } = sort;
-
-  const sortedMembersAscending = sortBy(orgenheter, orderBy);
-  const reversed = direction === "descending";
-
-  return reversed ? sortedMembersAscending.reverse() : sortedMembersAscending;
 }

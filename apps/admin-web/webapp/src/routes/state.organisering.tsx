@@ -1,14 +1,13 @@
-import { Alert, type SortState, Table } from "@navikt/ds-react";
+import { Alert, Table } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import sortBy from "lodash/sortBy";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { getOrganiseringStateOptions, searchSchema } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
-import type { OrganiseringState } from "~/types.ts";
+import { useTableSort } from "~/hooks/useTableSort.ts";
 
 export const Route = createFileRoute("/state/organisering")({
   validateSearch: searchSchema.parse,
@@ -35,28 +34,7 @@ function OrganiseringPage() {
     staleTime: Number.POSITIVE_INFINITY,
   }).data;
 
-  const [sort, setSort] = useState<SortState>({
-    orderBy: "navn",
-    direction: "ascending",
-  });
-
-  const handleSort = (sortKey: string | undefined) => {
-    if (sortKey) {
-      setSort({
-        orderBy: sortKey,
-        direction:
-          sort && sortKey === sort.orderBy && sort.direction === "ascending"
-            ? "descending"
-            : "ascending",
-      });
-    } else {
-      setSort({ orderBy: "id", direction: "none" });
-    }
-  };
-
-  const sortedOrgenheter = sort
-    ? sortOrganiseringer({ organiseringer, sort })
-    : organiseringer;
+  const { data, sort, handleSort } = useTableSort(organiseringer, "id");
 
   return (
     <Table
@@ -89,7 +67,7 @@ function OrganiseringPage() {
         </Table.Row>
       </Table.Header>
       <Table.Body>
-        {sortedOrgenheter.map((organisering) => {
+        {data.map((organisering) => {
           return (
             <Table.Row key={organisering.fid}>
               <Table.HeaderCell scope="row">{organisering.id}</Table.HeaderCell>
@@ -104,19 +82,4 @@ function OrganiseringPage() {
       </Table.Body>
     </Table>
   );
-}
-
-function sortOrganiseringer({
-  organiseringer,
-  sort,
-}: {
-  organiseringer: OrganiseringState[];
-  sort: SortState;
-}) {
-  const { orderBy, direction } = sort;
-
-  const sortedMembersAscending = sortBy(organiseringer, orderBy);
-  const reversed = direction === "descending";
-
-  return reversed ? sortedMembersAscending.reverse() : sortedMembersAscending;
 }

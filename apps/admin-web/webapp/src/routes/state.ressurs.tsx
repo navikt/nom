@@ -1,15 +1,13 @@
-import type { SortState } from "@navikt/ds-react";
 import { Alert, Link, Table } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link as TanStackLink } from "@tanstack/react-router";
-import sortBy from "lodash/sortBy";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { getRessursStatesOptions, searchSchema } from "~/api/queries.ts";
-import type { RessursState } from "~/api-types.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
+import { useTableSort } from "~/hooks/useTableSort.ts";
 import { formatVisningsnavn } from "~/utils.ts";
 
 export const Route = createFileRoute("/state/ressurs")({
@@ -31,10 +29,6 @@ export const Route = createFileRoute("/state/ressurs")({
 
 function RessursPage() {
   const search = Route.useSearch();
-  const [sort, setSort] = useState<SortState>({
-    orderBy: "navident",
-    direction: "ascending",
-  });
 
   const ressurser = useSuspenseQuery({
     ...getRessursStatesOptions(search),
@@ -42,23 +36,7 @@ function RessursPage() {
     staleTime: Number.POSITIVE_INFINITY,
   }).data;
 
-  const handleSort = (sortKey: string | undefined) => {
-    if (sortKey) {
-      setSort({
-        orderBy: sortKey,
-        direction:
-          sort && sortKey === sort.orderBy && sort.direction === "ascending"
-            ? "descending"
-            : "ascending",
-      });
-    } else {
-      setSort({ orderBy: "navident", direction: "none" });
-    }
-  };
-
-  const sortedRessurser = sort
-    ? sortRessurser({ ressurser: ressurser, sort })
-    : ressurser;
+  const { data, sort, handleSort } = useTableSort(ressurser, "navident");
 
   return (
     <Table
@@ -88,7 +66,7 @@ function RessursPage() {
         </Table.Row>
       </Table.Header>
       <Table.Body>
-        {sortedRessurser.map((ressurs) => (
+        {data.map((ressurs) => (
           <Table.Row key={ressurs.fid}>
             <Table.HeaderCell scope="row">
               <Link
@@ -111,95 +89,10 @@ function RessursPage() {
               >
                 Se Events
               </TanStackLink>
-              {/*<Button variant="tertiary">Se events</Button>*/}
             </Table.DataCell>
           </Table.Row>
         ))}
       </Table.Body>
     </Table>
   );
-}
-
-// TODO: kopiert ukritisk
-// function OrgTilknytningDataCell({
-//   orgTilknytninger,
-// }: {
-//   orgTilknytninger: {
-//     orgEnhet: {
-//       id: string;
-//       navn: string;
-//     };
-//     gyldigFom: string;
-//     gyldigTom: string;
-//   }[];
-// }) {
-//   const activeOrgtilknytninger = orgTilknytninger.filter((orgTilknytning) =>
-//     isGyldighetsPeriodeActive(
-//       orgTilknytning.gyldigFom,
-//       orgTilknytning.gyldigTom,
-//     ),
-//   );
-//
-//   const pluralDisplay = (
-//     <div className="flex flex-row gap-2">
-//       <OrgEnhetLink orgenhet={activeOrgtilknytninger[0]?.orgEnhet} />
-//       <ExtraRowContent
-//         content={activeOrgtilknytninger.slice(1).map((orgTilknytning) => (
-//           <OrgEnhetLink
-//             key={orgTilknytning.orgEnhet.id}
-//             orgenhet={orgTilknytning.orgEnhet}
-//           />
-//         ))}
-//       />
-//     </div>
-//   );
-//
-//   return (
-//     <Table.DataCell>
-//       <Pluralize
-//         numberOfElements={activeOrgtilknytninger.length}
-//         pluralForm={pluralDisplay}
-//         singleForm={
-//           <OrgEnhetLink orgenhet={activeOrgtilknytninger[0]?.orgEnhet} />
-//         }
-//       />
-//     </Table.DataCell>
-//   );
-// }
-
-function sortRessurser({
-  ressurser,
-  sort,
-}: {
-  ressurser: RessursState[];
-  sort: SortState;
-}) {
-  const { orderBy, direction } = sort;
-
-  const sortedMembersAscending = sortRessurserAscending(ressurser, orderBy);
-
-  const reversed = direction === "descending";
-
-  return reversed ? sortedMembersAscending.reverse() : sortedMembersAscending;
-}
-
-function sortRessurserAscending(ressurser: RessursState[], orderBy: string) {
-  if (
-    [
-      "navident",
-      "visningsnavn",
-      "startdato",
-      "sluttdato",
-      "opprettetAv",
-      "opprettetDato",
-    ].includes(orderBy)
-  ) {
-    return sortBy(ressurser, orderBy);
-  }
-
-  if (orderBy === "sektor") {
-    return sortBy(ressurser, (ressurs) => ressurs.sektor);
-  }
-
-  return ressurser;
 }
