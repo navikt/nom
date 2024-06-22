@@ -1,4 +1,4 @@
-import { Alert, Link, Table } from "@navikt/ds-react";
+import { Alert, Table } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link as TanStackLink } from "@tanstack/react-router";
 import { Suspense } from "react";
@@ -7,6 +7,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { getRessursStatesOptions, searchSchema } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
+import { NomLink } from "~/components/NomLink.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
 import { formatVisningsnavn } from "~/utils.ts";
 
@@ -69,12 +70,9 @@ function RessursPage() {
         {data.map((ressurs) => (
           <Table.Row key={ressurs.fid}>
             <Table.HeaderCell scope="row">
-              <Link
-                href={`http://nom.nav.no/ressurs/${ressurs.navident}`}
-                target="_blank"
-              >
+              <NomLink path={`ressurs/${ressurs.navident}`}>
                 {ressurs.navident}
-              </Link>
+              </NomLink>
             </Table.HeaderCell>
             <Table.DataCell>
               {formatVisningsnavn(ressurs.visningsnavn)}

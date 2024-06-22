@@ -1,6 +1,6 @@
 import { Alert, Table } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -70,9 +70,23 @@ function OrganiseringPage() {
         {data.map((organisering) => {
           return (
             <Table.Row key={organisering.fid}>
-              <Table.HeaderCell scope="row">{organisering.id}</Table.HeaderCell>
+              <Table.HeaderCell scope="row">
+                <Link
+                  search={{ filterText: organisering.id }}
+                  to="/state/orgenhet"
+                >
+                  {organisering.id}
+                </Link>
+              </Table.HeaderCell>
               <Table.DataCell>{organisering.navn}</Table.DataCell>
-              <Table.DataCell>{organisering.idOver}</Table.DataCell>
+              <Table.DataCell>
+                <Link
+                  search={{ filterText: organisering.idOver }}
+                  to="/state/orgenhet"
+                >
+                  {organisering.idOver}
+                </Link>
+              </Table.DataCell>
               <Table.DataCell>{organisering.navnOver}</Table.DataCell>
               <Table.DataCell>{organisering.gyldigFom}</Table.DataCell>
               <Table.DataCell>{organisering.gyldigTom}</Table.DataCell>

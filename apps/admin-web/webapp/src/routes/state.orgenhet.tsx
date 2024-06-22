@@ -1,4 +1,4 @@
-import { Alert, Link, Table } from "@navikt/ds-react";
+import { Alert, Table } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link as TanStackLink } from "@tanstack/react-router";
 import { Suspense } from "react";
@@ -7,6 +7,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { getOrgenhetStatesOptions, searchSchema } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
+import { NomLink } from "~/components/NomLink.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
 
 export const Route = createFileRoute("/state/orgenhet")({
@@ -84,12 +85,7 @@ function OrgenhetPage() {
           return (
             <Table.Row key={orgEnhet.fid}>
               <Table.HeaderCell scope="row">
-                <Link
-                  href={`http://nom.nav.no/org/${orgEnhet.id}`}
-                  target="_blank"
-                >
-                  {orgEnhet.id}
-                </Link>
+                <NomLink path={`org/${orgEnhet.id}`}>{orgEnhet.id}</NomLink>
               </Table.HeaderCell>
               <Table.DataCell />
               <Table.DataCell>{orgEnhet.navn}</Table.DataCell>

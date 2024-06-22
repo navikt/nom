@@ -1,6 +1,6 @@
 import { Alert, Table } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -35,7 +35,7 @@ function OrgtilknytningPage() {
     staleTime: Number.POSITIVE_INFINITY,
   }).data;
 
-  const { data, sort, handleSort } = useTableSort(orgtilknytninger, "navn");
+  const { data, sort, handleSort } = useTableSort(orgtilknytninger, "navident");
 
   return (
     <Table
@@ -71,9 +71,21 @@ function OrgtilknytningPage() {
           return (
             <Table.Row key={orgtilknytning.fid}>
               <Table.HeaderCell scope="row">
-                <NavidentNameLookup navident={orgtilknytning.navident} />
+                <Link
+                  search={{ filterText: orgtilknytning.navident }}
+                  to="/state/ressurs"
+                >
+                  <NavidentNameLookup navident={orgtilknytning.navident} />
+                </Link>
               </Table.HeaderCell>
-              <Table.DataCell>{orgtilknytning.orgEnhetId}</Table.DataCell>
+              <Table.DataCell>
+                <Link
+                  search={{ filterText: orgtilknytning.orgEnhetId }}
+                  to="/state/orgenhet"
+                >
+                  {orgtilknytning.orgEnhetId}
+                </Link>
+              </Table.DataCell>
               <Table.DataCell>
                 {orgtilknytning.erDagligOppfolging.toString()}
               </Table.DataCell>

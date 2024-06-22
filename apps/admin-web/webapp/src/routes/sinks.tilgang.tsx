@@ -1,6 +1,6 @@
-import { Alert, Link, Table } from "@navikt/ds-react";
+import { Alert, Table } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -64,21 +64,20 @@ function TilgangHistoryPage() {
               <Table.Row key={index}>
                 <Table.DataCell>
                   <Link
-                    href={`http://nom.nav.no/ressurs/${tilgangEvent.data.av}`}
-                    target="_blank"
+                    search={{ filterText: tilgangEvent.data.av }}
+                    to="/state/ressurs"
                   >
                     <NavidentNameLookup navident={tilgangEvent.data.av} />
                   </Link>
                 </Table.DataCell>
                 <Table.DataCell scope="row">
                   <Link
-                    href={`http://nom.nav.no/ressurs/${tilgangEvent.data.til}`}
-                    target="_blank"
+                    search={{ filterText: tilgangEvent.data.til }}
+                    to="/state/ressurs"
                   >
                     <NavidentNameLookup navident={tilgangEvent.data.til} />
                   </Link>
                 </Table.DataCell>
-
                 <Table.DataCell>
                   <JsonModal data={tilgangEvent} text={tilgangEvent.type} />
                 </Table.DataCell>

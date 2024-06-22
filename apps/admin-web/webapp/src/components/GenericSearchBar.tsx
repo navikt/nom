@@ -15,11 +15,10 @@ export function GenericSearchBar({ search }: { search: searchType }) {
   });
 
   const tilbakestill = () => {
-    // Av en eller annen grunn så fungerer ikke "reset()" for hele formet. Må derfor gjøre en hack ved å gjøre det per key.
-    for (const key of Object.keys(methods.watch()))
-      methods.resetField(key as keyof searchType);
+    methods.reset({ filterText: "", fromOffset: undefined });
     navigate({
       search: {},
+      replace: true,
     });
   };
 
