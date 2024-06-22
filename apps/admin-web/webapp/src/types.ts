@@ -81,3 +81,13 @@ export type AvsluttDelegertAuthorization = {
 export type DelegertAuthorizationFelles = OpprettDelegertAuthorization &
   FornyDelegertAuthorization &
   AvsluttDelegertAuthorization;
+
+export type OrganiseringState = {
+  fid: string;
+  id: string;
+  navn: string;
+  idOver: string;
+  navnOver: string;
+  gyldigFom: string;
+  gyldigTom?: string;
+};

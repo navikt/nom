@@ -39,8 +39,8 @@ import { Pluralize } from "~/components/Pluralize";
 import { NavidentSelectFormPart } from "~/components/select/NavidentSelect";
 import { blueTopBorder } from "~/resources/NomStyles";
 import type {
-  LederTilgang,
   LederTilgangForOrgenhetRequest,
+  LederTilgangState,
   OrgEnhet,
 } from "~/types/api-models";
 import {
@@ -103,7 +103,7 @@ function TilgangerPage() {
   );
 }
 
-function DelegertRolleCard({ tilgang }: { tilgang: LederTilgang }) {
+function DelegertRolleCard({ tilgang }: { tilgang: LederTilgangState }) {
   const orgEnhet = useQuery({
     queryKey: getOrgEnhet.queryKey(tilgang.orgenhetId),
     queryFn: () => getOrgEnhet.queryFn(tilgang.orgenhetId),
@@ -342,7 +342,7 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   );
 }
 
-function TilgangRowEditable({ tilgang }: { tilgang: LederTilgang }) {
+function TilgangRowEditable({ tilgang }: { tilgang: LederTilgangState }) {
   const queryClient = useQueryClient();
   const { field, fieldState } = useController({
     name: `${tilgang.fid}.gyldigTom`,
@@ -407,7 +407,7 @@ function TilgangRowEditable({ tilgang }: { tilgang: LederTilgang }) {
   );
 }
 
-function TilgangRowReadOnly({ tilgang }: { tilgang: LederTilgang }) {
+function TilgangRowReadOnly({ tilgang }: { tilgang: LederTilgangState }) {
   return (
     <Table.Row>
       <Table.DataCell>

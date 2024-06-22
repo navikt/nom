@@ -113,14 +113,14 @@ function OrgenhetPage() {
                 </Link>
               </Table.HeaderCell>
               <Table.DataCell />
-              <Table.DataCell>{orgEnhet?.navn}</Table.DataCell>
-              <Table.DataCell>{orgEnhet?.gyldigFom}</Table.DataCell>
-              <Table.DataCell>{orgEnhet?.gyldigTom}</Table.DataCell>
-              <Table.DataCell>{orgEnhet?.agressoId}</Table.DataCell>
-              <Table.DataCell>{orgEnhet?.agressoOrgNivaa}</Table.DataCell>
-              <Table.DataCell>{orgEnhet?.agressoId}</Table.DataCell>
-              <Table.DataCell>{orgEnhet?.nomNivaa}</Table.DataCell>
-              <Table.DataCell>{orgEnhet?.agressoOrgenhetType}</Table.DataCell>
+              <Table.DataCell>{orgEnhet.navn}</Table.DataCell>
+              <Table.DataCell>{orgEnhet.gyldigFom}</Table.DataCell>
+              <Table.DataCell>{orgEnhet.gyldigTom}</Table.DataCell>
+              <Table.DataCell>{orgEnhet.agressoId}</Table.DataCell>
+              <Table.DataCell>{orgEnhet.agressoOrgNivaa}</Table.DataCell>
+              <Table.DataCell>{orgEnhet.agressoId}</Table.DataCell>
+              <Table.DataCell>{orgEnhet.nomNivaa}</Table.DataCell>
+              <Table.DataCell>{orgEnhet.agressoOrgenhetType}</Table.DataCell>
               <Table.DataCell>
                 <TanStackLink
                   search={{ filterText: orgEnhet.fid, fromOffset: 0 }}

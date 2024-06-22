@@ -6,7 +6,12 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 
-import { getOrgenhetStatesOptions, getRessursStatesOptions } from "~/api/queries.ts";
+import {
+  getOrganiseringStateOptions,
+  getOrgenhetStatesOptions,
+  getOrgtilknytningStateOptions,
+  getRessursStatesOptions,
+} from "~/api/queries.ts";
 
 export const Route = createFileRoute("/state")({
   loaderDeps: ({ search }) => search,
@@ -14,6 +19,8 @@ export const Route = createFileRoute("/state")({
     // prefetch as much as possible
     context.queryClient.prefetchQuery(getRessursStatesOptions(deps));
     context.queryClient.prefetchQuery(getOrgenhetStatesOptions(deps));
+    context.queryClient.prefetchQuery(getOrganiseringStateOptions(deps));
+    context.queryClient.prefetchQuery(getOrgtilknytningStateOptions(deps));
   },
   component: () => {
     const search = Route.useSearch();
@@ -32,6 +39,16 @@ export const Route = createFileRoute("/state")({
             label="Orgenheter"
             onClick={() => navigate({ to: "/state/orgenhet", search })}
             value="/state/orgenhet"
+          />
+          <Tabs.Tab
+            label="Organisering"
+            onClick={() => navigate({ to: "/state/organisering", search })}
+            value="/state/organisering"
+          />
+          <Tabs.Tab
+            label="Orgtilknytning"
+            onClick={() => navigate({ to: "/state/orgtilknytning", search })}
+            value="/state/orgtilknytning"
           />
         </Tabs.List>
         <Outlet />

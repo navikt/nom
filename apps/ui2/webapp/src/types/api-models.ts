@@ -49,9 +49,25 @@ export interface GetPersonRequest {
   personident: string;
 }
 
+/** @default "STANDARD" */
+export enum IdentType {
+  ROBOT = "ROBOT",
+  STANDARD = "STANDARD",
+  VIKAFOSSEN = "VIKAFOSSEN",
+  UTENLANDSK_KONSULENT = "UTENLANDSK_KONSULENT",
+  UKJENT = "UKJENT",
+}
+
 export type JsonNode = object;
 
-export interface LederTilgang {
+export interface LederTilgangForOrgenhetRequest {
+  delegertTilNavident: string;
+  /** @format date */
+  gyldigTom: string;
+  orgenhetId: string;
+}
+
+export interface LederTilgangState {
   active?: boolean;
   av: string;
   fid: string;
@@ -61,13 +77,6 @@ export interface LederTilgang {
   gyldigTom: string;
   orgenhetId: string;
   til: string;
-}
-
-export interface LederTilgangForOrgenhetRequest {
-  delegertTilNavident: string;
-  /** @format date */
-  gyldigTom: string;
-  orgenhetId: string;
 }
 
 export interface LeggTilOrgtilknytningRequest {
@@ -197,6 +206,7 @@ export interface Ressurs {
   epost?: string;
   fid: string;
   fysiskeBrukersteder: string[];
+  identType: IdentType;
   isNomMastered: boolean;
   navident: string;
   personident: string;
@@ -232,6 +242,7 @@ export interface RessursNavn {
 export interface RessursState {
   fid: string;
   fysiskeBrukersteder: string[];
+  identType: IdentType;
   navident: string;
   personident: string;
   primaryFysiskBrukersted?: string;
@@ -289,7 +300,7 @@ export interface UpdateFysiskeBrukerstederRequest {
 }
 
 export interface UpdatePrimarytelefonnummer {
-  nummer?: string;
+  nummer: string;
 }
 
 export interface UpdateVisningsnavnRequest {

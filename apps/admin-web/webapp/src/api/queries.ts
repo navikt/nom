@@ -3,10 +3,11 @@ import ky from "ky";
 import queryString from "query-string";
 import { z } from "zod";
 
-import type { RessursState } from "~/api-types.ts";
+import type { OrgtilknytningState, RessursState } from "~/api-types.ts";
 import type {
   DelegertAuthorizationFelles,
   KafkaEvent,
+  OrganiseringState,
   OrgEnhetState,
 } from "~/types.ts";
 const API_BASE_URL = "/frackend/admin-api";
@@ -82,5 +83,29 @@ export function getOrgenhetStatesOptions(search: searchType) {
           `${API_BASE_URL}/states/orgenhet?${queryString.stringify(search, { skipNull: true })}`,
         )
       ).json<OrgEnhetState[]>(),
+  });
+}
+
+export function getOrgtilknytningStateOptions(search: searchType) {
+  return queryOptions({
+    queryKey: ["STATE", "ORGTILKNYTNING", search],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/states/orgtilknytning?${queryString.stringify(search, { skipNull: true })}`,
+        )
+      ).json<OrgtilknytningState[]>(),
+  });
+}
+
+export function getOrganiseringStateOptions(search: searchType) {
+  return queryOptions({
+    queryKey: ["STATE", "ORGANISERING", search],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/states/organisering?${queryString.stringify(search, { skipNull: true })}`,
+        )
+      ).json<OrganiseringState[]>(),
   });
 }

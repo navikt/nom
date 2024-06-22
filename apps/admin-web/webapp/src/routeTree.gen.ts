@@ -17,7 +17,9 @@ import { Route as IndexImport } from './routes/index'
 import { Route as StateIndexImport } from './routes/state.index'
 import { Route as SinksIndexImport } from './routes/sinks.index'
 import { Route as StateRessursImport } from './routes/state.ressurs'
+import { Route as StateOrgtilknytningImport } from './routes/state.orgtilknytning'
 import { Route as StateOrgenhetImport } from './routes/state.orgenhet'
+import { Route as StateOrganiseringImport } from './routes/state.organisering'
 import { Route as SinksTilgangImport } from './routes/sinks.tilgang'
 import { Route as SinksRessursImport } from './routes/sinks.ressurs'
 import { Route as SinksOrgenhetImport } from './routes/sinks.orgenhet'
@@ -54,8 +56,18 @@ const StateRessursRoute = StateRessursImport.update({
   getParentRoute: () => StateRoute,
 } as any)
 
+const StateOrgtilknytningRoute = StateOrgtilknytningImport.update({
+  path: '/orgtilknytning',
+  getParentRoute: () => StateRoute,
+} as any)
+
 const StateOrgenhetRoute = StateOrgenhetImport.update({
   path: '/orgenhet',
+  getParentRoute: () => StateRoute,
+} as any)
+
+const StateOrganiseringRoute = StateOrganiseringImport.update({
+  path: '/organisering',
   getParentRoute: () => StateRoute,
 } as any)
 
@@ -120,11 +132,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SinksTilgangImport
       parentRoute: typeof SinksImport
     }
+    '/state/organisering': {
+      id: '/state/organisering'
+      path: '/organisering'
+      fullPath: '/state/organisering'
+      preLoaderRoute: typeof StateOrganiseringImport
+      parentRoute: typeof StateImport
+    }
     '/state/orgenhet': {
       id: '/state/orgenhet'
       path: '/orgenhet'
       fullPath: '/state/orgenhet'
       preLoaderRoute: typeof StateOrgenhetImport
+      parentRoute: typeof StateImport
+    }
+    '/state/orgtilknytning': {
+      id: '/state/orgtilknytning'
+      path: '/orgtilknytning'
+      fullPath: '/state/orgtilknytning'
+      preLoaderRoute: typeof StateOrgtilknytningImport
       parentRoute: typeof StateImport
     }
     '/state/ressurs': {
@@ -162,7 +188,9 @@ export const routeTree = rootRoute.addChildren({
     SinksIndexRoute,
   }),
   StateRoute: StateRoute.addChildren({
+    StateOrganiseringRoute,
     StateOrgenhetRoute,
+    StateOrgtilknytningRoute,
     StateRessursRoute,
     StateIndexRoute,
   }),
@@ -196,7 +224,9 @@ export const routeTree = rootRoute.addChildren({
     "/state": {
       "filePath": "state.tsx",
       "children": [
+        "/state/organisering",
         "/state/orgenhet",
+        "/state/orgtilknytning",
         "/state/ressurs",
         "/state/"
       ]
@@ -213,8 +243,16 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "sinks.tilgang.tsx",
       "parent": "/sinks"
     },
+    "/state/organisering": {
+      "filePath": "state.organisering.tsx",
+      "parent": "/state"
+    },
     "/state/orgenhet": {
       "filePath": "state.orgenhet.tsx",
+      "parent": "/state"
+    },
+    "/state/orgtilknytning": {
+      "filePath": "state.orgtilknytning.tsx",
       "parent": "/state"
     },
     "/state/ressurs": {

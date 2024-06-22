@@ -14,8 +14,8 @@ import type {
   AvvikleRessursRequest,
   EndreOrgtilknytningDatoRequest,
   GetPersonRequest,
-  LederTilgang,
   LederTilgangForOrgenhetRequest,
+  LederTilgangState,
   LeggTilOrgtilknytningRequestOld,
   OppdaterOrgtilknytningerForRessursRequest,
   OpprettRessursRequest,
@@ -427,7 +427,7 @@ export function getTilgangerDelegertTilMegOptions() {
     queryKey: tilgangerKeys.me,
     queryFn: async () =>
       (
-        await axios.get<LederTilgang[]>(
+        await axios.get<LederTilgangState[]>(
           `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/getLederTilgangerDelegertTilMeg`,
         )
       ).data,
@@ -439,7 +439,7 @@ export function getTilgangerDelegertByUserOptions() {
     queryKey: tilgangerKeys.delegerteByUser(),
     queryFn: async () =>
       (
-        await axios.get<LederTilgang[]>(
+        await axios.get<LederTilgangState[]>(
           `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/getDelegerteLederTilgangerAvUser`,
         )
       ).data,
