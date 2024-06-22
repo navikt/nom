@@ -1,7 +1,9 @@
 import { queryOptions } from "@tanstack/react-query";
 import ky from "ky";
 
-const API_BASE_URL = "/frackend/api";
+import type { Ressurs } from "~/api-types.ts";
+
+export const API_BASE_URL = "/frackend/api";
 
 export function getRessursOptions(navident: string) {
   return queryOptions({
@@ -9,8 +11,42 @@ export function getRessursOptions(navident: string) {
     queryKey: ["RESSURS", navident],
     retry: false,
     queryFn: async () =>
-      (await ky.get(`${API_BASE_URL}/app/ressurser/byNavident/${navident}`))
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .json<any>(),
+      (
+        await ky.get(`${API_BASE_URL}/app/ressurser/byNavident/${navident}`)
+      ).json<Ressurs>(),
   });
+}
+
+export async function lastOrgenheter() {
+  return ky.get(`${API_BASE_URL}/api/admin/dvhLast/loadOrgEnheter`);
+}
+
+export async function lastRessurser() {
+  return ky.get(`${API_BASE_URL}/api/admin/dvhLast/loadRessurser`);
+}
+
+export async function lastOrganiseringerOgLedere() {
+  return ky.get(
+    `${API_BASE_URL}/api/admin/dvhLast/loadOrganiseringKoblingerOgLedere`,
+  );
+}
+
+export async function lastOrgtilknytninger() {
+  return ky.get(`${API_BASE_URL}/api/admin/dvhLast/loadOrgtilknytninger`);
+}
+
+export async function lastOrgtilknytningerForEksterne() {
+  return ky.get(
+    `${API_BASE_URL}/api/admin/dvhLast/loadOrgtilknytningerForEksterne`,
+  );
+}
+
+export async function lastSkyggeOrgtilknytningerForKommunale() {
+  return ky.get(
+    `${API_BASE_URL}/api/admin/dvhLast/loadSkyggeOrgtilknytningerForKommunale`,
+  );
+}
+
+export async function lastTyperForOrgenheter() {
+  return ky.get(`${API_BASE_URL}/api/admin/dvhLast/resolveOrgEnhetsTyper`);
 }
