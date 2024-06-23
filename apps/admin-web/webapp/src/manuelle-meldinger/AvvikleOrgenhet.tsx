@@ -44,7 +44,7 @@ export function AvvikleOrgenhet() {
         await ky.post(
           `${API_BASE_URL}/api/admin/manuelleEvtsrcMeldinger/avvikleOrgenhet?${queryString.stringify({ ...v, gyldigTom: formattedDate })}`,
         )
-      ).json<string>();
+      ).text();
     },
   });
 

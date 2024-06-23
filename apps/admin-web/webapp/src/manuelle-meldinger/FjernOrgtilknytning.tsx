@@ -45,7 +45,7 @@ export function FjernOrgtilknytning() {
         await ky.post(
           `${API_BASE_URL}/api/admin/manuelleEvtsrcMeldinger/fjernOrgtilknytning?${queryString.stringify(v)}`,
         )
-      ).json<string>(),
+      ).text(),
   });
 
   return (

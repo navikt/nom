@@ -45,7 +45,7 @@ export function OppdaterPersonidentRessurs() {
         await ky.post(
           `${API_BASE_URL}/api/admin/manuelleEvtsrcMeldinger/oppdaterPersonidentForRessurs?${queryString.stringify(v)}`,
         )
-      ).json<string>(),
+      ).text(),
   });
 
   return (

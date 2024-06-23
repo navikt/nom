@@ -44,7 +44,7 @@ export function SlettRessursMelding() {
         await ky.post(
           `${API_BASE_URL}/api/admin/manuelleEvtsrcMeldinger/lagSlettRessursMelding?${queryString.stringify(v)}`,
         )
-      ).json<string>(),
+      ).text(),
   });
 
   return (

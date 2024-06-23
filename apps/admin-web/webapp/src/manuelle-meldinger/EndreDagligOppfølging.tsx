@@ -46,7 +46,7 @@ export function EndreDagligOppfølging() {
         await ky.post(
           `${API_BASE_URL}/api/admin/manuelleEvtsrcMeldinger/endreDagligOppfolgingOrgtilknytning?${queryString.stringify(v)}`,
         )
-      ).json<string>(),
+      ).text(),
   });
 
   return (
