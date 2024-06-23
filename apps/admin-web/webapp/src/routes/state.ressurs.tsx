@@ -1,4 +1,4 @@
-import { Alert, Table } from "@navikt/ds-react";
+import { Alert, CopyButton, Table } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link as TanStackLink } from "@tanstack/react-router";
 import { Suspense } from "react";
@@ -48,6 +48,7 @@ function RessursPage() {
     >
       <Table.Header>
         <Table.Row>
+          <Table.ColumnHeader scope="col">Fid</Table.ColumnHeader>
           <Table.ColumnHeader scope="col" sortKey="navident" sortable>
             Navident
           </Table.ColumnHeader>
@@ -69,6 +70,9 @@ function RessursPage() {
       <Table.Body>
         {data.map((ressurs) => (
           <Table.Row key={ressurs.fid}>
+            <Table.DataCell>
+              <CopyButton copyText={ressurs.fid} text={ressurs.fid} />
+            </Table.DataCell>
             <Table.HeaderCell scope="row">
               <NomLink path={`ressurs/${ressurs.navident}`}>
                 {ressurs.navident}

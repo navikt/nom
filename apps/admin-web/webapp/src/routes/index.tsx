@@ -1,10 +1,16 @@
-import { BooksIcon, CogRotationIcon, DatabaseIcon } from "@navikt/aksel-icons";
+import {
+  BooksIcon,
+  CogRotationIcon,
+  DatabaseIcon,
+  TerminalIcon,
+} from "@navikt/aksel-icons";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+
 export const Route = createFileRoute("/")({
   component: () => {
     return (
-      <div className="flex items-center gap-2 justify-center">
+      <div className="flex items-center gap-2 justify-center flex-wrap">
         <Link to="/sinks">
           <CardWrapper>
             <BooksIcon fontSize={80} />
@@ -21,6 +27,12 @@ export const Route = createFileRoute("/")({
           <CardWrapper>
             <CogRotationIcon fontSize={80} />
             <b>Manuell last</b>
+          </CardWrapper>
+        </Link>
+        <Link to="/manuelle-meldinger">
+          <CardWrapper>
+            <TerminalIcon fontSize={80} />
+            <b>Send event</b>
           </CardWrapper>
         </Link>
       </div>

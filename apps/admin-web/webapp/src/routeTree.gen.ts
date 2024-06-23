@@ -13,6 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as StateImport } from './routes/state'
 import { Route as SinksImport } from './routes/sinks'
+import { Route as ManuelleMeldingerImport } from './routes/manuelle-meldinger'
 import { Route as ManuellLastImport } from './routes/manuell-last'
 import { Route as IndexImport } from './routes/index'
 import { Route as StateIndexImport } from './routes/state.index'
@@ -34,6 +35,11 @@ const StateRoute = StateImport.update({
 
 const SinksRoute = SinksImport.update({
   path: '/sinks',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ManuelleMeldingerRoute = ManuelleMeldingerImport.update({
+  path: '/manuelle-meldinger',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -108,6 +114,13 @@ declare module '@tanstack/react-router' {
       path: '/manuell-last'
       fullPath: '/manuell-last'
       preLoaderRoute: typeof ManuellLastImport
+      parentRoute: typeof rootRoute
+    }
+    '/manuelle-meldinger': {
+      id: '/manuelle-meldinger'
+      path: '/manuelle-meldinger'
+      fullPath: '/manuelle-meldinger'
+      preLoaderRoute: typeof ManuelleMeldingerImport
       parentRoute: typeof rootRoute
     }
     '/sinks': {
@@ -195,6 +208,7 @@ declare module '@tanstack/react-router' {
 export const routeTree = rootRoute.addChildren({
   IndexRoute,
   ManuellLastRoute,
+  ManuelleMeldingerRoute,
   SinksRoute: SinksRoute.addChildren({
     SinksOrgenhetRoute,
     SinksRessursRoute,
@@ -220,6 +234,7 @@ export const routeTree = rootRoute.addChildren({
       "children": [
         "/",
         "/manuell-last",
+        "/manuelle-meldinger",
         "/sinks",
         "/state"
       ]
@@ -229,6 +244,9 @@ export const routeTree = rootRoute.addChildren({
     },
     "/manuell-last": {
       "filePath": "manuell-last.tsx"
+    },
+    "/manuelle-meldinger": {
+      "filePath": "manuelle-meldinger.tsx"
     },
     "/sinks": {
       "filePath": "sinks.tsx",
