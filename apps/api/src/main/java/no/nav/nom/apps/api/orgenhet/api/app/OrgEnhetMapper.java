@@ -89,13 +89,13 @@ public class OrgEnhetMapper {
     }
 
     private RessursState ressursWithObscuredPersonident(DvhLeder leder) {
-        var ressursState = ressursStateRepository.findByNavident(leder.getNavIdent());
+        var ressursState = ressursStateRepository.findByNavident(leder.getNavIdent()).orElse(null);
         var loggedInUserAuthorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
 
-        if (loggedInUserAuthorities.contains(NomApiAccessScope.ADMIN.asGrantedAuthority())) {
-            ressursState.ifPresent(resState -> resState.toBuilder().personident(resState.personident().replaceFirst(".{5}$", "*****")));
+        if (ressursState != null && loggedInUserAuthorities.contains(NomApiAccessScope.ADMIN.asGrantedAuthority())) {
+            ressursState.toBuilder().personident(ressursState.personident().replaceFirst(".{5}$", "*****"));
         }
 
-        return ressursState.orElse(null);
+        return ressursState;
     }
 }
