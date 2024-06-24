@@ -1,6 +1,8 @@
 package no.nav.nom.apps.api.orgenhet.api.app;
 
+import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetOverordnetResolver;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetUnderordnetResolver;
@@ -11,6 +13,7 @@ import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.text.Collator;
@@ -80,9 +83,19 @@ public class OrgEnhetMapper {
     private List<RessursState> hentOrgEnhetsLedere(IOrgenhet orgEnhet) {
         return dvhRepository.getLederByAgressoIdAndNivAndNavn(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn())
             .stream()
-            .map(leder -> ressursStateRepository.findByNavident(leder.getNavIdent()).orElse(null))
+            .map(this::ressursWithObscuredPersonident)
             .filter(Objects::nonNull)
             .toList();
     }
 
+    private RessursState ressursWithObscuredPersonident(DvhLeder leder) {
+        var ressursState = ressursStateRepository.findByNavident(leder.getNavIdent());
+        var loggedInUserAuthorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+
+        if (loggedInUserAuthorities.contains(NomApiAccessScope.ADMIN.asGrantedAuthority())) {
+            ressursState.ifPresent(resState -> resState.toBuilder().personident(resState.personident().replaceFirst(".{5}$", "*****")));
+        }
+
+        return ressursState.orElse(null);
+    }
 }
