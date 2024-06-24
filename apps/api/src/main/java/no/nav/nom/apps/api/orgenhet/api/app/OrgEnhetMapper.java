@@ -92,7 +92,7 @@ public class OrgEnhetMapper {
         var ressursState = ressursStateRepository.findByNavident(leder.getNavIdent()).orElse(null);
         var loggedInUserAuthorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
 
-        if (ressursState != null && loggedInUserAuthorities.contains(NomApiAccessScope.ADMIN.asGrantedAuthority())) {
+        if (ressursState != null && !loggedInUserAuthorities.contains(NomApiAccessScope.ADMIN.asGrantedAuthority())) {
             ressursState = ressursState.toBuilder()
                 .personident(ressursState.personident().replaceFirst(".{5}$", "*****"))
                 .build();
