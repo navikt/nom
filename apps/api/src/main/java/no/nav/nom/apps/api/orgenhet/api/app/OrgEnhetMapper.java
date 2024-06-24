@@ -93,7 +93,9 @@ public class OrgEnhetMapper {
         var loggedInUserAuthorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
 
         if (ressursState != null && loggedInUserAuthorities.contains(NomApiAccessScope.ADMIN.asGrantedAuthority())) {
-            ressursState.toBuilder().personident(ressursState.personident().replaceFirst(".{5}$", "*****"));
+            ressursState = ressursState.toBuilder()
+                .personident(ressursState.personident().replaceFirst(".{5}$", "*****"))
+                .build();
         }
 
         return ressursState;
