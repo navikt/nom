@@ -115,7 +115,7 @@ public class RessursOpprettetEmailService {
             log.info("Sender epost subject: {} recipients: {}", subject, recipientList);
 
             EmailMessage message = new EmailMessage(subject, body, recipientList);
-            emailClient.sendEmail(message);
+            emailClient.sendEmail(message).subscribe();
 
         } catch (ADResponseException e) {
             throw new RessursOpprettetEmailException("Fant ikke leder epost adresse for leder");
