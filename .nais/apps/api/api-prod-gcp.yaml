@@ -85,7 +85,7 @@ spec:
           cluster: prod-gcp
         - application: nom-admin-web
           namespace: org
-          cluster: dev-gcp
+          cluster: prod-gcp
         - application: team-catalog-frackend
           namespace: org
         - application: org-ekstern-proxy
