@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.authorize.redigereressurs;
 
 import lombok.Builder;
 import lombok.Getter;
+import no.nav.nom.apps.api.authorize.email.TilgangDelegertEmailService;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
@@ -38,6 +39,8 @@ abstract public class MockBasisTestOrganisering {
     OrgenhetService orgenhetService;
     @MockBean
     DvhRepository dvhRepository;
+    @MockBean
+    TilgangDelegertEmailService tilgangDelegertEmailService;
     @Autowired
     AuthorizedNavident authorizedNavident;
 

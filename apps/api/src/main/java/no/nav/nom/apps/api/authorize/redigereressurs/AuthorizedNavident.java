@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.authorize.redigereressurs;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.authorize.email.TilgangDelegertEmailService;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.AvsluttDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.FornyDelegertAuthorization;
@@ -56,13 +57,17 @@ public class AuthorizedNavident {
     private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
     private final DvhRepository dvhRepository;
+    private final TilgangDelegertEmailService tilgangDelegertEmailService;
 
     public AuthorizedNavident(
-            AuthorizeCommandService authorizeCommandService, DelegertLederStateRepository delegertLederStateRepository,
-            OrgtilknytningStateRepository orgtilknytningStateRepository,
-            OrganiseringStateRepository organiseringStateRepository, RessursStateRepository ressursStateRepository,
-            OrgenhetService orgenhetService,
-            DvhRepository dvhRepository
+        AuthorizeCommandService authorizeCommandService,
+        DelegertLederStateRepository delegertLederStateRepository,
+        OrgtilknytningStateRepository orgtilknytningStateRepository,
+        OrganiseringStateRepository organiseringStateRepository,
+        RessursStateRepository ressursStateRepository,
+        OrgenhetService orgenhetService,
+        DvhRepository dvhRepository,
+        TilgangDelegertEmailService tilgangDelegertEmailService
     ) {
         this.authorizeCommandService = authorizeCommandService;
         this.delegertLederStateRepository = delegertLederStateRepository;
@@ -71,6 +76,7 @@ public class AuthorizedNavident {
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
         this.dvhRepository = dvhRepository;
+        this.tilgangDelegertEmailService = tilgangDelegertEmailService;
     }
 
     public List<LederTilgangState> getLederTilgangerForUser() {
@@ -130,6 +136,7 @@ public class AuthorizedNavident {
             .build();
 
         authorizeCommandService.opprettDelegertAuthorization(opprettDelegertAuthorization);
+        tilgangDelegertEmailService.notifyDelegertTilgangByEmail(leder, request);
         return true;
     }
 
