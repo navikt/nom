@@ -422,7 +422,7 @@ public class RessursStillingStrukturerer {
                                  }
                              }
 
-                            log.debug(SECURE_LOGS,
+                            log.debug(
                                 "Fikser inkonsistens i stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, historiskStillingsPerioder: {}",
                                 navident,
                                 stillingPeriode.gyldigFom(),

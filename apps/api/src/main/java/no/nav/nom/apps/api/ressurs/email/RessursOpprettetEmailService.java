@@ -130,12 +130,7 @@ public class RessursOpprettetEmailService {
             "resursName", resursName,
             "navIdent", navIdent,
             "orgenhetName", orgenhetName);
-        //freemarkerConfig.setOutputFormat(freemarker.core.HTMLOutputFormat.INSTANCE);
-        //freemarkerConfig.getTemplate(OPPRETTELSE_VARSEL_TEMPLATE).process(model, stringWriter);
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_31);
-        cfg.setClassForTemplateLoading(this.getClass(), "/templates");
-        cfg.setWrapUncheckedExceptions(true);
-        cfg.getTemplate(OPPRETTELSE_VARSEL_TEMPLATE).process(model, stringWriter);
+        freemarkerConfig.getTemplate(OPPRETTELSE_VARSEL_TEMPLATE).process(model, stringWriter);
         return stringWriter.getBuffer().toString();
     }
 
