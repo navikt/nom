@@ -1,4 +1,5 @@
-
+<html>
+<body>
 <div>
     <p>Hei!</p>
 
@@ -15,3 +16,5 @@
     <p><em>Dette er en autogenerert e-post fra NAV organisasjonsmaster (NOM). Du kan ikke svare på denne e-posten.</em></p>
     <p>__</p>
 </div>
+</body>
+</html>
