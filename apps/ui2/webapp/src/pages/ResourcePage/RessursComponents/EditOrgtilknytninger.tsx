@@ -21,12 +21,14 @@ import {
   Modal,
   useDatepicker,
 } from "@navikt/ds-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { addYears } from "date-fns";
 import partition from "lodash/partition";
+import sortBy from "lodash/sortBy";
 import type { MutableRefObject } from "react";
+import { useState } from "react";
 import React, { forwardRef, useEffect, useRef } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import {
@@ -62,6 +64,7 @@ import { OrgtilknytningTimeline } from "~/pages/ResourcePage/RessursComponents/O
 import infoikonNOM from "~/resources/infoikonNOM.svg";
 import type {
   OppdaterOrgtilknytningerForRessursRequest,
+  OrgEnhet,
   OrgtilknytningState,
   Ressurs,
 } from "~/types/api-models";
@@ -71,7 +74,9 @@ import {
   formatDisplayDate,
   formatVisningsnavn,
   isSameDateOrAfter,
+  isSameDateOrBefore,
   isTodayOrBefore,
+  todayWithoutTimezone,
 } from "~/utils";
 
 export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
@@ -81,6 +86,49 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
   });
 
   const orgtilknytninger = ressursOrgtilknytningerQuery.data ?? [];
+
+  const orgEnhetIdListe = [
+    ...new Set(
+      orgtilknytninger.flatMap(
+        (orgtilknytning) => orgtilknytning.orgEnhetId || [],
+      ),
+    ),
+  ];
+
+  const orgEnheter = useQueries({
+    queries: orgEnhetIdListe.map((id) => ({
+      queryKey: getOrgEnhet.queryKey(id),
+      queryFn: () => getOrgEnhet.queryFn(id),
+    })),
+    combine: (results) => results.flatMap((r) => r.data ?? []),
+  });
+
+  const dolOrgtilknytninger = orgtilknytninger.filter((orgtilknytning) => {
+    return orgtilknytning.erDagligOppfolging;
+  });
+
+  const dagensDolOrgtilknytning = dolOrgtilknytninger.find((tilknytning) => {
+    if (
+      !!tilknytning.gyldigFom &&
+      isSameDateOrBefore(
+        new Date(tilknytning.gyldigFom),
+        todayWithoutTimezone(),
+      ) &&
+      (!tilknytning.gyldigTom ||
+        isSameDateOrAfter(
+          new Date(tilknytning.gyldigTom),
+          todayWithoutTimezone(),
+        ))
+    ) {
+      return true;
+    }
+  });
+
+  const dagensDolOrgEnhet = orgEnheter.find(
+    (orgEnhet) => orgEnhet.id === dagensDolOrgtilknytning?.orgEnhetId,
+  );
+
+  const dagensRemedyEnhetId = dagensDolOrgEnhet?.remedyEnhetId;
 
   return (
     <div>
@@ -116,6 +164,8 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
       </Heading>
 
       <OrgtilknytningForm
+        dagensDolOrgEnhet={dagensDolOrgEnhet}
+        dagensRemedyEnhetId={dagensRemedyEnhetId}
         orgtilknytninger={orgtilknytninger}
         ressurs={ressurs}
       />
@@ -133,9 +183,13 @@ const defaultNyOrgtilknytning = {
 function OrgtilknytningForm({
   orgtilknytninger,
   ressurs,
+  dagensRemedyEnhetId,
+  dagensDolOrgEnhet,
 }: {
   orgtilknytninger: Partial<OrgtilknytningState>[];
   ressurs: Ressurs;
+  dagensRemedyEnhetId: string | undefined;
+  dagensDolOrgEnhet: OrgEnhet | undefined;
 }) {
   const navigate = useNavigate();
   const hasWriteAccess = useHasWriteAccess();
@@ -211,6 +265,24 @@ function OrgtilknytningForm({
   const modalReference = useRef<HTMLDialogElement>(null);
   const formReference = useRef<HTMLFormElement>(null);
 
+  const [modalProperties, setModalProperties] = useState<{
+    senesteTomDato: string | undefined;
+    navn: string | undefined;
+    orgtilknytninger: Partial<OrgtilknytningState>[];
+    dagensRemedyEnhetId: string | undefined;
+    dagensDolOrgEnhet: OrgEnhet | undefined;
+    formReference: React.RefObject<HTMLFormElement>;
+    saveButtonClicked: boolean;
+  }>({
+    senesteTomDato: "",
+    navn: "",
+    orgtilknytninger: [],
+    dagensRemedyEnhetId: dagensRemedyEnhetId,
+    dagensDolOrgEnhet: dagensDolOrgEnhet,
+    formReference: formReference,
+    saveButtonClicked: false,
+  });
+
   const handleSubmitClick = () => {
     const oppdaterteOrgtilknytninger = watch(
       "mappedeOrgtilknytninger",
@@ -222,13 +294,17 @@ function OrgtilknytningForm({
       dolOverlaps.length === 0 &&
       dolGaps.length === 0
     ) {
-      if (senesteTom(oppdaterteOrgtilknytninger)) {
-        modalReference.current?.showModal();
-      } else {
-        formReference.current?.dispatchEvent(
-          new Event("submit", { cancelable: true, bubbles: true }),
-        );
-      }
+      setModalProperties({
+        senesteTomDato: senesteTom(oppdaterteOrgtilknytninger),
+        navn: formatVisningsnavn(ressurs.visningsnavn),
+        orgtilknytninger: watch("mappedeOrgtilknytninger"),
+        dagensRemedyEnhetId: dagensRemedyEnhetId,
+        dagensDolOrgEnhet: dagensDolOrgEnhet,
+        formReference: formReference,
+        saveButtonClicked: true,
+      });
+
+      modalReference.current?.showModal();
     }
   };
 
@@ -381,11 +457,7 @@ function OrgtilknytningForm({
           <ApiResponseError error={oppdaterOrgtilknytningerMutation.error} />
         </div>
 
-        <BekreftModal
-          navn={formatVisningsnavn(ressurs.visningsnavn)}
-          ref={modalReference}
-          senesteTomDato={senesteTom(watch("mappedeOrgtilknytninger"))}
-        />
+        <BekreftModal {...modalProperties} ref={modalReference} />
       </form>
     </FormProvider>
   );
@@ -667,55 +739,166 @@ function IllegalDolCombinationAlert() {
   );
 }
 
+// TODO: Gjøre dette mye mer clean, dette er bare førsteutkast for å i alle fall ha noe
 const BekreftModal = forwardRef<
   HTMLDialogElement,
-  { senesteTomDato: string | undefined; navn: string }
->(({ senesteTomDato, navn }, reference) => {
-  if (!senesteTomDato) {
-    return <></>;
+  {
+    senesteTomDato: string | undefined;
+    navn: string | undefined;
+    orgtilknytninger: Partial<OrgtilknytningState>[];
+    dagensRemedyEnhetId: string | undefined;
+    dagensDolOrgEnhet: OrgEnhet | undefined;
+    formReference: React.RefObject<HTMLFormElement>;
+    saveButtonClicked: boolean;
   }
+>(
+  (
+    {
+      senesteTomDato,
+      navn,
+      orgtilknytninger,
+      dagensRemedyEnhetId,
+      dagensDolOrgEnhet,
+      formReference,
+      saveButtonClicked,
+    },
+    reference,
+  ) => {
+    const typedReference =
+      reference as MutableRefObject<HTMLDialogElement | null>;
 
-  const formatertDato = formatDisplayDate(senesteTomDato);
+    const orgEnhetIdListe = [
+      ...new Set(
+        orgtilknytninger.flatMap(
+          (orgtilknytning) => orgtilknytning.orgEnhetId || [],
+        ),
+      ),
+    ];
 
-  const typedReference =
-    reference as MutableRefObject<HTMLDialogElement | null>;
+    const orgEnheter = useQueries({
+      queries: orgEnhetIdListe.map((id) => ({
+        queryKey: getOrgEnhet.queryKey(id),
+        queryFn: () => getOrgEnhet.queryFn(id),
+      })),
+      combine: (results) => results.flatMap((r) => r.data ?? []),
+    });
 
-  return (
-    <Modal
-      css={css`
-        padding: var(--a-spacing-6);
-      `}
-      header={{ heading: "Bekreft endringer", closeButton: false }}
-      ref={reference}
-      width="548px"
-    >
-      <Modal.Body>
-        {isTodayOrBefore(new Date(senesteTomDato)) ? (
-          <BekreftModalInnholdTomIFortiden dato={formatertDato} navn={navn} />
-        ) : (
-          <BekreftModalInnholdTomIFremtiden dato={formatertDato} navn={navn} />
-        )}
-      </Modal.Body>
-      <Modal.Footer>
-        <Button
-          icon={<FloppydiskIcon aria-hidden />}
-          size="small"
-          type="submit"
-        >
-          Bekreft endring
-        </Button>
-        <Button
-          onClick={() => typedReference?.current?.close()}
-          size="small"
-          type="button"
-          variant="secondary"
-        >
-          Avbryt
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  );
-});
+    const relevanteDolOrgtilknytninger = sortBy(
+      orgtilknytninger.filter((orgtilknytning) => {
+        return (
+          orgtilknytning.erDagligOppfolging &&
+          (!orgtilknytning.gyldigTom ||
+            isSameDateOrAfter(
+              new Date(orgtilknytning.gyldigTom),
+              todayWithoutTimezone(),
+            ))
+        );
+      }),
+      "gyldigFom",
+    );
+
+    const nyRemedyTilknytning = relevanteDolOrgtilknytninger.find(
+      (tilknytning) => {
+        return (
+          orgEnheter.find((orgEnhet) => orgEnhet.id === tilknytning.orgEnhetId)
+            ?.remedyEnhetId !== dagensRemedyEnhetId
+        );
+      },
+    );
+
+    const nyRemedyOrgEnhet = orgEnheter.find(
+      (orgEnhet) => orgEnhet.id === nyRemedyTilknytning?.orgEnhetId,
+    );
+
+    useEffect(() => {
+      if (
+        !senesteTomDato &&
+        !nyRemedyTilknytning &&
+        !nyRemedyOrgEnhet &&
+        saveButtonClicked
+      ) {
+        formReference.current?.dispatchEvent(
+          new Event("submit", { cancelable: true, bubbles: true }),
+        );
+      }
+    }, [
+      senesteTomDato,
+      nyRemedyTilknytning,
+      nyRemedyOrgEnhet,
+      saveButtonClicked,
+      formReference,
+    ]);
+
+    if (
+      !senesteTomDato &&
+      !nyRemedyTilknytning &&
+      !nyRemedyOrgEnhet &&
+      saveButtonClicked
+    ) {
+      return <></>;
+    }
+
+    return (
+      <Modal
+        css={css`
+          padding: var(--a-spacing-6);
+        `}
+        header={{ heading: "Bekreft endringer", closeButton: false }}
+        ref={reference}
+        width="548px"
+      >
+        <Modal.Body>
+          {!!nyRemedyTilknytning && !!nyRemedyOrgEnhet ? (
+            isTodayOrBefore(
+              new Date(nyRemedyTilknytning.gyldigFom as string),
+            ) ? (
+              <BekreftModalInnholdNyRemedyIFortiden
+                gammelOrgEnhet={`${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.id})`}
+                navn={navn ?? "medarbeideren"}
+                nyOrgEnhet={`${nyRemedyOrgEnhet?.navn} (${nyRemedyOrgEnhet?.id})`}
+              />
+            ) : (
+              <BekreftModalInnholdNyRemedyIFremtiden
+                dato={formatDisplayDate(nyRemedyTilknytning.gyldigFom)}
+                gammelOrgEnhet={`${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.id})`}
+                navn={navn ?? "medarbeideren"}
+                nyOrgEnhet={`${nyRemedyOrgEnhet?.navn} (${nyRemedyOrgEnhet?.id})`}
+              />
+            )
+          ) : (
+            !!senesteTomDato &&
+            !!navn &&
+            (isTodayOrBefore(new Date(senesteTomDato)) ? (
+              <BekreftModalInnholdTomIFortiden navn={navn ?? "medarbeideren"} />
+            ) : (
+              <BekreftModalInnholdTomIFremtiden
+                dato={formatDisplayDate(senesteTomDato)}
+                navn={navn ?? "medarbeideren"}
+              />
+            ))
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            icon={<FloppydiskIcon aria-hidden />}
+            size="small"
+            type="submit"
+          >
+            Bekreft endring
+          </Button>
+          <Button
+            onClick={() => typedReference?.current?.close()}
+            size="small"
+            type="button"
+            variant="secondary"
+          >
+            Avbryt
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    );
+  },
+);
 
 function BekreftModalInnholdTomIFremtiden({
   navn,
@@ -751,20 +934,14 @@ function BekreftModalInnholdTomIFremtiden({
   );
 }
 
-function BekreftModalInnholdTomIFortiden({
-  navn,
-  dato,
-}: {
-  navn: string;
-  dato: string;
-}) {
+function BekreftModalInnholdTomIFortiden({ navn }: { navn: string }) {
   return (
     <Alert variant="warning">
       <HStack gap="6">
         <BodyLong>
           Du har nå satt siste sluttdato på medarbeiderens
-          organisasjonstilknytning(er) til {dato}, og det er ikke registrert
-          noen ny tilknytning etter denne datoen.
+          organisasjonstilknytning(er) til dagens dato eller tidligere, og det
+          er ikke registrert noen ny tilknytning etter denne datoen.
         </BodyLong>
         <BodyLong>
           <b>
@@ -780,6 +957,74 @@ function BekreftModalInnholdTomIFortiden({
         <BodyLong>
           Hvis dette er korrekt, kan du bekrefte endringen ved å trykke på{" "}
           <b>Bekreft endring</b>.
+        </BodyLong>
+      </HStack>
+    </Alert>
+  );
+}
+
+function BekreftModalInnholdNyRemedyIFremtiden({
+  navn,
+  dato,
+  gammelOrgEnhet,
+  nyOrgEnhet,
+}: {
+  navn: string;
+  dato: string;
+  gammelOrgEnhet: string;
+  nyOrgEnhet: string;
+}) {
+  return (
+    <HStack gap="6">
+      <BodyLong>
+        Du registrerer nå at medarbeideren fra {dato} bytter
+        organisasjonstilknytning fra <b>{gammelOrgEnhet}</b> til{" "}
+        <b>{nyOrgEnhet}</b>.
+      </BodyLong>
+      <BodyLong>
+        <b>
+          Dette innebærer en endring i innstillinger for tilganger
+          (4-siffer-enhet), slik at fra og med {dato} vil alle tilganger for{" "}
+          {navn} fjernes. Nye tilganger må tildeles i Identrutina og/eller Mine
+          tilganger.
+        </b>
+      </BodyLong>
+      <BodyLong>
+        Ta kontakt med identadministrator eller leder hvis du er usikker på om
+        noe må gjøres.
+      </BodyLong>
+    </HStack>
+  );
+}
+
+function BekreftModalInnholdNyRemedyIFortiden({
+  navn,
+  gammelOrgEnhet,
+  nyOrgEnhet,
+}: {
+  navn: string;
+  gammelOrgEnhet: string;
+  nyOrgEnhet: string;
+}) {
+  return (
+    <Alert variant="warning">
+      <HStack gap="6">
+        <BodyLong>
+          Du registrerer nå at medarbeideren på dagens dato eller tidligere
+          bytter organisasjonstilknytning fra <b>{gammelOrgEnhet}</b> til{" "}
+          <b>{nyOrgEnhet}</b>.
+        </BodyLong>
+        <BodyLong>
+          <b>
+            Dette innebærer en endring i innstillinger for tilganger
+            (4-siffer-enhet). Vær oppmerksom på at dette betyr at fra i dag vil
+            alle tilganger for {navn} fjernes. Nye tilganger må tildeles i
+            Identrutina og/eller Mine tilganger.
+          </b>
+        </BodyLong>
+        <BodyLong>
+          Ta kontakt med identadministrator eller leder hvis du er usikker på om
+          noe må gjøres.
         </BodyLong>
       </HStack>
     </Alert>
