@@ -382,7 +382,7 @@ public class RessursStillingStrukturerer {
                                 stillingPeriode
                             );
                         }
-                        else if (unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
+                        //else if (unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
                             var historiskStillingsPerioder = new ArrayList<StillingPeriode>();
 
                             // Fikser inkonsistens i stillingperioden
@@ -431,8 +431,10 @@ public class RessursStillingStrukturerer {
                                 stillingPeriode,
                                 StillingPeriode.toString(historiskStillingsPerioder, true)
                             );
-                            perioderGruppertMedOrgenhet.addAll(historiskStillingsPerioder);
-                        }
+                            if (unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
+                                perioderGruppertMedOrgenhet.addAll(historiskStillingsPerioder);
+                            }
+                        //}
                     } else if (stillingPeriode.gyldigTom().isAfter(nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE))) {
                         log.debug(SECURE_LOGS,
                             "Stillingperioden for navident {} slutter etter kjent orgenhets gyldighetsperiode. Må begrense stillingPeriodens gyldighet til å være innenfor",
