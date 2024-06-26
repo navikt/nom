@@ -1,7 +1,8 @@
 <div>
     <p>Hei!</p>
     <br>
-    <p>Det har nå blitt delegert redigeringstilgang i NOM til <b>${delegertRessursDisplayname} (${delegertRessursNavident})</b> for organisasjonsenheten <b>${orgenhetNavn}</b></p>
+    <p>Det har nå blitt delegert redigeringstilgang i NOM til <b>${delegertRessursDisplayname} (${delegertRessursNavIdent})</b> for organisasjonsenheten
+        <b>${orgenhetNavn}</b></p>
     <p>Dette har blitt delegert av leder for organisasjonsenheten, <b>${lederDisplayname} (${lederNavIdent})</b></p>
     <br>
     <p>Tilgangen varer frem til <b>${tomDato}</b>.</p>
