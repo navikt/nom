@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.authorize.email;
 
 import freemarker.template.Configuration;
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.LederTilgangForOrgenhetRequest;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
@@ -16,30 +17,36 @@ import org.springframework.stereotype.Service;
 
 import java.io.StringWriter;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @Service
 public class TilgangDelegertEmailService {
     private static final String DELEGERT_TILGANG_TEMPLATE = "delegert-tilgang.ftlh";
+    public static final String UNLEASH_INFORM_ADDITIONAL_RECIPIENTS = "nom.ressurs-create.inform_additional_recipients";
 
     private final Logger log = LoggerFactory.getLogger(TilgangDelegertEmailService.class);
     private final EmailClient emailClient;
     private final AdClient adClient;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final Configuration freemarkerConfig;
+    private final Unleash unleash;
 
 
     public TilgangDelegertEmailService(
         EmailClient emailClient,
         AdClient adClient,
         OrgEnhetStateRepository orgEnhetStateRepository,
-        Configuration freemarkerConfig
+        Configuration freemarkerConfig,
+        Unleash unleash
     ) {
         this.emailClient = emailClient;
         this.adClient = adClient;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.freemarkerConfig = freemarkerConfig;
+        this.unleash = unleash;
     }
 
     public void notifyDelegertTilgangByEmail(String lederNavident, LederTilgangForOrgenhetRequest request) {
@@ -56,13 +63,18 @@ public class TilgangDelegertEmailService {
     private void composeAndSendEmail(AdRessurs leder, AdRessurs delegertRessurs, LocalDate gyldigTom, OrgEnhetState orgEnhet) {
         String subject = String.format("Tilgang delegert til %s (%s)", delegertRessurs.getDisplayName(), delegertRessurs.getNavIdent());
         var recipientList = List.of(leder.getEmail(), delegertRessurs.getEmail());
+
+        if (unleash.isEnabled(UNLEASH_INFORM_ADDITIONAL_RECIPIENTS)) {
+            recipientList = Stream.concat(recipientList.stream(), getAdditionalRecipientsEmails().stream()).distinct().toList();
+        }
         String body = getFormattedEmailBody(
             leder.getDisplayName(),
             leder.getNavIdent(),
             delegertRessurs.getDisplayName(),
             delegertRessurs.getNavIdent(),
             gyldigTom,
-            orgEnhet.navn());
+            orgEnhet.navn()
+        );
 
         log.info("Sender epost emne {} til {}", subject, recipientList);
 
@@ -70,20 +82,36 @@ public class TilgangDelegertEmailService {
         emailClient.sendEmail(emailMessage).subscribe();
     }
 
-    private String getFormattedEmailBody(String lederDisplayname, String lederNavIdent, String delegertRessursDisplayname, String delegertRessursNavident, LocalDate gyldigTom, String orgenhetNavn) {
+    private String getFormattedEmailBody(
+        String lederDisplayname,
+        String lederNavIdent,
+        String delegertRessursDisplayname,
+        String delegertRessursNavIdent,
+        LocalDate gyldigTom,
+        String orgenhetNavn
+    ) {
         var stringWriter = new StringWriter();
         var model = Map.of(
             "lederDisplayname", lederDisplayname,
             "lederNavIdent", lederNavIdent,
             "delegertRessursDisplayname", delegertRessursDisplayname,
-            "delegertRessursNavident", delegertRessursNavident,
+            "delegertRessursNavIdent", delegertRessursNavIdent,
             "tomDato", gyldigTom,
-            "orgenhetNavn", orgenhetNavn);
+            "orgenhetNavn", orgenhetNavn
+        );
         try {
             freemarkerConfig.getTemplate(DELEGERT_TILGANG_TEMPLATE).process(model, stringWriter);
             return stringWriter.getBuffer().toString();
         } catch (Exception e) {
             throw new RuntimeException("Kunne ikke formatere epost", e);
         }
+    }
+
+    private List<String> getAdditionalRecipientsEmails() {
+        // add Line and Renate for testing purposes. This will be deleted later when tests are confirmed
+        List<String> additionalRecipients = new ArrayList<>();
+        additionalRecipients.add("Line.Eeg-Larsen@nav.no");
+        additionalRecipients.add("Linn.Renate.Fredriksen@nav.no");
+        return additionalRecipients;
     }
 }
