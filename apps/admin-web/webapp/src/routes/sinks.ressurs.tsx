@@ -1,6 +1,6 @@
-import { Alert, CopyButton, Table } from "@navikt/ds-react";
+import { Alert, Table } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -60,12 +60,14 @@ function RessursHistoryPage() {
           {ressursEvents.map((ressursEvent, index) => {
             return (
               <Table.Row key={index}>
-                <Table.DataCell>
-                  <CopyButton
-                    copyText={ressursEvent.fid}
-                    text={ressursEvent.fid}
-                  />
-                </Table.DataCell>
+                <Table.HeaderCell scope="row">
+                  <Link
+                    search={{ filterText: ressursEvent.fid }}
+                    to="/state/ressurs"
+                  >
+                    {ressursEvent.fid}
+                  </Link>
+                </Table.HeaderCell>
                 <Table.DataCell>
                   <JsonModal data={ressursEvent} text={ressursEvent.type} />
                 </Table.DataCell>

@@ -1,6 +1,6 @@
-import { Alert, CopyButton, Table } from "@navikt/ds-react";
+import { Alert, Table } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -60,12 +60,14 @@ function OrgenhetHistoryPage() {
           {orgEnhetEvents.map((orgEnhetEvent, index) => {
             return (
               <Table.Row key={index}>
-                <Table.DataCell>
-                  <CopyButton
-                    copyText={orgEnhetEvent.fid}
-                    text={orgEnhetEvent.fid}
-                  />
-                </Table.DataCell>
+                <Table.HeaderCell scope="row">
+                  <Link
+                    search={{ filterText: orgEnhetEvent.fid }}
+                    to="/state/orgenhet"
+                  >
+                    {orgEnhetEvent.fid}
+                  </Link>
+                </Table.HeaderCell>
                 <Table.DataCell>
                   <JsonModal data={orgEnhetEvent} text={orgEnhetEvent.type} />
                 </Table.DataCell>
