@@ -423,12 +423,13 @@ public class RessursStillingStrukturerer {
                              }
 
                             log.debug(
-                                "Fikser inkonsistens i stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, historiskStillingsPerioder: {}",
+                                "Fikser inkonsistens i stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, tidligereNomEnheter: {}, historiskStillingsPerioder: {}",
                                 navident,
                                 stillingPeriode.gyldigFom(),
                                 nomEnheter.get(0).getGyldigFom().minusDays(1),
                                 orgenheterToString(nomEnheter),
                                 stillingPeriode,
+                                orgenheterToString(tidligereNomEnheter),
                                 StillingPeriode.toString(historiskStillingsPerioder, true)
                             );
                             if (unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
