@@ -243,6 +243,9 @@ spec:
         - application: kabin-api
           namespace: klage
           cluster: dev-gcp
+        - application: modia-robot-api
+          namespace: personoversikt
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
