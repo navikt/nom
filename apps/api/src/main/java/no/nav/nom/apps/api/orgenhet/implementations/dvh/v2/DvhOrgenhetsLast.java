@@ -147,6 +147,8 @@ public class DvhOrgenhetsLast {
                             }
                         });
                     } else {
+                        // LF - dersom det var mer enn 1 mnd mellom skulle det lages som to separate enheter, selv om navnet var likt.
+                        // Ref - https://jira.adeo.no/browse/ORG-1755
                         log.error("Manual correction needed, enhet merge error with fids {} for parsed DVH enhet [{}]",
                                 stateEnheterMatchingDvhParsedEnhet.stream().map(OrgEnhetState::fid).toList(), parsedEnhet.getUniqueAgressoId());
                     }
