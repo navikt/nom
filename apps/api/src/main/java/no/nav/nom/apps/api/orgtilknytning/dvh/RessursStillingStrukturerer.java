@@ -361,8 +361,7 @@ public class RessursStillingStrukturerer {
                             nomEnheter.get(0).getGyldigFom().minusDays(1)
                         );
 
-                        log.debug(SECURE_LOGS,
-                            "Klippet før stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, tidligereNomEnheter: {}",
+                        log.debug("Klippet før stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, tidligereNomEnheter: {}",
                             navident,
                             stillingPeriode.gyldigFom(),
                             nomEnheter.get(0).getGyldigFom().minusDays(1),
