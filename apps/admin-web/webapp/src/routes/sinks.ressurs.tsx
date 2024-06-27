@@ -1,4 +1,4 @@
-import { Alert, Link, Table } from "@navikt/ds-react";
+import { Alert, CopyButton, Table } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
@@ -10,7 +10,7 @@ import { EventDateRange } from "~/components/EventDateRange.tsx";
 import { EventOrigination } from "~/components/EventOrigination.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
 import { JsonModal } from "~/components/JsonModal.tsx";
-import { formatDisplayDatetime, formatVisningsnavn } from "~/utils.ts";
+import { formatDisplayDatetime } from "~/utils.ts";
 
 export const Route = createFileRoute("/sinks/ressurs")({
   loaderDeps: ({ search }) => search,
@@ -50,8 +50,7 @@ function RessursHistoryPage() {
       <Table size="small">
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeader scope="col">Navident</Table.ColumnHeader>
-            <Table.ColumnHeader scope="col">Navn</Table.ColumnHeader>
+            <Table.ColumnHeader scope="col">Fid</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Endring</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Dato</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Opprinnelse</Table.ColumnHeader>
@@ -62,17 +61,11 @@ function RessursHistoryPage() {
             return (
               <Table.Row key={index}>
                 <Table.DataCell>
-                  <Link
-                    href={`http://nom.nav.no/ressurs/${ressursEvent.additionalData?.navident}`}
-                    target="_blank"
-                  >
-                    {ressursEvent.additionalData?.navident}
-                  </Link>
+                  <CopyButton
+                    copyText={ressursEvent.fid}
+                    text={ressursEvent.fid}
+                  />
                 </Table.DataCell>
-                <Table.DataCell scope="row">
-                  {formatVisningsnavn(ressursEvent.data?.visningsnavn)}
-                </Table.DataCell>
-
                 <Table.DataCell>
                   <JsonModal data={ressursEvent} text={ressursEvent.type} />
                 </Table.DataCell>

@@ -7,6 +7,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { getTilgangEventsOptions, searchSchema } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { EventDateRange } from "~/components/EventDateRange.tsx";
+import { EventOrigination } from "~/components/EventOrigination.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
 import { JsonModal } from "~/components/JsonModal.tsx";
 import { NavidentNameLookup } from "~/components/NavidentNameLookup.tsx";
@@ -87,8 +88,7 @@ function TilgangHistoryPage() {
                   )}
                 </Table.DataCell>
                 <Table.DataCell>
-                  {tilgangEvent.metadata.inputMetadata.inputInterfaceMethodName}{" "}
-                  via {tilgangEvent.metadata.inputMetadata.inputInterfaceName}
+                  <EventOrigination metadata={tilgangEvent.metadata} />
                 </Table.DataCell>
               </Table.Row>
             );

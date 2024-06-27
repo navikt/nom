@@ -1,4 +1,4 @@
-import { Alert, Table } from "@navikt/ds-react";
+import { Alert, CopyButton, Table } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
@@ -50,16 +50,22 @@ function OrgenhetHistoryPage() {
       <Table size="small">
         <Table.Header>
           <Table.Row>
+            <Table.ColumnHeader scope="col">Fid</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Endring</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Dato</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Opprinnelse</Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- events can be of any type */}
-          {orgEnhetEvents.map((orgEnhetEvent: any, index: number) => {
+          {orgEnhetEvents.map((orgEnhetEvent, index) => {
             return (
               <Table.Row key={index}>
+                <Table.DataCell>
+                  <CopyButton
+                    copyText={orgEnhetEvent.fid}
+                    text={orgEnhetEvent.fid}
+                  />
+                </Table.DataCell>
                 <Table.DataCell>
                   <JsonModal data={orgEnhetEvent} text={orgEnhetEvent.type} />
                 </Table.DataCell>
