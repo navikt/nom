@@ -398,6 +398,17 @@ public class RessursStillingStrukturerer {
                              } else {
                                  var previousOrgenhetFom =  nomEnheter.get(0).getGyldigFom().minusDays(1);
                                  var tidligereNomEnheterReserseSortedByTom = reverseSortNomEnheterByGyldigTom(tidligereNomEnheter);
+
+                                 log.debug(
+                                     "Sjekker stillingperioden for navident {} fra {} til {}, nomEnheter: {}, tidligereNomEnheter: {} og tidligereNomEnheterReserseSortedByTom: {}",
+                                     navident,
+                                     stillingPeriode.gyldigFom(),
+                                     nomEnheter.get(0).getGyldigFom().minusDays(1),
+                                     orgenheterToString(nomEnheter),
+                                     orgenheterToString(tidligereNomEnheter),
+                                     orgenheterToString(tidligereNomEnheterReserseSortedByTom)
+                                 );
+
                                  for (IOrgenhet oe : tidligereNomEnheterReserseSortedByTom) {
                                      // hvis previousOrgenhetFom er etter oe.getGyldigTom() - log potensielle hull i perioden
                                      if(previousOrgenhetFom.isAfter(oe.getGyldigTom().get())){
