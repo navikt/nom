@@ -598,7 +598,9 @@ public class RessursStillingStrukturerer {
             .append(orgenhet.getGyldigFom())
             .append(" - ")
             .append(orgenhet.getGyldigTom().orElse(NO_END_DATE))
-            .append("]");
+            .append("]")
+            .append(" - ")
+            .append(orgenhet.getUniqueAgressoId());
         return str.toString();
     }
 
