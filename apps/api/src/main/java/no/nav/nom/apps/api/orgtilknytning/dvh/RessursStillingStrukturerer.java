@@ -428,7 +428,7 @@ public class RessursStillingStrukturerer {
                                              stillingPeriodeTom,
                                              oe
                                          ));
-                                     previousOrgenhetFom = stillingPeriodeFom;
+                                     previousOrgenhetFom = stillingPeriodeFom.minusDays(1);
                                  }
                              }
 
