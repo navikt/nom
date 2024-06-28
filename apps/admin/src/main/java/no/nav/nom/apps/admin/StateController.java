@@ -12,6 +12,7 @@ import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,16 +36,19 @@ public class StateController {
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final OrganiseringStateRepository organiseringStateRepository;
+    private final MasteredRessursStateRepository masteredRessursStateRepository;
 
 
     public StateController(
         RessursStateRepository ressursStateRepository, OrgEnhetStateRepository orgEnhetStateRepository,
-        OrgtilknytningStateRepository orgtilknytningStateRepository, OrganiseringStateRepository organiseringStateRepository
+        OrgtilknytningStateRepository orgtilknytningStateRepository, OrganiseringStateRepository organiseringStateRepository,
+        MasteredRessursStateRepository masteredRessursStateRepository
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.organiseringStateRepository = organiseringStateRepository;
+        this.masteredRessursStateRepository = masteredRessursStateRepository;
     }
 
     @GetMapping(value = "/ressurs")
@@ -79,5 +83,10 @@ public class StateController {
             .getOrganiseringer().stream().filter(organiseringStateSearchFilter(organiseringStateSearchParams)).toList();
 
         return safeSubList(events, fromOffset, fromOffset + 100);
+    }
+
+    @GetMapping(value = "/nom-mastered")
+    public List<String> getMasteredNavidents() {
+        return masteredRessursStateRepository.navidenter();
     }
 }

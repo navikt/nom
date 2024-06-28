@@ -25,6 +25,7 @@ import { Route as StateOrganiseringImport } from './routes/state.organisering'
 import { Route as SinksTilgangImport } from './routes/sinks.tilgang'
 import { Route as SinksRessursImport } from './routes/sinks.ressurs'
 import { Route as SinksOrgenhetImport } from './routes/sinks.orgenhet'
+import { Route as SinksNomMasteredImport } from './routes/sinks.nom-mastered'
 
 // Create/Update Routes
 
@@ -98,6 +99,11 @@ const SinksOrgenhetRoute = SinksOrgenhetImport.update({
   getParentRoute: () => SinksRoute,
 } as any)
 
+const SinksNomMasteredRoute = SinksNomMasteredImport.update({
+  path: '/nom-mastered',
+  getParentRoute: () => SinksRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -136,6 +142,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/state'
       preLoaderRoute: typeof StateImport
       parentRoute: typeof rootRoute
+    }
+    '/sinks/nom-mastered': {
+      id: '/sinks/nom-mastered'
+      path: '/nom-mastered'
+      fullPath: '/sinks/nom-mastered'
+      preLoaderRoute: typeof SinksNomMasteredImport
+      parentRoute: typeof SinksImport
     }
     '/sinks/orgenhet': {
       id: '/sinks/orgenhet'
@@ -210,6 +223,7 @@ export const routeTree = rootRoute.addChildren({
   ManuellLastRoute,
   ManuelleMeldingerRoute,
   SinksRoute: SinksRoute.addChildren({
+    SinksNomMasteredRoute,
     SinksOrgenhetRoute,
     SinksRessursRoute,
     SinksTilgangRoute,
@@ -251,6 +265,7 @@ export const routeTree = rootRoute.addChildren({
     "/sinks": {
       "filePath": "sinks.tsx",
       "children": [
+        "/sinks/nom-mastered",
         "/sinks/orgenhet",
         "/sinks/ressurs",
         "/sinks/tilgang",
@@ -266,6 +281,10 @@ export const routeTree = rootRoute.addChildren({
         "/state/ressurs",
         "/state/"
       ]
+    },
+    "/sinks/nom-mastered": {
+      "filePath": "sinks.nom-mastered.tsx",
+      "parent": "/sinks"
     },
     "/sinks/orgenhet": {
       "filePath": "sinks.orgenhet.tsx",

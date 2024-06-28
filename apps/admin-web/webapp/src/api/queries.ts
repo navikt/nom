@@ -62,6 +62,14 @@ export function getOrgenhetEventsOptions(search: searchType) {
   });
 }
 
+export function getNomMasteredOptions() {
+  return queryOptions({
+    queryKey: ["EVENTS", "NOM-MASTERED"],
+    queryFn: async () =>
+      (await ky.get(`${API_BASE_URL}/sinks/mastered}`)).json<string[]>(),
+  });
+}
+
 export function getRessursStatesOptions(search: searchType) {
   return queryOptions({
     queryKey: ["STATE", "RESSURS", search],
