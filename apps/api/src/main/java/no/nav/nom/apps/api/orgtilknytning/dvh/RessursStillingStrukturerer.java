@@ -411,7 +411,7 @@ public class RessursStillingStrukturerer {
                                  for (IOrgenhet oe : tidligereNomEnheterReserseSortedByTom) {
                                      // hvis previousOrgenhetFom er etter oe.getGyldigTom() - log potensielle hull i perioden
                                      if(previousOrgenhetFom.isAfter(oe.getGyldigTom().get())){
-                                         log.debug(SECURE_LOGS, "Hull i perioden for navident {} fra {} til {}",
+                                         log.debug("Hull i perioden for navident {} fra {} til {}",
                                              navident,
                                              oe.getGyldigTom().get(),
                                              previousOrgenhetFom);
