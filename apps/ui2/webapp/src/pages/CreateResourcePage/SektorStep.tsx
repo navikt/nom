@@ -1,12 +1,16 @@
 import { css } from "@emotion/react";
 import { Alert, Radio, RadioGroup, Select } from "@navikt/ds-react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { getOrgEnhet, getOrgTilknytninger } from "~/api/react-query-endpoints";
+import { useGetSession } from "~/api/useGetSession";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
-import { Sektor, Tilknytningtype } from "~/types/api-models";
+import { OrgEnhetsType, Sektor, Tilknytningtype } from "~/types/api-models";
+import { isGyldighetsPeriodeActive } from "~/utils";
 
 export const SektorNameMapping = {
   [Sektor.EKSTERN]: "Ekstern",
@@ -24,6 +28,29 @@ export function SektorStep() {
   const { sektor, tilknytningtype } = useSearch({
     from: "/ressurs/create/$step",
   });
+
+  const navident = useGetSession().data?.navident;
+  const dinOrgenhetId = useQuery({
+    queryKey: getOrgTilknytninger.queryKey(navident as string),
+    queryFn: () => getOrgTilknytninger.queryFn(navident as string),
+    select: (organiseringer) =>
+      organiseringer
+        .filter((organisering) =>
+          isGyldighetsPeriodeActive(
+            organisering.gyldigFom,
+            organisering.gyldigTom,
+          ),
+        )
+        .find((organisering) => organisering.erDagligOppfolging)?.orgEnhetId,
+  }).data;
+
+  const brukerJobberIDirektoratet = useQuery({
+    queryKey: getOrgEnhet.queryKey(dinOrgenhetId as string),
+    queryFn: () => getOrgEnhet.queryFn(dinOrgenhetId as string),
+    enabled: !!dinOrgenhetId,
+    select: (orgEnhet) => orgEnhet.orgEnhetsType === OrgEnhetsType.DIREKTORAT,
+  }).data;
+
   const [selectedSektor, setSelectedSektor] = useState(
     sektor ?? Sektor.EKSTERN,
   );
@@ -96,13 +123,15 @@ export function SektorStep() {
             <option value={Tilknytningtype.KONSULENT}>
               {TilknytningtypeNameMapping[Tilknytningtype.KONSULENT]}
             </option>
-            <option value={Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER}>
-              {
-                TilknytningtypeNameMapping[
-                  Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER
-                ]
-              }
-            </option>
+            {brukerJobberIDirektoratet && (
+              <option value={Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER}>
+                {
+                  TilknytningtypeNameMapping[
+                    Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER
+                  ]
+                }
+              </option>
+            )}
           </Select>
         )}
         <NavigationButtons goBackCallback={() => saveValuesAndNavigate("1")} />
