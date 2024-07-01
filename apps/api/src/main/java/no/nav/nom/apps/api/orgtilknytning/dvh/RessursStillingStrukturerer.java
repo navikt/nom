@@ -74,9 +74,10 @@ public class RessursStillingStrukturerer {
             var stillingerGruppert = strukturerNavidentensRessursStillinger(navident, rsList);
             var stillingerMedDagligOppfolging = finnKorrekteDagligOppfolginger(navident, stillingerGruppert);
             if (log.isDebugEnabled()) {
-                log.debug(SECURE_LOGS,
-                    "Resultat av gruppering og matching til orgenhet for navident {}:\n{}",
+                log.debug(
+                    "Resultat av gruppering og matching til orgenhet for navident {}, stillingerGruppert:\n{}, stillingerMedDagligOppfolging:\n{}",
                     navident,
+                    StillingPeriode.toString(stillingerGruppert, true),
                     StillingPeriode.toString(stillingerMedDagligOppfolging, true)
                 );
             }
