@@ -323,8 +323,7 @@ public class RessursStillingStrukturerer {
                 if (nomEnheter.size() == 0) {
                     // Klarer ikke finne NOM orgenhet for stillingPeriode/agressoId
                     if (isHistoricPeriod(stillingPeriode)) { // Ikke så farlig
-                        log.debug(SECURE_LOGS,
-                            "Klarer ikke finne NOM orgenhet for historisk stillingPeriode/agressoId for navident {}. Den vil ikke behandles:\n\t{}",
+                        log.debug("Klarer ikke finne NOM orgenhet for historisk stillingPeriode/agressoId for navident {}. Den vil ikke behandles:\n\t{}",
                             navident,
                             stillingPeriode
                         );
@@ -338,10 +337,10 @@ public class RessursStillingStrukturerer {
                     }
                 } else if (nomEnheter.size() == 1) {
                     // Exact one match
-                    log.debug(SECURE_LOGS, "StillingPerioden for navident {} matcher en orgenhet: {}", navident, orgenhetToString(nomEnheter.get(0)));
+                    log.debug("StillingPerioden for navident {} matcher en orgenhet: {}", navident, orgenhetToString(nomEnheter.get(0)));
                     // Må nå sjekke om stillingPerioden går utover enhetens periode. Hvis så, må enhetens periode brukes, og overskytende stillingsperiode må forkastes.
                     if (stillingPeriode.gyldigFom().isBefore(nomEnheter.get(0).getGyldigFom())) {
-                        log.debug(SECURE_LOGS,
+                        log.debug(
                             "Stillingperioden for navident {} starter før kjent orgenhets gyldighetsperiode. Må begrense stillingPeriodens gyldighet til å være innenfor",
                             navident
                         );
@@ -361,7 +360,8 @@ public class RessursStillingStrukturerer {
                             nomEnheter.get(0).getGyldigFom().minusDays(1)
                         );
 
-                        log.debug("Klippet før stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, tidligereNomEnheter: {}",
+                        log.debug(
+                            "Klippet før stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, tidligereNomEnheter: {}",
                             navident,
                             stillingPeriode.gyldigFom(),
                             nomEnheter.get(0).getGyldigFom().minusDays(1),
@@ -372,7 +372,7 @@ public class RessursStillingStrukturerer {
 
                         if(tidligereNomEnheter.isEmpty()){
                             // finner ingen historisk enhet - vi bare logger
-                            log.debug(SECURE_LOGS,
+                            log.debug(
                                 "Finner ingen historisk enhet for stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}",
                                 navident,
                                 stillingPeriode.gyldigFom(),
@@ -447,7 +447,7 @@ public class RessursStillingStrukturerer {
                             }
                         //}
                     } else if (stillingPeriode.gyldigTom().isAfter(nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE))) {
-                        log.debug(SECURE_LOGS,
+                        log.debug(
                             "Stillingperioden for navident {} slutter etter kjent orgenhets gyldighetsperiode. Må begrense stillingPeriodens gyldighet til å være innenfor",
                             navident
                         );
@@ -470,7 +470,7 @@ public class RessursStillingStrukturerer {
                             );
                         }
 
-                        log.debug(SECURE_LOGS,
+                        log.debug(
                             "Klippet etter stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, seinereNomEnherer: {}",
                             navident,
                             nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
@@ -484,14 +484,16 @@ public class RessursStillingStrukturerer {
                         if (!seinereNomEnherer.isEmpty() && unleash.isEnabled(UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS)){
                             // NOTE: kanskje vi må legge til alle hvis seinereNomEnherer.size() > 1. Denne er ikke så realistisk case! Logger warning hvis skjer
                             if(seinereNomEnherer.size() > 1 ) {
-                                log.warn(SECURE_LOGS, "Finner flere seinere enheter for stillingperioden for navident {} fra {} til {}. seinereNomEnherer: {}",
+                                log.warn(
+                                    "Finner flere seinere enheter for stillingperioden for navident {} fra {} til {}. seinereNomEnherer: {}",
                                     navident,
                                     nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
                                     stillingPeriode.gyldigTom(),
                                     orgenheterToString(seinereNomEnherer)
                                 );
                             } else {
-                                log.debug(SECURE_LOGS, "Fikser inkonsistens i stillingperioden for navident {} fra {} til {}. seinereNomEnherer: {}",
+                                log.debug(
+                                    "Fikser inkonsistens i stillingperioden for navident {} fra {} til {}. seinereNomEnherer: {}",
                                     navident,
                                     nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
                                     stillingPeriode.gyldigTom(),
