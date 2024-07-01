@@ -550,6 +550,12 @@ public class RessursStillingStrukturerer {
                 }
             });
 
+
+        log.debug(
+            "perioderGruppertMedOrgenhet for navident {}, perioder: {}",
+            navident,
+            perioderGruppertMedOrgenhet.stream().map(StillingPeriode::toString).collect(Collectors.joining("\n"))
+        );
         return perioderGruppertMedOrgenhet;
     }
 
