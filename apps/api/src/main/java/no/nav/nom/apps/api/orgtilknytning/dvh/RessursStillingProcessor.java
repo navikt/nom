@@ -96,7 +96,7 @@ public class RessursStillingProcessor {
         if (log.isDebugEnabled()) {
             var duplikateCurrent = stillingPerioder.stream().filter(PeriodeUtil::isCurrentPeriod);
             if (duplikateCurrent.count() > 1) {
-                log.debug(SECURE_LOGS,
+                log.debug(
                     "Navid {} har duplikate aktive stillinger:\n{}",
                     navident,
                     StillingPeriode.toString(stillingPerioder.stream().filter(PeriodeUtil::isCurrentPeriod).toList(), true)
@@ -155,7 +155,7 @@ public class RessursStillingProcessor {
 
             if (isHistoricPeriod(stillingPeriode)) {  // Historisk stillingPeriode fra DVH - vi lager ingen historiske tilkoblinger. Vi bare evt. avslutter.
                 if (orgtilknytninger.size() == 0) {
-                    log.debug(SECURE_LOGS,
+                    log.debug(
                         "Navident {} har historisk stillingPeriode fra DVH ({}) men NOM har ingen orgtilknytninger for ident {}",
                         navident,
                         stillingPeriode,
@@ -193,7 +193,7 @@ public class RessursStillingProcessor {
                             if (matcherStartDatoOgAgressoId.size() == 0) {
                                 // Matcher ingen i NOM, DVH historisk finnes ikke i NOM, så da behandler vi den ikke.
                                 // TODO: Har vi kommet til ett sted hvor gyldigFOM på historisk periode kan ha endret seg i DVH?
-                                log.debug(SECURE_LOGS,
+                                log.debug(
                                     "Navident {} har historisk stillingPeriode fra DVH ({}) matcher ingen orgtilknytninger {}",
                                     navident,
                                     stillingPeriode,
@@ -475,7 +475,7 @@ public class RessursStillingProcessor {
         // Sjekk om det finnes en current stillingPeriode hvor stilling og ressurs har samme enhet
         if (!validAgrIdStillingVsRessurs(stillingPerioder)) {
             if (log.isDebugEnabled()) {
-                log.debug(SECURE_LOGS,
+                log.debug(
                     "Navident {} har ingen gjeldende stilling med samme agressoId som ressursen:\n{}",
                     navident,
                     StillingPeriode.toString(stillingPerioder.stream().filter(PeriodeUtil::isCurrentPeriod).toList())
@@ -787,7 +787,8 @@ public class RessursStillingProcessor {
             } else {
                 evtsrcCommandsPerNavident.get(navident).forEach(strbuf::append);
             }
-            log.debug(SECURE_LOGS, strbuf.toString());
+            log.debug(
+                strbuf.toString());
         }
 
         evtsrcCommandsPerNavident = new HashMap<>();
