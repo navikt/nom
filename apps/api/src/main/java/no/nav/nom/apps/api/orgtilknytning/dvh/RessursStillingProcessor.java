@@ -70,6 +70,9 @@ public class RessursStillingProcessor {
     }
 
     public void process(Map<String, List<StillingPeriode>> stillingPerioderPerNavident) {
+
+        log.debug("Prosesserer stillingPerioder for navidents");
+
         processCmdResult = new ProcessCmdResult();
         manglerSammeEnhetPaStillingOgRessurs.clear();
         stillingPerioderPerNavident.forEach(this::process);
@@ -87,6 +90,8 @@ public class RessursStillingProcessor {
 
     // Prosesserer ett sett med stillingPerioder fra DVH som allerede er slått sammen/splittet på enhet/periode
     public void process(String navident, List<StillingPeriode> stillingPerioder) {
+        log.debug("Prosesserer stillingPerioder for navidentn {}, stillingPerioder: {}", navident, stillingPerioder.stream().map(StillingPeriode::toString).collect(Collectors.joining("\n")));
+
         if (processCmdResult == null) {
             processCmdResult = new ProcessCmdResult();
         }
