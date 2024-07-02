@@ -769,7 +769,9 @@ public class RessursStillingProcessor {
     }
 
     private void loggOppsummering(String navident, List<StillingPeriode> stillingPerioder, Collection<OrgtilknytningState> orgtilknytninger) {
-        if (log.isDebugEnabled()) {
+        // NOTE: disable for te3sting
+        //if (log.isDebugEnabled())
+        {
             StringBuffer strbuf = new StringBuffer();
             strbuf.append("Oppsummering for navident %s".formatted(navident));
             strbuf.append("\n\tAntall DVH ressursStillinger: %s".formatted(stillingPerioder.size()));
