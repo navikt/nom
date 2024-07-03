@@ -419,7 +419,7 @@ public class RessursStillingStrukturerer {
                                      }
 
                                      log.debug(
-                                         "OE: {}, previousOrgenhetFom - {}",oe, previousOrgenhetFom
+                                         "OE: {}, previousOrgenhetFom - {}",orgenhetToString(oe), previousOrgenhetFom
                                      );
 
                                      // stillingsperioder
