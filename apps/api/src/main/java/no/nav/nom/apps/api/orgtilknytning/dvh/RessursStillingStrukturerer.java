@@ -423,7 +423,10 @@ public class RessursStillingStrukturerer {
                                      );
 
                                      // stillingsperioder
-                                     var stillingPeriodeTom = oe.getGyldigTom().get().isAfter(previousOrgenhetFom) ? previousOrgenhetFom : oe.getGyldigTom().get(); // if orgEnhets TOM is after previousOrgenhetFom, use previousOrgenhetFom
+                                     var stillingPeriodeTom = previousOrgenhetFom;
+                                     if(oe.getGyldigTom().isPresent()){
+                                         stillingPeriodeTom =  oe.getGyldigTom().get().isAfter(previousOrgenhetFom) ? previousOrgenhetFom : oe.getGyldigTom().get(); // if orgEnhets TOM is after previousOrgenhetFom, use previousOrgenhetFom
+                                     }
                                      var stillingPeriodeFom = oe.getGyldigFom().isBefore(stillingPeriode.gyldigFom()) ? stillingPeriode.gyldigFom():oe.getGyldigFom(); // if orgEnhets FOM is before stillingFOM, use stillingFOM
 
                                      historiskStillingsPerioder.add(
