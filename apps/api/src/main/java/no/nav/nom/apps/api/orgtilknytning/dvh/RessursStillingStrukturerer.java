@@ -418,6 +418,10 @@ public class RessursStillingStrukturerer {
                                              previousOrgenhetFom);
                                      }
 
+                                     log.debug(
+                                         "OE: {}, previousOrgenhetFom - {}",oe, previousOrgenhetFom
+                                     );
+
                                      // stillingsperioder
                                      var stillingPeriodeTom = oe.getGyldigTom().get().isAfter(previousOrgenhetFom) ? previousOrgenhetFom : oe.getGyldigTom().get(); // if orgEnhets TOM is after previousOrgenhetFom, use previousOrgenhetFom
                                      var stillingPeriodeFom = oe.getGyldigFom().isBefore(stillingPeriode.gyldigFom()) ? stillingPeriode.gyldigFom():oe.getGyldigFom(); // if orgEnhets FOM is before stillingFOM, use stillingFOM
