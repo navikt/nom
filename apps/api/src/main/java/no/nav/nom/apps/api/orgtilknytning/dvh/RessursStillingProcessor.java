@@ -204,6 +204,13 @@ public class RessursStillingProcessor {
                                     stillingPeriode,
                                     matcherAgressoId
                                 );
+                                // NOTE (surya):
+                                //      det betyr stillingPeriode finnes ikke i NOM og må legges til med opprettOrgtilknytning and endreOrgtilknytningDato commands?
+                                //      maybe endreOrgtilknytningDato happed in the next run
+                                if(navident.equalsIgnoreCase("G151271")) {
+                                    String fid = lagNyOrgtilknytning(navident, stillingPeriode.orgenhet().getId(), stillingPeriode, StillingPeriode.toString(stillingPerioder));
+                                    settOrgtilknytningSluttDato(fid, navident, stillingPeriode, StillingPeriode.toString(stillingPerioder));
+                                }
                             } else if (matcherStartDatoOgAgressoId.size() > 1) {
                                 // Matcher flere i NOM - dette må være feil!....
                                 String msg = "Navident %s har historisk stillingPeriode fra DVH (%s) matcher flere orgtilknytninger %s".formatted(
@@ -774,8 +781,7 @@ public class RessursStillingProcessor {
     }
 
     private void loggOppsummering(String navident, List<StillingPeriode> stillingPerioder, Collection<OrgtilknytningState> orgtilknytninger) {
-        // NOTE: disable for te3sting
-        //if (log.isDebugEnabled())
+        if (log.isDebugEnabled())
         {
             StringBuffer strbuf = new StringBuffer();
             strbuf.append("Oppsummering for navident %s".formatted(navident));
