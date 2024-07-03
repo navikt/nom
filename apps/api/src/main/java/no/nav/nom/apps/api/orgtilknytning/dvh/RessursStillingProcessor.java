@@ -204,15 +204,11 @@ public class RessursStillingProcessor {
                                     stillingPeriode,
                                     matcherAgressoId
                                 );
-                                // NOTE (surya):
-                                //      opprettOrgtilknytning and it is without gyldigTom
-                                //      settOrgtilknytningSluttDato that sets gyldigTom
-                                if(navident.equalsIgnoreCase("G151271") ||
-                                    navident.equalsIgnoreCase("H152669") ||
-                                    navident.equalsIgnoreCase("H125294")) {
-                                    String fid = lagNyOrgtilknytning(navident, stillingPeriode.orgenhet().getId(), stillingPeriode, StillingPeriode.toString(stillingPerioder));
-                                    settOrgtilknytningSluttDato(fid, navident, stillingPeriode, StillingPeriode.toString(stillingPerioder));
-                                }
+                                // Løsn forslag:
+                                // opprettOrgtilknytning does not set gyldigTom
+                                // settOrgtilknytningSluttDato sets gyldigTom per stillingPeriode
+                                String fid = lagNyOrgtilknytning(navident, stillingPeriode.orgenhet().getId(), stillingPeriode, StillingPeriode.toString(stillingPerioder));
+                                settOrgtilknytningSluttDato(fid, navident, stillingPeriode, StillingPeriode.toString(stillingPerioder));
                             } else if (matcherStartDatoOgAgressoId.size() > 1) {
                                 // Matcher flere i NOM - dette må være feil!....
                                 String msg = "Navident %s har historisk stillingPeriode fra DVH (%s) matcher flere orgtilknytninger %s".formatted(
