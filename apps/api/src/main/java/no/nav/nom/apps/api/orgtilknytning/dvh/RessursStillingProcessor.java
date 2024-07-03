@@ -205,9 +205,11 @@ public class RessursStillingProcessor {
                                     matcherAgressoId
                                 );
                                 // NOTE (surya):
-                                //      det betyr stillingPeriode finnes ikke i NOM og må legges til med opprettOrgtilknytning and endreOrgtilknytningDato commands?
-                                //      maybe endreOrgtilknytningDato happed in the next run
-                                if(navident.equalsIgnoreCase("G151271")) {
+                                //      opprettOrgtilknytning and it is without gyldigTom
+                                //      settOrgtilknytningSluttDato that sets gyldigTom
+                                if(navident.equalsIgnoreCase("G151271") ||
+                                    navident.equalsIgnoreCase("H152669") ||
+                                    navident.equalsIgnoreCase("H125294")) {
                                     String fid = lagNyOrgtilknytning(navident, stillingPeriode.orgenhet().getId(), stillingPeriode, StillingPeriode.toString(stillingPerioder));
                                     settOrgtilknytningSluttDato(fid, navident, stillingPeriode, StillingPeriode.toString(stillingPerioder));
                                 }
