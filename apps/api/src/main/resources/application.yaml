@@ -287,6 +287,8 @@ app:
         orgenhet: na664h
       - navident: J129293       # Støtte for PRIM/ Christian Prestvik
         orgenhet: ke793y        # ref: https://nav-it.slack.com/archives/G01F99D2AHX/p1717488133154109
+      - navident: N852930       # Støtte for PRIM/ Christian Prestvik
+        orgenhet: ta755b
 
 NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
 NIK_API_SCOPE: api://dev-gcp.org.nav-ident/.default
