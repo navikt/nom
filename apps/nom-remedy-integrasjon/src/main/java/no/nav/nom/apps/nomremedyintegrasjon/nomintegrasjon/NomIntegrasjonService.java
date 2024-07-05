@@ -510,11 +510,11 @@ public class NomIntegrasjonService {
 
         var ressursState = nomApiClient.getRessursByFid(ressursPrimaryTelefonnummerOppdatertEventV1.getFid());
         var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
-
+        var primaryTelefonnummer = ressursPrimaryTelefonnummerOppdatertEventV1
+            .getMobilnummerOppdatertEventData()
+            .primaryTelefonnummer();
         var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
-            .mobil(ressursPrimaryTelefonnummerOppdatertEventV1
-                .getMobilnummerOppdatertEventData()
-                .primaryTelefonnummer())
+            .mobil((isNull(primaryTelefonnummer) || primaryTelefonnummer.isBlank()) ? null : primaryTelefonnummer)
             .build();
 
         saveNewNomIntegrasjonEntity(
@@ -545,7 +545,7 @@ public class NomIntegrasjonService {
             .utlopsdato(
                 dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getGyldigTom).map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null)
             )
-            .mobil(ressurs.getPrimaryTelefonnummer())
+            .mobil(isNull(ressurs.getPrimaryTelefonnummer()) || ressurs.getPrimaryTelefonnummer().isBlank() ? null : ressurs.getPrimaryTelefonnummer())
             .build();
     }
 
@@ -570,7 +570,8 @@ public class NomIntegrasjonService {
     protected void saveNewNomIntegrasjonEntity(NomIntegrasjonEntity newNomIntegrasjonEntity, String initiatedByNavident) {
 
         validateThatRequiredValuesAreSet(newNomIntegrasjonEntity);
-
+        var latestEntityForNavident = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(newNomIntegrasjonEntity.getNavId());
+        logger.info("Latest entity for navident {}: {}", newNomIntegrasjonEntity.getNavId(), latestEntityForNavident);
         if (nomIntegrasjonEntityProvidesNewDataFromNom(newNomIntegrasjonEntity)) {
             logger.info("Saving new nom integrasjon {}", newNomIntegrasjonEntity);
             nomIntegrasjonRepository.save(

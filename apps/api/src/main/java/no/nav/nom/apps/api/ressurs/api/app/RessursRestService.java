@@ -26,6 +26,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysis
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPrimaryTelefonnummerCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.NomMastered;
@@ -60,7 +61,6 @@ import java.util.stream.Collectors;
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.DateUtils.validateChronologicalDates;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
-import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
 import static no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService.validateOrgtilknytningTypeSektorCombination;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
@@ -172,7 +172,7 @@ public class RessursRestService {
             ? ressursState.personident()
             : ressursState.personident().replaceFirst(".{5}$", "*****");
 
-        var ressurs = new Ressurs(
+        return new Ressurs(
             ressursState.toBuilder()
                 .personident(personident)
                 .primaryTelefonnummer(getPrimaryTelefonnummerOrFromTelefonList(ressursState, telefoner))
@@ -183,12 +183,11 @@ public class RessursRestService {
             epost.orElse(null),
             nomMastered.isMastered(ressursState.navident())
         );
-        return ressurs;
     }
 
     private static Optional<String> getPrimaryTelefonnummerOrFromTelefonList(RessursState ressursState, List<Ressurs.Telefon> telefoner) {
         if (ressursState.primaryTelefonnummer().isPresent()) return ressursState.primaryTelefonnummer();
-        if (!isNull(telefoner) && !telefoner.isEmpty()) return Optional.of(telefoner.get(0).nummer());
+        if (!isNull(telefoner) && !telefoner.isEmpty()) return Optional.of(telefoner.getFirst().nummer());
         return Optional.empty();
     }
 
@@ -542,6 +541,12 @@ public class RessursRestService {
                     metadata
                 );
         }
+
+        reaktivertRessurs.sluttdato().ifPresentOrElse(sluttdato -> ressursCommandService.oppdaterRessursSluttdatoEvent(
+            new OppdaterSluttdatoCommand(reaktivertRessurs.fid(), Optional.of(sluttdato), metadata)
+        ), () -> ressursCommandService.oppdaterRessursSluttdatoEvent(
+            new OppdaterSluttdatoCommand(reaktivertRessurs.fid(), Optional.empty(), metadata)
+        ));
 
         logger.debug("createRessurs for {} - {}", reaktivertRessurs.navident(), request.visningsetternavn());
 
