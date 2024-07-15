@@ -90,7 +90,7 @@ public class RessursStillingProcessor {
 
     // Prosesserer ett sett med stillingPerioder fra DVH som allerede er slått sammen/splittet på enhet/periode
     public void process(String navident, List<StillingPeriode> stillingPerioder) {
-        log.debug("Prosesserer stillingPerioder for navidentn {}, stillingPerioder: {}", navident, stillingPerioder.stream().map(StillingPeriode::toString).collect(Collectors.joining("\n")));
+        log.debug(SECURE_LOGS, "Prosesserer stillingPerioder for navident {}, stillingPerioder: {}", navident, stillingPerioder.stream().map(StillingPeriode::toString).collect(Collectors.joining("\n")));
 
         if (processCmdResult == null) {
             processCmdResult = new ProcessCmdResult();
@@ -101,7 +101,7 @@ public class RessursStillingProcessor {
         if (log.isDebugEnabled()) {
             var duplikateCurrent = stillingPerioder.stream().filter(PeriodeUtil::isCurrentPeriod);
             if (duplikateCurrent.count() > 1) {
-                log.debug(
+                log.debug(SECURE_LOGS,
                     "Navid {} har duplikate aktive stillinger:\n{}",
                     navident,
                     StillingPeriode.toString(stillingPerioder.stream().filter(PeriodeUtil::isCurrentPeriod).toList(), true)
@@ -160,7 +160,7 @@ public class RessursStillingProcessor {
 
             if (isHistoricPeriod(stillingPeriode)) {  // Historisk stillingPeriode fra DVH - vi lager ingen historiske tilkoblinger. Vi bare evt. avslutter.
                 if (orgtilknytninger.size() == 0) {
-                    log.debug(
+                    log.debug(SECURE_LOGS,
                         "Navident {} har historisk stillingPeriode fra DVH ({}) men NOM har ingen orgtilknytninger for ident {}",
                         navident,
                         stillingPeriode,
@@ -198,7 +198,7 @@ public class RessursStillingProcessor {
                             if (matcherStartDatoOgAgressoId.size() == 0) {
                                 // Matcher ingen i NOM, DVH historisk finnes ikke i NOM, så da behandler vi den ikke.
                                 // TODO: Har vi kommet til ett sted hvor gyldigFOM på historisk periode kan ha endret seg i DVH?
-                                log.debug(
+                                log.debug(SECURE_LOGS,
                                     "Navident {} har historisk stillingPeriode fra DVH ({}) matcher ingen orgtilknytninger {}",
                                     navident,
                                     stillingPeriode,
