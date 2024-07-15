@@ -25,26 +25,29 @@
         <file>/secure-logs/secure.log</file>
 
         <!-- FixedWindowRollingPolicy is deprecared, ref: https://logback.qos.ch/manual/appenders.html#FixedWindowRollingPolicy -->
-        <!--
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
             <fileNamePattern>/secure-logs/secure.log.%i</fileNamePattern>
             <minIndex>1</minIndex>
-            <maxIndex>1</maxIndex>
+            <maxIndex>2</maxIndex>
         </rollingPolicy>
         <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
             <maxFileSize>50MB</maxFileSize>
+            <!-- 5 sekunder i stedet for default 60s - Jeg tror vi med dagens logging kan klare opptil 5MB per sekund med logging under DVH last -->
+            <checkIncrement>5000</checkIncrement>
         </triggeringPolicy>
-        -->
 
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <!-- rollover hourly -->
-            <fileNamePattern>secure-%d{yyyy-MM-dd_HH}.%i.log.gz</fileNamePattern>
-            <!-- SecureLogs volume har 128MB limit : https://docs.nais.io/observability/logging/how-to/enable-secure-logs/?h=secure#set-log-rotation -->
-            <!-- max size for current file 10MB, totalSizeCap for all archive files 90MB, 20MB buffer -->
-            <maxFileSize>10MB</maxFileSize>
-            <maxHistory>1</maxHistory>
-            <totalSizeCap>90MB</totalSizeCap>
-        </rollingPolicy>-->
+        <!-- Denne bruker SizeAndTimeBasedFNATP i bakgrunnen som kun bruker default 60s checkInterval som ikke kan overstyres -->
+        <!-- Prøver allikevel med FixedWindowRollingPolicy selv om den er deprecated -->
+<!--        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">-->
+<!--            &lt;!&ndash; rollover hourly &ndash;&gt;-->
+<!--            <fileNamePattern>secure-%d{yyyy-MM-dd_HH}.%i.log.gz</fileNamePattern>-->
+<!--            &lt;!&ndash; SecureLogs volume har 128MB limit : https://docs.nais.io/observability/logging/how-to/enable-secure-logs/?h=secure#set-log-rotation &ndash;&gt;-->
+<!--            &lt;!&ndash; max size for current file 10MB, totalSizeCap for all archive files 90MB, 20MB buffer &ndash;&gt;-->
+<!--            <maxFileSize>10MB</maxFileSize>-->
+<!--            <maxHistory>1</maxHistory>-->
+<!--            <totalSizeCap>90MB</totalSizeCap>-->
+<!--            <checkIncrement>10 seconds</checkIncrement>-->
+<!--        </rollingPolicy> -->
 
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <!-- Deny log messages not having marker SECURE_LOGS -->
