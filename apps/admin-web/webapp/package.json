@@ -11,7 +11,10 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "eslint --fix --ext .js,.jsx,.ts,.tsx .",
     "stylelint": "stylelint '**/*.{tsx,css}'",
-    "stylelint:fix": "stylelint --fix '**/*.{tsx,css}'"
+    "stylelint:fix": "stylelint --fix '**/*.{tsx,css}'",
+    "generate-types:nom-admin": "swagger-typescript-api --path https://nom-admin-api.intern.dev.nav.no/v3/api-docs/internal --output ./src/types/nom-admin --no-client -r -n nom-admin-models",
+    "generate-types:nom-api": "swagger-typescript-api --path https://nom-api.intern.dev.nav.no/v3/api-docs/internal --output ./src/types/nom-api --no-client -r -n nom-api-models",
+    "generate-types": "npm run generate-types:nom-admin && npm run generate-types:nom-api"
   },
   "dependencies": {
     "@hookform/resolvers": "3.6.0",
@@ -30,6 +33,7 @@
     "react-error-boundary": "4.0.13",
     "react-hook-form": "7.52.0",
     "react-json-view-lite": "1.4.0",
+    "swagger-typescript-api": "^13.0.12",
     "zod": "3.23.8"
   },
   "devDependencies": {

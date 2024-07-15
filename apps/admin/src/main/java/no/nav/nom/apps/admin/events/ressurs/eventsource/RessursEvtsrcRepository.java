@@ -1,4 +1,4 @@
-package no.nav.nom.apps.admin.events.ressurs;
+package no.nav.nom.apps.admin.events.ressurs.eventsource;
 
 import lombok.Getter;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;

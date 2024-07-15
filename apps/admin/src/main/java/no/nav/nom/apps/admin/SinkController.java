@@ -1,8 +1,14 @@
 package no.nav.nom.apps.admin;
 
 import no.nav.nom.apps.admin.dto.EventSearchParams;
-import no.nav.nom.apps.admin.events.orgenhet.OrgenhetEvtsrcRepository;
-import no.nav.nom.apps.admin.events.ressurs.RessursEvtsrcRepository;
+import no.nav.nom.apps.admin.dto.hendelse.HendelseDTO;
+import no.nav.nom.apps.admin.dto.orgenhet.OrgEnhetStateDTO;
+import no.nav.nom.apps.admin.dto.ressurs.RessursStateKafkaDTO;
+import no.nav.nom.apps.admin.events.hendelser.HendelserApiStateRepository;
+import no.nav.nom.apps.admin.events.orgenhet.api.OrgEnhetStateApiRepository;
+import no.nav.nom.apps.admin.events.orgenhet.eventsource.OrgenhetEvtsrcRepository;
+import no.nav.nom.apps.admin.events.ressurs.eventsource.RessursEvtsrcRepository;
+import no.nav.nom.apps.admin.events.ressurs.api.RessursApiStateRepository;
 import no.nav.nom.apps.admin.events.tilgang.TilgangEvtsrcRepository;
 import no.nav.nom.contract.nom.eventsource.AuthorizationEvent;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
@@ -26,14 +32,24 @@ public class SinkController {
     private final RessursEvtsrcRepository ressursEvtsrcRepository;
     private final OrgenhetEvtsrcRepository orgenhetEvtsrcRepository;
     private final TilgangEvtsrcRepository tilgangEvtsrcRepository;
+    private final RessursApiStateRepository ressursApiStateRepository;
+    private final OrgEnhetStateApiRepository orgEnhetStateApiRepository;
+    private final HendelserApiStateRepository hendelserApiStateRepository;
 
     public SinkController(
-        RessursEvtsrcRepository ressursEvtsrcRepository, OrgenhetEvtsrcRepository orgenhetEvtsrcRepository,
-        TilgangEvtsrcRepository tilgangEvtsrcRepository
+        RessursEvtsrcRepository ressursEvtsrcRepository,
+        OrgenhetEvtsrcRepository orgenhetEvtsrcRepository,
+        TilgangEvtsrcRepository tilgangEvtsrcRepository,
+        RessursApiStateRepository ressursApiStateRepository,
+        OrgEnhetStateApiRepository orgEnhetStateApiRepository,
+        HendelserApiStateRepository hendelserApiStateRepository
     ) {
         this.ressursEvtsrcRepository = ressursEvtsrcRepository;
         this.orgenhetEvtsrcRepository = orgenhetEvtsrcRepository;
         this.tilgangEvtsrcRepository = tilgangEvtsrcRepository;
+        this.ressursApiStateRepository = ressursApiStateRepository;
+        this.orgEnhetStateApiRepository = orgEnhetStateApiRepository;
+        this.hendelserApiStateRepository = hendelserApiStateRepository;
     }
 
 
@@ -61,5 +77,27 @@ public class SinkController {
         return safeSubList(events.reversed(), fromOffset, fromOffset + 100);
     }
 
+    @GetMapping(value = "/apiRessursEvents")
+    public List<RessursStateKafkaDTO> getEksternRessursEvents(@Valid EventSearchParams eventSearchParams) {
+        int fromOffset = eventSearchParams.getFromOffset();
+        List<RessursStateKafkaDTO> events = ressursApiStateRepository.getRessursStateTopic().stream().filter(eventFilter(eventSearchParams)).toList();
 
+        return safeSubList(events.reversed(), fromOffset, fromOffset + 100);
+    }
+
+    @GetMapping(value = "/apiOrgenhetEvents")
+    public List<OrgEnhetStateDTO> getApiOrgenhetEvents(@Valid EventSearchParams eventSearchParams) {
+        int fromOffset = eventSearchParams.getFromOffset();
+        List<OrgEnhetStateDTO> events = orgEnhetStateApiRepository.getOrgtilknytningApiState().stream().filter(eventFilter(eventSearchParams)).toList();
+
+        return safeSubList(events.reversed(), fromOffset, fromOffset + 100);
+    }
+
+    @GetMapping(value = "/apiHendelserEvents")
+    public List<HendelseDTO> getApiHendelserEvents(@Valid EventSearchParams eventSearchParams) {
+        int fromOffset = eventSearchParams.getFromOffset();
+        List<HendelseDTO> events = hendelserApiStateRepository.getHendelserApiState().stream().filter(eventFilter(eventSearchParams)).toList();
+
+        return safeSubList(events.reversed(), fromOffset, fromOffset + 100);
+    }
 }

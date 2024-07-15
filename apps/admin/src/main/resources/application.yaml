@@ -3,13 +3,20 @@ app:
   kafka:
     ressurs:
       eventsourceTopic: org.nom.ressurs-eventsource
+      apiEventTopic: org.nom.api-ressurs-state-v2
       eventsource-listener-id: nom-admin_ressursEvtsrcListener_${HOSTNAME}
+      apiEventTopic-listener-id: nom-admin_apiRessursListener_${HOSTNAME}
     orgenhet:
       eventsourceTopic: org.nom.orgenhet-eventsource
+      apiEventTopic: org.nom.api-orgenhet-state-v3
       eventsource-listener-id: nom-admin_orgenhetEvtsrcListener_${HOSTNAME}
+      apiEventTopic-listener-id: nom-admin_apiOrgenhetListener_${HOSTNAME}
     authorize:
       eventsourceTopic: org.nom.nom-authorize-eventsource
       eventsource-listener-id: nom-admin_authorizeEvtsrcListener_${HOSTNAME}
+    hendelser:
+      apiEventTopic: org.nom.api-hendelser-v1
+      apiEventTopic-listener-id: nom-admin_apiHendelserListener_${HOSTNAME}
 
 nom.libs.state.ressurs.enabled: true
 nom.libs.state.orgenhet.enabled: true

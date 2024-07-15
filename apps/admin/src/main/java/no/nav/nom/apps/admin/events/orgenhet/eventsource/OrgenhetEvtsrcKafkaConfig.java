@@ -1,4 +1,4 @@
-package no.nav.nom.apps.admin.events.orgenhet;
+package no.nav.nom.apps.admin.events.orgenhet.eventsource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;

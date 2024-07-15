@@ -3,13 +3,21 @@ import ky from "ky";
 import queryString from "query-string";
 import { z } from "zod";
 
-import type { OrgtilknytningState, RessursState } from "~/api-types.ts";
 import type {
   DelegertAuthorizationFelles,
   KafkaEvent,
   OrganiseringState,
   OrgEnhetState,
 } from "~/types.ts";
+import type {
+  HendelseDTO,
+  OrgEnhetStateDTO,
+  RessursStateKafkaDTO,
+} from "~/types/nom-admin/nom-admin-models.ts";
+import type {
+  OrgtilknytningState,
+  RessursState,
+} from "~/types/nom-api/nom-api-models.ts";
 const API_BASE_URL = "/frackend/admin-api";
 
 export const searchSchema = z.object({
@@ -115,5 +123,41 @@ export function getOrganiseringStateOptions(search: searchType) {
           `${API_BASE_URL}/states/organisering?${queryString.stringify(search, { skipNull: true })}`,
         )
       ).json<OrganiseringState[]>(),
+  });
+}
+
+export function getApiRessursEventsOptions(search: searchType) {
+  return queryOptions({
+    queryKey: ["API", "RESSURS", search],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/sinks/apiRessursEvents?${queryString.stringify(search, { skipNull: true })}`,
+        )
+      ).json<RessursStateKafkaDTO[]>(),
+  });
+}
+
+export function getApiOrgenhetEventsOptions(search: searchType) {
+  return queryOptions({
+    queryKey: ["API", "ORGENHET", search],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/sinks/apiOrgenhetEvents?${queryString.stringify(search, { skipNull: true })}`,
+        )
+      ).json<OrgEnhetStateDTO[]>(),
+  });
+}
+
+export function getApiHendelserEventsOptions(search: searchType) {
+  return queryOptions({
+    queryKey: ["API", "HENDELSER", search],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/sinks/apiHendelserEvents?${queryString.stringify(search, { skipNull: true })}`,
+        )
+      ).json<HendelseDTO[]>(),
   });
 }

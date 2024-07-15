@@ -1,4 +1,4 @@
-import type { NomNivaa } from "~/api-types.ts";
+import type { NomNivaa } from "~/types/nom-api/nom-api-models.ts";
 
 export type Visningsnavn = {
   etternavn: string;

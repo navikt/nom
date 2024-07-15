@@ -1,7 +1,7 @@
-package no.nav.nom.apps.admin.events.orgenhet;
+package no.nav.nom.apps.admin.events.ressurs.eventsource;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
+import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,25 +17,25 @@ import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
-public class OrgenhetEvtsrcListener {
+public class RessursEvtsrcListener {
     private final AtomicBoolean hasReadToEndOnStartup = new AtomicBoolean(false);
-    private final OrgenhetEvtsrcRepository orgenhetEvtsrcRepository;
+    private final RessursEvtsrcRepository ressursEvtsrcRepository;
     private final String listenerId;
 
-    public OrgenhetEvtsrcListener(OrgenhetEvtsrcRepository orgenhetEvtsrcRepository, @Value("${app.kafka.orgenhet.eventsource-listener-id}") String listenerId) {
-        this.orgenhetEvtsrcRepository = orgenhetEvtsrcRepository;
+    public RessursEvtsrcListener(RessursEvtsrcRepository ressursEvtsrcRepository, @Value("${app.kafka.ressurs.eventsource-listener-id}") String listenerId) {
+        this.ressursEvtsrcRepository = ressursEvtsrcRepository;
         this.listenerId = listenerId;
     }
 
     @KafkaListener(
-        containerFactory = "orgenhetEvtsrcKafkaListenerContainerFactory",
-        id = "${app.kafka.orgenhet.eventsource-listener-id}",
+        containerFactory = "ressursEvtsrcKafkaListenerContainerFactory",
+        id = "${app.kafka.ressurs.eventsource-listener-id}",
         topicPartitions = @TopicPartition(
-            topic = "${app.kafka.orgenhet.eventsourceTopic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
+            topic = "${app.kafka.ressurs.eventsourceTopic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
         )
     )
-    public void onMessage(ConsumerRecords<String, OrgEnhetEvent> records) {
-        orgenhetEvtsrcRepository.addOrgEnhetEvents(StreamSupport.stream(records.spliterator(), false).map(ConsumerRecord::value).toList());
+    public void onMessage(ConsumerRecords<String, RessursEvent> records) {
+        ressursEvtsrcRepository.addRessursEvents(StreamSupport.stream(records.spliterator(), false).map(ConsumerRecord::value).toList());
     }
 
     @EventListener
@@ -47,7 +47,7 @@ public class OrgenhetEvtsrcListener {
         log.debug("Idle event received for listener {}. Waiting for listener {}", event.getListenerId(), listenerId);
         if (event.getListenerId().startsWith(listenerId)) {
             log.info(
-                "All Orgenhet SourceEvents has now been read on startup. Number of OrgenhetEvtsrc messages consumed: {}", orgenhetEvtsrcRepository.count()
+                "All Ressurs SourceEvents has now been read on startup. Number of RessursEvtsrc messages consumed: {}", ressursEvtsrcRepository.count()
             );
             hasReadToEndOnStartup.set(true);
         }

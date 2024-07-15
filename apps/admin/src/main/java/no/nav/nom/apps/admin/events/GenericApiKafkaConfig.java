@@ -1,8 +1,6 @@
-package no.nav.nom.apps.admin.events.ressurs;
+package no.nav.nom.apps.admin.events;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -11,29 +9,28 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.time.Duration;
 
 @Slf4j
 @Configuration
 @EnableKafka
-public class RessursEvtsrcKafkaConfig {
+public class GenericApiKafkaConfig {
 
     @Bean
-    ConsumerFactory<String, RessursEvent> ressursEvtsrcConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+    ConsumerFactory<String, Object> genericApiEventDTOConsumerFactory(KafkaProperties properties) {
         return new DefaultKafkaConsumerFactory<>(
             properties.buildConsumerProperties(),
             new StringDeserializer(),
-            new JsonDeserializer<>(RessursEvent.class, objectMapper)
+            new GenericApiEventDeserializer()
         );
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, RessursEvent> ressursEvtsrcKafkaListenerContainerFactory(
-        ConsumerFactory<String, RessursEvent> consumerFactory
+    ConcurrentKafkaListenerContainerFactory<String, Object> genericApiEventKafkaListenerContainerFactory(
+        ConsumerFactory<String, Object> consumerFactory
     ) {
-        final var factory = new ConcurrentKafkaListenerContainerFactory<String, RessursEvent>();
+        final var factory = new ConcurrentKafkaListenerContainerFactory<String, Object>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);
         factory.getContainerProperties().setIdleEventInterval(5 * 1000L);

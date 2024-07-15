@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 
 import {
+  getApiRessursEventsOptions,
   getOrgenhetEventsOptions,
   getRessursEventsOptions,
   getTilgangEventsOptions,
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/sinks")({
     context.queryClient.prefetchQuery(getOrgenhetEventsOptions(deps));
     context.queryClient.prefetchQuery(getTilgangEventsOptions(deps));
     context.queryClient.prefetchQuery(getRessursEventsOptions(deps));
+    context.queryClient.prefetchQuery(getApiRessursEventsOptions(deps));
   },
   component: () => {
     const search = Route.useSearch();
@@ -47,6 +49,21 @@ export const Route = createFileRoute("/sinks")({
             label="NOM mastered"
             onClick={() => navigate({ to: "/sinks/nom-mastered", search })}
             value="/sinks/nom-mastered"
+          />
+          <Tabs.Tab
+            label="Ekstern Topic Ressurser"
+            onClick={() => navigate({ to: "/sinks/api-ressurs", search })}
+            value="/sinks/api-ressurs"
+          />
+          <Tabs.Tab
+            label="Ekstern Topic OrgEnheter"
+            onClick={() => navigate({ to: "/sinks/api-orgenhet", search })}
+            value={"/sinks/api-orgenhet"}
+          />
+          <Tabs.Tab
+            label="Ekstern Topic Hendelser"
+            onClick={() => navigate({ to: "/sinks/api-hendelser", search })}
+            value={"/sinks/api-hendelser"}
           />
         </Tabs.List>
         <Outlet />

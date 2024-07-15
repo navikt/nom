@@ -1,4 +1,5 @@
 /src/vite-env.d.ts
 /dist
 /src/routeTree.gen.ts
-/src/api-types.ts
+/src/types/nom-admin/nom-admin-models.ts
+/src/types/nom-api/nom-api-models.ts

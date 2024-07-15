@@ -1,7 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import ky from "ky";
 
-import type { Ressurs } from "~/api-types.ts";
+import type { Ressurs } from "~/types/nom-api/nom-api-models.ts";
 
 export const API_BASE_URL = "/frackend/api";
 

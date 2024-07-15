@@ -26,6 +26,9 @@ import { Route as SinksTilgangImport } from './routes/sinks.tilgang'
 import { Route as SinksRessursImport } from './routes/sinks.ressurs'
 import { Route as SinksOrgenhetImport } from './routes/sinks.orgenhet'
 import { Route as SinksNomMasteredImport } from './routes/sinks.nom-mastered'
+import { Route as SinksApiRessursImport } from './routes/sinks.api-ressurs'
+import { Route as SinksApiOrgenhetImport } from './routes/sinks.api-orgenhet'
+import { Route as SinksApiHendelserImport } from './routes/sinks.api-hendelser'
 
 // Create/Update Routes
 
@@ -104,6 +107,21 @@ const SinksNomMasteredRoute = SinksNomMasteredImport.update({
   getParentRoute: () => SinksRoute,
 } as any)
 
+const SinksApiRessursRoute = SinksApiRessursImport.update({
+  path: '/api-ressurs',
+  getParentRoute: () => SinksRoute,
+} as any)
+
+const SinksApiOrgenhetRoute = SinksApiOrgenhetImport.update({
+  path: '/api-orgenhet',
+  getParentRoute: () => SinksRoute,
+} as any)
+
+const SinksApiHendelserRoute = SinksApiHendelserImport.update({
+  path: '/api-hendelser',
+  getParentRoute: () => SinksRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -142,6 +160,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/state'
       preLoaderRoute: typeof StateImport
       parentRoute: typeof rootRoute
+    }
+    '/sinks/api-hendelser': {
+      id: '/sinks/api-hendelser'
+      path: '/api-hendelser'
+      fullPath: '/sinks/api-hendelser'
+      preLoaderRoute: typeof SinksApiHendelserImport
+      parentRoute: typeof SinksImport
+    }
+    '/sinks/api-orgenhet': {
+      id: '/sinks/api-orgenhet'
+      path: '/api-orgenhet'
+      fullPath: '/sinks/api-orgenhet'
+      preLoaderRoute: typeof SinksApiOrgenhetImport
+      parentRoute: typeof SinksImport
+    }
+    '/sinks/api-ressurs': {
+      id: '/sinks/api-ressurs'
+      path: '/api-ressurs'
+      fullPath: '/sinks/api-ressurs'
+      preLoaderRoute: typeof SinksApiRessursImport
+      parentRoute: typeof SinksImport
     }
     '/sinks/nom-mastered': {
       id: '/sinks/nom-mastered'
@@ -223,6 +262,9 @@ export const routeTree = rootRoute.addChildren({
   ManuellLastRoute,
   ManuelleMeldingerRoute,
   SinksRoute: SinksRoute.addChildren({
+    SinksApiHendelserRoute,
+    SinksApiOrgenhetRoute,
+    SinksApiRessursRoute,
     SinksNomMasteredRoute,
     SinksOrgenhetRoute,
     SinksRessursRoute,
@@ -265,6 +307,9 @@ export const routeTree = rootRoute.addChildren({
     "/sinks": {
       "filePath": "sinks.tsx",
       "children": [
+        "/sinks/api-hendelser",
+        "/sinks/api-orgenhet",
+        "/sinks/api-ressurs",
         "/sinks/nom-mastered",
         "/sinks/orgenhet",
         "/sinks/ressurs",
@@ -281,6 +326,18 @@ export const routeTree = rootRoute.addChildren({
         "/state/ressurs",
         "/state/"
       ]
+    },
+    "/sinks/api-hendelser": {
+      "filePath": "sinks.api-hendelser.tsx",
+      "parent": "/sinks"
+    },
+    "/sinks/api-orgenhet": {
+      "filePath": "sinks.api-orgenhet.tsx",
+      "parent": "/sinks"
+    },
+    "/sinks/api-ressurs": {
+      "filePath": "sinks.api-ressurs.tsx",
+      "parent": "/sinks"
     },
     "/sinks/nom-mastered": {
       "filePath": "sinks.nom-mastered.tsx",
