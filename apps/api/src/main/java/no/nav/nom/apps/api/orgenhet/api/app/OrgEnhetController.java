@@ -78,6 +78,15 @@ public class OrgEnhetController {
         return ResponseEntity.ok(orgenhetService.findAllUnderliggendeOrgenheter(parentId));
     }
 
+    @GetMapping("/underliggende-objekt/{parentId}")
+    @Operation(
+        description = "Henter ut alle underliggende organisasjonsenheter",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    public ResponseEntity<List<OrgEnhet>> getUnderliggendeOrgEnheterObjekt(@PathVariable("parentId") String parentId) {
+        return ResponseEntity.ok(orgenhetService.getUnderliggendeOrgEnhetById(parentId).stream().map(orgEnhetMapper::mapFrom).collect(Collectors.toList()));
+    }
+
     @GetMapping("/read-topic")
     @Operation(
             description = "Henter records fra ressurs event-source",

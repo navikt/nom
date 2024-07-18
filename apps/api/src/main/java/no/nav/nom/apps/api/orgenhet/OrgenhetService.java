@@ -227,6 +227,26 @@ public class OrgenhetService {
         }
     }
 
+    public List<IOrgenhet> getUnderliggendeOrgEnhetById(String id) {
+        Set<String> underliggendeIds = orgEnhetStateRepository.findById(id).map(parent -> {
+
+            List<OrganiseringState> organiseringer = organiseringStateRepository.getOrganiseringerContainingId(parent.id());
+            ArrayList<String> allUnderliggende = new java.util.ArrayList<>(emptyList());
+
+            Set<OrganiseringState> nextLevelChildren = organiseringer.stream().filter(organisering -> organisering.idOver().equals(parent.id()))
+                .collect(Collectors.toSet());
+
+            while (!nextLevelChildren.isEmpty()) {
+                allUnderliggende.addAll(nextLevelChildren.stream().map(OrganiseringState::id).toList());
+                nextLevelChildren = findChildOrganiseringerUsingNewOrganisering(nextLevelChildren);
+            }
+
+            return new HashSet<>(allUnderliggende);
+        }).orElse(new HashSet<>());
+
+        return orgEnhetStateRepository.findByIdIn(underliggendeIds).stream().map(this::map).toList();
+    }
+
     private Set<DvhOrganisering> findChildOrganiseringer(Set<DvhOrganisering> parentOrganiseringer) {
         return parentOrganiseringer.stream()
             .map(organisering ->
