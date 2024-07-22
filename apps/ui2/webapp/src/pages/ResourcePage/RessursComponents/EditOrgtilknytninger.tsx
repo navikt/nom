@@ -535,16 +535,13 @@ function EditOrgilkntyningFormPart({ index }: { index: number }) {
   });
 
   return (
-    <>
-      <div
-        css={css`
-          display: flex;
-          justify-content: space-between;
-        `}
-      >
-        <Heading size="medium">{orgEnhetQuery.data?.navn}</Heading>
-      </div>
-    </>
+    <div>
+      <Heading size="medium">{orgEnhetQuery.data?.navn}</Heading>
+
+      <BodyLong>
+        Enhet i Remedy: <b>{orgEnhetQuery.data?.remedyEnhetId}</b>
+      </BodyLong>
+    </div>
   );
 }
 
@@ -853,16 +850,16 @@ const BekreftModal = forwardRef<
               new Date(nyRemedyTilknytning.gyldigFom as string),
             ) ? (
               <BekreftModalInnholdNyRemedyIFortiden
-                gammelOrgEnhet={`${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.id})`}
+                gammelOrgEnhet={`${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.remedyEnhetId})`}
                 navn={navn ?? "medarbeideren"}
-                nyOrgEnhet={`${nyRemedyOrgEnhet?.navn} (${nyRemedyOrgEnhet?.id})`}
+                nyOrgEnhet={`${nyRemedyOrgEnhet?.navn} (${nyRemedyOrgEnhet?.remedyEnhetId})`}
               />
             ) : (
               <BekreftModalInnholdNyRemedyIFremtiden
                 dato={formatDisplayDate(nyRemedyTilknytning.gyldigFom)}
-                gammelOrgEnhet={`${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.id})`}
+                gammelOrgEnhet={`${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.remedyEnhetId})`}
                 navn={navn ?? "medarbeideren"}
-                nyOrgEnhet={`${nyRemedyOrgEnhet?.navn} (${nyRemedyOrgEnhet?.id})`}
+                nyOrgEnhet={`${nyRemedyOrgEnhet?.navn} (${nyRemedyOrgEnhet?.remedyEnhetId})`}
               />
             )
           ) : (
