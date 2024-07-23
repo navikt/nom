@@ -184,16 +184,22 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
           );
         })
         .map(([key, formData]) => {
-          return key === "newTilgang"
-            ? addDelegering({
-                ...formData,
-                orgenhetId: orgEnhet.id,
-              })
-            : fornyDelegering({
-                ...formData,
-                delegertTilNavident: key,
-                orgenhetId: orgEnhet.id,
-              });
+          if (key === "newTilgang") {
+            return addDelegering({
+              ...formData,
+              orgenhetId: orgEnhet.id,
+            });
+          } else {
+            const fornyTilgangNavident = tilgangerDelegertAvMeg.find(
+              (tilgang) => tilgang.fid === key,
+            )?.til;
+
+            return fornyDelegering({
+              ...formData,
+              delegertTilNavident: fornyTilgangNavident as string,
+              orgenhetId: orgEnhet.id,
+            });
+          }
         });
 
       const settledPromises = await Promise.allSettled(promises);
