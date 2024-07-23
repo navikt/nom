@@ -34,7 +34,7 @@
             <!-- 5 sekunder i stedet for default 60s - Jeg tror vi med dagens logging kan klare opptil 5MB per sekund med logging under DVH last -->
             <!-- Kan tydeligvis være mer - treffer sporadisk på 128MB grensen fortsatt. -->
             <!-- Sett ned ytterligere fra 5s til 3s. Skrur også ned filesize til under 3x -->
-            <maxFileSize>40MB</maxFileSize>
+            <maxFileSize>30MB</maxFileSize>
             <checkIncrement>3000</checkIncrement>
         </triggeringPolicy>
 
