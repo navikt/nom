@@ -184,6 +184,10 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
           );
         })
         .map(([key, formData]) => {
+          const fornyTilgangNavident = tilgangerDelegertAvMeg.find(
+            (tilgang) => tilgang.fid === key,
+          )?.til;
+
           return key === "newTilgang"
             ? addDelegering({
                 ...formData,
@@ -191,7 +195,7 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               })
             : fornyDelegering({
                 ...formData,
-                delegertTilNavident: formData.delegertTilNavident,
+                delegertTilNavident: fornyTilgangNavident as string,
                 orgenhetId: orgEnhet.id,
               });
         });
