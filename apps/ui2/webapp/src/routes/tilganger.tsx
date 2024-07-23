@@ -191,6 +191,7 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               })
             : fornyDelegering({
                 ...formData,
+                delegertTilNavident: formData.delegertTilNavident,
                 orgenhetId: orgEnhet.id,
               });
         });
