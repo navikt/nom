@@ -296,6 +296,27 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
         assertOrgtilknytning(CMD.ENDRE_DAGLIG_OPPFOLGING)
             .forFid(fid)
             .erDagligOppfolging(true);
+
+    }
+
+    @Test
+    @DisplayName("Ekstern med eksisterende knytning hvor orgenhet er endret, og startdato og sluttdato er før dagens dato")
+    public void test_010_1() {
+        DvhEksternRessurs ekstern =
+            new DvhEksternRessurs("payload", "A000001", "1234", "8000100", "ORGENHET", yesterday.minusDays(1), yesterday, true);
+
+        when(orgtilknytningService.getByNavIdent(ekstern.navident())).thenReturn(List.of(
+            orgtilknytningState().toBuilder()
+                .fid("FID_A")
+                .navident(ekstern.navident())
+                .build()
+        ));
+
+        eksterneRessurserProcessor.process(ekstern);
+
+        assertOrgtilknytning(CMD.AVVIKLET)
+            .forFid("FID_A")
+            .gyldigTom(yesterday);
     }
 
     @Test
