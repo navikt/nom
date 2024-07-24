@@ -6,7 +6,7 @@ import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandServ
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.AvsluttDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.FornyDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.OpprettDelegertAuthorization;
-import no.nav.nom.apps.api.authorize.redigereressurs.api.LederTilgangForOrgenhetRequest;
+import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrgenhetRequest;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
@@ -244,10 +244,13 @@ public class AuthorizedNavident {
             throw new NotAuthorizedToDelegateLeder("Leder " + leder + " har ikke rett til å delegere eller endre delegert leder rettighet for ressurs-redigering tilhørende orgenhet " + orgenhetId);
         }
     }
-
     public void sjekkOmOrgenhetAlleredeDelegertTilNavident(LederTilgangForOrgenhetRequest request) {
-        if (delegertLederStateRepository.erOrgenhetDelegertTilNavident(request.orgenhetId(), request.delegertTilNavident())) {
-            throw new IllegalArgumentException("Delegert leder " + request.delegertTilNavident() + " er allerede aktiv for orgenhet " + request.orgenhetId());
+        sjekkOmOrgenhetAlleredeDelegertTilNavident(request.orgenhetId(), request.delegertTilNavident());
+    }
+
+    public void sjekkOmOrgenhetAlleredeDelegertTilNavident(String orgenhetId, String delegertTilNavident) {
+        if (delegertLederStateRepository.erOrgenhetDelegertTilNavident(orgenhetId, delegertTilNavident)) {
+            throw new IllegalArgumentException("Delegert leder " + delegertTilNavident + " er allerede aktiv for orgenhet " +orgenhetId);
         }
     }
 

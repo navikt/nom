@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.authorize.redigereressurs.api;
+package no.nav.nom.apps.api.authorize.redigereressurs.api.app;
 
 
 import io.getunleash.Unleash;

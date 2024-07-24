@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.authorize.redigereressurs;
 
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
-import no.nav.nom.apps.api.authorize.redigereressurs.api.LederTilgangForOrgenhetRequest;
+import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrgenhetRequest;
 import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
