@@ -141,6 +141,12 @@ public class RessursRestService {
         return hideSensitiveDataAndEnrichRessursStateWithDvhData(ressursState);
     }
 
+    public List<Ressurs> findRessurserByNavident(List<String> navidenter) {
+        return ressursStateRepository.findByNavidentBulk(navidenter).values().stream()
+            .map(this::hideSensitiveDataAndEnrichRessursStateWithDvhData)
+            .toList();
+    }
+
     private RessursState findRessursStateByNavident(String navident) {
         return ressursStateRepository.findByNavident(navident).orElseThrow(() -> RessursNotFoundException.navident(navident));
     }

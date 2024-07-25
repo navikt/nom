@@ -266,7 +266,7 @@ public class OrgenhetService {
                 organiseringStateRepository.getOrganiseringerContainingId(organisering.id()).stream()
                     .filter(lowerOrganisering ->
                         !lowerOrganisering.equals(organisering) &&
-                            lowerOrganisering.id().equals(organisering.id())
+                            lowerOrganisering.idOver().equals(organisering.id())
                     ).toList()
             ).flatMap(List::stream).collect(Collectors.toSet());
     }

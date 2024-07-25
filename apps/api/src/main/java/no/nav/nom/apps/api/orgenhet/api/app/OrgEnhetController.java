@@ -78,9 +78,9 @@ public class OrgEnhetController {
         return ResponseEntity.ok(orgenhetService.findAllUnderliggendeOrgenheter(parentId));
     }
 
-    @GetMapping("/underliggende-objekt/{parentId}")
+    @GetMapping("/alle-underliggende/{parentId}")
     @Operation(
-        description = "Henter ut alle underliggende organisasjonsenheter",
+        description = "Henter ut objekt for alle underliggende organisasjonsenheter",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     public ResponseEntity<List<OrgEnhet>> getUnderliggendeOrgEnheterObjekt(@PathVariable("parentId") String parentId) {

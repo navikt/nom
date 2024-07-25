@@ -105,6 +105,12 @@ export const underliggendeOrgEnheterKeys = {
     [...underliggendeOrgEnheterKeys.all, parent] as const,
 };
 
+export const underliggendeOrgEnheterObjects = {
+  all: ["UNDERLIGGENDE_ORGENHETER_OBJECTS"] as const,
+  childOrgEnheter: (parent: string) =>
+    [...underliggendeOrgEnheterObjects.all, parent] as const,
+};
+
 export const teamcatMembershipsKeys = {
   all: ["TEAMCAT_MEMBERSHIPS"] as const,
   navident: (navident: string) =>
@@ -194,6 +200,17 @@ export const getRessurserForOrgenhet = {
     await Promise.all(
       navidenter.map((navident) => getRessurs.queryFn(navident)),
     ),
+};
+
+export const getRessurserByListNavident = {
+  queryKey: (navidenter: string[]) => ["RESSURSER_BY_LIST", ...navidenter],
+  queryFn: async (navidenter: string[]) =>
+    (
+      await axios.post<string[], AxiosResponse<Ressurs[]>>(
+        `${NOM_API_BASE_PATH}/app/ressurser/byListNavident`,
+        navidenter,
+      )
+    ).data,
 };
 
 export const getLedereForRessurs = {
@@ -407,6 +424,17 @@ export const getUnderliggendeOrgenheter = {
     (
       await axios.get<string[]>(
         `${NOM_API_BASE_PATH}/app/orgenheter/underliggende/${parentId}`,
+      )
+    ).data,
+};
+
+export const getAlleUnderliggendeOrgEnheter = {
+  queryKey: (parentId: string) =>
+    underliggendeOrgEnheterObjects.childOrgEnheter(parentId),
+  queryFn: async (parentId: string) =>
+    (
+      await axios.get<OrgEnhet[]>(
+        `${NOM_API_BASE_PATH}/app/orgenheter/alle-underliggende/${parentId}`,
       )
     ).data,
 };

@@ -22,6 +22,7 @@ import { Route as AdminOrgenheterImport } from './routes/admin.orgenheter'
 import { Route as AdminHistoryRessurserImport } from './routes/admin.history-ressurser'
 import { Route as AdminHistoryOrgenheterImport } from './routes/admin.history-orgenheter'
 import { Route as RessursCreateStepImport } from './routes/ressurs.create.$step'
+import { Route as OrgTableIdImport } from './routes/org.table.$id'
 
 // Create/Update Routes
 
@@ -77,6 +78,11 @@ const AdminHistoryOrgenheterRoute = AdminHistoryOrgenheterImport.update({
 
 const RessursCreateStepRoute = RessursCreateStepImport.update({
   path: '/ressurs/create/$step',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const OrgTableIdRoute = OrgTableIdImport.update({
+  path: '/org/table/$id',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -154,6 +160,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RessursIdImport
       parentRoute: typeof rootRoute
     }
+    '/org/table/$id': {
+      id: '/org/table/$id'
+      path: '/org/table/$id'
+      fullPath: '/org/table/$id'
+      preLoaderRoute: typeof OrgTableIdImport
+      parentRoute: typeof rootRoute
+    }
     '/ressurs/create/$step': {
       id: '/ressurs/create/$step'
       path: '/ressurs/create/$step'
@@ -178,6 +191,7 @@ export const routeTree = rootRoute.addChildren({
   OrgIdRoute,
   RessursTerminateIdRoute,
   RessursIdRoute,
+  OrgTableIdRoute,
   RessursCreateStepRoute,
 })
 
@@ -195,6 +209,7 @@ export const routeTree = rootRoute.addChildren({
         "/org/$id",
         "/ressurs-terminate/$id",
         "/ressurs/$id",
+        "/org/table/$id",
         "/ressurs/create/$step"
       ]
     },
@@ -237,6 +252,9 @@ export const routeTree = rootRoute.addChildren({
     },
     "/ressurs/$id": {
       "filePath": "ressurs.$id.tsx"
+    },
+    "/org/table/$id": {
+      "filePath": "org.table.$id.tsx"
     },
     "/ressurs/create/$step": {
       "filePath": "ressurs.create.$step.tsx"

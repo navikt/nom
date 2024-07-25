@@ -203,6 +203,18 @@ public class RessursController {
         return ResponseEntity.ok(ressurs);
     }
 
+    @PostMapping("/byListNavident")
+    @Operation(
+        description = "Henter ressurser med liste av navident",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "List of Ressurs if found or empty list"),
+    })
+    public List<Ressurs> getRessursByListNavident(@Valid @RequestBody List<String> navidentList){
+        return ressursRestService.findRessurserByNavident(navidentList);
+    }
+
     @GetMapping("/read-topic")
     @Operation(
         description = "Henter records fra ressurs event-source",
