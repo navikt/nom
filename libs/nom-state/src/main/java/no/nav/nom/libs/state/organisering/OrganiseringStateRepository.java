@@ -13,7 +13,7 @@ public interface OrganiseringStateRepository {
 
     Optional<OrganiseringState> findActiveById(String id);
 
-    public Optional<OrganiseringState> findById(String id);
+    Optional<OrganiseringState> findById(String id);
 
     void clear();
 

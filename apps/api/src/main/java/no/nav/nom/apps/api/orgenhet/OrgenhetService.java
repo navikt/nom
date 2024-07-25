@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
+import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -227,7 +228,7 @@ public class OrgenhetService {
         }
     }
 
-    public List<IOrgenhet> getUnderliggendeOrgEnhetById(String id) {
+    public List<IOrgenhet> getAllUnderliggendeOrgEnhetById(String id) {
         Set<String> underliggendeIds = orgEnhetStateRepository.findById(id).map(parent -> {
 
             List<OrganiseringState> organiseringer = organiseringStateRepository.getOrganiseringerContainingId(parent.id());
@@ -245,6 +246,21 @@ public class OrgenhetService {
         }).orElse(new HashSet<>());
 
         return orgEnhetStateRepository.findByIdIn(underliggendeIds).stream().map(this::map).toList();
+    }
+
+    public boolean isOrgEnhetInArbeidsomraade(String orgenhetId) {
+        var orgenhetState = orgEnhetStateRepository.findById(orgenhetId);
+        if (orgenhetState.isEmpty()) {
+            return false;
+        }
+
+        if (orgenhetState.get().nomNivaa().isPresent() && orgenhetState.get().nomNivaa().get().equals(NomNivaa.ARBEIDSOMRAADE)) {
+            return true;
+        }
+
+        var organisering = organiseringStateRepository.findActiveById(orgenhetState.get().id());
+
+        return organisering.filter(organiseringState -> isOrgEnhetInArbeidsomraade(organiseringState.idOver())).isPresent();
     }
 
     private Set<DvhOrganisering> findChildOrganiseringer(Set<DvhOrganisering> parentOrganiseringer) {

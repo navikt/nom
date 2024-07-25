@@ -84,7 +84,16 @@ public class OrgEnhetController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     public ResponseEntity<List<OrgEnhet>> getUnderliggendeOrgEnheterObjekt(@PathVariable("parentId") String parentId) {
-        return ResponseEntity.ok(orgenhetService.getUnderliggendeOrgEnhetById(parentId).stream().map(orgEnhetMapper::mapFrom).collect(Collectors.toList()));
+        return ResponseEntity.ok(orgenhetService.getAllUnderliggendeOrgEnhetById(parentId).stream().map(orgEnhetMapper::mapFrom).collect(Collectors.toList()));
+    }
+
+    @GetMapping("/finn-arbeidsomraade/{orgEnhetId}")
+    @Operation(
+        description = "Sjekk om Organisasjonen tilhøerer et arbeidsområde.",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    public ResponseEntity<Boolean> checkIfOrgEnhetIsArbeidsomraade(@PathVariable("orgEnhetId") String orgEnhetId) {
+        return ResponseEntity.ok(orgenhetService.isOrgEnhetInArbeidsomraade(orgEnhetId));
     }
 
     @GetMapping("/read-topic")
