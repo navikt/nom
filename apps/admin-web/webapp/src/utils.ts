@@ -4,7 +4,7 @@ import type { Visningsnavn } from "~/types.ts";
 
 export const DATE_FORMATS = {
   no: "dd.MM.yyyy",
-  noLong: "dd.MM.yyyy HH:MM",
+  noLong: "dd.MM.yyyy HH:mm",
 };
 
 export function formatVisningsnavn(visningsNavn?: Visningsnavn) {

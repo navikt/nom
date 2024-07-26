@@ -8,6 +8,7 @@ import { getApiHendelserEventsOptions, searchSchema } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
+import { formatDisplayDatetime } from "~/utils.ts";
 
 export const Route = createFileRoute("/sinks/api-hendelser")({
   validateSearch: searchSchema.parse,
@@ -68,7 +69,9 @@ function ApiHendelserPage() {
                 {apiHendelse.id}
               </Link>
             </Table.HeaderCell>
-            <Table.DataCell>{apiHendelse.timestamp}</Table.DataCell>
+            <Table.DataCell>
+              {formatDisplayDatetime(apiHendelse.timestamp)}
+            </Table.DataCell>
             <Table.DataCell>{apiHendelse.entityType}</Table.DataCell>
             <Table.DataCell>{apiHendelse.hendelseType}</Table.DataCell>
           </Table.Row>
