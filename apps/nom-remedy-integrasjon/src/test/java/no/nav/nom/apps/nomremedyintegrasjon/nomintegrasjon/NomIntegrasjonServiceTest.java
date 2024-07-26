@@ -1,5 +1,7 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.nomremedyintegrasjon.TestBase;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEvent;
@@ -33,6 +35,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static java.util.Objects.isNull;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.inputMetadata;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.nomIntegrasjonEntity;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgenhet;
@@ -67,6 +70,8 @@ public class NomIntegrasjonServiceTest extends TestBase {
     @MockBean
     private NomApiClient nomApiClient;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @BeforeEach
     void clearRepositories() {
         nomIntegrasjonRepository.deleteAll();
@@ -85,9 +90,15 @@ public class NomIntegrasjonServiceTest extends TestBase {
     @MethodSource(value = "testShouldHandleRessursOpprettetEventIfNonStatligInput")
     @DisplayName("Should create new entry with correct data for RessursOpprettetEventV1")
     void testShouldCreateForRessursOpprettetEventV1(RessursOpprettetEventV1 ressursOpprettetEventV1) {
+        Map<String, Object> inputInterfaceMethodArguments = objectMapper.convertValue(
+            ressursOpprettetEventV1.getMetadata().inputMetadata().inputInterfaceMethodArguments(),
+            new TypeReference<>() {}
+        );
         var remedyEnhetId = "some-remedy-id";
         var fysiskBrukerstedNr = "0123";
-        var sluttDato = ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().equals(Sektor.NAV_KOMMUNAL) ? null : LocalDate.of(2024, 12, 12);
+        var sluttDato = Optional.ofNullable((String) inputInterfaceMethodArguments.get("sluttDato"))
+            .map(LocalDate::parse)
+            .orElse(null);
 
         var ressursOpprettetEventData = ressursOpprettetEventV1.getRessursOpprettetEventData();
         var ressursOpprettetAdditionalData = ressursOpprettetEventV1.getRessursOpprettetAdditionalData();
@@ -116,7 +127,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .navId(ressursOpprettetAdditionalData.navident().get())
                     .sektor(nomSektorToRemedyCode(ressursOpprettetEventV1.getRessursOpprettetEventData().sektor()))
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(ressursOpprettetAdditionalData.startdato().get()))
-                    .utlopsdato(sluttDato == null ? null : epochSecondsNorwegianTimeEndOfDay(sluttDato))
+                    .utlopsdato((!ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().equals(Sektor.EKSTERN) || isNull(sluttDato)) ? null : epochSecondsNorwegianTimeEndOfDay(sluttDato))
                     .mobil(ressursOpprettetEventData.primaryTelefonnummer().get())
                     .build()
             ));
@@ -168,7 +179,8 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 ressursOpprettetEventV1.getRessursOpprettetEventData().toBuilder().sektor(Sektor.NAV_KOMMUNAL).build(),
                 ressursOpprettetEventV1.getMetadata().inputMetadata().toBuilder().inputInterfaceMethodArguments(Map.of(
                     "orgEnhetId", orgEnhetId,
-                    "fysiskBrukerstedNr", fysiskBrukerstedNr
+                    "fysiskBrukerstedNr", fysiskBrukerstedNr,
+                    "sluttDato", sluttDato.toString()
                 )).build(),
                 ressursOpprettetEventV1.getRessursOpprettetAdditionalData()
             ))

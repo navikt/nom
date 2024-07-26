@@ -226,6 +226,7 @@ public class NomIntegrasjonService {
         var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
 
         var gyldigTom = orgtilknytningDatoEndretEventData.gyldigTom()
+            .filter(dato -> ressursState.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN))
             .orElse(null);
 
         var remedyEnhetIdForOrgenhet = getRemedyEnhetId(orgtilknytningState.getOrgEnhetId());
@@ -253,6 +254,7 @@ public class NomIntegrasjonService {
         var newRemedyEnhetId = getRemedyEnhetId(orgtilknytningDagligOppfolgingEndretEventData.orgEnhetId());
 
         var gyldigTom = orgtilknytningDagligOppfolgingEndretEventData.gyldigTom()
+            .filter(dato -> ressursState.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN))
             .orElse(null);
 
         var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
@@ -428,6 +430,7 @@ public class NomIntegrasjonService {
         );
 
         var sluttDato = Optional.ofNullable((String) inputInterfaceMethodArguments.get("sluttDato"))
+            .filter(ressursSluttdato -> ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().equals(Sektor.EKSTERN))
             .map(LocalDate::parse)
             .orElse(null);
 
@@ -570,10 +573,8 @@ public class NomIntegrasjonService {
     protected void saveNewNomIntegrasjonEntity(NomIntegrasjonEntity newNomIntegrasjonEntity, String initiatedByNavident) {
 
         validateThatRequiredValuesAreSet(newNomIntegrasjonEntity);
-        var latestEntityForNavident = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(newNomIntegrasjonEntity.getNavId());
-        logger.info("Latest entity for navident {}: {}", newNomIntegrasjonEntity.getNavId(), latestEntityForNavident);
+
         if (nomIntegrasjonEntityProvidesNewDataFromNom(newNomIntegrasjonEntity)) {
-            logger.info("Saving new nom integrasjon {}", newNomIntegrasjonEntity);
             nomIntegrasjonRepository.save(
                 newNomIntegrasjonEntity.toBuilder()
                     .entryId(nextId())
