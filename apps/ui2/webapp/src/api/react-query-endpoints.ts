@@ -251,6 +251,16 @@ export const getOrgEnhet = {
     ).data,
 };
 
+export const isOrgEnhetArbeidsomraade = {
+  queryKey: (orgEnhetId: string) => ["IS_ARBEIDSOMRAADE", orgEnhetId],
+  queryFn: async (orgEnhetId: string) =>
+    (
+      await axios.get<boolean>(
+        `${NOM_API_BASE_PATH}/app/orgenheter/finn-arbeidsomraade/${orgEnhetId}`,
+      )
+    ).data,
+};
+
 export function getOrgEnheterLedetAvOptions(navident: string) {
   return queryOptions({
     queryKey: orgEnheterKeys.ledetAv(navident),

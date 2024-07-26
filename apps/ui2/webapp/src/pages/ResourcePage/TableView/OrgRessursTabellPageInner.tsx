@@ -9,7 +9,7 @@ import {
   Table,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import { getRessurserByListNavident } from "~/api/react-query-endpoints";
 import { useTableSort } from "~/hooks/useTableSort";
@@ -46,8 +46,8 @@ function customSortByOrgEnhetName(
 const createCustomRessurser = (
   orgEnheter: OrgEnhet[],
   hentedeRessurser: Ressurs[],
-): CustomRessurs[] => {
-  return hentedeRessurser.map((ressurs) => {
+): CustomRessurs[] | undefined => {
+  return hentedeRessurser?.map((ressurs) => {
     const correspondingOrgEnheter = orgEnheter.filter((orgEnhet) =>
       orgEnhet.ressursKoblinger.some(
         (kobling) =>
@@ -99,37 +99,19 @@ export const OrgRessursTabellPageInner = ({
 
   const [page, setPage] = useState(1);
   const rowsPerPage = 50;
+  const ressursData = hentedeRessurserQuery.data;
 
-  const [isLoading, setIsLoading] = useState(hentedeRessurserQuery.isLoading);
-  const [isError, setIsError] = useState(hentedeRessurserQuery.isError);
-  const [data, setData] = useState(hentedeRessurserQuery.data);
-  const [customRessurser, setCustomRessurser] = useState<CustomRessurs[]>([]);
+  const customRessurser = createCustomRessurser(
+    orgEnheter,
+    ressursData as Ressurs[],
+  );
 
-  useEffect(() => {
-    setIsLoading(hentedeRessurserQuery.isLoading);
-    setIsError(hentedeRessurserQuery.isError);
-    setData(hentedeRessurserQuery.data);
-  }, [
-    hentedeRessurserQuery.isLoading,
-    hentedeRessurserQuery.isError,
-    hentedeRessurserQuery.data,
-  ]);
+  const { data, sort, handleSort } = useTableSort(
+    customRessurser as CustomRessurs[],
+    "visningsnavn.fornavn",
+  );
 
-  useEffect(() => {
-    if (data) {
-      setCustomRessurser(createCustomRessurser(orgEnheter, data as Ressurs[]));
-    }
-  }, [data, orgEnheter]);
-
-  const {
-    data: sortedData,
-    sort,
-    handleSort,
-  } = useTableSort(customRessurser, "visningsnavn.fornavn");
-  let sortData = customSortByOrgEnhetName(sortedData, sort);
-  sortData = sortData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
-
-  if (isLoading) {
+  if (hentedeRessurserQuery.isLoading) {
     return (
       <div
         css={css`
@@ -143,7 +125,7 @@ export const OrgRessursTabellPageInner = ({
     );
   }
 
-  if (isError) {
+  if (hentedeRessurserQuery.isError) {
     return (
       <Alert variant="error">
         <Heading level="3" size="small">
@@ -153,119 +135,124 @@ export const OrgRessursTabellPageInner = ({
     );
   }
 
-  if (!data) {
-    return <></>;
-  }
+  if (ressursData) {
+    let sortData = customSortByOrgEnhetName(data, sort);
+    sortData = sortData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
-  return (
-    <div
-      css={css`
-        margin-top: 20px;
-      `}
-    >
-      <Table
+    if (!data) {
+      return <></>;
+    }
+
+    return (
+      <div
         css={css`
-          background-color: #fff;
-          padding: 6px;
-          border-radius: 5px;
-
-          --ac-table-row-border: #071a3636;
+          margin-top: 20px;
         `}
-        onSortChange={(sortKey) => handleSort(sortKey)}
-        size="small"
-        sort={sort}
       >
-        <Table.Header
+        <Table
           css={css`
-            height: 48px;
-            border-bottom: 2px;
+            background-color: #fff;
+            padding: 6px;
+            border-radius: 5px;
+
+            --ac-table-row-border: #071a3636;
           `}
+          onSortChange={(sortKey) => handleSort(sortKey)}
+          size="small"
+          sort={sort}
         >
-          <Table.Row
+          <Table.Header
             css={css`
               height: 48px;
-              border-width: 0 0 1px;
+              border-bottom: 2px;
             `}
           >
-            <Table.ColumnHeader scope="col" sortKey="navident" sortable>
-              NAV-ident
-            </Table.ColumnHeader>
-            <Table.ColumnHeader
-              scope="col"
-              sortKey="visningsnavn.fornavn"
-              sortable
-            >
-              Navn
-            </Table.ColumnHeader>
-            <Table.ColumnHeader scope="col" sortKey="sektor" sortable>
-              Sektor
-            </Table.ColumnHeader>
-            <Table.ColumnHeader scope="col" sortKey="orgEnhet.name" sortable>
-              Organisasjonsenhet
-            </Table.ColumnHeader>
-            <Table.ColumnHeader scope="col" sortKey="telefonnumer">
-              Telefonnr.
-            </Table.ColumnHeader>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body
-          css={css`
-            height: 48px;
-          `}
-        >
-          {sortData.map((ressurs) => (
             <Table.Row
               css={css`
-                --ac-table-row-border: none;
                 height: 48px;
                 border-width: 0 0 1px;
               `}
-              key={ressurs.navident}
-              shadeOnHover={false}
             >
-              <Table.DataCell>
-                <Link href={`/ressurs/${ressurs.navident}`}>
-                  {ressurs.navident}
-                </Link>
-              </Table.DataCell>
-              <Table.DataCell>
-                <Link href={`/ressurs/${ressurs.navident}`}>
-                  {formatVisningsnavn(ressurs.visningsnavn)}
-                </Link>
-              </Table.DataCell>
-              <Table.DataCell>
-                {SektorNameMapping[ressurs.sektor]}
-              </Table.DataCell>
-              <Table.DataCell>
-                {ressurs.orgEnheter.map((orgEnhet, index, array) => (
-                  <React.Fragment key={orgEnhet.id}>
-                    <Link href={`/org/${orgEnhet.id}`}>{orgEnhet.name}</Link>
-                    {index < array.length - 1 ? ", " : ""}
-                  </React.Fragment>
-                ))}
-              </Table.DataCell>
-              <Table.DataCell>
-                {ressurs.primaryTelefonnummer || ressurs.telefoner[0]?.nummer}
-              </Table.DataCell>
+              <Table.ColumnHeader scope="col" sortKey="navident" sortable>
+                NAV-ident
+              </Table.ColumnHeader>
+              <Table.ColumnHeader
+                scope="col"
+                sortKey="visningsnavn.fornavn"
+                sortable
+              >
+                Navn
+              </Table.ColumnHeader>
+              <Table.ColumnHeader scope="col" sortKey="sektor" sortable>
+                Sektor
+              </Table.ColumnHeader>
+              <Table.ColumnHeader scope="col" sortKey="orgEnhet.name" sortable>
+                Organisasjonsenhet
+              </Table.ColumnHeader>
+              <Table.ColumnHeader scope="col" sortKey="telefonnumer">
+                Telefonnr.
+              </Table.ColumnHeader>
             </Table.Row>
-          ))}
-        </Table.Body>
-      </Table>
-      <Pagination
-        count={Math.ceil(data.length / rowsPerPage)}
-        css={css`
-          margin-top: 24px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        `}
-        onPageChange={setPage}
-        page={page}
-        prevNextTexts
-        size="medium"
-      />
-    </div>
-  );
+          </Table.Header>
+          <Table.Body
+            css={css`
+              height: 48px;
+            `}
+          >
+            {sortData.map((ressurs) => (
+              <Table.Row
+                css={css`
+                  --ac-table-row-border: none;
+                  height: 48px;
+                  border-width: 0 0 1px;
+                `}
+                key={ressurs.navident}
+                shadeOnHover={false}
+              >
+                <Table.DataCell>
+                  <Link href={`/ressurs/${ressurs.navident}`}>
+                    {ressurs.navident}
+                  </Link>
+                </Table.DataCell>
+                <Table.DataCell>
+                  <Link href={`/ressurs/${ressurs.navident}`}>
+                    {formatVisningsnavn(ressurs.visningsnavn)}
+                  </Link>
+                </Table.DataCell>
+                <Table.DataCell>
+                  {SektorNameMapping[ressurs.sektor]}
+                </Table.DataCell>
+                <Table.DataCell>
+                  {ressurs.orgEnheter.map((orgEnhet, index, array) => (
+                    <React.Fragment key={orgEnhet.id}>
+                      <Link href={`/org/${orgEnhet.id}`}>{orgEnhet.name}</Link>
+                      {index < array.length - 1 ? ", " : ""}
+                    </React.Fragment>
+                  ))}
+                </Table.DataCell>
+                <Table.DataCell>
+                  {ressurs.primaryTelefonnummer || ressurs.telefoner[0]?.nummer}
+                </Table.DataCell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table>
+        <Pagination
+          count={Math.ceil(data.length / rowsPerPage)}
+          css={css`
+            margin-top: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          `}
+          onPageChange={setPage}
+          page={page}
+          prevNextTexts
+          size="medium"
+        />
+      </div>
+    );
+  }
 };
 
 interface CustomOrgEnhet {

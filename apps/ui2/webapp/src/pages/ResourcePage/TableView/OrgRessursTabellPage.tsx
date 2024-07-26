@@ -8,6 +8,7 @@ import React, { useState } from "react";
 import {
   getAlleUnderliggendeOrgEnheter,
   getOrgEnhet,
+  isOrgEnhetArbeidsomraade,
 } from "~/api/react-query-endpoints";
 import ContentWrapper from "~/components/ContentWrapper";
 import { PageBanner } from "~/components/PageBanner";
@@ -16,6 +17,12 @@ import type { OrgEnhet } from "~/types/api-models";
 
 export const OrgRessursTabellPage = () => {
   const { id } = useParams({ from: "/org/table/$id" });
+
+  const isOrgEnhetArbeidsomraadeQuery = useQuery({
+    queryKey: isOrgEnhetArbeidsomraade.queryKey(id as string),
+    queryFn: () => isOrgEnhetArbeidsomraade.queryFn(id as string),
+    enabled: !!id,
+  });
 
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(id as string),
@@ -44,7 +51,45 @@ export const OrgRessursTabellPage = () => {
 
   const filteredOrgEnheter: OrgEnhet[] = kombinertOrgEnheter as OrgEnhet[];
 
-  if (orgEnhetQuery.data && underliggendeOrgEnhetQuery.data) {
+  if (orgEnhetQuery.isLoading || underliggendeOrgEnhetQuery.isLoading) {
+    return (
+      <div
+        css={css`
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        `}
+      >
+        <Loader size="3xlarge" variant="neutral" />
+      </div>
+    );
+  }
+
+  if (isOrgEnhetArbeidsomraadeQuery.data?.valueOf() === false) {
+    return (
+      <Alert variant="error">
+        <Heading level="3" size="small">
+          Denne organisasjonsenheten tilhører ikke et arbeidsområde
+        </Heading>
+      </Alert>
+    );
+  }
+
+  if (orgEnhetQuery.isError) {
+    return (
+      <Alert variant="error">
+        <Heading level="3" size="small">
+          Kunne ikke hente organisajoner
+        </Heading>
+      </Alert>
+    );
+  }
+
+  if (
+    isOrgEnhetArbeidsomraadeQuery.data?.valueOf() === true &&
+    orgEnhetQuery.data &&
+    underliggendeOrgEnhetQuery.data
+  ) {
     return (
       <>
         <PageBanner text={"Medarbeidere i " + orgEnhetQuery.data?.navn || ""} />
@@ -77,24 +122,6 @@ export const OrgRessursTabellPage = () => {
           <OrgRessursTabellPageInner orgEnheter={filteredOrgEnheter} />
         </ContentWrapper>
       </>
-    );
-  } else if (orgEnhetQuery.isLoading && underliggendeOrgEnhetQuery.isLoading) {
-    return (
-      <div
-        css={css`
-          justify-self: center;
-        `}
-      >
-        <Loader size="3xlarge" variant="neutral" />
-      </div>
-    );
-  } else {
-    return (
-      <Alert variant="error">
-        <Heading level="3" size="small">
-          Kunne ikke hente organisajoner
-        </Heading>
-      </Alert>
     );
   }
 };
