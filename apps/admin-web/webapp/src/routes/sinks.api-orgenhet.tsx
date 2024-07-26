@@ -87,9 +87,7 @@ function ApiOrgenhetPage() {
               {formatDisplayDatetime(apiOrgenhet.timestamp)}
             </Table.DataCell>
             <Table.DataCell>
-              <NomLink path={`ressurs/${apiOrgenhet.id}`}>
-                {apiOrgenhet.id}
-              </NomLink>
+              <NomLink path={`org/${apiOrgenhet.id}`}>{apiOrgenhet.id}</NomLink>
             </Table.DataCell>
             <Table.DataCell>
               <JsonModal data={apiOrgenhet} text={apiOrgenhet.navn} />
