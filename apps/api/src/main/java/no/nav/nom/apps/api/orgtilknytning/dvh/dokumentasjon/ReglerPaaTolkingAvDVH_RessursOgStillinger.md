@@ -93,7 +93,7 @@ DagligOppfolging dagligOppfolging // JA, NEI, UKJENT
 Vi grupperer deretter alle DvhRessursStilling'er på unike StillingPeriode.StillingAgressoOrgIdOgNavn, og slår sammen sammenhengende perioder til en periode 
 Vi dropper også evt stillinger fra U4 som starter på eller etter det som er registrert som sluttdato på ressursen i NOM allerede. Det kan være f.eks. en ikke avsluttet stilling i U4 på en kommunal ressurs, men som har fått en sluttdato i Remedy. Tilsvarende avslutter vi siste StillingPeriode på Ressursens sluttdato.  
 
-Hvis vi skulle få DvhRessursStilling'er som for samme StillingAgressoOrgIdOgNavn som har overlappende perioder, så vil ikke den 'yngste/seneste' stillingen behandles i dagens koden, men generere en feilmelding i logg.
+Hvis vi skulle få DvhRessursStilling'er som for samme StillingAgressoOrgIdOgNavn som har overlappende perioder, så vil det generere en feilmelding i logg.
 
 ### Matche til enheter i NOM
 
