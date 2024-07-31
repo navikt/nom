@@ -9,10 +9,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.SlettRessursCommand;
+import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredService;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -39,13 +41,15 @@ public class ManuelleRessursEvtsrcMeldinger {
 
     private final RessursCommandService ressursCommandService;
     private final RessursStateRepository ressursStateRepository;
+    private final NomMastered nomMastered;
 
     public ManuelleRessursEvtsrcMeldinger(
         RessursCommandService ressursCommandService,
-        RessursStateRepository ressursStateRepository
+        RessursStateRepository ressursStateRepository, NomMastered nomMastered
     ) {
         this.ressursCommandService = ressursCommandService;
         this.ressursStateRepository = ressursStateRepository;
+        this.nomMastered = nomMastered;
     }
 
 
@@ -240,6 +244,104 @@ public class ManuelleRessursEvtsrcMeldinger {
                 ressursState.get().navident(),
                 ressursState.get().visningsnavn().toString()
             ));
+    }
+
+    @Operation(
+        description = "Lag mastre navident Eventsrc melding",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
+        }
+    )
+    @PostMapping(value = "/merkNavidentSomMastret")
+    public ResponseEntity<String> merkNavidentSomMastret(
+        @Parameter(description = "Navident som skal merkes som mastret") @RequestParam String navident,
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
+        @NonNull JwtAuthenticationToken token
+    ) {
+        if (ressursStateRepository.findByNavident(navident).isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Navidenten finnes ikke");
+        }
+
+        if (nomMastered.isMastered(navident)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Navidenten er allerede mastret i NOM");
+        }
+
+        if (!"CONFIRM".equals(confirm)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body("Ressurs med navident %s er funnet og er ikke allerede Mastret i NOM. Men event vil ikke sendes for å mastre da handling ikke er bekreftet".formatted(
+                    HtmlUtils.htmlEncode(navident)
+                ));
+        }
+
+        var ok = nomMastered.markRessursAsMasteredInNom(navident);
+
+        if (ok) {
+            return ResponseEntity.ok()
+                .body("Ressurs med navident %s er nå mastret i NOM".formatted(
+                    HtmlUtils.htmlEncode(navident)
+                ));
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Feil ved forsøk på å merke navident %s som mastret".formatted(
+                    HtmlUtils.htmlEncode(navident)
+                ));
+        }
+    }
+
+    @Operation(
+        description = "Lag Eventsrc melding for å fjerne mastret i NOM merking",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
+        }
+    )
+    @PostMapping(value = "/avmerkNavidentSomMastret")
+    public ResponseEntity<String> avmerkNavidentSomMastret(
+        @Parameter(description = "Navident som skal få mastret i NOM merking") @RequestParam String navident,
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
+        @NonNull JwtAuthenticationToken token
+    ) {
+        if (ressursStateRepository.findByNavident(navident).isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Navidenten finnes ikke");
+        }
+
+        if (!nomMastered.isMastered(navident)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Navidenten er ikke mastret i NOM");
+        }
+
+        if (!"CONFIRM".equals(confirm)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body("Ressurs med navident %s er funnet og er Mastret i NOM. Men event vil ikke sendes for å av-merke da handling ikke er bekreftet".formatted(
+                    HtmlUtils.htmlEncode(navident)
+                ));
+        }
+
+        var ok = nomMastered.unmarkRessursAsMasteredInNom(navident);
+
+        if (ok) {
+            return ResponseEntity.ok()
+                .body("Ressurs med navident %s er nå av-merket som mastret i NOM".formatted(
+                    HtmlUtils.htmlEncode(navident)
+                ));
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Feil ved forsøk på å av-merke navident %s som mastret".formatted(
+                    HtmlUtils.htmlEncode(navident)
+                ));
+        }
     }
 
     private boolean validFid(String fid) {
