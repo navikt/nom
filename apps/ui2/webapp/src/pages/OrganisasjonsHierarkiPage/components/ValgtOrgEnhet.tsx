@@ -1,17 +1,35 @@
 import { css } from "@emotion/react";
-import { BodyShort, Heading, HGrid, Link, ReadMore } from "@navikt/ds-react";
+import { TableIcon } from "@navikt/aksel-icons";
+import {
+  BodyShort,
+  Button,
+  Heading,
+  HGrid,
+  Link,
+  ReadMore,
+} from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 import partition from "lodash/partition";
 import React from "react";
 
-import { getRessurserForOrgenhet } from "~/api/react-query-endpoints";
+import {
+  getRessurserForOrgenhet,
+  isOrgEnhetArbeidsomraade,
+} from "~/api/react-query-endpoints";
 import { UserImage } from "~/components/UserImage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import building from "~/resources/building.svg";
 import type { OrgEnhet } from "~/types/api-models";
 import { NomNivaa, OrgEnhetsType, Sektor } from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn } from "~/utils";
+
+const isOrgEnhetArbeidsomraadeQuery = (id: string) =>
+  useQuery({
+    queryKey: isOrgEnhetArbeidsomraade.queryKey(id as string),
+    queryFn: () => isOrgEnhetArbeidsomraade.queryFn(id as string),
+    enabled: !!id,
+  });
 
 export const ValgtOrgEnhet = ({
   ressurser,
@@ -110,6 +128,23 @@ export const ValgtOrgEnhet = ({
           <OrgenhetLederLink orgEnhet={orgEnhet} />
         </div>
       </div>
+      {isOrgEnhetArbeidsomraadeQuery(orgEnhet.id).data?.valueOf() && (
+        <div
+          css={css`
+            display: flex;
+            justify-content: end;
+            align-items: end;
+            flex-wrap: wrap;
+            gap: 1rem;
+          `}
+        >
+          <Link href={`/org/table/${orgEnhet.id}`}>
+            <Button icon={<TableIcon />} size="medium" variant="primary">
+              Tabellvisning
+            </Button>
+          </Link>
+        </div>
+      )}
       <MedarbeidereList navidenter={ressurser} orgEnhet={orgEnhet} />
     </div>
   </div>
