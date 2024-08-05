@@ -18,6 +18,7 @@ import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.ressurs.api.exceptions.DuplicateRessursException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
+import no.nav.nom.apps.api.ressurs.api.exceptions.NomMasteredException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
@@ -229,6 +230,10 @@ public class RessursRestService {
 
         if (ressursState.sektor() == Sektor.NAV_STATLIG) {
             throw InvalidSektorException.actionNotAllowedForSektor(Sektor.NAV_STATLIG);
+        }
+
+        if (authResolver.kanSelvbetjene(navident) && !nomMastered.isMastered(ressursState.navident())) {
+            throw NomMasteredException.actionNotAllowedForNonNomMastered();
         }
 
         var oppdaterMobilnummerCommand = new OppdaterPrimaryTelefonnummerCommand(

@@ -159,7 +159,7 @@ public class RessursController {
         @PathVariable String navident,
         @RequestBody UpdatePrimarytelefonnummer updatePrimarytelefonnummer
     ) {
-        if (!authResolver.kanRedigereRessurs(navident)) {
+        if (!authResolver.kanRedigereRessurs(navident) && !authResolver.kanSelvbetjene(navident)) {
             throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
         }
 

@@ -29,7 +29,11 @@ import {
   getOrgTilknytninger,
   getTeamcatMemberships,
 } from "~/api/react-query-endpoints";
-import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
+import {
+  useGetSession,
+  useHasAdminAccess,
+  useHasWriteAccess,
+} from "~/api/useGetSession";
 import { Divider } from "~/components/Divider";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
@@ -447,8 +451,16 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
   });
   const hasWriteAccess = useHasWriteAccess();
 
-  if (editPersonopplysninger && hasWriteAccess) {
-    return <EditPersonOpplysninger ressurs={ressurs} />;
+  const hasSelfServiceAccess =
+    useGetSession().data?.navident === ressurs.navident;
+
+  if (editPersonopplysninger && (hasWriteAccess || hasSelfServiceAccess)) {
+    return (
+      <EditPersonOpplysninger
+        hasSelfServiceAccess={hasSelfServiceAccess}
+        ressurs={ressurs}
+      />
+    );
   }
 
   return <PersonOpplysninger ressurs={ressurs} />;

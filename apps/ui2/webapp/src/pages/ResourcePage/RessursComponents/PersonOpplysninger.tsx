@@ -18,6 +18,7 @@ import {
   getLedereForRessurs,
   harLederTilgangForNavidentOptions,
 } from "~/api/react-query-endpoints";
+import { useGetSession } from "~/api/useGetSession";
 import { LabelWithValue } from "~/components/LabelWithValue";
 import { UserImage } from "~/components/UserImage";
 import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
@@ -82,11 +83,17 @@ function EditButton({ ressurs }: { ressurs: Ressurs }) {
   const hasWriteAccessForRessurs =
     useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
 
-  if (!hasWriteAccessForRessurs) {
-    return;
-  }
+  const hasWriteAccessForSelvbetjening =
+    useGetSession().data?.navident === ressurs.navident;
 
   const ressursCanBeEdited = ressurs.sektor !== Sektor.NAV_STATLIG;
+
+  if (
+    !hasWriteAccessForRessurs &&
+    !(hasWriteAccessForSelvbetjening && ressurs.isNomMastered)
+  ) {
+    return;
+  }
 
   return (
     <HStack align="center" gap="2">
@@ -94,7 +101,7 @@ function EditButton({ ressurs }: { ressurs: Ressurs }) {
         <HelpText title="Hvorfor er dette utilgjengelig?">
           Statlige ansatte kan ikke opprettes eller endres i NOM på dette
           tidspunktet. Disse kan endres i tråd med gjeldende rutiner i
-          Identrutina og Unit4.
+          Identrutina og Unit4. NOM Mastered ansatte kan redigere telefonnummer.
         </HelpText>
       )}
 
