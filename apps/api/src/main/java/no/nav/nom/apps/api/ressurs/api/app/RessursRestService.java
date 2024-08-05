@@ -322,7 +322,9 @@ public class RessursRestService {
             .orElseGet(() -> createRessurs(request, existingRessurs));
 
         try {
-            ressursOpprettetEmailService.notifyByEmail(createdRessurs.navident(), request.orgEnhetId());
+            final var orgEnhet = orgEnhetStateRepository.findById(request.orgEnhetId())
+                .orElseThrow(() -> new RessursOpprettetEmailException("Fant ikke orgenhet med id " + request.orgEnhetId()));
+            ressursOpprettetEmailService.notifyByEmail(createdRessurs, orgEnhet);
         } catch (RessursOpprettetEmailException exception) {
             //TODO: consider handling exception if email sending is important
             logger.warn("Epost varsling om opprettelse av ressurs til orgenhet leder feilet. {}", exception.getMessage());

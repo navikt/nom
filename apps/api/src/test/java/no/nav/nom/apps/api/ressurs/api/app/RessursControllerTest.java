@@ -16,6 +16,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPrima
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.apps.api.rest.RestTestBase;
@@ -48,6 +49,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptySet;
+import static no.nav.nom.apps.api.common.TestData.orgEnhetState;
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static no.nav.nom.apps.api.common.TestData.ressursState;
 import static no.nav.nom.apps.api.ressurs.api.app.RessursController.UNLEASH_EDIT_RESSURS;
@@ -75,6 +77,9 @@ public class RessursControllerTest extends RestTestBase {
 
     @MockBean
     private RessursStateRepository ressursStateRepository;
+
+    @MockBean
+    private OrgEnhetStateRepository orgEnhetStateRepository;
 
     @MockBean
     NomStateRessursListener nomStateRessursListener;
@@ -353,15 +358,24 @@ public class RessursControllerTest extends RestTestBase {
             .sluttDato(Optional.empty())
             .tilknytningtype(Tilknytningtype.INGEN)
             .ansettelsesType(null)
+            .orgEnhetId("orgEnhet123")
             .fysiskBrukerstedNr("")
-            .orgEnhetId("")
             .build();
+
+        var orgEnhet = orgEnhetState().toBuilder()
+            .agressoId(Optional.of("123456"))
+            .agressoOrgNivaa(Optional.of("4"))
+            .navn("NAV")
+            .build();
+
 
         when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
             .thenReturn(Set.of(request.fysiskBrukerstedNr()));
 
         when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
             .thenReturn(ressursState());
+
+        when(orgEnhetStateRepository.findById(request.orgEnhetId())).thenReturn(Optional.of(orgEnhet));
 
         postOpprettRessursRequest(
             testToken.nomWriteGroupAndNomUiAzp(),
