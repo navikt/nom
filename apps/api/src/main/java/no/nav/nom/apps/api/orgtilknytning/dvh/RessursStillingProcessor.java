@@ -212,6 +212,9 @@ public class RessursStillingProcessor {
                                 // testing tracking
                                 log.info("Calling endreOrgtilknytningGyldigTOM from process 10 " + fid);
                                 settOrgtilknytningSluttDato(fid, navident, stillingPeriode, StillingPeriode.toString(stillingPerioder));
+
+                                // forslag: hvis -ve OT, fjern
+                                fjernNegativeOrgtilknytning(fid);
                             } else if (matcherStartDatoOgAgressoId.size() > 1) {
                                 // Matcher flere i NOM - dette må være feil!....
                                 String msg = "Navident %s har historisk stillingPeriode fra DVH (%s) matcher flere orgtilknytninger %s".formatted(
@@ -317,7 +320,7 @@ public class RessursStillingProcessor {
                         if (stillingPeriode.gyldigTom().isBefore(NO_END_DATE)) {
 
                             // testing tracking
-                            log.info("Calling endreOrgtilknytningGyldigTOM from process 12");
+                            log.info("Calling endreOrgtilknytningGyldigTOM from process 12 ");
                             settOrgtilknytningSluttDato(fid, navident, stillingPeriode, StillingPeriode.toString(stillingPerioder));
                         }
                     } else {
@@ -539,6 +542,14 @@ public class RessursStillingProcessor {
             }
         });
         return statesToKeep;
+    }
+
+    private void fjernNegativeOrgtilknytning(String fid) {
+        var orgtilknytning = orgtilknytningService.findByFid(fid);
+        orgtilknytning.ifPresent(ot -> {
+            log.info("Fjerner negativ orgtilknytning for Navident {}: {}", ot.navident(), ot);
+            //fjernOrgtilknytning(ot);
+        });
     }
 
     public boolean isMatchingPeriod(OrgtilknytningState orgtilknytningState, StillingPeriode stillingPeriode) {
