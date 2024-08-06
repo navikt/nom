@@ -548,7 +548,7 @@ public class RessursStillingProcessor {
 
     private void fjernNegativeOrgtilknytning(String fid) {
         var orgtilknytning = orgtilknytningService.findByFid(fid);
-        log.info("Fjerner negativ orgtilknytning {}", fid);
+        log.info("Fjerner negativ orgtilknytning {} {}", fid, orgtilknytning);
         orgtilknytning.ifPresent(ot -> {
             log.info("Fjerner negativ orgtilknytning finnes for {}: {}", fid, ot);
             if(ot.gyldigTom().isPresent() && ot.gyldigTom().get().isBefore(ot.gyldigFom())) {
