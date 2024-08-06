@@ -215,7 +215,7 @@ public class RessursStillingProcessor {
 
                                 // forslag: hvis -ve OT, fjern
                                 if(fid !=null && !fid.isBlank()){
-                                    fjernNegativeOrgtilknytning(fid);
+                                    fjernNegativeOrgtilknytning(fid, stillingPeriode);
                                 }
                             } else if (matcherStartDatoOgAgressoId.size() > 1) {
                                 // Matcher flere i NOM - dette må være feil!....
@@ -546,9 +546,9 @@ public class RessursStillingProcessor {
         return statesToKeep;
     }
 
-    private void fjernNegativeOrgtilknytning(String fid) {
+    private void fjernNegativeOrgtilknytning(String fid, StillingPeriode stillingPeriode) {
         var orgtilknytning = orgtilknytningService.findByFid(fid);
-        log.info("Fjerner negativ orgtilknytning {} {}", fid, orgtilknytning);
+        log.info("Fjerner negativ orgtilknytning {} {} {}", fid, orgtilknytning, stillingPeriode);
         orgtilknytning.ifPresent(ot -> {
             log.info("Fjerner negativ orgtilknytning finnes for {}: {}", fid, ot);
             if(ot.gyldigTom().isPresent() && ot.gyldigTom().get().isBefore(ot.gyldigFom())) {
