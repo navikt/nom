@@ -22,6 +22,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -213,9 +214,12 @@ public class RessursStillingProcessor {
                                 log.info("Calling endreOrgtilknytningGyldigTOM from process 10 " + fid);
                                 settOrgtilknytningSluttDato(fid, navident, stillingPeriode, StillingPeriode.toString(stillingPerioder));
 
-                                // forslag: hvis -ve OT, fjern
-                                if(fid !=null && !fid.isBlank()){
-                                    fjernNegativeOrgtilknytning(fid, stillingPeriode);
+                                // historisk og -ve OT, fjern
+                                if(fid !=null && !fid.isBlank() && stillingPeriode.gyldigTom().isBefore(stillingPeriode.gyldigFom())){
+                                    //fjernNegativeOrgtilknytning(fid, stillingPeriode);
+                                    var orgtilknytning = orgtilknytningService.findByFid(fid);
+                                    log.info("Fjerner negativ orgtilknytning {} {} {}", fid, orgtilknytning, stillingPeriode);
+                                    //fjernNegativeOrgtilknytning(fid, navident, stillingPeriode.orgenhet().getId(), stillingPeriode.gyldigFom(), Optional.of(stillingPeriode.gyldigTom()));
                                 }
                             } else if (matcherStartDatoOgAgressoId.size() > 1) {
                                 // Matcher flere i NOM - dette må være feil!....
@@ -553,7 +557,7 @@ public class RessursStillingProcessor {
             log.info("Fjerner negativ orgtilknytning finnes for {}: {}", fid, ot);
             if(ot.gyldigTom().isPresent() && ot.gyldigTom().get().isBefore(ot.gyldigFom())) {
                 log.info("Fjerner negativ orgtilknytning for Navident {}: {}", ot.navident(), ot);
-                //fjernOrgtilknytning(ot);
+                fjernOrgtilknytning(ot);
             }
         });
     }
@@ -814,6 +818,31 @@ public class RessursStillingProcessor {
         loggCommand(originalOrgtilknytning.navident(), originalOrgtilknytning.fid(), command);
 
         orgtilknytningCommandService.fjernOrgtilknytning(originalOrgtilknytning.fid(), command);
+    }
+
+    public void fjernNegativeOrgtilknytning(String fid, String navident, String orgenhetId, LocalDate gyldigFom, Optional<LocalDate> gyldigTom) {
+        /*
+        if (nomMastered.isMastered(navident)) {
+            log.info("Navident {} er mastered. Vi endrer ikke orgtilknytning for denne", navident);
+            return;
+        }
+        */
+
+        InputMetadata metadata = new InputMetadata("nom-api BatchJob", "Datavarehus", null, new Origination("nom-api", "nom-api"));
+
+        var command = new FjernOrgtilknytning(
+            navident,
+            orgenhetId,
+            gyldigFom,
+            gyldigTom,
+            metadata,
+            null
+        );
+
+        //loggCommand(navident, fid, command);
+
+        log.warn("Fjerner negativ orgtilknytning fid: {}, navident: {}, orgenhet: {}, gyldigFom: {}, gyldigTom: {}", fid, navident, orgenhetId, gyldigFom, gyldigTom.orElse(null));
+        //orgtilknytningCommandService.fjernOrgtilknytning(fid, command);
     }
 
     private void loggOppsummering(String navident, List<StillingPeriode> stillingPerioder, Collection<OrgtilknytningState> orgtilknytninger) {
