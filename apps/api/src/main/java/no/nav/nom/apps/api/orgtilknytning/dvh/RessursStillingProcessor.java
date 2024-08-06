@@ -214,7 +214,9 @@ public class RessursStillingProcessor {
                                 settOrgtilknytningSluttDato(fid, navident, stillingPeriode, StillingPeriode.toString(stillingPerioder));
 
                                 // forslag: hvis -ve OT, fjern
-                                fjernNegativeOrgtilknytning(fid);
+                                if(!fid.isBlank()){
+                                    fjernNegativeOrgtilknytning(fid);
+                                }
                             } else if (matcherStartDatoOgAgressoId.size() > 1) {
                                 // Matcher flere i NOM - dette må være feil!....
                                 String msg = "Navident %s har historisk stillingPeriode fra DVH (%s) matcher flere orgtilknytninger %s".formatted(
