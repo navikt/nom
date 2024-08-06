@@ -214,7 +214,7 @@ public class RessursStillingProcessor {
                                 settOrgtilknytningSluttDato(fid, navident, stillingPeriode, StillingPeriode.toString(stillingPerioder));
 
                                 // forslag: hvis -ve OT, fjern
-                                if(!fid.isBlank()){
+                                if(fid !=null && !fid.isBlank()){
                                     fjernNegativeOrgtilknytning(fid);
                                 }
                             } else if (matcherStartDatoOgAgressoId.size() > 1) {
