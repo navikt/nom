@@ -208,6 +208,9 @@ public class RessursStillingProcessor {
                                 // opprettOrgtilknytning does not set gyldigTom
                                 // settOrgtilknytningSluttDato sets gyldigTom per stillingPeriode
                                 String fid = lagNyOrgtilknytning(navident, stillingPeriode.orgenhet().getId(), stillingPeriode, StillingPeriode.toString(stillingPerioder));
+
+                                // testing tracking
+                                log.info("Calling endreOrgtilknytningGyldigTOM from process 10");
                                 settOrgtilknytningSluttDato(fid, navident, stillingPeriode, StillingPeriode.toString(stillingPerioder));
                             } else if (matcherStartDatoOgAgressoId.size() > 1) {
                                 // Matcher flere i NOM - dette må være feil!....
@@ -223,6 +226,8 @@ public class RessursStillingProcessor {
                                     .map(OrgtilknytningState::fid)
                                     .collect(Collectors.toSet()));
                             } else {
+                                // testing tracking
+                                log.info("Calling endreOrgtilknytningGyldigTOM from process 1");
                                 // Vi matcher 1. Og trenger å endre GyldigTOM for denne -> Enten korriger, eller avvikle
                                 endreOrgtilknytningGyldigTOM(
                                     matcherStartDatoOgAgressoId.get(0),
@@ -285,6 +290,8 @@ public class RessursStillingProcessor {
 
                     String fid = lagNyOrgtilknytning(navident, stillingPeriode.orgenhet().getId(), stillingPeriode, StillingPeriode.toString(stillingPerioder));
                     if (stillingPeriode.gyldigTom().isBefore(NO_END_DATE)) {
+                        // testing tracking
+                        log.info("Calling endreOrgtilknytningGyldigTOM from process 11");
                         settOrgtilknytningSluttDato(fid, navident, stillingPeriode, StillingPeriode.toString(stillingPerioder));
                     }
                     if (erDagligOppfolging) {
@@ -308,6 +315,9 @@ public class RessursStillingProcessor {
                             StillingPeriode.toString(stillingPerioder)
                         );
                         if (stillingPeriode.gyldigTom().isBefore(NO_END_DATE)) {
+
+                            // testing tracking
+                            log.info("Calling endreOrgtilknytningGyldigTOM from process 12");
                             settOrgtilknytningSluttDato(fid, navident, stillingPeriode, StillingPeriode.toString(stillingPerioder));
                         }
                     } else {
@@ -318,6 +328,8 @@ public class RessursStillingProcessor {
                             matcherAgressoId
                         );
                         if (!orgtilknytning.gyldigTom().orElse(NO_END_DATE).equals(stillingPeriode.gyldigTom())) {
+                            // testing tracking
+                            log.info("Calling endreOrgtilknytningGyldigTOM from process 2");
                             endreOrgtilknytningGyldigTOM(orgtilknytning, stillingPeriode, StillingPeriode.toString(stillingPerioder));
                         }
                         if (!orgtilknytning.gyldigFom().equals(stillingPeriode.gyldigFom())) {
@@ -407,6 +419,8 @@ public class RessursStillingProcessor {
                                 OrgtilknytningState orgtilknytning = matcherAgressoId.get(0);
 
                                 if (!orgtilknytning.gyldigTom().orElse(NO_END_DATE).equals(stillingPeriode.gyldigTom())) {
+                                    // testing tracking
+                                    log.info("Calling endreOrgtilknytningGyldigTOM from process 3");
                                     endreOrgtilknytningGyldigTOM(orgtilknytning, stillingPeriode, StillingPeriode.toString(stillingPerioder));
                                 }
                                 if (erDagligOppfolging != orgtilknytning.erDagligOppfolging() && stillingPeriode.dagligOppfolging() != UKJENT) {
@@ -433,6 +447,9 @@ public class RessursStillingProcessor {
                                 StillingPeriode.toString(stillingPerioder)
                             );
                             if (stillingPeriode.gyldigTom().isBefore(NO_END_DATE)) {
+
+                                // testing tracking
+                                log.info("Calling endreOrgtilknytningGyldigTOM from process 13");
                                 settOrgtilknytningSluttDato(fid, navident, stillingPeriode, StillingPeriode.toString(stillingPerioder));
                             }
                             if (erDagligOppfolging) {
@@ -690,6 +707,8 @@ public class RessursStillingProcessor {
                 additionalData
             );
 
+            // testing tracking
+            log.info("Calling loggCommand from endreOrgtilknytningGyldigTOM");
             loggCommand(originalOrgtilknytning.navident(), originalOrgtilknytning.fid(), command);
 
             orgtilknytningCommandService.avvikleOrgtilknytning(originalOrgtilknytning.fid(), command);
@@ -717,6 +736,8 @@ public class RessursStillingProcessor {
             additionalData
         );
 
+        // testing tracking
+        log.info("Calling loggCommand from settOrgtilknytningSluttDato");
         loggCommand(navident, fid, command);
 
         orgtilknytningCommandService.avvikleOrgtilknytning(fid, command);
