@@ -159,6 +159,11 @@ public class RessursStillingProcessor {
             }
             final var stillingPeriode = nyStillingPeriode != null ? nyStillingPeriode : midlStillingPeriode;
 
+            if(stillingPeriode.gyldigTom().isBefore(stillingPeriode.gyldigFom())){
+                log.info("Hopper over negativ stillingPeriode: {}, for navident: {}", stillingPeriode, navident);
+                return;
+            }
+
             if (isHistoricPeriod(stillingPeriode)) {  // Historisk stillingPeriode fra DVH - vi lager ingen historiske tilkoblinger. Vi bare evt. avslutter.
                 if (orgtilknytninger.size() == 0) {
                     log.debug(SECURE_LOGS,
@@ -214,13 +219,15 @@ public class RessursStillingProcessor {
                                 log.info("Calling endreOrgtilknytningGyldigTOM from process 10 " + fid);
                                 settOrgtilknytningSluttDato(fid, navident, stillingPeriode, StillingPeriode.toString(stillingPerioder));
 
+                                /*
                                 // historisk og -ve OT, fjern
-                                if(fid !=null && !fid.isBlank() && stillingPeriode.gyldigTom().isBefore(stillingPeriode.gyldigFom())){
-                                    //fjernNegativeOrgtilknytning(fid, stillingPeriode);
-                                    var orgtilknytning = orgtilknytningService.findByFid(fid);
+                                var orgtilknytning = orgtilknytningService.findByFid(fid);
+                                if(fid !=null && !fid.isBlank()
+                                    && stillingPeriode.gyldigTom().isBefore(stillingPeriode.gyldigFom())){
                                     log.info("Fjerner negativ orgtilknytning {} {} {}", fid, orgtilknytning, stillingPeriode);
                                     //fjernNegativeOrgtilknytning(fid, navident, stillingPeriode.orgenhet().getId(), stillingPeriode.gyldigFom(), Optional.of(stillingPeriode.gyldigTom()));
                                 }
+                                */
                             } else if (matcherStartDatoOgAgressoId.size() > 1) {
                                 // Matcher flere i NOM - dette må være feil!....
                                 String msg = "Navident %s har historisk stillingPeriode fra DVH (%s) matcher flere orgtilknytninger %s".formatted(
@@ -548,18 +555,6 @@ public class RessursStillingProcessor {
             }
         });
         return statesToKeep;
-    }
-
-    private void fjernNegativeOrgtilknytning(String fid, StillingPeriode stillingPeriode) {
-        var orgtilknytning = orgtilknytningService.findByFid(fid);
-        log.info("Fjerner negativ orgtilknytning {} {} {}", fid, orgtilknytning, stillingPeriode);
-        orgtilknytning.ifPresent(ot -> {
-            log.info("Fjerner negativ orgtilknytning finnes for {}: {}", fid, ot);
-            if(ot.gyldigTom().isPresent() && ot.gyldigTom().get().isBefore(ot.gyldigFom())) {
-                log.info("Fjerner negativ orgtilknytning for Navident {}: {}", ot.navident(), ot);
-                fjernOrgtilknytning(ot);
-            }
-        });
     }
 
     public boolean isMatchingPeriod(OrgtilknytningState orgtilknytningState, StillingPeriode stillingPeriode) {
