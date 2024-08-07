@@ -18,7 +18,6 @@ import {
   HelpText,
   HStack,
   Label,
-  Modal,
   useDatepicker,
 } from "@navikt/ds-react";
 import {
@@ -32,10 +31,7 @@ import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { addYears } from "date-fns";
 import partition from "lodash/partition";
-import sortBy from "lodash/sortBy";
-import type { MutableRefObject } from "react";
-import { useState } from "react";
-import React, { forwardRef, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import ReactDOMServer from "react-dom/server";
 import type { SubmitHandler } from "react-hook-form";
 import {
@@ -88,7 +84,6 @@ import {
   formatVisningsnavn,
   isSameDateOrAfter,
   isSameDateOrBefore,
-  isTodayOrBefore,
   todayWithoutTimezone,
 } from "~/utils";
 
@@ -267,36 +262,15 @@ function OrgtilknytningForm({
       validation.dolGaps.length === 0 &&
       validation.dolOverlaps.length === 0
     ) {
-      // oppdaterOrgtilknytningerMutation.mutate(
-      //   lagOppdaterOrgtilknytningerRequest(
-      //     data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
-      //   ),
-      // );
-
-      console.log("Would save");
+      oppdaterOrgtilknytningerMutation.mutate(
+        lagOppdaterOrgtilknytningerRequest(
+          data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+        ),
+      );
     }
   };
 
-  const modalReference = useRef<HTMLDialogElement>(null);
   const formReference = useRef<HTMLFormElement>(null);
-
-  const [modalProperties, setModalProperties] = useState<{
-    senesteTomDato: string | undefined;
-    navn: string | undefined;
-    orgtilknytninger: Partial<OrgtilknytningState>[];
-    dagensRemedyEnhetId: string | undefined;
-    dagensDolOrgEnhet: OrgEnhet | undefined;
-    formReference: React.RefObject<HTMLFormElement>;
-    saveButtonClicked: boolean;
-  }>({
-    senesteTomDato: "",
-    navn: "",
-    orgtilknytninger: [],
-    dagensRemedyEnhetId: dagensRemedyEnhetId,
-    dagensDolOrgEnhet: dagensDolOrgEnhet,
-    formReference: formReference,
-    saveButtonClicked: false,
-  });
 
   const { showModal } = useModal();
 
@@ -333,12 +307,10 @@ function OrgtilknytningForm({
         );
       }
 
-      // Show the second modal only after the first one is confirmed
       await showModal(
         <BekreftModal content={remedyInnhold} heading={"Bekreft endringer"} />,
       );
 
-      // Perform the final action after both modals are confirmed
       formReference.current?.dispatchEvent(
         new Event("submit", { cancelable: true, bubbles: true }),
       );
@@ -786,298 +758,6 @@ function IllegalDolCombinationAlert() {
           </div>
         )}
       </div>
-    </Alert>
-  );
-}
-
-// TODO: Gjøre dette mye mer clean, dette er bare førsteutkast for å i alle fall ha noe
-export const BekreftModal2 = forwardRef<
-  HTMLDialogElement,
-  {
-    senesteTomDato: string | undefined;
-    navn: string | undefined;
-    orgtilknytninger: Partial<OrgtilknytningState>[];
-    dagensRemedyEnhetId: string | undefined;
-    dagensDolOrgEnhet: OrgEnhet | undefined;
-    formReference: React.RefObject<HTMLFormElement>;
-    saveButtonClicked: boolean;
-  }
->(
-  (
-    {
-      senesteTomDato,
-      navn,
-      orgtilknytninger,
-      dagensRemedyEnhetId,
-      dagensDolOrgEnhet,
-      formReference,
-      saveButtonClicked,
-    },
-    reference,
-  ) => {
-    const typedReference =
-      reference as MutableRefObject<HTMLDialogElement | null>;
-
-    const orgEnhetIdListe = [
-      ...new Set(
-        orgtilknytninger.flatMap(
-          (orgtilknytning) => orgtilknytning.orgEnhetId || [],
-        ),
-      ),
-    ];
-
-    const orgEnheter = useQueries({
-      queries: orgEnhetIdListe.map((id) => ({
-        queryKey: getOrgEnhet.queryKey(id),
-        queryFn: () => getOrgEnhet.queryFn(id),
-      })),
-      combine: (results) => results.flatMap((r) => r.data ?? []),
-    });
-
-    const relevanteDolOrgtilknytninger = sortBy(
-      orgtilknytninger.filter((orgtilknytning) => {
-        return (
-          orgtilknytning.erDagligOppfolging &&
-          (!orgtilknytning.gyldigTom ||
-            isSameDateOrAfter(
-              new Date(orgtilknytning.gyldigTom),
-              todayWithoutTimezone(),
-            ))
-        );
-      }),
-      "gyldigFom",
-    );
-
-    const nyRemedyTilknytning = relevanteDolOrgtilknytninger.find(
-      (tilknytning) => {
-        return (
-          orgEnheter.find((orgEnhet) => orgEnhet.id === tilknytning.orgEnhetId)
-            ?.remedyEnhetId !== dagensRemedyEnhetId
-        );
-      },
-    );
-
-    const nyRemedyOrgEnhet = orgEnheter.find(
-      (orgEnhet) => orgEnhet.id === nyRemedyTilknytning?.orgEnhetId,
-    );
-
-    useEffect(() => {
-      if (
-        !senesteTomDato &&
-        !nyRemedyTilknytning &&
-        !nyRemedyOrgEnhet &&
-        saveButtonClicked
-      ) {
-        formReference.current?.dispatchEvent(
-          new Event("submit", { cancelable: true, bubbles: true }),
-        );
-      }
-    }, [
-      senesteTomDato,
-      nyRemedyTilknytning,
-      nyRemedyOrgEnhet,
-      saveButtonClicked,
-      formReference,
-    ]);
-
-    if (
-      !senesteTomDato &&
-      !nyRemedyTilknytning &&
-      !nyRemedyOrgEnhet &&
-      saveButtonClicked
-    ) {
-      return <></>;
-    }
-
-    return (
-      <Modal
-        css={css`
-          padding: var(--a-spacing-6);
-        `}
-        header={{ heading: "Bekreft endringer", closeButton: false }}
-        ref={reference}
-        width="548px"
-      >
-        <Modal.Body>
-          {!!nyRemedyTilknytning && !!nyRemedyOrgEnhet ? (
-            isTodayOrBefore(
-              new Date(nyRemedyTilknytning.gyldigFom as string),
-            ) ? (
-              <BekreftModalInnholdNyRemedyIFortiden
-                gammelOrgEnhet={`${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.remedyEnhetId})`}
-                navn={navn ?? "medarbeideren"}
-                nyOrgEnhet={`${nyRemedyOrgEnhet?.navn} (${nyRemedyOrgEnhet?.remedyEnhetId})`}
-              />
-            ) : (
-              <BekreftModalInnholdNyRemedyIFremtiden
-                dato={formatDisplayDate(nyRemedyTilknytning.gyldigFom)}
-                gammelOrgEnhet={`${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.remedyEnhetId})`}
-                navn={navn ?? "medarbeideren"}
-                nyOrgEnhet={`${nyRemedyOrgEnhet?.navn} (${nyRemedyOrgEnhet?.remedyEnhetId})`}
-              />
-            )
-          ) : (
-            !!senesteTomDato &&
-            !!navn &&
-            (isTodayOrBefore(new Date(senesteTomDato)) ? (
-              <BekreftModalInnholdTomIFortiden navn={navn ?? "medarbeideren"} />
-            ) : (
-              <BekreftModalInnholdTomIFremtiden
-                dato={formatDisplayDate(senesteTomDato)}
-                navn={navn ?? "medarbeideren"}
-              />
-            ))
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            icon={<FloppydiskIcon aria-hidden />}
-            size="small"
-            type="submit"
-          >
-            Bekreft endring
-          </Button>
-          <Button
-            onClick={() => typedReference?.current?.close()}
-            size="small"
-            type="button"
-            variant="secondary"
-          >
-            Avbryt
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    );
-  },
-);
-
-function BekreftModalInnholdTomIFremtiden({
-  navn,
-  dato,
-}: {
-  navn: string;
-  dato: string;
-}) {
-  return (
-    <HStack gap="6">
-      <BodyLong>
-        Du har nå satt siste sluttdato på medarbeiderens
-        organisasjonstilknytning(er) til {dato}, og det er ikke registrert noen
-        ny tilknytning etter denne datoen.
-      </BodyLong>
-      <BodyLong>
-        <b>
-          Dette innebærer at etter {dato} vil {navn} ikke lenger være registrert
-          som medarbeider i NAV, og alle tilganger for medarbeideren vil bli
-          fjernet.
-        </b>
-      </BodyLong>
-      <BodyLong>
-        Hvis dette ikke er korrekt, må det legges inn en ny tilknytning. Du kan
-        trykke på <b>Avbryt</b> og gjøre dette nå, eller så kan du eller noen
-        andre gjøre det senere, men senest sluttdatoen {dato}.
-      </BodyLong>
-      <BodyLong>
-        Hvis dette er korrekt, kan du bekrefte endringen ved å trykke på{" "}
-        <b>Bekreft endring</b>.
-      </BodyLong>
-    </HStack>
-  );
-}
-
-function BekreftModalInnholdTomIFortiden({ navn }: { navn: string }) {
-  return (
-    <Alert variant="warning">
-      <HStack gap="6">
-        <BodyLong>
-          Du har nå satt siste sluttdato på medarbeiderens
-          organisasjonstilknytning(er) til dagens dato eller tidligere, og det
-          er ikke registrert noen ny tilknytning etter denne datoen.
-        </BodyLong>
-        <BodyLong>
-          <b>
-            Dette innebærer at fra i dag vil {navn} ikke lenger være registrert
-            som medarbeider i NAV, og alle tilganger for medarbeideren vil bli
-            fjernet.
-          </b>
-        </BodyLong>
-        <BodyLong>
-          Hvis dette ikke er korrekt, må du trykke på <b>Avbryt</b> og legge til
-          en ny tilknytning.
-        </BodyLong>
-        <BodyLong>
-          Hvis dette er korrekt, kan du bekrefte endringen ved å trykke på{" "}
-          <b>Bekreft endring</b>.
-        </BodyLong>
-      </HStack>
-    </Alert>
-  );
-}
-
-function BekreftModalInnholdNyRemedyIFremtiden({
-  navn,
-  dato,
-  gammelOrgEnhet,
-  nyOrgEnhet,
-}: {
-  navn: string;
-  dato: string;
-  gammelOrgEnhet: string;
-  nyOrgEnhet: string;
-}) {
-  return (
-    <HStack gap="6">
-      <BodyLong>
-        Du registrerer nå at medarbeideren fra {dato} bytter
-        organisasjonstilknytning fra <b>{gammelOrgEnhet}</b> til{" "}
-        <b>{nyOrgEnhet}</b>.
-      </BodyLong>
-      <BodyLong>
-        <b>
-          Dette innebærer en endring i innstillinger for tilganger
-          (4-siffer-enhet), slik at fra og med {dato} vil alle tilganger for{" "}
-          {navn} fjernes. Nye tilganger må tildeles i Identrutina og/eller Mine
-          tilganger.
-        </b>
-      </BodyLong>
-      <BodyLong>
-        Ta kontakt med identadministrator eller leder hvis du er usikker på om
-        noe må gjøres.
-      </BodyLong>
-    </HStack>
-  );
-}
-
-function BekreftModalInnholdNyRemedyIFortiden({
-  navn,
-  gammelOrgEnhet,
-  nyOrgEnhet,
-}: {
-  navn: string;
-  gammelOrgEnhet: string;
-  nyOrgEnhet: string;
-}) {
-  return (
-    <Alert variant="warning">
-      <HStack gap="6">
-        <BodyLong>
-          Du registrerer nå at medarbeideren på dagens dato eller tidligere
-          bytter organisasjonstilknytning fra <b>{gammelOrgEnhet}</b> til{" "}
-          <b>{nyOrgEnhet}</b>.
-        </BodyLong>
-        <BodyLong>
-          <b>
-            Dette innebærer en endring i innstillinger for tilganger
-            (4-siffer-enhet). Vær oppmerksom på at dette betyr at fra i dag vil
-            alle tilganger for {navn} fjernes. Nye tilganger må tildeles i
-            Identrutina og/eller Mine tilganger.
-          </b>
-        </BodyLong>
-        <BodyLong>
-          Ta kontakt med identadministrator eller leder hvis du er usikker på om
-          noe må gjøres.
-        </BodyLong>
-      </HStack>
     </Alert>
   );
 }

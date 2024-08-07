@@ -1,4 +1,4 @@
-import { Alert, BodyLong, HStack, Loader } from "@navikt/ds-react";
+import { Alert, BodyLong, HStack } from "@navikt/ds-react";
 import { useQueries } from "@tanstack/react-query";
 import sortBy from "lodash/sortBy";
 import React from "react";
