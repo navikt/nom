@@ -21,7 +21,13 @@ import {
   Modal,
   useDatepicker,
 } from "@navikt/ds-react";
-import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useMutation,
+  useQueries,
+  useQuery,
+} from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { addYears } from "date-fns";
@@ -30,6 +36,7 @@ import sortBy from "lodash/sortBy";
 import type { MutableRefObject } from "react";
 import { useState } from "react";
 import React, { forwardRef, useEffect, useRef } from "react";
+import ReactDOMServer from "react-dom/server";
 import type { SubmitHandler } from "react-hook-form";
 import {
   FormProvider,
@@ -53,11 +60,17 @@ import {
 } from "~/api/react-query-endpoints";
 import { useHasWriteAccess } from "~/api/useGetSession";
 import { ApiResponseError } from "~/components/ApiResponseError";
+import { BekreftModal } from "~/components/BekreftModal";
+import ModalComponent from "~/components/modalProvider/ModalComponent";
+import { useModal } from "~/components/modalProvider/ModalProvider";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { showToast } from "~/hooks/showToast";
 import {
+  EndreRemedyEnhetModalInnhold,
+  TomDatoModalInnhold,
+} from "~/pages/ResourcePage/RessursComponents/DolModaler";
+import {
   dolValidering,
-  senesteTom,
   validInput,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { OrgtilknytningTimeline } from "~/pages/ResourcePage/RessursComponents/OrgtilknytningTimeline";
@@ -254,11 +267,13 @@ function OrgtilknytningForm({
       validation.dolGaps.length === 0 &&
       validation.dolOverlaps.length === 0
     ) {
-      oppdaterOrgtilknytningerMutation.mutate(
-        lagOppdaterOrgtilknytningerRequest(
-          data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
-        ),
-      );
+      // oppdaterOrgtilknytningerMutation.mutate(
+      //   lagOppdaterOrgtilknytningerRequest(
+      //     data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+      //   ),
+      // );
+
+      console.log("Would save");
     }
   };
 
@@ -283,7 +298,56 @@ function OrgtilknytningForm({
     saveButtonClicked: false,
   });
 
-  const handleSubmitClick = () => {
+  const { showModal } = useModal();
+
+  const handleSequentialModals = async () => {
+    try {
+      const orgtilknytninger = watch("mappedeOrgtilknytninger");
+
+      const queryClient = new QueryClient();
+
+      const remedyInnhold = (
+        <QueryClientProvider client={queryClient}>
+          <EndreRemedyEnhetModalInnhold
+            dagensDolOrgEnhet={dagensDolOrgEnhet}
+            dagensRemedyEnhetId={dagensRemedyEnhetId}
+            navn={formatVisningsnavn(ressurs.visningsnavn)}
+            orgtilknytninger={orgtilknytninger}
+          />
+        </QueryClientProvider>
+      );
+
+      const tomDatoInnhold = (
+        <TomDatoModalInnhold
+          navn={formatVisningsnavn(ressurs.visningsnavn)}
+          orgtilknytninger={orgtilknytninger}
+        />
+      );
+
+      if (ReactDOMServer.renderToString(tomDatoInnhold).length > 0) {
+        await showModal(
+          <BekreftModal
+            content={tomDatoInnhold}
+            heading={"Bekreft endringer"}
+          />,
+        );
+      }
+
+      // Show the second modal only after the first one is confirmed
+      await showModal(
+        <BekreftModal content={remedyInnhold} heading={"Bekreft endringer"} />,
+      );
+
+      // Perform the final action after both modals are confirmed
+      formReference.current?.dispatchEvent(
+        new Event("submit", { cancelable: true, bubbles: true }),
+      );
+    } catch {
+      /* Do nothing */
+    }
+  };
+
+  const handleSubmitClick = async () => {
     const oppdaterteOrgtilknytninger = watch(
       "mappedeOrgtilknytninger",
     ) as OrgtilknytningEtterValidering[];
@@ -294,17 +358,7 @@ function OrgtilknytningForm({
       dolOverlaps.length === 0 &&
       dolGaps.length === 0
     ) {
-      setModalProperties({
-        senesteTomDato: senesteTom(oppdaterteOrgtilknytninger),
-        navn: formatVisningsnavn(ressurs.visningsnavn),
-        orgtilknytninger: watch("mappedeOrgtilknytninger"),
-        dagensRemedyEnhetId: dagensRemedyEnhetId,
-        dagensDolOrgEnhet: dagensDolOrgEnhet,
-        formReference: formReference,
-        saveButtonClicked: true,
-      });
-
-      modalReference.current?.showModal();
+      await handleSequentialModals();
     }
   };
 
@@ -457,7 +511,7 @@ function OrgtilknytningForm({
           <ApiResponseError error={oppdaterOrgtilknytningerMutation.error} />
         </div>
 
-        <BekreftModal {...modalProperties} ref={modalReference} />
+        <ModalComponent />
       </form>
     </FormProvider>
   );
@@ -737,7 +791,7 @@ function IllegalDolCombinationAlert() {
 }
 
 // TODO: Gjøre dette mye mer clean, dette er bare førsteutkast for å i alle fall ha noe
-const BekreftModal = forwardRef<
+export const BekreftModal2 = forwardRef<
   HTMLDialogElement,
   {
     senesteTomDato: string | undefined;
