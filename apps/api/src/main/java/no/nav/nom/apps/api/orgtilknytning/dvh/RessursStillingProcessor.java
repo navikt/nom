@@ -22,6 +22,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -158,6 +159,11 @@ public class RessursStillingProcessor {
             }
             final var stillingPeriode = nyStillingPeriode != null ? nyStillingPeriode : midlStillingPeriode;
 
+            if(stillingPeriode.gyldigTom().isBefore(stillingPeriode.gyldigFom())){
+                log.info("Hopper over negativ stillingPeriode: {}, for navident: {}", stillingPeriode, navident);
+                return;
+            }
+
             if (isHistoricPeriod(stillingPeriode)) {  // Historisk stillingPeriode fra DVH - vi lager ingen historiske tilkoblinger. Vi bare evt. avslutter.
                 if (orgtilknytninger.size() == 0) {
                     log.debug(SECURE_LOGS,
@@ -208,6 +214,7 @@ public class RessursStillingProcessor {
                                 // opprettOrgtilknytning does not set gyldigTom
                                 // settOrgtilknytningSluttDato sets gyldigTom per stillingPeriode
                                 String fid = lagNyOrgtilknytning(navident, stillingPeriode.orgenhet().getId(), stillingPeriode, StillingPeriode.toString(stillingPerioder));
+
                                 settOrgtilknytningSluttDato(fid, navident, stillingPeriode, StillingPeriode.toString(stillingPerioder));
                             } else if (matcherStartDatoOgAgressoId.size() > 1) {
                                 // Matcher flere i NOM - dette må være feil!....

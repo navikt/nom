@@ -109,6 +109,14 @@ public class TestTokensGenerator {
         return validToken(claims);
     }
 
+    public String nomUiClient(String navident) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("NAVident", navident);
+        claims.put("groups", List.of("nomWriteGroup"));
+        claims.put("azp_name", "nomUiClient");
+        return validToken(claims);
+    }
+
 
 
 }

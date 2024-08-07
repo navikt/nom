@@ -22,6 +22,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.StreamSupport;
 
+/**
+ * Denne lager ingen faktiske orgtilknytninger
+ * Den parser om kommunale ressurser mangler stillinger i Unit4 og smatidig ikke har en OT i NOM (e.g. mastret)
+ * Så vil den benytte seg av DVH sin OrgenhetPaaRessurs info som er en best effort tolkning av Remedy enhet etc for å plassere i organisasjonen.
+ * Og lage en liksom OT - som kun tas vare på i ShadowOrgtilknytningerKommunaleRepository
+ * NOM bruker aldri denne infoen selv, men den leveres til Omada, slik at Omada får tilknytning på 'aktive' Kommmunale ressurser som (enda) ikke har fått noen Stilling i Unit4
+ *
+ * Når NOM blir full master for alle kommunale så kan dette fjernes
+ */
 @Slf4j
 @Service
 public class KommunaleRessurserLoader {

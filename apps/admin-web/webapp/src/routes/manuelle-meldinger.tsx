@@ -6,6 +6,7 @@ import { EndreDagligOppfølging } from "~/manuelle-meldinger/EndreDagligOppfølg
 import { FjernOrgtilknytning } from "~/manuelle-meldinger/FjernOrgtilknytning.tsx";
 import { OppdaterPersonalia } from "~/manuelle-meldinger/OppdaterPersonalia.tsx";
 import { OppdaterPersonidentRessurs } from "~/manuelle-meldinger/OppdaterPersonidentRessurs.tsx";
+import { SettNomMaster } from "~/manuelle-meldinger/SettNomMaster.tsx";
 import { SlettRessursMelding } from "~/manuelle-meldinger/SlettRessursMelding.tsx";
 
 export const Route = createFileRoute("/manuelle-meldinger")({
@@ -22,6 +23,7 @@ function ManuelleMeldingerPage() {
         <SlettRessursMelding />
         <OppdaterPersonidentRessurs />
         <OppdaterPersonalia />
+        <SettNomMaster />
       </div>
       <Heading level="2" size="medium" spacing>
         Orgenhet

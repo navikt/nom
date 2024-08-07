@@ -118,7 +118,6 @@ public class RessursStillingStrukturerer {
                 }
             }
         });
-
         return medDagligOppfolging;
     }
 
@@ -306,7 +305,8 @@ public class RessursStillingStrukturerer {
                 } else {
                     // Kan ikke finne orgenhet for stillingPeriode siden agressoId tilgjengelig ikke er presis (7-8 tegn lang)
                     if (isHistoricPeriod(stillingPeriode)) { // Ikke så farlig
-                        log.debug(SECURE_LOGS,
+                        log.debug(
+                            SECURE_LOGS,
                             "StillingPeriode for navident {} er ikke presis nok på historisk stilling/ressurs sin agressoId til å kunne finne NOM enhet denne tilhører. Den vil ikke behandles:\n  {}",
                             navident,
                             stillingPeriode

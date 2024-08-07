@@ -18,6 +18,7 @@ import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.ressurs.api.exceptions.DuplicateRessursException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
+import no.nav.nom.apps.api.ressurs.api.exceptions.NomMasteredException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
@@ -231,6 +232,10 @@ public class RessursRestService {
             throw InvalidSektorException.actionNotAllowedForSektor(Sektor.NAV_STATLIG);
         }
 
+        if (authResolver.kanSelvbetjene(navident) && !nomMastered.isMastered(ressursState.navident())) {
+            throw NomMasteredException.actionNotAllowedForNonNomMastered();
+        }
+
         var oppdaterMobilnummerCommand = new OppdaterPrimaryTelefonnummerCommand(
             ressursState.fid(),
             updatePrimarytelefonnummer.nummer()
@@ -322,7 +327,9 @@ public class RessursRestService {
             .orElseGet(() -> createRessurs(request, existingRessurs));
 
         try {
-            ressursOpprettetEmailService.notifyByEmail(createdRessurs.navident(), request.orgEnhetId());
+            final var orgEnhet = orgEnhetStateRepository.findById(request.orgEnhetId())
+                .orElseThrow(() -> new RessursOpprettetEmailException("Fant ikke orgenhet med id " + request.orgEnhetId()));
+            ressursOpprettetEmailService.notifyByEmail(createdRessurs, orgEnhet);
         } catch (RessursOpprettetEmailException exception) {
             //TODO: consider handling exception if email sending is important
             logger.warn("Epost varsling om opprettelse av ressurs til orgenhet leder feilet. {}", exception.getMessage());

@@ -4,11 +4,7 @@ import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
-import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
@@ -41,6 +37,16 @@ public class AuthResolver {
         } else {
             return true;
         }
+    }
+
+    /**
+     * Sjekker om inloggede bruker er lik ressursen som skal redigeres.
+     * @param navident
+     * @return true hvis tilgang, false hvis ikke
+     */
+
+    public boolean kanSelvbetjene(String navident) {
+        return getAuthenticatedNavIdent().equals(navident);
     }
 
     /**

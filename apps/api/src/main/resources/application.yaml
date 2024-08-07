@@ -278,6 +278,10 @@ app:
         orgtilknytning: na664h    # 8551401-Teknisk brukerstøtte og verktøy 1-ORGENHET
       - navident: F873959         # gjestfri.folk@trygdeetaten.no - Har IKKE NOM-WRITE-DELEGERT tilgang - Har F869325 som leder
         orgtilknytning: na664h    # 8551401-Teknisk brukerstøtte og verktøy 1-ORGENHET
+      - navident: A862414         # toff.andrefiolin@trygdeetaten.no - Leder av na494k - 192400-Målselv-Bardu-ORGNIV3
+        orgtilknytning: mu972n    # 1924000-Målselv-Bardu-ORGENHET
+      - navident: G850411         # Varm.Gullstol@trygdeetaten.no - Har NOM-WRITE-DELEGERT tilgang - Har A862414 som leder
+        orgtilknytning: mu972n    # 1924000-Målselv-Bardu-ORGENHET
       - navident: T168579         # Støtte for PRIM/ Christian Prestvik
         orgtilknytning: ke793y    # ref: https://nav-it.slack.com/archives/G01F99D2AHX/p1717488133154109
     ledere:
@@ -285,6 +289,8 @@ app:
         orgenhet: ty960s
       - navident: F869325
         orgenhet: na664h
+      - navident: A862414
+        orgenhet: na494k
       - navident: J129293       # Støtte for PRIM/ Christian Prestvik
         orgenhet: ke793y        # ref: https://nav-it.slack.com/archives/G01F99D2AHX/p1717488133154109
       - navident: N852930       # Støtte for PRIM/ Christian Prestvik

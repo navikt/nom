@@ -9,6 +9,7 @@ import {
   Table,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
+import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
 
 import { getRessurserByListNavident } from "~/api/react-query-endpoints";
@@ -21,7 +22,21 @@ import type {
   Telefon,
   Visningsnavn,
 } from "~/types/api-models";
-import { formatVisningsnavn, isGyldighetsPeriodeActive } from "~/utils";
+import {
+  formatTlf,
+  formatVisningsnavn,
+  isGyldighetsPeriodeActive,
+} from "~/utils";
+
+export function TelefonNummere({ ressurs }: { ressurs: CustomRessurs }) {
+  const telefonnummere = ressurs.primaryTelefonnummer
+    ? [{ nummer: ressurs.primaryTelefonnummer }, ...ressurs.telefoner]
+    : ressurs.telefoner;
+
+  const uniqueTelefonnummere = uniqBy(telefonnummere, "nummer");
+
+  return uniqueTelefonnummere.map(({ nummer }) => formatTlf(nummer)).join(", ");
+}
 
 function customSortByOrgEnhetName(
   customRessurser: CustomRessurs[],
@@ -231,7 +246,7 @@ export const OrgRessursTabellPageInner = ({
                   ))}
                 </Table.DataCell>
                 <Table.DataCell>
-                  {ressurs.primaryTelefonnummer || ressurs.telefoner[0]?.nummer}
+                  <TelefonNummere ressurs={ressurs} />
                 </Table.DataCell>
               </Table.Row>
             ))}

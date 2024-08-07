@@ -9,13 +9,16 @@ import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.pdl.PdlClient;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
+import no.nav.nom.apps.api.ressurs.api.exceptions.NomMasteredException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPrimaryTelefonnummerCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.apps.api.rest.RestTestBase;
@@ -48,10 +51,12 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptySet;
+import static no.nav.nom.apps.api.common.TestData.orgEnhetState;
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static no.nav.nom.apps.api.common.TestData.ressursState;
 import static no.nav.nom.apps.api.ressurs.api.app.RessursController.UNLEASH_EDIT_RESSURS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -77,10 +82,16 @@ public class RessursControllerTest extends RestTestBase {
     private RessursStateRepository ressursStateRepository;
 
     @MockBean
+    private OrgEnhetStateRepository orgEnhetStateRepository;
+
+    @MockBean
     NomStateRessursListener nomStateRessursListener;
 
     @MockBean
     private AuthResolver authResolver;
+
+    @MockBean
+    private NomMastered nomMastered;
 
     @Autowired
     TestTokensGenerator testToken;
@@ -353,15 +364,24 @@ public class RessursControllerTest extends RestTestBase {
             .sluttDato(Optional.empty())
             .tilknytningtype(Tilknytningtype.INGEN)
             .ansettelsesType(null)
+            .orgEnhetId("orgEnhet123")
             .fysiskBrukerstedNr("")
-            .orgEnhetId("")
             .build();
+
+        var orgEnhet = orgEnhetState().toBuilder()
+            .agressoId(Optional.of("123456"))
+            .agressoOrgNivaa(Optional.of("4"))
+            .navn("NAV")
+            .build();
+
 
         when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
             .thenReturn(Set.of(request.fysiskBrukerstedNr()));
 
         when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
             .thenReturn(ressursState());
+
+        when(orgEnhetStateRepository.findById(request.orgEnhetId())).thenReturn(Optional.of(orgEnhet));
 
         postOpprettRessursRequest(
             testToken.nomWriteGroupAndNomUiAzp(),
@@ -548,6 +568,7 @@ public class RessursControllerTest extends RestTestBase {
     }
 
     @Test
+    @DisplayName("Skal kunne endre primarytelefonnnummer på ekstern ressurs")
     void skal_kunne_endre_telefonnummer_ekstern() {
         var existingRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
@@ -555,6 +576,9 @@ public class RessursControllerTest extends RestTestBase {
 
         when(ressursStateRepository.findByNavident(existingRessurs.navident()))
             .thenReturn(Optional.of(existingRessurs));
+
+        when(authResolver.kanSelvbetjene(anyString())).thenReturn(false);
+        when(nomMastered.isMastered(anyString())).thenReturn(true);
 
         var updatePrimaryTelefonnummer = new UpdatePrimarytelefonnummer(
             "12345678"
@@ -575,6 +599,118 @@ public class RessursControllerTest extends RestTestBase {
             .matches(oppdaterPersonaliaCommand -> oppdaterPersonaliaCommand.fid().equals(existingRessurs.fid()))
             .matches(oppdaterPersonaliaCommand -> oppdaterPersonaliaCommand.primaryTelefonnummer().equals(updatePrimaryTelefonnummer.nummer()));
     }
+
+    @ParameterizedTest(name = "GET {0}")
+    @DisplayName("Skal kunne endre primarytelefonnnummer på seg selv, kommunal og ekstern ressurs")
+    @MethodSource("getSektors")
+    void skal_kunne_endre_telefonnummer_selv(Sektor sektor) {
+        var existingRessurs = ressursState().toBuilder()
+            .sektor(sektor)
+            .build();
+
+        when(ressursStateRepository.findByNavident(existingRessurs.navident()))
+            .thenReturn(Optional.of(existingRessurs));
+
+        when(authResolver.kanSelvbetjene(anyString())).thenReturn(true);
+        when(authResolver.kanRedigereRessurs(anyString())).thenReturn(false);
+        when(nomMastered.isMastered(anyString())).thenReturn(true);
+
+        var updatePrimaryTelefonnummer = new UpdatePrimarytelefonnummer(
+            "12345678"
+        );
+
+        postUpdatePrimaryTelefonnummerRequest(
+            existingRessurs.navident(),
+            testToken.nomUiClient(existingRessurs.navident()),
+            updatePrimaryTelefonnummer
+        )
+            .expectStatus().isOk();
+
+        var oppdaterMobilnummerCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterPrimaryTelefonnummerCommand.class);
+        verify(ressursCommandService, times(1))
+            .oppdatertPrimaryTelefonnummer(oppdaterMobilnummerCommandArgumentCaptor.capture(), any());
+
+        assertThat(oppdaterMobilnummerCommandArgumentCaptor.getValue())
+            .matches(oppdaterPersonaliaCommand -> oppdaterPersonaliaCommand.fid().equals(existingRessurs.fid()))
+            .matches(oppdaterPersonaliaCommand -> oppdaterPersonaliaCommand.primaryTelefonnummer().equals(updatePrimaryTelefonnummer.nummer()));
+    }
+
+    @Test
+    @DisplayName("Skal ikke kunne endre primarytelefonnnummer på seg selv, statlig ressurs")
+    void skal_ikke_kunne_endre_telefonnummer_selv() {
+        var existingRessurs = ressursState().toBuilder()
+            .sektor(Sektor.NAV_STATLIG)
+            .build();
+
+        when(ressursStateRepository.findByNavident(existingRessurs.navident()))
+            .thenReturn(Optional.of(existingRessurs));
+
+        when(authResolver.kanSelvbetjene(anyString())).thenReturn(true);
+        when(authResolver.kanRedigereRessurs(anyString())).thenReturn(false);
+        when(nomMastered.isMastered(anyString())).thenReturn(false);
+
+        var updatePrimaryTelefonnummer = new UpdatePrimarytelefonnummer(
+            "12345678"
+        );
+
+        postUpdatePrimaryTelefonnummerRequest(
+            existingRessurs.navident(),
+            testToken.nomUiClient(existingRessurs.navident()),
+            updatePrimaryTelefonnummer
+        )
+            .expectStatus().is4xxClientError();
+
+        var oppdaterMobilnummerCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterPrimaryTelefonnummerCommand.class);
+        verify(ressursCommandService, times(0))
+            .oppdatertPrimaryTelefonnummer(oppdaterMobilnummerCommandArgumentCaptor.capture(), any());
+
+        assertThrows(InvalidSektorException.class, () -> {
+            throw InvalidSektorException.actionNotAllowedForSektor(Sektor.NAV_STATLIG);
+        });
+    }
+
+    @Test
+    @DisplayName("Skal ikke kunne endre primarytelefonnnummer på seg selv, ikke nom-mastered")
+    void skal_ikke_kunne_endre_telefonnummer_selv_2() {
+        var existingRessurs = ressursState().toBuilder()
+            .sektor(Sektor.NAV_KOMMUNAL)
+            .build();
+
+        when(ressursStateRepository.findByNavident(existingRessurs.navident()))
+            .thenReturn(Optional.of(existingRessurs));
+
+        when(authResolver.kanSelvbetjene(anyString())).thenReturn(true);
+        when(authResolver.kanRedigereRessurs(anyString())).thenReturn(false);
+        when(nomMastered.isMastered(anyString())).thenReturn(false);
+
+        var updatePrimaryTelefonnummer = new UpdatePrimarytelefonnummer(
+            "12345678"
+        );
+
+        postUpdatePrimaryTelefonnummerRequest(
+            existingRessurs.navident(),
+            testToken.nomUiClient(existingRessurs.navident()),
+            updatePrimaryTelefonnummer
+        )
+            .expectStatus().is5xxServerError();
+
+        var oppdaterMobilnummerCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterPrimaryTelefonnummerCommand.class);
+        verify(ressursCommandService, times(0))
+            .oppdatertPrimaryTelefonnummer(oppdaterMobilnummerCommandArgumentCaptor.capture(), any());
+
+        assertThrows(NomMasteredException.class, () -> {
+            throw NomMasteredException.actionNotAllowedForNonNomMastered();
+        });
+    }
+
+
+    static Stream<Arguments> getSektors(){
+        return Stream.of(
+            Arguments.of(Sektor.NAV_KOMMUNAL),
+            Arguments.of(Sektor.EKSTERN)
+        );
+    }
+
 
 
     @ParameterizedTest(name = "GET {0}")

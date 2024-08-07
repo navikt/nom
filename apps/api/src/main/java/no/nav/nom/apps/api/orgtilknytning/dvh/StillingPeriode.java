@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
+import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 
 import java.time.LocalDate;

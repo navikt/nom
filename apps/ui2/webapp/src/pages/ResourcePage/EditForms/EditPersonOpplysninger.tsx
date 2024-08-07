@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { HStack, Label, TextField, VStack } from "@navikt/ds-react";
+import { Heading, HStack, Label, TextField, VStack } from "@navikt/ds-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import intersection from "lodash/intersection";
@@ -22,6 +22,7 @@ import { SaveOrAbortButtons } from "~/pages/ResourcePage/EditForms/SaveOrAbortBu
 import {
   DagligLeder,
   Epost,
+  FysiskBrukersted,
   KortFortalt,
   Navident,
   SektorView,
@@ -31,7 +32,13 @@ import {
 import { type Ressurs } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
 
-export function EditPersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
+export function EditPersonOpplysninger({
+  ressurs,
+  hasSelfServiceAccess,
+}: {
+  ressurs: Ressurs;
+  hasSelfServiceAccess: boolean;
+}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { editPersonopplysninger } = useSearch({ from: "/ressurs/$id" });
@@ -56,49 +63,64 @@ export function EditPersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
   >({
     mutationFn: async (values) => {
       let promises: Promise<unknown>[] = [];
+      if (hasSelfServiceAccess) {
+        if (
+          checkIfDirtyField(
+            ["primaryTelefonnummer"],
+            Object.keys(methods.formState.dirtyFields),
+          )
+        ) {
+          const updateTelefonPromise = updateTelefonnummer(ressurs.navident, {
+            nummer: values.primaryTelefonnummer?.replaceAll(" ", "") ?? "",
+          });
+          promises = [...promises, updateTelefonPromise];
+        }
+      } else if (!hasSelfServiceAccess) {
+        if (
+          checkIfDirtyField(
+            ["primaryTelefonnummer"],
+            Object.keys(methods.formState.dirtyFields),
+          )
+        ) {
+          const updateTelefonPromise = updateTelefonnummer(ressurs.navident, {
+            nummer: values.primaryTelefonnummer?.replaceAll(" ", "") ?? "",
+          });
+          promises = [...promises, updateTelefonPromise];
+        }
 
-      if (
-        checkIfDirtyField(
-          ["primaryTelefonnummer"],
-          Object.keys(methods.formState.dirtyFields),
-        )
-      ) {
-        const updateTelefonPromise = updateTelefonnummer(ressurs.navident, {
-          nummer: values.primaryTelefonnummer?.replaceAll(" ", "") ?? "",
-        });
-        promises = [...promises, updateTelefonPromise];
+        if (
+          checkIfDirtyField(
+            ["primaryFysiskBrukersted"],
+            Object.keys(methods.formState.dirtyFields),
+          )
+        ) {
+          const updateBrukerstedPromise = updateFysiskeBrukersteder(
+            ressurs.fid,
+            {
+              primaryFysiskBrukersted: values.primaryFysiskBrukersted,
+              fysiskeBrukersteder: [values.primaryFysiskBrukersted],
+            },
+          );
+
+          promises = [...promises, updateBrukerstedPromise];
+        }
+
+        if (
+          checkIfDirtyField(
+            ["fornavn", "mellomnavn", "etternavn"],
+            Object.keys(methods.formState.dirtyFields),
+          )
+        ) {
+          const { fornavn, mellomnavn, etternavn } = values;
+          const updateNamePromise = updateNavnForRessurs(ressurs.navident, {
+            fornavn,
+            mellomnavn,
+            etternavn,
+          });
+
+          promises = [...promises, updateNamePromise];
+        }
       }
-
-      if (
-        checkIfDirtyField(
-          ["primaryFysiskBrukersted"],
-          Object.keys(methods.formState.dirtyFields),
-        )
-      ) {
-        const updateBrukerstedPromise = updateFysiskeBrukersteder(ressurs.fid, {
-          primaryFysiskBrukersted: values.primaryFysiskBrukersted,
-          fysiskeBrukersteder: [values.primaryFysiskBrukersted],
-        });
-
-        promises = [...promises, updateBrukerstedPromise];
-      }
-
-      if (
-        checkIfDirtyField(
-          ["fornavn", "mellomnavn", "etternavn"],
-          Object.keys(methods.formState.dirtyFields),
-        )
-      ) {
-        const { fornavn, mellomnavn, etternavn } = values;
-        const updateNamePromise = updateNavnForRessurs(ressurs.navident, {
-          fornavn,
-          mellomnavn,
-          etternavn,
-        });
-
-        promises = [...promises, updateNamePromise];
-      }
-
       await Promise.allSettled(promises);
     },
     onSettled: () => {
@@ -117,50 +139,60 @@ export function EditPersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit((values) => mutate(values))}>
-        <VStack
-          css={css`
-            margin-bottom: var(--a-spacing-4);
-          `}
-        >
-          <Label>Visningsnavn</Label>
-          <span>
-            Navnet under vil bli brukt i alle NAVs applikasjoner. Medarbeideren
-            må ha minst ett fornavn og minst ett etternavn.
-          </span>
-        </VStack>
-        <div
-          css={css`
-            display: flex;
-            gap: var(--a-spacing-2);
-            align-items: flex-start;
+        {hasSelfServiceAccess ? (
+          <>
+            <Heading level="1" size="large">
+              {formatVisningsnavn(ressurs.visningsnavn)}
+            </Heading>
+          </>
+        ) : (
+          <>
+            <VStack
+              css={css`
+                margin-bottom: var(--a-spacing-4);
+              `}
+            >
+              <Label>Visningsnavn</Label>
+              <span>
+                Navnet under vil bli brukt i alle NAVs applikasjoner.
+                Medarbeideren må ha minst ett fornavn og minst ett etternavn.
+              </span>
+            </VStack>
+            <div
+              css={css`
+                display: flex;
+                gap: var(--a-spacing-2);
+                align-items: flex-start;
 
-            > * {
-              flex: 1;
-            }
-          `}
-        >
-          <TextField
-            autoComplete="off"
-            {...methods.register("fornavn")}
-            data-cy="fornavn-textfield"
-            error={methods.formState.errors.fornavn?.message}
-            label="Fornavn"
-          />
-          <TextField
-            autoComplete="off"
-            data-cy="mellomnavn-textfield"
-            {...methods.register("mellomnavn")}
-            error={methods.formState.errors.mellomnavn?.message}
-            label="Mellomnavn"
-          />
-          <TextField
-            autoComplete="off"
-            data-cy="etternavn-textfield"
-            {...methods.register("etternavn")}
-            error={methods.formState.errors.etternavn?.message}
-            label="Etternavn"
-          />
-        </div>
+                > * {
+                  flex: 1;
+                }
+              `}
+            >
+              <TextField
+                autoComplete="off"
+                {...methods.register("fornavn")}
+                data-cy="fornavn-textfield"
+                error={methods.formState.errors.fornavn?.message}
+                label="Fornavn"
+              />
+              <TextField
+                autoComplete="off"
+                data-cy="mellomnavn-textfield"
+                {...methods.register("mellomnavn")}
+                error={methods.formState.errors.mellomnavn?.message}
+                label="Mellomnavn"
+              />
+              <TextField
+                autoComplete="off"
+                data-cy="etternavn-textfield"
+                {...methods.register("etternavn")}
+                error={methods.formState.errors.etternavn?.message}
+                label="Etternavn"
+              />
+            </div>
+          </>
+        )}
         <KortFortalt />
         <HStack>
           <div
@@ -201,10 +233,14 @@ export function EditPersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
             error={methods.formState.errors.primaryTelefonnummer?.message}
             label="Telefon"
           />
-          <FysiskBrukerstedSelectFormPart
-            defaultValue={currentPrimaryFysiskBrukersted}
-            name="primaryFysiskBrukersted"
-          />
+          {hasSelfServiceAccess ? (
+            <FysiskBrukersted ressurs={ressurs} />
+          ) : (
+            <FysiskBrukerstedSelectFormPart
+              defaultValue={currentPrimaryFysiskBrukersted}
+              name="primaryFysiskBrukersted"
+            />
+          )}
         </VStack>
         {editPersonopplysninger ? (
           <SaveOrAbortButtons isLoading={isPending} />
