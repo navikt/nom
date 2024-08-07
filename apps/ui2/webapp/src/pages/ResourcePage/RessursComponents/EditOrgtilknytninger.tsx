@@ -20,19 +20,12 @@ import {
   Label,
   useDatepicker,
 } from "@navikt/ds-react";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useMutation,
-  useQueries,
-  useQuery,
-} from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { addYears } from "date-fns";
 import partition from "lodash/partition";
 import React, { useEffect, useRef } from "react";
-import ReactDOMServer from "react-dom/server";
 import type { SubmitHandler } from "react-hook-form";
 import {
   FormProvider,
@@ -56,19 +49,16 @@ import {
 } from "~/api/react-query-endpoints";
 import { useHasWriteAccess } from "~/api/useGetSession";
 import { ApiResponseError } from "~/components/ApiResponseError";
-import { BekreftModal } from "~/components/BekreftModal";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { showToast } from "~/hooks/showToast";
 import {
-  EndreRemedyEnhetModalInnhold,
-  TomDatoModalInnhold,
-} from "~/pages/ResourcePage/RessursComponents/DolModaler";
-import {
   dolValidering,
   validInput,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import { RemedyEndringModal } from "~/pages/ResourcePage/RessursComponents/Modal/RemedyEndringModal";
+import { TomDatoModal } from "~/pages/ResourcePage/RessursComponents/Modal/TomDatoModal";
 import { OrgtilknytningTimeline } from "~/pages/ResourcePage/RessursComponents/OrgtilknytningTimeline";
 import infoikonNOM from "~/resources/infoikonNOM.svg";
 import type {
@@ -274,41 +264,24 @@ function OrgtilknytningForm({
 
   const { showModal } = useModal();
 
-  const handleSequentialModals = async () => {
+  const handleSequentialModals = async (
+    orgtilknytninger: Partial<OrgtilknytningState>[],
+  ) => {
     try {
-      const orgtilknytninger = watch("mappedeOrgtilknytninger");
-
-      const queryClient = new QueryClient();
-
-      const remedyInnhold = (
-        <QueryClientProvider client={queryClient}>
-          <EndreRemedyEnhetModalInnhold
-            dagensDolOrgEnhet={dagensDolOrgEnhet}
-            dagensRemedyEnhetId={dagensRemedyEnhetId}
-            navn={formatVisningsnavn(ressurs.visningsnavn)}
-            orgtilknytninger={orgtilknytninger}
-          />
-        </QueryClientProvider>
-      );
-
-      const tomDatoInnhold = (
-        <TomDatoModalInnhold
+      await showModal(
+        <RemedyEndringModal
+          dagensDolOrgEnhet={dagensDolOrgEnhet}
+          dagensRemedyEnhetId={dagensRemedyEnhetId}
           navn={formatVisningsnavn(ressurs.visningsnavn)}
           orgtilknytninger={orgtilknytninger}
-        />
+        />,
       );
 
-      if (ReactDOMServer.renderToString(tomDatoInnhold).length > 0) {
-        await showModal(
-          <BekreftModal
-            content={tomDatoInnhold}
-            heading={"Bekreft endringer"}
-          />,
-        );
-      }
-
       await showModal(
-        <BekreftModal content={remedyInnhold} heading={"Bekreft endringer"} />,
+        <TomDatoModal
+          navn={formatVisningsnavn(ressurs.visningsnavn)}
+          orgtilknytninger={orgtilknytninger}
+        />,
       );
 
       formReference.current?.dispatchEvent(
@@ -330,7 +303,7 @@ function OrgtilknytningForm({
       dolOverlaps.length === 0 &&
       dolGaps.length === 0
     ) {
-      await handleSequentialModals();
+      await handleSequentialModals(oppdaterteOrgtilknytninger);
     }
   };
 
