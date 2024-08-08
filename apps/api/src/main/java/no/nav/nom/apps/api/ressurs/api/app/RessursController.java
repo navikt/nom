@@ -17,6 +17,7 @@ import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.ressurs.api.exceptions.DuplicateRessursException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
+import no.nav.nom.apps.api.ressurs.api.exceptions.NomMasteredException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
@@ -289,6 +290,7 @@ public class RessursController {
     @ExceptionHandler({
         IllegalArgumentException.class,
         NoSuchElementException.class,
+        NomMasteredException.class,
         InvalidSektorException.class,
         InvalidOrgtilknytningTypeAndSektorCombinationException.class
     })
