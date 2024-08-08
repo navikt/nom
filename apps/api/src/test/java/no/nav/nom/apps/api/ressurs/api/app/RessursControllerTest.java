@@ -692,7 +692,7 @@ public class RessursControllerTest extends RestTestBase {
             testToken.nomUiClient(existingRessurs.navident()),
             updatePrimaryTelefonnummer
         )
-            .expectStatus().is5xxServerError();
+            .expectStatus().is4xxClientError();
 
         var oppdaterMobilnummerCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterPrimaryTelefonnummerCommand.class);
         verify(ressursCommandService, times(0))
