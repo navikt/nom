@@ -78,7 +78,7 @@ export function EditPersonOpplysninger({
           });
           promises = [...promises, updateTelefonPromise];
         }
-      } else if (!hasSelfServiceAccess) {
+      } else {
         if (
           checkIfDirtyField(
             ["primaryTelefonnummer"],
