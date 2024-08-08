@@ -142,7 +142,7 @@ export function EditPersonOpplysninger({
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit((values) => mutate(values))}>
-        {hasSelfServiceAccess ? (
+        {hasSelfServiceAccess && !isUserAdmin ? (
           <>
             <Heading level="1" size="large">
               {formatVisningsnavn(ressurs.visningsnavn)}
@@ -236,7 +236,7 @@ export function EditPersonOpplysninger({
             error={methods.formState.errors.primaryTelefonnummer?.message}
             label="Telefon"
           />
-          {hasSelfServiceAccess ? (
+          {hasSelfServiceAccess && !isUserAdmin ? (
             <FysiskBrukersted ressurs={ressurs} />
           ) : (
             <FysiskBrukerstedSelectFormPart
