@@ -14,6 +14,7 @@ import {
   updateNavnForRessurs,
   updateTelefonnummer,
 } from "~/api/react-query-endpoints";
+import { useHasAdminAccess } from "~/api/useGetSession";
 import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBrukerstedSelect";
 import { UserImage } from "~/components/UserImage";
 import { showToast } from "~/hooks/showToast";
@@ -56,6 +57,8 @@ export function EditPersonOpplysninger({
     resolver: yupResolver(validationSchema),
   });
 
+  const isUserAdmin = useHasAdminAccess();
+
   const { mutate, isPending } = useMutation<
     unknown,
     unknown,
@@ -63,7 +66,7 @@ export function EditPersonOpplysninger({
   >({
     mutationFn: async (values) => {
       let promises: Promise<unknown>[] = [];
-      if (hasSelfServiceAccess) {
+      if (hasSelfServiceAccess && !isUserAdmin) {
         if (
           checkIfDirtyField(
             ["primaryTelefonnummer"],
