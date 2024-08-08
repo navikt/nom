@@ -35,6 +35,7 @@ import {
   useHasWriteAccess,
 } from "~/api/useGetSession";
 import { Divider } from "~/components/Divider";
+import { ModalProvider } from "~/components/modalProvider/ModalProvider";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
 import { EditPersonOpplysninger } from "~/pages/ResourcePage/EditForms/EditPersonOpplysninger";
@@ -80,7 +81,9 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
       ]}
     >
       {editOrgtilknytninger ? (
-        <EditOrgtilknytninger ressurs={ressurs} />
+        <ModalProvider>
+          <EditOrgtilknytninger ressurs={ressurs} />
+        </ModalProvider>
       ) : (
         <>
           <SummarySection ressurs={ressurs} />
