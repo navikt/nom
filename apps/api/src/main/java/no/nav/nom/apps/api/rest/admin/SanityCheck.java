@@ -42,6 +42,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
@@ -450,6 +451,32 @@ public class SanityCheck {
     public List<OrgtilknytningState> orgtilknytningNegativPeriode() {
         return orgtilknytningService.getAll().stream()
             .filter(ot -> ot.gyldigTom().isPresent() && ot.gyldigTom().get().isBefore(ot.gyldigFom()))
+            .toList();
+    }
+
+    @Operation(
+        description = "List orgtilknytninger med flere dagligOppfolging i current periode (gyldigFom < now < gyldigTom)",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/orgtilknytningMedFlereAktivDagligOppfolging")
+    public List<String> orgtilknytningMedFlereAktivDagligOppfolging() {
+        // Group by navident for current period and dagligOppfolging
+        Map<String, List<OrgtilknytningState>> groupedByNavidentForCurrentPeriodWithDagligDagligOppfolging = orgtilknytningService.getAll().stream()
+            .filter(ot -> ot.gyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
+                (ot.gyldigTom().isEmpty() || ot.gyldigTom().get().isAfter(LocalDate.now()))) // er current date
+            .filter(OrgtilknytningState::erDagligOppfolging) // er dagligoppfolging
+            .collect(Collectors.groupingBy(OrgtilknytningState::navident));
+
+        // Filter out groups where there is more than one dagligOppfolging in current period
+        return groupedByNavidentForCurrentPeriodWithDagligDagligOppfolging.values().stream()
+            .filter(group -> group.size() > 1)
+            .flatMap(List::stream)
+            .map(ot -> String.format("%s %s %s %s %s %s", ot.navident(), ot.orgEnhetId(), ot.fid(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()))
             .toList();
     }
 
