@@ -25,7 +25,7 @@ import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { addYears } from "date-fns";
 import partition from "lodash/partition";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import {
   FormProvider,
@@ -53,10 +53,7 @@ import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { showToast } from "~/hooks/showToast";
-import {
-  dolValidering,
-  validInput,
-} from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import { dolValidering } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { RemedyEndringModal } from "~/pages/ResourcePage/RessursComponents/Modal/RemedyEndringModal";
 import { TomDatoModal } from "~/pages/ResourcePage/RessursComponents/Modal/TomDatoModal";
 import { OrgtilknytningTimeline } from "~/pages/ResourcePage/RessursComponents/OrgtilknytningTimeline";
@@ -241,9 +238,31 @@ function OrgtilknytningForm({
     },
   });
 
+  const { showModal } = useModal();
+
+  const visBekreftelsesmodaler = async (
+    orgtilknytninger: Partial<OrgtilknytningState>[],
+  ) => {
+    await showModal(
+      <RemedyEndringModal
+        dagensDolOrgEnhet={dagensDolOrgEnhet}
+        dagensRemedyEnhetId={dagensRemedyEnhetId}
+        navn={formatVisningsnavn(ressurs.visningsnavn)}
+        orgtilknytninger={orgtilknytninger}
+      />,
+    );
+
+    await showModal(
+      <TomDatoModal
+        navn={formatVisningsnavn(ressurs.visningsnavn)}
+        orgtilknytninger={orgtilknytninger}
+      />,
+    );
+  };
+
   const onValid: SubmitHandler<{
     mappedeOrgtilknytninger: Partial<OrgtilknytningState>[];
-  }> = (data) => {
+  }> = async (data) => {
     const validation = dolValidering(
       data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
     );
@@ -252,58 +271,17 @@ function OrgtilknytningForm({
       validation.dolGaps.length === 0 &&
       validation.dolOverlaps.length === 0
     ) {
-      oppdaterOrgtilknytningerMutation.mutate(
-        lagOppdaterOrgtilknytningerRequest(
-          data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
-        ),
-      );
-    }
-  };
-
-  const formReference = useRef<HTMLFormElement>(null);
-
-  const { showModal } = useModal();
-
-  const handleSequentialModals = async (
-    orgtilknytninger: Partial<OrgtilknytningState>[],
-  ) => {
-    try {
-      await showModal(
-        <RemedyEndringModal
-          dagensDolOrgEnhet={dagensDolOrgEnhet}
-          dagensRemedyEnhetId={dagensRemedyEnhetId}
-          navn={formatVisningsnavn(ressurs.visningsnavn)}
-          orgtilknytninger={orgtilknytninger}
-        />,
-      );
-
-      await showModal(
-        <TomDatoModal
-          navn={formatVisningsnavn(ressurs.visningsnavn)}
-          orgtilknytninger={orgtilknytninger}
-        />,
-      );
-
-      formReference.current?.dispatchEvent(
-        new Event("submit", { cancelable: true, bubbles: true }),
-      );
-    } catch {
-      /* Do nothing */
-    }
-  };
-
-  const handleSubmitClick = async () => {
-    const oppdaterteOrgtilknytninger = watch(
-      "mappedeOrgtilknytninger",
-    ) as OrgtilknytningEtterValidering[];
-    const { dolGaps, dolOverlaps } = dolValidering(oppdaterteOrgtilknytninger);
-
-    if (
-      validInput(oppdaterteOrgtilknytninger) &&
-      dolOverlaps.length === 0 &&
-      dolGaps.length === 0
-    ) {
-      await handleSequentialModals(oppdaterteOrgtilknytninger);
+      await visBekreftelsesmodaler(data.mappedeOrgtilknytninger)
+        .then(() => {
+          oppdaterOrgtilknytningerMutation.mutate(
+            lagOppdaterOrgtilknytningerRequest(
+              data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+            ),
+          );
+        })
+        .catch(() => {
+          console.log("Modals cancelled");
+        });
     }
   };
 
@@ -315,11 +293,7 @@ function OrgtilknytningForm({
 
       <Informasjonsboks ressursSektor={ressurs.sektor} />
 
-      <form
-        autoComplete="false"
-        onSubmit={handleSubmit(onValid)}
-        ref={formReference}
-      >
+      <form autoComplete="false" onSubmit={handleSubmit(onValid)}>
         {hasWriteAccess && (
           <div
             css={css`
@@ -438,9 +412,8 @@ function OrgtilknytningForm({
           <Button
             data-cy="lagre-button"
             icon={<FloppydiskIcon aria-hidden />}
-            onClick={handleSubmitClick}
             size="small"
-            type="button"
+            type="submit"
           >
             Lagre
           </Button>
