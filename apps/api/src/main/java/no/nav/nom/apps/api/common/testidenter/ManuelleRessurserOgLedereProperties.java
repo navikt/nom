@@ -21,14 +21,15 @@ public record ManuelleRessurserOgLedereProperties(
 ) {
     public record ManuellRessurs(
         String navident,
-        String orgtilknytning
+        String orgtilknytning,
+        String sektor
     ) {
         public RessursState asState() {
             return new RessursState(
                 "FID_MANUELL_" + navident,
                 navident,
                 navident,
-                Sektor.NAV_STATLIG,
+                Sektor.valueOf(sektor),
                 new Visningsnavn("Test", Optional.empty(), navident),
                 Optional.empty(),
                 Optional.empty(),

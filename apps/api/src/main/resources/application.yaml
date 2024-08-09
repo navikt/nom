@@ -272,18 +272,25 @@ app:
     ressurser:
       - navident: N852930         # fredfull.nitrogen@trygdeetaten.no - Leder av ty960s - 855140-Teknisk brukerstøtte og verktøy-ORGNIV3
         orgtilknytning: ta755b    # 8551400-Teknisk brukerstøtte og verktøy-ORGENHET
+        sektor: NAV_STATLIG
       - navident: F869325         # kald.floy@trygdeetaten.no - Leder av na664h - 8551401-Teknisk brukerstøtte og verktøy 1-ORGENHET - Har N852930 som leder
         orgtilknytning: na664h    # 8551401-Teknisk brukerstøtte og verktøy 1-ORGENHET
+        sektor: NAV_STATLIG
       - navident: F850744         # lei.frukt@trygdeetaten.no - Har NOM-WRITE-DELEGERT tilgang - Har F869325 som leder
         orgtilknytning: na664h    # 8551401-Teknisk brukerstøtte og verktøy 1-ORGENHET
+        sektor: NAV_STATLIG
       - navident: F873959         # gjestfri.folk@trygdeetaten.no - Har IKKE NOM-WRITE-DELEGERT tilgang - Har F869325 som leder
         orgtilknytning: na664h    # 8551401-Teknisk brukerstøtte og verktøy 1-ORGENHET
+        sektor: EKSTERN
       - navident: A862414         # toff.andrefiolin@trygdeetaten.no - Leder av na494k - 192400-Målselv-Bardu-ORGNIV3
         orgtilknytning: mu972n    # 1924000-Målselv-Bardu-ORGENHET
+        sektor: NAV_STATLIG
       - navident: G850411         # Varm.Gullstol@trygdeetaten.no - Har NOM-WRITE-DELEGERT tilgang - Har A862414 som leder
         orgtilknytning: mu972n    # 1924000-Målselv-Bardu-ORGENHET
+        sektor: NAV_KOMMUNAL
       - navident: T168579         # Støtte for PRIM/ Christian Prestvik
         orgtilknytning: ke793y    # ref: https://nav-it.slack.com/archives/G01F99D2AHX/p1717488133154109
+        sektor: NAV_STATLIG
     ledere:
       - navident: N852930
         orgenhet: ty960s
