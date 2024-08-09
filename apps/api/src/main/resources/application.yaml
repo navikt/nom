@@ -291,6 +291,10 @@ app:
       - navident: T168579         # Støtte for PRIM/ Christian Prestvik
         orgtilknytning: ke793y    # ref: https://nav-it.slack.com/archives/G01F99D2AHX/p1717488133154109
         sektor: NAV_STATLIG
+      # Z - dent brukere
+      - navident: Z993219         # Z -ident til Roy Grini
+        orgtilknytning: ga691g    # 8540000-IT-ledelse-ORGENHET
+        sektor: NAV_STATLIG
     ledere:
       - navident: N852930
         orgenhet: ty960s
