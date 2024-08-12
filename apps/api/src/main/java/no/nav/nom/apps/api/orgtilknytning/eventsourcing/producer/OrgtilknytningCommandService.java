@@ -38,6 +38,7 @@ public class OrgtilknytningCommandService {
     }
 
     private CompletableFuture<SendResult<String, OrgtilknytningEvent>> opprettOrgtilknytning(String fid, OpprettOrgtilknytning opprettOrgtilknytning) {
+        log.debug("Oppretter orgtilknytning med fid: {} for navident: {}", fid, opprettOrgtilknytning.navident());
         return eventProducer.sendMessage(new OrgtilknytningOpprettetEventV1(
             fid,
             new OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData(

@@ -66,7 +66,7 @@ class KafkaStreamProcessor {
             if (eventStateAggregate.hasNonNull("TOMBSTONE")) {
                 return null;
             }
-            log.debug("Mapping to OrgtilknytningState: {}", eventStateAggregate);
+            log.debug("Mapping to OrgtilknytningState: {} and navident {}", eventStateAggregate, eventStateAggregate.get("navident"));
             return new OrgtilknytningState(
                 fid,
                 eventStateAggregate.get("navident").asText(),
