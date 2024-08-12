@@ -271,17 +271,13 @@ function OrgtilknytningForm({
       validation.dolGaps.length === 0 &&
       validation.dolOverlaps.length === 0
     ) {
-      await visBekreftelsesmodaler(data.mappedeOrgtilknytninger)
-        .then(() => {
-          oppdaterOrgtilknytningerMutation.mutate(
-            lagOppdaterOrgtilknytningerRequest(
-              data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
-            ),
-          );
-        })
-        .catch(() => {
-          console.log("Modals cancelled");
-        });
+      await visBekreftelsesmodaler(data.mappedeOrgtilknytninger).then(() => {
+        oppdaterOrgtilknytningerMutation.mutate(
+          lagOppdaterOrgtilknytningerRequest(
+            data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+          ),
+        );
+      });
     }
   };
 
