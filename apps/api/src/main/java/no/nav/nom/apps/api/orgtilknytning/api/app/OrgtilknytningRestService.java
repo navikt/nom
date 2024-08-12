@@ -33,6 +33,8 @@ import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -56,6 +58,7 @@ import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNa
 
 @Service
 public class OrgtilknytningRestService {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
@@ -105,17 +108,23 @@ public class OrgtilknytningRestService {
     // TODO: Valider at det til en hver tid finnes en aktiv daglig oppfolging
     public void oppdaterOrgtilknytningerForRessurs(String navident, OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
 
+        logger.debug("Oppdaterer orgtilknytninger for ressurs med navident {}", navident);
         validateOppdaterOrgtilknytningerForRessursRequest(oppdaterOrgtilknytningerForRessursRequest);
+        logger.debug("Validering av oppdaterOrgtilknytningerForRessursRequest OK");
 
         var tilknyttetRessurs = ressursStateRepository.findByNavident(navident)
             .orElseThrow(() -> RessursNotFoundException.navident(navident));
+        logger.debug("Hentet ressurs med navident {}", navident);
 
         var existingOrgtilknytningerForRessurs = orgtilknytningStateRepository.findByNavident(navident).stream()
             .collect(Collectors.toMap(OrgtilknytningState::fid, Function.identity()));
+        logger.debug("Hentet eksisterende orgtilknytninger for ressurs med navident {}, {}", navident, existingOrgtilknytningerForRessurs.values());
 
         validateOrgTilknytningerToUpdateHasNoDuplicateFidsAndIncludesAllExistingOrgtilknytningerForRessurs(
             existingOrgtilknytningerForRessurs.keySet(), oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger()
         );
+
+        logger.debug("Validering av eksisterende orgtilknytninger for ressurs OK");
 
         oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().stream()
             .filter(endreOrgtilknytningRequest -> endreOrgtilknytningRequestProvidesChangesToState(
@@ -123,13 +132,14 @@ public class OrgtilknytningRestService {
                 existingOrgtilknytningerForRessurs.get(endreOrgtilknytningRequest.fid())
             ))
             .forEach(this::endreOrgtilknytning);
-
+        logger.debug("Endret eksisterende orgtilknytninger for ressurs med navident {}", navident);
+        logger.debug("Legger inn nye orgtilknytninger for ressurs med navident {}, {}", navident, oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger());
         oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(
             leggTilOrgtilknytningRequest -> leggTilOrgtilknytningForRessurs(
                 tilknyttetRessurs.navident(), leggTilOrgtilknytningRequest
             )
         );
-
+        logger.debug("La til nye orgtilknytninger for ressurs med navident {}", navident);
         if (oppdaterOrgtilknytningerForRessursRequest.setRessursSluttdato()) {
             oppdaterRessursSluttdato(
                 tilknyttetRessurs,
@@ -256,6 +266,7 @@ public class OrgtilknytningRestService {
                     .build()
             );
         } else if (hasChangesInGyldighetsperiode) {
+            logger.debug("Endrer gyldighetsperiode for orgtilknytning med fid {} og id {}", endreOrgtilknytningRequest.fid(), orgtilknytningStateBeforeChanges.orgEnhetId());
             orgtilknytningCommandService.endreOrgtilknytningDato(EndreOrgtilknytningDatoCommand.builder()
                 .fid(endreOrgtilknytningRequest.fid())
                 .gyldigFom(endreOrgtilknytningRequest.gyldigFom())

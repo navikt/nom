@@ -246,6 +246,9 @@ spec:
         - application: modia-robot-api
           namespace: personoversikt
           cluster: dev-gcp
+        - application: tilgang
+          namespace: aap
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
