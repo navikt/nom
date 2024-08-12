@@ -8,10 +8,10 @@
     </appender>
 
 <!-- NOM loggers -->
-<!--    <logger name="no.nav.nom" level="debug" />-->
+    <logger name="no.nav.nom" level="debug" />
 
 <!-- Spring Security logger -->
-<!--    <logger name="org.springframework.security" level="trace"/>-->
+    <logger name="org.springframework.security" level="trace"/>
 
     <root level="info">
         <appender-ref ref="STDOUT"/>
