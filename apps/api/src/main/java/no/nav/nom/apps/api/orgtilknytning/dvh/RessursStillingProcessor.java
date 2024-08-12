@@ -332,6 +332,9 @@ public class RessursStillingProcessor {
                         }
                     }
                     if (erDagligOppfolging != orgtilknytning.erDagligOppfolging() && stillingPeriode.dagligOppfolging() != UKJENT) {
+
+                        log.debug("endreOrgtilknytningDagligOppfolging for {} med erDagligOppfolging: {} for stillingPeriode: {} i orgtilknytning: {}", navident, erDagligOppfolging, stillingPeriode, orgtilknytning);
+
                         endreOrgtilknytningDagligOppfolging(
                             orgtilknytning.fid(),
                             navident,
