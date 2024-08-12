@@ -36,7 +36,7 @@ class KafkaStreamProcessor {
     ) {
         final var stringSerde = Serdes.String();
         final var eventSerde = objectSerde.copyWithType(OrgtilknytningEvent.class);
-
+        log.debug("Creating KafkaStreamProcessor for eventsourceTopic: {} and stateTopic: {}", eventsourceTopic, stateTopic);
         streamsBuilder.stream(eventsourceTopic, Consumed.with(stringSerde, eventSerde))
             .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))
             .aggregate(
@@ -58,6 +58,7 @@ class KafkaStreamProcessor {
             .toStream()
             //            .foreach( (k, v) -> log.info("Log aggregate [{} - {}]", k, v));
             .to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(OrgtilknytningState.class)));
+        log.debug("KafkaStreamProcessor created for eventsourceTopic: {} and stateTopic: {}", eventsourceTopic, stateTopic);
     }
 
     public OrgtilknytningState toOrgtilknytningState(String fid, JsonNode eventStateAggregate) {
@@ -65,7 +66,7 @@ class KafkaStreamProcessor {
             if (eventStateAggregate.hasNonNull("TOMBSTONE")) {
                 return null;
             }
-
+            log.debug("Mapping to OrgtilknytningState: {}", eventStateAggregate);
             return new OrgtilknytningState(
                 fid,
                 eventStateAggregate.get("navident").asText(),

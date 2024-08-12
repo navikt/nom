@@ -133,6 +133,7 @@ public class OrgtilknytningRestService {
             ))
             .forEach(this::endreOrgtilknytning);
         logger.debug("Endret eksisterende orgtilknytninger for ressurs med navident {}", navident);
+        logger.debug("Legger inn nye orgtilknytninger for ressurs med navident {}, {}", navident, oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger());
         oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(
             leggTilOrgtilknytningRequest -> leggTilOrgtilknytningForRessurs(
                 tilknyttetRessurs.navident(), leggTilOrgtilknytningRequest
@@ -265,6 +266,7 @@ public class OrgtilknytningRestService {
                     .build()
             );
         } else if (hasChangesInGyldighetsperiode) {
+            logger.debug("Endrer gyldighetsperiode for orgtilknytning med fid {} og id {}", endreOrgtilknytningRequest.fid(), orgtilknytningStateBeforeChanges.orgEnhetId());
             orgtilknytningCommandService.endreOrgtilknytningDato(EndreOrgtilknytningDatoCommand.builder()
                 .fid(endreOrgtilknytningRequest.fid())
                 .gyldigFom(endreOrgtilknytningRequest.gyldigFom())
