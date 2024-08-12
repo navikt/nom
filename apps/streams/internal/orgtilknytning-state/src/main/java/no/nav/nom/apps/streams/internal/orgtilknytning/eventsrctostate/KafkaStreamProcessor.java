@@ -49,6 +49,7 @@ class KafkaStreamProcessor {
                         // NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
                     } else {
                         state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                        log.debug("Aggregating event: {} to state: {}", event, state.get("navident").asText());
                     }
                     return state;
                 },
@@ -66,7 +67,7 @@ class KafkaStreamProcessor {
             if (eventStateAggregate.hasNonNull("TOMBSTONE")) {
                 return null;
             }
-            log.debug("Mapping to OrgtilknytningState: {} and navident {}", eventStateAggregate, eventStateAggregate.get("navident"));
+            log.debug("Mapping to OrgtilknytningState: {} and navident {}", eventStateAggregate, eventStateAggregate.get("navident").asText());
             return new OrgtilknytningState(
                 fid,
                 eventStateAggregate.get("navident").asText(),
