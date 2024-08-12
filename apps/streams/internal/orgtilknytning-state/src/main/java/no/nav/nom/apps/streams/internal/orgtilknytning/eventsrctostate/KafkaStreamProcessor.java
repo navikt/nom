@@ -57,7 +57,7 @@ class KafkaStreamProcessor {
             )
             .mapValues(this::toOrgtilknytningState)
             .toStream()
-            .peek((k, v) -> log.info("Log aggregate [{} - {}]", k, isNull(v) ? null : v.navident()))
+            .peek((k, v) -> log.debug("Log aggregate [{} - {}]", k, isNull(v) ? null : v.navident()))
             .to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(OrgtilknytningState.class)));
     }
 
