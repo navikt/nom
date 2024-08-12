@@ -22,6 +22,8 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static java.util.Objects.isNull;
+
 @Component
 class KafkaStreamProcessor {
 
@@ -55,7 +57,7 @@ class KafkaStreamProcessor {
             )
             .mapValues(this::toOrgtilknytningState)
             .toStream()
-            .peek((k, v) -> log.info("Log aggregate [{} - {}]", k, v.navident()))
+            .peek((k, v) -> log.info("Log aggregate [{} - {}]", k, isNull(v) ? null : v.navident()))
             .to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(OrgtilknytningState.class)));
     }
 
