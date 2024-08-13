@@ -22,8 +22,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static java.util.Objects.isNull;
-
 @Component
 class KafkaStreamProcessor {
 
@@ -38,6 +36,7 @@ class KafkaStreamProcessor {
     ) {
         final var stringSerde = Serdes.String();
         final var eventSerde = objectSerde.copyWithType(OrgtilknytningEvent.class);
+
         streamsBuilder.stream(eventsourceTopic, Consumed.with(stringSerde, eventSerde))
             .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))
             .aggregate(
@@ -57,7 +56,7 @@ class KafkaStreamProcessor {
             )
             .mapValues(this::toOrgtilknytningState)
             .toStream()
-            .peek((k, v) -> log.debug("Log aggregate [{} - {}]", k, isNull(v) ? null : v.navident()))
+            //            .foreach( (k, v) -> log.info("Log aggregate [{} - {}]", k, v));
             .to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(OrgtilknytningState.class)));
     }
 
@@ -66,6 +65,7 @@ class KafkaStreamProcessor {
             if (eventStateAggregate.hasNonNull("TOMBSTONE")) {
                 return null;
             }
+
             return new OrgtilknytningState(
                 fid,
                 eventStateAggregate.get("navident").asText(),
