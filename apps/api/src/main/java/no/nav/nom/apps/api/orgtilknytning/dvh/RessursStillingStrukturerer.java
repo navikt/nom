@@ -82,6 +82,9 @@ public class RessursStillingStrukturerer {
                 );
             }
             stillingPerioderPerNavident.put(navident, stillingerMedDagligOppfolging);
+
+            log.debug("ressursStillinger for navident {} per orgtilknytninger før: {}, etter: {}", navident, rsList, stillingerMedDagligOppfolging);
+
         });
         return stillingPerioderPerNavident;
     }
