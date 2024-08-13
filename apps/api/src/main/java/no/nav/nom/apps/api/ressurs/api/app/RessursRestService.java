@@ -232,9 +232,12 @@ public class RessursRestService {
             throw InvalidSektorException.actionNotAllowedForSektor(Sektor.NAV_STATLIG);
         }
 
-        if (authResolver.kanSelvbetjene(navident) && !nomMastered.isMastered(ressursState.navident())) {
-            throw NomMasteredException.actionNotAllowedForNonNomMastered();
+        if (!loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)) {
+            if (authResolver.kanSelvbetjene(navident) && !nomMastered.isMastered(ressursState.navident())) {
+                throw NomMasteredException.actionNotAllowedForNonNomMastered();
+            }
         }
+
 
         var oppdaterMobilnummerCommand = new OppdaterPrimaryTelefonnummerCommand(
             ressursState.fid(),
