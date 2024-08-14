@@ -19,7 +19,7 @@ export function ContainerWithHighlightedTop({
         blueTopBorder,
         css`
           min-height: 300px;
-          padding: var(--a-spacing-8);
+          padding: var(--a-spacing-12);
           display: flex;
           flex-direction: column;
           background: white;

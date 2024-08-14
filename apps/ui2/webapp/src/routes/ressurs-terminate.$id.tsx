@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import React from "react";
 
 import { harLederTilgangForNavidentOptions } from "~/api/react-query-endpoints";
+import { ModalProvider } from "~/components/modalProvider/ModalProvider";
 import { TerminateResourcePage } from "~/pages/ResourcePage/TerminateResourcePage";
 
 export const Route = createFileRoute("/ressurs-terminate/$id")({
@@ -15,6 +16,10 @@ export const Route = createFileRoute("/ressurs-terminate/$id")({
       return;
     }
 
-    return <TerminateResourcePage />;
+    return (
+      <ModalProvider>
+        <TerminateResourcePage />
+      </ModalProvider>
+    );
   },
 });

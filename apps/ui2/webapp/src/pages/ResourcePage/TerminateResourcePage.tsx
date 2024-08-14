@@ -18,15 +18,24 @@ import * as yup from "yup";
 
 import { avvikleRessurs, getRessurs } from "~/api/react-query-endpoints";
 import { ApiResponseError } from "~/components/ApiResponseError";
+import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
 import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
+import ModalComponent from "~/components/modalProvider/ModalComponent";
+import { useModal } from "~/components/modalProvider/ModalProvider";
 import { PageBanner } from "~/components/PageBanner";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
+import { BekreftModalInnholdTomIFortiden } from "~/pages/ResourcePage/RessursComponents/Modal/TomDatoModal";
 import { RessursCard } from "~/pages/ResourcePage/RessursComponents/RessursCard";
 import fjernRessursIcon from "~/resources/fjernRessursIcon.svg";
 import type { AvvikleRessursRequest } from "~/types/api-models";
-import { formatDateWithoutTimezone } from "~/utils";
+import {
+  formatDateWithoutTimezone,
+  formatVisningsnavn,
+  isTodayOrBefore,
+  todayWithoutTimezone,
+} from "~/utils";
 
 export function TerminateResourcePage() {
   const { id } = useParams({ from: "/ressurs-terminate/$id" });
@@ -76,16 +85,37 @@ export function TerminateResourcePage() {
     },
   });
 
+  const { showModal } = useModal();
+
+  const onSubmit = async (values: { sluttDato: string }) => {
+    const sluttDato = values.sluttDato;
+
+    if (isTodayOrBefore(new Date(sluttDato))) {
+      await showModal(
+        <BekreftModal
+          content={
+            <BekreftModalInnholdTomIFortiden
+              navn={
+                formatVisningsnavn(ressurs?.visningsnavn) ?? "medarbeideren"
+              }
+            />
+          }
+          heading={"Bekreft endring"}
+        />,
+      ).then(() => {
+        avvikleRessursMutation.mutate(values);
+      });
+    } else {
+      avvikleRessursMutation.mutate(values);
+    }
+  };
+
   return (
     <>
       <PageBanner text="Medarbeider slutter" />
       <ContentWrapper>
         <FormProvider {...methods}>
-          <form
-            onSubmit={handleSubmit((values) =>
-              avvikleRessursMutation.mutate(values),
-            )}
-          >
+          <form onSubmit={handleSubmit(onSubmit)}>
             {ressurs && (
               <ContainerWithHighlightedTop
                 icon={fjernRessursIcon}
@@ -121,6 +151,8 @@ export function TerminateResourcePage() {
                 </HStack>
               </ContainerWithHighlightedTop>
             )}
+
+            <ModalComponent />
           </form>
         </FormProvider>
       </ContentWrapper>
@@ -140,27 +172,40 @@ function SluttDatoPicker() {
   });
 
   return (
-    <HStack gap="8">
-      <FullWidthDatePickerWrapper>
-        <DatePicker {...sluttDatoDatepicker.datepickerProps}>
-          <DatePicker.Input
-            data-cy="sluttDato-picker"
-            {...sluttDatoDatepicker.inputProps}
-            error={fieldState.error?.message?.toString()}
-            label="Sluttdato (Siste arbeidsdag)"
-            ref={field.ref}
-          />
-        </DatePicker>
-      </FullWidthDatePickerWrapper>
+    <HStack
+      css={css`
+        display: flex;
+        justify-content: space-between;
+      `}
+    >
+      <div
+        css={css`
+          display: flex;
+          flex-grow: 1;
+        `}
+      >
+        <FullWidthDatePickerWrapper>
+          <DatePicker {...sluttDatoDatepicker.datepickerProps}>
+            <DatePicker.Input
+              data-cy="sluttDato-picker"
+              {...sluttDatoDatepicker.inputProps}
+              error={fieldState.error?.message?.toString()}
+              label="Sluttdato (Siste arbeidsdag)"
+              ref={field.ref}
+            />
+          </DatePicker>
+        </FullWidthDatePickerWrapper>
+      </div>
+
       <Button
         css={css`
+          margin-left: var(--a-spacing-8);
           margin-top: var(--a-spacing-10);
-          min-width: fit-content;
-          height: fit-content;
+          height: var(--a-spacing-8);
         `}
         data-cy="velg-dagens-dato-button"
         onClick={() => {
-          sluttDatoDatepicker.setSelected(new Date());
+          sluttDatoDatepicker.setSelected(todayWithoutTimezone());
         }}
         size="small"
         type="button"
