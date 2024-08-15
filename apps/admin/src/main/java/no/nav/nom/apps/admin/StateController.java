@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static no.nav.nom.apps.admin.dto.OrganiseringStateSearchParams.organiseringStateSearchFilter;
 import static no.nav.nom.apps.admin.dto.OrgenhetStateSearchParams.orgenhetSearchFilter;
@@ -86,7 +88,12 @@ public class StateController {
     }
 
     @GetMapping(value = "/nom-mastered")
-    public List<String> getMasteredNavidents() {
+    public List<String> getMasteredNavidentsIds() {
         return masteredRessursStateRepository.navidenter();
+    }
+
+    @GetMapping(value = "/nom-mastered-state")
+    public Map<String, LocalDateTime> getMasteredNavidents() {
+        return masteredRessursStateRepository.getMasteredNavidenter();
     }
 }
