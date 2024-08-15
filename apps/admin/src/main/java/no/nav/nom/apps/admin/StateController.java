@@ -4,6 +4,7 @@ import no.nav.nom.apps.admin.dto.OrganiseringStateSearchParams;
 import no.nav.nom.apps.admin.dto.OrgenhetStateSearchParams;
 import no.nav.nom.apps.admin.dto.OrgtilknytningStateSearchParams;
 import no.nav.nom.apps.admin.dto.RessursSearchParams;
+import no.nav.nom.apps.admin.dto.ressurs.MasteredRessursDTO;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -19,9 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 import static no.nav.nom.apps.admin.dto.OrganiseringStateSearchParams.organiseringStateSearchFilter;
 import static no.nav.nom.apps.admin.dto.OrgenhetStateSearchParams.orgenhetSearchFilter;
@@ -93,7 +92,9 @@ public class StateController {
     }
 
     @GetMapping(value = "/nom-mastered-state")
-    public Map<String, LocalDateTime> getMasteredNavidents() {
-        return masteredRessursStateRepository.getMasteredNavidenter();
+    public List<MasteredRessursDTO> getMasteredNavidents() {
+        return masteredRessursStateRepository.getMasteredNavidenter().entrySet().stream()
+            .map(masteredEntry -> MasteredRessursDTO.from(masteredEntry.getKey(), masteredEntry.getValue()))
+            .toList();
     }
 }
