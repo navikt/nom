@@ -2,10 +2,14 @@ import type { SortState } from "@navikt/ds-react";
 import sortBy from "lodash/sortBy";
 import { useState } from "react";
 
-export function useTableSort<T>(tableData: T[], defaultOrderBy: string) {
+export function useTableSort<T>(
+  tableData: T[],
+  defaultOrderBy: string,
+  direction?: "ascending" | "descending" | "none",
+) {
   const [sort, setSort] = useState<SortState>({
     orderBy: defaultOrderBy,
-    direction: "ascending",
+    direction: direction ?? "ascending",
   });
   const handleSort = (sortKey: string | undefined) => {
     if (sortKey) {

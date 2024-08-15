@@ -153,6 +153,12 @@ export interface OrganiseringState {
   gyldigTom?: string;
 }
 
+export interface MasteredRessursDTO {
+  navident?: string;
+  /** @format date-time */
+  opprettet?: string;
+}
+
 export interface EventSearchParams {
   /**
    * @format int32
