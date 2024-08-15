@@ -29,6 +29,10 @@ public class MasteredRessursStateRepositoryImpl implements MasteredRessursStateR
         return masteredNavidenter.keySet().stream().toList();
     }
 
+    public Map<String, LocalDateTime> getMasteredNavidenter() {
+        return masteredNavidenter;
+    }
+
     @Override
     public void update(String navident, LocalDateTime since) {
         if (since == null) {
