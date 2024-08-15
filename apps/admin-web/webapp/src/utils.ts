@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { format, formatISO, isAfter, isBefore, isToday } from "date-fns";
 
 import type { Visningsnavn } from "~/types.ts";
 
@@ -23,4 +23,28 @@ export function formatDisplayDatetime(dateTime?: string) {
     return "";
   }
   return format(new Date(dateTime), DATE_FORMATS.noLong);
+}
+
+export function formatDateWithoutTimezone(date: Date) {
+  return formatISO(date, { representation: "date" });
+}
+
+export function dateWithoutTimezone(date: Date) {
+  return new Date(formatDateWithoutTimezone(date));
+}
+
+export function todayWithoutTimezone() {
+  return dateWithoutTimezone(new Date());
+}
+
+export function isTodayOrBefore(date: Date) {
+  const noTzDate = dateWithoutTimezone(date);
+
+  return isToday(noTzDate) || isBefore(noTzDate, todayWithoutTimezone());
+}
+
+export function isTodayOrAfter(date: Date) {
+  const noTzDate = dateWithoutTimezone(date);
+
+  return isToday(noTzDate) || isAfter(noTzDate, todayWithoutTimezone());
 }

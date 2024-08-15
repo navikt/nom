@@ -11,14 +11,17 @@ import type {
 } from "~/types.ts";
 import type {
   HendelseDTO,
+  MasteredRessursDTO,
   OrgEnhetStateDTO,
   RessursStateKafkaDTO,
 } from "~/types/nom-admin/nom-admin-models.ts";
 import type {
   OrgtilknytningState,
+  Ressurs,
   RessursState,
 } from "~/types/nom-api/nom-api-models.ts";
 const API_BASE_URL = "/frackend/admin-api";
+const NOM_API_BASE_URL = "/frackend/api";
 
 export const searchSchema = z.object({
   filterText: z.string().optional(),
@@ -75,6 +78,16 @@ export function getNomMasteredOptions() {
     queryKey: ["STATE", "NOM-MASTERED"],
     queryFn: async () =>
       (await ky.get(`${API_BASE_URL}/states/nom-mastered`)).json<string[]>(),
+  });
+}
+
+export function getNomMasteredStateOptions() {
+  return queryOptions({
+    queryKey: ["STATE", "NOM-MASTERED-STATE"],
+    queryFn: async () =>
+      (await ky.get(`${API_BASE_URL}/states/nom-mastered-state`)).json<
+        MasteredRessursDTO[]
+      >(),
   });
 }
 
@@ -159,5 +172,27 @@ export function getApiHendelserEventsOptions(search: searchType) {
           `${API_BASE_URL}/sinks/apiHendelserEvents?${queryString.stringify(search, { skipNull: true })}`,
         )
       ).json<HendelseDTO[]>(),
+  });
+}
+
+export function getRessurs(navident: string | undefined) {
+  return queryOptions({
+    queryKey: ["API", "RESSURS", navident],
+    queryFn: async () =>
+      (
+        await ky.get(`${NOM_API_BASE_URL}/app/ressurser/byNavident/${navident}`)
+      ).json<Ressurs>(),
+  });
+}
+
+export function getOrgtilknytninger(navident: string | undefined) {
+  return queryOptions({
+    queryKey: ["API", "ORGTILKNYTNING", navident],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${NOM_API_BASE_URL}/app/orgtilknytninger?navident=${navident}`,
+        )
+      ).json<OrgtilknytningState[]>(),
   });
 }
