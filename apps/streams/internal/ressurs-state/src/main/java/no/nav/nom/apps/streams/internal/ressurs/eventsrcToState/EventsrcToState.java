@@ -78,7 +78,7 @@ class EventsrcToState {
             );
 
         var byNavIdentGroupedObjects = groupedObjects.toStream()
-            .filter((k,v) -> v != null) // Vi har klart å få en aggregat helt hit uten navident i stream intern state i DEV- må ekskludere den
+            .filter((k,v) -> v != null && v.get("navident") != null) // Ser ut til at vi har fått en event uten navident - skip denne
             .groupBy((k,v) -> v.get("navident").asText(), Grouped.with(stringSerde,jsonSerde2))
             .aggregate(
                 objectMapper::createObjectNode,
