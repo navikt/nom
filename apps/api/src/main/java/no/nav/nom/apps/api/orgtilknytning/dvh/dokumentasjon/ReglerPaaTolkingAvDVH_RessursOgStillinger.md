@@ -108,7 +108,7 @@ Deretter skal vi matche disse DVH periodene til Enheter i NOM. Om DVH perioden s
    Hvis denne enhetens periode ikke spenner over hele StillingPerioden.
    Og dette vil kunne gi en logisk feil i tolkning av dataene fra DVH. E.g. vi har en stillingsperiode vi ikke fullt ut klarer å representere i NOM, eller vi har en OT som går utover enhetens periode
    Dette må logges/advares - og noe må korrigeres ett sted
-      1. Hvis vi har eksisterende OT på enheten for identen og om den dekker stillingsperioden (det vil si, enhetens periode er endret i mellomtiden), så lag StillingPeriode med OT'ens periode, selv om dette går utover enhetens periode
+      1. Hvis vi har eksisterende OT på enheten for identen og om den dekker stillingsperioden (det vil si, enhetens periode er endret i mellomtiden?), så lag StillingPeriode med OT'ens periode, selv om dette går utover enhetens periode
       Dette er for å forhindre uønsket fjerning/endring av evt OT
       2. Hvis ikke klipp StillingPerioden til enhetens periode 
 
@@ -121,15 +121,18 @@ Deretter skal vi matche disse DVH periodene til Enheter i NOM. Om DVH perioden s
    
    3. Ingen match: 
    Hvis vi av en eller annen grunn ikke klarer å matche presis AgressoId til en enhet i NOM så må dette logges/advares - og noe må korrigeres ett sted
-      1. Hvis det eksisterer en OT på ressursen for samme periode og det er ikke flere StillingPerioder på samme periode, så forvent at den eksisterende er/var korrekt, og benytt den som enhet i StillingPerioden for å forhindre uønsket fjerning/endring av OT som ant er korrekt    
+      1. Hvis det eksisterer en OT på ressursen for eksakt samme periode (valget 'eksakt samme periode' er subjektivt) og det er ikke flere andre StillingPerioder på samme periode, så forvent at den eksisterende er/var korrekt, og benytt den som enhet i StillingPerioden for å forhindre uønsket fjerning/endring av OT som antagelig er korrekt    
 
-2. Er stillingens agressoId < 7 tegn henger ikke stillingen i U4 ikke på en løvnode og/eller hvor denne har feilkode i DVH stedet (felte har negativ tallkode - se `DvhRessursStilling`)
-   1. Hvis det ikke er feilkode og denne matcher en presis ressursAgressoId (OrgenhetPaaRessurs), så kan vi med stor sikkerhet anta at DVH tolkningen er korrekt, og vi kan plassere StillingPerioden på denne enheten som  ressursAgressoId (OrgenhetPaaRessurs) peker på med samme regler som over [4.i Presis enhet på stilling]. 
-   2. Hvis det derimot ikke er match mellom stillingens agressoId og ressursAgressoId (OrgenhetPaaRessurs) så forsøk å finne eksisterende OT matcher mot stillingens agressoId - Er det match, benytt den OT'ens periode/enhet. Og om dbruk et her ikke er noen match, men ressursAgressoId (OrgenhetPaaRessurs) er presis denne på samme måte som for presis agresoId på Stilling [4.i Presis enhet på stilling]. Merk at dette bør kun gjøres på aktiv periode, så varsel om det ifra før finnes OT på ressursen som er historisk/fremtidig evt utenfor denne eventuelle ene StillingsPerioden, fordi den/de OT'en(e) vil fjernes og/eller få periode endret.
-   3. Hvis stillingens AgressoId ikke er presis eller er feilkode eller null, og ressursAgressoId (OrgenhetPaaRessurs) heller ikke er presis - dvs 7 eller flere sifre 
-      1. forsøk å matche eksisterende OT'er mot først Stillingens upresise AgressoId og benytt evt matchende OT. 
-      2. Hvis ingen match der - så match mot ressursAgressoId (OrgenhetPaaRessurs) og bruk den OT'en hvis match. Dette kan kun gjøres på aktiv periode. og varsle om det ifra før finnes OT på ressursen som er historisk/fremtidig evt utenfor denne eventuelle ene StillingsPerioden, fordi den/de OT'en(e) vil fjernes og/eller få periode endret.
-      3. Om ingen eksisterende OT matcher i det hele tatt, har vi ingen sjanse til å tolke DVH - og stillingPerioden vil ikke dekkes - må alarmeres.
+2. Er stillingens agressoId < 7 tegn henger ikke stillingen i U4 ikke på en løvnode og/eller hvor denne har feilkode i DVH stedet (felte har negativ tallkode - se `DvhRessursStilling`), men det finnes presis ressursAgressoId (OrgenhetPaaRessurs) 
+   1. Hvis det ikke er feilkode og denne matcher en presis ressursAgressoId (OrgenhetPaaRessurs), så kan vi med stor sikkerhet anta at DVH tolkningen er korrekt, og vi kan plassere StillingPerioden på denne enheten som ressursAgressoId (OrgenhetPaaRessurs) peker på med samme regler som over [1. Presis enhet på stilling]. 
+   2. Hvis det derimot ikke er match mellom stillingens agressoId og ressursAgressoId (OrgenhetPaaRessurs) så forsøk å finne eksisterende OT matcher mot stillingens agressoId - Er det match, benytt den OT'ens periode og enhet. 
+    Varlse dette, og evt. om OT'ens periode avviker fra StillingPerioden.
+   3. Og om det her ikke er noen match mellom stillingens agressoId og ressursAgressoId (OrgenhetPaaRessurs), men ressursAgressoId (OrgenhetPaaRessurs) er presis så behandle denne på samme måte som for presis agressoId på Stilling [1. Presis enhet på stilling]. Merk at dette bør kun gjøres på aktiv periode
+   
+3. Hvis stillingens AgressoId ikke er presis eller er feilkode eller null, og ressursAgressoId (OrgenhetPaaRessurs) heller ikke er presis - dvs 7 eller flere sifre 
+   1. forsøk å matche eksisterende OT'er mot først Stillingens upresise AgressoId og benytt evt matchende OT. (samme som 2.ii over?)
+   2. Hvis ingen match der - så match mot ressursAgressoId (OrgenhetPaaRessurs) og bruk den OT'en hvis match. Dette kan kun gjøres på aktiv periode.
+   3. Om ingen eksisterende OT matcher i det hele tatt, har vi ingen sjanse til å tolke DVH - og stillingPerioden vil ikke dekkes - må alarmeres.
 
 ### Matche til Daglig Oppfølgings Leder (DOL)
 

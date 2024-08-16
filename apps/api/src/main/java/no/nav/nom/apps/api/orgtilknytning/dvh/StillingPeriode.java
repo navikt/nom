@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
-import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 
 import java.time.LocalDate;
@@ -61,6 +60,64 @@ public record StillingPeriode(
             return "HRRES_STILLING[" + agressoId.orElse("NULL") + "-" + enhetNavn + "]/HRRES_RESSURS[" + ressursAgressoId.orElse("NULL") + "-" + ressursAgressoOrgNiv.orElse(
                 "NULL") + "]";
         }
+    }
+
+    public boolean erAgressoIdPresis() {
+        return stilling.agressoId.isPresent() && stilling.agressoId.get().length() > 6;
+    }
+
+    public boolean erRessursAgressoIdPresis() {
+        return stilling.ressursAgressoId.isPresent() && stilling.ressursAgressoId.get().length() > 6;
+    }
+
+    public boolean manglerAgressoId() {
+        return !stilling.agressoId.isPresent() || stilling.agressoId.get().isBlank() || stilling.agressoId.get().startsWith("-");
+    }
+
+    public boolean manglerRessursAgressoId() {
+        return !stilling.ressursAgressoId.isPresent() || stilling.ressursAgressoId.get().isBlank() || stilling.ressursAgressoId.get().startsWith("-");
+    }
+
+    public boolean erRessursAgressoOrgNivORGENHETnode() {
+        return "ORGENHET".equalsIgnoreCase(stilling.ressursAgressoOrgNiv.orElse(""));
+    }
+
+    public boolean erAgressoIdOgRessursAgressoIdLike() {
+        return stilling.agressoId.equals(stilling.ressursAgressoId);
+    }
+
+    public boolean matcherRessursAgressoIdOgAgressoId() {
+        if (erAgressoIdPresis()) {
+            return stilling.agressoId.get().startsWith(stilling.ressursAgressoId.orElse("-"));
+        } else if (erRessursAgressoIdPresis()) {
+            return stilling.ressursAgressoId.get().startsWith(stilling.agressoId.orElse("-"));
+        }
+        return false;
+    }
+
+    public String getPresisAgressoId() {
+        if (erAgressoIdPresis()) {
+            return stilling.agressoId.get();
+        }
+        if (erRessursAgressoIdPresis() && matcherRessursAgressoIdOgAgressoId()) {
+            return stilling.ressursAgressoId.get();
+        }
+        if (erRessursAgressoIdPresis() && isCurrentPeriod()) {
+            return stilling.ressursAgressoId.get();
+        }
+        return null;
+    }
+
+    public boolean isCurrentPeriod() {
+        return PeriodeUtil.isCurrentPeriod(this);
+    }
+
+    public boolean isHistoricPeriod() {
+        return PeriodeUtil.isHistoricPeriod(this);
+    }
+
+    public boolean isFuturePeriod() {
+        return PeriodeUtil.isFuturePeriod(this);
     }
 
     enum DagligOppfolging {
