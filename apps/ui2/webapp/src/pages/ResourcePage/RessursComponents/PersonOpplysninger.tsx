@@ -101,7 +101,7 @@ function EditButton({ ressurs }: { ressurs: Ressurs }) {
         <HelpText title="Hvorfor er dette utilgjengelig?">
           Statlige ansatte kan ikke opprettes eller endres i NOM på dette
           tidspunktet. Disse kan endres i tråd med gjeldende rutiner i
-          Identrutina og Unit4. NOM Mastered ansatte kan redigere telefonnummer.
+          Identrutina og Unit4.
         </HelpText>
       )}
 
