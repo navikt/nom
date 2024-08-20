@@ -1,14 +1,10 @@
-package no.nav.nom.apps.api.orgtilknytning.dvh;
+package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
-import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.contract.nom.state.RessursState;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,15 +12,15 @@ import java.util.Optional;
 
 import static no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident.ErrorType.DVH_RESSURSSTILLINGER_HAR_OVERLAPPENDE_PERIODER;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident.ErrorType.DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident.ErrorType.NAVIDENT_FINNES_IKKE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 // REF: no/nav/nom/apps/api/orgtilknytning/dvh/dokumentasjon/TestReferanser_GrupperOgSlaaSammenPerioder.md
 @DisplayName("Tester gruppering og strukturering av periodisering på RessursStillinger fra DVH")
-class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursStillingStrukturererBasis {
+class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTestBase {
+    @Autowired
+    GrupperOgSlaaSammenDvhStillinger CUT; // Class under test
 
     @Test
     @DisplayName("Basic sammenslåing")
@@ -38,7 +34,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
@@ -62,7 +58,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
         var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getLast();
@@ -97,7 +93,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
         var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getLast();
@@ -126,7 +122,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
         var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getLast();
@@ -157,7 +153,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
@@ -182,7 +178,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
@@ -207,7 +203,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
@@ -232,7 +228,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
@@ -257,7 +253,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
@@ -282,7 +278,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
@@ -307,7 +303,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
@@ -332,7 +328,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
@@ -357,7 +353,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2020, 11, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
@@ -384,7 +380,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2020, 5, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
@@ -411,7 +407,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2021, 11, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
@@ -447,7 +443,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2019, 1, 1), LocalDate.of(2023, 12, 31))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
@@ -474,7 +470,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2019, 1, 1), LocalDate.of(2021, 12, 31))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
@@ -502,7 +498,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
 
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
@@ -529,7 +525,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
 
@@ -558,7 +554,7 @@ class NyeRessursStillingStrukturererGrupperOgSlaaSammenTest extends NyeRessursSt
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, strukturerteStillingPerioder);
+        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
         var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
         var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getLast();

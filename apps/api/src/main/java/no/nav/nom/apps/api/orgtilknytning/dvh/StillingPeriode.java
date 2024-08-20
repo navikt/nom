@@ -120,7 +120,7 @@ public record StillingPeriode(
         return PeriodeUtil.isFuturePeriod(this);
     }
 
-    enum DagligOppfolging {
+    public enum DagligOppfolging {
         JA, NEI, UKJENT
     }
 }

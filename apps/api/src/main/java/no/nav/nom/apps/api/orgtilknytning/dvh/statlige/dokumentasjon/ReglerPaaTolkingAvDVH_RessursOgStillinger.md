@@ -155,6 +155,7 @@ Perioder som dekker hverandre må vi finne DOL ved å:
    Slå opp eksisterende OT på ressursen for samme periode og enheter. Finnes historikk med DOL som matcher, bruk historikkens DOL 
    Hvis ingen historikk matcher, sjekk om StillingPeriodens AgressoId matcher `ORGENHET_PAA_RESSURS` - bruk da dette som DOL
    Hvis ingen treff over, så logg og advar, men endre ingen DOL på historiske StillingPerioder 
+   1. Denne "...men endre ingen DOL på historiske StillingPerioder" er noe som må ivaretas av koden som prosesserer de strukturerte StillingPeriodene til Orgtilknytninger 
 2. Hvis aktiv periode
    Match med `ORGENHET_PAA_RESSURS` og bruk matchende StillingPeriode som DOL.
    Finnes ingen så logg og advar om dette - vi vil da ende opp uten aktiv DOL periode
@@ -168,7 +169,7 @@ Slå (eventuelt) sammen igjen evt StillingPerioder som er sammenhengende på enh
 E.g. (* markerer DOL)
 ```
 A: <---*---><----------*----->
-B:          <----------------><--*-->
+B:          <----------------><---*--->
 ```
 Kan slås sammen til:
 ```

@@ -1,298 +1,48 @@
-package no.nav.nom.apps.api.orgtilknytning.dvh;
+package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
+import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
+import no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 
-import static java.util.stream.Collectors.groupingBy;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.NO_END_DATE;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.dayAfter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.dayBefore;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.etter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.foer;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.lik;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerEtter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerFoer;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.overlapsInterval;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident.ErrorType.NAVIDENT_FINNES_IKKE;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.erOrgenhetGyldigIHeleStillingPerioden;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.getEarliestDate;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.getLatestDate;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.overlapperEllerErDirekteEtterfoelgende;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.slaaSammenBackToBackPerioderOgSorterAsc;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.sorterMedNyesteEnhetFoerst;
 
 @Component
 @Slf4j
-public class NyeRessursStillingStrukturerer {
-    private final OrgenhetService orgenhetService;
-    private final RessursStillingLoadStatus ressursStillingLoadStatus;
-    private final RessursStateRepository ressursStateRepository;
+public class MatchStrukturerteStillingPerioderTilNOM {
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
+    private final OrgenhetService orgenhetService;
 
-    public NyeRessursStillingStrukturerer(
-        OrgenhetService orgenhetService, RessursStillingLoadStatus ressursStillingLoadStatus,
-        RessursStateRepository ressursStateRepository, OrgtilknytningStateRepository orgtilknytningStateRepository
-    ) {
-        this.orgenhetService = orgenhetService;
-        this.ressursStillingLoadStatus = ressursStillingLoadStatus;
-        this.ressursStateRepository = ressursStateRepository;
+    public MatchStrukturerteStillingPerioderTilNOM(OrgtilknytningStateRepository orgtilknytningStateRepository, OrgenhetService orgenhetService) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
+        this.orgenhetService = orgenhetService;
     }
 
-    public Map<String, StrukturerteStillingPerioderForNavident> strukturerStilingPerioderPerNavident(List<DvhRessursStilling> dvhRessursStillinger) {
-        Map<String, List<DvhRessursStilling>> dvhRessursStillingPerNavident = grupperDvhRessursStillingerPerNavident(dvhRessursStillinger);
-
-        Map<String, StrukturerteStillingPerioderForNavident> stillingPerioderPerNavident = new HashMap<>();
-        dvhRessursStillingPerNavident.forEach((navident, navidentensDvhRessursStillinger) -> {
-            stillingPerioderPerNavident.put(navident, strukturerStillingPerioderFraDvhRessursStillinger(navident, navidentensDvhRessursStillinger));
-        });
-
-        // stillingPerioderPerNavident har nå alle stillingPerioder for alle navidenter
-        // Hvor sammenhengende perioder er slått sammen, korrekt NOM orgenhet er populert, og DOL er plassert, og evt feil og problemer identifisert
-        return stillingPerioderPerNavident;
-    }
-
-    protected Map<String, List<DvhRessursStilling>> grupperDvhRessursStillingerPerNavident(List<DvhRessursStilling> dvhRessursStillinger) {
-        return dvhRessursStillinger.stream()
-            .filter(rs -> rs.getNavident().isPresent())
-            .collect(groupingBy(rs -> rs.getNavident().get()));
-    }
-
-
-    protected StrukturerteStillingPerioderForNavident strukturerStillingPerioderFraDvhRessursStillinger(String navident, List<DvhRessursStilling> dvhRessursStillinger) {
-        var sspForNavident = new StrukturerteStillingPerioderForNavident(navident, dvhRessursStillinger);
-
-        if (!finnesNavidentINOM(sspForNavident)) {
-            return sspForNavident;
-        }
-
-        grupperOgSlaaSammenDvhStillingperioder(dvhRessursStillinger, sspForNavident);
-        matchStillingPerioderTilNomEnheter(sspForNavident);
-        settKorrekteDOLPerioder(sspForNavident);
-
-        // TODO: Sjekke for Ressursens SluttDato - ingen StillingPeriode utover dette
-        // TODO: Sanity sjekk av StillingPerioder - ikke negative etc
-        // TODO: Sjekk mismatch mellom aktiv stilling og enhet på ressurs i DvhRessursStillinger
-        // TODO: Sjekk DvhRessursStillinger utover Ressursens periode
-
-        return sspForNavident;
-    }
-
-    protected boolean finnesNavidentINOM(StrukturerteStillingPerioderForNavident sspForNavident) {
-        String navident = sspForNavident.navident();
-        if (ressursStateRepository.findByNavident(navident).isEmpty()) {
-            log.error("Har ressursStillinger fra DVH for navident {} som ikke finnes i NOM", navident);
-            sspForNavident.addError(
-                NAVIDENT_FINNES_IKKE,
-                "Har ressursStillinger fra DVH for navident %s som ikke finnes i NOM".formatted(navident)
-            );
-            return false;
-        }
-        return true;
-    }
-
-    protected void grupperOgSlaaSammenDvhStillingperioder(
-        List<DvhRessursStilling> dvhRessursStillinger,
-        StrukturerteStillingPerioderForNavident sspForNavident
-    ) {
-        // grupper først på Stillingens - stilling enhet/navn +enhetNavn+ressurs (A+B)
-        var grupperteDvhStillinger = dvhRessursStillinger.stream()
-            .collect(groupingBy(rs ->
-                new StillingPeriode.StillingAgressoOrgIdOgNavn(
-                    rs.getStillingAgressoId(),
-                    rs.getStillingOrgenhetNavn(),
-                    rs.getRessursAgressoId(),
-                    rs.getRessursOrgenhetNiv()
-                )
-            ));
-
-        List<StillingPeriode> perioderGruppert = new ArrayList<>();
-
-        var ressurs = ressursStateRepository.findByNavident(sspForNavident.navident()).get();
-        LocalDate ressursStartdato = ressurs.startdato().orElse(null);
-        LocalDate ressursSluttdato = ressurs.sluttdato().orElse(null);
-
-        // Sorter og slå sammen sammenhengende perioder
-        grupperteDvhStillinger.forEach((stillingAgressoOrgIdOgNavn, grupperteRessursStillinger) -> {
-            var sorted = grupperteRessursStillinger.stream().sorted(Comparator.comparing(DvhRessursStilling::getStillingDatoFom)).toList();
-
-            LocalDate periodStart = null;
-            LocalDate previousEnd = null;
-
-            for (DvhRessursStilling rs : sorted) {
-                var start = rs.getStillingDatoFom();
-                var end = rs.getStillingDatoTom();
-
-                if (erLikEllerEtterRessursensSluttDato(start, ressursSluttdato)) {
-                    lagErrorStartEtterRessursSluttdato(sspForNavident, rs, ressurs.navident(), ressursSluttdato);
-                    continue; // Skipp denne DvhRessursStillings raden
-                }
-
-                if (erFoerRessursensStartDato(end, ressursStartdato)) {
-                    lagErrorEndFoerRessursStartdato(sspForNavident, rs, ressurs.navident(), ressursStartdato);
-                    continue; // Skipp denne DvhRessursStillings raden
-                }
-
-                if (periodStart == null) {
-                    periodStart = start;
-                    previousEnd = end;
-                }
-
-                if (erEtterRessursensSluttDato(end, ressursSluttdato)) {
-                    lagErrorSlutterEtterRessursSluttdato(sspForNavident, rs, ressurs.navident(), ressursSluttdato);
-                    if (end.isEqual(previousEnd)) {
-                        previousEnd = ressursSluttdato;
-                    }
-                    end = ressursSluttdato;
-                }
-
-                if (erFoerRessursensStartDato(start, ressursStartdato)) {
-                    lagErrorStartFoerRessursStartdato(sspForNavident, rs, ressurs.navident(), ressursStartdato);
-                    if (start.isEqual(periodStart)) {
-                        periodStart = ressursStartdato;
-                    }
-                    start = ressursStartdato;
-                }
-
-                if (end.isEqual(previousEnd)) {
-                    // Kan være første DvhRessursStillings rad som er klippet på startdato ift ressursStartdato)
-                    continue;
-                } else if (start.isEqual(dayAfter(previousEnd))) {
-                    //Stillings raden er fortsettelse på forrige rad - slå sammen
-                    previousEnd = end;
-                } else if (start.isAfter(previousEnd)) {
-                    // Her er det brudd i stilling - Lag en StillingPeriode på forrige periode, og fortsett
-                    perioderGruppert.add(
-                        new StillingPeriode(stillingAgressoOrgIdOgNavn, periodStart, previousEnd, null)
-                    );
-                    periodStart = start;
-                    previousEnd = end;
-                } else {
-                    // Her er det overlapp i datoer på samme stillingAgressoId, stillingOrgenhetNavn og stillingRessursAgressoId
-                    // Logg Error - og klipp bort overlappingen
-                    lagErrorOverlappIPeriode(sspForNavident, rs, ressurs.navident(), stillingAgressoOrgIdOgNavn, periodStart, previousEnd, start, end);
-
-                    previousEnd = end;
-                }
-            }
-
-            // Siste RessursStilling er slått sammen - Lag StillingsPeriode, hvis vi har en periode
-            if (periodStart != null) {
-                perioderGruppert.add(
-                    new StillingPeriode(stillingAgressoOrgIdOgNavn, periodStart, previousEnd, null)
-                );
-            }
-        });
-        sspForNavident.addStillingPerioder(perioderGruppert.stream().sorted(Comparator.comparing(StillingPeriode::gyldigFom)).toList());
-    }
-
-    private boolean erLikEllerEtterRessursensSluttDato(LocalDate dato, LocalDate ressursSluttdato) {
-        return ressursSluttdato != null && (dato.equals(ressursSluttdato) || dato.isAfter(ressursSluttdato));
-    }
-
-    private boolean erFoerRessursensStartDato(LocalDate dato, LocalDate ressursStartdato) {
-        return ressursStartdato != null && dato.isBefore(ressursStartdato);
-    }
-
-    private boolean erEtterRessursensSluttDato(LocalDate dato, LocalDate ressursSluttdato) {
-        return ressursSluttdato != null && dato.isAfter(ressursSluttdato);
-    }
-
-    private void lagErrorStartEtterRessursSluttdato(
-        StrukturerteStillingPerioderForNavident sspForNavident,
-        DvhRessursStilling dvhRessursStilling,
-        String navident,
-        LocalDate ressursSluttdato
-    ) {
-        sspForNavident.addError(
-            StrukturerteStillingPerioderForNavident.ErrorType.DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET,
-            """
-            DVH RessursStilling for Navident %s starter %s på eller etter ressursens sluttdato %s.
-            Behandler ikke denne DVH RessursStillingen.
-            """
-                .formatted(navident, dvhRessursStilling.getStillingDatoFom(), ressursSluttdato),
-            dvhRessursStilling
-        );
-    }
-
-    private void lagErrorEndFoerRessursStartdato(
-        StrukturerteStillingPerioderForNavident sspForNavident,
-        DvhRessursStilling dvhRessursStilling,
-        String navident,
-        LocalDate ressursStartdato
-    ) {
-        sspForNavident.addError(
-            StrukturerteStillingPerioderForNavident.ErrorType.DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET,
-            """
-            DVH RessursStilling for Navident %s slutter %s før ressursens startdato %s.
-            Behandler ikke denne DVH RessursStillingen.
-            """
-                .formatted(navident, dvhRessursStilling.getStillingDatoTom(), ressursStartdato),
-            dvhRessursStilling
-        );
-    }
-
-    private void lagErrorSlutterEtterRessursSluttdato(
-        StrukturerteStillingPerioderForNavident sspForNavident,
-        DvhRessursStilling dvhRessursStilling,
-        String navident,
-        LocalDate ressursSluttdato
-    ) {
-        sspForNavident.addError(
-            StrukturerteStillingPerioderForNavident.ErrorType.DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET,
-            """
-            DVH ressursStilling for Navident %s har sluttdato %s etter ressursens sluttdato %s.
-            Avslutter stillingen på ressursens sluttdato.
-            """
-                .formatted(navident, dvhRessursStilling.getStillingDatoTom(),  ressursSluttdato),
-            dvhRessursStilling
-        );
-    }
-
-    private void lagErrorStartFoerRessursStartdato(
-        StrukturerteStillingPerioderForNavident sspForNavident,
-        DvhRessursStilling dvhRessursStilling,
-        String navident,
-        LocalDate ressursStartdato
-    ) {
-        sspForNavident.addError(
-            StrukturerteStillingPerioderForNavident.ErrorType.DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET,
-            """
-            DVH RessursStilling for Navident %s slutter %s før ressursens startdato %s.
-            Starter stillingen på ressursens startdato.
-            """
-                .formatted(navident, dvhRessursStilling.getStillingDatoTom(), ressursStartdato),
-            dvhRessursStilling
-        );
-    }
-
-    private void lagErrorOverlappIPeriode(
-        StrukturerteStillingPerioderForNavident sspForNavident,
-        DvhRessursStilling dvhRessursStilling,
-        String navident,
-        StillingPeriode.StillingAgressoOrgIdOgNavn stillingAgressoOrgIdOgNavn,
-        LocalDate periodStart, LocalDate previousEnd,
-        LocalDate start, LocalDate end
-    ) {
-        sspForNavident.addError(
-            StrukturerteStillingPerioderForNavident.ErrorType.DVH_RESSURSSTILLINGER_HAR_OVERLAPPENDE_PERIODER,
-            "Navident %s har overlapp i stillingsdatoer for '%s' -> forrige periode [%s - %s] og denne stillingen [%s - %s]"
-                .formatted(navident, stillingAgressoOrgIdOgNavn, periodStart, previousEnd, start, end),
-            dvhRessursStilling
-        );
-    }
-
-
-    protected void matchStillingPerioderTilNomEnheter(StrukturerteStillingPerioderForNavident sspForNavident) {
+    protected void behandle(StrukturerteStillingPerioderForNavident sspForNavident) {
         String navident = sspForNavident.navident();
         List<StillingPeriode> matchetMedNOMenhet = new ArrayList<>();
         TreeMap<Integer, StillingPeriode> unmatchedPresisAgressoId = new TreeMap<>(); // Sorterer automagisk på key
@@ -561,11 +311,6 @@ public class NyeRessursStillingStrukturerer {
         return nyStillingsPeriode;
     }
 
-    private static List<IOrgenhet> sorterMedNyesteEnhetFoerst(List<IOrgenhet> orgenheter) {
-        return orgenheter.stream()
-            .sorted(Comparator.comparing((IOrgenhet orgenhet) -> orgenhet.getGyldigFom() == null ? NO_END_DATE : orgenhet.getGyldigFom()).reversed()).toList();
-    }
-
     private void behandleUnmatchedPresisAgressoId(
         StrukturerteStillingPerioderForNavident sspForNavident,
         TreeMap<Integer, StillingPeriode> unmatchedPresisAgressoId,
@@ -646,30 +391,6 @@ public class NyeRessursStillingStrukturerer {
         return true;
     }
 
-    private boolean overlapperEllerErDirekteEtterfoelgende(LocalDate forrigeTom, LocalDate nesteFom) {
-        return likEllerFoer(nesteFom, dayAfter(forrigeTom));
-    }
-
-    private LocalDate getLatestDate(LocalDate d1, LocalDate d2) {
-        d1 = d1 == null ? NO_END_DATE : d1;
-        return d1.isBefore(d2) ? d2 : d1;
-    }
-
-    private LocalDate getEarliestDate(LocalDate d1, LocalDate d2) {
-        d1 = d1 == null ? NO_END_DATE : d1;
-        return d1.isBefore(d2) ? d1 : d2;
-    }
-
-    private LocalDate getEarliestDate(LocalDate d1, Optional<LocalDate> d2) {
-        d1 = d1 == null ? NO_END_DATE : d1;
-        return getEarliestDate(d1, d2.orElse(NO_END_DATE));
-    }
-
-    private boolean erOrgenhetGyldigIHeleStillingPerioden(StillingPeriode stillingPeriode, IOrgenhet matchetOrgenhet) {
-        return likEllerEtter(stillingPeriode.gyldigFom(), matchetOrgenhet.getGyldigFom())
-            && likEllerFoer(stillingPeriode.gyldigTom(), matchetOrgenhet.getGyldigTom().orElse(NO_END_DATE));
-    }
-
     private List<OrgtilknytningState> finnOTerSomRepresentererEnhetOgOverlapperPeriode(String navident, LocalDate gyldigFom, LocalDate gyldigTom, String orgenhetId) {
         return orgtilknytningStateRepository.findByNavident(navident).stream()
             .filter(ot ->
@@ -724,56 +445,8 @@ public class NyeRessursStillingStrukturerer {
         return orgtilknytningStateRepository.findByNavident(navident).stream()
             .filter(ot ->
                 ot.gyldigFom().equals(gyldigFom) &&
-                ot.gyldigTom().orElse(NO_END_DATE).equals(gyldigTom)
+                    ot.gyldigTom().orElse(NO_END_DATE).equals(gyldigTom)
             )
-            .toList();
-    }
-
-    protected List<StillingPeriode> slaaSammenBackToBackPerioderOgSorterAsc(List<StillingPeriode> stillingPerioder,
-                                                                            StrukturerteStillingPerioderForNavident sspForNavident
-    ) {
-        stillingPerioder = advarOgFjernNegativePerioder(stillingPerioder, sspForNavident);
-
-        List<StillingPeriode> sammenslaatt = new ArrayList<>();
-        var gruppertOrgenhetOgDol = stillingPerioder.stream().collect(groupingBy(sp -> sp.orgenhet().getId() + " - " + sp.dagligOppfolging()));
-
-        gruppertOrgenhetOgDol.forEach((OrgenhetOgDol, stillingPerioderForOrgenhetOgDol) -> {
-            stillingPerioderForOrgenhetOgDol.sort(Comparator.comparing(StillingPeriode::gyldigFom));
-            StillingPeriode forrige = null;
-            for (StillingPeriode sp: stillingPerioderForOrgenhetOgDol) {
-                if (forrige == null) {
-                    forrige = sp;
-                } else {
-                    if (likEllerFoer(sp.gyldigFom(), dayAfter(forrige.gyldigTom()))) {
-                        forrige = new StillingPeriode(forrige.stilling(), forrige.gyldigFom(), sp.gyldigTom(), forrige.orgenhet(), forrige.dagligOppfolging());
-                    } else {
-                        sammenslaatt.add(forrige);
-                        forrige = sp;
-                    }
-                }
-            }
-            if (forrige != null) {
-                sammenslaatt.add(forrige);
-            }
-        });
-
-        sammenslaatt.sort(
-            Comparator.comparing(StillingPeriode::gyldigFom)
-                .thenComparing(StillingPeriode::dagligOppfolging)
-                .thenComparing(sp -> sp.orgenhet().getId()));
-
-        return sammenslaatt;
-    }
-
-    private List<StillingPeriode> advarOgFjernNegativePerioder(List<StillingPeriode> stillingPerioder, StrukturerteStillingPerioderForNavident sspForNavident) {
-        stillingPerioder.stream()
-            .filter(sp -> foer(sp.gyldigTom(), sp.gyldigFom()))
-            .forEach(sp -> {
-                lagErrorHarNegativStillingPeriode(sspForNavident, sp, sspForNavident.navident());
-            });
-
-        return stillingPerioder.stream()
-            .filter(sp -> likEllerEtter(sp.gyldigTom(), sp.gyldigFom()))
             .toList();
     }
 
@@ -1014,24 +687,5 @@ public class NyeRessursStillingStrukturerer {
         );
     }
 
-    private void lagErrorHarNegativStillingPeriode(
-        StrukturerteStillingPerioderForNavident sspForNavident,
-        StillingPeriode stillingPeriode,
-        String navident
-    ) {
-        sspForNavident.addError(
-            StrukturerteStillingPerioderForNavident.ErrorType.HAR_LAGET_NEGATIV_STILLINGPERIODE__DENNE_FJERNES,
-            """
-            Har på en eller annen måte laget negativ StillingPeriode for Navident %s med gyldighetsperiode [%s - %s] for enhet [%s (%s) %s]
-            Denne fjernes
-            """
-                .formatted(navident,
-                    stillingPeriode.gyldigFom(), stillingPeriode.gyldigTom(),
-                    stillingPeriode.orgenhet().getId(), stillingPeriode.orgenhet().getNavn(), stillingPeriode.orgenhet().getAgressoId()),
-            stillingPeriode
-        );
-    }
 
-    protected void settKorrekteDOLPerioder(StrukturerteStillingPerioderForNavident sspForNavident) {
-    }
 }

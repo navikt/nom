@@ -1,17 +1,15 @@
-package no.nav.nom.apps.api.orgtilknytning.dvh;
+package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 
-import ch.qos.logback.core.spi.LogbackLock;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
+import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
-import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -19,19 +17,20 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Random;
 
-@SpringBootTest(classes = { NyeRessursStillingStrukturerer.class })
-class NyeRessursStillingStrukturererBasis {
+@SpringBootTest(classes = {
+    NyeRessursStillingStrukturerer.class,
+    GrupperOgSlaaSammenDvhStillinger.class,
+    MatchStrukturerteStillingPerioderTilNOM.class,
+    SettDOLPerioderPaaStrukturerteStillinger.class
+})
+class RessursStillingStrukturererTestBase {
     static final LocalDate MAX_DATE = LocalDate.of(2099, 12, 31);
     static final String A000001 = "A000001";
 
-    @Autowired
-    NyeRessursStillingStrukturerer CUT; // Class under test
     @MockBean
     OrgenhetService orgenhetService;
     @MockBean
     RessursStateRepository ressursStateRepository;
-    @MockBean
-    RessursStillingLoadStatus ressursStillingLoadStatus;
     @MockBean
     OrgtilknytningStateRepository orgtilknytningStateRepository;
 
