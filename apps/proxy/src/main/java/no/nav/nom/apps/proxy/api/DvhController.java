@@ -2,6 +2,7 @@ package no.nav.nom.apps.proxy.api;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.proxy.common.AppProperties;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -75,7 +76,10 @@ public class DvhController {
             .toEntity(String.class)
             .block();
         assert clientResponse != null;
-        return ResponseEntity.status(clientResponse.getStatusCode()).body(clientResponse.getBody());
+        return ResponseEntity
+            .status(clientResponse.getStatusCode())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(clientResponse.getBody());
 
         /*
         return webClient.get()
