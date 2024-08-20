@@ -3,11 +3,11 @@ package no.nav.nom.apps.proxy.api;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.proxy.common.AppProperties;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunctions;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -15,6 +15,9 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import reactor.core.publisher.Mono;
+
 import java.net.URI;
 
 
@@ -35,6 +38,7 @@ public class DvhController {
             .baseUrl(appProperties.getDvh().getBaseUrl())
             .exchangeStrategies(useLargeInMemorySize())
             .filter(ExchangeFilterFunctions.basicAuthentication(appProperties.getDvh().getTdvUsername(), appProperties.getDvh().getTdvPassword()))
+            .filter(logResponse())
             .build();
         this.uriBuilderFactory = new DefaultUriBuilderFactory(appProperties.getDvh().getBaseUrl());
     }
@@ -69,6 +73,26 @@ public class DvhController {
             .retrieve()
             .toEntity(String.class)
             .block();
+    }
+
+    ExchangeFilterFunction logResponse() {
+        return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
+            if (log.isDebugEnabled()) {
+                StringBuilder sb = new StringBuilder("NOM-PROXY Response status and headers: \n")
+                    .append("Status: ")
+                    .append(clientResponse.statusCode());
+                clientResponse
+                    .headers()
+                    .asHttpHeaders()
+                    .forEach((key, value1) -> value1.forEach(value -> sb
+                        .append("\n")
+                        .append(key)
+                        .append(":")
+                        .append(value)));
+                log.debug(sb.toString());
+            }
+            return Mono.just(clientResponse);
+        });
     }
 
 }
