@@ -68,11 +68,22 @@ public class DvhController {
 
         log.info("Mottatt forespørsel fra [" + appName + "] med path: " + request.getRequestURI() + ", ruter til: " + uri);
 
+        // NOTE: attempt to fix duplicate headers
+        var clientResponse = webClient.get()
+            .uri(uri)
+            .retrieve()
+            .toEntity(String.class)
+            .block();
+        assert clientResponse != null;
+        return ResponseEntity.status(clientResponse.getStatusCode()).body(clientResponse.getBody());
+
+        /*
         return webClient.get()
             .uri(uri)
             .retrieve()
             .toEntity(String.class)
             .block();
+        */
     }
 
     ExchangeFilterFunction logResponse() {
