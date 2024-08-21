@@ -70,6 +70,7 @@ spec:
         databases:
           - name: nav-ident-db
             envVarPrefix: DATABASE
+        tier: db-custom-1-3840
     buckets:
       - name: no-nav-org-dev-nav-ident-storage-bucket   #Bucket names er globally unique across all google.
         lifecycleCondition:

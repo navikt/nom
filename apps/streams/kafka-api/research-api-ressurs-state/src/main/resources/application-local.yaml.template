@@ -1,0 +1,12 @@
+KAFKA_BROKERS: localhost:39092
+KAFKA_STREAMS_APPLICATION_ID: research-api-ressurs-state-v2
+spring:
+  kafka:
+    security:
+      protocol: PLAINTEXT
+    streams:
+      cleanup:
+        on-shutdown: true
+        on-startup: true
+
+server.port: 8088

@@ -24,6 +24,9 @@ spec:
       application: nom-kafka-api-ressurs-state
       access: read
     - team: org
+      application: nom-research-kafka-api-ressurs-state
+      access: read
+    - team: org
       application: org-kafka-manager
       access: read
     - team: org
@@ -186,6 +189,9 @@ spec:
       access: read
     - team: org
       application: nom-kafka-api-ressurs-state
+      access: read
+    - team: org
+      application: nom-research-kafka-api-ressurs-state
       access: read
     - team: nom
       application: nom-api

@@ -37,8 +37,6 @@ import java.util.Set;
 public class RessursOpprettetEmailService {
     private static final String OPPRETTELSE_VARSEL_TEMPLATE = "opprettelse-varsel.ftlh";
     public static final String NAVIDENT = "NAVident";
-    public static final String UNLEASH_INFORM_ADDITIONAL_RECIPIENTS = "nom.ressurs-create.inform_additional_recipients";
-    public static final String UNLEASH_INFORM_LEDER = "nom.ressurs-create.inform_leader";
 
     private final Logger log = LoggerFactory.getLogger(RessursOpprettetEmailService.class);
     private final EmailClient emailClient;
@@ -80,7 +78,7 @@ public class RessursOpprettetEmailService {
         }
 
         // compose and send email to all recipients
-        Set <String> recipientNavidents = unleash.isEnabled(UNLEASH_INFORM_LEDER) ? Set.copyOf(leaders) : Set.of();
+        Set <String> recipientNavidents = Set.copyOf(leaders);
         recipientNavidents = appendAuthenticatedUserToRecipientNavIdents(Set.copyOf(recipientNavidents));
         composeAndSendEmail(opprettetRessurs, recipientNavidents, orgEnhet.navn());
     }
@@ -89,10 +87,6 @@ public class RessursOpprettetEmailService {
         try {
             var adRessurser = adClient.getAdRessurser(recipientNavidents);
             var recipientList = adRessurser.getRessurser().stream().map(AdRessurs::getEmail).toList();
-
-            if (unleash.isEnabled(UNLEASH_INFORM_ADDITIONAL_RECIPIENTS)) {
-                recipientList = appendAdditionalRecipientsEmails(recipientList, getAdditionalRecipientsEmails());
-            }
 
             String subject = String.format("Ressurs opprettet %s (%s)",
                 opprettetRessurs.visningsnavn().getFormattedVisningsnavn(), opprettetRessurs.navident()

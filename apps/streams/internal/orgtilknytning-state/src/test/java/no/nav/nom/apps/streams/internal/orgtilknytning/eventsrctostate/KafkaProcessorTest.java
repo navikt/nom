@@ -206,7 +206,7 @@ public class KafkaProcessorTest {
 
 
     @Test
-    @DisplayName("Send kun en Fjern orgtilknytning event")
+    @DisplayName("Send kun en Fjern orgtilknytning event - denne skal ikke behandles")
     public void test_005(){
         String navident = "A000001";
         String orgEnhetId = "'123bc";
@@ -214,7 +214,6 @@ public class KafkaProcessorTest {
         LocalDate gyldigTom = LocalDate.of(2022, 12, 31);
 
         final OrgtilknytningEvent fjernetEvent = lagFjernetEvent(navident, orgEnhetId, gyldigFom, gyldigTom);
-
 
         inputTopic.pipeInput(fjernetEvent.getFid(), fjernetEvent);
 

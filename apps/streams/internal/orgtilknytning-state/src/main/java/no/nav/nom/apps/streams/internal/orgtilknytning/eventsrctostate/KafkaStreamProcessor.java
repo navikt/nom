@@ -38,6 +38,7 @@ class KafkaStreamProcessor {
         final var eventSerde = objectSerde.copyWithType(OrgtilknytningEvent.class);
 
         streamsBuilder.stream(eventsourceTopic, Consumed.with(stringSerde, eventSerde))
+            .filter((k, v) -> !v.getFid().startsWith("FID_MANUELL")) // Ikke behandle manuelle test ressurser/orgtilknytninger
             .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))
             .aggregate(
                 objectMapper::createObjectNode,
@@ -56,7 +57,6 @@ class KafkaStreamProcessor {
             )
             .mapValues(this::toOrgtilknytningState)
             .toStream()
-            //            .foreach( (k, v) -> log.info("Log aggregate [{} - {}]", k, v));
             .to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(OrgtilknytningState.class)));
     }
 

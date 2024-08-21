@@ -228,8 +228,12 @@ public class DvhRestConsumer {
     }
 
     public void updateShadowOrgtilknytningerForKommunaleFromDvh() {
-        log.info("Oppdater skygge Orgtilknytninger for kommunale fra dvh");
-        kommunaleRessurserLoader.loadAndProcess();
+        try {
+            log.info("Oppdater skygge Orgtilknytninger for kommunale fra dvh");
+            kommunaleRessurserLoader.loadAndProcess();
+        }  catch (Exception e) {
+            log.error("Failure loading skygge-orgtilknytninger data from DVH", e);
+        }
     }
 
     public void loadTlfFromDvh() {

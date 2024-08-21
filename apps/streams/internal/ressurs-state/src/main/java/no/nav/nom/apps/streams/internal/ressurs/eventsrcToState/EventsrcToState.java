@@ -49,6 +49,7 @@ class EventsrcToState {
         final var jsonSerde2 = jsonSerde.copyWithType(ObjectNode.class);
 
         var groupedObjects = streamsBuilder.stream(eventsourceTopic, Consumed.with(stringSerde, eventSerde))
+            .filter((k, v) -> !v.getFid().startsWith("FID_MANUELL")) // Ikke behandle manuelle test ressurser/orgtilknytninger
             .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))
             .aggregate(
                 objectMapper::createObjectNode,
