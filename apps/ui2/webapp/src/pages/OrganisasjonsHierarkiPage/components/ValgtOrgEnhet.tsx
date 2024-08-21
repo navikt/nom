@@ -48,8 +48,6 @@ export const ValgtOrgEnhet = ({
 
   const visTabellKnapp = isOrgEnhetArbeidsomraadeQuery(orgEnhet.id).data;
 
-  const harRessurser = hentedeRessurser.length > 0;
-
   return (
     <div
       css={css`
@@ -140,19 +138,12 @@ export const ValgtOrgEnhet = ({
             <OrgenhetLederLink orgEnhet={orgEnhet} />
           </div>
         </div>
-        {visTabellKnapp && (
-          <div
-            css={css`
-              display: flex;
-              justify-content: end;
-              //transform: ${harRessurser ? "translateY(30px)" : "unset"};
-              margin-top: ${harRessurser ? "none" : "17px"};
-            `}
-          >
-            <DropdownMeny orgEnhet={orgEnhet} />
-          </div>
-        )}
-        <MedarbeidereList orgEnhet={orgEnhet} ressurser={hentedeRessurser} />
+
+        <MedarbeidereList
+          orgEnhet={orgEnhet}
+          ressurser={hentedeRessurser}
+          visTabellKnapp={visTabellKnapp ?? false}
+        />
       </div>
     </div>
   );
@@ -161,12 +152,27 @@ export const ValgtOrgEnhet = ({
 function MedarbeidereList({
   orgEnhet,
   ressurser,
+  visTabellKnapp,
 }: {
   orgEnhet: OrgEnhet;
   ressurser: Ressurs[];
+  visTabellKnapp: boolean;
 }) {
   if (ressurser.length === 0) {
-    return <></>;
+    return visTabellKnapp ? (
+      <div
+        css={css`
+          display: flex;
+          justify-content: end;
+          align-items: center;
+          margin-top: var(--a-spacing-6);
+        `}
+      >
+        <DropdownMeny orgEnhet={orgEnhet} />
+      </div>
+    ) : (
+      <></>
+    );
   }
 
   const [eksterneRessurser, interneRessurser] = partition(
@@ -176,6 +182,21 @@ function MedarbeidereList({
 
   return (
     <VStack gap="4">
+      <div
+        css={css`
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: var(--a-spacing-6);
+        `}
+      >
+        <Heading level="3" size="medium">
+          Medarbeidere i {orgEnhet.navn}
+        </Heading>
+
+        <DropdownMeny orgEnhet={orgEnhet} />
+      </div>
+
       {interneRessurser.length > 0 && (
         <div>
           <div
@@ -185,8 +206,8 @@ function MedarbeidereList({
               align-items: center;
             `}
           >
-            <Heading level="3" size="small">
-              Medarbeidere i {orgEnhet.navn}
+            <Heading level="4" size="small">
+              Interne medarbeidere
             </Heading>
           </div>
           <div
@@ -225,7 +246,7 @@ function MedarbeidereList({
               }
             `}
             defaultOpen
-            header={"Eksterne medarbeidere i " + orgEnhet.navn}
+            header={"Eksterne medarbeidere"}
           >
             <div
               css={css`
