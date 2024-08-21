@@ -1,0 +1,34 @@
+name: 'deploy: nom-research-kafka-api-ressurs-state'
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'dev/**'
+    paths:
+      - 'apps/streams/kafka-api/research-api-ressurs-state/**'
+      - 'libs/contract-nom-dto/**'
+      - '.nais/streams/research-kafka-api-ressurs-state.yaml'
+      - '.github/*/deploy-streams-research-kafka-api-ressurs-state.yaml'
+      - 'Dockerfile_distroless'
+  workflow_dispatch:
+
+jobs:
+  deploy-spring-app:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    uses: ./.github/workflows/deploy-spring-app.yaml
+    with:
+      maven-project: research-api-ressurs-state
+      jar-path: apps/streams/kafka-api/research-api-ressurs-state/target/app.jar
+      image-suffix: nom-research-kafka-api-ressurs-state
+      nais-config-file-path-dev: .nais/streams/research-kafka-api-ressurs-state.yaml
+      nais-config-file-path-prod: .nais/streams/research-kafka-api-ressurs-state.yaml
+      additional-nais-vars-dev: ',kafka-pool=nav-dev'
+      additional-nais-vars-prod: ',kafka-pool=nav-prod'
+      skip-prod-deploy: true
+      dockerfile: Dockerfile_distroless
+    secrets:
+      GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+      NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}

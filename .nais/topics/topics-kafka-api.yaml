@@ -95,3 +95,28 @@ spec:
     - team: org
       application: nom-admin
       access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.research-api-ressurs-state-v2
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+  acl:
+    - team: org
+      application: nom-research-kafka-api-ressurs-state
+      access: readwrite
+    - team: org
+      application: org-kafka-manager
+      access: read
+

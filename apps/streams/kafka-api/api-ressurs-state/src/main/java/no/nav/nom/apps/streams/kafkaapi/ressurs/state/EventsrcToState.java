@@ -56,16 +56,20 @@ class EventsrcToState {
             .aggregate(
                 objectMapper::createObjectNode,
                 (key, event, state) -> {
-                    if(event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data){
-                        if(data.navident().isPresent()){
-                            state.put("navident", data.navident().get());
+                    if (key.startsWith("FID_MANUELL_")) {
+                        log.warn("Skipping event med FID: {}", key);
+                    } else {
+                        if (event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data) {
+                            if (data.navident().isPresent()) {
+                                state.put("navident", data.navident().get());
+                            }
+                            if (data.startdato().isPresent()) {
+                                state.put("startdato", String.valueOf(data.startdato().get()));
+                            }
                         }
-                        if(data.startdato().isPresent()){
-                            state.put("startdato", String.valueOf(data.startdato().get()));
-                        }
+                        state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                        state.put("fid", event.getFid()); // Keep fid - Ønsker å benytte denne som key på output
                     }
-                    state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
-                    state.put("fid", event.getFid()); // Keep fid - Ønsker å benytte denne som key på output
                     return state;
                 },
                 Materialized.with(stringSerde, jsonSerde)
@@ -75,25 +79,29 @@ class EventsrcToState {
         var ressursPerNavident = ressursAggregateKTable.toStream()
             .selectKey( (fid, ressursJson) -> ressursJson.get("navident").asText())
             .groupByKey(Grouped.with(stringSerde, jsonSerde))
-            .reduce((oldRessurs, newRessurs) -> newRessurs,  // Keep only newest ressurs - Actually - there will alwasy be one-to-one fid<->navident, so only one will ever emerge
+            .reduce((oldRessurs, newRessurs) -> newRessurs,  // Keep only newest ressurs - Actually - there will always be one-to-one fid<->navident, so only one will ever emerge
                 Materialized.with(stringSerde, jsonSerde)
             );
 
-        // Aggreger orgtilknytning evtsrc til en Json som er sum per tilknytnig, returner per fid
+        // Aggreger orgtilknytning evtsrc til en Json som er sum per tilknytning, returner per fid
         var orgtilknytningAggregateKTable = streamsBuilder.stream(orgtilknytningEvtsrcTopic, Consumed.with(stringSerde, orgtilknytningEventSerde))
             .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, orgtilknytningEventSerde))
             .aggregate(
                 objectMapper::createObjectNode,
                 (key, event, state) -> {
-                    if(event instanceof OrgtilknytningFjernetEventV1) {
-                        state.put("TOMBSTONE", true);
-                        //                           return null; // Create TOMBSTONE - should skip mapValues and get forwarded directly to output stream. -
-                        // (See https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Stream+Usage+Patterns#KafkaStreamUsagePatterns-Howtomanagethesizeofstatestoresusingtombstones?)
-                        //                              NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
+                    if (key.startsWith("FID_MANUELL_")) {
+                        log.warn("Skipping event med FID: {}", key);
                     } else {
-                        state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                        if (event instanceof OrgtilknytningFjernetEventV1) {
+                            state.put("TOMBSTONE", true);
+                            //                           return null; // Create TOMBSTONE - should skip mapValues and get forwarded directly to output stream. -
+                            // (See https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Stream+Usage+Patterns#KafkaStreamUsagePatterns-Howtomanagethesizeofstatestoresusingtombstones?)
+                            //                              NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
+                        } else {
+                            state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                        }
+                        state.put("fid", event.getFid());
                     }
-                    state.put("fid", event.getFid());
                     return state;
                 },
                 Materialized.with(stringSerde, jsonSerde)

@@ -47,6 +47,11 @@ on:
         required: false
         default: false
         description: Skip tests. This makes build faster.
+      skip-prod-deploy:
+        type: boolean
+        required: false
+        default: false
+        description: Skip deployment to production.
       dockerfile:
         type: string
         required: false
@@ -121,7 +126,7 @@ jobs:
 
   deploy-prod:
     name: Deploy to NAIS ${{ inputs.prod-cluster }}
-    if: ${{ github.ref == 'refs/heads/main' && !inputs.skip-tests }}
+    if: ${{ github.ref == 'refs/heads/main' && !inputs.skip-tests && !inputs.skip-prod-deploy}}
     needs: build-app-docker
     runs-on: ubuntu-latest
     steps:
