@@ -26,18 +26,10 @@ spec:
     - name: NOM_ADMIN_GROUP_ID
       value: 9e0e2958-df7a-4376-83f3-9bcbec1f2650
     - name: JDK_JAVA_OPTIONS
-      value: "-Xms4g -Xmx12g -Dhttp.proxyHost=webproxy.nais -Dhttps.proxyHost=webproxy.nais -Dhttp.proxyPort=8088 -Dhttps.proxyPort=8088 -Dhttp.nonProxyHosts=localhost|127.0.0.1|10.254.0.1|*.local|*.adeo.no|*.nav.no|*.aetat.no|*.devillo.no|*.oera.no|*.nais.io|*.aivencloud.com|*.intern.dev.nav.no"
+      value: "-Dhttp.proxyHost=webproxy.nais -Dhttps.proxyHost=webproxy.nais -Dhttp.proxyPort=8088 -Dhttps.proxyPort=8088 -Dhttp.nonProxyHosts=localhost|127.0.0.1|10.254.0.1|*.local|*.adeo.no|*.nav.no|*.aetat.no|*.devillo.no|*.oera.no|*.nais.io|*.aivencloud.com|*.intern.dev.nav.no"
   envFrom:
     - secret: nom-remedy-integrasjon-unleash-api-token
     - secret: remedy-db-credentials
-  resources:
-    requests:
-      memory: 4Gi
-    limits:
-      memory: 20Gi
-  replicas:
-    min: 1
-    max: 1
   webproxy: true
   azure:
     application:

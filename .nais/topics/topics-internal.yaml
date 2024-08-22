@@ -68,10 +68,7 @@ spec:
     - team: org
       application: nom-admin
       access: read
-    - team: org
-      application: nom-remedy-integrasjon
-      access: read
-
+      
 ---
 
 apiVersion: kafka.nais.io/v1
@@ -98,9 +95,6 @@ spec:
       access: read
     - team: org
       application: nom-admin
-      access: read
-    - team: org
-      application: nom-remedy-integrasjon
       access: read
 
 ---
@@ -139,7 +133,7 @@ spec:
     - team: org
       application: nom-admin
       access: read
-
+      
 ---
 
 apiVersion: kafka.nais.io/v1
@@ -168,9 +162,6 @@ spec:
       access: readwrite
     - team: org
       application: nom-admin
-      access: read
-    - team: org
-      application: nom-remedy-integrasjon
       access: read
 
 ---
@@ -248,9 +239,6 @@ spec:
       access: readwrite
     - team: org
       application: nom-admin
-      access: read
-    - team: org
-      application: nom-remedy-integrasjon
       access: read
 
 ---

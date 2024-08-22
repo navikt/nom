@@ -116,10 +116,6 @@
             <artifactId>contract-nom-dto</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.nom</groupId>
-            <artifactId>nom-state</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
         </dependency>

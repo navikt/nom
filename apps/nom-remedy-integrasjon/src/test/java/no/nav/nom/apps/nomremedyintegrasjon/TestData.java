@@ -1,7 +1,6 @@
 package no.nav.nom.apps.nomremedyintegrasjon;
 
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
-import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
@@ -14,7 +13,6 @@ import no.nav.nom.contract.nom.eventsource.RessursPrimaryTelefonnummerOppdatertE
 import no.nav.nom.contract.nom.eventsource.RessursSluttdatoOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
-import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.generated.model.OrgEnhet;
 import no.nav.nom.generated.model.OrgtilknytningState;
 import no.nav.nom.generated.model.Ressurs;
@@ -237,22 +235,6 @@ public class TestData {
             .sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
     }
 
-    public static RessursState ressursState(RessursOpprettetEventV1 v1) {
-        return new RessursState(
-            v1.getFid(),
-            v1.getRessursOpprettetEventData().personident(),
-            v1.getRessursOpprettetAdditionalData().navident().get(),
-            v1.getRessursOpprettetEventData().sektor(),
-            v1.getRessursOpprettetEventData().visningsnavn(),
-            v1.getRessursOpprettetEventData().primaryTelefonnummer(),
-            Optional.empty(),
-            v1.getRessursOpprettetAdditionalData().startdato(),
-            Optional.of(v1.getRessursOpprettetEventData().primaryFysiskBrukersted()),
-            v1.getRessursOpprettetEventData().fysiskeBrukersteder(),
-            IdentType.STANDARD
-        );
-    }
-
     public static OrgtilknytningState orgtilknytningState() {
         return new OrgtilknytningState()
             .navident("X123456")
@@ -260,17 +242,5 @@ public class TestData {
             .gyldigFom(LocalDate.now())
             .gyldigTom(LocalDate.now().plusMonths(10))
             .erDagligOppfolging(true);
-    }
-
-    public static no.nav.nom.contract.nom.state.OrgtilknytningState orgtilknytningState(OrgtilknytningDagligOppfolgingEndretEventV1 v1) {
-        return new no.nav.nom.contract.nom.state.OrgtilknytningState(
-            v1.getFid(),
-            v1.getOrgtilknytningDagligOppfolgingEndretEventData().navident(),
-            v1.getOrgtilknytningDagligOppfolgingEndretEventData().orgEnhetId(),
-            v1.getOrgtilknytningDagligOppfolgingEndretEventData().dagligOppfolging(),
-            v1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom(),
-            v1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom(),
-            Optional.empty()
-        );
     }
 }
