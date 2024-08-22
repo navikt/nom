@@ -59,6 +59,7 @@ export function SlettRessursMelding() {
             ref={ref}
           >
             <Modal.Body className="flex gap-4 flex-col">
+              <p>Dette er for å slette en ressurs fra NOM-State</p>
               <FidTextField />
               <ConfirmTextField />
               {(() => {

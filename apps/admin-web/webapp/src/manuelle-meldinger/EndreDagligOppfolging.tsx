@@ -29,7 +29,7 @@ const schema = z.object({
 
 type SchemaType = z.infer<typeof schema>;
 
-export function EndreDagligOppfølging() {
+export function EndreDagligOppfolging() {
   const ref = useRef<HTMLDialogElement>(null);
 
   const methods = useForm<SchemaType>({

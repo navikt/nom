@@ -9,10 +9,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.ressurs.NomMastered;
+import no.nav.nom.apps.api.ressurs.api.app.AvvikleRessursRequest;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.SlettRessursCommand;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredService;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
@@ -30,7 +33,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.Optional;
+
+import static java.util.Objects.isNull;
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
 @Slf4j
 @Tag(name = "Admin for å lage manuelle Evtsrc meldinger")
@@ -342,6 +349,75 @@ public class ManuelleRessursEvtsrcMeldinger {
                     HtmlUtils.htmlEncode(navident)
                 ));
         }
+    }
+
+    @PostMapping(value = "/avvikleRessurs")
+    @Operation(
+        description = "Lag en Ressurs Sluttet Eventsrc melding",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
+        }
+    )
+    public ResponseEntity<String> avsluttRessurs(
+        @Parameter(description = "NAVIDENT for ressursen som skal avsluttes") @RequestParam String navident,
+        @Parameter(description = "Sluttdato for ressursen") @RequestParam(required = false) LocalDate localDate,
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
+    ) {
+
+        var ressursState = ressursStateRepository.findByNavident(navident);
+
+        if (ressursState.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Navidenten finnes ikke");
+        }
+
+        if (!nomMastered.isMastered(navident)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Navidenten er ikke mastret i NOM");
+        }
+
+        if (isNull(localDate) && ressursState.get().sluttdato().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ressurs har ingen sluttdato eller så er ikke sluttdato satt som parameter");
+        } else {
+            localDate = ressursState.get().sluttdato().isPresent() ? ressursState.get().sluttdato().get() : localDate;
+        }
+
+
+        if (!"CONFIRM".equals(confirm)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body("Ressurs med FID %s er funnet for navident %s med navn %s. Men vil ikke endres da handling ikke er bekreftet".formatted(
+                    HtmlUtils.htmlEncode(ressursState.get().fid()),
+                    ressursState.get().navident(),
+                    ressursState.get().visningsnavn().toString()
+                ));
+        }
+
+        var metaData = new InputMetadata(
+            "/api/admin/manuelleEvtsrcMeldinger",
+            "avvikleRessurs",
+            new AvvikleRessursRequest(localDate),
+            new Origination(
+                getAuthenticatedNavIdent(),
+                "Admin swagger/rest"
+            )
+        );
+
+        ressursCommandService.avsluttRessursEvent(
+            new OpphorRessursCommand(ressursState.get().fid(), localDate),
+            metaData
+        );
+
+        return ResponseEntity.ok()
+            .body("Ressurs med FID %s er funnet for navident %s med navn %s. Avvikle ressurs event er nå sendt".formatted(
+                HtmlUtils.htmlEncode(ressursState.get().fid()),
+                ressursState.get().navident(),
+                ressursState.get().visningsnavn().toString()
+            ));
     }
 
     private boolean validFid(String fid) {
