@@ -181,7 +181,7 @@ function MedarbeidereList({
   );
 
   return (
-    <VStack gap="4">
+    <>
       <div
         css={css`
           display: flex;
@@ -196,67 +196,28 @@ function MedarbeidereList({
 
         <DropdownMeny orgEnhet={orgEnhet} />
       </div>
-
-      {interneRessurser.length > 0 && (
-        <div>
-          <div
-            css={css`
-              display: flex;
-              margin-bottom: var(--a-spacing-5);
-              align-items: center;
-            `}
-          >
-            <Heading level="4" size="small">
-              Interne medarbeidere
-            </Heading>
-          </div>
-          <div
-            css={css`
-              display: grid;
-              grid-template-columns: repeat(2, 1fr);
-              gap: var(--a-spacing-4);
-            `}
-          >
-            {interneRessurser.map((ressurs) => {
-              return (
-                <ResourceLink
-                  key={ressurs.navident}
-                  navident={ressurs.navident}
-                />
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {eksterneRessurser.length > 0 && (
-        <div>
-          <ReadMore
-            css={css`
-              .navds-read-more__button {
-                color: var(--a-text-default);
-                font-size: var(--a-font-size-heading-small);
-                font-weight: var(--a-font-weight-bold);
-              }
-
-              .navds-read-more__content {
-                margin-left: 0;
-                padding-left: 0;
-                border-left: none;
-              }
-            `}
-            defaultOpen
-            header={"Eksterne medarbeidere"}
-          >
+      <VStack gap="4">
+        {interneRessurser.length > 0 && (
+          <div>
             <div
               css={css`
-                margin-top: var(--a-spacing-4);
+                display: flex;
+                margin-bottom: var(--a-spacing-5);
+                align-items: center;
+              `}
+            >
+              <Heading level="4" size="small">
+                Interne medarbeidere
+              </Heading>
+            </div>
+            <div
+              css={css`
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
                 gap: var(--a-spacing-4);
               `}
             >
-              {eksterneRessurser.map((ressurs) => {
+              {interneRessurser.map((ressurs) => {
                 return (
                   <ResourceLink
                     key={ressurs.navident}
@@ -265,10 +226,50 @@ function MedarbeidereList({
                 );
               })}
             </div>
-          </ReadMore>
-        </div>
-      )}
-    </VStack>
+          </div>
+        )}
+
+        {eksterneRessurser.length > 0 && (
+          <div>
+            <ReadMore
+              css={css`
+                .navds-read-more__button {
+                  color: var(--a-text-default);
+                  font-size: var(--a-font-size-heading-small);
+                  font-weight: var(--a-font-weight-bold);
+                }
+
+                .navds-read-more__content {
+                  margin-left: 0;
+                  padding-left: 0;
+                  border-left: none;
+                }
+              `}
+              defaultOpen
+              header={"Eksterne medarbeidere"}
+            >
+              <div
+                css={css`
+                  margin-top: var(--a-spacing-4);
+                  display: grid;
+                  grid-template-columns: repeat(2, 1fr);
+                  gap: var(--a-spacing-4);
+                `}
+              >
+                {eksterneRessurser.map((ressurs) => {
+                  return (
+                    <ResourceLink
+                      key={ressurs.navident}
+                      navident={ressurs.navident}
+                    />
+                  );
+                })}
+              </div>
+            </ReadMore>
+          </div>
+        )}
+      </VStack>
+    </>
   );
 }
 
@@ -277,8 +278,10 @@ function DropdownMeny({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     <Dropdown>
       <Button
         as={Dropdown.Toggle}
+        css={css`
+          color: black;
+        `}
         icon={<MenuElipsisHorizontalCircleIcon title="Rediger" />}
-        size="small"
         variant="tertiary"
       />
       <Dropdown.Menu
