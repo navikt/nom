@@ -1,6 +1,10 @@
 import { css } from "@emotion/react";
 
+import { useGetSession } from "~/api/useGetSession";
+
 export function TestBanner() {
+  const session = useGetSession();
+
   if (window.location.href.includes("nom.ekstern.dev.nav.no")) {
     return (
       <>
@@ -14,7 +18,7 @@ export function TestBanner() {
             z-index: 10;
           `}
         >
-          TEST
+          TEST - {session.data?.navident}
         </div>
         <div
           css={css`
