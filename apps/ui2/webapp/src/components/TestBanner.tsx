@@ -9,10 +9,12 @@ export function TestBanner() {
 
   const navident = session.data?.navident;
 
-  const ressurs = useQuery({
-    queryKey: getRessurs.queryKey(navident),
-    queryFn: () => getRessurs.queryFn(navident),
-  }).data;
+  const ressurs = navident
+    ? useQuery({
+        queryKey: getRessurs.queryKey(navident),
+        queryFn: () => getRessurs.queryFn(navident),
+      }).data
+    : undefined;
 
   if (window.location.href.includes("nom.ekstern.dev.nav.no")) {
     return (
