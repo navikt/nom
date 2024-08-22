@@ -131,7 +131,9 @@ public class NomIntegrasjonKafkaListener {
 
     private Boolean orgtilknytningEventIsNomOrigination(OrgtilknytningEvent event) {
         return orgtilknytningStateRepository.findByFid(event.getFid()).map(state -> {
+            logger.info("Found orgtilknytning state for fid {} with navident {}", event.getFid(), state.navident());
             if (!masteredRessursStateRepository.isMastered(state.navident())) {
+                logger.info("Navident {} is not mastered", state.navident());
                 return event.getMetadata().inputMetadata().origination().initiatedFrom().contains(":nom-ui2");
             }
             return true;
