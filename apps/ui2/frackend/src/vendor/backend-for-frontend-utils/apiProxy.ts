@@ -29,13 +29,36 @@ export function addProxyHandler(server: Express, { ingoingUrl, outgoingUrl, scop
           const accessToken = getOboTokenForRequest(request, scope)?.accessToken;
           if (accessToken) {
             proxyRequest.setHeader("Authorization", `Bearer ${accessToken}`);
+            const infoCtx = "proxy request to " + outgoingUrl;
+            console.log(`ctx: ${infoCtx}, url: ${request.url}`)
           } else {
             console.log(`Access token var not present in session for scope ${scope}`);
           }
         },
+        econnreset: (err, req, res, target) => {
+          console.warn(jsonToFlatMsg({ctx: "proxy econnreset", errname: err.message, target}))
+        },
+        error: (err, req, res, target) => {
+          console.warn(jsonToFlatMsg({ctx: "proxy error", errname: err.name, target}))
+        },
+        close: (proxyRes, proxySocket, proxyHead) => {
+          console.warn(jsonToFlatMsg({ctx: "proxy close", proxyResStatusCode: proxyRes?.statusCode}))
+        },
+        proxyRes: (proxyRes, req, res) => {
+          const infoCtx = "proxy-response received from " + outgoingUrl;
+          console.log(`ctx: ${infoCtx}, url: ${req.url}, status: ${proxyRes.statusCode}`)
+        }
       },
     }),
   );
+}
+
+function jsonToFlatMsg(inp: any){
+  let out = "";
+  for(const k of Object.keys(inp)){
+    out += `${k} = ${inp[k]}; `
+  }
+  return out;
 }
 
 type SimpleProxyOptions = {
