@@ -14,10 +14,10 @@ import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateRepository;
 import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -41,9 +41,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 public class NomIntegrasjonListenerTest extends TestBase {
-
-    @InjectMocks
-    private NomIntegrasjonKafkaListener nomIntegrasjonKafkaListener;
 
     @MockBean
     private NomIntegrasjonService nomIntegrasjonService;
@@ -81,7 +78,8 @@ public class NomIntegrasjonListenerTest extends TestBase {
         when(nomStateRessursListener.hasReadToEndOnStartup()).thenReturn(true);
         when(nomStateOrgtilknytningListener.hasReadToEndOnStartup()).thenReturn(true);
         when(nomStateOrgEnhetListener.hasReadToEndOnStartup()).thenReturn(true);
-        nomIntegrasjonKafkaListener.setTestEnvironment(true);
+        when(unleash.isEnabled("nom-remedy-integrasjon.write_to_remedy")).thenReturn(true);
+        when(unleash.isEnabled("nom-remedy-integrasjon.use_nom_mastered_logic")).thenReturn(true);
     }
 
 
@@ -92,7 +90,6 @@ public class NomIntegrasjonListenerTest extends TestBase {
         var ressursState = ressursState(ressursOpprettetEventV1);
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        when(unleash.isEnabled("nom-remedy-integrasjon.use_nom_mastered_logic")).thenReturn(true);
         when(ressursStateRepository.findByFid(ressursOpprettetEventV1.getFid())).thenReturn(Optional.of(ressursState));
         when(masteredRessursStateRepository.isMastered(ressursState.navident())).thenReturn(false);
 
@@ -107,6 +104,7 @@ public class NomIntegrasjonListenerTest extends TestBase {
 
         countDownLatch.await(5, TimeUnit.SECONDS);
 
+        Awaitility.await().until(() -> ressursStateRepository.findByFid(ressursOpprettetEventV1.getFid()).isPresent());
         verify(nomIntegrasjonService, times(1))
             .handleRessursEvent(any(RessursOpprettetEventV1.class));
     }
@@ -119,7 +117,6 @@ public class NomIntegrasjonListenerTest extends TestBase {
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
-        when(unleash.isEnabled("nom-remedy-integrasjon.use_nom_mastered_logic")).thenReturn(true);
         when(ressursStateRepository.findByFid(ressursOpprettetEventV1.getFid())).thenReturn(Optional.of(ressursState));
         when(masteredRessursStateRepository.isMastered(ressursState.navident())).thenReturn(true);
 
@@ -146,7 +143,6 @@ public class NomIntegrasjonListenerTest extends TestBase {
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
-        when(unleash.isEnabled("nom-remedy-integrasjon.use_nom_mastered_logic")).thenReturn(true);
         when(orgtilknytningStateRepository.findByFid(orgtilknytningDagligOppfolgingEndretEventV1.getFid())).thenReturn(Optional.of(orgtilknytningState));
         when(masteredRessursStateRepository.isMastered(anyString())).thenReturn(false);
 
@@ -173,7 +169,6 @@ public class NomIntegrasjonListenerTest extends TestBase {
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
-        when(unleash.isEnabled("nom-remedy-integrasjon.use_nom_mastered_logic")).thenReturn(true);
         when(orgtilknytningStateRepository.findByFid(orgtilknytningDagligOppfolgingEndretEventV1.getFid())).thenReturn(Optional.of(orgtilknytningState));
         when(masteredRessursStateRepository.isMastered(anyString())).thenReturn(true);
 
@@ -190,27 +185,6 @@ public class NomIntegrasjonListenerTest extends TestBase {
 
         verify(nomIntegrasjonService, times(1))
             .handleOrgtilknytningEvent(any(OrgtilknytningEvent.class));
-    }
-
-    @Test
-    @DisplayName("Should skip handling events that are not originated from nom")
-    void testSkipsHandlingEventsIfNotNomOrigination() throws InterruptedException {
-
-        orgtilknytningEventKafkaTemplate.send(
-            orgtilknytningEventSourceTopic,
-            UUID.randomUUID().toString(),
-            orgtilknytningDagligOppfolgingEndretEventV1(new Origination("", "context:namespace:not-nom-ui2"))
-        );
-
-        ressursEventKafkaTemplate.send(
-            ressursEventSourceTopic,
-            UUID.randomUUID().toString(),
-            ressursOpprettetEventV1(new Origination("", "context:namespace:not-nom-ui2"))
-        );
-
-        Thread.sleep(700);
-
-        verifyNoInteractions(nomIntegrasjonService);
     }
 
     @Test

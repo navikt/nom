@@ -34,8 +34,6 @@ public class NomIntegrasjonKafkaListener {
 
     private final Logger logger = LoggerFactory.getLogger(NomIntegrasjonKafkaListener.class);
 
-    private boolean isTestEnvironment = false;
-
     public NomIntegrasjonKafkaListener(
         Unleash unleash,
         NomIntegrasjonService nomIntegrasjonService,
@@ -144,16 +142,16 @@ public class NomIntegrasjonKafkaListener {
 
     private Boolean orgtilknytningEventIsNomOriginationOrNomMastered(OrgtilknytningEvent orgtilknytningEvent) {
         var orgtilknytningState = orgtilknytningStateRepository.findByFid(orgtilknytningEvent.getFid());
-        if (isTestEnvironment) {
-            while (orgtilknytningState.isEmpty()) {
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    logger.error("Thread interrupted while waiting for orgtilknytningStateRepository to be ready", e);
-                }
-                orgtilknytningState = orgtilknytningStateRepository.findByFid(orgtilknytningEvent.getFid());
+
+        while (orgtilknytningState.isEmpty()) {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                logger.error("Thread interrupted while waiting for orgtilknytningStateRepository to be ready", e);
             }
+            orgtilknytningState = orgtilknytningStateRepository.findByFid(orgtilknytningEvent.getFid());
         }
+
         return orgtilknytningState.map(state -> {
             logger.info("Checking if ressurs with fid {} navident {} and orgtilknytning {} is mastered", orgtilknytningEvent.getFid(), state.navident(), state.orgEnhetId());
             if (!masteredRessursStateRepository.isMastered(state.navident())) {
@@ -166,19 +164,15 @@ public class NomIntegrasjonKafkaListener {
     private boolean ressursEventIsNomOriginationOrNomMastered(RessursEvent ressursEvent) {
         var ressursState = ressursStateRepository.findByFid(ressursEvent.getFid());
         logger.info("Prøver å finne ressursState for ressurs med fid {}, forsøk 1", ressursEvent.getFid());
-        if (isTestEnvironment) {
-            int count = 1;
-            while (ressursState.isEmpty()) {
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    logger.error("Thread interrupted while waiting for ressursStateRepository to be ready", e);
-                }
-                logger.info("Prøver å finne ressursState for ressurs med fid {}, forsøk {}", ressursEvent.getFid(), ++count);
-                ressursState = ressursStateRepository.findByFid(ressursEvent.getFid());
+
+        while (ressursState.isEmpty()) {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                logger.error("Thread interrupted while waiting for ressursStateRepository to be ready", e);
             }
+            ressursState = ressursStateRepository.findByFid(ressursEvent.getFid());
         }
-        logger.info("Fant ressursState for ressurs med fid {}", ressursState.get().fid());
         return ressursState.map(state -> {
             logger.info("Checking if ressurs with fid {} and navident {} is mastered", ressursEvent.getFid(), state.navident());
             if (!masteredRessursStateRepository.isMastered(state.navident())) {
@@ -196,9 +190,5 @@ public class NomIntegrasjonKafkaListener {
 
     private boolean useNomMasteredLogic() {
         return unleash.isEnabled("nom-remedy-integrasjon.use_nom_mastered_logic");
-    }
-
-    public void setTestEnvironment(boolean isTestEnvironment) {
-        this.isTestEnvironment = isTestEnvironment;
     }
 }
