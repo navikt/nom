@@ -1,10 +1,11 @@
 import path from "node:path";
 
+import express, { Express } from "express";
+
 import {
   addLocalViteServerHandler,
   addServeSpaHandler,
-} from "@navikt/backend-for-frontend-utils";
-import express, { Express } from "express";
+} from "./vendor/backend-for-frontend-utils/singlePageAppUtils.js";
 
 export function setupStaticRoutes(app: Express) {
   app.use(express.static("./public", { index: false }));

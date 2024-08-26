@@ -1,4 +1,4 @@
-import { requireEnvironment } from "@navikt/backend-for-frontend-utils";
+import { requireEnvironment } from "./vendor/backend-for-frontend-utils/config.js";
 
 const azureAd = {
   clientId: requireEnvironment("AZURE_APP_CLIENT_ID"),
