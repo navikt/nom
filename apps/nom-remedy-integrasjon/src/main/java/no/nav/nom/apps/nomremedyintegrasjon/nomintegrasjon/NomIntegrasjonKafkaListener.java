@@ -165,16 +165,20 @@ public class NomIntegrasjonKafkaListener {
 
     private boolean ressursEventIsNomOriginationOrNomMastered(RessursEvent ressursEvent) {
         var ressursState = ressursStateRepository.findByFid(ressursEvent.getFid());
+        logger.info("Prøver å finne ressursState for ressurs med fid {}, forsøk 1", ressursEvent.getFid());
         if (isTestEnvironment) {
+            int count = 1;
             while (ressursState.isEmpty()) {
                 try {
                     Thread.sleep(200);
                 } catch (InterruptedException e) {
                     logger.error("Thread interrupted while waiting for ressursStateRepository to be ready", e);
                 }
+                logger.info("Prøver å finne ressursState for ressurs med fid {}, forsøk {}", ressursEvent.getFid(), ++count);
                 ressursState = ressursStateRepository.findByFid(ressursEvent.getFid());
             }
         }
+        logger.info("Fant ressursState for ressurs med fid {}", ressursState.get().fid());
         return ressursState.map(state -> {
             logger.info("Checking if ressurs with fid {} and navident {} is mastered", ressursEvent.getFid(), state.navident());
             if (!masteredRessursStateRepository.isMastered(state.navident())) {
