@@ -123,10 +123,13 @@ public class NomIntegrasjonKafkaListener {
     }
 
     private Boolean isNomOriginationOrNomMastered(Event event) {
+        logger.info("Event with fid {} is a {}", event.getFid(), event.getClass().getSimpleName());
         if (useNomMasteredLogic()) {
             if (event instanceof RessursEvent) {
+                logger.info("Event {} is a RessursEvent", event.getFid());
                 return ressursEventIsNomOriginationOrNomMastered((RessursEvent) event);
             } else if (event instanceof OrgtilknytningEvent) {
+                logger.info("Event {} is a OrgtilknytningEvent", event.getFid());
                 return orgtilknytningEventIsNomOriginationOrNomMastered((OrgtilknytningEvent) event);
             }
             return false;
