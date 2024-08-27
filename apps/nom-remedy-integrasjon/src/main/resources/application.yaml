@@ -1,5 +1,13 @@
 app:
   name: ${NAIS_APP_NAME:nom-remedy-integrasjon}
+  kafka:
+    ressurs:
+      stateTopic: org.nom.intern-ressurs-state
+      nomMasteredRessursTopic: org.nom.nom-mastered-ressurs
+    orgEnhet:
+      stateTopic: org.nom.intern-orgenhet-state
+    orgTilknytning:
+      stateTopic: org.nom.intern-orgtilknytning-state
   kafka-topics:
     ressurs-eventsource:
       topic-name: org.nom.ressurs-eventsource
@@ -10,6 +18,11 @@ app:
   clients:
     nom-api:
       url: ${NOM_API_URL}
+
+nom.libs.state.ressurs.enabled: true
+nom.libs.state.orgenhet.enabled: true
+nom.libs.state.orgtilknytning.enabled: true
+nom.libs.state.mastered-ressurs.enabled: true
 
 management:
   endpoint:

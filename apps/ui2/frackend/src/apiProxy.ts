@@ -1,7 +1,7 @@
-import { addProxyHandler } from "@navikt/backend-for-frontend-utils";
 import { Express } from "express";
 
 import config from "./config.js";
+import { addProxyHandler } from "./vendor/backend-for-frontend-utils/apiProxy.js";
 
 export const setupNomApiProxy = (app: Express) =>
   addProxyHandler(app, {
