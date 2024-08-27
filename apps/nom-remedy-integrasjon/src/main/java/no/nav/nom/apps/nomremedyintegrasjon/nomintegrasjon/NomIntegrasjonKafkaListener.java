@@ -147,12 +147,14 @@ public class NomIntegrasjonKafkaListener {
     private Boolean orgtilknytningEventIsNomOriginationOrNomMastered(OrgtilknytningEvent orgtilknytningEvent) {
         var orgtilknytningState = orgtilknytningStateRepository.findByFid(orgtilknytningEvent.getFid());
 
-        while (orgtilknytningState.isEmpty()) {
+        int count = 0;
+        while (orgtilknytningState.isEmpty() && count < 5) {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
                 logger.error("Thread interrupted while waiting for orgtilknytningStateRepository to be ready", e);
             }
+            count++;
             orgtilknytningState = orgtilknytningStateRepository.findByFid(orgtilknytningEvent.getFid());
         }
 
@@ -169,12 +171,14 @@ public class NomIntegrasjonKafkaListener {
         var ressursState = ressursStateRepository.findByFid(ressursEvent.getFid());
         logger.info("Prøver å finne ressursState for ressurs med fid {}, forsøk 1", ressursEvent.getFid());
 
-        while (ressursState.isEmpty()) {
+        int count = 0;
+        while (ressursState.isEmpty() && count < 5) {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
                 logger.error("Thread interrupted while waiting for ressursStateRepository to be ready", e);
             }
+            count++;
             ressursState = ressursStateRepository.findByFid(ressursEvent.getFid());
         }
         return ressursState.map(state -> {
