@@ -126,6 +126,11 @@ POSTGRES_DB_HOST: b27dbvl033.preprod.local
 DB_ENV: preprod-fss
 
 ---
+logging:
+  level:
+    org.springframework.kafka: DEBUG
+
+---
 spring:
   config:
     activate:
