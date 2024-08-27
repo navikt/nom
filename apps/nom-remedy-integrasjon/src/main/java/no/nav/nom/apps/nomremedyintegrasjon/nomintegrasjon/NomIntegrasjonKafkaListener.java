@@ -62,7 +62,9 @@ public class NomIntegrasjonKafkaListener {
         containerFactory = "ressursEventKafkaListenerContainerFactory"
     )
     public void ressursEventListener(RessursEvent ressursEvent, @Header(KafkaHeaders.RECEIVED_KEY) String recordId) {
+        logger.info("Waiting for NOM states to be ready");
         waitForNomStates();
+        logger.info("Received ressurs event with fid {}", ressursEvent.getFid());
         if (isWriteToRemedyEnabled()) {
 
             putMDCContext(recordId, ressursEvent.getClass().getSimpleName());
@@ -83,7 +85,9 @@ public class NomIntegrasjonKafkaListener {
         containerFactory = "orgtilknytningEventKafkaListenerContainerFactory"
     )
     public void orgtilknytningEventListener(OrgtilknytningEvent orgtilknytningEvent, @Header(KafkaHeaders.RECEIVED_KEY) String recordId) {
+        logger.info("Waiting for NOM states to be ready");
         waitForNomStates();
+        logger.info("Received orgtilknytning event with fid {}", orgtilknytningEvent.getFid());
         if (isWriteToRemedyEnabled()) {
 
             putMDCContext(recordId, orgtilknytningEvent.getClass().getSimpleName());
