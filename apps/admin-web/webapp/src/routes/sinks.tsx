@@ -9,9 +9,9 @@ import {
 import {
   getApiRessursEventsOptions,
   getOrgenhetEventsOptions,
+  getOrgtilknytningEventsOptions,
   getRessursEventsOptions,
   getTilgangEventsOptions,
-  getOrgtilknytningEventsOptions,
 } from "~/api/queries.ts";
 
 export const Route = createFileRoute("/sinks")({
