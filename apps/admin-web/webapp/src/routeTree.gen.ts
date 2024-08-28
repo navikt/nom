@@ -25,6 +25,7 @@ import { Route as StateOrganiseringImport } from './routes/state.organisering'
 import { Route as SinksTilgangImport } from './routes/sinks.tilgang'
 import { Route as SinksRessursImport } from './routes/sinks.ressurs'
 import { Route as SinksOrgenhetImport } from './routes/sinks.orgenhet'
+import { Route as SinksOrgtilknytningImport } from './routes/sinks.orgtilknytning'
 import { Route as SinksNomMasteredImport } from './routes/sinks.nom-mastered'
 import { Route as SinksApiRessursImport } from './routes/sinks.api-ressurs'
 import { Route as SinksApiOrgenhetImport } from './routes/sinks.api-orgenhet'
@@ -99,6 +100,11 @@ const SinksRessursRoute = SinksRessursImport.update({
 
 const SinksOrgenhetRoute = SinksOrgenhetImport.update({
   path: '/orgenhet',
+  getParentRoute: () => SinksRoute,
+} as any)
+
+const SinksOrgtilknytningRoute = SinksOrgtilknytningImport.update({
+  path: '/orgtilknytning',
   getParentRoute: () => SinksRoute,
 } as any)
 
@@ -196,6 +202,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SinksOrgenhetImport
       parentRoute: typeof SinksImport
     }
+    '/sinks/orgtilknytning': {
+      id: '/sinks/orgtilknytning'
+      path: '/orgtilknytning'
+      fullPath: '/sinks/orgtilknytning'
+      preLoaderRoute: typeof SinksOrgtilknytningImport
+      parentRoute: typeof SinksImport
+    }
     '/sinks/ressurs': {
       id: '/sinks/ressurs'
       path: '/ressurs'
@@ -267,6 +280,7 @@ export const routeTree = rootRoute.addChildren({
     SinksApiRessursRoute,
     SinksNomMasteredRoute,
     SinksOrgenhetRoute,
+    SinksOrgtilknytningRoute,
     SinksRessursRoute,
     SinksTilgangRoute,
     SinksIndexRoute,
