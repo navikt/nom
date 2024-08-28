@@ -69,7 +69,10 @@ function OrgtilknytningHistoryPage() {
                   </Link>
                 </Table.HeaderCell>
                 <Table.DataCell>
-                  <JsonModal data={orgtilknytningEvent} text={orgtilknytningEvent.type} />
+                  <JsonModal
+                    data={orgtilknytningEvent}
+                    text={orgtilknytningEvent.type}
+                  />
                 </Table.DataCell>
                 <Table.DataCell>
                   {formatDisplayDatetime(
