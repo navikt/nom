@@ -36,7 +36,7 @@ export function addProxyHandler(server: Express, { ingoingUrl, outgoingUrl, scop
           }
         },
         econnreset: (err, req, res, target) => {
-          console.warn(jsonToFlatMsg({ctx: "proxy econnreset", errname: err.message, target}))
+          console.warn(jsonToFlatMsg({ctx: "proxy econnreset", errname: err.message, srvStatusCode: res?.statusCode, reqmethod: req.method, target: (target as any)["path"] ?? target}))
         },
         error: (err, req, res, target) => {
           console.warn(jsonToFlatMsg({ctx: "proxy error", errname: err.name, target}))
