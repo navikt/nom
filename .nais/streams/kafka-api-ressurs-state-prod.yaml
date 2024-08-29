@@ -11,6 +11,8 @@ metadata:
 spec:
   image: "{{image}}"
   env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: prod
     - name: LOGGING_CONFIG
       value: 'classpath:logback-nais.xml'
   port: 8080

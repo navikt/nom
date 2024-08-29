@@ -19,11 +19,20 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Properties;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 public class EventsrcToStateTestTopology {
     ObjectMapper objectMapper = configureObjectMapper();
     TestInputTopic<String, RessursEvent> ressursInputTopic;
     TestInputTopic<String, OrgtilknytningEvent> orgtilknytningInputTopic;
     TestOutputTopic<String, RessursState> outputTopic;
+
+    final AppProperties appProperties = mock(AppProperties.class);
+
+    static final String RESSURS_INPUT_TOPIC = "ressursInputTopic";
+    static final String ORGTILKNYTNING_INPUT_TOPIC = "orgtilknytningInputTopic";
+    static final String STATE_TOPIC = "stateTopic";
 
     @BeforeEach
     public void setup() {
@@ -35,14 +44,15 @@ public class EventsrcToStateTestTopology {
         final StreamsBuilder streamsBuilder = new StreamsBuilder();
         final var objectSerde = kafkaConfig.objectSerde(objectMapper);
 
+        when(appProperties.ressursEvtsrcTopic()).thenReturn(RESSURS_INPUT_TOPIC);
+        when(appProperties.orgtilknytningEvtsrcTopic()).thenReturn(ORGTILKNYTNING_INPUT_TOPIC);
+        when(appProperties.stateTopic()).thenReturn(STATE_TOPIC);
 
         new EventsrcToState(
-            "ressursInputTopic",
-            "orgtilknytningInputTopic",
-            "outputTopic",
             objectMapper,
             objectSerde,
-            streamsBuilder
+            streamsBuilder,
+            appProperties
         );
 
         Topology topology = streamsBuilder.build();
@@ -51,13 +61,13 @@ public class EventsrcToStateTestTopology {
 
         //        log.debug(topology.describe().toString());
 
-        ressursInputTopic = topologyTestDriver.createInputTopic("ressursInputTopic", new StringSerializer(), objectSerde.copyWithType(RessursEvent.class).serializer());
-        orgtilknytningInputTopic = topologyTestDriver.createInputTopic("orgtilknytningInputTopic", new StringSerializer(), objectSerde.copyWithType(
+        ressursInputTopic = topologyTestDriver.createInputTopic(RESSURS_INPUT_TOPIC, new StringSerializer(), objectSerde.copyWithType(RessursEvent.class).serializer());
+        orgtilknytningInputTopic = topologyTestDriver.createInputTopic(ORGTILKNYTNING_INPUT_TOPIC, new StringSerializer(), objectSerde.copyWithType(
             OrgtilknytningEvent.class).serializer());
 
         final var ressursStateSerde = objectSerde.copyWithType(RessursState.class);
         ressursStateSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());
-        outputTopic = topologyTestDriver.createOutputTopic("outputTopic", new StringDeserializer(), ressursStateSerde.deserializer());
+        outputTopic = topologyTestDriver.createOutputTopic(STATE_TOPIC, new StringDeserializer(), ressursStateSerde.deserializer());
     }
 
     private static ObjectMapper configureObjectMapper() {
@@ -70,3 +80,4 @@ public class EventsrcToStateTestTopology {
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
     }
 }
+

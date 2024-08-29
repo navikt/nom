@@ -41,6 +41,7 @@ import java.util.Properties;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 public class EventsrcToStateTest extends EventsrcToStateTestTopology {
@@ -339,6 +340,99 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
             (Event.Metadata) null,
             additionalData
         );
+    }
+
+
+    @Test
+    @DisplayName("Hopp over første State melding basert på offset på Ressurs")
+    public void test71() {
+        String navident = "A123000";
+        String enhet = "a123bc";
+        String ressursFid = "RESSURS_FID_1";
+        String orgtilknytningFid = "OT_FID_1";
+
+        final RessursOpprettetEventV1 ressursEvent = ressursOpprettetEvent(ressursFid, navident);
+        final OrgtilknytningOpprettetEventV1 orgtilknytningEvent = orgtilknytningOpprettetEvent(orgtilknytningFid, navident, enhet);
+
+        when(appProperties.skipProducingStateEventsUntilRessursEvtsrcOffset()).thenReturn(1);
+
+        ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursEvent); // Skal ikke lage State event
+        orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), orgtilknytningEvent); // Vil lage State event
+
+        RessursState firstExpectedStateEvt = ressursStateFraOpprettetEvent(ressursEvent);
+        RessursState nextExpectedStateEvt = oppdaterRessursState(firstExpectedStateEvt, orgtilknytningEvent);
+
+        List<KeyValue<String, RessursState>> expected = new ArrayList<>();
+        //        expected.add(new KeyValue<>(ressursFid, firstExpectedStateEvt)); // This is skipped
+        expected.add(new KeyValue<>(ressursFid, nextExpectedStateEvt));
+
+        var result = outputTopic.readKeyValuesToList();
+
+        log.info("Expected result: {}", asFormattedOutputString(expected));
+        log.info("Acctual result: {}", asFormattedOutputString(result));
+
+        assertThat(result)
+            .containsExactly(
+                toArray(expected)
+            );
+    }
+
+    @Test
+    @DisplayName("Hopp over 2 OT offset og en Ressurs offset - Opprett ressurs, legg til orgtilknytning, sett daglig oppfølging, endre ressurs, avslutt orgtilknytning og til slutt avslutt ressurs")
+    public void test72() {
+        String navident = "A123000";
+        String enhet = "a123bc";
+        String ressursFid = "RESSURS_FID_1";
+        String orgtilknytningFid = "OT_FID_1";
+        LocalDate sluttdato = LocalDate.now().plusMonths(2);
+
+        final RessursOpprettetEventV1 ressursEvent = ressursOpprettetEvent(ressursFid, navident);
+        final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEvent = orgtilknytningOpprettetEvent(orgtilknytningFid, navident, enhet);
+        final OrgtilknytningDagligOppfolgingEndretEventV1 dagligOppfolgingEvent = dagligOppfolgingEvent(orgtilknytningOpprettetEvent, true);
+        final RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertEvent = ressursPersonaliaOppdatertEvent(ressursFid,
+            new Visningsnavn(
+                "fornavnEndret",
+                Optional.empty(),
+                "etternavnEndret"
+            )
+        );
+        final OrgtilknytningAvsluttetEventV1 orgtilknytningAvsluttetEvent =  orgtilknytningAvsluttetEvent(orgtilknytningOpprettetEvent, sluttdato);
+        final RessursSluttetEventV1 ressursSluttetEvent = ressursSluttetEvent(ressursFid, sluttdato);
+
+        when(appProperties.skipProducingStateEventsUntilRessursEvtsrcOffset()).thenReturn(1);
+        when(appProperties.skipProducingStateEventsUntilOrgtilknytningEvtsrcOffset()).thenReturn(2);
+
+        ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursEvent);
+        orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), orgtilknytningOpprettetEvent);
+        orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), dagligOppfolgingEvent);
+        ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursPersonaliaOppdatertEvent);
+        orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), orgtilknytningAvsluttetEvent);
+        ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursSluttetEvent);
+
+        RessursState expectedStateEvt_1 = ressursStateFraOpprettetEvent(ressursEvent);
+        RessursState expectedStateEvt_2 = oppdaterRessursState(expectedStateEvt_1, orgtilknytningOpprettetEvent);
+        RessursState expectedStateEvt_3 = oppdaterRessursState(expectedStateEvt_2, dagligOppfolgingEvent);
+        RessursState expectedStateEvt_4 = oppdaterRessursState(expectedStateEvt_3, ressursPersonaliaOppdatertEvent);
+        RessursState expectedStateEvt_5 = oppdaterRessursState(expectedStateEvt_4, orgtilknytningAvsluttetEvent);
+        RessursState expectedStateEvt_6 = oppdaterRessursState(expectedStateEvt_5, ressursSluttetEvent);
+
+        List<KeyValue<String, RessursState>> expected = new ArrayList<>();
+        //        expected.add(new KeyValue<>(ressursFid, expectedStateEvt_1)); // Skipped
+        //        expected.add(new KeyValue<>(ressursFid, expectedStateEvt_2)); // Skipped
+        //        expected.add(new KeyValue<>(ressursFid, expectedStateEvt_3)); // Skipped
+        expected.add(new KeyValue<>(ressursFid, expectedStateEvt_4));
+        expected.add(new KeyValue<>(ressursFid, expectedStateEvt_5));
+        expected.add(new KeyValue<>(ressursFid, expectedStateEvt_6));
+
+        var result = outputTopic.readKeyValuesToList();
+
+        log.info("Expected result: {}", asFormattedOutputString(expected));
+        log.info("Acctual result: {}", asFormattedOutputString(result));
+
+        assertThat(result)
+            .containsExactly(
+                toArray(expected)
+            );
     }
 
     private RessursSluttetEventV1 ressursSluttetEvent(String fid, LocalDate sluttdato) {

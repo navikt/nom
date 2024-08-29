@@ -23,8 +23,8 @@ jobs:
       maven-project: api-ressurs-state
       jar-path: apps/streams/kafka-api/api-ressurs-state/target/app.jar
       image-suffix: nom-kafka-api-ressurs-state
-      nais-config-file-path-dev: .nais/streams/kafka-api-ressurs-state.yaml
-      nais-config-file-path-prod: .nais/streams/kafka-api-ressurs-state.yaml
+      nais-config-file-path-dev: .nais/streams/kafka-api-ressurs-state-dev.yaml
+      nais-config-file-path-prod: .nais/streams/kafka-api-ressurs-state-prod.yaml
       additional-nais-vars-dev: ',kafka-pool=nav-dev'
       additional-nais-vars-prod: ',kafka-pool=nav-prod'
       dockerfile: Dockerfile_distroless

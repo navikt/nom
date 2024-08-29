@@ -1,7 +1,7 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: nom-research-kafka-api-ressurs-state
+  name: nom-kafka-api-ressurs-state
   namespace: org
   annotations:
     nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
@@ -11,6 +11,8 @@ metadata:
 spec:
   image: "{{image}}"
   env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: dev
     - name: LOGGING_CONFIG
       value: 'classpath:logback-nais.xml'
   port: 8080

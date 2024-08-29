@@ -1,6 +1,6 @@
 app:
   kafka:
-    state-topic.v2: org.nom.api-ressurs-state-v2
+    state-topic: org.nom.api-ressurs-state-v2
     ressurs-evtsrc-topic: org.nom.ressurs-eventsource
     orgtilknytning-evtsrc-topic: org.nom.orgtilknytning-eventsource
 
@@ -37,9 +37,26 @@ management:
       exposure:
         include: prometheus, info, health, metrics
       base-path: /internal
-  metrics:
-    web:
-      server:
-        request:
-          autotime:
-            enabled: true
+
+--- # PROD config
+spring:
+  config:
+    activate:
+      on-profile: prod && !dev
+
+app:
+  kafka:
+    # Se Readme.md
+    skip-producing-state-events-until-ressurs-evtsrc-offset: 0          # org.nom-research-kafka-api-ressurs-state_stream_-2
+    skip-producing-state-events-until-orgtilknytning-evtsrc-offset: 0
+
+--- # DEV config
+spring:
+  config:
+    activate:
+      on-profile: dev && !prod
+
+app:
+  kafka:
+    skip-producing-state-events-until-ressurs-evtsrc-offset: 452777           # 15. aug. 2024 kl. 14:51:59  - vil vi miste events fra før dette tidspunktet?
+    skip-producing-state-events-until-orgtilknytning-evtsrc-offset: 109166    # 09. aug. 2024 kl. 09:31:59
