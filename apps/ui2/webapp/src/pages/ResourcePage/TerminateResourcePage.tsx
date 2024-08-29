@@ -129,7 +129,12 @@ export function TerminateResourcePage() {
           cancelButtonLabel={"Gå tilbake"}
           confirmButtonLabel={"Gå videre"}
           content={
-            "Du har satt en sluttdato som er senere enn medarbeiderens nåværende sluttdato. Dette betyr at du må angi hvor vedkommende jobber i den utvidede perioden. Trykk for å gå videre til Endre-grensesnittet."
+            <span>
+              Du har satt en sluttdato som er senere enn medarbeiderens
+              nåværende sluttdato. For å gjøre dette må du angi hvor vedkommende
+              jobber i den utvidede perioden. Trykk på <b>Gå videre</b> for å
+              angi hvor medarbeideren jobber i perioden.
+            </span>
           }
           heading={"Utsette sluttdato"}
         />,
