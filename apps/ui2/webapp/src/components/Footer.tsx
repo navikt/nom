@@ -1,5 +1,9 @@
 import { css } from "@emotion/react";
-import { EnvelopeClosedFillIcon } from "@navikt/aksel-icons";
+import {
+  EnvelopeClosedFillIcon,
+  InformationSquareIcon,
+  QuestionmarkDiamondIcon,
+} from "@navikt/aksel-icons";
 import { Link } from "@navikt/ds-react";
 import type { Ref, SVGProps } from "react";
 import { forwardRef } from "react";
@@ -24,10 +28,9 @@ export function Footer() {
       <div
         css={css(
           css`
+            display: flex;
             align-self: center;
-            gap: var(--a-spacing-4) 3rem;
-            display: grid;
-            grid-template-columns: max-content 1fr;
+            justify-content: space-between;
 
             a {
               color: var(--a-white);
@@ -47,14 +50,15 @@ export function Footer() {
           rel="noopener noreferrer"
           target="_blank"
         >
-          Om NOM
+          <QuestionmarkDiamondIcon />
+          Brukerveiledning
         </Link>
         <Link
           css={css`
             svg {
-              width: 18px;
-              height: 18px;
-              margin-right: 4px;
+              width: 20px;
+              height: 20px;
+              margin-right: 2px;
             }
           `}
           href={"https://nav-it.slack.com/archives/C0362LA7ZLN"}
@@ -67,6 +71,7 @@ export function Footer() {
           rel="noopener noreferrer"
           target="_blank"
         >
+          <InformationSquareIcon />
           Tilgjengelighetserklæring
         </Link>
         <Link
@@ -78,10 +83,10 @@ export function Footer() {
               align-self: start;
             }
           `}
-          href="mailto:mugunthan.dharmadas@nav.no;line.eeg-larsen@nav.no?subject=Tilbakemelding NOM"
+          href="https://jira.adeo.no/plugins/servlet/desk/portal/581/?requestGroup=1144"
         >
           <EnvelopeClosedFillIcon />
-          Spørsmål eller tilbakemeldinger?
+          Meld feil i Porten
         </Link>
       </div>
     </div>
