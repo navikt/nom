@@ -63,12 +63,7 @@ export function Footer() {
           `}
           href={"https://nav-it.slack.com/archives/C0362LA7ZLN"}
         >
-          <SlackIcon
-            css={css`
-              //margin: 2px;
-              //padding: 2px;
-            `}
-          />
+          <SlackIcon />
           #nom
         </Link>
         <Link
