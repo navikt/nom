@@ -9,6 +9,7 @@ import {
 import {
   getApiRessursEventsOptions,
   getOrgenhetEventsOptions,
+  getOrgtilknytningEventsOptions,
   getRessursEventsOptions,
   getTilgangEventsOptions,
 } from "~/api/queries.ts";
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/sinks")({
     context.queryClient.prefetchQuery(getTilgangEventsOptions(deps));
     context.queryClient.prefetchQuery(getRessursEventsOptions(deps));
     context.queryClient.prefetchQuery(getApiRessursEventsOptions(deps));
+    context.queryClient.prefetchQuery(getOrgtilknytningEventsOptions(deps));
   },
   component: () => {
     const search = Route.useSearch();
@@ -44,6 +46,11 @@ export const Route = createFileRoute("/sinks")({
             label="Historikk tilganger"
             onClick={() => navigate({ to: "/sinks/tilgang", search })}
             value="/sinks/tilgang"
+          />
+          <Tabs.Tab
+            label="Historikk orgtilknytninger"
+            onClick={() => navigate({ to: "/sinks/orgtilknytning", search })}
+            value="/sinks/orgtilknytning"
           />
           <Tabs.Tab
             label="NOM mastered"

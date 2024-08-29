@@ -91,6 +91,7 @@ public class OrgtilknytningTypeUpdater {
 
         orgtilknytningService.getByNavidenter(aktiveKommunale, Function.identity()).values().stream()
             .flatMap(Collection::stream)
+            .filter(orgtilknytningState -> !orgtilknytningState.fid().startsWith("FID_MANUELL")) // Manuelle orgtilknytninger skal ikke endres
             .filter(orgtilknytningState ->
                 PeriodeUtil.isCurrentOrFuturePeriod(orgtilknytningState) && !orgtilknytningState.orgtilknytningType().isPresent()
             ).forEach(orgtilknytningState ->

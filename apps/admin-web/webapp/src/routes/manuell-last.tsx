@@ -11,6 +11,7 @@ import {
   lastRessurser,
   lastSkyggeOrgtilknytningerForKommunale,
   lastTyperForOrgenheter,
+  reberegnNomnivaa,
 } from "~/api/apiQueries.ts";
 
 export const Route = createFileRoute("/manuell-last")({
@@ -31,6 +32,7 @@ const LASTER = [
     fn: lastSkyggeOrgtilknytningerForKommunale,
   },
   { text: "Last typer for orgenheter", fn: lastTyperForOrgenheter },
+  { text: "Beregn NOM-nivå på nytt", fn: reberegnNomnivaa },
 ];
 function ManuellLastPage() {
   return (

@@ -9,6 +9,8 @@ interface BekreftModalProperties {
   onConfirm?: () => void;
   heading: string;
   content: ReactNode;
+  confirmButtonLabel?: string;
+  cancelButtonLabel?: string;
 }
 
 export function BekreftModal({
@@ -16,6 +18,8 @@ export function BekreftModal({
   onConfirm,
   heading,
   content,
+  confirmButtonLabel,
+  cancelButtonLabel,
 }: BekreftModalProperties) {
   return (
     <Modal
@@ -35,10 +39,10 @@ export function BekreftModal({
           onClick={onConfirm}
           size="small"
         >
-          Bekreft endring
+          {confirmButtonLabel ?? "Bekreft"}
         </Button>
         <Button onClick={onCancel} size="small" variant="secondary">
-          Avbryt
+          {cancelButtonLabel ?? "Avbryt"}
         </Button>
       </Modal.Footer>
     </Modal>

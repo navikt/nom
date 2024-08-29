@@ -73,6 +73,18 @@ export function getOrgenhetEventsOptions(search: searchType) {
   });
 }
 
+export function getOrgtilknytningEventsOptions(search: searchType) {
+  return queryOptions({
+    queryKey: ["EVENTS", "ORGTILKNYTNING", search],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/sinks/orgtilknytningEvents?${queryString.stringify(search, { skipNull: true })}`,
+        )
+      ).json<KafkaEvent[]>(),
+  });
+}
+
 export function getNomMasteredOptions() {
   return queryOptions({
     queryKey: ["STATE", "NOM-MASTERED"],

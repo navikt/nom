@@ -31,8 +31,10 @@ import { RessursCard } from "~/pages/ResourcePage/RessursComponents/RessursCard"
 import fjernRessursIcon from "~/resources/fjernRessursIcon.svg";
 import type { AvvikleRessursRequest } from "~/types/api-models";
 import {
+  dateWithoutTimezone,
   formatDateWithoutTimezone,
   formatVisningsnavn,
+  isSameDateOrBefore,
   isTodayOrBefore,
   todayWithoutTimezone,
 } from "~/utils";
@@ -80,33 +82,68 @@ export function TerminateResourcePage() {
       }
     },
     onSuccess: () => {
-      showToast({ text: "Avsluttet" });
-      navigate({ params: { id }, to: "/ressurs/$id" });
+      showToast({ text: "Oppdatert" });
+      navigate({ params: { id }, to: "/ressurs/$id" }).then();
     },
   });
 
   const { showModal } = useModal();
 
-  const onSubmit = async (values: { sluttDato: string }) => {
-    const sluttDato = values.sluttDato;
+  if (!ressurs) {
+    return <></>;
+  }
 
-    if (isTodayOrBefore(new Date(sluttDato))) {
+  const onSubmit = async (values: { sluttDato: string }) => {
+    const nySluttdato = values.sluttDato;
+    const ressursSluttdato = ressurs.sluttdato;
+
+    if (
+      !ressursSluttdato ||
+      isSameDateOrBefore(
+        dateWithoutTimezone(new Date(nySluttdato)),
+        dateWithoutTimezone(new Date(ressursSluttdato)),
+      )
+    ) {
+      if (isTodayOrBefore(new Date(nySluttdato))) {
+        await showModal(
+          <BekreftModal
+            confirmButtonLabel={"Bekreft endring"}
+            content={
+              <BekreftModalInnholdTomIFortiden
+                navn={
+                  formatVisningsnavn(ressurs?.visningsnavn) ?? "medarbeideren"
+                }
+              />
+            }
+            heading={"Bekreft endring"}
+          />,
+        ).then(() => {
+          avvikleRessursMutation.mutate(values);
+        });
+      } else {
+        avvikleRessursMutation.mutate(values);
+      }
+    } else {
       await showModal(
         <BekreftModal
+          cancelButtonLabel={"Gå tilbake"}
+          confirmButtonLabel={"Gå videre"}
           content={
-            <BekreftModalInnholdTomIFortiden
-              navn={
-                formatVisningsnavn(ressurs?.visningsnavn) ?? "medarbeideren"
-              }
-            />
+            <span>
+              Du har satt en sluttdato som er senere enn medarbeiderens
+              nåværende sluttdato. For å gjøre dette må du angi hvor vedkommende
+              jobber i den utvidede perioden. Trykk på <b>Gå videre</b> for å
+              angi hvor medarbeideren jobber i perioden.
+            </span>
           }
-          heading={"Bekreft endring"}
+          heading={"Utsette sluttdato"}
         />,
       ).then(() => {
-        avvikleRessursMutation.mutate(values);
+        navigate({
+          to: `/ressurs/${ressurs.navident}`,
+          search: { editOrgtilknytninger: true },
+        });
       });
-    } else {
-      avvikleRessursMutation.mutate(values);
     }
   };
 
