@@ -28,10 +28,9 @@ export function Footer() {
       <div
         css={css(
           css`
+            display: flex;
             align-self: center;
-            gap: var(--a-spacing-4) 3rem;
-            display: grid;
-            grid-template-columns: max-content 1fr;
+            justify-content: space-between;
 
             a {
               color: var(--a-white);
@@ -57,8 +56,8 @@ export function Footer() {
         <Link
           css={css`
             svg {
-              width: 20px;
-              height: 20px;
+              width: 18px;
+              height: 18px;
               margin-right: 4px;
             }
           `}
@@ -66,7 +65,8 @@ export function Footer() {
         >
           <SlackIcon
             css={css`
-              margin: 2px;
+              //margin: 2px;
+              padding: 2px;
             `}
           />
           #nom
