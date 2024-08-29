@@ -319,8 +319,6 @@ function OrganisationHierarchyTree({
 
   const orgEnhet = orgEnhetQuery.data;
 
-  // const navigate = useNavigate();
-
   if (!orgEnhet) {
     return <></>;
   }

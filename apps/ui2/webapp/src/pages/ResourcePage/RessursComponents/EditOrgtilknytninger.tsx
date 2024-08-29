@@ -18,6 +18,7 @@ import {
   HelpText,
   HStack,
   Label,
+  Tag,
   useDatepicker,
 } from "@navikt/ds-react";
 import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
@@ -66,11 +67,13 @@ import type {
 } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
 import {
+  dateWithoutTimezone,
   formatDateWithoutTimezone,
   formatDisplayDate,
   formatVisningsnavn,
   isSameDateOrAfter,
   isSameDateOrBefore,
+  isTodayOrAfter,
   todayWithoutTimezone,
 } from "~/utils";
 
@@ -504,7 +507,21 @@ function EditOrgilkntyningFormPart({ index }: { index: number }) {
 
   return (
     <div>
-      <Heading size="medium">{orgEnhetQuery.data?.navn}</Heading>
+      <div
+        css={css`
+          display: flex;
+          justify-content: space-between;
+        `}
+      >
+        <Heading size="medium">{orgEnhetQuery.data?.navn}</Heading>
+
+        {field.gyldigTom &&
+          !isTodayOrAfter(dateWithoutTimezone(new Date(field.gyldigTom))) && (
+            <Tag size="medium" variant="warning">
+              Avsluttet
+            </Tag>
+          )}
+      </div>
 
       <BodyLong>
         Enhet i Remedy: <b>{orgEnhetQuery.data?.remedyEnhetId}</b>
