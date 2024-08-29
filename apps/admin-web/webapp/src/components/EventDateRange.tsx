@@ -3,7 +3,7 @@ import { formatDisplayDatetime } from "~/utils.ts";
 
 export function EventDateRange({ events }: { events: KafkaEvent[] }) {
   const latestEvent = events[0];
-  const firstEvent = events.at(-1);
+  const firstEvent = events[events.length - 1];
 
   return (
     <div>

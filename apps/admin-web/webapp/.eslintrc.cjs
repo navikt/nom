@@ -3,6 +3,7 @@ const IGNORED_UNICORN_RULES = {
   "unicorn/no-null": "off",
   "unicorn/prevent-abbreviations": "off",
   "unicorn/no-await-expression-member": "off",
+    "unicorn/prefer-at": "off",
 };
 
 // eslint-disable-next-line unicorn/prefer-module,no-undef
