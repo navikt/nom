@@ -26,7 +26,7 @@ export function TestBanner() {
             text-align: center;
             padding: 0.5rem;
             position: fixed;
-            z-index: -1;
+            z-index: 1;
             font-size: 24px;
           `}
         >

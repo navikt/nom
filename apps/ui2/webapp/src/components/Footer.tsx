@@ -56,9 +56,9 @@ export function Footer() {
         <Link
           css={css`
             svg {
-              width: 18px;
-              height: 18px;
-              margin-right: 4px;
+              width: 20px;
+              height: 20px;
+              margin-right: 2px;
             }
           `}
           href={"https://nav-it.slack.com/archives/C0362LA7ZLN"}
@@ -66,7 +66,7 @@ export function Footer() {
           <SlackIcon
             css={css`
               //margin: 2px;
-              padding: 2px;
+              //padding: 2px;
             `}
           />
           #nom

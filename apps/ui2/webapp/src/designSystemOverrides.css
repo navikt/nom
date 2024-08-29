@@ -19,4 +19,9 @@
     /*--ac prefixes overrides tokens for specific components*/
     --ac-dropdown-item-text: var(--a-text-default);
     --ac-link-text: var(--a-gray-900);
+
+    /*--Make the "Skru av DEVMODE" button float above the test banner, so the test banner can be above everything else*/
+    #dev-mode {
+        z-index: 2;
+    }
 }
