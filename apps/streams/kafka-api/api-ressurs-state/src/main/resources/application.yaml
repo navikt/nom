@@ -46,9 +46,9 @@ spring:
 
 app:
   kafka:
-    # Se Readme.md
-    skip-producing-state-events-until-ressurs-evtsrc-offset: 0          # org.nom-research-kafka-api-ressurs-state_stream_-2
-    skip-producing-state-events-until-orgtilknytning-evtsrc-offset: 0
+    # Se Readme.md    org.nom-kafka-api-ressurs-state_stream_-2
+    skip-producing-state-events-until-ressurs-evtsrc-offset: 785512     # Første etter deploy 29.08.24
+    skip-producing-state-events-until-orgtilknytning-evtsrc-offset: 359100 
 
 --- # DEV config
 spring:
