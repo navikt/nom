@@ -28,7 +28,7 @@
     "@navikt/ds-react": "6.11.0",
     "@tanstack/react-query": "5.45.1",
     "@tanstack/react-router": "1.39.8",
-    "axios": "1.7.2",
+    "axios": "1.7.4",
     "date-fns": "3.6.0",
     "lodash": "4.17.21",
     "react": "18.3.1",
