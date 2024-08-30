@@ -49,6 +49,10 @@ public class PeriodeUtil {
         return overlapsInterval(stillingPeriode1.gyldigFom(), stillingPeriode1.gyldigTom(), stillingPeriode2);
     }
 
+    public static boolean overlapsInterval(OrgtilknytningState orgtilknytning1, OrgtilknytningState orgtilknytning2) {
+        return overlapsInterval(orgtilknytning1.gyldigFom(), orgtilknytning1.gyldigTom().orElse(NO_END_DATE), orgtilknytning2);
+    }
+
     public static boolean overlapsInterval(LocalDate start, LocalDate end, StillingPeriode stillingPeriode) {
         return stillingPeriode.gyldigFom().isBefore(dayAfter(end)) &&
             (stillingPeriode.gyldigTom() == null || stillingPeriode.gyldigTom().isAfter(dayBefore(start)));

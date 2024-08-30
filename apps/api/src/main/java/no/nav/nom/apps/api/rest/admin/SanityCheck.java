@@ -481,6 +481,43 @@ public class SanityCheck {
     }
 
     @Operation(
+        description = "List orgtilknytninger med flere overlappende dagligOppfolging i aktiv eller fremtidig periode (gyldigTom > now)",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/orgtilknytningMedFlereOverlappendeDagligOppfolgingCurrentOgFuture")
+    public String orgtilknytningMedFlereOverlappendeDagligOppfolgingCurrentOgFuture() {
+        // Group by navident for current period and dagligOppfolging
+        Map<String, List<OrgtilknytningState>> groupedByNavidentForCurrentAndFuturePeriodWithDagligDagligOppfolging = orgtilknytningService.getAll().stream()
+            .filter( PeriodeUtil::isCurrentOrFuturePeriod) // er current eller fremtidig
+            .filter(OrgtilknytningState::erDagligOppfolging) // er dagligoppfolging
+            .collect(Collectors.groupingBy(OrgtilknytningState::navident));
+
+        StringBuffer result = new StringBuffer("Duplikate overlappende OTer aktiv og/eller fremtidig periode:\n");
+
+        // Filter out groups where there is more than one dagligOppfolging in current period
+        groupedByNavidentForCurrentAndFuturePeriodWithDagligDagligOppfolging.values().stream()
+            .filter(group -> group.size() > 1)
+            .forEach(otEr -> {
+                OrgtilknytningState previous = null;
+                for (OrgtilknytningState ot : otEr) {
+                    if (previous != null) {
+                        if (PeriodeUtil.overlapsInterval(ot, previous)) {
+                            result.append("Overlappende dagligOppfolging: %s %s %s %s %s %s\n".formatted(previous.navident(), previous.orgEnhetId(), previous.fid(), previous.gyldigFom(), previous.gyldigTom(), previous.erDagligOppfolging()));
+                            result.append("Overlappende dagligOppfolging: %s %s %s %s %s %s\n".formatted(ot.navident(), ot.orgEnhetId(), ot.fid(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()));
+                        }
+                    }
+                    previous = ot;
+                }
+            });
+        return result.toString();
+    }
+
+    @Operation(
         description = "Valider angivelse av ARBEIDSOMRÅDE på enheter",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
