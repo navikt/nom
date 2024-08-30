@@ -7,7 +7,11 @@ import {
   findPeriodOverlaps,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { OrgtilknytningEtterValidering } from "~/pages/ResourcePage/RessursComponents/EditOrgtilknytninger";
-import { formatDateWithoutTimezone, todayWithoutTimezone } from "~/utils";
+import {
+  dateWithoutTimezone,
+  formatDateWithoutTimezone,
+  todayWithoutTimezone,
+} from "~/utils";
 
 describe("findPeriodGaps", () => {
   test("Sjekk at ingen orgtilknytninger gir ingen gaps", () => {
@@ -860,7 +864,7 @@ describe("dolValidation", () => {
       dolGaps: [
         {
           fom: todayWithoutTimezone(),
-          tom: addMonths(todayWithoutTimezone(), 1),
+          tom: dateWithoutTimezone(addMonths(todayWithoutTimezone(), 1)),
         },
       ],
       dolOverlaps: [],
@@ -897,7 +901,7 @@ describe("dolValidation", () => {
       dolOverlaps: [
         {
           fom: todayWithoutTimezone(),
-          tom: addMonths(todayWithoutTimezone(), 1),
+          tom: dateWithoutTimezone(addMonths(todayWithoutTimezone(), 1)),
         },
       ],
     });
@@ -958,7 +962,7 @@ describe("dolValidation", () => {
       dolOverlaps: [
         {
           fom: todayWithoutTimezone(),
-          tom: addMonths(todayWithoutTimezone(), 2),
+          tom: dateWithoutTimezone(addMonths(todayWithoutTimezone(), 2)),
         },
       ],
     });
