@@ -47,7 +47,7 @@ export function NavidentSelectFormPart({
             filteredOptions={optionsQuery.data ?? []}
             label={label}
             onChange={(event) =>
-              setSearchTerm(event?.currentTarget.value ?? "")
+              setSearchTerm(event?.currentTarget?.value ?? "")
             }
             onToggleSelected={(value, isSelected) => {
               field.onChange(isSelected ? value : undefined);
