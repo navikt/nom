@@ -556,7 +556,7 @@ public class SanityCheck {
                 for (OrgtilknytningState ot : otEr) {
                     if (original != null) {
                         if (original.orgEnhetId().equals(ot.orgEnhetId()) && original.gyldigFom().equals(ot.gyldigFom())) {
-                            result.append("%s er duplikat av %s %s %s %s %s %s\n".formatted(original.fid(),ot.navident(), ot.orgEnhetId(), ot.fid(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()));
+                            result.append("%s har duplikat %s %s %s %s %s %s\n".formatted(original.fid(),ot.navident(), ot.orgEnhetId(), ot.fid(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()));
                         } else {
                             original = ot;
                         }
