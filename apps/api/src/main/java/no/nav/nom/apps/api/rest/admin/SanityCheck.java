@@ -34,6 +34,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -495,6 +496,7 @@ public class SanityCheck {
         Map<String, List<OrgtilknytningState>> groupedByNavidentForCurrentAndFuturePeriodWithDagligDagligOppfolging = orgtilknytningService.getAll().stream()
             .filter( PeriodeUtil::isCurrentOrFuturePeriod) // er current eller fremtidig
             .filter(OrgtilknytningState::erDagligOppfolging) // er dagligoppfolging
+            .sorted(Comparator.comparing(OrgtilknytningState::gyldigFom))
             .collect(Collectors.groupingBy(OrgtilknytningState::navident));
 
         StringBuffer result = new StringBuffer("Duplikate overlappende OTer aktiv og/eller fremtidig periode:\n");
@@ -507,8 +509,47 @@ public class SanityCheck {
                 for (OrgtilknytningState ot : otEr) {
                     if (previous != null) {
                         if (PeriodeUtil.overlapsInterval(ot, previous)) {
-                            result.append("Overlappende dagligOppfolging: %s %s %s %s %s %s\n".formatted(previous.navident(), previous.orgEnhetId(), previous.fid(), previous.gyldigFom(), previous.gyldigTom(), previous.erDagligOppfolging()));
-                            result.append("Overlappende dagligOppfolging: %s %s %s %s %s %s\n".formatted(ot.navident(), ot.orgEnhetId(), ot.fid(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()));
+                            result.append("%s %s %s %s %s %s\n".formatted(previous.navident(), previous.orgEnhetId(), previous.fid(), previous.gyldigFom(), previous.gyldigTom(), previous.erDagligOppfolging()));
+                            result.append("%s %s %s %s %s %s\n".formatted(ot.navident(), ot.orgEnhetId(), ot.fid(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()));
+                        }
+                    }
+                    previous = ot;
+                }
+            });
+        return result.toString();
+    }
+
+    @Operation(
+        description = "List duplikate orgtilknytninger på samme orgenhet og navident",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/duplikateOrgtilknytninger")
+    public String duplikateOrgtilknytninger() {
+        // Group by navident for current period and dagligOppfolging
+        Map<String, List<OrgtilknytningState>> groupedByNavident = orgtilknytningService.getAll().stream()
+            .sorted(Comparator
+                .comparing(OrgtilknytningState::orgEnhetId)
+                .thenComparing(OrgtilknytningState::gyldigFom)
+            )
+            .collect(Collectors.groupingBy(OrgtilknytningState::navident));
+
+        StringBuffer result = new StringBuffer("Duplikate OTer (samme navident, enhet og gyldigFom):\n");
+
+        // Filter out groups where there is more than one dagligOppfolging in current period
+        groupedByNavident.values().stream()
+            .filter(group -> group.size() > 1)
+            .forEach(otEr -> {
+                OrgtilknytningState previous = null;
+                for (OrgtilknytningState ot : otEr) {
+                    if (previous != null) {
+                        if (previous.orgEnhetId().equals(ot.orgEnhetId()) && previous.gyldigFom().equals(ot.gyldigFom())) {
+                            result.append("%s %s %s %s %s %s\n".formatted(previous.navident(), previous.orgEnhetId(), previous.fid(), previous.gyldigFom(), previous.gyldigTom(), previous.erDagligOppfolging()));
+                            result.append("%s %s %s %s %s %s\n".formatted(ot.navident(), ot.orgEnhetId(), ot.fid(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()));
                         }
                     }
                     previous = ot;
