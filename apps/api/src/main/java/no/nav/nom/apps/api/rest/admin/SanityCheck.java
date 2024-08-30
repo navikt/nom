@@ -544,15 +544,17 @@ public class SanityCheck {
         groupedByNavident.values().stream()
             .filter(group -> group.size() > 1)
             .forEach(otEr -> {
-                OrgtilknytningState previous = null;
+                OrgtilknytningState original = null;
                 for (OrgtilknytningState ot : otEr) {
-                    if (previous != null) {
-                        if (previous.orgEnhetId().equals(ot.orgEnhetId()) && previous.gyldigFom().equals(ot.gyldigFom())) {
-                            result.append("%s %s %s %s %s %s\n".formatted(previous.navident(), previous.orgEnhetId(), previous.fid(), previous.gyldigFom(), previous.gyldigTom(), previous.erDagligOppfolging()));
-                            result.append("%s %s %s %s %s %s\n".formatted(ot.navident(), ot.orgEnhetId(), ot.fid(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()));
+                    if (original != null) {
+                        if (original.orgEnhetId().equals(ot.orgEnhetId()) && original.gyldigFom().equals(ot.gyldigFom())) {
+                            result.append("%s er duplikat av %s %s %s %s %s %s\n".formatted(original.fid(),ot.navident(), ot.orgEnhetId(), ot.fid(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()));
+                        } else {
+                            original = ot;
                         }
+                    } else {
+                        original = ot;
                     }
-                    previous = ot;
                 }
             });
         return result.toString();
