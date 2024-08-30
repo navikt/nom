@@ -530,7 +530,7 @@ public class SanityCheck {
     )
     @GetMapping(value = "/duplikateOrgtilknytninger")
     public String duplikateOrgtilknytninger() {
-        // Group by navident for current period and dagligOppfolging
+        // Group by navident
         Map<String, List<OrgtilknytningState>> groupedByNavident = orgtilknytningService.getAll().stream()
             .sorted(Comparator
                 .comparing(OrgtilknytningState::orgEnhetId)
