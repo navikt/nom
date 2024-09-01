@@ -1,6 +1,7 @@
 import { UNSAFE_Combobox } from "@navikt/ds-react";
 import type { ComboboxOption } from "@navikt/ds-react/esm/form/combobox/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type { ChangeEvent } from "react";
 import { useState } from "react";
 import { Controller } from "react-hook-form";
 
@@ -46,7 +47,10 @@ export function NavidentSelectFormPart({
             error={fieldState.error?.message?.toString()}
             filteredOptions={optionsQuery.data ?? []}
             label={label}
-            onChange={(event, value) => setSearchTerm(value ?? "")}
+            onChange={(
+              event: ChangeEvent<HTMLInputElement> | null,
+              value: string | undefined,
+            ) => setSearchTerm(value ?? "")}
             onToggleSelected={(value, isSelected) => {
               field.onChange(isSelected ? value : undefined);
             }}
