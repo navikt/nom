@@ -31,6 +31,8 @@ public interface RessursStateRepository {
 
     Map<String, RessursState> findAllWithSluttdatoBeforeToday();
 
+    Map<String, RessursState> findAllActiveRessurser();
+
     void update(RessursState ressursEventData);
 
     void clear();

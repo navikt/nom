@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class RessursStateRepositoryImpl implements RessursStateRepository {
@@ -83,6 +84,13 @@ public class RessursStateRepositoryImpl implements RessursStateRepository {
         return ressursByNavident.values().stream()
             .filter(ressurs -> ressurs.sluttdato().isPresent())
             .filter(ressurs -> ressurs.sluttdato().get().isBefore(LocalDate.now()))
+            .collect(Collectors.toMap(RessursState::navident, ressurs -> ressurs));
+    }
+
+    @Override
+    public Map<String, RessursState> findAllActiveRessurser() {
+        return ressursByNavident.values().stream()
+            .filter(ressurs -> ressurs.sluttdato().isEmpty() || !ressurs.sluttdato().get().isBefore(LocalDate.now()))
             .collect(Collectors.toMap(RessursState::navident, ressurs -> ressurs));
     }
 

@@ -24,7 +24,9 @@ import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,9 +44,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.groupingBy;
 import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
 
@@ -653,6 +661,176 @@ public class SanityCheck {
         return EnhtetMedRessursSomHarSluttetOgErLederSanityCheckResponse.from(alleOrgEnheterMedLederSomHarSluttet);
     }
 
+    @Operation(
+        description = "Valider ressurser som har en ulik sluttdato på organisasjonstilknytning og ressurs sluttdato",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        @ApiResponse(responseCode = "200", description = "Success")
+    )
+    @GetMapping(value = "/ressursSluttdatoUlikOrgTilknytningSluttdato")
+    public String ressurserMedUlikOrgTilknyttningSluttDato() {
+        var alleRessurserSomErAktive = ressursStateRepository.findAllActiveRessurser();
+        var alleOrgTilknytninger = orgtilknytningService.getByNavidenter(alleRessurserSomErAktive.keySet(), orgtilknytningState -> orgtilknytningState);
+        Map<String, Collection<OrgtilknytningState>> sisteOrgtilknytninger = getSisteOrgtilknytninger(alleOrgTilknytninger);
+
+        StringBuilder ulikeSluttdatoer = new StringBuilder();
+
+        for (OrgtilknytningState orgtilknytning : sisteOrgtilknytninger.values().stream().flatMap(Collection::stream).toList()) {
+            var ressurs = alleRessurserSomErAktive.get(orgtilknytning.navident());
+            if (orgtilknytning.gyldigTom().isPresent() && ressurs.sluttdato().isPresent()) {
+                if (!orgtilknytning.gyldigTom().get().isEqual(ressurs.sluttdato().get())) {
+                    appendUlikeDatoerToString(orgtilknytning, ulikeSluttdatoer, ressurs);
+                }
+            } else if (orgtilknytning.gyldigTom().isPresent()) {
+                appendUlikeDatoerToString(orgtilknytning, ulikeSluttdatoer, ressurs);
+            } else if (ressurs.sluttdato().isPresent()) {
+                appendUlikeDatoerToString(orgtilknytning, ulikeSluttdatoer, ressurs);
+            }
+        }
+
+        return ulikeSluttdatoer.toString();
+    }
+
+    private Map<String, Collection<OrgtilknytningState>> getSisteOrgtilknytninger(Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger) {
+        Map<String, Collection<OrgtilknytningState>> result = new HashMap<>();
+        for (Map.Entry<String, Collection<OrgtilknytningState>> entry : alleOrgTilknytninger.entrySet()) {
+            String key = entry.getKey();
+            Collection<OrgtilknytningState> orgtilknytningState = entry.getValue();
+
+            Optional<LocalDate> latestDates = orgtilknytningState.stream()
+                .map(OrgtilknytningState::gyldigTom)
+                .flatMap(Optional::stream)
+                .max(LocalDate::compareTo);
+
+            if (latestDates.isPresent()) {
+                Collection<OrgtilknytningState> filteredOrgtilknytningState = orgtilknytningState.stream()
+                    .filter(org -> org.gyldigTom().equals(latestDates))
+                    .toList();
+
+                if (!filteredOrgtilknytningState.isEmpty()) {
+                    result.put(key, filteredOrgtilknytningState);
+                }
+            }
+        }
+        return result;
+    }
+
+    private <K, V> Map<K, List<V>> addOrPut(Map<K, List<V>> map, K key, V value) {
+        if (map.containsKey(key)) {
+            map.get(key).add(value);
+        } else {
+            map.put(key, new ArrayList<>());
+            map.get(key).add(value);
+        }
+        return map;
+    }
+
+    @Operation(
+        description = "Valider ressurser som har flere enn en DOL",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        @ApiResponse(responseCode = "200", description = "Success")
+    )
+    @GetMapping(value = "ressursMedFlereEnnEnDOL")
+    public String ressursMedFlereEnnEnDOL() {
+        var alleRessurserSomErAtkive = ressursStateRepository.findAllActiveRessurser();
+        var alleOrgtilknytningerKobletTilRessurs = orgtilknytningService.getByNavidenter(alleRessurserSomErAtkive.keySet(), orgtilknytningState -> orgtilknytningState);
+        var alleOrgEnheter = orgenhetService.getAllEnheter();
+
+        Map<String, List<OrgtilknytningState>> flereDolTilknytningerList = alleOrgtilknytningerKobletTilRessurs.entrySet().stream()
+            .filter(orgtilknytning -> orgtilknytning.getValue().size() > 1)
+            .filter(orgtilknytning -> validerOmRessursHarFlereDol(orgtilknytning.getValue()))
+            .filter(orgtilknytning -> validerDatoOverlapp(orgtilknytning.getValue().stream().filter(Objects::nonNull).toList()))
+            .flatMap(orgtilknytning -> orgtilknytning.getValue().stream())
+            .collect(Collectors.groupingBy(OrgtilknytningState::navident, Collectors.toList()));
+
+        StringBuilder flereDol = new StringBuilder();
+        flereDolTilknytningerList.forEach((navident, orgtilknytningStates) -> {
+            flereDol.append(navident)
+                .append(";");
+            orgtilknytningStates.forEach(orgtilknytningState -> {
+                alleOrgEnheter.stream().filter(orgenhet -> orgenhet.getId().equals(orgtilknytningState.orgEnhetId())).findFirst().ifPresent(orgenhet -> {
+                    flereDol.append(orgenhet.getNavn())
+                        .append("=");
+                });
+                flereDol.append(orgtilknytningState.orgEnhetId())
+                    .append(";")
+                    .append(orgtilknytningState.gyldigFom())
+                    .append(";")
+                    .append(orgtilknytningState.gyldigTom().isPresent() ? orgtilknytningState.gyldigTom().get() : "Ingen Sluttdato")
+                    .append(";");
+            });
+            flereDol.append("\n");
+        });
+        if (flereDolTilknytningerList.isEmpty()) flereDol.append("Ingen ressurs med flere DOL");
+        return flereDol.toString();
+    }
+
+    @Operation(
+        description = "Valider aktive ressurser uten orgtilknytning",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        @ApiResponse(responseCode = "200", description = "Success")
+    )
+    @GetMapping("/ressursUtenOrgtilknytning")
+    public String ressursUtenOrgtilknytning() {
+        var alleRessurserSomErAtkive = ressursStateRepository.findAllActiveRessurser();
+        var alleOrgtilknytningerKobletTilRessurs = orgtilknytningService.getByNavidenter(alleRessurserSomErAtkive.keySet(), orgtilknytningState -> orgtilknytningState);
+
+        var utenOrgtilknytninger = alleOrgtilknytningerKobletTilRessurs.entrySet().stream()
+            .filter(orgtilknytning -> orgtilknytning.getValue().isEmpty())
+            .map(Map.Entry::getKey);
+
+        var medOrgtilknytningerSomIkkeErAktiv = alleOrgtilknytningerKobletTilRessurs.entrySet().stream()
+            .filter(orgtilknytning -> !orgtilknytning.getValue().isEmpty())
+            .filter(orgtilknytning -> orgtilknytning.getValue().stream()
+                .allMatch(orgtilknytningState -> orgtilknytningState.gyldigTom().isPresent() && orgtilknytningState.gyldigTom().get().isBefore(LocalDate.now())))
+            .map(Map.Entry::getKey);
+
+        var ressursUtenOrgtilknytning = Stream.concat(utenOrgtilknytninger, medOrgtilknytningerSomIkkeErAktiv).toList();
+
+        StringBuilder ressurserUtenOrgtilknytning = new StringBuilder();
+        ressursUtenOrgtilknytning.forEach(navident -> ressurserUtenOrgtilknytning.append(navident).append(";").append("\n"));
+        return ressurserUtenOrgtilknytning.toString();
+    }
+
+    private boolean validerDatoOverlapp(List<OrgtilknytningState> orgtilknytningStates) {
+        List<OrgtilknytningState> sortedByFomDato = orgtilknytningStates.stream().sorted(Comparator.comparing(OrgtilknytningState::gyldigFom)).toList();
+        return IntStream.range(0, sortedByFomDato.size()).anyMatch(i ->  {
+            OrgtilknytningState orgtilknytningStateEn = orgtilknytningStates.get(i);
+            LocalDate sluttdatoEn = orgtilknytningStateEn.gyldigTom().orElse(LocalDate.MAX);
+
+            return IntStream.range(i + 1, sortedByFomDato.size()).anyMatch(j ->   {
+                OrgtilknytningState orgtilknytningStateTo = orgtilknytningStates.get(j);
+                LocalDate startdatoEn = orgtilknytningStateEn.gyldigFom();
+                LocalDate startdatoTo = orgtilknytningStateTo.gyldigFom();
+                LocalDate sluttdatoTo = orgtilknytningStateTo.gyldigTom().orElse(LocalDate.MAX);
+
+                return !startdatoEn.isAfter(sluttdatoTo) && !sluttdatoEn.isBefore(startdatoTo);
+            });
+        });
+    }
+
+    private boolean validerOmRessursHarFlereDol(Collection<OrgtilknytningState> orgtilknytningStates) {
+        return orgtilknytningStates.stream().allMatch(OrgtilknytningState::erDagligOppfolging);
+    }
+
+    private static void appendUlikeDatoerToString(OrgtilknytningState orgtilknytning, StringBuilder ulikeSluttdatoer, RessursState ressurs) {
+        ulikeSluttdatoer.append(ressurs.navident())
+            .append(";")
+            .append(orgtilknytning.orgEnhetId())
+            .append(";")
+            .append("RessursSluttdato:")
+            .append(ressurs.sluttdato().isPresent() ? ressurs.sluttdato().get() : "null")
+            .append(";")
+            .append("OrgGyldigTom:")
+            .append(orgtilknytning.gyldigTom().isPresent() ? orgtilknytning.gyldigTom().get() : "null")
+            .append("\n");
+    }
+
     private int findArbeidsomraadeCountInHierarkiAbove(IOrgenhet orgenhet) {
         boolean isArbOmr = NomNivaa.ARBEIDSOMRAADE.equals(orgenhet.getNomNivaa().orElse(null));
         AtomicInteger countAbove = new AtomicInteger();
@@ -849,7 +1027,7 @@ public class SanityCheck {
         // FOM er før eller lik dagens dat, samt at TOM er null eller fremtidig
         return enheter.stream().filter(oe ->
             oe.getGyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
-                (!oe.getGyldigTom().isPresent() || oe.getGyldigTom().get().isAfter(LocalDate.now()))
+                (oe.getGyldigTom().isEmpty() || oe.getGyldigTom().get().isAfter(LocalDate.now()))
         ).toList();
     }
 
@@ -987,6 +1165,11 @@ public class SanityCheck {
             .map(leder -> alleRessurserWithSluttDatoBeforeToday.get(leder.getNavIdent()))
             .filter(Objects::nonNull)
             .findFirst();
+    }
+
+    public static <T>Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
+        return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 }
 
