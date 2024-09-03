@@ -210,6 +210,9 @@ spec:
         - application: modia-robot-api
           namespace: personoversikt
           cluster: prod-gcp
+        - application: brev-administrasjon
+          namespace: isa
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
