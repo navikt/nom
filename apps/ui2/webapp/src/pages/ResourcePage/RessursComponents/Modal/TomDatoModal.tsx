@@ -101,7 +101,7 @@ function BekreftModalInnholdTomIFremtiden({
   );
 }
 
-export function BekreftModalInnholdTomIFortiden({ navn }: { navn: string }) {
+function BekreftModalInnholdTomIFortiden({ navn }: { navn: string }) {
   return (
     <Alert variant="warning">
       <HStack gap="6">
