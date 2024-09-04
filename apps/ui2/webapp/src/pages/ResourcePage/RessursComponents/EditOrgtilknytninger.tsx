@@ -237,7 +237,7 @@ function OrgtilknytningForm({
       navigate({
         params: { id: ressurs.navident },
         to: "/ressurs/$id",
-      });
+      }).then();
     },
   });
 
@@ -284,6 +284,10 @@ function OrgtilknytningForm({
     }
   };
 
+  useEffect(() => {
+    console.log(watch("mappedeOrgtilknytninger"));
+  }, [watch("mappedeOrgtilknytninger")]);
+
   return (
     <FormProvider {...methods}>
       <OrgtilknytningTimeline
@@ -318,6 +322,13 @@ function OrgtilknytningForm({
         )}
 
         {fields.map((field, index) => {
+          if (
+            field.gyldigTom &&
+            !isTodayOrAfter(dateWithoutTimezone(new Date(field.gyldigTom)))
+          ) {
+            return <></>;
+          }
+
           return (
             <div
               css={css`
