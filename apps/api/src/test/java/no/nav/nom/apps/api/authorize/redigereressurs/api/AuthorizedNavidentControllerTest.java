@@ -58,7 +58,7 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
         mockMvc.perform(get(API_URL + "/isAuthorizedForNavident/" + navident).header("Authorization", "Bearer " + nomWriteUserToken_Leder_C()))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(content().string("false"));
+            .andExpect(content().string("true"));
     }
 
 //    @Test

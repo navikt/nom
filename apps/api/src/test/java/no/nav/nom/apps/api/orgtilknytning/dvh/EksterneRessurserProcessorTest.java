@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
@@ -11,7 +10,6 @@ import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,8 +38,6 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
     OrgenhetService orgenhetService;
     @Mock
     NomMastered nomMastered;
-    @Mock
-    Unleash unleash;
 
     final LocalDate yesterday = LocalDate.now().minusDays(1);
     final LocalDate today = LocalDate.now();
@@ -57,8 +53,7 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
             orgenhetService,
             organiseringStateRepository,
             orgtilknytningCommandService,
-            nomMastered,
-            unleash
+            nomMastered
         );
 
         setupOrgenhetServiceDefaultResponses();

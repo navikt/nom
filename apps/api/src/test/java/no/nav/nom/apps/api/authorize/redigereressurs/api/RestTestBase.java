@@ -45,7 +45,7 @@ public class RestTestBase extends MockBasisTestOrganisering {
     private Authentication auth;
     @Autowired
     MockMvc mockMvc;
-    @MockBean
+    @Autowired
     Unleash unleash;
     public static final String LOGGED_IN_USER_NAVIDENT = "A321321";
     private static final String OAUTH_VALID_AUDIENCE = "test";
