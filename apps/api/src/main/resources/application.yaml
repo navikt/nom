@@ -354,6 +354,8 @@ spring:
     graphiql:
       enabled: false # Disable graphiql in production
 
+server.tomcat.mbeanregistry.enabled: true
+
 app:
   granted-authorities:
     clients:
