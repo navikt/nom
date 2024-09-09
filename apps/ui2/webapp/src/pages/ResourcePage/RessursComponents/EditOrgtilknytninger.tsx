@@ -24,7 +24,7 @@ import {
 import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { addYears } from "date-fns";
+import { addYears, subMonths } from "date-fns";
 import partition from "lodash/partition";
 import React, { useEffect } from "react";
 import type { SubmitHandler } from "react-hook-form";
@@ -83,7 +83,29 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
     queryFn: () => getOrgTilknytninger.queryFn(ressurs.navident),
   });
 
-  const orgtilknytninger = ressursOrgtilknytningerQuery.data ?? [];
+  const hentedeOrgtilknytninger = ressursOrgtilknytningerQuery.data ?? [];
+
+  const orgtilknytninger = hentedeOrgtilknytninger.sort((a, b) => {
+    if (!a.gyldigTom && !b.gyldigTom) {
+      return (
+        dateWithoutTimezone(new Date(b.gyldigFom)).getTime() -
+        dateWithoutTimezone(new Date(a.gyldigFom)).getTime()
+      );
+    }
+
+    if (!a.gyldigTom) return -1;
+    if (!b.gyldigTom) return 1;
+
+    const tomComparison =
+      dateWithoutTimezone(new Date(b.gyldigTom)).getTime() -
+      dateWithoutTimezone(new Date(a.gyldigTom)).getTime();
+    if (tomComparison !== 0) return tomComparison;
+
+    return (
+      dateWithoutTimezone(new Date(a.gyldigFom)).getTime() -
+      dateWithoutTimezone(new Date(b.gyldigFom)).getTime()
+    );
+  });
 
   const orgEnhetIdListe = [
     ...new Set(
@@ -284,10 +306,6 @@ function OrgtilknytningForm({
     }
   };
 
-  useEffect(() => {
-    console.log(watch("mappedeOrgtilknytninger"));
-  }, [watch("mappedeOrgtilknytninger")]);
-
   return (
     <FormProvider {...methods}>
       <OrgtilknytningTimeline
@@ -323,10 +341,21 @@ function OrgtilknytningForm({
 
         {fields.map((field, index) => {
           if (
+            field.fid &&
             field.gyldigTom &&
-            !isTodayOrAfter(dateWithoutTimezone(new Date(field.gyldigTom)))
+            !isSameDateOrAfter(
+              dateWithoutTimezone(new Date(field.gyldigTom)),
+              subMonths(todayWithoutTimezone(), 2),
+            )
           ) {
-            return <></>;
+            return (
+              <div
+                css={css`
+                  display: none;
+                `}
+                key={field.id}
+              />
+            );
           }
 
           return (
