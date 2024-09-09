@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
-import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
@@ -45,12 +44,14 @@ public class EksterneRessurserProcessor {
     private final OrganiseringStateRepository organiseringStateRepository;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final NomMastered nomMastered;
-    private final Unleash unleash;
 
     public EksterneRessurserProcessor(
-            RemedyEnhetMapperService remedyEnhetMapperService, OrgtilknytningService orgtilknytningService,
-            OrgenhetService orgenhetService, OrganiseringStateRepository organiseringStateRepository,
-            OrgtilknytningCommandService orgtilknytningCommandService, NomMastered nomMastered, Unleash unleash
+            RemedyEnhetMapperService remedyEnhetMapperService,
+            OrgtilknytningService orgtilknytningService,
+            OrgenhetService orgenhetService,
+            OrganiseringStateRepository organiseringStateRepository,
+            OrgtilknytningCommandService orgtilknytningCommandService,
+            NomMastered nomMastered
     ) {
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.orgtilknytningService = orgtilknytningService;
@@ -58,7 +59,6 @@ public class EksterneRessurserProcessor {
         this.organiseringStateRepository = organiseringStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.nomMastered = nomMastered;
-        this.unleash = unleash;
     }
 
     public void process(DvhEksternRessurs eksternRessurs) {
@@ -95,7 +95,7 @@ public class EksterneRessurserProcessor {
                 eksternRessurs.orgenhetPaaRessurs(),
                 eksternRessurs.orgenhetPaaRessursNivaa()
             );
-            log.error(msg);
+            log.info(msg);
             return;
         }
 
@@ -377,8 +377,7 @@ public class EksterneRessurserProcessor {
 
         log.debug(SECURE_LOGS, "Lager OpprettOrgtilknytning event: {}", opprettOrgtilknytning);
 
-        String fid = null;
-        fid = orgtilknytningCommandService.opprettOrgtilknytning(opprettOrgtilknytning);
+        String fid = orgtilknytningCommandService.opprettOrgtilknytning(opprettOrgtilknytning);
 
         if (eksternRessurs.remedySlutt() != null) {
             var avvikleOrgtilknytning = new AvvikleOrgtilknytning(

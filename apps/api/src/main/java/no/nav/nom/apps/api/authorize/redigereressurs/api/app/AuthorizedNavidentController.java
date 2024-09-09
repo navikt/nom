@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
+import no.nav.nom.apps.api.authorize.redigereressurs.NotAuthorizedToDelegateLeder;
 import no.nav.nom.contract.nom.state.LederTilgangState;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.SwaggerConfig;
@@ -160,6 +161,17 @@ public class AuthorizedNavidentController {
     public ResponseEntity<StandardResponse> handleBadRequest(RuntimeException exception) {
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
+            .body(StandardResponse.builder().message(exception.getMessage()).build());
+    }
+
+    @ExceptionHandler(
+        {
+            NotAuthorizedToDelegateLeder.class
+        }
+    )
+    public ResponseEntity<StandardResponse> handleNotAuthorizedToDelegateLeder(RuntimeException exception) {
+        return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
             .body(StandardResponse.builder().message(exception.getMessage()).build());
     }
 }

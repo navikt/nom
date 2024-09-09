@@ -49,7 +49,7 @@ public class KorrigerDuplikatOrgtilknytninger {
     }
 
     @Operation(
-        description = "Lag avvikle eventer for duplikater. Kjør med False for kun dry-run",
+        description = "Lag fjern eventer for duplikater. Kjør med False for kun dry-run",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @GetMapping()

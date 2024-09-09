@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.authorize.redigereressurs;
 
+import io.getunleash.Unleash;
 import lombok.Builder;
 import lombok.Getter;
 import no.nav.nom.apps.api.authorize.email.TilgangDelegertEmailService;
@@ -36,6 +37,8 @@ abstract public class MockBasisTestOrganisering {
     @MockBean
     RessursStateRepository ressursStateRepository;
     @MockBean
+    Unleash unleash;
+    @MockBean
     OrgenhetService orgenhetService;
     @MockBean
     DvhRepository dvhRepository;
@@ -46,6 +49,7 @@ abstract public class MockBasisTestOrganisering {
 
     @BeforeEach
     void setup() {
+        when(unleash.isEnabled("nom-api.driftsenhet-delegering-losning")).thenReturn(true);
         setupBasisOrganisasjon();
         authorizedNavident.oppdaterLedereForOrgenheter();
     }
@@ -60,6 +64,15 @@ abstract public class MockBasisTestOrganisering {
     }
 
     private void setupBasisOrgenheter() {
+        IOrgenhet orgenhet_X = MockOrgenhet.builder()
+            .fid("FID_X")
+            .id("X")
+            .navn("OrgEnhet X")
+            .nomNivaa(Optional.of(NomNivaa.LINJEENHET))
+            .agressoId("X")
+            .orgNiv("NAV")
+            .build();
+
         IOrgenhet orgenhet_A = MockOrgenhet.builder()
             .fid("FID_A")
             .id("A")
@@ -67,6 +80,24 @@ abstract public class MockBasisTestOrganisering {
             .nomNivaa(Optional.of(NomNivaa.DRIFTSENHET))
             .agressoId("A")
             .orgNiv("NAV")
+            .build();
+
+        IOrgenhet orgenhet_A1 = MockOrgenhet.builder()
+            .fid("FID_A1")
+            .id("A1")
+            .navn("OrgEnhet A1")
+            .nomNivaa(Optional.empty())
+            .agressoId("A1")
+            .orgNiv("ORGNIV2")
+            .build();
+
+        IOrgenhet orgenhet_A11 = MockOrgenhet.builder()
+            .fid("FID_A11")
+            .id("A11")
+            .navn("OrgEnhet A11")
+            .nomNivaa(Optional.of(NomNivaa.ARBEIDSOMRAADE))
+            .agressoId("A11")
+            .orgNiv("ORGNIV3")
             .build();
 
         IOrgenhet orgenhet_B = MockOrgenhet.builder()
@@ -177,7 +208,10 @@ abstract public class MockBasisTestOrganisering {
             .orgNiv("ORGENHET")
             .build();
 
+        lenient().when(orgenhetService.getById("X")).thenReturn(Optional.of(orgenhet_X));
         lenient().when(orgenhetService.getById("A")).thenReturn(Optional.of(orgenhet_A));
+        lenient().when(orgenhetService.getById("A1")).thenReturn(Optional.of(orgenhet_A1));
+        lenient().when(orgenhetService.getById("A11")).thenReturn(Optional.of(orgenhet_A11));
         lenient().when(orgenhetService.getById("B")).thenReturn(Optional.of(orgenhet_B));
         lenient().when(orgenhetService.getById("B1")).thenReturn(Optional.of(orgenhet_B1));
         lenient().when(orgenhetService.getById("B11")).thenReturn(Optional.of(orgenhet_B11));
@@ -192,12 +226,48 @@ abstract public class MockBasisTestOrganisering {
         lenient().when(orgenhetService.getById("E1")).thenReturn(Optional.of(orgenhet_E1));
 
         when(orgenhetService.getAllEnheterMedOrganisering()).thenReturn(List.of(
-            orgenhet_A, orgenhet_B, orgenhet_B1, orgenhet_B11, orgenhet_C, orgenhet_C1, orgenhet_C11,
-            orgenhet_C2, orgenhet_C22, orgenhet_D, orgenhet_D1, orgenhet_E, orgenhet_E1
+            orgenhet_X,
+            orgenhet_A, orgenhet_A1, orgenhet_A11,
+            orgenhet_B, orgenhet_B1, orgenhet_B11,
+            orgenhet_C, orgenhet_C1, orgenhet_C11, orgenhet_C2, orgenhet_C22,
+            orgenhet_D, orgenhet_D1,
+            orgenhet_E, orgenhet_E1
         ));
     }
 
     private void setupBasisOrganisering() {
+
+        OrganiseringState organisering_A_X = OrganiseringState.builder()
+            .fid("FID_A_X")
+            .id("A")
+            .navn("OrgEnhet A")
+            .idOver("X")
+            .navnOver("OrgEnhet X")
+            .gyldigFom(LocalDate.now().minusDays(5))
+            .gyldigTom(Optional.empty())
+            .build();
+
+        OrganiseringState organisering_A1_A = OrganiseringState.builder()
+            .fid("FID_A1_A")
+            .id("A1")
+            .navn("OrgEnhet A1")
+            .idOver("A")
+            .navnOver("OrgEnhet A")
+            .gyldigFom(LocalDate.now().minusDays(5))
+            .gyldigTom(Optional.empty())
+            .build();
+
+        OrganiseringState organisering_A11_A1 = OrganiseringState.builder()
+            .fid("FID_A11_A1")
+            .id("A11")
+            .navn("OrgEnhet A11")
+            .idOver("A1")
+            .navnOver("OrgEnhet A1")
+            .gyldigFom(LocalDate.now().minusDays(5))
+            .gyldigTom(Optional.empty())
+            .build();
+
+
         OrganiseringState organisering_B_A = OrganiseringState.builder()
             .fid("FID_B_A")
             .id("B")
@@ -319,6 +389,9 @@ abstract public class MockBasisTestOrganisering {
             .build();
 
         when(organiseringStateRepository.getActiveOrganisering()).thenReturn(Map.ofEntries(
+            Map.entry("FID_A_X", organisering_A_X),
+            Map.entry("FID_A1_A", organisering_A1_A),
+            Map.entry("FID_A11_A1", organisering_A11_A1),
             Map.entry("FID_B_A", organisering_B_A),
             Map.entry("FID_B1_B", organisering_B1_B),
             Map.entry("FID_B11_B1", organisering_B11_B1),
@@ -332,6 +405,22 @@ abstract public class MockBasisTestOrganisering {
             Map.entry("FID_E_A", organisering_E_A),
             Map.entry("FID_E1_E", organisering_E1_E)
         ));
+
+        lenient().when(organiseringStateRepository.findActiveById("A")).thenReturn(Optional.of(organisering_A_X));
+        lenient().when(organiseringStateRepository.findActiveById("A1")).thenReturn(Optional.of(organisering_A1_A));
+        lenient().when(organiseringStateRepository.findActiveById("A11")).thenReturn(Optional.of(organisering_A11_A1));
+        lenient().when(organiseringStateRepository.findActiveById("B")).thenReturn(Optional.of(organisering_B_A));
+        lenient().when(organiseringStateRepository.findActiveById("B1")).thenReturn(Optional.of(organisering_B1_B));
+        lenient().when(organiseringStateRepository.findActiveById("B11")).thenReturn(Optional.of(organisering_B11_B1));
+        lenient().when(organiseringStateRepository.findActiveById("C")).thenReturn(Optional.of(organisering_C_A));
+        lenient().when(organiseringStateRepository.findActiveById("C1")).thenReturn(Optional.of(organisering_C1_C));
+        lenient().when(organiseringStateRepository.findActiveById("C11")).thenReturn(Optional.of(organisering_C11_C1));
+        lenient().when(organiseringStateRepository.findActiveById("C2")).thenReturn(Optional.of(organisering_C2_C));
+        lenient().when(organiseringStateRepository.findActiveById("C22")).thenReturn(Optional.of(organisering_C22_C2));
+        lenient().when(organiseringStateRepository.findActiveById("D")).thenReturn(Optional.of(organisering_D_A));
+        lenient().when(organiseringStateRepository.findActiveById("D1")).thenReturn(Optional.of(organisering_D1_D));
+        lenient().when(organiseringStateRepository.findActiveById("E")).thenReturn(Optional.of(organisering_E_A));
+        lenient().when(organiseringStateRepository.findActiveById("E1")).thenReturn(Optional.of(organisering_E1_E));
     }
 
     private void setupBasisLedere() {
@@ -340,6 +429,20 @@ abstract public class MockBasisTestOrganisering {
             .orgEnhetNr("A")
             .orgenhetNavn("OrgEnhet A")
             .orgNiv("NAV")
+            .build();
+
+        DvhLeder leder_A1 = DvhLeder.builder()
+            .navIdent("A1")
+            .orgEnhetNr("A1")
+            .orgenhetNavn("OrgEnhet A1")
+            .orgNiv("ORGNIV2")
+            .build();
+
+        DvhLeder leder_A11 = DvhLeder.builder()
+            .navIdent("A11")
+            .orgEnhetNr("A11")
+            .orgenhetNavn("OrgEnhet A11")
+            .orgNiv("ORGNIV3")
             .build();
 
         DvhLeder leder_B = DvhLeder.builder()
@@ -427,7 +530,7 @@ abstract public class MockBasisTestOrganisering {
             .build();
 
         when(dvhRepository.getLedere()).thenReturn(List.of(
-            leder_A, leder_B, leder_B1, leder_B11, leder_C, leder_C1, leder_C11, leder_C2, leder_C22, leder_D, leder_D1, leder_E, leder_E1
+            leder_A, leder_A1, leder_A11, leder_B, leder_B1, leder_B11, leder_C, leder_C1, leder_C11, leder_C2, leder_C22, leder_D, leder_D1, leder_E, leder_E1
         ));
     }
 

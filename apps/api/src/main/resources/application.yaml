@@ -190,6 +190,8 @@ spring:
     activate:
       on-profile: dev && !prod
 
+server.tomcat.mbeanregistry.enabled: true
+
 logging:
   level:
      no.nav.nom: INFO
