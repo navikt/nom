@@ -271,8 +271,7 @@ function ModalInnholdFremtiden({ navn, dato }: { navn: string; dato: string }) {
         </b>
       </BodyLong>
       <BodyLong>
-        Hvis dette ikke er korrekt, må du trykke på Avbryt og legge til en ny
-        tilknytning.
+        Hvis dette ikke er korrekt, må du trykke på <b>Avbryt</b>.
       </BodyLong>
       <BodyLong>
         Hvis dette er korrekt, kan du bekrefte endringen ved å trykke på{" "}
@@ -298,8 +297,7 @@ function ModalInnholdFortiden({ navn }: { navn: string }) {
           </b>
         </BodyLong>
         <BodyLong>
-          Hvis dette ikke er korrekt, må du trykke på <b>Avbryt</b> og legge til
-          en ny tilknytning.
+          Hvis dette ikke er korrekt, må du trykke på <b>Avbryt</b>.
         </BodyLong>
         <BodyLong>
           Hvis dette er korrekt, kan du bekrefte endringen ved å trykke på{" "}
