@@ -81,8 +81,9 @@ export function SektorStep() {
     <ContainerWithHighlightedTop icon={opprettRessursIcon} title="Sektor">
       <Alert variant="info">
         For øyeblikket kan du kun bruke NOM til å opprette eksterne konsulenter
-        og kommunalt ansatte. Statlig ansatte opprettes i Remedy som tidligere.
-        Dette gjelder også roboter, Vikafossen og utenlandske konsulenter.
+        og kommunalt ansatte. Statlige ansatte opprettes i Identrutina og Unit4
+        som tidligere. Roboter, Vikafossen og utenlandske konsulenter opprettes
+        som tidligere.
       </Alert>
 
       <form

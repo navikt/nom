@@ -190,6 +190,8 @@ spring:
     activate:
       on-profile: dev && !prod
 
+server.tomcat.mbeanregistry.enabled: true
+
 logging:
   level:
      no.nav.nom: INFO
@@ -351,6 +353,8 @@ spring:
   graphql:
     graphiql:
       enabled: false # Disable graphiql in production
+
+server.tomcat.mbeanregistry.enabled: true
 
 app:
   granted-authorities:
