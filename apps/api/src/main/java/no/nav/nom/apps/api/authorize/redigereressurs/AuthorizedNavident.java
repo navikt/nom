@@ -329,6 +329,15 @@ public class AuthorizedNavident {
         );
     }
 
+    public List<IOrgenhet> isAuthorizedToDelegate(String lederNavident) {
+        var orgenheterTilLeder = orgenhetService.getEnheterByLeder(lederNavident);
+        var enheterMellomDriftOgArbomr = alleOrgenheterMellomDriftsenhetOgArbeidsomraade();
+
+        return orgenheterTilLeder.stream()
+            .filter(orgenhet -> enheterMellomDriftOgArbomr.contains(orgenhet.getId()))
+            .toList();
+    }
+
     private int orgenheterMedAuthedLederCount() {
         return lederForOrgenhetSomKanRedigere.values().stream().mapToInt(Collection::size).sum();
     }

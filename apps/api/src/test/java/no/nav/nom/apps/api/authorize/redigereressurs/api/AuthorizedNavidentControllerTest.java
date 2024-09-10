@@ -247,4 +247,20 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
                 .header("Authorization", "Bearer " + nomAdminUserToken()))
             .andExpect(status().isBadRequest());
     }
+
+    @Test
+    @DisplayName("Verifiser at man kan delegere")
+    public void test_0019() throws Exception {
+        mockMvc.perform(get(API_URL + "/isAuthorizedToDelegate/B")
+                .header("Authorization", "Bearer " + nomWriteUserToken_Leder_B()))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Verifiser at man ikke kan delegere")
+    public void test_0020() throws Exception {
+        mockMvc.perform(get(API_URL + "/isAuthorizedToDelegate/HR")
+                .header("Authorization", "Bearer " + vanligUserToken_DelegertLeder_HR()))
+            .andExpect(status().isForbidden());
+    }
 }
