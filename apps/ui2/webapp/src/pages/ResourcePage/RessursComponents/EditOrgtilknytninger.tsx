@@ -102,8 +102,8 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
     if (tomComparison !== 0) return tomComparison;
 
     return (
-      dateWithoutTimezone(new Date(a.gyldigFom)).getTime() -
-      dateWithoutTimezone(new Date(b.gyldigFom)).getTime()
+      dateWithoutTimezone(new Date(b.gyldigFom)).getTime() -
+      dateWithoutTimezone(new Date(a.gyldigFom)).getTime()
     );
   });
 
@@ -213,6 +213,14 @@ function OrgtilknytningForm({
 }) {
   const navigate = useNavigate();
   const hasWriteAccess = useHasWriteAccess();
+
+  const hasFieldTomChanged = (field: Partial<OrgtilknytningState>) => {
+    const originalField = orgtilknytninger.find(
+      (tilknytning) => tilknytning.fid === field.fid,
+    );
+
+    return !(field.gyldigTom === originalField?.gyldigTom);
+  };
 
   // Hvis det ikke finnes noen orgtilknytninger, legger vi til en ny en by default.
   const defaultOrgtilknytninger =
@@ -343,6 +351,7 @@ function OrgtilknytningForm({
           if (
             field.fid &&
             field.gyldigTom &&
+            !hasFieldTomChanged(field) &&
             !isSameDateOrAfter(
               dateWithoutTimezone(new Date(field.gyldigTom)),
               subMonths(todayWithoutTimezone(), 2),
