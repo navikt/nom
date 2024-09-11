@@ -484,6 +484,18 @@ export function getTilgangerDelegertByUserOptions() {
   });
 }
 
+export function getDelegerbareOrgEnheterForUserOptions(navident: string) {
+  return queryOptions({
+    queryKey: ["DELEGERBARE_ORGENHETER", navident],
+    queryFn: async () =>
+      (
+        await axios.get<OrgEnhet[]>(
+          `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/isAuthorizedToDelegate/${navident}`,
+        )
+      ).data,
+  });
+}
+
 export const updateFysiskeBrukersteder = async (
   fid: string,
   updateFysiskeBrukerstederRequest: UpdateFysiskeBrukerstederRequest,
