@@ -179,10 +179,6 @@ public class RessursRestService {
             ? ressursState.personident()
             : ressursState.personident().replaceFirst(".{5}$", "*****");
 
-        var showSluttdato = loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP) ||
-            authResolver.kanRedigereRessurs(ressursState.navident()) ||
-            ressursState.isEkstern();
-
 
         return new Ressurs(
             ressursState.toBuilder()
@@ -190,7 +186,6 @@ public class RessursRestService {
                 .primaryTelefonnummer(getPrimaryTelefonnummerOrFromTelefonList(ressursState, telefoner))
                 .primaryFysiskBrukersted(showFysiskBrukerSted ? ressursState.primaryFysiskBrukersted() : Optional.empty())
                 .fysiskeBrukersteder(showFysiskBrukerSted ? ressursState.fysiskeBrukersteder() : Collections.emptyList())
-                .sluttdato(showSluttdato && ressursState.sluttdato().isPresent() ? ressursState.sluttdato() : Optional.empty())
                 .build(),
             telefoner,
             epost.orElse(null),
