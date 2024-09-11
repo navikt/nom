@@ -24,7 +24,7 @@ import {
 import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { addYears } from "date-fns";
+import { addYears, subMonths } from "date-fns";
 import partition from "lodash/partition";
 import React, { useEffect } from "react";
 import type { SubmitHandler } from "react-hook-form";
@@ -83,7 +83,29 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
     queryFn: () => getOrgTilknytninger.queryFn(ressurs.navident),
   });
 
-  const orgtilknytninger = ressursOrgtilknytningerQuery.data ?? [];
+  const hentedeOrgtilknytninger = ressursOrgtilknytningerQuery.data ?? [];
+
+  const orgtilknytninger = hentedeOrgtilknytninger.sort((a, b) => {
+    if (!a.gyldigTom && !b.gyldigTom) {
+      return (
+        dateWithoutTimezone(new Date(b.gyldigFom)).getTime() -
+        dateWithoutTimezone(new Date(a.gyldigFom)).getTime()
+      );
+    }
+
+    if (!a.gyldigTom) return -1;
+    if (!b.gyldigTom) return 1;
+
+    const tomComparison =
+      dateWithoutTimezone(new Date(b.gyldigTom)).getTime() -
+      dateWithoutTimezone(new Date(a.gyldigTom)).getTime();
+    if (tomComparison !== 0) return tomComparison;
+
+    return (
+      dateWithoutTimezone(new Date(b.gyldigFom)).getTime() -
+      dateWithoutTimezone(new Date(a.gyldigFom)).getTime()
+    );
+  });
 
   const orgEnhetIdListe = [
     ...new Set(
@@ -192,6 +214,14 @@ function OrgtilknytningForm({
   const navigate = useNavigate();
   const hasWriteAccess = useHasWriteAccess();
 
+  const hasFieldTomChanged = (field: Partial<OrgtilknytningState>) => {
+    const originalField = orgtilknytninger.find(
+      (tilknytning) => tilknytning.fid === field.fid,
+    );
+
+    return !(field.gyldigTom === originalField?.gyldigTom);
+  };
+
   // Hvis det ikke finnes noen orgtilknytninger, legger vi til en ny en by default.
   const defaultOrgtilknytninger =
     orgtilknytninger.length > 0 ? orgtilknytninger : [defaultNyOrgtilknytning];
@@ -237,7 +267,7 @@ function OrgtilknytningForm({
       navigate({
         params: { id: ressurs.navident },
         to: "/ressurs/$id",
-      });
+      }).then();
     },
   });
 
@@ -318,6 +348,25 @@ function OrgtilknytningForm({
         )}
 
         {fields.map((field, index) => {
+          if (
+            field.fid &&
+            field.gyldigTom &&
+            !hasFieldTomChanged(field) &&
+            !isSameDateOrAfter(
+              dateWithoutTimezone(new Date(field.gyldigTom)),
+              subMonths(todayWithoutTimezone(), 2),
+            )
+          ) {
+            return (
+              <div
+                css={css`
+                  display: none;
+                `}
+                key={field.id}
+              />
+            );
+          }
+
           return (
             <div
               css={css`

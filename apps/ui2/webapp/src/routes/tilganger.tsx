@@ -8,6 +8,7 @@ import {
   Heading,
   HGrid,
   HStack,
+  List,
   Table,
   useDatepicker,
   VStack,
@@ -24,8 +25,8 @@ import * as yup from "yup";
 import {
   addDelegering,
   fornyDelegering,
+  getDelegerbareOrgEnheterForUserOptions,
   getOrgEnhet,
-  getOrgEnheterLedetAvOptions,
   getSession,
   getTilgangerDelegertByUserOptions,
   getTilgangerDelegertTilMegOptions,
@@ -57,47 +58,78 @@ export const Route = createFileRoute("/tilganger")({
     const session =
       await options.context.queryClient.ensureQueryData(getSession);
     const navident = session.navident;
-    const orgenheterLedetAvMeg =
+    const orgenheterLedetAvMegOgDelegerbart =
       await options.context.queryClient.ensureQueryData(
-        getOrgEnheterLedetAvOptions(navident),
+        getDelegerbareOrgEnheterForUserOptions(navident),
       );
 
-    return { orgenheterLedetAvMeg, navident };
+    return { orgenheterLedetAvMegOgDelegerbart, navident };
   },
 });
 
 function TilgangerPage() {
-  const { orgenheterLedetAvMeg } = Route.useLoaderData();
+  const { orgenheterLedetAvMegOgDelegerbart } = Route.useLoaderData();
 
   const delegertTilMeg =
     useQuery(getTilgangerDelegertTilMegOptions()).data ?? [];
+
+  function HarIkkeTilgangTilInnhold() {
+    return (
+      <List
+        as="ul"
+        title="Følgende ledere kan delegere redigeringstilgang i NOM:"
+      >
+        <List.Item>
+          Ledere på driftsenhetsnivå (f.eks. Agder fylke, NKS styringsenhet,
+          Arbeid og ytelser styringsenhet osv.)
+        </List.Item>
+        <List.Item>
+          Ledere på arbeidsområdenivå (Bjerke (NAV-kontor), Familie- og
+          pensjonsytelser Ålesund, HMS Buskerud osv.)
+        </List.Item>
+        <List.Item>
+          Alle ledere på nivå mellom de to overnevnte nivåene
+        </List.Item>
+      </List>
+    );
+  }
+
+  function HarTilgangState() {
+    return (
+      <VStack gap="6">
+        {orgenheterLedetAvMegOgDelegerbart.length > 0 && (
+          <>
+            <Heading level="1" size="medium">
+              Organisasjonsenheter du er leder for:
+            </Heading>
+            {orgenheterLedetAvMegOgDelegerbart.map((orgEnhet) => (
+              <OrgEnhetCard key={orgEnhet.id} orgEnhet={orgEnhet} />
+            ))}
+          </>
+        )}
+        {delegertTilMeg.length > 0 && (
+          <>
+            <Heading level="1" size="medium">
+              Organisasjonsenheter du har fått redigeringstilgang til:
+            </Heading>
+            {delegertTilMeg.map((tilgang) => (
+              <DelegertRolleCard key={tilgang.fid} tilgang={tilgang} />
+            ))}
+          </>
+        )}
+      </VStack>
+    );
+  }
 
   return (
     <>
       <PageBanner text="Redigeringstilgang" />
       <ContentWrapper>
-        <VStack gap="6">
-          {orgenheterLedetAvMeg.length > 0 && (
-            <>
-              <Heading level="1" size="medium">
-                Organisasjonsenheter du er leder for:
-              </Heading>
-              {orgenheterLedetAvMeg.map((orgEnhet) => (
-                <OrgEnhetCard key={orgEnhet.id} orgEnhet={orgEnhet} />
-              ))}
-            </>
-          )}
-          {delegertTilMeg.length > 0 && (
-            <>
-              <Heading level="1" size="medium">
-                Organisasjonsenheter du har fått redigeringstilgang til:
-              </Heading>
-              {delegertTilMeg.map((tilgang) => (
-                <DelegertRolleCard key={tilgang.fid} tilgang={tilgang} />
-              ))}
-            </>
-          )}
-        </VStack>
+        {orgenheterLedetAvMegOgDelegerbart.length > 0 ? (
+          <HarTilgangState />
+        ) : (
+          <HarIkkeTilgangTilInnhold />
+        )}
       </ContentWrapper>
     </>
   );
@@ -123,7 +155,7 @@ function DelegertRolleCard({ tilgang }: { tilgang: LederTilgangState }) {
       <Heading level="2" size="small">
         <HGrid columns={{ md: "max-content 1fr max-content" }} gap="2">
           <Buildings3Icon fontSize="24" />
-          <span>{orgEnhet?.navn}</span>
+          <span>{`${orgEnhet?.navn} (${orgEnhet?.id})`}</span>
           <Detail>{orgEnhet?.nomNivaa ?? orgEnhet?.orgNiv}</Detail>
         </HGrid>
       </Heading>
@@ -246,7 +278,7 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
         <Heading level="2" size="small">
           <HGrid columns={{ md: "max-content 1fr max-content" }} gap="2">
             <Buildings3Icon fontSize="24" />
-            <span>{orgEnhet.navn}</span>
+            <span>{`${orgEnhet?.navn} (${orgEnhet?.id})`}</span>
             <Detail>{orgEnhet.nomNivaa ?? orgEnhet.orgNiv}</Detail>
           </HGrid>
         </Heading>

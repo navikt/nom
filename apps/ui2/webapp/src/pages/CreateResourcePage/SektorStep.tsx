@@ -20,7 +20,8 @@ export const SektorNameMapping = {
 
 export const TilknytningtypeNameMapping = {
   [Tilknytningtype.KONSULENT]: "Konsulent (standard)",
-  [Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER]: "Ekstern samarbeidspartner",
+  [Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER]:
+    "Ekstern samarbeidspartner (For eksempel ansatte i Helfo, Skatteetaten og Riksrevisjonen)",
   [Tilknytningtype.INGEN]: "Ingen",
 };
 
@@ -81,8 +82,9 @@ export function SektorStep() {
     <ContainerWithHighlightedTop icon={opprettRessursIcon} title="Sektor">
       <Alert variant="info">
         For øyeblikket kan du kun bruke NOM til å opprette eksterne konsulenter
-        og kommunalt ansatte. Statlig ansatte opprettes i Remedy som tidligere.
-        Dette gjelder også roboter, Vikafossen og utenlandske konsulenter.
+        og kommunalt ansatte. Statlige ansatte opprettes i Identrutina og Unit4
+        som tidligere. Roboter, Vikafossen og utenlandske konsulenter opprettes
+        som tidligere.
       </Alert>
 
       <form

@@ -231,4 +231,19 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
         assertTrue(kanOppretteForEnhetD1, "Delegert leder HR har ikke auth til å opprette ressurs i enhet D1");
         assertFalse(kanOppretteForEnhetE1, "Delegert leder HR auth til å opprette ressurs i enhet E1");
     }
+
+    @Test
+    @DisplayName("Verifiser at leder har auth til å delegere tilgang til en annen bruker")
+    void test_0022() {
+        var kanDelegereForEnhetA = authorizedNavident.isAuthorizedToDelegate("A");
+        assertTrue(!kanDelegereForEnhetA.isEmpty() && kanDelegereForEnhetA.getFirst().getId().equals("A"));
+    }
+
+    @Test
+    @DisplayName("Verifiser at leder ikke har auth til å delegere tilgang til en annen bruker")
+    void test_0023() {
+        when(orgenhetService.isOrgEnhetInArbeidsomraade("B1")).thenReturn(true);
+        var kanDelegereForEnhetB = authorizedNavident.isAuthorizedToDelegate("B1");
+        assertTrue(kanDelegereForEnhetB.isEmpty());
+    }
 }

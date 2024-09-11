@@ -233,6 +233,22 @@ abstract public class MockBasisTestOrganisering {
             orgenhet_D, orgenhet_D1,
             orgenhet_E, orgenhet_E1
         ));
+
+        when(orgenhetService.getEnheterByLeder("A")).thenReturn(List.of(orgenhet_A));
+        when(orgenhetService.getEnheterByLeder("A1")).thenReturn(List.of(orgenhet_A1));
+        when(orgenhetService.getEnheterByLeder("A11")).thenReturn(List.of(orgenhet_A11));
+        when(orgenhetService.getEnheterByLeder("B")).thenReturn(List.of(orgenhet_B));
+        when(orgenhetService.getEnheterByLeder("B1")).thenReturn(List.of(orgenhet_B1));
+        when(orgenhetService.getEnheterByLeder("B11")).thenReturn(List.of(orgenhet_B11));
+        when(orgenhetService.getEnheterByLeder("C")).thenReturn(List.of(orgenhet_C));
+        when(orgenhetService.getEnheterByLeder("C1")).thenReturn(List.of(orgenhet_C1));
+        when(orgenhetService.getEnheterByLeder("C11")).thenReturn(List.of(orgenhet_C11));
+        when(orgenhetService.getEnheterByLeder("C2")).thenReturn(List.of(orgenhet_C2));
+        when(orgenhetService.getEnheterByLeder("C22")).thenReturn(List.of(orgenhet_C22));
+        when(orgenhetService.getEnheterByLeder("D")).thenReturn(List.of(orgenhet_D));
+        when(orgenhetService.getEnheterByLeder("D1")).thenReturn(List.of(orgenhet_D1));
+        when(orgenhetService.getEnheterByLeder("E")).thenReturn(List.of(orgenhet_E));
+        when(orgenhetService.getEnheterByLeder("E1")).thenReturn(List.of(orgenhet_E1));
     }
 
     private void setupBasisOrganisering() {

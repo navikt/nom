@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.authorize.redigereressurs.NotAuthorizedToDelegateLeder;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.contract.nom.state.LederTilgangState;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.SwaggerConfig;
@@ -140,6 +141,16 @@ public class AuthorizedNavidentController {
         }
 
         authorizedNavident.renewLederTilgangForOrgenhet(lederNavident.get(), request);
+    }
+
+    @GetMapping("isAuthorizedToDelegate/{navident}")
+    @Operation(
+        description = "Returner en liste med orgenheter du har tilgang til å delegere på.",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PreAuthorize("hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')")
+    public List<IOrgenhet> isAuthorizedToDelegate(@PathVariable String navident) {
+        return authorizedNavident.isAuthorizedToDelegate(navident);
     }
 
     @ExceptionHandler(
