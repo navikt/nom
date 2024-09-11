@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
+  Alert,
   BodyLong,
   Button,
   DatePicker,
@@ -26,13 +27,13 @@ import { useModal } from "~/components/modalProvider/ModalProvider";
 import { PageBanner } from "~/components/PageBanner";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
-import { BekreftModalInnholdTomIFortiden } from "~/pages/ResourcePage/RessursComponents/Modal/TomDatoModal";
 import { RessursCard } from "~/pages/ResourcePage/RessursComponents/RessursCard";
 import fjernRessursIcon from "~/resources/fjernRessursIcon.svg";
 import type { AvvikleRessursRequest } from "~/types/api-models";
 import {
   dateWithoutTimezone,
   formatDateWithoutTimezone,
+  formatDisplayDate,
   formatVisningsnavn,
   isSameDateOrBefore,
   isTodayOrBefore,
@@ -97,54 +98,56 @@ export function TerminateResourcePage() {
     const nySluttdato = values.sluttDato;
     const ressursSluttdato = ressurs.sluttdato;
 
-    if (
-      !ressursSluttdato ||
-      isSameDateOrBefore(
-        dateWithoutTimezone(new Date(nySluttdato)),
-        dateWithoutTimezone(new Date(ressursSluttdato)),
-      )
-    ) {
-      if (isTodayOrBefore(new Date(nySluttdato))) {
-        await showModal(
+    await (!ressursSluttdato ||
+    isSameDateOrBefore(
+      dateWithoutTimezone(new Date(nySluttdato)),
+      dateWithoutTimezone(new Date(ressursSluttdato)),
+    )
+      ? showModal(
           <BekreftModal
             confirmButtonLabel={"Bekreft endring"}
             content={
-              <BekreftModalInnholdTomIFortiden
-                navn={
-                  formatVisningsnavn(ressurs?.visningsnavn) ?? "medarbeideren"
-                }
-              />
+              isTodayOrBefore(new Date(nySluttdato)) ? (
+                <ModalInnholdFortiden
+                  navn={
+                    formatVisningsnavn(ressurs?.visningsnavn) ?? "medarbeideren"
+                  }
+                />
+              ) : (
+                <ModalInnholdFremtiden
+                  dato={formatDisplayDate(new Date(nySluttdato))}
+                  navn={
+                    formatVisningsnavn(ressurs?.visningsnavn) ?? "medarbeideren"
+                  }
+                />
+              )
             }
             heading={"Bekreft endring"}
           />,
         ).then(() => {
           avvikleRessursMutation.mutate(values);
-        });
-      } else {
-        avvikleRessursMutation.mutate(values);
-      }
-    } else {
-      await showModal(
-        <BekreftModal
-          cancelButtonLabel={"Gå tilbake"}
-          confirmButtonLabel={"Gå videre"}
-          content={
-            <span>
-              Du har satt en sluttdato som er senere enn medarbeiderens
-              nåværende sluttdato. For å gjøre dette må du angi hvor vedkommende
-              jobber i den utvidede perioden. Trykk på <b>Gå videre</b> for å
-              angi hvor medarbeideren jobber i perioden.
-            </span>
-          }
-          heading={"Utsette sluttdato"}
-        />,
-      ).then(() => {
-        navigate({
-          to: `/ressurs/${ressurs.navident}`,
-          search: { editOrgtilknytninger: true },
-        });
-      });
-    }
+        })
+      : showModal(
+          <BekreftModal
+            cancelButtonLabel={"Gå tilbake"}
+            confirmButtonLabel={"Gå videre"}
+            content={
+              <span>
+                Du har satt en sluttdato som er senere enn medarbeiderens
+                nåværende sluttdato. For å gjøre dette må du angi hvor
+                vedkommende jobber i den utvidede perioden. Trykk på{" "}
+                <b>Gå videre</b> for å angi hvor medarbeideren jobber i
+                perioden.
+              </span>
+            }
+            heading={"Utsette sluttdato"}
+          />,
+        ).then(() => {
+          navigate({
+            to: `/ressurs/${ressurs.navident}`,
+            search: { editOrgtilknytninger: true },
+          });
+        }));
   };
 
   return (
@@ -251,5 +254,56 @@ function SluttDatoPicker() {
         Velg datoen i dag
       </Button>
     </HStack>
+  );
+}
+
+function ModalInnholdFremtiden({ navn, dato }: { navn: string; dato: string }) {
+  return (
+    <HStack gap="6">
+      <BodyLong>
+        Du er nå i ferd med å sette medarbeiderens sluttdato til <b>{dato}</b>.
+      </BodyLong>
+      <BodyLong>
+        <b>
+          Dette innebærer at etter {dato} vil {navn} ikke lenger være registrert
+          som medarbeider i NAV, og alle tilganger for medarbeideren vil bli
+          fjernet.
+        </b>
+      </BodyLong>
+      <BodyLong>
+        Hvis dette ikke er korrekt, må du trykke på <b>Avbryt</b>.
+      </BodyLong>
+      <BodyLong>
+        Hvis dette er korrekt, kan du bekrefte endringen ved å trykke på{" "}
+        <b>Bekreft endring</b>.
+      </BodyLong>
+    </HStack>
+  );
+}
+
+function ModalInnholdFortiden({ navn }: { navn: string }) {
+  return (
+    <Alert variant="warning">
+      <HStack gap="6">
+        <BodyLong>
+          Du er nå i ferd med å sette medarbeiderens sluttdato til dagens dato
+          eller tidligere.
+        </BodyLong>
+        <BodyLong>
+          <b>
+            Dette innebærer at fra i dag vil {navn} ikke lenger være registrert
+            som medarbeider i NAV, og alle tilganger for medarbeideren vil bli
+            fjernet.
+          </b>
+        </BodyLong>
+        <BodyLong>
+          Hvis dette ikke er korrekt, må du trykke på <b>Avbryt</b>.
+        </BodyLong>
+        <BodyLong>
+          Hvis dette er korrekt, kan du bekrefte endringen ved å trykke på{" "}
+          <b>Bekreft endring</b>.
+        </BodyLong>
+      </HStack>
+    </Alert>
   );
 }
