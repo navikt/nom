@@ -20,7 +20,8 @@ export const SektorNameMapping = {
 
 export const TilknytningtypeNameMapping = {
   [Tilknytningtype.KONSULENT]: "Konsulent (standard)",
-  [Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER]: "Ekstern samarbeidspartner",
+  [Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER]:
+    "Ekstern samarbeidspartner (For eksempel ansatte i Helfo, Skatteetaten og Riksrevisjonen)",
   [Tilknytningtype.INGEN]: "Ingen",
 };
 
