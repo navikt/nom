@@ -12,7 +12,7 @@ public record StrukturerteStillingPerioderForNavident(
     List<DvhRessursStilling> dvhRessursStillinger,
     List<Error> errors
 ) {
-    public StrukturerteStillingPerioderForNavident(String navident, ArrayList<StillingPeriode> stillingPerioder, List<DvhRessursStilling> ressursStillinger) {
+    public StrukturerteStillingPerioderForNavident(String navident, List<StillingPeriode> stillingPerioder, List<DvhRessursStilling> ressursStillinger) {
         this(navident, stillingPerioder, ressursStillinger, new ArrayList<>());
     }
 
@@ -43,6 +43,10 @@ public record StrukturerteStillingPerioderForNavident(
         AGRESSOID_PAA_STILLING_ER_IKKE_PRESIS_MEN_BRUKER_EKSISTERENDE_OT_SOM_MATCHER,
         KAN_IKKE_MATCHE_STILLINGSPERIODE_TIL_ENHET,
         HAR_LAGET_NEGATIV_STILLINGPERIODE__DENNE_FJERNES,
+        HISTORIC_PERIODE_KAN_IKKE_SETTE_DOL,
+        FUTURE_PERIODE_KAN_IKKE_SETTE_DOL,
+        DUPLIKATE_EKSISTERENDE_ORGTILKNYNINGER_I_HISTORISK_PERIODE,
+        CURRENT_PERIODE_KAN_IKKE_MATCHE_ORGENHET_PAA_RESSURS_FOR_DOL
     }
 
     public void addError(ErrorType errorType, String message, StillingPeriode gjeldendeStillingPeriode) {

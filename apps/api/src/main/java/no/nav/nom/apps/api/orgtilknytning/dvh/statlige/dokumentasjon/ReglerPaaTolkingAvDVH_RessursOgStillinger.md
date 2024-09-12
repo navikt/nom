@@ -136,31 +136,32 @@ Deretter skal vi matche disse DVH periodene til Enheter i NOM. Om DVH perioden s
 
 ### Matche til Daglig Oppfølgings Leder (DOL)
 
-Hvis ulike StillingPerioder overlapper hverandre uten å dekke hverandre helt, så splitt periodene slik at periodene dekker hverandre helt eller ikke overlapper mer. 
+Hvis ulike StillingPerioder overlapper hverandre uten å dekke hverandre helt, så splitt periodene slik at periodene dekker hverandre helt eller ikke overlapper mer. Brekk også opp ift eksisterende OT'er på ressursen.
 E.g splitt følgende to:
 ```
-A: <----------------------->
-B:         <----------------------->
+A:     <----------------------->
+B:             <----------------------->
+OT_A:  <----DOL------>
+OT_B:                 <----DOL--------->
 ```
 Til:
 ```
-A: <------><---------------->
-B:         <----------------><----->
+A:     <------><-----><-------->
+B:             <-----><--------><------>
 ```
 Det gjør det lettere å finne DOL perioder.
 Perioder som da kun dekkes av en StillingPeriode vil da være DOL     
 
 Perioder som dekker hverandre må vi finne DOL ved å:
 1. Hvis historisk periode
-   Slå opp eksisterende OT på ressursen for samme periode og enheter. Finnes historikk med DOL som matcher, bruk historikkens DOL 
-   Hvis ingen historikk matcher, sjekk om StillingPeriodens AgressoId matcher `ORGENHET_PAA_RESSURS` - bruk da dette som DOL
-   Hvis ingen treff over, så logg og advar, men endre ingen DOL på historiske StillingPerioder 
-   1. Denne "...men endre ingen DOL på historiske StillingPerioder" er noe som må ivaretas av koden som prosesserer de strukturerte StillingPeriodene til Orgtilknytninger 
+   Slå opp eksisterende OT på ressursen for samme periode og enheter. Finnes historikk med DOL som matcher, bruk historikkens DOL.<br> 
+   Hvis ingen historikk matcher, sjekk om StillingPeriodens AgressoId matcher `ORGENHET_PAA_RESSURS` - bruk da dette som DOL.<br>
+   Hvis ingen treff over, så logg og advar 
 2. Hvis aktiv periode
-   Match med `ORGENHET_PAA_RESSURS` og bruk matchende StillingPeriode som DOL.
+   Match med `ORGENHET_PAA_RESSURS` og bruk matchende StillingPeriode som DOL.<br>
    Finnes ingen så logg og advar om dette - vi vil da ende opp uten aktiv DOL periode
 3. Hvis fremtidig periode
-   Sjekk om StillingPeriodens AgressoId matcher `ORGENHET_PAA_RESSURS` - bruk da denne som DOL
+   Sjekk om StillingPeriodens AgressoId matcher `ORGENHET_PAA_RESSURS` - bruk da denne som DOL. <br>
    Hvis ingen treff over, så logg - men vi forventer at dette korrigerer seg før/når perioden blir aktiv
 
 Avslutt med å gjøre kontroll på at det ikke finnes overlappende DOL perioder og at det må finnes en aktiv periode med DOL.  

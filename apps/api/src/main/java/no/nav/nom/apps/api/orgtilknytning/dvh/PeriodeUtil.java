@@ -67,6 +67,18 @@ public class PeriodeUtil {
         return orgtilknytning.gyldigFom().isBefore(dayAfter(end)) && orgtilknytning.gyldigTom().orElse(NO_END_DATE).isAfter(dayBefore(start));
     }
 
+    public static boolean intervalCoversDate(LocalDate intervalStart, LocalDate intervalEnd, LocalDate date) {
+        return likEllerFoer(intervalStart, date) && likEllerEtter(intervalEnd, date);
+    }
+
+    public static boolean intervalCoversDate(StillingPeriode stillingPeriode, LocalDate date) {
+        return intervalCoversDate(stillingPeriode.gyldigFom(), stillingPeriode.gyldigTom(), date);
+    }
+
+    public static boolean intervalCoversDate(OrgtilknytningState orgtilknytning, LocalDate date) {
+        return intervalCoversDate(orgtilknytning.gyldigFom(), orgtilknytning.gyldigTom().orElse(NO_END_DATE), date);
+    }
+
     public static LocalDate dayAfter(LocalDate localDate) { return localDate.plusDays(1); }
 
     public static LocalDate dayBefore(LocalDate localDate) { return localDate.minusDays(1); }
@@ -94,5 +106,9 @@ public class PeriodeUtil {
     public static boolean likEllerEtter(LocalDate dato, LocalDate sjekkMotDato) {
         dato = dato == null ? NO_END_DATE : dato;
         return dato.isAfter(dayBefore(sjekkMotDato == null ? NO_END_DATE : sjekkMotDato));
+    }
+
+    public static LocalDate tidligst(LocalDate  a, LocalDate b) {
+        return a == null ? b : (b == null ? a : (a.isBefore(b) ? a : b));
     }
 }

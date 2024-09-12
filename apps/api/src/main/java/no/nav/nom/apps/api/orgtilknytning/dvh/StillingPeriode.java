@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,6 +20,10 @@ public record StillingPeriode(
 
     public StillingPeriode(StillingPeriode copy, DagligOppfolging erDagligOppfolging) {
         this(copy.stilling, copy.gyldigFom, copy.gyldigTom, copy.orgenhet, erDagligOppfolging);
+    }
+
+    public StillingPeriode(StillingPeriode copy, LocalDate gyldigFom, LocalDate gyldigTom) {
+        this(copy.stilling, gyldigFom, gyldigTom, copy.orgenhet, copy.dagligOppfolging);
     }
 
     public StillingPeriode(StillingAgressoOrgIdOgNavn stillingAgressoOrgIdOgNavn, LocalDate gyldigFom, LocalDate gyldigTom, IOrgenhet orgenhet) {
@@ -120,7 +125,23 @@ public record StillingPeriode(
         return PeriodeUtil.isFuturePeriod(this);
     }
 
+    public boolean covers(LocalDate date) {
+        return PeriodeUtil.intervalCoversDate(this, date);
+    }
+
+    public boolean overlaps(StillingPeriode other) {
+        return PeriodeUtil.overlapsInterval(this, other);
+    }
+
+    public boolean overlaps(OrgtilknytningState other) {
+        return PeriodeUtil.overlapsInterval(this, other);
+    }
+
     public enum DagligOppfolging {
         JA, NEI, UKJENT
+    }
+
+    public boolean erDagligOppfolging() {
+        return dagligOppfolging == DagligOppfolging.JA;
     }
 }
