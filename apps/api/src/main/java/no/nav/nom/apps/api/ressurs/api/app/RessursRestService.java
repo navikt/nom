@@ -179,6 +179,7 @@ public class RessursRestService {
             ? ressursState.personident()
             : ressursState.personident().replaceFirst(".{5}$", "*****");
 
+
         return new Ressurs(
             ressursState.toBuilder()
                 .personident(personident)

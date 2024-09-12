@@ -7,22 +7,36 @@ import React from "react";
 
 import { getOrgEnhet } from "~/api/react-query-endpoints";
 import type { OrgtilknytningState } from "~/types/api-models";
-import { formatDisplayDate } from "~/utils";
+import {
+  dateWithoutTimezone,
+  formatDisplayDate,
+  isSameDateOrAfter,
+  todayWithoutTimezone,
+} from "~/utils";
 
 export function OrgtilknytningTimeline({
   orgtilknytninger,
 }: {
   orgtilknytninger: Partial<OrgtilknytningState>[];
 }) {
+  const filtrerteOrgtilknytninger = orgtilknytninger.filter((tilknytning) => {
+    return !(
+      tilknytning.gyldigTom &&
+      !isSameDateOrAfter(
+        dateWithoutTimezone(new Date(tilknytning.gyldigTom)),
+        subMonths(todayWithoutTimezone(), 2),
+      )
+    );
+  });
+
   const orgenhetIdListe = [
     ...new Set(
-      orgtilknytninger.flatMap(
+      filtrerteOrgtilknytninger.flatMap(
         (orgtilknytning) => orgtilknytning.orgEnhetId || [],
       ),
     ),
   ];
 
-  // TODO: ønsket sortering?
   const orgenheter = useQueries({
     queries: orgenhetIdListe.map((id) => ({
       queryKey: getOrgEnhet.queryKey(id),
@@ -50,7 +64,7 @@ export function OrgtilknytningTimeline({
           <p>I dag</p>
         </Timeline.Pin>
         {orgenheter.map((orgenhet) => {
-          const orgenhetTilknytninger = orgtilknytninger.filter(
+          const orgenhetTilknytninger = filtrerteOrgtilknytninger.filter(
             (orgtilknytning) => orgtilknytning.orgEnhetId === orgenhet.id,
           );
 
