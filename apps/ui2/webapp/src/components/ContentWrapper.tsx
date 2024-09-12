@@ -10,7 +10,7 @@ type ContentWrapperProperties = {
 
 const ContentWrapper = ({
   children,
-  limitWidth = true, // default value is true
+  limitWidth = true,
 }: ContentWrapperProperties) => (
   <div
     css={[
