@@ -85,6 +85,7 @@ const createCustomRessurser = (
       sektor: ressurs.sektor,
       telefoner: ressurs.telefoner,
       orgEnheter: customOrgEnheter,
+      test: "test99",
     };
 
     return customRessurs;
@@ -151,12 +152,15 @@ export const OrgRessursTabellPageInner = ({
   }
 
   if (ressursData) {
-    let sortData = customSortByOrgEnhetName(data, sort);
-    sortData = sortData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
-
     if (!data) {
       return <></>;
     }
+
+    let sortData = customSortByOrgEnhetName(data, sort);
+    sortData = sortData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+
+    console.log("sortData:");
+    console.log(sortData);
 
     return (
       <div
@@ -207,6 +211,9 @@ export const OrgRessursTabellPageInner = ({
               <Table.ColumnHeader scope="col" sortKey="telefonnumer">
                 Telefonnr.
               </Table.ColumnHeader>
+              <Table.ColumnHeader scope="col" sortKey="telefonnumer">
+                Test
+              </Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
           <Table.Body
@@ -248,6 +255,7 @@ export const OrgRessursTabellPageInner = ({
                 <Table.DataCell>
                   <TelefonNummere ressurs={ressurs} />
                 </Table.DataCell>
+                <Table.DataCell>{ressurs.test}</Table.DataCell>
               </Table.Row>
             ))}
           </Table.Body>
@@ -282,4 +290,5 @@ interface CustomRessurs {
   telefoner: Telefon[];
   sektor: Sektor;
   orgEnheter: CustomOrgEnhet[];
+  test?: string;
 }
