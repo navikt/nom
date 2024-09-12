@@ -144,6 +144,33 @@ export function isSameDateOrBefore(checkDate: Date, compareDate: Date) {
   return isSameDay(checkDate, compareDate) || isBefore(checkDate, compareDate);
 }
 
+export function earliestDateInList(dates: (Date | string | undefined)[]) {
+  const dateDates = dates.map((date) =>
+    date ? dateWithoutTimezone(new Date(date)) : undefined,
+  );
+
+  const sortedDates = dateDates.sort((a, b) => {
+    if (!a && !b) {
+      return 0;
+    }
+
+    if (!a) {
+      return 1;
+    }
+    if (!b) {
+      return -1;
+    }
+
+    if (isSameDay(a, b)) {
+      return 0;
+    }
+
+    return isSameDateOrBefore(a, b) ? -1 : 1;
+  });
+
+  return sortedDates[0];
+}
+
 export function earliestDate(date1: Date, date2: Date) {
   return isSameDateOrBefore(date1, date2) ? date1 : date2;
 }

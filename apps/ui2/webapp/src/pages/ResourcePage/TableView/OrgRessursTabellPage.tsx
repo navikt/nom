@@ -93,7 +93,7 @@ export const OrgRessursTabellPage = () => {
     return (
       <>
         <PageBanner text={"Medarbeidere i " + orgEnhetQuery.data?.navn || ""} />
-        <ContentWrapper>
+        <ContentWrapper limitWidth={false}>
           <Link
             css={css`
               color: #000;

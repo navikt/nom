@@ -5,19 +5,24 @@ import { defaultWidth } from "~/resources/NomStyles";
 
 type ContentWrapperProperties = {
   children: ReactNode;
+  limitWidth?: boolean;
 };
 
-const ContentWrapper = (properties: ContentWrapperProperties) => (
+const ContentWrapper = ({
+  children,
+  limitWidth = true, // default value is true
+}: ContentWrapperProperties) => (
   <div
     css={[
       css`
         margin-top: var(--a-spacing-8);
         margin-bottom: var(--a-spacing-20);
+        ${limitWidth ? "" : "max-width: unset !important;"}
       `,
       defaultWidth,
     ]}
   >
-    {properties.children}
+    {children}
   </div>
 );
 
