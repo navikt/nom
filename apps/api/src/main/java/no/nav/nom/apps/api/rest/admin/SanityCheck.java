@@ -343,6 +343,44 @@ public class SanityCheck {
     }
 
     @Operation(
+        description = "List tilknytninger med gyldighet utover ressurens gyldighetsperiode",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/listTilkoblingerUtoverRessursGyldighetPeriode")
+    public String listTilkoblingerUtoverRessursGyldighetPeriode() {
+
+        var allRessursState = ressursStateRepository.getAll();
+        var allRessursNavIdents = ressursStateRepository.getAll().stream().map(RessursState::navident).collect(Collectors.toSet());
+        var alleOrgtilknytningerKobletTilRessurser = orgtilknytningService.getByNavidenter(allRessursNavIdents, orgtilknytningState -> orgtilknytningState);
+        var tilknytningerUtoverRessursPerioder = alleOrgtilknytningerKobletTilRessurser.entrySet().stream()
+            .filter(orgtilknytning -> !orgtilknytning.getValue().isEmpty())
+            .filter(orgtilknytning -> orgtilknytning.getValue().stream()
+                .allMatch(orgtilknytningState ->
+                    isTilkoblingerUtoverRessursGyldighetPeriode(allRessursState, orgtilknytning.getKey(), orgtilknytningState)
+                )
+            )
+            .map(Map.Entry::getKey)
+            .toList();
+
+        StringBuilder ressurserUtoverRessursGyldighetPeriode = new StringBuilder();
+        tilknytningerUtoverRessursPerioder.forEach(navident -> ressurserUtoverRessursGyldighetPeriode.append(navident).append(";").append("\n"));
+        return ressurserUtoverRessursGyldighetPeriode.toString();
+    }
+
+    private boolean isTilkoblingerUtoverRessursGyldighetPeriode(Collection<RessursState> allRessurser, String navIdent, OrgtilknytningState orgtilknytningState) {
+        var resursState = allRessurser.stream().filter(r -> r.navident().equals(navIdent)).findFirst().orElse(null);
+        assert resursState != null;
+        return resursState.sluttdato().isPresent() && resursState.startdato().isPresent() &&
+            orgtilknytningState.gyldigTom().isPresent() && orgtilknytningState.gyldigTom().get().isAfter(resursState.sluttdato().get()) &&
+            orgtilknytningState.gyldigFom().isBefore(resursState.startdato().get());
+    }
+
+    @Operation(
         description = "List tilknytninger med gyldighet utover enhetens gyldighetsperiode",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
