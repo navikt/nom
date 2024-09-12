@@ -126,7 +126,7 @@ export const OrgRessursTabellPageInner = ({
   });
 
   const [page, setPage] = useState(1);
-  const rowsPerPage = 50;
+  const rowsPerPage = 300;
   const ressursData = hentedeRessurserQuery.data;
 
   const customRessurser = createCustomRessurser(
