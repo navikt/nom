@@ -158,7 +158,10 @@ export function SluttDato({ ressurs }: { ressurs: Ressurs }) {
   const hasWriteAccessForRessurs =
     useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
 
-  if (ressurs.sluttdato && hasWriteAccessForRessurs) {
+  if (
+    ressurs.sluttdato &&
+    (hasWriteAccessForRessurs || ressurs.sektor === "EKSTERN")
+  ) {
     return (
       <LabelWithValue
         helpText="Medarbeiderens siste arbeidsdag i NAV."
