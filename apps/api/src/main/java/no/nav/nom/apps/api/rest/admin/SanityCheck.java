@@ -353,31 +353,49 @@ public class SanityCheck {
     )
     @GetMapping(value = "/listTilkoblingerUtoverRessursGyldighetPeriode")
     public String listTilkoblingerUtoverRessursGyldighetPeriode() {
+        StringBuffer result = new StringBuffer();
+        var alleOrgtilknytningState = orgtilknytningService.getAll().stream().toList();
+        log.info("alleOrgtilknytningState, size: {}", alleOrgtilknytningState.size());
 
-        var allRessursState = ressursStateRepository.getAll();
-        var allRessursNavIdents = ressursStateRepository.getAll().stream().map(RessursState::navident).collect(Collectors.toSet());
-        var alleOrgtilknytningerKobletTilRessurser = orgtilknytningService.getByNavidenter(allRessursNavIdents, orgtilknytningState -> orgtilknytningState);
-        var tilknytningerUtoverRessursPerioder = alleOrgtilknytningerKobletTilRessurser.entrySet().stream()
-            .filter(orgtilknytning -> !orgtilknytning.getValue().isEmpty())
-            .filter(orgtilknytning -> orgtilknytning.getValue().stream()
-                .allMatch(orgtilknytningState ->
-                    isTilkoblingerUtoverRessursGyldighetPeriode(allRessursState, orgtilknytning.getKey(), orgtilknytningState)
-                )
-            )
-            .map(Map.Entry::getKey)
-            .toList();
+        var tilknytningerUtoverRessursPeriode = orgtilknytningerUtoverRessursPeriode(alleOrgtilknytningState);
+        log.info("tilknytningerUtoverRessursPeriode, size: {}", tilknytningerUtoverRessursPeriode.size());
 
-        StringBuilder ressurserUtoverRessursGyldighetPeriode = new StringBuilder();
-        tilknytningerUtoverRessursPerioder.forEach(navident -> ressurserUtoverRessursGyldighetPeriode.append(navident).append(";").append("\n"));
-        return ressurserUtoverRessursGyldighetPeriode.toString();
+        tilknytningerUtoverRessursPeriode.forEach(t -> {
+            var oe = orgenhetService.getById(t.orgEnhetId()).get();
+            result.append(t.navident())
+                .append(";")
+                .append(oe.getUniqueAgressoId())
+                .append(";")
+                .append(t.orgEnhetId())
+                .append(";")
+                .append(t.gyldigFom())
+                .append(";")
+                .append(t.gyldigTom().isPresent() ? t.gyldigTom().get() : "")
+                .append(";")
+                .append(oe.getGyldigFom())
+                .append(";")
+                .append(oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "")
+                .append("\n");
+        });
+        return result.toString();
     }
 
-    private boolean isTilkoblingerUtoverRessursGyldighetPeriode(Collection<RessursState> allRessurser, String navIdent, OrgtilknytningState orgtilknytningState) {
-        var resursState = allRessurser.stream().filter(r -> r.navident().equals(navIdent)).findFirst().orElse(null);
-        assert resursState != null;
-        return resursState.sluttdato().isPresent() && resursState.startdato().isPresent() &&
-            orgtilknytningState.gyldigTom().isPresent() && orgtilknytningState.gyldigTom().get().isAfter(resursState.sluttdato().get()) &&
-            orgtilknytningState.gyldigFom().isBefore(resursState.startdato().get());
+    private List<OrgtilknytningState> orgtilknytningerUtoverRessursPeriode(List<OrgtilknytningState> orgtilknytninger) {
+        return orgtilknytninger.stream()
+            .filter(t -> {
+                var ressurs = ressursStateRepository.findByNavident(t.navident());
+
+                if (ressurs.get().sluttdato().isPresent() && ressurs.get().sluttdato().get().isBefore(t.gyldigFom())) {
+                    return true; // ressurs.sluttDato < tilknytning.gyldigFom
+                }
+                if (t.gyldigTom().isPresent() && ressurs.get().startdato().get().isAfter(t.gyldigTom().get())) {
+                    return true; // ressurs.startDato > tilknytning.gyldigTom
+                }
+                if (t.gyldigTom().isEmpty() && ressurs.get().sluttdato().isPresent()) {
+                    return true; // ressurs avsluttet > tilknytning ikke avsluttet
+                }
+                return false;
+            }).toList();
     }
 
     @Operation(
