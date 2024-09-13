@@ -180,6 +180,13 @@ function MedarbeidereList({
     (ressurs) => ressurs.sektor.includes(Sektor.EKSTERN),
   );
 
+  interneRessurser.sort((a, b) =>
+    a.visningsnavn.fornavn.localeCompare(b.visningsnavn.fornavn),
+  );
+  eksterneRessurser.sort((a, b) =>
+    a.visningsnavn.fornavn.localeCompare(b.visningsnavn.fornavn),
+  );
+
   return (
     <>
       <div
