@@ -381,13 +381,6 @@ public class ManuelleRessursEvtsrcMeldinger {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Navidenten er ikke mastret i NOM");
         }
 
-        if (isNull(localDate) && ressursState.get().sluttdato().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ressurs har ingen sluttdato eller så er ikke sluttdato satt som parameter");
-        } else {
-            localDate = ressursState.get().sluttdato().isPresent() ? ressursState.get().sluttdato().get() : localDate;
-        }
-
-
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Ressurs med FID %s er funnet for navident %s med navn %s. Men vil ikke endres da handling ikke er bekreftet".formatted(
