@@ -15,6 +15,7 @@ import no.nav.nom.apps.api.ressurs.api.app.AvvikleRessursRequest;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.SlettRessursCommand;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredService;
@@ -407,6 +408,68 @@ public class ManuelleRessursEvtsrcMeldinger {
 
         return ResponseEntity.ok()
             .body("Ressurs med FID %s er funnet for navident %s med navn %s. Avvikle ressurs event er nå sendt".formatted(
+                HtmlUtils.htmlEncode(ressursState.get().fid()),
+                ressursState.get().navident(),
+                ressursState.get().visningsnavn().toString()
+            ));
+    }
+
+
+    @PostMapping(value = "/oppdatereSluttDatoRessurs")
+    @Operation(
+        description = "Lag en RessursSluttdatoOppdatertEvent melding",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
+        }
+    )
+    public ResponseEntity<String> oppdatereSluttDatoRessurs(
+        @Parameter(description = "NAVIDENT for ressursen") @RequestParam String navident,
+        @Parameter(description = "Sluttdato for ressursen som skal oppdateres") @RequestParam(required = false) LocalDate localDate,
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
+    ){
+        var ressursState = ressursStateRepository.findByNavident(navident);
+
+        if (ressursState.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Navidenten finnes ikke");
+        }
+
+        if (!nomMastered.isMastered(navident)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Navidenten er ikke mastret i NOM");
+        }
+
+        if (!"CONFIRM".equals(confirm)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body("Ressurs med FID %s er funnet for navident %s med navn %s. Men vil ikke endres da handling ikke er bekreftet".formatted(
+                    HtmlUtils.htmlEncode(ressursState.get().fid()),
+                    ressursState.get().navident(),
+                    ressursState.get().visningsnavn().toString()
+                ));
+        }
+
+        var metaData = new InputMetadata(
+            "/api/admin/manuelleEvtsrcMeldinger",
+            "oppdatereSluttDatoRessurs",
+            new AvvikleRessursRequest(localDate),
+            new Origination(
+                getAuthenticatedNavIdent(),
+                "Admin swagger/rest"
+            )
+        );
+
+        ressursCommandService.oppdaterRessursSluttdatoEvent(
+            new OppdaterSluttdatoCommand(ressursState.get().fid(),
+                isNull(localDate)? Optional.empty() : Optional.of(localDate), metaData)
+        );
+
+        return ResponseEntity.ok()
+            .body("Ressurs med FID %s er funnet for navident %s med navn %s. RessursSluttdatoOppdatertEvent er nå sendt".formatted(
                 HtmlUtils.htmlEncode(ressursState.get().fid()),
                 ressursState.get().navident(),
                 ressursState.get().visningsnavn().toString()
