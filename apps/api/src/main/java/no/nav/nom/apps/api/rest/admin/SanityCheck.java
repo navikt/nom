@@ -354,6 +354,7 @@ public class SanityCheck {
     @GetMapping(value = "/listTilkoblingerUtoverRessursGyldighetPeriode")
     public String listTilkoblingerUtoverRessursGyldighetPeriode() {
         StringBuffer result = new StringBuffer();
+
         var alleOrgtilknytningState = orgtilknytningService.getAll().stream().toList();
         log.info("alleOrgtilknytningState, size: {}", alleOrgtilknytningState.size());
 
