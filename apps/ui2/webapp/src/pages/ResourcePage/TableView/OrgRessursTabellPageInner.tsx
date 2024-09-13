@@ -23,6 +23,9 @@ import type {
   Visningsnavn,
 } from "~/types/api-models";
 import {
+  dateWithoutTimezone,
+  earliestDateInList,
+  formatDisplayDate,
   formatTlf,
   formatVisningsnavn,
   isGyldighetsPeriodeActive,
@@ -71,6 +74,15 @@ const createCustomRessurser = (
       ),
     );
 
+    const fomDatoer = correspondingOrgEnheter.map(
+      (orgEnhet) =>
+        orgEnhet.ressursKoblinger.find(
+          (kobling) => kobling.navident === ressurs.navident,
+        )?.gyldigFom,
+    );
+
+    const tidligsteFomDato = earliestDateInList(fomDatoer);
+
     const customOrgEnheter: CustomOrgEnhet[] = correspondingOrgEnheter.map(
       (orgEnhet) => ({
         id: orgEnhet.id,
@@ -85,6 +97,7 @@ const createCustomRessurser = (
       sektor: ressurs.sektor,
       telefoner: ressurs.telefoner,
       orgEnheter: customOrgEnheter,
+      tidligsteFom: tidligsteFomDato,
     };
 
     return customRessurs;
@@ -113,7 +126,7 @@ export const OrgRessursTabellPageInner = ({
   });
 
   const [page, setPage] = useState(1);
-  const rowsPerPage = 50;
+  const rowsPerPage = 300;
   const ressursData = hentedeRessurserQuery.data;
 
   const customRessurser = createCustomRessurser(
@@ -151,12 +164,12 @@ export const OrgRessursTabellPageInner = ({
   }
 
   if (ressursData) {
-    let sortData = customSortByOrgEnhetName(data, sort);
-    sortData = sortData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
-
     if (!data) {
       return <></>;
     }
+
+    let sortData = customSortByOrgEnhetName(data, sort);
+    sortData = sortData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
     return (
       <div
@@ -204,6 +217,9 @@ export const OrgRessursTabellPageInner = ({
               <Table.ColumnHeader scope="col" sortKey="orgEnhet.name" sortable>
                 Organisasjonsenhet
               </Table.ColumnHeader>
+              <Table.ColumnHeader scope="col" sortKey="tidligsteFom" sortable>
+                Fra og med
+              </Table.ColumnHeader>
               <Table.ColumnHeader scope="col" sortKey="telefonnumer">
                 Telefonnr.
               </Table.ColumnHeader>
@@ -240,12 +256,25 @@ export const OrgRessursTabellPageInner = ({
                 <Table.DataCell>
                   {ressurs.orgEnheter.map((orgEnhet, index, array) => (
                     <React.Fragment key={orgEnhet.id}>
-                      <Link href={`/org/${orgEnhet.id}`}>{orgEnhet.name}</Link>
+                      <Link href={`/org/${orgEnhet.id}`}>
+                        {orgEnhet.name + " (" + orgEnhet.id + ")"}
+                      </Link>
                       {index < array.length - 1 ? ", " : ""}
                     </React.Fragment>
                   ))}
                 </Table.DataCell>
                 <Table.DataCell>
+                  {ressurs.tidligsteFom
+                    ? formatDisplayDate(
+                        dateWithoutTimezone(new Date(ressurs.tidligsteFom)),
+                      )
+                    : undefined}
+                </Table.DataCell>
+                <Table.DataCell
+                  css={css`
+                    min-width: 110px;
+                  `}
+                >
                   <TelefonNummere ressurs={ressurs} />
                 </Table.DataCell>
               </Table.Row>
@@ -282,4 +311,5 @@ interface CustomRessurs {
   telefoner: Telefon[];
   sektor: Sektor;
   orgEnheter: CustomOrgEnhet[];
+  tidligsteFom?: Date | string;
 }
