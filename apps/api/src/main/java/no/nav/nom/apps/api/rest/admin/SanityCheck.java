@@ -362,7 +362,14 @@ public class SanityCheck {
 
         tilknytningerUtoverRessursPeriode.forEach(t -> {
             var oe = orgenhetService.getById(t.orgEnhetId()).get();
+            var ressurs = ressursStateRepository.findByNavident(t.navident()).get();
             result.append(t.navident())
+                .append(";")
+                .append(ressurs.visningsnavn())
+                .append(";")
+                .append(ressurs.startdato())
+                .append(";")
+                .append(ressurs.sluttdato())
                 .append(";")
                 .append(oe.getUniqueAgressoId())
                 .append(";")
