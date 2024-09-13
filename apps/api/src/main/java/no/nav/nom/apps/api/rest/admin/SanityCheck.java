@@ -388,7 +388,7 @@ public class SanityCheck {
                 if (ressurs.get().sluttdato().isPresent() && ressurs.get().sluttdato().get().isBefore(t.gyldigFom())) {
                     return true; // ressurs.sluttDato < tilknytning.gyldigFom
                 }
-                if (t.gyldigTom().isPresent() && ressurs.get().startdato().get().isAfter(t.gyldigTom().get())) {
+                if (t.gyldigTom().isPresent() && ressurs.get().startdato().isPresent() && ressurs.get().startdato().get().isAfter(t.gyldigTom().get())) {
                     return true; // ressurs.startDato > tilknytning.gyldigTom
                 }
                 if (t.gyldigTom().isEmpty() && ressurs.get().sluttdato().isPresent()) {
