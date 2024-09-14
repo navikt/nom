@@ -469,7 +469,7 @@ public class ManuelleRessursEvtsrcMeldinger {
 
         ressursCommandService.oppdaterRessursSluttdatoEvent(
             new OppdaterSluttdatoCommand(ressursState.get().fid(),
-                    Optional.of(sluttDato), metaData)
+                   isNull(sluttDato)? Optional.empty() : Optional.of(sluttDato), metaData)
         );
 
         return ResponseEntity.ok()
