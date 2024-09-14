@@ -445,7 +445,7 @@ public class ManuelleRessursEvtsrcMeldinger {
         }
 
         if (isNull(sluttDato)){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sluttdato for gitt ressurs er tom!");
+            log.warn("Oppdateret sluttdato for gitt ressurs: {} er tom!", navident);
         }
 
         if (!"CONFIRM".equals(confirm)) {
