@@ -22,7 +22,7 @@ import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
 
 const schema = z.object({
   navident: navidentValidator(),
-  sluttdato: z.string().optional(),
+  sluttdato: z.date().optional(),
   confirm: confirmTextValidator(),
 });
 
@@ -43,7 +43,7 @@ export function OppdatereSluttDatoRessurs() {
       const formattedDate = v.sluttdato && format(v.sluttdato, "yyyy-MM-dd");
       return (
         await ky.post(
-          `${API_BASE_URL}/api/admin/manuelleEvtsrcMeldinger/oppdatereSluttDatoRessurs?${queryString.stringify({ ...v, gyldigTom: formattedDate })}`,
+          `${API_BASE_URL}/api/admin/manuelleEvtsrcMeldinger/oppdatereSluttDatoRessurs?${queryString.stringify({ ...v, sluttDato: formattedDate })}`,
         )
       ).text();
     },

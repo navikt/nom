@@ -431,7 +431,7 @@ public class ManuelleRessursEvtsrcMeldinger {
     )
     public ResponseEntity<String> oppdatereSluttDatoRessurs(
         @Parameter(description = "NAVIDENT for ressursen") @RequestParam String navident,
-        @Parameter(description = "Sluttdato for ressursen som skal oppdateres") @RequestParam(required = false) LocalDate localDate,
+        @Parameter(description = "Sluttdato for ressursen som skal oppdateres") @RequestParam(required = false) LocalDate sluttDato,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
     ){
         var ressursState = ressursStateRepository.findByNavident(navident);
@@ -442,6 +442,10 @@ public class ManuelleRessursEvtsrcMeldinger {
 
         if (!nomMastered.isMastered(navident)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Navidenten er ikke mastret i NOM");
+        }
+
+        if (isNull(sluttDato)){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sluttdato for gitt ressurs er tom!");
         }
 
         if (!"CONFIRM".equals(confirm)) {
@@ -456,7 +460,7 @@ public class ManuelleRessursEvtsrcMeldinger {
         var metaData = new InputMetadata(
             "/api/admin/manuelleEvtsrcMeldinger",
             "oppdatereSluttDatoRessurs",
-            new AvvikleRessursRequest(localDate),
+            new AvvikleRessursRequest(sluttDato),
             new Origination(
                 getAuthenticatedNavIdent(),
                 "Admin swagger/rest"
@@ -465,7 +469,7 @@ public class ManuelleRessursEvtsrcMeldinger {
 
         ressursCommandService.oppdaterRessursSluttdatoEvent(
             new OppdaterSluttdatoCommand(ressursState.get().fid(),
-                isNull(localDate)? Optional.empty() : Optional.of(localDate), metaData)
+                    Optional.of(sluttDato), metaData)
         );
 
         return ResponseEntity.ok()
