@@ -136,7 +136,8 @@ def setup_secrets(apps_filter: list, env: str, fss_included: bool):
     ]
 
     node_apps = [
-        AppInfo("ui2/frackend", "nom-ui2", "org")
+        AppInfo("ui2/frackend", "nom-ui2", "org"),
+        AppInfo("admin-web/frackend", "nom-admin-web", "org")
     ]
 
     if apps_filter:

@@ -31,6 +31,8 @@ import static no.nav.nom.apps.admin.utils.safeSubList;
 @PreAuthorize("hasAuthority('ADMIN')")
 public class SinkController {
 
+    private static final int NUMBER_OF_EVENTS = 300;
+    
     private final RessursEvtsrcRepository ressursEvtsrcRepository;
     private final OrgenhetEvtsrcRepository orgenhetEvtsrcRepository;
     private final TilgangEvtsrcRepository tilgangEvtsrcRepository;
@@ -63,7 +65,7 @@ public class SinkController {
         int fromOffset = eventSearchParams.getFromOffset();
         List<RessursEvent> events = ressursEvtsrcRepository.getRessursEvtsrc().stream().filter(eventFilter(eventSearchParams)).toList();
 
-        return safeSubList(events.reversed(), fromOffset, fromOffset + 100);
+        return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
 
     @GetMapping(value = "/orgenhetEvents")
@@ -71,7 +73,7 @@ public class SinkController {
         int fromOffset = eventSearchParams.getFromOffset();
         List<OrgEnhetEvent> events = orgenhetEvtsrcRepository.getOrgenhetEvtsrc().stream().filter(eventFilter(eventSearchParams)).toList();
 
-        return safeSubList(events.reversed(), fromOffset, fromOffset + 100);
+        return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
 
     @GetMapping(value = "/orgtilknytningEvents")
@@ -79,7 +81,7 @@ public class SinkController {
         int fromOffset = eventSearchParams.getFromOffset();
         List<OrgtilknytningEvent> events = orgtilknytningEvtsrcRepository.getOrgtilknytningEvtsrc().stream().filter(eventFilter(eventSearchParams)).toList();
 
-        return safeSubList(events.reversed(), fromOffset, fromOffset + 100);
+        return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
 
     @GetMapping(value = "/tilgangEvents")
@@ -87,7 +89,7 @@ public class SinkController {
         int fromOffset = eventSearchParams.getFromOffset();
         List<AuthorizationEvent> events = tilgangEvtsrcRepository.getTilgangEvtsrc().stream().filter(eventFilter(eventSearchParams)).toList();
 
-        return safeSubList(events.reversed(), fromOffset, fromOffset + 100);
+        return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
 
     @GetMapping(value = "/apiRessursEvents")
@@ -95,7 +97,7 @@ public class SinkController {
         int fromOffset = eventSearchParams.getFromOffset();
         List<RessursStateKafkaDTO> events = ressursApiStateRepository.getRessursStateTopic().stream().filter(eventFilter(eventSearchParams)).toList();
 
-        return safeSubList(events.reversed(), fromOffset, fromOffset + 100);
+        return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
 
     @GetMapping(value = "/apiOrgenhetEvents")
@@ -103,7 +105,7 @@ public class SinkController {
         int fromOffset = eventSearchParams.getFromOffset();
         List<OrgEnhetStateDTO> events = orgEnhetStateApiRepository.getOrgtilknytningApiState().stream().filter(eventFilter(eventSearchParams)).toList();
 
-        return safeSubList(events.reversed(), fromOffset, fromOffset + 100);
+        return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
 
     @GetMapping(value = "/apiHendelserEvents")
@@ -111,6 +113,6 @@ public class SinkController {
         int fromOffset = eventSearchParams.getFromOffset();
         List<HendelseDTO> events = hendelserApiStateRepository.getHendelserApiState().stream().filter(eventFilter(eventSearchParams)).toList();
 
-        return safeSubList(events.reversed(), fromOffset, fromOffset + 100);
+        return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
 }
