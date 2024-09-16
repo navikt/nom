@@ -31,7 +31,7 @@ import static no.nav.nom.apps.admin.utils.safeSubList;
 @PreAuthorize("hasAuthority('ADMIN')")
 public class SinkController {
 
-    private static final int NUMBER_OF_EVENTS = 300;
+    private static final int NUMBER_OF_EVENTS = 500;
     
     private final RessursEvtsrcRepository ressursEvtsrcRepository;
     private final OrgenhetEvtsrcRepository orgenhetEvtsrcRepository;

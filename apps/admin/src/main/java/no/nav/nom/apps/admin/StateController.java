@@ -33,6 +33,8 @@ import static no.nav.nom.apps.admin.utils.safeSubList;
 @PreAuthorize("hasAuthority('ADMIN')")
 public class StateController {
 
+    private static final int NUMBER_OF_EVENTS = 500;
+
     private final RessursStateRepository ressursStateRepository;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
@@ -57,7 +59,7 @@ public class StateController {
         int fromOffset = ressursSearchParams.getFromOffset();
         var events = ressursStateRepository.getAll().stream().filter(ressursSearchFilter(ressursSearchParams)).toList();
 
-        return safeSubList(events, fromOffset, fromOffset + 100);
+        return safeSubList(events, fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
 
     @GetMapping(value = "/orgenhet")
@@ -65,7 +67,7 @@ public class StateController {
         int fromOffset = orgenhetStateSearchParams.getFromOffset();
         var events = orgEnhetStateRepository.getAll().stream().filter(orgenhetSearchFilter(orgenhetStateSearchParams)).toList();
 
-        return safeSubList(events, fromOffset, fromOffset + 100);
+        return safeSubList(events, fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
 
     @GetMapping(value = "/orgtilknytning")
@@ -74,7 +76,7 @@ public class StateController {
         var events = orgtilknytningStateRepository
             .getAll().stream().filter(orgtilknytningStateSearchFilter(orgtilknytningStateSearchParams)).toList();
 
-        return safeSubList(events, fromOffset, fromOffset + 100);
+        return safeSubList(events, fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
 
     @GetMapping(value = "/organisering")
@@ -83,7 +85,7 @@ public class StateController {
         var events = organiseringStateRepository
             .getOrganiseringer().stream().filter(organiseringStateSearchFilter(organiseringStateSearchParams)).toList();
 
-        return safeSubList(events, fromOffset, fromOffset + 100);
+        return safeSubList(events, fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
 
     @GetMapping(value = "/nom-mastered")
