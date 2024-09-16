@@ -89,9 +89,9 @@ export function OppdatereSluttDatoRessurs() {
                   case "success": {
                     return (
                       <Alert variant="success">
-                        Meldingen ble sendt. <Detail>{mutation.data}</Detail>
+                        Meldingen ble sendt. <Detail>{JSON.parse(mutation.data).message}</Detail>
                         <Link
-                          search={{ filterText: methods.watch("navident") }}
+                          search={{ filterText: JSON.parse(mutation.data).fid }}
                           to="/sinks/ressurs"
                         >
                           Trykk her for å se historikk

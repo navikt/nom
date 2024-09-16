@@ -1,5 +1,7 @@
 package no.nav.nom.apps.api.ressurs.api.admin;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -9,16 +11,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.app.AvvikleRessursRequest;
+import no.nav.nom.apps.api.ressurs.api.app.OppdaterSluttdatoRessursResponse;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.SlettRessursCommand;
-import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredService;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -433,7 +434,7 @@ public class ManuelleRessursEvtsrcMeldinger {
         @Parameter(description = "NAVIDENT for ressursen") @RequestParam String navident,
         @Parameter(description = "Sluttdato for ressursen som skal oppdateres") @RequestParam(required = false) LocalDate sluttDato,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
-    ){
+    ) throws JsonProcessingException {
         var ressursState = ressursStateRepository.findByNavident(navident);
 
         if (ressursState.isEmpty()) {
@@ -472,12 +473,24 @@ public class ManuelleRessursEvtsrcMeldinger {
                    isNull(sluttDato)? Optional.empty() : Optional.of(sluttDato), metaData)
         );
 
+        /*
         return ResponseEntity.ok()
             .body("Ressurs med FID %s er funnet for navident %s med navn %s. RessursSluttdatoOppdatertEvent er nå sendt".formatted(
                 HtmlUtils.htmlEncode(ressursState.get().fid()),
                 ressursState.get().navident(),
                 ressursState.get().visningsnavn().toString()
             ));
+        */
+
+        var response = OppdaterSluttdatoRessursResponse.builder()
+            .fid(ressursState.get().fid())
+            .navident(ressursState.get().navident())
+            .visningsnavn(ressursState.get().visningsnavn().toString())
+            .message("Ressursens sluttdato er oppdatert, men eventuell nødvendig justering av orgtilknytninger må du gjøre manuelt via medarbeiderens profilside.")
+            .build();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonStr = objectMapper.writeValueAsString(response);
+        return ResponseEntity.ok().body(jsonStr);
     }
 
     private boolean validFid(String fid) {
