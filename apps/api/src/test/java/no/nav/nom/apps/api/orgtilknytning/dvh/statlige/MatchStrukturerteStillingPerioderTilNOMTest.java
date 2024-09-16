@@ -205,10 +205,10 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgenhetService.exactMatchByAgressoId("0110001")).thenReturn(List.of(orgenhet("a123bc", "Single match", "0110001", LocalDate.of(2022, 1, 1), null)));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals("0110001",                 forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("Single match",            forsteStillingPeriode.stilling().enhetNavn());
         assertEquals("ORGENHET",                forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
@@ -229,10 +229,10 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgenhetService.exactMatchByAgressoId("0110001")).thenReturn(List.of(orgenhet("a123bc", "Single match", "0110001", LocalDate.of(2022, 1, 1), null)));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals("01100",                   forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("0110001",                 forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
         assertEquals("Single match",            forsteStillingPeriode.stilling().enhetNavn());
@@ -254,10 +254,10 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgenhetService.exactMatchByAgressoId("0110001")).thenReturn(List.of(orgenhet("a123bc", "Single match", "0110001")));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2023, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE,                  forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
@@ -275,10 +275,10 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgenhetService.exactMatchByAgressoId("0110001")).thenReturn(List.of(orgenhet("a123bc", "Single match", "0110001")));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2023, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE,                  forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
@@ -296,10 +296,10 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgenhetService.exactMatchByAgressoId("0110001")).thenReturn(List.of(orgenhet("a123bc", "Single match", "0110001")));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2023, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 1, 31), forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
@@ -320,15 +320,15 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgenhet("a123bc", "Single match", "0110001", LocalDate.of(2022, 1, 1), LocalDate.of(2024, 12, 31)))
         );
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2022, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 1, 31), forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_PERIODE, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_PERIODE, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -345,15 +345,15 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgenhet("a123bc", "Single match", "0110001", LocalDate.of(2022, 1, 1), LocalDate.of(2024, 12, 31)))
         );
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2022, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 12, 31), forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_PERIODE, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_PERIODE, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -370,15 +370,15 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgenhet("a123bc", "Single match", "0110001", LocalDate.of(2022, 1, 1), LocalDate.of(2024, 12, 31)))
         );
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2023, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 12, 31), forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_PERIODE, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_PERIODE, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -395,15 +395,15 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgenhet("a123bc", "Single match", "0110001", LocalDate.of(2022, 1, 1), LocalDate.of(2024, 12, 31)))
         );
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2023, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 12, 31), forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_PERIODE, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_PERIODE, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -424,15 +424,15 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "a123bc", LocalDate.of(2021, 1, 1), LocalDate.of(2024, 1, 31))
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2021, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 1, 31), forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -455,15 +455,15 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "a123bc", LocalDate.of(2021, 1, 1), LocalDate.of(2023, 1, 31))
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2021, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 1, 31), forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -486,15 +486,15 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "a123bc", LocalDate.of(2021, 5, 1), LocalDate.of(2025, 1, 31))
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2021, 5, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 1, 31), forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -517,15 +517,15 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "a123bc", LocalDate.of(2021, 5, 1), LocalDate.of(2023, 1, 31))
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2021, 5, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 1, 31), forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -548,15 +548,15 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "a123bc", LocalDate.of(2022, 2, 1), LocalDate.of(2024, 1, 31))
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2021, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 1, 31), forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -579,15 +579,15 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "a123bc", LocalDate.of(2022, 2, 1), LocalDate.of(2026, 1, 31))
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2021, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2025, 1, 31), forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -610,15 +610,15 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "a123bc", LocalDate.of(2022, 2, 1), LocalDate.of(2026, 1, 31))
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2021, 5, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2025, 1, 31), forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -638,18 +638,18 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgtilknytningStateRepository.findByNavident(A000001)).thenReturn(Collections.emptyList());
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getLast();
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode = result.stillingPerioder().getLast();
         assertEquals(LocalDate.of(2022, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 12, 31),forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
         assertEquals(LocalDate.of(2023, 1, 1),  andreStillingPeriode.gyldigFom());
         assertEquals(null,                      andreStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  andreStillingPeriode.orgenhet().getId());
-        assertEquals(0, strukturerteStillingPerioder.errors().size());
+        assertEquals(0, result.errors().size());
     }
 
     @Test
@@ -669,18 +669,18 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgtilknytningStateRepository.findByNavident(A000001)).thenReturn(Collections.emptyList());
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getLast();
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode = result.stillingPerioder().getLast();
         assertEquals(LocalDate.of(2022, 5, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 12, 31),forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
         assertEquals(LocalDate.of(2023, 1, 1),  andreStillingPeriode.gyldigFom());
         assertEquals(null,                      andreStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  andreStillingPeriode.orgenhet().getId());
-        assertEquals(0, strukturerteStillingPerioder.errors().size());
+        assertEquals(0, result.errors().size());
     }
 
     @Test
@@ -700,18 +700,18 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgtilknytningStateRepository.findByNavident(A000001)).thenReturn(Collections.emptyList());
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getLast();
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode = result.stillingPerioder().getLast();
         assertEquals(LocalDate.of(2022, 5, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 12, 31),forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
         assertEquals(LocalDate.of(2023, 1, 1),  andreStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 1, 31), andreStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  andreStillingPeriode.orgenhet().getId());
-        assertEquals(0, strukturerteStillingPerioder.errors().size());
+        assertEquals(0, result.errors().size());
     }
 
     @Test
@@ -731,19 +731,19 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgtilknytningStateRepository.findByNavident(A000001)).thenReturn(Collections.emptyList());
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getLast();
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode = result.stillingPerioder().getLast();
         assertEquals(LocalDate.of(2022, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 6, 30), forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
         assertEquals(LocalDate.of(2022, 7, 1),  andreStillingPeriode.gyldigFom());
         assertEquals(null,                      andreStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  andreStillingPeriode.orgenhet().getId());
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -763,19 +763,19 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgtilknytningStateRepository.findByNavident(A000001)).thenReturn(Collections.emptyList());
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getLast();
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode = result.stillingPerioder().getLast();
         assertEquals(LocalDate.of(2022, 5, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 6, 30), forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
         assertEquals(LocalDate.of(2022, 7, 1),  andreStillingPeriode.gyldigFom());
         assertEquals(null,                      andreStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  andreStillingPeriode.orgenhet().getId());
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -795,18 +795,18 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgtilknytningStateRepository.findByNavident(A000001)).thenReturn(Collections.emptyList());
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getLast();
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode = result.stillingPerioder().getLast();
         assertEquals(LocalDate.of(2022, 5, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 6, 30), forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
         assertEquals(LocalDate.of(2022, 7, 1),  andreStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 1, 31), andreStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  andreStillingPeriode.orgenhet().getId());
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
+        assertEquals(1, result.errors().size());
         assertEquals(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE, strukturerteStillingPerioder.errors().getFirst().errorType());
     }
 
@@ -827,15 +827,15 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgtilknytningStateRepository.findByNavident(A000001)).thenReturn(Collections.emptyList());
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2022, 8, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 1, 31), forsteStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  forsteStillingPeriode.orgenhet().getId());
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -855,11 +855,11 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgtilknytningStateRepository.findByNavident(A000001)).thenReturn(Collections.emptyList());
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getLast();
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode = result.stillingPerioder().getLast();
 
         assertEquals(LocalDate.of(2022, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 6, 30), forsteStillingPeriode.gyldigTom());
@@ -869,9 +869,9 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
         assertEquals(LocalDate.of(2024, 1, 31), andreStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  andreStillingPeriode.orgenhet().getId());
 
-        assertEquals(2, strukturerteStillingPerioder.errors().size());
-        assertEquals(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE,                 strukturerteStillingPerioder.errors().getFirst().errorType());
-        assertEquals(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_DELPERIODE, strukturerteStillingPerioder.errors().getLast().errorType());
+        assertEquals(2, result.errors().size());
+        assertEquals(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE,                 result.errors().getFirst().errorType());
+        assertEquals(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_DELPERIODE, result.errors().getLast().errorType());
     }
 
     @Test
@@ -891,11 +891,11 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgtilknytningStateRepository.findByNavident(A000001)).thenReturn(Collections.emptyList());
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getLast();
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode = result.stillingPerioder().getLast();
 
         assertEquals(LocalDate.of(2022, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 6, 30), forsteStillingPeriode.gyldigTom());
@@ -905,9 +905,9 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
         assertEquals(LocalDate.of(2024, 12, 31),andreStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  andreStillingPeriode.orgenhet().getId());
 
-        assertEquals(3, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE));
-        assertEquals(2, strukturerteStillingPerioder.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_DELPERIODE));
+        assertEquals(3, result.errors().size());
+        assertEquals(1, result.countOfErrorType(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE));
+        assertEquals(2, result.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_DELPERIODE));
     }
 
     @Test
@@ -927,17 +927,17 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgtilknytningStateRepository.findByNavident(A000001)).thenReturn(Collections.emptyList());
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
 
         assertEquals(LocalDate.of(2023, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 12, 31),forsteStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  forsteStillingPeriode.orgenhet().getId());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_PERIODE));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_PERIODE));
     }
 
     @Test
@@ -958,17 +958,17 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgtilknytningStateRepository.findByNavident(A000001)).thenReturn(Collections.emptyList());
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
 
         assertEquals(LocalDate.of(2023, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 12, 31),forsteStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  forsteStillingPeriode.orgenhet().getId());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_PERIODE));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_PERIODE));
     }
 
     @Test
@@ -992,11 +992,11 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "c321ba", LocalDate.of(2022, 7, 1), LocalDate.of(2024, 1, 31))
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(0);
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(1);
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().get(0);
+        var andreStillingPeriode = result.stillingPerioder().get(1);
 
         assertEquals(LocalDate.of(2021, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 6, 30), forsteStillingPeriode.gyldigTom());
@@ -1006,9 +1006,9 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
         assertEquals(LocalDate.of(2024, 1, 31), andreStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  andreStillingPeriode.orgenhet().getId());
 
-        assertEquals(2, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE));
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT));
+        assertEquals(2, result.errors().size());
+        assertEquals(1, result.countOfErrorType(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE));
+        assertEquals(1, result.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT));
     }
 
     @Test
@@ -1033,11 +1033,11 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "c321ba", LocalDate.of(2022, 7, 1), LocalDate.of(2024, 1, 31))
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(0);
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(1);
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().get(0);
+        var andreStillingPeriode = result.stillingPerioder().get(1);
 
         assertEquals(LocalDate.of(2021, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 6, 30), forsteStillingPeriode.gyldigTom());
@@ -1047,9 +1047,9 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
         assertEquals(LocalDate.of(2024, 1, 31), andreStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  andreStillingPeriode.orgenhet().getId());
 
-        assertEquals(2, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE));
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT));
+        assertEquals(2, result.errors().size());
+        assertEquals(1, result.countOfErrorType(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE));
+        assertEquals(1, result.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT));
     }
 
     @Test
@@ -1073,11 +1073,11 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "c321ba", LocalDate.of(2022, 7, 1), LocalDate.of(2023, 1, 31))
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(0);
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(1);
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().get(0);
+        var andreStillingPeriode = result.stillingPerioder().get(1);
 
         assertEquals(LocalDate.of(2021, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 6, 30), forsteStillingPeriode.gyldigTom());
@@ -1087,9 +1087,9 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
         assertEquals(LocalDate.of(2024, 1, 31), andreStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  andreStillingPeriode.orgenhet().getId());
 
-        assertEquals(2, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE));
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT));
+        assertEquals(2, result.errors().size());
+        assertEquals(1, result.countOfErrorType(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE));
+        assertEquals(1, result.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT));
     }
 
     @Test
@@ -1113,11 +1113,11 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "c321ba", LocalDate.of(2022, 7, 1), LocalDate.of(2023, 1, 31))
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(0);
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(1);
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().get(0);
+        var andreStillingPeriode = result.stillingPerioder().get(1);
 
         assertEquals(LocalDate.of(2021, 5, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 6, 30), forsteStillingPeriode.gyldigTom());
@@ -1127,10 +1127,10 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
         assertEquals(LocalDate.of(2024, 1, 31), andreStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  andreStillingPeriode.orgenhet().getId());
 
-        assertEquals(3, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE));
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT));
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_DELPERIODE));
+        assertEquals(3, result.errors().size());
+        assertEquals(1, result.countOfErrorType(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE));
+        assertEquals(1, result.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT));
+        assertEquals(1, result.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_DELPERIODE));
     }
 
     @Test
@@ -1154,11 +1154,11 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "c321ba", LocalDate.of(2022, 7, 1), LocalDate.of(2023, 1, 31))
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(0);
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(1);
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().get(0);
+        var andreStillingPeriode = result.stillingPerioder().get(1);
 
         assertEquals(LocalDate.of(2021, 5, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 6, 30), forsteStillingPeriode.gyldigTom());
@@ -1168,10 +1168,10 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
         assertEquals(LocalDate.of(2024, 1, 31), andreStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  andreStillingPeriode.orgenhet().getId());
 
-        assertEquals(3, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE));
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT));
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_DELPERIODE));
+        assertEquals(3, result.errors().size());
+        assertEquals(1, result.countOfErrorType(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE));
+        assertEquals(1, result.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT));
+        assertEquals(1, result.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_DELPERIODE));
     }
 
     @Test
@@ -1196,11 +1196,11 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "x321xx", LocalDate.of(2022, 7, 1), LocalDate.of(2023, 1, 31))     // ANNEN ENHET
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(0);
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(1);
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().get(0);
+        var andreStillingPeriode = result.stillingPerioder().get(1);
 
         assertEquals(LocalDate.of(2022, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 6, 30), forsteStillingPeriode.gyldigTom());
@@ -1210,9 +1210,9 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
         assertEquals(LocalDate.of(2024, 1, 31), andreStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  andreStillingPeriode.orgenhet().getId());
 
-        assertEquals(2, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE));
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_DELPERIODE));
+        assertEquals(2, result.errors().size());
+        assertEquals(1, result.countOfErrorType(FLERE_ENHETER_KAN_MATCHES_FOR_DEL_AV_STILLINGSPERIODE));
+        assertEquals(1, result.countOfErrorType(DEL_AV_STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_DELPERIODE));
     }
 
     @Test
@@ -1235,11 +1235,11 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgenhetService.exactMatchByAgressoId("0XX000X")).thenReturn(Collections.emptyList());
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(0);
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(1);
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().get(0);
+        var andreStillingPeriode = result.stillingPerioder().get(1);
 
         assertEquals(LocalDate.of(2022, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 6, 30), forsteStillingPeriode.gyldigTom());
@@ -1249,9 +1249,9 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
         assertEquals(LocalDate.of(2024, 1, 31), andreStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  andreStillingPeriode.orgenhet().getId());
 
-        assertEquals(2, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_PERIODE));
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(FINNER_IKKE_ENHET_FOR_PRESIS_AGRESSOID_MEN_PERIDOE_ER_DEKT));
+        assertEquals(2, result.errors().size());
+        assertEquals(1, result.countOfErrorType(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_PERIODE));
+        assertEquals(1, result.countOfErrorType(FINNER_IKKE_ENHET_FOR_PRESIS_AGRESSOID_MEN_PERIDOE_ER_DEKT));
     }
 
     @Test
@@ -1274,11 +1274,11 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgenhetService.exactMatchByAgressoId("0XX000X")).thenReturn(Collections.emptyList());
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(0);
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(1);
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().get(0);
+        var andreStillingPeriode = result.stillingPerioder().get(1);
 
         assertEquals(LocalDate.of(2022, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 6, 30), forsteStillingPeriode.gyldigTom());
@@ -1288,9 +1288,9 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
         assertEquals(LocalDate.of(2024, 1, 31), andreStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  andreStillingPeriode.orgenhet().getId());
 
-        assertEquals(2, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_PERIODE));
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(FINNER_IKKE_ENHET_FOR_PRESIS_AGRESSOID_MEN_PERIDOE_ER_DEKT));
+        assertEquals(2, result.errors().size());
+        assertEquals(1, result.countOfErrorType(STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_PERIODE));
+        assertEquals(1, result.countOfErrorType(FINNER_IKKE_ENHET_FOR_PRESIS_AGRESSOID_MEN_PERIDOE_ER_DEKT));
     }
 
     @Test
@@ -1316,17 +1316,17 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "a123bc", LocalDate.of(2023, 1, 1), LocalDate.of(2024, 1, 31))
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(0);
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().get(0);
 
         assertEquals(LocalDate.of(2023, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 1, 31), forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(FINNER_IKKE_ENHET_FOR_PRESIS_AGRESSOID_MATCHER__MOT_EKSISTERENDE_OT));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(FINNER_IKKE_ENHET_FOR_PRESIS_AGRESSOID_MATCHER__MOT_EKSISTERENDE_OT));
     }
 
     @Test
@@ -1354,11 +1354,11 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "c321ba", LocalDate.of(2022, 1, 1), LocalDate.of(2024, 1, 31))
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(0);
-        var andreStillingPeriode  = strukturerteStillingPerioder.stillingPerioder().get(1);
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().get(0);
+        var andreStillingPeriode  = result.stillingPerioder().get(1);
 
         assertEquals(LocalDate.of(2022, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 6, 30), forsteStillingPeriode.gyldigTom());
@@ -1368,8 +1368,8 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
         assertEquals(LocalDate.of(2024, 1, 31), andreStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  andreStillingPeriode.orgenhet().getId());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(FINNER_IKKE_ENHET_FOR_PRESIS_AGRESSOID_MATCHER__MOT_EKSISTERENDE_OT));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(FINNER_IKKE_ENHET_FOR_PRESIS_AGRESSOID_MATCHER__MOT_EKSISTERENDE_OT));
     }
 
     @Test
@@ -1397,17 +1397,17 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "c321ba", LocalDate.of(2023, 1, 1), LocalDate.of(2024, 1, 31), true)
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(0);
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().get(0);
 
         assertEquals(LocalDate.of(2023, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 1, 31), forsteStillingPeriode.gyldigTom());
         assertEquals("c321ba",                  forsteStillingPeriode.orgenhet().getId());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(FINNER_IKKE_ENHET_FOR_PRESIS_AGRESSOID_MATCHER__MOT_EKSISTERENDE_OT));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(FINNER_IKKE_ENHET_FOR_PRESIS_AGRESSOID_MATCHER__MOT_EKSISTERENDE_OT));
     }
 
     @Test
@@ -1435,17 +1435,17 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "c321ba", LocalDate.of(2023, 1, 1), LocalDate.of(2024, 1, 31), false)
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().get(0);
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().get(0);
 
         assertEquals(LocalDate.of(2023, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 1, 31), forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(FINNER_IKKE_ENHET_FOR_PRESIS_AGRESSOID_MATCHER__MOT_EKSISTERENDE_OT));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(FINNER_IKKE_ENHET_FOR_PRESIS_AGRESSOID_MATCHER__MOT_EKSISTERENDE_OT));
     }
 
     @Test
@@ -1466,12 +1466,12 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
 
         when(orgenhetService.exactMatchByAgressoId("0XX000X")).thenReturn(Collections.emptyList());
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(0, strukturerteStillingPerioder.stillingPerioder().size());
+        assertEquals(0, result.stillingPerioder().size());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(FINNER_IKKE_ENHET_FOR_PRESIS_AGRESSOID_OG_HAR_INGEN_ANDRE_STILLINGSPERIODER_ELLER_ORGTILKNYTNINGER));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(FINNER_IKKE_ENHET_FOR_PRESIS_AGRESSOID_OG_HAR_INGEN_ANDRE_STILLINGSPERIODER_ELLER_ORGTILKNYTNINGER));
     }
 
     @Test
@@ -1496,16 +1496,16 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "x123yz", LocalDate.of(2022, 1, 1), LocalDate.of(2024, 1, 31), false)
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2022, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 1, 31),forsteStillingPeriode.gyldigTom());
         assertEquals("x123yz",                  forsteStillingPeriode.orgenhet().getId());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(AGRESSOID_PAA_STILLING_ER_IKKE_PRESIS_MEN_BRUKER_EKSISTERENDE_OT_SOM_MATCHER));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(AGRESSOID_PAA_STILLING_ER_IKKE_PRESIS_MEN_BRUKER_EKSISTERENDE_OT_SOM_MATCHER));
     }
 
     @Test
@@ -1531,16 +1531,16 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "x123yz", LocalDate.of(2022, 1, 1), LocalDate.of(2024, 1, 31), true)
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2022, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 1, 31),forsteStillingPeriode.gyldigTom());
         assertEquals("x123yz",                  forsteStillingPeriode.orgenhet().getId());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(AGRESSOID_PAA_STILLING_ER_IKKE_PRESIS_MEN_BRUKER_EKSISTERENDE_OT_SOM_MATCHER));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(AGRESSOID_PAA_STILLING_ER_IKKE_PRESIS_MEN_BRUKER_EKSISTERENDE_OT_SOM_MATCHER));
     }
 
     @Test
@@ -1566,16 +1566,16 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "x123yz", LocalDate.of(2022, 1, 1), LocalDate.of(2023, 1, 31), false)
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2022, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 1, 31),forsteStillingPeriode.gyldigTom());
         assertEquals("x123yz",                  forsteStillingPeriode.orgenhet().getId());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(AGRESSOID_PAA_STILLING_ER_IKKE_PRESIS_MEN_BRUKER_EKSISTERENDE_OT_SOM_MATCHER));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(AGRESSOID_PAA_STILLING_ER_IKKE_PRESIS_MEN_BRUKER_EKSISTERENDE_OT_SOM_MATCHER));
     }
 
 
@@ -1602,16 +1602,16 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "x123yz", LocalDate.of(2023, 1, 1), today().plusYears(1),      false)
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2023, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(today().plusYears(1),      forsteStillingPeriode.gyldigTom());
         assertEquals("x123yz",                  forsteStillingPeriode.orgenhet().getId());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(AGRESSOID_PAA_STILLING_ER_IKKE_PRESIS_MEN_BRUKER_EKSISTERENDE_OT_SOM_MATCHER));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(AGRESSOID_PAA_STILLING_ER_IKKE_PRESIS_MEN_BRUKER_EKSISTERENDE_OT_SOM_MATCHER));
     }
 
 
@@ -1637,16 +1637,16 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "x123yz", LocalDate.of(2023, 1, 1), LocalDate.of(2024, 1, 31), false)
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2023, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2024, 1,31),  forsteStillingPeriode.gyldigTom());
         assertEquals("x123yz",                  forsteStillingPeriode.orgenhet().getId());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(AGRESSOID_PAA_STILLING_ER_IKKE_PRESIS_MEN_BRUKER_EKSISTERENDE_OT_SOM_MATCHER));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(AGRESSOID_PAA_STILLING_ER_IKKE_PRESIS_MEN_BRUKER_EKSISTERENDE_OT_SOM_MATCHER));
     }
 
 
@@ -1670,15 +1670,15 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "a123bc", LocalDate.of(2022, 1, 1), null, false)
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2022, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(NO_END_DATE,               forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
 
-        assertEquals(0, strukturerteStillingPerioder.errors().size());
+        assertEquals(0, result.errors().size());
     }
 
 
@@ -1703,16 +1703,16 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "x123yz", LocalDate.of(2023, 1, 1), null, false)
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2023, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(NO_END_DATE,               forsteStillingPeriode.gyldigTom());
         assertEquals("x123yz",                  forsteStillingPeriode.orgenhet().getId());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(AGRESSOID_PAA_STILLING_ER_IKKE_PRESIS_MEN_BRUKER_EKSISTERENDE_OT_SOM_MATCHER));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(AGRESSOID_PAA_STILLING_ER_IKKE_PRESIS_MEN_BRUKER_EKSISTERENDE_OT_SOM_MATCHER));
     }
 
     @Test
@@ -1740,16 +1740,16 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
             orgtilknytning(A000001, "a123bc", LocalDate.of(2022, 1, 1), null, false)
         ));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals(LocalDate.of(2022, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(NO_END_DATE,               forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(AGRESSOID_PAA_STILLING_ER_IKKE_PRESIS_MEN_BRUKER_EKSISTERENDE_OT_SOM_MATCHER));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(AGRESSOID_PAA_STILLING_ER_IKKE_PRESIS_MEN_BRUKER_EKSISTERENDE_OT_SOM_MATCHER));
     }
 
     @Test
@@ -1773,12 +1773,12 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
         when(orgenhetService.matchByAgressoId("01100")).thenReturn(List.of(a123bc));
         when(orgenhetService.getById("a123bc")).thenReturn(Optional.of(a123bc));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(0, strukturerteStillingPerioder.stillingPerioder().size());
+        assertEquals(0, result.stillingPerioder().size());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(KAN_IKKE_MATCHE_STILLINGSPERIODE_TIL_ENHET));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(KAN_IKKE_MATCHE_STILLINGSPERIODE_TIL_ENHET));
     }
 
     @Test
@@ -1802,12 +1802,12 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
         when(orgenhetService.matchByAgressoId("01100")).thenReturn(List.of(a123bc));
         when(orgenhetService.getById("a123bc")).thenReturn(Optional.of(a123bc));
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(0, strukturerteStillingPerioder.stillingPerioder().size());
+        assertEquals(0, result.stillingPerioder().size());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(KAN_IKKE_MATCHE_STILLINGSPERIODE_TIL_ENHET));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(KAN_IKKE_MATCHE_STILLINGSPERIODE_TIL_ENHET));
     }
 
     @Test
@@ -1820,12 +1820,12 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
         );
         strukturerteStillingPerioder.addStillingPerioder(stillingperioder);
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(0, strukturerteStillingPerioder.stillingPerioder().size());
+        assertEquals(0, result.stillingPerioder().size());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(KAN_IKKE_MATCHE_STILLINGSPERIODE_TIL_ENHET));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(KAN_IKKE_MATCHE_STILLINGSPERIODE_TIL_ENHET));
     }
 
     @Test
@@ -1838,12 +1838,12 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
         );
         strukturerteStillingPerioder.addStillingPerioder(stillingperioder);
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(0, strukturerteStillingPerioder.stillingPerioder().size());
+        assertEquals(0, result.stillingPerioder().size());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(KAN_IKKE_MATCHE_STILLINGSPERIODE_TIL_ENHET));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(KAN_IKKE_MATCHE_STILLINGSPERIODE_TIL_ENHET));
     }
 
     @Test
@@ -1856,11 +1856,11 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStruktu
         );
         strukturerteStillingPerioder.addStillingPerioder(stillingperioder);
 
-        CUT.behandle(strukturerteStillingPerioder);
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(0, strukturerteStillingPerioder.stillingPerioder().size());
+        assertEquals(0, result.stillingPerioder().size());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(1, strukturerteStillingPerioder.countOfErrorType(KAN_IKKE_MATCHE_STILLINGSPERIODE_TIL_ENHET));
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(KAN_IKKE_MATCHE_STILLINGSPERIODE_TIL_ENHET));
     }
 }

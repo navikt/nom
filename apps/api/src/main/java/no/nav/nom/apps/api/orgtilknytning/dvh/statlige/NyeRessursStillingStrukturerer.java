@@ -37,7 +37,9 @@ public class NyeRessursStillingStrukturerer {
 
         Map<String, StrukturerteStillingPerioderForNavident> stillingPerioderPerNavident = new HashMap<>();
         dvhRessursStillingPerNavident.forEach((navident, navidentensDvhRessursStillinger) -> {
-            stillingPerioderPerNavident.put(navident, strukturerStillingPerioderFraDvhRessursStillinger(navident, navidentensDvhRessursStillinger));
+            stillingPerioderPerNavident.put(navident,
+                strukturerStillingPerioderFraDvhRessursStillinger(navident, navidentensDvhRessursStillinger)
+            );
         });
 
         // stillingPerioderPerNavident har nå alle stillingPerioder for alle navidenter
@@ -59,16 +61,19 @@ public class NyeRessursStillingStrukturerer {
             return sspForNavident;
         }
 
-        grupperOgSlaaSammenDvhStillinger.behandle(dvhRessursStillinger, sspForNavident);
-        matchStillingPerioderTilNomEnheter.behandle(sspForNavident);
-//        settDOLPerioderPaaStrukturerteStillinger.behandle(sspForNavident);
+        var behandletResultat =
+            settDOLPerioderPaaStrukturerteStillinger.behandle(
+                matchStillingPerioderTilNomEnheter.behandle(
+                    grupperOgSlaaSammenDvhStillinger.behandle(sspForNavident)
+                )
+            );
 
         // TODO: Sjekke for Ressursens SluttDato - ingen StillingPeriode utover dette
         // TODO: Sanity sjekk av StillingPerioder - ikke negative etc
         // TODO: Sjekk mismatch mellom aktiv stilling og enhet på ressurs i DvhRessursStillinger
         // TODO: Sjekk DvhRessursStillinger utover Ressursens periode
 
-        return sspForNavident;
+        return behandletResultat;
     }
 
     protected boolean finnesNavidentINOM(StrukturerteStillingPerioderForNavident sspForNavident) {
@@ -82,9 +87,5 @@ public class NyeRessursStillingStrukturerer {
             return false;
         }
         return true;
-    }
-
-
-    protected void settKorrekteDOLPerioder(StrukturerteStillingPerioderForNavident sspForNavident) {
     }
 }

@@ -1,7 +1,10 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,16 +12,677 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
+import static no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident.ErrorType.CURRENT_PERIODE_KAN_IKKE_MATCHE_ORGENHET_PAA_RESSURS_FOR_DOL;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident.ErrorType.DUPLIKATE_EKSISTERENDE_ORGTILKNYNINGER_I_HISTORISK_PERIODE;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident.ErrorType.DUPLIKATE_EKSISTERENDE_ORGTILKNYNINGER_MED_DOL_I_HISTORISK_PERIODE;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident.ErrorType.HISTORIC_PERIODE_KAN_IKKE_SETTE_DOL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+// REF: no/nav/nom/apps/api/orgtilknytning/dvh/dokumentasjon/TestReferanser_MatcheTilDagligOppfoelgingsLeder_DOL.md
 @DisplayName("Tester for å sette DOL på strukturerte StillingPerioder fra DVH")
 class SettDOLPerioderPaaStrukturerteStillingerTest extends RessursStillingStrukturererTestBase {
     @Autowired
     SettDOLPerioderPaaStrukturerteStillinger CUT; // Class under test
 
+    @Test
+    @DisplayName("Match historisk SP - singel SP - ref: 1.i.a")
+    void test_matchHistoriskSP_singleSP__1_i_a() {
+        LocalDate fom = LocalDate.of(2020, 1, 1);
+        LocalDate tom = LocalDate.of(2021, 12, 31);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A, fom, tom)
+        );
+
+        when(orgtilknytningStateRepository.findByNavident("A000001")).thenReturn(List.of(
+            orgtilknytning("A000001", ENHET_A.getId(), fom, tom, false),
+            orgtilknytning("A000001", ENHET_B.getId(), fom, tom, true)
+        ));
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(1, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        assertEquals(ENHET_A.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertTrue(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(0, result.errors().size());
+    }
+
+    @Test
+    @DisplayName("Match historisk SP - match mot eksisterende OT - ref: 1.i.b")
+    void test_matchHistoriskSP_motEksisterendeOT__1_i_b() {
+        LocalDate fom = LocalDate.of(2020, 1, 1);
+        LocalDate tom = LocalDate.of(2021, 12, 31);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A, fom, tom),
+            stillingPeriode(ENHET_B, fom, tom)
+        );
+
+        when(orgtilknytningStateRepository.findByNavident("A000001")).thenReturn(List.of(
+            orgtilknytning("A000001", ENHET_A.getId(), fom, tom, true)
+        ));
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(2, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode  = result.stillingPerioder().getLast();
+
+        assertEquals(ENHET_A.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertTrue(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(ENHET_B.getNavn(), andreStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               andreStillingPeriode.gyldigFom());
+        assertEquals(tom,               andreStillingPeriode.gyldigTom());
+        assertFalse(andreStillingPeriode.erDagligOppfolging());
+
+        assertEquals(0, result.errors().size());
+    }
+
+    @Test
+    @DisplayName("Match historisk SP - match mot eksisterende OT - ref: 1.i.c")
+    void test_matchHistoriskSP_motEksisterendeOT__1_i_c() {
+        LocalDate fom = LocalDate.of(2020, 1, 1);
+        LocalDate tom = LocalDate.of(2021, 12, 31);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A, fom, tom),
+            stillingPeriode(ENHET_B, fom, tom)
+        );
+
+        when(orgtilknytningStateRepository.findByNavident("A000001")).thenReturn(List.of(
+            orgtilknytning("A000001", ENHET_A.getId(), fom, tom, true),
+            orgtilknytning("A000001", ENHET_B.getId(), fom, tom, false),
+            orgtilknytning("A000001", ENHET_C.getId(), fom, tom, false)
+        ));
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(2, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode  = result.stillingPerioder().getLast();
+
+        assertEquals(ENHET_A.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertTrue(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(ENHET_B.getNavn(), andreStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               andreStillingPeriode.gyldigFom());
+        assertEquals(tom,               andreStillingPeriode.gyldigTom());
+        assertFalse(andreStillingPeriode.erDagligOppfolging());
+
+        assertEquals(0, result.errors().size());
+    }
+
+    @Test
+    @DisplayName("Match historisk SP - match mot eksisterende OT - ref: 1.i.d")
+    void test_matchHistoriskSP_motEksisterendeOT__1_i_d() {
+        LocalDate fom = LocalDate.of(2020, 1, 1);
+        LocalDate tom = LocalDate.of(2021, 12, 31);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A, fom, tom),
+            stillingPeriode(ENHET_B, fom, tom)
+        );
+
+        when(orgtilknytningStateRepository.findByNavident("A000001")).thenReturn(List.of(
+            orgtilknytning("A000001", ENHET_A.getId(), fom, tom, true),
+            orgtilknytning("A000001", ENHET_B.getId(), fom.minusMonths(2), fom.plusMonths(4).minusDays(1), false),
+            orgtilknytning("A000001", ENHET_C.getId(), fom.plusMonths(2), tom.plusMonths(3), false)
+        ));
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(2, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode  = result.stillingPerioder().getLast();
+
+        assertEquals(ENHET_A.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertTrue(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(ENHET_B.getNavn(), andreStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               andreStillingPeriode.gyldigFom());
+        assertEquals(tom,               andreStillingPeriode.gyldigTom());
+        assertFalse(andreStillingPeriode.erDagligOppfolging());
+
+        assertEquals(0, result.errors().size());
+    }
+
+    @Test
+    @DisplayName("Match historisk SP - match mot eksisterende OT - ref: 1.i.e")
+    void test_matchHistoriskSP_motEksisterendeOT__1_i_e() {
+        LocalDate fom = LocalDate.of(2020, 1, 1);
+        LocalDate tom = LocalDate.of(2021, 12, 31);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A, fom, tom),
+            stillingPeriode(ENHET_B, fom, tom)
+        );
+
+        when(orgtilknytningStateRepository.findByNavident("A000001")).thenReturn(List.of(
+            orgtilknytning("A000001", ENHET_A.getId(), fom.minusMonths(2), tom.plusMonths(2), true),
+            orgtilknytning("A000001", ENHET_B.getId(), fom, tom, false)
+        ));
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(2, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode  = result.stillingPerioder().getLast();
+
+        assertEquals(ENHET_A.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertTrue(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(ENHET_B.getNavn(), andreStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               andreStillingPeriode.gyldigFom());
+        assertEquals(tom,               andreStillingPeriode.gyldigTom());
+        assertFalse(andreStillingPeriode.erDagligOppfolging());
+
+        assertEquals(0, result.errors().size());
+    }
+
+    @Test
+    @DisplayName("Match historisk SP - match mot eksisterende OT - ref: 1.i.f")
+    void test_matchHistoriskSP_motEksisterendeOT__1_i_f() {
+        LocalDate fom = LocalDate.of(2020, 1, 1);
+        LocalDate tom = LocalDate.of(2021, 12, 31);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A, fom, tom),
+            stillingPeriode(ENHET_B, fom, tom)
+        );
+
+        when(orgtilknytningStateRepository.findByNavident("A000001")).thenReturn(List.of(
+            orgtilknytning("A000001", ENHET_A.getId(), fom.minusMonths(2), fom.plusMonths(2).minusDays(1), true),
+            orgtilknytning("A000001", ENHET_A.getId(), fom.plusMonths(2), tom.plusMonths(2), true),
+            orgtilknytning("A000001", ENHET_B.getId(), fom.minusMonths(4), fom.plusMonths(1).minusDays(1), false)
+        ));
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(2, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode  = result.stillingPerioder().getLast();
+
+        assertEquals(ENHET_A.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertTrue(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(ENHET_B.getNavn(), andreStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               andreStillingPeriode.gyldigFom());
+        assertEquals(tom,               andreStillingPeriode.gyldigTom());
+        assertFalse(andreStillingPeriode.erDagligOppfolging());
+
+        assertEquals(0, result.errors().size());
+    }
+
+    @Test
+    @DisplayName("Match historisk SP - match mot eksisterende OT - ref: 1.i.g")
+    void test_matchHistoriskSP_motEksisterendeOT__1_i_g() {
+        LocalDate fom = LocalDate.of(2020, 1, 1);
+        LocalDate tom = LocalDate.of(2021, 12, 31);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A, fom, tom, "Enhet_X"),
+            stillingPeriode(ENHET_B, fom, tom)
+        );
+
+        when(orgtilknytningStateRepository.findByNavident("A000001")).thenReturn(List.of(
+            orgtilknytning("A000001", ENHET_A.getId(), fom, tom, false),
+            orgtilknytning("A000001", ENHET_A.getId(), fom, tom, false),
+            orgtilknytning("A000001", ENHET_B.getId(), fom, tom, true)
+        ));
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(2, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode  = result.stillingPerioder().getLast();
+
+        assertEquals(ENHET_B.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertTrue(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(ENHET_A.getNavn(), andreStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               andreStillingPeriode.gyldigFom());
+        assertEquals(tom,               andreStillingPeriode.gyldigTom());
+        assertFalse(andreStillingPeriode.erDagligOppfolging());
+
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(DUPLIKATE_EKSISTERENDE_ORGTILKNYNINGER_I_HISTORISK_PERIODE));
+    }
+
+    @Test
+    @DisplayName("Match historisk SP - match mot eksisterende OT - ref: 1.i.h")
+    void test_matchHistoriskSP_motEksisterendeOT__1_i_h() {
+        LocalDate fom = LocalDate.of(2020, 1, 1);
+        LocalDate tom = LocalDate.of(2021, 12, 31);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A, fom, tom, ENHET_A.getAgressoId()),
+            stillingPeriode(ENHET_B, fom, tom, ENHET_A.getAgressoId())
+        );
+
+        when(orgtilknytningStateRepository.findByNavident("A000001")).thenReturn(List.of(
+            orgtilknytning("A000001", ENHET_A.getId(), fom, tom, true),
+            orgtilknytning("A000001", ENHET_B.getId(), fom, tom, true),
+            orgtilknytning("A000001", ENHET_C.getId(), fom, tom, false)
+        ));
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(2, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode  = result.stillingPerioder().getLast();
+
+        assertEquals(ENHET_A.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertTrue(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(ENHET_B.getNavn(), andreStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               andreStillingPeriode.gyldigFom());
+        assertEquals(tom,               andreStillingPeriode.gyldigTom());
+        assertFalse(andreStillingPeriode.erDagligOppfolging());
+
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(DUPLIKATE_EKSISTERENDE_ORGTILKNYNINGER_MED_DOL_I_HISTORISK_PERIODE));
+    }
+
+    @Test
+    @DisplayName("Match historisk SP - ingen match mot eksisterende OT - match mot Orgenhet på ressurs (OPR) - ref: 1.ii.a")
+    void test_matchHistoriskSP_ingenMatchMotEksisterendeOT_matchMotOPR__1_ii_a() {
+        LocalDate fom = LocalDate.of(2020, 1, 1);
+        LocalDate tom = LocalDate.of(2021, 12, 31);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A, fom, tom, ENHET_A.getAgressoId()),
+            stillingPeriode(ENHET_B, fom, tom, ENHET_A.getAgressoId())
+        );
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(2, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode  = result.stillingPerioder().getLast();
+
+        assertEquals(ENHET_A.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertTrue(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(ENHET_B.getNavn(), andreStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               andreStillingPeriode.gyldigFom());
+        assertEquals(tom,               andreStillingPeriode.gyldigTom());
+        assertFalse(andreStillingPeriode.erDagligOppfolging());
+
+        assertEquals(0, result.errors().size());
+    }
+
+    @Test
+    @DisplayName("Match historisk SP - ingen match mot eksisterende OT - match mot Orgenhet på ressurs (OPR) - ref: 1.ii.b")
+    void test_matchHistoriskSP_ingenMatchMotEksisterendeOT_matchMotOPR__1_ii_b() {
+        LocalDate fom = LocalDate.of(2020, 1, 1);
+        LocalDate tom = LocalDate.of(2021, 12, 31);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A, fom, tom, ENHET_B.getAgressoId()),
+            stillingPeriode(ENHET_B, fom, tom, ENHET_B.getAgressoId())
+        );
+
+        when(orgtilknytningStateRepository.findByNavident("A000001")).thenReturn(List.of(
+            orgtilknytning("A000001", ENHET_A.getId(), fom, tom, false),
+            orgtilknytning("A000001", ENHET_B.getId(), fom, tom, false)
+        ));
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(2, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode  = result.stillingPerioder().getLast();
+
+        assertEquals(ENHET_B.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertTrue(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(ENHET_A.getNavn(), andreStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               andreStillingPeriode.gyldigFom());
+        assertEquals(tom,               andreStillingPeriode.gyldigTom());
+        assertFalse(andreStillingPeriode.erDagligOppfolging());
+
+        assertEquals(0, result.errors().size());
+    }
+
+    @Test
+    @DisplayName("Match historisk SP - ingen match mot eksisterende OT - match mot Orgenhet på ressurs (OPR) - ref: 1.ii.c")
+    void test_matchHistoriskSP_ingenMatchMotEksisterendeOT_matchMotOPR__1_ii_c() {
+        LocalDate fom = LocalDate.of(2020, 1, 1);
+        LocalDate tom = LocalDate.of(2021, 12, 31);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A_0110021, fom, tom, "011001"),
+            stillingPeriode(ENHET_B_0110010, fom, tom, "011001")
+        );
+
+        when(orgtilknytningStateRepository.findByNavident("A000001")).thenReturn(List.of(
+            orgtilknytning("A000001", ENHET_A_0110021.getId(), fom, tom, false),
+            orgtilknytning("A000001", ENHET_B_0110010.getId(), fom, tom, false)
+        ));
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(2, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode  = result.stillingPerioder().getLast();
+
+        assertEquals(ENHET_B_0110010.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertTrue(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(ENHET_A_0110021.getNavn(), andreStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               andreStillingPeriode.gyldigFom());
+        assertEquals(tom,               andreStillingPeriode.gyldigTom());
+        assertFalse(andreStillingPeriode.erDagligOppfolging());
+
+        assertEquals(0, result.errors().size());
+    }
+
+    @Test
+    @DisplayName("Match historisk SP - ingen match mot eksisterende OT - match mot Orgenhet på ressurs (OPR) - ref: 1.ii.d")
+    void test_matchHistoriskSP_ingenMatchMotEksisterendeOT_matchMotOPR__1_ii_d() {
+        LocalDate fom = LocalDate.of(2020, 1, 1);
+        LocalDate tom = LocalDate.of(2021, 12, 31);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A, fom, tom, ENHET_A.getAgressoId()),
+            stillingPeriode(ENHET_B, fom, tom, ENHET_A.getAgressoId())
+        );
+
+        when(orgtilknytningStateRepository.findByNavident("A000001")).thenReturn(List.of(
+            orgtilknytning("A000001", ENHET_A.getId(), fom, tom, false),
+            orgtilknytning("A000001", ENHET_C.getId(), fom, tom, true)
+        ));
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(2, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode  = result.stillingPerioder().getLast();
+
+        assertEquals(ENHET_A.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertTrue(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(ENHET_B.getNavn(), andreStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               andreStillingPeriode.gyldigFom());
+        assertEquals(tom,               andreStillingPeriode.gyldigTom());
+        assertFalse(andreStillingPeriode.erDagligOppfolging());
+
+        assertEquals(0, result.errors().size());
+    }
+
+    @Test
+    @DisplayName("Match historisk SP - ingen match mot eksisterende OT - match mot Orgenhet på ressurs (OPR) - ref: 1.ii.e")
+    void test_matchHistoriskSP_ingenMatchMotEksisterendeOT_matchMotOPR__1_ii_e() {
+        LocalDate fom = LocalDate.of(2020, 1, 1);
+        LocalDate tom = LocalDate.of(2021, 12, 31);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A, fom, tom, ENHET_C.getAgressoId()),
+            stillingPeriode(ENHET_B, fom, tom, ENHET_C.getAgressoId())
+        );
+
+        when(orgtilknytningStateRepository.findByNavident("A000001")).thenReturn(List.of(
+            orgtilknytning("A000001", ENHET_A.getId(), fom, tom, false),
+            orgtilknytning("A000001", ENHET_B.getId(), fom, tom, false)
+        ));
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(2, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode  = result.stillingPerioder().getLast();
+
+        assertEquals(ENHET_A.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertFalse(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(ENHET_B.getNavn(), andreStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               andreStillingPeriode.gyldigFom());
+        assertEquals(tom,               andreStillingPeriode.gyldigTom());
+        assertFalse(andreStillingPeriode.erDagligOppfolging());
+
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(HISTORIC_PERIODE_KAN_IKKE_SETTE_DOL));
+    }
+
+
+    @Test
+    @DisplayName("Match current/aktiv SP - singel SP - ref: 2.i")
+    void test_matchHistoriskSP_singleSP__2_i() {
+        LocalDate fom = LocalDate.now().minusYears(1);
+        LocalDate tom = LocalDate.now().plusYears(1);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A, fom, tom, "Enhet X")
+        );
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(1, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        assertEquals(ENHET_A.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertTrue(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(0, result.errors().size());
+    }
+
+    @Test
+    @DisplayName("Match current/aktiv SP - match kun mot Orgenhet på ressurs (OPR) - ref: 2.ii")
+    void test_matchCurrentSP_matchKunMotOPR__2_ii() {
+        LocalDate fom = LocalDate.now().minusYears(1);
+        LocalDate tom = LocalDate.now().plusYears(1);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A, fom, tom, ENHET_A.getAgressoId()),
+            stillingPeriode(ENHET_B, fom, tom, ENHET_A.getAgressoId())
+        );
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(2, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode  = result.stillingPerioder().getLast();
+
+        assertEquals(ENHET_A.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertTrue(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(ENHET_B.getNavn(), andreStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               andreStillingPeriode.gyldigFom());
+        assertEquals(tom,               andreStillingPeriode.gyldigTom());
+        assertFalse(andreStillingPeriode.erDagligOppfolging());
+
+        assertEquals(0, result.errors().size());
+    }
+
+    @Test
+    @DisplayName("Match current/aktiv SP - match kun mot Orgenhet på ressurs (OPR) - ref: 2.iii")
+    void test_matchCurrentSP_matchKunMotOPR__2_iii() {
+        LocalDate fom = LocalDate.now().minusYears(1);
+        LocalDate tom = LocalDate.now().plusYears(1);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A, fom, tom, ENHET_B.getAgressoId()),
+            stillingPeriode(ENHET_B, fom, tom, ENHET_B.getAgressoId())
+        );
+
+        when(orgtilknytningStateRepository.findByNavident("A000001")).thenReturn(List.of(
+            orgtilknytning("A000001", ENHET_A.getId(), fom, tom, true),
+            orgtilknytning("A000001", ENHET_B.getId(), fom, tom, false)
+        ));
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(2, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode  = result.stillingPerioder().getLast();
+
+        assertEquals(ENHET_B.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertTrue(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(ENHET_A.getNavn(), andreStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               andreStillingPeriode.gyldigFom());
+        assertEquals(tom,               andreStillingPeriode.gyldigTom());
+        assertFalse(andreStillingPeriode.erDagligOppfolging());
+
+        assertEquals(0, result.errors().size());
+    }
+
+    @Test
+    @DisplayName("Match current/aktiv SP - match kun mot Orgenhet på ressurs (OPR) - ref: 2.iv")
+    void test_matchCurrentSP_matchKunMotOPR__2_iv() {
+        LocalDate fom = LocalDate.now().minusYears(1);
+        LocalDate tom = LocalDate.now().plusYears(1);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A_0110021, fom, tom, "011001"),
+            stillingPeriode(ENHET_B_0110010, fom, tom, "011001")
+        );
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(2, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode  = result.stillingPerioder().getLast();
+
+        assertEquals(ENHET_B_0110010.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertTrue(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(ENHET_A_0110021.getNavn(), andreStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               andreStillingPeriode.gyldigFom());
+        assertEquals(tom,               andreStillingPeriode.gyldigTom());
+        assertFalse(andreStillingPeriode.erDagligOppfolging());
+
+        assertEquals(0, result.errors().size());
+    }
+
+    @Test
+    @DisplayName("Match current/aktiv SP - ingen match mot Orgenhet på ressurs (OPR) - ref: 2.v")
+    void test_matchCurrentSP_ingenMatchMotOPR__2_v() {
+        LocalDate fom = LocalDate.now().minusYears(1);
+        LocalDate tom = LocalDate.now().plusYears(1);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            stillingPeriode(ENHET_A, fom, tom, ENHET_C.getAgressoId()),
+            stillingPeriode(ENHET_B, fom, tom, ENHET_C.getAgressoId())
+        );
+
+        StrukturerteStillingPerioderForNavident sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", stillingPerioder, null);
+
+        var result = CUT.behandle(sspForNavident);
+
+        assertEquals(2, result.stillingPerioder().size());
+
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode  = result.stillingPerioder().getLast();
+
+        assertEquals(ENHET_A.getNavn(), forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               forsteStillingPeriode.gyldigFom());
+        assertEquals(tom,               forsteStillingPeriode.gyldigTom());
+        assertFalse(forsteStillingPeriode.erDagligOppfolging());
+
+        assertEquals(ENHET_B.getNavn(), andreStillingPeriode.stilling().enhetNavn());
+        assertEquals(fom,               andreStillingPeriode.gyldigFom());
+        assertEquals(tom,               andreStillingPeriode.gyldigTom());
+        assertFalse(andreStillingPeriode.erDagligOppfolging());
+
+        assertEquals(1, result.errors().size());
+        assertEquals(1, result.countOfErrorType(CURRENT_PERIODE_KAN_IKKE_MATCHE_ORGENHET_PAA_RESSURS_FOR_DOL));
+    }
+
+    // --- Test Interne metoder ---
     @Test
     @DisplayName("Test finn brekk datoer - ingen OT'er")
     void test_finnBrekkDatoerIngenOT() {
@@ -270,4 +934,46 @@ class SettDOLPerioderPaaStrukturerteStillingerTest extends RessursStillingStrukt
         result = CUT.futureFomDates(fomDates);
         assertEquals(expected, result);
     }
+
+    IOrgenhet ENHET_A = new OrgEnhet(
+        new OrgEnhetState(
+            "FID_A", "a100xy", "Enhet A",
+            LocalDate.of(2015, 1, 1), Optional.empty(),
+            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+            Optional.of("Enhet_A"), Optional.of("ORGENHET"), Optional.empty()
+        )
+    );
+    IOrgenhet ENHET_B = new OrgEnhet(
+        new OrgEnhetState(
+            "FID_B", "b100xy", "Enhet B",
+            LocalDate.of(2015, 1, 1), Optional.empty(),
+            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+            Optional.of("Enhet_B"), Optional.of("ORGENHET"), Optional.empty()
+        )
+    );
+    IOrgenhet ENHET_C = new OrgEnhet(
+        new OrgEnhetState(
+            "FID_C", "c100xy", "Enhet C",
+            LocalDate.of(2015, 1, 1), Optional.empty(),
+            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+            Optional.of("Enhet_C"), Optional.of("ORGENHET"), Optional.empty()
+        )
+    );
+
+    IOrgenhet ENHET_A_0110021 = new OrgEnhet(
+        new OrgEnhetState(
+            "FID_A", "a100xy", "Enhet A",
+            LocalDate.of(2015, 1, 1), Optional.empty(),
+            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+            Optional.of("0110021"), Optional.of("ORGENHET"), Optional.empty()
+        )
+    );
+    IOrgenhet ENHET_B_0110010 = new OrgEnhet(
+        new OrgEnhetState(
+            "FID_B", "b100xy", "Enhet B",
+            LocalDate.of(2015, 1, 1), Optional.empty(),
+            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+            Optional.of("0110010"), Optional.of("ORGENHET"), Optional.empty()
+        )
+    );
 }

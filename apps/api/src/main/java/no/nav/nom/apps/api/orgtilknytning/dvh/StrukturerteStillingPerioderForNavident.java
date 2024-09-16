@@ -20,6 +20,10 @@ public record StrukturerteStillingPerioderForNavident(
         this(navident, new ArrayList<>(), ressursStillinger, new ArrayList<>());
     }
 
+    public StrukturerteStillingPerioderForNavident(StrukturerteStillingPerioderForNavident copy, List<StillingPeriode> stillingPerioder) {
+        this(copy.navident, stillingPerioder, copy.dvhRessursStillinger, copy.errors);
+    }
+
     public record  Error(
         ErrorType errorType,
         String message,
@@ -46,6 +50,7 @@ public record StrukturerteStillingPerioderForNavident(
         HISTORIC_PERIODE_KAN_IKKE_SETTE_DOL,
         FUTURE_PERIODE_KAN_IKKE_SETTE_DOL,
         DUPLIKATE_EKSISTERENDE_ORGTILKNYNINGER_I_HISTORISK_PERIODE,
+        DUPLIKATE_EKSISTERENDE_ORGTILKNYNINGER_MED_DOL_I_HISTORISK_PERIODE,
         CURRENT_PERIODE_KAN_IKKE_MATCHE_ORGENHET_PAA_RESSURS_FOR_DOL
     }
 
@@ -62,11 +67,6 @@ public record StrukturerteStillingPerioderForNavident(
     }
 
     public void addStillingPerioder(Collection<StillingPeriode> stillingPeriode) {
-        stillingPerioder().addAll(stillingPeriode);
-    }
-
-    public void replaceStillingPerioder(Collection<StillingPeriode> stillingPeriode) {
-        stillingPerioder().clear();
         stillingPerioder().addAll(stillingPeriode);
     }
 

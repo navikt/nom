@@ -42,7 +42,7 @@ public class MatchStrukturerteStillingPerioderTilNOM {
         this.orgenhetService = orgenhetService;
     }
 
-    protected void behandle(StrukturerteStillingPerioderForNavident sspForNavident) {
+    protected StrukturerteStillingPerioderForNavident behandle(StrukturerteStillingPerioderForNavident sspForNavident) {
         String navident = sspForNavident.navident();
         List<StillingPeriode> matchetMedNOMenhet = new ArrayList<>();
         TreeMap<Integer, StillingPeriode> unmatchedPresisAgressoId = new TreeMap<>(); // Sorterer automagisk på key
@@ -105,7 +105,7 @@ public class MatchStrukturerteStillingPerioderTilNOM {
         // må etterbehandles (for å sammenlignes meda alle de andre stillingsPeriodene)
         behandleUnmatchedPresisAgressoId(sspForNavident, unmatchedPresisAgressoId, matchetMedNOMenhet);
 
-        sspForNavident.replaceStillingPerioder(slaaSammenBackToBackPerioderOgSorterAsc(matchetMedNOMenhet, sspForNavident));
+        return new StrukturerteStillingPerioderForNavident(sspForNavident, slaaSammenBackToBackPerioderOgSorterAsc(matchetMedNOMenhet, sspForNavident));
     }
 
     public List<IOrgenhet> finnNomEnheterForEksaktIdIPerioden(String agressoId, LocalDate gyldigFom, LocalDate gyldigTom) {

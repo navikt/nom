@@ -27,12 +27,11 @@ public class GrupperOgSlaaSammenDvhStillinger {
         this.ressursStateRepository = ressursStateRepository;
     }
 
-    protected void behandle(
-        List<DvhRessursStilling> dvhRessursStillinger,
+    protected StrukturerteStillingPerioderForNavident behandle(
         StrukturerteStillingPerioderForNavident sspForNavident
     ) {
         // grupper først på Stillingens - stilling enhet/navn +enhetNavn+ressurs (A+B)
-        var grupperteDvhStillinger = dvhRessursStillinger.stream()
+        var grupperteDvhStillinger = sspForNavident.dvhRessursStillinger().stream()
             .collect(groupingBy(rs ->
                 new StillingPeriode.StillingAgressoOrgIdOgNavn(
                     rs.getStillingAgressoId(),
@@ -119,7 +118,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                 );
             }
         });
-        sspForNavident.addStillingPerioder(perioderGruppert.stream().sorted(Comparator.comparing(StillingPeriode::gyldigFom)).toList());
+        return new StrukturerteStillingPerioderForNavident(sspForNavident, perioderGruppert.stream().sorted(Comparator.comparing(StillingPeriode::gyldigFom)).toList());
     }
 
 

@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident;
@@ -10,22 +10,17 @@ import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.NO_END_DATE;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.dayAfter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.dayBefore;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.etter;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.foer;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerEtter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerFoer;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.overlapsInterval;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.tidligst;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.getEarliestDate;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.slaaSammenBackToBackPerioderOgSorterAsc;
 
 @Component
@@ -37,13 +32,15 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
     }
 
-    public void behandle(StrukturerteStillingPerioderForNavident sspForNavident) {
+    public StrukturerteStillingPerioderForNavident behandle(StrukturerteStillingPerioderForNavident sspForNavident) {
         var fomDatoer = finnBrekkDatoer(sspForNavident); // Sortert
+        // TODO: Vi trenger ikke brekkdatoer på OT'er for currrent og fremtidig?
         var splittedeSPer = splittStillingPerioder(sspForNavident.stillingPerioder(), fomDatoer);
 
-        var historicFomDates = historicFomDates(fomDatoer);
+
+        var historicFomDates = historicFomDates(fomDatoer, splittedeSPer);
         var currentFomDate = currentFomDate(fomDatoer);
-        var futureFomDates = futureFomDates(fomDatoer);
+        var futureFomDates = futureFomDates(fomDatoer, splittedeSPer);
 
         List<StillingPeriode> historicStillingPerioder =  handleHistoricPerioder(sspForNavident, splittedeSPer.stream()
                 .filter(sp -> historicFomDates.contains(sp.gyldigFom()))
@@ -67,7 +64,7 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         nyeStillingPerioder.addAll(currentStillingPerioder);
         nyeStillingPerioder.addAll(futureStillingPerioder);
 
-        sspForNavident.replaceStillingPerioder(slaaSammenBackToBackPerioderOgSorterAsc(nyeStillingPerioder, sspForNavident));
+        return new StrukturerteStillingPerioderForNavident(sspForNavident, slaaSammenBackToBackPerioderOgSorterAsc(nyeStillingPerioder, sspForNavident));
     }
 
     // Alle mulige fra og med datoer
@@ -123,10 +120,14 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
     }
 
     private List<StillingPeriode> handleHistoricPerioder(StrukturerteStillingPerioderForNavident sspForNavident, List<StillingPeriode> stillingPerioder, List<LocalDate> historicFomDates) {
+        if (stillingPerioder.isEmpty()) {
+            return stillingPerioder;
+        }
+
         List<StillingPeriode> historicStillingPerioder =  new ArrayList<>();
         historicFomDates.forEach( historicFomDate ->
             historicStillingPerioder.addAll(
-                handleHistoricPeriode( // Per periode
+                handleSingleHistoricPeriode( // Per periode (e.g. alle med samme gyldigFom)
                     sspForNavident,
                     stillingPerioder.stream()
                         .filter(sp -> sp.gyldigFom().equals(historicFomDate))
@@ -137,9 +138,9 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         return historicStillingPerioder;
     }
 
-    private List<StillingPeriode> handleHistoricPeriode(StrukturerteStillingPerioderForNavident sspForNavident, List<StillingPeriode> stillingPerioder) {
-        if (stillingPerioder.stream().map(StillingPeriode::gyldigFom).distinct().count() > 1) {
-            throw new RuntimeException("Kan ikke behandle ulike historiske perioder samtidig");
+    private List<StillingPeriode> handleSingleHistoricPeriode(StrukturerteStillingPerioderForNavident sspForNavident, List<StillingPeriode> stillingPerioder) {
+        if (duplikateStillingPerioderPaaEnhet(stillingPerioder).size() > 1) {
+            throw new RuntimeException("Kan ikke behandle duplikate historiske StillingPerioder på samme enhet");
         }
 
         if (stillingPerioder.size() == 1) {
@@ -148,33 +149,53 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
 
         final List<StillingPeriode> nyeHistoriskeStillingPerioder = new ArrayList<>();
 
-        // StillingPeriodene er sortert på gyldigFom
         stillingPerioder.forEach(stillingPeriode ->
             nyeHistoriskeStillingPerioder.add(handleMatchMotEksisterendeOtForHistoriskPeriode(sspForNavident, stillingPeriode))
         );
 
-        if (nyeHistoriskeStillingPerioder.stream().anyMatch(sp -> !sp.erDagligOppfolging())) {
+        if (nyeHistoriskeStillingPerioder.stream().filter(StillingPeriode::erDagligOppfolging).count() > 1) {
+            // Har vi laget flere med DOL - E.g. det finnes flere eksisterende OTer som overlapper perioden med DOL
+            // Logg og advar - og resolve på OrgEnhet På Ressurs i stedet
+            lagErrorHistoricPeriodeMedFlereOTerSomErDOL(sspForNavident, nyeHistoriskeStillingPerioder);
+            nyeHistoriskeStillingPerioder.clear();
+        }
+
+        if (nyeHistoriskeStillingPerioder.stream().noneMatch(StillingPeriode::erDagligOppfolging)) {
             //Har ikke klart å sette DOL på aktiv periode via eksisterende OTer
+            nyeHistoriskeStillingPerioder.clear();
             stillingPerioder.forEach(stillingPeriode -> {
                 nyeHistoriskeStillingPerioder.add(matchDOLMotOrgenhetPaaRessurs(stillingPeriode));
             });
         }
 
-        //Har vi ikke klart å sette DOL på aktiv periode - Logg og advar
-        if (nyeHistoriskeStillingPerioder.stream().anyMatch(sp -> !sp.erDagligOppfolging())) {
+        //Har vi ikke klart å sette DOL på periode - Logg og advar
+        if (nyeHistoriskeStillingPerioder.stream().noneMatch(StillingPeriode::erDagligOppfolging)) {
             lagErrorHistoricPeriodeUtenDOL(sspForNavident, nyeHistoriskeStillingPerioder);
         }
 
-        // Har vi laget flere med DOL
-        if (nyeHistoriskeStillingPerioder.stream().filter(sp -> !sp.erDagligOppfolging()).count() > 1) {
+        // Har vi laget flere med DOL?
+        if (nyeHistoriskeStillingPerioder.stream().filter(sp -> sp.erDagligOppfolging()).count() > 1) {
             throw new RuntimeException("Navident %s kan ikke ha flere DOL perioder for samme historiske periode".formatted(sspForNavident.navident()));
         }
 
         return nyeHistoriskeStillingPerioder;
     }
 
+    private static Map<IOrgenhet, Long> duplikateStillingPerioderPaaEnhet(List<StillingPeriode> stillingPerioder) {
+        return stillingPerioder.stream()
+            .collect(collectingAndThen(
+                groupingBy(StillingPeriode::orgenhet, counting()),
+                m -> {
+                    m.values().removeIf(v -> v <= 1L);
+                    return m;
+                }
+            ));
+    }
 
     private List<StillingPeriode> handleCurrentPerioder(StrukturerteStillingPerioderForNavident sspForNavident, List<StillingPeriode> stillingPerioder) {
+        if (stillingPerioder.isEmpty()) {
+            return stillingPerioder;
+        }
         if (stillingPerioder.stream().map(StillingPeriode::gyldigFom).distinct().count() > 1) {
             throw new RuntimeException("Kan ikke behandle ulike current perioder samtidig - Noe gikk feil i SplittStillingPerioder");
         }
@@ -189,7 +210,7 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         });
 
         //Har vi ikke klart å sette DOL på aktiv periode
-        if (behandledeStillingPerioder.stream().anyMatch(sp -> !sp.erDagligOppfolging())) {
+        if (behandledeStillingPerioder.stream().noneMatch(StillingPeriode::erDagligOppfolging)) {
             lagErrorCurrentPeriodeUtenDOL(sspForNavident, behandledeStillingPerioder);
         }
 
@@ -197,6 +218,9 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
     }
 
     private List<StillingPeriode> handleFuturePerioder(StrukturerteStillingPerioderForNavident sspForNavident, List<StillingPeriode> stillingPerioder, List<LocalDate> futureFomDates) {
+        if (stillingPerioder.isEmpty()) {
+            return stillingPerioder;
+        }
         List<StillingPeriode> futureStillingPerioder =  new ArrayList<>();
         futureFomDates.forEach( historicFomDate ->
             futureStillingPerioder.addAll(
@@ -212,8 +236,8 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
     }
 
     private List<StillingPeriode> handleFuturePeriode(StrukturerteStillingPerioderForNavident sspForNavident, List<StillingPeriode> stillingPerioder) {
-        if (stillingPerioder.stream().map(StillingPeriode::gyldigFom).distinct().count() > 1) {
-            throw new RuntimeException("Kan ikke behandle ulike fremtidige perioder samtidig");
+        if (duplikateStillingPerioderPaaEnhet(stillingPerioder).size() > 1) {
+            throw new RuntimeException("Kan ikke behandle duplikate fremtidige StillingPerioder på samme enhet");
         }
 
         if (stillingPerioder.size() == 1) {
@@ -228,12 +252,12 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         );
 
         //Har vi ikke klart å sette DOL på aktiv periode - Logg og advar
-        if (nyeFremtidigStillingPerioder.stream().anyMatch(sp -> !sp.erDagligOppfolging())) {
+        if (nyeFremtidigStillingPerioder.stream().noneMatch(StillingPeriode::erDagligOppfolging)) {
             lagErrorFuturePeriodeUtenDOL(sspForNavident, nyeFremtidigStillingPerioder);
         }
 
         // Har vi laget flere med DOL
-        if (nyeFremtidigStillingPerioder.stream().filter(sp -> !sp.erDagligOppfolging()).count() > 1) {
+        if (nyeFremtidigStillingPerioder.stream().filter(StillingPeriode::erDagligOppfolging).count() > 1) {
             throw new RuntimeException("Navident %s kan ikke ha flere DOL perioder for samme fremtidige periode".formatted(sspForNavident.navident()));
         }
 
@@ -253,8 +277,8 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
                 .toList();
 
         if (OTer.isEmpty()) {
-            // Hvis ingen OT er funnet - bare returner stillingPeriode uendret
-            return stillingPeriode;
+            // Hvis ingen OT er funnet - bare returner stillingPeriode med DagligOppfolging.NEI
+            return new StillingPeriode(stillingPeriode, StillingPeriode.DagligOppfolging.NEI);
         } if (OTer.size() > 1) {
             // Finnes flere eksisterende OTer som overlapper med samme enhet i perioden - dette er inkonsistens i eksisterende OT'er
             // Rapporter med Error - og fortsett med å velge DOl status fra første OT i listen
@@ -270,9 +294,22 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
                 StillingPeriode.DagligOppfolging.JA : StillingPeriode.DagligOppfolging.NEI);
     }
 
+    protected List<LocalDate> historicFomDates(List<LocalDate> fomDatoer, List<StillingPeriode> stillingPerioder) {
+        LocalDate minHistoricFomDate = stillingPerioder.stream().map(StillingPeriode::gyldigFom).min(LocalDate::compareTo).orElse(null);
+        LocalDate maxHistoricFomDate = stillingPerioder.stream().map(StillingPeriode::gyldigFom).filter(d -> d.isBefore(LocalDate.now())).max(LocalDate::compareTo).orElse(null);
+        return historicFomDates(fomDatoer, minHistoricFomDate, maxHistoricFomDate);
+    }
+
+    protected List<LocalDate> historicFomDates(List<LocalDate> fomDatoer, LocalDate minHistoricFomDate, LocalDate maxHistoricFomDate) {
+        return historicFomDates(fomDatoer).stream()
+            .filter(d -> likEllerFoer(d, maxHistoricFomDate))
+            .filter(d -> likEllerEtter(d, minHistoricFomDate))
+            .toList();
+    }
+
     protected List<LocalDate> historicFomDates(List<LocalDate> fomDatoer) {
         return fomDatoer.stream()
-            .filter(d -> foer(d, tidligst(currentFomDate(fomDatoer), LocalDate.now())))
+            .filter(d -> d.isBefore(tidligst(currentFomDate(fomDatoer), LocalDate.now())))
             .toList();
     }
 
@@ -283,9 +320,22 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
             .orElse(null);
     }
 
+    protected List<LocalDate> futureFomDates(List<LocalDate> fomDatoer, List<StillingPeriode> stillingPerioder) {
+        LocalDate minFutureFomDate = stillingPerioder.stream().map(StillingPeriode::gyldigFom).filter(d -> d.isAfter(LocalDate.now())).min(LocalDate::compareTo).orElse(null);
+        LocalDate maxFutureFomDate = stillingPerioder.stream().map(StillingPeriode::gyldigFom).max(LocalDate::compareTo).orElse(null);
+        return futureFomDates(fomDatoer, minFutureFomDate, maxFutureFomDate);
+    }
+
+    protected List<LocalDate> futureFomDates(List<LocalDate> fomDatoer, LocalDate minFutureFomDate, LocalDate maxFutureFomDate) {
+        return historicFomDates(fomDatoer).stream()
+            .filter(d -> likEllerEtter(d, minFutureFomDate))
+            .filter(d -> likEllerFoer(d, maxFutureFomDate))
+            .toList();
+    }
+
     protected List<LocalDate> futureFomDates(List<LocalDate> fomDatoer) {
         return fomDatoer.stream()
-            .filter(d -> etter(d, tidligst(currentFomDate(fomDatoer), LocalDate.now())))
+            .filter(d -> d.isAfter(tidligst(currentFomDate(fomDatoer), LocalDate.now())))
             .toList();
     }
 
@@ -343,7 +393,8 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
             StrukturerteStillingPerioderForNavident.ErrorType.FUTURE_PERIODE_KAN_IKKE_SETTE_DOL,
             """
             Klarer ikke sette DOL for fremtidig periode [%s - %s] for Navident %s.
-            Har StillingsPerioder for følgende orgenheter %s.
+            Har StillingsPerioder for følgende orgenhet(er) %s.
+            Dette kan være kun fordi navidenten er registrert i Remedy, men ikke har stilling i U4 enda.
             """
                 .formatted(fom, tom, sspForNavident.navident(), enheter)
         );
@@ -361,7 +412,22 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
             I historisk periode [%s - %s] for Navident %s finnes det flere (%s) eksisterende OTer som overlapper med samme enhet.
             Dette gjelder Orgtilknytningene med fid %s.
             """
-                .formatted(fom, tom, sspForNavident.navident(), oTer.size(), oTer.stream().map(OrgtilknytningState::fid).toList())
+                .formatted(fom, tom, sspForNavident.navident(), oTer.size(), oTer.stream().map(OrgtilknytningState::fid).toList()),
+            stillingPeriode
+        );
+    }
+
+    private void lagErrorHistoricPeriodeMedFlereOTerSomErDOL(StrukturerteStillingPerioderForNavident sspForNavident, List<StillingPeriode> stillingPerioder) {
+        var fom = stillingPerioder.getFirst().gyldigFom();
+        var tom = stillingPerioder.getFirst().gyldigTom();
+
+        sspForNavident.addError(
+            StrukturerteStillingPerioderForNavident.ErrorType.DUPLIKATE_EKSISTERENDE_ORGTILKNYNINGER_MED_DOL_I_HISTORISK_PERIODE,
+            """
+            I historisk periode [%s - %s] for Navident %s finnes det flere eksisterende OTer som har DOL.
+            Dette gjør at vi ikke kan velge StillingPeriode med DOL basert på OT. Vil forsøke å velge basert på Orgenhet På Ressurs i stedet.
+            """
+                .formatted(fom, tom, sspForNavident.navident())
         );
     }
 }
