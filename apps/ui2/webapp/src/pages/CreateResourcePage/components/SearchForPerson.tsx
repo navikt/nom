@@ -13,15 +13,25 @@ export function SearchForPerson() {
 
   return (
     <form
-      onSubmit={handleSubmit((values) =>
+      onSubmit={handleSubmit((values) => {
         navigate({
           params: (previous) => previous,
-          search: (oldSearch) => ({
-            ...oldSearch,
-            personident: values.personident?.replaceAll(" ", ""),
-          }),
-        }),
-      )}
+          search: (oldSearch) => {
+            return oldSearch.personident === values.personident
+              ? {
+                  ...oldSearch,
+                }
+              : {
+                  ...oldSearch,
+                  personident: values.personident?.replaceAll(" ", ""),
+                  visningsfornavn: undefined,
+                  visningsmellomnavn: undefined,
+                  visningsetternavn: undefined,
+                  primaryTelefonnummer: undefined,
+                };
+          },
+        }).then();
+      })}
     >
       <Controller
         control={control}
