@@ -4,6 +4,7 @@ import { Alert, BodyShort, Loader, TextField } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -150,7 +151,30 @@ function VisningsnavnForm({
     handleSubmit,
     register,
     formState: { errors },
+    reset,
   } = methods;
+
+  useEffect(() => {
+    reset({
+      visningsfornavn:
+        visningsfornavn ||
+        capitalizeName(folkeregisterPerson?.navn.fornavn ?? ""),
+      visningsmellomnavn:
+        visningsmellomnavn ||
+        capitalizeName(folkeregisterPerson?.navn.mellomnavn ?? ""),
+      visningsetternavn:
+        visningsetternavn ||
+        capitalizeName(folkeregisterPerson?.navn.etternavn ?? ""),
+      primaryTelefonnummer: primaryTelefonnummer ?? "",
+    });
+  }, [
+    visningsfornavn,
+    visningsmellomnavn,
+    visningsetternavn,
+    primaryTelefonnummer,
+    folkeregisterPerson,
+    reset,
+  ]);
 
   return (
     <>
