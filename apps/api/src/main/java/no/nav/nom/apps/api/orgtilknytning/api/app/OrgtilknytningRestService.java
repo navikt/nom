@@ -2,6 +2,8 @@ package no.nav.nom.apps.api.orgtilknytning.api.app;
 
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
@@ -33,6 +35,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -48,6 +51,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 import static no.nav.nom.apps.api.common.DateUtils.isPerioderOverlapping;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodsOverlapping;
@@ -64,6 +68,7 @@ public class OrgtilknytningRestService {
     private final RessursStateRepository ressursStateRepository;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final NomMastered nomMastered;
+    private final OrgenhetService orgenhetService;
 
     public OrgtilknytningRestService(
         OrgtilknytningStateRepository orgtilknytningStateRepository,
@@ -71,7 +76,8 @@ public class OrgtilknytningRestService {
         RessursCommandService ressursCommandService, OrgEnhetStateRepository orgEnhetStateRepository,
         RessursStateRepository ressursStateRepository,
         RemedyEnhetMapperService remedyEnhetMapperService,
-        NomMastered nomMastered
+        NomMastered nomMastered,
+        OrgenhetService orgenhetService
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
@@ -80,6 +86,7 @@ public class OrgtilknytningRestService {
         this.ressursStateRepository = ressursStateRepository;
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.nomMastered = nomMastered;
+        this.orgenhetService = orgenhetService;
     }
 
     public List<OrgtilknytningState> getOrgtilknytninger(Optional<String> navident) {
@@ -146,6 +153,51 @@ public class OrgtilknytningRestService {
         nomMastered.markRessursAsMasteredInNom(navident);
     }
 
+    public void oppdaterOrgtilknytningerForRessurs(String navident,
+                                                   OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
+                                                   String ledernavident) {
+        var orgEnheterTilLeder = orgenhetService.getEnheterByLeder(getAuthenticatedNavIdent());
+        validateOppdaterOrgtilknytningerForRessursRequest(oppdaterOrgtilknytningerForRessursRequest, orgEnheterTilLeder, ledernavident);
+
+        var tilknyttetRessurs = ressursStateRepository.findByNavident(navident)
+            .orElseThrow(() -> RessursNotFoundException.navident(navident));
+
+        var existingOrgtilknytningerForRessurs = orgtilknytningStateRepository.findByNavident(navident).stream()
+            .collect(Collectors.toMap(OrgtilknytningState::fid, Function.identity()));
+
+        validateOrgTilknytningerToUpdateHasNoDuplicateFidsAndIncludesAllExistingOrgtilknytningerForRessurs(
+            existingOrgtilknytningerForRessurs.keySet(), oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger()
+        );
+
+        oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().stream()
+            .filter(endreOrgtilknytningRequest -> endreOrgtilknytningRequestProvidesChangesToState(
+                endreOrgtilknytningRequest,
+                existingOrgtilknytningerForRessurs.get(endreOrgtilknytningRequest.fid())
+            ))
+            .forEach(this::endreOrgtilknytning);
+
+        oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(
+            leggTilOrgtilknytningRequest -> leggTilOrgtilknytningForRessurs(
+                tilknyttetRessurs.navident(), leggTilOrgtilknytningRequest
+            )
+        );
+
+        if (oppdaterOrgtilknytningerForRessursRequest.setRessursSluttdato()) {
+            oppdaterRessursSluttdato(
+                tilknyttetRessurs,
+                oppdaterOrgtilknytningerForRessursRequest
+            );
+        }
+
+        if (oppdaterOrgtilknytningerForRessursRequest.setRessursStartdato()) {
+            oppdaterRessursStartdato(
+                tilknyttetRessurs,
+                oppdaterOrgtilknytningerForRessursRequest
+            );
+        }
+        nomMastered.markRessursAsMasteredInNom(navident);
+    }
+
     private void oppdaterRessursStartdato(RessursState tilknyttetRessurs, OppdaterOrgtilknytningerForRessursRequest request) {
 
         var endredeFomDatoer = request.eksisterendeOrgtilknytninger().stream()
@@ -165,6 +217,60 @@ public class OrgtilknytningRestService {
     private void validateOppdaterOrgtilknytningerForRessursRequest(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
         validateChronologicalDates(oppdaterOrgtilknytningerForRessursRequest);
         validateNoOverlappingDagligeOppfolginger(oppdaterOrgtilknytningerForRessursRequest);
+    }
+
+    private void validateOppdaterOrgtilknytningerForRessursRequest(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
+                                                                   List<IOrgenhet> orgEnheterTilLeder,
+                                                                   String ledernavident) {
+        validateLederKanOppdatereOrgtilknytninger(oppdaterOrgtilknytningerForRessursRequest, orgEnheterTilLeder, ledernavident);
+        validateEndreOrgtilknytningUnderToMaaneder(oppdaterOrgtilknytningerForRessursRequest);
+        validateChronologicalDates(oppdaterOrgtilknytningerForRessursRequest);
+        validateNoOverlappingDagligeOppfolginger(oppdaterOrgtilknytningerForRessursRequest);
+    }
+
+    private void validateEndreOrgtilknytningUnderToMaaneder(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
+
+        oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(orgenhet -> {
+            //Spør Mugge om det trengs å sjekkes for nye orgtilknytninger
+            if (orgenhet.gyldigTom().isBefore(LocalDate.now().minusMonths(2))) {
+                throw new AccessDeniedException("Det er ikke lov å legge til en orgtilknytning som er eldre enn to måneder gammelt, gjelder endring for orgenhet " + orgenhet.orgEnhetId());
+            }
+        });
+
+        oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(orgenhet -> {
+            if (orgenhet.gyldigTom() != null && orgenhet.gyldigTom().isBefore(LocalDate.now().minusMonths(2))) {
+                var orgenhetNavn = orgenhetService.getByFid(orgenhet.fid()).get().getNavn();
+                throw new AccessDeniedException("Det er ikke lov å endre en orgtilknytning som er eldre enn to måneder gammelt, gjelder endring for orgenhet " + orgenhetNavn);
+            }
+        });
+    }
+
+    private void validateLederKanOppdatereOrgtilknytninger(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
+                                                           List<IOrgenhet> orgEnheterTilLeder,
+                                                           String ledernavident) {
+
+        Set<String> fid = orgEnheterTilLeder.stream().map(IOrgenhet::getFid).collect(Collectors.toSet());
+        Set<String> orgenhetId = orgEnheterTilLeder.stream().map(IOrgenhet::getId).collect(Collectors.toSet());
+
+        if (isNull(ledernavident)) {
+            if (!oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().isEmpty()) {
+                oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(
+                    leggTilOrgtilknytningRequest -> {
+                        if (!orgenhetId.contains(leggTilOrgtilknytningRequest.orgEnhetId())) {
+                            throw new AccessDeniedException(String.format("Leder har lagt til en orgtilknytning for en orgenhet som de ikke har tilgang til: %s", leggTilOrgtilknytningRequest.orgEnhetId()));
+                        }
+                    }
+                );
+            }
+
+            oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(
+                endreOrgtilknytningRequest -> {
+                    if (!fid.contains(endreOrgtilknytningRequest.fid())) {
+                        throw new AccessDeniedException("Leder har ikke tilgang til å oppdatere orgtilknytning for orgenhet " + endreOrgtilknytningRequest.fid());
+                    }
+                }
+            );
+        }
     }
 
 

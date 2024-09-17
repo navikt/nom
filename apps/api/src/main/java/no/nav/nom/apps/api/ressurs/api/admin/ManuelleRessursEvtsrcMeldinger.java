@@ -1,5 +1,7 @@
 package no.nav.nom.apps.api.ressurs.api.admin;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -9,15 +11,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.app.AvvikleRessursRequest;
+import no.nav.nom.apps.api.ressurs.api.app.OppdaterSluttdatoRessursResponse;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.SlettRessursCommand;
-import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredService;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -381,13 +383,6 @@ public class ManuelleRessursEvtsrcMeldinger {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Navidenten er ikke mastret i NOM");
         }
 
-        if (isNull(localDate) && ressursState.get().sluttdato().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ressurs har ingen sluttdato eller så er ikke sluttdato satt som parameter");
-        } else {
-            localDate = ressursState.get().sluttdato().isPresent() ? ressursState.get().sluttdato().get() : localDate;
-        }
-
-
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Ressurs med FID %s er funnet for navident %s med navn %s. Men vil ikke endres da handling ikke er bekreftet".formatted(
@@ -418,6 +413,84 @@ public class ManuelleRessursEvtsrcMeldinger {
                 ressursState.get().navident(),
                 ressursState.get().visningsnavn().toString()
             ));
+    }
+
+
+    @PostMapping(value = "/oppdatereSluttDatoRessurs")
+    @Operation(
+        description = "Lag en RessursSluttdatoOppdatertEvent melding",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
+        }
+    )
+    public ResponseEntity<String> oppdatereSluttDatoRessurs(
+        @Parameter(description = "NAVIDENT for ressursen") @RequestParam String navident,
+        @Parameter(description = "Sluttdato for ressursen som skal oppdateres") @RequestParam(required = false) LocalDate sluttDato,
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
+    ) throws JsonProcessingException {
+        var ressursState = ressursStateRepository.findByNavident(navident);
+
+        if (ressursState.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Navidenten finnes ikke");
+        }
+
+        if (!nomMastered.isMastered(navident)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Navidenten er ikke mastret i NOM");
+        }
+
+        if (isNull(sluttDato)){
+            log.warn("Oppdateret sluttdato for gitt ressurs: {} er tom!", navident);
+        }
+
+        if (!"CONFIRM".equals(confirm)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body("Ressurs med FID %s er funnet for navident %s med navn %s. Men vil ikke endres da handling ikke er bekreftet".formatted(
+                    HtmlUtils.htmlEncode(ressursState.get().fid()),
+                    ressursState.get().navident(),
+                    ressursState.get().visningsnavn().toString()
+                ));
+        }
+
+        var metaData = new InputMetadata(
+            "/api/admin/manuelleEvtsrcMeldinger",
+            "oppdatereSluttDatoRessurs",
+            new AvvikleRessursRequest(sluttDato),
+            new Origination(
+                getAuthenticatedNavIdent(),
+                "Admin swagger/rest"
+            )
+        );
+
+        ressursCommandService.oppdaterRessursSluttdatoEvent(
+            new OppdaterSluttdatoCommand(ressursState.get().fid(),
+                   isNull(sluttDato)? Optional.empty() : Optional.of(sluttDato), metaData)
+        );
+
+        /*
+        return ResponseEntity.ok()
+            .body("Ressurs med FID %s er funnet for navident %s med navn %s. RessursSluttdatoOppdatertEvent er nå sendt".formatted(
+                HtmlUtils.htmlEncode(ressursState.get().fid()),
+                ressursState.get().navident(),
+                ressursState.get().visningsnavn().toString()
+            ));
+        */
+
+        var response = OppdaterSluttdatoRessursResponse.builder()
+            .fid(ressursState.get().fid())
+            .navident(ressursState.get().navident())
+            .visningsnavn(ressursState.get().visningsnavn().toString())
+            .message("Ressursens sluttdato er oppdatert, men eventuell nødvendig justering av orgtilknytninger må du gjøre manuelt via medarbeiderens profilside.")
+            .build();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonStr = objectMapper.writeValueAsString(response);
+        return ResponseEntity.ok().body(jsonStr);
     }
 
     private boolean validFid(String fid) {

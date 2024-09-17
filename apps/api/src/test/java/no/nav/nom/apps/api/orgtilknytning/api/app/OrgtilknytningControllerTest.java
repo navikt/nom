@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgtilknytning.api.app;
 
 import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.authorize.AuthResolver;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOverlapException;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
@@ -41,11 +42,13 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static no.nav.nom.apps.api.common.TestData.orgEnhet;
 import static no.nav.nom.apps.api.common.TestData.orgEnhetState;
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static no.nav.nom.apps.api.common.TestData.ressursState;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -58,12 +61,14 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @MockBean
     private RessursCommandService ressursCommandService;
 
-
     @MockBean
     private NomStateRessursListener nomStateRessursListener;
 
     @MockBean
     private RemedyEnhetMapperService remedyEnhetMapperService;
+
+    @MockBean
+    private OrgenhetService orgenhetService;
 
     @MockBean
     private AuthResolver authResolver;
@@ -1003,6 +1008,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @Test
     @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} support updating null (= max date) dato for ressurs")
     void test_update_orgtilknytninger_for_ressurs_handle_null_dato() {
+        when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(false);
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
 
@@ -1041,10 +1047,155 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .expectStatus().is2xxSuccessful();
     }
 
+    @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} support updating null (= max date) dato for ressurs")
+    void test_update_orgtilknytninger_for_ressurs_handle_null_dato_ny() {
+        when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(true);
+        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .build();
+
+        saveOrgtilknytninger(List.of(existingOrgtilknytning));
+
+        var newStartdato = existingOrgtilknytning.gyldigFom().plusMonths(1);
+        LocalDate newSluttdato = null;
+
+        var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
+            .gyldigFom(
+                newStartdato
+            )
+            .gyldigTom(newSluttdato)
+            .build();
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(endreOrgtilknytningRequest))
+            .nyeOrgtilknytninger(Collections.emptyList())
+            .setRessursStartdato(true)
+            .setRessursSluttdato(true)
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().is2xxSuccessful();
+    }
+
+    @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan ikke redigere orgtilknytning som er over 2 maaneder gammel for ressurs")
+    void test_rediger_orgtilknytning_som_er_over_to_mnd_gammel() {
+        when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(true);
+        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        doReturn(Optional.of(orgEnhet())).when(orgenhetService).getByFid(any());
+
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .build();
+
+        saveOrgtilknytninger(List.of(existingOrgtilknytning));
+
+        var newStartdato = existingOrgtilknytning.gyldigFom().minusMonths(24);
+        LocalDate newSluttdato = existingOrgtilknytning.gyldigTom().get().minusMonths(3).minusDays(1);
+
+        var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
+            .gyldigFom(
+                newStartdato
+            )
+            .gyldigTom(newSluttdato)
+            .build();
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(endreOrgtilknytningRequest))
+            .nyeOrgtilknytninger(Collections.emptyList())
+            .setRessursStartdato(true)
+            .setRessursSluttdato(true)
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().isForbidden();
+    }
 
     @Test
     @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} support updating startdato and sluttdato for ressurs")
     void test_update_orgtilknytninger_for_ressurs_start_and_sluttdato() {
+        when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(false);
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .build();
+
+        saveOrgtilknytninger(List.of(existingOrgtilknytning));
+
+        var newStartdato = existingOrgtilknytning.gyldigFom().plusMonths(1);
+        var newSluttdato = existingOrgtilknytning.gyldigTom().orElseThrow().plusMonths(1);
+
+        var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
+            .gyldigFom(
+                newStartdato
+            )
+            .gyldigTom(newSluttdato)
+            .build();
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(endreOrgtilknytningRequest))
+            .nyeOrgtilknytninger(Collections.emptyList())
+            .setRessursStartdato(true)
+            .setRessursSluttdato(true)
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().is2xxSuccessful();
+
+        verify(orgtilknytningCommandService, times(1)).endreOrgtilknytningDato(any());
+        verify(ressursCommandService, times(1)).oppdaterRessursStartdatoEvent(oppdaterStartdatoCommandArgumentCaptor.capture(), any());
+        verify(ressursCommandService, times(1)).oppdaterRessursSluttdatoEvent(oppdaterSluttdatoCommandArgumentCaptor.capture());
+
+        assertThat(oppdaterStartdatoCommandArgumentCaptor.getValue())
+            .matches(oppdaterStartdatoCommand -> oppdaterStartdatoCommand.startdato().equals(newStartdato))
+            .matches(oppdaterStartdatoCommand -> oppdaterStartdatoCommand.fid().equals(tilknyttetRessurs.fid()));
+
+        assertThat(oppdaterSluttdatoCommandArgumentCaptor.getValue())
+            .matches(oppdaterSluttdatoCommand -> oppdaterSluttdatoCommand.sluttdato().orElseThrow().equals(newSluttdato))
+            .matches(oppdaterSluttdatoCommand -> oppdaterSluttdatoCommand.fid().equals(tilknyttetRessurs.fid()));
+
+    }
+
+    @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} support updating startdato and sluttdato for ressurs")
+    void test_update_orgtilknytninger_for_ressurs_start_and_sluttdato_ny() {
+        when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(true);
+        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
 
@@ -1099,6 +1250,136 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @Test
     @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} should update update and add new orgtilknytninger for ressurs")
     void test_update_orgtilknytninger_for_ressurs() {
+        when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(false);
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytningAnticipatingNewDate = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("1")
+            .erDagligOppfolging(false)
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .build();
+
+        var existingOrgtilknytningAnticipatingDolChange = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("2")
+            .erDagligOppfolging(false)
+            .gyldigFom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().orElseThrow().plusDays(1))
+            .gyldigTom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(gyldigTom -> gyldigTom.plusMonths(1)))
+            .build();
+
+        var existingOrgtilknytningAnticipatingNewTilknytningtype = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("3")
+            .erDagligOppfolging(false)
+            .orgtilknytningType(Optional.empty())
+            .build();
+
+        saveOrgtilknytninger(List.of(
+            existingOrgtilknytningAnticipatingNewDate,
+            existingOrgtilknytningAnticipatingDolChange,
+            existingOrgtilknytningAnticipatingNewTilknytningtype
+        ));
+
+        var endreDatoOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingNewDate).toBuilder()
+            .gyldigTom(
+                existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(localDate -> localDate.plusMonths(1)).orElseThrow()
+            )
+            .build();
+
+        var endreDolOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingDolChange).toBuilder()
+            .erDagligOppfolging(true)
+            .build();
+
+        var endreTilknytningtypeRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingNewTilknytningtype).toBuilder()
+            .tilknytningtype(Tilknytningtype.KONSULENT)
+            .build();
+
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+            .erDagligOppfolging(false)
+            .orgEnhetId("4")
+            .tilknytningtype(null)
+            .build();
+
+        var opprettetOrgtilknytningFid = UUID.randomUUID().toString();
+
+        when(orgtilknytningCommandService.opprettOrgtilknytning(any())).thenReturn(opprettetOrgtilknytningFid);
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(
+                endreDatoOrgtilknytningRequest,
+                endreDolOrgtilknytningRequest,
+                endreTilknytningtypeRequest
+            ))
+            .nyeOrgtilknytninger(List.of(leggTilOrgtilknytningRequest))
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().is2xxSuccessful();
+
+        verify(orgtilknytningCommandService, times(1)).endreDagligOppfolgingOrgtilknytning(endreDagligOppfolgingOrgtilknytningCommandArgumentCaptor.capture());
+        assertThat(endreDagligOppfolgingOrgtilknytningCommandArgumentCaptor.getValue()).usingRecursiveComparison()
+            .ignoringFields("inputMetadata")
+            .isEqualTo(EndreDagligOppfolgingOrgtilknytningCommand.builder()
+                .fid(endreDolOrgtilknytningRequest.fid())
+                .gyldigFom(endreDolOrgtilknytningRequest.gyldigFom())
+                .gyldigTom(Optional.ofNullable(endreDolOrgtilknytningRequest.gyldigTom()))
+                .erDagligOppfolging(endreDolOrgtilknytningRequest.erDagligOppfolging())
+                .navident(existingOrgtilknytningAnticipatingDolChange.navident())
+                .orgenhetId(existingOrgtilknytningAnticipatingDolChange.orgEnhetId())
+                .additionalAgressoData(null)
+                .build()
+            );
+
+        verify(orgtilknytningCommandService, times(1)).endreTilknytningtype(endreTilknytningtypeCommandArgumentCaptor.capture());
+        assertThat(endreTilknytningtypeCommandArgumentCaptor.getValue()).usingRecursiveComparison()
+            .ignoringFields("inputMetadata")
+            .isEqualTo(EndreTilknytningtypeCommand.builder()
+                .fid(endreTilknytningtypeRequest.fid())
+                .tilknytningtype(Optional.ofNullable(endreTilknytningtypeRequest.tilknytningtype()))
+                .build()
+            );
+
+        verify(orgtilknytningCommandService, times(2)).endreOrgtilknytningDato(endreOrgtilknytningDatoCommandArgumentCaptor.capture());
+        assertThat(endreOrgtilknytningDatoCommandArgumentCaptor.getAllValues()).usingRecursiveComparison()
+            .ignoringFields("inputMetadata")
+            .isEqualTo(List.of(
+                EndreOrgtilknytningDatoCommand.builder()
+                    .fid(endreDatoOrgtilknytningRequest.fid())
+                    .gyldigFom(endreDatoOrgtilknytningRequest.gyldigFom())
+                    .gyldigTom(Optional.ofNullable(endreDatoOrgtilknytningRequest.gyldigTom()))
+                    .build(),
+                EndreOrgtilknytningDatoCommand.builder()
+                    .fid(opprettetOrgtilknytningFid)
+                    .gyldigFom(leggTilOrgtilknytningRequest.gyldigFom())
+                    .gyldigTom(Optional.ofNullable(leggTilOrgtilknytningRequest.gyldigTom()))
+                    .build()
+            ));
+
+        verify(orgtilknytningCommandService, times(1)).opprettOrgtilknytning(opprettOrgtilknytningArgumentCaptor.capture());
+        assertThat(opprettOrgtilknytningArgumentCaptor.getValue()).usingRecursiveComparison()
+            .ignoringFields("inputMetadata")
+            .isEqualTo(OpprettOrgtilknytning.builder()
+                .navident(tilknyttetRessurs.navident())
+                .orgenhetId(leggTilOrgtilknytningRequest.orgEnhetId())
+                .gyldigFom(leggTilOrgtilknytningRequest.gyldigFom())
+                .additionalAgressoData(null)
+                .build()
+            );
+    }
+
+    @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} should update update and add new orgtilknytninger for ressurs")
+    void test_update_orgtilknytninger_for_ressurs_ny() {
+        when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(true);
+        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
 
@@ -1226,6 +1507,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @Test
     @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} should create new orgtilknytning with erDagligOppfolging=true and tilknytningtype not empty")
     void test_add_dol_with_tilknytningtype_to_ressurs() {
+        when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(false);
+
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
 
@@ -1322,7 +1605,20 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @DisplayName("Should return 400 if request has overlapping daglige oppfolginger")
     @MethodSource("test_no_overlapping_daglig_oppfolginger_input")
     void test_no_overlapping_daglig_oppfolginger(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
+        when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(false);
+        postOppdaterOrgtilknytningerForRessursRequest(
+            "whatever",
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        ).expectStatus().isBadRequest();
+    }
 
+    @ParameterizedTest(name = "{0}")
+    @DisplayName("Should return 400 if request has overlapping daglige oppfolginger")
+    @MethodSource("test_no_overlapping_daglig_oppfolginger_input")
+    void test_no_overlapping_daglig_oppfolginger_ny(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
+        when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(true);
+        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         postOppdaterOrgtilknytningerForRessursRequest(
             "whatever",
             testToken.nomWriteGroupAndNomUiAzp(),
@@ -1379,6 +1675,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         );
     }
 
+
+
     @ParameterizedTest(name = "existing fids: {0} \noppdaterOrgtilknytningerForRessursRequest: {1}")
     @DisplayName("Should return 400 if eksisterendeOrgtilknytninger does not contain exactly all existing orgtilknytninger")
     @MethodSource("test_oppdaterOrgtilknytningerForRessursRequest_contains_exactly_all_existing_orgtilknytninger_input")
@@ -1386,7 +1684,37 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         List<String> existingOrgtilknytningFids,
         OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest
     ) {
+        when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(false);
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
 
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        saveOrgtilknytninger(existingOrgtilknytningFids.stream().map(fid ->
+            orgtilknytningState().toBuilder()
+                .fid(fid)
+                .orgEnhetId(UUID.randomUUID().toString())
+                .erDagligOppfolging(false)
+                .navident(tilknyttetRessurs.navident())
+                .build()
+        ).toList());
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        ).expectStatus().isBadRequest();
+    }
+
+    @ParameterizedTest(name = "existing fids: {0} \noppdaterOrgtilknytningerForRessursRequest: {1}")
+    @DisplayName("Should return 400 if eksisterendeOrgtilknytninger does not contain exactly all existing orgtilknytninger")
+    @MethodSource("test_oppdaterOrgtilknytningerForRessursRequest_contains_exactly_all_existing_orgtilknytninger_input")
+    void test_eksisterendeOrgtilknytninger_contains_exactly_all_existing_orgtilknytninger_ny(
+        List<String> existingOrgtilknytningFids,
+        OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest
+    ) {
+        when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(true);
+        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
 

@@ -354,6 +354,7 @@ public class SanityCheck {
     @GetMapping(value = "/listTilkoblingerUtoverRessursGyldighetPeriode")
     public String listTilkoblingerUtoverRessursGyldighetPeriode() {
         StringBuffer result = new StringBuffer();
+
         var alleOrgtilknytningState = orgtilknytningService.getAll().stream().toList();
         log.info("alleOrgtilknytningState, size: {}", alleOrgtilknytningState.size());
 
@@ -378,10 +379,6 @@ public class SanityCheck {
                 .append(t.gyldigFom())
                 .append(";")
                 .append(t.gyldigTom().isPresent() ? t.gyldigTom().get() : "")
-                .append(";")
-                .append(oe.getGyldigFom())
-                .append(";")
-                .append(oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "")
                 .append("\n");
         });
         return result.toString();

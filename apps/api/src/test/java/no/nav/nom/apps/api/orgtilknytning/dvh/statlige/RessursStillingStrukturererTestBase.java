@@ -141,4 +141,33 @@ class RessursStillingStrukturererTestBase {
             null
         );
     }
+
+    StillingPeriode stillingPeriode(IOrgenhet orgenhet, LocalDate gyldigFom, LocalDate gyldigTom) {
+        return new StillingPeriode(
+                new StillingPeriode.StillingAgressoOrgIdOgNavn(
+                        Optional.ofNullable(orgenhet.getAgressoId()),
+                        orgenhet.getNavn(),
+                        Optional.ofNullable(orgenhet.getAgressoId()),
+                        Optional.of("ORGENHET")
+                ),
+                gyldigFom,
+                gyldigTom,
+                orgenhet
+        );
+    }
+
+    StillingPeriode stillingPeriode(IOrgenhet orgenhet, LocalDate gyldigFom, LocalDate gyldigTom, String ressursAgressoId) {
+        return new StillingPeriode(
+                new StillingPeriode.StillingAgressoOrgIdOgNavn(
+                        Optional.ofNullable(orgenhet.getAgressoId()),
+                        orgenhet.getNavn(),
+                        Optional.ofNullable(ressursAgressoId),
+                        Optional.of("ORGENHET")
+                ),
+                gyldigFom,
+                gyldigTom,
+                orgenhet
+        );
+    }
+
 }

@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException;
@@ -39,6 +40,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
+
 @Tag(name = "Orgtilknytning")
 @RestController
 @RequestMapping(value={"/app/orgtilknytninger"})
@@ -50,11 +53,16 @@ public class OrgtilknytningController {
     private final Unleash unleash;
     private final OrgtilknytningRestService orgtilknytningRestService;
     private final AuthResolver authResolver;
+    private final OrgenhetService orgenhetService;
 
-    public OrgtilknytningController(Unleash unleash, OrgtilknytningRestService orgtilknytningRestService, AuthResolver authResolver) {
+    public OrgtilknytningController(Unleash unleash, OrgtilknytningRestService orgtilknytningRestService,
+                                    AuthResolver authResolver,
+                                    OrgenhetService orgenhetService
+    ) {
         this.unleash = unleash;
         this.orgtilknytningRestService = orgtilknytningRestService;
         this.authResolver = authResolver;
+        this.orgenhetService = orgenhetService;
     }
 
     @GetMapping()
@@ -187,16 +195,26 @@ public class OrgtilknytningController {
         @PathVariable String navident,
         @Valid @RequestBody OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest
     ) {
-        if (!authResolver.kanRedigereRessurs(navident)) {
-            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
+        if (unleash.isEnabled("nom.ressurs.ny-move-prosess")) {
+            if (orgenhetService.getEnheterByLeder(getAuthenticatedNavIdent()).isEmpty()) {
+                throw new AccessDeniedException("Ikke tilgang til å redigere orgtilknytning for ressurs, da innlogget person har ikke tilgang til noen orgenheter");
+            }
+            var lederTilRessurs = authResolver.kanRedigereRessurs(navident) ? getAuthenticatedNavIdent() : null;
+
+            if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
+                orgtilknytningRestService.oppdaterOrgtilknytningerForRessurs(navident, oppdaterOrgtilknytningerForRessursRequest, lederTilRessurs);
+                return ResponseEntity.ok(StandardResponse.builder().message("Orgtilknytninger for ressurs oppdatert").build());
+            }
+        } else {
+            if (!authResolver.kanRedigereRessurs(navident)) {
+                throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
+            }
+
+            if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
+                orgtilknytningRestService.oppdaterOrgtilknytningerForRessurs(navident, oppdaterOrgtilknytningerForRessursRequest);
+                return ResponseEntity.ok(StandardResponse.builder().message("Orgtilknytninger for ressurs oppdatert").build());
+            }
         }
-
-        if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
-            orgtilknytningRestService.oppdaterOrgtilknytningerForRessurs(navident, oppdaterOrgtilknytningerForRessursRequest);
-
-            return ResponseEntity.ok(StandardResponse.builder().message("Orgtilknytninger for ressurs oppdatert").build());
-        }
-
         throw new AccessDeniedException("Endring av orgtilknytning er blokkert");
     }
 

@@ -32,12 +32,12 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals("AGRID_1",  forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("Enhet_1",  forsteStillingPeriode.stilling().enhetNavn());
         assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
@@ -56,14 +56,14 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getLast();
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode = result.stillingPerioder().getLast();
+
+        assertEquals(2, result.stillingPerioder().size());
 
         assertEquals("AGRID_1",  forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("Enhet_1",  forsteStillingPeriode.stilling().enhetNavn());
@@ -91,14 +91,14 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getLast();
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode = result.stillingPerioder().getLast();
+
+        assertEquals(2, result.stillingPerioder().size());
 
         assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse("NULL"));
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
@@ -120,14 +120,14 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getLast();
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode = result.stillingPerioder().getLast();
+
+        assertEquals(2, result.stillingPerioder().size());
 
         assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse("NULL"));
         assertEquals("AGRID_1", forsteStillingPeriode.stilling().ressursAgressoId().orElse("NULL"));
@@ -151,12 +151,12 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals("AGRID_1",  forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("AGRID",    forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
         assertEquals("Enhet_1",  forsteStillingPeriode.stilling().enhetNavn());
@@ -176,12 +176,12 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals("AGRID",    forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("AGRID_1",  forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
         assertEquals("Enhet_1",  forsteStillingPeriode.stilling().enhetNavn());
@@ -201,12 +201,12 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals("AGRID_1",  forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("AID_2",    forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
         assertEquals("Enhet_1",  forsteStillingPeriode.stilling().enhetNavn());
@@ -226,12 +226,12 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals("AID_100",  forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("AID_1",   forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
@@ -251,12 +251,12 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals("AID_100",  forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("AID_2",   forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
@@ -276,12 +276,12 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals("-4",       forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("AGRID_1",  forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
         assertEquals("Mangler",  forsteStillingPeriode.stilling().enhetNavn());
@@ -301,12 +301,12 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals("-4",      forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("AID_1",   forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
         assertEquals("Mangler", forsteStillingPeriode.stilling().enhetNavn());
@@ -326,12 +326,12 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals("-4",      forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("-3",      forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
         assertEquals("Mangler", forsteStillingPeriode.stilling().enhetNavn());
@@ -351,20 +351,20 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2020, 11, 1))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals("AGRID_1",  forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("Enhet_1",  forsteStillingPeriode.stilling().enhetNavn());
         assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
         assertEquals(LocalDate.of(2020, 11, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE,                  forsteStillingPeriode.gyldigTom());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -378,20 +378,20 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2020, 5, 1))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals("AGRID_1",  forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("Enhet_1",  forsteStillingPeriode.stilling().enhetNavn());
         assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
         assertEquals(LocalDate.of(2020, 5, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE,                 forsteStillingPeriode.gyldigTom());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -405,13 +405,13 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2021, 11, 1))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getLast();
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode = result.stillingPerioder().getLast();
 
         assertEquals("AGRID_1",  forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("Enhet_1",  forsteStillingPeriode.stilling().enhetNavn());
@@ -425,9 +425,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         assertEquals(LocalDate.of(2022, 1, 1), andreStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE,                 andreStillingPeriode.gyldigTom());
 
-        assertEquals(2, strukturerteStillingPerioder.errors().size());
-        assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, strukturerteStillingPerioder.errors().getFirst().errorType());
-        assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, strukturerteStillingPerioder.errors().getLast().errorType());
+        assertEquals(2, result.errors().size());
+        assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, result.errors().getFirst().errorType());
+        assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, result.errors().getLast().errorType());
     }
 
     @Test
@@ -441,20 +441,20 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2019, 1, 1), LocalDate.of(2023, 12, 31))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals("AGRID_1",  forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("Enhet_1",  forsteStillingPeriode.stilling().enhetNavn());
         assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
         assertEquals(LocalDate.of(2020, 1, 1),   forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2023, 12, 31), forsteStillingPeriode.gyldigTom());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -468,20 +468,20 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2019, 1, 1), LocalDate.of(2021, 12, 31))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals("AGRID_1",  forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("Enhet_1",  forsteStillingPeriode.stilling().enhetNavn());
         assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2021, 12, 31), forsteStillingPeriode.gyldigTom());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, result.errors().getFirst().errorType());
     }
 
     @Test
@@ -495,22 +495,21 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2019, 1, 1), LocalDate.of(2021, 8, 31))));
-
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
         assertEquals("AGRID_1",  forsteStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("Enhet_1",  forsteStillingPeriode.stilling().enhetNavn());
         assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2021, 8, 31), forsteStillingPeriode.gyldigTom());
 
-        assertEquals(2, strukturerteStillingPerioder.errors().size());
-        assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, strukturerteStillingPerioder.errors().getFirst().errorType());
-        assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, strukturerteStillingPerioder.errors().getLast().errorType());
+        assertEquals(2, result.errors().size());
+        assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, result.errors().getFirst().errorType());
+        assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, result.errors().getLast().errorType());
     }
 
     @Test
@@ -523,20 +522,20 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(1, strukturerteStillingPerioder.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+
+        assertEquals(1, result.stillingPerioder().size());
 
         assertEquals("AGRID_1", forsteStillingPeriode.stilling().ressursAgressoId().orElse("NULL"));
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
 
-        assertEquals(1, strukturerteStillingPerioder.errors().size());
-        assertEquals(DVH_RESSURSSTILLINGER_HAR_OVERLAPPENDE_PERIODER, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(1, result.errors().size());
+        assertEquals(DVH_RESSURSSTILLINGER_HAR_OVERLAPPENDE_PERIODER, result.errors().getFirst().errorType());
     }
 
 
@@ -552,14 +551,14 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
-
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
-        CUT.behandle(dvhRessursStillinger, strukturerteStillingPerioder);
 
-        var forsteStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getFirst();
-        var andreStillingPeriode = strukturerteStillingPerioder.stillingPerioder().getLast();
+        var result = CUT.behandle(strukturerteStillingPerioder);
 
-        assertEquals(2, strukturerteStillingPerioder.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode = result.stillingPerioder().getLast();
+
+        assertEquals(2, result.stillingPerioder().size());
 
         assertEquals("AGRID_1", forsteStillingPeriode.stilling().ressursAgressoId().orElse("NULL"));
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
@@ -569,8 +568,8 @@ class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTe
         assertEquals(LocalDate.of(2020, 11, 1), andreStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, andreStillingPeriode.gyldigTom());
 
-        assertEquals(2, strukturerteStillingPerioder.errors().size());
-        assertEquals(DVH_RESSURSSTILLINGER_HAR_OVERLAPPENDE_PERIODER, strukturerteStillingPerioder.errors().getFirst().errorType());
-        assertEquals(DVH_RESSURSSTILLINGER_HAR_OVERLAPPENDE_PERIODER, strukturerteStillingPerioder.errors().getFirst().errorType());
+        assertEquals(2, result.errors().size());
+        assertEquals(DVH_RESSURSSTILLINGER_HAR_OVERLAPPENDE_PERIODER, result.errors().getFirst().errorType());
+        assertEquals(DVH_RESSURSSTILLINGER_HAR_OVERLAPPENDE_PERIODER, result.errors().getFirst().errorType());
     }
 }

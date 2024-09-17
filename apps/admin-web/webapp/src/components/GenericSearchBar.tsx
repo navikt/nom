@@ -10,12 +10,17 @@ export function GenericSearchBar({ search }: { search: searchType }) {
 
   const submitHandler = methods.handleSubmit((values) => {
     navigate({
-      search: (prev) => ({ ...prev, ...values }),
+      search: (prev) => {
+        const overwriteOffset = {
+          fromOffset: Number.parseInt((values.fromOffset as never) || "0"),
+        };
+        return { ...prev, ...values, ...overwriteOffset };
+      },
     });
   });
 
   const tilbakestill = () => {
-    methods.reset({ filterText: "", fromOffset: undefined });
+    methods.reset({ filterText: "", fromOffset: 0 });
     navigate({
       search: {},
       replace: true,

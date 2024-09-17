@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.common;
 
+import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -72,5 +73,9 @@ public class TestData {
             .gyldigFom(LocalDate.now().minusDays(5))
             .gyldigTom(Optional.empty())
             .build();
+    }
+
+    public static OrgEnhet orgEnhet() {
+        return new OrgEnhet(orgEnhetState());
     }
 }
