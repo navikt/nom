@@ -118,7 +118,7 @@ jobs:
           TIMEOUT: ${{ inputs.deploy-timeout }}
           VAR: env=development
           VARS: ${{ inputs.unleash-vars-file-path }}
-          TELEMETRY: ${{ steps.docker-push.outputs.telemetry }}
+          TELEMETRY: ${{ needs.build-app-docker.outputs.telemetry }}
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: ${{ inputs.dev-cluster }}
@@ -142,7 +142,7 @@ jobs:
           TIMEOUT: ${{ inputs.deploy-timeout }}
           VAR: env=production
           VARS: ${{ inputs.unleash-vars-file-path }}
-          TELEMETRY: ${{ steps.docker-push.outputs.telemetry }}
+          TELEMETRY: ${{ needs.build-app-docker.outputs.telemetry }}
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: ${{ inputs.prod-cluster }}
