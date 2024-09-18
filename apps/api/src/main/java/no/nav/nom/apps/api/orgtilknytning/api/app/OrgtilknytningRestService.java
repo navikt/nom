@@ -35,6 +35,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -231,18 +232,29 @@ public class OrgtilknytningRestService {
     private void validateEndreOrgtilknytningUnderToMaaneder(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
 
         oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(orgenhet -> {
-            //Spør Mugge om det trengs å sjekkes for nye orgtilknytninger
             if (orgenhet.gyldigTom().isBefore(LocalDate.now().minusMonths(2))) {
                 throw new AccessDeniedException("Det er ikke lov å legge til en orgtilknytning som er eldre enn to måneder gammelt, gjelder endring for orgenhet " + orgenhet.orgEnhetId());
             }
         });
 
-        oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(orgenhet -> {
-            if (orgenhet.gyldigTom() != null && orgenhet.gyldigTom().isBefore(LocalDate.now().minusMonths(2))) {
-                var orgenhetNavn = orgenhetService.getByFid(orgenhet.fid()).get().getNavn();
-                throw new AccessDeniedException("Det er ikke lov å endre en orgtilknytning som er eldre enn to måneder gammelt, gjelder endring for orgenhet " + orgenhetNavn);
+        oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(orgtilknytningRequest -> {
+            var orgtilknytningState = orgtilknytningStateRepository.findByFid(orgtilknytningRequest.fid()).get();
+            if (compareDateForExistingOrgtilknytningWithStateOrgtilknytning(orgtilknytningRequest, orgtilknytningState)) return;
+            if (orgtilknytningState.gyldigTom().isPresent() && orgtilknytningState.gyldigTom().get().isBefore(LocalDate.now().minusMonths(2))) {
+                throw new AccessDeniedException("Det er ikke lov å endre en orgtilknytning som er eldre enn to måneder gammelt, gjelder endring for orgenhet " + orgtilknytningState.orgEnhetId());
             }
         });
+    }
+
+    private boolean compareDateForExistingOrgtilknytningWithStateOrgtilknytning(
+        EndreOrgtilknytningRequest orgtilknytningRequest,
+        OrgtilknytningState orgtilknytningState
+    ) {
+        var stateDate = orgtilknytningState.gyldigTom().isPresent() ? orgtilknytningState.gyldigTom().get() : LocalDate.MAX;
+        return new EqualsBuilder()
+            .append(orgtilknytningRequest.gyldigFom(), orgtilknytningState.gyldigFom())
+            .append(orgtilknytningRequest.gyldigTom(), stateDate)
+            .isEquals();
     }
 
     private void validateLederKanOppdatereOrgtilknytninger(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
