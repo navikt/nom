@@ -199,10 +199,10 @@ public class OrgtilknytningController {
             if (orgenhetService.getEnheterByLeder(getAuthenticatedNavIdent()).isEmpty()) {
                 throw new AccessDeniedException("Ikke tilgang til å redigere orgtilknytning for ressurs, da innlogget person har ikke tilgang til noen orgenheter");
             }
-            var lederTilRessurs = authResolver.kanRedigereRessurs(navident) ? getAuthenticatedNavIdent() : null;
+            var isLeder = authResolver.kanRedigereRessurs(navident);
 
             if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
-                orgtilknytningRestService.oppdaterOrgtilknytningerForRessurs(navident, oppdaterOrgtilknytningerForRessursRequest, lederTilRessurs);
+                orgtilknytningRestService.oppdaterOrgtilknytningerForRessurs(navident, oppdaterOrgtilknytningerForRessursRequest, isLeder);
                 return ResponseEntity.ok(StandardResponse.builder().message("Orgtilknytninger for ressurs oppdatert").build());
             }
         } else {
