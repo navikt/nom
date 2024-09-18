@@ -37,6 +37,8 @@ import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -60,7 +62,6 @@ import static no.nav.nom.apps.api.common.DateUtils.isPeriodsOverlapping;
 import static no.nav.nom.apps.api.common.DateUtils.nextWorkingDay;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
-@Slf4j
 @Service
 public class OrgtilknytningRestService {
 
@@ -72,6 +73,7 @@ public class OrgtilknytningRestService {
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final NomMastered nomMastered;
     private final OrgenhetService orgenhetService;
+    private final static Logger log = LoggerFactory.getLogger(OrgtilknytningRestService.class);
 
     public OrgtilknytningRestService(
         OrgtilknytningStateRepository orgtilknytningStateRepository,
@@ -265,7 +267,7 @@ public class OrgtilknytningRestService {
 
         Set<String> fid = orgEnheterTilLeder.stream().map(IOrgenhet::getFid).collect(Collectors.toSet());
         Set<String> orgenhetId = orgEnheterTilLeder.stream().map(IOrgenhet::getId).collect(Collectors.toSet());
-        log.debug("Leder har tilgang til orgenhetene: {}", orgenhetId);
+        log.info("Leder har tilgang til orgenhetene: {}", orgenhetId);
 
         if (isNull(ledernavident)) {
             if (!oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().isEmpty()) {
