@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.api.app;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
@@ -59,6 +60,7 @@ import static no.nav.nom.apps.api.common.DateUtils.isPeriodsOverlapping;
 import static no.nav.nom.apps.api.common.DateUtils.nextWorkingDay;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
+@Slf4j
 @Service
 public class OrgtilknytningRestService {
 
@@ -263,6 +265,7 @@ public class OrgtilknytningRestService {
 
         Set<String> fid = orgEnheterTilLeder.stream().map(IOrgenhet::getFid).collect(Collectors.toSet());
         Set<String> orgenhetId = orgEnheterTilLeder.stream().map(IOrgenhet::getId).collect(Collectors.toSet());
+        log.debug("Leder har tilgang til orgenhetene: {}", orgenhetId);
 
         if (isNull(ledernavident)) {
             if (!oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().isEmpty()) {
