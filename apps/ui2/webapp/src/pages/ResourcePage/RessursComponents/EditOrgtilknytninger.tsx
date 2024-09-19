@@ -22,7 +22,7 @@ import {
   useDatepicker,
 } from "@navikt/ds-react";
 import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { addYears, subMonths } from "date-fns";
 import partition from "lodash/partition";
@@ -213,6 +213,12 @@ function OrgtilknytningForm({
 }) {
   const navigate = useNavigate();
   const hasWriteAccess = useHasWriteAccess();
+
+  const nomSharepointLenke: string =
+    "https://navno.sharepoint.com/sites/intranett-organisasjon/SitePages/Organisasjonsmaster-(NOM).aspx";
+
+  const lonnsskjemaLenke: string =
+    "https://navno.sharepoint.com/sites/intranett-lonnsadministrasjon/SitePages/L%C3%B8nnsskjema.aspx";
 
   const hasFieldTomChanged = (field: Partial<OrgtilknytningState>) => {
     const originalField = orgtilknytninger.find(
@@ -435,6 +441,26 @@ function OrgtilknytningForm({
             </div>
           );
         })}
+
+        {ressurs.sektor === Sektor.NAV_KOMMUNAL && (
+          <Alert
+            css={css`
+              margin-top: var(--a-spacing-8);
+            `}
+            variant="info"
+          >
+            Du er i ferd med å redigere en kommunal medarbeider. Hvis
+            medarbeideren er{" "}
+            <Link to={nomSharepointLenke}>
+              leder eller har utvidede tilganger i Unit4
+            </Link>
+            , må du også melde inn de samme endringene{" "}
+            <Link to={lonnsskjemaLenke}>
+              via eksisterende rutiner til Unit4
+            </Link>
+            .
+          </Alert>
+        )}
 
         <div
           css={css`
