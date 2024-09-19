@@ -143,6 +143,9 @@ function DelegertRolleCard({ tilgang }: { tilgang: LederTilgangState }) {
     queryFn: () => getOrgEnhet.queryFn(tilgang.orgenhetId),
   }).data;
 
+  const brukerveiledningLenke: string =
+    "https://navno.sharepoint.com/sites/intranett-it/SitePages/Brukerveiledninger-Mine-Tilganger.aspx";
+
   return (
     <VStack
       css={[
@@ -169,10 +172,18 @@ function DelegertRolleCard({ tilgang }: { tilgang: LederTilgangState }) {
         <span>Gyldig t.o.m</span>
         <b>{formatDisplayDate(tilgang.gyldigTom)}</b>
       </HStack>
-      <span>
-        Redigeringstilgangen gjelder for alle underliggende
-        organisasjonsenheter.
-      </span>
+      <HStack gap="2">
+        <BodyShort>
+          Redigeringstilgangen gjelder for alle underliggende
+          organisasjonsenheter.
+        </BodyShort>
+        <BodyShort>
+          I tillegg til å ha delegert redigeringstilgang her i NOM, må du også
+          ha fått tilganger i Mine Tilganger. Brukerveiledning for Mine
+          Tilganger finner du <Link to={brukerveiledningLenke}>her</Link>. Du
+          kan søke på NOM for å finne riktig tilgang å delegere.
+        </BodyShort>
+      </HStack>
     </VStack>
   );
 }
