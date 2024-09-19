@@ -1,9 +1,9 @@
 package no.nav.nom.apps.api.orgtilknytning.api.app;
 
+import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
@@ -70,8 +70,8 @@ public class OrgtilknytningRestService {
     private final RessursStateRepository ressursStateRepository;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final NomMastered nomMastered;
-    private final OrgenhetService orgenhetService;
     private final static Logger log = LoggerFactory.getLogger(OrgtilknytningRestService.class);
+    private final AuthorizedNavident authorizedNavident;
 
     public OrgtilknytningRestService(
         OrgtilknytningStateRepository orgtilknytningStateRepository,
@@ -80,7 +80,7 @@ public class OrgtilknytningRestService {
         RessursStateRepository ressursStateRepository,
         RemedyEnhetMapperService remedyEnhetMapperService,
         NomMastered nomMastered,
-        OrgenhetService orgenhetService
+        AuthorizedNavident authorizedNavident
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
@@ -89,7 +89,7 @@ public class OrgtilknytningRestService {
         this.ressursStateRepository = ressursStateRepository;
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.nomMastered = nomMastered;
-        this.orgenhetService = orgenhetService;
+        this.authorizedNavident = authorizedNavident;
     }
 
     public List<OrgtilknytningState> getOrgtilknytninger(Optional<String> navident) {
@@ -159,9 +159,8 @@ public class OrgtilknytningRestService {
     public void oppdaterOrgtilknytningerForRessurs(String navident,
                                                    OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
                                                    boolean isLeder) {
-        var orgEnheterTilLeder = orgenhetService.getEnheterByLeder(getAuthenticatedNavIdent());
-        var alleUnderliggendeOrgenheter = orgEnheterTilLeder.stream().map(iOrgenhet -> orgenhetService.getAllUnderliggendeOrgEnhetById(iOrgenhet.getId())).flatMap(Collection::stream).toList();
-        validateOppdaterOrgtilknytningerForRessursRequest(oppdaterOrgtilknytningerForRessursRequest, alleUnderliggendeOrgenheter, isLeder);
+        var orgEnheterTilLeder = authorizedNavident.orgenheterLederKanRedigere(getAuthenticatedNavIdent());
+        validateOppdaterOrgtilknytningerForRessursRequest(oppdaterOrgtilknytningerForRessursRequest, orgEnheterTilLeder, isLeder);
 
         var tilknyttetRessurs = ressursStateRepository.findByNavident(navident)
             .orElseThrow(() -> RessursNotFoundException.navident(navident));
