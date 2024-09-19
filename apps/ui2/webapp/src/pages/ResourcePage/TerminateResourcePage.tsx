@@ -9,7 +9,7 @@ import {
   useDatepicker,
 } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { isAfter } from "date-fns";
 import { maxTime } from "date-fns/constants";
@@ -30,6 +30,7 @@ import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/componen
 import { RessursCard } from "~/pages/ResourcePage/RessursComponents/RessursCard";
 import fjernRessursIcon from "~/resources/fjernRessursIcon.svg";
 import type { AvvikleRessursRequest } from "~/types/api-models";
+import { Sektor } from "~/types/api-models";
 import {
   dateWithoutTimezone,
   formatDateWithoutTimezone,
@@ -150,6 +151,12 @@ export function TerminateResourcePage() {
         }));
   };
 
+  const nomSharepointLenke: string =
+    "https://navno.sharepoint.com/sites/intranett-organisasjon/SitePages/Organisasjonsmaster-(NOM).aspx";
+
+  const lonnsskjemaLenke: string =
+    "https://navno.sharepoint.com/sites/intranett-lonnsadministrasjon/SitePages/L%C3%B8nnsskjema.aspx";
+
   return (
     <>
       <PageBanner text="Medarbeider slutter" />
@@ -169,6 +176,20 @@ export function TerminateResourcePage() {
                 </BodyLong>
                 <SluttDatoPicker />
                 <ApiResponseError error={avvikleRessursMutation.error} />
+                {ressurs.sektor === Sektor.NAV_KOMMUNAL && (
+                  <Alert variant="info">
+                    Du er i ferd med å sette sluttdato på en kommunal
+                    medarbeider. Hvis medarbeideren er{" "}
+                    <Link to={nomSharepointLenke}>
+                      leder eller har utvidede tilganger i Unit4
+                    </Link>
+                    , må du også melde inn{" "}
+                    <Link to={lonnsskjemaLenke}>
+                      via eksisterende rutiner til Unit4
+                    </Link>{" "}
+                    at vedkommende slutter.
+                  </Alert>
+                )}
                 <HStack gap="8" justify="end">
                   <Button
                     onClick={() =>
