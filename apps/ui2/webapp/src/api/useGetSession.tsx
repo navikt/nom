@@ -21,3 +21,7 @@ export function useHasAdminAccess() {
   const session = useGetSession();
   return !!session.data?.roles.includes(UserRoles.ROLE_ADMIN);
 }
+
+export function useHasAdminOrWriteAccess() {
+  return useHasAdminAccess() || useHasAdminAccess();
+}
