@@ -17,12 +17,14 @@ on:
     paths:
       - 'apps/admin-web/**'
       - 'apps/ui2/**'
+      - '.github/workflows/codeql-scan_javascript-typescript.yaml'
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ "main" ]
     paths:
       - 'apps/admin-web/**'
       - 'apps/ui2/**'
+      - '.github/workflows/codeql-scan_javascript-typescript.yaml'
   schedule:
     - cron: '25 3 * * *'
 
