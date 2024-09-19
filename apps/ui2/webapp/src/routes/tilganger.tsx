@@ -126,7 +126,8 @@ function TilgangerPage() {
     <>
       <PageBanner text="Redigeringstilgang" />
       <ContentWrapper>
-        {orgenheterLedetAvMegOgDelegerbart.length > 0 ? (
+        {orgenheterLedetAvMegOgDelegerbart.length > 0 ||
+        delegertTilMeg.length > 0 ? (
           <HarTilgangState />
         ) : (
           <HarIkkeTilgangTilInnhold />
