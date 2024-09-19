@@ -225,27 +225,30 @@ public class OrgtilknytningRestService {
     private void validateOppdaterOrgtilknytningerForRessursRequest(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
                                                                    List<IOrgenhet> alleUnderliggendeEnheterTilLeder,
                                                                    boolean isLeder) {
+        log.debug("Validerer at leder kan oppdatere/legge til OT for ressurs");
         validateLederKanOppdatereOrgtilknytninger(oppdaterOrgtilknytningerForRessursRequest, alleUnderliggendeEnheterTilLeder, isLeder);
+        log.debug("Validerer at OT ikke er eldre enn to måneder");
         validateEndreOrgtilknytningUnderToMaaneder(oppdaterOrgtilknytningerForRessursRequest);
+        log.debug("Ferdig validering av OT redigering er under to måneder");
         validateChronologicalDates(oppdaterOrgtilknytningerForRessursRequest);
         validateNoOverlappingDagligeOppfolginger(oppdaterOrgtilknytningerForRessursRequest);
     }
 
     private void validateEndreOrgtilknytningUnderToMaaneder(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
-
+        log.debug("Validerer at nyeOrgtilknytninger ikke er eldre enn to måneder");
         oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(orgenhet -> {
             if (orgenhet.gyldigTom().isBefore(LocalDate.now().minusMonths(2))) {
                 throw new AccessDeniedException("Det er ikke lov å legge til en orgtilknytning som er eldre enn to måneder gammelt, gjelder endring for orgenhet " + orgenhet.orgEnhetId());
             }
         });
 
-        oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(orgtilknytningRequest -> {
-            var orgtilknytningState = orgtilknytningStateRepository.findByFid(orgtilknytningRequest.fid()).get();
+        log.debug("Validerer at eksisterendeOrgtilknytninger ikke er eldre enn to måneder");
+        oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(orgtilknytningRequest -> orgtilknytningStateRepository.findByFid(orgtilknytningRequest.fid()).ifPresent(orgtilknytningState -> {
             if (compareDateForExistingOrgtilknytningWithStateOrgtilknytning(orgtilknytningRequest, orgtilknytningState)) return;
             if (orgtilknytningState.gyldigTom().isPresent() && orgtilknytningState.gyldigTom().get().isBefore(LocalDate.now().minusMonths(2))) {
                 throw new AccessDeniedException("Det er ikke lov å endre en orgtilknytning som er eldre enn to måneder gammelt, gjelder endring for orgenhet " + orgtilknytningState.orgEnhetId());
             }
-        });
+        }));
     }
 
     private boolean compareDateForExistingOrgtilknytningWithStateOrgtilknytning(
@@ -272,12 +275,13 @@ public class OrgtilknytningRestService {
                 boolean hasAccessToAddOrgtilknytning = oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger()
                     .stream()
                     .anyMatch(leggTilOrgtilknytningRequest -> orgenhetId.contains(leggTilOrgtilknytningRequest.orgEnhetId()));
-
+                log.debug("Sjekket om leder har tilgang til orgenhet i nyeOrgtilknytninger: {}", hasAccessToAddOrgtilknytning);
                 if (!hasAccessToAddOrgtilknytning) {
                     hasAccessToAddOrgtilknytning = oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger()
                         .stream()
                         .anyMatch(endreOrgtilknytningRequest -> fid.contains(endreOrgtilknytningRequest.fid()));
                 }
+                log.debug("Sjekket om leder har tilgang til orgenhet i eksisterendeOrgtilknytninger: {}", hasAccessToAddOrgtilknytning);
 
                 if (!hasAccessToAddOrgtilknytning) {
                     throw new AccessDeniedException("Leder har lagt til og/eller prøvd å modifisere en orgtilknytning for en orgenhet som de ikke har tilgang til");
@@ -290,6 +294,7 @@ public class OrgtilknytningRestService {
                         }
                     })
                 );
+                log.debug("Sjekket ferdig om leder har tilgang til orgenhet i eksisterendeOrgtilknytninger");
             }
         }
     }
