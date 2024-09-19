@@ -66,6 +66,10 @@ class KafkaStreamProcessor {
                 return null;
             }
 
+            var tilknytningstypeNode = Optional.ofNullable(eventStateAggregate.findValue("orgtilknytningType"))
+                .or(() -> Optional.ofNullable(eventStateAggregate.findValue("tilknytningtype")));
+            var tilknytningType = tilknytningstypeNode.map(jsonNode -> jsonNode.isNull() ? null : Tilknytningtype.valueOf(jsonNode.asText())).orElse(null);
+
             return new OrgtilknytningState(
                 fid,
                 eventStateAggregate.get("navident").asText(),
@@ -73,8 +77,7 @@ class KafkaStreamProcessor {
                 Boolean.parseBoolean(eventStateAggregate.hasNonNull("dagligOppfolging") ? eventStateAggregate.get("dagligOppfolging").asText() : null),
                 LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
                 Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null),
-                Optional.ofNullable(eventStateAggregate.findValue("orgtilknytningType")).map(s -> Tilknytningtype.valueOf(s.asText()))
-                    .or(() -> Optional.ofNullable(eventStateAggregate.findValue("tilknytningtype")).map(s -> Tilknytningtype.valueOf(s.asText())))
+                Optional.ofNullable(tilknytningType)
             );
         } catch (Exception e) {
             log.error("Error mapping to OrgtilknytningState", e);
