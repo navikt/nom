@@ -100,7 +100,7 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
               size="small"
               variant="alt1"
             >
-              Opprettet/endret i NOM
+              Opprettet eller endret i NOM
             </Tag>
           )}
         </>
