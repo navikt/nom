@@ -2,15 +2,20 @@ package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
+import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.groupingBy;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.etter;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.foer;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident.ErrorType.NAVIDENT_FINNES_IKKE;
 
 @Component
@@ -68,12 +73,122 @@ public class NyeRessursStillingStrukturerer {
                 )
             );
 
-        // TODO: Sjekke for Ressursens SluttDato - ingen StillingPeriode utover dette
-        // TODO: Sanity sjekk av StillingPerioder - ikke negative etc
-        // TODO: Sjekk mismatch mellom aktiv stilling og enhet på ressurs i DvhRessursStillinger
-        // TODO: Sjekk DvhRessursStillinger utover Ressursens periode
+        sjekkKonsistensPaaResultat(behandletResultat);
 
         return behandletResultat;
+    }
+
+    private void sjekkKonsistensPaaResultat(StrukturerteStillingPerioderForNavident sspForNavident) {
+        sjekkStillingPerioderMotRessursensPeriode(sspForNavident);
+        sjekkStillingPerioderMotOrgenhetensPeriode(sspForNavident);
+        sjekkOverlappendeDOLPerioder(sspForNavident);
+        sjekkKonsistensPaaStillingperioder(sspForNavident);
+        sjekkMismatchPaaAktivDOLStillingOgOrgEnhetPaaRessurs(sspForNavident);
+    }
+
+    private void sjekkStillingPerioderMotRessursensPeriode(StrukturerteStillingPerioderForNavident sspForNavident) {
+        var ressurs = ressursStateRepository.findByNavident(sspForNavident.navident()).orElseThrow();
+        var ressursStart = ressurs.startdato().orElse(LocalDate.of(1900, 1,1));
+        var ressursSlutt = ressurs.sluttdato().orElse(null);
+        sspForNavident.stillingPerioder().forEach(sp -> {
+            if (foer(sp.gyldigFom(), ressursStart) || etter(sp.gyldigTom(), ressursSlutt)) {
+                sspForNavident.addError(
+                    StrukturerteStillingPerioderForNavident.ErrorType.STILLINGPERIODE_ER_UTENFOR_RESSURSENS_PERIODE,
+                    """
+                    Etter behandling av DvhStillinger til behandlede StillingPerioder:
+                    StillingsPeriode for Navident %s med gyldighetsperiode [%s - %s] går utover ressursens gyldighetsperiode [%s - %s].
+                    """.formatted(
+                        sspForNavident.navident(), sp.gyldigFom(), sp.gyldigTom(), ressursStart, ressursSlutt
+                    ),
+                    sp
+                );
+            }
+        });
+    }
+
+    private void sjekkStillingPerioderMotOrgenhetensPeriode(StrukturerteStillingPerioderForNavident sspForNavident) {
+        sspForNavident.stillingPerioder().forEach(sp -> {
+            if (foer(sp.gyldigFom(), sp.orgenhet().getGyldigFom()) || etter(sp.gyldigTom(), sp.orgenhet().getGyldigTom().orElse(null))) {
+                sspForNavident.addError(
+                    StrukturerteStillingPerioderForNavident.ErrorType.STILLINGPERIODE_ER_UTENFOR_ORGENHET_PERIODE,
+                    """
+                    Etter behandling av DvhStillinger til behandlede StillingPerioder:
+                    StillingsPeriode for Navident %s med gyldighetsperiode [%s - %s] går utover orgenhetens gyldighetsperiode [%s - %s].
+                    """.formatted(
+                        sspForNavident.navident(), sp.gyldigFom(), sp.gyldigTom(), sp.orgenhet().getGyldigFom(), sp.orgenhet().getGyldigTom().get()
+                    ),
+                    sp
+                );
+            }
+        });
+    }
+
+    private void sjekkOverlappendeDOLPerioder(StrukturerteStillingPerioderForNavident sspForNavident) {
+        sspForNavident.stillingPerioder().stream()
+            .filter(StillingPeriode::erDagligOppfolging)
+            .forEach(sp ->
+                sspForNavident.stillingPerioder().stream()
+                    .filter(StillingPeriode::erDagligOppfolging)
+                    .filter(sp2 -> sp != sp2)
+                    .filter(sp2 -> PeriodeUtil.overlapsInterval(sp, sp2))
+                    .forEach(sp2 ->
+                            sspForNavident.addError(
+                                StrukturerteStillingPerioderForNavident.ErrorType.STILLINGPERIODER_HAR_OVERLAPPENDE_DOL_PERIODER,
+                                """
+                                Etter behandling av DvhStillinger til behandlede StillingPerioder:
+                                DOL StillingsPeriode for Navident %s med gyldighetsperiode [%s - %s] for enhet (%s %s) 
+                                overlapper med en annen DOL stillingsperiode med gyldighetsperiode [%s - %s] for enhet (%s %s).
+                                """.formatted(
+                                    sspForNavident.navident(),
+                                    sp.gyldigFom(), sp.gyldigTom(), sp.orgenhet().getId(), sp.orgenhet().getNavn(),
+                                    sp2.gyldigFom(), sp2.gyldigTom(), sp2.orgenhet().getId(), sp2.orgenhet().getNavn()
+                                ),
+                                sp
+                            )
+                    )
+           );
+    }
+
+    private void sjekkKonsistensPaaStillingperioder(StrukturerteStillingPerioderForNavident sspForNavident) {
+        //Negative perioder
+        sspForNavident.stillingPerioder().forEach(sp -> {
+            if (foer(sp.gyldigFom(), sp.gyldigTom())) {
+                sspForNavident.addError(
+                    StrukturerteStillingPerioderForNavident.ErrorType.STILLINGPERIODE_HAR_NEGATIV_PERIODE,
+                    """
+                    Etter behandling av DvhStillinger til behandlede StillingPerioder:
+                    StillingsPeriode for Navident %s med gyldighetsperiode [%s - %s] er negativ.
+                    Denne skulle vært fjernet i behandlingen - sjekk for kodefeil...
+                    """.formatted(
+                        sspForNavident.navident(), sp.gyldigFom(), sp.gyldigTom()
+                    ),
+                    sp
+                );
+            }
+        });
+    }
+
+    private void sjekkMismatchPaaAktivDOLStillingOgOrgEnhetPaaRessurs(StrukturerteStillingPerioderForNavident sspForNavident) {
+        sspForNavident.stillingPerioder().stream()
+            .filter(StillingPeriode::isCurrentPeriod)
+            .filter(StillingPeriode::erDagligOppfolging)
+            .forEach(sp -> {
+                if (!sp.orgenhet().getAgressoId().startsWith(sp.stilling().ressursAgressoId().orElse(""))) {
+                    sspForNavident.addError(
+                        StrukturerteStillingPerioderForNavident.ErrorType.AKTIV_DOL_MATCHER_IKKE_ORGENHET_PAA_RESSURS,
+                        """
+                        Etter behandling av DvhStillinger til behandlede StillingPerioder:
+                        Aktiv DOL stillingsperiode for Navident %s med gyldighetsperiode [%s - %s] for enhet (%s %s) med agressoid [%s]
+                        matcher ikke 'Orgenhet på ressurs' [%s].
+                        """.formatted(
+                            sspForNavident.navident(), sp.gyldigFom(), sp.gyldigTom(),
+                            sp.orgenhet().getId(), sp.orgenhet().getNavn(), sp.orgenhet().getAgressoId(),
+                            sp.stilling().ressursAgressoId().orElse("")
+                        ),
+                        sp
+                    );
+                }
+        });
     }
 
     protected boolean finnesNavidentINOM(StrukturerteStillingPerioderForNavident sspForNavident) {
