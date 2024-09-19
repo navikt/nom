@@ -14,27 +14,9 @@ name: "CodeQL"
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'apps/admin/**'
-      - 'apps/api/**'
-      - 'apps/nav-ident/**'
-      - 'apps/nom-remedy-integrasjon/**'
-      - 'apps/nom-ressurser/**'
-      - 'apps/proxy/**'
-      - 'apps/streams/**'
-      - 'apps/unit4/**'
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ "main" ]
-    paths:
-      - 'apps/admin/**'
-      - 'apps/api/**'
-      - 'apps/nav-ident/**'
-      - 'apps/nom-remedy-integrasjon/**'
-      - 'apps/nom-ressurser/**'
-      - 'apps/proxy/**'
-      - 'apps/streams/**'
-      - 'apps/unit4/**'
   schedule:
     - cron: '25 3 * * *'
 
