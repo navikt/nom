@@ -35,6 +35,8 @@ public class KorrigerDuplikatEnheter {
     private final OrgenhetService orgenhetService;
     private final OrgEnhetCommandService orgEnhetCommandService;
 
+    private final int test = 0;
+
     public KorrigerDuplikatEnheter(OrgenhetService orgenhetService, OrgEnhetCommandService orgEnhetCommandService) {
         this.orgenhetService = orgenhetService;
         this.orgEnhetCommandService = orgEnhetCommandService;
