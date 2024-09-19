@@ -14,9 +14,29 @@ name: "CodeQL"
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'apps/admin/**'
+      - 'apps/api/**'
+      - 'apps/nav-ident/**'
+      - 'apps/nom-remedy-integrasjon/**'
+      - 'apps/nom-ressurser/**'
+      - 'apps/proxy/**'
+      - 'apps/streams/**'
+      - 'apps/unit4/**'
+      - '.github/workflows/codeql-scan_java-kotlin.yaml'
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ "main" ]
+    paths:
+      - 'apps/admin/**'
+      - 'apps/api/**'
+      - 'apps/nav-ident/**'
+      - 'apps/nom-remedy-integrasjon/**'
+      - 'apps/nom-ressurser/**'
+      - 'apps/proxy/**'
+      - 'apps/streams/**'
+      - 'apps/unit4/**'
+      - '.github/workflows/codeql-scan_java-kotlin.yaml'
   schedule:
     - cron: '25 3 * * *'
 
@@ -38,7 +58,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'java-kotlin',  'javascript-typescript' ]
+        language: [ 'java-kotlin' ]
         # CodeQL supports [ 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift' ]
         # Use only 'java-kotlin' to analyze code written in Java, Kotlin or both
         # Use only 'javascript-typescript' to analyze code written in JavaScript, TypeScript or both
