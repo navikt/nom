@@ -23,5 +23,5 @@ export function useHasAdminAccess() {
 }
 
 export function useHasAdminOrWriteAccess() {
-  return useHasAdminAccess() || useHasAdminAccess();
+  return useHasAdminAccess() || useHasWriteAccess();
 }
