@@ -2,6 +2,7 @@ import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Buildings3Icon, PlusCircleIcon } from "@navikt/aksel-icons";
 import {
+  BodyShort,
   Button,
   DatePicker,
   Detail,
@@ -14,7 +15,7 @@ import {
   VStack,
 } from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { isSameDay, subDays } from "date-fns";
 import sortBy from "lodash/sortBy";
@@ -168,7 +169,8 @@ function DelegertRolleCard({ tilgang }: { tilgang: LederTilgangState }) {
         <b>{formatDisplayDate(tilgang.gyldigTom)}</b>
       </HStack>
       <span>
-        Redigeringstilgangen gjelder for alle underliggende organisasjonsenheter
+        Redigeringstilgangen gjelder for alle underliggende
+        organisasjonsenheter.
       </span>
     </VStack>
   );
@@ -261,6 +263,9 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     setEdit(false);
   };
 
+  const brukerveiledningLenke: string =
+    "https://navno.sharepoint.com/sites/intranett-it/SitePages/Brukerveiledninger-Mine-Tilganger.aspx";
+
   return (
     <FormProvider {...methods}>
       <VStack
@@ -324,10 +329,19 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               {edit ? <AddTilgangRow /> : undefined}
             </Table.Body>
           </Table>
-          <span>
-            Redigeringstilgangen gjelder for alle underliggende
-            organisasjonsenheter
-          </span>
+          <HStack gap="2">
+            <BodyShort>
+              Redigeringstilgangen gjelder for alle underliggende
+              organisasjonsenheter.
+            </BodyShort>
+            <BodyShort>
+              I tillegg til å delegere redigeringstilgang her i NOM, må
+              vedkommende også få tilganger i Mine Tilganger. Brukerveiledning
+              for Mine Tilganger finner du{" "}
+              <Link to={brukerveiledningLenke}>her</Link>. Du kan søke på NOM
+              for å finne riktig tilgang å delegere.
+            </BodyShort>
+          </HStack>
         </VStack>
 
         <ApiResponseError error={error} />
