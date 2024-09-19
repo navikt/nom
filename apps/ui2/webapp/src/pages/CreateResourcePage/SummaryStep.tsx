@@ -53,6 +53,9 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
   const sharepointLenke: string =
     "https://navno.sharepoint.com/sites/intranett-organisasjon/SitePages/Organisasjonsmaster-(NOM).aspx";
 
+  const identskjemaLenke: string =
+    "https://navno.sharepoint.com/:b:/r/sites/intranett-hr/Delte%20dokumenter/HR-skjemaer/Identbekreftelses%20skjema.pdf?csf=1&web=1&e=E4RvBs";
+
   // Inntil vi vet bedre hvem som trenger å se denne teksten (f.eks antagelser fra hierarkiet) så skrur vi den av for nå. For majoriteten vil den heller være forvirrende
   const showTeamcatInstructions = false;
 
@@ -94,6 +97,13 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
           <BodyShort>
             E-postadresse opprettes automatisk og blir synlig på medarbeiderens
             profilside når den er klar.
+          </BodyShort>
+          <BodyShort>
+            Alle nye medarbeidere må signere identskjema.{" "}
+            <Link to={identskjemaLenke}>
+              Gå til skjemaet for å laste det ned
+            </Link>
+            .
           </BodyShort>
           {showTeamcatInstructions && (
             <BodyShort>
