@@ -20,6 +20,7 @@ import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,6 +30,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
@@ -48,7 +50,6 @@ import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static no.nav.nom.apps.api.common.TestData.ressursState;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -1094,9 +1095,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @Test
     @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan ikke redigere orgtilknytning som er over 2 maaneder gammel for ressurs")
     void test_rediger_orgtilknytning_som_er_over_to_mnd_gammel() {
+        OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(true);
         when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
-        doReturn(Optional.of(orgEnhet())).when(orgenhetService).getByFid(any());
 
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
@@ -1106,10 +1107,12 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .gyldigTom(Optional.of(LocalDate.now().minusMonths(2).minusDays(1)))
             .build();
 
+
         saveOrgtilknytninger(List.of(existingOrgtilknytning));
+        when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
 
         var newStartdato = existingOrgtilknytning.gyldigFom().minusMonths(24);
         LocalDate newSluttdato = existingOrgtilknytning.gyldigTom().get().minusMonths(3).minusDays(1);

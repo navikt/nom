@@ -122,6 +122,19 @@ public class AuthorizedNavident {
         return orgenhetIder.stream().anyMatch(orgenhetId -> alleEnheterIHierarkiFra(orgenhetId).contains(opprettesIOrgenhetId));
     }
 
+    public List<IOrgenhet> orgenheterLederKanRedigere(String navident) {
+        Set<String> orgenhetIder = new HashSet<>();
+        synchronized (this) {
+            var orgenheter = lederForOrgenhetSomKanRedigere.get(navident);
+            if (orgenheter != null) {
+                orgenhetIder.addAll(orgenheter);
+            }
+        }
+
+        orgenhetIder.addAll(delegertLederStateRepository.aktiveDelegeringerForOrgenheterTilNavident(navident));
+        return orgenhetService.getByIdBulk(orgenhetIder.stream().toList()).values().stream().toList();
+    }
+
 
     public boolean addLederTilgangForOrgenhet(String leder, LederTilgangForOrgenhetRequest request) {
         sjekkParametereForAddLederTilgang(leder, request);

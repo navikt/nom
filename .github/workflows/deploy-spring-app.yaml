@@ -102,6 +102,7 @@ jobs:
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
     outputs:
       image: ${{ steps.docker-push.outputs.image }}
+      telemetry: ${{ steps.docker-push.outputs.telemetry }}
 
   deploy-dev:
     name: Deploy to NAIS ${{ inputs.dev-cluster }}
@@ -117,12 +118,14 @@ jobs:
           TIMEOUT: ${{ inputs.deploy-timeout }}
           VAR: env=development
           VARS: ${{ inputs.unleash-vars-file-path }}
+          TELEMETRY: ${{ needs.build-app-docker.outputs.telemetry }}
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: ${{ inputs.dev-cluster }}
           RESOURCE: ${{ inputs.nais-config-file-path-dev }}
           TIMEOUT: ${{ inputs.deploy-timeout }}
           VAR: image=${{needs.build-app-docker.outputs.image}}${{ inputs.additional-nais-vars-dev }}
+          TELEMETRY: ${{ needs.build-app-docker.outputs.telemetry }}
 
   deploy-prod:
     name: Deploy to NAIS ${{ inputs.prod-cluster }}
@@ -139,9 +142,11 @@ jobs:
           TIMEOUT: ${{ inputs.deploy-timeout }}
           VAR: env=production
           VARS: ${{ inputs.unleash-vars-file-path }}
+          TELEMETRY: ${{ needs.build-app-docker.outputs.telemetry }}
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: ${{ inputs.prod-cluster }}
           RESOURCE: ${{ inputs.nais-config-file-path-prod }}
           TIMEOUT: ${{ inputs.deploy-timeout }}
           VAR: image=${{needs.build-app-docker.outputs.image}}${{ inputs.additional-nais-vars-prod }}
+          TELEMETRY: ${{ needs.build-app-docker.outputs.telemetry }}
