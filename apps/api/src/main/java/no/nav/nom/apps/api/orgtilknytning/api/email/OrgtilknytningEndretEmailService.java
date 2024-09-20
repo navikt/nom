@@ -21,9 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -55,7 +53,11 @@ public class OrgtilknytningEndretEmailService {
     }
 
     public void addToOrgtilknytningEndringerQueue(String navident, OTEndretData otEndretData) {
-        orgtilknytningEndringerQueueByNavident.get(navident).add(otEndretData);
+        if(!orgtilknytningEndringerQueueByNavident.containsKey(navident)){
+            orgtilknytningEndringerQueueByNavident.put(navident, new ArrayList<>(Collections.singletonList(otEndretData)));
+        } else {
+            orgtilknytningEndringerQueueByNavident.get(navident).add(otEndretData);
+        }
     }
 
     public void removeFromOrgtilknytningEndringerQueue(String navident) {
