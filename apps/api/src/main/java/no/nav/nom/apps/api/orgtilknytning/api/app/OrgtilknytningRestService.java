@@ -57,6 +57,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 import static no.nav.nom.apps.api.common.DateUtils.isPerioderOverlapping;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodsOverlapping;
@@ -291,13 +292,13 @@ public class OrgtilknytningRestService {
                 log.info("Sjekket om leder har tilgang til orgenhet i eksisterendeOrgtilknytninger: {}", hasAccessToAddOrgtilknytning);
 
                 if (!hasAccessToAddOrgtilknytning) {
-                    throw new AccessDeniedException("Leder har lagt til og/eller prøvd å modifisere en orgtilknytning for en orgenhet som de ikke har tilgang til");
+                    throw new AccessDeniedException("Du har lagt til og/eller prøvd å endre en organisasjonstilknytning for en orgenhet som du ikke har tilgang til.");
                 }
             } else {
                 oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(orgtilknytningRequest -> orgtilknytningStateRepository.findByFid(orgtilknytningRequest.fid())
                     .ifPresent(orgtilknytningState -> {
                         if (!fid.contains(orgtilknytningState.fid())) {
-                            throw new AccessDeniedException("Leder har modifsert orgtilknytning for en orgenhet som de ikke har tilgang til: " + orgtilknytningState.fid());
+                            throw new AccessDeniedException("Du er ikke leder for denne medarbeideren og kan derfor ikke endre personens orgtilknytning.");
                         }
                     })
                 );
@@ -404,14 +405,18 @@ public class OrgtilknytningRestService {
             );
         }
 
-        if (!Optional.ofNullable(endreOrgtilknytningRequest.tilknytningtype()).equals(orgtilknytningStateBeforeChanges.orgtilknytningType())) {
-            orgtilknytningCommandService.endreTilknytningtype(
-                EndreTilknytningtypeCommand.builder()
-                    .fid(endreOrgtilknytningRequest.fid())
-                    .tilknytningtype(Optional.ofNullable(endreOrgtilknytningRequest.tilknytningtype()))
-                    .inputMetadata(inputMetadata)
-                    .build()
-            );
+        if (!Optional.ofNullable(endreOrgtilknytningRequest.tilknytningtype()).equals(orgtilknytningStateBeforeChanges.orgtilknytningType())){
+            if (!isNull(endreOrgtilknytningRequest.tilknytningtype())) {
+                orgtilknytningCommandService.endreTilknytningtype(
+                    EndreTilknytningtypeCommand.builder()
+                        .fid(endreOrgtilknytningRequest.fid())
+                        .tilknytningtype(Optional.of(endreOrgtilknytningRequest.tilknytningtype()))
+                        .inputMetadata(inputMetadata)
+                        .build()
+                );
+            } else {
+                log.error("Innsendt tilknytningtype er null, men vi hadde en eksisterende verdi");
+            }
         }
 
         //update OTendretData for e-post varsel
@@ -491,18 +496,6 @@ public class OrgtilknytningRestService {
                     .build()
             );
         }
-
-        //update OTendretData for e-post varsel
-        orgtilknytningEndretEmailService.addToOrgtilknytningEndringerQueue(
-            navident,
-            OTEndretData.builder()
-                .fid(opprettetOrgtilknytningFid)
-                .navident(navident)
-                .changedBy(SecurityUtil.getAuthenticatedAzpName()+"(" + SecurityUtil.getAuthenticatedNavIdent() + ")")
-                .eventType(OTEndretData.OTEndretDataType.OT_NY)
-                .timestamp(LocalDateTime.now().toString())
-                .build()
-        );
     }
 
     private void oppdaterRessursSluttdato(

@@ -233,8 +233,63 @@ class RessursStateRepositoryFake implements RessursStateRepository {
     }
 
     @Override
-    public int count() {
+    public long count() {
         return ressursByFid.size();
+    }
+
+    @Override
+    public long countEksterne() {
+        return 0;
+    }
+
+    @Override
+    public long countKommunale() {
+        return 0;
+    }
+
+    @Override
+    public long countStatlige() {
+        return 0;
+    }
+
+    @Override
+    public long countIkkeAvsluttede() {
+        return 0;
+    }
+
+    @Override
+    public long countIkkeAvsluttedeEksterne() {
+        return 0;
+    }
+
+    @Override
+    public long countIkkeAvsluttedeKommunale() {
+        return 0;
+    }
+
+    @Override
+    public long countIkkeAvsluttedeStatlige() {
+        return 0;
+    }
+
+    @Override
+    public long countFremtidige() {
+        return 0;
+    }
+
+    @Override
+    public long countFremtidigeEksterne() {
+        return 0;
+    }
+
+    @Override
+    public long countFremtidigeKommunale() {
+        return 0;
+    }
+
+    @Override
+    public long countFremtidigeStatlige() {
+        return 0;
     }
 
     @Override
