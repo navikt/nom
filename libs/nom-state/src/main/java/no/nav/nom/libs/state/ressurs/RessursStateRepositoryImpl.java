@@ -11,14 +11,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 public class RessursStateRepositoryImpl implements RessursStateRepository {
-    private final AtomicInteger counter = new AtomicInteger(0);
     private final Map<String, RessursState> ressursByFid = new ConcurrentHashMap<>();
     private final Map<String, RessursState> ressursByPersonident = new ConcurrentHashMap<>();
     private final Map<String, RessursState> ressursByNavident = new ConcurrentHashMap<>();
@@ -58,11 +55,6 @@ public class RessursStateRepositoryImpl implements RessursStateRepository {
     @Override
     public Collection<RessursState> getAllByFid() {
         return ressursByFid.values();
-    }
-
-    @Override
-    public int count() {
-        return ressursByFid.size();
     }
 
     @Override
@@ -165,5 +157,67 @@ public class RessursStateRepositoryImpl implements RessursStateRepository {
 
             samePersonidentOtherFid.ifPresent(ressursState -> ressursByPersonident.put(ressursState.personident(), ressursState));
         }
+    }
+
+    // -- METRICS --
+
+    @Override
+    public long count() {
+        return ressursByFid.size();
+    }
+
+    @Override
+    public long countEksterne() {
+        return getAll().stream().filter(RessursState::isEkstern).count();
+    }
+
+    @Override
+    public long countKommunale() {
+        return getAll().stream().filter(RessursState::isKommunal).count();
+    }
+
+    @Override
+    public long countStatlige() {
+        return getAll().stream().filter(RessursState::isStatlig).count();
+    }
+
+    @Override
+    public long countIkkeAvsluttede() {
+        return getAll().stream().filter( r -> r.sluttdato().orElse(LocalDate.MAX).isAfter(LocalDate.now().plusDays(1))).count();
+    }
+
+    @Override
+    public long countIkkeAvsluttedeEksterne() {
+        return getAll().stream().filter(RessursState::isEkstern).filter( r -> r.sluttdato().orElse(LocalDate.MAX).isAfter(LocalDate.now().plusDays(1))).count();
+    }
+
+    @Override
+    public long countIkkeAvsluttedeKommunale() {
+        return getAll().stream().filter(RessursState::isKommunal).filter( r -> r.sluttdato().orElse(LocalDate.MAX).isAfter(LocalDate.now().plusDays(1))).count();
+    }
+
+    @Override
+    public long countIkkeAvsluttedeStatlige() {
+        return getAll().stream().filter(RessursState::isStatlig).filter( r -> r.sluttdato().orElse(LocalDate.MAX).isAfter(LocalDate.now().plusDays(1))).count();
+    }
+
+    @Override
+    public long countFremtidige() {
+        return getAll().stream().filter( r -> r.startdato().orElse(LocalDate.MIN).isAfter(LocalDate.now())).count();
+    }
+
+    @Override
+    public long countFremtidigeEksterne() {
+        return getAll().stream().filter(RessursState::isEkstern).filter( r -> r.startdato().orElse(LocalDate.MIN).isAfter(LocalDate.now())).count();
+    }
+
+    @Override
+    public long countFremtidigeKommunale() {
+        return getAll().stream().filter(RessursState::isKommunal).filter( r -> r.startdato().orElse(LocalDate.MIN).isAfter(LocalDate.now())).count();
+    }
+
+    @Override
+    public long countFremtidigeStatlige() {
+        return getAll().stream().filter(RessursState::isStatlig).filter( r -> r.startdato().orElse(LocalDate.MIN).isAfter(LocalDate.now())).count();
     }
 }

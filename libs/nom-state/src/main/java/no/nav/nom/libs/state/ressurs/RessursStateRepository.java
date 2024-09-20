@@ -23,8 +23,6 @@ public interface RessursStateRepository {
 
     Collection<RessursState> getAllByFid();
 
-    int count();
-
     Map<String, RessursState> findByPersonidentBulk(List<String> personIdenter);
 
     Map<String, RessursState> findByNavidentBulk(List<String> navIdenter);
@@ -38,4 +36,28 @@ public interface RessursStateRepository {
     void clear();
 
     void remove(String fid);
+
+    long count();
+
+    long countEksterne();
+
+    long countKommunale();
+
+    long countStatlige();
+
+    long countIkkeAvsluttede();
+
+    long countIkkeAvsluttedeEksterne();
+
+    long countIkkeAvsluttedeKommunale();
+
+    long countIkkeAvsluttedeStatlige();
+
+    long countFremtidige();
+
+    long countFremtidigeEksterne();
+
+    long countFremtidigeKommunale();
+
+    long countFremtidigeStatlige();
 }
