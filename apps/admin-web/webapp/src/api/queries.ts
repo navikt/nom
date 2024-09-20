@@ -29,7 +29,15 @@ export const searchSchema = z.object({
   fromOffset: z.number().optional().catch(0),
 });
 
+export const searchSchemaWithNavident = z.object({
+  navident: z.string().optional(),
+  // eslint-disable-next-line unicorn/prefer-top-level-await
+  fromOffset: z.number().optional().catch(0),
+});
+
 export type searchType = z.infer<typeof searchSchema>;
+
+export type searchTypeWithNavident = z.infer<typeof searchSchemaWithNavident>;
 
 export const CACHE_FOR = {
   aMinute: 1000 * 60,
@@ -85,21 +93,18 @@ export function getOrgtilknytningEventsOptions(search: searchType) {
   });
 }
 
-export function getNomMasteredOptions() {
+export function getNomMasteredStateOptions(
+  navident: string | undefined,
+  offset: number | undefined,
+) {
   return queryOptions({
-    queryKey: ["STATE", "NOM-MASTERED"],
+    queryKey: ["STATE", "NOM-MASTERED-STATE", navident, offset],
     queryFn: async () =>
-      (await ky.get(`${API_BASE_URL}/states/nom-mastered`)).json<string[]>(),
-  });
-}
-
-export function getNomMasteredStateOptions() {
-  return queryOptions({
-    queryKey: ["STATE", "NOM-MASTERED-STATE"],
-    queryFn: async () =>
-      (await ky.get(`${API_BASE_URL}/states/nom-mastered-state`)).json<
-        MasteredRessursDTO[]
-      >(),
+      (
+        await ky.get(
+          `${API_BASE_URL}/states/nom-mastered-state?${queryString.stringify({ navident, offset }, { skipNull: true })}`,
+        )
+      ).json<MasteredRessursDTO[]>(),
   });
 }
 
