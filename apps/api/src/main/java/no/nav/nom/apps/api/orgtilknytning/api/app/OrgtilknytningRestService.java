@@ -4,6 +4,8 @@ import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgtilknytning.api.email.OTEndretData;
+import no.nav.nom.apps.api.orgtilknytning.api.email.OrgtilknytningEndretEmailService;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
@@ -42,6 +44,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -73,6 +76,8 @@ public class OrgtilknytningRestService {
     private final static Logger log = LoggerFactory.getLogger(OrgtilknytningRestService.class);
     private final AuthorizedNavident authorizedNavident;
 
+    private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
+
     public OrgtilknytningRestService(
         OrgtilknytningStateRepository orgtilknytningStateRepository,
         OrgtilknytningCommandService orgtilknytningCommandService,
@@ -80,7 +85,8 @@ public class OrgtilknytningRestService {
         RessursStateRepository ressursStateRepository,
         RemedyEnhetMapperService remedyEnhetMapperService,
         NomMastered nomMastered,
-        AuthorizedNavident authorizedNavident
+        AuthorizedNavident authorizedNavident,
+        OrgtilknytningEndretEmailService orgtilknytningEndretEmailService
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
@@ -90,6 +96,7 @@ public class OrgtilknytningRestService {
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.nomMastered = nomMastered;
         this.authorizedNavident = authorizedNavident;
+        this.orgtilknytningEndretEmailService = orgtilknytningEndretEmailService;
     }
 
     public List<OrgtilknytningState> getOrgtilknytninger(Optional<String> navident) {
@@ -407,6 +414,17 @@ public class OrgtilknytningRestService {
             );
         }
 
+        //update OTendretData for e-post varsel
+        orgtilknytningEndretEmailService.addToOrgtilknytningEndringerQueue(
+            orgtilknytningStateBeforeChanges.navident(),
+            OTEndretData.builder()
+                .fid(endreOrgtilknytningRequest.fid())
+                .navident(orgtilknytningStateBeforeChanges.navident())
+                .changedBy(SecurityUtil.getAuthenticatedAzpName()+"(" + SecurityUtil.getAuthenticatedNavIdent() + ")")
+                .eventType(OTEndretData.OTEndretDataType.OT_ENDRET)
+                .timestamp(LocalDateTime.now().toString())
+                .build()
+        );
     }
 
     // TODO: Det burde det muligens lages et nytt event 'OrgtilknytningOpprettetEventV2' som inneholder felter for erDagligOppfolging og orgtilknytningType
@@ -473,6 +491,18 @@ public class OrgtilknytningRestService {
                     .build()
             );
         }
+
+        //update OTendretData for e-post varsel
+        orgtilknytningEndretEmailService.addToOrgtilknytningEndringerQueue(
+            navident,
+            OTEndretData.builder()
+                .fid(opprettetOrgtilknytningFid)
+                .navident(navident)
+                .changedBy(SecurityUtil.getAuthenticatedAzpName()+"(" + SecurityUtil.getAuthenticatedNavIdent() + ")")
+                .eventType(OTEndretData.OTEndretDataType.OT_NY)
+                .timestamp(LocalDateTime.now().toString())
+                .build()
+        );
     }
 
     private void oppdaterRessursSluttdato(
@@ -638,6 +668,18 @@ public class OrgtilknytningRestService {
         }
 
         nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
+
+        //update OTendretData for e-post varsel
+        orgtilknytningEndretEmailService.addToOrgtilknytningEndringerQueue(
+            orgtilknytning.navident(),
+            OTEndretData.builder()
+                .fid(fid)
+                .navident(orgtilknytning.navident())
+                .changedBy(SecurityUtil.getAuthenticatedAzpName()+"(" + SecurityUtil.getAuthenticatedNavIdent() + ")")
+                .eventType(OTEndretData.OTEndretDataType.OT_ENDRET)
+                .timestamp(LocalDateTime.now().toString())
+                .build()
+        );
     }
 
     public void updateOrgtilknytningType(String fid, EndreTilknytningtypeRequest endreTilknytningtypeRequest) {
@@ -673,6 +715,18 @@ public class OrgtilknytningRestService {
         );
 
         nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
+
+        //update OTendretData for e-post varsel
+        orgtilknytningEndretEmailService.addToOrgtilknytningEndringerQueue(
+            orgtilknytning.navident(),
+            OTEndretData.builder()
+                .fid(fid)
+                .navident(orgtilknytning.navident())
+                .changedBy(SecurityUtil.getAuthenticatedAzpName()+"(" + SecurityUtil.getAuthenticatedNavIdent() + ")")
+                .eventType(OTEndretData.OTEndretDataType.OT_ENDRET)
+                .timestamp(LocalDateTime.now().toString())
+                .build()
+        );
     }
 
     public static void validateOrgtilknytningTypeSektorCombination(Tilknytningtype tilknytningtype, Sektor sektor) {
@@ -772,6 +826,18 @@ public class OrgtilknytningRestService {
         }
 
         nomMastered.markRessursAsMasteredInNom(leggTilOrgtilknytningRequest.navident());
+
+        //update OTendretData for e-post varsel
+        orgtilknytningEndretEmailService.addToOrgtilknytningEndringerQueue(
+            leggTilOrgtilknytningRequest.navident(),
+            OTEndretData.builder()
+                .fid(opprettetOrgTilknytningFid)
+                .navident(leggTilOrgtilknytningRequest.navident())
+                .changedBy(SecurityUtil.getAuthenticatedAzpName()+"(" + SecurityUtil.getAuthenticatedNavIdent() + ")")
+                .eventType(OTEndretData.OTEndretDataType.OT_NY)
+                .timestamp(LocalDateTime.now().toString())
+                .build()
+        );
     }
 
     private void validateLeggTilOrgilknytningRequest(LeggTilOrgtilknytningRequestOld leggTilOrgtilknytningRequest) {
