@@ -7,11 +7,13 @@ import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.email.EmailClient;
 import no.nav.nom.apps.api.clients.email.EmailMessage;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
 import no.nav.nom.contract.ad.AdRessurs;
-import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.slf4j.Logger;
@@ -36,6 +38,9 @@ public class OrgtilknytningEndretEmailService {
     private final AdClient adClient;
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
+    private final LederResolver lederResolver;
+    private final OrgEnhetStateRepository orgEnhetStateRepository;
+
 
     public OrgtilknytningEndretEmailService(
         EmailClient emailClient,
@@ -43,13 +48,17 @@ public class OrgtilknytningEndretEmailService {
         Configuration freemarkerConfig,
         AdClient adClient,
         RessursStateRepository ressursStateRepository,
-        OrgtilknytningStateRepository orgtilknytningStateRepository) {
+        OrgtilknytningStateRepository orgtilknytningStateRepository,
+         OrgEnhetStateRepository orgEnhetStateRepository,
+        LederResolver lederResolver) {
         this.emailClient = emailClient;
         this.unleash = unleash;
         this.freemarkerConfig = freemarkerConfig;
         this.adClient = adClient;
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
+        this.orgEnhetStateRepository = orgEnhetStateRepository;
+        this.lederResolver = lederResolver;
     }
 
     public void addToOrgtilknytningEndringerQueue(String navident, OTEndretData otEndretData) {
@@ -77,14 +86,15 @@ public class OrgtilknytningEndretEmailService {
                 // clear from the queue
                 removeFromOrgtilknytningEndringerQueue(navident);
             } else {
-                sendEmail(endretRessurs.get(), Set.of(navident), endringer);
+                sendEmail(endretRessurs.get(), endringer);
                 removeFromOrgtilknytningEndringerQueue(navident);
             }
         });
     }
 
-    private void sendEmail(RessursState endretRessurs, Set<String> recipientNavidents, List<OTEndretData> otEndringerData) {
+    private void sendEmail(RessursState endretRessurs, List<OTEndretData> otEndringerData) {
         try {
+            Set<String> recipientNavidents = getReceiptionNavidents(otEndringerData);
             var adRessurser = adClient.getAdRessurser(recipientNavidents);
             var recipientList = adRessurser.getRessurser().stream().map(AdRessurs::getEmail).toList();
 
@@ -143,6 +153,34 @@ public class OrgtilknytningEndretEmailService {
             }
         }
         return otEndringer.toString();
+    }
+
+    public Set<String> getReceiptionNavidents(List<OTEndretData> otEndringerData) {
+        Set<String> recipientNavidents = new HashSet<>();
+        for (OTEndretData event : otEndringerData) {
+            // add the changedBy person
+            recipientNavidents.add(event.changedBy());
+            var orgtilknytningState =  orgtilknytningStateRepository.findByFid(event.fid());
+            if(orgtilknytningState.isPresent()){
+                var orgenhetState = orgEnhetStateRepository.findById(orgtilknytningState.get().orgEnhetId());
+                if (orgenhetState.isPresent()) {
+                    var leader = lederResolver.leder(
+                        // populate at least agressoId, orgNiv, and navn
+                        OrgEnhet.builder()
+                            .id(orgenhetState.get().id())
+                            .navn(orgenhetState.get().navn())
+                            .agressoId(orgenhetState.get().agressoId().orElse(null))
+                            .orgNiv(orgenhetState.get().agressoOrgNivaa().orElse(null))
+                            .build()
+                    );
+                    if(!leader.isEmpty()) {
+                        // add the leader of the orgenhet
+                        recipientNavidents.add(leader.get(0).getRessurs().getNavIdent());
+                    }
+                }
+            }
+        }
+        return recipientNavidents;
     }
 
 }
