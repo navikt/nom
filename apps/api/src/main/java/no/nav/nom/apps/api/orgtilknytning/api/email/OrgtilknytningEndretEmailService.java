@@ -127,7 +127,7 @@ public class OrgtilknytningEndretEmailService {
         }
     }
 
-    public String getFormattetEmailBody(String resursName, String navIdent, String otEndringer) throws IOException, TemplateException {
+    private String getFormattetEmailBody(String resursName, String navIdent, String otEndringer) throws IOException, TemplateException {
         var stringWriter = new StringWriter();
         var model = Map.of(
             "resursName", resursName,
