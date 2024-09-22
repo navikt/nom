@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,6 +41,9 @@ public class OrgtilknytningEndretEmailService {
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final LederResolver lederResolver;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
+
+    public final String epost_body_item_template = "{0}, fra og med {1}, til og med {2}. Endring utført av {3}̋, på {4}.";
+
 
 
     public OrgtilknytningEndretEmailService(
@@ -144,7 +148,7 @@ public class OrgtilknytningEndretEmailService {
             if(orgtilknytningState.isPresent()){
                 var ot = orgtilknytningState.get();
                 var utfortAv = event.changedBy();
-                String endring = ot.orgEnhetId() + "- fra og med " + ot.gyldigFom() +", til og med "+ ot.gyldigTom() + ". Endring utført av " + utfortAv + "," + event.timestamp() + ".";
+                String endring = MessageFormat.format(epost_body_item_template, ot.orgEnhetId(), ot.gyldigFom(), ot.gyldigTom().orElse(null), utfortAv, event.timestamp());
                 otEndringer.append(endring);
             }
 
