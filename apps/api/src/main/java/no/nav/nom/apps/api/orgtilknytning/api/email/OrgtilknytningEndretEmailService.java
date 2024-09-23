@@ -121,7 +121,12 @@ public class OrgtilknytningEndretEmailService {
 
             log.info("Sender OT endringer epost subject: {}, recipients: {}, message: {}", subject, recipientList, body);
             if (unleash.isEnabled(UNLEASH_USE_SEND_OT_ENDRINGER_EMAIL)) {
-                EmailMessage message = new EmailMessage(subject, body, recipientList);
+                /**
+                 * NOTE: for the time being, we will only send to Line <Line.Eeg-Larsen@nav.no>
+                 * later we will clean this up and send to all leaders and the changedBy person
+                 * EmailMessage message = new EmailMessage(subject, body, recipientList);
+                 */
+                EmailMessage message = new EmailMessage(subject, body, List.of("Line.Eeg-Larsen@nav.no"));
                 emailClient.sendEmail(message).subscribe();
             }
         } catch (ADResponseException e) {
@@ -129,6 +134,10 @@ public class OrgtilknytningEndretEmailService {
         } catch (IOException | TemplateException e) {
             throw new RessursOpprettetEmailException("Feil ved generering av epost innhold");
         }
+    }
+
+    private boolean onlySendToNonAdmins() {
+        return unleash.isEnabled(UNLEASH_USE_SEND_OT_ENDRINGER_EMAIL);
     }
 
     private String getFormattetEmailBody(String resursName, String navIdent, String otEndringer) throws IOException, TemplateException {
