@@ -72,8 +72,8 @@ public class EpostCheck {
         }
     )
     @GetMapping(value = "/sendEmailVedOTEndringer")
-    public String sendEmailVedOtEndringer(@RequestParam List<String> ids) throws TemplateException, IOException {
+    public String sendEmailVedOtEndringer() throws TemplateException, IOException {
         orgtilknytningEndretEmailService.sendEmail();
-        return "Email sent!";
+        return "Emails sent!";
     }
 }
