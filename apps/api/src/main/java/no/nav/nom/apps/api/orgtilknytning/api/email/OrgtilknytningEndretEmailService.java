@@ -83,17 +83,19 @@ public class OrgtilknytningEndretEmailService {
 
     @Scheduled(cron = "0 0 18 * * ?") // every day at 18:00
     public void sendEmail() {
-        orgtilknytningEndringerQueueByNavident.forEach((navident, endringer) -> {
-            var endretRessurs = ressursStateRepository.findByNavident(navident);
-            if(endretRessurs.isEmpty()) {
-                log.warn("Fant ikke ressurs med navident {} og epost varsel vil ikke bli sendt.", navident);
-                // clear from the queue
-                removeFromOrgtilknytningEndringerQueue(navident);
-            } else {
-                sendEmail(endretRessurs.get(), endringer);
-                removeFromOrgtilknytningEndringerQueue(navident);
-            }
-        });
+        if (unleash.isEnabled(UNLEASH_USE_SEND_OT_ENDRINGER_EMAIL)) {
+            orgtilknytningEndringerQueueByNavident.forEach((navident, endringer) -> {
+                var endretRessurs = ressursStateRepository.findByNavident(navident);
+                if(endretRessurs.isEmpty()) {
+                    log.warn("Fant ikke ressurs med navident {} og epost varsel vil ikke bli sendt.", navident);
+                    // clear from the queue
+                    removeFromOrgtilknytningEndringerQueue(navident);
+                } else {
+                    sendEmail(endretRessurs.get(), endringer);
+                    removeFromOrgtilknytningEndringerQueue(navident);
+                }
+            });
+        }
     }
 
     private void sendEmail(RessursState endretRessurs, List<OTEndretData> otEndringerData) {
@@ -120,15 +122,13 @@ public class OrgtilknytningEndretEmailService {
             }
 
             log.info("Sender OT endringer epost subject: {}, recipients: {}, message: {}", subject, recipientList, body);
-            if (unleash.isEnabled(UNLEASH_USE_SEND_OT_ENDRINGER_EMAIL)) {
-                /**
-                 * NOTE: for the time being, we will only send to Line <Line.Eeg-Larsen@nav.no>
-                 * later we will clean this up and send to all leaders and the changedBy person
-                 * EmailMessage message = new EmailMessage(subject, body, recipientList);
-                 */
-                EmailMessage message = new EmailMessage(subject, body, List.of("Line.Eeg-Larsen@nav.no"));
-                emailClient.sendEmail(message).subscribe();
-            }
+            /**
+             * NOTE: for the time being, we will only send to Line <Line.Eeg-Larsen@nav.no>
+             * later we will clean this up and send to all leaders and the changedBy person
+             * EmailMessage message = new EmailMessage(subject, body, recipientList);
+             */
+            EmailMessage message = new EmailMessage(subject, body, List.of("Line.Eeg-Larsen@nav.no"));
+            emailClient.sendEmail(message).subscribe();
         } catch (ADResponseException e) {
             throw new RessursOpprettetEmailException("Fant ikke leder epost adresse for leder");
         } catch (IOException | TemplateException e) {
