@@ -11,6 +11,7 @@ import { EventOrigination } from "~/components/EventOrigination.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
 import { JsonModal } from "~/components/JsonModal.tsx";
 import { NavidentNameLookup } from "~/components/NavidentNameLookup.tsx";
+import { OrgEnhetLookup } from "~/components/OrgEnhetLookup.tsx";
 import { formatDisplayDatetime } from "~/utils.ts";
 
 export const Route = createFileRoute("/sinks/tilgang")({
@@ -54,6 +55,9 @@ function TilgangHistoryPage() {
           <Table.Row>
             <Table.ColumnHeader scope="col">Fra</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Til</Table.ColumnHeader>
+            <Table.ColumnHeader scope="col">Orgenhet</Table.ColumnHeader>
+            <Table.ColumnHeader scope="col">Gyldig fra</Table.ColumnHeader>
+            <Table.ColumnHeader scope="col">Gyldig til</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Endring</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Dato</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Opprinnelse</Table.ColumnHeader>
@@ -79,6 +83,16 @@ function TilgangHistoryPage() {
                     <NavidentNameLookup navident={tilgangEvent.data.til} />
                   </Link>
                 </Table.DataCell>
+                <Table.DataCell>
+                  <Link
+                    search={{ filterText: tilgangEvent.data.forOrgenhet }}
+                    to="/state/orgenhet"
+                  >
+                    <OrgEnhetLookup orgEnhet={tilgangEvent.data.forOrgenhet} />
+                  </Link>
+                </Table.DataCell>
+                <Table.DataCell>{tilgangEvent.data.gyldigFom}</Table.DataCell>
+                <Table.DataCell>{tilgangEvent.data?.gyldigTom}</Table.DataCell>
                 <Table.DataCell>
                   <JsonModal data={tilgangEvent} text={tilgangEvent.type} />
                 </Table.DataCell>

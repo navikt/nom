@@ -216,6 +216,30 @@ export type RessursSluttdatoOppdatertEventV1 = RessursEvent;
 
 export type RessursSluttetEventV1 = RessursEvent;
 
+export type OrgtilknytningAvsluttetEventV1 = OrgtilknytningEvent;
+
+export type OrgtilknytningDagligOppfolgingEndretEventV1 = OrgtilknytningEvent;
+
+export type OrgtilknytningDatoEndretEventV1 = OrgtilknytningEvent;
+
+export type OrgtilknytningDatoEndretEventV2 = OrgtilknytningEvent;
+
+export interface OrgtilknytningEvent {
+  fid?: string;
+  data?: Data;
+  metadata?: Metadata;
+  additionalData?: Data;
+  type: string;
+}
+
+export type OrgtilknytningFjernetEventV1 = OrgtilknytningEvent;
+
+export type OrgtilknytningOpprettetEventV1 = OrgtilknytningEvent;
+
+export type OrgtilknytningTilknytningtypeEndretEventV1 = OrgtilknytningEvent;
+
+export type OrgtilknytningTypeEndretEventV1 = OrgtilknytningEvent;
+
 export type NomNivaaEndretEventV1 = OrgEnhetEvent;
 
 export type OrgEnhetAvvikletEventV1 = OrgEnhetEvent;

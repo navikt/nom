@@ -157,8 +157,11 @@ export function EditPersonOpplysninger({
             >
               <Label>Visningsnavn</Label>
               <span>
-                Navnet under vil bli brukt i alle NAVs applikasjoner.
-                Medarbeideren må ha minst ett fornavn og minst ett etternavn.
+                Visningsnavnet vil bli brukt i alle NAVs applikasjoner, og
+                fornavn og etternavn er obligatorisk. Navnet skal som hovedregel
+                være samme som folkeregistrert navn, men man kan om ønskelig
+                fjerne mellomnavn. Endring av visningsnavn vil innebære at det
+                vil genereres en ny e-postadresse for medarbeideren.
               </span>
             </VStack>
             <div

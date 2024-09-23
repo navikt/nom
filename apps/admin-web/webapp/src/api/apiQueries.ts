@@ -1,7 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import ky from "ky";
 
-import type { Ressurs } from "~/types/nom-api/nom-api-models.ts";
+import type { OrgEnhet, Ressurs } from "~/types/nom-api/nom-api-models.ts";
 
 export const API_BASE_URL = "/frackend/api";
 
@@ -53,4 +53,15 @@ export async function lastTyperForOrgenheter() {
 
 export async function reberegnNomnivaa() {
   return ky.get(`${API_BASE_URL}/api/admin/utlednomnivaaer`);
+}
+
+export function getOrgEnhetOptions(orgenhet: string) {
+  return queryOptions({
+    queryKey: ["ORGENHET", orgenhet],
+    retry: false,
+    queryFn: async () =>
+      (
+        await ky.get(`${API_BASE_URL}/app/orgenheter/${orgenhet}`)
+      ).json<OrgEnhet>(),
+  });
 }

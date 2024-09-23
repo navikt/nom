@@ -3,9 +3,9 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { AvvikleOrgenhet } from "~/manuelle-meldinger/AvvikleOrgenhet.tsx";
 import { AvvikleRessurs } from "~/manuelle-meldinger/AvvikleRessurs.tsx";
-import { OppdatereSluttDatoRessurs } from "~/manuelle-meldinger/OppdatereSluttDatoRessurs.tsx";
 import { EndreDagligOppfolging } from "~/manuelle-meldinger/EndreDagligOppfolging.tsx";
 import { FjernOrgtilknytning } from "~/manuelle-meldinger/FjernOrgtilknytning.tsx";
+import { OppdatereSluttDatoRessurs } from "~/manuelle-meldinger/OppdatereSluttDatoRessurs.tsx";
 import { OppdaterPersonalia } from "~/manuelle-meldinger/OppdaterPersonalia.tsx";
 import { OppdaterPersonidentRessurs } from "~/manuelle-meldinger/OppdaterPersonidentRessurs.tsx";
 import { SettNomMaster } from "~/manuelle-meldinger/SettNomMaster.tsx";

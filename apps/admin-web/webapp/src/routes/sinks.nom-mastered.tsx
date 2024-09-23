@@ -1,11 +1,12 @@
-import { Alert, Heading, Table } from "@navikt/ds-react";
+import { Alert, Button, Heading, Table, TextField } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { useForm } from "react-hook-form";
 
+import type { searchTypeWithNavident } from "~/api/queries.ts";
 import {
-  getNomMasteredOptions,
   getNomMasteredStateOptions,
   getOrgtilknytninger,
   getRessurs,
@@ -20,14 +21,62 @@ import {
   isTodayOrBefore,
 } from "~/utils.ts";
 
+export function NavidentOffsetSearchBar({
+  search,
+}: {
+  search: searchTypeWithNavident;
+}) {
+  const methods = useForm({ defaultValues: search });
+  const navigate = useNavigate();
+
+  const submitHandler = methods.handleSubmit((values) => {
+    navigate({
+      search: (prev) => {
+        const overwriteOffset = {
+          fromOffset: Number.parseInt((values.fromOffset as never) || "0"),
+        };
+        return { ...prev, ...values, ...overwriteOffset };
+      },
+    });
+  });
+
+  const tilbakestill = () => {
+    methods.reset({ navident: "", fromOffset: 0 });
+    navigate({
+      search: {},
+      replace: true,
+    });
+  };
+
+  return (
+    <form className="flex gap-4 p-6" onSubmit={submitHandler}>
+      <TextField label="Navident" {...methods.register("navident")} />
+      <TextField label="Fra offset" {...methods.register("fromOffset")} />
+      <Button className="h-fit mt-8" type="submit">
+        Søk
+      </Button>
+      <Button
+        className="h-fit mt-8"
+        onClick={tilbakestill}
+        type="button"
+        variant="tertiary"
+      >
+        Tilbakestill
+      </Button>
+    </form>
+  );
+}
+
 export const Route = createFileRoute("/sinks/nom-mastered")({
   loaderDeps: ({ search }) => search,
   loader: ({ context }) => {
-    context.queryClient.prefetchQuery(getNomMasteredOptions());
+    context.queryClient.prefetchQuery(getNomMasteredStateOptions(undefined, 0));
   },
   component: () => {
+    const search = Route.useSearch();
     return (
       <>
+        <NavidentOffsetSearchBar search={search} />
         <ErrorBoundary fallback={<Alert variant="error">Noe gikk galt</Alert>}>
           <Suspense fallback={<BigLoader />}>
             <NomMasteredPage />
@@ -39,8 +88,10 @@ export const Route = createFileRoute("/sinks/nom-mastered")({
 });
 
 function NomMasteredPage() {
+  const search = Route.useSearch<searchTypeWithNavident>();
+  const { navident, fromOffset: offset } = search;
   const nomMasteredObjekter = useSuspenseQuery({
-    ...getNomMasteredStateOptions(),
+    ...getNomMasteredStateOptions(navident, offset),
   }).data;
 
   const { data, sort, handleSort } = useTableSort(

@@ -17,11 +17,13 @@ import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import java.util.List;
 
+import static java.util.Objects.isNull;
 import static no.nav.nom.apps.admin.dto.OrganiseringStateSearchParams.organiseringStateSearchFilter;
 import static no.nav.nom.apps.admin.dto.OrgenhetStateSearchParams.orgenhetSearchFilter;
 import static no.nav.nom.apps.admin.dto.OrgtilknytningStateSearchParams.orgtilknytningStateSearchFilter;
@@ -74,7 +76,9 @@ public class StateController {
     public List<OrgtilknytningState> getOrgilknytning(@Valid OrgtilknytningStateSearchParams orgtilknytningStateSearchParams) {
         int fromOffset = orgtilknytningStateSearchParams.getFromOffset();
         var events = orgtilknytningStateRepository
-            .getAll().stream().filter(orgtilknytningStateSearchFilter(orgtilknytningStateSearchParams)).toList();
+            .getAll().stream()
+            .filter(orgtilknytningStateSearchFilter(orgtilknytningStateSearchParams))
+            .toList();
 
         return safeSubList(events, fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
@@ -83,7 +87,9 @@ public class StateController {
     public List<OrganiseringState> getOrganisering(@Valid OrganiseringStateSearchParams organiseringStateSearchParams) {
         int fromOffset = organiseringStateSearchParams.getFromOffset();
         var events = organiseringStateRepository
-            .getOrganiseringer().stream().filter(organiseringStateSearchFilter(organiseringStateSearchParams)).toList();
+            .getOrganiseringer().stream()
+            .filter(organiseringStateSearchFilter(organiseringStateSearchParams))
+            .toList();
 
         return safeSubList(events, fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
@@ -94,9 +100,14 @@ public class StateController {
     }
 
     @GetMapping(value = "/nom-mastered-state")
-    public List<MasteredRessursDTO> getMasteredNavidents() {
-        return masteredRessursStateRepository.getMasteredNavidenter().entrySet().stream()
+    public List<MasteredRessursDTO> getMasteredNavidents(
+        @RequestParam(required = false) String navident,
+        @RequestParam(required = false, defaultValue = "0") int fromOffset) {
+        var events =  masteredRessursStateRepository.getMasteredNavidenter().entrySet().stream()
+            .filter(entry -> isNull(navident) || entry.getKey().equals(navident))
             .map(masteredEntry -> MasteredRessursDTO.from(masteredEntry.getKey(), masteredEntry.getValue()))
             .toList();
+
+        return safeSubList(events, fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
 }

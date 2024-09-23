@@ -24,8 +24,8 @@ import { Route as StateOrgenhetImport } from './routes/state.orgenhet'
 import { Route as StateOrganiseringImport } from './routes/state.organisering'
 import { Route as SinksTilgangImport } from './routes/sinks.tilgang'
 import { Route as SinksRessursImport } from './routes/sinks.ressurs'
-import { Route as SinksOrgenhetImport } from './routes/sinks.orgenhet'
 import { Route as SinksOrgtilknytningImport } from './routes/sinks.orgtilknytning'
+import { Route as SinksOrgenhetImport } from './routes/sinks.orgenhet'
 import { Route as SinksNomMasteredImport } from './routes/sinks.nom-mastered'
 import { Route as SinksApiRessursImport } from './routes/sinks.api-ressurs'
 import { Route as SinksApiOrgenhetImport } from './routes/sinks.api-orgenhet'
@@ -98,13 +98,13 @@ const SinksRessursRoute = SinksRessursImport.update({
   getParentRoute: () => SinksRoute,
 } as any)
 
-const SinksOrgenhetRoute = SinksOrgenhetImport.update({
-  path: '/orgenhet',
+const SinksOrgtilknytningRoute = SinksOrgtilknytningImport.update({
+  path: '/orgtilknytning',
   getParentRoute: () => SinksRoute,
 } as any)
 
-const SinksOrgtilknytningRoute = SinksOrgtilknytningImport.update({
-  path: '/orgtilknytning',
+const SinksOrgenhetRoute = SinksOrgenhetImport.update({
+  path: '/orgenhet',
   getParentRoute: () => SinksRoute,
 } as any)
 
@@ -326,6 +326,7 @@ export const routeTree = rootRoute.addChildren({
         "/sinks/api-ressurs",
         "/sinks/nom-mastered",
         "/sinks/orgenhet",
+        "/sinks/orgtilknytning",
         "/sinks/ressurs",
         "/sinks/tilgang",
         "/sinks/"
@@ -359,6 +360,10 @@ export const routeTree = rootRoute.addChildren({
     },
     "/sinks/orgenhet": {
       "filePath": "sinks.orgenhet.tsx",
+      "parent": "/sinks"
+    },
+    "/sinks/orgtilknytning": {
+      "filePath": "sinks.orgtilknytning.tsx",
       "parent": "/sinks"
     },
     "/sinks/ressurs": {
