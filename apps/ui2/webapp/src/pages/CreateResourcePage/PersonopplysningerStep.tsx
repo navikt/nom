@@ -197,8 +197,11 @@ function VisningsnavnForm({
       >
         <b>Visningnavn</b>
         <BodyShort spacing>
-          Navnet under vil bli brukt i alle NAVs applikasjoner. Medarbeideren må
-          ha minst ett fornavn og minst ett etternavn.
+          Visningsnavnet vil bli brukt i alle NAVs applikasjoner, og fornavn og
+          etternavn er obligatorisk. Navnet skal som hovedregel være samme som
+          folkeregistrert navn, men man kan om ønskelig fjerne mellomnavn.
+          Visningsnavnet blir benyttet til å generere medarbeiderens
+          e-postadresse.
         </BodyShort>
         <div css={fullwidthRow}>
           <TextField
