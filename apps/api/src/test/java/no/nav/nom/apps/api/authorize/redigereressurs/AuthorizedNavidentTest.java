@@ -246,4 +246,16 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
         var kanDelegereForEnhetB = authorizedNavident.isAuthorizedToDelegate("B1");
         assertTrue(kanDelegereForEnhetB.isEmpty());
     }
+
+    @Test
+    @DisplayName("Verifiser at Leder C får redigering til orgenhet C, C1, C11, C2 og C22")
+    void test_0030() {
+        var enheterLederKanRedigere = authorizedNavident.orgenheterLederKanRedigere("C");
+        assertTrue(enheterLederKanRedigere.stream().anyMatch(orgenhet -> orgenhet.getId().equals("C")));
+        assertTrue(enheterLederKanRedigere.stream().anyMatch(orgenhet -> orgenhet.getId().equals("C1")));
+        assertTrue(enheterLederKanRedigere.stream().anyMatch(orgenhet -> orgenhet.getId().equals("C11")));
+        assertTrue(enheterLederKanRedigere.stream().anyMatch(orgenhet -> orgenhet.getId().equals("C2")));
+        assertTrue(enheterLederKanRedigere.stream().anyMatch(orgenhet -> orgenhet.getId().equals("C22")));
+    }
+
 }

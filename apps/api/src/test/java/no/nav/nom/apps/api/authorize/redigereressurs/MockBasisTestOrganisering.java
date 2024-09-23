@@ -26,8 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
+import static wiremock.org.hamcrest.Matchers.containsInAnyOrder;
 
 abstract public class MockBasisTestOrganisering {
     @MockBean
@@ -224,6 +226,14 @@ abstract public class MockBasisTestOrganisering {
         lenient().when(orgenhetService.getById("D1")).thenReturn(Optional.of(orgenhet_D1));
         lenient().when(orgenhetService.getById("E")).thenReturn(Optional.of(orgenhet_E));
         lenient().when(orgenhetService.getById("E1")).thenReturn(Optional.of(orgenhet_E1));
+
+        when(orgenhetService.getByIdBulk(argThat(list -> containsInAnyOrder("C", "C1", "C11", "C2", "C22").matches(list)))).thenReturn(Map.of(
+            "C", orgenhet_C,
+            "C1", orgenhet_C1,
+            "C11", orgenhet_C11,
+            "C2", orgenhet_C2,
+            "C22", orgenhet_C22
+        ));
 
         when(orgenhetService.getAllEnheterMedOrganisering()).thenReturn(List.of(
             orgenhet_X,
