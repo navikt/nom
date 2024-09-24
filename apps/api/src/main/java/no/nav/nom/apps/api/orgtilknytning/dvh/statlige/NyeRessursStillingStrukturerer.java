@@ -62,7 +62,7 @@ public class NyeRessursStillingStrukturerer {
     protected StrukturerteStillingPerioderForNavident strukturerStillingPerioderFraDvhRessursStillinger(String navident, List<DvhRessursStilling> dvhRessursStillinger) {
         var sspForNavident = new StrukturerteStillingPerioderForNavident(navident, dvhRessursStillinger);
 
-        if (!finnesNavidentINOM(sspForNavident)) {
+        if (!(finnesNavidentINOM(sspForNavident) && erStatlig(sspForNavident))) {
             return sspForNavident;
         }
 
@@ -203,4 +203,9 @@ public class NyeRessursStillingStrukturerer {
         }
         return true;
     }
+
+    private boolean erStatlig(StrukturerteStillingPerioderForNavident sspForNavident) {
+        return ressursStateRepository.findByNavident(sspForNavident.navident()).orElseThrow().isStatlig();
+    }
+
 }

@@ -132,7 +132,10 @@ public class AuthorizedNavident {
         }
 
         orgenhetIder.addAll(delegertLederStateRepository.aktiveDelegeringerForOrgenheterTilNavident(navident));
-        return orgenhetService.getByIdBulk(orgenhetIder.stream().toList()).values().stream().toList();
+
+        Set<String> orgenhetIderMedUnderEnheter = new HashSet<>();
+        orgenhetIder.forEach( o -> orgenhetIderMedUnderEnheter.addAll(alleEnheterIHierarkiFra(o)));
+        return orgenhetService.getByIdBulk(orgenhetIderMedUnderEnheter.stream().toList()).values().stream().toList();
     }
 
 
