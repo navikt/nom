@@ -93,7 +93,7 @@ export const ValgtOrgEnhet = ({
                   Remedy-enhet: <b>{orgEnhet.remedyEnhetId}</b>
                 </BodyShort>
               )}
-              {orgEnhet.gyldigFom && (
+              {orgEnhet.gyldigFom && orgEnhet.navn !== "NAV" && (
                 <BodyShort size="small">
                   Gyldig f.o.m.: <b>{formatDisplayDate(orgEnhet.gyldigFom)}</b>
                 </BodyShort>

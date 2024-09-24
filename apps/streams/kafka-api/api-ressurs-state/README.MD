@@ -7,7 +7,7 @@ selve state stream topologien, eller å måtte gå ett steg tilbake i topologi-p
 
 Kjør denne workflowen https://github.com/navikt/org-kafka-tools/actions/workflows/deploy-kafka-cli.yml
 
-Med Aiven secret referanse. Tilsvarende f.eks. `aiven-nom-research-kafka-api-ressurs-state-9d146b7d-2024-34` <br>
+Med Aiven secret referanse. Tilsvarende f.eks. `aiven-nom-kafka-api-ressurs-state-9d146b7d-2024-34` <br>
 Kan finnes med
 ```shell
 kubectl get secret -n org | grep nom-kafka-api-ressurs-state

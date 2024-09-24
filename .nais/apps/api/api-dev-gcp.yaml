@@ -97,8 +97,8 @@ spec:
           cluster: dev-gcp
           namespace: org
         - application: veilarbveileder
-          namespace: pto
-          cluster: dev-fss
+          namespace: obo
+          cluster: dev-gcp
         - application: saas-proxy
           namespace: teamcrm
           cluster: dev-gcp
@@ -249,6 +249,7 @@ spec:
         - application: tilgang
           namespace: aap
           cluster: dev-gcp
+
     outbound:
       rules:
         - application: nav-ident
