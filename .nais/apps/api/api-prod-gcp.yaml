@@ -96,6 +96,9 @@ spec:
         - application: veilarbveileder
           namespace: pto
           cluster: prod-fss
+        - application: veilarbveileder
+          namespace: obo
+          cluster: prod-gcp
         - application: journalforing-frontend
           namespace: isa
           cluster: prod-fss
