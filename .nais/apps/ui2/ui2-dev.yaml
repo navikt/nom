@@ -37,6 +37,7 @@ spec:
       external:
         - host: unpkg.com
         - host: nom-remedy-integrasjon.dev-fss-pub.nais.io
+        - host: static.hotjar.com
     inbound:
       rules:
         - application: org-token-tool
