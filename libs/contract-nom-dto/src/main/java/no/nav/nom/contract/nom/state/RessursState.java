@@ -28,13 +28,9 @@ public record RessursState(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, defaultValue = "STANDARD") IdentType identType
 ) {
     @JsonIgnore
-    public boolean isEkstern() {
-        return this.sektor().equals(Sektor.EKSTERN);
-    }
+    public boolean isEkstern() { return Sektor.EKSTERN.equals(this.sektor()); }
     @JsonIgnore
-    public boolean isStatlig() {
-        return this.sektor().equals(Sektor.NAV_STATLIG);
-    }
+    public boolean isStatlig() { return Sektor.NAV_STATLIG.equals(this.sektor()); }
     @JsonIgnore
-    public boolean isKommunal() { return this.sektor().equals(Sektor.NAV_KOMMUNAL); }
+    public boolean isKommunal() { return Sektor.NAV_KOMMUNAL.equals(this.sektor()); }
 }

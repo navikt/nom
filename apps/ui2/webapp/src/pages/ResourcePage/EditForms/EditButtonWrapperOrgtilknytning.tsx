@@ -6,7 +6,7 @@ import { useHasAdminOrWriteAccess } from "~/api/useGetSession";
 import type { Ressurs } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
 
-export function EditButtonWrapper({
+export function EditButtonWrapperOrgtilknytning({
   ressurs,
   children,
 }: {
@@ -17,11 +17,9 @@ export function EditButtonWrapper({
     from: "/ressurs/$id",
   });
   const ressursCanBeEdited = ressurs.sektor !== Sektor.NAV_STATLIG;
-  if (
-    !useHasAdminOrWriteAccess() ||
-    !ressursCanBeEdited ||
-    editPersonopplysninger
-  ) {
+  const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
+
+  if (!hasAdminOrWriteAccess || !ressursCanBeEdited || editPersonopplysninger) {
     return <></>;
   }
 

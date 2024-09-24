@@ -1,8 +1,7 @@
 # Forsøk på samle beskrivelse av regler og avarter for tolking av DVH ressurser og stillinger (fra U4 og remedy)
 Samt sammenstille referanse til tester som sjekker overholdelse av reglene
 
-NB! Per nå kun fokus på tolking som gjøres av Statlige og Kommunale - e.g. RessursStillingLoader
-Ekskluderer eksterne (se EksterneRessurserLoader).Kommunale uten stilling i Unit4 er ikke inkludert (se KommunalRessursLoader for shadow til Omada) 
+Dette er kun for behandling av statlige - kommunale og eksterne skal nå mastres i NOM. 
 Gjør ingen faktisk OT oppdatering på Ressurser som er markert som Mastret i NOM. (Men strukturering og prosessering/tolkning gjøres)
 
 ## Grunnlag og overordnet tolkning

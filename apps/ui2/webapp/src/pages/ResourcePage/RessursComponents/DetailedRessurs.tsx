@@ -37,7 +37,8 @@ import {
 import { Divider } from "~/components/Divider";
 import { ModalProvider } from "~/components/modalProvider/ModalProvider";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
-import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
+import { EditButtonWrapperOrgtilknytning } from "~/pages/ResourcePage/EditForms/EditButtonWrapperOrgtilknytning";
+import { EditButtonWrapperRessursSlutter } from "~/pages/ResourcePage/EditForms/EditButtonWrapperRessursSlutter";
 import { EditPersonOpplysninger } from "~/pages/ResourcePage/EditForms/EditPersonOpplysninger";
 import { EditOrgtilknytninger } from "~/pages/ResourcePage/RessursComponents/EditOrgtilknytninger";
 import { PersonOpplysninger } from "~/pages/ResourcePage/RessursComponents/PersonOpplysninger";
@@ -159,7 +160,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
             <Buldings3Icon />
             Organisatorisk tilhørighet
           </Heading>
-          <EditButtonWrapper ressurs={ressurs}>
+          <EditButtonWrapperOrgtilknytning ressurs={ressurs}>
             <Button
               data-cy="endre-orgtilknytninger-button"
               icon={<PencilIcon aria-hidden />}
@@ -174,7 +175,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
             >
               Endre
             </Button>
-          </EditButtonWrapper>
+          </EditButtonWrapperOrgtilknytning>
         </div>
 
         {orgtilknytninger.length === 0 ? (
@@ -510,7 +511,7 @@ function TeamCatSection({ navident }: { navident: string }) {
 
 function TerminateButton({ ressurs }: { ressurs: Ressurs }) {
   return (
-    <EditButtonWrapper ressurs={ressurs}>
+    <EditButtonWrapperRessursSlutter ressurs={ressurs}>
       <Divider noMargins />
       <ReactRouterLink
         css={css`
@@ -530,6 +531,6 @@ function TerminateButton({ ressurs }: { ressurs: Ressurs }) {
           Medarbeider slutter
         </Button>
       </ReactRouterLink>
-    </EditButtonWrapper>
+    </EditButtonWrapperRessursSlutter>
   );
 }
