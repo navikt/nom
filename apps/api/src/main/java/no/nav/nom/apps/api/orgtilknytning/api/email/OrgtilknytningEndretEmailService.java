@@ -83,6 +83,12 @@ public class OrgtilknytningEndretEmailService {
 
     @Scheduled(cron = "0 0 18 * * ?") // every day at 18:00
     public void sendEmail() {
+        //Note: print the queue for debugging. To be removed later
+        log.info("orgtilknytningEndringerQueueByNavident size: {}", orgtilknytningEndringerQueueByNavident.size());
+        orgtilknytningEndringerQueueByNavident.forEach((navident, endringer) -> {
+            log.info("navident: {}, endringer: {}", navident, endringer);
+        });
+
         if (unleash.isEnabled(UNLEASH_USE_SEND_OT_ENDRINGER_EMAIL)) {
             orgtilknytningEndringerQueueByNavident.forEach((navident, endringer) -> {
                 var endretRessurs = ressursStateRepository.findByNavident(navident);
