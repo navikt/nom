@@ -116,6 +116,7 @@ public class RessursStillingProcessor {
             String msg = "Navident %s finnes ikke. Behandler ikke DVH ressursStillinger\n%s".formatted(navident, stillingPerioder);
             log.error(msg);
             ressursStillingLoadStatus.addError(navident, msg);
+            return;
         } else if (ressurs.sektor() == Sektor.EKSTERN) {
             log.debug(SECURE_LOGS, "Navident {} er ekstern. Enn sålenge behandler vi ikke disse", navident);
             return;
@@ -493,7 +494,7 @@ public class RessursStillingProcessor {
         loggOppsummering(navident, stillingPerioder, orgtilknytninger);
 
         // Sjekk om det finnes en current stillingPeriode hvor stilling og ressurs har samme enhet
-        if (!validAgrIdStillingVsRessurs(stillingPerioder)) {
+        if (ressurs.isStatlig() && !validAgrIdStillingVsRessurs(stillingPerioder)) {
             if (log.isDebugEnabled()) {
                 log.debug(
                     "Navident {} har ingen gjeldende stilling med samme agressoId som ressursen:\n{}",
