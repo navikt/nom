@@ -183,6 +183,7 @@ public class OrgtilknytningEndretEmailService {
             if(orgtilknytningState.isPresent()){
                 var orgenhetState = orgEnhetStateRepository.findById(orgtilknytningState.get().orgEnhetId());
                 if (orgenhetState.isPresent()) {
+                    log.info("Orgenhet ved OT endriner: {}", orgenhetState.get());
                     var leader = lederResolver.leder(
                         // populate at least agressoId, orgNiv, and navn
                         OrgEnhet.builder()
@@ -192,6 +193,7 @@ public class OrgtilknytningEndretEmailService {
                             .orgNiv(orgenhetState.get().agressoOrgNivaa().orElse(null))
                             .build()
                     );
+                    log.info("Orgenhet og leder ved OT endriner: {}, {}", orgenhetState.get(), leader);
                     if(!leader.isEmpty()) {
                         // add the leader of the orgenhet
                         recipientNavidents.add(leader.get(0).getRessurs().getNavIdent());
