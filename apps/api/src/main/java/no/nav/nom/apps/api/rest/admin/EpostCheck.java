@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.clients.email.EmailClient;
 import no.nav.nom.apps.api.clients.email.EmailMessage;
 import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.orgtilknytning.api.email.OrgtilknytningEndretEmailService;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,10 +28,14 @@ public class EpostCheck {
 
     private final EmailClient emailClient;
     private final RessursOpprettetEmailService opprettetRessurs;
+    private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
 
-    public EpostCheck(EmailClient emailClient, RessursOpprettetEmailService opprettetRessurs) {
+    public EpostCheck(EmailClient emailClient,
+                      RessursOpprettetEmailService opprettetRessurs,
+                      OrgtilknytningEndretEmailService orgtilknytningEndretEmailService) {
         this.emailClient = emailClient;
         this.opprettetRessurs = opprettetRessurs;
+        this.orgtilknytningEndretEmailService = orgtilknytningEndretEmailService;
     }
 
     @Operation(
@@ -42,8 +47,8 @@ public class EpostCheck {
             @ApiResponse(responseCode = "200", description = "Success")
         }
     )
-    @GetMapping(value = "/sendEmail")
-    public String sendEmail(@RequestParam List<String> ids) throws TemplateException, IOException {
+    @GetMapping(value = "/sendEmailTest")
+    public String sendEmailTest(@RequestParam List<String> ids) throws TemplateException, IOException {
         List<String> recipientList = ids.stream().map(id -> id + "@nav.no").toList();
 
         String testBody = opprettetRessurs.getFormattetEmailBody(
@@ -55,5 +60,20 @@ public class EpostCheck {
         EmailMessage message = new EmailMessage("subject", testBody, recipientList);
         emailClient.sendEmail(message).subscribe();
         return "Email sent to: " + recipientList;
+    }
+
+    @Operation(
+        description = "Trigger send email about changes in orgtilknytning",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/sendEmailVedOTEndringer")
+    public String sendEmailVedOtEndringer() throws TemplateException, IOException {
+        orgtilknytningEndretEmailService.sendEmail();
+        return "Emails sent!";
     }
 }
