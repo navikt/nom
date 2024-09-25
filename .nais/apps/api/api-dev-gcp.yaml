@@ -270,3 +270,7 @@ spec:
           - name: nom-api-db
             envVarPrefix: DATABASE
         tier: db-custom-1-3840
+    buckets:
+      - name: no-nav-org-dev-missing-orgtilnytninger-storage-bucket
+        lifecycleCondition:
+          age: 14        
