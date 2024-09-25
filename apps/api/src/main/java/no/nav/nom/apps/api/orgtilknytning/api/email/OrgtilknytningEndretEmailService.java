@@ -107,6 +107,8 @@ public class OrgtilknytningEndretEmailService {
     private void sendEmail(RessursState endretRessurs, List<OTEndretData> otEndringerData) {
         try {
             Set<String> recipientNavidents = getReceiptionNavidents(otEndringerData);
+            log.info("Sender OT endringer epost til navidents: {}", recipientNavidents);
+
             var adRessurser = adClient.getAdRessurser(recipientNavidents);
             var recipientList = adRessurser.getRessurser().stream().map(AdRessurs::getEmail).toList();
 
