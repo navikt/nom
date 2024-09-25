@@ -259,6 +259,8 @@ app:
         scopes: ["ADMIN", "MUTATE_RESSURS"]
   orgenhet:
     linjeenhetene: me177r,su645c,hu797w,tu734a
+  google-storage-bucket-name:
+    missing-ot: no-nav-org-dev-missing-orgtilnytninger-storage-bucket
   clients:
     nom-proxy:
       enhet-path: /proxy/dvh/json/Hr/NOM3_Dev/NOM_HRORG_ORGENHET

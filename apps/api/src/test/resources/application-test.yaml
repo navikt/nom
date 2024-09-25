@@ -38,8 +38,9 @@ app:
         scopes: ["MUTATE_RESSURS", "ADMIN"]
   orgenhet:
     linjeenhetene: linje-enhet,en-annen-linjeenhet
-
-
+  google-storage-bucket-name:
+    missing-ot: none
+      
 KAFKA_BROKERS: ${spring.embedded.kafka.brokers}
 ELECTOR_PATH: localhost:8080
 

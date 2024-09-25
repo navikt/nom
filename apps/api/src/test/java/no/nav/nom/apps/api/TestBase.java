@@ -54,7 +54,9 @@ import static org.mockito.Mockito.when;
     }
 )
 @Testcontainers
-@EmbeddedKafka(partitions = 1, topics = {"nom-state-v1", "org.nom.ressurs-state-v1", "org.nom.orgenhet-state-v1", "org.nom.nom-mastered-ressurs", "org.nom.organisering-eventsource"}, controlledShutdown = true)
+@EmbeddedKafka(partitions = 1, topics = {"nom-state-v1", "org.nom.ressurs-state-v1", "org.nom.orgenhet-state-v1", 
+        "org.nom.nom-mastered-ressurs", "org.nom.organisering-eventsource", "org.nom.orgtilknytning-eventsource"}, 
+        controlledShutdown = true)
 @ContextConfiguration(initializers = {MockOAuth2ServerInitializer.class})
 @AutoConfigureWireMock(port = 0)
 public abstract class TestBase {
