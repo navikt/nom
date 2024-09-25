@@ -18,7 +18,7 @@ export function UserImage(properties: UserImageProperties) {
   const imageQuery = useQuery({
     queryKey: getPhotoQuery.queryKey(navident as string),
     queryFn: () => getPhotoQuery.queryFn(navident as string),
-    enabled: !!navident,
+    enabled: !!navident && window.location.href.includes("nom.nav.no"),
     staleTime: getPhotoQuery.staleTime,
     gcTime: getPhotoQuery.cacheTime,
     retry: false,
@@ -52,6 +52,7 @@ export function UserImage(properties: UserImageProperties) {
       </Link>
     );
   }
+
   return <img alt="" css={STYLE} src={person} />;
 }
 

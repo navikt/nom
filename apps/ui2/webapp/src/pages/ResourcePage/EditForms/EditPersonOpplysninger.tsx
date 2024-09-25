@@ -139,9 +139,13 @@ export function EditPersonOpplysninger({
     ressurs.primaryFysiskBrukersted,
   );
 
+  const onValid = (data) => {
+    console.log(data);
+  };
+
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit((values) => mutate(values))}>
+      <form onSubmit={methods.handleSubmit(onValid)}>
         {hasSelfServiceAccess && !isUserAdmin ? (
           <>
             <Heading level="1" size="large">
