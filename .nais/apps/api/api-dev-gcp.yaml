@@ -150,6 +150,9 @@ spec:
         - application: modiacontextholder
           namespace: personoversikt
           cluster: dev-gcp
+        - application: modiacontextholder-next
+          namespace: personoversikt
+          cluster: dev-gcp
         - application: modiacontextholder
           namespace: personoversikt
           cluster: dev-fss
