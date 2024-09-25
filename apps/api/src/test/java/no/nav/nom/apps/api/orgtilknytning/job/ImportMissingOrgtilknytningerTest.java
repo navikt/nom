@@ -207,14 +207,18 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
     }
 
     @Test
-    void should_not_generate_message_for_existing_ot() {
+    void should_not_generate_message_for_existing_and_active_ot() {
         // Ressurs og OrgEnhet eksisterer
         when(ressursStateRepositoryMock.findByNavident(NAVIDENT)).thenReturn(Optional.ofNullable(ressursState()));
         when(orgEnhetStateRepositoryMock.findById(ORG_ID)).thenReturn(Optional.of(orgEnhetState()));
 
         var missingOt = new MissingOrgtilknytning(NAVIDENT, NAVN, ORG_ID, ORG_NAVN);
 
-        var existingOrgtilknytning = OrgtilknytningState.builder().navident(NAVIDENT).orgEnhetId(ORG_ID).build();
+        var existingOrgtilknytning = OrgtilknytningState.builder()
+                .navident(NAVIDENT)
+                .orgEnhetId(ORG_ID)
+                .gyldigTom(Optional.of(LocalDate.now().plusMonths(2)))
+                .build();
         when(orgtilknytningStateRepositoryMock.findByNavident(NAVIDENT)).thenReturn(List.of(existingOrgtilknytning));
 
 
@@ -224,6 +228,32 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
         await().pollDelay(1, SECONDS).untilAsserted(() -> assertThat(true).isTrue());
 
         assertThat(recordsQueue.size()).isEqualTo(0);
+    }
+
+    @Test
+    void should_generate_message_for_existing_ot_that_has_expired() {
+        // Ressurs og OrgEnhet eksisterer
+        when(ressursStateRepositoryMock.findByNavident(NAVIDENT)).thenReturn(Optional.ofNullable(ressursState()));
+        when(orgEnhetStateRepositoryMock.findById(ORG_ID)).thenReturn(Optional.of(orgEnhetState()));
+
+        var missingOt = new MissingOrgtilknytning(NAVIDENT, NAVN, ORG_ID, ORG_NAVN);
+
+        var expiredOrgtilknytning = OrgtilknytningState.builder()
+                .navident(NAVIDENT)
+                .orgEnhetId(ORG_ID)
+                .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
+                .build();
+        when(orgtilknytningStateRepositoryMock.findByNavident(NAVIDENT)).thenReturn(List.of(expiredOrgtilknytning));
+
+        
+        importMissingOrgtilknytninger.createEventsForNewOrgtilknytning(missingOt);
+
+        
+        // Tre meldinger skal sendes
+        await()
+                .atMost(1, SECONDS)
+                .pollInterval(10, MILLISECONDS)
+                .until(() -> recordsQueue.size() == 3);
     }
 
     @Test

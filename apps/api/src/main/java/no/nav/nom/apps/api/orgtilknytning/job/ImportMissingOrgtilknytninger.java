@@ -16,6 +16,7 @@ import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
@@ -194,7 +195,11 @@ public class ImportMissingOrgtilknytninger {
         }
 
         var eksisterendeOrgtilknytninger = orgtilknytningStateRepository.findByNavident(missingOt.navident());
-        if (!eksisterendeOrgtilknytninger.isEmpty()) {
+        var notExpiredOrgtilknytninger = eksisterendeOrgtilknytninger.stream()
+                .filter(ot -> !otIsExpired(ot))
+                .toList();
+        
+        if (!notExpiredOrgtilknytninger.isEmpty()) {
             log.warn(SECURE_LOGS, "Ressurs med navident {} har eksisterende orgtilknytninger: {}", missingOt.navident(),
                     eksisterendeOrgtilknytninger);
             return "";
@@ -248,6 +253,10 @@ public class ImportMissingOrgtilknytninger {
         }
 
         return opprettetOrgtilknytningFid;
+    }
+    
+    private boolean otIsExpired(OrgtilknytningState ot) {
+        return ot.gyldigTom().isPresent() && ot.gyldigTom().get().isBefore(LocalDate.now());
     }
 
     public record MissingOrgtilknytning(
