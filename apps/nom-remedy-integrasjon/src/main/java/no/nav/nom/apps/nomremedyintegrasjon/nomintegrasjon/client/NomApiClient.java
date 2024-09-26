@@ -1,12 +1,15 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client;
 
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.generated.model.OrgEnhet;
 import no.nav.nom.generated.model.OrgtilknytningState;
 import no.nav.nom.generated.model.Ressurs;
 import no.nav.nom.generated.model.RessursState;
 import no.nav.nom.generated.model.Sektor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -92,6 +95,10 @@ public class NomApiClient {
                 .build(fid)
             )
             .retrieve()
+            .onStatus(
+                status -> status.equals(HttpStatus.NOT_FOUND),
+                response -> Mono.error(new OrgtilknytningNotFoundException(String.format("Orgtilknytning with fid %s not found", fid)))
+            )
             .bodyToMono(OrgtilknytningState.class)
             .retryWhen(defaultRetry)
             .block();

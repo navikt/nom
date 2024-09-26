@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredValueMissingException;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEvent;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEventRepository;
@@ -193,26 +194,34 @@ public class NomIntegrasjonService {
     private void handleDelayedOrgtiknytning(OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
         logger.info("Handling delayed update of OrgtilknytningDagligOppfolgingEndretEventV1 with fid {}", orgtilknytningDagligOppfolgingEndretEventV1.getFid());
 
-        var orgtilknytningDolEventData = orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData();
-        var orgtilknytningState = nomApiClient.getOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1.getFid());
+        try {
+            var orgtilknytningDolEventData = orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData();
+            var orgtilknytningState = nomApiClient.getOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1.getFid());
 
-        if (orgtilknytningState.getErDagligOppfolging() &&
-            orgtilknytningDolEventData.gyldigFom().equals(orgtilknytningState.getGyldigFom()) &&
-            orgtilknytningDolEventData.gyldigTom().equals(Optional.of(orgtilknytningState.getGyldigTom()))) {
-            updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
+            if (orgtilknytningState.getErDagligOppfolging() &&
+                orgtilknytningDolEventData.gyldigFom().equals(orgtilknytningState.getGyldigFom()) &&
+                orgtilknytningDolEventData.gyldigTom().equals(Optional.ofNullable(orgtilknytningState.getGyldigTom()))) {
+                updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
+            }
+        } catch (OrgtilknytningNotFoundException e) {
+            logger.info("Delayed update of OrgtilknytningDagligOppfolgingEndretEventV1 cancelled. {}", e.getMessage());
         }
     }
 
     private void handleDelayedOrgtiknytning(OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
         logger.info("Handling delayed update of OrgtilknytningDatoEndretEventV2 with fid {}", orgtilknytningDatoEndretEventV2.getFid());
 
-        var orgtilknytningEventData = orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData();
-        var orgtilknytningState = nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid());
+        try {
+            var orgtilknytningEventData = orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData();
+            var orgtilknytningState = nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid());
 
-        if (orgtilknytningState.getErDagligOppfolging() &&
-            orgtilknytningEventData.gyldigFom().equals(orgtilknytningState.getGyldigFom()) &&
-            orgtilknytningEventData.gyldigTom().equals(Optional.of(orgtilknytningState.getGyldigTom()))) {
-            updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
+            if (orgtilknytningState.getErDagligOppfolging() &&
+                orgtilknytningEventData.gyldigFom().equals(orgtilknytningState.getGyldigFom()) &&
+                orgtilknytningEventData.gyldigTom().equals(Optional.ofNullable(orgtilknytningState.getGyldigTom()))) {
+                updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
+            }
+        } catch (OrgtilknytningNotFoundException e) {
+            logger.info("Delayed processing of OrgtilknytningDatoEndretEventV2. {}", e.getMessage());
         }
     }
 

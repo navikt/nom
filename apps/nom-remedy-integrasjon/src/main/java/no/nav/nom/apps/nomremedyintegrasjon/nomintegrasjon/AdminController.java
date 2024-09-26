@@ -90,6 +90,23 @@ public class AdminController {
         return ResponseEntity.ok(nomIntegrasjonService.getNomIntegrasjonEntities());
     }
 
+    @Operation(
+        description = "Behandler forsinkede events",
+        security = @SecurityRequirement(name = BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+        }
+    )
+    @GetMapping(value = "/triggerDelayedEvents")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public void triggerDelayedEvents() {
+        nomIntegrasjonService.triggerDelayedEvents();
+    }
+
     public static String getAuthenticatedNavIdent() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Jwt jwt = (Jwt) authentication.getPrincipal();
@@ -97,4 +114,6 @@ public class AdminController {
             () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Couldn't find %s in Claims", NAVIDENT_CLAIM_NAME))
         );
     }
+
+
 }
