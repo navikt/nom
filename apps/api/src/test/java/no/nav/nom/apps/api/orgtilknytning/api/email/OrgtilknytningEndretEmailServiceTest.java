@@ -111,7 +111,7 @@ public class OrgtilknytningEndretEmailServiceTest {
         );
 
         // verify
-        String expected = MessageFormat.format(orgtilknytningEndretEmailService.epost_body_item_template,orgEnhet, LocalDate.now().minusDays(10), LocalDate.now().plusDays(10), navidentChangedBy, timestamp);
+        String expected = MessageFormat.format(orgtilknytningEndretEmailService.epost_body_item_template,"Ukjent", orgEnhet, LocalDate.now().minusDays(10), LocalDate.now().plusDays(10), navidentChangedBy, timestamp);
         var result = orgtilknytningEndretEmailService.composeOTChangesMessage(otEndringerData);
         assertEquals(expected, result.trim());
     }

@@ -500,6 +500,9 @@ public class OrgtilknytningRestService {
                     .build()
             );
         }
+
+        //update OTendretData for e-post varsel
+        addToOTEndretDataEmailQueue(navident, opprettetOrgtilknytningFid, OTEndretData.OTEndretDataType.OT_NY);
     }
 
     private void oppdaterRessursSluttdato(

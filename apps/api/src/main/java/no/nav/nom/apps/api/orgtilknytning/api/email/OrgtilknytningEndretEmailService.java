@@ -42,7 +42,7 @@ public class OrgtilknytningEndretEmailService {
     private final LederResolver lederResolver;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
 
-    public final String epost_body_item_template = "{0}, fra og med {1}, til og med {2}. Endring utført av {3}̋, på {4}.";
+    public final String epost_body_item_template = "{0}({1}), fra og med {2}, til og med {3}. Endring utført av {4}̋, på {5}.";
 
 
 
@@ -165,7 +165,8 @@ public class OrgtilknytningEndretEmailService {
             if(orgtilknytningState.isPresent()){
                 var ot = orgtilknytningState.get();
                 var utfortAv = event.changedBy();
-                String endring = MessageFormat.format(epost_body_item_template, ot.orgEnhetId(), ot.gyldigFom(), ot.gyldigTom().orElse(null), utfortAv, event.timestamp());
+                var orgenhetNavn = orgEnhetStateRepository.findById(ot.orgEnhetId()).map(orgEnhet -> orgEnhet.navn()).orElse("Ukjent");
+                String endring = MessageFormat.format(epost_body_item_template, orgenhetNavn, ot.orgEnhetId(), ot.gyldigFom(), ot.gyldigTom().orElse(null), utfortAv, event.timestamp());
                 otEndringer.append(endring);
             }
 
