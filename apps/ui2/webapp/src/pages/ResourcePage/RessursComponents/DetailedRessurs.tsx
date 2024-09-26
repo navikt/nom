@@ -458,10 +458,12 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
 
   if (editPersonopplysninger && (hasWriteAccess || hasSelfServiceAccess)) {
     return (
-      <EditPersonOpplysninger
-        hasSelfServiceAccess={hasSelfServiceAccess}
-        ressurs={ressurs}
-      />
+      <ModalProvider>
+        <EditPersonOpplysninger
+          hasSelfServiceAccess={hasSelfServiceAccess}
+          ressurs={ressurs}
+        />
+      </ModalProvider>
     );
   }
 

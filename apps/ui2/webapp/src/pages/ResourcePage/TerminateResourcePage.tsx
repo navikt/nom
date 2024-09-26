@@ -95,7 +95,7 @@ export function TerminateResourcePage() {
     return <></>;
   }
 
-  const onSubmit = async (values: { sluttDato: string }) => {
+  const onValid = async (values: { sluttDato: string }) => {
     const nySluttdato = values.sluttDato;
     const ressursSluttdato = ressurs.sluttdato;
 
@@ -162,7 +162,7 @@ export function TerminateResourcePage() {
       <PageBanner text="Medarbeider slutter" />
       <ContentWrapper>
         <FormProvider {...methods}>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(onValid)}>
             {ressurs && (
               <ContainerWithHighlightedTop
                 icon={fjernRessursIcon}
