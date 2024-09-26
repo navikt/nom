@@ -2,7 +2,6 @@ package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.getunleash.Unleash;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredValueMissingException;
@@ -61,8 +60,6 @@ public class NomIntegrasjonService {
 
     private final DelayedEventRepository delayedEventRepository;
 
-    private final Unleash unleash;
-
     private final ObjectMapper objectMapper;
 
 
@@ -71,14 +68,12 @@ public class NomIntegrasjonService {
         NomApiClient nomApiClient,
         LeaderElection leaderElection,
         DelayedEventRepository delayedEventRepository,
-        Unleash unleash,
         ObjectMapper objectMapper
     ) {
         this.nomIntegrasjonRepository = nomIntegrasjonRepository;
         this.nomApiClient = nomApiClient;
         this.leaderElection = leaderElection;
         this.delayedEventRepository = delayedEventRepository;
-        this.unleash = unleash;
         this.objectMapper = objectMapper;
     }
 
@@ -366,11 +361,6 @@ public class NomIntegrasjonService {
     }
 
     private void avsluttRessursInRemedy(String ressursFid, LocalDate sluttdatoForRessurs, String initiatedBy) {
-
-        if (!unleash.isEnabled("nom-remedy-integrasjon.delete_avsluttede_ressurser")) {
-            return;
-        }
-
         if (sluttdatoForRessurs.isBefore(LocalDate.now())) {
             var ressursState = nomApiClient.getRessursByFid(ressursFid);
 
@@ -384,11 +374,6 @@ public class NomIntegrasjonService {
     }
 
     public void findRessurserWithSluttdatoAndMarkForDeletion(LocalDate sluttdato, String initiatedBy) {
-
-        if (!unleash.isEnabled("nom-remedy-integrasjon.delete_avsluttede_ressurser")) {
-            return;
-        }
-
         var ressurserWithSluttdato =
             Stream.concat(
                 nomApiClient.getRessurser(no.nav.nom.generated.model.Sektor.EKSTERN, sluttdato).stream(),
