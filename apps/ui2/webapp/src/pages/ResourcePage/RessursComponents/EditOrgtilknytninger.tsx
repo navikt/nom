@@ -301,19 +301,19 @@ function OrgtilknytningForm({
 
   const onValid: SubmitHandler<{
     mappedeOrgtilknytninger: Partial<OrgtilknytningState>[];
-  }> = async (data) => {
+  }> = async (values) => {
     const validation = dolValidering(
-      data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+      values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
     );
 
     if (
       validation.dolGaps.length === 0 &&
       validation.dolOverlaps.length === 0
     ) {
-      await visBekreftelsesmodaler(data.mappedeOrgtilknytninger).then(() => {
+      await visBekreftelsesmodaler(values.mappedeOrgtilknytninger).then(() => {
         oppdaterOrgtilknytningerMutation.mutate(
           lagOppdaterOrgtilknytningerRequest(
-            data.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+            values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
           ),
         );
       });
