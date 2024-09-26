@@ -28,6 +28,8 @@ import no.nav.nom.generated.model.RessursState;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -83,6 +85,13 @@ public class NomIntegrasjonService {
     // Run at 00:15 every night
     @Scheduled(cron = "0 15 0 * * *")
     public void findRessurserWithSluttdatoYesterdayAndDeleteThemFromRemedy() {
+        if (leaderElection.isLeader()) {
+            triggerDelayedEvents();
+        }
+    }
+
+    @EventListener
+    public void contextRefreshed(ContextRefreshedEvent event) {
         if (leaderElection.isLeader()) {
             triggerDelayedEvents();
         }
