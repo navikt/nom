@@ -39,16 +39,12 @@ import java.util.Optional;
 @Slf4j
 @RequestMapping("/app/authorizedRessursRedigering")
 public class AuthorizedNavidentController {
-
     private final AuthorizedNavident authorizedNavident;
     private final AuthResolver authResolver;
-    private final Unleash unleash;
-    public static final String UNLEASH_DELEGER_TILGANG = "nom.deleger-tilgang";
 
-    public AuthorizedNavidentController(AuthorizedNavident authorizedNavident, AuthResolver authResolver, Unleash unleash) {
+    public AuthorizedNavidentController(AuthorizedNavident authorizedNavident, AuthResolver authResolver) {
         this.authorizedNavident = authorizedNavident;
         this.authResolver = authResolver;
-        this.unleash = unleash;
     }
 
     @Operation(
@@ -91,10 +87,6 @@ public class AuthorizedNavidentController {
     @PostMapping("addDelegatedAuthorization")
     @PreAuthorize("hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')")
     void addDelegatedAuthorization(@Valid @RequestBody LederTilgangForOrgenhetRequest request) {
-        if (!unleash.isEnabled(UNLEASH_DELEGER_TILGANG)) {
-            throw new AccessDeniedException("Metode er feature togglet av");
-        }
-
         Optional<String> lederNavident = SecurityUtil.getNavIdent(SecurityContextHolder.getContext().getAuthentication());
 
         if (lederNavident.isEmpty()) {
@@ -111,10 +103,6 @@ public class AuthorizedNavidentController {
     @GetMapping("removeDelegatedAuthorization/{navidentDelegertLeder}")
     @PreAuthorize("hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')")
     void removeDelegatedAuthorization(@PathVariable String navidentDelegertLeder, @RequestParam(name = "orgenhet") String orgenhetId) {
-        if (!unleash.isEnabled(UNLEASH_DELEGER_TILGANG)) {
-            throw new AccessDeniedException("Metode er feature togglet av");
-        }
-
         Optional<String> lederNavident = SecurityUtil.getNavIdent(SecurityContextHolder.getContext().getAuthentication());
 
         if (lederNavident.isEmpty()) {
@@ -130,10 +118,6 @@ public class AuthorizedNavidentController {
     @PostMapping("renewDelegatedAuthorization")
     @PreAuthorize("hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')")
     void renewDelegatedAuthorization(@RequestBody @Valid LederTilgangForOrgenhetRequest request) {
-        if (!unleash.isEnabled(UNLEASH_DELEGER_TILGANG)) {
-            throw new AccessDeniedException("Metode er feature togglet av");
-        }
-
         Optional<String> lederNavident = SecurityUtil.getNavIdent(SecurityContextHolder.getContext().getAuthentication());
 
         if (lederNavident.isEmpty()) {
