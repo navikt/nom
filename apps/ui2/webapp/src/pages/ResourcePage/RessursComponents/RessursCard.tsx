@@ -77,16 +77,18 @@ export function RessursCard({
           justify-content: end;
         `}
       >
-        <Button
-          icon={<PencilIcon fontSize="1.5rem" />}
-          onClick={() =>
-            navigate({ to: "/ressurs/create/$step", params: { step: "1" } })
-          }
-          size="small"
-          variant="secondary"
-        >
-          Gjenopprett
-        </Button>
+        {hasQuit && (
+          <Button
+            icon={<PencilIcon fontSize="1.5rem" />}
+            onClick={() =>
+              navigate({ to: "/ressurs/create/$step", params: { step: "1" } })
+            }
+            size="small"
+            variant="secondary"
+          >
+            Gjenopprett
+          </Button>
+        )}
       </div>
     </div>
   );
