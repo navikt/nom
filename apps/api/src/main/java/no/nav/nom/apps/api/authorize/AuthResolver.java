@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.authorize;
 
-import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
@@ -12,12 +11,9 @@ import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAcc
 @Service
 @Slf4j
 public class AuthResolver {
-    public static final String UNLEASH_REDIGERE_RESSURS_BRUK_NY_AUTH_RESOLVER = "nom.redigere_ressurs.bruk_ny_auth_resolver";
-    private final Unleash unleash;
     private final AuthorizedNavident authorizedNavident;
 
-    public AuthResolver(Unleash unleash, AuthorizedNavident authorizedNavident) {
-        this.unleash = unleash;
+    public AuthResolver(AuthorizedNavident authorizedNavident) {
         this.authorizedNavident = authorizedNavident;
     }
 
@@ -31,12 +27,8 @@ public class AuthResolver {
      * @return true hvis tilgang, false hvis ikke
      */
     public boolean kanRedigereRessurs(String navident) {
-        if (unleash.isEnabled(UNLEASH_REDIGERE_RESSURS_BRUK_NY_AUTH_RESOLVER)) {
-            return loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
-                authorizedNavident.kanBrukerRedigereRessurs(getAuthenticatedNavIdent(), navident);
-        } else {
-            return true;
-        }
+        return loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
+            authorizedNavident.kanBrukerRedigereRessurs(getAuthenticatedNavIdent(), navident);
     }
 
     /**
@@ -59,12 +51,7 @@ public class AuthResolver {
      * @return true hvis tilgang, false hvis ikke
      */
     public boolean kanOppretteRessurs(String orgenhetId) {
-        if (unleash.isEnabled(UNLEASH_REDIGERE_RESSURS_BRUK_NY_AUTH_RESOLVER)) {
-            return loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
-                authorizedNavident.kanBrukerOppretteRessurs(getAuthenticatedNavIdent(), orgenhetId);
-        } else {
-            return true;
-        }
+        return loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
+            authorizedNavident.kanBrukerOppretteRessurs(getAuthenticatedNavIdent(), orgenhetId);
     }
-
 }
