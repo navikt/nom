@@ -1,6 +1,5 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
-import io.getunleash.Unleash;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class NomIntegrasjonKafkaListener {
 
-    private final Unleash unleash;
     private final NomIntegrasjonService nomIntegrasjonService;
     private final MasteredRessursStateRepository masteredRessursStateRepository;
     private final RessursStateRepository ressursStateRepository;
@@ -35,7 +33,6 @@ public class NomIntegrasjonKafkaListener {
     private final Logger logger = LoggerFactory.getLogger(NomIntegrasjonKafkaListener.class);
 
     public NomIntegrasjonKafkaListener(
-        Unleash unleash,
         NomIntegrasjonService nomIntegrasjonService,
         MasteredRessursStateRepository masteredRessursStateRepository,
         RessursStateRepository ressursStateRepository,
@@ -45,7 +42,6 @@ public class NomIntegrasjonKafkaListener {
         NomStateOrgtilknytningListener nomStateOrgtilknytningListener,
         NomStateOrgEnhetListener nomStateOrgEnhetListener
     ) {
-        this.unleash = unleash;
         this.nomIntegrasjonService = nomIntegrasjonService;
         this.masteredRessursStateRepository = masteredRessursStateRepository;
         this.ressursStateRepository = ressursStateRepository;
@@ -65,18 +61,16 @@ public class NomIntegrasjonKafkaListener {
         logger.info("Waiting for NOM states to be ready");
         waitForNomStates();
         logger.info("Received ressurs event with fid {}", ressursEvent.getFid());
-        if (isWriteToRemedyEnabled()) {
 
-            putMDCContext(recordId, ressursEvent.getClass().getSimpleName());
+        putMDCContext(recordId, ressursEvent.getClass().getSimpleName());
 
-            if (isNomOriginationOrNomMastered(ressursEvent)) {
-                nomIntegrasjonService.handleRessursEvent(ressursEvent);
-            } else {
-                logger.info("Skipping event with fid {} since it is not originated from nom", ressursEvent.getFid());
-            }
-
-            MDC.clear();
+        if (isNomOriginationOrNomMastered(ressursEvent)) {
+            nomIntegrasjonService.handleRessursEvent(ressursEvent);
+        } else {
+            logger.info("Skipping event with fid {} since it is not originated from nom", ressursEvent.getFid());
         }
+
+        MDC.clear();
     }
 
     @KafkaListener(
@@ -88,18 +82,16 @@ public class NomIntegrasjonKafkaListener {
         logger.info("Waiting for NOM states to be ready");
         waitForNomStates();
         logger.info("Received orgtilknytning event with fid {}", orgtilknytningEvent.getFid());
-        if (isWriteToRemedyEnabled()) {
 
-            putMDCContext(recordId, orgtilknytningEvent.getClass().getSimpleName());
+        putMDCContext(recordId, orgtilknytningEvent.getClass().getSimpleName());
 
-            if (isNomOriginationOrNomMastered(orgtilknytningEvent)) {
-                nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningEvent);
-            } else {
-                logger.info("Skipping event with fid {} since it is not originated from nom", orgtilknytningEvent.getFid());
-            }
-
-            MDC.clear();
+        if (isNomOriginationOrNomMastered(orgtilknytningEvent)) {
+            nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningEvent);
+        } else {
+            logger.info("Skipping event with fid {} since it is not originated from nom", orgtilknytningEvent.getFid());
         }
+
+        MDC.clear();
     }
 
     private void waitForNomStates() {
@@ -126,22 +118,15 @@ public class NomIntegrasjonKafkaListener {
 
     private Boolean isNomOriginationOrNomMastered(Event event) {
         logger.info("Event with fid {} is a {}", event.getFid(), event.getClass().getSimpleName());
-        if (useNomMasteredLogic()) {
-            if (event instanceof RessursEvent) {
-                logger.info("Event {} is a RessursEvent", event.getFid());
-                return ressursEventIsNomOriginationOrNomMastered((RessursEvent) event);
-            } else if (event instanceof OrgtilknytningEvent) {
-                logger.info("Event {} is a OrgtilknytningEvent", event.getFid());
-                return orgtilknytningEventIsNomOriginationOrNomMastered((OrgtilknytningEvent) event);
-            }
-            return false;
-        } else {
-            return isNomOrigination(event);
-        }
-    }
 
-    private Boolean isNomOrigination(Event event) {
-        return event.getMetadata().inputMetadata().origination().initiatedFrom().contains(":nom-ui2");
+        if (event instanceof RessursEvent) {
+            logger.info("Event {} is a RessursEvent", event.getFid());
+            return ressursEventIsNomOriginationOrNomMastered((RessursEvent) event);
+        } else if (event instanceof OrgtilknytningEvent) {
+            logger.info("Event {} is a OrgtilknytningEvent", event.getFid());
+            return orgtilknytningEventIsNomOriginationOrNomMastered((OrgtilknytningEvent) event);
+        }
+        return false;
     }
 
     private Boolean orgtilknytningEventIsNomOriginationOrNomMastered(OrgtilknytningEvent orgtilknytningEvent) {
@@ -190,13 +175,5 @@ public class NomIntegrasjonKafkaListener {
             logger.info("Ressurs with navident {} is mastered", state.navident());
             return true;
         }).orElse(false);
-    }
-
-    private boolean isWriteToRemedyEnabled() {
-        return unleash.isEnabled("nom-remedy-integrasjon.write_to_remedy");
-    }
-
-    private boolean useNomMasteredLogic() {
-        return unleash.isEnabled("nom-remedy-integrasjon.use_nom_mastered_logic");
     }
 }

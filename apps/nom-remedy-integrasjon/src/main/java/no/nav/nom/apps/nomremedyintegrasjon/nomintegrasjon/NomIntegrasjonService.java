@@ -2,8 +2,8 @@ package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.getunleash.Unleash;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredValueMissingException;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEvent;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEventRepository;
@@ -27,6 +27,8 @@ import no.nav.nom.generated.model.RessursState;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -58,8 +60,6 @@ public class NomIntegrasjonService {
 
     private final DelayedEventRepository delayedEventRepository;
 
-    private final Unleash unleash;
-
     private final ObjectMapper objectMapper;
 
 
@@ -68,20 +68,25 @@ public class NomIntegrasjonService {
         NomApiClient nomApiClient,
         LeaderElection leaderElection,
         DelayedEventRepository delayedEventRepository,
-        Unleash unleash,
         ObjectMapper objectMapper
     ) {
         this.nomIntegrasjonRepository = nomIntegrasjonRepository;
         this.nomApiClient = nomApiClient;
         this.leaderElection = leaderElection;
         this.delayedEventRepository = delayedEventRepository;
-        this.unleash = unleash;
         this.objectMapper = objectMapper;
     }
 
     // Run at 00:15 every night
     @Scheduled(cron = "0 15 0 * * *")
     public void findRessurserWithSluttdatoYesterdayAndDeleteThemFromRemedy() {
+        if (leaderElection.isLeader()) {
+            triggerDelayedEvents();
+        }
+    }
+
+    @EventListener
+    public void contextRefreshed(ContextRefreshedEvent event) {
         if (leaderElection.isLeader()) {
             triggerDelayedEvents();
         }
@@ -193,26 +198,34 @@ public class NomIntegrasjonService {
     private void handleDelayedOrgtiknytning(OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
         logger.info("Handling delayed update of OrgtilknytningDagligOppfolgingEndretEventV1 with fid {}", orgtilknytningDagligOppfolgingEndretEventV1.getFid());
 
-        var orgtilknytningDolEventData = orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData();
-        var orgtilknytningState = nomApiClient.getOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1.getFid());
+        try {
+            var orgtilknytningDolEventData = orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData();
+            var orgtilknytningState = nomApiClient.getOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1.getFid());
 
-        if (orgtilknytningState.getErDagligOppfolging() &&
-            orgtilknytningDolEventData.gyldigFom().equals(orgtilknytningState.getGyldigFom()) &&
-            orgtilknytningDolEventData.gyldigTom().equals(Optional.of(orgtilknytningState.getGyldigTom()))) {
-            updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
+            if (orgtilknytningState.getErDagligOppfolging() &&
+                orgtilknytningDolEventData.gyldigFom().equals(orgtilknytningState.getGyldigFom()) &&
+                orgtilknytningDolEventData.gyldigTom().equals(Optional.ofNullable(orgtilknytningState.getGyldigTom()))) {
+                updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
+            }
+        } catch (OrgtilknytningNotFoundException e) {
+            logger.info("Delayed update of OrgtilknytningDagligOppfolgingEndretEventV1 cancelled. {}", e.getMessage());
         }
     }
 
     private void handleDelayedOrgtiknytning(OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
         logger.info("Handling delayed update of OrgtilknytningDatoEndretEventV2 with fid {}", orgtilknytningDatoEndretEventV2.getFid());
 
-        var orgtilknytningEventData = orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData();
-        var orgtilknytningState = nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid());
+        try {
+            var orgtilknytningEventData = orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData();
+            var orgtilknytningState = nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid());
 
-        if (orgtilknytningState.getErDagligOppfolging() &&
-            orgtilknytningEventData.gyldigFom().equals(orgtilknytningState.getGyldigFom()) &&
-            orgtilknytningEventData.gyldigTom().equals(Optional.of(orgtilknytningState.getGyldigTom()))) {
-            updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
+            if (orgtilknytningState.getErDagligOppfolging() &&
+                orgtilknytningEventData.gyldigFom().equals(orgtilknytningState.getGyldigFom()) &&
+                orgtilknytningEventData.gyldigTom().equals(Optional.ofNullable(orgtilknytningState.getGyldigTom()))) {
+                updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
+            }
+        } catch (OrgtilknytningNotFoundException e) {
+            logger.info("Delayed processing of OrgtilknytningDatoEndretEventV2. {}", e.getMessage());
         }
     }
 
@@ -348,11 +361,6 @@ public class NomIntegrasjonService {
     }
 
     private void avsluttRessursInRemedy(String ressursFid, LocalDate sluttdatoForRessurs, String initiatedBy) {
-
-        if (!unleash.isEnabled("nom-remedy-integrasjon.delete_avsluttede_ressurser")) {
-            return;
-        }
-
         if (sluttdatoForRessurs.isBefore(LocalDate.now())) {
             var ressursState = nomApiClient.getRessursByFid(ressursFid);
 
@@ -366,11 +374,6 @@ public class NomIntegrasjonService {
     }
 
     public void findRessurserWithSluttdatoAndMarkForDeletion(LocalDate sluttdato, String initiatedBy) {
-
-        if (!unleash.isEnabled("nom-remedy-integrasjon.delete_avsluttede_ressurser")) {
-            return;
-        }
-
         var ressurserWithSluttdato =
             Stream.concat(
                 nomApiClient.getRessurser(no.nav.nom.generated.model.Sektor.EKSTERN, sluttdato).stream(),

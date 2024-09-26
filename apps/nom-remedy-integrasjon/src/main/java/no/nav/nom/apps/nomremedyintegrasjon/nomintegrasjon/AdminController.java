@@ -1,6 +1,5 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
-import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -34,11 +33,9 @@ import static no.nav.nom.apps.nomremedyintegrasjon.config.SwaggerConfig.BEARER_T
 public class AdminController {
 
     private final NomIntegrasjonService nomIntegrasjonService;
-    private final Unleash unleash;
 
-    public AdminController(NomIntegrasjonService nomIntegrasjonService, Unleash unleash) {
+    public AdminController(NomIntegrasjonService nomIntegrasjonService) {
         this.nomIntegrasjonService = nomIntegrasjonService;
-        this.unleash = unleash;
     }
 
     @Operation(
@@ -59,10 +56,6 @@ public class AdminController {
         @Parameter(description = "Sluttdato for ressurser som skal slettes")
         @RequestParam LocalDate sluttdato
     ) {
-        if (!unleash.isEnabled("nom-remedy-integrasjon.delete_avsluttede_ressurser")) {
-            return ResponseEntity.status(403).body("Feature er ikke aktivert ennå");
-        }
-
         if (sluttdato.isAfter(LocalDate.now().minusDays(1))) {
             return ResponseEntity.badRequest().body("Ikke mulig å slette aktive ressurser fra remedy");
         }
@@ -97,4 +90,6 @@ public class AdminController {
             () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Couldn't find %s in Claims", NAVIDENT_CLAIM_NAME))
         );
     }
+
+
 }

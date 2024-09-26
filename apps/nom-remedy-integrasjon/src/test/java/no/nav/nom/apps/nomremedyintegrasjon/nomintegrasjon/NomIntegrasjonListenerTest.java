@@ -78,8 +78,6 @@ public class NomIntegrasjonListenerTest extends TestBase {
         when(nomStateRessursListener.hasReadToEndOnStartup()).thenReturn(true);
         when(nomStateOrgtilknytningListener.hasReadToEndOnStartup()).thenReturn(true);
         when(nomStateOrgEnhetListener.hasReadToEndOnStartup()).thenReturn(true);
-        when(unleash.isEnabled("nom-remedy-integrasjon.write_to_remedy")).thenReturn(true);
-        when(unleash.isEnabled("nom-remedy-integrasjon.use_nom_mastered_logic")).thenReturn(true);
     }
 
 
