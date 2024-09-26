@@ -4,7 +4,7 @@ import {
   ChevronUpIcon,
   InformationSquareFillIcon,
 } from "@navikt/aksel-icons";
-import { BodyShort, Heading } from "@navikt/ds-react";
+import { Heading, List } from "@navikt/ds-react";
 import { useState } from "react";
 
 export const pilotBannerHeight = "50px";
@@ -50,7 +50,7 @@ const PilotBanner = () => {
     <div css={outerDivStyles}>
       <div css={bannerStyles} onClick={() => setIsOpen(!isOpen)}>
         <InformationSquareFillIcon css={iconStyles} />
-        <Heading size="small">Løsningen er i pilot</Heading>
+        <Heading size="small">Nytt i NOM</Heading>
         <div css={buttonDivStyles}>
           {isOpen && <ChevronUpIcon fontSize="32px" />}
           {!isOpen && <ChevronDownIcon fontSize="32px" />}
@@ -58,15 +58,18 @@ const PilotBanner = () => {
       </div>
 
       {isOpen && (
-        <div css={textDivStyles}>
-          <BodyShort css={css({ lineHeight: "28px" })} size="medium">
-            NOM presenterer det formelle organisasjonshierarkiet i NAV.
-            Hierarkiet hentes per idag fra lønnssystemet, og oppsettet i
-            lønnssystemet gjør at ansatte må knyttes til laveste nivå i
-            organisasjonsstrukturen. Dette fører til at enkelte enheter gjentas
-            flere ganger.
-          </BodyShort>
-        </div>
+        <List as="ul" css={textDivStyles} title="September 2024">
+          <List.Item>
+            Alle kommunalt ansatte og eksterne konsulenter skal nå opprettes og
+            vedlikeholdes i NOM
+          </List.Item>
+          <List.Item>
+            Tabellvisning av medarbeidere i en organisasjonsenhet
+          </List.Item>
+          <List.Item>
+            Ny tilbakemeldingsfunksjon er lansert (nederst til høyre)
+          </List.Item>
+        </List>
       )}
     </div>
   );
