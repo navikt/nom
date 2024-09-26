@@ -45,7 +45,6 @@ import java.util.Optional;
 public class OrgtilknytningController {
 
     private final static Logger logger = LoggerFactory.getLogger(OrgtilknytningController.class);
-    private static final String UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL = "nom.ressurs.edit-external";
 
     private final Unleash unleash;
     private final OrgtilknytningRestService orgtilknytningRestService;
@@ -94,13 +93,8 @@ public class OrgtilknytningController {
             throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
         }
 
-        if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
-            orgtilknytningRestService.addOrgtilknyting(leggTilOrgtilknytningRequest);
-
-            return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
-        }
-
-        throw new AccessDeniedException("Opprettelse av orgtilknytning er blokkert");
+        orgtilknytningRestService.addOrgtilknyting(leggTilOrgtilknytningRequest);
+        return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
     }
 
     @PostMapping("/{fid}/dato")
@@ -122,13 +116,8 @@ public class OrgtilknytningController {
             throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
         }
 
-        if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
-            orgtilknytningRestService.updateOrgtilknytingDato(fid, endreOrgtilknytningDatoRequest);
-
-            return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
-        }
-
-        throw new AccessDeniedException("Endring av orgtilknytning er blokkert");
+        orgtilknytningRestService.updateOrgtilknytingDato(fid, endreOrgtilknytningDatoRequest);
+        return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
     }
 
     @PostMapping("/{fid}/tilknytningtype")
@@ -150,13 +139,8 @@ public class OrgtilknytningController {
             throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
         }
 
-        if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
-            orgtilknytningRestService.updateOrgtilknytningType(fid, endreTilknytningtypeRequest);
-
-            return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
-        }
-
-        throw new AccessDeniedException("Endring av orgtilknytning er blokkert");
+        orgtilknytningRestService.updateOrgtilknytningType(fid, endreTilknytningtypeRequest);
+        return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
     }
 
     @GetMapping("/{fid}")
@@ -193,21 +177,16 @@ public class OrgtilknytningController {
         if (unleash.isEnabled("nom.ressurs.ny-move-prosess")) {
             var isLeder = authResolver.kanRedigereRessurs(navident);
 
-            if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
-                orgtilknytningRestService.oppdaterOrgtilknytningerForRessurs(navident, oppdaterOrgtilknytningerForRessursRequest, isLeder);
-                return ResponseEntity.ok(StandardResponse.builder().message("Orgtilknytninger for ressurs oppdatert").build());
-            }
+            orgtilknytningRestService.oppdaterOrgtilknytningerForRessurs(navident, oppdaterOrgtilknytningerForRessursRequest, isLeder);
+            return ResponseEntity.ok(StandardResponse.builder().message("Orgtilknytninger for ressurs oppdatert").build());
         } else {
             if (!authResolver.kanRedigereRessurs(navident)) {
                 throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
             }
 
-            if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
-                orgtilknytningRestService.oppdaterOrgtilknytningerForRessurs(navident, oppdaterOrgtilknytningerForRessursRequest);
-                return ResponseEntity.ok(StandardResponse.builder().message("Orgtilknytninger for ressurs oppdatert").build());
-            }
+            orgtilknytningRestService.oppdaterOrgtilknytningerForRessurs(navident, oppdaterOrgtilknytningerForRessursRequest);
+            return ResponseEntity.ok(StandardResponse.builder().message("Orgtilknytninger for ressurs oppdatert").build());
         }
-        throw new AccessDeniedException("Endring av orgtilknytning er blokkert");
     }
 
 
@@ -262,5 +241,4 @@ public class OrgtilknytningController {
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(StandardResponse.builder().message("Server error").build());
     }
-
 }

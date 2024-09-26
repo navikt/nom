@@ -1,15 +1,11 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
-import jakarta.validation.Valid;
-
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
@@ -36,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -45,18 +42,14 @@ import java.util.NoSuchElementException;
 public class RessursController {
 
     private final static Logger log = LoggerFactory.getLogger(RessursController.class);
-    public static final String UNLEASH_EDIT_RESSURS = "nom.ressurs.edit-external";
     private final RessursRestService ressursRestService;
     private final AuthResolver authResolver;
-    private final Unleash unleash;
 
     public RessursController(
-            RessursRestService ressursRestService, AuthResolver authResolver,
-            Unleash unleash
+            RessursRestService ressursRestService, AuthResolver authResolver
     ) {
         this.ressursRestService = ressursRestService;
         this.authResolver = authResolver;
-        this.unleash = unleash;
     }
 
     @GetMapping
@@ -110,9 +103,6 @@ public class RessursController {
             throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
         }
 
-        if (!unleash.isEnabled(UNLEASH_EDIT_RESSURS)) {
-            throw new AccessDeniedException("Endring av ressurs er blokkert");
-        }
         ressursRestService.avvikleRessurs(fid, request);
         return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
     }
@@ -134,10 +124,6 @@ public class RessursController {
     ) {
         if (!authResolver.kanRedigereRessurs(navident)) {
             throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
-        }
-
-        if (!unleash.isEnabled(UNLEASH_EDIT_RESSURS)) {
-            throw new AccessDeniedException("Endring av ressurs er blokkert");
         }
 
         ressursRestService.updateRessursNavn(navident, updateVisningsnavnRequest);
@@ -162,10 +148,6 @@ public class RessursController {
     ) {
         if (!authResolver.kanRedigereRessurs(navident) && !authResolver.kanSelvbetjene(navident)) {
             throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
-        }
-
-        if (!unleash.isEnabled(UNLEASH_EDIT_RESSURS)) {
-            throw new AccessDeniedException("Endring av ressurs er blokkert");
         }
 
         ressursRestService.updateRessursPrimaryTelefonnummer(navident, updatePrimarytelefonnummer);
@@ -272,10 +254,6 @@ public class RessursController {
     ) {
         if (!authResolver.kanRedigereRessurs(ressursRestService.findRessursByFid(fid).state().navident())) {
             throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
-        }
-
-        if (!unleash.isEnabled(UNLEASH_EDIT_RESSURS)) {
-            throw new AccessDeniedException("Endring av ressurs er blokkert");
         }
 
         ressursRestService.updateFysiskeBrukersteder(fid, updateFysiskeBrukerstederRequest);
