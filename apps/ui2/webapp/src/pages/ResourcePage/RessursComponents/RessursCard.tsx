@@ -1,5 +1,7 @@
 import { css } from "@emotion/react";
-import { Heading, Tag } from "@navikt/ds-react";
+import { PencilIcon } from "@navikt/aksel-icons";
+import { Button, Heading, Tag } from "@navikt/ds-react";
+import { useNavigate } from "@tanstack/react-router";
 import { format } from "date-fns";
 import React from "react";
 
@@ -16,6 +18,8 @@ export function RessursCard({
   ressurs: Ressurs;
   hasQuit?: boolean;
 }) {
+  const navigate = useNavigate();
+
   return (
     <div
       css={[
@@ -38,6 +42,7 @@ export function RessursCard({
         </Heading>
         {hasQuit && <Tag variant="warning">Sluttet</Tag>}
       </div>
+
       <div
         css={css`
           display: grid;
@@ -64,6 +69,26 @@ export function RessursCard({
             format(new Date(ressurs.sluttdato), DATE_FORMATS.no)
           }
         />
+      </div>
+
+      <div
+        css={css`
+          display: flex;
+          justify-content: end;
+        `}
+      >
+        {hasQuit && (
+          <Button
+            icon={<PencilIcon fontSize="1.5rem" />}
+            onClick={() =>
+              navigate({ to: "/ressurs/create/$step", params: { step: "1" } })
+            }
+            size="small"
+            variant="secondary"
+          >
+            Gjenopprett
+          </Button>
+        )}
       </div>
     </div>
   );
