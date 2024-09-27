@@ -5,6 +5,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { format } from "date-fns";
 import React from "react";
 
+import { useHasWriteAccess } from "~/api/useGetSession";
 import { LabelWithValue } from "~/components/LabelWithValue";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { blueTopBorder } from "~/resources/NomStyles";
@@ -18,6 +19,8 @@ export function RessursCard({
   ressurs: Ressurs;
   hasQuit?: boolean;
 }) {
+  const hasWriteAccess = useHasWriteAccess();
+
   const navigate = useNavigate();
 
   return (
@@ -77,7 +80,7 @@ export function RessursCard({
           justify-content: end;
         `}
       >
-        {hasQuit && (
+        {hasQuit && hasWriteAccess && (
           <Button
             icon={<PencilIcon fontSize="1.5rem" />}
             onClick={() =>
