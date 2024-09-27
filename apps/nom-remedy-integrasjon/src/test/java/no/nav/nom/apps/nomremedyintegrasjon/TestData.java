@@ -6,6 +6,7 @@ import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
@@ -178,6 +179,22 @@ public class TestData {
             .gyldigFom(LocalDate.now())
             .gyldigTom(Optional.of(LocalDate.now().plusMonths(11)))
             .build();
+    }
+
+    public static OrgtilknytningFjernetEventV1 orgtilknytningFjernetEventV1(String fid) {
+        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+
+        return new OrgtilknytningFjernetEventV1(
+            fid,
+            new OrgtilknytningFjernetEventV1.OrgtilknytningFjernetEventData(
+                existingRessurs.getNavident(),
+                orgenhet().getId(),
+                LocalDate.now(),
+                null
+            ),
+            inputMetadata(),
+            null
+        );
     }
 
     public static InputMetadata inputMetadata(){
