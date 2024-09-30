@@ -54,7 +54,10 @@ import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { showToast } from "~/hooks/showToast";
-import { dolValidering } from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import {
+  dolValidering,
+  setRessursStartdato,
+} from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { RemedyEndringModal } from "~/pages/ResourcePage/RessursComponents/Modal/RemedyEndringModal";
 import { TomDatoModal } from "~/pages/ResourcePage/RessursComponents/Modal/TomDatoModal";
 import { OrgtilknytningTimeline } from "~/pages/ResourcePage/RessursComponents/OrgtilknytningTimeline";
@@ -68,6 +71,7 @@ import type {
 import { Sektor } from "~/types/api-models";
 import {
   dateWithoutTimezone,
+  earliestDateInList,
   formatDateWithoutTimezone,
   formatDisplayDate,
   formatVisningsnavn,
@@ -220,6 +224,16 @@ function OrgtilknytningForm({
   const lonnsskjemaLenke: string =
     "https://navno.sharepoint.com/sites/intranett-lonnsadministrasjon/SitePages/L%C3%B8nnsskjema.aspx";
 
+  const tidligsteOrgtilknytningStartdato = earliestDateInList(
+    orgtilknytninger
+      .filter((orgtilknytning) => orgtilknytning.gyldigFom)
+      .map((orgtilknytning) => new Date(orgtilknytning.gyldigFom as string)),
+  );
+
+  const tidligsteOrgDatoPre = tidligsteOrgtilknytningStartdato
+    ? formatDateWithoutTimezone(tidligsteOrgtilknytningStartdato)
+    : undefined;
+
   const hasFieldTomChanged = (field: Partial<OrgtilknytningState>) => {
     const originalField = orgtilknytninger.find(
       (tilknytning) => tilknytning.fid === field.fid,
@@ -314,6 +328,11 @@ function OrgtilknytningForm({
         oppdaterOrgtilknytningerMutation.mutate(
           lagOppdaterOrgtilknytningerRequest(
             values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+            setRessursStartdato(
+              ressurs,
+              values.mappedeOrgtilknytninger,
+              tidligsteOrgDatoPre,
+            ),
           ),
         );
       });
@@ -857,6 +876,7 @@ function InnholdInformasjonsboks({ ressursSektor }: { ressursSektor: Sektor }) {
 
 function lagOppdaterOrgtilknytningerRequest(
   orgtilknytninger: OrgtilknytningEtterValidering[],
+  setRessursStartdato: boolean,
 ): OppdaterOrgtilknytningerForRessursRequest {
   const [eksisterendeOrgtilknytninger, nyeOrgtilknytninger] = partition(
     orgtilknytninger,
@@ -880,7 +900,7 @@ function lagOppdaterOrgtilknytningerRequest(
       orgEnhetId: orgtilknytning.orgEnhetId,
     })),
     setRessursSluttdato: true,
-    setRessursStartdato: false,
+    setRessursStartdato: setRessursStartdato,
   };
 }
 
