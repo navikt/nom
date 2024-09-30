@@ -44,7 +44,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -429,9 +429,9 @@ public class OrgtilknytningRestService {
             OTEndretData.builder()
                 .fid(fid)
                 .navident(navident)
-                .changedBy(SecurityUtil.getAuthenticatedNavIdent())
+                .changedBy(SecurityUtil.getAuthenticatedAzpName() + "(" + SecurityUtil.getAuthenticatedNavIdent() + ")")
                 .eventType(eventType)
-                .timestamp(LocalDateTime.now().toString())
+                .timestamp(DateTimeFormatter.ofPattern("dd.MM.YYYY").format(LocalDate.now()))
                 .build()
         );
     }

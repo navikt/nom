@@ -25,6 +25,7 @@ import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -111,7 +112,7 @@ public class OrgtilknytningEndretEmailServiceTest {
         );
 
         // verify
-        String expected = MessageFormat.format(orgtilknytningEndretEmailService.epost_body_item_template,"Ukjent", orgEnhet, LocalDate.now().minusDays(10), LocalDate.now().plusDays(10), navidentChangedBy, timestamp);
+        String expected = MessageFormat.format(orgtilknytningEndretEmailService.epost_body_item_template,"Ukjent", orgEnhet,orgtilknytningEndretEmailService.formatDateTime(LocalDate.now().minusDays(10)), orgtilknytningEndretEmailService.formatDateTime(LocalDate.now().plusDays(10)), navidentChangedBy, timestamp);
         var result = orgtilknytningEndretEmailService.composeOTChangesMessage(otEndringerData);
         assertEquals(expected, result.trim());
     }
@@ -180,4 +181,13 @@ public class OrgtilknytningEndretEmailServiceTest {
         assertTrue(result.contains(navidentChangedBy));
         assertTrue(result.contains(orgenhetLederNavIdent));
     }
-}
+
+    @Test
+    public void testDateFormat() {
+        // setup data
+        String timestamp = DateTimeFormatter.ofPattern("dd.MM.YYYY").format(LocalDate.of(2021, 10, 1));
+        assertEquals("01.10.2021", timestamp);
+
+    }
+
+    }
