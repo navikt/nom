@@ -43,6 +43,7 @@ import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningDaglig
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningDagligOppfolgingEndretEventV1;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningDatoEndretEventData;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningDatoEndretEventV2;
+import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningFjernetEventV1;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningState;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressurs;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursFysiskeBrukerstederOppdatertEventData;
@@ -59,7 +60,12 @@ import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSec
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.fifteenCharLengthZeroPaddedNumber;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.formatFornavnWithMellomnavn;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class NomIntegrasjonServiceTest extends TestBase {
@@ -473,6 +479,24 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .mobil(existingRessurs.getPrimaryTelefonnummer())
                     .build()
             ));
+    }
+
+    @Test
+    @DisplayName("Should delete OrgtilknytningEvents from local db with deleted orgtilknytning fid")
+    void testShouldDeleteOrgtilknytningEventsFromDb() {
+        var orgtilknytningDagligOppfolgingEndretEventV1 = orgtilknytningDagligOppfolgingEndretEventV1();
+        var orgtilknytningFjernetEventV1 = orgtilknytningFjernetEventV1(orgtilknytningDagligOppfolgingEndretEventV1.getFid());
+
+        delayedEventRepository.save(
+            DelayedEvent.builder()
+                .delayedEventId(UUID.randomUUID())
+                .delayedUntil(LocalDate.now())
+                .event(orgtilknytningDagligOppfolgingEndretEventV1)
+                .build()
+        );
+
+        nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningFjernetEventV1);
+       assertThat(delayedEventRepository.findAll()).isEmpty();
     }
 
     @Test
