@@ -7,8 +7,13 @@ import {
   TokenFillIcon,
 } from "@navikt/aksel-icons";
 import { Button, Dropdown } from "@navikt/ds-react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
+import {
+  getOrgEnheterLedetAvOptions,
+  getTilgangerDelegertTilMegOptions,
+} from "~/api/react-query-endpoints";
 import {
   useGetSession,
   useHasAdminAccess,
@@ -17,10 +22,24 @@ import {
 import hierarchyFilled from "~/resources/hierarchyFilled.svg";
 
 export function BurgerMenu() {
-  const navigate = useNavigate();
   const hasAdminAccess = useHasAdminAccess();
   const hasWriteAccess = useHasWriteAccess();
+
   const session = useGetSession();
+
+  const navigate = useNavigate();
+
+  const delegertTilMeg =
+    useQuery(getTilgangerDelegertTilMegOptions()).data ?? [];
+
+  const ledetAvMeg = useGetSession().data?.navident
+    ? useQuery(
+        getOrgEnheterLedetAvOptions(useGetSession().data?.navident as string),
+      ).data ?? []
+    : [];
+
+  const lederEllerDelegert =
+    ledetAvMeg?.length > 0 || delegertTilMeg?.length > 0;
 
   return (
     <Dropdown>
@@ -59,7 +78,7 @@ export function BurgerMenu() {
             <PersonFillIcon color="black" fontSize="24px" />
             <span>Min profil</span>
           </Dropdown.Menu.List.Item>
-          {hasWriteAccess && (
+          {(hasAdminAccess || (hasWriteAccess && lederEllerDelegert)) && (
             <Dropdown.Menu.List.Item
               data-cy="opprettRessurs-button"
               onClick={() =>
@@ -70,7 +89,7 @@ export function BurgerMenu() {
               <span>Opprett medarbeider</span>
             </Dropdown.Menu.List.Item>
           )}
-          {hasWriteAccess && (
+          {(hasAdminAccess || (hasWriteAccess && lederEllerDelegert)) && (
             <Dropdown.Menu.List.Item
               data-cy="tilganger-button"
               onClick={() => navigate({ to: "/tilganger" })}
