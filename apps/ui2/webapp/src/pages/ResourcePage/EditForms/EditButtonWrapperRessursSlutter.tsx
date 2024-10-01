@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import React from "react";
 
 import { harLederTilgangForNavidentOptions } from "~/api/react-query-endpoints";
+import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
 import type { Ressurs } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
 
@@ -17,17 +17,21 @@ export function EditButtonWrapperRessursSlutter({
   const { editPersonopplysninger } = useSearch({
     from: "/ressurs/$id",
   });
+  const hasWriteAccess = useHasWriteAccess();
+  const hasAdminAccess = useHasAdminAccess();
+
   const hasWriteAccessForRessurs =
     useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
+
   const ressursCanBeEdited = ressurs.sektor !== Sektor.NAV_STATLIG;
 
   if (
-    !hasWriteAccessForRessurs ||
-    !ressursCanBeEdited ||
-    editPersonopplysninger
+    !editPersonopplysninger &&
+    ressursCanBeEdited &&
+    (hasAdminAccess || (hasWriteAccess && hasWriteAccessForRessurs))
   ) {
-    return <></>;
+    return children;
   }
 
-  return children;
+  return;
 }
