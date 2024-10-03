@@ -557,8 +557,9 @@ public class NomIntegrasjonService {
             .tiltredelsesdato(
                 dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getGyldigFom).map(Utils::epochSecondsNorwegianTimeNoon).orElse(null)
             )
-            .utlopsdato(
-                dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getGyldigTom).map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null)
+            .utlopsdato(ressurs.getSektor().equals(no.nav.nom.generated.model.Sektor.NAV_KOMMUNAL)
+                ? null
+                : dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getGyldigTom).map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null)
             )
             .mobil(isNull(ressurs.getPrimaryTelefonnummer()) || ressurs.getPrimaryTelefonnummer().isBlank() ? null : ressurs.getPrimaryTelefonnummer())
             .build();
