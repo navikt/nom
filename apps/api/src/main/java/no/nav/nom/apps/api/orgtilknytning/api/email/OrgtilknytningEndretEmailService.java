@@ -167,7 +167,7 @@ public class OrgtilknytningEndretEmailService {
             if(orgtilknytningState.isPresent()){
                 var ot = orgtilknytningState.get();
                 var utfortAvNavIdent = event.changedByNavIdent();
-                var utfortAvRessurs = ressursStateRepository.findByNavident(utfortAvNavIdent.trim());
+                var utfortAvRessurs = ressursStateRepository.findByNavident(utfortAvNavIdent);
                 String utfortAvRessursNavn = utfortAvRessurs.isPresent()? utfortAvRessurs.get().visningsnavn().getFormattedVisningsnavn() : "Ukjent";
                 log.info("Sender OT endringer utfortAv: {}, {}, {}", utfortAvNavIdent, utfortAvRessurs, utfortAvRessursNavn);
                 var orgenhetNavn = orgEnhetStateRepository.findById(ot.orgEnhetId()).map(orgEnhet -> orgEnhet.navn()).orElse("Ukjent");
