@@ -16,7 +16,7 @@ import { SearchForPerson } from "~/pages/CreateResourcePage/components/SearchFor
 import { fullwidthRow } from "~/resources/NomStyles";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import type { FolkeregisterPerson, Person } from "~/types/api-models";
-import { capitalizeName, isTodayOrAfter, isTodayOrBefore } from "~/utils";
+import { capitalizeName, isTodayOrAfter } from "~/utils";
 
 export function PersonopplysningerStep() {
   const { personident } = useSearch({
