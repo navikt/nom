@@ -465,7 +465,7 @@ function TilgangRowEditable({ tilgang }: { tilgang: LederTilgangState }) {
           type="button"
           variant="secondary"
         >
-          Slett
+          Avslutt
         </Button>
       </Table.DataCell>
     </Table.Row>
