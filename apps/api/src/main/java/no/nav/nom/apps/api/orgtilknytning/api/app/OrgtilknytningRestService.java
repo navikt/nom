@@ -425,18 +425,12 @@ public class OrgtilknytningRestService {
 
     private void addToOTEndretDataEmailQueue(String navident, String fid, OTEndretData.OTEndretDataType eventType) {
         String changedByNavIdent = SecurityUtil.getAuthenticatedNavIdent();
-        var changedByRessurs = ressursStateRepository.findByNavident(changedByNavIdent);
-        String changedBy = SecurityUtil.getAuthenticatedAzpName() + "(" + changedByNavIdent + ")";
-        if(changedByRessurs.isPresent()) {
-            changedBy = changedByRessurs.get().visningsnavn() + "(" + changedByNavIdent + ")";
-        }
-
         orgtilknytningEndretEmailService.addToOrgtilknytningEndringerQueue(
             navident,
             OTEndretData.builder()
                 .fid(fid)
                 .navident(navident)
-                .changedBy(changedBy)
+                .changedByNavIdent(changedByNavIdent)
                 .eventType(eventType)
                 .timestamp(DateTimeFormatter.ofPattern("dd.MM.YYYY").format(LocalDate.now()))
                 .build()
