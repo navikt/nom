@@ -46,7 +46,10 @@ public class DelegertLederStateRepositoryImpl implements DelegertLederStateRepos
 
     @Override
     public boolean erOrgenhetDelegertTilNavident(String orgenhetId, String navident) {
-        return delegertLederByNavidentAndEnhet.getOrDefault(navident, Collections.emptyMap()).containsKey(orgenhetId);
+        return delegertLederByNavidentAndEnhet.getOrDefault(navident, Collections.emptyMap())
+            .getOrDefault(orgenhetId, Collections.emptyList()).stream()
+            .filter(LederTilgangState::isActive)
+            .count() > 0;
     }
 
     @Override
