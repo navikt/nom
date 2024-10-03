@@ -191,7 +191,7 @@ public class RessursHendelseForEventsourceService {
         ressursCommandService.oppdaterRessursSluttdatoEvent(
             new OppdaterSluttdatoCommand(
                 fid,
-                Optional.of(dvhRessurs.getSluttdato()),
+                Optional.ofNullable(dvhRessurs.getSluttdato()),
                 createInputMetadata(dvhRessurs.getRawData())
             )
         );
