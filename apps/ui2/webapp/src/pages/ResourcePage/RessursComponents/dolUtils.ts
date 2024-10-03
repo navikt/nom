@@ -243,8 +243,16 @@ export function setRessursStartdato(
     ? formatDateWithoutTimezone(tidligsteNyeOrgtilknytningStartdato)
     : undefined;
 
-  return ressursStartdato
-    ? isSameDate(ressursStartdato, tidligsteOrgDatoPre as string) ||
-        isBeforeDate(tidligsteOrgDatoPost as string, ressursStartdato)
-    : false;
+  if (!ressursStartdato || !tidligsteOrgDatoPost) {
+    return false;
+  }
+
+  if (
+    tidligsteOrgDatoPre &&
+    isSameDate(tidligsteOrgDatoPre, ressursStartdato)
+  ) {
+    return true;
+  }
+
+  return isBeforeDate(tidligsteOrgDatoPost, ressursStartdato);
 }

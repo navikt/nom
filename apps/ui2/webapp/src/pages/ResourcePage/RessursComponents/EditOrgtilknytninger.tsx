@@ -75,9 +75,9 @@ import {
   formatDateWithoutTimezone,
   formatDisplayDate,
   formatVisningsnavn,
+  isBeforeToday,
   isSameDateOrAfter,
   isSameDateOrBefore,
-  isTodayOrAfter,
   todayWithoutTimezone,
 } from "~/utils";
 
@@ -373,13 +373,17 @@ function OrgtilknytningForm({
         )}
 
         {fields.map((field, index) => {
+          const avsluttet =
+            !!field.gyldigTom &&
+            isBeforeToday(dateWithoutTimezone(new Date(field.gyldigTom)));
+
           if (
             field.fid &&
             field.gyldigTom &&
             !hasFieldTomChanged(field) &&
             !isSameDateOrAfter(
               dateWithoutTimezone(new Date(field.gyldigTom)),
-              subMonths(todayWithoutTimezone(), 2),
+              dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
             )
           ) {
             return (
@@ -404,7 +408,10 @@ function OrgtilknytningForm({
               key={field.id}
             >
               {field.fid ? (
-                <EditOrgilkntyningFormPart index={index} />
+                <EditOrgilkntyningFormPart
+                  avsluttet={avsluttet}
+                  index={index}
+                />
               ) : (
                 <NewOrgtilknytningFormPart
                   index={index}
@@ -589,7 +596,13 @@ function NewOrgtilknytningFormPart({
   );
 }
 
-function EditOrgilkntyningFormPart({ index }: { index: number }) {
+function EditOrgilkntyningFormPart({
+  index,
+  avsluttet,
+}: {
+  index: number;
+  avsluttet: boolean;
+}) {
   const { watch } = useFormContext();
   const field = watch(`mappedeOrgtilknytninger.${index}`);
 
@@ -609,12 +622,11 @@ function EditOrgilkntyningFormPart({ index }: { index: number }) {
       >
         <Heading size="medium">{orgEnhetQuery.data?.navn}</Heading>
 
-        {field.gyldigTom &&
-          !isTodayOrAfter(dateWithoutTimezone(new Date(field.gyldigTom))) && (
-            <Tag size="medium" variant="warning">
-              Avsluttet
-            </Tag>
-          )}
+        {field.gyldigTom && avsluttet && (
+          <Tag size="medium" variant="warning">
+            Avsluttet
+          </Tag>
+        )}
       </div>
 
       <BodyLong>
