@@ -6,10 +6,13 @@ import freemarker.template.TemplateException;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,6 +61,9 @@ public class OrgtilknytningEndretEmailServiceTest {
     @Mock
     private OrgEnhetStateRepository orgEnhetStateRepository;
 
+    @Mock
+    private RessursStateRepository ressursStateRepository;
+
     @Test
     public void tessFreemarkerTemplate() throws TemplateException, IOException {
         configuration.setClassForTemplateLoading(this.getClass(), "/templates/");
@@ -101,18 +107,30 @@ public class OrgtilknytningEndretEmailServiceTest {
             )
         );
 
+
+        String navidentChangedForNavn = "Ressurs";
+        String navidentChangedEtterNavn = "Navn";
+        var navidentChangedByVisningsnavn = new Visningsnavn(navidentChangedForNavn, Optional.empty(), navidentChangedEtterNavn);
+        when(ressursStateRepository.findByNavident(navidentChangedBy)).thenReturn(
+            Optional.of(RessursState.builder()
+                .navident(navidentChangedBy)
+                .visningsnavn(navidentChangedByVisningsnavn)
+                .build()
+            )
+        );
+
         // test
         List<OTEndretData> otEndringerData = List.of(
             OTEndretData.builder()
                 .fid(fid)
-                .changedBy(navidentChangedBy)
+                .changedByNavIdent(navidentChangedBy)
                 .timestamp(timestamp)
                 .eventType(OTEndretData.OTEndretDataType.OT_NY)
                 .build()
         );
 
         // verify
-        String expected = MessageFormat.format(orgtilknytningEndretEmailService.epost_body_item_template,"Ukjent", orgEnhet,orgtilknytningEndretEmailService.formatDateTime(LocalDate.now().minusDays(10)), orgtilknytningEndretEmailService.formatDateTime(LocalDate.now().plusDays(10)), navidentChangedBy, timestamp);
+        String expected = MessageFormat.format(orgtilknytningEndretEmailService.epost_body_item_template,"Ukjent", orgEnhet,orgtilknytningEndretEmailService.formatDateTime(LocalDate.now().minusDays(10)), orgtilknytningEndretEmailService.formatDateTime(LocalDate.now().plusDays(10)), navidentChangedByVisningsnavn.getFormattedVisningsnavn(), timestamp);
         var result = orgtilknytningEndretEmailService.composeOTChangesMessage(otEndringerData);
         assertEquals(expected, result.trim());
     }
@@ -170,7 +188,7 @@ public class OrgtilknytningEndretEmailServiceTest {
             List.of(
                 OTEndretData.builder()
                     .fid(fid)
-                    .changedBy(navidentChangedBy)
+                    .changedByNavIdent(navidentChangedBy)
                     .timestamp(timestamp)
                     .eventType(OTEndretData.OTEndretDataType.OT_ENDRET)
                     .build()
