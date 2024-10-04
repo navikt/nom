@@ -67,6 +67,7 @@ public class RessursUtlopersnartEmailService {
         if(!unleash.isEnabled(UNLEASH_SLUTTDATO_UTLOPER_EPOST_VARSEL)) {
             log.info("Sender en e-post om utløpsdato for ressurser til ledere av organisasjonsenheter");
             var ressurserUtloperSnart = getUtlopendeRessurser();
+            log.info("Ressurser utløper snart: {}", ressurserUtloperSnart);
             if(!ressurserUtloperSnart.isEmpty()){
                 ressurserUtloperSnart.forEach(this::sendEmail);
             }
