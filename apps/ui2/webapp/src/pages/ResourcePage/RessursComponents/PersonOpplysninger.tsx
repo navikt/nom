@@ -18,7 +18,11 @@ import {
   getLedereForRessurs,
   harLederTilgangForNavidentOptions,
 } from "~/api/react-query-endpoints";
-import { useGetSession } from "~/api/useGetSession";
+import {
+  useGetSession,
+  useHasAdminAccess,
+  useHasWriteAccess,
+} from "~/api/useGetSession";
 import { LabelWithValue } from "~/components/LabelWithValue";
 import { UserImage } from "~/components/UserImage";
 import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
@@ -80,6 +84,9 @@ export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
 function EditButton({ ressurs }: { ressurs: Ressurs }) {
   const navigate = useNavigate();
 
+  const hasWriteAccess = useHasWriteAccess();
+  const hasAdminAccess = useHasAdminAccess();
+
   const hasWriteAccessForRessurs =
     useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
 
@@ -89,39 +96,40 @@ function EditButton({ ressurs }: { ressurs: Ressurs }) {
   const ressursCanBeEdited = ressurs.sektor !== Sektor.NAV_STATLIG;
 
   if (
-    !hasWriteAccessForRessurs &&
-    !(hasWriteAccessForSelvbetjening && ressurs.isNomMastered)
+    hasAdminAccess ||
+    (hasWriteAccess && hasWriteAccessForRessurs) ||
+    hasWriteAccessForSelvbetjening
   ) {
-    return;
+    return (
+      <HStack align="center" gap="2">
+        {!ressursCanBeEdited && (
+          <HelpText title="Hvorfor er dette utilgjengelig?">
+            Statlige ansatte kan ikke opprettes eller endres i NOM på dette
+            tidspunktet. Disse kan endres i tråd med gjeldende rutiner i
+            Identrutina og Unit4.
+          </HelpText>
+        )}
+
+        <Button
+          data-cy="endre-personopplysninger-button"
+          disabled={!ressursCanBeEdited}
+          icon={<PencilIcon aria-hidden />}
+          onClick={() =>
+            navigate({
+              search: { editPersonopplysninger: true },
+              params: (previous) => previous,
+            })
+          }
+          size="small"
+          variant="secondary"
+        >
+          Endre personopplysninger
+        </Button>
+      </HStack>
+    );
   }
 
-  return (
-    <HStack align="center" gap="2">
-      {!ressursCanBeEdited && (
-        <HelpText title="Hvorfor er dette utilgjengelig?">
-          Statlige ansatte kan ikke opprettes eller endres i NOM på dette
-          tidspunktet. Disse kan endres i tråd med gjeldende rutiner i
-          Identrutina og Unit4.
-        </HelpText>
-      )}
-
-      <Button
-        data-cy="endre-personopplysninger-button"
-        disabled={!ressursCanBeEdited}
-        icon={<PencilIcon aria-hidden />}
-        onClick={() =>
-          navigate({
-            search: { editPersonopplysninger: true },
-            params: (previous) => previous,
-          })
-        }
-        size="small"
-        variant="secondary"
-      >
-        Endre personopplysninger
-      </Button>
-    </HStack>
-  );
+  return;
 }
 
 export function KortFortalt() {
