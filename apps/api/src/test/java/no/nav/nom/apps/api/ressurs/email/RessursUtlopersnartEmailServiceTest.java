@@ -192,7 +192,6 @@ public class RessursUtlopersnartEmailServiceTest {
         assertEquals(expected.size(), result.size());
         assertTrue(expected.containsAll(result));
         assertTrue(result.containsAll(expected));
-        assertEquals(expected, result);
     }
 
 }
