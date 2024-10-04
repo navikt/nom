@@ -16,6 +16,7 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -27,12 +28,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Service
+@Component
 public class RessursUtlopersnartEmailService {
 
     private static final String SLUTTDATO_UTLOPER_VARSEL_TEMPLATE = "epostvarsel-utlopsdato.ftlh";
     private static final String UNLEASH_SLUTTDATO_UTLOPER_EPOST_VARSEL = "nom.ressurs.sluttdato_utloper_email";
-    private final Logger log = LoggerFactory.getLogger(RessursOpprettetEmailService.class);
+    private final Logger log = LoggerFactory.getLogger(RessursUtlopersnartEmailService.class);
     private final EmailClient emailClient;
     private final AdClient adClient;
     private final RessursStateRepository ressursStateRepository;
@@ -79,7 +80,8 @@ public class RessursUtlopersnartEmailService {
             Set<String> recipientNavidents = new HashSet<>(utlopendeRessurs.orgenhetData().values());
             var adRessurser = adClient.getAdRessurser(recipientNavidents);
             var recipientList = adRessurser.getRessurser().stream().map(AdRessurs::getEmail).toList();
-            log.info("Sender epose varsel om utløpende ressurs: {}({}), til: {}",utlopendeRessurs.ressurNavn(), utlopendeRessurs.ressursNavident(), recipientList);
+            log.info("Sender epose varsel om utløpende ressurs: {}({}), til navidents og eposts: {}, {}"
+                ,utlopendeRessurs.ressurNavn(), utlopendeRessurs.ressursNavident(), recipientNavidents, recipientList);
 
             String subject = String.format("Varsel før utløpsdato for %s (%s)", utlopendeRessurs.ressurNavn(), utlopendeRessurs.ressursNavident());
             String emailBody = generateEmailBody(utlopendeRessurs);
@@ -107,7 +109,7 @@ public class RessursUtlopersnartEmailService {
         var stringWriter = new StringWriter();
         var model = Map.of(
             "orgenhetNavn", utlopendeRessurs.orgenhetData().keySet().stream().findFirst().orElse("Ukjent"),
-            "ressurNavnOgNavIdent", utlopendeRessurs.ressursNavident(),
+            "ressurNavnOgNavIdent", utlopendeRessurs.ressurNavn() + "(" + utlopendeRessurs.ressursNavident() + ")" ,
             "ressursNavn", utlopendeRessurs.ressurNavn(),
             "ressursSluttdato", utlopendeRessurs.ressursSluttdato(),
             "ressursSluttdatoPlus1dag", utlopendeRessurs.ressursSluttdato().plusDays(1)
