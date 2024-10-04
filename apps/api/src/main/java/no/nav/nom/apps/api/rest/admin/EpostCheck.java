@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.clients.email.EmailMessage;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.api.email.OrgtilknytningEndretEmailService;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
+import no.nav.nom.apps.api.ressurs.email.RessursUtlopersnartEmailService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,13 +30,16 @@ public class EpostCheck {
     private final EmailClient emailClient;
     private final RessursOpprettetEmailService opprettetRessurs;
     private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
+    private final RessursUtlopersnartEmailService ressursUtlopersnartEmailService;
 
     public EpostCheck(EmailClient emailClient,
                       RessursOpprettetEmailService opprettetRessurs,
-                      OrgtilknytningEndretEmailService orgtilknytningEndretEmailService) {
+                      OrgtilknytningEndretEmailService orgtilknytningEndretEmailService,
+                      RessursUtlopersnartEmailService ressursUtlopersnartEmailService) {
         this.emailClient = emailClient;
         this.opprettetRessurs = opprettetRessurs;
         this.orgtilknytningEndretEmailService = orgtilknytningEndretEmailService;
+        this.ressursUtlopersnartEmailService = ressursUtlopersnartEmailService;
     }
 
     @Operation(
@@ -74,6 +78,21 @@ public class EpostCheck {
     @GetMapping(value = "/sendEmailVedOTEndringer")
     public String sendEmailVedOtEndringer() throws TemplateException, IOException {
         orgtilknytningEndretEmailService.sendEmail();
+        return "Emails sent!";
+    }
+
+    @Operation(
+        description = "Trigger send email about expiring ressurs sluttdato",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/sendEmailRessursSluttdatoUtloper")
+    public String sendEmailRessursSluttdatoUtloper() throws TemplateException, IOException {
+        ressursUtlopersnartEmailService.sendEmail();
         return "Emails sent!";
     }
 }
