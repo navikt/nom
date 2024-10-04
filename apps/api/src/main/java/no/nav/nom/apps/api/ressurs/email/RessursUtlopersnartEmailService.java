@@ -1,10 +1,12 @@
 package no.nav.nom.apps.api.ressurs.email;
 
 import freemarker.template.Configuration;
+import freemarker.template.TemplateException;
 import io.getunleash.Unleash;
+import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.email.EmailClient;
-import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.clients.email.EmailMessage;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
@@ -16,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -28,14 +32,10 @@ public class RessursUtlopersnartEmailService {
 
     private static final String SLUTTDATO_UTLOPER_VARSEL_TEMPLATE = "epostvarsel-utlopsdato.ftlh";
     private static final String UNLEASH_SLUTTDATO_UTLOPER_EPOST_VARSEL = "nom.ressurs.sluttdato_utloper_email";
-
-    public static final String NAVIDENT = "NAVident";
-
     private final Logger log = LoggerFactory.getLogger(RessursOpprettetEmailService.class);
     private final EmailClient emailClient;
     private final AdClient adClient;
     private final RessursStateRepository ressursStateRepository;
-    private final DvhRepository dvhRepository;
     private final Configuration freemarkerConfig;
     private final Unleash unleash;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
@@ -46,7 +46,6 @@ public class RessursUtlopersnartEmailService {
         EmailClient emailClient,
         AdClient adClient,
         RessursStateRepository ressursStateRepository,
-        DvhRepository dvhRepository,
         Configuration freemarkerConfig,
         Unleash unleash,
         OrgtilknytningStateRepository orgtilknytningStateRepository,
@@ -56,7 +55,6 @@ public class RessursUtlopersnartEmailService {
         this.emailClient = emailClient;
         this.adClient = adClient;
         this.ressursStateRepository = ressursStateRepository;
-        this.dvhRepository = dvhRepository;
         this.freemarkerConfig = freemarkerConfig;
         this.unleash = unleash;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -76,12 +74,45 @@ public class RessursUtlopersnartEmailService {
     }
 
     private void sendEmail(UtloperRessursData utlopendeRessurs) {
-        Set<String> recipientNavidents = new HashSet<>(utlopendeRessurs.orgenhetData().values());
-        var adRessurser = adClient.getAdRessurser(recipientNavidents);
-        var recipientList = adRessurser.getRessurser().stream().map(AdRessurs::getEmail).toList();
-        log.info("Sender epose varsel om utløpende ressurs: {}({}), til: {}",utlopendeRessurs.ressurNavn(), utlopendeRessurs.ressursNavident(), recipientList);
+        try {
+            Set<String> recipientNavidents = new HashSet<>(utlopendeRessurs.orgenhetData().values());
+            var adRessurser = adClient.getAdRessurser(recipientNavidents);
+            var recipientList = adRessurser.getRessurser().stream().map(AdRessurs::getEmail).toList();
+            log.info("Sender epose varsel om utløpende ressurs: {}({}), til: {}",utlopendeRessurs.ressurNavn(), utlopendeRessurs.ressursNavident(), recipientList);
 
+            String subject = String.format("Varsel før utløpsdato for %s (%s)", utlopendeRessurs.ressurNavn(), utlopendeRessurs.ressursNavident());
+            String emailBody = generateEmailBody(utlopendeRessurs);
+            if(emailBody.isBlank()) {
+                log.warn("Epost body er tom, Varsel før utløpsdato for ressurs vil ikke bli sendt");
+                return;
+            }
 
+            log.info("Sender ressurs sluttdato utløper epost subject: {}, recipients: {}, message: {}", subject, recipientList, emailBody);
+            /**
+             * NOTE: for the time being, we will only send to Line <Line.Eeg-Larsen@nav.no>
+             * later we will clean this up and send to all leaders of the orgenhet
+             * EmailMessage message = new EmailMessage(subject, body, recipientList);
+             */
+            EmailMessage message = new EmailMessage(subject, emailBody, List.of("Line.Eeg-Larsen@nav.no"));
+            emailClient.sendEmail(message).subscribe();
+        } catch (ADResponseException e) {
+            throw new RessursOpprettetEmailException("UtloperRessurs: Fant ikke epost adresse for ressurs");
+        } catch (IOException | TemplateException e) {
+            throw new RessursOpprettetEmailException("UtloperRessurs: Feil ved generering av epost innhold");
+        }
+    }
+
+    private String generateEmailBody(UtloperRessursData utlopendeRessurs) throws IOException, TemplateException {
+        var stringWriter = new StringWriter();
+        var model = Map.of(
+            "orgenhetNavn", utlopendeRessurs.orgenhetData().keySet().stream().findFirst().orElse("Ukjent"),
+            "ressurNavnOgNavIdent", utlopendeRessurs.ressursNavident(),
+            "ressursNavn", utlopendeRessurs.ressurNavn(),
+            "ressursSluttdato", utlopendeRessurs.ressursSluttdato(),
+            "ressursSluttdatoPlus1dag", utlopendeRessurs.ressursSluttdato().plusDays(1)
+        );
+        freemarkerConfig.getTemplate(SLUTTDATO_UTLOPER_VARSEL_TEMPLATE).process(model, stringWriter);
+        return stringWriter.getBuffer().toString();
     }
 
     public List<UtloperRessursData> getUtlopendeRessurser() {
@@ -90,6 +121,7 @@ public class RessursUtlopersnartEmailService {
             .filter(ressurs -> ressurs.sluttdato().get().isEqual(LocalDate.now().plusWeeks(2)) ||
                 ressurs.sluttdato().get().isEqual(LocalDate.now().plusWeeks(5)))
             .map(ressurs -> {
+                var visningsnavn = ressurs.visningsnavn() != null? ressurs.visningsnavn().getFormattedVisningsnavn() : "Ukjent";
                 var orgTilknytninger = orgtilknytningStateRepository.findByNavident(ressurs.navident());
 
                 // innholder orgenhetNavn og orgenhetLederNavident
@@ -115,7 +147,7 @@ public class RessursUtlopersnartEmailService {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
                 return UtloperRessursData.builder()
-                    .ressurNavn(ressurs.visningsnavn().toString())
+                    .ressurNavn(visningsnavn)
                     .ressursNavident(ressurs.navident())
                     .ressursSluttdato(ressurs.sluttdato().get())
                     .orgenhetData(orgenhetData)
