@@ -64,7 +64,7 @@ public class RessursUtlopersnartEmailService {
 
     @Scheduled(cron = "0 0 19 * * ?") // every day at 18:00
     public void sendEmail() {
-        if(!unleash.isEnabled(UNLEASH_SLUTTDATO_UTLOPER_EPOST_VARSEL)) {
+        if(unleash.isEnabled(UNLEASH_SLUTTDATO_UTLOPER_EPOST_VARSEL)) {
             log.info("Sender en e-post om utløpsdato for ressurser til ledere av organisasjonsenheter");
             var ressurserUtloperSnart = getUtlopendeRessurser();
             log.info("Ressurser utløper snart: {}", ressurserUtloperSnart);
