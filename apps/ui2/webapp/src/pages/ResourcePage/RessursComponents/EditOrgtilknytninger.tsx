@@ -231,7 +231,7 @@ function OrgtilknytningForm({
     return !(field.gyldigTom === originalField?.gyldigTom);
   };
 
-  // Hvis det ikke finnes noen orgtilknytninger, legger vi til en ny en by default.
+  // Hvis det ikke finnes noen orgtilknytninger, legger vi automatisk til en ny
   const defaultOrgtilknytninger =
     orgtilknytninger.length > 0 ? orgtilknytninger : [defaultNyOrgtilknytning];
 
@@ -272,16 +272,12 @@ function OrgtilknytningForm({
       return oppdaterOrgtilknytningerForRessurs(ressurs.navident, request);
     },
     onSuccess: async () => {
-      await showModal(
-        <BekreftModal content="Testtekst" heading="Testoverskrift" />,
-      ).then(() => {
-        showToast({ text: "Lagret" });
+      showToast({ text: "Lagret" });
 
-        navigate({
-          params: { id: ressurs.navident },
-          to: "/ressurs/$id",
-        }).then();
-      });
+      navigate({
+        params: { id: ressurs.navident },
+        to: "/ressurs/$id",
+      }).then();
     },
   });
 
