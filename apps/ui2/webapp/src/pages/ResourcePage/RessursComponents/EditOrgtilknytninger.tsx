@@ -50,6 +50,7 @@ import {
 } from "~/api/react-query-endpoints";
 import { useHasWriteAccess } from "~/api/useGetSession";
 import { ApiResponseError } from "~/components/ApiResponseError";
+import { BekreftModal } from "~/components/BekreftModal";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
@@ -189,6 +190,8 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
         orgtilknytninger={orgtilknytninger}
         ressurs={ressurs}
       />
+
+      <ModalComponent />
     </div>
   );
 }
@@ -268,12 +271,17 @@ function OrgtilknytningForm({
     mutationFn: async (request) => {
       return oppdaterOrgtilknytningerForRessurs(ressurs.navident, request);
     },
-    onSuccess: () => {
-      showToast({ text: "Lagret" });
-      navigate({
-        params: { id: ressurs.navident },
-        to: "/ressurs/$id",
-      }).then();
+    onSuccess: async () => {
+      await showModal(
+        <BekreftModal content="Testtekst" heading="Testoverskrift" />,
+      ).then(() => {
+        showToast({ text: "Lagret" });
+
+        navigate({
+          params: { id: ressurs.navident },
+          to: "/ressurs/$id",
+        }).then();
+      });
     },
   });
 
