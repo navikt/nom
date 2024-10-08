@@ -8,6 +8,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysis
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
@@ -131,7 +132,9 @@ public class RessursHendelseForEventsourceService {
 
         ressursState.sluttdato().ifPresentOrElse((stateSluttdato) -> {
             if (!stateSluttdato.equals(dvhRessurs.getSluttdato())) {
-                ressursSluttet(ressursState.fid(), dvhRessurs);
+                //  I tilfeller hvor ressurs.sluttDato var satt i state, men så endres i Dvh (kan være null også!),
+                //  så skal vi sende RessursCommandService.oppdaterRessursSluttdatoEvent
+                ressursSluttdatoUpdate(ressursState.fid(), dvhRessurs);
             }
         }, () -> {
             if (dvhRessurs.getSluttdato() != null) {
@@ -178,6 +181,20 @@ public class RessursHendelseForEventsourceService {
         }
 
         ressursCommandService.avsluttRessursEvent(new OpphorRessursCommand(fid, dvhRessurs.getSluttdato()), createInputMetadata(dvhRessurs.getRawData()));
+    }
+
+    private void ressursSluttdatoUpdate(String fid, DvhRessurs dvhRessurs) {
+        if (skipDueToNomMastered(dvhRessurs.getNavIdent())) {
+            return;
+        }
+
+        ressursCommandService.oppdaterRessursSluttdatoEvent(
+            new OppdaterSluttdatoCommand(
+                fid,
+                Optional.ofNullable(dvhRessurs.getSluttdato()),
+                createInputMetadata(dvhRessurs.getRawData())
+            )
+        );
     }
 
     private void ressursStartet(String fid, DvhRessurs dvhRessurs) {

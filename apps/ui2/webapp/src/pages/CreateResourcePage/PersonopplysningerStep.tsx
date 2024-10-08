@@ -16,7 +16,7 @@ import { SearchForPerson } from "~/pages/CreateResourcePage/components/SearchFor
 import { fullwidthRow } from "~/resources/NomStyles";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import type { FolkeregisterPerson, Person } from "~/types/api-models";
-import { capitalizeName, isTodayOrAfter, isTodayOrBefore } from "~/utils";
+import { capitalizeName, isTodayOrAfter } from "~/utils";
 
 export function PersonopplysningerStep() {
   const { personident } = useSearch({
@@ -56,9 +56,8 @@ function CreateResourceForm({ personident }: { personident: string }) {
     orgtilknytninger &&
     orgtilknytninger.some(
       (orgtilknytning) =>
-        isTodayOrBefore(new Date(orgtilknytning.gyldigFom)) &&
-        (!orgtilknytning.gyldigTom ||
-          isTodayOrAfter(new Date(orgtilknytning.gyldigTom))),
+        !orgtilknytning.gyldigTom ||
+        isTodayOrAfter(new Date(orgtilknytning.gyldigTom)),
     );
 
   if (hentPersonQuery.isLoading || hentOrgtilknytningerQuery.isLoading) {
@@ -86,8 +85,8 @@ function CreateResourceForm({ personident }: { personident: string }) {
   if (erAktiv) {
     return (
       <Alert variant="error">
-        Denne personen finnes allerede som aktiv medarbeider med NAV-ident{" "}
-        <b>{person?.navident}</b>. For å gjøre endringer, gå til{" "}
+        Denne personen finnes allerede som aktiv eller fremtidig medarbeider med
+        NAV-ident <b>{person?.navident}</b>. For å gjøre endringer, gå til{" "}
         <Link to={`/ressurs/${person?.navident}`}>
           medarbeiderens profilside
         </Link>

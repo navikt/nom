@@ -96,14 +96,22 @@ export function RemedyEndringModal({
       <Modal.Body>
         {isTodayOrBefore(new Date(nyRemedyTilknytning.gyldigFom as string)) ? (
           <BekreftModalInnholdNyRemedyIFortiden
-            gammelOrgEnhet={`${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.remedyEnhetId})`}
+            gammelOrgEnhet={
+              dagensDolOrgEnhet
+                ? `${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.remedyEnhetId})`
+                : undefined
+            }
             navn={navn ?? "medarbeideren"}
             nyOrgEnhet={`${nyRemedyOrgEnhet?.navn} (${nyRemedyOrgEnhet?.remedyEnhetId})`}
           />
         ) : (
           <BekreftModalInnholdNyRemedyIFremtiden
             dato={formatDisplayDate(nyRemedyTilknytning.gyldigFom)}
-            gammelOrgEnhet={`${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.remedyEnhetId})`}
+            gammelOrgEnhet={
+              dagensDolOrgEnhet
+                ? `${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.remedyEnhetId})`
+                : undefined
+            }
             navn={navn ?? "medarbeideren"}
             nyOrgEnhet={`${nyRemedyOrgEnhet?.navn} (${nyRemedyOrgEnhet?.remedyEnhetId})`}
           />
@@ -133,24 +141,43 @@ function BekreftModalInnholdNyRemedyIFremtiden({
 }: {
   navn: string;
   dato: string;
-  gammelOrgEnhet: string;
+  gammelOrgEnhet: string | undefined;
   nyOrgEnhet: string;
 }) {
   return (
     <HStack gap="6">
-      <BodyLong>
-        Du registrerer nå at medarbeideren fra {dato} bytter
-        organisasjonstilknytning fra <b>{gammelOrgEnhet}</b> til{" "}
-        <b>{nyOrgEnhet}</b>.
-      </BodyLong>
-      <BodyLong>
-        <b>
-          Dette innebærer en endring i innstillinger for tilganger
-          (4-siffer-enhet), slik at fra og med {dato} vil alle tilganger for{" "}
-          {navn} fjernes. Nye tilganger må tildeles i Identrutina og/eller Mine
-          tilganger.
-        </b>
-      </BodyLong>
+      {gammelOrgEnhet ? (
+        <>
+          <BodyLong>
+            Du registrerer nå at medarbeideren fra {dato} bytter
+            organisasjonstilknytning fra <b>{gammelOrgEnhet}</b> til{" "}
+            <b>{nyOrgEnhet}</b>.
+          </BodyLong>
+          <BodyLong>
+            <b>
+              Dette innebærer en endring i innstillinger for tilganger
+              (4-siffer-enhet), slik at fra og med {dato} vil alle tilganger for{" "}
+              {navn} fjernes. Nye tilganger må tildeles i Identrutina og/eller
+              Mine tilganger.
+            </b>
+          </BodyLong>
+        </>
+      ) : (
+        <>
+          <BodyLong>
+            Du registrerer nå at medarbeideren fra {dato} får en
+            organisasjonstilknytning ved <b>{nyOrgEnhet}</b>.
+          </BodyLong>
+          <BodyLong>
+            <b>
+              Dette kan gjøre at {navn} mister sine tilganger hvis vedkommende
+              bytter 4-sifferenhet i Identrutina. Nye tilganger må i så fall
+              tildeles i Identrutina. Hvis vedkommende ikke bytter 4-sifferenhet
+              i Identrutina vil tilgangene ikke påvirkes.
+            </b>
+          </BodyLong>
+        </>
+      )}
       <BodyLong>
         Ta kontakt med identadministrator eller leder hvis du er usikker på om
         noe må gjøres.
@@ -165,25 +192,44 @@ function BekreftModalInnholdNyRemedyIFortiden({
   nyOrgEnhet,
 }: {
   navn: string;
-  gammelOrgEnhet: string;
+  gammelOrgEnhet: string | undefined;
   nyOrgEnhet: string;
 }) {
   return (
     <Alert variant="warning">
       <HStack gap="6">
-        <BodyLong>
-          Du registrerer nå at medarbeideren på dagens dato eller tidligere
-          bytter organisasjonstilknytning fra <b>{gammelOrgEnhet}</b> til{" "}
-          <b>{nyOrgEnhet}</b>.
-        </BodyLong>
-        <BodyLong>
-          <b>
-            Dette innebærer en endring i innstillinger for tilganger
-            (4-siffer-enhet). Vær oppmerksom på at dette betyr at fra i dag vil
-            alle tilganger for {navn} fjernes. Nye tilganger må tildeles i
-            Identrutina og/eller Mine tilganger.
-          </b>
-        </BodyLong>
+        {gammelOrgEnhet ? (
+          <>
+            <BodyLong>
+              Du registrerer nå at medarbeideren på dagens dato eller tidligere
+              bytter organisasjonstilknytning fra <b>{gammelOrgEnhet}</b> til{" "}
+              <b>{nyOrgEnhet}</b>.
+            </BodyLong>
+            <BodyLong>
+              <b>
+                Dette innebærer en endring i innstillinger for tilganger
+                (4-siffer-enhet). Vær oppmerksom på at dette betyr at fra i dag
+                vil alle tilganger for {navn} fjernes. Nye tilganger må tildeles
+                i Identrutina og/eller Mine tilganger.
+              </b>
+            </BodyLong>
+          </>
+        ) : (
+          <>
+            <BodyLong>
+              Du registrerer nå at medarbeideren på dagens dato eller tidligere
+              fikk en organisasjonstilknytning ved <b>{nyOrgEnhet}</b>.
+            </BodyLong>
+            <BodyLong>
+              <b>
+                Dette kan gjøre at {navn} mister sine tilganger hvis vedkommende
+                bytter 4-sifferenhet i Identrutina. Nye tilganger må i så fall
+                tildeles i Identrutina. Hvis vedkommende ikke bytter
+                4-sifferenhet i Identrutina vil tilgangene ikke påvirkes.
+              </b>
+            </BodyLong>
+          </>
+        )}
         <BodyLong>
           Ta kontakt med identadministrator eller leder hvis du er usikker på om
           noe må gjøres.

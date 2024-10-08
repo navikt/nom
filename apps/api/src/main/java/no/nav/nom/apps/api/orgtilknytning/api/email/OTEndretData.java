@@ -7,7 +7,7 @@ public record OTEndretData(
     String fid,
     String navident,
     OTEndretDataType eventType,
-    String changedBy,
+    String changedByNavIdent,
     String timestamp
 ) {
 

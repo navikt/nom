@@ -24,6 +24,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,7 +44,7 @@ public class OrgtilknytningEndretEmailService {
     private final LederResolver lederResolver;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
 
-    public final String epost_body_item_template = "{0}({1}), fra og med {2}, til og med {3}. Endring utført av {4}̋, på {5}.";
+    public final String epost_body_item_template = "{0}({1}), fra og med {2}, til og med {3}. Endring utført av {4}, på {5}.";
 
 
 
@@ -112,7 +114,7 @@ public class OrgtilknytningEndretEmailService {
             var adRessurser = adClient.getAdRessurser(recipientNavidents);
             var recipientList = adRessurser.getRessurser().stream().map(AdRessurs::getEmail).toList();
 
-            String subject = String.format("Endringer i Orgtilknytninger %s (%s)",
+            String subject = String.format("Endringer i org.tilknytninger for %s (%s)",
                 endretRessurs.visningsnavn().getFormattedVisningsnavn(), endretRessurs.navident()
             );
 
@@ -164,9 +166,13 @@ public class OrgtilknytningEndretEmailService {
             var orgtilknytningState =  orgtilknytningStateRepository.findByFid(event.fid());
             if(orgtilknytningState.isPresent()){
                 var ot = orgtilknytningState.get();
-                var utfortAv = event.changedBy();
+                var utfortAvNavIdent = event.changedByNavIdent();
+                var utfortAvRessurs = ressursStateRepository.findByNavident(utfortAvNavIdent);
+                String utfortAvRessursNavn = utfortAvRessurs.isPresent()? utfortAvRessurs.get().visningsnavn().getFormattedVisningsnavn() : "Ukjent";
+                log.info("Sender OT endringer utfortAv: {}, {}, {}", utfortAvNavIdent, utfortAvRessurs, utfortAvRessursNavn);
                 var orgenhetNavn = orgEnhetStateRepository.findById(ot.orgEnhetId()).map(orgEnhet -> orgEnhet.navn()).orElse("Ukjent");
-                String endring = MessageFormat.format(epost_body_item_template, orgenhetNavn, ot.orgEnhetId(), ot.gyldigFom(), ot.gyldigTom().orElse(null), utfortAv, event.timestamp());
+                String endring = MessageFormat.format(epost_body_item_template,
+                    orgenhetNavn, ot.orgEnhetId(), formatDateTime(ot.gyldigFom()), formatDateTime(ot.gyldigTom()), utfortAvRessursNavn, event.timestamp());
                 otEndringer.append(endring);
             }
 
@@ -177,11 +183,22 @@ public class OrgtilknytningEndretEmailService {
         return otEndringer.toString();
     }
 
+    public String formatDateTime(LocalDate localDate) {
+        if(localDate == null || localDate.toString().isEmpty() || localDate.toString().isBlank()){
+            return "";
+        }
+        return DateTimeFormatter.ofPattern("dd.MM.YYYY").format(localDate);
+    }
+
+    public String formatDateTime(Optional<LocalDate> localDate) {
+        return localDate.map(this::formatDateTime).orElse("");
+    }
+
     public Set<String> getReceiptionNavidents(List<OTEndretData> otEndringerData) {
         Set<String> recipientNavidents = new HashSet<>();
         for (OTEndretData event : otEndringerData) {
             // add the changedBy person
-            recipientNavidents.add(event.changedBy());
+            recipientNavidents.add(event.changedByNavIdent());
             var orgtilknytningState =  orgtilknytningStateRepository.findByFid(event.fid());
             if(orgtilknytningState.isPresent()){
                 var orgenhetState = orgEnhetStateRepository.findById(orgtilknytningState.get().orgEnhetId());

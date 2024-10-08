@@ -14,6 +14,7 @@ import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
@@ -132,7 +133,14 @@ public class NomIntegrasjonService {
             && isOrgtilknytningEksternEllerKommunalAndDagligOppfolgning(orgtilknytningDatoEndretEventV2.getFid())) {
 
             handleOrgtilknytningDatoEndretEvent(orgtilknytningDatoEndretEventV2);
+        } else if (orgtilknytningEvent instanceof OrgtilknytningFjernetEventV1 orgtilknytningFjernetEventV1) {
+            deleteOrgtilknytningEvents(orgtilknytningFjernetEventV1.getFid());
         }
+    }
+
+    private void deleteOrgtilknytningEvents(String fid) {
+        logger.info("Deleting Orgtilknytning events with fid {}", fid);
+        delayedEventRepository.deleteDelayedOrgtilknytningEvents(fid);
     }
 
     private void handleOrgtilknytningDagligOppfolgingEndretEvent(OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
@@ -184,6 +192,7 @@ public class NomIntegrasjonService {
                     .navident()).stream()
                 .anyMatch(NomIntegrasjonService::orgtilknytningIsActiveOnCurrentDate);
         }
+
         if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
             var orgtilknytning = nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid());
             return orgtilknytningIsActiveOnCurrentDate(orgtilknytning);
@@ -225,7 +234,7 @@ public class NomIntegrasjonService {
                 updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
             }
         } catch (OrgtilknytningNotFoundException e) {
-            logger.info("Delayed processing of OrgtilknytningDatoEndretEventV2. {}", e.getMessage());
+            logger.info("Delayed update of OrgtilknytningDatoEndretEventV2. {} cancelled", e.getMessage());
         }
     }
 
@@ -548,8 +557,9 @@ public class NomIntegrasjonService {
             .tiltredelsesdato(
                 dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getGyldigFom).map(Utils::epochSecondsNorwegianTimeNoon).orElse(null)
             )
-            .utlopsdato(
-                dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getGyldigTom).map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null)
+            .utlopsdato(ressurs.getSektor().equals(no.nav.nom.generated.model.Sektor.NAV_KOMMUNAL)
+                ? null
+                : dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getGyldigTom).map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null)
             )
             .mobil(isNull(ressurs.getPrimaryTelefonnummer()) || ressurs.getPrimaryTelefonnummer().isBlank() ? null : ressurs.getPrimaryTelefonnummer())
             .build();
