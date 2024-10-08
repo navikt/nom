@@ -50,7 +50,6 @@ import {
 } from "~/api/react-query-endpoints";
 import { useHasWriteAccess } from "~/api/useGetSession";
 import { ApiResponseError } from "~/components/ApiResponseError";
-import { BekreftModal } from "~/components/BekreftModal";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
