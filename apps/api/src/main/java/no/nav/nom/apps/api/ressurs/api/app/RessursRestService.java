@@ -12,6 +12,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningC
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
@@ -601,7 +602,7 @@ public class RessursRestService {
 
     public void avvikleRessurs(String fid, AvvikleRessursRequest request) {
         var ressursState = findRessursStateByFid(fid);
-        var metaData = new InputMetadata(
+        var metadata = new InputMetadata(
             "REST",
             "avvikleRessurs",
             request,
@@ -613,21 +614,33 @@ public class RessursRestService {
 
         ressursCommandService.avsluttRessursEvent(
             new OpphorRessursCommand(fid, request.sluttDato()),
-            metaData
+            metadata
         );
 
         var orgtilknytninger = orgtilknytningRestService.getOrgtilknytninger(Optional.of(ressursState.navident()));
 
         orgtilknytninger.forEach(orgtilknytningState -> {
+            var gyldigFomIsAfterAvvikletDato = orgtilknytningState.gyldigFom().isAfter(request.sluttDato());
             var gyldigTomIsAfterAvvikletDato = orgtilknytningState.gyldigTom().orElse(LocalDate.MAX).isAfter(request.sluttDato());
-            if (gyldigTomIsAfterAvvikletDato) {
+            if (gyldigFomIsAfterAvvikletDato) {
+                orgtilknytningCommandService.fjernOrgtilknytning(
+                    orgtilknytningState.fid(),
+                    new FjernOrgtilknytning(
+                        ressursState.navident(),
+                        orgtilknytningState.orgEnhetId(),
+                        orgtilknytningState.gyldigFom(),
+                        orgtilknytningState.gyldigTom(),
+                        metadata,
+                        null
+                    ));
+            } else if (gyldigTomIsAfterAvvikletDato) {
                 orgtilknytningCommandService.avvikleOrgtilknytning(
                     orgtilknytningState.fid(),
                     new AvvikleOrgtilknytning(
                         ressursState.navident(),
                         orgtilknytningState.orgEnhetId(),
                         request.sluttDato(),
-                        metaData,
+                        metadata,
                         null
                     )
                 );
