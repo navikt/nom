@@ -252,7 +252,7 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
 
         eksterneRessurserProcessor.process(ekstern);
 
-        assertOrgtilknytning(CMD.KORRIGERT)
+        assertOrgtilknytning(CMD.ENDRET_DATO)
             .forFid("FID_A")
             .gyldigFom(yesterday)
             .gyldigTom(tomorrow);

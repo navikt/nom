@@ -1,7 +1,11 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OrgtilknytningCommand;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -10,18 +14,24 @@ public record StrukturerteStillingPerioderForNavident(
     String navident,
     List<StillingPeriode> stillingPerioder,
     List<DvhRessursStilling> dvhRessursStillinger,
+    List<OrgtilknytningState> eksisterendeOrgtilknytninger,
+    List<AbstractMap.SimpleEntry<String, OrgtilknytningCommand>> endringer,
     List<Error> errors
 ) {
     public StrukturerteStillingPerioderForNavident(String navident, List<StillingPeriode> stillingPerioder, List<DvhRessursStilling> ressursStillinger) {
-        this(navident, stillingPerioder, ressursStillinger, new ArrayList<>());
+        this(navident, stillingPerioder, ressursStillinger, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 
     public StrukturerteStillingPerioderForNavident(String navident, List<DvhRessursStilling> ressursStillinger) {
-        this(navident, new ArrayList<>(), ressursStillinger, new ArrayList<>());
+        this(navident, new ArrayList<>(), ressursStillinger, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 
     public StrukturerteStillingPerioderForNavident(StrukturerteStillingPerioderForNavident copy, List<StillingPeriode> stillingPerioder) {
-        this(copy.navident, stillingPerioder, copy.dvhRessursStillinger, copy.errors);
+        this(copy.navident, stillingPerioder, copy.dvhRessursStillinger, new ArrayList<>(), new ArrayList<>(), copy.errors);
+    }
+
+    public StrukturerteStillingPerioderForNavident(StrukturerteStillingPerioderForNavident copy, List<OrgtilknytningState> eksisterendeOrgtilknytninger, List<AbstractMap.SimpleEntry<String, OrgtilknytningCommand>> endringer) {
+        this(copy.navident, copy.stillingPerioder, copy.dvhRessursStillinger, eksisterendeOrgtilknytninger, endringer, copy.errors);
     }
 
     public record  Error(

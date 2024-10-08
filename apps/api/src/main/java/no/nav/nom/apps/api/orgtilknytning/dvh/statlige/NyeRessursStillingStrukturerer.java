@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Component;
 
@@ -25,16 +26,18 @@ public class NyeRessursStillingStrukturerer {
     private final GrupperOgSlaaSammenDvhStillinger grupperOgSlaaSammenDvhStillinger;
     private final MatchStrukturerteStillingPerioderTilNOM matchStillingPerioderTilNomEnheter;
     private final SettDOLPerioderPaaStrukturerteStillinger settDOLPerioderPaaStrukturerteStillinger;
+    private final NomMastered nomMastered;
 
     public NyeRessursStillingStrukturerer(
         RessursStateRepository ressursStateRepository, GrupperOgSlaaSammenDvhStillinger grupperOgSlaaSammenDvhStillinger,
         MatchStrukturerteStillingPerioderTilNOM matchStillingPerioderTilNomEnheter,
-        SettDOLPerioderPaaStrukturerteStillinger settDOLPerioderPaaStrukturerteStillinger
+        SettDOLPerioderPaaStrukturerteStillinger settDOLPerioderPaaStrukturerteStillinger, NomMastered nomMastered
     ) {
         this.matchStillingPerioderTilNomEnheter = matchStillingPerioderTilNomEnheter;
         this.ressursStateRepository = ressursStateRepository;
         this.grupperOgSlaaSammenDvhStillinger = grupperOgSlaaSammenDvhStillinger;
         this.settDOLPerioderPaaStrukturerteStillinger = settDOLPerioderPaaStrukturerteStillinger;
+        this.nomMastered = nomMastered;
     }
 
     public Map<String, StrukturerteStillingPerioderForNavident> strukturerStilingPerioderPerNavident(List<DvhRessursStilling> dvhRessursStillinger) {
@@ -42,6 +45,11 @@ public class NyeRessursStillingStrukturerer {
 
         Map<String, StrukturerteStillingPerioderForNavident> stillingPerioderPerNavident = new HashMap<>();
         dvhRessursStillingPerNavident.forEach((navident, navidentensDvhRessursStillinger) -> {
+            if (nomMastered.isMastered(navident)) {
+                log.info("Navident {} er mastered. Vi behandler ikke orgtilknytning fra DVH for denne", navident);
+                return;
+            }
+
             stillingPerioderPerNavident.put(navident,
                 strukturerStillingPerioderFraDvhRessursStillinger(navident, navidentensDvhRessursStillinger)
             );
@@ -115,7 +123,7 @@ public class NyeRessursStillingStrukturerer {
                     Etter behandling av DvhStillinger til behandlede StillingPerioder:
                     StillingsPeriode for Navident %s med gyldighetsperiode [%s - %s] går utover orgenhetens gyldighetsperiode [%s - %s].
                     """.formatted(
-                        sspForNavident.navident(), sp.gyldigFom(), sp.gyldigTom(), sp.orgenhet().getGyldigFom(), sp.orgenhet().getGyldigTom().get()
+                        sspForNavident.navident(), sp.gyldigFom(), sp.gyldigTom(), sp.orgenhet().getGyldigFom(), sp.orgenhet().getGyldigTom().orElse(null)
                     ),
                     sp
                 );
@@ -136,7 +144,7 @@ public class NyeRessursStillingStrukturerer {
                                 StrukturerteStillingPerioderForNavident.ErrorType.STILLINGPERIODER_HAR_OVERLAPPENDE_DOL_PERIODER,
                                 """
                                 Etter behandling av DvhStillinger til behandlede StillingPerioder:
-                                DOL StillingsPeriode for Navident %s med gyldighetsperiode [%s - %s] for enhet (%s %s) 
+                                DOL StillingsPeriode for Navident %s med gyldighetsperiode [%s - %s] for enhet (%s %s)
                                 overlapper med en annen DOL stillingsperiode med gyldighetsperiode [%s - %s] for enhet (%s %s).
                                 """.formatted(
                                     sspForNavident.navident(),
@@ -178,7 +186,7 @@ public class NyeRessursStillingStrukturerer {
                         StrukturerteStillingPerioderForNavident.ErrorType.AKTIV_DOL_MATCHER_IKKE_ORGENHET_PAA_RESSURS,
                         """
                         Etter behandling av DvhStillinger til behandlede StillingPerioder:
-                        Aktiv DOL stillingsperiode for Navident %s med gyldighetsperiode [%s - %s] for enhet (%s %s) med agressoid [%s]
+                        Aktiv DOL stillingsperiode for Navident %s med gyldighetsperiode [%s - %s] for enhet (%s %s) med agressoId [%s]
                         matcher ikke 'Orgenhet på ressurs' [%s].
                         """.formatted(
                             sspForNavident.navident(), sp.gyldigFom(), sp.gyldigTom(),

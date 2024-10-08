@@ -12,5 +12,4 @@ public record EndreOrgtilknytningDatoCommand (
     LocalDate gyldigFom,
     Optional<LocalDate> gyldigTom,
     InputMetadata inputMetadata
-)  {
-}
+) implements OrgtilknytningCommand {}

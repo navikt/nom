@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 
 // REF: no/nav/nom/apps/api/orgtilknytning/dvh/dokumentasjon/TestReferanser_GrupperOgSlaaSammenPerioder.md
 @DisplayName("Tester gruppering og strukturering av periodisering på RessursStillinger fra DVH")
-class GrupperOgSlaaSammenDvhStillingerTest extends RessursStillingStrukturererTestBase {
+class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
     @Autowired
     GrupperOgSlaaSammenDvhStillinger CUT; // Class under test
 

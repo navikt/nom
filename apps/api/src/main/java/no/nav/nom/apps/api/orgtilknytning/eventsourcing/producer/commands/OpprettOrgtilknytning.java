@@ -13,4 +13,4 @@ public record OpprettOrgtilknytning (
     LocalDate gyldigFom,
     InputMetadata inputMetadata,
     OrgtilknytningEvent.AdditionalAgressoData additionalAgressoData
-) {}
+) implements OrgtilknytningCommand {}

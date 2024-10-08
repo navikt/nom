@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @DisplayName("Tester gruppering og strukturering av periodisering på RessursStillinger fra DVH")
-class NyeRessursStillingStrukturererTest extends RessursStillingStrukturererTestBase {
+class NyeRessursStillingStrukturererTest extends TestBase {
     @Autowired
     NyeRessursStillingStrukturerer CUT; // Class under test
 

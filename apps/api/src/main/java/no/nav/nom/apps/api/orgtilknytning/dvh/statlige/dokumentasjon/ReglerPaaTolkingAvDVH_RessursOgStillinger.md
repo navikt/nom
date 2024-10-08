@@ -69,14 +69,14 @@ DVH kan i tilfeller levere tomt på `OrgenhetPaaRessurs` og `OrgenhetPaaRessursN
 
 ### Daglig oppfølging 
 Slik jeg har forstått det er DVH sin OrgenhetPaaRessurs det som representerer det de kaller 'stilling/enhet/leder i bunn', og er det vi ønsker å representere som den aktive `Daglig Oppfølgings Leder`-tilknytningen' (DOL) 
-Så vi prøver å finne OT med agressoId som matcher OrgenhetPaaRessurs, hvis det er flere orgtilknytinger på samme periode. 
+Så vi prøver å finne OT med agressoId som matcher OrgenhetPaaRessurs, hvis det er flere orgtilknytninger på samme periode. 
 
 1. I NOM skal vi alltid kun ha en aktiv DOL periode om gangen
 2. Og DOL perioder kan ikke overlappe
 
-## Prossesering og regler
+## Prosessering og regler
 
-Vi gjør først en prossesering av alle `DvhRessursStilling` objektene fra DVh lasten (`DT_HR.NOM_RESSURS_STILLINGER`) for å strukturere alle stillinger på Ressursen til å matche slik vi ønsker å se de i NOM brutt opp i perioder på enhet og DOL. Dette lager da ett sett med `StillingPeriode` objekter for NavIdenten.
+Vi gjør først en prosessering av alle `DvhRessursStilling` objektene fra DVh lasten (`DT_HR.NOM_RESSURS_STILLINGER`) for å strukturere alle stillinger på Ressursen til å matche slik vi ønsker å se de i NOM brutt opp i perioder på enhet og DOL. Dette lager da ett sett med `StillingPeriode` objekter for NavIdenten.
 
 StillingPeriode:
 ```
@@ -89,10 +89,10 @@ DagligOppfolging dagligOppfolging // JA, NEI, UKJENT
 
 ### Gruppere og slå sammen perioder
 
-Vi grupperer deretter alle DvhRessursStilling'er på unike StillingPeriode.StillingAgressoOrgIdOgNavn, og slår sammen sammenhengende perioder til en periode 
+Vi grupperer deretter alle DvhRessursStillinger på unike StillingPeriode.StillingAgressoOrgIdOgNavn, og slår sammen sammenhengende perioder til en periode 
 Vi dropper også evt stillinger fra U4 som starter på eller etter det som er registrert som sluttdato på ressursen i NOM allerede. Det kan være f.eks. en ikke avsluttet stilling i U4 på en kommunal ressurs, men som har fått en sluttdato i Remedy. Tilsvarende avslutter vi siste StillingPeriode på Ressursens sluttdato.  
 
-Hvis vi skulle få DvhRessursStilling'er som for samme StillingAgressoOrgIdOgNavn som har overlappende perioder, så vil det generere en feilmelding i logg.
+Hvis vi skulle få DvhRessursStillinger som for samme StillingAgressoOrgIdOgNavn som har overlappende perioder, så vil det generere en feilmelding i logg.
 
 ### Matche til enheter i NOM
 
@@ -125,7 +125,7 @@ Deretter skal vi matche disse DVH periodene til Enheter i NOM. Om DVH perioden s
 2. Er stillingens agressoId < 7 tegn henger ikke stillingen i U4 ikke på en løvnode og/eller hvor denne har feilkode i DVH stedet (felte har negativ tallkode - se `DvhRessursStilling`), men det finnes presis ressursAgressoId (OrgenhetPaaRessurs) 
    1. Hvis det ikke er feilkode og denne matcher en presis ressursAgressoId (OrgenhetPaaRessurs), så kan vi med stor sikkerhet anta at DVH tolkningen er korrekt, og vi kan plassere StillingPerioden på denne enheten som ressursAgressoId (OrgenhetPaaRessurs) peker på med samme regler som over [1. Presis enhet på stilling]. 
    2. Hvis det derimot ikke er match mellom stillingens agressoId og ressursAgressoId (OrgenhetPaaRessurs) så forsøk å finne eksisterende OT matcher mot stillingens agressoId - Er det match, benytt den OT'ens periode og enhet. 
-    Varlse dette, og evt. om OT'ens periode avviker fra StillingPerioden.
+    Varsle dette, og evt. om OT'ens periode avviker fra StillingPerioden.
    3. Og om det her ikke er noen match mellom stillingens agressoId og ressursAgressoId (OrgenhetPaaRessurs), men ressursAgressoId (OrgenhetPaaRessurs) er presis så behandle denne på samme måte som for presis agressoId på Stilling [1. Presis enhet på stilling]. Merk at dette bør kun gjøres på aktiv periode
    
 3. Hvis stillingens AgressoId ikke er presis eller er feilkode eller null, og ressursAgressoId (OrgenhetPaaRessurs) heller ikke er presis - dvs 7 eller flere sifre 

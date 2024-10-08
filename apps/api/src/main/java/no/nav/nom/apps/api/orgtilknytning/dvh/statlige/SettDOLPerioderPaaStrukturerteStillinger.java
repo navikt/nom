@@ -34,7 +34,7 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
 
     public StrukturerteStillingPerioderForNavident behandle(StrukturerteStillingPerioderForNavident sspForNavident) {
         var fomDatoer = finnBrekkDatoer(sspForNavident); // Sortert
-        // TODO: Vi trenger ikke brekkdatoer på OT'er for currrent og fremtidig?
+        // TODO: Vi trenger ikke brekk-datoer på OT'er for current og fremtidig?
         var splittedeSPer = splittStillingPerioder(sspForNavident.stillingPerioder(), fomDatoer);
 
 
@@ -93,18 +93,17 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
 
     List<StillingPeriode> splittStillingPerioder(List<StillingPeriode> stillingPerioder, List<LocalDate> brekkDatoer) {
         Map<StillingPeriode, List<LocalDate>> brekkDatoerPerStillingPeriode = new LinkedHashMap<>();
-        brekkDatoer.forEach(brekkDato -> {
+        brekkDatoer.forEach(brekkDato ->
             stillingPerioder.stream()
-                    .filter( sp -> sp.covers(brekkDato))
-                    .forEach(sp -> {
-                        if (!brekkDatoerPerStillingPeriode.containsKey(sp)) {
-                            brekkDatoerPerStillingPeriode.put(sp, new ArrayList<>());
-                        }
-                        if (!sp.gyldigFom().equals(brekkDato)) {
-                            brekkDatoerPerStillingPeriode.get(sp).add(brekkDato);
-                        }
-                    });
-        });
+                .filter( sp -> sp.covers(brekkDato))
+                .forEach(sp -> {
+                    if (!brekkDatoerPerStillingPeriode.containsKey(sp)) {
+                        brekkDatoerPerStillingPeriode.put(sp, new ArrayList<>());
+                    }
+                    if (!sp.gyldigFom().equals(brekkDato)) {
+                        brekkDatoerPerStillingPeriode.get(sp).add(brekkDato);
+                    }
+                }));
 
         List<StillingPeriode> splittedeStillingPerioder = new ArrayList<>();
 
@@ -163,9 +162,7 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         if (nyeHistoriskeStillingPerioder.stream().noneMatch(StillingPeriode::erDagligOppfolging)) {
             //Har ikke klart å sette DOL på aktiv periode via eksisterende OTer
             nyeHistoriskeStillingPerioder.clear();
-            stillingPerioder.forEach(stillingPeriode -> {
-                nyeHistoriskeStillingPerioder.add(matchDOLMotOrgenhetPaaRessurs(stillingPeriode));
-            });
+            stillingPerioder.forEach(stillingPeriode -> nyeHistoriskeStillingPerioder.add(matchDOLMotOrgenhetPaaRessurs(stillingPeriode)));
         }
 
         //Har vi ikke klart å sette DOL på periode - Logg og advar
@@ -174,7 +171,7 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         }
 
         // Har vi laget flere med DOL?
-        if (nyeHistoriskeStillingPerioder.stream().filter(sp -> sp.erDagligOppfolging()).count() > 1) {
+        if (nyeHistoriskeStillingPerioder.stream().filter(StillingPeriode::erDagligOppfolging).count() > 1) {
             throw new RuntimeException("Navident %s kan ikke ha flere DOL perioder for samme historiske periode".formatted(sspForNavident.navident()));
         }
 
@@ -205,9 +202,7 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         }
 
         List<StillingPeriode> behandledeStillingPerioder = new ArrayList<>();
-        stillingPerioder.forEach(stillingPeriode -> {
-            behandledeStillingPerioder.add(matchDOLMotOrgenhetPaaRessurs(stillingPeriode));
-        });
+        stillingPerioder.forEach(stillingPeriode -> behandledeStillingPerioder.add(matchDOLMotOrgenhetPaaRessurs(stillingPeriode)));
 
         //Har vi ikke klart å sette DOL på aktiv periode
         if (behandledeStillingPerioder.stream().noneMatch(StillingPeriode::erDagligOppfolging)) {

@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 
 // REF: no/nav/nom/apps/api/orgtilknytning/dvh/dokumentasjon/TestReferanser_MatcheTilEnheterINOM.md
 @DisplayName("Tester matching av RessursStillinger fra DVH til NOM enhet")
-class MatchStrukturerteStillingPerioderTilNOMTest extends RessursStillingStrukturererTestBase {
+class MatchStrukturerteStillingPerioderTilNOMTest extends TestBase {
 
     @Autowired
     MatchStrukturerteStillingPerioderTilNOM CUT; // Class under test

@@ -43,7 +43,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
 
         List<StillingPeriode> perioderGruppert = new ArrayList<>();
 
-        var ressurs = ressursStateRepository.findByNavident(sspForNavident.navident()).get();
+        var ressurs = ressursStateRepository.findByNavident(sspForNavident.navident()).orElseThrow();
         LocalDate ressursStartdato = ressurs.startdato().orElse(null);
         LocalDate ressursSluttdato = ressurs.sluttdato().orElse(null);
 

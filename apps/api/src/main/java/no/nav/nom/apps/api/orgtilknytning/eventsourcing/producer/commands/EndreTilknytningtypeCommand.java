@@ -11,4 +11,4 @@ public record EndreTilknytningtypeCommand(
     String fid,
     Optional<Tilknytningtype> tilknytningtype,
     InputMetadata inputMetadata
-) {}
+) implements OrgtilknytningCommand {}
