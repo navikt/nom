@@ -34,7 +34,13 @@ import {
   tilgangerKeys,
 } from "~/api/react-query-endpoints";
 import { ApiResponseError } from "~/components/ApiResponseError";
+import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
+import ModalComponent from "~/components/modalProvider/ModalComponent";
+import {
+  ModalProvider,
+  useModal,
+} from "~/components/modalProvider/ModalProvider";
 import { NavidentNameLookup } from "~/components/NavidentNameLookup";
 import { PageBanner } from "~/components/PageBanner";
 import { Pluralize } from "~/components/Pluralize";
@@ -54,7 +60,7 @@ import {
 } from "~/utils";
 
 export const Route = createFileRoute("/tilganger")({
-  component: TilgangerPage,
+  component: TilgangerPageWrapper,
   loader: async (options) => {
     const session =
       await options.context.queryClient.ensureQueryData(getSession);
@@ -67,6 +73,14 @@ export const Route = createFileRoute("/tilganger")({
     return { orgenheterLedetAvMegOgDelegerbart, navident };
   },
 });
+
+function TilgangerPageWrapper() {
+  return (
+    <ModalProvider>
+      <TilgangerPage />
+    </ModalProvider>
+  );
+}
 
 function TilgangerPage() {
   const { orgenheterLedetAvMegOgDelegerbart } = Route.useLoaderData();
@@ -211,6 +225,8 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     resolver: yupResolver(tilgangSchema),
   });
 
+  const { showModal } = useModal();
+
   const { mutate, isPending, error } = useMutation<
     unknown,
     AxiosError<Error>,
@@ -260,13 +276,25 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
       return fulfilled;
     },
     onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: getTilgangerDelegertByUserOptions().queryKey,
-      });
+      queryClient
+        .invalidateQueries({
+          queryKey: getTilgangerDelegertByUserOptions().queryKey,
+        })
+        .then();
     },
-    onSuccess: () => {
+    onSuccess: async (values) => {
       methods.reset();
       setEdit(false);
+
+      console.log(values);
+
+      await showModal(
+        <BekreftModal
+          confirmOnly
+          content="Du har nå delegert redigeringstilgang i NOM "
+          heading="Testoverskrift"
+        />,
+      );
     },
   });
 
@@ -403,6 +431,8 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
           )}
         </HStack>
       </VStack>
+
+      <ModalComponent />
     </FormProvider>
   );
 }
