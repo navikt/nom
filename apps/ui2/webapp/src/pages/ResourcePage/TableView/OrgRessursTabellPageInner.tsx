@@ -74,8 +74,6 @@ const createCustomRessurser = (
       ),
     );
 
-    console.log(correspondingOrgEnheter);
-
     const fomDatoer = correspondingOrgEnheter.map(
       (orgEnhet) =>
         orgEnhet.ressursKoblinger.find(

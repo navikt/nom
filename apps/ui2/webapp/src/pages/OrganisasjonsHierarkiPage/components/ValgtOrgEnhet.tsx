@@ -46,8 +46,6 @@ export const ValgtOrgEnhet = ({
       queryFn: () => getRessurserForOrgenhet.queryFn(ressurser),
     }).data ?? [];
 
-  console.log(hentedeRessurser);
-
   const visTabellKnapp = isOrgEnhetArbeidsomraadeQuery(orgEnhet.id).data;
 
   return (
