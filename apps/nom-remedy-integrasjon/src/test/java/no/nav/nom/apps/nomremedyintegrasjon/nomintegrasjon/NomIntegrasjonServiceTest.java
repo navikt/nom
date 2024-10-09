@@ -60,12 +60,7 @@ import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSec
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.fifteenCharLengthZeroPaddedNumber;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.formatFornavnWithMellomnavn;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class NomIntegrasjonServiceTest extends TestBase {
@@ -274,6 +269,51 @@ public class NomIntegrasjonServiceTest extends TestBase {
 
         var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
         var dagligOppfolgingOrgtilknytning = orgtilknytningState().erDagligOppfolging(true);
+        var dagligOppfolgingOrgenhet = orgenhet();
+
+        var ressursPersonaliaOppdatertV1 = ressursPersonaliaOppdatertV1(
+            new RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData(
+                new Visningsnavn("Charles", Optional.empty(), "Torgrimsson")
+            )
+        );
+
+        when(nomApiClient.getRessursByFid(ressursPersonaliaOppdatertV1.getFid())).thenReturn(existingRessurs);
+        when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(dagligOppfolgingOrgtilknytning));
+        when(nomApiClient.getOrgEnhet(dagligOppfolgingOrgtilknytning.getOrgEnhetId())).thenReturn(dagligOppfolgingOrgenhet);
+
+        nomIntegrasjonService.handleRessursEvent(ressursPersonaliaOppdatertV1);
+
+        var newNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
+
+        assertThat(newNomIntegrasjonEntityForNavident)
+            .usingRecursiveComparison()
+            .isEqualTo(Optional.of(
+                NomIntegrasjonEntity.builder()
+                    .entryId(fifteenCharLengthZeroPaddedNumber(0L))
+                    .entryBestiller(ressursPersonaliaOppdatertV1.getMetadata().inputMetadata().origination().initiatedBy())
+                    .entryOperasjon("Ny")
+                    .entryStatus("Ubehandlet")
+                    .enhetsId(dagligOppfolgingOrgenhet.getRemedyEnhetId())
+                    .etternavn(capitalizeNavn(ressursPersonaliaOppdatertV1.getPersonaliaOppdatertEventData().visningsnavn().etternavn()))
+                    .fodselsnummer(existingRessurs.getPersonident())
+                    .fornavn(capitalizeNavn(ressursPersonaliaOppdatertV1.getPersonaliaOppdatertEventData().visningsnavn().getFornavnMellomnavn()))
+                    .fysiskBrukerstedId(existingRessurs.getPrimaryFysiskBrukersted())
+                    .navId(existingRessurs.getNavident())
+                    .sektor(2)
+                    .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
+                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()))
+                    .mobil(existingRessurs.getPrimaryTelefonnummer())
+                    .build()
+
+            ));
+    }
+
+    @Test
+    @DisplayName("Should write new entity with correctly updated values for RessursPersonaliaOppdatertV1 with no active DOL, but future DOL")
+    void testShouldUpdateForWithNoActiveDOLRessursPersonaliaOppdatertV1() {
+
+        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+        var dagligOppfolgingOrgtilknytning = orgtilknytningState().gyldigFom(LocalDate.now().plusDays(2)).erDagligOppfolging(true);
         var dagligOppfolgingOrgenhet = orgenhet();
 
         var ressursPersonaliaOppdatertV1 = ressursPersonaliaOppdatertV1(

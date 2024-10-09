@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 
 // REF: no/nav/nom/apps/api/orgtilknytning/dvh/dokumentasjon/TestReferanser_MatcheTilDagligOppfoelgingsLeder_DOL.md
 @DisplayName("Tester for å sette DOL på strukturerte StillingPerioder fra DVH")
-class SettDOLPerioderPaaStrukturerteStillingerTest extends RessursStillingStrukturererTestBase {
+class SettDOLPerioderPaaStrukturerteStillingerTest extends TestBase {
     @Autowired
     SettDOLPerioderPaaStrukturerteStillinger CUT; // Class under test
 

@@ -28,6 +28,10 @@ export function NavidentSelectFormPart({
     enabled: searchTerm.length >= 3,
   });
 
+  const options = optionsQuery.data?.map((option) => {
+    return { value: option.value, label: `${option.label} (${option.value})` };
+  });
+
   const alleOptions = queryClient
     .getQueriesData<ComboboxOption[]>({
       queryKey: ["RESSURS_SØK"],
@@ -44,13 +48,13 @@ export function NavidentSelectFormPart({
         return (
           <UNSAFE_Combobox
             error={fieldState.error?.message?.toString()}
-            filteredOptions={optionsQuery.data ?? []}
+            filteredOptions={options ?? []}
             label={label}
             onChange={(value) => setSearchTerm(value ?? "")}
             onToggleSelected={(value, isSelected) => {
               field.onChange(isSelected ? value : undefined);
             }}
-            options={optionsQuery.data ?? []}
+            options={options ?? []}
             selectedOptions={selectedOption ? [selectedOption] : []}
             size="small"
           />

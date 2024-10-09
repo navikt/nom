@@ -16,4 +16,4 @@ public record EndreDagligOppfolgingOrgtilknytning(
     boolean dagligOppfolging,
     InputMetadata inputMetadata,
     OrgtilknytningEvent.AdditionalAgressoData additionalAgressoData
-) {}
+) implements OrgtilknytningCommand {}

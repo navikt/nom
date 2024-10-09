@@ -28,12 +28,12 @@ public class OrgtilknytningCmdServiceTestBase {
     static final VerificationMode NEVER_INVOKED = times(0);
 
     @Mock
-    OrgtilknytningCommandService orgtilknytningCommandService;
+    public OrgtilknytningCommandService orgtilknytningCommandService;
 
     @Captor
     ArgumentCaptor<OpprettOrgtilknytning> opprettOrgtilknytningArgumentCaptor;
     @Captor
-    ArgumentCaptor<EndreOrgtilknytningDato> korrigerOrgtilknytningDatoArgumentCaptor;
+    ArgumentCaptor<EndreOrgtilknytningDato> endreDatoOrgtilknytningDatoArgumentCaptor;
     @Captor
     ArgumentCaptor<AvvikleOrgtilknytning> avvikleOrgtilknytningArgumentCaptor;
     @Captor
@@ -42,13 +42,13 @@ public class OrgtilknytningCmdServiceTestBase {
     ArgumentCaptor<EndreDagligOppfolgingOrgtilknytning> endreDagligOppfolgingOrgtilknytningArgumentCaptor;
 
     @Captor
-    ArgumentCaptor<String> korrigertFidArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> endretDatoFidArgumentCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<String> avvikletFidArgumentCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<String> fjernetFidArgumentCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<String> endretDagligOppfolgingFidArgumentCaptor = ArgumentCaptor.forClass(String.class);
 
     int opprettetTimes;
-    int korrigertTimes;
+    int endretDatoTimes;
     int avvikleTimes;
     int fjernetTimes;
     int endretDagligOppfolgingTimes;
@@ -56,21 +56,21 @@ public class OrgtilknytningCmdServiceTestBase {
     @BeforeEach
     void setup() {
         opprettetTimes = 0;
-        korrigertTimes = 0;
+        endretDatoTimes = 0;
         avvikleTimes = 0;
         fjernetTimes = 0;
         endretDagligOppfolgingTimes = 0;
     }
 
-    enum CMD {
+    protected enum CMD {
         OPPRETTET,
-        KORRIGERT,
+        ENDRET_DATO,
         AVVIKLET,
         FJERNET,
         ENDRE_DAGLIG_OPPFOLGING
     }
 
-    OrgtilknytningAssert assertOrgtilknytning(CMD cmd) {
+    protected OrgtilknytningAssert assertOrgtilknytning(CMD cmd) {
         return assertOrgtilknytning(cmd, null);
     }
 
@@ -79,7 +79,7 @@ public class OrgtilknytningCmdServiceTestBase {
             switch (cmd) {
                 case OPPRETTET -> verificationMode = atLeast(++opprettetTimes);
                 case FJERNET -> verificationMode = atLeast(++fjernetTimes);
-                case KORRIGERT -> verificationMode = atLeast(++korrigertTimes);
+                case ENDRET_DATO -> verificationMode = atLeast(++endretDatoTimes);
                 case AVVIKLET -> verificationMode = atLeast(++avvikleTimes);
                 case ENDRE_DAGLIG_OPPFOLGING -> verificationMode = atLeast(++endretDagligOppfolgingTimes);
             }
@@ -106,11 +106,12 @@ public class OrgtilknytningCmdServiceTestBase {
                     return null;
                 }
             }
-            case KORRIGERT -> {
-                mock.endreOrgtilknytningDato(korrigertFidArgumentCaptor.capture(), korrigerOrgtilknytningDatoArgumentCaptor.capture());
-                log.debug("KORRIGERT ({})- FID argument: {}", korrigertTimes, korrigertFidArgumentCaptor.getAllValues());
+            case ENDRET_DATO -> {
+                mock.endreOrgtilknytningDato(endretDatoFidArgumentCaptor.capture(), endreDatoOrgtilknytningDatoArgumentCaptor.capture());
+                log.debug("ENDRET DATO ({})- FID argument: {}", endretDatoTimes, endretDatoFidArgumentCaptor.getAllValues());
                 if (verificationMode != NEVER_INVOKED) {
-                    return new KorrigertOrgtilknytningDatoAssert(korrigertFidArgumentCaptor.getAllValues().get(korrigertTimes -1), korrigerOrgtilknytningDatoArgumentCaptor.getAllValues().get(korrigertTimes - 1));
+                    return new EndretOrgtilknytningDatoAssert(endretDatoFidArgumentCaptor.getAllValues().get(endretDatoTimes -1), endreDatoOrgtilknytningDatoArgumentCaptor.getAllValues().get(
+                        endretDatoTimes - 1));
                 } else {
                     return null;
                 }
@@ -140,7 +141,7 @@ public class OrgtilknytningCmdServiceTestBase {
         return null;
     }
 
-    class OrgtilknytningAssert {
+    protected class OrgtilknytningAssert {
 
         final String fid;
 
@@ -263,29 +264,29 @@ public class OrgtilknytningCmdServiceTestBase {
         }
     }
 
-    class KorrigertOrgtilknytningDatoAssert extends OrgtilknytningAssert {
+    class EndretOrgtilknytningDatoAssert extends OrgtilknytningAssert {
         private final EndreOrgtilknytningDato endreOrgtilknytningDato;
 
-        KorrigertOrgtilknytningDatoAssert(String fid, EndreOrgtilknytningDato endreOrgtilknytningDato) {
+        EndretOrgtilknytningDatoAssert(String fid, EndreOrgtilknytningDato endreOrgtilknytningDato) {
             super(fid);
             this.endreOrgtilknytningDato = endreOrgtilknytningDato;
         }
 
         @Override
         public OrgtilknytningAssert forFid(String fid) {
-            assertEquals(fid, this.fid, "FID er ikke korrekt for KorrigerOrgtilknytningDato");
+            assertEquals(fid, this.fid, "FID er ikke korrekt for EndreOrgtilknytningDato");
             return this;
         }
 
         @Override
         public OrgtilknytningAssert gyldigFom(LocalDate gyldigFom) {
-            assertEquals(gyldigFom, endreOrgtilknytningDato.gyldigFom(), "GyldigFOM dato er ikke korrekt for KorrigerOrgtilknytningDato");
+            assertEquals(gyldigFom, endreOrgtilknytningDato.gyldigFom(), "GyldigFOM dato er ikke korrekt for EndreOrgtilknytningDato");
             return this;
         }
 
         @Override
         public OrgtilknytningAssert gyldigTom(LocalDate gyldigTom) {
-            assertEquals(gyldigTom, endreOrgtilknytningDato.gyldigTom().orElse(null), "GyldigTOM dato er ikke korrekt for KorrigerOrgtilknytningDato");
+            assertEquals(gyldigTom, endreOrgtilknytningDato.gyldigTom().orElse(null), "GyldigTOM dato er ikke korrekt for EndreOrgtilknytningDato");
             return this;
         }
     }

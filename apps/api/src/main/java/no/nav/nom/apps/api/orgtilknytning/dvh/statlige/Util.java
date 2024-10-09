@@ -100,9 +100,7 @@ public class Util {
     private static List<StillingPeriode> advarOgFjernNegativePerioder(List<StillingPeriode> stillingPerioder, StrukturerteStillingPerioderForNavident sspForNavident) {
         stillingPerioder.stream()
             .filter(sp -> foer(sp.gyldigTom(), sp.gyldigFom()))
-            .forEach(sp -> {
-                lagErrorHarNegativStillingPeriode(sspForNavident, sp, sspForNavident.navident());
-            });
+            .forEach(sp -> lagErrorHarNegativStillingPeriode(sspForNavident, sp, sspForNavident.navident()));
 
         return stillingPerioder.stream()
             .filter(sp -> likEllerEtter(sp.gyldigTom(), sp.gyldigFom()))

@@ -34,6 +34,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -543,6 +544,20 @@ public class NomIntegrasjonService {
             .filter(orgtilknytningState -> isActive(orgtilknytningState.getGyldigFom(), orgtilknytningState.getGyldigTom()))
             .filter(OrgtilknytningState::getErDagligOppfolging)
             .findFirst();
+
+        if (dagligOppfolgningOrgTilknytning.isEmpty()) {
+            logger.info("Ingen aktiv DOL funnet for ressurs med navident {}, prøver å finne fremtidig DOL", ressurs.getNavident());
+            dagligOppfolgningOrgTilknytning = nomApiClient.getOrgtilknytningerForNavident(ressurs.getNavident()).stream()
+                .sorted(Comparator.comparing(OrgtilknytningState::getGyldigFom))
+                .filter(orgtilknytningState -> orgtilknytningState.getGyldigFom().isAfter(LocalDate.now()))
+                .filter(OrgtilknytningState::getErDagligOppfolging)
+                .findFirst();
+            dagligOppfolgningOrgTilknytning.ifPresent(orgtilknytningState -> logger.info(
+                "Fant fremtidig DOL funnet for ressurs med navident {}, orgenhetId {}",
+                ressurs.getNavident(),
+                orgtilknytningState.getOrgEnhetId()
+            ));
+        }
 
         return NomIntegrasjonEntity.builder()
             .enhetsId(dagligOppfolgningOrgTilknytning.map(orgtilknytningState -> getRemedyEnhetId(orgtilknytningState.getOrgEnhetId())).orElse(null))

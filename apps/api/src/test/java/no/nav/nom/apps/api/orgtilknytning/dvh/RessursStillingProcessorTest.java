@@ -528,7 +528,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
         assertOrgtilknytning(CMD.OPPRETTET, NEVER_INVOKED);
         assertOrgtilknytning(CMD.AVVIKLET, NEVER_INVOKED);
         assertOrgtilknytning(CMD.FJERNET, NEVER_INVOKED);
-        assertOrgtilknytning(CMD.KORRIGERT, NEVER_INVOKED);
+        assertOrgtilknytning(CMD.ENDRET_DATO, NEVER_INVOKED);
         assertOrgtilknytning(CMD.ENDRE_DAGLIG_OPPFOLGING, NEVER_INVOKED);
     }
 

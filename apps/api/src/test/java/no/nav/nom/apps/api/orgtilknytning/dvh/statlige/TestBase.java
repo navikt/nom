@@ -1,10 +1,16 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.dvh.OrgtilknytningCmdServiceTestBase;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
+import no.nav.nom.apps.api.ressurs.NomMastered;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -12,6 +18,8 @@ import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -23,7 +31,7 @@ import java.util.Random;
     MatchStrukturerteStillingPerioderTilNOM.class,
     SettDOLPerioderPaaStrukturerteStillinger.class
 })
-class RessursStillingStrukturererTestBase {
+public class TestBase extends OrgtilknytningCmdServiceTestBase {
     static final LocalDate MAX_DATE = LocalDate.of(2099, 12, 31);
     static final String A000001 = "A000001";
 
@@ -33,29 +41,36 @@ class RessursStillingStrukturererTestBase {
     RessursStateRepository ressursStateRepository;
     @MockBean
     OrgtilknytningStateRepository orgtilknytningStateRepository;
+    @MockBean
+    OrgtilknytningService orgtilknytningService;
+    @MockBean
+    NomMastered nomMastered;
+    @MockBean
+    Unleash unleash;
 
     private Random rnd = new Random();
 
-    OrgtilknytningState orgtilknytning(String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom) {
-        return OrgtilknytningState.builder()
-            .fid("FID_" + rnd.nextInt(1000))
-            .navident(navident)
-            .orgEnhetId(orgEnhetId)
-            .gyldigFom(gyldigFom)
-            .gyldigTom(Optional.ofNullable(gyldigTom))
-            .erDagligOppfolging(true)
-            .build();
+    OrgtilknytningState orgtilknytning(String fid, String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom) {
+        return orgtilknytning(fid, navident, orgEnhetId, gyldigFom, gyldigTom, true);
     }
 
-    OrgtilknytningState orgtilknytning(String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom, boolean erDagligOppfolging) {
+    OrgtilknytningState orgtilknytning(String fid, String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom, boolean erDagligOppfolging) {
         return OrgtilknytningState.builder()
-            .fid("FID_" + rnd.nextInt(1000))
+            .fid(fid)
             .navident(navident)
             .orgEnhetId(orgEnhetId)
             .gyldigFom(gyldigFom)
             .gyldigTom(Optional.ofNullable(gyldigTom))
             .erDagligOppfolging(erDagligOppfolging)
             .build();
+    }
+
+    OrgtilknytningState orgtilknytning(String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom) {
+        return orgtilknytning(navident, orgEnhetId, gyldigFom, gyldigTom, true);
+    }
+
+    OrgtilknytningState orgtilknytning(String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom, boolean erDagligOppfolging) {
+        return orgtilknytning("FID_" + rnd.nextInt(1000), navident, orgEnhetId, gyldigFom, gyldigTom, erDagligOppfolging);
     }
 
     IOrgenhet orgenhet(String id, String navn, String agressoId) {
@@ -87,6 +102,7 @@ class RessursStillingStrukturererTestBase {
             .navident(navident)
             .startdato(Optional.ofNullable(startDato))
             .sluttdato(Optional.ofNullable(sluttDato))
+            .sektor(Sektor.NAV_STATLIG)
             .build();
     }
 
@@ -153,6 +169,21 @@ class RessursStillingStrukturererTestBase {
                 gyldigFom,
                 gyldigTom,
                 orgenhet
+        );
+    }
+
+    StillingPeriode stillingPeriode(IOrgenhet orgenhet, LocalDate gyldigFom, LocalDate gyldigTom, StillingPeriode.DagligOppfolging dol) {
+        return new StillingPeriode(
+            new StillingPeriode.StillingAgressoOrgIdOgNavn(
+                Optional.ofNullable(orgenhet.getAgressoId()),
+                orgenhet.getNavn(),
+                Optional.ofNullable(orgenhet.getAgressoId()),
+                Optional.of("ORGENHET")
+            ),
+            gyldigFom,
+            gyldigTom,
+            orgenhet,
+            dol
         );
     }
 

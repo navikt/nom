@@ -17,7 +17,7 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode.DagligOppfo
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Tester util metodene som bruker i strukturering av periodisering på RessursStillinger fra DVH")
-public class UtilTest extends RessursStillingStrukturererTestBase {
+public class UtilTest extends TestBase {
 
     StrukturerteStillingPerioderForNavident DUMMY_sspForNavident = new StrukturerteStillingPerioderForNavident("A000001", new ArrayList<>(), new ArrayList<>());
 
