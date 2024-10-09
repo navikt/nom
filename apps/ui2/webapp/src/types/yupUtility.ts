@@ -1,7 +1,7 @@
 import { addYears, isBefore } from "date-fns";
 import * as yup from "yup";
 
-import { isPresentOrAfter } from "~/utils";
+import { isTodayOrAfter } from "~/utils";
 
 declare module "yup" {
   interface StringSchema {
@@ -20,7 +20,7 @@ yup.addMethod(yup.string, "futureOrPresent", function () {
         return true;
       }
 
-      return isPresentOrAfter(new Date(dateString));
+      return isTodayOrAfter(new Date(dateString));
     },
   );
 });
