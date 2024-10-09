@@ -317,6 +317,9 @@ app:
       - navident: Z991770         # Team ISA / Øystein Brox
         orgtilknytning: ga691g    # 8540000-IT-ledelse-ORGENHET
         sektor: NAV_STATLIG
+      - navident: Z994247         # Team ISA / Øystein Brox
+        orgtilknytning: ga691g    # 8540000-IT-ledelse-ORGENHET
+        sektor: NAV_STATLIG
 
     ledere:
       - navident: N852930
