@@ -194,8 +194,12 @@ function DelegertRolleCard({ tilgang }: { tilgang: LederTilgangState }) {
         <BodyShort>
           I tillegg til å ha delegert redigeringstilgang her i NOM, må du også
           ha fått tilganger i Mine Tilganger. Brukerveiledning for Mine
-          Tilganger finner du <Link to={brukerveiledningLenke}>her</Link>. Du
-          kan søke på NOM for å finne riktig tilgang å delegere.
+          Tilganger finner du her:{" "}
+          <Link target="_blank" to={brukerveiledningLenke}>
+            Brukerveiledning Mine Tilganger
+          </Link>
+          . Du kan søke på NOM i Mine Tilganger for å finne riktig tilgang å
+          delegere.
         </BodyShort>
       </HStack>
     </VStack>
@@ -205,6 +209,9 @@ function DelegertRolleCard({ tilgang }: { tilgang: LederTilgangState }) {
 function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const [edit, setEdit] = useState(false);
   const queryClient = useQueryClient();
+
+  const brukerveiledningLenke: string =
+    "https://navno.sharepoint.com/sites/intranett-it/SitePages/Brukerveiledninger-Mine-Tilganger.aspx";
 
   const tilgangerDelegertAvMeg =
     useQuery({
@@ -282,17 +289,27 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
         })
         .then();
     },
-    onSuccess: async (values) => {
+    onSuccess: async () => {
       methods.reset();
       setEdit(false);
-
-      console.log(values);
 
       await showModal(
         <BekreftModal
           confirmOnly
-          content="Du har nå delegert redigeringstilgang i NOM "
-          heading="Testoverskrift"
+          content={
+            <BodyShort>
+              Du har nå endret medarbeideres redigeringstilgang i NOM. For å få
+              tilgang til lønsingen, kreves det også at medarbeidere har fått
+              tilgang i Mine Tilganger. Brukerveiledning for Mine Tilgganger
+              finner du her:{" "}
+              <Link target="_blank" to={brukerveiledningLenke}>
+                Brukerveiledninger Mine Tilganger
+              </Link>
+              . Du kan søke på NOM inne i Mine Tilganger for å finne riktig
+              tilgang å delegere.
+            </BodyShort>
+          }
+          heading="Tilganger"
         />,
       );
     },
@@ -302,9 +319,6 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     methods.reset();
     setEdit(false);
   };
-
-  const brukerveiledningLenke: string =
-    "https://navno.sharepoint.com/sites/intranett-it/SitePages/Brukerveiledninger-Mine-Tilganger.aspx";
 
   return (
     <FormProvider {...methods}>
@@ -377,9 +391,12 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             <BodyShort>
               I tillegg til å delegere redigeringstilgang her i NOM, må
               vedkommende også få tilganger i Mine Tilganger. Brukerveiledning
-              for Mine Tilganger finner du{" "}
-              <Link to={brukerveiledningLenke}>her</Link>. Du kan søke på NOM
-              for å finne riktig tilgang å delegere.
+              for Mine Tilganger finner du her:{" "}
+              <Link target="_blank" to={brukerveiledningLenke}>
+                Brukerveiledning Mine Tilganger
+              </Link>
+              . Du kan søke på NOM i Mine Tilganger for å finne riktig tilgang å
+              delegere.
             </BodyShort>
           </HStack>
         </VStack>
