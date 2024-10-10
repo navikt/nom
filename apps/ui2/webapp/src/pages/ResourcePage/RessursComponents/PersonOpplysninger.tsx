@@ -204,19 +204,13 @@ export function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {
 }
 
 export function TelefonNummere({ ressurs }: { ressurs: Ressurs }) {
-  const telefonnummere = ressurs.primaryTelefonnummer
-    ? [{ nummer: ressurs.primaryTelefonnummer }, ...ressurs.telefoner]
-    : ressurs.telefoner;
-
-  const uniqueTelefonnummere = uniqBy(telefonnummere, "nummer");
-
-  return (
+  return ressurs.primaryTelefonnummer ? (
     <LabelWithValue
       label="Telefon"
-      value={uniqueTelefonnummere
-        .map(({ nummer }) => formatTlf(nummer))
-        .join(", ")}
+      value={formatTlf(ressurs.primaryTelefonnummer)}
     />
+  ) : (
+    <></>
   );
 }
 
