@@ -54,7 +54,10 @@ import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { showToast } from "~/hooks/showToast";
-import { dolValidering } from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import {
+  dolValidering,
+  setRessursStartdato,
+} from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { RemedyEndringModal } from "~/pages/ResourcePage/RessursComponents/Modal/RemedyEndringModal";
 import { TomDatoModal } from "~/pages/ResourcePage/RessursComponents/Modal/TomDatoModal";
 import { OrgtilknytningTimeline } from "~/pages/ResourcePage/RessursComponents/OrgtilknytningTimeline";
@@ -68,12 +71,13 @@ import type {
 import { Sektor } from "~/types/api-models";
 import {
   dateWithoutTimezone,
+  earliestDateInList,
   formatDateWithoutTimezone,
   formatDisplayDate,
   formatVisningsnavn,
+  isBeforeToday,
   isSameDateOrAfter,
   isSameDateOrBefore,
-  isTodayOrAfter,
   todayWithoutTimezone,
 } from "~/utils";
 
@@ -220,6 +224,16 @@ function OrgtilknytningForm({
   const lonnsskjemaLenke: string =
     "https://navno.sharepoint.com/sites/intranett-lonnsadministrasjon/SitePages/L%C3%B8nnsskjema.aspx";
 
+  const tidligsteOrgtilknytningStartdato = earliestDateInList(
+    orgtilknytninger
+      .filter((orgtilknytning) => orgtilknytning.gyldigFom)
+      .map((orgtilknytning) => new Date(orgtilknytning.gyldigFom as string)),
+  );
+
+  const tidligsteOrgDatoPre = tidligsteOrgtilknytningStartdato
+    ? formatDateWithoutTimezone(tidligsteOrgtilknytningStartdato)
+    : undefined;
+
   const hasFieldTomChanged = (field: Partial<OrgtilknytningState>) => {
     const originalField = orgtilknytninger.find(
       (tilknytning) => tilknytning.fid === field.fid,
@@ -314,6 +328,11 @@ function OrgtilknytningForm({
         oppdaterOrgtilknytningerMutation.mutate(
           lagOppdaterOrgtilknytningerRequest(
             values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+            setRessursStartdato(
+              ressurs,
+              values.mappedeOrgtilknytninger,
+              tidligsteOrgDatoPre,
+            ),
           ),
         );
       });
@@ -354,13 +373,17 @@ function OrgtilknytningForm({
         )}
 
         {fields.map((field, index) => {
+          const avsluttet =
+            !!field.gyldigTom &&
+            isBeforeToday(dateWithoutTimezone(new Date(field.gyldigTom)));
+
           if (
             field.fid &&
             field.gyldigTom &&
             !hasFieldTomChanged(field) &&
             !isSameDateOrAfter(
               dateWithoutTimezone(new Date(field.gyldigTom)),
-              subMonths(todayWithoutTimezone(), 2),
+              dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
             )
           ) {
             return (
@@ -385,7 +408,10 @@ function OrgtilknytningForm({
               key={field.id}
             >
               {field.fid ? (
-                <EditOrgilkntyningFormPart index={index} />
+                <EditOrgilkntyningFormPart
+                  avsluttet={avsluttet}
+                  index={index}
+                />
               ) : (
                 <NewOrgtilknytningFormPart
                   index={index}
@@ -570,7 +596,13 @@ function NewOrgtilknytningFormPart({
   );
 }
 
-function EditOrgilkntyningFormPart({ index }: { index: number }) {
+function EditOrgilkntyningFormPart({
+  index,
+  avsluttet,
+}: {
+  index: number;
+  avsluttet: boolean;
+}) {
   const { watch } = useFormContext();
   const field = watch(`mappedeOrgtilknytninger.${index}`);
 
@@ -590,12 +622,11 @@ function EditOrgilkntyningFormPart({ index }: { index: number }) {
       >
         <Heading size="medium">{orgEnhetQuery.data?.navn}</Heading>
 
-        {field.gyldigTom &&
-          !isTodayOrAfter(dateWithoutTimezone(new Date(field.gyldigTom))) && (
-            <Tag size="medium" variant="warning">
-              Avsluttet
-            </Tag>
-          )}
+        {field.gyldigTom && avsluttet && (
+          <Tag size="medium" variant="warning">
+            Avsluttet
+          </Tag>
+        )}
       </div>
 
       <BodyLong>
@@ -857,6 +888,7 @@ function InnholdInformasjonsboks({ ressursSektor }: { ressursSektor: Sektor }) {
 
 function lagOppdaterOrgtilknytningerRequest(
   orgtilknytninger: OrgtilknytningEtterValidering[],
+  setRessursStartdato: boolean,
 ): OppdaterOrgtilknytningerForRessursRequest {
   const [eksisterendeOrgtilknytninger, nyeOrgtilknytninger] = partition(
     orgtilknytninger,
@@ -880,7 +912,7 @@ function lagOppdaterOrgtilknytningerRequest(
       orgEnhetId: orgtilknytning.orgEnhetId,
     })),
     setRessursSluttdato: true,
-    setRessursStartdato: false,
+    setRessursStartdato: setRessursStartdato,
   };
 }
 
