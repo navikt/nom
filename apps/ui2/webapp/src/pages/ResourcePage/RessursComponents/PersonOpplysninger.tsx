@@ -11,7 +11,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink, useNavigate } from "@tanstack/react-router";
 import capitalize from "lodash/capitalize";
-import uniqBy from "lodash/uniqBy";
 import React from "react";
 
 import {
