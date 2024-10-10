@@ -193,6 +193,8 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
         orgtilknytninger={orgtilknytninger}
         ressurs={ressurs}
       />
+
+      <ModalComponent />
     </div>
   );
 }
@@ -242,7 +244,7 @@ function OrgtilknytningForm({
     return !(field.gyldigTom === originalField?.gyldigTom);
   };
 
-  // Hvis det ikke finnes noen orgtilknytninger, legger vi til en ny en by default.
+  // Hvis det ikke finnes noen orgtilknytninger, legger vi automatisk til en ny
   const defaultOrgtilknytninger =
     orgtilknytninger.length > 0 ? orgtilknytninger : [defaultNyOrgtilknytning];
 
@@ -282,8 +284,9 @@ function OrgtilknytningForm({
     mutationFn: async (request) => {
       return oppdaterOrgtilknytningerForRessurs(ressurs.navident, request);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       showToast({ text: "Lagret" });
+
       navigate({
         params: { id: ressurs.navident },
         to: "/ressurs/$id",

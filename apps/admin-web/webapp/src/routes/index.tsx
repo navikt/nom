@@ -2,6 +2,7 @@ import {
   BooksIcon,
   CogRotationIcon,
   DatabaseIcon,
+  HeadHeartIcon,
   TerminalIcon,
 } from "@navikt/aksel-icons";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -33,6 +34,12 @@ export const Route = createFileRoute("/")({
           <CardWrapper>
             <TerminalIcon fontSize={80} />
             <b>Send event</b>
+          </CardWrapper>
+        </Link>
+        <Link to="/sanity-checks/orgenhet">
+          <CardWrapper>
+            <HeadHeartIcon fontSize={80} />
+            <b>Sanity checks</b>
           </CardWrapper>
         </Link>
       </div>
