@@ -9,8 +9,13 @@ export function NomLink({
   path: string;
   children: ReactNode;
 }) {
+  const prodEnv = window.location.href.includes("nom-admin.ansatt.nav.no");
+
   return (
-    <Link href={`http://nom.nav.no/${path}`} target="_blank">
+    <Link
+      href={`https://${prodEnv ? "nom.nav.no" : "nom.ekstern.dev.nav.no"}/${path}`}
+      target="_blank"
+    >
       {children}
       <ExternalLinkIcon />
     </Link>
