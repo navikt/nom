@@ -3,9 +3,13 @@ import orderBy from "lodash/orderBy";
 import sortBy from "lodash/orderBy";
 
 import type { OrgtilknytningEtterValidering } from "~/pages/ResourcePage/RessursComponents/EditOrgtilknytninger";
-import type { OrgtilknytningState } from "~/types/api-models";
+import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 import {
   earliestDate,
+  earliestDateInList,
+  formatDateWithoutTimezone,
+  isBeforeDate,
+  isSameDate,
   isSameDateOrBefore,
   isTodayOrAfter,
   latestDate,
@@ -222,15 +226,33 @@ export function senesteTom(
   return orderBy(orgtilknytninger, "gyldigTom", "desc")[0].gyldigTom;
 }
 
-export function validInput(orgtilknytninger: Partial<OrgtilknytningState>[]) {
-  return !orgtilknytninger.some(
-    (orgtilknytning) =>
-      !orgtilknytning.gyldigFom ||
-      !orgtilknytning.orgEnhetId ||
-      (orgtilknytning.gyldigTom &&
-        isBefore(
-          new Date(orgtilknytning.gyldigTom),
-          new Date(orgtilknytning.gyldigFom),
-        )),
+export function setRessursStartdato(
+  ressurs: Ressurs,
+  orgtilknytninger: Partial<OrgtilknytningState>[],
+  tidligsteOrgDatoPre: string | undefined,
+) {
+  const ressursStartdato = ressurs.startdato;
+
+  const tidligsteNyeOrgtilknytningStartdato = earliestDateInList(
+    orgtilknytninger
+      .filter((orgtilknytning) => orgtilknytning.gyldigFom)
+      .map((orgtilknytning) => new Date(orgtilknytning.gyldigFom as string)),
   );
+
+  const tidligsteOrgDatoPost = tidligsteNyeOrgtilknytningStartdato
+    ? formatDateWithoutTimezone(tidligsteNyeOrgtilknytningStartdato)
+    : undefined;
+
+  if (!ressursStartdato || !tidligsteOrgDatoPost) {
+    return false;
+  }
+
+  if (
+    tidligsteOrgDatoPre &&
+    isSameDate(tidligsteOrgDatoPre, ressursStartdato)
+  ) {
+    return true;
+  }
+
+  return isBeforeDate(tidligsteOrgDatoPost, ressursStartdato);
 }

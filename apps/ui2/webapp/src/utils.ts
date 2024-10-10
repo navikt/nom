@@ -67,8 +67,8 @@ export function formatDateWithoutTimezone(date: Date) {
   return formatISO(date, { representation: "date" });
 }
 
-export function dateWithoutTimezone(date: Date) {
-  return new Date(formatDateWithoutTimezone(date));
+export function dateWithoutTimezone(date: Date | string) {
+  return new Date(formatDateWithoutTimezone(new Date(date)));
 }
 
 export function todayWithoutTimezone() {
@@ -128,12 +128,42 @@ export function isPresentOrAfter(date: Date) {
   return isTodayOrAfter(date);
 }
 
+export function isBeforeDate(
+  checkDate: Date | string,
+  compareDate: Date | string,
+) {
+  return isBefore(
+    dateWithoutTimezone(checkDate),
+    dateWithoutTimezone(compareDate),
+  );
+}
+
+export function isAfterDate(
+  checkDate: Date | string,
+  compareDate: Date | string,
+) {
+  return isAfter(
+    dateWithoutTimezone(checkDate),
+    dateWithoutTimezone(compareDate),
+  );
+}
+
 export function isBeforeToday(date: Date) {
   return !isTodayOrAfter(date);
 }
 
 export function isAfterToday(date: Date) {
   return !isTodayOrBefore(date);
+}
+
+export function isSameDate(
+  checkDate: Date | string,
+  compareDate: Date | string,
+) {
+  return isSameDay(
+    dateWithoutTimezone(new Date(checkDate)),
+    dateWithoutTimezone(new Date(compareDate)),
+  );
 }
 
 export function isSameDateOrAfter(checkDate: Date, compareDate: Date) {

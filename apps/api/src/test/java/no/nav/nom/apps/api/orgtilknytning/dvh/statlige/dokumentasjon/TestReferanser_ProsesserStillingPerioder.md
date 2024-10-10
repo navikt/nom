@@ -1,5 +1,9 @@
 ### TESTER: Prosessering av StillingPerioder
 
+* En liste over eksisterende OT’er (OT A, OT B etc)
+* En liste over hvordan vi har tolket Unit4 sine stillinger, kalt StillingPeriode (SP A, SP B)
+* Og så en liste over de ulike eventene som skal lages for å endre eksisterende OT’er til å se ut som U4 sin representasjon av virkeligheten.
+
 1. Ingen eksisterende Orgtilknytninger
     1. Single StillingPeriode med sluttdato
         ```

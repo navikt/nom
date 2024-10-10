@@ -9,12 +9,14 @@ import org.springdoc.core.models.GroupedOpenApi;
 @Configuration
 public class SwaggerConfig {
 
+    public static final String BEARER_TOKEN = "BearerAuth";
+
     @Bean
     public GroupedOpenApi v1Api() {
         return GroupedOpenApi.builder()
             .group("internal")
             .displayName("NOM ADMIN API v1")
-            .pathsToMatch("/sinks/**", "/states/**")
+            .pathsToMatch("/sinks/**", "/states/**", "/SanityCheck/**")
             .build();
     }
 
