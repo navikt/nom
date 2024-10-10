@@ -155,12 +155,42 @@ export function isTodayOrAfter(date: Date | string) {
   );
 }
 
+export function isBeforeDate(
+  checkDate: Date | string,
+  compareDate: Date | string,
+) {
+  return isBefore(
+    dateWithoutTimezone(checkDate),
+    dateWithoutTimezone(compareDate),
+  );
+}
+
+export function isAfterDate(
+  checkDate: Date | string,
+  compareDate: Date | string,
+) {
+  return isAfter(
+    dateWithoutTimezone(checkDate),
+    dateWithoutTimezone(compareDate),
+  );
+}
+
 export function isBeforeToday(date: Date | string) {
   return !isTodayOrAfter(dateWithoutTimezone(date));
 }
 
 export function isAfterToday(date: Date | string) {
   return !isTodayOrBefore(dateWithoutTimezone(date));
+}
+
+export function isSameDate(
+  checkDate: Date | string,
+  compareDate: Date | string,
+) {
+  return isSameDay(
+    dateWithoutTimezone(new Date(checkDate)),
+    dateWithoutTimezone(new Date(compareDate)),
+  );
 }
 
 export function isSameDateOrAfter(checkDate: Date, compareDate: Date) {

@@ -17,10 +17,12 @@ import no.nav.nom.apps.api.ressurs.api.app.OppdaterSluttdatoRessursResponse;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.SlettRessursCommand;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -512,7 +514,7 @@ public class ManuelleRessursEvtsrcMeldinger {
         @Parameter(description = "NAVIDENT for ressursen") @RequestParam String navident,
         @Parameter(description = "Startdato for ressursen som skal oppdateres") @RequestParam(required = true) LocalDate startdato,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
-    ) throws JsonProcessingException {
+    ) {
         var ressursState = ressursStateRepository.findByNavident(navident);
 
         if (ressursState.isEmpty()) {
@@ -559,6 +561,75 @@ public class ManuelleRessursEvtsrcMeldinger {
                 ressursState.get().visningsnavn().toString(),
                 ressursState.get().startdato(),
                 startdato.toString()
+            )
+        );
+    }
+
+    @PostMapping(value = "/endreSektorRessurs")
+    @Operation(
+        description = "Lag en RessursSektorOppdatert event melding",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
+        }
+    )
+    public ResponseEntity<String> endreSektorRessurs(
+        @Parameter(description = "NAVIDENT for ressursen") @RequestParam String navident,
+        @Parameter(description = "Ny sektor som for ressursen som skal settes") @RequestParam Sektor sektor,
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
+    ) {
+        var ressursState = ressursStateRepository.findByNavident(navident);
+
+        if (ressursState.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Navidenten finnes ikke");
+        }
+
+        if (!nomMastered.isMastered(navident)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Navidenten er ikke mastret i NOM");
+        }
+
+        if (isNull(sektor)){
+            log.warn("sektor til oppdatering for ressurs: {} er tom!", navident);
+        }
+
+        if (!"CONFIRM".equals(confirm)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body("Ressurs med FID %s er funnet for navident %s med navn %s og sektor %s. Men vil ikke endres da handling ikke er bekreftet".formatted(
+                    HtmlUtils.htmlEncode(ressursState.get().fid()),
+                    ressursState.get().navident(),
+                    ressursState.get().visningsnavn().toString(),
+                    ressursState.get().sektor()
+                ));
+        }
+
+        var metaData = new InputMetadata(
+            "/api/admin/manuelleEvtsrcMeldinger",
+            "endreSektorRessurs",
+            sektor.toString(),
+            new Origination(
+                getAuthenticatedNavIdent(),
+                "Admin swagger/rest"
+            )
+        );
+
+        ressursCommandService.oppdaterSektorEvent(
+            new OppdaterSektorCommand(ressursState.get().fid(), sektor),
+            metaData
+        );
+
+        return ResponseEntity.ok().body(
+            "Ressurs med FID %s er funnet for navident %s med navn %s og sektor %s har fått ny sektor %s".formatted(
+                HtmlUtils.htmlEncode(ressursState.get().fid()),
+                ressursState.get().navident(),
+                ressursState.get().visningsnavn().toString(),
+                ressursState.get().sektor(),
+                sektor
             )
         );
     }
