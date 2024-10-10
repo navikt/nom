@@ -5,6 +5,7 @@ import { ErrorBoundary } from "react-error-boundary";
 
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { AntallOrgenheter } from "~/sanitychecks/AntallOrgenheter.tsx";
+import { EnheterOgOrganisering } from "~/sanitychecks/EnheterOgOrganisering.tsx";
 
 export const Route = createFileRoute("/sanity-checks/orgenhet")({
   component: () => {
@@ -25,6 +26,9 @@ function ListSelector(props: { selected: string }) {
     case "Alle enheter": {
       return <AntallOrgenheter />;
     }
+    case "Enheter og Organisering": {
+      return <EnheterOgOrganisering />;
+    }
     default: {
       return <></>;
     }
@@ -42,9 +46,7 @@ function OrgEnhetSanityChecks() {
         style={{ width: "300px", paddingBottom: "20px" }}
       >
         <option value="Alle enheter">Alle enheter</option>
-        <option value="Enhet uten orgtilknytning">
-          Enhet uten orgtilknytning
-        </option>
+        <option value="Enheter og Organisering">Enheter og Organisering</option>
       </Select>
       <ListSelector selected={handleChange} />
     </div>

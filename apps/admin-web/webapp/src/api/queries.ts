@@ -10,6 +10,7 @@ import type {
   OrgEnhetState,
 } from "~/types.ts";
 import type {
+  EnheterOgOrganisering,
   HendelseDTO,
   MasteredRessursDTO,
   OrgEnhetStartOgSluttdato,
@@ -222,5 +223,17 @@ export function getAlleEnheter() {
       (
         await ky.get(`${API_BASE_URL}/SanityCheck/orgenhet/enheter`)
       ).json<OrgEnhetStartOgSluttdato>(),
+  });
+}
+
+export function enheterOgOrganisering() {
+  return queryOptions({
+    queryKey: ["API", "ORGENHET"],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/SanityCheck/orgenhet/enheterOgOrganisering`,
+        )
+      ).json<EnheterOgOrganisering>(),
   });
 }
