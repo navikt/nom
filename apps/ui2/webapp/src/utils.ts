@@ -75,11 +75,11 @@ export function todayWithoutTimezone() {
   return dateWithoutTimezone(new Date());
 }
 
-export function formatDisplayDate(date?: string | Date) {
+export function formatDisplayDate(date?: Date | string) {
   if (!date) {
     return "";
   }
-  return format(new Date(date), DATE_FORMATS.no);
+  return format(dateWithoutTimezone(date), DATE_FORMATS.no);
 }
 
 export function formatDisplayDatetime(dateTime?: string) {
@@ -112,20 +112,47 @@ export function isGyldighetsPeriodeActive(
   }
 }
 
-export function isTodayOrBefore(date: Date) {
-  return isToday(date) || isBefore(date, todayWithoutTimezone());
+export function isPeriodActive(
+  gyldigFom: Date | string,
+  gyldigTom: Date | string | undefined,
+) {
+  return (
+    isTodayOrBefore(gyldigFom) && (!gyldigTom || isTodayOrAfter(gyldigTom))
+  );
 }
 
-export function isTodayOrAfter(date: Date) {
-  return isToday(date) || isAfter(date, todayWithoutTimezone());
+export function isPeriodFuture(
+  gyldigFom: Date | string,
+  gyldigTom: Date | string | undefined,
+) {
+  return isAfterToday(gyldigFom) && (!gyldigTom || isAfterToday(gyldigFom));
 }
 
-export function isPresentOrBefore(date: Date) {
-  return isTodayOrBefore(date);
+export function isPeriodActiveOrFuture(
+  gyldigFom: Date | string,
+  gyldigTom: Date | string | undefined,
+) {
+  return (
+    isPeriodActive(gyldigFom, gyldigTom) || isPeriodFuture(gyldigFom, gyldigTom)
+  );
 }
 
-export function isPresentOrAfter(date: Date) {
-  return isTodayOrAfter(date);
+export function isTodayOrBefore(date: Date | string) {
+  const providedDateWithoutTimezone = dateWithoutTimezone(date);
+
+  return (
+    isToday(providedDateWithoutTimezone) ||
+    isBefore(providedDateWithoutTimezone, todayWithoutTimezone())
+  );
+}
+
+export function isTodayOrAfter(date: Date | string) {
+  const providedDateWithoutTimezone = dateWithoutTimezone(date);
+
+  return (
+    isToday(providedDateWithoutTimezone) ||
+    isAfter(providedDateWithoutTimezone, todayWithoutTimezone())
+  );
 }
 
 export function isBeforeDate(
@@ -148,12 +175,12 @@ export function isAfterDate(
   );
 }
 
-export function isBeforeToday(date: Date) {
-  return !isTodayOrAfter(date);
+export function isBeforeToday(date: Date | string) {
+  return !isTodayOrAfter(dateWithoutTimezone(date));
 }
 
-export function isAfterToday(date: Date) {
-  return !isTodayOrBefore(date);
+export function isAfterToday(date: Date | string) {
+  return !isTodayOrBefore(dateWithoutTimezone(date));
 }
 
 export function isSameDate(

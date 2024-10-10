@@ -28,7 +28,7 @@ import {
   formatDisplayDate,
   formatTlf,
   formatVisningsnavn,
-  isGyldighetsPeriodeActive,
+  isPeriodActiveOrFuture,
 } from "~/utils";
 
 export function TelefonNummere({ ressurs }: { ressurs: CustomRessurs }) {
@@ -70,7 +70,7 @@ const createCustomRessurser = (
       orgEnhet.ressursKoblinger.some(
         (kobling) =>
           kobling.navident === ressurs.navident &&
-          isGyldighetsPeriodeActive(kobling.gyldigFom, kobling.gyldigTom),
+          isPeriodActiveOrFuture(kobling.gyldigFom, kobling.gyldigTom),
       ),
     );
 
@@ -111,7 +111,7 @@ export const OrgRessursTabellPageInner = ({
 }) => {
   const allRessursKoblinger = orgEnheter.flatMap((orgEnhet) =>
     orgEnhet.ressursKoblinger.filter((kobling) =>
-      isGyldighetsPeriodeActive(kobling.gyldigFom, kobling.gyldigTom),
+      isPeriodActiveOrFuture(kobling.gyldigFom, kobling.gyldigTom),
     ),
   );
 
@@ -266,7 +266,7 @@ export const OrgRessursTabellPageInner = ({
                 <Table.DataCell>
                   {ressurs.tidligsteFom
                     ? formatDisplayDate(
-                        dateWithoutTimezone(new Date(ressurs.tidligsteFom)),
+                        dateWithoutTimezone(ressurs.tidligsteFom),
                       )
                     : undefined}
                 </Table.DataCell>
