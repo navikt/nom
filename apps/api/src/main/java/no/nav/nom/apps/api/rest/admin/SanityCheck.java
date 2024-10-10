@@ -24,9 +24,7 @@ import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -52,8 +50,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.util.Objects.isNull;
-import static java.util.stream.Collectors.groupingBy;
 import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
 
 @Tag(name = "Admin for å kjøre en sanity check på data")
@@ -83,7 +79,7 @@ public class SanityCheck {
         this.organiseringStateRepository = organiseringStateRepository;
         this.unleash = unleash;
     }
-
+    //TODO: (Test Testesen 4) Denne er ferdig implementert i nom-admin, kan fjernes.
     @Operation(
         description = "Sjekk enheter antall og dato",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -102,6 +98,7 @@ public class SanityCheck {
         return result.toString();
     }
 
+    //TODO: (Test Testesen 4) Denne er ferdig implementert i nom-admin, kan fjernes.
     @Operation(
         description = "Sjekk aktive enheter og organiseringer",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)

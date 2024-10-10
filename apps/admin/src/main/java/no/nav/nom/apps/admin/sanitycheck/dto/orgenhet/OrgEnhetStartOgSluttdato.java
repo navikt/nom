@@ -1,4 +1,4 @@
-package no.nav.nom.apps.admin.sanitycheck.dto;
+package no.nav.nom.apps.admin.sanitycheck.dto.orgenhet;
 
 public record OrgEnhetStartOgSluttdato(
         int totaltAntallEnheter,

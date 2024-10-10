@@ -333,3 +333,22 @@ export interface OrgEnhetStartOgSluttdato {
   /** @format int32 */
   antallEnheterMedSluttdatoFoerStartdato?: number;
 }
+
+export interface EnheterOgOrganisering {
+  /** @format int32 */
+  aktiveEnheter?: number;
+  /** @format int32 */
+  aktiveOrganiseringer?: number;
+  /** @format int32 */
+  antallOverEnheter?: number;
+  /** @format int32 */
+  antallUnderEnheter?: number;
+  /** @format int32 */
+  aktiveEnheterUtenOverEnheter?: number;
+  /** @format int32 */
+  aktiveEnheterUtenUnderEnheter?: number;
+  /** @format int32 */
+  aktiveEnheterMedUnderEnheterUtenOverEnheter?: number;
+  /** @format int32 */
+  aktiveEnheterUtenNoenOrganisering?: number;
+}
