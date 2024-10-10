@@ -322,3 +322,14 @@ export enum HendelseType {
   ENDRET = "ENDRET",
   FJERNET = "FJERNET",
 }
+
+export interface OrgEnhetStartOgSluttdato {
+  /** @format int32 */
+  totaltAntallEnheter?: number;
+  /** @format int32 */
+  antallEnheterMedStartdato?: number;
+  /** @format int32 */
+  antallEnheterMedSluttdato?: number;
+  /** @format int32 */
+  antallEnheterMedSluttdatoFoerStartdato?: number;
+}

@@ -1,0 +1,27 @@
+import { Tabs } from "@navikt/ds-react";
+import {
+  createFileRoute,
+  Outlet,
+  useLocation,
+  useNavigate,
+} from "@tanstack/react-router";
+
+export const Route = createFileRoute("/sanity-checks")({
+  component: () => {
+    const { pathname } = useLocation();
+    const navigate = useNavigate();
+
+    return (
+      <Tabs iconPosition={"left"} value={pathname}>
+        <Tabs.List>
+          <Tabs.Tab
+            label="Orgenhet"
+            onClick={() => navigate({ to: "/sanity-checks/orgenhet" })}
+            value="/sanity-checks/orgenhet"
+          />
+        </Tabs.List>
+        <Outlet />
+      </Tabs>
+    );
+  },
+});

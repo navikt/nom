@@ -12,6 +12,7 @@ import type {
 import type {
   HendelseDTO,
   MasteredRessursDTO,
+  OrgEnhetStartOgSluttdato,
   OrgEnhetStateDTO,
   RessursStateKafkaDTO,
 } from "~/types/nom-admin/nom-admin-models.ts";
@@ -211,5 +212,15 @@ export function getOrgtilknytninger(navident: string | undefined) {
           `${NOM_API_BASE_URL}/app/orgtilknytninger?navident=${navident}`,
         )
       ).json<OrgtilknytningState[]>(),
+  });
+}
+
+export function getAlleEnheter() {
+  return queryOptions({
+    queryKey: ["API", "ORGENHET"],
+    queryFn: async () =>
+      (
+        await ky.get(`${API_BASE_URL}/SanityCheck/orgenhet/enheter`)
+      ).json<OrgEnhetStartOgSluttdato>(),
   });
 }

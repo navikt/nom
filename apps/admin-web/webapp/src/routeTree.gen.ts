@@ -13,6 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as StateImport } from './routes/state'
 import { Route as SinksImport } from './routes/sinks'
+import { Route as SanityChecksImport } from './routes/sanity-checks'
 import { Route as ManuelleMeldingerImport } from './routes/manuelle-meldinger'
 import { Route as ManuellLastImport } from './routes/manuell-last'
 import { Route as IndexImport } from './routes/index'
@@ -30,6 +31,7 @@ import { Route as SinksNomMasteredImport } from './routes/sinks.nom-mastered'
 import { Route as SinksApiRessursImport } from './routes/sinks.api-ressurs'
 import { Route as SinksApiOrgenhetImport } from './routes/sinks.api-orgenhet'
 import { Route as SinksApiHendelserImport } from './routes/sinks.api-hendelser'
+import { Route as SanityChecksOrgenhetImport } from './routes/sanity-checks.orgenhet'
 
 // Create/Update Routes
 
@@ -40,6 +42,11 @@ const StateRoute = StateImport.update({
 
 const SinksRoute = SinksImport.update({
   path: '/sinks',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const SanityChecksRoute = SanityChecksImport.update({
+  path: '/sanity-checks',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -128,6 +135,11 @@ const SinksApiHendelserRoute = SinksApiHendelserImport.update({
   getParentRoute: () => SinksRoute,
 } as any)
 
+const SanityChecksOrgenhetRoute = SanityChecksOrgenhetImport.update({
+  path: '/orgenhet',
+  getParentRoute: () => SanityChecksRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -153,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ManuelleMeldingerImport
       parentRoute: typeof rootRoute
     }
+    '/sanity-checks': {
+      id: '/sanity-checks'
+      path: '/sanity-checks'
+      fullPath: '/sanity-checks'
+      preLoaderRoute: typeof SanityChecksImport
+      parentRoute: typeof rootRoute
+    }
     '/sinks': {
       id: '/sinks'
       path: '/sinks'
@@ -166,6 +185,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/state'
       preLoaderRoute: typeof StateImport
       parentRoute: typeof rootRoute
+    }
+    '/sanity-checks/orgenhet': {
+      id: '/sanity-checks/orgenhet'
+      path: '/orgenhet'
+      fullPath: '/sanity-checks/orgenhet'
+      preLoaderRoute: typeof SanityChecksOrgenhetImport
+      parentRoute: typeof SanityChecksImport
     }
     '/sinks/api-hendelser': {
       id: '/sinks/api-hendelser'
@@ -274,6 +300,9 @@ export const routeTree = rootRoute.addChildren({
   IndexRoute,
   ManuellLastRoute,
   ManuelleMeldingerRoute,
+  SanityChecksRoute: SanityChecksRoute.addChildren({
+    SanityChecksOrgenhetRoute,
+  }),
   SinksRoute: SinksRoute.addChildren({
     SinksApiHendelserRoute,
     SinksApiOrgenhetRoute,
@@ -305,6 +334,7 @@ export const routeTree = rootRoute.addChildren({
         "/",
         "/manuell-last",
         "/manuelle-meldinger",
+        "/sanity-checks",
         "/sinks",
         "/state"
       ]
@@ -317,6 +347,12 @@ export const routeTree = rootRoute.addChildren({
     },
     "/manuelle-meldinger": {
       "filePath": "manuelle-meldinger.tsx"
+    },
+    "/sanity-checks": {
+      "filePath": "sanity-checks.tsx",
+      "children": [
+        "/sanity-checks/orgenhet"
+      ]
     },
     "/sinks": {
       "filePath": "sinks.tsx",
@@ -341,6 +377,10 @@ export const routeTree = rootRoute.addChildren({
         "/state/ressurs",
         "/state/"
       ]
+    },
+    "/sanity-checks/orgenhet": {
+      "filePath": "sanity-checks.orgenhet.tsx",
+      "parent": "/sanity-checks"
     },
     "/sinks/api-hendelser": {
       "filePath": "sinks.api-hendelser.tsx",
