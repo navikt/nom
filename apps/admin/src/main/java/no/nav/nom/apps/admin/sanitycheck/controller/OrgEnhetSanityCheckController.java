@@ -6,7 +6,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.admin.SwaggerConfig;
-import no.nav.nom.apps.admin.sanitycheck.dto.OrgEnhetStartOgSluttdato;
+import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.EnheterOgOrganisering;
+import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetStartOgSluttdato;
 import no.nav.nom.apps.admin.sanitycheck.service.OrgEnhetSanityCheckService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,5 +43,19 @@ public class OrgEnhetSanityCheckController {
     @GetMapping(value = "/enheter")
     public ResponseEntity<OrgEnhetStartOgSluttdato> dataSanityCheckEnheter() {
         return ResponseEntity.ok(orgEnhetSanityCheckService.sjekkOrgEnhetStartSluttDato());
+    }
+
+    @Operation(
+            description = "Sjekk aktive enheter og organiseringer",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+            {
+                    @ApiResponse(responseCode = "200", description = "Success")
+            }
+    )
+    @GetMapping(value = "/enheterOgOrganisering")
+    public ResponseEntity<EnheterOgOrganisering> dataSanityCheckEnheterOgOrganisering() {
+        return ResponseEntity.ok(orgEnhetSanityCheckService.sjekkAktiveEnheterOgOrganisering());
     }
 }
