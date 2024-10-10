@@ -34,7 +34,13 @@ import {
   tilgangerKeys,
 } from "~/api/react-query-endpoints";
 import { ApiResponseError } from "~/components/ApiResponseError";
+import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
+import ModalComponent from "~/components/modalProvider/ModalComponent";
+import {
+  ModalProvider,
+  useModal,
+} from "~/components/modalProvider/ModalProvider";
 import { NavidentNameLookup } from "~/components/NavidentNameLookup";
 import { PageBanner } from "~/components/PageBanner";
 import { Pluralize } from "~/components/Pluralize";
@@ -54,7 +60,7 @@ import {
 } from "~/utils";
 
 export const Route = createFileRoute("/tilganger")({
-  component: TilgangerPage,
+  component: TilgangerPageWrapper,
   loader: async (options) => {
     const session =
       await options.context.queryClient.ensureQueryData(getSession);
@@ -67,6 +73,14 @@ export const Route = createFileRoute("/tilganger")({
     return { orgenheterLedetAvMegOgDelegerbart, navident };
   },
 });
+
+function TilgangerPageWrapper() {
+  return (
+    <ModalProvider>
+      <TilgangerPage />
+    </ModalProvider>
+  );
+}
 
 function TilgangerPage() {
   const { orgenheterLedetAvMegOgDelegerbart } = Route.useLoaderData();
@@ -180,8 +194,12 @@ function DelegertRolleCard({ tilgang }: { tilgang: LederTilgangState }) {
         <BodyShort>
           I tillegg til å ha delegert redigeringstilgang her i NOM, må du også
           ha fått tilganger i Mine Tilganger. Brukerveiledning for Mine
-          Tilganger finner du <Link to={brukerveiledningLenke}>her</Link>. Du
-          kan søke på NOM for å finne riktig tilgang å delegere.
+          Tilganger finner du her:{" "}
+          <Link target="_blank" to={brukerveiledningLenke}>
+            Brukerveiledning Mine Tilganger
+          </Link>
+          . Du kan søke på NOM i Mine Tilganger for å finne riktig tilgang å
+          delegere.
         </BodyShort>
       </HStack>
     </VStack>
@@ -191,6 +209,9 @@ function DelegertRolleCard({ tilgang }: { tilgang: LederTilgangState }) {
 function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const [edit, setEdit] = useState(false);
   const queryClient = useQueryClient();
+
+  const brukerveiledningLenke: string =
+    "https://navno.sharepoint.com/sites/intranett-it/SitePages/Brukerveiledninger-Mine-Tilganger.aspx";
 
   const tilgangerDelegertAvMeg =
     useQuery({
@@ -210,6 +231,8 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     shouldUnregister: true,
     resolver: yupResolver(tilgangSchema),
   });
+
+  const { showModal } = useModal();
 
   const { mutate, isPending, error } = useMutation<
     unknown,
@@ -260,13 +283,35 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
       return fulfilled;
     },
     onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: getTilgangerDelegertByUserOptions().queryKey,
-      });
+      queryClient
+        .invalidateQueries({
+          queryKey: getTilgangerDelegertByUserOptions().queryKey,
+        })
+        .then();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       methods.reset();
       setEdit(false);
+
+      await showModal(
+        <BekreftModal
+          confirmOnly
+          content={
+            <BodyShort>
+              Du har nå endret medarbeideres redigeringstilgang i NOM. For å få
+              tilgang til lønsingen, kreves det også at medarbeidere har fått
+              tilgang i Mine Tilganger. Brukerveiledning for Mine Tilgganger
+              finner du her:{" "}
+              <Link target="_blank" to={brukerveiledningLenke}>
+                Brukerveiledninger Mine Tilganger
+              </Link>
+              . Du kan søke på NOM inne i Mine Tilganger for å finne riktig
+              tilgang å delegere.
+            </BodyShort>
+          }
+          heading="Tilganger"
+        />,
+      );
     },
   });
 
@@ -274,9 +319,6 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     methods.reset();
     setEdit(false);
   };
-
-  const brukerveiledningLenke: string =
-    "https://navno.sharepoint.com/sites/intranett-it/SitePages/Brukerveiledninger-Mine-Tilganger.aspx";
 
   return (
     <FormProvider {...methods}>
@@ -349,9 +391,12 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             <BodyShort>
               I tillegg til å delegere redigeringstilgang her i NOM, må
               vedkommende også få tilganger i Mine Tilganger. Brukerveiledning
-              for Mine Tilganger finner du{" "}
-              <Link to={brukerveiledningLenke}>her</Link>. Du kan søke på NOM
-              for å finne riktig tilgang å delegere.
+              for Mine Tilganger finner du her:{" "}
+              <Link target="_blank" to={brukerveiledningLenke}>
+                Brukerveiledning Mine Tilganger
+              </Link>
+              . Du kan søke på NOM i Mine Tilganger for å finne riktig tilgang å
+              delegere.
             </BodyShort>
           </HStack>
         </VStack>
@@ -403,6 +448,8 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
           )}
         </HStack>
       </VStack>
+
+      <ModalComponent />
     </FormProvider>
   );
 }

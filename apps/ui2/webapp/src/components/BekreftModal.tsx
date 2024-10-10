@@ -11,6 +11,7 @@ interface BekreftModalProperties {
   content: ReactNode;
   confirmButtonLabel?: string;
   cancelButtonLabel?: string;
+  confirmOnly?: boolean;
 }
 
 export function BekreftModal({
@@ -20,6 +21,7 @@ export function BekreftModal({
   content,
   confirmButtonLabel,
   cancelButtonLabel,
+  confirmOnly,
 }: BekreftModalProperties) {
   return (
     <Modal
@@ -41,9 +43,11 @@ export function BekreftModal({
         >
           {confirmButtonLabel ?? "Bekreft"}
         </Button>
-        <Button onClick={onCancel} size="small" variant="secondary">
-          {cancelButtonLabel ?? "Avbryt"}
-        </Button>
+        {!confirmOnly && (
+          <Button onClick={onCancel} size="small" variant="secondary">
+            {cancelButtonLabel ?? "Avbryt"}
+          </Button>
+        )}
       </Modal.Footer>
     </Modal>
   );

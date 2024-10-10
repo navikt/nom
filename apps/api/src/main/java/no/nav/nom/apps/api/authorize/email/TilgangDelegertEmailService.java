@@ -57,6 +57,8 @@ public class TilgangDelegertEmailService {
             composeAndSendEmail(adRessurser.get(lederNavident), adRessurser.get(request.delegertTilNavident()), request.gyldigTom(), orgEnhet);
         } catch (ADResponseException e) {
             throw new ADResponseException("Fant ikke leder eller delegert ressurs i AD", e.getErrorCode());
+        } catch (Exception e) {
+            log.error("Feil ved notifyDelegertTilgangByEmail", e);
         }
     }
 
