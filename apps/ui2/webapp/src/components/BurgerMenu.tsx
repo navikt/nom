@@ -29,6 +29,8 @@ export function BurgerMenu() {
 
   const navigate = useNavigate();
 
+  const adminLenke: string = "https://nom-admin.ansatt.nav.no/sinks/ressurs";
+
   const delegertTilMeg =
     useQuery(getTilgangerDelegertTilMegOptions()).data ?? [];
 
@@ -100,7 +102,7 @@ export function BurgerMenu() {
           )}
           {hasAdminAccess && (
             <Dropdown.Menu.List.Item
-              onClick={() => navigate({ to: "/admin/orgenheter" })}
+              onClick={() => window.open(adminLenke, "_blank")}
             >
               <TokenFillIcon color="black" fontSize="24px" />
               <span>Admin</span>
