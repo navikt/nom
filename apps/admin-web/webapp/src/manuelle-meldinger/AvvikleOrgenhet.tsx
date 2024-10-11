@@ -21,7 +21,7 @@ import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
 
 const schema = z.object({
   orgenhetId: z.string().min(1, "Må oppgis"),
-  gylidgTom: z.string().min(1, "må oppgis og ha bedre validering"),
+  gylidgTom: z.date({ message: "Må oppgis" }),
   confirm: confirmTextValidator(),
 });
 
@@ -40,6 +40,7 @@ export function AvvikleOrgenhet() {
   const mutation = useMutation<string, HTTPError, SchemaType>({
     mutationFn: async (v) => {
       const formattedDate = format(v.gylidgTom, "yyyy-MM-dd");
+
       return (
         await ky.post(
           `${API_BASE_URL}/api/admin/manuelleEvtsrcMeldinger/avvikleOrgenhet?${queryString.stringify({ ...v, gyldigTom: formattedDate })}`,
