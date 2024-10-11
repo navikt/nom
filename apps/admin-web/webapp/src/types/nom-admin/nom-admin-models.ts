@@ -323,6 +323,30 @@ export enum HendelseType {
   FJERNET = "FJERNET",
 }
 
+export interface RessursOrgtilknytningInfo {
+  /** @format int32 */
+  totaltAntallRessurser?: number;
+  /** @format int32 */
+  antallAktiveOrgtilknytninger?: number;
+  /** @format int32 */
+  ressurserMedAktiveOrgtilknytninger?: number;
+  /** @format int32 */
+  ressurserUtenAktiveOrgtilknytninger?: number;
+  /** @format int32 */
+  ressurserMedAktiveOrgtilknytningerForEnhetSomErInaktivEllerUtenOrganisering?: number;
+  /** @format int32 */
+  ressursMedTilknytningerUtoverEnhetGyldigPeriode?: number;
+}
+
+export interface OrgEnhetOrganisering {
+  orgEnhetId?: string;
+  uniqueAgressoId?: string;
+  /** @format date */
+  gyldigFom?: string;
+  /** @format date */
+  gyldigTom?: string;
+}
+
 export interface OrgEnhetStartOgSluttdato {
   /** @format int32 */
   totaltAntallEnheter?: number;

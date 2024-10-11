@@ -49,6 +49,23 @@ export interface GetPersonRequest {
   personident: string;
 }
 
+export interface IOrgenhet {
+  agressoId?: string;
+  agressoOrgenhetType?: string;
+  fid?: string;
+  /** @format date */
+  gyldigFom?: string;
+  /** @format date */
+  gyldigTom?: string;
+  id?: string;
+  navn?: string;
+  nomNivaa?: NomNivaa;
+  orgEnhetsType?: OrgEnhetsType;
+  orgNiv?: string;
+  overordnetOrgEnhetFid?: string;
+  uniqueAgressoId?: string;
+}
+
 /** @default "STANDARD" */
 export enum IdentType {
   ROBOT = "ROBOT",
