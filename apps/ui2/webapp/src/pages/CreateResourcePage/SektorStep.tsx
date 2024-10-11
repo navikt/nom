@@ -75,7 +75,7 @@ export function SektorStep() {
         sektor: selectedSektor,
         tilknytningtype,
       }),
-    });
+    }).then();
   };
 
   return (
