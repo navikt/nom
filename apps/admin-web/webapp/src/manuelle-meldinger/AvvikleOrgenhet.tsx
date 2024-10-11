@@ -41,9 +41,15 @@ export function AvvikleOrgenhet() {
     mutationFn: async (v) => {
       const formattedDate = format(v.gylidgTom, "yyyy-MM-dd");
 
+      const values = {
+        orgenhetId: v.orgenhetId,
+        gyldigTom: formattedDate,
+        confirm: v.confirm,
+      };
+
       return (
         await ky.post(
-          `${API_BASE_URL}/api/admin/manuelleEvtsrcMeldinger/avvikleOrgenhet?${queryString.stringify({ ...v, gyldigTom: formattedDate })}`,
+          `${API_BASE_URL}/api/admin/manuelleEvtsrcMeldinger/avvikleOrgenhet?${queryString.stringify({ ...values })}`,
         )
       ).text();
     },
