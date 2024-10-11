@@ -103,14 +103,14 @@ export function SektorStep() {
           onChange={(value) => setSelectedSektor(value)}
           value={selectedSektor}
         >
-          <Radio value={Sektor.EKSTERN}>
-            {SektorNameMapping[Sektor.EKSTERN]}
+          <Radio disabled value={Sektor.NAV_STATLIG}>
+            {`${SektorNameMapping[Sektor.NAV_STATLIG]} (Ikke tilgjengelig ennå)`}
           </Radio>
           <Radio value={Sektor.NAV_KOMMUNAL}>
             {SektorNameMapping[Sektor.NAV_KOMMUNAL]}
           </Radio>
-          <Radio disabled value={Sektor.NAV_STATLIG}>
-            {`${SektorNameMapping[Sektor.NAV_STATLIG]} (Ikke tilgjengelig ennå)`}
+          <Radio value={Sektor.EKSTERN}>
+            {SektorNameMapping[Sektor.EKSTERN]}
           </Radio>
         </RadioGroup>
         {selectedSektor === Sektor.NAV_KOMMUNAL ? undefined : (
