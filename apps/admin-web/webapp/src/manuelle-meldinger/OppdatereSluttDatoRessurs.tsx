@@ -41,6 +41,7 @@ export function OppdatereSluttDatoRessurs() {
   const mutation = useMutation<string, HTTPError, SchemaType>({
     mutationFn: async (v) => {
       const formattedDate = v.sluttdato && format(v.sluttdato, "yyyy-MM-dd");
+
       return (
         await ky.post(
           `${API_BASE_URL}/api/admin/manuelleEvtsrcMeldinger/oppdatereSluttDatoRessurs?${queryString.stringify({ ...v, sluttDato: formattedDate })}`,
