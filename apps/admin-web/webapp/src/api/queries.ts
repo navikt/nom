@@ -270,7 +270,7 @@ export function getRessurserSanityCheck() {
     queryFn: async () =>
       (
         await ky.get(`${API_BASE_URL}/SanityCheck/ressurs/ressurser`, {
-          timeout: 60_000, // 60 sek
+          timeout: 120_000, // 120 sek
         })
       ).json<RessursOrgtilknytningInfo>(),
   });
