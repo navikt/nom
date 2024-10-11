@@ -31,6 +31,7 @@ import { Route as SinksNomMasteredImport } from './routes/sinks.nom-mastered'
 import { Route as SinksApiRessursImport } from './routes/sinks.api-ressurs'
 import { Route as SinksApiOrgenhetImport } from './routes/sinks.api-orgenhet'
 import { Route as SinksApiHendelserImport } from './routes/sinks.api-hendelser'
+import { Route as SanityChecksRessursImport } from './routes/sanity-checks.ressurs'
 import { Route as SanityChecksOrgenhetImport } from './routes/sanity-checks.orgenhet'
 
 // Create/Update Routes
@@ -135,6 +136,11 @@ const SinksApiHendelserRoute = SinksApiHendelserImport.update({
   getParentRoute: () => SinksRoute,
 } as any)
 
+const SanityChecksRessursRoute = SanityChecksRessursImport.update({
+  path: '/ressurs',
+  getParentRoute: () => SanityChecksRoute,
+} as any)
+
 const SanityChecksOrgenhetRoute = SanityChecksOrgenhetImport.update({
   path: '/orgenhet',
   getParentRoute: () => SanityChecksRoute,
@@ -191,6 +197,13 @@ declare module '@tanstack/react-router' {
       path: '/orgenhet'
       fullPath: '/sanity-checks/orgenhet'
       preLoaderRoute: typeof SanityChecksOrgenhetImport
+      parentRoute: typeof SanityChecksImport
+    }
+    '/sanity-checks/ressurs': {
+      id: '/sanity-checks/ressurs'
+      path: '/ressurs'
+      fullPath: '/sanity-checks/ressurs'
+      preLoaderRoute: typeof SanityChecksRessursImport
       parentRoute: typeof SanityChecksImport
     }
     '/sinks/api-hendelser': {
@@ -302,6 +315,7 @@ export const routeTree = rootRoute.addChildren({
   ManuelleMeldingerRoute,
   SanityChecksRoute: SanityChecksRoute.addChildren({
     SanityChecksOrgenhetRoute,
+    SanityChecksRessursRoute,
   }),
   SinksRoute: SinksRoute.addChildren({
     SinksApiHendelserRoute,
@@ -351,7 +365,8 @@ export const routeTree = rootRoute.addChildren({
     "/sanity-checks": {
       "filePath": "sanity-checks.tsx",
       "children": [
-        "/sanity-checks/orgenhet"
+        "/sanity-checks/orgenhet",
+        "/sanity-checks/ressurs"
       ]
     },
     "/sinks": {
@@ -380,6 +395,10 @@ export const routeTree = rootRoute.addChildren({
     },
     "/sanity-checks/orgenhet": {
       "filePath": "sanity-checks.orgenhet.tsx",
+      "parent": "/sanity-checks"
+    },
+    "/sanity-checks/ressurs": {
+      "filePath": "sanity-checks.ressurs.tsx",
       "parent": "/sanity-checks"
     },
     "/sinks/api-hendelser": {

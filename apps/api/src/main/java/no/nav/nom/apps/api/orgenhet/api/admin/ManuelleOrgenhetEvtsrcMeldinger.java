@@ -60,7 +60,7 @@ public class ManuelleOrgenhetEvtsrcMeldinger {
     @PostMapping(value = "/avvikleOrgenhet")
     public ResponseEntity<String> avvikleOrgenhet(
         @Parameter(description = "Orgenhet Id") @RequestParam String orgenhetId,
-        @Parameter(description = "Gyldig til og med") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate gylidgTom,
+        @Parameter(description = "Gyldig til og med") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate gyldigTom,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
         @NonNull JwtAuthenticationToken token
     ) {
@@ -68,21 +68,21 @@ public class ManuelleOrgenhetEvtsrcMeldinger {
         if (orgenhet == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen orgenhet med ID: " +  HtmlUtils.htmlEncode(orgenhetId));
         }
-        if (orgenhet.getGyldigFom().isAfter(gylidgTom)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Enhetens gyldigFom (" + orgenhet.getGyldigFom() + ") er etter ny gyldigTOM (" + HtmlUtils.htmlEncode(gylidgTom.toString()) + ") dato");
+        if (orgenhet.getGyldigFom().isAfter(gyldigTom)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Enhetens gyldigFom (" + orgenhet.getGyldigFom() + ") er etter ny gyldigTOM (" + HtmlUtils.htmlEncode(gyldigTom.toString()) + ") dato");
         }
 
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Orgenhet %s - %s [%s - %s] kan avsluttes på dato %s. Men vil ikke utføres da handling ikke er bekreftet".formatted(
                     HtmlUtils.htmlEncode(orgenhetId), HtmlUtils.htmlEncode(orgenhet.getNavn()),
-                    orgenhet.getGyldigFom(), orgenhet.getGyldigTom().isPresent() ? orgenhet.getGyldigTom() : "", HtmlUtils.htmlEncode(gylidgTom.toString())));
+                    orgenhet.getGyldigFom(), orgenhet.getGyldigTom().isPresent() ? orgenhet.getGyldigTom() : "", HtmlUtils.htmlEncode(gyldigTom.toString())));
         }
 
         orgEnhetCommandService.avikleOrgEnhet(
             orgenhet.getFid(),
             new AvvikleOrgEnhet(
-                gylidgTom,
+                gyldigTom,
                 new InputMetadata(
                     "/api/admin/manuelleEvtsrcMeldinger",
                     "avvikleOrgenhet",
@@ -97,7 +97,7 @@ public class ManuelleOrgenhetEvtsrcMeldinger {
         return ResponseEntity.ok()
             .body("Orgenhet %s - %s [%s - %s] avsluttes på dato %s.".formatted(
                 HtmlUtils.htmlEncode(orgenhetId), HtmlUtils.htmlEncode(orgenhet.getNavn()),
-                orgenhet.getGyldigFom(), orgenhet.getGyldigTom().isPresent() ? orgenhet.getGyldigTom() : "", HtmlUtils.htmlEncode(gylidgTom.toString())));
+                orgenhet.getGyldigFom(), orgenhet.getGyldigTom().isPresent() ? orgenhet.getGyldigTom() : "", HtmlUtils.htmlEncode(gyldigTom.toString())));
     }
 
 }
