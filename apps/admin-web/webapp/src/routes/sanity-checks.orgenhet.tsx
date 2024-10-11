@@ -1,11 +1,17 @@
 import { Alert, Select } from "@navikt/ds-react";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
+import {
+  getEnheterUtenOverenheter,
+  getEnheterUtenOverenheterMedUnderEnheter,
+} from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { AntallOrgenheter } from "~/sanitychecks/AntallOrgenheter.tsx";
 import { EnheterOgOrganisering } from "~/sanitychecks/EnheterOgOrganisering.tsx";
+import { OrgEnhetOrganiseringTabell } from "~/sanitychecks/OrgEnhetOrganiseringTabell.tsx";
 
 export const Route = createFileRoute("/sanity-checks/orgenhet")({
   component: () => {
@@ -29,6 +35,24 @@ function ListSelector(props: { selected: string }) {
     case "Enheter og Organisering": {
       return <EnheterOgOrganisering />;
     }
+    case "Enheter uten over enheter": {
+      const orgEnhetOrganisering = useQuery(getEnheterUtenOverenheter());
+      return (
+        <OrgEnhetOrganiseringTabell
+          orgEnhetOrganisering={orgEnhetOrganisering}
+        />
+      );
+    }
+    case "Enheter uten over med under": {
+      const orgEnhetOrganisering = useQuery(
+        getEnheterUtenOverenheterMedUnderEnheter(),
+      );
+      return (
+        <OrgEnhetOrganiseringTabell
+          orgEnhetOrganisering={orgEnhetOrganisering}
+        />
+      );
+    }
     default: {
       return <></>;
     }
@@ -47,6 +71,12 @@ function OrgEnhetSanityChecks() {
       >
         <option value="Alle enheter">Alle enheter</option>
         <option value="Enheter og Organisering">Enheter og Organisering</option>
+        <option value="Enheter uten over enheter">
+          Enheter uten over enheter
+        </option>
+        <option value="Enheter uten over med under">
+          Enheter uten over enheter, men med under enheter
+        </option>
       </Select>
       <ListSelector selected={handleChange} />
     </div>

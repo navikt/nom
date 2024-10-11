@@ -13,8 +13,10 @@ import type {
   EnheterOgOrganisering,
   HendelseDTO,
   MasteredRessursDTO,
+  OrgEnhetOrganisering,
   OrgEnhetStartOgSluttdato,
   OrgEnhetStateDTO,
+  RessursOrgtilknytningInfo,
   RessursStateKafkaDTO,
 } from "~/types/nom-admin/nom-admin-models.ts";
 import type {
@@ -228,12 +230,48 @@ export function getAlleEnheter() {
 
 export function enheterOgOrganisering() {
   return queryOptions({
-    queryKey: ["API", "ORGENHET"],
+    queryKey: ["API", "ORGENHETOGORGANISERING"],
     queryFn: async () =>
       (
         await ky.get(
           `${API_BASE_URL}/SanityCheck/orgenhet/enheterOgOrganisering`,
         )
       ).json<EnheterOgOrganisering>(),
+  });
+}
+
+export function getEnheterUtenOverenheter() {
+  return queryOptions({
+    queryKey: ["API", "ORGENHETUTENOVERENHET"],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/SanityCheck/orgenhet/listEnheterUtenOverEnheter`,
+        )
+      ).json<OrgEnhetOrganisering[]>(),
+  });
+}
+
+export function getEnheterUtenOverenheterMedUnderEnheter() {
+  return queryOptions({
+    queryKey: ["API", "ORGENHETUTENOVERENHETMEDUNDERENHETER"],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/SanityCheck/orgenhet/listEnheterUtenOverEnheterMedUnderEnheter`,
+        )
+      ).json<OrgEnhetOrganisering[]>(),
+  });
+}
+
+export function getRessurserSanityCheck() {
+  return queryOptions({
+    queryKey: ["API", "RESSURSERSANITYCHECK"],
+    queryFn: async () =>
+      (
+        await ky.get(`${API_BASE_URL}/SanityCheck/ressurs/ressurser`, {
+          timeout: 60_000, // 60 sek
+        })
+      ).json<RessursOrgtilknytningInfo>(),
   });
 }
