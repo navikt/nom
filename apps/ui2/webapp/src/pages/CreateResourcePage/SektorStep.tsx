@@ -75,16 +75,17 @@ export function SektorStep() {
         sektor: selectedSektor,
         tilknytningtype,
       }),
-    });
+    }).then();
   };
 
   return (
     <ContainerWithHighlightedTop icon={opprettRessursIcon} title="Sektor">
       <Alert variant="info">
-        For øyeblikket kan du kun bruke NOM til å opprette eksterne konsulenter
-        og kommunalt ansatte. Statlige ansatte opprettes i Identrutina og Unit4
-        som tidligere. Roboter, Vikafossen og utenlandske konsulenter opprettes
-        som tidligere.
+        For øyeblikket kan du kun bruke NOM til å opprette kommunalt ansatte og
+        eksterne konsulenter. Eksterne konsulenter er ansatte i konsulentselskap
+        som selger tjenester til NAV. Studenter, personer i arbeidstrening og
+        andre eksterne opprettes som tidligere. Statlige ansatte opprettes i
+        Identrutina og Unit4 som tidligere.
       </Alert>
 
       <form
@@ -103,14 +104,14 @@ export function SektorStep() {
           onChange={(value) => setSelectedSektor(value)}
           value={selectedSektor}
         >
-          <Radio value={Sektor.EKSTERN}>
-            {SektorNameMapping[Sektor.EKSTERN]}
+          <Radio disabled value={Sektor.NAV_STATLIG}>
+            {`${SektorNameMapping[Sektor.NAV_STATLIG]} (Ikke tilgjengelig ennå)`}
           </Radio>
           <Radio value={Sektor.NAV_KOMMUNAL}>
             {SektorNameMapping[Sektor.NAV_KOMMUNAL]}
           </Radio>
-          <Radio disabled value={Sektor.NAV_STATLIG}>
-            {`${SektorNameMapping[Sektor.NAV_STATLIG]} (Ikke tilgjengelig ennå)`}
+          <Radio value={Sektor.EKSTERN}>
+            {SektorNameMapping[Sektor.EKSTERN]}
           </Radio>
         </RadioGroup>
         {selectedSektor === Sektor.NAV_KOMMUNAL ? undefined : (
