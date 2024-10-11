@@ -21,7 +21,7 @@ import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
 
 const schema = z.object({
   orgenhetId: z.string().min(1, "Må oppgis"),
-  gylidgTom: z.date({ message: "Må oppgis" }),
+  gyldigTom: z.date({ message: "Må oppgis" }),
   confirm: confirmTextValidator(),
 });
 
@@ -39,7 +39,7 @@ export function AvvikleOrgenhet() {
 
   const mutation = useMutation<string, HTTPError, SchemaType>({
     mutationFn: async (v) => {
-      const formattedDate = format(v.gylidgTom, "yyyy-MM-dd");
+      const formattedDate = format(v.gyldigTom, "yyyy-MM-dd");
 
       return (
         await ky.post(
@@ -68,7 +68,7 @@ export function AvvikleOrgenhet() {
                 label="Orgenhet ID"
                 {...methods.register("orgenhetId")}
               />
-              <DatePickerWrapped label="Gyldig til og med" name="gylidgTom" />
+              <DatePickerWrapped label="Gyldig til og med" name="gyldigTom" />
               <ConfirmTextField />
               {(() => {
                 switch (mutation.status) {
