@@ -64,6 +64,9 @@ function OrgtilknytningPage() {
           <Table.ColumnHeader scope="col" sortKey="orgtilknytningType" sortable>
             Orgtilknytning Type
           </Table.ColumnHeader>
+          <Table.ColumnHeader scope="col" sortKey="fid" sortable>
+            Fid
+          </Table.ColumnHeader>
         </Table.Row>
       </Table.Header>
       <Table.Body>
@@ -94,6 +97,7 @@ function OrgtilknytningPage() {
               <Table.DataCell>
                 {orgtilknytning.orgtilknytningType}
               </Table.DataCell>
+              <Table.DataCell>{orgtilknytning.fid}</Table.DataCell>
             </Table.Row>
           );
         })}
