@@ -2,6 +2,7 @@ package no.nav.nom.apps.admin.sanitycheck.service;
 
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.EnheterOgOrganisering;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetStartOgSluttdato;
+import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetOrganisering;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
@@ -39,7 +40,6 @@ public class OrgEnhetSanityCheckService {
     }
 
     public EnheterOgOrganisering sjekkAktiveEnheterOgOrganisering() {
-
         List<OrgEnhetState> alleEnheter = orgEnhetStateRepository.getAll().stream().toList();
         List<OrgEnhetState> aktiveEnheter = aktiveEnheter(alleEnheter);
 
@@ -83,6 +83,52 @@ public class OrgEnhetSanityCheckService {
             aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet.size(),
             aktiveEnheterUtenOrganisering.size()
         );
+    }
+
+    public List<OrgEnhetOrganisering> enhetUtenOverEnhet() {
+        List<OrgEnhetState> alleEnheter =  orgEnhetStateRepository.getAll().stream().toList();
+        List<OrgEnhetState> aktiveEnheter = aktiveEnheter(alleEnheter);
+
+        List<OrgEnhetState> aktiveEnheterUtenAktivOverEnhet;
+        log.info("Lister enheter uten overenheter med ny implementasjon");
+
+        List<OrganiseringState> aktiveOrganiseringer = organiseringStateRepository.getOrganiseringer();
+
+        List<String> aktiveUnderEnheterUniqueIder = uniqueIdForUnderEnhet(aktiveOrganiseringer);
+        aktiveEnheterUtenAktivOverEnhet = enheterIkkeBlantEnhetIder(aktiveEnheter, aktiveUnderEnheterUniqueIder);
+
+        return aktiveEnheterUtenAktivOverEnhet.stream()
+                .map(oe ->
+                        new OrgEnhetOrganisering(
+                                oe.id(),
+                                oe.uniqueAgressoId().orElse(""),
+                                oe.gyldigFom(),
+                                oe.gyldigTom().orElse(null)))
+                .toList();
+    }
+
+    public List<OrgEnhetOrganisering> enhetUtenOverEnhetMedUnderEnhet() {
+        List<OrgEnhetState> alleEnheter = orgEnhetStateRepository.getAll().stream().toList();
+        List<OrgEnhetState> aktiveEnheter = aktiveEnheter(alleEnheter);
+
+        List<OrgEnhetState> aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet;
+        log.info("Lister enheter uten overenheter med ny implementasjon");
+
+        List<OrganiseringState> aktiveOrganiseringer = organiseringStateRepository.getOrganiseringer();
+
+        List<String> aktiveUnderEnheterUniqueIder = uniqueIdForUnderEnhet(aktiveOrganiseringer);
+        List<OrgEnhetState> aktiveEnheterUtenAktivOverEnhet = enheterIkkeBlantEnhetIder(aktiveEnheter, aktiveUnderEnheterUniqueIder);
+
+        aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet = enheterBlantEnhetIder(aktiveEnheterUtenAktivOverEnhet, aktiveUnderEnheterUniqueIder);
+
+        return aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet.stream()
+                .map(oe ->
+                        new OrgEnhetOrganisering(
+                                oe.id(),
+                                oe.uniqueAgressoId().orElse(""),
+                                oe.gyldigFom(),
+                                oe.gyldigTom().orElse(null)))
+                .toList();
     }
 
     private List<OrgEnhetState> enheterMedStartdato(List<OrgEnhetState> enheter) {
