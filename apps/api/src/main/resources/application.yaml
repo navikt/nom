@@ -303,22 +303,25 @@ app:
 
       # Team ISA / Øystein Brox -  https://nav-it.slack.com/archives/C0362LA7ZLN/p1723203417454239?thread_ts=1718097159.822789&cid=C0362LA7ZLN
       - navident: Z992683         # Team ISA / Øystein Brox
-        orgtilknytning: ga691g    # 8540000-IT-ledelse-ORGENHET
+        orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
         sektor: NAV_STATLIG
       - navident: Z992029         # Team ISA / Øystein Brox
-        orgtilknytning: ga691g    # 8540000-IT-ledelse-ORGENHET
+        orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
         sektor: NAV_STATLIG
       - navident: Z990891         # Team ISA / Øystein Brox
-        orgtilknytning: ga691g    # 8540000-IT-ledelse-ORGENHET
+        orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
         sektor: NAV_STATLIG
       - navident: Z991555         # Team ISA / Øystein Brox
-        orgtilknytning: ga691g    # 8540000-IT-ledelse-ORGENHET
+        orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
         sektor: NAV_STATLIG
       - navident: Z991770         # Team ISA / Øystein Brox
-        orgtilknytning: ga691g    # 8540000-IT-ledelse-ORGENHET
+        orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
         sektor: NAV_STATLIG
       - navident: Z994247         # Team ISA / Øystein Brox
-        orgtilknytning: ga691g    # 8540000-IT-ledelse-ORGENHET
+        orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z991459         # Team ISA / Øystein Brox
+        orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
         sektor: NAV_STATLIG
 
     ledere:
