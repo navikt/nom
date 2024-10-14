@@ -96,7 +96,9 @@ export function SettNomMaster() {
                   case "success": {
                     return (
                       <Alert variant="success">
-                        Ressursen er nå markert som NOM-masteret
+                        {mutation.variables?.action === "MERK"
+                          ? "Ressursen er nå markert som NOM-masteret"
+                          : "Ressursen er ikke lenger markert som NOM-masteret"}
                       </Alert>
                     );
                   }
