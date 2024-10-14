@@ -83,7 +83,7 @@ export function SearchBar() {
 
 async function searchIfEnoughInput(inputValue: string, hasAdmin: boolean) {
   // Se bort ifra NAV når man søker
-  const newSearchTerm = inputValue.toLowerCase().replace("nav ", "");
+  const newSearchTerm = inputValue.toLowerCase().replace("nav ", "").trim();
   if (newSearchTerm.length < RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT) {
     return [];
   }
