@@ -27,9 +27,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
         this.ressursStateRepository = ressursStateRepository;
     }
 
-    protected StrukturerteStillingPerioderForNavident behandle(
-        StrukturerteStillingPerioderForNavident sspForNavident
-    ) {
+    protected StrukturerteStillingPerioderForNavident behandle(StrukturerteStillingPerioderForNavident sspForNavident) {
         // grupper først på Stillingens - stilling enhet/navn +enhetNavn+ressurs (A+B)
         var grupperteDvhStillinger = sspForNavident.dvhRessursStillinger().stream()
             .collect(groupingBy(rs ->

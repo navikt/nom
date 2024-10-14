@@ -110,6 +110,10 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
         return dvhRessursStilling(navid, stillingAgressoId, stillingOrgenhetNavn, stillingAgressoId, "ORGENHET", from, to);
     }
 
+    DvhRessursStilling dvhRessursStilling(String navid, String stillingAgressoId, String stillingOrgenhetNavn, String orgenhetPaaReessurs, LocalDate from, LocalDate to) {
+        return dvhRessursStilling(navid, stillingAgressoId, stillingOrgenhetNavn, orgenhetPaaReessurs, "ORGENHET", from, to);
+    }
+
     DvhRessursStilling dvhRessursStilling(
         String navid,
         String stillingAgressoId,

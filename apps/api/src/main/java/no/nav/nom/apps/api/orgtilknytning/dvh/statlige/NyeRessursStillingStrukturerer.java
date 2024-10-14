@@ -160,7 +160,7 @@ public class NyeRessursStillingStrukturerer {
     private void sjekkKonsistensPaaStillingperioder(StrukturerteStillingPerioderForNavident sspForNavident) {
         //Negative perioder
         sspForNavident.stillingPerioder().forEach(sp -> {
-            if (foer(sp.gyldigFom(), sp.gyldigTom())) {
+            if (foer(sp.gyldigTom(), sp.gyldigFom())) {
                 sspForNavident.addError(
                     StrukturerteStillingPerioderForNavident.ErrorType.STILLINGPERIODE_HAR_NEGATIV_PERIODE,
                     """
