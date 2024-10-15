@@ -15,7 +15,7 @@ spec:
     - name: LOGGING_CONFIG
       value: 'classpath:logback-nais.xml'
     - name: JDK_JAVA_OPTIONS
-      value: "-XX:+UseParallelGC -XX:MaxRAMPercentage=70.0 -XX:ActiveProcessorCount=2" # Ref https://nav-it.slack.com/archives/C5KUST8N6/p1714054537557279 og https://nav-it.slack.com/archives/C60FFACN5/p1728888091610999
+      value: "-XX:+UseZGC -XX:+ZGenerational -XX:MaxRAMPercentage=70.0 -XX:ActiveProcessorCount=4" # Ref https://nav-it.slack.com/archives/C5KUST8N6/p1714054537557279 og https://nav-it.slack.com/archives/C60FFACN5/p1728888091610999
   envFrom:
     - secret: nom-api-unleash-api-token
   image: "{{image}}"
