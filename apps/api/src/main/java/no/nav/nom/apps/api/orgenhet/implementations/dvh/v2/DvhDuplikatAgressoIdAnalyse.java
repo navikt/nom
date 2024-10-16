@@ -66,19 +66,28 @@ public class DvhDuplikatAgressoIdAnalyse {
         String dvhDuplikaterPaaAgressoId = dvhDuplikaterPaaAgressoId(dvhGroupedByAgressoId, "AgressoId");
         String dvhDuplikaterPaaAgressoIdOgNivaa = dvhDuplikaterPaaAgressoId(dvhGroupedByAgressoIdAndNivaa, "AgressoId og Nivå");
 
+        log.info("Ferdig med å gruppere og liste DVH enheter:{}", parsedDvhEnheter.size());
+
         var stateOrgEnheterByAgressoId = orgenhetService.getAllEnheter().stream()
             .collect(Collectors.groupingBy(IOrgenhet::getAgressoId));
 
         var stateOrgEnheterByAgressoIdAndNivaa = orgenhetService.getAllEnheter().stream()
             .collect(Collectors.groupingBy( o -> o.getAgressoId() + " - " + o.getOrgNiv()));
 
-        String stateDuplikaterPaaAgressoId =stateDuplikaterPaaAgressoId(stateOrgEnheterByAgressoId, "AgressoId");
-        String stateDuplikaterPaaAgressoIdAndNivaa =stateDuplikaterPaaAgressoId(stateOrgEnheterByAgressoIdAndNivaa, "AgressoId og Nivå");
+        var stateOrgEnheterByAgressoIdAndNivaaOgGyldigFom = orgenhetService.getAllEnheter().stream()
+            .collect(Collectors.groupingBy( o -> o.getAgressoId() + " - " + o.getOrgNiv() + " - " + o.getGyldigFom()));
+
+        String stateDuplikaterPaaAgressoId = stateDuplikaterPaaAgressoId(stateOrgEnheterByAgressoId, "AgressoId");
+        String stateDuplikaterPaaAgressoIdAndNivaa = stateDuplikaterPaaAgressoId(stateOrgEnheterByAgressoIdAndNivaa, "AgressoId og Nivå");
+        String stateDuplikaterPaaAgressoIdAndNivaaOgGyldigFom = stateDuplikaterPaaAgressoId(stateOrgEnheterByAgressoIdAndNivaa, "AgressoId og Nivå og GyldigFom (Navnebytte?)");
+
+        log.info("Ferdig med å gruppere og liste State enheter:{}", parsedDvhEnheter.size());
 
         return dvhDuplikaterPaaAgressoId + "\n"
             + dvhDuplikaterPaaAgressoIdOgNivaa + "\n"
             + stateDuplikaterPaaAgressoId + "\n"
-            + stateDuplikaterPaaAgressoIdAndNivaa;
+            + stateDuplikaterPaaAgressoIdAndNivaa + "\n"
+            + stateDuplikaterPaaAgressoIdAndNivaaOgGyldigFom;
     }
 
     private String dvhDuplikaterPaaAgressoId(Map<String, List<DvhOrgenhetV2>> parsedEnheter, String grouping) {
@@ -96,7 +105,7 @@ public class DvhDuplikatAgressoIdAnalyse {
                             .append(dvhOrgenhetV2.getNavn()).append(";")
                             .append(dvhOrgenhetV2.getOrgNiv()).append(";")
                             .append(dvhOrgenhetV2.getGyldigFom()).append(";")
-                            .append(dvhOrgenhetV2.getGyldigTom().isPresent() ? dvhOrgenhetV2.getGyldigTom() : "").append(";")
+                            .append(dvhOrgenhetV2.getGyldigTom().isPresent() ? dvhOrgenhetV2.getGyldigTom().get() : "").append(";")
                             .append(dvhOrgenhetV2.getRawData())
                             .append("\n"));
             });
@@ -113,14 +122,14 @@ public class DvhDuplikatAgressoIdAnalyse {
                 e.getValue().stream()
                     .sorted(Comparator.comparing(IOrgenhet::getGyldigFom).reversed())
                     .forEach(oe ->
-                        result
+                        result.append("   ")
                             .append(oe.getAgressoId()).append(";")
                             .append(oe.getNavn()).append(";")
                             .append(oe.getOrgNiv()).append(";")
                             .append(oe.getId()).append(";")
                             .append(enhetIdForEnheterIOrganisering.contains(oe.getId()) ? "Y" : "N").append(";")
                             .append(oe.getGyldigFom()).append(";")
-                            .append(oe.getGyldigTom().isPresent() ? oe.getGyldigTom() : "")
+                            .append(oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "")
                             .append("\n"));
             });
         return result.toString();
