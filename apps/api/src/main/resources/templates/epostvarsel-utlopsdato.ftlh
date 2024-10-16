@@ -1,9 +1,8 @@
 Hei!
 
 Du mottar denne e-posten fordi du er leder for ${orgenhetNavn}.
-${ressurNavnOgNavIdent} har tidligere blitt opprettet som medarbeider i NOM, og er tilknyttet ${orgenhetNavn}.
 
-${ressursNavn} har sluttdato i ${orgenhetNavn} den ${ressursSluttdato}.
+${ressurNavnOgNavIdent} har sluttdato i ${orgenhetNavn} den ${ressursSluttdato}.
 
 Dette innebærer at fra ${ressursSluttdatoPlus1dag} vil ${ressursNavn} ikke lenger være registrert som medarbeider i NAV, og medarbeiderens tilganger vil bli fjernet.
 

@@ -2,9 +2,18 @@ package no.nav.nom.apps.api.common;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 public class DateUtils {
+
+    public static String formatDateTime(LocalDate localDate) {
+        if(localDate == null || localDate.toString().isEmpty() || localDate.toString().isBlank()){
+            return "";
+        }
+        return DateTimeFormatter.ofPattern("dd.MM.YYYY").format(localDate);
+    }
+
     public static boolean isPeriodsOverlapping(LocalDate period1Start, Optional<LocalDate> period1End, LocalDate period2Start, Optional<LocalDate> period2End) {
         return isPerioderOverlapping(
             new Periode(period1Start, period1End.orElse(LocalDate.MAX)),
