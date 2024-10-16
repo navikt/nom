@@ -134,8 +134,6 @@ public class DvhOrgenhetsLast {
                                 fidMarkedForEndDate.put(orgEnhetState.fid(), parsedEnhet.getGyldigTom().get());
                             }
                             // Ved overlapp skal orgEnhetState korrigeres med fra-til dato settes likt DvhEnhet fra-til - Hvis disse er forskjellig
-                            // TODO: EndreLeder og EndrePlassering
-
                             korrigerOrgEnhetHvisEndringer(parsedEnhet, orgEnhetState);
                             // Need to keep track of Eventual changed gyldigFom in case there are more parsed enheter for same uniqueAgressoId to process
                             if (!parsedEnhet.getGyldigFom().equals(orgEnhetState.gyldigFom())) {
