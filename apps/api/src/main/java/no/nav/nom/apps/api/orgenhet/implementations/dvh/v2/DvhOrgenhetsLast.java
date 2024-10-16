@@ -109,6 +109,8 @@ public class DvhOrgenhetsLast {
 
             log.info("Orgenhet v2 last fra dvh. Parsed antall enheter:{}", parsedEnheter.size());
 
+            debugLogDuplikaterPaaUniqueAgressoId(parsedEnheter);
+
             parsedEnheter.forEach((key, value) -> value.stream().sorted(Comparator.comparing(IOrgenhet::getGyldigFom).reversed())
                 .forEach(parsedEnhet -> {
                     val stateEnheterPerUniqueAgressoId = orgEnhetStateRepository.findAllByUniqueAgressoId(parsedEnhet.getUniqueAgressoId());
@@ -199,6 +201,17 @@ public class DvhOrgenhetsLast {
         } catch (Exception e) {
             log.error("Failure loading data from DVH", e);
         }
+    }
+
+    private void debugLogDuplikaterPaaUniqueAgressoId(Map<String, List<DvhOrgenhetV2>> parsedEnheter) {
+        parsedEnheter.entrySet().stream()
+                .filter(e -> e.getValue().size() > 1)
+                .forEach(e -> {
+                    StringBuffer sb = new StringBuffer();
+                    sb.append("Duplikater på UniqueAgressoId: ").append(e.getKey()).append("\n");
+                    e.getValue().forEach(dvhOrgenhetV2 -> sb.append("   ").append(dvhOrgenhetV2.getRawData()).append("\n"));
+                    log.debug(sb.toString());
+                });
     }
 
     public boolean isOverlapping(IOrgenhet orgenhetV2One, IOrgenhet orgenhetV2Two) {
