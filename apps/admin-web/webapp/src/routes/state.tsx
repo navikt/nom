@@ -23,7 +23,6 @@ export const Route = createFileRoute("/state")({
     context.queryClient.prefetchQuery(getOrgtilknytningStateOptions(deps));
   },
   component: () => {
-    const search = Route.useSearch();
     const { pathname } = useLocation();
     const navigate = useNavigate();
 
@@ -32,22 +31,38 @@ export const Route = createFileRoute("/state")({
         <Tabs.List>
           <Tabs.Tab
             label="Ressurser"
-            onClick={() => navigate({ to: "/state/ressurs", search })}
+            onClick={() =>
+              navigate({
+                to: "/state/ressurs",
+              })
+            }
             value="/state/ressurs"
           />
           <Tabs.Tab
             label="Orgenheter"
-            onClick={() => navigate({ to: "/state/orgenhet", search })}
+            onClick={() =>
+              navigate({
+                to: "/state/orgenhet",
+              })
+            }
             value="/state/orgenhet"
           />
           <Tabs.Tab
             label="Organisering"
-            onClick={() => navigate({ to: "/state/organisering", search })}
+            onClick={() =>
+              navigate({
+                to: "/state/organisering",
+              })
+            }
             value="/state/organisering"
           />
           <Tabs.Tab
             label="Orgtilknytning"
-            onClick={() => navigate({ to: "/state/orgtilknytning", search })}
+            onClick={() =>
+              navigate({
+                to: "/state/orgtilknytning",
+              })
+            }
             value="/state/orgtilknytning"
           />
         </Tabs.List>

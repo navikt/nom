@@ -14,9 +14,11 @@
     "stylelint:fix": "stylelint --fix '**/*.{tsx,css}'",
     "generate-types:nom-admin": "swagger-typescript-api --path https://nom-admin-api.intern.dev.nav.no/v3/api-docs/internal --output ./src/types/nom-admin --no-client -r -n nom-admin-models",
     "generate-types:nom-api": "swagger-typescript-api --path https://nom-api.intern.dev.nav.no/v3/api-docs/internal --output ./src/types/nom-api --no-client -r -n nom-api-models",
-    "generate-types": "npm run generate-types:nom-admin && npm run generate-types:nom-api"
+    "generate-types": "npm run generate-types:nom-admin && npm run generate-types:nom-api",
+    "all-checks": "npm run check-types && npm run lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.13.3",
     "@hookform/resolvers": "3.6.0",
     "@navikt/aksel-icons": "6.10.1",
     "@navikt/ds-css": "6.10.1",
@@ -32,6 +34,7 @@
     "react-dom": "18.3.1",
     "react-error-boundary": "4.0.13",
     "react-hook-form": "7.52.0",
+    "react-hot-toast": "^2.4.1",
     "react-json-view-lite": "1.4.0",
     "swagger-typescript-api": "^13.0.12",
     "zod": "3.23.8"
