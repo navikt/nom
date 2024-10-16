@@ -146,7 +146,7 @@ function OrgEnhetsTypeDataCell({
 }: {
   orgEnhet: OrgEnhetState;
   allowEdit: boolean | undefined;
-  style: React.CSSProperties | undefined;
+  style?: React.CSSProperties | undefined;
 }) {
   const queryClient = useQueryClient();
 
