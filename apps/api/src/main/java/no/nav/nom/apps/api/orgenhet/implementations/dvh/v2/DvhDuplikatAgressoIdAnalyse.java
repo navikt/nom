@@ -69,17 +69,20 @@ public class DvhDuplikatAgressoIdAnalyse {
         log.info("Ferdig med å gruppere og liste DVH enheter:{}", parsedDvhEnheter.size());
 
         var stateOrgEnheterByAgressoId = orgenhetService.getAllEnheter().stream()
+            .filter(e -> !(e.getGyldigTom().isPresent() && e.getGyldigFom().isEqual(e.getGyldigTom().get()))) // Filter ut de som slutter samme dag som de starter
             .collect(Collectors.groupingBy(IOrgenhet::getAgressoId));
 
         var stateOrgEnheterByAgressoIdAndNivaa = orgenhetService.getAllEnheter().stream()
+            .filter(e -> !(e.getGyldigTom().isPresent() && e.getGyldigFom().isEqual(e.getGyldigTom().get()))) // Filter ut de som slutter samme dag som de starter
             .collect(Collectors.groupingBy( o -> o.getAgressoId() + " - " + o.getOrgNiv()));
 
         var stateOrgEnheterByAgressoIdAndNivaaOgGyldigFom = orgenhetService.getAllEnheter().stream()
+            .filter(e -> !(e.getGyldigTom().isPresent() && e.getGyldigFom().isEqual(e.getGyldigTom().get()))) // Filter ut de som slutter samme dag som de starter
             .collect(Collectors.groupingBy( o -> o.getAgressoId() + " - " + o.getOrgNiv() + " - " + o.getGyldigFom()));
 
         String stateDuplikaterPaaAgressoId = stateDuplikaterPaaAgressoId(stateOrgEnheterByAgressoId, "AgressoId");
         String stateDuplikaterPaaAgressoIdAndNivaa = stateDuplikaterPaaAgressoId(stateOrgEnheterByAgressoIdAndNivaa, "AgressoId og Nivå");
-        String stateDuplikaterPaaAgressoIdAndNivaaOgGyldigFom = stateDuplikaterPaaAgressoId(stateOrgEnheterByAgressoIdAndNivaa, "AgressoId og Nivå og GyldigFom (Navnebytte?)");
+        String stateDuplikaterPaaAgressoIdAndNivaaOgGyldigFom = stateDuplikaterPaaAgressoId(stateOrgEnheterByAgressoIdAndNivaaOgGyldigFom, "AgressoId og Nivå og GyldigFom (Navnebytte?)");
 
         log.info("Ferdig med å gruppere og liste State enheter:{}", parsedDvhEnheter.size());
 
