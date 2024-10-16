@@ -17,7 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin/DvhDuplikatAgressoIdAnalyse")
 @PreAuthorize("hasAuthority('ADMIN')")
 public class DvhDuplikatAgressoIdAnalyseController {
-    DvhDuplikatAgressoIdAnalyse dvhDuplikatAgressoIdAnalyse;
+    private final DvhDuplikatAgressoIdAnalyse dvhDuplikatAgressoIdAnalyse;
+
+    public DvhDuplikatAgressoIdAnalyseController(DvhDuplikatAgressoIdAnalyse dvhDuplikatAgressoIdAnalyse) {
+        this.dvhDuplikatAgressoIdAnalyse = dvhDuplikatAgressoIdAnalyse;
+    }
 
     @Operation(
         description = "List duplikate AgressoIder og duplikate agressoId+Nivå",
