@@ -122,11 +122,20 @@ public class RessursUtlopersnartEmailService {
 
     private String generateEmailBody(UtloperRessursData utlopendeRessurs) throws IOException, TemplateException {
         var stringWriter = new StringWriter();
+
+        var orgenhetNavn = utlopendeRessurs.orgenhetData().keySet().stream().findFirst().orElse("Ukjent");
+        var ressursNavnOgNavIdent = utlopendeRessurs.ressurNavn() + "(" + utlopendeRessurs.ressursNavident() + ")";
+        var ressursSluttdato = DateUtils.formatDateTime(utlopendeRessurs.ressursSluttdato());
+        var ressursSluttdatoPlus1dag = DateUtils.formatDateTime(utlopendeRessurs.ressursSluttdato().plusDays(1));
+        var ressursNavn = utlopendeRessurs.ressurNavn();
+        log.info("Genererer epost varsel body om utløpsdato for ressurs: {}, {}, {}, {}, {}", orgenhetNavn, ressursNavn, ressursNavnOgNavIdent, ressursSluttdato, ressursSluttdatoPlus1dag);
+
         var model = Map.of(
-            "orgenhetNavn", utlopendeRessurs.orgenhetData().keySet().stream().findFirst().orElse("Ukjent"),
-            "ressurNavnOgNavIdent", utlopendeRessurs.ressurNavn() + "(" + utlopendeRessurs.ressursNavident() + ")" ,
-            "ressursSluttdato", DateUtils.formatDateTime(utlopendeRessurs.ressursSluttdato()),
-            "ressursSluttdatoPlus1dag", DateUtils.formatDateTime(utlopendeRessurs.ressursSluttdato().plusDays(1))
+            "orgenhetNavn", orgenhetNavn,
+            "ressursNavn", ressursNavn,
+            "ressurNavnOgNavIdent", ressursNavnOgNavIdent ,
+            "ressursSluttdato", ressursSluttdato,
+            "ressursSluttdatoPlus1dag", ressursSluttdatoPlus1dag
         );
         freemarkerConfig.getTemplate(SLUTTDATO_UTLOPER_VARSEL_TEMPLATE).process(model, stringWriter);
         return stringWriter.getBuffer().toString();
