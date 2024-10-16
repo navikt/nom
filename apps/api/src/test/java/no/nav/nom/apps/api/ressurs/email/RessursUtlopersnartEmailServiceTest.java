@@ -94,7 +94,7 @@ public class RessursUtlopersnartEmailServiceTest {
     }
 
     @Test
-    public void testGetUtlopendeRessurser() {
+    public void testGetUtlopendeRessurser_OT_has_same_gyldigTom_then_ressurs_sluttdato() {
         // setup data
         String ressusNavIdent = "ressurNavnOgNavIdent";
         String ressursForNavn = "ressursForNavn";
@@ -197,7 +197,7 @@ public class RessursUtlopersnartEmailServiceTest {
     }
 
     @Test
-    public void testGetUtlopendeRessurser_OT_has_different_gyldigTom() {
+    public void testGetUtlopendeRessurser_OT_has_different_gyldigTom_then_ressurs_sluttdato() {
         // setup data
         String ressusNavIdent = "ressurNavnOgNavIdent";
         String ressursForNavn = "ressursForNavn";
