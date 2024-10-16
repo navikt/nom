@@ -8,6 +8,7 @@ import { createFileRoute, Link as TanStackLink } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Toaster } from "react-hot-toast";
+import { z } from "zod";
 
 import { oppdaterOrgEnhetType } from "~/api/apiQueries.ts";
 import { getOrgenhetStatesOptions, searchSchema } from "~/api/queries.ts";
@@ -20,12 +21,14 @@ import type { OrgEnhetState } from "~/types.ts";
 import { OrgEnhetsType } from "~/types/nom-admin/nom-admin-models.ts";
 
 export const Route = createFileRoute("/state/orgenhet")({
-  validateSearch: searchSchema.parse,
+  validateSearch: searchSchema.extend({
+    allowEdit: z.boolean().optional(),
+  }).parse,
   component: () => {
     const search = Route.useSearch();
     return (
       <>
-        <GenericSearchBar search={search} />
+        <GenericSearchBar editButton={true} search={search} />
         <ErrorBoundary fallback={<Alert variant="error">Noe gikk galt</Alert>}>
           <Suspense fallback={<BigLoader />}>
             <OrgenhetPage />
@@ -41,10 +44,15 @@ function OrgenhetPage() {
   const search = Route.useSearch();
 
   const orgenheter = useSuspenseQuery({
-    ...getOrgenhetStatesOptions(search),
+    ...getOrgenhetStatesOptions({
+      filterText: search.filterText,
+      fromOffset: search.fromOffset,
+    }),
     gcTime: Number.POSITIVE_INFINITY,
     staleTime: Number.POSITIVE_INFINITY,
   }).data;
+
+  const allowEdit = search.allowEdit;
 
   const { data, sort, handleSort } = useTableSort(orgenheter, "id");
 
@@ -94,10 +102,13 @@ function OrgenhetPage() {
         {data.map((orgEnhet) => {
           return (
             <Table.Row key={orgEnhet.fid}>
-              <Table.HeaderCell scope="row">
+              <Table.DataCell scope="row">
                 <NomLink path={`org/${orgEnhet.id}`}>{orgEnhet.id}</NomLink>
-              </Table.HeaderCell>
-              <OrgEnhetsTypeDataCell orgEnhet={orgEnhet} />
+              </Table.DataCell>
+              <OrgEnhetsTypeDataCell
+                allowEdit={allowEdit}
+                orgEnhet={orgEnhet}
+              />
               <Table.DataCell>{orgEnhet.navn}</Table.DataCell>
               <Table.DataCell>{orgEnhet.gyldigFom}</Table.DataCell>
               <Table.DataCell>{orgEnhet.gyldigTom}</Table.DataCell>
@@ -122,8 +133,13 @@ function OrgenhetPage() {
   );
 }
 
-function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhetState }) {
-  const allowEdit = true;
+function OrgEnhetsTypeDataCell({
+  orgEnhet,
+  allowEdit,
+}: {
+  orgEnhet: OrgEnhetState;
+  allowEdit: boolean | undefined;
+}) {
   const queryClient = useQueryClient();
 
   const search = Route.useSearch();
@@ -142,7 +158,11 @@ function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhetState }) {
       */
 
       queryClient.setQueryData<OrgEnhetState[]>(
-        ["STATE", "ORGENHET", search],
+        [
+          "STATE",
+          "ORGENHET",
+          { filterText: search.filterText, fromOffset: search.fromOffset },
+        ],
         (previousData) =>
           (previousData ?? []).map((oe) =>
             oe.id === orgEnhet.id
