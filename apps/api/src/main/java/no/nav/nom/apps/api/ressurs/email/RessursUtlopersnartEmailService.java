@@ -7,7 +7,9 @@ import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.email.EmailClient;
 import no.nav.nom.apps.api.clients.email.EmailMessage;
+import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
@@ -15,6 +17,8 @@ import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -22,9 +26,11 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,6 +48,7 @@ public class RessursUtlopersnartEmailService {
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final LederResolver lederResolver;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
+    private final NomMastered nomMastered;
 
     public RessursUtlopersnartEmailService(
         EmailClient emailClient,
@@ -51,7 +58,8 @@ public class RessursUtlopersnartEmailService {
         Unleash unleash,
         OrgtilknytningStateRepository orgtilknytningStateRepository,
         LederResolver lederResolver,
-        OrgEnhetStateRepository orgEnhetStateRepository
+        OrgEnhetStateRepository orgEnhetStateRepository,
+        NomMastered nomMastered
     ) {
         this.emailClient = emailClient;
         this.adClient = adClient;
@@ -61,6 +69,7 @@ public class RessursUtlopersnartEmailService {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.lederResolver = lederResolver;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
+        this.nomMastered = nomMastered;
     }
 
     @Scheduled(cron = "0 0 19 * * ?") // every day at 18:00
@@ -76,6 +85,10 @@ public class RessursUtlopersnartEmailService {
     }
 
     private void sendEmail(UtloperRessursData utlopendeRessurs) {
+        if (!nomMastered.isMastered(utlopendeRessurs.ressursNavident())) {
+            log.warn("Navidenten er ikke mastret i NOM. Epost om utløpende ressurs vil ikke bli sendt");
+            return;
+        }
         try {
             Set<String> recipientNavidents = new HashSet<>(utlopendeRessurs.orgenhetData().values());
             var adRessurser = adClient.getAdRessurser(recipientNavidents);
@@ -110,9 +123,8 @@ public class RessursUtlopersnartEmailService {
         var model = Map.of(
             "orgenhetNavn", utlopendeRessurs.orgenhetData().keySet().stream().findFirst().orElse("Ukjent"),
             "ressurNavnOgNavIdent", utlopendeRessurs.ressurNavn() + "(" + utlopendeRessurs.ressursNavident() + ")" ,
-            "ressursNavn", utlopendeRessurs.ressurNavn(),
-            "ressursSluttdato", utlopendeRessurs.ressursSluttdato(),
-            "ressursSluttdatoPlus1dag", utlopendeRessurs.ressursSluttdato().plusDays(1)
+            "ressursSluttdato", DateUtils.formatDateTime(utlopendeRessurs.ressursSluttdato()),
+            "ressursSluttdatoPlus1dag", DateUtils.formatDateTime(utlopendeRessurs.ressursSluttdato().plusDays(1))
         );
         freemarkerConfig.getTemplate(SLUTTDATO_UTLOPER_VARSEL_TEMPLATE).process(model, stringWriter);
         return stringWriter.getBuffer().toString();
@@ -129,6 +141,9 @@ public class RessursUtlopersnartEmailService {
 
                 // innholder orgenhetNavn og orgenhetLederNavident
                 Map<String, String> orgenhetData = orgTilknytninger.stream()
+                    .filter(orgtilknytningState -> (orgtilknytningState.gyldigTom() != null) &&
+                        (orgtilknytningState.gyldigTom().isPresent()) &&
+                        orgtilknytningState.gyldigTom().get().isEqual(ressurs.sluttdato().get()))
                     .map(orgtilknytningState -> {
                         var orgenhetState = orgEnhetStateRepository.findById(orgtilknytningState.orgEnhetId());
                         String orgenhetNavn = orgenhetState.isPresent() ? orgenhetState.get().navn() : "Ukjent";
@@ -155,7 +170,9 @@ public class RessursUtlopersnartEmailService {
                     .ressursSluttdato(ressurs.sluttdato().get())
                     .orgenhetData(orgenhetData)
                     .build();
-            }).toList();
+            })
+            .filter(utloperRessursData -> !utloperRessursData.orgenhetData().isEmpty())
+            .toList();
     }
 
 
