@@ -204,6 +204,7 @@ public class DvhOrgenhetsLast {
     }
 
     private void debugLogDuplikaterPaaUniqueAgressoId(Map<String, List<DvhOrgenhetV2>> parsedEnheter) {
+        log.debug("logger evt. duplikater på UniqueAgressoId");
         parsedEnheter.entrySet().stream()
                 .filter(e -> e.getValue().size() > 1)
                 .forEach(e -> {
