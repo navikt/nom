@@ -1,14 +1,23 @@
-import { Alert, Table } from "@navikt/ds-react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { Alert, Select, Table } from "@navikt/ds-react";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute, Link as TanStackLink } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { Toaster } from "react-hot-toast";
 
+import { oppdaterOrgEnhetType } from "~/api/apiQueries.ts";
 import { getOrgenhetStatesOptions, searchSchema } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
 import { NomLink } from "~/components/NomLink.tsx";
+import { showToast } from "~/hooks/showToast.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
+import type { OrgEnhetState } from "~/types.ts";
+import { OrgEnhetsType } from "~/types/nom-admin/nom-admin-models.ts";
 
 export const Route = createFileRoute("/state/orgenhet")({
   validateSearch: searchSchema.parse,
@@ -22,6 +31,7 @@ export const Route = createFileRoute("/state/orgenhet")({
             <OrgenhetPage />
           </Suspense>
         </ErrorBoundary>
+        <Toaster toastOptions={{ position: "top-right" }} />
       </>
     );
   },
@@ -87,7 +97,7 @@ function OrgenhetPage() {
               <Table.HeaderCell scope="row">
                 <NomLink path={`org/${orgEnhet.id}`}>{orgEnhet.id}</NomLink>
               </Table.HeaderCell>
-              <Table.DataCell />
+              <OrgEnhetsTypeDataCell orgEnhet={orgEnhet} />
               <Table.DataCell>{orgEnhet.navn}</Table.DataCell>
               <Table.DataCell>{orgEnhet.gyldigFom}</Table.DataCell>
               <Table.DataCell>{orgEnhet.gyldigTom}</Table.DataCell>
@@ -109,5 +119,65 @@ function OrgenhetPage() {
         })}
       </Table.Body>
     </Table>
+  );
+}
+
+function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhetState }) {
+  const allowEdit = true;
+  const queryClient = useQueryClient();
+
+  const search = Route.useSearch();
+
+  const updateOrgEnhetsTypeMutation = useMutation({
+    mutationFn: (newOrgEnhetsType: OrgEnhetsType | null) =>
+      oppdaterOrgEnhetType({
+        nomId: orgEnhet.id,
+        orgEnhetsType: newOrgEnhetsType ?? undefined,
+      }),
+    onSuccess: (_, newOrgEnhetsType) => {
+      /*
+         When this mutation returns, we have only sent a message to Kafka to change the orgEnhetsType.
+         It is not immediately available in the orgEnhet state.
+         Therefore, we do a manual optimistic update of the orgEnhetsType for this orgEnhet in the cache.
+      */
+
+      queryClient.setQueryData<OrgEnhetState[]>(
+        ["STATE", "ORGENHET", search],
+        (previousData) =>
+          (previousData ?? []).map((oe) =>
+            oe.id === orgEnhet.id
+              ? { ...oe, orgEnhetsType: newOrgEnhetsType ?? undefined }
+              : oe,
+          ),
+      );
+
+      showToast({ text: "OrgEnhetsType endret" });
+    },
+  });
+
+  return (
+    <Table.DataCell>
+      <Select
+        hideLabel
+        label=""
+        onChange={(event) => {
+          const orgEnhetsType =
+            event.target.value === ""
+              ? null
+              : (event.target.value as OrgEnhetsType);
+          updateOrgEnhetsTypeMutation.mutate(orgEnhetsType);
+        }}
+        readOnly={!allowEdit}
+        size="small"
+        value={orgEnhet?.orgEnhetsType ?? ""}
+      >
+        <option value=""></option>
+        {Object.values(OrgEnhetsType).map((orgEnhetsType) => (
+          <option key={orgEnhetsType} value={orgEnhetsType}>
+            {orgEnhetsType}
+          </option>
+        ))}
+      </Select>
+    </Table.DataCell>
   );
 }
