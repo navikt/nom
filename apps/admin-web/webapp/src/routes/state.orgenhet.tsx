@@ -102,9 +102,9 @@ function OrgenhetPage() {
         {data.map((orgEnhet) => {
           return (
             <Table.Row key={orgEnhet.fid}>
-              <Table.DataCell scope="row">
+              <Table.HeaderCell scope="row">
                 <NomLink path={`org/${orgEnhet.id}`}>{orgEnhet.id}</NomLink>
-              </Table.DataCell>
+              </Table.HeaderCell>
               <OrgEnhetsTypeDataCell
                 allowEdit={allowEdit}
                 orgEnhet={orgEnhet}
