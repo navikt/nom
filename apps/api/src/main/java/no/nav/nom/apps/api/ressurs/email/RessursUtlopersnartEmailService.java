@@ -141,7 +141,9 @@ public class RessursUtlopersnartEmailService {
 
                 // innholder orgenhetNavn og orgenhetLederNavident
                 Map<String, String> orgenhetData = orgTilknytninger.stream()
-                    .filter(orgtilknytningState -> orgtilknytningState.gyldigTom().isPresent() && orgtilknytningState.gyldigTom().get().isEqual(ressurs.sluttdato().get()))
+                    .filter(orgtilknytningState -> (orgtilknytningState.gyldigTom() != null) &&
+                        (orgtilknytningState.gyldigTom().isPresent()) &&
+                        orgtilknytningState.gyldigTom().get().isEqual(ressurs.sluttdato().get()))
                     .map(orgtilknytningState -> {
                         var orgenhetState = orgEnhetStateRepository.findById(orgtilknytningState.orgEnhetId());
                         String orgenhetNavn = orgenhetState.isPresent() ? orgenhetState.get().navn() : "Ukjent";
@@ -168,7 +170,9 @@ public class RessursUtlopersnartEmailService {
                     .ressursSluttdato(ressurs.sluttdato().get())
                     .orgenhetData(orgenhetData)
                     .build();
-            }).toList();
+            })
+            .filter(utloperRessursData -> !utloperRessursData.orgenhetData().isEmpty())
+            .toList();
     }
 
 

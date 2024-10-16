@@ -39,6 +39,7 @@ import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -142,6 +143,7 @@ public class RessursUtlopersnartEmailServiceTest {
                 OrgtilknytningState.builder()
                     .navident(ressusNavIdent)
                     .orgEnhetId(orgEnhet)
+                    .gyldigTom(Optional.of(ressursSluttdato.get()))
                     .build()
             )
         );
@@ -150,6 +152,7 @@ public class RessursUtlopersnartEmailServiceTest {
                 OrgtilknytningState.builder()
                     .navident(ressursNavIdent2)
                     .orgEnhetId(orgEnhet)
+                    .gyldigTom(Optional.of(ressursSluttdato2.get()))
                     .build()
             )
         );
@@ -168,7 +171,6 @@ public class RessursUtlopersnartEmailServiceTest {
                     .build()
             )
         );
-
 
         // test
         var result = ressursUtlopersnartEmailService.getUtlopendeRessurser();
@@ -192,6 +194,109 @@ public class RessursUtlopersnartEmailServiceTest {
         assertEquals(expected.size(), result.size());
         assertTrue(expected.containsAll(result));
         assertTrue(result.containsAll(expected));
+    }
+
+    @Test
+    public void testGetUtlopendeRessurser_OT_has_different_gyldigTom() {
+        // setup data
+        String ressusNavIdent = "ressurNavnOgNavIdent";
+        String ressursForNavn = "ressursForNavn";
+        String ressursEtterNavn = "ressursForNavn";
+        Visningsnavn vis1 = new Visningsnavn(ressursForNavn, Optional.empty(), ressursEtterNavn);
+        Optional<LocalDate> ressursSluttdato = Optional.of(LocalDate.now().plusWeeks(2));
+        Optional<LocalDate> ressursSluttdatoPlus1dag = Optional.of(LocalDate.now().plusWeeks(2).plusDays(1));
+
+        String ressursNavIdent2 = "ressurNavnOgNavIdent2";
+        String ressursForNavn2 = "ressursForNavn2";
+        String ressursEtterNavn2 = "ressursEtterNavn2";
+        Visningsnavn vis2 = new Visningsnavn(ressursForNavn2, Optional.empty(), ressursEtterNavn2);
+        Optional<LocalDate> ressursSluttdato2 = Optional.of(LocalDate.now().plusWeeks(5));
+        Optional<LocalDate> ressursSluttdato2Plus1dag = Optional.of(LocalDate.now().plusWeeks(5).plusDays(1));
+
+        String orgEnhet = "orgenhet123456";
+        String orgEnhetNavn = "orgenhetNavn";
+        String agressoId = "orgEnhetAgressoId123456";
+        String orgNiva = "Nivaa";
+        String orgenhetLederNavIdent = "L123456";
+
+        when(orgEnhetStateRepository.findById(orgEnhet)).thenReturn(
+            Optional.of(OrgEnhetState.builder()
+                .id(orgEnhet)
+                .navn(orgEnhetNavn)
+                .agressoId(Optional.of(agressoId))
+                .agressoOrgNivaa(Optional.of(orgNiva))
+                .gyldigFom(LocalDate.now().minusDays(10))
+                .gyldigTom(Optional.of(LocalDate.now().plusDays(10)))
+                .build()
+            )
+        );
+
+        when(lederResolver.leder(any())).thenReturn(List.of(
+                OrgEnhetsLeder.builder()
+                    .ressurs(Ressurs.builder()
+                        .navIdent(orgenhetLederNavIdent)
+                        .build()
+                    )
+                    .build()
+            )
+        );
+
+        when(orgtilknytningStateRepository.findByNavident(ressusNavIdent)).thenReturn(
+            List.of(
+                OrgtilknytningState.builder()
+                    .navident(ressusNavIdent)
+                    .orgEnhetId(orgEnhet)
+                    .gyldigTom(Optional.of(ressursSluttdato.get().minusDays(7)))
+                    .build()
+            )
+        );
+        when(orgtilknytningStateRepository.findByNavident(ressursNavIdent2)).thenReturn(
+            List.of(
+                OrgtilknytningState.builder()
+                    .navident(ressursNavIdent2)
+                    .orgEnhetId(orgEnhet)
+                    .gyldigTom(Optional.of(ressursSluttdato2.get().plusDays(8)))
+                    .build()
+            )
+        );
+
+        when(ressursStateRepository.findAllActiveRessurser()).thenReturn(
+            Map.of(
+                "ressurs1", RessursState.builder()
+                    .navident(ressusNavIdent)
+                    .visningsnavn(vis1)
+                    .sluttdato(ressursSluttdato)
+                    .build(),
+                "ressurs2", RessursState.builder()
+                    .navident(ressursNavIdent2)
+                    .visningsnavn(vis2)
+                    .sluttdato(ressursSluttdato2)
+                    .build()
+            )
+        );
+
+        // test
+        var result = ressursUtlopersnartEmailService.getUtlopendeRessurser();
+
+        // verify
+        List<UtloperRessursData> expected = List.of(
+            UtloperRessursData.builder()
+                .ressurNavn(vis1.getFormattedVisningsnavn())
+                .ressursNavident(ressusNavIdent)
+                .ressursSluttdato(ressursSluttdato.get())
+                .orgenhetData(Map.of(orgEnhetNavn, orgenhetLederNavIdent))
+                .build(),
+            UtloperRessursData.builder()
+                .ressurNavn(vis2.getFormattedVisningsnavn())
+                .ressursNavident(ressursNavIdent2)
+                .ressursSluttdato(ressursSluttdato2.get())
+                .orgenhetData(Map.of(orgEnhetNavn, orgenhetLederNavIdent))
+                .build()
+        );
+
+        assertEquals(expected.size(), 2);
+        assertEquals(result.size(), 0);
+        assertNotEquals(expected.size(), result.size());
     }
 
 }
