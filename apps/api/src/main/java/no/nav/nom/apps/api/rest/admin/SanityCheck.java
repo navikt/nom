@@ -117,8 +117,9 @@ public class SanityCheck {
         return result.toString();
     }
 
+    //TODO: (Test Testesen 4) Denne er ferdig implementert i nom-admin, kan fjernes.
     @Operation(
-        description = "Sjekk aktive enheter og organiseringer",
+        description = "Sjekk aktive ressurser",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -135,6 +136,7 @@ public class SanityCheck {
         return result.toString();
     }
 
+    //TODO: (Test Testesen 4) Denne er ferdig implementert i nom-admin, kan fjernes.
     @Operation(
         description = "List aktive enheter Uten over-enhet",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -185,6 +187,7 @@ public class SanityCheck {
         return result.toString();
     }
 
+    //TODO: (Test Testesen 4) Denne er ferdig implementert i nom-admin, kan fjernes.
     @Operation(
         description = "List aktive enheter Uten over-enhet men med under-enheter",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -233,6 +236,7 @@ public class SanityCheck {
         return result.toString();
     }
 
+    //TODO: (Test Testesen 4) Denne er ferdig implementert i nom-admin, kan fjernes.
     @Operation(
         description = "List ressurser med aktive orgtilknytninger for enhet om er inaktiv eller uten organisering",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)

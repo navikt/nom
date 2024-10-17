@@ -459,10 +459,10 @@ public class RessursRestService {
             .visningsnavn(
                 new Visningsnavn(
                     request.visningsfornavn(),
-                    Optional.ofNullable(request.visningsmellomnavn()),
+                    Optional.ofNullable(trimToNull(request.visningsmellomnavn())),
                     request.visningsetternavn()
                 ))
-            .primaryTelefonnummer(Optional.ofNullable(request.primaryTelefonnummer()))
+            .primaryTelefonnummer(Optional.ofNullable(trimToNull(request.primaryTelefonnummer())))
             .sektor(request.sektor())
             .sluttdato(request.sluttDato())
             .primaryFysiskBrukersted(Optional.ofNullable(request.fysiskBrukerstedNr()))
