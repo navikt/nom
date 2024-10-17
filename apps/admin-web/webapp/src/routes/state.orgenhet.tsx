@@ -5,7 +5,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { createFileRoute, Link as TanStackLink } from "@tanstack/react-router";
-import { Suspense } from "react";
+import React, { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Toaster } from "react-hot-toast";
 import { z } from "zod";
@@ -68,7 +68,12 @@ function OrgenhetPage() {
           <Table.ColumnHeader scope="col" sortKey="id" sortable>
             Id
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="orgEnhetsType" sortable>
+          <Table.ColumnHeader
+            scope="col"
+            sortKey="orgEnhetsType"
+            sortable
+            style={{ maxWidth: "160px" }}
+          >
             OrgEnhetsType
           </Table.ColumnHeader>
           <Table.ColumnHeader scope="col" sortKey="navn" sortable>
@@ -108,6 +113,7 @@ function OrgenhetPage() {
               <OrgEnhetsTypeDataCell
                 allowEdit={allowEdit}
                 orgEnhet={orgEnhet}
+                style={{ maxWidth: "160px" }}
               />
               <Table.DataCell>{orgEnhet.navn}</Table.DataCell>
               <Table.DataCell>{orgEnhet.gyldigFom}</Table.DataCell>
@@ -119,7 +125,7 @@ function OrgenhetPage() {
               <Table.DataCell>{orgEnhet.agressoOrgenhetType}</Table.DataCell>
               <Table.DataCell>
                 <TanStackLink
-                  search={{ filterText: orgEnhet.fid, fromOffset: 0 }}
+                  search={{ filterText: orgEnhet.fid, fromOffset: undefined }}
                   to="/sinks/orgenhet"
                 >
                   Se Events
@@ -136,9 +142,11 @@ function OrgenhetPage() {
 function OrgEnhetsTypeDataCell({
   orgEnhet,
   allowEdit,
+  style,
 }: {
   orgEnhet: OrgEnhetState;
   allowEdit: boolean | undefined;
+  style?: React.CSSProperties | undefined;
 }) {
   const queryClient = useQueryClient();
 
@@ -176,7 +184,7 @@ function OrgEnhetsTypeDataCell({
   });
 
   return (
-    <Table.DataCell>
+    <Table.DataCell style={style}>
       <Select
         hideLabel
         label=""
