@@ -9,9 +9,9 @@ import {
   getEnheterUtenOverenheterMedUnderEnheter,
 } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
-import { AntallOrgenheter } from "~/sanitychecks/AntallOrgenheter.tsx";
-import { EnheterOgOrganisering } from "~/sanitychecks/EnheterOgOrganisering.tsx";
-import { OrgEnhetOrganiseringTabell } from "~/sanitychecks/OrgEnhetOrganiseringTabell.tsx";
+import { AntallOrgenheter } from "~/sanitychecks/OrgEnhet/AntallOrgenheter.tsx";
+import { EnheterOgOrganisering } from "~/sanitychecks/OrgEnhet/EnheterOgOrganisering.tsx";
+import { OrgEnhetOrganiseringTabell } from "~/sanitychecks/OrgEnhet/OrgEnhetOrganiseringTabell.tsx";
 
 export const Route = createFileRoute("/sanity-checks/orgenhet")({
   component: () => {

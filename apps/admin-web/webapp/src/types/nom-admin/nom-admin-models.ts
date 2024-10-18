@@ -323,7 +323,7 @@ export enum HendelseType {
   FJERNET = "FJERNET",
 }
 
-export interface RessursOrgtilknytningInfo {
+export interface RessursOrgtilknytningKoblingInfo {
   /** @format int32 */
   totaltAntallRessurser?: number;
   /** @format int32 */
@@ -336,6 +336,15 @@ export interface RessursOrgtilknytningInfo {
   ressurserMedAktiveOrgtilknytningerForEnhetSomErInaktivEllerUtenOrganisering?: number;
   /** @format int32 */
   ressursMedTilknytningerUtoverEnhetGyldigPeriode?: number;
+}
+
+export interface RessursMedInaktivEnhet {
+  navident?: string;
+  ressursFid?: string;
+  sektor?: Sektor;
+  orgEnhetId?: string;
+  orgEnhetNavn?: string;
+  uniqueAgressoId?: string;
 }
 
 export interface OrgEnhetOrganisering {

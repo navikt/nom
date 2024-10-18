@@ -16,7 +16,8 @@ import type {
   OrgEnhetOrganisering,
   OrgEnhetStartOgSluttdato,
   OrgEnhetStateDTO,
-  RessursOrgtilknytningInfo,
+  RessursMedInaktivEnhet,
+  RessursOrgtilknytningKoblingInfo,
   RessursStateKafkaDTO,
 } from "~/types/nom-admin/nom-admin-models.ts";
 import type {
@@ -264,14 +265,24 @@ export function getEnheterUtenOverenheterMedUnderEnheter() {
   });
 }
 
-export function getRessurserSanityCheck() {
-  return queryOptions({
-    queryKey: ["API", "RESSURSERSANITYCHECK"],
-    queryFn: async () =>
-      (
-        await ky.get(`${API_BASE_URL}/SanityCheck/ressurs/ressurser`, {
-          timeout: 120_000, // 120 sek
-        })
-      ).json<RessursOrgtilknytningInfo>(),
-  });
+export async function getRessurserSanityCheck(): Promise<RessursOrgtilknytningKoblingInfo> {
+  return await ky
+    .get(`${API_BASE_URL}/SanityCheck/ressurs/ressurser`, {
+      timeout: 120_000, // 120 sekunder
+    })
+    .json<RessursOrgtilknytningKoblingInfo>();
+}
+
+export async function getRessursMedAktivOrgTilknytningHvorEnhetErInaktiv(
+  inkluderEksterne: boolean,
+  inkluderHelfo: boolean,
+): Promise<RessursMedInaktivEnhet[]> {
+  return await ky
+    .get(
+      `${API_BASE_URL}/SanityCheck/ressurs/listRessurserTilIkkeAktivEnhet?inkluderEksterne=${inkluderEksterne}&inkluderHelfo=${inkluderHelfo}`,
+      {
+        timeout: 120_000, // 120 seconds
+      },
+    )
+    .json<RessursMedInaktivEnhet[]>();
 }
