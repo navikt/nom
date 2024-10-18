@@ -106,12 +106,7 @@ public class RessursUtlopersnartEmailService {
             }
 
             log.info("Sender ressurs sluttdato utløper epost subject: {}, recipients: {}, message: {}", subject, recipientList, emailBody);
-            /**
-             * NOTE: for the time being, we will only send to Line <Line.Eeg-Larsen@nav.no>
-             * later we will clean this up and send to all leaders of the orgenhet
-             * EmailMessage message = new EmailMessage(subject, body, recipientList);
-             */
-            EmailMessage message = new EmailMessage(subject, emailBody, List.of("Line.Eeg-Larsen@nav.no"));
+            EmailMessage message = new EmailMessage(subject, emailBody, recipientList);
             emailClient.sendEmail(message).subscribe();
         } catch (ADResponseException e) {
             throw new RessursOpprettetEmailException("UtloperRessurs: Fant ikke epost adresse for ressurs");
