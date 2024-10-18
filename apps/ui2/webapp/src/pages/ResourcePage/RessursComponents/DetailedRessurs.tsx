@@ -56,8 +56,6 @@ import {
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   const { editOrgtilknytninger } = useSearch({ from: "/ressurs/$id" });
 
-  const hasAdminAccess = useHasAdminAccess();
-
   return (
     <div
       css={[
@@ -92,7 +90,7 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
           <OrgTilknytningSection ressurs={ressurs} />
           <TeamCatSection navident={ressurs.navident} />
           <TerminateButton ressurs={ressurs} />
-          {ressurs.isNomMastered && hasAdminAccess && (
+          {ressurs.isNomMastered && (
             <Tag
               css={css`
                 width: fit-content;
