@@ -7,6 +7,9 @@ import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.email.EmailClient;
 import no.nav.nom.apps.api.clients.email.EmailMessage;
+import no.nav.nom.apps.api.common.cache.CacheQueueService;
+import no.nav.nom.apps.api.common.cache.CacheType;
+import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
@@ -16,6 +19,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,13 +31,11 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class OrgtilknytningEndretEmailService {
     private static final String OT_ENDRINGER_VARSEL_TEMPLATE = "ot-endringer-varsel.ftlh";
     private static final String UNLEASH_USE_SEND_OT_ENDRINGER_EMAIL = "nom.orgtilknytning.send_ot_endringer_email";
-    private final Map<String, List<OTEndretData>> orgtilknytningEndringerQueueByNavident = new ConcurrentHashMap<>();
     private final Logger log = LoggerFactory.getLogger(RessursOpprettetEmailService.class);
     private final EmailClient emailClient;
     private final Unleash unleash;
@@ -43,10 +45,10 @@ public class OrgtilknytningEndretEmailService {
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final LederResolver lederResolver;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
-
+    private final CacheQueueService cacheQueueService;
+    private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
+    private final LeaderElection leaderElection;
     public final String epost_body_item_template = "{0}({1}), fra og med {2}, til og med {3}. Endring utført av {4}, på {5}.";
-
-
 
     public OrgtilknytningEndretEmailService(
         EmailClient emailClient,
@@ -56,7 +58,10 @@ public class OrgtilknytningEndretEmailService {
         RessursStateRepository ressursStateRepository,
         OrgtilknytningStateRepository orgtilknytningStateRepository,
          OrgEnhetStateRepository orgEnhetStateRepository,
-        LederResolver lederResolver) {
+        LederResolver lederResolver,
+        CacheQueueService cacheQueueService,
+        DvhStartupLoadMonitor dvhStartupLoadMonitor,
+        LeaderElection leaderElection) {
         this.emailClient = emailClient;
         this.unleash = unleash;
         this.freemarkerConfig = freemarkerConfig;
@@ -65,39 +70,49 @@ public class OrgtilknytningEndretEmailService {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.lederResolver = lederResolver;
+        this.cacheQueueService = cacheQueueService;
+        this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
+        this.leaderElection = leaderElection;
     }
 
     public void addToOrgtilknytningEndringerQueue(String navident, OTEndretData otEndretData) {
-        if(!orgtilknytningEndringerQueueByNavident.containsKey(navident)){
-            orgtilknytningEndringerQueueByNavident.put(navident, new ArrayList<>(Collections.singletonList(otEndretData)));
-        } else {
-            orgtilknytningEndringerQueueByNavident.get(navident).add(otEndretData);
+        // save to database
+        try {
+            cacheQueueService.save(navident, otEndretData);
+        } catch (IOException e) {
+            // log error and ignore
+            log.error("Error while saving to cache", e);
         }
     }
 
     public void removeFromOrgtilknytningEndringerQueue(String navident) {
-        orgtilknytningEndringerQueueByNavident.remove(navident);
-    }
-
-    public void clear() {
-        orgtilknytningEndringerQueueByNavident.clear();
+        cacheQueueService.delete(navident, CacheType.OTENDRINGER.toString());
     }
 
     @Scheduled(cron = "0 0 18 * * ?") // every day at 18:00
     public void sendEmail() {
+        // await until initial load is complete
+        dvhStartupLoadMonitor.awaitInitialLoadComplete();
+
+        // skip if not leader
+        if (!leaderElection.isLeader()) {
+            log.info("This pod is not the leader, skipping email sending about changes in Orgtilknytning");
+            return;
+        }
+
+        Map<String, List<OTEndretData>> otEndringer = cacheQueueService.getOTEndringerFromCache();
         //Note: print the queue for debugging. To be removed later
-        log.info("orgtilknytningEndringerQueueByNavident size: {}", orgtilknytningEndringerQueueByNavident.size());
-        orgtilknytningEndringerQueueByNavident.forEach((navident, endringer) -> {
+        log.info("otEndringer size: {}", otEndringer.size());
+        otEndringer.forEach((navident, endringer) -> {
             log.info("navident: {}, endringer: {}", navident, endringer);
         });
 
         if (unleash.isEnabled(UNLEASH_USE_SEND_OT_ENDRINGER_EMAIL)) {
-            orgtilknytningEndringerQueueByNavident.forEach((navident, endringer) -> {
+            otEndringer.forEach((navident, endringer) -> {
                 var endretRessurs = ressursStateRepository.findByNavident(navident);
                 if(endretRessurs.isEmpty()) {
-                    log.warn("Fant ikke ressurs med navident {} og epost varsel vil ikke bli sendt.", navident);
-                    // clear from the queue
-                    removeFromOrgtilknytningEndringerQueue(navident);
+                    log.error("Fant ikke ressurs med navident {} og epost varsel vil ikke bli sendt.", navident);
+                    // not cleared from the queue! will be retried next time
                 } else {
                     sendEmail(endretRessurs.get(), endringer);
                     removeFromOrgtilknytningEndringerQueue(navident);
@@ -144,10 +159,6 @@ public class OrgtilknytningEndretEmailService {
         } catch (IOException | TemplateException e) {
             throw new RessursOpprettetEmailException("Feil ved generering av epost innhold");
         }
-    }
-
-    private boolean onlySendToNonAdmins() {
-        return unleash.isEnabled(UNLEASH_USE_SEND_OT_ENDRINGER_EMAIL);
     }
 
     private String getFormattetEmailBody(String resursName, String navIdent, String otEndringer) throws IOException, TemplateException {
