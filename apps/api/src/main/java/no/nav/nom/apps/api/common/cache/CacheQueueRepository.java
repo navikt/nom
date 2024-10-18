@@ -14,7 +14,4 @@ public interface CacheQueueRepository extends JpaRepository<CacheQueue, CacheID>
 
     @Query("SELECT q FROM CacheQueue q WHERE q.cacheType = :cacheType")
     List<CacheQueue> findAllByType(String cacheType);
-
-    @Query("SELECT q FROM CacheQueue q")
-    List<CacheQueue> findAllBy();
 }
