@@ -1,6 +1,6 @@
 package no.nav.nom.apps.admin.sanitycheck.dto.ressurs;
 
-public record RessursOrgtilknytningInfo(
+public record RessursOrgtilknytningKoblingInfo(
     int totaltAntallRessurser,
     int antallAktiveOrgtilknytninger,
     int ressurserMedAktiveOrgtilknytninger,
