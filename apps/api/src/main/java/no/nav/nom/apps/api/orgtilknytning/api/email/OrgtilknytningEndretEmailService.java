@@ -9,6 +9,7 @@ import no.nav.nom.apps.api.clients.email.EmailClient;
 import no.nav.nom.apps.api.clients.email.EmailMessage;
 import no.nav.nom.apps.api.common.cache.CacheQueueService;
 import no.nav.nom.apps.api.common.cache.CacheType;
+import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
@@ -18,6 +19,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -44,6 +46,8 @@ public class OrgtilknytningEndretEmailService {
     private final LederResolver lederResolver;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final CacheQueueService cacheQueueService;
+    private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
+    private final LeaderElection leaderElection;
     public final String epost_body_item_template = "{0}({1}), fra og med {2}, til og med {3}. Endring utført av {4}, på {5}.";
 
     public OrgtilknytningEndretEmailService(
@@ -55,7 +59,9 @@ public class OrgtilknytningEndretEmailService {
         OrgtilknytningStateRepository orgtilknytningStateRepository,
          OrgEnhetStateRepository orgEnhetStateRepository,
         LederResolver lederResolver,
-        CacheQueueService cacheQueueService) {
+        CacheQueueService cacheQueueService,
+        DvhStartupLoadMonitor dvhStartupLoadMonitor,
+        LeaderElection leaderElection) {
         this.emailClient = emailClient;
         this.unleash = unleash;
         this.freemarkerConfig = freemarkerConfig;
@@ -65,6 +71,8 @@ public class OrgtilknytningEndretEmailService {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.lederResolver = lederResolver;
         this.cacheQueueService = cacheQueueService;
+        this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
+        this.leaderElection = leaderElection;
     }
 
     public void addToOrgtilknytningEndringerQueue(String navident, OTEndretData otEndretData) {
@@ -83,6 +91,15 @@ public class OrgtilknytningEndretEmailService {
 
     @Scheduled(cron = "0 0 18 * * ?") // every day at 18:00
     public void sendEmail() {
+        // await until initial load is complete
+        dvhStartupLoadMonitor.awaitInitialLoadComplete();
+
+        // skip if not leader
+        if (!leaderElection.isLeader()) {
+            log.info("This pod is not the leader, skipping email sending about changes in Orgtilknytning");
+            return;
+        }
+
         Map<String, List<OTEndretData>> otEndringer = cacheQueueService.getOTEndringerFromCache();
         //Note: print the queue for debugging. To be removed later
         log.info("otEndringer size: {}", otEndringer.size());
@@ -94,9 +111,8 @@ public class OrgtilknytningEndretEmailService {
             otEndringer.forEach((navident, endringer) -> {
                 var endretRessurs = ressursStateRepository.findByNavident(navident);
                 if(endretRessurs.isEmpty()) {
-                    log.warn("Fant ikke ressurs med navident {} og epost varsel vil ikke bli sendt.", navident);
-                    // clear from the queue
-                    removeFromOrgtilknytningEndringerQueue(navident);
+                    log.error("Fant ikke ressurs med navident {} og epost varsel vil ikke bli sendt.", navident);
+                    // not cleared from the queue! will be retried next time
                 } else {
                     sendEmail(endretRessurs.get(), endringer);
                     removeFromOrgtilknytningEndringerQueue(navident);
