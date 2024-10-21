@@ -20,6 +20,8 @@ spec:
       value: '168000'
     - name: JDK_JAVA_OPTIONS
       value: "-Xms1g -Xmx2g"
+    - name: OTEL_JAVAAGENT_LOGGING  # Bli kvitt Otel loggingen https://opentelemetry.io/docs/zero-code/java/agent/configuration/#java-agent-logging-output
+      value: none
   envFrom:
     - secret: nav-ident-unleash-api-token
   secureLogs:
