@@ -36,7 +36,7 @@ public class DvhDuplikatAgressoIdAnalyseController {
         }
     )
     @GetMapping(value = "/duplikatAnalyse")
-    public String duplikatAnalyse(@RequestParam(required = false) String year) {
+    public String duplikatAnalyse(@RequestParam(required = false, defaultValue = "") String year) {
         return dvhDuplikatAgressoIdAnalyse.analyserDvhOrgenheterOgStateEnheter(year);
     }
 }
