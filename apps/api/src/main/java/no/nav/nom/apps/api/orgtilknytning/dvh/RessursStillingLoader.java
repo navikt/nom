@@ -6,6 +6,7 @@ import lombok.val;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
+import no.nav.nom.apps.api.orgtilknytning.dvh.statlige.AsyncNyeStrukturerOgProsesser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -27,12 +28,14 @@ public class RessursStillingLoader {
     private final NomProxyClient nomProxyClient;
     private final AppProperties appProperties;
     private final String ressursStillingerResponseNode;
+    private final AsyncNyeStrukturerOgProsesser asyncNyeStrukturerOgProsesser;
 
     public RessursStillingLoader(
         RessursStillingStrukturerer ressursStillingStrukturerer,
         RessursStillingProcessor ressursStillingProcessor,
         RessursStillingLoadStatus ressursStillingLoadStatus, NomProxyClient nomProxyClient, AppProperties appProperties,
-        @Value("${app.dvh-load.nom-ressurser-stillinger-respons-navn}") String ressursStillingerResponseNode
+        @Value("${app.dvh-load.nom-ressurser-stillinger-respons-navn}") String ressursStillingerResponseNode,
+        AsyncNyeStrukturerOgProsesser asyncNyeStrukturerOgProsesser
     ) {
         this.ressursStillingStrukturerer = ressursStillingStrukturerer;
         this.ressursStillingProcessor = ressursStillingProcessor;
@@ -40,16 +43,24 @@ public class RessursStillingLoader {
         this.nomProxyClient = nomProxyClient;
         this.appProperties = appProperties;
         this.ressursStillingerResponseNode = ressursStillingerResponseNode;
+        this.asyncNyeStrukturerOgProsesser = asyncNyeStrukturerOgProsesser;
     }
 
     public void loadAndProcess() {
+        LocalDateTime start = LocalDateTime.now();
+
         ressursStillingLoadStatus.startNewLoad();
 
         List<DvhRessursStilling> ressursStillinger = load();
 
-        Map <String, List<StillingPeriode>> stillingPerioderPerNavident = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
+        var nyeStillingPerioderPerNavident = asyncNyeStrukturerOgProsesser.asyncStrukturerStillingPerioderPerNavident(ressursStillinger);
 
+        Map <String, List<StillingPeriode>> stillingPerioderPerNavident = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
         ressursStillingProcessor.process(stillingPerioderPerNavident);
+
+        log.info("Lastet og prosessert ressursStillinger på gamlemåten. Tok {}", durationAsH24(start));
+        nyeStillingPerioderPerNavident.join();
+        log.info("Lastet og prosessert ressursStillinger på både nye og gamlemåten. Tok {}", durationAsH24(start));
 
         ressursStillingLoadStatus.endLoad();
     }

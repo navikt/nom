@@ -100,7 +100,7 @@ class RessursStillingLoaderTest extends TestBase {
                 null,
                 Optional.empty(),
                 Optional.empty(),
-                null,
+                Optional.empty(),
                 null,
                 Collections.emptyList(),
                 IdentType.STANDARD
@@ -114,7 +114,7 @@ class RessursStillingLoaderTest extends TestBase {
                 null,
                 Optional.empty(),
                 Optional.empty(),
-                null,
+                Optional.empty(),
                 null,
                 Collections.emptyList(),
                 IdentType.STANDARD
