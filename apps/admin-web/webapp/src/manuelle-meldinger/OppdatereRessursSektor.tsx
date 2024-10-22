@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, Detail, Modal, Select, TextField } from "@navikt/ds-react";
 import { useMutation } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import type { HTTPError } from "ky";
 import ky from "ky";
 import queryString from "query-string";
@@ -104,7 +105,14 @@ export function OppdatereRessursSektor() {
                   case "success": {
                     return (
                       <Alert variant="success">
-                        Meldingen ble sendt. <Detail>{mutation.data}</Detail>
+                        Meldingen ble sendt.{" "}
+                        <Detail>{JSON.parse(mutation.data).message}</Detail>
+                        <Link
+                          search={{ filterText: JSON.parse(mutation.data).fid }}
+                          to="/sinks/ressurs"
+                        >
+                          Trykk her for å se historikk
+                        </Link>
                       </Alert>
                     );
                   }
