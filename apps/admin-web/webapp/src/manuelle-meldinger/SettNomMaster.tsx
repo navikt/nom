@@ -57,7 +57,10 @@ export function SettNomMaster() {
       </Trigger>
 
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit((v) => mutation.mutate(v))}>
+        <form
+          autoComplete="off"
+          onSubmit={methods.handleSubmit((v) => mutation.mutate(v))}
+        >
           <Modal
             className="w-fit"
             header={{ heading: "Merk eller avmerk Ressurs som NOM-mastret" }}

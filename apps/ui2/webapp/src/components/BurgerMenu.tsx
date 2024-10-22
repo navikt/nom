@@ -29,7 +29,9 @@ export function BurgerMenu() {
 
   const navigate = useNavigate();
 
-  const adminLenke: string = "https://nom-admin.ansatt.nav.no/sinks/ressurs";
+  const adminLenke: string = window.location.href.includes("nom.nav.no")
+    ? "https://nom-admin.ansatt.nav.no/sinks/ressurs"
+    : "https://nom-admin.intern.dev.nav.no/sinks/ressurs";
 
   const delegertTilMeg =
     useQuery(getTilgangerDelegertTilMegOptions()).data ?? [];

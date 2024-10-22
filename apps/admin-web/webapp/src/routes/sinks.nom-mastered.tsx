@@ -37,7 +37,7 @@ export function NavidentOffsetSearchBar({
         };
         return { ...prev, ...values, ...overwriteOffset };
       },
-    });
+    }).then();
   });
 
   const tilbakestill = () => {
@@ -45,7 +45,7 @@ export function NavidentOffsetSearchBar({
     navigate({
       search: {},
       replace: true,
-    });
+    }).then();
   };
 
   return (
