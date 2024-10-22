@@ -56,7 +56,10 @@ export function AvvikleOrgenhet() {
       </Trigger>
 
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit((v) => mutation.mutate(v))}>
+        <form
+          autoComplete="off"
+          onSubmit={methods.handleSubmit((v) => mutation.mutate(v))}
+        >
           <Modal
             className="w-fit"
             header={{ heading: "Avvikle orgenhet" }}

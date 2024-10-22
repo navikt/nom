@@ -52,7 +52,10 @@ export function SlettRessursMelding() {
       <Trigger onClick={() => ref.current?.showModal()}>Slett ressurs</Trigger>
 
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit((v) => mutation.mutate(v))}>
+        <form
+          autoComplete="off"
+          onSubmit={methods.handleSubmit((v) => mutation.mutate(v))}
+        >
           <Modal
             className="w-fit"
             header={{ heading: "Slett ressurs" }}

@@ -57,7 +57,10 @@ export function SettNomMaster() {
       </Trigger>
 
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit((v) => mutation.mutate(v))}>
+        <form
+          autoComplete="off"
+          onSubmit={methods.handleSubmit((v) => mutation.mutate(v))}
+        >
           <Modal
             className="w-fit"
             header={{ heading: "Merk eller avmerk Ressurs som NOM-mastret" }}
@@ -79,10 +82,9 @@ export function SettNomMaster() {
                     defaultValue="MERK"
                     legend="Velg handling"
                     onChange={field.onChange}
-                    value={field.value}
                   >
-                    <Radio value="MERK">Merk som NOM-master</Radio>
-                    <Radio value="AVMERK">Avmerk som NOM-master</Radio>
+                    <Radio value="MERK">Merk som NOM-mastret</Radio>
+                    <Radio value="AVMERK">Avmerk som NOM-mastret</Radio>
                   </RadioGroup>
                 )}
               />
