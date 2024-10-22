@@ -103,7 +103,9 @@ export function OppdatereRessursSektor() {
                   }
                   case "success": {
                     return (
-                      <Alert variant="success">Meldingen ble sendt. </Alert>
+                      <Alert variant="success">
+                        Meldingen ble sendt. <Detail>{mutation.data}</Detail>
+                      </Alert>
                     );
                   }
                   case "error": {
