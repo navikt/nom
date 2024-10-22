@@ -13,6 +13,7 @@ import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.app.AvvikleRessursRequest;
+import no.nav.nom.apps.api.ressurs.api.app.OppdaterSektorRessursResponse;
 import no.nav.nom.apps.api.ressurs.api.app.OppdaterSluttdatoRessursResponse;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
@@ -583,7 +584,7 @@ public class ManuelleRessursEvtsrcMeldinger {
         @Parameter(description = "NAVIDENT for ressursen") @RequestParam String navident,
         @Parameter(description = "Ny sektor som for ressursen som skal settes") @RequestParam Sektor sektor,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
-    ) {
+    ) throws JsonProcessingException {
         var ressursState = ressursStateRepository.findByNavident(navident);
 
         if (ressursState.isEmpty()) {
@@ -623,15 +624,15 @@ public class ManuelleRessursEvtsrcMeldinger {
             metaData
         );
 
-        return ResponseEntity.ok().body(
-            "Ressurs med FID %s er funnet for navident %s med navn %s og sektor %s har fått ny sektor %s".formatted(
-                HtmlUtils.htmlEncode(ressursState.get().fid()),
-                ressursState.get().navident(),
-                ressursState.get().visningsnavn().toString(),
-                ressursState.get().sektor(),
-                sektor
-            )
-        );
+        var response = OppdaterSektorRessursResponse.builder()
+            .fid(ressursState.get().fid())
+            .navident(ressursState.get().navident())
+            .visningsnavn(ressursState.get().visningsnavn().toString())
+            .message("Ressursen %s har byttet sektor til %s.".formatted(navident, sektor))
+            .build();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonStr = objectMapper.writeValueAsString(response);
+        return ResponseEntity.ok().body(jsonStr);
     }
 
     private boolean validFid(String fid) {
