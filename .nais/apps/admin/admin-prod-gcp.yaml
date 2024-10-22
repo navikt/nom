@@ -16,6 +16,8 @@ spec:
       value: 'classpath:logback.xml'
     - name: JDK_JAVA_OPTIONS
       value: "-Xms2g -Xmx8g"
+    - name: OTEL_JAVAAGENT_LOGGING  # Bli kvitt Otel loggingen https://opentelemetry.io/docs/zero-code/java/agent/configuration/#java-agent-logging-output
+      value: none
   envFrom:
     - secret: nom-admin-unleash-api-token
   image: "{{image}}"

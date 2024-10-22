@@ -16,6 +16,8 @@ spec:
       value: 'classpath:logback-nais.xml'
     - name: JDK_JAVA_OPTIONS
       value: "-Xms4g -Xmx12g"
+    - name: OTEL_JAVAAGENT_LOGGING  # Bli kvitt Otel loggingen https://opentelemetry.io/docs/zero-code/java/agent/configuration/#java-agent-logging-output
+      value: none
   envFrom:
     - secret: nom-sluttdato-override-json
     - secret: nom-api-unleash-api-token

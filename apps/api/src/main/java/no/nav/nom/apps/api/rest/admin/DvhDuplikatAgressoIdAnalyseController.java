@@ -10,7 +10,10 @@ import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDuplikatAgressoIdA
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @Tag(name = "Admin for å analysere litt rundt duplikat AgressoId i DVH last.")
 @RestController
@@ -33,7 +36,7 @@ public class DvhDuplikatAgressoIdAnalyseController {
         }
     )
     @GetMapping(value = "/duplikatAnalyse")
-    public String duplikatAnalyse() {
-        return dvhDuplikatAgressoIdAnalyse.analyserDvhOrgenheterOgStateEnheter();
+    public String duplikatAnalyse(@RequestParam(required = false, defaultValue = "") String year) {
+        return dvhDuplikatAgressoIdAnalyse.analyserDvhOrgenheterOgStateEnheter(year);
     }
 }

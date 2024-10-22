@@ -6,8 +6,6 @@ import lombok.val;
 import no.nav.nom.apps.api.common.NomProxyRestClient;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.contract.nom.state.OrgEnhetState;
-import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -26,7 +24,7 @@ public class DvhDuplikatAgressoIdAnalyse {
     private final OrgenhetService orgenhetService;
     private HashSet<String> enhetIdForEnheterIOrganisering = new HashSet<>();
 
-    public String analyserDvhOrgenheterOgStateEnheter() {
+    public String analyserDvhOrgenheterOgStateEnheter(String year) {
         enhetIdForEnheterIOrganisering.clear();
         enhetIdForEnheterIOrganisering.addAll(orgenhetService.getAllEnheterMedOrganisering().stream().map(IOrgenhet::getId).collect(Collectors.toSet()));
 
@@ -55,28 +53,46 @@ public class DvhDuplikatAgressoIdAnalyse {
 
         log.info("Orgenhet v2 last fra dvh. Parsed antall enheter:{}", parsedDvhEnheter.size());
 
-        val dvhGroupedByAgressoId = parsedDvhEnheter.stream()
+        var filtrerteDvhEnheter = parsedDvhEnheter;
+        var filtrerteStateEnheter = orgenhetService.getAllEnheter();
+        if (year != null && !year.isEmpty()) {
+            log.info("Filtrerer på år:{}", year);
+            var agresoiderMedGyldigFomIFilterAaret = parsedDvhEnheter.stream()
+                    .filter(e -> e.getGyldigFom().getYear() == Integer.valueOf(year))
+                    .map(DvhOrgenhetV2::getAgressoId)
+                    .toList();
+
+            filtrerteDvhEnheter = parsedDvhEnheter.stream()
+                    .filter(e -> agresoiderMedGyldigFomIFilterAaret.contains(e.getAgressoId()))
+                    .toList();
+
+            filtrerteStateEnheter = filtrerteStateEnheter.stream()
+                    .filter(e -> agresoiderMedGyldigFomIFilterAaret.contains(e.getAgressoId()))
+                    .toList();
+        }
+
+        val dvhGroupedByAgressoId = filtrerteDvhEnheter.stream()
                 // Grupperer enheter på kombinasjonen agressoId + navn + agresso orgnivå
                 .collect(Collectors.groupingBy(DvhOrgenhetV2::getAgressoId));
 
-        val dvhGroupedByAgressoIdAndNivaa = parsedDvhEnheter.stream()
+        val dvhGroupedByAgressoIdAndNivaa = filtrerteDvhEnheter.stream()
             // Grupperer enheter på kombinasjonen agressoId + navn + agresso orgnivå
             .collect(Collectors.groupingBy(dvhOrgenhetV2 -> dvhOrgenhetV2.getAgressoId() + "-" + dvhOrgenhetV2.getOrgNiv()));
 
         String dvhDuplikaterPaaAgressoId = dvhDuplikaterPaaAgressoId(dvhGroupedByAgressoId, "AgressoId");
         String dvhDuplikaterPaaAgressoIdOgNivaa = dvhDuplikaterPaaAgressoId(dvhGroupedByAgressoIdAndNivaa, "AgressoId og Nivå");
 
-        log.info("Ferdig med å gruppere og liste DVH enheter:{}", parsedDvhEnheter.size());
+        log.info("Ferdig med å gruppere og liste filtrerte DVH enheter:{}", filtrerteDvhEnheter.size());
 
-        var stateOrgEnheterByAgressoId = orgenhetService.getAllEnheter().stream()
+        var stateOrgEnheterByAgressoId = filtrerteStateEnheter.stream()
             .filter(e -> !(e.getGyldigTom().isPresent() && e.getGyldigFom().isEqual(e.getGyldigTom().get()))) // Filter ut de som slutter samme dag som de starter
             .collect(Collectors.groupingBy(IOrgenhet::getAgressoId));
 
-        var stateOrgEnheterByAgressoIdAndNivaa = orgenhetService.getAllEnheter().stream()
+        var stateOrgEnheterByAgressoIdAndNivaa = filtrerteStateEnheter.stream()
             .filter(e -> !(e.getGyldigTom().isPresent() && e.getGyldigFom().isEqual(e.getGyldigTom().get()))) // Filter ut de som slutter samme dag som de starter
             .collect(Collectors.groupingBy( o -> o.getAgressoId() + " - " + o.getOrgNiv()));
 
-        var stateOrgEnheterByAgressoIdAndNivaaOgGyldigFom = orgenhetService.getAllEnheter().stream()
+        var stateOrgEnheterByAgressoIdAndNivaaOgGyldigFom = filtrerteStateEnheter.stream()
             .filter(e -> !(e.getGyldigTom().isPresent() && e.getGyldigFom().isEqual(e.getGyldigTom().get()))) // Filter ut de som slutter samme dag som de starter
             .collect(Collectors.groupingBy( o -> o.getAgressoId() + " - " + o.getOrgNiv() + " - " + o.getGyldigFom()));
 
@@ -84,7 +100,7 @@ public class DvhDuplikatAgressoIdAnalyse {
         String stateDuplikaterPaaAgressoIdAndNivaa = stateDuplikaterPaaAgressoId(stateOrgEnheterByAgressoIdAndNivaa, "AgressoId og Nivå");
         String stateDuplikaterPaaAgressoIdAndNivaaOgGyldigFom = stateDuplikaterPaaAgressoId(stateOrgEnheterByAgressoIdAndNivaaOgGyldigFom, "AgressoId og Nivå og GyldigFom (Navnebytte?)");
 
-        log.info("Ferdig med å gruppere og liste State enheter:{}", parsedDvhEnheter.size());
+        log.info("Ferdig med å gruppere og liste filtrerte State enheter:{}", parsedDvhEnheter.size());
 
         return dvhDuplikaterPaaAgressoId + "\n"
             + dvhDuplikaterPaaAgressoIdOgNivaa + "\n"
