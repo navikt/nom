@@ -343,6 +343,7 @@ public class SanityCheck {
         return result.toString();
     }
 
+    //TODO: (Test Testesen 4) Denne er ferdig implementert i nom-admin, kan fjernes.
     @Operation(
         description = "List tilknytninger med gyldighet utover ressurens gyldighetsperiode",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -403,6 +404,7 @@ public class SanityCheck {
             }).toList();
     }
 
+    //TODO: (Test Testesen 4) Denne er ferdig implementert i nom-admin, kan fjernes.
     @Operation(
         description = "List tilknytninger med gyldighet utover enhetens gyldighetsperiode",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -440,6 +442,7 @@ public class SanityCheck {
         return result.toString();
     }
 
+    //TODO: (Test Testesen 4) Denne er ferdig implementert i nom-admin, kan fjernes.
     @Operation(
         description = "List aktive enheter som er duplikat på samme unique agresso id ('agressoId+orgNiv+Navn')",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -455,7 +458,12 @@ public class SanityCheck {
 
         List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
         List<IOrgenhet> aktiveEnheter = aktiveEnheter(alleEnheter);
+        Map<String, List<IOrgenhet>> aktiveDuplikateEnheterMedSammeUniqueAgressoId = aktiveEnheter.stream().collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId));
         Map<String, List<IOrgenhet>> aktiveEnheterDuplikatAvSammeUniqueAgressoId = duplikatPaaSammeUniqueAgresssoId(aktiveEnheter);
+
+        log.info("Antall aktive enheter: {}", aktiveEnheter.size());
+        log.info("Antall aktive duplikate enheter med samme unique agresso id: {}", aktiveDuplikateEnheterMedSammeUniqueAgressoId.size());
+        log.info("Antall aktive enheter duplikat av samme unique agresso id: {}", aktiveEnheterDuplikatAvSammeUniqueAgressoId.size());
 
         result.append("Totalt antall duplikater: %s\n".formatted(aktiveEnheterDuplikatAvSammeUniqueAgressoId.size()));
         aktiveEnheterDuplikatAvSammeUniqueAgressoId.forEach((faktiskId, duplikater) -> {
