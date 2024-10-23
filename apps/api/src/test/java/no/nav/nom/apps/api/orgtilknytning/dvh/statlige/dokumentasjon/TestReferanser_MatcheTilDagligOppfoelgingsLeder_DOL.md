@@ -334,6 +334,26 @@ OPR -> Orgenhet På Ressurs
       Og error
         HULL_I_STILLINGSPERIODE 
       ```                     
+      10. Det finnes ikke eksisterende OT med DOL - OPR delvis matcher flere SP
+      ```
+      Dato            A                       B      DD
+      Enhet A - '0110021'
+      Enhet B - '0110010'
+      OPR: 
+        '01100'
+      SP:
+        Enhet A:      <-----------A----------->
+        Enhet B:      <-----------B----------->
+      ```
+      Resultat:
+      ```
+      Dato            A                       B      DD
+      SP:
+        Enhet A:      <---------A-DOL--------->
+        Enhet B:      <-----------B----------->
+      Og error
+        MULTI_DOL_MATCH_MOT_OPR 
+      ```         
 2. Aktive/current StillingPerioder
    1. En single stillingperiode vil alltid få DOL
       ```
@@ -418,10 +438,30 @@ OPR -> Orgenhet På Ressurs
       Dato            A          DD             B
       SP:
         Enhet A:      <------------A------------>
-        Enhet B:      <------------B----------->
+        Enhet B:      <------------B------------>
       Og error
         CURRENT_PERIODE_KAN_IKKE_MATCHE_ORGENHET_PAA_RESSURS_FOR_DOL
       ```
+   6. Det finnes ikke eksisterende OT med DOL - OPR delvis matcher flere SP
+      ```
+      Dato            A          DD             B
+      Enhet A - '0110021'
+      Enhet B - '0110010'
+      OPR: 
+        '01100'
+      SP:
+        Enhet A:      <------------A------------>
+        Enhet B:      <------------B------------>
+      ```
+      Resultat:
+      ```
+      Dato            A          DD             B
+      SP:
+        Enhet A:      <----------A-DOL---------->
+        Enhet B:      <------------B------------>
+      Og error
+        MULTI_DOL_MATCH_MOT_OPR 
+      ```               
 3. Fremtidige StillingPerioder
     1. En single stillingperiode vil alltid få DOL
        ```
@@ -531,3 +571,23 @@ OPR -> Orgenhet På Ressurs
        Og error
          HULL_I_STILLINGSPERIODE 
        ```                
+   7. Det finnes ikke eksisterende OT med DOL - OPR delvis matcher flere SP
+      ```
+      Dato            DD   A                       B
+      Enhet A - '0110021'
+      Enhet B - '0110010'
+      OPR: 
+        '01100'
+       SP:
+         Enhet A:           <-----------A----------->
+         Enhet B:           <-----------B----------->
+      ```
+      Resultat:
+      ```
+      Dato            DD   A                       B
+      SP:
+        Enhet A:           <---------A-DOL--------->
+        Enhet B:           <-----------B----------->
+      Og error
+        MULTI_DOL_MATCH_MOT_OPR 
+      ```                  

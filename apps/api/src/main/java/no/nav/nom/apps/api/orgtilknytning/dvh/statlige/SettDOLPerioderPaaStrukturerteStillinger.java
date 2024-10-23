@@ -168,7 +168,19 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         if (nyeHistoriskeStillingPerioder.stream().noneMatch(StillingPeriode::erDagligOppfolging)) {
             //Har ikke klart å sette DOL på aktiv periode via eksisterende OTer
             nyeHistoriskeStillingPerioder.clear();
-            stillingPerioder.forEach(stillingPeriode -> nyeHistoriskeStillingPerioder.add(matchDOLMotOrgenhetPaaRessurs(stillingPeriode)));
+            boolean hasDOLBeenSet = false;
+            for (StillingPeriode stillingPeriode : stillingPerioder) {
+                var nySP = matchDOLMotOrgenhetPaaRessurs(stillingPeriode);
+                if (hasDOLBeenSet) {
+                    nyeHistoriskeStillingPerioder.add(stillingPeriode);
+                    if (nySP.erDagligOppfolging()) {
+                        lagErrorPeriodeMedOPRMatchMotFlere(sspForNavident, stillingPerioder, stillingPeriode.stilling().ressursAgressoId().orElse("NULL"));
+                    }
+                } else {
+                    nyeHistoriskeStillingPerioder.add(nySP);
+                    hasDOLBeenSet = nySP.erDagligOppfolging();
+                }
+            }
         }
 
         //Har vi ikke klart å sette DOL på periode - Logg og advar
@@ -178,10 +190,6 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
 
         // Har vi laget flere med DOL?
         if (nyeHistoriskeStillingPerioder.stream().filter(StillingPeriode::erDagligOppfolging).count() > 1) {
-            log.error("ErrorHistoricPeriodeUtenDOL {} for historicFomDate {} - Stillingperioder: {}", sspForNavident.navident(), historicFomDate, stillingPerioder.stream().map(StillingPeriode::toString).toList());
-            log.error("ErrorHistoricPeriodeUtenDOL {} for historicFomDate {} - nyeHistoriskeStillingPerioder: {}", sspForNavident.navident(), historicFomDate, nyeHistoriskeStillingPerioder.stream().map(StillingPeriode::toString).toList());
-            log.error("ErrorHistoricPeriodeUtenDOL {} - alle sp'er {}", sspForNavident.navident(), sspForNavident.stillingPerioder().stream().map(StillingPeriode::toString).toList());
-            log.error("ErrorHistoricPeriodeUtenDOL {} - alle ot'er {}", sspForNavident.navident(), sspForNavident.eksisterendeOrgtilknytninger().stream().map(OrgtilknytningState::toString).toList());
             throw new RuntimeException("Navident %s kan ikke ha flere DOL perioder for samme historiske periode".formatted(sspForNavident.navident()));
         }
 
@@ -212,7 +220,19 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         }
 
         List<StillingPeriode> behandledeStillingPerioder = new ArrayList<>();
-        stillingPerioder.forEach(stillingPeriode -> behandledeStillingPerioder.add(matchDOLMotOrgenhetPaaRessurs(stillingPeriode)));
+        boolean hasDOLBeenSet = false;
+        for (StillingPeriode stillingPeriode : stillingPerioder) {
+            var nySP = matchDOLMotOrgenhetPaaRessurs(stillingPeriode);
+            if (hasDOLBeenSet) {
+                behandledeStillingPerioder.add(stillingPeriode);
+                if (nySP.erDagligOppfolging()) {
+                    lagErrorPeriodeMedOPRMatchMotFlere(sspForNavident, stillingPerioder, stillingPeriode.stilling().ressursAgressoId().orElse("NULL"));
+                }
+            } else {
+                behandledeStillingPerioder.add(nySP);
+                hasDOLBeenSet = nySP.erDagligOppfolging();
+            }
+        }
 
         //Har vi ikke klart å sette DOL på aktiv periode
         if (behandledeStillingPerioder.stream().noneMatch(StillingPeriode::erDagligOppfolging)) {
@@ -227,14 +247,14 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
             return stillingPerioder;
         }
         List<StillingPeriode> futureStillingPerioder =  new ArrayList<>();
-        futureFomDates.forEach( historicFomDate ->
+        futureFomDates.forEach( futureFomDate ->
             futureStillingPerioder.addAll(
                 handleFuturePeriode( // Per periode
                     sspForNavident,
                     stillingPerioder.stream()
-                        .filter(sp -> sp.gyldigFom().equals(historicFomDate))
+                        .filter(sp -> sp.gyldigFom().equals(futureFomDate))
                         .toList(),
-                    historicFomDate
+                    futureFomDate
                 )
             )
         );
@@ -258,9 +278,19 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         final List<StillingPeriode> nyeFremtidigStillingPerioder = new ArrayList<>();
 
         // StillingPeriodene er sortert på gyldigFom
-        stillingPerioder.forEach(stillingPeriode ->
-            nyeFremtidigStillingPerioder.add(matchDOLMotOrgenhetPaaRessurs(stillingPeriode))
-        );
+        boolean hasDOLBeenSet = false;
+        for (StillingPeriode stillingPeriode : stillingPerioder) {
+            var nySP = matchDOLMotOrgenhetPaaRessurs(stillingPeriode);
+            if (hasDOLBeenSet) {
+                nyeFremtidigStillingPerioder.add(stillingPeriode);
+                if (nySP.erDagligOppfolging()) {
+                    lagErrorPeriodeMedOPRMatchMotFlere(sspForNavident, stillingPerioder, stillingPeriode.stilling().ressursAgressoId().orElse("NULL"));
+                }
+            } else {
+                nyeFremtidigStillingPerioder.add(nySP);
+                hasDOLBeenSet = nySP.erDagligOppfolging();
+            }
+        }
 
         //Har vi ikke klart å sette DOL på aktiv periode - Logg og advar
         if (nyeFremtidigStillingPerioder.stream().noneMatch(StillingPeriode::erDagligOppfolging)) {
@@ -392,7 +422,6 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
     }
 
     private void lagErrorPeriodeUtenStillingPerioder(StrukturerteStillingPerioderForNavident sspForNavident, LocalDate fomDate) {
-
         List<String> SPer = sspForNavident.stillingPerioder().stream()
             .map(sp -> sp.orgenhet().getId() + "-" + sp.orgenhet().getNavn() + " (" + sp.orgenhet().getAgressoId() + ")" + sp.gyldigFom() + " - " + sp.gyldigTom())
             .toList();
@@ -456,6 +485,27 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
             Dette gjør at vi ikke kan velge StillingPeriode med DOL basert på OT. Vil forsøke å velge basert på Orgenhet På Ressurs i stedet.
             """
                 .formatted(fom, tom, sspForNavident.navident())
+        );
+    }
+
+
+    private void lagErrorPeriodeMedOPRMatchMotFlere(StrukturerteStillingPerioderForNavident sspForNavident, List<StillingPeriode> stillingPerioder, String OPR) {
+        var fom = stillingPerioder.getFirst().gyldigFom();
+        var tom = stillingPerioder.getFirst().gyldigTom();
+
+        List<String> SPer = stillingPerioder.stream()
+            .map(sp -> sp.orgenhet().getId() + "-" + sp.orgenhet().getNavn() + " (" + sp.orgenhet().getAgressoId() + ")" + sp.gyldigFom() + " - " + sp.gyldigTom())
+            .toList();
+
+        sspForNavident.addError(
+            StrukturerteStillingPerioderForNavident.ErrorType.MULTI_MATCH_ORGENHET_PAA_RESSURS,
+            """
+            Flere stillingperioder matcher Orgenhet På Ressurs (%s) for Navident %s i perioden [%s - %s].
+            Vi har valgt første og beste match for DOL.
+            Dette er stillingperiodene i perioden:
+            %s
+            """
+                .formatted(OPR, sspForNavident.navident(), fom, tom, SPer)
         );
     }
 }
