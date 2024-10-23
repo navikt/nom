@@ -178,6 +178,10 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
 
         // Har vi laget flere med DOL?
         if (nyeHistoriskeStillingPerioder.stream().filter(StillingPeriode::erDagligOppfolging).count() > 1) {
+            log.error("ErrorHistoricPeriodeUtenDOL {} for historicFomDate {} - Stillingperioder: {}", sspForNavident.navident(), historicFomDate, stillingPerioder.stream().map(StillingPeriode::toString).toList());
+            log.error("ErrorHistoricPeriodeUtenDOL {} for historicFomDate {} - nyeHistoriskeStillingPerioder: {}", sspForNavident.navident(), historicFomDate, nyeHistoriskeStillingPerioder.stream().map(StillingPeriode::toString).toList());
+            log.error("ErrorHistoricPeriodeUtenDOL {} - alle sp'er {}", sspForNavident.navident(), sspForNavident.stillingPerioder().stream().map(StillingPeriode::toString).toList());
+            log.error("ErrorHistoricPeriodeUtenDOL {} - alle ot'er {}", sspForNavident.navident(), sspForNavident.eksisterendeOrgtilknytninger().stream().map(OrgtilknytningState::toString).toList());
             throw new RuntimeException("Navident %s kan ikke ha flere DOL perioder for samme historiske periode".formatted(sspForNavident.navident()));
         }
 
