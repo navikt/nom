@@ -59,7 +59,13 @@ public class RessursStillingLoader {
         ressursStillingProcessor.process(stillingPerioderPerNavident);
 
         log.info("Lastet og prosessert ressursStillinger på gamlemåten. Tok {}", durationAsH24(start));
-        nyeStillingPerioderPerNavident.join();
+
+        try {
+            nyeStillingPerioderPerNavident.join();
+        } catch (Exception e) {
+            log.error("Feil ved lasting og prosessering av ressursStillinger på nye måten", e);
+        }
+
         log.info("Lastet og prosessert ressursStillinger på både nye og gamlemåten. Tok {}", durationAsH24(start));
 
         ressursStillingLoadStatus.endLoad();

@@ -249,78 +249,8 @@ OPR -> Orgenhet På Ressurs
         Enhet B:      <-----------B----------->
       Og error
         HISTORIC_PERIODE_KAN_IKKE_SETTE_DOL
-      ```
-2. Aktive/current StillingPerioder
-   1. En single stillingperiode vil alltid få DOL
-      ```
-      Dato            A                       B      DD
-      OPR: 
-        Enhet X
-      SP:
-        Enhet A:      <-----------A----------->
-      ```
-      Resultat:
-      ```
-      Dato            A                       B      DD
-      SP:
-        Enhet A:      <--------A-DOL---------->
-      ```  
-   2. Match mot OPR for å sette DOL
-      ```
-      Dato            A                       B      DD
-      OPR: 
-        Enhet A
-      SP:
-        Enhet A:      <-----------A----------->
-        Enhet B:      <-----------B----------->
-      OT:
-        Ingen 
-      ```
-      Resultat:
-      ```
-      Dato            A                       B      DD
-      SP:
-        Enhet A:      <---------A-DOL--------->
-        Enhet B:      <-----------B----------->
-      ```   
-   3. Det finnes eksisterende OT med DOL - Skal uansett matche mot OPR
-      ```
-      Dato            A                       B      DD
-      OPR: 
-        Enhet B
-      SP:
-        Enhet A:      <-----------A----------->
-        Enhet B:      <-----------B----------->
-      OT:
-        Enhet A:      <---------A-DOL--------->
-        Enhet B:      <-----------B----------->
-      ```
-      Resultat:
-      ```
-      Dato            A                       B      DD
-      SP:
-        Enhet A:      <-----------A----------->
-        Enhet B:      <---------B-DOL--------->
-      ```   
-   4. OPR delvis matcher en SP
-      ```
-      Dato            A                       B      DD
-      Enhet A - '0110021'
-      Enhet B - '0110010'
-      OPR: 
-        '011001'
-      SP:
-        Enhet A:      <-----------A----------->
-        Enhet B:      <-----------B----------->
-      ```
-      Resultat:
-      ```
-      Dato            A                       B      DD
-      SP:
-        Enhet A:      <-----------A----------->
-        Enhet B:      <---------B-DOL--------->
-      ```   
-   5. OPR matcher ikke en SP
+      ``` 
+      6. Det finnes flere eksisterende OT med DOL - Gir Error
       ```
       Dato            A                       B      DD
       OPR: 
@@ -328,6 +258,9 @@ OPR -> Orgenhet På Ressurs
       SP:
         Enhet A:      <-----------A----------->
         Enhet B:      <-----------B----------->
+      OT:
+        Enhet A:      <-----------A DOL------->
+        Enhet B:      <-----------B BOL------->
       ```
       Resultat:
       ```
@@ -336,93 +269,265 @@ OPR -> Orgenhet På Ressurs
         Enhet A:      <-----------A----------->
         Enhet B:      <-----------B----------->
       Og error
+        DUPLIKATE_EKSISTERENDE_ORGTILKNYNINGER_MED_DOL_I_HISTORISK_PERIODE
+      ```
+      7. Det finnes flere eksisterende OT med DOL - Gir Error - matcher heller ikke på OPR - Gir Feil nr 2
+      ```
+      Dato            A                       B      DD
+      OPR: 
+        Enhet C
+      SP:
+        Enhet A:      <-----------A----------->
+        Enhet B:      <-----------B----------->
+      OT:
+        Enhet A:      <-----------A DOL------->
+        Enhet B:      <-----------B BOL------->
+      ```
+      Resultat:
+      ```
+      Dato            A                       B      DD
+      SP:
+        Enhet A:      <-----------A----------->
+        Enhet B:      <-----------B----------->
+      Og error
+        DUPLIKATE_EKSISTERENDE_ORGTILKNYNINGER_MED_DOL_I_HISTORISK_PERIODE
+        HISTORIC_PERIODE_KAN_IKKE_SETTE_DOL 
+      ```      
+      8. Det finnes ingen eksisterende OT - matcher heller ikke på OPR - Gir Feil
+      ```
+      Dato            A                       B      DD
+      OPR: 
+        Enhet C
+      SP:
+        Enhet A:      <-----------A----------->
+        Enhet B:      <-----------B----------->
+      OT:
+        INGEN
+      ```
+      Resultat:
+      ```
+      Dato            A                       B      DD
+      SP:
+        Enhet A:      <-----------A----------->
+        Enhet B:      <-----------B----------->
+      Og error
+        HISTORIC_PERIODE_KAN_IKKE_SETTE_DOL 
+      ```
+      9. Det er hull i historisk periode på stillingPerioder - gir error
+      ```
+      Dato            A                                  B      DD
+      OPR: 
+        Enhet C
+      SP:
+        Hull:                        <---->
+        Enhet A:      <------A------>
+        Enhet B:                           <------B------>
+      OT:
+        INGEN
+      ```
+      Resultat:
+      ```
+      Dato            A                                   B      DD
+      SP:
+        Enhet A:      <----A DOL---->
+        Enhet B:                           <----B DOL---->
+      Og error
+        HULL_I_STILLINGSPERIODE 
+      ```                     
+2. Aktive/current StillingPerioder
+   1. En single stillingperiode vil alltid få DOL
+      ```
+      Dato            A          DD             B
+      OPR: 
+        Enhet X
+      SP:
+        Enhet A:      <------------A------------>
+      ```
+      Resultat:
+      ```
+      Dato            A          DD             B
+      SP:
+        Enhet A:      <---------A-DOL----------->
+      ```  
+   2. Match mot OPR for å sette DOL
+      ```
+      Dato            A          DD             B
+      OPR: 
+        Enhet A
+      SP:
+        Enhet A:      <------------A------------>
+        Enhet B:      <------------B------------>
+      OT:
+        Ingen 
+      ```
+      Resultat:
+      ```
+      Dato            A          DD             B
+      SP:
+        Enhet A:      <----------A-DOL---------->
+        Enhet B:      <------------B------------>
+      ```   
+   3. Det finnes eksisterende OT med DOL - Skal uansett matche mot OPR
+      ```
+      Dato            A          DD             B
+      OPR: 
+        Enhet B
+      SP:
+        Enhet A:      <------------A------------>
+        Enhet B:      <------------B------------>
+      OT:
+        Enhet A:      <----------A-DOL---------->
+        Enhet B:      <------------B------------>
+      ```
+      Resultat:
+      ```
+      Dato            A          DD             B
+      SP:
+        Enhet A:      <------------A------------>
+        Enhet B:      <----------B-DOL---------->
+      ```   
+   4. OPR delvis matcher en SP
+      ```
+      Dato            A          DD             B
+      Enhet A - '0110021'
+      Enhet B - '0110010'
+      OPR: 
+        '011001'
+      SP:
+        Enhet A:      <------------A------------>
+        Enhet B:      <------------B------------>
+      ```
+      Resultat:
+      ```
+      Dato            A          DD             B
+      SP:
+        Enhet A:      <------------A------------>
+        Enhet B:      <----------B-DOL---------->
+      ```   
+   5. OPR matcher ikke en SP
+      ```
+      Dato            A          DD             B
+      OPR: 
+        Enhet C
+      SP:
+        Enhet A:      <------------A------------>
+        Enhet B:      <------------B------------>
+      ```
+      Resultat:
+      ```
+      Dato            A          DD             B
+      SP:
+        Enhet A:      <------------A------------>
+        Enhet B:      <------------B----------->
+      Og error
         CURRENT_PERIODE_KAN_IKKE_MATCHE_ORGENHET_PAA_RESSURS_FOR_DOL
       ```
 3. Fremtidige StillingPerioder
     1. En single stillingperiode vil alltid få DOL
        ```
-       Dato            A                       B      DD
+       Dato            DD   A                       B
        OPR: 
          Enhet X
        SP:
-         Enhet A:      <-----------A----------->
+         Enhet A:           <-----------A----------->
        ```
        Resultat:
        ```
-       Dato            A                       B      DD
+       Dato            DD   A                       B
        SP:
-         Enhet A:      <--------A-DOL---------->
+         Enhet A:           <--------A-DOL---------->
        ```  
     2. Match mot OPR for å sette DOL
        ```
-       Dato            A                       B      DD
+       Dato            DD   A                       B
        OPR: 
          Enhet A
        SP:
-         Enhet A:      <-----------A----------->
-         Enhet B:      <-----------B----------->
+         Enhet A:           <-----------A----------->
+         Enhet B:           <-----------B----------->
        OT:
          Ingen 
        ```
        Resultat:
        ```
-       Dato            A                       B      DD
+       Dato            DD   A                       B
        SP:
-         Enhet A:      <---------A-DOL--------->
-         Enhet B:      <-----------B----------->
+         Enhet A:           <---------A-DOL--------->
+         Enhet B:           <-----------B----------->
        ```   
     3. Det finnes eksisterende OT med DOL - Skal uansett matche mot OPR
        ```
-       Dato            A                       B      DD
+       Dato            DD   A                       B
        OPR: 
          Enhet B
        SP:
-         Enhet A:      <-----------A----------->
-         Enhet B:      <-----------B----------->
+         Enhet A:           <-----------A----------->
+         Enhet B:           <-----------B----------->
        OT:
-         Enhet A:      <---------A-DOL--------->
-         Enhet B:      <-----------B----------->
+         Enhet A:           <---------A-DOL--------->
+         Enhet B:           <-----------B----------->
        ```
        Resultat:
        ```
-       Dato            A                       B      DD
+       Dato            DD   A                       B
        SP:
-         Enhet A:      <-----------A----------->
-         Enhet B:      <---------B-DOL--------->
+         Enhet A:           <-----------A----------->
+         Enhet B:           <---------B-DOL--------->
        ```   
     4. OPR delvis matcher en SP
        ```
-       Dato            A                       B      DD
+       Dato            DD   A                       B  
        Enhet A - '0110021'
        Enhet B - '0110010'
        OPR: 
          '011001'
        SP:
-         Enhet A:      <-----------A----------->
-         Enhet B:      <-----------B----------->
+         Enhet A:           <-----------A----------->
+         Enhet B:           <-----------B----------->
        ```
        Resultat:
        ```
-       Dato            A                       B      DD
+       Dato            DD   A                       B 
        SP:
-         Enhet A:      <-----------A----------->
-         Enhet B:      <---------B-DOL--------->
+         Enhet A:           <-----------A----------->
+         Enhet B:           <---------B-DOL--------->
        ```   
     5. OPR matcher ikke en SP
        ```
-       Dato            A                       B      DD
+       Dato            DD   A                       B 
        OPR: 
          Enhet C
        SP:
-         Enhet A:      <-----------A----------->
-         Enhet B:      <-----------B----------->
+         Enhet A:           <-----------A----------->
+         Enhet B:           <-----------B----------->
        ```
        Resultat:
        ```
-       Dato            A                       B      DD
+       Dato            DD   A                       B
        SP:
-         Enhet A:      <-----------A----------->
-         Enhet B:      <-----------B----------->
+         Enhet A:           <-----------A----------->
+         Enhet B:           <-----------B----------->
        Og error
          FREMTIDIG_PERIODE_KAN_IKKE_MATCHE_ORGENHET_PAA_RESSURS_FOR_DOL
        ```
+    6. Det er hull i fremtidig periode på stillingPerioder - gir error
+       ```
+       Dato            DD   A                                  B 
+       OPR: 
+         Enhet C
+       SP:
+         Hull:                             <---->
+         Enhet A:           <------A------>
+         Enhet B:                                <------B------>
+       OT:
+         INGEN
+       ```
+       Resultat:
+       ```
+       Dato            DD   A                                   B
+       SP:
+         Enhet A:           <----A DOL---->
+         Enhet B:                                <----B DOL---->
+       Og error
+         HULL_I_STILLINGSPERIODE 
+       ```                

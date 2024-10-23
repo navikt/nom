@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OrgtilknytningCommand;
-import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 
 import java.util.AbstractMap;
@@ -66,6 +65,7 @@ public record StrukturerteStillingPerioderForNavident(
         STILLINGPERIODER_HAR_OVERLAPPENDE_DOL_PERIODER,
         STILLINGPERIODE_HAR_NEGATIV_PERIODE,
         AKTIV_DOL_MATCHER_IKKE_ORGENHET_PAA_RESSURS,
+        HULL_I_STILLINGSPERIODE,
         CURRENT_PERIODE_KAN_IKKE_MATCHE_ORGENHET_PAA_RESSURS_FOR_DOL
     }
 

@@ -46,7 +46,7 @@ public class NyeRessursStillingStrukturerer {
         Map<String, StrukturerteStillingPerioderForNavident> stillingPerioderPerNavident = new HashMap<>();
         dvhRessursStillingPerNavident.forEach((navident, navidentensDvhRessursStillinger) -> {
             if (nomMastered.isMastered(navident)) {
-                log.info("Navident {} er mastered. Vi behandler ikke orgtilknytning fra DVH for denne", navident);
+                log.debug("Navident {} er mastered. Vi behandler ikke orgtilknytning fra DVH for denne", navident);
                 return;
             }
 
