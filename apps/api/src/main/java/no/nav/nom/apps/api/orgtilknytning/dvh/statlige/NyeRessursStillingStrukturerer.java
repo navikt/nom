@@ -50,9 +50,10 @@ public class NyeRessursStillingStrukturerer {
                 return;
             }
 
-            stillingPerioderPerNavident.put(navident,
-                strukturerStillingPerioderFraDvhRessursStillinger(navident, navidentensDvhRessursStillinger)
-            );
+            var sspForNavident = strukturerStillingPerioderFraDvhRessursStillinger(navident, navidentensDvhRessursStillinger);
+            if (sspForNavident != null) {
+                stillingPerioderPerNavident.put(navident, sspForNavident);
+            }
         });
 
         // stillingPerioderPerNavident har nå alle stillingPerioder for alle navidenter
@@ -70,8 +71,11 @@ public class NyeRessursStillingStrukturerer {
     protected StrukturerteStillingPerioderForNavident strukturerStillingPerioderFraDvhRessursStillinger(String navident, List<DvhRessursStilling> dvhRessursStillinger) {
         var sspForNavident = new StrukturerteStillingPerioderForNavident(navident, dvhRessursStillinger);
 
-        if (!(finnesNavidentINOM(sspForNavident) && erStatlig(sspForNavident))) {
+        if (!finnesNavidentINOM(sspForNavident)) {
             return sspForNavident;
+        }
+        if (!erStatlig(sspForNavident)) {
+            return null;
         }
 
         var behandletResultat =
