@@ -13,7 +13,12 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static java.util.Comparator.comparing;
 
 @Service
 public class OrgEnhetSanityCheckService {
@@ -129,6 +134,44 @@ public class OrgEnhetSanityCheckService {
                                 oe.gyldigFom(),
                                 oe.gyldigTom().orElse(null)))
                 .toList();
+    }
+
+    public List<OrgEnhetState> finnDuplikateEnheter() {
+        List<OrgEnhetState> alleEnheter = orgEnhetStateRepository.getAll().stream().toList();
+        List<OrgEnhetState> aktiveEnheter = aktiveEnheter(alleEnheter);
+        return duplikatPaaSammeUniqueAgresssoId(aktiveEnheter).values().stream().flatMap(List::stream).toList();
+    }
+
+    private Map<String, List<OrgEnhetState>> duplikatPaaSammeUniqueAgresssoId(List<OrgEnhetState> aktiveEnheter) {
+        var duplicateListMap = new HashMap<String, List<OrgEnhetState>>();
+        aktiveEnheter.forEach(e -> {
+            OrgEnhetState enhetPaaUniqueAgressoId = getEnhetByAgressoIdNivaAndName(e.agressoId().get(), e.agressoOrgNivaa().get(), e.navn()).get();
+                if (!enhetPaaUniqueAgressoId.id().equals(e.id())) {
+                    List<OrgEnhetState> duplicates = duplicateListMap.computeIfAbsent(enhetPaaUniqueAgressoId.id(), k -> new ArrayList<>());
+                    duplicates.add(e);
+                }
+            }
+        );
+        return duplicateListMap;
+    }
+
+    public Optional<OrgEnhetState> getEnhetByAgressoIdNivaAndName(String agressoId, String orgNiv, String name) {
+        if (name != null) {
+            return orgEnhetStateRepository.findAllByUniqueAgressoId(agressoId + "-" + name + "-" + orgNiv)
+                    .stream()
+                    .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
+                    .max(comparing(OrgEnhetState::gyldigFom));
+
+        }
+        return getEnhetByAgressoIdAndOrgniv(agressoId, orgNiv);
+    }
+
+
+    public Optional<OrgEnhetState> getEnhetByAgressoIdAndOrgniv(String agressoId, String orgNiv) {
+        return orgEnhetStateRepository.findAllByAgressoIdAndNiv(agressoId + "--" + orgNiv)
+            .stream()
+            .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
+            .max(comparing(OrgEnhetState::gyldigFom));
     }
 
     private List<OrgEnhetState> enheterMedStartdato(List<OrgEnhetState> enheter) {

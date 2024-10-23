@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.admin.SwaggerConfig;
-import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedInaktivEnhet;
+import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedEnhet;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningKoblingInfo;
 import no.nav.nom.apps.admin.sanitycheck.service.RessursSanityCheckService;
 import org.springframework.http.ResponseEntity;
@@ -54,9 +54,24 @@ public class RessursSanityCheckController {
         }
     )
     @GetMapping(value = "/listRessurserTilIkkeAktivEnhet")
-    public ResponseEntity<List<RessursMedInaktivEnhet>> listRessurserTilIkkeAktivEnhet(
+    public ResponseEntity<List<RessursMedEnhet>> listRessurserTilIkkeAktivEnhet(
         @RequestParam(defaultValue = "false") boolean inkluderEksterne,
         @RequestParam(defaultValue = "false") boolean inkluderHelfo) {
         return ResponseEntity.ok(ressursSanityCheckService.ressurserMedAktivOrgtilknytningTilIkkeAktivEnhet(inkluderEksterne, inkluderHelfo));
     }
+
+    @Operation(
+        description = "List tilknytninger med gyldighet utover ressurens gyldighetsperiode",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/listTilkoblingerUtoverRessursGyldighetPeriode")
+    public ResponseEntity<List<RessursMedEnhet>> listTilkoblingerUtoverRessursGyldighetPeriode() {
+        return ResponseEntity.ok(ressursSanityCheckService.ressurserMedEnhetUtoverRessursSluttdato());
+    }
+
 }

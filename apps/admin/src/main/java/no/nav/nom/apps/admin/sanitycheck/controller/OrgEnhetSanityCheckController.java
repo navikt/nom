@@ -7,9 +7,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.admin.SwaggerConfig;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.EnheterOgOrganisering;
-import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetStartOgSluttdato;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetOrganisering;
+import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetStartOgSluttdato;
 import no.nav.nom.apps.admin.sanitycheck.service.OrgEnhetSanityCheckService;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,13 +47,13 @@ public class OrgEnhetSanityCheckController {
     }
 
     @Operation(
-            description = "Sjekk aktive enheter og organiseringer",
-            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+        description = "Sjekk aktive enheter og organiseringer",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
-            {
-                    @ApiResponse(responseCode = "200", description = "Success")
-            }
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
     )
     @GetMapping(value = "/enheterOgOrganisering")
     public ResponseEntity<EnheterOgOrganisering> dataSanityCheckEnheterOgOrganisering() {
@@ -60,13 +61,13 @@ public class OrgEnhetSanityCheckController {
     }
 
     @Operation(
-            description = "List aktive enheter Uten over-enhet",
-            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+        description = "List aktive enheter Uten over-enhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
-            {
-                    @ApiResponse(responseCode = "200", description = "Success")
-            }
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
     )
     @GetMapping(value = "/listEnheterUtenOverEnheter")
     public ResponseEntity<List<OrgEnhetOrganisering>> listEnheterUtenOverEnheter() {
@@ -74,16 +75,30 @@ public class OrgEnhetSanityCheckController {
     }
 
     @Operation(
-            description = "List aktive enheter Uten over-enhet men med under-enheter",
-            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+        description = "List aktive enheter Uten over-enhet men med under-enheter",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
-            {
-                    @ApiResponse(responseCode = "200", description = "Success")
-            }
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
     )
     @GetMapping(value = "/listEnheterUtenOverEnheterMedUnderEnheter")
     public ResponseEntity<List<OrgEnhetOrganisering>> listEnheterUtenOverEnheterMedUnderEnheter() {
         return ResponseEntity.ok(orgEnhetSanityCheckService.enhetUtenOverEnhetMedUnderEnhet());
+    }
+
+    @Operation(
+        description = "List aktive enheter som er duplikat på samme unique agresso id ('agressoId+Navn+orgNiv')",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/listDuplikateEnheter")
+    public ResponseEntity<List<OrgEnhetState>> listDuplikateEnheter() {
+        return ResponseEntity.ok(orgEnhetSanityCheckService.finnDuplikateEnheter());
     }
 }
