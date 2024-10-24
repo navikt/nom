@@ -15,6 +15,7 @@ import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrganiseringState;
@@ -860,6 +861,57 @@ public class SanityCheck {
         ressursUtenOrgtilknytning.forEach(navident -> ressurserUtenOrgtilknytning.append(navident).append(";").append("\n"));
         return ressurserUtenOrgtilknytning.toString();
     }
+
+    @Operation(
+        description = "List robot ressurser",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        @ApiResponse(responseCode = "200", description = "Success")
+    )
+    @GetMapping("/robotRessurser")
+    public List<RobotRessursSanityCheckResponse> listRobotRessurser() {
+        var alleAtkiveRessurser = ressursStateRepository.findAllActiveRessurser();
+        var alleAktiveRoboter = alleAtkiveRessurser.entrySet().stream()
+            .filter(ressurs -> ressurs.getValue().identType().equals(IdentType.ROBOT))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        var alleOrgtilknytningerKobletTilRessurs = orgtilknytningService.getByNavidenter(alleAktiveRoboter.keySet(), orgtilknytningState -> orgtilknytningState);
+
+        var result = new ArrayList<RobotRessursSanityCheckResponse>();
+        alleAktiveRoboter.forEach((navident, ressurs) -> {
+            if (alleOrgtilknytningerKobletTilRessurs.containsKey(navident)) {
+                result.add(new RobotRessursSanityCheckResponse(
+                    navident,
+                    ressurs.visningsnavn().getFormattedVisningsnavn(),
+                    ressurs.sektor(),
+                    ressurs.startdato().isPresent() ? ressurs.startdato() : null,
+                    ressurs.sluttdato().isPresent() ? ressurs.sluttdato() : null,
+                    alleOrgtilknytningerKobletTilRessurs.get(navident)
+                        .stream()
+                        .map(orgtilknytningState -> new RobotRessursSanityCheckResponse.RobotOrgtilknytningSanityCheckResponse(
+                            orgtilknytningState.orgEnhetId(),
+                            orgenhetService.getById(orgtilknytningState.orgEnhetId()).isPresent() ? orgenhetService.getById(orgtilknytningState.orgEnhetId()).get().getNavn() : "Ukjent",
+                            orgtilknytningState.gyldigFom(),
+                            Optional.of(orgtilknytningState.gyldigTom()).orElse(null)
+                        ))
+                        .toList()
+                ));
+            } else {
+                result.add(new RobotRessursSanityCheckResponse(
+                    navident,
+                    ressurs.visningsnavn().getFormattedVisningsnavn(),
+                    ressurs.sektor(),
+                    ressurs.startdato().isPresent() ? ressurs.startdato() : null,
+                    ressurs.sluttdato().isPresent() ? ressurs.sluttdato() : null,
+                    Collections.emptyList()
+                ));
+            }
+        });
+
+        return result;
+    }
+
 
     private boolean validerDatoOverlapp(List<OrgtilknytningState> orgtilknytningStates) {
         List<OrgtilknytningState> sortedByFomDato = orgtilknytningStates.stream().sorted(Comparator.comparing(OrgtilknytningState::gyldigFom)).toList();
