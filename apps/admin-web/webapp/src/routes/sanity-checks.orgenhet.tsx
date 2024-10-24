@@ -10,6 +10,7 @@ import {
 } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { AntallOrgenheter } from "~/sanitychecks/OrgEnhet/AntallOrgenheter.tsx";
+import { DuplikateEnheter } from "~/sanitychecks/OrgEnhet/DuplikateEnheter.tsx";
 import { EnheterOgOrganisering } from "~/sanitychecks/OrgEnhet/EnheterOgOrganisering.tsx";
 import { OrgEnhetOrganiseringTabell } from "~/sanitychecks/OrgEnhet/OrgEnhetOrganiseringTabell.tsx";
 
@@ -53,6 +54,9 @@ function ListSelector(props: { selected: string }) {
         />
       );
     }
+    case "DuplikateEnheter": {
+      return <DuplikateEnheter />;
+    }
     default: {
       return <></>;
     }
@@ -67,7 +71,7 @@ function OrgEnhetSanityChecks() {
         defaultValue="Alle enheter"
         label="Velg sanity check"
         onChange={(e) => setHandleChange(e.target.value)}
-        style={{ width: "300px", paddingBottom: "20px" }}
+        style={{ width: "600px", paddingBottom: "20px" }}
       >
         <option value="Alle enheter">Alle enheter</option>
         <option value="Enheter og Organisering">Enheter og Organisering</option>
@@ -76,6 +80,9 @@ function OrgEnhetSanityChecks() {
         </option>
         <option value="Enheter uten over med under">
           Enheter uten over enheter, men med under enheter
+        </option>
+        <option value={"DuplikateEnheter"}>
+          List Duplikate enheter på samme unike agressoId
         </option>
       </Select>
       <ListSelector selected={handleChange} />

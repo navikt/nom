@@ -17,7 +17,7 @@ import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
 import { NomLink } from "~/components/NomLink.tsx";
 import { showToast } from "~/hooks/showToast.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
-import type { OrgEnhetState } from "~/types.ts";
+import type { OrgEnhetState } from "~/types/nom-admin/nom-admin-models.ts";
 import { OrgEnhetsType } from "~/types/nom-admin/nom-admin-models.ts";
 
 export const Route = createFileRoute("/state/orgenhet")({

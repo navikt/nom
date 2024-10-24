@@ -338,13 +338,32 @@ export interface RessursOrgtilknytningKoblingInfo {
   ressursMedTilknytningerUtoverEnhetGyldigPeriode?: number;
 }
 
-export interface RessursMedInaktivEnhet {
+export interface RessursMedEnhet {
   navident?: string;
   ressursFid?: string;
+  visningsnavn?: string;
+  /** @format date */
+  startdato?: string;
+  /** @format date */
+  sluttdato?: string;
   sektor?: Sektor;
   orgEnhetId?: string;
   orgEnhetNavn?: string;
+  /** @format date */
+  gyldigFom?: string;
+  /** @format date */
+  gyldigTom?: string;
   uniqueAgressoId?: string;
+}
+
+export interface OrgtilknytningMedOrgEnhet {
+  navident?: string;
+  uniqueAgressoId?: string;
+  orgEnhetId?: string;
+  gyldigFom?: string;
+  gyldigTom?: string;
+  orgEnhetGyldigFom?: string;
+  orgEnhetGyldigTom?: string;
 }
 
 export interface OrgEnhetOrganisering {

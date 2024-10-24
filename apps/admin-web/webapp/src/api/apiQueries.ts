@@ -57,7 +57,7 @@ export async function reberegnNomnivaa() {
 }
 
 export async function oppdaterOrgEnhetType(data: {
-  nomId: string;
+  nomId: string | undefined;
   orgEnhetsType: OrgEnhetsType | undefined;
 }) {
   return ky.post(`${API_BASE_URL}/app/orgenheter/orgEnhetsType`, {

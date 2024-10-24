@@ -6,6 +6,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { Ressurser } from "~/sanitychecks/Ressurs/Ressurser.tsx";
 import { RessursMedOTUtenAktivEnhet } from "~/sanitychecks/Ressurs/RessursMedOTUtenAktivEnhet.tsx";
+import { RessursSluttetMedAktivOT } from "~/sanitychecks/Ressurs/RessursSluttetMedAktivOT.tsx";
 
 export const Route = createFileRoute("/sanity-checks/ressurs")({
   component: () => {
@@ -50,6 +51,9 @@ function ListSelector(props: { selected: string }) {
         </>
       );
     }
+    case "RessursSluttetMedAktivOT": {
+      return <RessursSluttetMedAktivOT />;
+    }
     default: {
       return <></>;
     }
@@ -64,11 +68,14 @@ function RessursSanityChecks() {
         defaultValue="RessurserOT"
         label="Velg sanity check"
         onChange={(e) => setSelected(e.target.value)}
-        style={{ width: "300px", paddingBottom: "20px" }}
+        style={{ width: "600px", paddingBottom: "20px" }}
       >
         <option value="RessurserOT">Ressurser</option>
         <option value="RessursMedOTUtenAktivEnhet">
           Ressurs med aktiv OT som er inaktiv eller uten organisering
+        </option>
+        <option value="RessursSluttetMedAktivOT">
+          List tilknytninger med gyldighet utover ressurens gyldighetsperiode
         </option>
       </Select>
       <ListSelector selected={selected} />

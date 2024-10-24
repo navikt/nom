@@ -7,7 +7,6 @@ import type {
   DelegertAuthorizationFelles,
   KafkaEvent,
   OrganiseringState,
-  OrgEnhetState,
 } from "~/types.ts";
 import type {
   EnheterOgOrganisering,
@@ -15,8 +14,10 @@ import type {
   MasteredRessursDTO,
   OrgEnhetOrganisering,
   OrgEnhetStartOgSluttdato,
+  OrgEnhetState,
   OrgEnhetStateDTO,
-  RessursMedInaktivEnhet,
+  OrgtilknytningMedOrgEnhet,
+  RessursMedEnhet,
   RessursOrgtilknytningKoblingInfo,
   RessursStateKafkaDTO,
 } from "~/types/nom-admin/nom-admin-models.ts";
@@ -276,7 +277,7 @@ export async function getRessurserSanityCheck(): Promise<RessursOrgtilknytningKo
 export async function getRessursMedAktivOrgTilknytningHvorEnhetErInaktiv(
   inkluderEksterne: boolean,
   inkluderHelfo: boolean,
-): Promise<RessursMedInaktivEnhet[]> {
+): Promise<RessursMedEnhet[]> {
   return await ky
     .get(
       `${API_BASE_URL}/SanityCheck/ressurs/listRessurserTilIkkeAktivEnhet?inkluderEksterne=${inkluderEksterne}&inkluderHelfo=${inkluderHelfo}`,
@@ -284,5 +285,39 @@ export async function getRessursMedAktivOrgTilknytningHvorEnhetErInaktiv(
         timeout: 120_000, // 120 seconds
       },
     )
-    .json<RessursMedInaktivEnhet[]>();
+    .json<RessursMedEnhet[]>();
+}
+
+export async function getRessursMedAktivOrgTilknytningHvorEnhetErInaktivMedUnderenhet(): Promise<
+  RessursMedEnhet[]
+> {
+  return await ky
+    .get(
+      `${API_BASE_URL}/SanityCheck/ressurs/listTilkoblingerUtoverRessursGyldighetPeriode`,
+      {
+        timeout: 120_000, // 120 seconds
+      },
+    )
+    .json<RessursMedEnhet[]>();
+}
+
+export async function getListAvDuplikateEnheter(): Promise<OrgEnhetState[]> {
+  return await ky
+    .get(`${API_BASE_URL}/SanityCheck/orgenhet/listDuplikateEnheter`, {
+      timeout: 120_000, // 120 seconds
+    })
+    .json<OrgEnhetState[]>();
+}
+
+export async function getListAvOTMedGyldighetUtoverEnhetensGyldighet(): Promise<
+  OrgtilknytningMedOrgEnhet[]
+> {
+  return await ky
+    .get(
+      `${API_BASE_URL}/SanityCheck/orgtilknytning/listTilkoblingerUtoverOrgEnhetGyldighetPeriode`,
+      {
+        timeout: 120_000, // 120 seconds
+      },
+    )
+    .json<OrgtilknytningMedOrgEnhet[]>();
 }
