@@ -8,6 +8,7 @@ import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.email.EmailClient;
 import no.nav.nom.apps.api.clients.email.EmailMessage;
 import no.nav.nom.apps.api.common.DateUtils;
+import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.ad.AdRessurs;
@@ -15,22 +16,17 @@ import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,6 +45,8 @@ public class RessursUtlopersnartEmailService {
     private final LederResolver lederResolver;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final NomMastered nomMastered;
+    private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
+    private final LeaderElection leaderElection;
 
     public RessursUtlopersnartEmailService(
         EmailClient emailClient,
@@ -59,7 +57,9 @@ public class RessursUtlopersnartEmailService {
         OrgtilknytningStateRepository orgtilknytningStateRepository,
         LederResolver lederResolver,
         OrgEnhetStateRepository orgEnhetStateRepository,
-        NomMastered nomMastered
+        NomMastered nomMastered,
+        DvhStartupLoadMonitor dvhStartupLoadMonitor,
+        LeaderElection leaderElection
     ) {
         this.emailClient = emailClient;
         this.adClient = adClient;
@@ -70,10 +70,21 @@ public class RessursUtlopersnartEmailService {
         this.lederResolver = lederResolver;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.nomMastered = nomMastered;
+        this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
+        this.leaderElection = leaderElection;
     }
 
     @Scheduled(cron = "0 0 19 * * ?") // every day at 18:00
     public void sendEmail() {
+        // await until initial load is complete
+        dvhStartupLoadMonitor.awaitInitialLoadComplete();
+
+        // skip if not leader
+        if (!leaderElection.isLeader()) {
+            log.info("This pod is not the leader, skipping email sending about expiring ressurses");
+            return;
+        }
+
         if(unleash.isEnabled(UNLEASH_SLUTTDATO_UTLOPER_EPOST_VARSEL)) {
             log.info("Sender en e-post om utløpsdato for ressurser til ledere av organisasjonsenheter");
             var ressurserUtloperSnart = getUtlopendeRessurser();
