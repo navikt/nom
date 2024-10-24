@@ -873,7 +873,8 @@ public class SanityCheck {
     public List<RobotRessursSanityCheckResponse> listRobotRessurser() {
         var alleAtkiveRessurser = ressursStateRepository.findAllActiveRessurser();
         var alleAktiveRoboter = alleAtkiveRessurser.entrySet().stream()
-            .filter(ressurs -> ressurs.getValue().identType().equals(IdentType.ROBOT))
+            .filter(ressurs -> ressurs.getValue().identType() != null)
+            .filter(ressurs -> ressurs.getValue().identType().name().equals(IdentType.ROBOT.name()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         var alleOrgtilknytningerKobletTilRessurs = orgtilknytningService.getByNavidenter(alleAktiveRoboter.keySet(), orgtilknytningState -> orgtilknytningState);
