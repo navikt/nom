@@ -147,12 +147,7 @@ public class OrgtilknytningEndretEmailService {
             }
 
             log.info("Sender OT endringer epost subject: {}, recipients: {}, message: {}", subject, recipientList, body);
-            /**
-             * NOTE: for the time being, we will only send to Line <Line.Eeg-Larsen@nav.no>
-             * later we will clean this up and send to all leaders and the changedBy person
-             * EmailMessage message = new EmailMessage(subject, body, recipientList);
-             */
-            EmailMessage message = new EmailMessage(subject, body, List.of("Line.Eeg-Larsen@nav.no"));
+            EmailMessage message = new EmailMessage(subject, body, recipientList);
             emailClient.sendEmail(message).subscribe();
         } catch (ADResponseException e) {
             throw new RessursOpprettetEmailException("Fant ikke leder epost adresse for leder");
