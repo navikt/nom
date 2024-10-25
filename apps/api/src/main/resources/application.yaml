@@ -13,6 +13,8 @@ app:
     orgtilknytning:
       state-topic: org.nom.intern-orgtilknytning-state
       eventsource-topic: org.nom.orgtilknytning-eventsource
+      dvhLastResultTopic: org.nom.intern-dvh-last-result
+      gmlDvhLastResultTopic: org.nom.intern-gml-dvh-last-result
     organisering:
       stateTopic: org.nom.intern-organisering-state
       eventsourceTopic: org.nom.organisering-eventsource
@@ -44,7 +46,6 @@ app:
       base-url: ${NOM_REMEDY_INTEGRASJON_BASEURL}
   manuelle-ressurser-og-ledere:
     enabled: false
-
   dvh-load:
     nom-ressurser-stillinger-respons-navn: "NOM_RESSURS_STILLINGERResponse"
     nom-kommunale-ressurser-respons-navn: "NOM_KOMMUNALE_V1Response"

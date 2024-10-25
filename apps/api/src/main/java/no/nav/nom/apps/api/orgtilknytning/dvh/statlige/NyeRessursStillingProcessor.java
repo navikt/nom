@@ -84,6 +84,7 @@ public class NyeRessursStillingProcessor {
         if (!endringer.isEmpty() && unleash.isEnabled(LAGRE_ORGTILKNYTNINGER_I_NY_PROSESSERING_FOR_DVH_LAST, false)) {
             endringer = utfoerEndringer(endringer);
         }
+
         return new StrukturerteStillingPerioderForNavident(sspForNavident, eksisterendeOTer, endringer);
     }
 

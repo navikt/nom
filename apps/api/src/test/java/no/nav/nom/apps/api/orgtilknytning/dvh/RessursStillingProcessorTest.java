@@ -69,7 +69,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
             ressursStillingLoadStatus,
             ressursStateRepository,
             nomMastered,
-            unleash
+            gmlDvhLastResultProducerTemplate
         );
 
         when(orgtilknytningCommandService.opprettOrgtilknytning(any())).thenReturn("FID_1");

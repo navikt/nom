@@ -53,15 +53,15 @@ public class RessursStillingLoader {
 
         List<DvhRessursStilling> ressursStillinger = load();
 
-        var nyeStillingPerioderPerNavident = asyncNyeStrukturerOgProsesser.asyncStrukturerStillingPerioderPerNavident(ressursStillinger);
+        var nyeStillingPerioderPerNavidentFuture = asyncNyeStrukturerOgProsesser.asyncStrukturerStillingPerioderPerNavident(ressursStillinger);
 
         Map <String, List<StillingPeriode>> stillingPerioderPerNavident = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
-        ressursStillingProcessor.process(stillingPerioderPerNavident);
+        var gmlStillingPerioderPerNavident =ressursStillingProcessor.process(stillingPerioderPerNavident);
 
         log.info("Lastet og prosessert ressursStillinger på gamlemåten. Tok {}", durationAsH24(start));
 
         try {
-            nyeStillingPerioderPerNavident.join();
+            var nyeStillingPerioderPerNavident = nyeStillingPerioderPerNavidentFuture.get();
         } catch (Exception e) {
             log.error("Feil ved lasting og prosessering av ressursStillinger på nye måten", e);
         }

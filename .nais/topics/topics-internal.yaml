@@ -334,3 +334,59 @@ spec:
     - team: org
       application: nom-admin
       access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.intern-dvh-last-result
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+    maxCompactionLagMs: 7200000  # 1000 * 60 * 60 * 2 = 7200000 = 2 hours
+  acl:
+    - team: nom
+      application: nom-api
+      access: readwrite
+    - team: org
+      application: org-kafka-manager
+      access: read
+    - team: org
+      application: nom-admin
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.intern-gml-dvh-last-result
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+    maxCompactionLagMs: 7200000  # 1000 * 60 * 60 * 2 = 7200000 = 2 hours
+  acl:
+    - team: nom
+      application: nom-api
+      access: readwrite
+    - team: org
+      application: org-kafka-manager
+      access: read
+    - team: org
+      application: nom-admin
+      access: read

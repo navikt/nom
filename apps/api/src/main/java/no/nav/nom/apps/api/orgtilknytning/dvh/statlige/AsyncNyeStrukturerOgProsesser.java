@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -17,10 +18,17 @@ import java.util.concurrent.CompletableFuture;
 public class AsyncNyeStrukturerOgProsesser {
     private final NyeRessursStillingStrukturerer nyeRessursStillingStrukturerer;
     private final NyeRessursStillingProcessor nyeRessursStillingProcessor;
+    final KafkaTemplate<String, StrukturerteStillingPerioderForNavident> dvhLastResultProducerTemplate;
 
-    public AsyncNyeStrukturerOgProsesser(NyeRessursStillingStrukturerer nyeRessursStillingStrukturerer, NyeRessursStillingProcessor nyeRessursStillingProcessor) {
+
+    public AsyncNyeStrukturerOgProsesser(
+            NyeRessursStillingStrukturerer nyeRessursStillingStrukturerer,
+            NyeRessursStillingProcessor nyeRessursStillingProcessor,
+            KafkaTemplate<String, StrukturerteStillingPerioderForNavident> dvhLastResultProducerTemplate
+    ) {
         this.nyeRessursStillingStrukturerer = nyeRessursStillingStrukturerer;
         this.nyeRessursStillingProcessor = nyeRessursStillingProcessor;
+        this.dvhLastResultProducerTemplate = dvhLastResultProducerTemplate;
     }
 
     @Async
@@ -31,9 +39,14 @@ public class AsyncNyeStrukturerOgProsesser {
             nyeRessursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger)
         );
 
+        persistDvhLastResult(result);
         log.info("Lastet og prosessert ressursStillinger på nye måten. Tok {}", durationAsH24(start));
 
         return CompletableFuture.completedFuture(result);
+    }
+
+    private void persistDvhLastResult(Map<String, StrukturerteStillingPerioderForNavident> result) {
+        result.forEach(dvhLastResultProducerTemplate::sendDefault);
     }
 
     private String durationAsH24(LocalDateTime start) {

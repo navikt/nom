@@ -41,6 +41,8 @@ app:
         scopes: ["ADMIN"]
   manuelle-ressurser-og-ledere:
     enabled: false
+  google-storage-bucket-name:
+    missing-ot: "DUMMY"
 
 # DB. Bruk cloud-proxy mot miljø, eller kjør postgres lokalt
 

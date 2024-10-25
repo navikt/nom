@@ -22,6 +22,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -63,12 +64,15 @@ class RessursStillingProcessorTestUtilityMetoder {
     NomMastered nomMastered;
     @Mock
     Unleash unleash;
+    @Mock
+    public KafkaTemplate<String, StrukturerteStillingPerioderForNavident> gmlDvhLastResultProducerTemplate;
 
     @BeforeEach
     public void init() {
         MockitoAnnotations.openMocks(this);
-        ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, null, orgtilknytningCommandService, ressursStillingLoadStatus, ressursStateRepository, nomMastered,
-            unleash
+        ressursStillingProcessor = new RessursStillingProcessor(
+            orgenhetService, null, orgtilknytningCommandService,
+            ressursStillingLoadStatus, ressursStateRepository, nomMastered, gmlDvhLastResultProducerTemplate
         );
     }
 
