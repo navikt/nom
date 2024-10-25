@@ -67,5 +67,12 @@ I tillegg kan du filtrere hvilke entiteter du ønsker å opprette eller resette
 python setup_local_kafka_topics.py --entites=orgenhet,ressurs --recreate
 ```
 
+## Henvendelser
+
+Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub
+
+### For NAV-ansatte
+Interne henvendelser kan sendes via Slack i kanalen [#nom](https://slack.com/app_redirect?team=T5LNAMWNA&channel=nom)
+
 ## Kode generert av GitHub Copilot
 Dette repoet bruker GitHub Copilot til å generere kode.

@@ -12,6 +12,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.verification.VerificationMode;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import java.time.LocalDate;
 
@@ -29,6 +30,8 @@ public class OrgtilknytningCmdServiceTestBase {
 
     @Mock
     public OrgtilknytningCommandService orgtilknytningCommandService;
+    @Mock
+    public KafkaTemplate<String, StrukturerteStillingPerioderForNavident> gmlDvhLastResultProducerTemplate;
 
     @Captor
     ArgumentCaptor<OpprettOrgtilknytning> opprettOrgtilknytningArgumentCaptor;

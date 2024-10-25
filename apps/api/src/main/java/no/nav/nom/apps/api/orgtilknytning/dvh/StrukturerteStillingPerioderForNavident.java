@@ -14,24 +14,35 @@ public record StrukturerteStillingPerioderForNavident(
     List<StillingPeriode> stillingPerioder,
     List<DvhRessursStilling> dvhRessursStillinger,
     List<OrgtilknytningState> eksisterendeOrgtilknytninger,
-    List<AbstractMap.SimpleEntry<String, OrgtilknytningCommand>> endringer,
-    List<Error> errors
+    List<Endring> endringer,
+    List<Error> errors,
+    String endringsLogg
 ) {
     public StrukturerteStillingPerioderForNavident(String navident, List<StillingPeriode> stillingPerioder, List<DvhRessursStilling> ressursStillinger) {
-        this(navident, stillingPerioder, ressursStillinger, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        this(navident, stillingPerioder, ressursStillinger, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), null);
     }
 
     public StrukturerteStillingPerioderForNavident(String navident, List<DvhRessursStilling> ressursStillinger) {
-        this(navident, new ArrayList<>(), ressursStillinger, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        this(navident, new ArrayList<>(), ressursStillinger, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), null);
     }
 
     public StrukturerteStillingPerioderForNavident(StrukturerteStillingPerioderForNavident copy, List<StillingPeriode> stillingPerioder) {
-        this(copy.navident, stillingPerioder, copy.dvhRessursStillinger, new ArrayList<>(), new ArrayList<>(), copy.errors);
+        this(copy.navident, stillingPerioder, copy.dvhRessursStillinger, new ArrayList<>(), new ArrayList<>(), copy.errors, null);
     }
 
     public StrukturerteStillingPerioderForNavident(StrukturerteStillingPerioderForNavident copy, List<OrgtilknytningState> eksisterendeOrgtilknytninger, List<AbstractMap.SimpleEntry<String, OrgtilknytningCommand>> endringer) {
-        this(copy.navident, copy.stillingPerioder, copy.dvhRessursStillinger, eksisterendeOrgtilknytninger, endringer, copy.errors);
+        this(copy.navident, copy.stillingPerioder, copy.dvhRessursStillinger, eksisterendeOrgtilknytninger, from(endringer), copy.errors, null);
     }
+
+    public StrukturerteStillingPerioderForNavident(String navident, List<StillingPeriode> stillingPerioder, List<AbstractMap.SimpleEntry<String, OrgtilknytningCommand>> simpleEntries, String endringsLogg) {
+        this(navident, stillingPerioder, new ArrayList<>(), new ArrayList<>(), from(simpleEntries), new ArrayList<>(), endringsLogg);
+    }
+
+    public record Endring(
+        String navident,
+        String type,
+        OrgtilknytningCommand command
+    ) {}
 
     public record  Error(
         ErrorType errorType,
@@ -88,5 +99,16 @@ public record StrukturerteStillingPerioderForNavident(
 
     public long countOfErrorType(ErrorType errorType) {
         return errors().stream().filter(e -> e.errorType().equals(errorType)).count();
+    }
+
+    private static List<Endring> from(List<AbstractMap.SimpleEntry<String, OrgtilknytningCommand>> endringer) {
+        List<Endring> result = new ArrayList<>();
+        if (endringer == null) {
+            return result;
+        }
+        endringer.forEach( e -> {
+            result.add(new Endring(e.getKey(), e.getValue().getClass().getSimpleName(), e.getValue()));
+        });
+        return result;
     }
 }

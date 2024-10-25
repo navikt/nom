@@ -81,6 +81,18 @@ def create_topics_for_nom_entities(nom_entity_filter: list, recreate: bool):
         "authorize": EntityTopics(
             event_source_topic="org.nom.nom-authorize-eventsource",
         ),
+        "dvhLast": EntityTopics(
+            state_topic="org.nom.intern-dvh-last-result"
+        ),
+        "gmlDvhLast": EntityTopics(
+            state_topic="org.nom.intern-gml-dvh-last-result"
+        ),
+        "mastered": EntityTopics(
+            state_topic="org.nom.nom-mastered-ressurs"
+        ),
+        "navident": EntityTopics(
+            state_topic="org.nav-ident"
+        ),
     }
 
     for entity, entity_topics in entity_topics_map.items():

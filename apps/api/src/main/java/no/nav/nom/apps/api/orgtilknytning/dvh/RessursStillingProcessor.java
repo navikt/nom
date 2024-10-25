@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreO
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OrgtilknytningCommand;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
@@ -20,9 +21,11 @@ import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -50,16 +53,16 @@ public class RessursStillingProcessor {
     private final RessursStateRepository ressursStateRepository;
     private final NomMastered nomMastered;
     private ProcessCmdResult processCmdResult = new ProcessCmdResult();
-    private HashMap<String, List<String>> evtsrcCommandsPerNavident = new HashMap<>();
+    private HashMap<String, List<AbstractMap.SimpleEntry<String, OrgtilknytningCommand>>> evtsrcCommandsPerNavident = new HashMap<>();
     private List<String> manglerSammeEnhetPaStillingOgRessurs = new ArrayList<>();
-    private final Unleash unleash;
+    final KafkaTemplate<String, StrukturerteStillingPerioderForNavident> gmlDvhLastResultProducerTemplate;
+
 
     public RessursStillingProcessor(
         OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService, OrgtilknytningCommandService orgtilknytningCommandService,
         RessursStillingLoadStatus ressursStillingLoadStatus,
         RessursStateRepository ressursStateRepository,
-        NomMastered nomMastered,
-        Unleash unleash
+        NomMastered nomMastered, KafkaTemplate<String, StrukturerteStillingPerioderForNavident> gmlDvhLastResultProducerTemplate
     ) {
         this.orgenhetService = orgenhetService;
         this.orgtilknytningService = orgtilknytningService;
@@ -67,16 +70,21 @@ public class RessursStillingProcessor {
         this.ressursStillingLoadStatus = ressursStillingLoadStatus;
         this.ressursStateRepository = ressursStateRepository;
         this.nomMastered = nomMastered;
-        this.unleash = unleash;
+        this.gmlDvhLastResultProducerTemplate = gmlDvhLastResultProducerTemplate;
     }
 
-    public void process(Map<String, List<StillingPeriode>> stillingPerioderPerNavident) {
-
+    public Map<String, StrukturerteStillingPerioderForNavident> process(Map<String, List<StillingPeriode>> stillingPerioderPerNavident) {
         log.debug("Prosesserer stillingPerioder for navidents");
 
+        Map<String, StrukturerteStillingPerioderForNavident> sspForNavident = new HashMap<>();
         processCmdResult = new ProcessCmdResult();
         manglerSammeEnhetPaStillingOgRessurs.clear();
-        stillingPerioderPerNavident.forEach(this::process);
+        stillingPerioderPerNavident.forEach((navident, stillingPerioder) -> {
+            var endringsLogg = process(navident, stillingPerioder);
+            sspForNavident.put(navident,
+                new StrukturerteStillingPerioderForNavident(navident, stillingPerioder, evtsrcCommandsPerNavident.get(navident), endringsLogg)
+            );
+        });
 
         log.info(
             "Ferdig prossesert stillingPerioder for {} navidenter. Laget følgene evtSrc commands:{}",
@@ -87,10 +95,13 @@ public class RessursStillingProcessor {
         if (!manglerSammeEnhetPaStillingOgRessurs.isEmpty()) {
             log.error("Disse navidentene har ingen aktiv stilling for samme enhet som på ressurs i Unit4.\n{}", manglerSammeEnhetPaStillingOgRessurs);
         }
+
+        persistDvhLastResult(sspForNavident);
+        return sspForNavident;
     }
 
     // Prosesserer ett sett med stillingPerioder fra DVH som allerede er slått sammen/splittet på enhet/periode
-    public void process(String navident, List<StillingPeriode> stillingPerioder) {
+    public String process(String navident, List<StillingPeriode> stillingPerioder) {
         log.debug(SECURE_LOGS, "Prosesserer stillingPerioder for navident {}, stillingPerioder: {}", navident, stillingPerioder.stream().map(StillingPeriode::toString).collect(Collectors.joining("\n")));
 
         if (processCmdResult == null) {
@@ -116,10 +127,10 @@ public class RessursStillingProcessor {
             String msg = "Navident %s finnes ikke. Behandler ikke DVH ressursStillinger\n%s".formatted(navident, stillingPerioder);
             log.error(msg);
             ressursStillingLoadStatus.addError(navident, msg);
-            return;
+            return null;
         } else if (ressurs.sektor() == Sektor.EKSTERN) {
             log.debug(SECURE_LOGS, "Navident {} er ekstern. Enn sålenge behandler vi ikke disse", navident);
-            return;
+            return null;
         }
 
         // Hent orgtilknytninger fra State
@@ -491,7 +502,7 @@ public class RessursStillingProcessor {
                 fjernOrgtilknytning(ot);
             });
 
-        loggOppsummering(navident, stillingPerioder, orgtilknytninger);
+        var endringsLogg = loggOppsummering(navident, stillingPerioder, orgtilknytninger);
 
         // Sjekk om det finnes en current stillingPeriode hvor stilling og ressurs har samme enhet
         if (ressurs.isStatlig() && !validAgrIdStillingVsRessurs(stillingPerioder)) {
@@ -504,6 +515,7 @@ public class RessursStillingProcessor {
             }
             manglerSammeEnhetPaStillingOgRessurs.add(navident);
         }
+        return endringsLogg;
     }
 
     private boolean validAgrIdStillingVsRessurs(List<StillingPeriode> stillingPerioder) {
@@ -598,9 +610,9 @@ public class RessursStillingProcessor {
             additionalData
         );
 
-        loggCommand(navident, command);
-
         var orgtilknytningFid = orgtilknytningCommandService.opprettOrgtilknytning(command);
+
+        loggCommand(navident, orgtilknytningFid, command);
 
         if (ressursStateRepository.findByNavident(navident).get().isKommunal()) {
             orgtilknytningCommandService.endreTilknytningtype(
@@ -789,81 +801,82 @@ public class RessursStillingProcessor {
         orgtilknytningCommandService.fjernOrgtilknytning(originalOrgtilknytning.fid(), command);
     }
 
-    private void loggOppsummering(String navident, List<StillingPeriode> stillingPerioder, Collection<OrgtilknytningState> orgtilknytninger) {
-        if (log.isDebugEnabled())
-        {
-            StringBuffer strbuf = new StringBuffer();
-            strbuf.append("Oppsummering for navident %s".formatted(navident));
-            strbuf.append("\n\tAntall DVH ressursStillinger: %s".formatted(stillingPerioder.size()));
-            strbuf.append("\n\t\tHistoriske: %s".formatted(stillingPerioder.stream().filter(PeriodeUtil::isHistoricPeriod).count()));
-            strbuf.append("\n\t\tAktive: %s".formatted(stillingPerioder.stream().filter(PeriodeUtil::isCurrentPeriod).count()));
-            strbuf.append("\n\t\tFremtidige: %s".formatted(stillingPerioder.stream().filter(PeriodeUtil::isFuturePeriod).count()));
-            strbuf.append("\n\tAntall eksisterende orgtilknytninger: %s".formatted(orgtilknytninger.size()));
-            strbuf.append("\n\t\tHistoriske: %s".formatted(orgtilknytninger.stream().filter(PeriodeUtil::isHistoricPeriod).count()));
-            strbuf.append("\n\t\tAktive: %s".formatted(orgtilknytninger.stream().filter(PeriodeUtil::isCurrentPeriod).count()));
-            strbuf.append("\n\t\tFremtidige: %s".formatted(orgtilknytninger.stream().filter(PeriodeUtil::isFuturePeriod).count()));
+    private String loggOppsummering(String navident, List<StillingPeriode> stillingPerioder, Collection<OrgtilknytningState> orgtilknytninger) {
+        StringBuffer strbuf = new StringBuffer();
+        strbuf.append("Oppsummering for navident %s".formatted(navident));
+        strbuf.append("\n\tAntall DVH ressursStillinger: %s".formatted(stillingPerioder.size()));
+        strbuf.append("\n\t\tHistoriske: %s".formatted(stillingPerioder.stream().filter(PeriodeUtil::isHistoricPeriod).count()));
+        strbuf.append("\n\t\tAktive: %s".formatted(stillingPerioder.stream().filter(PeriodeUtil::isCurrentPeriod).count()));
+        strbuf.append("\n\t\tFremtidige: %s".formatted(stillingPerioder.stream().filter(PeriodeUtil::isFuturePeriod).count()));
+        strbuf.append("\n\tAntall eksisterende orgtilknytninger: %s".formatted(orgtilknytninger.size()));
+        strbuf.append("\n\t\tHistoriske: %s".formatted(orgtilknytninger.stream().filter(PeriodeUtil::isHistoricPeriod).count()));
+        strbuf.append("\n\t\tAktive: %s".formatted(orgtilknytninger.stream().filter(PeriodeUtil::isCurrentPeriod).count()));
+        strbuf.append("\n\t\tFremtidige: %s".formatted(orgtilknytninger.stream().filter(PeriodeUtil::isFuturePeriod).count()));
 
-            strbuf.append("\n\t===> Har laget følgende evtsrc hendelser:");
-            if (evtsrcCommandsPerNavident.get(navident).size() == 0) {
-                strbuf.append("\n\t\tIngen");
-            } else {
-                evtsrcCommandsPerNavident.get(navident).forEach(strbuf::append);
-            }
-            log.debug(
-                strbuf.toString());
-        }
+//        strbuf.append("\n\t===> Har laget følgende evtsrc hendelser:");
+//        if (evtsrcCommandsPerNavident.get(navident).size() == 0) {
+//            strbuf.append("\n\t\tIngen");
+//        } else {
+//            evtsrcCommandsPerNavident.get(navident).forEach(strbuf::append);
+//        }
+        log.debug(strbuf.toString());
 
         evtsrcCommandsPerNavident = new HashMap<>();
+        return strbuf.toString();
     }
 
-    private void loggCommand(String navident, OpprettOrgtilknytning cmd) {
-        if (log.isDebugEnabled() && evtsrcCommandsPerNavident.containsKey(navident)) {
-            evtsrcCommandsPerNavident.get(navident).add("\n\t\tOpprettOrgtilknytning for enhet %s gyldigFom %s".formatted(cmd.orgenhetId(), cmd.gyldigFom()));
+    private void loggCommand(String navident, String fid, OpprettOrgtilknytning cmd) {
+        if (evtsrcCommandsPerNavident.containsKey(navident)) {
+//            evtsrcCommandsPerNavident.get(navident).add("\n\t\tOpprettOrgtilknytning for enhet %s gyldigFom %s".formatted(cmd.orgenhetId(), cmd.gyldigFom()));
+            evtsrcCommandsPerNavident.get(navident).add(new AbstractMap.SimpleEntry<>(fid, cmd));
         }
         processCmdResult.numOpprett++;
     }
 
     private void loggCommand(String navident, String fid, AvvikleOrgtilknytning cmd) {
-        if (log.isDebugEnabled() && evtsrcCommandsPerNavident.containsKey(navident)) {
-            evtsrcCommandsPerNavident.get(navident)
-                .add("\n\t\tAvvikleOrgtilknytning for fid %s enhet %s gyldigTom %s".formatted(fid, cmd.orgenhetId(), cmd.gyldigTom()));
+        if (evtsrcCommandsPerNavident.containsKey(navident)) {
+//            evtsrcCommandsPerNavident.get(navident).add("\n\t\tAvvikleOrgtilknytning for fid %s enhet %s gyldigTom %s".formatted(fid, cmd.orgenhetId(), cmd.gyldigTom()));
+            evtsrcCommandsPerNavident.get(navident).add(new AbstractMap.SimpleEntry<>(fid, cmd));
         }
         processCmdResult.numAvviklet++;
     }
 
     private void loggCommand(String navident, String fid, EndreOrgtilknytningDato cmd) {
-        if (log.isDebugEnabled() && evtsrcCommandsPerNavident.containsKey(navident)) {
-            evtsrcCommandsPerNavident.get(navident)
-                .add("\n\t\tAvvikleOrgtilknytning for fid %s enhet %s gyldigFom %s - gyldigTom %s".formatted(fid,
-                    cmd.orgenhetId(),
-                    cmd.gyldigFom(),
-                    cmd.gyldigTom()
-                ));
+        if (evtsrcCommandsPerNavident.containsKey(navident)) {
+//            evtsrcCommandsPerNavident.get(navident)
+//                .add("\n\t\tAvvikleOrgtilknytning for fid %s enhet %s gyldigFom %s - gyldigTom %s".formatted(fid,
+//                    cmd.orgenhetId(),
+//                    cmd.gyldigFom(),
+//                    cmd.gyldigTom()
+//                ));
+            evtsrcCommandsPerNavident.get(navident).add(new AbstractMap.SimpleEntry<>(fid, cmd));
         }
         processCmdResult.numKorrigertDato++;
     }
 
     private void loggCommand(String navident, String fid, EndreDagligOppfolgingOrgtilknytning cmd) {
-        if (log.isDebugEnabled() && evtsrcCommandsPerNavident.containsKey(navident)) {
-            evtsrcCommandsPerNavident.get(navident)
-                .add("\n\t\tEndreDagligOppfolgingOrgtilknytning for fid %s enhet %s gyldigFom %s - gyldigTom %s => %s".formatted(fid,
-                    cmd.orgenhetId(),
-                    cmd.gyldigFom(),
-                    cmd.gyldigTom(),
-                    cmd.dagligOppfolging()
-                ));
+        if (evtsrcCommandsPerNavident.containsKey(navident)) {
+//            evtsrcCommandsPerNavident.get(navident)
+//                .add("\n\t\tEndreDagligOppfolgingOrgtilknytning for fid %s enhet %s gyldigFom %s - gyldigTom %s => %s".formatted(fid,
+//                    cmd.orgenhetId(),
+//                    cmd.gyldigFom(),
+//                    cmd.gyldigTom(),
+//                    cmd.dagligOppfolging()
+//                ));
+            evtsrcCommandsPerNavident.get(navident).add(new AbstractMap.SimpleEntry<>(fid, cmd));
         }
         processCmdResult.numEndretDagligOppfolging++;
     }
 
     private void loggCommand(String navident, String fid, FjernOrgtilknytning cmd) {
-        if (log.isDebugEnabled() && evtsrcCommandsPerNavident.containsKey(navident)) {
-            evtsrcCommandsPerNavident.get(navident)
-                .add("\n\t\tFjernOrgtilknytning for fid %s enhet %s gyldigFom %s - gyldigTom %s".formatted(fid,
-                    cmd.orgenhetId(),
-                    cmd.gyldigFom(),
-                    cmd.gyldigTom()
-                ));
+        if (evtsrcCommandsPerNavident.containsKey(navident)) {
+//            evtsrcCommandsPerNavident.get(navident)
+//                .add("\n\t\tFjernOrgtilknytning for fid %s enhet %s gyldigFom %s - gyldigTom %s".formatted(fid,
+//                    cmd.orgenhetId(),
+//                    cmd.gyldigFom(),
+//                    cmd.gyldigTom()
+//                ));
+            evtsrcCommandsPerNavident.get(navident).add(new AbstractMap.SimpleEntry<>(fid, cmd));
         }
         processCmdResult.numFjernet++;
     }
@@ -884,5 +897,9 @@ public class RessursStillingProcessor {
             strbuf.append("\n\tFjernOrgtilknytning:                 %6s".formatted(numFjernet));
             return strbuf.toString();
         }
+    }
+
+    private void persistDvhLastResult(Map<String, StrukturerteStillingPerioderForNavident> result) {
+        result.forEach(gmlDvhLastResultProducerTemplate::sendDefault);
     }
 }
