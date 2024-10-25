@@ -6,6 +6,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import jakarta.servlet.http.HttpServletResponse;
+
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
@@ -20,6 +23,7 @@ import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -33,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -43,12 +48,14 @@ public class RessursController {
 
     private final static Logger log = LoggerFactory.getLogger(RessursController.class);
     private final RessursRestService ressursRestService;
+    private final RessursExcelGenerator ressursExcelGenerator;
     private final AuthResolver authResolver;
 
     public RessursController(
-            RessursRestService ressursRestService, AuthResolver authResolver
+        RessursRestService ressursRestService, RessursExcelGenerator ressursExcelGenerator, AuthResolver authResolver
     ) {
         this.ressursRestService = ressursRestService;
+        this.ressursExcelGenerator = ressursExcelGenerator;
         this.authResolver = authResolver;
     }
 
@@ -196,6 +203,26 @@ public class RessursController {
     })
     public List<Ressurs> getRessursByListNavident(@Valid @RequestBody List<String> navidentList){
         return ressursRestService.findRessurserByNavident(navidentList);
+    }
+
+    @PostMapping("/byListNavident/export")
+    @Operation(
+        description = "Genererer regneark med oversikt over ressurser for liste av navidenter",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Exported file"),
+    })
+    public void getRessursByListNavidentExport(HttpServletResponse response, @Valid @RequestBody List<String> navidenter) throws IOException {
+        try {
+            var ressurser = ressursRestService.findRessurserByNavident(navidenter);
+
+            ressursExcelGenerator.generate(response, ressurser, navidenter);
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=skjerminger.xlsx");
+        } catch (Exception e) {
+            log.error("Failed to generate export file");
+            response.sendError(500);
+        }
     }
 
     @GetMapping("/read-topic")
