@@ -46,6 +46,7 @@ public class CacheQueueServiceTest {
         OTEndretData otEndringerData =
             OTEndretData.builder()
                 .fid(fid)
+                .navident(navident)
                 .changedByNavIdent(navidentChangedBy)
                 .timestamp(timestamp)
                 .eventType(OTEndretData.OTEndretDataType.OT_NY)
