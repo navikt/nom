@@ -87,7 +87,7 @@ public class RessursStillingProcessor {
         });
 
         log.info(
-            "Ferdig prossesert stillingPerioder for {} navidenter. Laget følgene evtSrc commands:{}",
+            "Ferdig prosessert stillingPerioder for {} navidenter. Laget følgene evtSrc commands:{}",
             stillingPerioderPerNavident.size(),
             processCmdResult.summary()
         );
@@ -820,8 +820,6 @@ public class RessursStillingProcessor {
 //            evtsrcCommandsPerNavident.get(navident).forEach(strbuf::append);
 //        }
         log.debug(strbuf.toString());
-
-        evtsrcCommandsPerNavident = new HashMap<>();
         return strbuf.toString();
     }
 
