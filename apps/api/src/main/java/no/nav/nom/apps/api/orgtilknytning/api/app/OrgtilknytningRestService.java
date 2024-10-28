@@ -4,7 +4,6 @@ import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.apps.api.orgtilknytning.api.email.OTEndretData;
 import no.nav.nom.apps.api.orgtilknytning.api.email.OrgtilknytningEndretEmailService;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException;
@@ -44,7 +43,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -420,9 +418,10 @@ public class OrgtilknytningRestService {
         }
 
         //update OTendretData for e-post varsel
-        addToOTEndretDataEmailQueue(orgtilknytningStateBeforeChanges.navident(), endreOrgtilknytningRequest.fid(), OTEndretData.OTEndretDataType.OT_ENDRET);
+        //addToOTEndretDataEmailQueue(orgtilknytningStateBeforeChanges.navident(), endreOrgtilknytningRequest.fid(), OTEndretData.OTEndretDataType.OT_ENDRET);
     }
 
+    /*
     private void addToOTEndretDataEmailQueue(String navident, String fid, OTEndretData.OTEndretDataType eventType) {
         String changedByNavIdent = SecurityUtil.getAuthenticatedNavIdent();
         orgtilknytningEndretEmailService.addToOrgtilknytningEndringerQueue(
@@ -436,6 +435,7 @@ public class OrgtilknytningRestService {
                 .build()
         );
     }
+    */
 
     // TODO: Det burde det muligens lages et nytt event 'OrgtilknytningOpprettetEventV2' som inneholder felter for erDagligOppfolging og orgtilknytningType
     //  slik at man kun trenger å sende ett i event i sammenheng med opprettelse av en ny orgtilknytning
@@ -503,7 +503,7 @@ public class OrgtilknytningRestService {
         }
 
         //update OTendretData for e-post varsel
-        addToOTEndretDataEmailQueue(navident, opprettetOrgtilknytningFid, OTEndretData.OTEndretDataType.OT_NY);
+        //addToOTEndretDataEmailQueue(navident, opprettetOrgtilknytningFid, OTEndretData.OTEndretDataType.OT_NY);
     }
 
     private void oppdaterRessursSluttdato(
@@ -671,7 +671,7 @@ public class OrgtilknytningRestService {
         nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
 
         //update OTendretData for e-post varsel
-        addToOTEndretDataEmailQueue(orgtilknytning.navident(), fid, OTEndretData.OTEndretDataType.OT_ENDRET);
+        //addToOTEndretDataEmailQueue(orgtilknytning.navident(), fid, OTEndretData.OTEndretDataType.OT_ENDRET);
     }
 
     public void updateOrgtilknytningType(String fid, EndreTilknytningtypeRequest endreTilknytningtypeRequest) {
@@ -709,7 +709,7 @@ public class OrgtilknytningRestService {
         nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
 
         //update OTendretData for e-post varsel
-        addToOTEndretDataEmailQueue(orgtilknytning.navident(), fid, OTEndretData.OTEndretDataType.OT_ENDRET);
+        //addToOTEndretDataEmailQueue(orgtilknytning.navident(), fid, OTEndretData.OTEndretDataType.OT_ENDRET);
     }
 
     public static void validateOrgtilknytningTypeSektorCombination(Tilknytningtype tilknytningtype, Sektor sektor) {
@@ -811,7 +811,7 @@ public class OrgtilknytningRestService {
         nomMastered.markRessursAsMasteredInNom(leggTilOrgtilknytningRequest.navident());
 
         //update OTendretData for e-post varsel
-        addToOTEndretDataEmailQueue(leggTilOrgtilknytningRequest.navident(), opprettetOrgTilknytningFid, OTEndretData.OTEndretDataType.OT_NY);
+        //addToOTEndretDataEmailQueue(leggTilOrgtilknytningRequest.navident(), opprettetOrgTilknytningFid, OTEndretData.OTEndretDataType.OT_NY);
     }
 
     private void validateLeggTilOrgilknytningRequest(LeggTilOrgtilknytningRequestOld leggTilOrgtilknytningRequest) {
