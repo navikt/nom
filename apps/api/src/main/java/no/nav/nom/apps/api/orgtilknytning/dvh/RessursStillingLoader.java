@@ -56,19 +56,33 @@ public class RessursStillingLoader {
         var nyeStillingPerioderPerNavidentFuture = asyncNyeStrukturerOgProsesser.asyncStrukturerStillingPerioderPerNavident(ressursStillinger);
 
         Map <String, List<StillingPeriode>> stillingPerioderPerNavident = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
-        var gmlStillingPerioderPerNavident =ressursStillingProcessor.process(stillingPerioderPerNavident);
+        var gmlStillingPerioderPerNavident = ressursStillingProcessor.process(stillingPerioderPerNavident);
 
         log.info("Lastet og prosessert ressursStillinger på gamlemåten. Tok {}", durationAsH24(start));
 
         try {
             var nyeStillingPerioderPerNavident = nyeStillingPerioderPerNavidentFuture.get();
+            diffNyGmlResult(gmlStillingPerioderPerNavident, nyeStillingPerioderPerNavident);
         } catch (Exception e) {
             log.error("Feil ved lasting og prosessering av ressursStillinger på nye måten", e);
         }
 
         log.info("Lastet og prosessert ressursStillinger på både nye og gamlemåten. Tok {}", durationAsH24(start));
 
+
+
         ressursStillingLoadStatus.endLoad();
+    }
+
+    private void diffNyGmlResult(Map<String, StrukturerteStillingPerioderForNavident> gmlStillingPerioderPerNavident, Map<String, StrukturerteStillingPerioderForNavident> nyeStillingPerioderPerNavident) {
+        log.info("Diffing ny og gammel prosessering av ressursStillinger");
+        gmlStillingPerioderPerNavident.forEach((navident, gmlSSPFN) -> {
+            var nySSPFN = nyeStillingPerioderPerNavident.get(navident);
+            var differ = nySSPFN.diff(gmlSSPFN);
+            if (!differ.isEmpty()) {
+                log.info("Forskjell i prosessering av ressursStillinger for navident {}: {}", navident, differ);
+            }
+        });
     }
 
     public List<DvhRessursStilling> load() {
