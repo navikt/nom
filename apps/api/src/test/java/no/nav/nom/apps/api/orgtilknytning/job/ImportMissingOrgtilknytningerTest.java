@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
@@ -34,10 +35,15 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -145,12 +151,32 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
         nomMasteredContainer.start();
 
         ContainerTestUtils.waitForAssignment(nomMasteredContainer, embeddedKafkaBroker.getPartitionsPerTopic());
+
+        // Mock authenticated bruker
+        Authentication authentication = Mockito.mock(Authentication.class);
+        Mockito.when(authentication.getPrincipal()).thenReturn(getMockPrincipal());
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
     }
 
     @AfterEach
     public void tearDown() {
         container.stop();
         nomMasteredContainer.stop();
+    }
+
+    private Jwt getMockPrincipal() {
+        Map<String, Object> claims = Map.of(
+            "NAVident", "C123456"
+        );
+        return new Jwt(
+            "AUTH0_TOKEN",
+            Instant.now(),
+            Instant.now().plusSeconds(30),
+            Map.of("alg", "none"),
+            claims
+        );
     }
 
     @Test

@@ -41,6 +41,10 @@ public class OrgtilknytningCommandService {
     }
 
     private void addToOTEndretDataEmailQueue(String navident, String fid, OTEndretData.OTEndretDataType eventType) {
+        if(navident == null  || navident.isBlank()) {
+            log.warn("Navident is null. Cannot add to OTendretData email queue");
+            return;
+        }
         String changedByNavIdent = SecurityUtil.getAuthenticatedNavIdent();
         orgtilknytningEndretEmailService.addToOrgtilknytningEndringerQueue(
             navident,
