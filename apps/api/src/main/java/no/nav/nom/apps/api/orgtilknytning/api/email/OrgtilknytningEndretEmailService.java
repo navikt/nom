@@ -79,6 +79,7 @@ public class OrgtilknytningEndretEmailService {
     public void addToOrgtilknytningEndringerQueue(String navident, OTEndretData otEndretData) {
         // save to database
         try {
+            log.info("Adding to cache: navident: {}, otEndretData: {}", navident, otEndretData);
             cacheQueueService.save(navident, otEndretData);
         } catch (IOException e) {
             // log error and ignore
