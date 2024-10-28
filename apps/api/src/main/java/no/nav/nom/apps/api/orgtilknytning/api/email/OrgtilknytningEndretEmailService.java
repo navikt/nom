@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.common.cache.CacheQueueService;
 import no.nav.nom.apps.api.common.cache.CacheType;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
 import no.nav.nom.contract.ad.AdRessurs;
@@ -228,6 +229,18 @@ public class OrgtilknytningEndretEmailService {
             }
         }
         return recipientNavidents;
+    }
+
+
+    public String getNavIdentFromOrgtilknytningState(String orgtilknytningStateFid) {
+        try {
+            var orgtilknytningStateBeforeChanges = orgtilknytningStateRepository.findByFid(orgtilknytningStateFid)
+                .orElseThrow(() -> OrgtilknytningNotFoundException.fid(orgtilknytningStateFid));
+            return orgtilknytningStateBeforeChanges.navident();
+        } catch (Exception e) {
+            log.error("Navident not found in state for  fid: {}. Error: {}", orgtilknytningStateFid, e.getMessage());
+        }
+        return null;
     }
 
 }
