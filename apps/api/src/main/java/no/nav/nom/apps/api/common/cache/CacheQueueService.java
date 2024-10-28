@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgtilknytning.api.email.OTEndretData;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
+@Transactional
 public class CacheQueueService {
     private final CacheQueueRepository cacheQueueRepository;
 
@@ -33,6 +35,7 @@ public class CacheQueueService {
             payload.add(otEndretData);
 
             existingCacheQueue.setPayload(new ObjectMapper().convertValue(payload, JsonNode.class));
+            log.info("CacheQueue updated: {}", existingCacheQueue);
             cacheQueueRepository.save(existingCacheQueue);
         } else {
             log.info("CacheQueue does not exists for {}. New element will be added: {}", navident, otEndretData);
@@ -41,6 +44,7 @@ public class CacheQueueService {
             cacheQueue.setCacheKey(navident);
             cacheQueue.setCacheType(CacheType.OTENDRINGER.toString());
             cacheQueue.setPayload(new ObjectMapper().convertValue(payload, JsonNode.class));
+            log.info("CacheQueue added: {}", cacheQueue);
             cacheQueueRepository.save(cacheQueue);
         }
     }
