@@ -69,8 +69,6 @@ public class RessursStillingLoader {
 
         log.info("Lastet og prosessert ressursStillinger på både nye og gamlemåten. Tok {}", durationAsH24(start));
 
-
-
         ressursStillingLoadStatus.endLoad();
     }
 
@@ -78,9 +76,18 @@ public class RessursStillingLoader {
         log.info("Diffing ny og gammel prosessering av ressursStillinger");
         gmlStillingPerioderPerNavident.forEach((navident, gmlSSPFN) -> {
             var nySSPFN = nyeStillingPerioderPerNavident.get(navident);
-            var differ = nySSPFN.diff(gmlSSPFN);
-            if (!differ.isEmpty()) {
-                log.info("Forskjell i prosessering av ressursStillinger for navident {}: {}", navident, differ);
+            if (nySSPFN == null) {
+                log.info("Ny prosessering mangler for navident {}", navident);
+            } else {
+                var differ = nySSPFN.diff(gmlSSPFN);
+                if (!differ.isEmpty()) {
+                    log.info("Forskjell i prosessering av ressursStillinger for navident {}: {}", navident, differ);
+                }
+            }
+        });
+        nyeStillingPerioderPerNavident.forEach((navident, nySSPFN) -> {
+            if (!gmlStillingPerioderPerNavident.containsKey(navident)) {
+                log.info("Ny prosessering har navident {} som ikke finnes i gammel prosessering", navident);
             }
         });
     }
@@ -97,7 +104,6 @@ public class RessursStillingLoader {
         log.info("Lastet {} ressursStillinger. Tok {}", ressursStillinger.size(), durationAsH24(start));
         return ressursStillinger;
     }
-
 
     // Shameless duplication from DvhRestConsumer
     private JsonNode dvhExchange(String urlPath) {
