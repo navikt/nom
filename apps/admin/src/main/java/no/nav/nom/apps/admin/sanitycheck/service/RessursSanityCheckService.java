@@ -262,4 +262,11 @@ public class RessursSanityCheckService {
                 return t.gyldigTom().isEmpty() && orgEnhet.isPresent() && orgEnhet.get().gyldigTom().isPresent(); // orgEnhet avsluttet > tilknytning ikke avsluttet
             }).toList();
     }
+
+    public List<RessursState> ressurserMedBlankMellomnavn() {
+        return ressursStateRepository.getAll().stream()
+            .filter(r -> r.visningsnavn().mellomnavn().isPresent())
+            .filter(r -> r.visningsnavn().mellomnavn().get().isBlank())
+            .toList();
+    }
 }
