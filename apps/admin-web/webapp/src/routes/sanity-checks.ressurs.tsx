@@ -5,6 +5,7 @@ import { ErrorBoundary } from "react-error-boundary";
 
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { Ressurser } from "~/sanitychecks/Ressurs/Ressurser.tsx";
+import { RessursMedBlankMellomnavn } from "~/sanitychecks/Ressurs/RessursMedBlankMellomnavn.tsx";
 import { RessursMedOTUtenAktivEnhet } from "~/sanitychecks/Ressurs/RessursMedOTUtenAktivEnhet.tsx";
 import { RessursSluttetMedAktivOT } from "~/sanitychecks/Ressurs/RessursSluttetMedAktivOT.tsx";
 
@@ -54,6 +55,9 @@ function ListSelector(props: { selected: string }) {
     case "RessursSluttetMedAktivOT": {
       return <RessursSluttetMedAktivOT />;
     }
+    case "RessursMedBlankMellomnavn": {
+      return <RessursMedBlankMellomnavn />;
+    }
     default: {
       return <></>;
     }
@@ -76,6 +80,9 @@ function RessursSanityChecks() {
         </option>
         <option value="RessursSluttetMedAktivOT">
           List tilknytninger med gyldighet utover ressurens gyldighetsperiode
+        </option>
+        <option value="RessursMedBlankMellomnavn">
+          Ressurs med blankt mellomnavn
         </option>
       </Select>
       <ListSelector selected={selected} />

@@ -9,6 +9,7 @@ import no.nav.nom.apps.admin.SwaggerConfig;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedEnhet;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningKoblingInfo;
 import no.nav.nom.apps.admin.sanitycheck.service.RessursSanityCheckService;
+import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -84,7 +85,7 @@ public class RessursSanityCheckController {
         }
     )
     @GetMapping(value = "/ressursMedBlankMellomNavn")
-    public ResponseEntity<List<String>> listRessurserMedBlankMellomNavn() {
+    public ResponseEntity<List<RessursState>> listRessurserMedBlankMellomNavn() {
         return ResponseEntity.ok(ressursSanityCheckService.ressurserMedBlankMellomnavn());
     }
 
