@@ -217,8 +217,8 @@ public class RessursController {
         try {
             var ressurser = ressursRestService.findRessurserByNavident(navidenter);
 
-            ressursExcelGenerator.generate(response, ressurser, navidenter);
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=skjerminger.xlsx");
+            ressursExcelGenerator.generate(response, ressurser, navidenter);
         } catch (Exception e) {
             log.error("Failed to generate export file");
             response.sendError(500);
