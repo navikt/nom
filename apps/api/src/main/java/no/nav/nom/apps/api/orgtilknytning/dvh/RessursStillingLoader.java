@@ -7,6 +7,9 @@ import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgtilknytning.dvh.statlige.AsyncNyeStrukturerOgProsesser;
+import no.nav.nom.apps.api.ressurs.NomMastered;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -29,13 +32,16 @@ public class RessursStillingLoader {
     private final AppProperties appProperties;
     private final String ressursStillingerResponseNode;
     private final AsyncNyeStrukturerOgProsesser asyncNyeStrukturerOgProsesser;
+    private final RessursStateRepository ressursStateRepository;
+    private final NomMastered nomMastered;
 
     public RessursStillingLoader(
         RessursStillingStrukturerer ressursStillingStrukturerer,
         RessursStillingProcessor ressursStillingProcessor,
         RessursStillingLoadStatus ressursStillingLoadStatus, NomProxyClient nomProxyClient, AppProperties appProperties,
         @Value("${app.dvh-load.nom-ressurser-stillinger-respons-navn}") String ressursStillingerResponseNode,
-        AsyncNyeStrukturerOgProsesser asyncNyeStrukturerOgProsesser
+        AsyncNyeStrukturerOgProsesser asyncNyeStrukturerOgProsesser,
+        RessursStateRepository ressursStateRepository, NomMastered nomMastered
     ) {
         this.ressursStillingStrukturerer = ressursStillingStrukturerer;
         this.ressursStillingProcessor = ressursStillingProcessor;
@@ -44,6 +50,8 @@ public class RessursStillingLoader {
         this.appProperties = appProperties;
         this.ressursStillingerResponseNode = ressursStillingerResponseNode;
         this.asyncNyeStrukturerOgProsesser = asyncNyeStrukturerOgProsesser;
+        this.ressursStateRepository = ressursStateRepository;
+        this.nomMastered = nomMastered;
     }
 
     public void loadAndProcess() {
@@ -63,6 +71,7 @@ public class RessursStillingLoader {
         try {
             var nyeStillingPerioderPerNavident = nyeStillingPerioderPerNavidentFuture.get();
             diffNyGmlResult(gmlStillingPerioderPerNavident, nyeStillingPerioderPerNavident);
+            loggErrorsFraNyLast(nyeStillingPerioderPerNavident);
         } catch (Exception e) {
             log.error("Feil ved lasting og prosessering av ressursStillinger på nye måten", e);
         }
@@ -72,16 +81,32 @@ public class RessursStillingLoader {
         ressursStillingLoadStatus.endLoad();
     }
 
+    private void loggErrorsFraNyLast(Map<String, StrukturerteStillingPerioderForNavident> nyeStillingPerioderPerNavident) {
+        nyeStillingPerioderPerNavident.forEach((navident, sspfn) -> {
+            if (!sspfn.errors().isEmpty()) {
+                log.error("Feil ved NYE lasting og prosessering av ressursStillinger for navident {}: {}", navident, sspfn.errors());
+            }
+        });
+    }
+
     private void diffNyGmlResult(Map<String, StrukturerteStillingPerioderForNavident> gmlStillingPerioderPerNavident, Map<String, StrukturerteStillingPerioderForNavident> nyeStillingPerioderPerNavident) {
         log.info("Diffing ny og gammel prosessering av ressursStillinger");
         gmlStillingPerioderPerNavident.forEach((navident, gmlSSPFN) -> {
             var nySSPFN = nyeStillingPerioderPerNavident.get(navident);
-            if (nySSPFN == null) {
+            var ressurs = ressursStateRepository.findByNavident(navident);
+            if (ressurs.isEmpty() || nomMastered.isMastered(navident)) {
+                log.info("Gammel prosessering har navident {} som ikke finnes i ny prosessering", navident);
+            }
+            if (nySSPFN == null || (ressurs.isPresent() && ressurs.get().isStatlig())) {
                 log.info("Ny prosessering mangler for navident {}", navident);
             } else {
                 var differ = nySSPFN.diff(gmlSSPFN);
                 if (!differ.isEmpty()) {
                     log.info("Forskjell i prosessering av ressursStillinger for navident {}: {}", navident, differ);
+                }
+                var nyLastAktiveOgFremtidigeEndringer = nySSPFN.aktiveOgFremtidigeEndringer();
+                if (!nyLastAktiveOgFremtidigeEndringer.isEmpty()) {
+                    log.info("Aktive og fremtidige endringer i ny last for navident {}: {}", navident, nyLastAktiveOgFremtidigeEndringer);
                 }
             }
         });

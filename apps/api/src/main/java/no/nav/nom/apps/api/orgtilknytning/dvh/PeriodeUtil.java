@@ -39,6 +39,14 @@ public class PeriodeUtil {
         return orgtilknytning.gyldigTom().isEmpty() || orgtilknytning.gyldigTom().get().isAfter(yesterday());
     }
 
+    public static boolean isCurrentOrFuture(LocalDate date) {
+        return date == null || date.isAfter(yesterday());
+    }
+
+    public static boolean isCurrentOrFuture(Optional<LocalDate> date) {
+        return isCurrentOrFuture(date != null ? date.orElse(null) : null);
+    }
+
     public static LocalDate today() { return LocalDate.now(); }
 
     public static LocalDate yesterday() { return today().minusDays(1); }
