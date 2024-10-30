@@ -66,10 +66,11 @@ public class RessursStillingLoader {
         Map <String, List<StillingPeriode>> stillingPerioderPerNavident = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
         var gmlStillingPerioderPerNavident = ressursStillingProcessor.process(stillingPerioderPerNavident);
 
-        log.info("Lastet og prosessert ressursStillinger på gamlemåten. Tok {}", durationAsH24(start));
+        log.info("Lastet og prosessert ressursStillinger {} på gamlemåten. Tok {}", gmlStillingPerioderPerNavident.size(), durationAsH24(start));
 
         try {
             var nyeStillingPerioderPerNavident = nyeStillingPerioderPerNavidentFuture.get();
+            log.info("Lastet og prosessert ressursStillinger {} på nye måten. Tok {}", nyeStillingPerioderPerNavident.size(), durationAsH24(start));
             diffNyGmlResult(gmlStillingPerioderPerNavident, nyeStillingPerioderPerNavident);
             loggErrorsFraNyLast(nyeStillingPerioderPerNavident);
         } catch (Exception e) {
@@ -97,7 +98,7 @@ public class RessursStillingLoader {
             if (ressurs.isEmpty() || nomMastered.isMastered(navident)) {
                 log.info("Gammel prosessering har navident {} som ikke finnes i ny prosessering", navident);
             }
-            if (nySSPFN == null || (ressurs.isPresent() && ressurs.get().isStatlig())) {
+            if (nySSPFN == null && ressurs.isPresent() && ressurs.get().isStatlig()) {
                 log.info("Ny prosessering mangler for navident {}", navident);
             } else {
                 var differ = nySSPFN.diff(gmlSSPFN);
