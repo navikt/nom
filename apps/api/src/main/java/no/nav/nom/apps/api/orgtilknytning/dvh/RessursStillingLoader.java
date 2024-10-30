@@ -98,8 +98,10 @@ public class RessursStillingLoader {
             if (ressurs.isEmpty() || nomMastered.isMastered(navident)) {
                 log.info("Gammel prosessering har navident {} som ikke finnes i ny prosessering", navident);
             }
-            if (nySSPFN == null && ressurs.isPresent() && ressurs.get().isStatlig()) {
-                log.info("Ny prosessering mangler for navident {}", navident);
+            if (nySSPFN == null) {
+                if (ressurs.isPresent() && ressurs.get().isStatlig()) {
+                    log.info("Ny prosessering mangler for navident {}", navident);
+                }
             } else {
                 var differ = nySSPFN.diff(gmlSSPFN);
                 if (!differ.isEmpty()) {
