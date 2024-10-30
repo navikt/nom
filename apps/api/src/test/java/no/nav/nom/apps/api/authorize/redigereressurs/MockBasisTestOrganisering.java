@@ -51,7 +51,6 @@ abstract public class MockBasisTestOrganisering {
 
     @BeforeEach
     void setup() {
-        when(unleash.isEnabled("nom-api.driftsenhet-delegering-losning")).thenReturn(true);
         setupBasisOrganisasjon();
         authorizedNavident.oppdaterLedereForOrgenheter();
     }
