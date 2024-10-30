@@ -263,10 +263,11 @@ public class RessursSanityCheckService {
             }).toList();
     }
 
-    public List<RessursState> ressurserMedBlankMellomnavn() {
+    public List<String> ressurserMedBlankMellomnavn() {
         return ressursStateRepository.getAll().stream()
             .filter(r -> r.visningsnavn().mellomnavn().isPresent())
             .filter(r -> r.visningsnavn().mellomnavn().get().isBlank())
+            .map(RessursState::navident)
             .toList();
     }
 }
