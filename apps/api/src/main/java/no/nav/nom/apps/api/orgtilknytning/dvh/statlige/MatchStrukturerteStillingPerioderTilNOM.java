@@ -55,7 +55,7 @@ public class MatchStrukturerteStillingPerioderTilNOM {
             String presisAgressoId = stillingPeriode.getPresisAgressoId();
             if (presisAgressoId != null) {
                 // Ref: 'Matche til enheter i NOM' 1. Presis enhet på Stilling (eller via tilsvarende 2.i/2.iii)
-                var orgenheter = finnNomEnheterForEksaktIdIPerioden(presisAgressoId, stillingPeriode.stilling().enhetNavn(), stillingPeriode.gyldigFom(), stillingPeriode.gyldigTom());
+                var orgenheter = finnNomEnheterForEksaktIdIPerioden(presisAgressoId, stillingPeriode.gyldigFom(), stillingPeriode.gyldigTom());
 
                 if (orgenheter.size() == 1) {
                     var resultat = behandlePresisAgressoIdMedSingleMatchPaaNOMEnhet(stillingPeriode, orgenheter.getFirst(), sspForNavident);
@@ -108,21 +108,12 @@ public class MatchStrukturerteStillingPerioderTilNOM {
         return new StrukturerteStillingPerioderForNavident(sspForNavident, slaaSammenBackToBackPerioderOgSorterAsc(matchetMedNOMEnhet, sspForNavident));
     }
 
-    public List<IOrgenhet> finnNomEnheterForEksaktIdIPerioden(String agressoId, String navn, LocalDate gyldigFom, LocalDate gyldigTom) {
-        var matchPaaAgressoId = orgenhetService.exactMatchByAgressoId(agressoId).stream()
+    public List<IOrgenhet> finnNomEnheterForEksaktIdIPerioden(String agressoId, LocalDate gyldigFom, LocalDate gyldigTom) {
+        return orgenhetService.exactMatchByAgressoId(agressoId).stream()
             .filter(oe ->
                 oe.erORGENHETnode() && oe.overlapper(gyldigFom, gyldigTom)
             )
             .toList();
-        var matchPaaNavn = matchPaaAgressoId.stream()
-            .filter(oe -> oe.getNavn().equals(navn))
-            .toList();
-
-        if (matchPaaNavn.isEmpty()) {
-            return matchPaaAgressoId;
-        } else {
-            return matchPaaNavn;
-        }
     }
 
     private StillingPeriode behandlePresisAgressoIdMedSingleMatchPaaNOMEnhet(
@@ -252,7 +243,7 @@ public class MatchStrukturerteStillingPerioderTilNOM {
                 // Det vil si at perioden med overlapp faktisk kunne tilhørt begge enhetene
                 // Advar om dette
                 lagErrorForDelAvStillingPeriodeSomHvorMatchetEnhetSinPeriodeGaarInnIForrigeBehandledeDelPeriode(
-                    dayAfter(aktuellGyldigTom), oe.getGyldigTom().orElse(NO_END_DATE),
+                    aktuellGyldigTom, oe.getGyldigTom().orElse(NO_END_DATE),
                     sspForNavident, stillingPeriode, sspForNavident.navident(), oe
                 );
             }
