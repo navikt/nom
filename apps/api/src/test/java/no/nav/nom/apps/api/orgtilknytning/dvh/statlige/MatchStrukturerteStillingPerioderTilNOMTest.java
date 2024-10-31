@@ -23,6 +23,7 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPeriode
 import static no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident.ErrorType.KAN_IKKE_MATCHE_STILLINGSPERIODE_TIL_ENHET;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident.ErrorType.STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__BRUKER_EKSISTERENDE_OT;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident.ErrorType.STILLINGSPERIODE_UTENFOR_ORGENHET_GYLDIGHET__ENDRER_PERIODE;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.sorterOrgenhetFomDatoerNyesteDatoFoerstPrefererLiktNavn;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -194,6 +195,18 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends TestBase {
     }
 
     @Test
+    @DisplayName("sorterOrgenhetFomDatoerNyesteDatoFoerstPrefererLiktNavn")
+    void test_sorterOrgenhetFomDatoerNyesteDatoFoerstPrefererLiktNavn() {
+        var orgenhet1 = orgenhet("a123bc", "Nytt Navn", "0110001", LocalDate.of(2022, 1, 1), null);
+        var orgenhet2 = orgenhet("c321a", "Gammelt navn", "0110001", LocalDate.of(2021, 1, 1), null);
+        var result = sorterOrgenhetFomDatoerNyesteDatoFoerstPrefererLiktNavn(List.of(orgenhet1, orgenhet2), "Nytt Navn");
+
+        assertEquals(2, result.size());
+        assertEquals(LocalDate.of(2022, 1, 1), result.getFirst());
+        assertEquals(LocalDate.of(2021, 1, 1), result.getLast());
+    }
+
+    @Test
     @DisplayName("Singel match på presis AgressoId på Stillingen - Ref: 1.i.a.a")
     void test_SingleMatchPresisAgressoId_1_i_a_a() {
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, Collections.emptyList());
@@ -262,6 +275,33 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends TestBase {
         assertEquals(MAX_DATE,                  forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
     }
+
+    @Test
+    @DisplayName("Singel match på presis AgressoId med navn på Stillingen - Ref: 1.i.a.b")
+    void test_SingleMatchPresisAgressoId_medNavn_1_i_a_b() {
+        var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, Collections.emptyList());
+
+        List<StillingPeriode> stillingperioder =  List.of(
+            stillingPeriode("0110001", "Single match", LocalDate.of(2023, 1, 1), MAX_DATE)
+        );
+        strukturerteStillingPerioder.addStillingPerioder(stillingperioder);
+
+        when(orgenhetService.exactMatchByAgressoId("0110001")).thenReturn(List.of(
+            orgenhet("a999bc", "Single match", "0110001", LocalDate.of(2021, 1, 1), null), // Skal velge den under fordi den er nyere
+            orgenhet("a123bc", "Single match", "0110001", LocalDate.of(2023, 1, 1), null),
+            orgenhet("c987ba", "Annet navn", "0110001", LocalDate.of(2024, 1, 1), null), // Selv om denne er nyere - skal den velge match på navn først.
+            orgenhet("c321ba", "Annet navn", "0110001")
+        ));
+
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        assertEquals(LocalDate.of(2023, 1, 1),  forsteStillingPeriode.gyldigFom());
+        assertEquals(MAX_DATE,                  forsteStillingPeriode.gyldigTom());
+        assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
+    }
+
 
     @Test
     @DisplayName("Singel match på upresis AgressoId matcher presis AgressoId på Ressurs på Stillingen - Ref: 2.i -> 1.i.a.b")
