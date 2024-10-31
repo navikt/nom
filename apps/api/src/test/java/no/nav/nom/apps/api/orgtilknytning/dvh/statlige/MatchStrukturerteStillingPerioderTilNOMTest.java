@@ -264,6 +264,31 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Singel match på presis AgressoId med navn på Stillingen - Ref: 1.i.a.b")
+    void test_SingleMatchPresisAgressoId_medNavn_1_i_a_b() {
+        var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, Collections.emptyList());
+
+        List<StillingPeriode> stillingperioder =  List.of(
+            stillingPeriode("0110001", "Single match", LocalDate.of(2023, 1, 1), MAX_DATE)
+        );
+        strukturerteStillingPerioder.addStillingPerioder(stillingperioder);
+
+        when(orgenhetService.exactMatchByAgressoId("0110001")).thenReturn(List.of(
+            orgenhet("c321ba", "Annet navn", "0110001"),
+            orgenhet("a123bc", "Single match", "0110001")
+        ));
+
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        assertEquals(LocalDate.of(2023, 1, 1),  forsteStillingPeriode.gyldigFom());
+        assertEquals(MAX_DATE,                  forsteStillingPeriode.gyldigTom());
+        assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
+    }
+
+
+    @Test
     @DisplayName("Singel match på upresis AgressoId matcher presis AgressoId på Ressurs på Stillingen - Ref: 2.i -> 1.i.a.b")
     void test_SingleMatchUpresisAgressoIdMatcherPresisRessursAgressoId_2_i__1_i_a_b() {
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, Collections.emptyList());
