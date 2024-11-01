@@ -11,7 +11,6 @@ import no.nav.nom.apps.api.common.cache.CacheQueueService;
 import no.nav.nom.apps.api.common.cache.CacheType;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
-import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
 import no.nav.nom.contract.ad.AdRessurs;
@@ -50,6 +49,7 @@ public class OrgtilknytningEndretEmailService {
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
     private final LeaderElection leaderElection;
     public final String epost_body_item_template = "{0}({1}), fra og med {2}, til og med {3}. Endring utført av {4}, på {5}.";
+    public final String epost_body_item_template_ot_notfound = "Endring({0}) utført av {1}, på {2}.";
 
     public OrgtilknytningEndretEmailService(
         EmailClient emailClient,
@@ -109,18 +109,17 @@ public class OrgtilknytningEndretEmailService {
             log.info("navident: {}, endringer: {}", navident, endringer);
         });
 
-        if (unleash.isEnabled(UNLEASH_USE_SEND_OT_ENDRINGER_EMAIL)) {
-            otEndringer.forEach((navident, endringer) -> {
-                var endretRessurs = ressursStateRepository.findByNavident(navident);
-                if(endretRessurs.isEmpty()) {
-                    log.error("Fant ikke ressurs med navident {} og epost varsel vil ikke bli sendt.", navident);
-                    // not cleared from the queue! will be retried next time
-                } else {
-                    sendEmail(endretRessurs.get(), endringer);
-                    removeFromOrgtilknytningEndringerQueue(navident);
-                }
-            });
-        }
+        otEndringer.forEach((navident, endringer) -> {
+            var endretRessurs = ressursStateRepository.findByNavident(navident);
+            if(endretRessurs.isEmpty()) {
+                log.error("Fant ikke ressurs med navident {} og epost varsel vil ikke bli sendt.", navident);
+                // not cleared from the queue! will be retried next time
+            } else {
+                sendEmail(endretRessurs.get(), endringer);
+                removeFromOrgtilknytningEndringerQueue(navident);
+            }
+        });
+
     }
 
     private void sendEmail(RessursState endretRessurs, List<OTEndretData> otEndringerData) {
@@ -149,8 +148,10 @@ public class OrgtilknytningEndretEmailService {
             }
 
             log.info("Sender OT endringer epost subject: {}, recipients: {}, message: {}", subject, recipientList, body);
-            EmailMessage message = new EmailMessage(subject, body, recipientList);
-            emailClient.sendEmail(message).subscribe();
+            if (unleash.isEnabled(UNLEASH_USE_SEND_OT_ENDRINGER_EMAIL)) {
+                EmailMessage message = new EmailMessage(subject, body, recipientList);
+                emailClient.sendEmail(message).subscribe();
+            }
         } catch (ADResponseException e) {
             throw new RessursOpprettetEmailException("Fant ikke leder epost adresse for leder");
         } catch (IOException | TemplateException e) {
@@ -172,15 +173,20 @@ public class OrgtilknytningEndretEmailService {
         StringBuilder otEndringer = new StringBuilder();
         for (OTEndretData event : otEndringerData) {
             var orgtilknytningState =  orgtilknytningStateRepository.findByFid(event.fid());
+            var utfortAvNavIdent = event.changedByNavIdent();
+            var utfortAvRessurs = ressursStateRepository.findByNavident(utfortAvNavIdent);
+            String utfortAvRessursNavn = utfortAvRessurs.isPresent()? utfortAvRessurs.get().visningsnavn().getFormattedVisningsnavn() : "Ukjent";
             if(orgtilknytningState.isPresent()){
                 var ot = orgtilknytningState.get();
-                var utfortAvNavIdent = event.changedByNavIdent();
-                var utfortAvRessurs = ressursStateRepository.findByNavident(utfortAvNavIdent);
-                String utfortAvRessursNavn = utfortAvRessurs.isPresent()? utfortAvRessurs.get().visningsnavn().getFormattedVisningsnavn() : "Ukjent";
                 log.info("Sender OT endringer utfortAv: {}, {}, {}", utfortAvNavIdent, utfortAvRessurs, utfortAvRessursNavn);
                 var orgenhetNavn = orgEnhetStateRepository.findById(ot.orgEnhetId()).map(orgEnhet -> orgEnhet.navn()).orElse("Ukjent");
                 String endring = MessageFormat.format(epost_body_item_template,
                     orgenhetNavn, ot.orgEnhetId(), formatDateTime(ot.gyldigFom()), formatDateTime(ot.gyldigTom()), utfortAvRessursNavn, event.timestamp());
+                otEndringer.append(endring);
+            } else {
+                log.warn("Fant ikke orgtilknytning for OTEndretData: {} i orgtilknytningStateRepository. Sjekk!", event);
+                String endring = MessageFormat.format(epost_body_item_template_ot_notfound,
+                    event.eventType(), utfortAvRessursNavn, event.timestamp());
                 otEndringer.append(endring);
             }
 
@@ -230,18 +236,6 @@ public class OrgtilknytningEndretEmailService {
             }
         }
         return recipientNavidents;
-    }
-
-
-    public String getNavIdentFromOrgtilknytningState(String orgtilknytningStateFid) {
-        try {
-            var orgtilknytningStateBeforeChanges = orgtilknytningStateRepository.findByFid(orgtilknytningStateFid)
-                .orElseThrow(() -> OrgtilknytningNotFoundException.fid(orgtilknytningStateFid));
-            return orgtilknytningStateBeforeChanges.navident();
-        } catch (Exception e) {
-            log.error("Navident not found in state for  fid: {}. Error: {}", orgtilknytningStateFid, e.getMessage());
-        }
-        return null;
     }
 
 }

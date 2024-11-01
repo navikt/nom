@@ -2,9 +2,6 @@ package no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
-import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.orgtilknytning.api.email.OTEndretData;
-import no.nav.nom.apps.api.orgtilknytning.api.email.OrgtilknytningEndretEmailService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytningCommand;
@@ -22,9 +19,6 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretE
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningTilknytningtypeEndretEventV1;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -32,30 +26,8 @@ import java.util.concurrent.CompletableFuture;
 public class OrgtilknytningCommandService {
     private final no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningEventProducer eventProducer;
 
-    private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
-
-    public OrgtilknytningCommandService(no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningEventProducer eventProducer,
-                                        OrgtilknytningEndretEmailService orgtilknytningEndretEmailService) {
+    public OrgtilknytningCommandService(no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningEventProducer eventProducer) {
         this.eventProducer = eventProducer;
-        this.orgtilknytningEndretEmailService = orgtilknytningEndretEmailService;
-    }
-
-    private void addToOTEndretDataEmailQueue(String navident, String fid, OTEndretData.OTEndretDataType eventType) {
-        if(navident == null  || navident.isBlank()) {
-            log.warn("Navident is null. Cannot add to OTendretData email queue");
-            return;
-        }
-        String changedByNavIdent = SecurityUtil.getAuthenticatedNavIdent();
-        orgtilknytningEndretEmailService.addToOrgtilknytningEndringerQueue(
-            navident,
-            OTEndretData.builder()
-                .fid(fid)
-                .navident(navident)
-                .changedByNavIdent(changedByNavIdent)
-                .eventType(eventType)
-                .timestamp(DateTimeFormatter.ofPattern("dd.MM.YYYY").format(LocalDate.now()))
-                .build()
-        );
     }
 
     public String opprettOrgtilknytning(OpprettOrgtilknytning opprettOrgtilknytning) {
@@ -65,8 +37,6 @@ public class OrgtilknytningCommandService {
     }
 
     private CompletableFuture<SendResult<String, OrgtilknytningEvent>> opprettOrgtilknytning(String fid, OpprettOrgtilknytning opprettOrgtilknytning) {
-        //update OTendretData for e-post varsel
-        addToOTEndretDataEmailQueue(opprettOrgtilknytning.navident(), fid, OTEndretData.OTEndretDataType.OT_NY);
         return eventProducer.sendMessage(new OrgtilknytningOpprettetEventV1(
             fid,
             new OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData(
@@ -103,8 +73,6 @@ public class OrgtilknytningCommandService {
     public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreDagligOppfolgingOrgtilknytning(
         EndreDagligOppfolgingOrgtilknytningCommand endreDagligOppfolgingOrgtilknytningCommand
     ) {
-        //update OTendretData for e-post varsel
-        addToOTEndretDataEmailQueue(endreDagligOppfolgingOrgtilknytningCommand.navident(), endreDagligOppfolgingOrgtilknytningCommand.fid(), OTEndretData.OTEndretDataType.OT_ENDRET);
         return eventProducer.sendMessage(new OrgtilknytningDagligOppfolgingEndretEventV1(
             endreDagligOppfolgingOrgtilknytningCommand.fid(),
             new OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData(
@@ -134,8 +102,6 @@ public class OrgtilknytningCommandService {
 
     // Alle verdier i OrgtilknytningDatoEndretEventData objektet erstatter eksisterende verdier. Også tomme.
     public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreOrgtilknytningDato(String fid, EndreOrgtilknytningDato endreOrgtilknytningDato) {
-        //update OTendretData for e-post varsel
-        addToOTEndretDataEmailQueue(endreOrgtilknytningDato.navident(), fid, OTEndretData.OTEndretDataType.OT_ENDRET);
         return eventProducer.sendMessage(
             new OrgtilknytningDatoEndretEventV2(
                 fid,
@@ -150,9 +116,6 @@ public class OrgtilknytningCommandService {
 
 
     public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreOrgtilknytningDato(EndreOrgtilknytningDatoCommand endreOrgtilknytningDatoCommand) {
-        //update OTendretData for e-post varsel
-        addToOTEndretDataEmailQueue(orgtilknytningEndretEmailService.getNavIdentFromOrgtilknytningState(endreOrgtilknytningDatoCommand.fid()),
-            endreOrgtilknytningDatoCommand.fid(), OTEndretData.OTEndretDataType.OT_ENDRET);
         return eventProducer.sendMessage(
             new OrgtilknytningDatoEndretEventV2(
                 endreOrgtilknytningDatoCommand.fid(),
@@ -166,10 +129,6 @@ public class OrgtilknytningCommandService {
     }
 
     public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreTilknytningtype(EndreTilknytningtypeCommand endreTilknytningTypeCommand) {
-        //update OTendretData for e-post varsel
-        addToOTEndretDataEmailQueue(orgtilknytningEndretEmailService.getNavIdentFromOrgtilknytningState(endreTilknytningTypeCommand.fid()),
-            endreTilknytningTypeCommand.fid(), OTEndretData.OTEndretDataType.OT_ENDRET);
-
         return eventProducer.sendMessage(
             new OrgtilknytningTilknytningtypeEndretEventV1(
                 endreTilknytningTypeCommand.fid(),
@@ -181,9 +140,6 @@ public class OrgtilknytningCommandService {
     }
 
     public CompletableFuture<SendResult<String, OrgtilknytningEvent>> fjernOrgtilknytning(String fid, FjernOrgtilknytning fjernOrgtilknytning) {
-        //update OTendretData for e-post varsel
-        addToOTEndretDataEmailQueue(fjernOrgtilknytning.navident(),
-            fid, OTEndretData.OTEndretDataType.OT_FJERNET);
         return eventProducer.sendMessage(new OrgtilknytningFjernetEventV1(
             fid,
             new OrgtilknytningFjernetEventV1.OrgtilknytningFjernetEventData(
