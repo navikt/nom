@@ -3,6 +3,9 @@ package no.nav.nom.apps.api.common;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 public class DateUtils {
@@ -57,6 +60,63 @@ public class DateUtils {
         }
 
         return today.plusDays(1);
+    }
+
+    public static boolean isPeriodCoveredBy(LocalDate periodFom, LocalDate periodTom, List<Periode> perioder) {
+        return perioder.stream().anyMatch(p -> isPeriodCoveredByAny(periodFom, periodTom, mergeContinuousPeriods(perioder)));
+    }
+
+    public static List<Periode> mergeContinuousPeriods(List<Periode> perioder) {
+        var sorted = perioder.stream()
+            .sorted(Comparator.comparing(p -> orMin(p.start())))
+            .toList();
+
+        List<Periode> merged = new ArrayList<>();
+        Periode current = null;
+        for (Periode p : sorted) {
+            var start = orMin(p.start());
+            var end = orMax(p.end());
+            if (current == null) {
+                current = new Periode(orNull(start), orNull(end));
+            } else {
+                if (orMax(current.end()).isBefore(start.minusDays(1))) {
+                    merged.add(current);
+                    current = new Periode(orNull(start), orNull(end));
+                } else {
+                    current = new Periode(current.start(), orNull(end));
+                }
+            }
+        }
+        merged.add(current);
+        return merged;
+    }
+
+    public static boolean isPeriodCoveredByAny(LocalDate periodFom, LocalDate periodTom, List<Periode> periode) {
+        return periode.stream().anyMatch(p -> isPeriodCoveredBy(periodFom, periodTom, p));
+    }
+
+    public static boolean isPeriodCoveredBy(LocalDate periodFom, LocalDate periodTom, Periode periode) {
+        return isPeriodCoveredBy(periodFom, periodTom, periode.start(), periode.end());
+    }
+
+    public static boolean isPeriodCoveredBy(LocalDate periodFom, LocalDate periodTom, LocalDate fom, LocalDate tom) {
+        periodFom = orMin(periodFom);
+        periodTom = orMax(periodTom);
+        fom = orMin(fom);
+        tom = orMax(tom);
+
+        return !fom.isAfter(periodFom) && !tom.isBefore(periodTom);
+    }
+
+    private static LocalDate orMin(LocalDate date) {
+        return date == null ? LocalDate.MIN : date;
+    }
+    private static LocalDate orMax(LocalDate date) {
+        return date == null ? LocalDate.MAX : date;
+    }
+
+    private static LocalDate orNull(LocalDate date) {
+        return LocalDate.MIN.equals(date) || LocalDate.MAX.equals(date) ? null : date;
     }
 
     public record Periode(

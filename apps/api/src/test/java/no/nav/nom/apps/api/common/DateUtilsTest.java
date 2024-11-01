@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertThrows;
@@ -48,5 +49,45 @@ class DateUtilsTest {
         } else {
             Assertions.assertEquals(LocalDate.now().plusDays(1), DateUtils.nextWorkingDay());
         }
+    }
+
+    @Test
+    @DisplayName("Merge continuous periods")
+    void test_mergeContinuousPeriods() {
+        var periode1 = new DateUtils.Periode(LocalDate.now(), LocalDate.now().plusYears(1));
+        var periode2 = new DateUtils.Periode(periode1.end().plusDays(1), LocalDate.now().plusYears(2));
+        var periode3 = new DateUtils.Periode(periode1.end().plusDays(1), null);
+        var periode4 = new DateUtils.Periode(null, LocalDate.now().plusMonths(18));
+        var periode5 = new DateUtils.Periode(LocalDate.now(), null);
+        var periode6 = new DateUtils.Periode(LocalDate.now().plusYears(4), null);
+
+        var merged = DateUtils.mergeContinuousPeriods(List.of(periode1, periode2, periode3, periode4, periode5, periode6));
+        Assertions.assertEquals(1, merged.size());
+        Assertions.assertNull(merged.getFirst().start());
+        Assertions.assertNull(merged.getFirst().end());
+
+        merged = DateUtils.mergeContinuousPeriods(List.of(periode1, periode2));
+        Assertions.assertEquals(1, merged.size());
+        Assertions.assertEquals(periode1.start(), merged.getFirst().start());
+        Assertions.assertEquals(periode2.end(), merged.getFirst().end());
+
+        merged = DateUtils.mergeContinuousPeriods(List.of(periode1, periode2, periode6));
+        Assertions.assertEquals(2, merged.size());
+        Assertions.assertEquals(periode1.start(), merged.getFirst().start());
+        Assertions.assertEquals(periode2.end(), merged.getFirst().end());
+        Assertions.assertEquals(periode6.start(), merged.getLast().start());
+        Assertions.assertEquals(periode6.end(), merged.getLast().end());
+
+        merged = DateUtils.mergeContinuousPeriods(List.of(periode1, periode2, periode3, periode6));
+        Assertions.assertEquals(1, merged.size());
+        Assertions.assertEquals(periode1.start(), merged.getFirst().start());
+        Assertions.assertNull(merged.getFirst().end());
+
+        merged = DateUtils.mergeContinuousPeriods(List.of(periode1, periode2, periode4, periode6));
+        Assertions.assertEquals(2, merged.size());
+        Assertions.assertNull(merged.getFirst().start());
+        Assertions.assertEquals(periode2.end(), merged.getFirst().end());
+        Assertions.assertEquals(periode6.start(), merged.getLast().start());
+        Assertions.assertEquals(periode6.end(), merged.getLast().end());
     }
 }

@@ -96,20 +96,24 @@ public class RessursStillingLoader {
             var nySSPFN = nyeStillingPerioderPerNavident.get(navident);
             var ressurs = ressursStateRepository.findByNavident(navident);
             if (ressurs.isEmpty() || nomMastered.isMastered(navident)) {
-                log.info("Gammel prosessering har navident {} som ikke finnes i ny prosessering", navident);
+                log.debug("Gammel prosessering har navident {} som ikke finnes i ny prosessering", navident);
             }
             if (nySSPFN == null) {
                 if (ressurs.isPresent() && ressurs.get().isStatlig()) {
                     log.info("Ny prosessering mangler for navident {}", navident);
                 }
             } else {
-                var differ = nySSPFN.diff(gmlSSPFN);
+                var differ = nySSPFN.diff(gmlSSPFN, log.isDebugEnabled());
                 if (!differ.isEmpty()) {
                     log.info("Forskjell i prosessering av ressursStillinger for navident {}: {}", navident, differ);
                 }
                 var nyLastAktiveOgFremtidigeEndringer = nySSPFN.aktiveOgFremtidigeEndringer();
                 if (!nyLastAktiveOgFremtidigeEndringer.isEmpty()) {
-                    log.info("Aktive og fremtidige endringer i ny last for navident {}: {}", navident, nyLastAktiveOgFremtidigeEndringer);
+                    if (log.isDebugEnabled()) {
+                        log.info("Aktive og fremtidige endringer i ny last for navident {}: {}", navident, nyLastAktiveOgFremtidigeEndringer);
+                    } else {
+                        log.info("Aktive og fremtidige endringer i ny last for navident {}", navident);
+                    }
                 }
             }
         });
