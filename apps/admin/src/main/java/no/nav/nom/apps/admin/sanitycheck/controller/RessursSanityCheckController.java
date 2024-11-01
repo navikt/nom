@@ -89,4 +89,18 @@ public class RessursSanityCheckController {
         return ResponseEntity.ok(ressursSanityCheckService.ressurserMedBlankMellomnavn());
     }
 
+    @Operation(
+        description = "List duplikate ressurser på samme navident",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/duplikateRessurserPaaNavident")
+    public ResponseEntity<List<RessursState>> duplikateRessurserPaaNavident() {
+        return ResponseEntity.ok(ressursSanityCheckService.finnDuplikateRessurserPaaSammeNavident());
+    }
+
 }

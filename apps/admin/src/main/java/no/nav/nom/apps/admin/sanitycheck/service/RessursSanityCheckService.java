@@ -18,7 +18,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class RessursSanityCheckService {
@@ -170,6 +172,15 @@ public class RessursSanityCheckService {
             ));
         });
         return ressursMedEnhet;
+    }
+
+    public List<RessursState> finnDuplikateRessurserPaaSammeNavident() {
+        var alleRessurser = ressursStateRepository.getAll();
+
+        Set<String> fidNavidenter = new HashSet<>();
+        return alleRessurser.stream()
+            .filter(n -> !fidNavidenter.add(n.navident()))
+            .toList();
     }
 
     private List<String> uniqueIdForOverEnhet(List<OrganiseringState> organiseringer) {

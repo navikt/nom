@@ -12,6 +12,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class OrgtilknytningSanityCheckService {
@@ -19,7 +21,8 @@ public class OrgtilknytningSanityCheckService {
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
 
-    public OrgtilknytningSanityCheckService(OrgtilknytningStateRepository orgtilknytningStateRepository, OrgEnhetStateRepository orgEnhetStateRepository) {
+    public OrgtilknytningSanityCheckService(OrgtilknytningStateRepository orgtilknytningStateRepository,
+                                            OrgEnhetStateRepository orgEnhetStateRepository) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
     }
@@ -44,6 +47,27 @@ public class OrgtilknytningSanityCheckService {
         });
 
         return orgtilknytningMedOrgEnhetList;
+    }
+
+    public List<OrgtilknytningState> orgtilknytningNegativPeriode() {
+        return orgtilknytningStateRepository.getAll().stream()
+            .filter(ot -> ot.gyldigTom().isPresent() && ot.gyldigTom().get().isBefore(ot.gyldigFom()))
+            .toList();
+    }
+
+    public List<OrgtilknytningState> orgtilknytningerMedFlereDOLSammePeriode() {
+        Map<String, List<OrgtilknytningState>> groupedByNavidentForCurrentPeriodWithDagligDagligOppfolging = orgtilknytningStateRepository.getAll().stream()
+            .filter(ot -> ot.gyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
+                (ot.gyldigTom().isEmpty() || ot.gyldigTom().get().isAfter(LocalDate.now()))) // er current date
+            .filter(OrgtilknytningState::erDagligOppfolging) // er dagligoppfolging
+            .collect(Collectors.groupingBy(OrgtilknytningState::navident));
+
+
+        // Filter out groups where there is more than one dagligOppfolging in current period
+        return groupedByNavidentForCurrentPeriodWithDagligDagligOppfolging.values().stream()
+            .filter(group -> group.size() > 1)
+            .flatMap(List::stream)
+            .toList();
     }
 
     private List<OrgtilknytningState> aktiveOrgtilknytninger(Collection<OrgtilknytningState> orgtilknytninger) {
