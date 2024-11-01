@@ -75,6 +75,8 @@ import {
   formatDateWithoutTimezone,
   formatDisplayDate,
   formatVisningsnavn,
+  isAfterToday,
+  isBeforeDate,
   isBeforeToday,
   isSameDateOrAfter,
   isSameDateOrBefore,
@@ -219,6 +221,7 @@ function OrgtilknytningForm({
 }) {
   const navigate = useNavigate();
   const hasWriteAccess = useHasWriteAccess();
+  const hasAdminAccess = useHasAdminAccess();
 
   const nomSharepointLenke: string =
     "https://navno.sharepoint.com/sites/intranett-organisasjon/SitePages/Organisasjonsmaster-(NOM).aspx";
@@ -381,11 +384,11 @@ function OrgtilknytningForm({
             isBeforeToday(dateWithoutTimezone(new Date(field.gyldigTom)));
 
           if (
-            field.fid &&
-            field.gyldigTom &&
-            !useHasAdminAccess() &&
+            !!field.fid &&
+            !!field.gyldigTom &&
+            !hasAdminAccess &&
             !hasFieldTomChanged(field) &&
-            !isSameDateOrAfter(
+            isBeforeDate(
               dateWithoutTimezone(new Date(field.gyldigTom)),
               dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
             )
@@ -403,7 +406,7 @@ function OrgtilknytningForm({
           return (
             <div
               css={css`
-                background: #fff;
+                background: ${avsluttet ? "var(--a-surface-subtle)" : "#fff"};
                 margin-top: var(--a-spacing-6);
                 padding: var(--a-spacing-6);
                 border-radius: 8px;
@@ -626,9 +629,15 @@ function EditOrgilkntyningFormPart({
       >
         <Heading size="medium">{orgEnhetQuery.data?.navn}</Heading>
 
-        {field.gyldigTom && avsluttet && (
+        {avsluttet && (
           <Tag size="medium" variant="warning">
             Avsluttet
+          </Tag>
+        )}
+
+        {isAfterToday(field.gyldigFom) && (
+          <Tag size="medium" variant="success">
+            Fremtidig
           </Tag>
         )}
       </div>
