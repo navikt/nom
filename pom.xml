@@ -340,6 +340,17 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <!-- Enable annotation processing for JDK >= 23 -->
+                <!-- https://inside.java/2024/06/18/quality-heads-up/ -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-proc:full</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
