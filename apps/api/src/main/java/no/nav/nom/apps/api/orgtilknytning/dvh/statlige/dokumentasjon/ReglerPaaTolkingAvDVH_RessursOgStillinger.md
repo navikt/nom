@@ -100,7 +100,7 @@ Deretter skal vi matche disse DVH periodene til Enheter i NOM. Om DVH perioden s
 
 1. Er agressoId (Stilling/U4) 'presis' - det vil si 7 eller flere sifre, så representerer den en løvnode/ORGENHET.
     Dette vil være tilfellet med korrekt stilling i U4 hvor stillingen henger på en AgressoId for enhet av nivå ORGENHET. 
-    Da skal vi finne den enhet i NOM som har samme (exact match) AgressoId og er nivå ORGENHET. 
+    Da skal vi finne den enhet i NOM som har samme (exact match) AgressoId og er nivå ORGENHET.
     Det kan være: 
 
    1. Single match:  

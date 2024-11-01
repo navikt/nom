@@ -321,3 +321,15 @@ export async function getListAvOTMedGyldighetUtoverEnhetensGyldighet(): Promise<
     )
     .json<OrgtilknytningMedOrgEnhet[]>();
 }
+
+export function getRessursMedBlankMellomNavn() {
+  return queryOptions({
+    queryKey: ["API", "RESSURSBLANKMELLOMNAVN"],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/SanityCheck/ressurs/ressursMedBlankMellomNavn`,
+        )
+      ).json<RessursState[]>(),
+  });
+}

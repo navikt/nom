@@ -1,11 +1,19 @@
 import { css } from "@emotion/react";
-import { ChevronLeftIcon } from "@navikt/aksel-icons";
-import { Alert, Checkbox, Heading, Link, Loader } from "@navikt/ds-react";
+import { ChevronLeftIcon, FileExcelIcon } from "@navikt/aksel-icons";
+import {
+  Alert,
+  Button,
+  Checkbox,
+  Heading,
+  Link,
+  Loader,
+} from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import React, { useState } from "react";
 
 import {
+  downloadExcelByListNavident,
   getAlleUnderliggendeOrgEnheter,
   getOrgEnhet,
   isOrgEnhetArbeidsomraade,
@@ -14,6 +22,7 @@ import ContentWrapper from "~/components/ContentWrapper";
 import { PageBanner } from "~/components/PageBanner";
 import { OrgRessursTabellPageInner } from "~/pages/ResourcePage/TableView/OrgRessursTabellPageInner";
 import type { OrgEnhet } from "~/types/api-models";
+import { isPeriodActiveOrFuture } from "~/utils";
 
 export const OrgRessursTabellPage = () => {
   const { id } = useParams({ from: "/org/table/$id" });
@@ -27,13 +36,13 @@ export const OrgRessursTabellPage = () => {
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(id as string),
     queryFn: () => getOrgEnhet.queryFn(id as string),
-    enabled: !!id,
+    enabled: !!id && isOrgEnhetArbeidsomraadeQuery.isSuccess,
   });
 
   const underliggendeOrgEnhetQuery = useQuery({
     queryKey: getAlleUnderliggendeOrgEnheter.queryKey(id as string),
     queryFn: () => getAlleUnderliggendeOrgEnheter.queryFn(id as string),
-    enabled: !!id,
+    enabled: !!id && orgEnhetQuery.isSuccess,
   });
 
   const [includeUnderliggende, setIncludeUnderliggende] = useState(true);
@@ -50,6 +59,28 @@ export const OrgRessursTabellPage = () => {
   }
 
   const filteredOrgEnheter: OrgEnhet[] = kombinertOrgEnheter as OrgEnhet[];
+
+  const allRessursKoblinger = filteredOrgEnheter.flatMap((orgEnhet) =>
+    orgEnhet.ressursKoblinger.filter((kobling) =>
+      isPeriodActiveOrFuture(kobling.gyldigFom, kobling.gyldigTom),
+    ),
+  );
+
+  const ressurserNavidents = [
+    ...new Set(allRessursKoblinger.map((tilknytning) => tilknytning.navident)),
+  ];
+
+  const excelFilNavn = () => {
+    return includeUnderliggende &&
+      underliggendeOrgEnhetQuery.isSuccess &&
+      underliggendeOrgEnhetQuery.data.length > 0
+      ? "Medarbeidere i " + orgEnhetQuery.data?.navn + " og underliggende.xlsx"
+      : "Medarbeidere i " + orgEnhetQuery.data?.navn + ".xlsx";
+  };
+
+  const handleDownloadExcel = async () => {
+    await downloadExcelByListNavident(ressurserNavidents, excelFilNavn());
+  };
 
   if (orgEnhetQuery.isLoading || underliggendeOrgEnhetQuery.isLoading) {
     return (
@@ -105,21 +136,35 @@ export const OrgRessursTabellPage = () => {
             <ChevronLeftIcon fontSize="1.8rem" />
             <b>Tilbake til {orgEnhetQuery.data?.navn}</b>
           </Link>
-          <Checkbox
-            checked={includeUnderliggende}
-            css={css`
-              color: #000;
-              font-size: 1.2rem;
-              margin-bottom: 20px;
-            `}
-            onChange={() => {
-              setIncludeUnderliggende(!includeUnderliggende);
-            }}
-            value="underliggende-organisasjonsenheter"
-          >
-            Vis medarbeidere fra underliggende organisasjonsenheter
-          </Checkbox>
-          <OrgRessursTabellPageInner orgEnheter={filteredOrgEnheter} />
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <Checkbox
+              checked={includeUnderliggende}
+              css={css`
+                color: #000;
+                font-size: 1.2rem;
+                margin-bottom: 20px;
+              `}
+              onChange={() => {
+                setIncludeUnderliggende(!includeUnderliggende);
+              }}
+              value="underliggende-organisasjonsenheter"
+            >
+              Vis medarbeidere fra underliggende organisasjonsenheter
+            </Checkbox>
+            <div>
+              <Button
+                icon={<FileExcelIcon />}
+                onClick={handleDownloadExcel}
+                variant="secondary"
+              >
+                Til Excel
+              </Button>
+            </div>
+          </div>
+          <OrgRessursTabellPageInner
+            orgEnheter={filteredOrgEnheter}
+            ressurserNavidents={ressurserNavidents}
+          />
         </ContentWrapper>
       </>
     );

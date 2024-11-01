@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -109,6 +110,9 @@ public abstract class TestBase {
     @MockBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
+//    @Autowired
+//    NomMastered nomMastered;
+//
     @BeforeEach
     void reset() {
         dvhRepository.clearRepository();

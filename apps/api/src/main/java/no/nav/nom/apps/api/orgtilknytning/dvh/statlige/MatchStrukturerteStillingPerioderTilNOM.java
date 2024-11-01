@@ -30,6 +30,8 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.getLatestDate
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.overlapperEllerErDirekteEtterfoelgende;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.slaaSammenBackToBackPerioderOgSorterAsc;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.sorterMedNyesteEnhetFoerst;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.sorterOrgenhetFomDatoerNyesteDatoFoerst;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.sorterOrgenhetFomDatoerNyesteDatoFoerstPrefererLiktNavn;
 
 @Component
 @Slf4j
@@ -185,17 +187,21 @@ public class MatchStrukturerteStillingPerioderTilNOM {
 
         LocalDate aktuellGyldigTom = stillingPeriode.gyldigTom();
 
-        // Match perioder baklengs - altså bruk orgenheten som har senest gyldigFom først
-        for(IOrgenhet oe: sorterMedNyesteEnhetFoerst(orgenheter)) {
+        var stillingPeriodeEnhetNavn = stillingPeriode.stilling().enhetNavn();
+        // Match perioder baklengs - altså bruk orgenheten som har nyest gyldigFom først
+        for(LocalDate oeGyldigFom: sorterOrgenhetFomDatoerNyesteDatoFoerstPrefererLiktNavn(orgenheter, stillingPeriodeEnhetNavn)) {
+            // Finn orgenhet som matcher gyldigFom, prioriter likt navn
+            var aktuellOrgEnhet = getEnhetMedGyldigFomPrioriterNavn(stillingPeriodeEnhetNavn, orgenheter, oeGyldigFom);
+
             if (likEllerFoer(stillingPeriode.gyldigFom(),aktuellGyldigTom)) { // Vi har ikke 'fylt' opp perioden enda
-                if (foer(oe.getGyldigTom().orElse(NO_END_DATE), aktuellGyldigTom)) {
+                if (foer(aktuellOrgEnhet.getGyldigTom().orElse(NO_END_DATE), aktuellGyldigTom)) {
                     // - Udekket periode mellom oe.getGyldigTom() og aktuellGyldigTom
                     // Sjekk om dette kan dekkes av eksisterende OT for denne enheten
                     var eksisterendeOT = finnOTerSomRepresentererEnhetOgOverlapperPeriode(
                         sspForNavident.navident(),
-                        getLatestDate(oe.getGyldigFom(), stillingPeriode.gyldigFom()),
+                        getLatestDate(aktuellOrgEnhet.getGyldigFom(), stillingPeriode.gyldigFom()),
                         aktuellGyldigTom,
-                        oe.getId()
+                        aktuellOrgEnhet.getId()
                     );
                     if (!eksisterendeOT.isEmpty()) {
                         // Har eksisterende OT som dekker perioden for matchet Orgenhet, som enheten selv ikke er gyldig for
@@ -203,23 +209,23 @@ public class MatchStrukturerteStillingPerioderTilNOM {
 
                         // Har en eller flere eksisterende OT som dekker inn i perioden for matchet Orgenhet.
                         // Kan bruke kombinasjon av disse for å dekke perioder utenfor Enhetens gyldighetsperiode
-                        var nyStillingsPeriode = dekkDelperiodeMedEksisterendeOTer(stillingPeriode, sspForNavident, oe, eksisterendeOT);
+                        var nyStillingsPeriode = dekkDelperiodeMedEksisterendeOTer(stillingPeriode, sspForNavident, aktuellOrgEnhet, eksisterendeOT);
                         splittetPerioder.add(nyStillingsPeriode);
                     } else {
                         // Har ikke eksisterende OT for StillingPerioden - Må endre StillingPerioden til å være innenfor Enhetens gyldighetsperiode
-                        LocalDate nyGyldigFom = getLatestDate(stillingPeriode.gyldigFom(), oe.getGyldigFom());
-                        LocalDate nyGyldigTom = getEarliestDate(aktuellGyldigTom, oe.getGyldigTom());
+                        LocalDate nyGyldigFom = getLatestDate(stillingPeriode.gyldigFom(), aktuellOrgEnhet.getGyldigFom());
+                        LocalDate nyGyldigTom = getEarliestDate(aktuellGyldigTom, aktuellOrgEnhet.getGyldigTom());
 
                         var nyStillingsPeriode = new StillingPeriode(
                             stillingPeriode.stilling(),
                             nyGyldigFom,
                             nyGyldigTom,
-                            oe
+                            aktuellOrgEnhet
                         );
 
                         lagErrorForDelAvStillingPeriodeSomGaarUtoverEnhetPeriodeUtenMatchendeEksisterendeOT(
                             nyGyldigFom, aktuellGyldigTom,
-                            sspForNavident, stillingPeriode, sspForNavident.navident(), oe,
+                            sspForNavident, stillingPeriode, sspForNavident.navident(), aktuellOrgEnhet,
                             nyGyldigFom, nyGyldigTom,
                             dayAfter(nyGyldigTom), aktuellGyldigTom
                         );
@@ -227,24 +233,24 @@ public class MatchStrukturerteStillingPerioderTilNOM {
                         splittetPerioder.add(nyStillingsPeriode);
                     }
                 } else {
-                    LocalDate nyGyldigFom = getLatestDate(stillingPeriode.gyldigFom(), oe.getGyldigFom());
+                    LocalDate nyGyldigFom = getLatestDate(stillingPeriode.gyldigFom(), aktuellOrgEnhet.getGyldigFom());
                     // Matchet orgenhet kan dekke delperioden
                     var nyStillingsPeriode = new StillingPeriode(
                         stillingPeriode.stilling(),
                         nyGyldigFom,
                         aktuellGyldigTom,
-                        oe
+                        aktuellOrgEnhet
                     );
                     splittetPerioder.add(nyStillingsPeriode);
                 }
             }
-            if (etter(getEarliestDate(stillingPeriode.gyldigTom(), oe.getGyldigTom().orElse(NO_END_DATE)), aktuellGyldigTom)) {
+            if (etter(getEarliestDate(stillingPeriode.gyldigTom(), aktuellOrgEnhet.getGyldigTom().orElse(NO_END_DATE)), aktuellGyldigTom)) {
                 // Vi har her en orgenhet med gyldigTom som overlapper inn i den forrige orgenhetens periode.
                 // Det vil si at perioden med overlapp faktisk kunne tilhørt begge enhetene
                 // Advar om dette
                 lagErrorForDelAvStillingPeriodeSomHvorMatchetEnhetSinPeriodeGaarInnIForrigeBehandledeDelPeriode(
-                    aktuellGyldigTom, oe.getGyldigTom().orElse(NO_END_DATE),
-                    sspForNavident, stillingPeriode, sspForNavident.navident(), oe
+                    dayAfter(aktuellGyldigTom), aktuellOrgEnhet.getGyldigTom().orElse(NO_END_DATE),
+                    sspForNavident, stillingPeriode, sspForNavident.navident(), aktuellOrgEnhet
                 );
             }
             aktuellGyldigTom = dayBefore(splittetPerioder.getLast().gyldigFom());
@@ -253,8 +259,16 @@ public class MatchStrukturerteStillingPerioderTilNOM {
         if (stillingPeriode.gyldigFom().isBefore(aktuellGyldigTom)) {
             // Enhetperiodene dekker ikke starten av perioden til StillingPerioden
 
+            // Tidligste felles gyldigFom for enheter og stillingperiode
+            var eldsteFellesDato = getLatestDate(stillingPeriode.gyldigFom(),
+                orgenheter.stream().map(IOrgenhet::getGyldigFom).min(LocalDate::compareTo).orElse(NO_END_DATE)
+            );
             // Sjekk om dette kan dekkes av eksisterende OT for denne enheten
-            IOrgenhet sisteEnhet = sorterMedNyesteEnhetFoerst(orgenheter).getLast();
+            var orgenheterMedFomFoerStillingPeriodeFom = orgenheter.stream().
+                filter(oe -> likEllerFoer(oe.getGyldigFom(), eldsteFellesDato)).
+                toList();
+
+            var sisteEnhet = foersteEnhetIListePreferLiktNavn(stillingPeriodeEnhetNavn, orgenheterMedFomFoerStillingPeriodeFom);
 
             var eksisterendeOT = finnOTerSomRepresentererEnhetOgOverlapperPeriode(
                 sspForNavident.navident(),
@@ -284,6 +298,20 @@ public class MatchStrukturerteStillingPerioderTilNOM {
             }
         }
         return slaaSammenBackToBackPerioderOgSorterAsc(splittetPerioder, sspForNavident);
+    }
+
+    private static IOrgenhet getEnhetMedGyldigFomPrioriterNavn(String enhetNavn, List<IOrgenhet> orgenheter, LocalDate oeGyldigFom) {
+        var aktuelle = orgenheter.stream()
+            .filter(oe -> oe.getGyldigFom().equals(oeGyldigFom)).
+            toList();
+        return foersteEnhetIListePreferLiktNavn(enhetNavn, aktuelle);
+    }
+
+    private static IOrgenhet foersteEnhetIListePreferLiktNavn(String enhetNavn, List<IOrgenhet> aktuelle) {
+        var liktNavn = aktuelle.stream()
+            .filter(oe -> oe.getNavn().equals(enhetNavn))
+            .findFirst();
+        return liktNavn.orElseGet(aktuelle::getFirst);
     }
 
     private StillingPeriode dekkDelperiodeMedEksisterendeOTer(

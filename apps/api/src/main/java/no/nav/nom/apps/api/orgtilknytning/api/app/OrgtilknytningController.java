@@ -189,6 +189,24 @@ public class OrgtilknytningController {
         }
     }
 
+    @PostMapping("/masseflytting")
+    @Operation(
+        description = "Masseflytting av ressurs fra en enhet til en annen",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Flyttingen ble utført"),
+        @ApiResponse(responseCode = "400", description = "Feil i input"),
+    })
+    @PreAuthorize(
+        "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
+    )
+    public ResponseEntity<MasseFlyttingRequest> masseflytting(
+        @Valid @RequestBody MasseFlyttingRequest masseFlyttingRequest
+    ) {
+        return ResponseEntity.ok(masseFlyttingRequest);
+    }
+
 
     // TODO: Lage global ControllerAdvice
     @ExceptionHandler({

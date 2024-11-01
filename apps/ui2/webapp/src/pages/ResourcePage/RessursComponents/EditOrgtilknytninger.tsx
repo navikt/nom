@@ -48,7 +48,7 @@ import {
   getOrgTilknytninger,
   oppdaterOrgtilknytningerForRessurs,
 } from "~/api/react-query-endpoints";
-import { useHasWriteAccess } from "~/api/useGetSession";
+import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
 import { ApiResponseError } from "~/components/ApiResponseError";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
@@ -383,6 +383,7 @@ function OrgtilknytningForm({
           if (
             field.fid &&
             field.gyldigTom &&
+            !useHasAdminAccess() &&
             !hasFieldTomChanged(field) &&
             !isSameDateOrAfter(
               dateWithoutTimezone(new Date(field.gyldigTom)),

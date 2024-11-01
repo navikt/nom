@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 
+import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident;
@@ -9,8 +10,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
+import static no.nav.nom.apps.api.common.DateUtils.isPeriodCoveredByAny;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.NO_END_DATE;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.dayAfter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.foer;
@@ -29,6 +32,27 @@ public class Util {
 
     public static boolean erEtterRessursensSluttDato(LocalDate dato, LocalDate ressursSluttdato) {
         return ressursSluttdato != null && dato.isAfter(ressursSluttdato);
+    }
+
+
+    public static List<LocalDate> sorterOrgenhetFomDatoerNyesteDatoFoerstPrefererLiktNavn(List<IOrgenhet> orgenheter, String enhetsNavn) {
+        var enheterMedLiktNavn = orgenheter.stream().filter(oe -> oe.getNavn().equals(enhetsNavn)).toList();
+        var perioderForEnheterMedLiktNavn = enheterMedLiktNavn.stream()
+            .map(oe -> new DateUtils.Periode(oe.getGyldigFom(), oe.getGyldigTom().orElse(null)))
+            .toList();
+
+        // Ta vekk andre enheter som dekkes av periodene til enheter med likt navn
+        var enheterUtenLiktNavnMedPeriodeUtoverLiktNavnPerioder = orgenheter.stream()
+            .filter(oe -> !oe.getNavn().equals(enhetsNavn))
+            .filter(oe -> !isPeriodCoveredByAny(oe.getGyldigFom(), oe.getGyldigTom().orElse(LocalDate.MAX), perioderForEnheterMedLiktNavn))
+            .toList();
+
+        return Stream.concat(enheterMedLiktNavn.stream(), enheterUtenLiktNavnMedPeriodeUtoverLiktNavnPerioder.stream())
+            .map(oe ->  oe.getGyldigFom() == null ? NO_END_DATE : oe.getGyldigFom()).sorted(Comparator.reverseOrder()).toList();
+    }
+
+    public static List<LocalDate> sorterOrgenhetFomDatoerNyesteDatoFoerst(List<IOrgenhet> orgenheter) {
+        return orgenheter.stream().map( oe ->  oe.getGyldigFom() == null ? NO_END_DATE : oe.getGyldigFom()).sorted(Comparator.reverseOrder()).toList();
     }
 
     public static List<IOrgenhet> sorterMedNyesteEnhetFoerst(List<IOrgenhet> orgenheter) {

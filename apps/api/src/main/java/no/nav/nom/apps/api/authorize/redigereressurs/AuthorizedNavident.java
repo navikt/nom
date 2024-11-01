@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.authorize.redigereressurs;
 
-import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.email.TilgangDelegertEmailService;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
@@ -39,19 +38,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
 /**
- *  Denne tjenesten inneholder alle som har til å redigere ressurser under gitt orgenhet i hierarkiet.
- *  Alle ledere på en enhet fra og med 'Arbeidsområde' type og nedover har tilgang for ressurser som har en tilknytning til en av disse enhetene og nedover.
- *  Per nå sjekker den at orgtilknytning isCurrentOrFuturePeriod
- *
- *  Disse samme lederne har også mulighet til å gi andre ansatte tilgang til å redigere ressurser på samme orgenhet eller er valgt nivå under der igjen
- *  Disse tildelte rettighetene ka bestå også etter lederbytte, men må revideres på jevnlig basis. (Bekreftes på nytt, hvis ikke vil tilgangen tas vekk)
+ * Denne tjenesten inneholder alle som har til å redigere ressurser under gitt orgenhet i hierarkiet.
+ * Alle ledere på en enhet fra og med 'Arbeidsområde' type og nedover har tilgang for ressurser som har en tilknytning til en av disse enhetene og nedover.
+ * Per nå sjekker den at orgtilknytning isCurrentOrFuturePeriod
+ * <p>
+ * Disse samme lederne har også mulighet til å gi andre ansatte tilgang til å redigere ressurser på samme orgenhet eller er valgt nivå under der igjen
+ * Disse tildelte rettighetene ka bestå også etter lederbytte, men må revideres på jevnlig basis. (Bekreftes på nytt, hvis ikke vil tilgangen tas vekk)
  */
 @Slf4j
 @Service
 public class AuthorizedNavident {
-    private final Unleash unleash;
-    // Per leder for alle orgenheter på ARBEIDSOMRÅDE nivå og nedover. For den enkelte leder er alle under-nivåer lagt til.
-    Map<String, HashSet<String>> lederForOrgenhetSomKanRedigere = new ConcurrentHashMap<>();
     // Delegert lederskap. Delegert leder for orgenhet, og alle underliggende enheter
     private final AuthorizeCommandService authorizeCommandService;
     private final DelegertLederStateRepository delegertLederStateRepository;
@@ -61,6 +57,8 @@ public class AuthorizedNavident {
     private final OrgenhetService orgenhetService;
     private final DvhRepository dvhRepository;
     private final TilgangDelegertEmailService tilgangDelegertEmailService;
+    // Per leder for alle orgenheter på ARBEIDSOMRÅDE nivå og nedover. For den enkelte leder er alle under-nivåer lagt til.
+    Map<String, HashSet<String>> lederForOrgenhetSomKanRedigere = new ConcurrentHashMap<>();
 
     public AuthorizedNavident(
         AuthorizeCommandService authorizeCommandService,
@@ -70,8 +68,7 @@ public class AuthorizedNavident {
         RessursStateRepository ressursStateRepository,
         OrgenhetService orgenhetService,
         DvhRepository dvhRepository,
-        TilgangDelegertEmailService tilgangDelegertEmailService,
-        Unleash unleash
+        TilgangDelegertEmailService tilgangDelegertEmailService
     ) {
         this.authorizeCommandService = authorizeCommandService;
         this.delegertLederStateRepository = delegertLederStateRepository;
@@ -81,7 +78,6 @@ public class AuthorizedNavident {
         this.orgenhetService = orgenhetService;
         this.dvhRepository = dvhRepository;
         this.tilgangDelegertEmailService = tilgangDelegertEmailService;
-        this.unleash = unleash;
     }
 
     public List<LederTilgangState> getLederTilgangerForUser() {
@@ -134,7 +130,7 @@ public class AuthorizedNavident {
         orgenhetIder.addAll(delegertLederStateRepository.aktiveDelegeringerForOrgenheterTilNavident(navident));
 
         Set<String> orgenhetIderMedUnderEnheter = new HashSet<>();
-        orgenhetIder.forEach( o -> orgenhetIderMedUnderEnheter.addAll(alleEnheterIHierarkiFra(o)));
+        orgenhetIder.forEach(o -> orgenhetIderMedUnderEnheter.addAll(alleEnheterIHierarkiFra(o)));
         return orgenhetService.getByIdBulk(orgenhetIderMedUnderEnheter.stream().toList()).values().stream().toList();
     }
 
@@ -254,38 +250,32 @@ public class AuthorizedNavident {
         orgenhetService.getById(orgenhetId)
             .orElseThrow(() -> new IllegalArgumentException("Orgenhet " + orgenhetId + " finnes ikke i hierarkiet"));
 
-        if (unleash.isEnabled("nom-api.driftsenhet-delegering-losning")) {
-            alleOrgenheterMellomDriftsenhetOgArbeidsomraade().stream()
-                .filter(orgenhetId::equals)
-                .findAny().orElseThrow(() ->
-                    new IllegalArgumentException("Kan ikke delegere eller endre delegert leder rettighet for ressurs-redigering tilhørende orgenhet " + orgenhetId +
-                        " da denne ikke er  DRIFTSENHET, ARBEIDSOMRÅDE eller mellom disse organisasjonstreet"));
-            if (!harLederDelegeringsRettForOrgenhet(leder, orgenhetId)) {
-                throw new NotAuthorizedToDelegateLeder("Leder " + leder + " har ikke rett til å delegere eller endre delegert leder rettighet for ressurs-redigering tilhørende orgenhet " + orgenhetId);
-            }
-        } else {
-            alleEnheterIHierarkiFraArbeidsomraade().stream()
-                .filter(orgenhetId::equals)
-                .findAny().orElseThrow(() ->
-                    new IllegalArgumentException("Kan ikke delegere eller endre delegert leder rettighet for ressurs-redigering tilhørende orgenhet " + orgenhetId
-                        + " da denne ikke er under ARBEIDSOMRÅDE i organisasjonstreet"));
-            if (!harLederDelegeringsRettForOrgenhetOld(leder, orgenhetId)) {
-                throw new NotAuthorizedToDelegateLeder("Leder " + leder + " har ikke rett til å delegere eller endre delegert leder rettighet for ressurs-redigering tilhørende orgenhet " + orgenhetId);
-            }
+
+        alleOrgenheterMellomDriftsenhetOgArbeidsomraade().stream()
+            .filter(orgenhetId::equals)
+            .findAny().orElseThrow(() ->
+                new IllegalArgumentException("Kan ikke delegere eller endre delegert leder rettighet for ressurs-redigering tilhørende orgenhet " + orgenhetId +
+                    " da denne ikke er  DRIFTSENHET, ARBEIDSOMRÅDE eller mellom disse organisasjonstreet"));
+        if (!harLederDelegeringsRettForOrgenhet(leder, orgenhetId)) {
+            throw new NotAuthorizedToDelegateLeder("Leder " + leder + " har ikke rett til å delegere eller endre delegert leder rettighet for ressurs-redigering tilhørende orgenhet " + orgenhetId);
         }
+
     }
+
     public void sjekkOmOrgenhetAlleredeDelegertTilNavident(LederTilgangForOrgenhetRequest request) {
         sjekkOmOrgenhetAlleredeDelegertTilNavident(request.orgenhetId(), request.delegertTilNavident());
     }
 
     public void sjekkOmOrgenhetAlleredeDelegertTilNavident(String orgenhetId, String delegertTilNavident) {
         if (delegertLederStateRepository.erOrgenhetDelegertTilNavident(orgenhetId, delegertTilNavident)) {
-            throw new IllegalArgumentException("Delegert leder " + delegertTilNavident + " er allerede aktiv for orgenhet " +orgenhetId);
+            throw new IllegalArgumentException("Delegert leder " + delegertTilNavident + " er allerede aktiv for orgenhet " + orgenhetId);
         }
     }
 
     private boolean erRessursAktiv(String delegertLeder) {
-        if (ressursStateRepository.findByNavident(delegertLeder).isEmpty()) return false;
+        if (ressursStateRepository.findByNavident(delegertLeder).isEmpty()) {
+            return false;
+        }
         var ressurs = ressursStateRepository.findByNavident(delegertLeder).get();
         return DateUtils.isPeriodActive(ressurs.startdato().orElse(LocalDate.now()), ressurs.sluttdato().orElse(null));
     }
@@ -295,22 +285,16 @@ public class AuthorizedNavident {
         return ident.isPresent() && ident.get().isEkstern();
     }
 
-    public boolean harLederDelegeringsRettForOrgenhetOld(String leder, String orgenhetId) {
-        return lederForOrgenhetSomKanRedigere.containsKey(leder)
-            && lederForOrgenhetSomKanRedigere.get(leder).stream()
-            .anyMatch(o -> alleEnheterIHierarkiFra(orgenhetId).contains(o));
-    }
-
 
     public boolean harLederDelegeringsRettForOrgenhet(String leder, String orgenhetId) {
         var orgenhet = orgenhetService.getById(orgenhetId).orElseThrow();
         var orgenheter = new HashSet<String>();
         return lederForOrgenhetSomKanRedigere.containsKey(leder)
             && lederForOrgenhetSomKanRedigere.get(leder).stream()
-                .anyMatch(o -> {
-                    alleEnheterIHierarkiFraArbeidsomraadeTilDriftsenhet(orgenhet, orgenheter);
-                    return orgenheter.contains(o);
-                });
+            .anyMatch(o -> {
+                alleEnheterIHierarkiFraArbeidsomraadeTilDriftsenhet(orgenhet, orgenheter);
+                return orgenheter.contains(o);
+            });
     }
 
     /**
@@ -319,11 +303,11 @@ public class AuthorizedNavident {
      */
     public void oppdaterLedereForOrgenheter() {
         log.info("Oppdaterer ledere for orgenheter i redigere ressurs auth liste");
-        var enheterIHierarkiFraDriftsenhet = unleash.isEnabled("nom-api.driftsenhet-delegering-losning") ? alleEnheterIHierarkiFraDriftsenhet() : alleEnheterIHierarkiFraArbeidsomraade();
+        var enheterIHierarkiFraDriftsenhet = alleEnheterIHierarkiFraDriftsenhet();
         Map<String, HashSet<String>> nyLederForOrgenhetListe = new HashMap<>();
 
         enheterIHierarkiFraDriftsenhet.forEach(
-            enhetId ->  {
+            enhetId -> {
                 var orgenhet = orgenhetService.getById(enhetId).get();
                 var lederNavident = dvhRepository.getLedere().stream()
                     .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
@@ -340,7 +324,7 @@ public class AuthorizedNavident {
             lederForOrgenhetSomKanRedigere.clear();
             lederForOrgenhetSomKanRedigere.putAll(nyLederForOrgenhetListe);
         }
-        log.info("Oppdatert {} ledere for {} orgenheter i redigere ressurs auth liste", 
+        log.info("Oppdatert {} ledere for {} orgenheter i redigere ressurs auth liste",
             lederForOrgenhetSomKanRedigere.size(), orgenheterMedAuthedLederCount()
         );
     }
@@ -375,14 +359,6 @@ public class AuthorizedNavident {
             .findByNavident(ressursNavident).stream()
             .filter(PeriodeUtil::isCurrentOrFuturePeriod)
             .anyMatch(ot -> orgenheterIHierarki.contains(ot.orgEnhetId()));
-    }
-
-    private List<String> alleEnheterIHierarkiFraArbeidsomraade() {
-        var arbeidsomraadeEnheter = orgenhetService.getAllEnheterMedOrganisering().stream()
-            .filter(orgenhet -> orgenhet.getNomNivaa().isPresent() && orgenhet.getNomNivaa().get().equals(NomNivaa.ARBEIDSOMRAADE));
-        List<String> orgenheter = new ArrayList<>();
-        arbeidsomraadeEnheter.forEach(orgenhet -> orgenheter.addAll(alleEnheterIHierarkiFra(orgenhet.getId())));
-        return orgenheter;
     }
 
     private List<String> alleOrgenheterMellomDriftsenhetOgArbeidsomraade() {

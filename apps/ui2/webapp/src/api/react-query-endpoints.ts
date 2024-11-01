@@ -213,6 +213,27 @@ export const getRessurserByListNavident = {
     ).data,
 };
 
+export const downloadExcelByListNavident = async (
+  navidenter: string[],
+  orgenhetNavn: string,
+) => {
+  const response = await axios.post(
+    `${NOM_API_BASE_PATH}/app/ressurser/byListNavident/export`,
+    navidenter,
+    {
+      responseType: "blob",
+    },
+  );
+
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", orgenhetNavn);
+  document.body.append(link);
+  link.click();
+  link.remove();
+};
+
 export const getLedereForRessurs = {
   queryKey: (navident: string) => ressurserKeys.ledereTil(navident),
   queryFn: async (navident: string) =>

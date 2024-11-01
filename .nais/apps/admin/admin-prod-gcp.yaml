@@ -22,6 +22,8 @@ spec:
     - secret: nom-admin-unleash-api-token
   image: "{{image}}"
   port: 8080
+  ingresses:
+    - https://nom-admin-api.intern.nav.no
   replicas:
     min: 2
     max: 2

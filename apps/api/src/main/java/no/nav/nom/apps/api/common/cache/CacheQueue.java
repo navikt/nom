@@ -40,7 +40,7 @@ public class CacheQueue {
 
     @NotNull
     @Type(JsonBinaryType.class)
-    @Column(name = "PAYLOAD", nullable = false, updatable = false)
+    @Column(name = "PAYLOAD", nullable = false, updatable = true)
     private JsonNode payload;
 
     @Override

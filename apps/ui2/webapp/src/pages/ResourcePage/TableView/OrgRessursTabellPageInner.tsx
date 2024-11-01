@@ -106,19 +106,11 @@ const createCustomRessurser = (
 
 export const OrgRessursTabellPageInner = ({
   orgEnheter = [],
+  ressurserNavidents,
 }: {
   orgEnheter: OrgEnhet[];
+  ressurserNavidents: string[];
 }) => {
-  const allRessursKoblinger = orgEnheter.flatMap((orgEnhet) =>
-    orgEnhet.ressursKoblinger.filter((kobling) =>
-      isPeriodActiveOrFuture(kobling.gyldigFom, kobling.gyldigTom),
-    ),
-  );
-
-  const ressurserNavidents = [
-    ...new Set(allRessursKoblinger.map((tilknytning) => tilknytning.navident)),
-  ];
-
   const hentedeRessurserQuery = useQuery({
     queryKey: getRessurserByListNavident.queryKey(ressurserNavidents),
     queryFn: () => getRessurserByListNavident.queryFn(ressurserNavidents),
