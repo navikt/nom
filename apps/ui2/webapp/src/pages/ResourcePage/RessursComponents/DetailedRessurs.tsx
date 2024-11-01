@@ -286,7 +286,7 @@ function ExpiredOrgTilknytning({
         display: flex;
         gap: var(--a-spacing-4);
         align-items: center;
-        background: white;
+        background: var(--a-bg-subtle);
         padding: var(--a-spacing-6);
         border: 1px solid var(--a-border-default);
         border-radius: var(--a-border-radius-large);
@@ -300,6 +300,16 @@ function ExpiredOrgTilknytning({
         {formatDisplayDate(expiredOrgTilknytning.gyldigFom)} -{" "}
         {formatDisplayDate(expiredOrgTilknytning.gyldigTom)}
       </span>
+
+      <Tag
+        css={css`
+          margin-left: auto;
+        `}
+        size="medium"
+        variant="warning"
+      >
+        Avsluttet
+      </Tag>
     </div>
   );
 }
@@ -339,20 +349,42 @@ function OrganisationHierarchyTree({
       `}
       size="small"
     >
-      <ExpansionCard.Header>
-        <ExpansionCard.Title>
+      <ExpansionCard.Header
+        css={css`
+          .navds-expansioncard__header-content {
+            width: 100%;
+          }
+        `}
+      >
+        <ExpansionCard.Title
+          css={css`
+            display: flex;
+          `}
+        >
           <span>{orgEnhet.navn}</span>
           {startsInTheFuture && (
-            <span
-              css={css`
-                font-size: var(--a-font-size-large);
-                font-weight: var(--a-font-weight-regular);
-                margin-left: var(--a-spacing-4);
-              `}
-              id="title-start-date"
-            >
-              Starter {formatDisplayDate(gyldigFom)}
-            </span>
+            <>
+              <span
+                css={css`
+                  font-size: var(--a-font-size-large);
+                  font-weight: var(--a-font-weight-regular);
+                  margin-left: var(--a-spacing-4);
+                `}
+                id="title-start-date"
+              >
+                Starter {formatDisplayDate(gyldigFom)}
+              </span>
+
+              <Tag
+                css={css`
+                  margin-left: auto;
+                `}
+                size="medium"
+                variant="success"
+              >
+                Fremtidig
+              </Tag>
+            </>
           )}
         </ExpansionCard.Title>
         <ExpansionCard.Description>
@@ -528,7 +560,7 @@ function TerminateButton({ ressurs }: { ressurs: Ressurs }) {
           type="button"
           variant="secondary"
         >
-          Medarbeider slutter
+          Medarbeider slutter i Nav
         </Button>
       </ReactRouterLink>
     </EditButtonWrapperRessursSlutter>
