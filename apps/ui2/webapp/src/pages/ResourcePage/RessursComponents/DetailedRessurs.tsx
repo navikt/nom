@@ -286,7 +286,7 @@ function ExpiredOrgTilknytning({
         display: flex;
         gap: var(--a-spacing-4);
         align-items: center;
-        background: var(--a-surface-subtle);
+        background: var(--a-bg-subtle);
         padding: var(--a-spacing-6);
         border: 1px solid var(--a-border-default);
         border-radius: var(--a-border-radius-large);
@@ -560,7 +560,7 @@ function TerminateButton({ ressurs }: { ressurs: Ressurs }) {
           type="button"
           variant="secondary"
         >
-          Medarbeider slutter
+          Medarbeider slutter i Nav
         </Button>
       </ReactRouterLink>
     </EditButtonWrapperRessursSlutter>

@@ -406,7 +406,7 @@ function OrgtilknytningForm({
           return (
             <div
               css={css`
-                background: ${avsluttet ? "var(--a-surface-subtle)" : "#fff"};
+                background: ${avsluttet ? "var(--a-bg-subtle)" : "#fff"};
                 margin-top: var(--a-spacing-6);
                 padding: var(--a-spacing-6);
                 border-radius: 8px;
