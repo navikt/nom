@@ -49,6 +49,7 @@ public class OrgtilknytningEndretEmailService {
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
     private final LeaderElection leaderElection;
     public final String epost_body_item_template = "{0}({1}), fra og med {2}, til og med {3}. Endring utført av {4}, på {5}.";
+    public final String epost_body_item_template_ot_notfound = "Endring({0}) utført av {1}, på {2}.";
 
     public OrgtilknytningEndretEmailService(
         EmailClient emailClient,
@@ -172,18 +173,21 @@ public class OrgtilknytningEndretEmailService {
         StringBuilder otEndringer = new StringBuilder();
         for (OTEndretData event : otEndringerData) {
             var orgtilknytningState =  orgtilknytningStateRepository.findByFid(event.fid());
+            var utfortAvNavIdent = event.changedByNavIdent();
+            var utfortAvRessurs = ressursStateRepository.findByNavident(utfortAvNavIdent);
+            String utfortAvRessursNavn = utfortAvRessurs.isPresent()? utfortAvRessurs.get().visningsnavn().getFormattedVisningsnavn() : "Ukjent";
             if(orgtilknytningState.isPresent()){
                 var ot = orgtilknytningState.get();
-                var utfortAvNavIdent = event.changedByNavIdent();
-                var utfortAvRessurs = ressursStateRepository.findByNavident(utfortAvNavIdent);
-                String utfortAvRessursNavn = utfortAvRessurs.isPresent()? utfortAvRessurs.get().visningsnavn().getFormattedVisningsnavn() : "Ukjent";
                 log.info("Sender OT endringer utfortAv: {}, {}, {}", utfortAvNavIdent, utfortAvRessurs, utfortAvRessursNavn);
                 var orgenhetNavn = orgEnhetStateRepository.findById(ot.orgEnhetId()).map(orgEnhet -> orgEnhet.navn()).orElse("Ukjent");
                 String endring = MessageFormat.format(epost_body_item_template,
                     orgenhetNavn, ot.orgEnhetId(), formatDateTime(ot.gyldigFom()), formatDateTime(ot.gyldigTom()), utfortAvRessursNavn, event.timestamp());
                 otEndringer.append(endring);
-            }{
-                log.warn("Fant ikke orgtilknytning for OTEndretData: {} i orgtilknytningStateRepository. Epost kropen blir tom. Sjekk!", event);
+            } else {
+                log.warn("Fant ikke orgtilknytning for OTEndretData: {} i orgtilknytningStateRepository. Sjekk!", event);
+                String endring = MessageFormat.format(epost_body_item_template_ot_notfound,
+                    event.eventType(), utfortAvRessursNavn, event.timestamp());
+                otEndringer.append(endring);
             }
 
             if(!otEndringer.isEmpty()) {
