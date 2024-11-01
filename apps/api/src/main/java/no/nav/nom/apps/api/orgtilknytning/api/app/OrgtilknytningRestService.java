@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgtilknytning.api.email.OTEndretData;
 import no.nav.nom.apps.api.orgtilknytning.api.email.OrgtilknytningEndretEmailService;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException;
@@ -44,6 +45,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -421,24 +423,12 @@ public class OrgtilknytningRestService {
         }
 
         //update OTendretData for e-post varsel
-        //addToOTEndretDataEmailQueue(orgtilknytningStateBeforeChanges.navident(), endreOrgtilknytningRequest.fid(), OTEndretData.OTEndretDataType.OT_ENDRET);
+        addToOTEndretDataEmailQueue(orgtilknytningStateBeforeChanges.navident(),
+            endreOrgtilknytningRequest.fid(),
+            OTEndretData.OTEndretDataType.OT_ENDRET,
+            inputMetadata.origination().initiatedFrom());
     }
 
-    /*
-    private void addToOTEndretDataEmailQueue(String navident, String fid, OTEndretData.OTEndretDataType eventType) {
-        String changedByNavIdent = SecurityUtil.getAuthenticatedNavIdent();
-        orgtilknytningEndretEmailService.addToOrgtilknytningEndringerQueue(
-            navident,
-            OTEndretData.builder()
-                .fid(fid)
-                .navident(navident)
-                .changedByNavIdent(changedByNavIdent)
-                .eventType(eventType)
-                .timestamp(DateTimeFormatter.ofPattern("dd.MM.YYYY").format(LocalDate.now()))
-                .build()
-        );
-    }
-    */
 
     // TODO: Det burde det muligens lages et nytt event 'OrgtilknytningOpprettetEventV2' som inneholder felter for erDagligOppfolging og orgtilknytningType
     //  slik at man kun trenger å sende ett i event i sammenheng med opprettelse av en ny orgtilknytning
@@ -506,7 +496,10 @@ public class OrgtilknytningRestService {
         }
 
         //update OTendretData for e-post varsel
-        //addToOTEndretDataEmailQueue(navident, opprettetOrgtilknytningFid, OTEndretData.OTEndretDataType.OT_NY);
+        addToOTEndretDataEmailQueue(navident,
+            opprettetOrgtilknytningFid,
+            OTEndretData.OTEndretDataType.OT_NY,
+            inputMetadata.origination().initiatedFrom());
     }
 
     private void oppdaterRessursSluttdato(
@@ -674,7 +667,10 @@ public class OrgtilknytningRestService {
         nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
 
         //update OTendretData for e-post varsel
-        //addToOTEndretDataEmailQueue(orgtilknytning.navident(), fid, OTEndretData.OTEndretDataType.OT_ENDRET);
+        addToOTEndretDataEmailQueue(orgtilknytning.navident(),
+            fid,
+            OTEndretData.OTEndretDataType.OT_ENDRET,
+            origination.initiatedFrom());
     }
 
     public void updateOrgtilknytningType(String fid, EndreTilknytningtypeRequest endreTilknytningtypeRequest) {
@@ -712,7 +708,10 @@ public class OrgtilknytningRestService {
         nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
 
         //update OTendretData for e-post varsel
-        //addToOTEndretDataEmailQueue(orgtilknytning.navident(), fid, OTEndretData.OTEndretDataType.OT_ENDRET);
+        addToOTEndretDataEmailQueue(orgtilknytning.navident(),
+            fid,
+            OTEndretData.OTEndretDataType.OT_ENDRET,
+            SecurityUtil.getAuthenticatedAzpName());
     }
 
     public static void validateOrgtilknytningTypeSektorCombination(Tilknytningtype tilknytningtype, Sektor sektor) {
@@ -814,7 +813,10 @@ public class OrgtilknytningRestService {
         nomMastered.markRessursAsMasteredInNom(leggTilOrgtilknytningRequest.navident());
 
         //update OTendretData for e-post varsel
-        //addToOTEndretDataEmailQueue(leggTilOrgtilknytningRequest.navident(), opprettetOrgTilknytningFid, OTEndretData.OTEndretDataType.OT_NY);
+        addToOTEndretDataEmailQueue(leggTilOrgtilknytningRequest.navident(),
+            opprettetOrgTilknytningFid,
+            OTEndretData.OTEndretDataType.OT_NY,
+            metaData.origination().initiatedFrom());
     }
 
     private void validateLeggTilOrgilknytningRequest(LeggTilOrgtilknytningRequestOld leggTilOrgtilknytningRequest) {
@@ -963,5 +965,34 @@ public class OrgtilknytningRestService {
         if (requestedGyldigTomIsMoreThan1YearFromNow) {
             throw new IllegalArgumentException("Sluttdato kan være maks 1 år frem i tid");
         }
+    }
+
+    private void addToOTEndretDataEmailQueue(String navident, String fid, OTEndretData.OTEndretDataType eventType, String initiatedFromMetadata) {
+        if(navident == null  || navident.isBlank()) {
+            log.warn("Navident is null. Cannot add OTendretData to the email queue");
+            return;
+        }
+
+        if(!nomMastered.isMastered(navident)) {
+            log.warn("Navident is not mastered in nom. OTendretData won´t be added to the email queue");
+            return;
+        }
+
+        if(!initiatedFromMetadata.equals("prod-gcp:org:nom-ui2")) {
+            log.warn("OT-endringero peration is not performed nom frontend. OTendretData won´t be added to the email queue");
+            return;
+        }
+
+        String changedByNavIdent = SecurityUtil.getAuthenticatedNavIdent();
+        orgtilknytningEndretEmailService.addToOrgtilknytningEndringerQueue(
+            navident,
+            OTEndretData.builder()
+                .fid(fid)
+                .navident(navident)
+                .changedByNavIdent(changedByNavIdent)
+                .eventType(eventType)
+                .timestamp(DateTimeFormatter.ofPattern("dd.MM.YYYY").format(LocalDate.now()))
+                .build()
+        );
     }
 }
