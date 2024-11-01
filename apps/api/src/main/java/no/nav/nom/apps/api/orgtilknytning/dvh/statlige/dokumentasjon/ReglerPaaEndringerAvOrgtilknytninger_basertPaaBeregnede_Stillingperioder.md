@@ -12,6 +12,9 @@ Alle stillingsperioder som ikke har en tilsvarende orgtilknytning, skal behandle
 Dette regelverket forenkler i stor grad hvordan lage endrings meldinger på orgtilknytninger. Men samtidig vil ikke den ikke gjøre endringer på eksisterende orgtilknytningers startdato, siden da er startdato ulik, og vi matcher ikke eksisterende OT til Stillingsperiode som angir ny start dato.
 Det vil i stedet ende opp med at det foretas en slett av eksisterende OT, og opprettelse av en ny.
 
+### Match på startdato og det at lasten fra DVH kun tar med  3 års historikk
+Vi forventer at det ikke er endringer på så gammel historikk, så vi matcher her på StillingPeriode sluttdato, hvis eksisterende OT har startDato som er eldre enn 3år (minus 1 mnd). Fjern heller ikke eksisterende OT'er som er eldre enn 3år. (Ingen SP for disse fra dvh grunnet historikk klipping)
+
 ## Bygg opp liste på endringsmeldinger per navident, før faktisk endring
 I tolkningen over på å lage evtsrc meldinger på orgtilknytninger, så samle disse i 'StrukturerteStillingPerioderForNavident'
 Da har vi all sammenstilt informasjon om DVH synkroniseringen per navident, for rapport, kontroll og feilsøking.

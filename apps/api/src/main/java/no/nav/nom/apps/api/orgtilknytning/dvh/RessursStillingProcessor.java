@@ -633,6 +633,18 @@ public class RessursStillingProcessor {
             return;
         }
 
+        var ThreeYearsAgo = LocalDate.now().minusYears(3);
+        if (originalOrgtilknytning.gyldigFom().isBefore(ThreeYearsAgo)) {
+            log.info(
+                "Endring av startdato {} på orgtilknytning til {} for Navident {} vil ikke gjøres. " +
+                    "Dette på grunn av at dvh last kun henter 3 års historikk, og eldre historikk vil vi ikke endre på.",
+                originalOrgtilknytning.gyldigFom(),
+                stillingPeriode.gyldigFom(),
+                originalOrgtilknytning.navident()
+            );
+            return;
+        }
+
         OrgtilknytningEvent.AdditionalAgressoData additionalData = new OrgtilknytningEvent.AdditionalAgressoData(
             stillingPeriode.stilling().toString(),
             stillingPerioderAsString

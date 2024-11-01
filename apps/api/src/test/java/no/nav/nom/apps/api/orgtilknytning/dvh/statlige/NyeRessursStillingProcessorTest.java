@@ -50,7 +50,7 @@ class NyeRessursStillingProcessorTest extends TestBase {
     @DisplayName("Ny stillingperiode uten eksisterende OT - Ref: 1.i")
     void ny_stillingperiode_uten_ot__1_i() {
         var inputToProcess = getInputToProcess(A000001, List.of(
-            stillingPeriode(ENHET_A, _2022_01_01, _2024_01_31, DagligOppfolging.JA)
+            stillingPeriode(ENHET_A, DD_2Y, DD_6M_1D, DagligOppfolging.JA)
         ));
 
         var sspForNavidentResult = CUT.process(inputToProcess);
@@ -59,13 +59,13 @@ class NyeRessursStillingProcessorTest extends TestBase {
             assertOrgtilknytning(CMD.OPPRETTET)
                 .forNavident(A000001)
                 .tilEnhet(ENHET_A.getId())
-                .gyldigFom(_2022_01_01)
+                .gyldigFom(DD_2Y)
                 .getFid();
 
         assertOrgtilknytning(CMD.ENDRET_DATO)
             .forFid(fid)
-            .gyldigFom(_2022_01_01)
-            .gyldigTom(_2024_01_31)
+            .gyldigFom(DD_2Y)
+            .gyldigTom(DD_6M_1D)
             .getFid();
 
         assertOrgtilknytning(CMD.ENDRE_DAGLIG_OPPFOLGING)
@@ -81,9 +81,9 @@ class NyeRessursStillingProcessorTest extends TestBase {
     @DisplayName("To stillingperioder uten eksisterende OT, overlapp og overtakende DOL - Ref: 1.ii")
     void to_stillingperioder_uten_ot__1_ii() {
         var inputToProcess = getInputToProcess(A000001, List.of(
-            stillingPeriode(ENHET_A, _2022_01_01, _2024_01_31, DagligOppfolging.JA),
-            stillingPeriode(ENHET_B, _2023_01_01, _2024_01_31, DagligOppfolging.NEI),
-            stillingPeriode(ENHET_B, _2024_02_01, NO_END_DATE, DagligOppfolging.JA)
+            stillingPeriode(ENHET_A, DD_2Y, DD_6M_1D, DagligOppfolging.JA),
+            stillingPeriode(ENHET_B, DD_1Y, DD_6M_1D, DagligOppfolging.NEI),
+            stillingPeriode(ENHET_B, DD_6M, NO_END_DATE, DagligOppfolging.JA)
         ));
 
         var sspForNavidentResult = CUT.process(inputToProcess);
@@ -92,13 +92,13 @@ class NyeRessursStillingProcessorTest extends TestBase {
             assertOrgtilknytning(CMD.OPPRETTET)
                 .forNavident(A000001)
                 .tilEnhet(ENHET_A.getId())
-                .gyldigFom(_2022_01_01)
+                .gyldigFom(DD_2Y)
                 .getFid();
 
         assertOrgtilknytning(CMD.ENDRET_DATO)
             .forFid(fid1)
-            .gyldigFom(_2022_01_01)
-            .gyldigTom(_2024_01_31)
+            .gyldigFom(DD_2Y)
+            .gyldigTom(DD_6M_1D)
             .getFid();
 
         assertOrgtilknytning(CMD.ENDRE_DAGLIG_OPPFOLGING)
@@ -111,20 +111,20 @@ class NyeRessursStillingProcessorTest extends TestBase {
             assertOrgtilknytning(CMD.OPPRETTET)
                 .forNavident(A000001)
                 .tilEnhet(ENHET_B.getId())
-                .gyldigFom(_2023_01_01)
+                .gyldigFom(DD_1Y)
                 .getFid();
 
         assertOrgtilknytning(CMD.ENDRET_DATO)
             .forFid(fid2)
-            .gyldigFom(_2023_01_01)
-            .gyldigTom(_2024_01_31)
+            .gyldigFom(DD_1Y)
+            .gyldigTom(DD_6M_1D)
             .getFid();
 
         String fid3 =
             assertOrgtilknytning(CMD.OPPRETTET)
                 .forNavident(A000001)
                 .tilEnhet(ENHET_B.getId())
-                .gyldigFom(_2024_02_01)
+                .gyldigFom(DD_6M)
                 .getFid();
 
         assertOrgtilknytning(CMD.ENDRE_DAGLIG_OPPFOLGING)
@@ -140,11 +140,11 @@ class NyeRessursStillingProcessorTest extends TestBase {
     @DisplayName("En stillingperiode lik eksisterende OT - Ref: 2.i")
     void stillingperiode_lik_ot__2_i() {
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
-            orgtilknytning(A000001, ENHET_A.getId(), _2022_01_01, _2024_01_31, true)
+            orgtilknytning(A000001, ENHET_A.getId(), DD_2Y, DD_6M_1D, true)
         ));
 
         var inputToProcess = getInputToProcess(A000001, List.of(
-            stillingPeriode(ENHET_A, _2022_01_01, _2024_01_31, DagligOppfolging.JA)
+            stillingPeriode(ENHET_A, DD_2Y, DD_6M_1D, DagligOppfolging.JA)
         ));
 
         var sspForNavidentResult = CUT.process(inputToProcess);
@@ -157,11 +157,11 @@ class NyeRessursStillingProcessorTest extends TestBase {
     @DisplayName("En stillingperiode, eksisterende OT ulik DOL- Ref: 2.ii")
     void stillingperiode_ot_ulik_dol__2_ii() {
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
-            orgtilknytning("FID_1", A000001, ENHET_A.getId(), _2022_01_01, _2024_01_31, false)
+            orgtilknytning("FID_1", A000001, ENHET_A.getId(), DD_2Y, DD_6M_1D, false)
         ));
 
         var inputToProcess = getInputToProcess(A000001, List.of(
-            stillingPeriode(ENHET_A, _2022_01_01, _2024_01_31, DagligOppfolging.JA)
+            stillingPeriode(ENHET_A, DD_2Y, DD_6M_1D, DagligOppfolging.JA)
         ));
 
         var sspForNavidentResult = CUT.process(inputToProcess);
@@ -179,19 +179,19 @@ class NyeRessursStillingProcessorTest extends TestBase {
     @DisplayName("Single OT, single StillingPeriode ikke match på periode - Ref: 2.iii")
     void stillingperiode_ot_ikke_match_periode__2_iii() {
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
-            orgtilknytning("FID_1", A000001, ENHET_A.getId(), _2022_01_01, _2024_01_31, false)
+            orgtilknytning("FID_1", A000001, ENHET_A.getId(), DD_2Y, DD_6M_1D, false)
         ));
 
         var inputToProcess = getInputToProcess(A000001, List.of(
-            stillingPeriode(ENHET_A, _2022_01_01, _2022_12_31, DagligOppfolging.JA)
+            stillingPeriode(ENHET_A, DD_2Y, DD_1Y_1D, DagligOppfolging.JA)
         ));
 
         var sspForNavidentResult = CUT.process(inputToProcess);
 
         assertOrgtilknytning(CMD.ENDRET_DATO)
             .forFid("FID_1")
-            .gyldigFom(_2022_01_01)
-            .gyldigTom(_2022_12_31);
+            .gyldigFom(DD_2Y)
+            .gyldigTom(DD_1Y_1D);
 
         assertOrgtilknytning(CMD.ENDRE_DAGLIG_OPPFOLGING)
             .forFid("FID_1")
@@ -206,11 +206,11 @@ class NyeRessursStillingProcessorTest extends TestBase {
     @DisplayName("Single OT, single StillingPeriode ikke match på periode - Ref: 2.iv")
     void single_ot_single_stillingperiode_ikke_match_periode__2_iv() {
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
-            orgtilknytning("FID_1", A000001, ENHET_A.getId(), _2022_01_01, _2024_01_31, true)
+            orgtilknytning("FID_1", A000001, ENHET_A.getId(), DD_2Y, DD_6M_1D, true)
         ));
 
         var inputToProcess = getInputToProcess(A000001, List.of(
-            stillingPeriode(ENHET_A, _2023_01_01, NO_END_DATE, DagligOppfolging.JA)
+            stillingPeriode(ENHET_A, DD_1Y, NO_END_DATE, DagligOppfolging.JA)
         ));
 
         var sspForNavidentResult = CUT.process(inputToProcess);
@@ -223,7 +223,7 @@ class NyeRessursStillingProcessorTest extends TestBase {
             assertOrgtilknytning(CMD.OPPRETTET)
                 .forNavident(A000001)
                 .tilEnhet(ENHET_A.getId())
-                .gyldigFom(_2023_01_01)
+                .gyldigFom(DD_1Y)
                 .getFid();
 
         assertOrgtilknytning(CMD.ENDRE_DAGLIG_OPPFOLGING)
@@ -239,12 +239,12 @@ class NyeRessursStillingProcessorTest extends TestBase {
     @DisplayName("Single OT, to StillingPerioder, en match på periode - Ref: 2.v")
     void single_ot_to_stillingperioder_en_match_periode__2_v() {
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
-            orgtilknytning("FID_A", A000001, ENHET_A.getId(), _2023_01_01, null, true)
+            orgtilknytning("FID_A", A000001, ENHET_A.getId(), DD_1Y, null, true)
         ));
 
         var inputToProcess = getInputToProcess(A000001, List.of(
-            stillingPeriode(ENHET_B, _2022_01_01, _2022_12_31, DagligOppfolging.JA),
-            stillingPeriode(ENHET_A, _2023_01_01, NO_END_DATE, DagligOppfolging.JA)
+            stillingPeriode(ENHET_B, DD_2Y, DD_1Y_1D, DagligOppfolging.JA),
+            stillingPeriode(ENHET_A, DD_1Y, NO_END_DATE, DagligOppfolging.JA)
         ));
 
         var sspForNavidentResult = CUT.process(inputToProcess);
@@ -254,13 +254,13 @@ class NyeRessursStillingProcessorTest extends TestBase {
             assertOrgtilknytning(CMD.OPPRETTET)
                 .forNavident(A000001)
                 .tilEnhet(ENHET_B.getId())
-                .gyldigFom(_2022_01_01)
+                .gyldigFom(DD_2Y)
                 .getFid();
 
         assertOrgtilknytning(CMD.ENDRET_DATO)
             .forFid(fid2)
-            .gyldigFom(_2022_01_01)
-            .gyldigTom(_2022_12_31);
+            .gyldigFom(DD_2Y)
+            .gyldigTom(DD_1Y_1D);
 
         assertOrgtilknytning(CMD.ENDRE_DAGLIG_OPPFOLGING)
             .forFid(fid2)
@@ -275,12 +275,12 @@ class NyeRessursStillingProcessorTest extends TestBase {
     @DisplayName("Single OT, to StillingPerioder, en delvis match på periode - Ref: 2.vi")
     void single_ot_to_stillingperioder_en_delvis_match_periode__2_vi() {
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
-            orgtilknytning("FID_A", A000001, ENHET_A.getId(), _2023_01_01, _2024_01_31, false)
+            orgtilknytning("FID_A", A000001, ENHET_A.getId(), DD_1Y, DD_6M_1D, false)
         ));
 
         var inputToProcess = getInputToProcess(A000001, List.of(
-            stillingPeriode(ENHET_B, _2022_01_01, _2022_12_31, DagligOppfolging.JA),
-            stillingPeriode(ENHET_A, _2023_01_01, NO_END_DATE, DagligOppfolging.JA)
+            stillingPeriode(ENHET_B, DD_2Y, DD_1Y_1D, DagligOppfolging.JA),
+            stillingPeriode(ENHET_A, DD_1Y, NO_END_DATE, DagligOppfolging.JA)
         ));
 
         var sspForNavidentResult = CUT.process(inputToProcess);
@@ -289,18 +289,18 @@ class NyeRessursStillingProcessorTest extends TestBase {
             assertOrgtilknytning(CMD.OPPRETTET)
                 .forNavident(A000001)
                 .tilEnhet(ENHET_B.getId())
-                .gyldigFom(_2022_01_01)
+                .gyldigFom(DD_2Y)
                 .getFid();
 
         assertOrgtilknytning(CMD.ENDRET_DATO)
             .forFid("FID_A")
-            .gyldigFom(_2023_01_01)
+            .gyldigFom(DD_1Y)
             .gyldigTom(null);
 
         assertOrgtilknytning(CMD.ENDRET_DATO)
             .forFid(fid_B)
-            .gyldigFom(_2022_01_01)
-            .gyldigTom(_2022_12_31);
+            .gyldigFom(DD_2Y)
+            .gyldigTom(DD_1Y_1D);
 
         assertOrgtilknytning(CMD.ENDRE_DAGLIG_OPPFOLGING)
             .forFid("FID_A")
@@ -321,12 +321,12 @@ class NyeRessursStillingProcessorTest extends TestBase {
     @DisplayName("Single OT, to StillingPerioder,ny tar over - Ref: 2.vii")
     void single_ot_to_stillingperioder_ny_tar_over__2_vii() {
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
-            orgtilknytning("FID_A", A000001, ENHET_A.getId(), _2022_01_01, null, true)
+            orgtilknytning("FID_A", A000001, ENHET_A.getId(), DD_2Y, null, true)
         ));
 
         var inputToProcess = getInputToProcess(A000001, List.of(
-            stillingPeriode(ENHET_A, _2022_01_01, _2022_12_31, DagligOppfolging.JA),
-            stillingPeriode(ENHET_B, _2023_01_01, NO_END_DATE, DagligOppfolging.JA)
+            stillingPeriode(ENHET_A, DD_2Y, DD_1Y_1D, DagligOppfolging.JA),
+            stillingPeriode(ENHET_B, DD_1Y, NO_END_DATE, DagligOppfolging.JA)
         ));
 
         var sspForNavidentResult = CUT.process(inputToProcess);
@@ -334,13 +334,13 @@ class NyeRessursStillingProcessorTest extends TestBase {
 
         assertOrgtilknytning(CMD.AVVIKLET)
             .forFid("FID_A")
-            .gyldigTom(_2022_12_31);
+            .gyldigTom(DD_1Y_1D);
 
         String fid_B =
             assertOrgtilknytning(CMD.OPPRETTET)
                 .forNavident(A000001)
                 .tilEnhet(ENHET_B.getId())
-                .gyldigFom(_2023_01_01)
+                .gyldigFom(DD_1Y)
                 .getFid();
 
         assertOrgtilknytning(CMD.ENDRE_DAGLIG_OPPFOLGING)
@@ -356,11 +356,11 @@ class NyeRessursStillingProcessorTest extends TestBase {
     @DisplayName("Single OT, to StillingPerioder,ny tar over fremtidig - Ref: 2.viii")
     void single_ot_to_stillingperioder_ny_tar_over_fremtidig__2_viii() {
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
-            orgtilknytning("FID_A", A000001, ENHET_A.getId(), _2022_01_01, null, true)
+            orgtilknytning("FID_A", A000001, ENHET_A.getId(), DD_2Y, null, true)
         ));
 
         var inputToProcess = getInputToProcess(A000001, List.of(
-            stillingPeriode(ENHET_A, _2022_01_01, SLUTT_OM_CA_2_MND, DagligOppfolging.JA),
+            stillingPeriode(ENHET_A, DD_2Y, SLUTT_OM_CA_2_MND, DagligOppfolging.JA),
             stillingPeriode(ENHET_B, START_OM_CA_2_MND, NO_END_DATE, DagligOppfolging.JA)
         ));
 
@@ -391,14 +391,14 @@ class NyeRessursStillingProcessorTest extends TestBase {
     @DisplayName("Flere OTer, flere StillingPerioder, en match en delvis match - Ref: 2.ix")
     void flere_ot_flere_stillingperioder_en_match_en_delvis__2_ix() {
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
-            orgtilknytning("FID_A", A000001, ENHET_A.getId(), _2022_01_01, _2022_12_31, true),
-            orgtilknytning("FID_B", A000001, ENHET_B.getId(), _2022_01_01, _2024_01_31, false),
-            orgtilknytning("FID_C", A000001, ENHET_C.getId(), _2023_01_01, SLUTT_OM_CA_2_MND, true)
+            orgtilknytning("FID_A", A000001, ENHET_A.getId(), DD_2Y, DD_1Y_1D, true),
+            orgtilknytning("FID_B", A000001, ENHET_B.getId(), DD_2Y, DD_6M_1D, false),
+            orgtilknytning("FID_C", A000001, ENHET_C.getId(), DD_1Y, SLUTT_OM_CA_2_MND, true)
         ));
 
         var inputToProcess = getInputToProcess(A000001, List.of(
-            stillingPeriode(ENHET_A, _2022_01_01, _2022_12_31, DagligOppfolging.JA),
-            stillingPeriode(ENHET_C, _2023_01_01, NO_END_DATE, DagligOppfolging.JA)
+            stillingPeriode(ENHET_A, DD_2Y, DD_1Y_1D, DagligOppfolging.JA),
+            stillingPeriode(ENHET_C, DD_1Y, NO_END_DATE, DagligOppfolging.JA)
         ));
 
         var sspForNavidentResult = CUT.process(inputToProcess);
@@ -409,7 +409,7 @@ class NyeRessursStillingProcessorTest extends TestBase {
 
         assertOrgtilknytning(CMD.ENDRET_DATO)
             .forFid("FID_C")
-            .gyldigFom(_2023_01_01)
+            .gyldigFom(DD_1Y)
             .gyldigTom(null);
 
         assertEquals(2, sspForNavidentResult.get(A000001).endringer().size());
@@ -419,14 +419,14 @@ class NyeRessursStillingProcessorTest extends TestBase {
     @DisplayName("Flere OTer, flere StillingPerioder, en match en delvis match - Ref: 2.x")
     void flere_ot_flere_stillingperioder_en_match_en_delvis__2_x() {
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
-            orgtilknytning("FID_A", A000001, ENHET_A.getId(), _2022_01_01, _2022_12_31, true),
-            orgtilknytning("FID_B", A000001, ENHET_B.getId(), _2022_01_01, _2024_01_31, true),
-            orgtilknytning("FID_C", A000001, ENHET_C.getId(), _2024_02_01, null, false)
+            orgtilknytning("FID_A", A000001, ENHET_A.getId(), DD_2Y, DD_1Y_1D, true),
+            orgtilknytning("FID_B", A000001, ENHET_B.getId(), DD_2Y, DD_6M_1D, true),
+            orgtilknytning("FID_C", A000001, ENHET_C.getId(), DD_6M, null, false)
         ));
 
         var inputToProcess = getInputToProcess(A000001, List.of(
-            stillingPeriode(ENHET_B, _2022_01_01, _2022_12_31, DagligOppfolging.JA),
-            stillingPeriode(ENHET_C, _2023_01_01, NO_END_DATE, DagligOppfolging.JA)
+            stillingPeriode(ENHET_B, DD_2Y, DD_1Y_1D, DagligOppfolging.JA),
+            stillingPeriode(ENHET_C, DD_1Y, NO_END_DATE, DagligOppfolging.JA)
         ));
 
         var sspForNavidentResult = CUT.process(inputToProcess);
@@ -436,8 +436,8 @@ class NyeRessursStillingProcessorTest extends TestBase {
 
         assertOrgtilknytning(CMD.ENDRET_DATO)
             .forFid("FID_B")
-            .gyldigFom(_2022_01_01)
-            .gyldigTom(_2022_12_31);
+            .gyldigFom(DD_2Y)
+            .gyldigTom(DD_1Y_1D);
 
         assertOrgtilknytning(CMD.FJERNET)
             .forFid("FID_C");
@@ -446,7 +446,7 @@ class NyeRessursStillingProcessorTest extends TestBase {
             assertOrgtilknytning(CMD.OPPRETTET)
                 .forNavident(A000001)
                 .tilEnhet(ENHET_C.getId())
-                .gyldigFom(_2023_01_01)
+                .gyldigFom(DD_1Y)
                 .getFid();
 
         assertOrgtilknytning(CMD.ENDRE_DAGLIG_OPPFOLGING)
@@ -457,6 +457,41 @@ class NyeRessursStillingProcessorTest extends TestBase {
 
         assertEquals(5, sspForNavidentResult.get(A000001).endringer().size());
     }
+
+    @Test
+    @DisplayName("Flere OTer en historisk, flere StillingPerioder en klippet i historikk, behold gammel historikk - Ref: 2.xi")
+    void flere_ot_flere_stillingperioder_match_gammel_historisk__2_xi() {
+        when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
+            orgtilknytning("FID_A", A000001, ENHET_A.getId(), DD_3Y2M, DD_2Y_1D, true),
+            orgtilknytning("FID_B", A000001, ENHET_B.getId(), DD_2Y, null, true)
+        ));
+
+        var inputToProcess = getInputToProcess(A000001, List.of(
+            stillingPeriode(ENHET_A, DD_3Y, DD_2Y_1D, DagligOppfolging.JA),
+            stillingPeriode(ENHET_B, DD_2Y, NO_END_DATE, DagligOppfolging.JA)
+        ));
+
+        var sspForNavidentResult = CUT.process(inputToProcess);
+
+        verifyNoInteractions(orgtilknytningCommandService);
+        assertEquals(0, sspForNavidentResult.get(A000001).endringer().size());
+    }
+
+    @Test
+    @DisplayName("En OTer historisk slutt +3år siden, ingen StillingPerioder (klippet historikk), behold gammel historikk - Ref: 2.xii")
+    void en_historisk_ot_ingen_sp_behold_gammel_historisk__2_xii() {
+        when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
+            orgtilknytning("FID_A", A000001, ENHET_A.getId(), DD_5Y, DD_4Y, true)
+        ));
+
+        var inputToProcess = getInputToProcess(A000001, List.of());
+
+        var sspForNavidentResult = CUT.process(inputToProcess);
+
+        verifyNoInteractions(orgtilknytningCommandService);
+        assertEquals(0, sspForNavidentResult.get(A000001).endringer().size());
+    }
+
     // ------ Helpers
 
     private Map<String, StrukturerteStillingPerioderForNavident> getInputToProcess(String navident, List<StillingPeriode> stillingPerioder) {
@@ -475,11 +510,16 @@ class NyeRessursStillingProcessorTest extends TestBase {
     final RessursState RESSURS_A = ressurs(A000001);
 
     final LocalDate NO_END_DATE = LocalDate.of(2099, 12, 31);
-    final LocalDate _2022_01_01 = LocalDate.of(2021, 1, 1);
-    final LocalDate _2022_12_31 = LocalDate.of(2022, 12, 31);
-    final LocalDate _2023_01_01 = LocalDate.of(2023, 1, 1);
-    final LocalDate _2024_01_31 = LocalDate.of(2024, 1, 31);
-    final LocalDate _2024_02_01 = LocalDate.of(2024, 2, 1);
+    final LocalDate DD_5Y = LocalDate.now().minusYears(5).withDayOfMonth(1); // 5 år siden
+    final LocalDate DD_4Y = LocalDate.now().minusYears(4).withDayOfMonth(1); // 4 år siden
+    final LocalDate DD_3Y2M = LocalDate.now().minusYears(3).minusMonths(2).withDayOfMonth(1); // 3 år, 2 måneder siden
+    final LocalDate DD_3Y = LocalDate.now().minusYears(3).withDayOfMonth(1); // 3 år siden
+    final LocalDate DD_2Y = LocalDate.now().minusYears(2).withDayOfMonth(1); // 2 år siden
+    final LocalDate DD_2Y_1D = DD_2Y.minusDays(1);                           // Dagen før 1 år siden
+    final LocalDate DD_1Y = LocalDate.now().minusYears(1).withDayOfMonth(1); // 1 år siden
+    final LocalDate DD_1Y_1D = DD_1Y.minusDays(1);                           // Dagen før 1 år siden
+    final LocalDate DD_6M = LocalDate.now().minusMonths(6).withDayOfMonth(1); // 6 måneder siden
+    final LocalDate DD_6M_1D = DD_6M.minusDays(1);                            // Dagen før 6 måneder siden
 
     final LocalDate START_OM_CA_2_MND = LocalDate.now().plusMonths(3).withDayOfMonth(1);
     final LocalDate SLUTT_OM_CA_2_MND = START_OM_CA_2_MND.minusDays(1);
@@ -487,7 +527,7 @@ class NyeRessursStillingProcessorTest extends TestBase {
     IOrgenhet ENHET_A = new OrgEnhet(
         new OrgEnhetState(
             "FID_A", "a100xy", "Enhet A",
-            LocalDate.of(2015, 1, 1), Optional.empty(),
+            LocalDate.now().minusYears(10), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
             Optional.of("Enhet_A"), Optional.of("ORGENHET"), Optional.empty()
         )
@@ -495,7 +535,7 @@ class NyeRessursStillingProcessorTest extends TestBase {
     IOrgenhet ENHET_B = new OrgEnhet(
         new OrgEnhetState(
             "FID_B", "b100xy", "Enhet B",
-            LocalDate.of(2015, 1, 1), Optional.empty(),
+            LocalDate.now().minusYears(10), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
             Optional.of("Enhet_B"), Optional.of("ORGENHET"), Optional.empty()
         )
@@ -503,7 +543,7 @@ class NyeRessursStillingProcessorTest extends TestBase {
     IOrgenhet ENHET_C = new OrgEnhet(
         new OrgEnhetState(
             "FID_C", "c100xy", "Enhet C",
-            LocalDate.of(2015, 1, 1), Optional.empty(),
+            LocalDate.now().minusYears(10), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
             Optional.of("Enhet_C"), Optional.of("ORGENHET"), Optional.empty()
         )

@@ -19,6 +19,7 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -325,10 +326,28 @@ public class NyeRessursStillingProcessor {
         Map<StillingPeriode, OrgtilknytningState> matchedeOTer,
         List<StillingPeriode> stillingPerioderAaOpprette
     ) {
+        var nestenTreAarSiden = LocalDate.now().minusYears(3).plusMonths(1);
         stillingPerioder.forEach(sp -> {
             var match = eksisterendeOTer.stream()
                 .filter(ot -> ot.gyldigFom().equals(sp.gyldigFom()) && ot.orgEnhetId().equals(sp.orgenhet().getId()))
                 .findFirst();
+
+            if (match.isEmpty()) {
+                // Sjekk om dette er gammel historisk hvor data last med 3 års historikk ikke er tilgjengelig, men NOM har akkumulert denne gamle historikken.
+                match = eksisterendeOTer.stream()
+                    .filter(ot -> ot.gyldigFom().isBefore(nestenTreAarSiden)
+                        && lik(ot.gyldigTom(), sp.gyldigTom())
+                        && ot.orgEnhetId().equals(sp.orgenhet().getId())
+                    )
+                    .findFirst();
+
+                match.ifPresent(eksisterendeOT ->
+                    log.info("Fant gammel (3år+) historisk OT for navident {} med gyldigFom {} og gyldigTom {}." +
+                            " Vi mathcher mot den selv om gyldigFom ikke matchet StillingPeriode GyldigFom {}",
+                        eksisterendeOT.navident(), eksisterendeOT.gyldigFom(), eksisterendeOT.gyldigTom(), sp.gyldigFom()
+                ));
+            }
+
             match.ifPresent(ot -> matchedeOTer.put(sp, ot));
             if (match.isEmpty()) {
                 stillingPerioderAaOpprette.add(sp);
@@ -337,7 +356,9 @@ public class NyeRessursStillingProcessor {
     }
 
     private static List<OrgtilknytningState> getOTerAaFjerne(List<OrgtilknytningState> eksisterendeOTer, Map<StillingPeriode, OrgtilknytningState> matchedeOTer) {
+        var nestenTreAarSiden = LocalDate.now().minusYears(3).plusMonths(1);
         return eksisterendeOTer.stream()
+            .filter(eksisterende -> eksisterende.gyldigTom().isEmpty() || eksisterende.gyldigTom().get().isAfter(nestenTreAarSiden))
             .filter(eksisterende -> matchedeOTer.values().stream().map(OrgtilknytningState::fid).noneMatch( matchetFid -> eksisterende.fid().equals(matchetFid)))
             .toList();
     }

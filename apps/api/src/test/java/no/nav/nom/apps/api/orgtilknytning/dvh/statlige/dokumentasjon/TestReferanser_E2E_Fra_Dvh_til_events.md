@@ -2,14 +2,18 @@
 
 * En liste over evt eksisterende OT’er (OT R1/A, OT R1/B etc, )
 * Og så en liste over de ulike eventene som skal lages for å endre eksisterende OT’er til å se ut som U4 sin representasjon av virkeligheten.
+* Datoer er angitt med DD_2Y etc eksempler:
+    * DD_2Y  => dagens dato - minus to år første dag i måneden
+    * DD_6M => dagens dato - minus 6 måneder første dag i måneden
+    * DD_6M_1D => Dagen før DD_6M (altså siste dag i måneden før)
 
 Alle tester har følgende Enheter til gjengelig
 ```
-Enhet A: FID_A a100xy   2015-01-01  -               0AA0001
-Enhet B: FID_B b100xy   2015-01-01  -               0BB0001
-Enhet C: FID_C c100xy   2015-01-01  -               0CC0001
-Enhet D: FID_D1 d100xy  2015-01-01  - 2023-31-01    0DD0001
-Enhet E: FID_D2 d200xy  2023-02-01  -               0DD0001                  
+Enhet A: FID_A a100xy   DD_10Y  -               0AA0001
+Enhet B: FID_B b100xy   DD_10Y  -               0BB0001
+Enhet C: FID_C c100xy   DD_10Y  -               0CC0001
+Enhet D: FID_D1 d100xy  DD_10Y  - DD_1Y_1D      0DD0001
+Enhet E: FID_D2 d200xy  DD_1Y  -                0DD0001                  
 ```
 Og ressurser:
 ```
@@ -21,7 +25,7 @@ Ressurs 2: B000002  null - null     NAV_STATLIG
 
 1. En DvhStilling, ingen eksisterende OT
    ```
-    DATO:     2022-01-01               2024-02-01
+    DATO:        DD_2Y                    DD_6M
                    |                        |
     DVH R1/A:       <--------- R1/A -------->
   
@@ -29,13 +33,13 @@ Ressurs 2: B000002  null - null     NAV_STATLIG
    ```
    Gir orgtilknytning events:
    ```
-    opprettet    R1/A, 2022-01-01
-    endretDato   R1/A, 2022-01-01, 2024-31-01
+    opprettet    R1/A, DD_2Y
+    endretDato   R1/A, DD_2Y, DD_6M_1D
     endretDOL    R1/A, JA
    ``` 
 2. To sammenhengende DvhStillinger, ingen eksisterende OT
    ```
-    DATO:     2022-01-01       2023-02-01        2024-02-01
+    DATO:        DD_2Y            DD_1Y             DD_6M
                    |                |                 |
     DVH R1/A:       <----- R1/A ---->
     DVH R1/A:                        <----- R1/A ------
@@ -44,13 +48,12 @@ Ressurs 2: B000002  null - null     NAV_STATLIG
    ```
    Gir orgtilknytning events:
    ```
-    opprettet    R1/A, 2022-01-01
-    endretDato   R1/A, 2022-01-01, 2024-31-01
+    opprettet    R1/A, DD_2Y
     endretDOL    R1/A, JA
    ``` 
 3. To sammenhengende DvhStillinger, matcher eksisterende OT
    ```
-    DATO:     2022-01-01       2023-02-01        2024-02-01
+    DATO:        DD_2Y            DD_1Y             DD_6M
                    |                |                 |
     DVH R1/A:       <----- R1/A ---->
     DVH R1/A:                        <----- R1/A ------
@@ -65,7 +68,7 @@ Ressurs 2: B000002  null - null     NAV_STATLIG
    ```
 4. En DvhStilling, matcher med agressoId mot to Enheter
    ```
-    DATO:     2022-01-01           2023-02-01        2024-02-01
+    DATO:        DD_2Y                DD_1Y             DD_6M
                    |                    |                 |
     DVH R1/D1:      <-------- R1/D1 - 0DD0001 ---------------
 
@@ -74,18 +77,18 @@ Ressurs 2: B000002  null - null     NAV_STATLIG
    ```
    Gir orgtilknytning events:
    ```
-    opprettet    R1/D1, 2022-01-01
-    endretDato   R1/D1, 2022-01-01, 2023-01-31
+    opprettet    R1/D1, DD_2Y
+    endretDato   R1/D1, DD_2Y, DD_1Y_1D
     endretDOL    R1/D1, JA
 
-    opprettet    R1/D2, 2023-02-01
+    opprettet    R1/D2, DD_1Y
     endretDOL    R1/D2, JA
    ```
 5. To DvhStillinger, en matcher med agressoId mot to Enheter, en matcher ikke Orgenhet På Ressurs, ulike OTer
    ```
     ORGENHET PÅ RESSURS: 0DD0001
    
-    DATO:     2022-01-01          2022-05-01            2023-02-01        2024-02-01
+    DATO:        DD_3Y               DD_2Y                 DD_1Y             DD_6M
                    |                   |                     |                 |
     DVH R1/A:       <----------------- R1/A ----------------->
     DVH R1/A:                                                 <----- R1/A ----->
@@ -101,16 +104,16 @@ Ressurs 2: B000002  null - null     NAV_STATLIG
    ```
    Gir orgtilknytning events:
    ```
-    endretDato   R1/A, 2022-01-01, 2022-04-30
+    endretDato   R1/A, DD_3Y, DD_2Y_1D
 
-    opprettet    R1/A, 2022-05-01
-    endretDato   R1/A, 2022-05-01, 2024-01-31
-
-    opprettet    R1/D1, 2022-05-01
-    endretDato   R1/D1, 2022-05-01, 2023-01-31
+    opprettet    R1/D1, DD_2Y
+    endretDato   R1/D1, DD_2Y, DD_1Y_1D
     endretDOL    R1/D1, JA
 
-    opprettet    R1/D2, 2023-02-01 
+    opprettet    R1/A, DD_2Y
+    endretDato   R1/A, DD_2Y, DD_6M_1D
+
+    opprettet    R1/D2, DD_1Y
     endretDOL    R1/D2, JA
    
     fjernet      R1/B

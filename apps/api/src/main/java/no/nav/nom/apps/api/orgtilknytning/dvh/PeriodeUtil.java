@@ -91,6 +91,10 @@ public class PeriodeUtil {
 
     public static LocalDate dayBefore(LocalDate localDate) { return localDate.minusDays(1); }
 
+    public static boolean lik(Optional<LocalDate> dato, LocalDate sjekkMotDato) {
+        return lik(dato.orElse(null), sjekkMotDato);
+    }
+
     public static boolean lik(LocalDate dato, LocalDate sjekkMotDato) {
         dato = dato == null ? NO_END_DATE : dato;
         return dato.equals(sjekkMotDato == null ? NO_END_DATE : sjekkMotDato);
