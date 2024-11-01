@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { BigLoader } from "~/components/BigLoader.tsx";
+import { RessursDuplikat } from "~/sanitychecks/Ressurs/RessursDuplikat.tsx";
 import { Ressurser } from "~/sanitychecks/Ressurs/Ressurser.tsx";
 import { RessursMedBlankMellomnavn } from "~/sanitychecks/Ressurs/RessursMedBlankMellomnavn.tsx";
 import { RessursMedOTUtenAktivEnhet } from "~/sanitychecks/Ressurs/RessursMedOTUtenAktivEnhet.tsx";
@@ -58,6 +59,9 @@ function ListSelector(props: { selected: string }) {
     case "RessursMedBlankMellomnavn": {
       return <RessursMedBlankMellomnavn />;
     }
+    case "RessursDuplikat": {
+      return <RessursDuplikat />;
+    }
     default: {
       return <></>;
     }
@@ -83,6 +87,9 @@ function RessursSanityChecks() {
         </option>
         <option value="RessursMedBlankMellomnavn">
           Ressurs med blankt mellomnavn
+        </option>
+        <option value="RessursDuplikat">
+          Duplikate Ressurser på samme navident
         </option>
       </Select>
       <ListSelector selected={selected} />

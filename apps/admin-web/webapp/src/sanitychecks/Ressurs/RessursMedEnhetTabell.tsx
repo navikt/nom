@@ -4,7 +4,7 @@ import { Link as TanStackLink } from "@tanstack/react-router";
 import { NomLink } from "~/components/NomLink.tsx";
 import type { RessursMedEnhet } from "~/types/nom-admin/nom-admin-models.ts";
 
-export function FellesRessursTabell({
+export function RessursMedEnhetTabell({
   sortedData,
 }: {
   sortedData: RessursMedEnhet[];

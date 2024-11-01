@@ -7,7 +7,7 @@ import { getListAvOTMedGyldighetUtoverEnhetensGyldighet } from "~/api/queries.ts
 import { useTableSort } from "~/hooks/useTableSort.ts";
 import type { OrgtilknytningMedOrgEnhet } from "~/types/nom-admin/nom-admin-models.ts";
 
-export function OrgtilknytningMedOrgEnhetTabell() {
+export function OrgtilknytningOrgGyldighet() {
   const [page, setPage] = useState(1);
   const [fetchData, setFetchData] = useState(false);
   const handlePageChange = (value: SetStateAction<number>) => {

@@ -333,3 +333,37 @@ export function getRessursMedBlankMellomNavn() {
       ).json<RessursState[]>(),
   });
 }
+
+export async function getDuplikateRessurserPaaNavident(): Promise<
+  RessursState[]
+> {
+  return await ky
+    .get(`${API_BASE_URL}/SanityCheck/ressurs/duplikateRessurserPaaNavident`, {
+      timeout: 120_000, // 120 seconds
+    })
+    .json<RessursState[]>();
+}
+
+export function getOrgtilknytningMedNegativPeriode() {
+  return queryOptions({
+    queryKey: ["API", "ORGTILKNYTNINGMEDNEGATIVPERIODE"],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/SanityCheck/orgtilknytning/orgtilknytningNegativPeriode`,
+        )
+      ).json<OrgtilknytningState[]>(),
+  });
+}
+
+export function getOrgtilknytningMedFlereAktivDOL() {
+  return queryOptions({
+    queryKey: ["API", "ORGTILKNYTNINGMEDFLEREAKTIVDOL"],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/SanityCheck/orgtilknytning/orgtilknytningMedFlereAktivDagligOppfolging`,
+        )
+      ).json<OrgtilknytningState[]>(),
+  });
+}

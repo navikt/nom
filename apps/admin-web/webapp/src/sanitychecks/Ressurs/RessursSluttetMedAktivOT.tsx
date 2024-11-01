@@ -4,7 +4,7 @@ import { type SetStateAction, useState } from "react";
 
 import { getRessursMedAktivOrgTilknytningHvorEnhetErInaktivMedUnderenhet } from "~/api/queries.ts";
 import { useTableSort } from "~/hooks/useTableSort.ts";
-import { FellesRessursTabell } from "~/sanitychecks/Ressurs/FellesRessursTabell.tsx";
+import { RessursMedEnhetTabell } from "~/sanitychecks/Ressurs/RessursMedEnhetTabell.tsx";
 import type { RessursMedEnhet } from "~/types/nom-admin/nom-admin-models.ts";
 
 export function RessursSluttetMedAktivOT() {
@@ -84,7 +84,7 @@ export function RessursSluttetMedAktivOT() {
   return (
     <div>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
-        <FellesRessursTabell sortedData={sortedData} />
+        <RessursMedEnhetTabell sortedData={sortedData} />
       </Table>
       <Pagination
         count={Math.ceil(data.length / rowsPerPage)}
