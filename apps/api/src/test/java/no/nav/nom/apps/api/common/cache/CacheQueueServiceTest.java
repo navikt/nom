@@ -131,4 +131,33 @@ public class CacheQueueServiceTest {
         endringer = cacheQueueService.getOTEndringerFromCache();
         assertEquals(2, endringer.size());
     }
+
+    @Test
+    public void testTemoveDuplicateOTChangesEntries(){
+        // setup data
+        String fid = "fid123456";
+        String navidentChangedBy = "T123456";
+        String timestamp = LocalDateTime.now().toString();
+
+        OTEndretData otEndretData = OTEndretData.builder()
+            .fid(fid)
+            .changedByNavIdent(navidentChangedBy)
+            .timestamp(timestamp)
+            .eventType(OTEndretData.OTEndretDataType.OT_ENDRET)
+            .build();
+
+        OTEndretData otEndretData2 = OTEndretData.builder()
+            .fid(fid)
+            .changedByNavIdent(navidentChangedBy)
+            .timestamp(LocalDateTime.now().minusDays(1).toString())
+            .eventType(OTEndretData.OTEndretDataType.OT_ENDRET)
+            .build();
+
+        // test
+        var result = cacheQueueService.removeDuplicateOTChangesEntries(List.of(otEndretData, otEndretData, otEndretData));
+        assertEquals(1, result.size());
+
+        var result2 = cacheQueueService.removeDuplicateOTChangesEntries(List.of(otEndretData2, otEndretData, otEndretData));
+        assertEquals(2, result2.size());
+    }
 }

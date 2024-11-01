@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +35,7 @@ public class CacheQueueService {
             List<OTEndretData> payload = reader.readValue(existingCacheQueue.getPayload());
             payload.add(otEndretData);
 
-            existingCacheQueue.setPayload(new ObjectMapper().convertValue(payload, JsonNode.class));
+            existingCacheQueue.setPayload(new ObjectMapper().convertValue(removeDuplicateOTChangesEntries(payload), JsonNode.class));
             log.info("CacheQueue updated: {}", existingCacheQueue);
             cacheQueueRepository.save(existingCacheQueue);
         } else {
@@ -47,6 +48,10 @@ public class CacheQueueService {
             log.info("CacheQueue added: {}", cacheQueue);
             cacheQueueRepository.save(cacheQueue);
         }
+    }
+
+    public List<OTEndretData> removeDuplicateOTChangesEntries(List<OTEndretData> otEndringerData) {
+        return new ArrayList<>(new HashSet<>(otEndringerData));
     }
 
     public void delete(String cacheKey, String cacheType) {
