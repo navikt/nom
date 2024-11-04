@@ -7,6 +7,7 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetOverordnetResolver;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetUnderordnetResolver;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetMedLedernavn;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
@@ -49,12 +50,12 @@ public class OrgEnhetMapper {
         this.underordnetResolver = underordnetResolver;
     }
 
-    public OrgEnhet mapFrom(IOrgenhet orgEnhet) {
+    public OrgEnhet mapToOrgEnhet(IOrgenhet orgEnhet) {
 
         var remedyEnhetId = remedyEnhetMapperService.findByNomId(orgEnhet.getId()).map(RemedyEnhet::remedyEnhetId);
         var overordnetId = overordnetResolver.findOverordnetOrgEnhet(orgEnhet.getFid()).map(OrgEnhetState::id);
 
-        Collator norwegianCollator = Collator.getInstance(new Locale("no", "NO"));
+        Collator norwegianCollator = Collator.getInstance(new Locale.Builder().setLanguage("no").setRegion("NO").build());
         var underordnedeOrgEnhetIds = underordnetResolver.findUnderordnedeOrgEnheter(orgEnhet.getFid())
             .stream()
             .sorted(Comparator.comparing(OrgEnhetState::navn, norwegianCollator))
@@ -80,6 +81,17 @@ public class OrgEnhetMapper {
         );
     }
 
+    public OrgEnhetMedLedernavn mapToOrgEnhetMedLedernavn(IOrgenhet orgEnhet) {
+        var remedyEnhetId = remedyEnhetMapperService.findByNomId(orgEnhet.getId()).map(RemedyEnhet::remedyEnhetId);
+
+        return new OrgEnhetMedLedernavn(
+                orgEnhet.getId(),
+                orgEnhet.getNavn(),
+                remedyEnhetId.orElse(null),
+                getLedernavn(orgEnhet)
+        );
+    }
+
     private List<RessursState> hentOrgEnhetsLedere(IOrgenhet orgEnhet) {
         return dvhRepository.getLederByAgressoIdAndNivAndNavn(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn())
             .stream()
@@ -99,5 +111,19 @@ public class OrgEnhetMapper {
         }
 
         return ressursState;
+    }
+
+    private List<String> getLedernavn(IOrgenhet orgEnhet) {
+        return dvhRepository.getLederByAgressoIdAndNivAndNavn(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn())
+                .stream()
+                .map(this::getLedernavnFromDvhLeder)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    private String getLedernavnFromDvhLeder(DvhLeder dvhLeder) {
+        return ressursStateRepository.findByNavident(dvhLeder.getNavIdent())
+                .map(r -> r.visningsnavn().getFormattedVisningsnavn())
+                .orElse(null);
     }
 }

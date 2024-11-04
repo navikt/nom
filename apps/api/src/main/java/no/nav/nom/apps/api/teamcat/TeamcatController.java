@@ -244,7 +244,7 @@ public class TeamcatController {
         var perRequestCache = new PerRequestCache();
         var out = new HashMap<String, TeamcatOrgenhetDTO>(alleEnheter.size());
         for (var r : alleEnheter) {
-            var mapped = orgEnhetMapper.mapFrom(r);
+            var mapped = orgEnhetMapper.mapToOrgEnhet(r);
             var lederNavident = mapped.ledere().stream().findFirst().map(RessursState::navident).orElse(null);
             var enhetOverId = mapped.overordnetEnhetId();
             var tmp = new TeamcatOrgenhetDTO(r.getId(), r.getNavn(), enhetOverId, determineAvdelingNavnByEnhet(r, perRequestCache), lederNavident);
@@ -265,7 +265,7 @@ public class TeamcatController {
             return ResponseEntity.notFound().build();
         }
         var enhet = enhetMaybe.get();
-        var mapped = orgEnhetMapper.mapFrom(enhet);
+        var mapped = orgEnhetMapper.mapToOrgEnhet(enhet);
         return ResponseEntity.ok(new TeamcatOrgenhetDTO(
             enhet.getId(),
             enhet.getNavn(),

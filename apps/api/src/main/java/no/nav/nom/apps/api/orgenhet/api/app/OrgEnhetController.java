@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetMedLedernavn;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import org.springframework.http.ResponseEntity;
@@ -31,8 +32,8 @@ public class OrgEnhetController {
     private final OrgEnhetMapper orgEnhetMapper;
 
     public OrgEnhetController(
-        OrgenhetService orgenhetService,
-        OrgEnhetMapper orgEnhetMapper
+            OrgenhetService orgenhetService,
+            OrgEnhetMapper orgEnhetMapper
     ) {
         this.orgenhetService = orgenhetService;
         this.orgEnhetMapper = orgEnhetMapper;
@@ -46,7 +47,7 @@ public class OrgEnhetController {
     public ResponseEntity<OrgEnhet> hentOrgenhet(@PathVariable String orgenhetId) {
 
         return orgenhetService.getById(orgenhetId)
-            .map(orgEnhetMapper::mapFrom)
+            .map(orgEnhetMapper::mapToOrgEnhet)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
@@ -57,7 +58,18 @@ public class OrgEnhetController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     public List<OrgEnhet> hentOrgEnheter() {
-        return orgenhetService.getAllEnheter().stream().map(orgEnhetMapper::mapFrom).collect(Collectors.toList());
+        return orgenhetService.getAllEnheter().stream().map(orgEnhetMapper::mapToOrgEnhet).collect(Collectors.toList());
+    }
+
+    @GetMapping("/harOverenhet")
+    @Operation(
+            description = "Henter alle aktive orgenheter som har overenhet",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    public List<OrgEnhetMedLedernavn> hentOrgEnheterMedLeder() {
+        return orgenhetService.getAllEnheterSomHarOverEnhet().stream()
+                .map(orgEnhetMapper::mapToOrgEnhetMedLedernavn)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/ledetAv/{navident}")
@@ -66,7 +78,7 @@ public class OrgEnhetController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     public List<OrgEnhet> hentOrgEnheterByLeder(@PathVariable String navident) {
-        return orgenhetService.getEnheterByLeder(navident).stream().map(orgEnhetMapper::mapFrom).collect(Collectors.toList());
+        return orgenhetService.getEnheterByLeder(navident).stream().map(orgEnhetMapper::mapToOrgEnhet).collect(Collectors.toList());
     }
 
     @GetMapping("/underliggende/{parentId}")
@@ -84,7 +96,7 @@ public class OrgEnhetController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     public ResponseEntity<List<OrgEnhet>> getUnderliggendeOrgEnheterObjekt(@PathVariable("parentId") String parentId) {
-        return ResponseEntity.ok(orgenhetService.getAllUnderliggendeOrgEnhetById(parentId).stream().map(orgEnhetMapper::mapFrom).collect(Collectors.toList()));
+        return ResponseEntity.ok(orgenhetService.getAllUnderliggendeOrgEnhetById(parentId).stream().map(orgEnhetMapper::mapToOrgEnhet).collect(Collectors.toList()));
     }
 
     @GetMapping("/finn-arbeidsomraade/{orgEnhetId}")

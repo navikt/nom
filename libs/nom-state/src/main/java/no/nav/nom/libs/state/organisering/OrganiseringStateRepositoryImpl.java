@@ -4,6 +4,7 @@ import no.nav.nom.contract.nom.state.OrganiseringState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -221,6 +222,13 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
         } else {
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public boolean hasOrganiseringParent(String id) {
+        return findActiveById(id)
+                .filter(organiseringState -> !ObjectUtils.isEmpty(organiseringState.idOver()))
+                .isPresent();
     }
 
     private boolean isActive(OrganiseringState organiseringState) {

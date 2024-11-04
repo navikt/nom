@@ -31,4 +31,6 @@ public interface OrganiseringStateRepository {
     List<OrganiseringState> getOrganiseringer();
 
     List<OrganiseringState> getOrganiseringerContainingId(String id);
+    
+    boolean hasOrganiseringParent(String id);
 }

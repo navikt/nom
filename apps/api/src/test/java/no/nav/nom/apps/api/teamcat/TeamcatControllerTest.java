@@ -313,7 +313,7 @@ public class TeamcatControllerTest extends RestTestBase {
         for(var oe : toMock){
             when(orgenhetService.getByFid(oe.getFid())).thenReturn(Optional.of(oe));
             when(orgenhetService.getById(oe.getFid())).thenReturn(Optional.of(oe));
-            when(orgEnhetMapper.mapFrom(oe)).thenReturn(new no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet(
+            when(orgEnhetMapper.mapToOrgEnhet(oe)).thenReturn(new no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet(
                 oe.getId(),
                 oe.getFid(),
                 oe.getAgressoId(),

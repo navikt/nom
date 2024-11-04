@@ -25,15 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
@@ -56,7 +48,10 @@ public class OrgenhetService {
     private List<IOrgenhet> organiserteEnheter = emptyList();
 
 
-    public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository, OrgEnhetCommandService orgEnhetCommandService, DvhRepository dvhRepository, KafkaTopicReader kafkaTopicReader,
+    public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository, 
+                           OrgEnhetCommandService orgEnhetCommandService, 
+                           DvhRepository dvhRepository, 
+                           KafkaTopicReader kafkaTopicReader, 
                            Unleash unleash,
                            OrganiseringStateRepository organiseringStateRepository
     ) {
@@ -112,6 +107,11 @@ public class OrgenhetService {
         return orgEnhetStateRepository.getAll().stream().map(this::map).toList();
     }
 
+    public Collection<IOrgenhet> getAllEnheterSomHarOverEnhet() {
+        return orgEnhetStateRepository.getAll().stream()
+                .filter(orgEnhetState -> organiseringStateRepository.hasOrganiseringParent(orgEnhetState.id()))
+                .map(this::map).toList();
+    }
 
     public Collection<IOrgenhet> getAllEnheterMedOrganisering() {
         return organiserteEnheter;

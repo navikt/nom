@@ -5,7 +5,6 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
-import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -18,7 +17,6 @@ import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateRepository;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
@@ -62,6 +60,7 @@ import static org.mockito.Mockito.when;
 @AutoConfigureWireMock(port = 0)
 public abstract class TestBase {
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     protected MockOAuth2Server mockOAuth2Server;
 
@@ -69,7 +68,7 @@ public abstract class TestBase {
     protected ResourceLoader resourceLoader;
 
     @Autowired
-    private DvhRepository dvhRepository;
+    protected DvhRepository dvhRepository;
 
     @Autowired
     private GenericStorage genericStorage;
