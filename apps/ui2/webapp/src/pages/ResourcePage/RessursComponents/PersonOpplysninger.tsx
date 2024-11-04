@@ -101,7 +101,7 @@ function EditButton({ ressurs }: { ressurs: Ressurs }) {
   ) {
     return (
       <HStack align="center" gap="2">
-        {!ressursCanBeEdited && (
+        {!ressursCanBeEdited && !hasAdminAccess && (
           <HelpText title="Hvorfor er dette utilgjengelig?">
             Statlige ansatte kan ikke opprettes eller endres i NOM på dette
             tidspunktet. Disse kan endres i tråd med gjeldende rutiner i
@@ -111,7 +111,7 @@ function EditButton({ ressurs }: { ressurs: Ressurs }) {
 
         <Button
           data-cy="endre-personopplysninger-button"
-          disabled={!ressursCanBeEdited}
+          disabled={!ressursCanBeEdited && !hasAdminAccess}
           icon={<PencilIcon aria-hidden />}
           onClick={() =>
             navigate({
