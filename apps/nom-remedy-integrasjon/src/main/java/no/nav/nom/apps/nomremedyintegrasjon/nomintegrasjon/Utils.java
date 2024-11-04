@@ -16,7 +16,16 @@ public class Utils {
     }
 
     public static String capitalizeNavn(String navn){
-        return navn.substring(0, 1).toUpperCase() + navn.substring(1);
+        StringBuilder stringBuilder = new StringBuilder(navn.substring(0, 1).toUpperCase() + navn.substring(1).toLowerCase());
+        for(int i = 0; i < navn.length(); i++) {
+            char characterAtIndex = navn.charAt(i);
+            if(characterAtIndex == '-' || Character.isWhitespace(characterAtIndex)) {
+                if(i + 1 < navn.length()) {
+                    stringBuilder.replace(i + 1, i + 2, String.valueOf(Character.toUpperCase(navn.charAt(i + 1))));
+                }
+            }
+        }
+        return stringBuilder.toString();
     }
 
     public static Long epochSecondsNorwegianTimeNoon(LocalDate localDate) {

@@ -1038,6 +1038,23 @@ public class NomIntegrasjonServiceTest extends TestBase {
         );
     }
 
+    @ParameterizedTest(name = "Should capitalize {0} correctly")
+    @DisplayName("Should capitalize navn correctly")
+    @MethodSource("testCapitalizeNavnArguments")
+    void testCapitalizeNavn(String input, String expected) {
+        assertThat(capitalizeNavn(input)).isEqualTo(expected);
+    }
+
+    private static Stream<Arguments> testCapitalizeNavnArguments() {
+        return Stream.of(
+            Arguments.of("ola", "Ola"),
+            Arguments.of("ola n", "Ola N"),
+            Arguments.of("Anne-lise", "Anne-Lise"),
+            Arguments.of("Anne-lise næset", "Anne-Lise Næset"),
+            Arguments.of("anne-lise næSet", "Anne-Lise Næset")
+        );
+    }
+
     private Integer nomSektorToRemedyCode(Sektor sektor) {
         return switch (sektor) {
             case NAV_STATLIG -> 0;
