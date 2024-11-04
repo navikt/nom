@@ -266,8 +266,8 @@ public class NyeRessursStillingProcessor {
         var cmd = new EndreDagligOppfolgingOrgtilknytning(
             originalOrgtilknytning.navident(),
             originalOrgtilknytning.orgEnhetId(),
-            originalOrgtilknytning.gyldigFom(),
-            originalOrgtilknytning.gyldigTom(),
+            stillingPeriode.gyldigFom(),
+            Optional.ofNullable(stillingPeriode.gyldigTom()),
             stillingPeriode.erDagligOppfolging(),
             metadata,
             additionalData
