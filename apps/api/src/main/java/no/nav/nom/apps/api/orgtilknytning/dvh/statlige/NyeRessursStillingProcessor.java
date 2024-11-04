@@ -35,7 +35,7 @@ public class NyeRessursStillingProcessor {
     private final RessursStateRepository ressursStateRepository;
     private final Unleash unleash;
 
-    static final String LAGRE_ORGTILKNYTNINGER_I_NY_PROSESSERING_FOR_DVH_LAST = "nom.dvh-last.lagre-orgtilknytninger-i-ny-prosessering";
+    public static final String LAGRE_ORGTILKNYTNINGER_I_NY_PROSESSERING_FOR_DVH_LAST = "nom.dvh-last.lagre-orgtilknytninger-i-ny-prosessering";
 
     public NyeRessursStillingProcessor(
         OrgtilknytningService orgtilknytningService, OrgtilknytningCommandService orgtilknytningCommandService, RessursStateRepository ressursStateRepository,

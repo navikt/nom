@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.NyeRessursStillingProcessor.LAGRE_ORGTILKNYTNINGER_I_NY_PROSESSERING_FOR_DVH_LAST;
 
 @Slf4j
 @Service
@@ -34,6 +36,7 @@ public class RessursStillingLoader {
     private final AsyncNyeStrukturerOgProsesser asyncNyeStrukturerOgProsesser;
     private final RessursStateRepository ressursStateRepository;
     private final NomMastered nomMastered;
+    private final Unleash unleash;
 
     public RessursStillingLoader(
         RessursStillingStrukturerer ressursStillingStrukturerer,
@@ -41,7 +44,7 @@ public class RessursStillingLoader {
         RessursStillingLoadStatus ressursStillingLoadStatus, NomProxyClient nomProxyClient, AppProperties appProperties,
         @Value("${app.dvh-load.nom-ressurser-stillinger-respons-navn}") String ressursStillingerResponseNode,
         AsyncNyeStrukturerOgProsesser asyncNyeStrukturerOgProsesser,
-        RessursStateRepository ressursStateRepository, NomMastered nomMastered
+        RessursStateRepository ressursStateRepository, NomMastered nomMastered, Unleash unleash
     ) {
         this.ressursStillingStrukturerer = ressursStillingStrukturerer;
         this.ressursStillingProcessor = ressursStillingProcessor;
@@ -52,6 +55,7 @@ public class RessursStillingLoader {
         this.asyncNyeStrukturerOgProsesser = asyncNyeStrukturerOgProsesser;
         this.ressursStateRepository = ressursStateRepository;
         this.nomMastered = nomMastered;
+        this.unleash = unleash;
     }
 
     public void loadAndProcess() {
@@ -63,21 +67,27 @@ public class RessursStillingLoader {
 
         var nyeStillingPerioderPerNavidentFuture = asyncNyeStrukturerOgProsesser.asyncStrukturerStillingPerioderPerNavident(ressursStillinger);
 
-        Map <String, List<StillingPeriode>> stillingPerioderPerNavident = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
-        var gmlStillingPerioderPerNavident = ressursStillingProcessor.process(stillingPerioderPerNavident);
-
-        log.info("Lastet og prosessert ressursStillinger {} på gamlemåten. Tok {}", gmlStillingPerioderPerNavident.size(), durationAsH24(start));
+        Map <String, StrukturerteStillingPerioderForNavident> gmlStillingPerioderPerNavident = null;
+        if (!unleash.isEnabled(LAGRE_ORGTILKNYTNINGER_I_NY_PROSESSERING_FOR_DVH_LAST) ) {
+            Map <String, List<StillingPeriode>> stillingPerioderPerNavident = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
+            gmlStillingPerioderPerNavident = ressursStillingProcessor.process(stillingPerioderPerNavident);
+            log.info("Lastet og prosessert ressursStillinger {} på gamlemåten. Tok {}", gmlStillingPerioderPerNavident.size(), durationAsH24(start));
+        }
 
         try {
             var nyeStillingPerioderPerNavident = nyeStillingPerioderPerNavidentFuture.get();
             log.info("Lastet og prosessert ressursStillinger {} på nye måten. Tok {}", nyeStillingPerioderPerNavident.size(), durationAsH24(start));
-            diffNyGmlResult(gmlStillingPerioderPerNavident, nyeStillingPerioderPerNavident);
+            if (!unleash.isEnabled(LAGRE_ORGTILKNYTNINGER_I_NY_PROSESSERING_FOR_DVH_LAST) ) {
+                diffNyGmlResult(gmlStillingPerioderPerNavident, nyeStillingPerioderPerNavident);
+            }
             loggErrorsFraNyLast(nyeStillingPerioderPerNavident);
         } catch (Exception e) {
             log.error("Feil ved lasting og prosessering av ressursStillinger på nye måten", e);
         }
 
-        log.info("Lastet og prosessert ressursStillinger på både nye og gamlemåten. Tok {}", durationAsH24(start));
+        if (!unleash.isEnabled(LAGRE_ORGTILKNYTNINGER_I_NY_PROSESSERING_FOR_DVH_LAST) ) {
+            log.info("Lastet og prosessert ressursStillinger på både nye og gamlemåten. Tok {}", durationAsH24(start));
+        }
 
         ressursStillingLoadStatus.endLoad();
     }
