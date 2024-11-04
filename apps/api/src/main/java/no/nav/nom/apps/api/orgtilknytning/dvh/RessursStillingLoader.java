@@ -95,7 +95,7 @@ public class RessursStillingLoader {
     private void loggErrorsFraNyLast(Map<String, StrukturerteStillingPerioderForNavident> nyeStillingPerioderPerNavident) {
         nyeStillingPerioderPerNavident.forEach((navident, sspfn) -> {
             if (!sspfn.errors().isEmpty()) {
-                log.error("Feil ved NYE lasting og prosessering av ressursStillinger for navident {}: {}", navident, sspfn.errors());
+                log.info("Feil ved NYE lasting og prosessering av ressursStillinger for navident {}: {}", navident, sspfn.errors());
             }
         });
     }
