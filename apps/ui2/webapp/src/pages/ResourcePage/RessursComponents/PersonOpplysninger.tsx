@@ -28,7 +28,12 @@ import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import type { Ressurs } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
-import { formatDisplayDate, formatTlf, formatVisningsnavn } from "~/utils";
+import {
+  formatDisplayDate,
+  formatTlf,
+  formatVisningsnavn,
+  isInDevelopment,
+} from "~/utils";
 
 // Det er kanskje litt unødvendig å ha en wrapper komponent rundt hver detalj (navident, sluttdato, etc)
 // men det kommer stadig endringer i reglene for logikken rundt når noe skal vises og ikke.
@@ -92,16 +97,18 @@ function EditButton({ ressurs }: { ressurs: Ressurs }) {
   const hasWriteAccessForSelvbetjening =
     useGetSession().data?.navident === ressurs.navident;
 
-  const ressursCanBeEdited = ressurs.sektor !== Sektor.NAV_STATLIG;
-
   if (
     hasAdminAccess ||
     (hasWriteAccess && hasWriteAccessForRessurs) ||
     hasWriteAccessForSelvbetjening
   ) {
+    const isDevelopment = isInDevelopment();
+    const ressursCanBeEdited =
+      ressurs.sektor !== Sektor.NAV_STATLIG ||
+      (hasAdminAccess && isDevelopment);
     return (
       <HStack align="center" gap="2">
-        {!ressursCanBeEdited && !hasAdminAccess && (
+        {!ressursCanBeEdited && (
           <HelpText title="Hvorfor er dette utilgjengelig?">
             Statlige ansatte kan ikke opprettes eller endres i NOM på dette
             tidspunktet. Disse kan endres i tråd med gjeldende rutiner i
@@ -111,7 +118,7 @@ function EditButton({ ressurs }: { ressurs: Ressurs }) {
 
         <Button
           data-cy="endre-personopplysninger-button"
-          disabled={!ressursCanBeEdited && !hasAdminAccess}
+          disabled={!ressursCanBeEdited}
           icon={<PencilIcon aria-hidden />}
           onClick={() =>
             navigate({
