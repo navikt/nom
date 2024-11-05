@@ -398,7 +398,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
     @ParameterizedTest(name = "Should not handle RessursEvent if ressurs is NAV_STATLIG")
     @MethodSource("testShouldNotHandleRessursEventIfStatligInput")
     void testShouldNotHandleRessursEventIfNotEkstern(RessursEvent ressursEvent) {
-
+        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(false);
         when(nomApiClient.getRessursByFid(ressursEvent.getFid()))
             .thenReturn(new Ressurs().sektor(no.nav.nom.generated.model.Sektor.NAV_STATLIG));
 
@@ -578,6 +578,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
     @Test
     @DisplayName("Should skip handling OrgtilknytningDagligOppfolgingEndretEventV1 if ressurs is not EKSTERN")
     void testSkipUpdateForOrgtilknytningDagligOppfolgingEndretEventV1IfRessursIsNotEkstern() {
+        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(false);
 
         var orgtilknytningDagligOppfolgingEndretEventV1 = orgtilknytningDagligOppfolgingEndretEventV1(
             orgtilknytningDagligOppfolgingEndretEventData().toBuilder().dagligOppfolging(true).build()
@@ -709,8 +710,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
     @MethodSource("testShouldNotUpdateOrgtilknytningDolEventInput")
     @DisplayName("Should not update remedy for delayed OrgtilknytningDagligOppfolgingEndretEventV1")
     void testShouldNotUpdateForDelayedOrgtilknytningDagligOppfolgingEndretEventV1(
-        DelayedEvent delayedEvent, OrgtilknytningState orgtilknytning, Ressurs existingRessurs
-    ) {
+        DelayedEvent delayedEvent, OrgtilknytningState orgtilknytning) {
         var orgtilknytningDolEvent = (OrgtilknytningDagligOppfolgingEndretEventV1)delayedEvent.getEvent();
         delayedEventRepository.save(delayedEvent);
 
@@ -726,8 +726,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
     @MethodSource("testShouldNotUpdateOrgtilknytningEventInput")
     @DisplayName("Should not update remedy for delayed OrgtilknytningDatoEndretEventV2")
     void testShouldNotUpdateForDelayedOrgtilknytningEndretEventV1(
-        DelayedEvent delayedEvent, OrgtilknytningState orgtilknytning, Ressurs existingRessurs
-    ) {
+        DelayedEvent delayedEvent, OrgtilknytningState orgtilknytning) {
         var orgtilknytningDolEvent = (OrgtilknytningDatoEndretEventV2)delayedEvent.getEvent();
         delayedEventRepository.save(delayedEvent);
 
@@ -874,6 +873,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
     @Test
     @DisplayName("Should skip handling OrgtilknytningDatoEndretEventV2 if ressurs is not EKSTERN")
     void testSkipUpdateForOrgtilknytningDatoEndretEventV2IfRessursIsNotEkstern() {
+        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(false);
         var navident = "X123456";
 
         var orgtilknytningDatoEndretEventV2 = orgtilknytningDatoEndretEventV2();
@@ -893,7 +893,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
     @Test
     @DisplayName("Should skip updating values for OrgtilknytningDatoEndretEventV2 if orgtilknytning is not dagligOppfolgning")
     void testSkipUpdateForOrgtilknytningDatoEndretEventV2IfRessursIsNotDagligOppfolgning() {
-
+        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(false);
         var orgtilknytningDatoEndretEventV2 = orgtilknytningDatoEndretEventV2();
 
         when(nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid()))

@@ -22,6 +22,7 @@ import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -73,6 +74,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     @MockBean
     private AuthResolver authResolver;
+
+    @MockBean
+    private RessursStateRepository ressursStateRepository;
 
     @Autowired
     TestTokensGenerator testToken;
@@ -176,7 +180,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         var orgtilknytningToUpdate = orgtilknytningState();
         saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
-
+        when(ressursStateRepository.findByNavident(orgtilknytningToUpdate.navident())).thenReturn(Optional.of(ressursState().toBuilder().sektor(Sektor.EKSTERN).build()));
         saveRessurser(List.of(
             ressursState().toBuilder()
                 .navident(orgtilknytningToUpdate.navident())
@@ -215,7 +219,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @Test
     @DisplayName("POST /app/orgtilknytninger/{fid}/dato: Should update sluttdato for ressurs on update orgtilknytning dato when setRessursSluttdato=true")
     void test_update_ressurs_sluttdato_on_update_orgtilknytning_dato() {
-
+        when(ressursStateRepository.findByNavident("X123456")).thenReturn(Optional.of(ressursState().toBuilder().sektor(Sektor.EKSTERN).build()));
         var orgtilknytningToUpdate = orgtilknytningState();
         saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
 
@@ -257,8 +261,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     )
     void test_not_update_ressurs_sluttdato_on_update_orgtilknytning_dato_when_other_orgtilknytning_has_later_gyldig_tom() {
         var newSluttdato = LocalDate.now().plusMonths(5);
-
         var orgtilknytningToUpdate = orgtilknytningState();
+        when(ressursStateRepository.findByNavident(orgtilknytningToUpdate.navident())).thenReturn(Optional.of(ressursState().toBuilder().sektor(Sektor.EKSTERN).build()));
         saveOrgtilknytninger(List.of(
             orgtilknytningToUpdate,
             orgtilknytningState().toBuilder()
@@ -296,7 +300,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     void test_no_overlapping_periode_for_orgenhet_navident_on_update_date() {
         var navident = "Y654321";
         var orgEnhet = orgEnhetState();
-
+        when(ressursStateRepository.findByNavident("Y654321")).thenReturn(Optional.of(ressursState().toBuilder().sektor(Sektor.EKSTERN).build()));
         var existingOrgtilknytningWithConflictingPeriod = orgtilknytningState().toBuilder()
             .navident(navident)
             .orgEnhetId(orgEnhet.id())
@@ -347,7 +351,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build()
         ));
 
-
+        when(ressursStateRepository.findByNavident("Y654321")).thenReturn(Optional.of(ressursState().toBuilder().sektor(Sektor.EKSTERN).build()));
         var orgEnhetForDagligOppfolgingToChange = orgEnhetState();
         var orgEnhetForDagligOppfolgingWithConflictingPeriod = orgEnhetState().toBuilder()
             .id("some-other-orgenhet")
@@ -465,8 +469,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @Test
     @DisplayName("Should update tilknytningtype for orgtilknytning")
     void test_update_orgtilknytning_type() {
-
         var orgtilknytningToUpdate = orgtilknytningState();
+        when(ressursStateRepository.findByNavident(orgtilknytningToUpdate.navident())).thenReturn(Optional.of(ressursState().toBuilder().sektor(Sektor.EKSTERN).build()));
         saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
 
         saveRessurser(List.of(
@@ -504,6 +508,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @Test
     @DisplayName("Should block update tilknytningtype for orgtilknytning if tilknyttet ressurs is not EKSTERN")
     void test_update_orgtilknytning_type_for_ekstern_only() {
+        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(false);
+        when(ressursStateRepository.findByNavident("X123456")).thenReturn(Optional.of(ressursState().toBuilder().sektor(Sektor.NAV_STATLIG).build()));
         var orgtilknytningToUpdate = orgtilknytningState();
         saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
 
@@ -549,7 +555,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     void test_add_orgtilknytning(Boolean erDagligOppfolging) {
         var navident = "Y654321";
         var orgEnhet = orgEnhetState();
-
+        when(ressursStateRepository.findByNavident("Y654321")).thenReturn(Optional.of(ressursState().toBuilder().sektor(Sektor.EKSTERN).build()));
         saveOrgenheter(List.of(orgEnhet));
         saveRessurser(List.of(
             ressursState().toBuilder()
@@ -637,7 +643,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .sluttdato(Optional.empty())
             .sektor(Sektor.EKSTERN)
             .build();
-
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
         var tilknyttetOrgenhet = orgEnhetState();
 
         saveOrgenheter(List.of(tilknyttetOrgenhet));
@@ -676,6 +682,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .sektor(Sektor.EKSTERN)
             .build();
 
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
         var tilknyttetOrgenhet = orgEnhetState();
 
         saveOrgenheter(List.of(tilknyttetOrgenhet));
@@ -711,7 +718,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .sluttdato(Optional.empty())
             .sektor(Sektor.EKSTERN)
             .build();
-
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
         var tilknyttetOrgenhet = orgEnhetState();
 
         saveOrgenheter(List.of(tilknyttetOrgenhet));
@@ -803,7 +810,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .gyldigFom(LocalDate.now())
             .gyldigTom(Optional.empty())
             .build();
-
+        when(ressursStateRepository.findByNavident("Y654321")).thenReturn(Optional.of(ressursState().toBuilder().sektor(Sektor.EKSTERN).build()));
         saveOrgtilknytninger(List.of(existingOrgtilknytning));
         saveRessurser(List.of(
             ressursState().toBuilder()
@@ -845,7 +852,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .gyldigTom(Optional.empty())
             .erDagligOppfolging(true)
             .build();
-
+        when(ressursStateRepository.findByNavident("Y654321")).thenReturn(Optional.of(ressursState().toBuilder().sektor(Sektor.EKSTERN).build()));
         saveOrgtilknytninger(List.of(existingDagligOppfolging));
         saveRessurser(List.of(
             ressursState().toBuilder()
@@ -900,7 +907,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .gyldigTom(Optional.of(LocalDate.now()))
             .erDagligOppfolging(true)
             .build();
-
+        when(ressursStateRepository.findByNavident("Y654321")).thenReturn(Optional.of(ressursState().toBuilder().sektor(Sektor.EKSTERN).build()));
         saveOrgtilknytninger(List.of(existingOrgtilknytning));
         saveRessurser(List.of(
             ressursState().toBuilder()
@@ -1012,7 +1019,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(false);
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
-
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
         saveRessurser(List.of(tilknyttetRessurs));
 
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
@@ -1053,10 +1060,10 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     void test_update_orgtilknytninger_for_ressurs_handle_null_dato_ny() {
         when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(true);
         when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
-
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
 
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
         saveRessurser(List.of(tilknyttetRessurs));
 
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
@@ -1098,10 +1105,10 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(true);
         when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
-
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
 
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
         saveRessurser(List.of(tilknyttetRessurs));
 
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
@@ -1145,7 +1152,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(false);
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
-
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
         saveRessurser(List.of(tilknyttetRessurs));
 
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
@@ -1201,7 +1208,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
-
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
         saveRessurser(List.of(tilknyttetRessurs));
 
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
@@ -1256,7 +1263,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(false);
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
-
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
         saveRessurser(List.of(tilknyttetRessurs));
 
         var existingOrgtilknytningAnticipatingNewDate = orgtilknytningState().toBuilder()
@@ -1385,7 +1392,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
-
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
         saveRessurser(List.of(tilknyttetRessurs));
 
         var existingOrgtilknytningAnticipatingNewDate = orgtilknytningState().toBuilder()
@@ -1514,7 +1521,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
-
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
         saveRessurser(List.of(tilknyttetRessurs));
 
         var leggTilDagligOppfolgingOrgtilknytningWithTilknytningtypeRequest = leggTilOrgtilknytningRequest().toBuilder()
@@ -1580,7 +1587,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
-
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
         saveRessurser(List.of(tilknyttetRessurs));
 
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
@@ -1621,7 +1628,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @MethodSource("test_no_overlapping_daglig_oppfolginger_input")
     void test_no_overlapping_daglig_oppfolginger_ny(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
         when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(true);
+        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(true);
         when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(ressursStateRepository.findByNavident("whatever")).thenReturn(Optional.of(ressursState().toBuilder().sektor(Sektor.EKSTERN).build()));
         postOppdaterOrgtilknytningerForRessursRequest(
             "whatever",
             testToken.nomWriteGroupAndNomUiAzp(),
@@ -1690,7 +1699,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(unleash.isEnabled("nom.ressurs.ny-move-prosess")).thenReturn(false);
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
-
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
         saveRessurser(List.of(tilknyttetRessurs));
 
         saveOrgtilknytninger(existingOrgtilknytningFids.stream().map(fid ->
@@ -1720,7 +1729,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
-
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
         saveRessurser(List.of(tilknyttetRessurs));
 
         saveOrgtilknytninger(existingOrgtilknytningFids.stream().map(fid ->

@@ -894,9 +894,12 @@ public class RessursControllerTest extends RestTestBase {
 
     @Test
     void skal_oppdatere_fysiske_brukersteder(){
+        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(false);
+
         var existingRessurs = ressursState()
             .toBuilder()
             .fysiskeBrukersteder(null)
+            .sektor(Sektor.NAV_KOMMUNAL)
             .build();
 
         var updateFysiskeBrukerstederRequest = UpdateFysiskeBrukerstederRequest.builder()
