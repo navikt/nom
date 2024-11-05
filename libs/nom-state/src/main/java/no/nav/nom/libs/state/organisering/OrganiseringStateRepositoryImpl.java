@@ -225,10 +225,16 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
     }
 
     @Override
-    public boolean hasOrganiseringParent(String id) {
+    public boolean orgEnhetHasParent(String id) {
         return findActiveById(id)
                 .filter(organiseringState -> !ObjectUtils.isEmpty(organiseringState.idOver()))
                 .isPresent();
+    }
+    
+    @Override
+    public boolean orgEnhetHasChildren(String id) {
+        return getOrganiseringerContainingId(id).stream()
+                .anyMatch(organiseringState -> organiseringState.idOver().equals(id));
     }
 
     private boolean isActive(OrganiseringState organiseringState) {

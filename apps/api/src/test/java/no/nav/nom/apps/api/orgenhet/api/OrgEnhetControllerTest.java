@@ -145,7 +145,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
 
         List<OrgEnhetMedLedernavn> result = webTestClient.get()
-                .uri("/app/orgenheter/harOverenhet")
+                .uri("/app/orgenheter/kanHaRessurser")
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.noScopesUser()))
                 .exchange()
                 .expectStatus().isOk()

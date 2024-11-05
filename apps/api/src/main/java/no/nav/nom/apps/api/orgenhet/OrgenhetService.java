@@ -107,9 +107,13 @@ public class OrgenhetService {
         return orgEnhetStateRepository.getAll().stream().map(this::map).toList();
     }
 
-    public Collection<IOrgenhet> getAllEnheterSomHarOverEnhet() {
+    // Returns orgEnheter that 
+    // - has a parent unit (is considered active)
+    // - has no children (is a leaf node in the tree)
+    public Collection<IOrgenhet> getAllOrgEnheterThatCanHaveRessurser() {
         return orgEnhetStateRepository.getAll().stream()
-                .filter(orgEnhetState -> organiseringStateRepository.hasOrganiseringParent(orgEnhetState.id()))
+                .filter(orgEnhetState -> organiseringStateRepository.orgEnhetHasParent(orgEnhetState.id()))
+                .filter(orgEnhetState -> !organiseringStateRepository.orgEnhetHasChildren(orgEnhetState.id()))
                 .map(this::map).toList();
     }
 

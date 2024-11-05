@@ -61,13 +61,13 @@ public class OrgEnhetController {
         return orgenhetService.getAllEnheter().stream().map(orgEnhetMapper::mapToOrgEnhet).collect(Collectors.toList());
     }
 
-    @GetMapping("/harOverenhet")
+    @GetMapping("/kanHaRessurser")
     @Operation(
-            description = "Henter alle aktive orgenheter som har overenhet",
+            description = "Henter alle aktive orgenheter (har overenhet) som er løvnoder (ikke har underenheter)",
             security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     public List<OrgEnhetMedLedernavn> hentOrgEnheterMedLeder() {
-        return orgenhetService.getAllEnheterSomHarOverEnhet().stream()
+        return orgenhetService.getAllOrgEnheterThatCanHaveRessurser().stream()
                 .map(orgEnhetMapper::mapToOrgEnhetMedLedernavn)
                 .collect(Collectors.toList());
     }

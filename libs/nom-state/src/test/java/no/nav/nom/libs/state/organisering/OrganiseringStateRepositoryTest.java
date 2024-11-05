@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class OrganiseringStateRepositoryTest {
 
     private static final String ORG_ENHET = "ab123c";
+    private static final String CHILD_ORG_ENHET = "de456f";
     private final OrganiseringStateRepository organiseringStateRepository = new OrganiseringStateRepositoryImpl();
 
 
@@ -19,7 +20,7 @@ public class OrganiseringStateRepositoryTest {
                 .build();
         organiseringStateRepository.putEventAggregate(orgState);
 
-        assertThat(organiseringStateRepository.hasOrganiseringParent(ORG_ENHET)).isFalse();
+        assertThat(organiseringStateRepository.orgEnhetHasParent(ORG_ENHET)).isFalse();
     }
 
     @Test
@@ -31,7 +32,7 @@ public class OrganiseringStateRepositoryTest {
                 .build();
         organiseringStateRepository.putEventAggregate(orgState);
 
-        assertThat(organiseringStateRepository.hasOrganiseringParent(ORG_ENHET)).isTrue();
+        assertThat(organiseringStateRepository.orgEnhetHasParent(ORG_ENHET)).isTrue();
     }
 
     @Test
@@ -43,6 +44,37 @@ public class OrganiseringStateRepositoryTest {
                 .build();
         organiseringStateRepository.putEventAggregate(orgState);
 
-        assertThat(organiseringStateRepository.hasOrganiseringParent(ORG_ENHET)).isFalse();
+        assertThat(organiseringStateRepository.orgEnhetHasParent(ORG_ENHET)).isFalse();
+    }
+
+    @Test
+    void should_return_true_for_organisering_with_children() {
+        var parent = OrganiseringState.builder()
+                .fid("fid-parent")
+                .id(ORG_ENHET)
+                .idOver("")
+                .build();
+        organiseringStateRepository.putEventAggregate(parent);
+
+        var child = OrganiseringState.builder()
+                .fid("fid-child")
+                .id(CHILD_ORG_ENHET)
+                .idOver(ORG_ENHET)
+                .build();
+        organiseringStateRepository.putEventAggregate(child);
+        
+        assertThat(organiseringStateRepository.orgEnhetHasChildren(ORG_ENHET)).isTrue();
+    }
+
+    @Test
+    void should_return_false_for_organisering_with_no_children() {
+        var parent = OrganiseringState.builder()
+                .fid("fid-parent")
+                .id(ORG_ENHET)
+                .idOver("")
+                .build();
+        organiseringStateRepository.putEventAggregate(parent);
+
+        assertThat(organiseringStateRepository.orgEnhetHasChildren(ORG_ENHET)).isFalse();
     }
 }

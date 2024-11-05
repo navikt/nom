@@ -32,5 +32,7 @@ public interface OrganiseringStateRepository {
 
     List<OrganiseringState> getOrganiseringerContainingId(String id);
     
-    boolean hasOrganiseringParent(String id);
+    boolean orgEnhetHasParent(String id);
+    
+    boolean orgEnhetHasChildren(String id);
 }
