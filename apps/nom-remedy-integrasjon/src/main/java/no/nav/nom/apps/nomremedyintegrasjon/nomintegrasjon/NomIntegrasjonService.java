@@ -2,6 +2,7 @@ package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.getunleash.Unleash;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredValueMissingException;
@@ -63,6 +64,7 @@ public class NomIntegrasjonService {
     private final DelayedEventRepository delayedEventRepository;
 
     private final ObjectMapper objectMapper;
+    private final Unleash unleash;
 
 
     public NomIntegrasjonService(
@@ -70,13 +72,15 @@ public class NomIntegrasjonService {
         NomApiClient nomApiClient,
         LeaderElection leaderElection,
         DelayedEventRepository delayedEventRepository,
-        ObjectMapper objectMapper
+        ObjectMapper objectMapper,
+        Unleash unleash
     ) {
         this.nomIntegrasjonRepository = nomIntegrasjonRepository;
         this.nomApiClient = nomApiClient;
         this.leaderElection = leaderElection;
         this.delayedEventRepository = delayedEventRepository;
         this.objectMapper = objectMapper;
+        this.unleash = unleash;
     }
 
     // Run at 00:15 every night
@@ -96,46 +100,77 @@ public class NomIntegrasjonService {
 
     public void handleRessursEvent(RessursEvent ressursEvent) {
 
-        if (ressursEvent instanceof RessursOpprettetEventV1 ressursOpprettetEventV1
-            && ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().kanOppretteRessurs()) {
-            createRessurs(ressursOpprettetEventV1);
+        if (unleash.isEnabled("nom.ressurs.opprett_statlig")) {
+            if (ressursEvent instanceof RessursOpprettetEventV1 ressursOpprettetEventV1) {
+                createRessurs(ressursOpprettetEventV1);
 
-        } else if (ressursEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1
-            && isFidEksternEllerKommunalRessurs(ressursEvent.getFid())
-        ) {
-            handleRessursSluttetEventV1(ressursSluttetEventV1);
+            } else if (ressursEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1) {
+                handleRessursSluttetEventV1(ressursSluttetEventV1);
 
-        } else if (ressursEvent instanceof RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
-            handleRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
+            } else if (ressursEvent instanceof RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
+                handleRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
 
-        } else if (ressursEvent instanceof RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertV1
-            && isFidEksternEllerKommunalRessurs(ressursEvent.getFid())
-        ) {
-            updateRessursPersonalia(ressursPersonaliaOppdatertV1);
+            } else if (ressursEvent instanceof RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertV1) {
+                updateRessursPersonalia(ressursPersonaliaOppdatertV1);
 
-        } else if (ressursEvent instanceof RessursFysiskeBrukerstederOppdatertEventV1 ressursFysiskeBrukerstederOppdatertEventV1
-            && isFidEksternEllerKommunalRessurs(ressursEvent.getFid())) {
-            updateRessursFysiskeBrukersteder(ressursFysiskeBrukerstederOppdatertEventV1);
-        } else if (ressursEvent instanceof RessursPrimaryTelefonnummerOppdatertEventV1 ressursPrimaryTelefonnummerOppdatertEventV1
-            && isFidEksternEllerKommunalRessurs(ressursEvent.getFid())) {
-            updateRessursTelefonnummer(ressursPrimaryTelefonnummerOppdatertEventV1);
+            } else if (ressursEvent instanceof RessursFysiskeBrukerstederOppdatertEventV1 ressursFysiskeBrukerstederOppdatertEventV1) {
+                updateRessursFysiskeBrukersteder(ressursFysiskeBrukerstederOppdatertEventV1);
+            } else if (ressursEvent instanceof RessursPrimaryTelefonnummerOppdatertEventV1 ressursPrimaryTelefonnummerOppdatertEventV1) {
+                updateRessursTelefonnummer(ressursPrimaryTelefonnummerOppdatertEventV1);
+            }
+        } else {
+            if (ressursEvent instanceof RessursOpprettetEventV1 ressursOpprettetEventV1
+                && ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().kanOppretteRessurs()) {
+                createRessurs(ressursOpprettetEventV1);
+
+            } else if (ressursEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1
+                && isFidEksternEllerKommunalRessurs(ressursEvent.getFid())
+            ) {
+                handleRessursSluttetEventV1(ressursSluttetEventV1);
+
+            } else if (ressursEvent instanceof RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
+                handleRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
+
+            } else if (ressursEvent instanceof RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertV1
+                && isFidEksternEllerKommunalRessurs(ressursEvent.getFid())
+            ) {
+                updateRessursPersonalia(ressursPersonaliaOppdatertV1);
+
+            } else if (ressursEvent instanceof RessursFysiskeBrukerstederOppdatertEventV1 ressursFysiskeBrukerstederOppdatertEventV1
+                && isFidEksternEllerKommunalRessurs(ressursEvent.getFid())) {
+                updateRessursFysiskeBrukersteder(ressursFysiskeBrukerstederOppdatertEventV1);
+            } else if (ressursEvent instanceof RessursPrimaryTelefonnummerOppdatertEventV1 ressursPrimaryTelefonnummerOppdatertEventV1
+                && isFidEksternEllerKommunalRessurs(ressursEvent.getFid())) {
+                updateRessursTelefonnummer(ressursPrimaryTelefonnummerOppdatertEventV1);
+            }
         }
     }
 
     public void handleOrgtilknytningEvent(OrgtilknytningEvent orgtilknytningEvent) {
 
-        if (orgtilknytningEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1
-            && orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().dagligOppfolging()
-            && isNavidentEksternEllerKommunalRessurs(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData()
-            .navident())) {
+        if (unleash.isEnabled("nom.ressurs.opprett_statlig")) {
+            if (orgtilknytningEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1
+                && orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().dagligOppfolging()) {
+                handleOrgtilknytningDagligOppfolgingEndretEvent(orgtilknytningDagligOppfolgingEndretEventV1);
+            } else if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
+                handleOrgtilknytningDatoEndretEvent(orgtilknytningDatoEndretEventV2);
+            } else if (orgtilknytningEvent instanceof OrgtilknytningFjernetEventV1 orgtilknytningFjernetEventV1) {
+                deleteOrgtilknytningEvents(orgtilknytningFjernetEventV1.getFid());
+            }
+        } else {
+            if (orgtilknytningEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1
+                && orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().dagligOppfolging()
+                && isNavidentEksternEllerKommunalRessurs(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData()
+                .navident())) {
 
-            handleOrgtilknytningDagligOppfolgingEndretEvent(orgtilknytningDagligOppfolgingEndretEventV1);
-        } else if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2
-            && isOrgtilknytningEksternEllerKommunalAndDagligOppfolgning(orgtilknytningDatoEndretEventV2.getFid())) {
+                handleOrgtilknytningDagligOppfolgingEndretEvent(orgtilknytningDagligOppfolgingEndretEventV1);
+            } else if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2
+                && isOrgtilknytningEksternEllerKommunalAndDagligOppfolgning(orgtilknytningDatoEndretEventV2.getFid())) {
 
-            handleOrgtilknytningDatoEndretEvent(orgtilknytningDatoEndretEventV2);
-        } else if (orgtilknytningEvent instanceof OrgtilknytningFjernetEventV1 orgtilknytningFjernetEventV1) {
-            deleteOrgtilknytningEvents(orgtilknytningFjernetEventV1.getFid());
+                handleOrgtilknytningDatoEndretEvent(orgtilknytningDatoEndretEventV2);
+            } else if (orgtilknytningEvent instanceof OrgtilknytningFjernetEventV1 orgtilknytningFjernetEventV1) {
+                deleteOrgtilknytningEvents(orgtilknytningFjernetEventV1.getFid());
+            }
         }
     }
 
@@ -573,6 +608,7 @@ public class NomIntegrasjonService {
                 dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getGyldigFom).map(Utils::epochSecondsNorwegianTimeNoon).orElse(null)
             )
             .utlopsdato(ressurs.getSektor().equals(no.nav.nom.generated.model.Sektor.NAV_KOMMUNAL)
+                || ressurs.getSektor().equals(no.nav.nom.generated.model.Sektor.NAV_STATLIG)
                 ? null
                 : dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getGyldigTom).map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null)
             )

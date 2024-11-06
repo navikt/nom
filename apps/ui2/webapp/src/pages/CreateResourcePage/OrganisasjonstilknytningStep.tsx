@@ -6,8 +6,6 @@ import {
   Checkbox,
   DatePicker,
   HelpText,
-  Radio,
-  RadioGroup,
   useDatepicker,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
@@ -16,7 +14,6 @@ import { addYears, subDays } from "date-fns";
 import pickBy from "lodash/pickBy";
 import { useEffect, useState } from "react";
 import {
-  Controller,
   FormProvider,
   useController,
   useForm,
@@ -36,10 +33,9 @@ import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBruker
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
-import { AnsettelsesTypeNameMapping } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
 import { defaultFormStyle, fullwidthRow } from "~/resources/NomStyles";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
-import { AnsettelsesType, Sektor } from "~/types/api-models";
+import { Sektor } from "~/types/api-models";
 import { formatDateWithoutTimezone } from "~/utils";
 
 export function OrganisasjonstilknytningStep() {
@@ -58,7 +54,7 @@ export function OrganisasjonstilknytningStep() {
             return <CreateEksternRessurs />;
           }
           case Sektor.NAV_STATLIG: {
-            return <CreateStatligRessurs />;
+            return <CreateKommunaleRessurs />;
           }
         }
       })()}
@@ -67,7 +63,7 @@ export function OrganisasjonstilknytningStep() {
 }
 
 // TODO: må refaktoreres når den tid kommer
-function CreateStatligRessurs() {
+/*function CreateStatligRessurs() {
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
   const { ansettelsesType, orgEnhetId, gyldigFom } = useSearch({
     from: "/ressurs/create/$step",
@@ -158,7 +154,7 @@ function CreateStatligRessurs() {
       </form>
     </FormProvider>
   );
-}
+}*/
 
 function CreateEksternRessurs() {
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
@@ -315,6 +311,7 @@ const orgEnhetIdSchema = yup.object().shape({
   orgEnhetId: yup.string().required("Obligatorisk"),
 });
 
+/*
 const statligValidationSchema = yup.object({
   orgEnhetId: yup.string().required("Obligatorisk"),
   gyldigFom: yup.string().required("Obligatorisk"),
@@ -323,7 +320,7 @@ const statligValidationSchema = yup.object({
     .oneOf(Object.values(AnsettelsesType))
     .required("Obligatorisk"),
 });
-
+*/
 const kommunalPeriodeValidationSchema = yup.object().shape({
   gyldigFom: yup.string().required("Obligatorisk"),
   gyldigTom: yup.string().optional(),

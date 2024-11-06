@@ -5,12 +5,12 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { getOrgEnhet, getOrgTilknytninger } from "~/api/react-query-endpoints";
-import { useGetSession } from "~/api/useGetSession";
+import { useGetSession, useHasAdminAccess } from "~/api/useGetSession";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import { OrgEnhetsType, Sektor, Tilknytningtype } from "~/types/api-models";
-import { isGyldighetsPeriodeActive } from "~/utils";
+import { isGyldighetsPeriodeActive, isInDevelopment } from "~/utils";
 
 export const SektorNameMapping = {
   [Sektor.EKSTERN]: "Ekstern",
@@ -29,7 +29,8 @@ export function SektorStep() {
   const { sektor, tilknytningtype } = useSearch({
     from: "/ressurs/create/$step",
   });
-
+  const isDevelopment = isInDevelopment();
+  const hasAdminAccess = useHasAdminAccess();
   const navident = useGetSession().data?.navident;
   const dinOrgenhetId = useQuery({
     queryKey: getOrgTilknytninger.queryKey(navident as string),
@@ -77,7 +78,7 @@ export function SektorStep() {
       }),
     }).then();
   };
-
+  const canEditStatlige = hasAdminAccess && isDevelopment;
   return (
     <ContainerWithHighlightedTop icon={opprettRessursIcon} title="Sektor">
       <Alert variant="info">
@@ -104,8 +105,10 @@ export function SektorStep() {
           onChange={(value) => setSelectedSektor(value)}
           value={selectedSektor}
         >
-          <Radio disabled value={Sektor.NAV_STATLIG}>
-            {`${SektorNameMapping[Sektor.NAV_STATLIG]} (Ikke tilgjengelig ennå)`}
+          <Radio disabled={!canEditStatlige} value={Sektor.NAV_STATLIG}>
+            {canEditStatlige
+              ? SektorNameMapping[Sektor.NAV_STATLIG]
+              : `${SektorNameMapping[Sektor.NAV_STATLIG]} (Ikke tilgjengelig ennå)`}
           </Radio>
           <Radio value={Sektor.NAV_KOMMUNAL}>
             {SektorNameMapping[Sektor.NAV_KOMMUNAL]}
@@ -114,7 +117,8 @@ export function SektorStep() {
             {SektorNameMapping[Sektor.EKSTERN]}
           </Radio>
         </RadioGroup>
-        {selectedSektor === Sektor.NAV_KOMMUNAL ? undefined : (
+        {selectedSektor === Sektor.NAV_KOMMUNAL ||
+        selectedSektor === Sektor.NAV_STATLIG ? undefined : (
           <Select
             label="Velg hvilken kategori medarbeideren tilhører innenfor denne sektoren"
             name="tilknytningtype"

@@ -11,4 +11,8 @@ public enum Sektor{
     public boolean kanOppretteRessurs(){
         return this == EKSTERN || this == NAV_KOMMUNAL;
     }
+
+    public boolean erStatlig() {
+        return this == NAV_STATLIG;
+    }
 }

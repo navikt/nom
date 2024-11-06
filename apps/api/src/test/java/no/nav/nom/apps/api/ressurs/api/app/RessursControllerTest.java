@@ -280,7 +280,7 @@ public class RessursControllerTest extends RestTestBase {
                     request.visningsfornavn(),
                     Optional.of("YEP"),
                     request.visningsetternavn()
-            ))
+                ))
             .primaryTelefonnummer(Optional.of("87654321"))
             .sluttdato(Optional.of(LocalDate.MIN))
             .startdato(Optional.of(LocalDate.MIN.plusYears(1)))
@@ -546,8 +546,8 @@ public class RessursControllerTest extends RestTestBase {
     @Test
     void skal_ikke_kunne_endre_navn_for_statlig() {
         var existingRessurs = ressursState().toBuilder()
-                .sektor(Sektor.NAV_STATLIG)
-                    .build();
+            .sektor(Sektor.NAV_STATLIG)
+            .build();
 
         when(ressursStateRepository.findByNavident(existingRessurs.navident()))
             .thenReturn(Optional.of(existingRessurs));
@@ -894,9 +894,12 @@ public class RessursControllerTest extends RestTestBase {
 
     @Test
     void skal_oppdatere_fysiske_brukersteder(){
+        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(false);
+
         var existingRessurs = ressursState()
             .toBuilder()
             .fysiskeBrukersteder(null)
+            .sektor(Sektor.NAV_KOMMUNAL)
             .build();
 
         var updateFysiskeBrukerstederRequest = UpdateFysiskeBrukerstederRequest.builder()
@@ -975,7 +978,7 @@ public class RessursControllerTest extends RestTestBase {
                     .fysiskeBrukersteder(emptySet())
                     .build(),
                 "primaryFysiskBrukersted cannot be blank or null"
-                ),
+            ),
             Arguments.of(
                 UpdateFysiskeBrukerstederRequest.builder()
                     .primaryFysiskBrukersted("oslo")

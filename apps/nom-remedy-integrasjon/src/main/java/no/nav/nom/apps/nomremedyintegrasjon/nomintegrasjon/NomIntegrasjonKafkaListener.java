@@ -154,7 +154,6 @@ public class NomIntegrasjonKafkaListener {
 
     private boolean ressursEventIsNomOriginationOrNomMastered(RessursEvent ressursEvent) {
         var ressursState = ressursStateRepository.findByFid(ressursEvent.getFid());
-        logger.info("Prøver å finne ressursState for ressurs med fid {}, forsøk 1", ressursEvent.getFid());
 
         int count = 0;
         while (ressursState.isEmpty() && count < 5) {

@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.api.app;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
@@ -78,8 +79,8 @@ public class OrgtilknytningRestService {
     private final NomMastered nomMastered;
     private final static Logger log = LoggerFactory.getLogger(OrgtilknytningRestService.class);
     private final AuthorizedNavident authorizedNavident;
-
     private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
+    private final Unleash unleash;
 
     public OrgtilknytningRestService(
         OrgtilknytningStateRepository orgtilknytningStateRepository,
@@ -89,7 +90,8 @@ public class OrgtilknytningRestService {
         RemedyEnhetMapperService remedyEnhetMapperService,
         NomMastered nomMastered,
         AuthorizedNavident authorizedNavident,
-        OrgtilknytningEndretEmailService orgtilknytningEndretEmailService
+        OrgtilknytningEndretEmailService orgtilknytningEndretEmailService,
+        Unleash unleash
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
@@ -100,6 +102,7 @@ public class OrgtilknytningRestService {
         this.nomMastered = nomMastered;
         this.authorizedNavident = authorizedNavident;
         this.orgtilknytningEndretEmailService = orgtilknytningEndretEmailService;
+        this.unleash = unleash;
     }
 
     public List<OrgtilknytningState> getOrgtilknytninger(Optional<String> navident) {
@@ -169,6 +172,14 @@ public class OrgtilknytningRestService {
     public void oppdaterOrgtilknytningerForRessurs(String navident,
                                                    OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
                                                    boolean isLeder) {
+        var ressursState = ressursStateRepository.findByNavident(navident)
+            .orElseThrow(() -> RessursNotFoundException.navident(navident));
+        if (unleash.isEnabled("nom.ressurs.opprett_statlig")
+            && loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)) {
+            log.info("Feature flag nom.ressurs.opprett_statlig is enabled, allowing update of ressurs with sektor NAV_STATLIG");
+        } else if (ressursState.sektor().erStatlig()) {
+            throw InvalidSektorException.actionNotAllowedForSektor(Sektor.NAV_STATLIG);
+        }
         var orgEnheterTilLeder = authorizedNavident.orgenheterLederKanRedigere(getAuthenticatedNavIdent());
         validateOppdaterOrgtilknytningerForRessursRequest(oppdaterOrgtilknytningerForRessursRequest, orgEnheterTilLeder, isLeder);
 
@@ -600,8 +611,9 @@ public class OrgtilknytningRestService {
         var tilknyttetRessurs = ressursStateRepository.findByNavident(orgtilknytning.navident())
             .orElseThrow(() -> RessursNotFoundException.navident(orgtilknytning.navident()));
 
-
-        if (tilknyttetRessurs.sektor() == Sektor.NAV_STATLIG) {
+        if (unleash.isEnabled("nom.ressurs.opprett_statlig") && loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)) {
+            log.info("Bruker har tilgang til å opprette statlig ressurs");
+        } else if (tilknyttetRessurs.sektor() == Sektor.NAV_STATLIG) {
             throw InvalidSektorException.actionNotAllowedForSektor(tilknyttetRessurs.sektor());
         }
 
@@ -681,7 +693,10 @@ public class OrgtilknytningRestService {
         var tilknyttetRessurs = ressursStateRepository.findByNavident(orgtilknytning.navident())
             .orElseThrow(() -> RessursNotFoundException.navident(orgtilknytning.navident()));
 
-        if (tilknyttetRessurs.sektor() == Sektor.NAV_STATLIG) {
+        if (unleash.isEnabled("nom.ressurs.opprett_statlig")
+            && loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)) {
+            log.info("Bruker har tilgang til å opprette statlig ressurs");
+        } else if (tilknyttetRessurs.sektor().erStatlig()) {
             throw InvalidSektorException.actionNotAllowedForSektor(tilknyttetRessurs.sektor());
         }
 

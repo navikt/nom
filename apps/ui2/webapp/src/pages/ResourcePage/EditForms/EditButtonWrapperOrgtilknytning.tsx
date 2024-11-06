@@ -2,9 +2,13 @@ import { useSearch } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import React from "react";
 
-import { useHasAdminOrWriteAccess } from "~/api/useGetSession";
+import {
+  useHasAdminAccess,
+  useHasAdminOrWriteAccess,
+} from "~/api/useGetSession";
 import type { Ressurs } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
+import { isInDevelopment } from "~/utils";
 
 export function EditButtonWrapperOrgtilknytning({
   ressurs,
@@ -16,8 +20,14 @@ export function EditButtonWrapperOrgtilknytning({
   const { editPersonopplysninger } = useSearch({
     from: "/ressurs/$id",
   });
+  const isDevelopment = isInDevelopment();
   const ressursCanBeEdited = ressurs.sektor !== Sektor.NAV_STATLIG;
   const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
+  const hasAdminAccess = useHasAdminAccess();
+
+  if (hasAdminAccess && isDevelopment) {
+    return children;
+  }
 
   if (!hasAdminOrWriteAccess || !ressursCanBeEdited || editPersonopplysninger) {
     return <></>;
