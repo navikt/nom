@@ -58,7 +58,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 import static no.nav.nom.apps.api.common.DateUtils.isPerioderOverlapping;
@@ -734,7 +733,7 @@ public class OrgtilknytningRestService {
         Map<Sektor, List<Tilknytningtype>> allowedOrgtilknytningTypeForSektorMap = Map.of(
             Sektor.EKSTERN, List.of(Tilknytningtype.KONSULENT, Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER),
             Sektor.NAV_KOMMUNAL, List.of(Tilknytningtype.INGEN),
-            Sektor.NAV_STATLIG, emptyList()
+            Sektor.NAV_STATLIG, List.of(Tilknytningtype.INGEN)
         );
 
         if (!allowedOrgtilknytningTypeForSektorMap.get(sektor).contains(tilknytningtype)) {

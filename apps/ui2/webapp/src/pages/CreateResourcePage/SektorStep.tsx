@@ -64,7 +64,8 @@ export function SektorStep() {
   const saveValuesAndNavigate = (step: string) => {
     // TilknytningsType gir ikke mening for kommunale, derfor vises ikke dette som et valg i gui, og i state lagrer vi dette som "INGEN"
     const tilknytningtype =
-      selectedSektor === Sektor.NAV_KOMMUNAL
+      selectedSektor === Sektor.NAV_KOMMUNAL ||
+      selectedSektor === Sektor.NAV_STATLIG
         ? Tilknytningtype.INGEN
         : selectedTilknytningtype;
 
