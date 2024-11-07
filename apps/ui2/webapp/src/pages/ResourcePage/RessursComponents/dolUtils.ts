@@ -5,6 +5,7 @@ import sortBy from "lodash/orderBy";
 import type { OrgtilknytningEtterValidering } from "~/pages/ResourcePage/RessursComponents/EditOrgtilknytninger";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 import {
+  dateWithoutTimezone,
   earliestDate,
   earliestDateInList,
   formatDateWithoutTimezone,
@@ -255,4 +256,29 @@ export function setRessursStartdato(
   }
 
   return isBeforeDate(tidligsteOrgDatoPost, ressursStartdato);
+}
+
+export function otCustomStortByDate(
+  otA: OrgtilknytningState,
+  otB: OrgtilknytningState,
+) {
+  if (!otA.gyldigTom && !otB.gyldigTom) {
+    return (
+      dateWithoutTimezone(new Date(otB.gyldigFom)).getTime() -
+      dateWithoutTimezone(new Date(otA.gyldigFom)).getTime()
+    );
+  }
+
+  if (!otA.gyldigTom) return -1;
+  if (!otB.gyldigTom) return 1;
+
+  const tomComparison =
+    dateWithoutTimezone(new Date(otB.gyldigTom)).getTime() -
+    dateWithoutTimezone(new Date(otA.gyldigTom)).getTime();
+  if (tomComparison !== 0) return tomComparison;
+
+  return (
+    dateWithoutTimezone(new Date(otB.gyldigFom)).getTime() -
+    dateWithoutTimezone(new Date(otA.gyldigFom)).getTime()
+  );
 }

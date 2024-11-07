@@ -56,6 +56,7 @@ import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { showToast } from "~/hooks/showToast";
 import {
   dolValidering,
+  otCustomStortByDate,
   setRessursStartdato,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { RemedyEndringModal } from "~/pages/ResourcePage/RessursComponents/Modal/RemedyEndringModal";
@@ -91,27 +92,9 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
 
   const hentedeOrgtilknytninger = ressursOrgtilknytningerQuery.data ?? [];
 
-  const orgtilknytninger = hentedeOrgtilknytninger.sort((a, b) => {
-    if (!a.gyldigTom && !b.gyldigTom) {
-      return (
-        dateWithoutTimezone(new Date(b.gyldigFom)).getTime() -
-        dateWithoutTimezone(new Date(a.gyldigFom)).getTime()
-      );
-    }
-
-    if (!a.gyldigTom) return -1;
-    if (!b.gyldigTom) return 1;
-
-    const tomComparison =
-      dateWithoutTimezone(new Date(b.gyldigTom)).getTime() -
-      dateWithoutTimezone(new Date(a.gyldigTom)).getTime();
-    if (tomComparison !== 0) return tomComparison;
-
-    return (
-      dateWithoutTimezone(new Date(b.gyldigFom)).getTime() -
-      dateWithoutTimezone(new Date(a.gyldigFom)).getTime()
-    );
-  });
+  const orgtilknytninger = hentedeOrgtilknytninger.sort((a, b) =>
+    otCustomStortByDate(a, b),
+  );
 
   const orgEnhetIdListe = [
     ...new Set(
