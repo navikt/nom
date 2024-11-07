@@ -232,8 +232,9 @@ function VisningsnavnForm({
           {...register("primaryTelefonnummer")}
           autoComplete="off"
           css={css`
-            max-width: 350px;
             margin-top: var(--a-spacing-4);
+            width: 33%;
+            padding-right: var(--a-spacing-2);
           `}
           data-cy="telefon-textfield"
           description="Telefonnummer er valgfritt"
