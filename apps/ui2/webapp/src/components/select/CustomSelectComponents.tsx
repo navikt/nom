@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import { BodyShort, ErrorMessage, HelpText, Label } from "@navikt/ds-react";
 import type { ReactElement, ReactNode } from "react";
+import React from "react";
 import { forwardRef } from "react";
 import type { FieldError } from "react-hook-form";
 import type {
@@ -72,6 +73,28 @@ const commonSelectOverwriteStyles = {
   }),
 };
 
+function handleKeyDown(event: React.KeyboardEvent) {
+  const input = event.target as HTMLInputElement;
+
+  if (event.key === "Home") {
+    if (event.shiftKey) {
+      input.setSelectionRange(0, input.selectionEnd);
+    } else {
+      input.setSelectionRange(0, 0);
+    }
+    event.preventDefault();
+  }
+
+  if (event.key === "End") {
+    if (event.shiftKey) {
+      input.setSelectionRange(input.selectionStart, input.value.length);
+    } else {
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+    event.preventDefault();
+  }
+}
+
 type AsyncSearch = <
   Option,
   IsMulti extends boolean = false,
@@ -100,6 +123,7 @@ export const AsyncSearch = forwardRef(
         }}
         {...properties}
         components={{ MenuList: CustomMenuList, ...properties.components }}
+        onKeyDown={handleKeyDown}
       />
     );
   },
