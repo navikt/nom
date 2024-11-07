@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import React from "react";
 
-import { useHasWriteAccess } from "~/api/useGetSession";
+import { useHasAdminOrWriteAccess } from "~/api/useGetSession";
 import {
   CreateRessursPage,
   validateCreateRessursSearch,
@@ -9,8 +9,8 @@ import {
 
 export const Route = createFileRoute("/ressurs/create/$step")({
   component: () => {
-    const hasWriteAccess = useHasWriteAccess();
-    if (hasWriteAccess) {
+    const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
+    if (hasAdminOrWriteAccess) {
       return <CreateRessursPage />;
     }
   },

@@ -28,6 +28,7 @@ import {
   useSearchOrgenheterQuery,
 } from "~/api/generated/graphql_generated";
 import { harLederTilgangForOrgenhetOptions } from "~/api/react-query-endpoints";
+import { useHasAdminAccess } from "~/api/useGetSession";
 import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
 import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBrukerstedSelect";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
@@ -355,6 +356,8 @@ export function OrganisasjonstilknytningInnerForm({
     erDagligOppfolgingLockedToTrue,
   );
 
+  const hasAdminAccess = useHasAdminAccess();
+
   const hasAccessToOrgenhetQuery = useQuery(
     harLederTilgangForOrgenhetOptions(watch("orgEnhetId")),
   );
@@ -368,7 +371,7 @@ export function OrganisasjonstilknytningInnerForm({
       <InnerOrgEnhetSelect />
       {watch("orgEnhetId") ? (
         <>
-          {hasWriteAccessForOrgenhet ? undefined : (
+          {hasAdminAccess || hasWriteAccessForOrgenhet ? undefined : (
             <Alert variant="error">
               Du har ikke tilgang til å opprette medarbeidere i denne enheten.
             </Alert>

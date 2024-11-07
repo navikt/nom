@@ -48,7 +48,10 @@ import {
   getOrgTilknytninger,
   oppdaterOrgtilknytningerForRessurs,
 } from "~/api/react-query-endpoints";
-import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
+import {
+  useHasAdminAccess,
+  useHasAdminOrWriteAccess,
+} from "~/api/useGetSession";
 import { ApiResponseError } from "~/components/ApiResponseError";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
@@ -203,7 +206,7 @@ function OrgtilknytningForm({
   dagensDolOrgEnhet: OrgEnhet | undefined;
 }) {
   const navigate = useNavigate();
-  const hasWriteAccess = useHasWriteAccess();
+  const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
 
   const nomSharepointLenke: string =
@@ -337,7 +340,7 @@ function OrgtilknytningForm({
       <Informasjonsboks ressursSektor={ressurs.sektor} />
 
       <form autoComplete="false" onSubmit={handleSubmit(onValid)}>
-        {hasWriteAccess && (
+        {hasAdminOrWriteAccess && (
           <div
             css={css`
               margin-top: var(--a-spacing-9);

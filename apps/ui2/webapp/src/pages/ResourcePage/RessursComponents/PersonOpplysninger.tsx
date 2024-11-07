@@ -169,12 +169,17 @@ export function StartDato({ ressurs }: { ressurs: Ressurs }) {
 }
 
 export function SluttDato({ ressurs }: { ressurs: Ressurs }) {
+  const hasAdminAccess = useHasAdminAccess();
+  const hasWriteAccess = useHasWriteAccess();
+
   const hasWriteAccessForRessurs =
     useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
 
   if (
     ressurs.sluttdato &&
-    (hasWriteAccessForRessurs || ressurs.sektor === "EKSTERN")
+    (hasAdminAccess ||
+      (hasWriteAccess && hasWriteAccessForRessurs) ||
+      ressurs.sektor === "EKSTERN")
   ) {
     return (
       <LabelWithValue

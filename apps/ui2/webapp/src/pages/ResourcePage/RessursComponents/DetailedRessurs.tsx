@@ -32,7 +32,7 @@ import {
 import {
   useGetSession,
   useHasAdminAccess,
-  useHasWriteAccess,
+  useHasAdminOrWriteAccess,
 } from "~/api/useGetSession";
 import { Divider } from "~/components/Divider";
 import { ModalProvider } from "~/components/modalProvider/ModalProvider";
@@ -483,12 +483,15 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
   const { editPersonopplysninger } = useSearch({
     from: "/ressurs/$id",
   });
-  const hasWriteAccess = useHasWriteAccess();
+  const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
 
   const hasSelfServiceAccess =
     useGetSession().data?.navident === ressurs.navident;
 
-  if (editPersonopplysninger && (hasWriteAccess || hasSelfServiceAccess)) {
+  if (
+    editPersonopplysninger &&
+    (hasAdminOrWriteAccess || hasSelfServiceAccess)
+  ) {
     return (
       <ModalProvider>
         <EditPersonOpplysninger
