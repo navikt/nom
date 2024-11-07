@@ -988,12 +988,12 @@ public class OrgtilknytningRestService {
         }
 
         if(!nomMastered.isMastered(navident)) {
-            log.warn("Navident is not mastered in nom. OTendretData won´t be added to the email queue");
+            log.info("Navident is not mastered in nom. OTendretData won´t be added to the email queue");
             return;
         }
 
         if(!initiatedFromMetadata.equals("prod-gcp:org:nom-ui2")) {
-            log.warn("OT-endringero peration is not performed nom frontend. OTendretData won´t be added to the email queue");
+            log.info("OT-endringer operation is not performed nom frontend. OTendretData won´t be added to the email queue");
             return;
         }
 

@@ -171,7 +171,7 @@ public class EksterneRessurserProcessor {
                 orgenhet.getId(),
                 remedyEnhetForMappetOrgenhet != null ? remedyEnhetForMappetOrgenhet : "'ingen remedyenhet mappet for NOM enhet'"
             );
-            log.warn(warn);
+            log.info(warn);
         }
     }
 
