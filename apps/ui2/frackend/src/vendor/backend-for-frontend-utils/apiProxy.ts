@@ -28,6 +28,7 @@ export function addProxyHandler(server: Express, { ingoingUrl, outgoingUrl, scop
         proxyReq: (proxyRequest, request) => {
           const accessToken = getOboTokenForRequest(request, scope)?.accessToken;
           if (accessToken) {
+            proxyRequest.removeHeader("cookie");
             proxyRequest.setHeader("Authorization", `Bearer ${accessToken}`);
             const infoCtx = "proxy request to " + outgoingUrl;
             console.log(`ctx: ${infoCtx}, url: ${request.url}`)
