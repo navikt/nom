@@ -48,7 +48,10 @@ import {
   getOrgTilknytninger,
   oppdaterOrgtilknytningerForRessurs,
 } from "~/api/react-query-endpoints";
-import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
+import {
+  useHasAdminAccess,
+  useHasAdminOrWriteAccess,
+} from "~/api/useGetSession";
 import { ApiResponseError } from "~/components/ApiResponseError";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
@@ -56,6 +59,7 @@ import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { showToast } from "~/hooks/showToast";
 import {
   dolValidering,
+  otCustomStortByDate,
   setRessursStartdato,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { RemedyEndringModal } from "~/pages/ResourcePage/RessursComponents/Modal/RemedyEndringModal";
@@ -91,27 +95,9 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
 
   const hentedeOrgtilknytninger = ressursOrgtilknytningerQuery.data ?? [];
 
-  const orgtilknytninger = hentedeOrgtilknytninger.sort((a, b) => {
-    if (!a.gyldigTom && !b.gyldigTom) {
-      return (
-        dateWithoutTimezone(new Date(b.gyldigFom)).getTime() -
-        dateWithoutTimezone(new Date(a.gyldigFom)).getTime()
-      );
-    }
-
-    if (!a.gyldigTom) return -1;
-    if (!b.gyldigTom) return 1;
-
-    const tomComparison =
-      dateWithoutTimezone(new Date(b.gyldigTom)).getTime() -
-      dateWithoutTimezone(new Date(a.gyldigTom)).getTime();
-    if (tomComparison !== 0) return tomComparison;
-
-    return (
-      dateWithoutTimezone(new Date(b.gyldigFom)).getTime() -
-      dateWithoutTimezone(new Date(a.gyldigFom)).getTime()
-    );
-  });
+  const orgtilknytninger = hentedeOrgtilknytninger.sort((a, b) =>
+    otCustomStortByDate(a, b),
+  );
 
   const orgEnhetIdListe = [
     ...new Set(
@@ -220,7 +206,7 @@ function OrgtilknytningForm({
   dagensDolOrgEnhet: OrgEnhet | undefined;
 }) {
   const navigate = useNavigate();
-  const hasWriteAccess = useHasWriteAccess();
+  const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
 
   const nomSharepointLenke: string =
@@ -354,7 +340,7 @@ function OrgtilknytningForm({
       <Informasjonsboks ressursSektor={ressurs.sektor} />
 
       <form autoComplete="false" onSubmit={handleSubmit(onValid)}>
-        {hasWriteAccess && (
+        {hasAdminOrWriteAccess && (
           <div
             css={css`
               margin-top: var(--a-spacing-9);

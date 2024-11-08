@@ -32,7 +32,7 @@ import {
 import {
   useGetSession,
   useHasAdminAccess,
-  useHasWriteAccess,
+  useHasAdminOrWriteAccess,
 } from "~/api/useGetSession";
 import { Divider } from "~/components/Divider";
 import { ModalProvider } from "~/components/modalProvider/ModalProvider";
@@ -40,6 +40,7 @@ import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganis
 import { EditButtonWrapperOrgtilknytning } from "~/pages/ResourcePage/EditForms/EditButtonWrapperOrgtilknytning";
 import { EditButtonWrapperRessursSlutter } from "~/pages/ResourcePage/EditForms/EditButtonWrapperRessursSlutter";
 import { EditPersonOpplysninger } from "~/pages/ResourcePage/EditForms/EditPersonOpplysninger";
+import { otCustomStortByDate } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { EditOrgtilknytninger } from "~/pages/ResourcePage/RessursComponents/EditOrgtilknytninger";
 import { PersonOpplysninger } from "~/pages/ResourcePage/RessursComponents/PersonOpplysninger";
 import { blueTopBorder } from "~/resources/NomStyles";
@@ -234,9 +235,12 @@ function ExpiredOrgTilknytninger({
   expiredOrgTilknytninger: OrgtilknytningState[];
 }) {
   const [showAll, setShowAll] = useState(false);
+
   if (expiredOrgTilknytninger.length === 0) {
     return <></>;
   }
+
+  expiredOrgTilknytninger.sort((a, b) => otCustomStortByDate(a, b));
 
   const tilknyttingerToShow = expiredOrgTilknytninger.slice(
     0,
@@ -251,10 +255,10 @@ function ExpiredOrgTilknytninger({
       <Heading level="2" size="xsmall">
         Avsluttede org.tilknytninger
       </Heading>
-      {tilknyttingerToShow.map((orgTilknytning) => (
+      {tilknyttingerToShow.map((orgtilknytning) => (
         <ExpiredOrgTilknytning
-          expiredOrgTilknytning={orgTilknytning}
-          key={orgTilknytning.fid}
+          expiredOrgTilknytning={orgtilknytning}
+          key={orgtilknytning.fid}
         />
       ))}
       {shouldDisplayShowAllButton && (
@@ -296,18 +300,16 @@ function ExpiredOrgTilknytning({
       <Heading level="3" size="medium">
         {orgEnhet?.navn}
       </Heading>
-      <span>
+      <span
+        css={css`
+          margin-left: auto;
+        `}
+      >
         {formatDisplayDate(expiredOrgTilknytning.gyldigFom)} -{" "}
         {formatDisplayDate(expiredOrgTilknytning.gyldigTom)}
       </span>
 
-      <Tag
-        css={css`
-          margin-left: auto;
-        `}
-        size="medium"
-        variant="warning"
-      >
+      <Tag size="medium" variant="warning">
         Avsluttet
       </Tag>
     </div>
@@ -481,12 +483,15 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
   const { editPersonopplysninger } = useSearch({
     from: "/ressurs/$id",
   });
-  const hasWriteAccess = useHasWriteAccess();
+  const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
 
   const hasSelfServiceAccess =
     useGetSession().data?.navident === ressurs.navident;
 
-  if (editPersonopplysninger && (hasWriteAccess || hasSelfServiceAccess)) {
+  if (
+    editPersonopplysninger &&
+    (hasAdminOrWriteAccess || hasSelfServiceAccess)
+  ) {
     return (
       <ModalProvider>
         <EditPersonOpplysninger

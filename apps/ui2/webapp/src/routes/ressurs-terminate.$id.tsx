@@ -3,16 +3,19 @@ import { createFileRoute } from "@tanstack/react-router";
 import React from "react";
 
 import { harLederTilgangForNavidentOptions } from "~/api/react-query-endpoints";
+import { useHasAdminAccess } from "~/api/useGetSession";
 import { ModalProvider } from "~/components/modalProvider/ModalProvider";
 import { TerminateResourcePage } from "~/pages/ResourcePage/TerminateResourcePage";
 
 export const Route = createFileRoute("/ressurs-terminate/$id")({
   component: () => {
+    const hasAdminAccess = useHasAdminAccess();
+
     const hasWriteAccessForRessurs =
       useQuery(harLederTilgangForNavidentOptions(Route.useParams().id)).data ??
       false;
 
-    if (!hasWriteAccessForRessurs) {
+    if (!(hasWriteAccessForRessurs || hasAdminAccess)) {
       return;
     }
 
