@@ -115,6 +115,7 @@ public class OrgtilknytningEndretEmailService {
                 log.error("Fant ikke ressurs med navident {} og epost varsel vil ikke bli sendt.", navident);
                 // not cleared from the queue! will be retried next time
             } else {
+                log.info("endretRessurs i OrgtilknytningEndretEmailService: {} ", endretRessurs.get());
                 sendEmail(endretRessurs.get(), endringer);
                 removeFromOrgtilknytningEndringerQueue(navident);
             }
@@ -178,6 +179,7 @@ public class OrgtilknytningEndretEmailService {
             String utfortAvRessursNavn = utfortAvRessurs.isPresent()? utfortAvRessurs.get().visningsnavn().getFormattedVisningsnavn() : "Ukjent";
             if(orgtilknytningState.isPresent()){
                 var ot = orgtilknytningState.get();
+                log.info("Sender OT endringer for navident:{} orgtilknytningState: {}, and formated dates: {}, {}", event.navident() , ot, formatDateTime(ot.gyldigFom()), formatDateTime(ot.gyldigTom()));
                 log.info("Sender OT endringer utfortAv: {}, {}, {}", utfortAvNavIdent, utfortAvRessurs, utfortAvRessursNavn);
                 var orgenhetNavn = orgEnhetStateRepository.findById(ot.orgEnhetId()).map(orgEnhet -> orgEnhet.navn()).orElse("Ukjent");
                 String endring = MessageFormat.format(epost_body_item_template,
