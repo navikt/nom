@@ -179,11 +179,11 @@ public class OrgtilknytningEndretEmailService {
             String utfortAvRessursNavn = utfortAvRessurs.isPresent()? utfortAvRessurs.get().visningsnavn().getFormattedVisningsnavn() : "Ukjent";
             if(orgtilknytningState.isPresent()){
                 var ot = orgtilknytningState.get();
-                log.info("Sender OT endringer for navident:{} orgtilknytningState: {}, and formated dates: {}, {}", event.navident() , ot, formatDateTime(ot.gyldigFom()), formatDateTime(ot.gyldigTom()));
+                log.info("Sender OT endringer for navident:{} orgtilknytningState: {}, and formated dates: {}, {}", event.navident() , ot, formatDateTime(ot.gyldigFom()), formatDateTime(ot.gyldigTom().isPresent()?ot.gyldigTom().get():null));
                 log.info("Sender OT endringer utfortAv: {}, {}, {}", utfortAvNavIdent, utfortAvRessurs, utfortAvRessursNavn);
                 var orgenhetNavn = orgEnhetStateRepository.findById(ot.orgEnhetId()).map(orgEnhet -> orgEnhet.navn()).orElse("Ukjent");
                 String endring = MessageFormat.format(epost_body_item_template,
-                    orgenhetNavn, ot.orgEnhetId(), formatDateTime(ot.gyldigFom()), formatDateTime(ot.gyldigTom()), utfortAvRessursNavn, event.timestamp());
+                    orgenhetNavn, ot.orgEnhetId(), formatDateTime(ot.gyldigFom()), formatDateTime(ot.gyldigTom().isPresent()?ot.gyldigTom().get():null), utfortAvRessursNavn, event.timestamp());
                 otEndringer.append(endring);
             } else {
                 log.warn("Fant ikke orgtilknytning for OTEndretData: {} i orgtilknytningStateRepository. Sjekk!", event);
@@ -204,10 +204,6 @@ public class OrgtilknytningEndretEmailService {
             return "";
         }
         return DateTimeFormatter.ofPattern("dd.MM.YYYY").format(localDate);
-    }
-
-    public String formatDateTime(Optional<LocalDate> localDate) {
-        return localDate.map(this::formatDateTime).orElse("");
     }
 
     public Set<String> getReceiptionNavidents(List<OTEndretData> otEndringerData) {
