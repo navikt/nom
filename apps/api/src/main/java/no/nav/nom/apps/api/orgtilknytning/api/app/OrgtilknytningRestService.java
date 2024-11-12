@@ -42,6 +42,7 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -81,6 +82,8 @@ public class OrgtilknytningRestService {
     private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
     private final Unleash unleash;
 
+    private final Environment env;
+
     public OrgtilknytningRestService(
         OrgtilknytningStateRepository orgtilknytningStateRepository,
         OrgtilknytningCommandService orgtilknytningCommandService,
@@ -90,7 +93,8 @@ public class OrgtilknytningRestService {
         NomMastered nomMastered,
         AuthorizedNavident authorizedNavident,
         OrgtilknytningEndretEmailService orgtilknytningEndretEmailService,
-        Unleash unleash
+        Unleash unleash,
+        Environment env
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
@@ -102,6 +106,7 @@ public class OrgtilknytningRestService {
         this.authorizedNavident = authorizedNavident;
         this.orgtilknytningEndretEmailService = orgtilknytningEndretEmailService;
         this.unleash = unleash;
+        this.env = env;
     }
 
     public List<OrgtilknytningState> getOrgtilknytninger(Optional<String> navident) {
@@ -992,7 +997,8 @@ public class OrgtilknytningRestService {
             return;
         }
 
-        if(!initiatedFromMetadata.equals("prod-gcp:org:nom-ui2")) {
+        var clusterName  = getClusterName();
+        if(!initiatedFromMetadata.equals(clusterName+":org:nom-ui2")) {
             log.info("OT-endringer operation is not performed nom frontend. OTendretData won´t be added to the email queue");
             return;
         }
@@ -1008,5 +1014,11 @@ public class OrgtilknytningRestService {
                 .timestamp(DateTimeFormatter.ofPattern("dd.MM.YYYY").format(LocalDate.now()))
                 .build()
         );
+    }
+
+    private String getClusterName() {
+        var isProd = "prod-gcp".equals(env.getProperty("NAIS_CLUSTER_NAME"));
+        if(isProd) return "prod-gcp";
+        return "dev-gcp";
     }
 }
