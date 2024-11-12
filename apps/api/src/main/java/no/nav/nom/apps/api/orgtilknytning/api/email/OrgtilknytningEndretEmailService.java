@@ -36,7 +36,7 @@ import java.util.*;
 public class OrgtilknytningEndretEmailService {
     private static final String OT_ENDRINGER_VARSEL_TEMPLATE = "ot-endringer-varsel.ftlh";
     private static final String UNLEASH_USE_SEND_OT_ENDRINGER_EMAIL = "nom.orgtilknytning.send_ot_endringer_email";
-    private final Logger log = LoggerFactory.getLogger(RessursOpprettetEmailService.class);
+    private final Logger log = LoggerFactory.getLogger(OrgtilknytningEndretEmailService.class);
     private final EmailClient emailClient;
     private final Unleash unleash;
     private final Configuration freemarkerConfig;
