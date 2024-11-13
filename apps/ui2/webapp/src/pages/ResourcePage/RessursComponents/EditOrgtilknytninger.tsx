@@ -84,7 +84,6 @@ import {
   isAfterToday,
   isBeforeDate,
   isBeforeToday,
-  isInDevelopment,
   isSameDateOrAfter,
   isSameDateOrBefore,
   todayWithoutTimezone,
@@ -788,7 +787,6 @@ function FormSektorSelectWrapper({
     name,
   });
 
-  const inDevelopment = isInDevelopment();
   const hasAdminAccess = useHasAdminAccess();
 
   return (
@@ -828,10 +826,7 @@ function FormSektorSelectWrapper({
         >
           {!field.value && <option value="" />}
           {Object.values(Sektor).map((sektor) => {
-            if (
-              sektor === Sektor.NAV_STATLIG &&
-              !(inDevelopment && hasAdminAccess)
-            ) {
+            if (sektor === Sektor.NAV_STATLIG && !hasAdminAccess) {
               return;
             }
 

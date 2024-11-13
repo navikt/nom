@@ -6,7 +6,6 @@ import { harLederTilgangForNavidentOptions } from "~/api/react-query-endpoints";
 import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
 import type { Ressurs } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
-import { isInDevelopment } from "~/utils";
 
 export function EditButtonWrapperRessursSlutter({
   ressurs,
@@ -20,13 +19,12 @@ export function EditButtonWrapperRessursSlutter({
   });
   const hasWriteAccess = useHasWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
-  const isDevelopment = isInDevelopment();
 
   const hasWriteAccessForRessurs =
     useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
 
   const ressursCanBeEdited =
-    ressurs.sektor !== Sektor.NAV_STATLIG || (hasAdminAccess && isDevelopment);
+    ressurs.sektor !== Sektor.NAV_STATLIG || hasAdminAccess;
 
   if (
     !editPersonopplysninger &&

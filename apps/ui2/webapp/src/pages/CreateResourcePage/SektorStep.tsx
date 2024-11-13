@@ -10,7 +10,7 @@ import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/componen
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import { OrgEnhetsType, Sektor, Tilknytningtype } from "~/types/api-models";
-import { isGyldighetsPeriodeActive, isInDevelopment } from "~/utils";
+import { isGyldighetsPeriodeActive } from "~/utils";
 
 export const SektorNameMapping = {
   [Sektor.EKSTERN]: "Ekstern",
@@ -29,7 +29,6 @@ export function SektorStep() {
   const { sektor, tilknytningtype } = useSearch({
     from: "/ressurs/create/$step",
   });
-  const isDevelopment = isInDevelopment();
   const hasAdminAccess = useHasAdminAccess();
   const navident = useGetSession().data?.navident;
   const dinOrgenhetId = useQuery({
@@ -79,7 +78,7 @@ export function SektorStep() {
       }),
     }).then();
   };
-  const canEditStatlige = hasAdminAccess && isDevelopment;
+  const canEditStatlige = hasAdminAccess;
   return (
     <ContainerWithHighlightedTop icon={opprettRessursIcon} title="Sektor">
       <Alert variant="info">
