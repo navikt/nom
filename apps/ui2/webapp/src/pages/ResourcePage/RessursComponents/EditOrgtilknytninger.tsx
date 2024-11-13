@@ -1091,11 +1091,10 @@ const orgtilknytningSchema = yup.object().shape({
     name: "sektor-obligatorisk-fremtid",
     message: "Obligatorisk",
     test: function (value, context) {
-      const hasAdminAccess = useHasAdminAccess();
-      if (!hasAdminAccess) {
-        return true;
-      }
+      // Midlertidig fiks
+      return true;
 
+      // Blir her til senere
       const otTom = context?.parent?.gyldigTom ?? undefined;
 
       const required = otTom ? !isBeforeToday(otTom) : true;
