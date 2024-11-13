@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningAvsluttetEventV1;
@@ -48,11 +49,12 @@ public class KafkaProcessorTest {
     public void test_001(){
         String navident = "A000001";
         String orgEnhetId = "'123bc";
+        Sektor sektor = Sektor.NAV_KOMMUNAL;
         LocalDate gyldigFom = LocalDate.now();
         
-        final OrgtilknytningEvent event = lagOpprettEvent(navident, orgEnhetId, gyldigFom);
+        final OrgtilknytningEvent event = lagOpprettEvent(navident, orgEnhetId, sektor, gyldigFom);
 
-        final OrgtilknytningState expected = lagStateObjekt(navident, orgEnhetId, false, gyldigFom, null);
+        final OrgtilknytningState expected = lagStateObjekt(navident, orgEnhetId, sektor,false, gyldigFom, null);
 
         inputTopic.pipeInput(event.getFid(), event);
 
@@ -67,15 +69,17 @@ public class KafkaProcessorTest {
     public void test_002(){
         String navident = "A000001";
         String orgEnhetId = "'123bc";
+        Sektor sektor = Sektor.NAV_KOMMUNAL;
         LocalDate gyldigFom = LocalDate.of(2022, 1,  1);
         LocalDate gyldigTom = LocalDate.of(2022, 12, 31);
 
-        final OrgtilknytningEvent opprettEvent = lagOpprettEvent(navident, orgEnhetId, gyldigFom);
+        final OrgtilknytningEvent opprettEvent = lagOpprettEvent(navident, orgEnhetId, sektor, gyldigFom);
         final OrgtilknytningEvent avsluttetEvent = lagAvsluttEvent(navident, orgEnhetId, gyldigTom);
 
         final OrgtilknytningState expectedOpprettet = lagStateObjekt(
             navident,
             orgEnhetId,
+            sektor,
             false,
             gyldigFom,
             null
@@ -84,6 +88,7 @@ public class KafkaProcessorTest {
         final OrgtilknytningState expectedAvsluttet = lagStateObjekt(
             navident,
             orgEnhetId,
+            sektor,
             false,
             gyldigFom,
             gyldigTom
@@ -106,16 +111,18 @@ public class KafkaProcessorTest {
     public void test_003(){
         String navident = "A000001";
         String orgEnhetId = "'123bc";
+        Sektor sektor = Sektor.EKSTERN;
         LocalDate gyldigFom = LocalDate.of(2022, 1,  1);
         LocalDate gyldigTom = LocalDate.of(2022, 12, 31);
 
-        final OrgtilknytningEvent opprettEvent = lagOpprettEvent(navident, orgEnhetId, gyldigFom);
+        final OrgtilknytningEvent opprettEvent = lagOpprettEvent(navident, orgEnhetId, sektor, gyldigFom);
         final OrgtilknytningEvent dagligOppfolgingEndretEvent = lagDagligOppfolgingEndretEvent(navident, orgEnhetId, gyldigFom, null, true);
         final OrgtilknytningEvent avsluttetEvent = lagAvsluttEvent(navident, orgEnhetId, gyldigTom);
 
         final OrgtilknytningState expectedOpprettet = lagStateObjekt(
             navident,
             orgEnhetId,
+            sektor,
             false,
             gyldigFom,
             null
@@ -124,6 +131,7 @@ public class KafkaProcessorTest {
         final OrgtilknytningState expectedDagligOppforingEndret = lagStateObjekt(
             navident,
             orgEnhetId,
+            sektor,
             true,
             gyldigFom,
             null
@@ -132,6 +140,7 @@ public class KafkaProcessorTest {
         final OrgtilknytningState expectedAvsluttet = lagStateObjekt(
             navident,
             orgEnhetId,
+            sektor,
             true,
             gyldigFom,
             gyldigTom
@@ -155,12 +164,13 @@ public class KafkaProcessorTest {
     public void test_004(){
         String navident = "A000001";
         String orgEnhetId = "'123bc";
+        Sektor sektor = Sektor.NAV_STATLIG;
         LocalDate gyldigFom = LocalDate.of(2022, 1,  1);
         LocalDate gyldigTom = LocalDate.of(2022, 12, 31);
         LocalDate nyGyldigFom = LocalDate.of(2023, 1,  1);
         LocalDate nyGyldigTom = LocalDate.of(2023, 12, 31);
 
-        final OrgtilknytningEvent opprettEvent = lagOpprettEvent(navident, orgEnhetId, gyldigFom);
+        final OrgtilknytningEvent opprettEvent = lagOpprettEvent(navident, orgEnhetId, sektor, gyldigFom);
         final OrgtilknytningEvent avsluttetEvent = lagAvsluttEvent(navident, orgEnhetId, gyldigTom);
         final OrgtilknytningEvent endretDatoEvent = lagDatoEndretEvent(navident, orgEnhetId, nyGyldigFom, nyGyldigTom);
         final OrgtilknytningEvent fjernetEvent = lagFjernetEvent(navident, orgEnhetId, nyGyldigFom, nyGyldigTom);
@@ -168,6 +178,7 @@ public class KafkaProcessorTest {
         final OrgtilknytningState expectedOpprettet = lagStateObjekt(
             navident,
             orgEnhetId,
+            sektor,
             false,
             gyldigFom,
             null
@@ -176,6 +187,7 @@ public class KafkaProcessorTest {
         final OrgtilknytningState expectedAvsluttet = lagStateObjekt(
             navident,
             orgEnhetId,
+            sektor,
             false,
             gyldigFom,
             gyldigTom
@@ -184,6 +196,7 @@ public class KafkaProcessorTest {
         final OrgtilknytningState expectedEndret = lagStateObjekt(
             navident,
             orgEnhetId,
+            sektor,
             false,
             nyGyldigFom,
             nyGyldigTom
@@ -229,9 +242,10 @@ public class KafkaProcessorTest {
 
         String navident = "A000001";
         String orgEnhetId = "'123bc";
+        Sektor sektor = Sektor.NAV_KOMMUNAL;
         LocalDate gyldigFom = LocalDate.of(2022, 1,  1);
 
-        final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEventV1 = lagOpprettEvent(navident, orgEnhetId, LocalDate.of(2022, 1,  1));
+        final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEventV1 = lagOpprettEvent(navident, orgEnhetId, sektor, LocalDate.of(2022, 1,  1));
         final OrgtilknytningTypeEndretEventV1 orgtilknytningTypeEndretEventV1 = new OrgtilknytningTypeEndretEventV1(
             orgtilknytningOpprettetEventV1.getFid(),
             new OrgtilknytningTypeEndretEventV1.OrgtilknytningTypeEndretEventData(Optional.of(Tilknytningtype.KONSULENT)),
@@ -241,6 +255,7 @@ public class KafkaProcessorTest {
         final OrgtilknytningState expectedEndret = lagStateObjekt(
             navident,
             orgEnhetId,
+            sektor,
             false,
             gyldigFom,
             null
@@ -263,9 +278,10 @@ public class KafkaProcessorTest {
 
         String navident = "A000001";
         String orgEnhetId = "'123bc";
+        Sektor sektor = Sektor.EKSTERN;
         LocalDate gyldigFom = LocalDate.of(2022, 1,  1);
 
-        final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEventV1 = lagOpprettEvent(navident, orgEnhetId, LocalDate.of(2022, 1,  1));
+        final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEventV1 = lagOpprettEvent(navident, orgEnhetId, sektor, LocalDate.of(2022, 1,  1));
         final OrgtilknytningTilknytningtypeEndretEventV1 orgtilknytningTilknytningtypeEndretEventV1 = new OrgtilknytningTilknytningtypeEndretEventV1(
             orgtilknytningOpprettetEventV1.getFid(),
             new OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData(Optional.of(Tilknytningtype.KONSULENT)),
@@ -275,6 +291,7 @@ public class KafkaProcessorTest {
         final OrgtilknytningState expectedEndret = lagStateObjekt(
             navident,
             orgEnhetId,
+            sektor,
             false,
             gyldigFom,
             null
@@ -291,16 +308,17 @@ public class KafkaProcessorTest {
 
     }
 
-    private OrgtilknytningOpprettetEventV1 lagOpprettEvent(String navident, String orgEnhetId, LocalDate gyldigFom) {
-        return lagOpprettEvent("FID_1", navident, orgEnhetId, gyldigFom);
+    private OrgtilknytningOpprettetEventV1 lagOpprettEvent(String navident, String orgEnhetId, Sektor sektor, LocalDate gyldigFom) {
+        return lagOpprettEvent("FID_1", navident, orgEnhetId, sektor, gyldigFom);
     }
 
-    private OrgtilknytningOpprettetEventV1 lagOpprettEvent(String fid, String navident, String orgEnhetId, LocalDate gyldigFom) {
+    private OrgtilknytningOpprettetEventV1 lagOpprettEvent(String fid, String navident, String orgEnhetId, Sektor sektor, LocalDate gyldigFom) {
         return new OrgtilknytningOpprettetEventV1(
             fid,
             new OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData(
                 navident,
                 orgEnhetId,
+                sektor,
                 gyldigFom
             ),
             (Event.Metadata) null,
@@ -380,13 +398,14 @@ public class KafkaProcessorTest {
         );
     }
 
-    private static OrgtilknytningState lagStateObjekt(String navident, String orgEnhetId, boolean erDagligOppfolging, LocalDate gyldigFom, LocalDate gyldigTom) {
+    private static OrgtilknytningState lagStateObjekt(String navident, String orgEnhetId, Sektor sektor, boolean erDagligOppfolging, LocalDate gyldigFom, LocalDate gyldigTom) {
 
         return OrgtilknytningState
             .builder()
             .fid("FID_1")
             .navident(navident)
             .orgEnhetId(orgEnhetId)
+            .sektor(sektor)
             .erDagligOppfolging(erDagligOppfolging)
             .gyldigFom(gyldigFom)
             .gyldigTom(Optional.ofNullable(gyldigTom))

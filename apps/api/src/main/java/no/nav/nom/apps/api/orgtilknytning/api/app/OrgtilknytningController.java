@@ -1,19 +1,15 @@
 package no.nav.nom.apps.api.orgtilknytning.api.app;
 
-import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
-import jakarta.validation.Valid;
-
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
-import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOverlapException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
@@ -35,26 +31,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Tag(name = "Orgtilknytning")
 @RestController
-@RequestMapping(value={"/app/orgtilknytninger"})
+@RequestMapping(value = {"/app/orgtilknytninger"})
 public class OrgtilknytningController {
 
     private final static Logger logger = LoggerFactory.getLogger(OrgtilknytningController.class);
 
-    private final Unleash unleash;
     private final OrgtilknytningRestService orgtilknytningRestService;
     private final AuthResolver authResolver;
 
-    public OrgtilknytningController(Unleash unleash,
-                                    OrgtilknytningRestService orgtilknytningRestService,
-                                    AuthResolver authResolver
+    public OrgtilknytningController(
+        OrgtilknytningRestService orgtilknytningRestService,
+        AuthResolver authResolver
     ) {
-        this.unleash = unleash;
         this.orgtilknytningRestService = orgtilknytningRestService;
         this.authResolver = authResolver;
     }
@@ -64,9 +59,11 @@ public class OrgtilknytningController {
         description = "Henter orgtilknytninger",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200"),
-    })
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200"),
+        }
+    )
     public ResponseEntity<List<OrgtilknytningState>> getOrgtilknytninger(
         @RequestParam Optional<String> navident
     ) {
@@ -75,59 +72,16 @@ public class OrgtilknytningController {
         );
     }
 
-    @PostMapping
-    @Operation(
-        description = "Oppretter orgtilknytning",
-        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200"),
-    })
-    @PreAuthorize(
-        "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
-    )
-    public ResponseEntity<StandardResponse> addOrgtilknytning(
-        @RequestBody LeggTilOrgtilknytningRequestOld leggTilOrgtilknytningRequest
-    ) {
-        if (!authResolver.kanRedigereRessurs(leggTilOrgtilknytningRequest.navident())) {
-            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
-        }
-
-        orgtilknytningRestService.addOrgtilknyting(leggTilOrgtilknytningRequest);
-        return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
-    }
-
-    @PostMapping("/{fid}/dato")
-    @Operation(
-        description = "Endrer dato for en orgtilknytning",
-        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200"),
-    })
-    @PreAuthorize(
-        "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
-    )
-    public ResponseEntity<StandardResponse> updateDato(
-        @PathVariable String fid,
-        @RequestBody EndreOrgtilknytningDatoRequest endreOrgtilknytningDatoRequest
-    ) {
-        if (!authResolver.kanRedigereRessurs(orgtilknytningRestService.getOrgtilknytning(fid).navident())) {
-            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
-        }
-
-        orgtilknytningRestService.updateOrgtilknytingDato(fid, endreOrgtilknytningDatoRequest);
-        return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
-    }
-
     @PostMapping("/{fid}/tilknytningtype")
     @Operation(
         description = "Endrer orgtilknytningType for en orgtilknytning",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200"),
-    })
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200"),
+        }
+    )
     @PreAuthorize(
         "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
     )
@@ -148,9 +102,11 @@ public class OrgtilknytningController {
         description = "Direkte oppslag på orgtilknytning med fid",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200"),
-    })
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200"),
+        }
+    )
     public ResponseEntity<OrgtilknytningState> getOrgtilknytning(
         @PathVariable String fid
     ) {
@@ -164,9 +120,11 @@ public class OrgtilknytningController {
         description = "Sender inn komplett øyeblikksbilde av hvordan alle orgtilknytningene til en ressurs skal se ut",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200"),
-    })
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200"),
+        }
+    )
     @PreAuthorize(
         "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
     )
@@ -174,19 +132,11 @@ public class OrgtilknytningController {
         @PathVariable String navident,
         @Valid @RequestBody OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest
     ) {
-        if (unleash.isEnabled("nom.ressurs.ny-move-prosess")) {
-            var isLeder = authResolver.kanRedigereRessurs(navident);
+        var isLeder = authResolver.kanRedigereRessurs(navident);
 
-            orgtilknytningRestService.oppdaterOrgtilknytningerForRessurs(navident, oppdaterOrgtilknytningerForRessursRequest, isLeder);
-            return ResponseEntity.ok(StandardResponse.builder().message("Orgtilknytninger for ressurs oppdatert").build());
-        } else {
-            if (!authResolver.kanRedigereRessurs(navident)) {
-                throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
-            }
+        orgtilknytningRestService.oppdaterOrgtilknytningerForRessurs(navident, oppdaterOrgtilknytningerForRessursRequest, isLeder);
+        return ResponseEntity.ok(StandardResponse.builder().message("Orgtilknytninger for ressurs oppdatert").build());
 
-            orgtilknytningRestService.oppdaterOrgtilknytningerForRessurs(navident, oppdaterOrgtilknytningerForRessursRequest);
-            return ResponseEntity.ok(StandardResponse.builder().message("Orgtilknytninger for ressurs oppdatert").build());
-        }
     }
 
     @PostMapping("/masseflytting")
@@ -209,42 +159,50 @@ public class OrgtilknytningController {
 
 
     // TODO: Lage global ControllerAdvice
-    @ExceptionHandler({
-        IllegalArgumentException.class,
-        NoSuchElementException.class,
-        InvalidSektorException.class,
-        InvalidOrgtilknytningTypeAndSektorCombinationException.class,
-        InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException.class,
-        InvalidOppdaterOrgtilknytningerForRessursRequestException.class
-    })
+    @ExceptionHandler(
+        {
+            IllegalArgumentException.class,
+            NoSuchElementException.class,
+            InvalidSektorException.class,
+            InvalidOrgtilknytningTypeAndSektorCombinationException.class,
+            InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException.class,
+            InvalidOppdaterOrgtilknytningerForRessursRequestException.class
+        }
+    )
     public ResponseEntity<StandardResponse> handleBadRequest(RuntimeException exception) {
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(StandardResponse.builder().message(exception.getMessage()).build());
     }
 
-    @ExceptionHandler({
-        RessursNotFoundException.class,
-        OrgtilknytningNotFoundException.class
-    })
+    @ExceptionHandler(
+        {
+            RessursNotFoundException.class,
+            OrgtilknytningNotFoundException.class
+        }
+    )
     public ResponseEntity<StandardResponse> handleNotFound(RuntimeException exception) {
         return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
             .body(StandardResponse.builder().message(exception.getMessage()).build());
     }
 
-    @ExceptionHandler({
-        AccessDeniedException.class,
-    })
+    @ExceptionHandler(
+        {
+            AccessDeniedException.class,
+        }
+    )
     public ResponseEntity<StandardResponse> handleForbidden(RuntimeException exception) {
         return ResponseEntity
             .status(HttpStatus.FORBIDDEN)
             .body(StandardResponse.builder().message(exception.getMessage()).build());
     }
 
-    @ExceptionHandler({
-        OrgtilknytningPeriodeOverlapException.class,
-    })
+    @ExceptionHandler(
+        {
+            OrgtilknytningPeriodeOverlapException.class,
+        }
+    )
     public ResponseEntity<StandardResponse> handleConflict(RuntimeException exception) {
         return ResponseEntity
             .status(HttpStatus.CONFLICT)

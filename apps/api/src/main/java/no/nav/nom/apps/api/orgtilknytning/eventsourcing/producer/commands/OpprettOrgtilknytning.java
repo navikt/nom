@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands;
 
 import lombok.Builder;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 public record OpprettOrgtilknytning (
     String navident,
     String orgenhetId,
+    Sektor sektor,
     LocalDate gyldigFom,
     InputMetadata inputMetadata,
     OrgtilknytningEvent.AdditionalAgressoData additionalAgressoData

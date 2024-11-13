@@ -284,6 +284,7 @@ public class TestData {
             v1.getFid(),
             v1.getOrgtilknytningDagligOppfolgingEndretEventData().navident(),
             v1.getOrgtilknytningDagligOppfolgingEndretEventData().orgEnhetId(),
+            null,
             v1.getOrgtilknytningDagligOppfolgingEndretEventData().dagligOppfolging(),
             v1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom(),
             v1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom(),

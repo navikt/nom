@@ -16,6 +16,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretE
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningSektorEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
@@ -328,6 +329,24 @@ public class NomIntegrasjonService {
 
     }
 
+    private void handleOrgtilknytningSektorEndretEvent(OrgtilknytningSektorEndretEventV1 orgtilknytningSektorEndretEventV1) {
+        logger.info("Updating remedy data for OrgtilknytningSektorEndretEventV1 with fid {}", orgtilknytningSektorEndretEventV1.getFid());
+
+        var orgtilknytningSektorEndretEventData = orgtilknytningSektorEndretEventV1.getOrgtilknytningSektorEndretEventData();
+
+        var ressursState = nomApiClient.getRessursByNavident(orgtilknytningSektorEndretEventData.navident());
+        var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
+
+        var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
+            .sektor(nomSektorToRemedyCode(orgtilknytningSektorEndretEventData.sektor()))
+            .build();
+
+        saveNewNomIntegrasjonEntity(
+            newNomIntegrasjonEntity,
+            orgtilknytningSektorEndretEventV1.getMetadata().inputMetadata().origination().initiatedBy()
+        );
+    }
+
     private void handleRessursSluttetEventV1(RessursSluttetEventV1 ressursSluttetEventV1) {
 
         logger.info("Updating remedy data for RessursSluttetEventV1 with fid {}", ressursSluttetEventV1.getFid());
@@ -603,11 +622,11 @@ public class NomIntegrasjonService {
             ))
             .fysiskBrukerstedId(ressurs.getPrimaryFysiskBrukersted())
             .navId(ressurs.getNavident())
-            .sektor(nomSektorToRemedyCode(ressurs.getSektor()))
+            .sektor(nomSektorToRemedyCode(dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getSektor).orElse(ressurs.getSektor())))
             .tiltredelsesdato(
                 dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getGyldigFom).map(Utils::epochSecondsNorwegianTimeNoon).orElse(null)
             )
-            .utlopsdato(ressurs.getSektor().equals(no.nav.nom.generated.model.Sektor.NAV_KOMMUNAL)
+            .utlopsdato(dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getSektor).orElse(ressurs.getSektor()).equals(no.nav.nom.generated.model.Sektor.NAV_KOMMUNAL)
                 || ressurs.getSektor().equals(no.nav.nom.generated.model.Sektor.NAV_STATLIG)
                 ? null
                 : dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getGyldigTom).map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null)
@@ -617,15 +636,23 @@ public class NomIntegrasjonService {
     }
 
     private boolean isNavidentEksternEllerKommunalRessurs(String navident) {
-        var ressursSektor = nomApiClient.getRessursByNavident(navident).getSektor();
-        return ressursSektor.equals(no.nav.nom.generated.model.Sektor.EKSTERN)
-            || ressursSektor.equals(no.nav.nom.generated.model.Sektor.NAV_KOMMUNAL);
+        var orgtilknytning = getDolOrgtilknytningStateByNavident(navident);
+        var sektor = orgtilknytning.map(OrgtilknytningState::getSektor).orElse(null);
+        if (isNull(sektor)) {
+            sektor = nomApiClient.getRessursByNavident(navident).getSektor();
+        }
+        return sektor.equals(no.nav.nom.generated.model.Sektor.EKSTERN)
+            || sektor.equals(no.nav.nom.generated.model.Sektor.NAV_KOMMUNAL);
     }
 
     private boolean isFidEksternEllerKommunalRessurs(String fid) {
-        var ressursSektor = nomApiClient.getRessursByFid(fid).getSektor();
-        return ressursSektor.equals(no.nav.nom.generated.model.Sektor.EKSTERN)
-            || ressursSektor.equals(no.nav.nom.generated.model.Sektor.NAV_KOMMUNAL);
+        var orgtilknytning = getDolOrgtilknytningStateByFid(fid);
+        var sektor = orgtilknytning.map(OrgtilknytningState::getSektor).orElse(null);
+        if (isNull(sektor)) {
+            sektor = nomApiClient.getRessursByFid(fid).getSektor();
+        }
+        return sektor.equals(no.nav.nom.generated.model.Sektor.EKSTERN)
+            || sektor.equals(no.nav.nom.generated.model.Sektor.NAV_KOMMUNAL);
     }
 
     private boolean isOrgtilknytningEksternEllerKommunalAndDagligOppfolgning(String orgtilknytningFid) {
@@ -708,6 +735,34 @@ public class NomIntegrasjonService {
         if (nomIntegrasjonEntity.getSektor() == 2 && nomIntegrasjonEntity.getUtlopsdato() == null) {
             throw RequiredValueMissingException.forField("utløpsdato");
         }
+    }
+
+    private Optional<OrgtilknytningState> getDolOrgtilknytningStateByNavident(String navident) {
+        var dagligOppfolgningOrgTilknytning = nomApiClient.getOrgtilknytningerForNavident(navident).stream()
+            .filter(orgtilknytningState -> isActive(orgtilknytningState.getGyldigFom(), orgtilknytningState.getGyldigTom()))
+            .filter(OrgtilknytningState::getErDagligOppfolging)
+            .findFirst();
+
+        if (dagligOppfolgningOrgTilknytning.isEmpty()) {
+            logger.info("Ingen aktiv DOL funnet for ressurs med navident {}, prøver å finne fremtidig DOL", navident);
+            dagligOppfolgningOrgTilknytning = nomApiClient.getOrgtilknytningerForNavident(navident).stream()
+                .sorted(Comparator.comparing(OrgtilknytningState::getGyldigFom))
+                .filter(orgtilknytningState -> orgtilknytningState.getGyldigFom().isAfter(LocalDate.now()))
+                .filter(OrgtilknytningState::getErDagligOppfolging)
+                .findFirst();
+            dagligOppfolgningOrgTilknytning.ifPresent(orgtilknytningState -> logger.info(
+                "Fant fremtidig DOL funnet for ressurs med navident {}, orgenhetId {}",
+                navident,
+                orgtilknytningState.getOrgEnhetId()
+            ));
+        }
+
+        return dagligOppfolgningOrgTilknytning;
+    }
+
+    private Optional<OrgtilknytningState> getDolOrgtilknytningStateByFid(String fid) {
+        return getDolOrgtilknytningStateByNavident(nomApiClient.getRessursByNavident(fid).getNavident());
+
     }
 
     private String getRemedyEnhetId(String orgEnhetId) {

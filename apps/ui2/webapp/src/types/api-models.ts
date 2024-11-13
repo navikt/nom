@@ -19,14 +19,6 @@ export interface AvvikleRessursRequest {
   sluttDato: string;
 }
 
-export interface EndreOrgtilknytningDatoRequest {
-  /** @format date */
-  gyldigFom: string;
-  /** @format date */
-  gyldigTom?: string;
-  setRessursSluttdato?: boolean;
-}
-
 export interface EndreOrgtilknytningRequest {
   erDagligOppfolging: boolean;
   fid: string;
@@ -34,6 +26,7 @@ export interface EndreOrgtilknytningRequest {
   gyldigFom: string;
   /** @format date */
   gyldigTom?: string;
+  sektor?: Sektor;
   tilknytningtype?: Tilknytningtype;
 }
 
@@ -103,18 +96,14 @@ export interface LeggTilOrgtilknytningRequest {
   /** @format date */
   gyldigTom?: string;
   orgEnhetId: string;
+  sektor: Sektor;
   tilknytningtype?: Tilknytningtype;
 }
 
-export interface LeggTilOrgtilknytningRequestOld {
-  erDagligOppfolging?: boolean;
-  /** @format date */
-  gyldigFom: string;
-  /** @format date */
-  gyldigTom?: string;
-  navident: string;
-  orgEnhetId: string;
-  setRessursSluttdato?: boolean;
+export interface MasseFlyttingRequest {
+  beholdTilganger: boolean;
+  nyOrgenhetId: string;
+  ressurserNavident: string[];
 }
 
 export enum NomNivaa {
@@ -175,6 +164,13 @@ export interface OrgEnhet {
   underordnedeOrgEnhetId: string[];
 }
 
+export interface OrgEnhetMedLedernavn {
+  id: string;
+  ledere: string[];
+  navn: string;
+  remedyEnhetId?: string;
+}
+
 export enum OrgEnhetsType {
   ARBEIDSLIVSSENTER = "ARBEIDSLIVSSENTER",
   NAV_ARBEID_OG_YTELSER = "NAV_ARBEID_OG_YTELSER",
@@ -202,6 +198,7 @@ export interface OrgtilknytningState {
   navident: string;
   orgEnhetId: string;
   orgtilknytningType?: Tilknytningtype;
+  sektor?: Sektor;
 }
 
 export interface Person {

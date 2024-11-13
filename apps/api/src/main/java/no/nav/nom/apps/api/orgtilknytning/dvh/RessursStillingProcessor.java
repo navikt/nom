@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
-import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
@@ -605,6 +604,7 @@ public class RessursStillingProcessor {
         var command = new OpprettOrgtilknytning(
             navident,
             orgenhetId,
+            null,
             stillingPeriode.gyldigFom(),
             metadata,
             additionalData

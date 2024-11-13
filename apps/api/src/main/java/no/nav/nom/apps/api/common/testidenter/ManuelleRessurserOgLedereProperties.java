@@ -45,6 +45,7 @@ public record ManuelleRessurserOgLedereProperties(
                 orgtilknytningFid(),
                 navident,
                 orgtilknytning,
+                Sektor.valueOf(sektor),
                 true,
                 LocalDate.of(2022, 1, 1),
                 Optional.empty(),

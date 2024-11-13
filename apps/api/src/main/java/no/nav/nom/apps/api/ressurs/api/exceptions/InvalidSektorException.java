@@ -13,4 +13,12 @@ public class InvalidSektorException extends RuntimeException {
             String.format("Handling ikke tillatt for ressurser i sektor %s", sektor)
         );
     }
+
+    public static InvalidSektorException sektorIsNull() {
+        return new InvalidSektorException("Sektor kan ikke være null på nye Orgtilknytninger");
+    }
+
+    public static InvalidSektorException sektorCannotBeChanged() {
+        return new InvalidSektorException("Sektor kan ikke endres på eksisterende Orgtilknytninger");
+    }
 }
