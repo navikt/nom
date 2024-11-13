@@ -514,8 +514,6 @@ public class OrgtilknytningRestService {
     private boolean endreOrgtilknytningRequestProvidesChangesToState(
         EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState
     ) {
-        log.debug("endreOrgtilkningRequest: {}", endreOrgtilknytningRequest);
-        log.debug("currentOrgtilknytningState: {}", currentOrgtilknytningState);
         validateSektorCanBeChanged(endreOrgtilknytningRequest, currentOrgtilknytningState);
 
         return !(
@@ -523,9 +521,8 @@ public class OrgtilknytningRestService {
                 && Optional.ofNullable(endreOrgtilknytningRequest.gyldigTom()).equals(currentOrgtilknytningState.gyldigTom())
                 && endreOrgtilknytningRequest.erDagligOppfolging() == currentOrgtilknytningState.erDagligOppfolging()
                 && Optional.ofNullable(endreOrgtilknytningRequest.tilknytningtype()).equals(currentOrgtilknytningState.orgtilknytningType())
-                && endreOrgtilknytningRequest.sektor().equals(currentOrgtilknytningState.sektor())
+                && (endreOrgtilknytningRequest.sektor() != null && endreOrgtilknytningRequest.sektor().equals(currentOrgtilknytningState.sektor()))
         );
-
     }
 
     private static void validateSektorCanBeChanged(EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState) {
