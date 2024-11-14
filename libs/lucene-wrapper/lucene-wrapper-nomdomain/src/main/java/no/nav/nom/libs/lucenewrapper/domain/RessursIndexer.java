@@ -38,8 +38,18 @@ public class RessursIndexer implements IEntityIndexer<LuceneRessurs, LuceneRessu
             return new MatchNoDocsQuery();
         }
 
-
-        var coreQry = helper.nameQuery(terms);
+        Query coreQry;
+        if(terms.matches("^\\d{6}$")){
+            var letters = "abcdefghijklmnopqrstuvwxyz";
+            var boolQryBuilder = new BooleanQuery.Builder();
+            for(var l : letters.toCharArray()){
+                var letterQry = new TermQuery(new Term(this.idField(),l + terms));
+                boolQryBuilder.add(letterQry, BooleanClause.Occur.SHOULD);
+            }
+            coreQry = boolQryBuilder.build();
+        }else{
+            coreQry = helper.nameQuery(terms);
+        }
 
         var activeQry = helper.termCategoryQuery("active", String.valueOf(true));
         var inactiveQry = helper.termCategoryQuery("active", String.valueOf(false));
