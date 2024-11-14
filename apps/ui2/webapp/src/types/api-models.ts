@@ -106,6 +106,12 @@ export interface MasseFlyttingRequest {
   ressurserNavident: string[];
 }
 
+export interface MasseFlyttingRequest {
+  beholdTilganger: boolean;
+  nyOrgenhetId: string;
+  ressurserNavident: string[];
+}
+
 export enum NomNivaa {
   LINJEENHET = "LINJEENHET",
   DRIFTSENHET = "DRIFTSENHET",

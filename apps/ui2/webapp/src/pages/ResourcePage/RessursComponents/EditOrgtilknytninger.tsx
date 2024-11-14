@@ -39,13 +39,8 @@ import {
 import * as yup from "yup";
 
 import {
-  GyldigTomSelection,
-  OrgnivSelection,
-  ResultLimit,
-  useSearchOrgenheterQuery,
-} from "~/api/generated/graphql_generated";
-import {
   getOrgEnhet,
+  getOrgEnheterSomKanHaRessurser,
   getOrgTilknytninger,
   oppdaterOrgtilknytningerForRessurs,
 } from "~/api/react-query-endpoints";
@@ -680,20 +675,14 @@ function EditOrgilkntyningFormPart({
 }
 
 function FormOrgEnhetSelectWrapper({ name }: { name: string }) {
-  const searchOrgenheterQuery = useSearchOrgenheterQuery({
-    variables: {
-      term: "*:*",
-      filter: {
-        gyldigTomSelection: GyldigTomSelection.IkkePassert,
-        orgnivSelection: OrgnivSelection.OrgnivOrgenhet,
-        limit: ResultLimit.Unlimited,
-      },
-    },
-  });
-
-  const orgEnheter = searchOrgenheterQuery.data?.searchOrgEnhet || [];
-
-  return <OrgEnhetSelectFormPart name={name} orgEnheter={orgEnheter} />;
+  const orgEnheterSomKanHaRessurser =
+    useQuery(getOrgEnheterSomKanHaRessurser).data || [];
+  return (
+    <OrgEnhetSelectFormPart
+      name={name}
+      orgEnheter={orgEnheterSomKanHaRessurser}
+    />
+  );
 }
 
 function FormDateWrapper({

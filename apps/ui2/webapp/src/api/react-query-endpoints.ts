@@ -19,6 +19,7 @@ import type {
   OpprettRessursRequest,
   OpprettRessursResponse,
   OrgEnhet,
+  OrgEnhetMedLedernavn,
   OrgtilknytningState,
   Person,
   Ressurs,
@@ -291,6 +292,18 @@ export function getOrgEnheterLedetAvOptions(navident: string) {
       ).data,
   });
 }
+
+export const getOrgEnheterSomKanHaRessurser = {
+  gcTime: CACHE_FOR.anHour,
+  staleTime: CACHE_FOR.aMinute * 5,
+  queryKey: ["ORGENHETER_KAN_HA_RESSURSER"],
+  queryFn: async () =>
+    (
+      await axios.get<OrgEnhetMedLedernavn[]>(
+        `${NOM_API_BASE_PATH}/app/orgenheter/kanHaRessurser`,
+      )
+    ).data,
+};
 
 export const getOrgTilknytninger = {
   queryKey: (navident: string) => orgtilknytningerKeys.navident(navident),

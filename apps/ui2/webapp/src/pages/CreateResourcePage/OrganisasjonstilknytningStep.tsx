@@ -22,12 +22,9 @@ import {
 import * as yup from "yup";
 
 import {
-  GyldigTomSelection,
-  OrgnivSelection,
-  ResultLimit,
-  useSearchOrgenheterQuery,
-} from "~/api/generated/graphql_generated";
-import { harLederTilgangForOrgenhetOptions } from "~/api/react-query-endpoints";
+  getOrgEnheterSomKanHaRessurser,
+  harLederTilgangForOrgenhetOptions,
+} from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
 import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBrukerstedSelect";
@@ -505,26 +502,19 @@ function Orgtilknytningsvarighet({
 function InnerOrgEnhetSelect() {
   const { watch } = useFormContext();
 
-  const searchOrgenheterQuery = useSearchOrgenheterQuery({
-    variables: {
-      term: "*:*",
-      filter: {
-        gyldigTomSelection: GyldigTomSelection.IkkePassert,
-        orgnivSelection: OrgnivSelection.OrgnivOrgenhet,
-        limit: ResultLimit.Unlimited,
-      },
-    },
-  });
+  const orgEnheterSomKanHaRessurser =
+    useQuery(getOrgEnheterSomKanHaRessurser).data || [];
 
-  const orgEnheter = searchOrgenheterQuery.data?.searchOrgEnhet || [];
-
-  const selectedOrgEnhet = orgEnheter.find(
+  const selectedOrgEnhet = orgEnheterSomKanHaRessurser.find(
     (orgEnhet) => orgEnhet.id === watch("orgEnhetId"),
   );
 
   return (
     <>
-      <OrgEnhetSelectFormPart name="orgEnhetId" orgEnheter={orgEnheter} />
+      <OrgEnhetSelectFormPart
+        name="orgEnhetId"
+        orgEnheter={orgEnheterSomKanHaRessurser}
+      />
       {selectedOrgEnhet ? (
         <div
           css={css`
@@ -533,7 +523,7 @@ function InnerOrgEnhetSelect() {
           `}
         >
           <span>
-            Leder: <b>{selectedOrgEnhet.leder[0]?.ressurs.visningsnavn}</b>
+            Leder: <b>{selectedOrgEnhet.ledere[0]}</b>
           </span>
           <div
             css={css`
