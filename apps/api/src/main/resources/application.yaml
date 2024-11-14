@@ -4,25 +4,19 @@ app:
     authorize:
       eventsource-topic: org.nom.nom-authorize-eventsource
     ressurs:
-      stateTopic: org.nom.intern-ressurs-state
       eventsourceTopic: org.nom.ressurs-eventsource
       nomMasteredRessursTopic: org.nom.nom-mastered-ressurs
     orgEnhet:
-      stateTopic: org.nom.intern-orgenhet-state
       eventsourceTopic: org.nom.orgenhet-eventsource
     orgtilknytning:
-      state-topic: org.nom.intern-orgtilknytning-state
       eventsource-topic: org.nom.orgtilknytning-eventsource
       dvhLastResultTopic: org.nom.intern-dvh-last-result
-      gmlDvhLastResultTopic: org.nom.intern-gml-dvh-last-result
     organisering:
-      stateTopic: org.nom.intern-organisering-state
       eventsourceTopic: org.nom.organisering-eventsource
   clients:
     nom-proxy:
       base-url: ${NOM_PROXY_BASEURL}
       enhet-path: /proxy/dvh/json/Hr/NOM3/NOM_HRORG_ORGENHET
-      orgtilknytning-path: /proxy/dvh/json/Hr/NOM2/stilling2nom
       ressurs-stillinger-path: /proxy/dvh/json/Hr/Nom/NOM_RESSURS_STILLINGER
       eksterne-ressurser-path: /proxy/dvh/json/Hr/NOM3/NOM_EKSTERNE_V1
       kommunale-ressurser-path: /proxy/dvh/json/Hr/NOM3/NOM_KOMMUNALE_V1
@@ -265,7 +259,6 @@ app:
   clients:
     nom-proxy:
       enhet-path: /proxy/dvh/json/Hr/NOM3_Dev/NOM_HRORG_ORGENHET
-      orgtilknytning-path: /proxy/dvh/json/Hr/NOM2_Dev/stilling2nom
       ressurs-stillinger-path: /proxy/dvh/json/Hr/Nom_Dev/NOM_RESSURS_STILLINGER
       eksterne-ressurser-path: /proxy/dvh/json/Hr/NOM3_Dev/NOM_EKSTERNE_V1
       kommunale-ressurser-path: /proxy/dvh/json/Hr/NOM3_Dev/NOM_KOMMUNALE_V1
