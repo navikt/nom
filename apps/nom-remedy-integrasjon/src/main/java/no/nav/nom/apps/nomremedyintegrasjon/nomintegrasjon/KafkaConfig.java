@@ -15,6 +15,8 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
+import java.time.LocalDateTime;
+
 @Configuration
 public class KafkaConfig {
 
@@ -45,6 +47,22 @@ public class KafkaConfig {
     orgtilknytningEventKafkaListenerContainerFactory(ConsumerFactory<String, OrgtilknytningEvent> orgtilknytningEventConsumerFactory) {
         var concurrentKafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<String, OrgtilknytningEvent>();
         concurrentKafkaListenerContainerFactory.setConsumerFactory(orgtilknytningEventConsumerFactory);
+        concurrentKafkaListenerContainerFactory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
+
+        return concurrentKafkaListenerContainerFactory;
+    }
+
+    @Bean
+    public ConsumerFactory<String, LocalDateTime> nomMasteredRessursEventConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+        JsonDeserializer<LocalDateTime> jsonEventDeserializer = new JsonDeserializer<>(objectMapper);
+        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonEventDeserializer);
+    }
+
+    @Bean
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, LocalDateTime>>
+    nomMasteredRessursEventKafkaListenerContainerFactory(ConsumerFactory<String, LocalDateTime> nomMasteredRessursEventConsumerFactory) {
+        var concurrentKafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<String, LocalDateTime>();
+        concurrentKafkaListenerContainerFactory.setConsumerFactory(nomMasteredRessursEventConsumerFactory);
         concurrentKafkaListenerContainerFactory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
 
         return concurrentKafkaListenerContainerFactory;

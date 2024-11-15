@@ -4,6 +4,7 @@ app:
     ressurs:
       stateTopic: org.nom.intern-ressurs-state
       nomMasteredRessursTopic: org.nom.nom-mastered-ressurs
+      nomMasteredRessursTopic-auto-startup: true
     orgEnhet:
       stateTopic: org.nom.intern-orgenhet-state
     orgTilknytning:
