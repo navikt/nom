@@ -57,6 +57,14 @@ public class MainTest {
     }
 
     @Test
+    void navidentHitByNumberSectionOnly(){
+        var wantedIds = Stream.of(r1).map(LuceneRessurs::navident).toList();
+        var repo = Helpers.initScenario(List.of(r1,r2,oe1,oe2));
+        var resList = repo.search("000001");
+        Helpers.assertRetrievedIds(wantedIds, indexRessurs.typeString() , resList);
+    }
+
+    @Test
     void phraseHitRessurs(){
         var repo = Helpers.initScenario(List.of(r1,r2,oe1,oe2));
         var resList = repo.search("Are GY Asles");
