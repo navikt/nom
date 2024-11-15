@@ -616,9 +616,9 @@ public class OrgtilknytningRestService {
     public static void validateOrgtilknytningTypeSektorCombination(Tilknytningtype tilknytningtype, Sektor sektor) {
 
         Map<Sektor, List<Tilknytningtype>> allowedOrgtilknytningTypeForSektorMap = Map.of(
-            Sektor.EKSTERN, List.of(Tilknytningtype.KONSULENT, Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER),
+            Sektor.EKSTERN, List.of(Tilknytningtype.KONSULENT, Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER, Tilknytningtype.ARBEIDSTRENING),
             Sektor.NAV_KOMMUNAL, List.of(Tilknytningtype.INGEN),
-            Sektor.NAV_STATLIG, List.of(Tilknytningtype.INGEN)
+            Sektor.NAV_STATLIG, List.of(Tilknytningtype.INGEN, Tilknytningtype.FAST, Tilknytningtype.MIDLERTIDLIG, Tilknytningtype.PENSJONIST, Tilknytningtype.LAERLING)
         );
 
         if (!allowedOrgtilknytningTypeForSektorMap.get(sektor).contains(tilknytningtype)) {
@@ -659,7 +659,7 @@ public class OrgtilknytningRestService {
                 .navident(navident)
                 .changedByNavIdent(changedByNavIdent)
                 .eventType(eventType)
-                .timestamp(DateTimeFormatter.ofPattern("dd.MM.YYYY").format(LocalDate.now()))
+                .timestamp(DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now()))
                 .build()
         );
     }
