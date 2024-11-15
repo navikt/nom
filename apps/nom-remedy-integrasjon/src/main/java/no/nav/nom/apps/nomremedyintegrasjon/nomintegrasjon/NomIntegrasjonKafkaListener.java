@@ -97,8 +97,8 @@ public class NomIntegrasjonKafkaListener {
     }
 
     @KafkaListener(
-        topics = "${app.kafka.ressurs-nomMasteredRessursTopic}",
-        autoStartup = "${app.kafka.ressurs-nomMasteredRessursTopic-auto-startup}",
+        topics = "${app.kafka-topics.nom-mastered-ressurs.topic-name}",
+        autoStartup = "${app.kafka-topics.nom-mastered-ressurs.auto-startup}",
         containerFactory = "nomMasteredRessursEventKafkaListenerContainerFactory"
     )
     public void nomMasteredRessursEventListener(LocalDateTime nomMasteredRessursEvent, @Header(KafkaHeaders.RECEIVED_KEY) String recordId) {

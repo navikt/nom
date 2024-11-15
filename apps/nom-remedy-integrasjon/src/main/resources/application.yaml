@@ -4,7 +4,6 @@ app:
     ressurs:
       stateTopic: org.nom.intern-ressurs-state
       nomMasteredRessursTopic: org.nom.nom-mastered-ressurs
-      nomMasteredRessursTopic-auto-startup: true
     orgEnhet:
       stateTopic: org.nom.intern-orgenhet-state
     orgTilknytning:
@@ -15,6 +14,9 @@ app:
       auto-startup: true
     orgtilknytning-eventsource:
       topic-name: org.nom.orgtilknytning-eventsource
+      auto-startup: true
+    nom-mastered-ressurs:
+      topic-name: org.nom.nom-mastered-ressurs
       auto-startup: true
   clients:
     nom-api:
