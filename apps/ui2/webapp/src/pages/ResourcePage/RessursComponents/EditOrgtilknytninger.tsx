@@ -255,6 +255,9 @@ function OrgtilknytningForm({
     },
     // @ts-expect-error -- Type inferred fra resolver er typen etter submit der flere felter er required, men under utfylling av formet vil flere verdier kunne være undefined. Derfor bruker vi heller eksplisitt type til UseForm
     resolver: yupResolver(formValuesSchema),
+    context: {
+      hasAdminAccess,
+    },
   });
 
   useEffect(() => {
@@ -782,10 +785,14 @@ function FormSektorSelectWrapper({
     <div
       css={css`
         display: flex;
-        align-items: center;
       `}
     >
-      <Label size="small">
+      <Label
+        css={css`
+          margin-top: 6px;
+        `}
+        size="small"
+      >
         Sektor:{disabled ? ` ${SektorNameMapping[field.value as Sektor]}` : ""}
       </Label>
 
@@ -1049,7 +1056,7 @@ const orgtilknytningSchema = yup.object().shape({
     .nullable()
     .test({
       name: "gyldigTom-required",
-      message: "Obligatorisk",
+      message: "Obligatorisk for eksterne",
       test: function (value, context) {
         const otSektor = context?.parent?.sektor;
 
@@ -1075,10 +1082,12 @@ const orgtilknytningSchema = yup.object().shape({
     name: "sektor-obligatorisk-fremtid",
     message: "Obligatorisk",
     test: function (value, context) {
-      // Midlertidig fiks
-      return true;
+      const hasAdminAccess = context?.options?.context?.hasAdminAccess;
 
-      // Blir her til senere
+      if (!hasAdminAccess) {
+        return true;
+      }
+
       const otTom = context?.parent?.gyldigTom ?? undefined;
 
       const required = otTom ? !isBeforeToday(otTom) : true;
