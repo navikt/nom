@@ -55,6 +55,7 @@ public class KafkaConfig {
     @Bean
     public ConsumerFactory<String, LocalDateTime> nomMasteredRessursEventConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
         JsonDeserializer<LocalDateTime> jsonEventDeserializer = new JsonDeserializer<>(objectMapper);
+        jsonEventDeserializer.addTrustedPackages("java.time.LocalDateTime");
         return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonEventDeserializer);
     }
 
