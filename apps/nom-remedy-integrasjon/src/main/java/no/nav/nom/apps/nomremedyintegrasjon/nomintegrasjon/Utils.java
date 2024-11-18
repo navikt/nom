@@ -41,7 +41,9 @@ public class Utils {
     }
 
     public static String formatFornavnWithMellomnavn(Visningsnavn visningsnavn) {
-        return visningsnavn.getFornavn() + Optional.ofNullable(visningsnavn.getMellomnavn()).map(it -> " " + it).orElse("");
+        // Visningsnavn fra nomApi over rest kommer med mellomnavn som tom streng "", og ikke som null
+        var m = visningsnavn.getMellomnavn();
+        return visningsnavn.getFornavn() + (m != null && !m.isBlank() ? " " + m : "");
     }
 
     public static boolean isActive(LocalDate gyldigFom, LocalDate gyldigTom) {
