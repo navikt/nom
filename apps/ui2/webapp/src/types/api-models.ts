@@ -106,12 +106,6 @@ export interface MasseFlyttingRequest {
   ressurserNavident: string[];
 }
 
-export interface MasseFlyttingRequest {
-  beholdTilganger: boolean;
-  nyOrgenhetId: string;
-  ressurserNavident: string[];
-}
-
 export enum NomNivaa {
   LINJEENHET = "LINJEENHET",
   DRIFTSENHET = "DRIFTSENHET",
@@ -308,9 +302,14 @@ export enum TelefonType {
 }
 
 export enum Tilknytningtype {
-  KONSULENT = "KONSULENT",
+  ARBEIDSTRENING = "ARBEIDSTRENING",
   EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER",
+  FAST = "FAST",
   INGEN = "INGEN",
+  KONSULENT = "KONSULENT",
+  LAERLING = "LAERLING",
+  MIDLERTIDLIG = "MIDLERTIDLIG",
+  PENSJONIST = "PENSJONIST",
 }
 
 export interface UpdateFysiskeBrukerstederRequest {

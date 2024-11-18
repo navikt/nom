@@ -19,18 +19,25 @@ export const SektorNameMapping = {
 };
 
 export const TilknytningtypeNameMapping = {
-  [Tilknytningtype.KONSULENT]: "Konsulent (standard)",
-  [Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER]:
-    "Ekstern samarbeidspartner (For eksempel ansatte i Helfo, Skatteetaten og Riksrevisjonen)",
-  [Tilknytningtype.INGEN]: "Ingen",
+  [Tilknytningtype.FAST]: "Fast",
+  [Tilknytningtype.MIDLERTIDLIG]: "Midlertidig",
+  [Tilknytningtype.PENSJONIST]: "Pensjonist",
+  [Tilknytningtype.LAERLING]: "Lærling",
+  [Tilknytningtype.KONSULENT]: "Konsulent",
+  [Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER]: "Ekstern samarbeidspartner",
+  [Tilknytningtype.ARBEIDSTRENING]: "Arbeidstrening",
+  [Tilknytningtype.INGEN]: "Annet",
 };
 
 export function SektorStep() {
   const { sektor, tilknytningtype } = useSearch({
     from: "/ressurs/create/$step",
   });
+
   const hasAdminAccess = useHasAdminAccess();
   const navident = useGetSession().data?.navident;
+  const navigate = useNavigate();
+
   const dinOrgenhetId = useQuery({
     queryKey: getOrgTilknytninger.queryKey(navident as string),
     queryFn: () => getOrgTilknytninger.queryFn(navident as string),
@@ -58,13 +65,11 @@ export function SektorStep() {
   const [selectedTilknytningtype, setSelectedTilknytningtype] = useState(
     tilknytningtype ?? Tilknytningtype.KONSULENT,
   );
-  const navigate = useNavigate();
 
   const saveValuesAndNavigate = (step: string) => {
     // TilknytningsType gir ikke mening for kommunale, derfor vises ikke dette som et valg i gui, og i state lagrer vi dette som "INGEN"
     const tilknytningtype =
-      selectedSektor === Sektor.NAV_KOMMUNAL ||
-      selectedSektor === Sektor.NAV_STATLIG
+      selectedSektor === Sektor.NAV_KOMMUNAL
         ? Tilknytningtype.INGEN
         : selectedTilknytningtype;
 
@@ -78,7 +83,33 @@ export function SektorStep() {
       }),
     }).then();
   };
+
+  const handleSektorChange = (value: Sektor) => {
+    setSelectedSektor(value);
+
+    if (value === Sektor.NAV_STATLIG) {
+      setSelectedTilknytningtype(tilknytningstyperStatlige[0]);
+    } else if (value === Sektor.EKSTERN) {
+      setSelectedTilknytningtype(tilknytningstyperEksterne[0]);
+    }
+  };
+
   const canEditStatlige = hasAdminAccess;
+
+  const tilknytningstyperStatlige = [
+    Tilknytningtype.FAST,
+    Tilknytningtype.MIDLERTIDLIG,
+    Tilknytningtype.LAERLING,
+    Tilknytningtype.PENSJONIST,
+  ];
+
+  const tilknytningstyperEksterne = [
+    Tilknytningtype.KONSULENT,
+    Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER,
+    Tilknytningtype.ARBEIDSTRENING,
+    Tilknytningtype.INGEN,
+  ];
+
   return (
     <ContainerWithHighlightedTop icon={opprettRessursIcon} title="Sektor">
       <Alert variant="info">
@@ -102,7 +133,7 @@ export function SektorStep() {
           data-cy="sektor-radio"
           legend="Velg hvilken sektor medarbeideren skal tilhøre"
           name="sektor"
-          onChange={(value) => setSelectedSektor(value)}
+          onChange={handleSektorChange}
           value={selectedSektor}
         >
           <Radio disabled={!canEditStatlige} value={Sektor.NAV_STATLIG}>
@@ -117,8 +148,8 @@ export function SektorStep() {
             {SektorNameMapping[Sektor.EKSTERN]}
           </Radio>
         </RadioGroup>
-        {selectedSektor === Sektor.NAV_KOMMUNAL ||
-        selectedSektor === Sektor.NAV_STATLIG ? undefined : (
+
+        {selectedSektor !== Sektor.NAV_KOMMUNAL && (
           <Select
             label="Velg hvilken kategori medarbeideren tilhører innenfor denne sektoren"
             name="tilknytningtype"
@@ -127,20 +158,27 @@ export function SektorStep() {
             }
             value={selectedTilknytningtype}
           >
-            <option value={Tilknytningtype.KONSULENT}>
-              {TilknytningtypeNameMapping[Tilknytningtype.KONSULENT]}
-            </option>
-            {brukerJobberIDirektoratet && (
-              <option value={Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER}>
-                {
-                  TilknytningtypeNameMapping[
-                    Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER
-                  ]
-                }
-              </option>
-            )}
+            {(selectedSektor === Sektor.EKSTERN
+              ? tilknytningstyperEksterne
+              : tilknytningstyperStatlige
+            ).map((tilknytningstype) => {
+              if (
+                tilknytningstype ===
+                  Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER &&
+                !brukerJobberIDirektoratet
+              ) {
+                return;
+              }
+
+              return (
+                <option key={tilknytningstype} value={tilknytningstype}>
+                  {`${TilknytningtypeNameMapping[tilknytningstype]}${tilknytningstype === Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER ? " (f.eks. Helfo, Skatteetaten, osv.)" : ""}`}
+                </option>
+              );
+            })}
           </Select>
         )}
+
         <NavigationButtons goBackCallback={() => saveValuesAndNavigate("1")} />
       </form>
     </ContainerWithHighlightedTop>
