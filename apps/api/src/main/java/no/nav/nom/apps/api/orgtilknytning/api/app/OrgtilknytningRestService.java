@@ -9,34 +9,26 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgtilknytning.api.email.OTEndretData;
 import no.nav.nom.apps.api.orgtilknytning.api.email.OrgtilknytningEndretEmailService;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
-import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
-import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOverlapException;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytningCommand;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDatoCommand;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningSektorCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
-import no.nav.nom.apps.api.remedy.RemedyEnhet;
-import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
-import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
-import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
-import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -60,10 +52,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
-import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 import static no.nav.nom.apps.api.common.DateUtils.isPerioderOverlapping;
-import static no.nav.nom.apps.api.common.DateUtils.isPeriodsOverlapping;
-import static no.nav.nom.apps.api.common.DateUtils.nextWorkingDay;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
 
@@ -73,9 +62,7 @@ public class OrgtilknytningRestService {
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final RessursCommandService ressursCommandService;
-    private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final RessursStateRepository ressursStateRepository;
-    private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final NomMastered nomMastered;
     private final static Logger log = LoggerFactory.getLogger(OrgtilknytningRestService.class);
     private final AuthorizedNavident authorizedNavident;
@@ -87,9 +74,8 @@ public class OrgtilknytningRestService {
     public OrgtilknytningRestService(
         OrgtilknytningStateRepository orgtilknytningStateRepository,
         OrgtilknytningCommandService orgtilknytningCommandService,
-        RessursCommandService ressursCommandService, OrgEnhetStateRepository orgEnhetStateRepository,
+        RessursCommandService ressursCommandService,
         RessursStateRepository ressursStateRepository,
-        RemedyEnhetMapperService remedyEnhetMapperService,
         NomMastered nomMastered,
         AuthorizedNavident authorizedNavident,
         OrgtilknytningEndretEmailService orgtilknytningEndretEmailService,
@@ -99,9 +85,7 @@ public class OrgtilknytningRestService {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.ressursCommandService = ressursCommandService;
-        this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.ressursStateRepository = ressursStateRepository;
-        this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.nomMastered = nomMastered;
         this.authorizedNavident = authorizedNavident;
         this.orgtilknytningEndretEmailService = orgtilknytningEndretEmailService;
@@ -130,49 +114,6 @@ public class OrgtilknytningRestService {
     // Validerer at oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger inneholder alle, og inneholder kun, eksisterende orgtilknytninger for tilknyttet ressurs.
     // Påser at det ikke sendes unødvendige endring-events (endring-events som ikke gir ny verdi til state)
     // TODO: Valider at det til en hver tid finnes en aktiv daglig oppfolging
-    public void oppdaterOrgtilknytningerForRessurs(String navident, OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
-
-        validateOppdaterOrgtilknytningerForRessursRequest(oppdaterOrgtilknytningerForRessursRequest);
-
-        var tilknyttetRessurs = ressursStateRepository.findByNavident(navident)
-            .orElseThrow(() -> RessursNotFoundException.navident(navident));
-
-        var existingOrgtilknytningerForRessurs = orgtilknytningStateRepository.findByNavident(navident).stream()
-            .collect(Collectors.toMap(OrgtilknytningState::fid, Function.identity()));
-
-        validateOrgTilknytningerToUpdateHasNoDuplicateFidsAndIncludesAllExistingOrgtilknytningerForRessurs(
-            existingOrgtilknytningerForRessurs.keySet(), oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger()
-        );
-
-        oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().stream()
-            .filter(endreOrgtilknytningRequest -> endreOrgtilknytningRequestProvidesChangesToState(
-                endreOrgtilknytningRequest,
-                existingOrgtilknytningerForRessurs.get(endreOrgtilknytningRequest.fid())
-            ))
-            .forEach(this::endreOrgtilknytning);
-
-        oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(
-            leggTilOrgtilknytningRequest -> leggTilOrgtilknytningForRessurs(
-                tilknyttetRessurs.navident(), leggTilOrgtilknytningRequest
-            )
-        );
-
-        if (oppdaterOrgtilknytningerForRessursRequest.setRessursSluttdato()) {
-            oppdaterRessursSluttdato(
-                tilknyttetRessurs,
-                oppdaterOrgtilknytningerForRessursRequest
-            );
-        }
-
-        if (oppdaterOrgtilknytningerForRessursRequest.setRessursStartdato()) {
-            oppdaterRessursStartdato(
-                tilknyttetRessurs,
-                oppdaterOrgtilknytningerForRessursRequest
-            );
-        }
-        nomMastered.markRessursAsMasteredInNom(navident);
-    }
-
     public void oppdaterOrgtilknytningerForRessurs(String navident,
                                                    OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
                                                    boolean isLeder) {
@@ -186,7 +127,6 @@ public class OrgtilknytningRestService {
         }
         var orgEnheterTilLeder = authorizedNavident.orgenheterLederKanRedigere(getAuthenticatedNavIdent());
         validateOppdaterOrgtilknytningerForRessursRequest(oppdaterOrgtilknytningerForRessursRequest, orgEnheterTilLeder, isLeder);
-
         var tilknyttetRessurs = ressursStateRepository.findByNavident(navident)
             .orElseThrow(() -> RessursNotFoundException.navident(navident));
 
@@ -196,7 +136,6 @@ public class OrgtilknytningRestService {
         validateOrgTilknytningerToUpdateHasNoDuplicateFidsAndIncludesAllExistingOrgtilknytningerForRessurs(
             existingOrgtilknytningerForRessurs.keySet(), oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger()
         );
-
         oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().stream()
             .filter(endreOrgtilknytningRequest -> endreOrgtilknytningRequestProvidesChangesToState(
                 endreOrgtilknytningRequest,
@@ -242,19 +181,11 @@ public class OrgtilknytningRestService {
         }
     }
 
-    private void validateOppdaterOrgtilknytningerForRessursRequest(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
-        validateChronologicalDates(oppdaterOrgtilknytningerForRessursRequest);
-        validateNoOverlappingDagligeOppfolginger(oppdaterOrgtilknytningerForRessursRequest);
-    }
-
     private void validateOppdaterOrgtilknytningerForRessursRequest(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
                                                                    List<IOrgenhet> alleUnderliggendeEnheterTilLeder,
                                                                    boolean isLeder) {
-        log.info("Validerer at leder kan oppdatere/legge til OT for ressurs");
         validateLederKanOppdatereOrgtilknytninger(oppdaterOrgtilknytningerForRessursRequest, alleUnderliggendeEnheterTilLeder, isLeder);
-        log.info("Validerer at OT ikke er eldre enn to måneder");
         validateEndreOrgtilknytningUnderToMaaneder(oppdaterOrgtilknytningerForRessursRequest);
-        log.info("Ferdig validering av OT redigering er under to måneder");
         validateChronologicalDates(oppdaterOrgtilknytningerForRessursRequest);
         validateNoOverlappingDagligeOppfolginger(oppdaterOrgtilknytningerForRessursRequest);
     }
@@ -423,6 +354,13 @@ public class OrgtilknytningRestService {
             );
         }
 
+        if (orgtilknytningStateBeforeChanges.orgtilknytningType().isPresent()
+            && !isNull(endreOrgtilknytningRequest.sektor())
+            && !endreOrgtilknytningRequest.sektor().equals(orgtilknytningStateBeforeChanges.sektor())
+            && !endreOrgtilknytningRequest.sektor().equals(Sektor.EKSTERN)) {
+            endreOrgtilknytningRequest.toBuilder().tilknytningtype(Tilknytningtype.INGEN).build();
+        }
+
         if (!Optional.ofNullable(endreOrgtilknytningRequest.tilknytningtype()).equals(orgtilknytningStateBeforeChanges.orgtilknytningType())){
             if (!isNull(endreOrgtilknytningRequest.tilknytningtype())) {
                 orgtilknytningCommandService.endreTilknytningtype(
@@ -435,6 +373,19 @@ public class OrgtilknytningRestService {
             } else {
                 log.error("Innsendt tilknytningtype er null, men vi hadde en eksisterende verdi");
             }
+        }
+
+        if (!isNull(endreOrgtilknytningRequest.sektor()) && !endreOrgtilknytningRequest.sektor().equals(orgtilknytningStateBeforeChanges.sektor())) {
+            orgtilknytningCommandService.endreOrgtilknytningSektor(
+                EndreOrgtilknytningSektorCommand.builder()
+                    .fid(endreOrgtilknytningRequest.fid())
+                    .navident(orgtilknytningStateBeforeChanges.navident())
+                    .orgenhetId(orgtilknytningStateBeforeChanges.orgEnhetId())
+                    .sektor(endreOrgtilknytningRequest.sektor())
+                    .inputMetadata(inputMetadata)
+                    .additionalAgressoData(null)
+                    .build()
+            );
         }
 
         //update OTendretData for e-post varsel
@@ -457,10 +408,13 @@ public class OrgtilknytningRestService {
 
         );
 
+        if (isNull(leggTilOrgtilknytningRequest.sektor())) throw InvalidSektorException.sektorIsNull();
+
         var opprettetOrgtilknytningFid = orgtilknytningCommandService.opprettOrgtilknytning(
             OpprettOrgtilknytning.builder()
                 .navident(navident)
                 .orgenhetId(leggTilOrgtilknytningRequest.orgEnhetId())
+                .sektor(leggTilOrgtilknytningRequest.sektor())
                 .gyldigFom(leggTilOrgtilknytningRequest.gyldigFom())
                 .inputMetadata(inputMetadata)
                 .additionalAgressoData(null)
@@ -560,13 +514,24 @@ public class OrgtilknytningRestService {
     private boolean endreOrgtilknytningRequestProvidesChangesToState(
         EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState
     ) {
+        validateSektorCanBeChanged(endreOrgtilknytningRequest, currentOrgtilknytningState);
+
         return !(
             endreOrgtilknytningRequest.gyldigFom().equals(currentOrgtilknytningState.gyldigFom())
                 && Optional.ofNullable(endreOrgtilknytningRequest.gyldigTom()).equals(currentOrgtilknytningState.gyldigTom())
                 && endreOrgtilknytningRequest.erDagligOppfolging() == currentOrgtilknytningState.erDagligOppfolging()
                 && Optional.ofNullable(endreOrgtilknytningRequest.tilknytningtype()).equals(currentOrgtilknytningState.orgtilknytningType())
+                && (endreOrgtilknytningRequest.sektor() != null && endreOrgtilknytningRequest.sektor().equals(currentOrgtilknytningState.sektor()))
         );
+    }
 
+    private static void validateSektorCanBeChanged(EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState) {
+        if (!loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)
+            && !isNull(endreOrgtilknytningRequest.sektor())
+            && !endreOrgtilknytningRequest.sektor().equals(currentOrgtilknytningState.sektor())
+            && !endreOrgtilknytningRequest.gyldigFom().isAfter(LocalDate.now())) {
+            throw InvalidSektorException.sektorCannotBeChanged();
+        }
     }
 
     private void validateOrgTilknytningerToUpdateHasNoDuplicateFidsAndIncludesAllExistingOrgtilknytningerForRessurs(
@@ -602,91 +567,6 @@ public class OrgtilknytningRestService {
                     .filter(fid -> !distinctOrgTilknytningFidsToUpdate.contains(fid)).toList()
             );
         }
-    }
-
-
-    public void updateOrgtilknytingDato(String fid, EndreOrgtilknytningDatoRequest endreOrgtilknytningDatoRequest) {
-
-        var orgtilknytning = orgtilknytningStateRepository.findByFid(fid)
-            .orElseThrow(() -> OrgtilknytningNotFoundException.fid(fid));
-
-        validateEndreOrgtilknytningDato(orgtilknytning, endreOrgtilknytningDatoRequest);
-
-        var tilknyttetRessurs = ressursStateRepository.findByNavident(orgtilknytning.navident())
-            .orElseThrow(() -> RessursNotFoundException.navident(orgtilknytning.navident()));
-
-        if (unleash.isEnabled("nom.ressurs.opprett_statlig") && loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)) {
-            log.info("Bruker har tilgang til å opprette statlig ressurs");
-        } else if (tilknyttetRessurs.sektor() == Sektor.NAV_STATLIG) {
-            throw InvalidSektorException.actionNotAllowedForSektor(tilknyttetRessurs.sektor());
-        }
-
-        validateEksternOrgtilknytningPeriode(endreOrgtilknytningDatoRequest.gyldigTom());
-
-        // If gyldigTom is set to before today, verify there are other active tilknytninger
-        var isGyldigTomInThePast = LocalDate.now().isAfter(endreOrgtilknytningDatoRequest.gyldigTom().orElse(LocalDate.MIN));
-        var setRessursSluttdatoIsEnabled = endreOrgtilknytningDatoRequest.setRessursSluttdato().orElse(false);
-
-        if (isGyldigTomInThePast && !setRessursSluttdatoIsEnabled) {
-            validateThatThereAreOtherActiveOrgtilknytninger(orgtilknytning);
-        }
-
-        var origination = new Origination(SecurityUtil.getAuthenticatedNavIdent(), SecurityUtil.getAuthenticatedAzpName());
-
-        orgtilknytningCommandService.endreOrgtilknytningDato(
-            fid,
-            new EndreOrgtilknytningDato(
-                orgtilknytning.navident(),
-                orgtilknytning.orgEnhetId(),
-                endreOrgtilknytningDatoRequest.gyldigFom(),
-                endreOrgtilknytningDatoRequest.gyldigTom(),
-                new InputMetadata(
-                    "REST",
-                    "updateOrgtilknytingDato",
-                    Map.of(
-                        "navident", orgtilknytning.navident(),
-                        "orgEnhetId", orgtilknytning.orgEnhetId()
-                    ),
-                    origination
-                ),
-                null
-            )
-        );
-
-        if (setRessursSluttdatoIsEnabled) {
-            var maxGyldigTomOnExistingOrgtilknytningerIsBeforeNewGyldigTom = orgtilknytningStateRepository.findByNavident(orgtilknytning.navident()).stream()
-                .filter(orgtilknytningState -> !orgtilknytningState.fid().equals(orgtilknytning.fid()))
-                .map(orgtilknytningState -> orgtilknytningState.gyldigTom().orElse(LocalDate.MAX))
-                .max(LocalDate::compareTo)
-                .map(maxGyldigTom -> maxGyldigTom.isBefore(endreOrgtilknytningDatoRequest.gyldigTom().orElse(LocalDate.MAX)))
-                .orElse(true);
-
-            var tilknyttetRessursSluttdatoNotEqualToNewGyldigTom = !tilknyttetRessurs.sluttdato().equals(endreOrgtilknytningDatoRequest.gyldigTom());
-
-            if (maxGyldigTomOnExistingOrgtilknytningerIsBeforeNewGyldigTom && tilknyttetRessursSluttdatoNotEqualToNewGyldigTom) {
-
-                ressursCommandService.oppdaterRessursSluttdatoEvent(
-                    new OppdaterSluttdatoCommand(
-                        tilknyttetRessurs.fid(),
-                        endreOrgtilknytningDatoRequest.gyldigTom(),
-                        new InputMetadata(
-                            "REST",
-                            "updateOrgtilknytingDato",
-                            endreOrgtilknytningDatoRequest,
-                            origination
-                        )
-                    )
-                );
-            }
-        }
-
-        nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
-
-        //update OTendretData for e-post varsel
-        addToOTEndretDataEmailQueue(orgtilknytning.navident(),
-            fid,
-            OTEndretData.OTEndretDataType.OT_ENDRET,
-            origination.initiatedFrom());
     }
 
     public void updateOrgtilknytningType(String fid, EndreTilknytningtypeRequest endreTilknytningtypeRequest) {
@@ -736,247 +616,15 @@ public class OrgtilknytningRestService {
     public static void validateOrgtilknytningTypeSektorCombination(Tilknytningtype tilknytningtype, Sektor sektor) {
 
         Map<Sektor, List<Tilknytningtype>> allowedOrgtilknytningTypeForSektorMap = Map.of(
-            Sektor.EKSTERN, List.of(Tilknytningtype.KONSULENT, Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER),
+            Sektor.EKSTERN, List.of(Tilknytningtype.KONSULENT, Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER, Tilknytningtype.ARBEIDSTRENING),
             Sektor.NAV_KOMMUNAL, List.of(Tilknytningtype.INGEN),
-            Sektor.NAV_STATLIG, List.of(Tilknytningtype.INGEN)
+            Sektor.NAV_STATLIG, List.of(Tilknytningtype.INGEN, Tilknytningtype.FAST, Tilknytningtype.MIDLERTIDLIG, Tilknytningtype.PENSJONIST, Tilknytningtype.LAERLING)
         );
 
         if (!allowedOrgtilknytningTypeForSektorMap.get(sektor).contains(tilknytningtype)) {
             throw InvalidOrgtilknytningTypeAndSektorCombinationException.forCombination(tilknytningtype, sektor);
         }
 
-    }
-
-    public void addOrgtilknyting(LeggTilOrgtilknytningRequestOld leggTilOrgtilknytningRequest) {
-        validateLeggTilOrgilknytningRequest(leggTilOrgtilknytningRequest);
-
-        var erDagligOppfolging = leggTilOrgtilknytningRequest.erDagligOppfolging().orElse(false);
-
-        if (erDagligOppfolging) {
-            validateLeggTilDagligOppfolgingOrgilknytningRequest(leggTilOrgtilknytningRequest);
-        }
-
-        var metaData = new InputMetadata(
-            "REST",
-            "addOrgtilknyting",
-            leggTilOrgtilknytningRequest,
-            new Origination(
-                getAuthenticatedNavIdent(),
-                SecurityUtil.getAuthenticatedAzpName()
-            )
-        );
-
-        var opprettetOrgTilknytningFid = orgtilknytningCommandService.opprettOrgtilknytning(
-            new OpprettOrgtilknytning(
-                leggTilOrgtilknytningRequest.navident(),
-                leggTilOrgtilknytningRequest.orgEnhetId(),
-                leggTilOrgtilknytningRequest.gyldigFom(),
-                metaData,
-                null
-            )
-        );
-
-        leggTilOrgtilknytningRequest.gyldigTom().ifPresent(gyldigTom -> orgtilknytningCommandService.avvikleOrgtilknytning(
-            opprettetOrgTilknytningFid,
-            new AvvikleOrgtilknytning(
-                leggTilOrgtilknytningRequest.navident(),
-                leggTilOrgtilknytningRequest.orgEnhetId(),
-                gyldigTom,
-                metaData,
-                null
-            )
-        ));
-
-        if (erDagligOppfolging) {
-            orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(
-                opprettetOrgTilknytningFid,
-                new EndreDagligOppfolgingOrgtilknytning(
-                    leggTilOrgtilknytningRequest.navident(),
-                    leggTilOrgtilknytningRequest.orgEnhetId(),
-                    leggTilOrgtilknytningRequest.gyldigFom(),
-                    leggTilOrgtilknytningRequest.gyldigTom(),
-                    erDagligOppfolging,
-                    metaData,
-                    null
-                )
-            );
-        }
-
-        if (leggTilOrgtilknytningRequest.setRessursSluttdato().orElse(false)) {
-            var maxGyldigTomOnExistingOrgtilknytningerIsBeforeNewGyldigTom = orgtilknytningStateRepository
-                .findByNavident(leggTilOrgtilknytningRequest.navident()).stream()
-                .filter(orgtilknytningState -> !orgtilknytningState.fid().equals(opprettetOrgTilknytningFid))
-                .map(orgtilknytningState -> orgtilknytningState.gyldigTom().orElse(LocalDate.MAX))
-                .max(LocalDate::compareTo)
-                .map(maxGyldigTom -> maxGyldigTom.isBefore(leggTilOrgtilknytningRequest.gyldigTom().orElse(LocalDate.MAX)))
-                .orElse(true);
-
-            var tilknyttetRessurs = ressursStateRepository.findByNavident(leggTilOrgtilknytningRequest.navident()).orElseThrow(
-                () -> RessursNotFoundException.navident(leggTilOrgtilknytningRequest.navident())
-            );
-
-            var tilknyttetRessursSluttdatoNotEqualToNewGyldigTom = !tilknyttetRessurs.sluttdato().equals(leggTilOrgtilknytningRequest.gyldigTom());
-
-            if (maxGyldigTomOnExistingOrgtilknytningerIsBeforeNewGyldigTom && tilknyttetRessursSluttdatoNotEqualToNewGyldigTom) {
-
-                ressursCommandService.oppdaterRessursSluttdatoEvent(
-                    new OppdaterSluttdatoCommand(
-                        tilknyttetRessurs.fid(),
-                        leggTilOrgtilknytningRequest.gyldigTom(),
-                        metaData
-                    )
-                );
-            }
-        }
-
-        nomMastered.markRessursAsMasteredInNom(leggTilOrgtilknytningRequest.navident());
-
-        //update OTendretData for e-post varsel
-        addToOTEndretDataEmailQueue(leggTilOrgtilknytningRequest.navident(),
-            opprettetOrgTilknytningFid,
-            OTEndretData.OTEndretDataType.OT_NY,
-            metaData.origination().initiatedFrom());
-    }
-
-    private void validateLeggTilOrgilknytningRequest(LeggTilOrgtilknytningRequestOld leggTilOrgtilknytningRequest) {
-        var ressursState = ressursStateRepository.findByNavident(leggTilOrgtilknytningRequest.navident()).orElseThrow(
-            () -> new IllegalArgumentException("Finner ikke ressurs med navident %s".formatted(leggTilOrgtilknytningRequest.navident()))
-        );
-
-        if (ressursState.sektor() == Sektor.EKSTERN) {
-            validateEksternOrgtilknytningPeriode(leggTilOrgtilknytningRequest.gyldigTom());
-        }
-
-        if (orgEnhetStateRepository.findById(leggTilOrgtilknytningRequest.orgEnhetId()).isEmpty()) {
-            throw new IllegalArgumentException("Finner ikke orgenhet med id %s".formatted(leggTilOrgtilknytningRequest.orgEnhetId()));
-        }
-
-        DateUtils.validateChronologicalDates(leggTilOrgtilknytningRequest.gyldigFom(), leggTilOrgtilknytningRequest.gyldigTom().orElse(null));
-
-        var existingOegtilknytningerForOrgEnhet = orgtilknytningStateRepository.findByNavident(leggTilOrgtilknytningRequest.navident())
-            .stream()
-            .filter(orgtilknytningState -> orgtilknytningState.orgEnhetId().equals(leggTilOrgtilknytningRequest.orgEnhetId()))
-            .toList();
-
-        existingOegtilknytningerForOrgEnhet.forEach(orgtilknytningState -> {
-            if (isPeriodsOverlapping(
-                orgtilknytningState.gyldigFom(),
-                orgtilknytningState.gyldigTom(),
-                leggTilOrgtilknytningRequest.gyldigFom(),
-                leggTilOrgtilknytningRequest.gyldigTom()
-            )) {
-                throw new OrgtilknytningPeriodeOverlapException("Det finnes allerede en orgtilknytning for samme orgenhet innenfor forespurt periode");
-
-            }
-        });
-    }
-
-    private void validateLeggTilDagligOppfolgingOrgilknytningRequest(LeggTilOrgtilknytningRequestOld leggTilOrgtilknytningRequest) {
-        var existingDagligOppfolgningTilknytninger = orgtilknytningStateRepository.findByNavident(leggTilOrgtilknytningRequest.navident())
-            .stream()
-            .filter(OrgtilknytningState::erDagligOppfolging)
-            .toList();
-
-        // https://jira.adeo.no/browse/ORG-1759
-        existingDagligOppfolgningTilknytninger.stream()
-            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
-            .findFirst()
-            .ifPresent(currentlyActiveDagligOppfolging -> {
-                var currentRemedyEnhetId = remedyEnhetMapperService.findByNomId(currentlyActiveDagligOppfolging.orgEnhetId())
-                    .map(RemedyEnhet::remedyEnhetId);
-                var newRemedyEnhetId = remedyEnhetMapperService.findByNomId(leggTilOrgtilknytningRequest.orgEnhetId())
-                    .map(RemedyEnhet::remedyEnhetId);
-
-                var newDagligOppfolgningIsActivatedAfterTomorrow = leggTilOrgtilknytningRequest.gyldigFom()
-                    .isAfter(nextWorkingDay());
-
-                if (!currentRemedyEnhetId.equals(newRemedyEnhetId) && newDagligOppfolgningIsActivatedAfterTomorrow) {
-                    throw new InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException(
-                        "Siden den nye daglig oppfolging orgtilknytningen vil endre den ansattes remedy enhet kan 'gyldigFom' være maks én virkedag frem i tid"
-                    );
-                }
-            });
-
-
-        existingDagligOppfolgningTilknytninger.forEach(orgtilknytningState -> {
-            if (isPeriodsOverlapping(
-                orgtilknytningState.gyldigFom(),
-                orgtilknytningState.gyldigTom(),
-                leggTilOrgtilknytningRequest.gyldigFom(),
-                leggTilOrgtilknytningRequest.gyldigTom()
-            )) {
-                throw OrgtilknytningPeriodeOverlapException.forDagligOppfolgingInPeriod(
-                    orgEnhetStateRepository.findById(orgtilknytningState.orgEnhetId()).map(OrgEnhetState::navn).orElse(orgtilknytningState.orgEnhetId()),
-                    orgtilknytningState.gyldigFom(),
-                    orgtilknytningState.gyldigTom()
-                );
-            }
-        });
-
-    }
-
-    private void validateEndreOrgtilknytningDato(
-        OrgtilknytningState existingOrgtilknytningToUpdate,
-        EndreOrgtilknytningDatoRequest endreOrgtilknytningDatoRequest
-    ) {
-        DateUtils.validateChronologicalDates(endreOrgtilknytningDatoRequest.gyldigFom(), endreOrgtilknytningDatoRequest.gyldigTom().orElse(null));
-
-        var ressursState = ressursStateRepository.findByNavident(existingOrgtilknytningToUpdate.navident()).orElseThrow(
-            () -> new IllegalArgumentException("Finner ikke ressurs med navident %s".formatted(existingOrgtilknytningToUpdate.navident()))
-        );
-
-        if (ressursState.sektor() == Sektor.EKSTERN) {
-            validateEksternOrgtilknytningPeriode(endreOrgtilknytningDatoRequest.gyldigTom());
-        }
-
-        var otherOrgtilknytningerForRessurs = orgtilknytningStateRepository.findByNavident(existingOrgtilknytningToUpdate.navident()).stream()
-            .filter(orgtilknytningState -> !orgtilknytningState.fid().equals(existingOrgtilknytningToUpdate.fid()))
-            .toList();
-
-        otherOrgtilknytningerForRessurs.stream()
-            .filter(orgtilknytningState -> orgtilknytningState.orgEnhetId().equals(existingOrgtilknytningToUpdate.orgEnhetId()))
-            .forEach(orgtilknytningState -> {
-                if (isPeriodsOverlapping(
-                    orgtilknytningState.gyldigFom(),
-                    orgtilknytningState.gyldigTom(),
-                    endreOrgtilknytningDatoRequest.gyldigFom(),
-                    endreOrgtilknytningDatoRequest.gyldigTom()
-                )) {
-                    throw new OrgtilknytningPeriodeOverlapException("Det finnes allerede en orgtilknytning for samme orgenhet innenfor forespurt periode");
-                }
-            });
-
-        if (existingOrgtilknytningToUpdate.erDagligOppfolging()) {
-            otherOrgtilknytningerForRessurs
-                .stream().filter(OrgtilknytningState::erDagligOppfolging)
-                .forEach(orgtilknytningState -> {
-                    if (isPeriodsOverlapping(
-                        orgtilknytningState.gyldigFom(),
-                        orgtilknytningState.gyldigTom(),
-                        endreOrgtilknytningDatoRequest.gyldigFom(),
-                        endreOrgtilknytningDatoRequest.gyldigTom()
-                    )) {
-                        throw OrgtilknytningPeriodeOverlapException.forDagligOppfolgingInPeriod(
-                            orgEnhetStateRepository.findById(orgtilknytningState.orgEnhetId())
-                                .map(OrgEnhetState::navn)
-                                .orElse(orgtilknytningState.orgEnhetId()),
-                            orgtilknytningState.gyldigFom(),
-                            orgtilknytningState.gyldigTom()
-                        );
-                    }
-                });
-        }
-    }
-
-    private void validateThatThereAreOtherActiveOrgtilknytninger(OrgtilknytningState orgtilknytningState) {
-        var activeOrgtilknytningExists = getOrgtilknytninger(Optional.ofNullable(orgtilknytningState.navident())).stream()
-            .filter(otherOrgtilknytningState -> !otherOrgtilknytningState.fid().equals(orgtilknytningState.fid()))
-            .anyMatch(otherOrgtilknytningState -> otherOrgtilknytningState.gyldigTom().orElse(LocalDate.MAX).isAfter(LocalDate.now()));
-
-        if (!activeOrgtilknytningExists) {
-            throw new IllegalArgumentException(
-                "Du kan ikke avslutte denne tilknytningen før du har lagt til en ny tilknytning  som gjelder fra denne tilknytningens sluttdato. Medarbeideren må til enhver tid være tilknyttet en enhet.");
-        }
     }
 
     private void validateEksternOrgtilknytningPeriode(Optional<LocalDate> gyldigTom) {
@@ -988,12 +636,12 @@ public class OrgtilknytningRestService {
 
     private void addToOTEndretDataEmailQueue(String navident, String fid, OTEndretData.OTEndretDataType eventType, String initiatedFromMetadata) {
         if(navident == null  || navident.isBlank()) {
-            log.warn("Navident is null. Cannot add OTendretData to the email queue");
+            log.info("Navident is null. Cannot add OTendretData to the email queue");
             return;
         }
 
         if(!nomMastered.isMastered(navident)) {
-            log.info("Navident is not mastered in nom. OTendretData won´t be added to the email queue");
+            log.info("Navident {} is not mastered in nom. OTendretData won´t be added to the email queue", navident);
             return;
         }
 
@@ -1011,7 +659,7 @@ public class OrgtilknytningRestService {
                 .navident(navident)
                 .changedByNavIdent(changedByNavIdent)
                 .eventType(eventType)
-                .timestamp(DateTimeFormatter.ofPattern("dd.MM.YYYY").format(LocalDate.now()))
+                .timestamp(DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now()))
                 .build()
         );
     }

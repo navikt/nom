@@ -1,6 +1,8 @@
 package no.nav.nom.contract.nom.eventsource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import no.nav.nom.contract.nom.Sektor;
+
 import java.time.LocalDate;
 
 public class OrgtilknytningOpprettetEventV1 extends OrgtilknytningEvent {
@@ -17,6 +19,7 @@ public class OrgtilknytningOpprettetEventV1 extends OrgtilknytningEvent {
     public record OrgtilknytningOpprettetEventData(
             String navident,
             String orgEnhetId,
+            Sektor sektor,
             LocalDate gyldigFom
     ) implements Data{ }
 

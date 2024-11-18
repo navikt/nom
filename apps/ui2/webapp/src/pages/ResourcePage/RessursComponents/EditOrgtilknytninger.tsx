@@ -18,6 +18,7 @@ import {
   HelpText,
   HStack,
   Label,
+  Select,
   Tag,
   useDatepicker,
 } from "@navikt/ds-react";
@@ -38,13 +39,8 @@ import {
 import * as yup from "yup";
 
 import {
-  GyldigTomSelection,
-  OrgnivSelection,
-  ResultLimit,
-  useSearchOrgenheterQuery,
-} from "~/api/generated/graphql_generated";
-import {
   getOrgEnhet,
+  getOrgEnheterSomKanHaRessurser,
   getOrgTilknytninger,
   oppdaterOrgtilknytningerForRessurs,
 } from "~/api/react-query-endpoints";
@@ -57,6 +53,7 @@ import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { showToast } from "~/hooks/showToast";
+import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import {
   dolValidering,
   otCustomStortByDate,
@@ -187,12 +184,15 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
   );
 }
 
-const defaultNyOrgtilknytning = {
-  erDagligOppfolging: false,
-  orgEnhetId: "",
-  gyldigFom: "",
-  gyldigTom: "",
-};
+function defaultNyOrgtilknytning(sektor: Sektor) {
+  return {
+    erDagligOppfolging: false,
+    orgEnhetId: "",
+    gyldigFom: "",
+    gyldigTom: "",
+    sektor: sektor,
+  };
+}
 
 function OrgtilknytningForm({
   orgtilknytninger,
@@ -225,17 +225,27 @@ function OrgtilknytningForm({
     ? formatDateWithoutTimezone(tidligsteOrgtilknytningStartdato)
     : undefined;
 
-  const hasFieldTomChanged = (field: Partial<OrgtilknytningState>) => {
-    const originalField = orgtilknytninger.find(
-      (tilknytning) => tilknytning.fid === field.fid,
+  const hasOtTomChanged = (orgtilknytning: Partial<OrgtilknytningState>) => {
+    const originalOt = orgtilknytninger.find(
+      (tilknytning) => tilknytning.fid === orgtilknytning.fid,
     );
 
-    return !(field.gyldigTom === originalField?.gyldigTom);
+    return !(orgtilknytning.gyldigTom === originalOt?.gyldigTom);
+  };
+
+  const otOriginalSektor = (orgtilknytning: Partial<OrgtilknytningState>) => {
+    const originalOt = orgtilknytninger.find(
+      (tilknytning) => tilknytning.fid === orgtilknytning.fid,
+    );
+
+    return originalOt?.sektor ?? undefined;
   };
 
   // Hvis det ikke finnes noen orgtilknytninger, legger vi automatisk til en ny
   const defaultOrgtilknytninger =
-    orgtilknytninger.length > 0 ? orgtilknytninger : [defaultNyOrgtilknytning];
+    orgtilknytninger.length > 0
+      ? orgtilknytninger
+      : [defaultNyOrgtilknytning(ressurs.sektor)];
 
   const methods = useForm<{
     mappedeOrgtilknytninger: Partial<OrgtilknytningState>[];
@@ -245,7 +255,6 @@ function OrgtilknytningForm({
     },
     // @ts-expect-error -- Type inferred fra resolver er typen etter submit der flere felter er required, men under utfylling av formet vil flere verdier kunne være undefined. Derfor bruker vi heller eksplisitt type til UseForm
     resolver: yupResolver(formValuesSchema),
-    context: { ressursSektor: ressurs.sektor },
   });
 
   useEffect(() => {
@@ -325,6 +334,7 @@ function OrgtilknytningForm({
               values.mappedeOrgtilknytninger,
               tidligsteOrgDatoPre,
             ),
+            ressurs.sektor,
           ),
         );
       });
@@ -351,7 +361,7 @@ function OrgtilknytningForm({
             <Button
               icon={<PlusCircleIcon />}
               onClick={() => {
-                prepend(defaultNyOrgtilknytning, {
+                prepend(defaultNyOrgtilknytning(ressurs.sektor), {
                   focusIndex: 0,
                 });
               }}
@@ -365,15 +375,28 @@ function OrgtilknytningForm({
         )}
 
         {fields.map((field, index) => {
+          const gyldigTom = watch(`mappedeOrgtilknytninger.${index}.gyldigTom`);
+          const gyldigFom = watch(`mappedeOrgtilknytninger.${index}.gyldigFom`);
+
+          const existingOt = !!field.fid;
+
           const avsluttet =
-            !!field.gyldigTom &&
-            isBeforeToday(dateWithoutTimezone(new Date(field.gyldigTom)));
+            !!gyldigTom &&
+            isBeforeToday(dateWithoutTimezone(new Date(gyldigTom)));
+
+          const fremtidig = !!gyldigFom && isAfterToday(gyldigFom);
+
+          const velgSektor =
+            !existingOt ||
+            fremtidig ||
+            !otOriginalSektor(field) ||
+            hasAdminAccess;
 
           if (
-            !!field.fid &&
-            !!field.gyldigTom &&
+            existingOt &&
+            !hasOtTomChanged(field) &&
             !hasAdminAccess &&
-            !hasFieldTomChanged(field) &&
+            !!field.gyldigTom &&
             isBeforeDate(
               dateWithoutTimezone(new Date(field.gyldigTom)),
               dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
@@ -400,9 +423,10 @@ function OrgtilknytningForm({
               `}
               key={field.id}
             >
-              {field.fid ? (
+              {existingOt ? (
                 <EditOrgilkntyningFormPart
                   avsluttet={avsluttet}
+                  fremtidig={fremtidig}
                   index={index}
                 />
               ) : (
@@ -437,6 +461,7 @@ function OrgtilknytningForm({
                       : undefined
                   }
                   name={`mappedeOrgtilknytninger.${index}.gyldigTom`}
+                  triggerOthers={[`mappedeOrgtilknytninger.${index}.sektor`]}
                 />
               </HStack>
 
@@ -457,6 +482,18 @@ function OrgtilknytningForm({
                   medarbeideren
                 </BodyShort>
               </Checkbox>
+
+              {hasAdminAccess && (
+                <FormSektorSelectWrapper
+                  disabled={!velgSektor}
+                  error={
+                    errors?.mappedeOrgtilknytninger?.[index]?.sektor?.message ??
+                    ""
+                  }
+                  name={`mappedeOrgtilknytninger.${index}.sektor`}
+                  triggerOthers={[`mappedeOrgtilknytninger.${index}.gyldigTom`]}
+                />
+              )}
             </div>
           );
         })}
@@ -592,9 +629,11 @@ function NewOrgtilknytningFormPart({
 function EditOrgilkntyningFormPart({
   index,
   avsluttet,
+  fremtidig,
 }: {
   index: number;
   avsluttet: boolean;
+  fremtidig: boolean;
 }) {
   const { watch } = useFormContext();
   const field = watch(`mappedeOrgtilknytninger.${index}`);
@@ -621,7 +660,7 @@ function EditOrgilkntyningFormPart({
           </Tag>
         )}
 
-        {isAfterToday(field.gyldigFom) && (
+        {fremtidig && (
           <Tag size="medium" variant="success">
             Fremtidig
           </Tag>
@@ -635,26 +674,14 @@ function EditOrgilkntyningFormPart({
   );
 }
 
-function LederLabel({ index }: { index: number }) {
-  const { watch } = useFormContext();
-  const field = watch(`mappedeOrgtilknytninger.${index}`);
-
-  const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(field.orgEnhetId as string),
-    queryFn: () => getOrgEnhet.queryFn(field.orgEnhetId as string),
-    enabled: !!field.orgEnhetId,
-  });
-
-  const lederNavn = orgEnhetQuery.data?.ledere[0]?.visningsnavn;
-
+function FormOrgEnhetSelectWrapper({ name }: { name: string }) {
+  const orgEnheterSomKanHaRessurser =
+    useQuery(getOrgEnheterSomKanHaRessurser).data || [];
   return (
-    <BodyLong
-      css={css`
-        margin-top: var(--a-spacing-6);
-      `}
-    >
-      Leder: <b>{lederNavn ? formatVisningsnavn(lederNavn) : ""}</b>
-    </BodyLong>
+    <OrgEnhetSelectFormPart
+      name={name}
+      orgEnheter={orgEnheterSomKanHaRessurser}
+    />
   );
 }
 
@@ -680,7 +707,9 @@ function FormDateWrapper({
   const datePickerProperties = useDatepicker({
     onDateChange: async (date) => {
       field.onChange(date ? formatDateWithoutTimezone(date) : undefined);
+
       await trigger(name);
+
       if (triggerOthers) {
         triggerOthers.map((otherField) => {
           trigger(otherField);
@@ -689,6 +718,7 @@ function FormDateWrapper({
     },
     defaultSelected: defaultDate ? new Date(defaultDate) : undefined,
   });
+
   return (
     <DatePicker {...datePickerProperties.datepickerProps}>
       <DatePicker.Input
@@ -730,21 +760,98 @@ function FormDateWrapper({
   );
 }
 
-function FormOrgEnhetSelectWrapper({ name }: { name: string }) {
-  const searchOrgenheterQuery = useSearchOrgenheterQuery({
-    variables: {
-      term: "*:*",
-      filter: {
-        gyldigTomSelection: GyldigTomSelection.IkkePassert,
-        orgnivSelection: OrgnivSelection.OrgnivOrgenhet,
-        limit: ResultLimit.Unlimited,
-      },
-    },
+function FormSektorSelectWrapper({
+  name,
+  error,
+  disabled,
+  triggerOthers,
+}: {
+  name: string;
+  error: string;
+  disabled?: boolean;
+  triggerOthers?: string[];
+}) {
+  const { trigger } = useFormContext();
+  const { field } = useController({
+    name,
   });
 
-  const orgEnheter = searchOrgenheterQuery.data?.searchOrgEnhet || [];
+  const hasAdminAccess = useHasAdminAccess();
 
-  return <OrgEnhetSelectFormPart name={name} orgEnheter={orgEnheter} />;
+  return (
+    <div
+      css={css`
+        display: flex;
+        align-items: center;
+      `}
+    >
+      <Label size="small">
+        Sektor:{disabled ? ` ${SektorNameMapping[field.value as Sektor]}` : ""}
+      </Label>
+
+      {!disabled && (
+        <Select
+          css={css`
+            width: 20%;
+            margin-left: var(--a-spacing-1);
+          `}
+          disabled={disabled}
+          error={error}
+          hideLabel
+          label="Sektor"
+          onChange={async (value) => {
+            field.onChange(value);
+
+            await trigger(name);
+
+            if (triggerOthers) {
+              triggerOthers.map((otherField) => {
+                trigger(otherField);
+              });
+            }
+          }}
+          size="small"
+          value={field.value}
+        >
+          {!field.value && <option value="" />}
+          {Object.values(Sektor).map((sektor) => {
+            if (sektor === Sektor.NAV_STATLIG && !hasAdminAccess) {
+              return;
+            }
+
+            return (
+              <option key={sektor} value={sektor}>
+                {SektorNameMapping[sektor]}
+              </option>
+            );
+          })}
+        </Select>
+      )}
+    </div>
+  );
+}
+
+function LederLabel({ index }: { index: number }) {
+  const { watch } = useFormContext();
+  const field = watch(`mappedeOrgtilknytninger.${index}`);
+
+  const orgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(field.orgEnhetId as string),
+    queryFn: () => getOrgEnhet.queryFn(field.orgEnhetId as string),
+    enabled: !!field.orgEnhetId,
+  });
+
+  const lederNavn = orgEnhetQuery.data?.ledere[0]?.visningsnavn;
+
+  return (
+    <BodyLong
+      css={css`
+        margin-top: var(--a-spacing-6);
+      `}
+    >
+      Leder: <b>{lederNavn ? formatVisningsnavn(lederNavn) : ""}</b>
+    </BodyLong>
+  );
 }
 
 function IllegalDolCombinationAlert() {
@@ -757,6 +864,7 @@ function IllegalDolCombinationAlert() {
   }
 
   const orgtilknytninger = watch("mappedeOrgtilknytninger");
+
   const { dolGaps, dolOverlaps } = dolValidering(orgtilknytninger ?? []);
 
   if (dolGaps.length === 0 && dolOverlaps.length === 0) {
@@ -888,6 +996,7 @@ function InnholdInformasjonsboks({ ressursSektor }: { ressursSektor: Sektor }) {
 function lagOppdaterOrgtilknytningerRequest(
   orgtilknytninger: OrgtilknytningEtterValidering[],
   setRessursStartdato: boolean,
+  ressursSektor: Sektor,
 ): OppdaterOrgtilknytningerForRessursRequest {
   const [eksisterendeOrgtilknytninger, nyeOrgtilknytninger] = partition(
     orgtilknytninger,
@@ -902,6 +1011,7 @@ function lagOppdaterOrgtilknytningerRequest(
         gyldigFom: orgtilknytning.gyldigFom,
         gyldigTom: orgtilknytning.gyldigTom,
         tilknytningtype: orgtilknytning.orgtilknytningType,
+        sektor: orgtilknytning.sektor,
       }),
     ),
     nyeOrgtilknytninger: nyeOrgtilknytninger.map((orgtilknytning) => ({
@@ -909,6 +1019,7 @@ function lagOppdaterOrgtilknytningerRequest(
       gyldigFom: orgtilknytning.gyldigFom,
       gyldigTom: orgtilknytning.gyldigTom,
       orgEnhetId: orgtilknytning.orgEnhetId,
+      sektor: orgtilknytning.sektor ?? ressursSektor,
     })),
     setRessursSluttdato: true,
     setRessursStartdato: setRessursStartdato,
@@ -940,9 +1051,9 @@ const orgtilknytningSchema = yup.object().shape({
       name: "gyldigTom-required",
       message: "Obligatorisk",
       test: function (value, context) {
-        const ressursSektor = context?.options?.context?.ressursSektor;
+        const otSektor = context?.parent?.sektor;
 
-        return ressursSektor !== Sektor.EKSTERN || !!value;
+        return otSektor !== Sektor.EKSTERN || !!value;
       },
     })
     .test({
@@ -960,6 +1071,21 @@ const orgtilknytningSchema = yup.object().shape({
         return !gyldigFom || !value || new Date(value) >= new Date(gyldigFom);
       },
     }),
+  sektor: yup.mixed().test({
+    name: "sektor-obligatorisk-fremtid",
+    message: "Obligatorisk",
+    test: function (value, context) {
+      // Midlertidig fiks
+      return true;
+
+      // Blir her til senere
+      const otTom = context?.parent?.gyldigTom ?? undefined;
+
+      const required = otTom ? !isBeforeToday(otTom) : true;
+
+      return required ? !!value : true;
+    },
+  }),
 });
 
 const formValuesSchema = yup.object().shape({
@@ -970,16 +1096,13 @@ const validateMaxTime = (
   value: string | undefined | null,
   context: yup.TestContext<yup.AnyObject>,
 ) => {
-  const ressursSektor = context?.options?.context?.ressursSektor;
+  const otSektor = context?.parent?.sektor;
 
-  const maxDate = addYears(
-    new Date(),
-    ressursSektor === Sektor.EKSTERN ? 1 : 5,
-  );
+  const maxDate = addYears(new Date(), otSektor === Sektor.EKSTERN ? 1 : 5);
 
   if (isSameDateOrAfter(new Date(value ?? ""), maxDate)) {
     return context.createError({
-      message: `Må være under ${ressursSektor === Sektor.EKSTERN ? "ett" : "fem"} år frem i tid fra dagens dato`,
+      message: `Må være under ${otSektor === Sektor.EKSTERN ? "ett" : "fem"} år frem i tid fra dagens dato${otSektor === Sektor.EKSTERN ? " for eksterne medarbeidere" : ""}`,
     });
   }
 

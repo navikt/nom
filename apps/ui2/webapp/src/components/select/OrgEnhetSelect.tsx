@@ -6,20 +6,16 @@ import { Controller, useFormContext } from "react-hook-form";
 import type { OptionProps } from "react-select";
 import { components, createFilter } from "react-select";
 
-import type { SearchOrgenheterQuery } from "~/api/generated/graphql_generated";
+import type { OrgEnhetMedLedernavn } from "~/types/api-models";
 
 import { AsyncSearch, SelectLayoutWrapper } from "./CustomSelectComponents";
-
-type OrgEnheterFromSearch = NonNullable<
-  SearchOrgenheterQuery["searchOrgEnhet"]
->;
 
 export function OrgEnhetSelectFormPart({
   name,
   orgEnheter,
 }: {
   name: string;
-  orgEnheter: OrgEnheterFromSearch;
+  orgEnheter: OrgEnhetMedLedernavn[];
 }) {
   const { control } = useFormContext();
 
@@ -56,7 +52,7 @@ export const OrgEnhetSelect = forwardRef(
       error,
       helpText,
     }: {
-      orgEnheter: OrgEnheterFromSearch;
+      orgEnheter: OrgEnhetMedLedernavn[];
       onChange: (s: string | undefined) => void;
       value?: string;
       description?: string;

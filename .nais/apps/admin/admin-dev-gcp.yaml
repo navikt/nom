@@ -28,6 +28,10 @@ spec:
     min: 2
     max: 2
     cpuThresholdPercentage: 50
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 99%
   liveness:
     path: internal/health/liveness
     initialDelay: 15

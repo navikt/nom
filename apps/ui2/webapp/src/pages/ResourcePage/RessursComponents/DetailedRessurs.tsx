@@ -28,6 +28,7 @@ import {
   getOrgEnheterLedetAvOptions,
   getOrgTilknytninger,
   getTeamcatMemberships,
+  harLederTilgangForNavidentOptions,
 } from "~/api/react-query-endpoints";
 import {
   useGetSession,
@@ -36,6 +37,10 @@ import {
 } from "~/api/useGetSession";
 import { Divider } from "~/components/Divider";
 import { ModalProvider } from "~/components/modalProvider/ModalProvider";
+import {
+  SektorNameMapping,
+  TilknytningtypeNameMapping,
+} from "~/pages/CreateResourcePage/SektorStep";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { EditButtonWrapperOrgtilknytning } from "~/pages/ResourcePage/EditForms/EditButtonWrapperOrgtilknytning";
 import { EditButtonWrapperRessursSlutter } from "~/pages/ResourcePage/EditForms/EditButtonWrapperRessursSlutter";
@@ -45,6 +50,7 @@ import { EditOrgtilknytninger } from "~/pages/ResourcePage/RessursComponents/Edi
 import { PersonOpplysninger } from "~/pages/ResourcePage/RessursComponents/PersonOpplysninger";
 import { blueTopBorder } from "~/resources/NomStyles";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
+import { Tilknytningtype } from "~/types/api-models";
 import {
   formatDisplayDate,
   formatVisningsnavn,
@@ -56,6 +62,9 @@ import {
 
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   const { editOrgtilknytninger } = useSearch({ from: "/ressurs/$id" });
+
+  const hasWriteAccessForRessurs =
+    useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
 
   return (
     <div
@@ -88,9 +97,15 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
         <>
           <SummarySection ressurs={ressurs} />
           <LeaderForSection ressurs={ressurs} />
-          <OrgTilknytningSection ressurs={ressurs} />
+          <OrgTilknytningSection
+            hasWriteAccessForRessurs={hasWriteAccessForRessurs}
+            ressurs={ressurs}
+          />
           <TeamCatSection navident={ressurs.navident} />
-          <TerminateButton ressurs={ressurs} />
+          <TerminateButton
+            hasWriteAccessForRessurs={hasWriteAccessForRessurs}
+            ressurs={ressurs}
+          />
           {ressurs.isNomMastered && (
             <Tag
               css={css`
@@ -109,7 +124,13 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   );
 }
 
-function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
+function OrgTilknytningSection({
+  ressurs,
+  hasWriteAccessForRessurs,
+}: {
+  ressurs: Ressurs;
+  hasWriteAccessForRessurs: boolean;
+}) {
   const orgtilknytningerQuery = useQuery({
     queryKey: getOrgTilknytninger.queryKey(ressurs.navident),
     queryFn: () => getOrgTilknytninger.queryFn(ressurs.navident),
@@ -159,6 +180,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
             <Buldings3Icon />
             Organisatorisk tilhørighet
           </Heading>
+
           <EditButtonWrapperOrgtilknytning ressurs={ressurs}>
             <Button
               data-cy="endre-orgtilknytninger-button"
@@ -185,6 +207,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
 
         {activeOrgtilknytninger.map((orgTilknytning) => (
           <OrganisationHierarchyTree
+            hasWriteAccessForRessurs={hasWriteAccessForRessurs}
             key={orgTilknytning.fid}
             orgTilknytning={orgTilknytning}
             ressurs={ressurs}
@@ -192,6 +215,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
         ))}
         <FutureOrgTilknytninger
           futureOrgTilknytninger={futureOrgTilknytninger}
+          hasWriteAccessForRessurs={hasWriteAccessForRessurs}
           ressurs={ressurs}
         />
         <ExpiredOrgTilknytninger
@@ -205,9 +229,11 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
 function FutureOrgTilknytninger({
   futureOrgTilknytninger,
   ressurs,
+  hasWriteAccessForRessurs,
 }: {
   futureOrgTilknytninger: OrgtilknytningState[];
   ressurs: Ressurs;
+  hasWriteAccessForRessurs: boolean;
 }) {
   if (futureOrgTilknytninger.length === 0) {
     return <></>;
@@ -220,6 +246,7 @@ function FutureOrgTilknytninger({
       </Heading>
       {futureOrgTilknytninger.map((orgTilknytning) => (
         <OrganisationHierarchyTree
+          hasWriteAccessForRessurs={hasWriteAccessForRessurs}
           key={orgTilknytning.fid}
           orgTilknytning={orgTilknytning}
           ressurs={ressurs}
@@ -319,14 +346,21 @@ function ExpiredOrgTilknytning({
 function OrganisationHierarchyTree({
   ressurs,
   orgTilknytning,
+  hasWriteAccessForRessurs,
 }: {
   orgTilknytning: OrgtilknytningState;
   ressurs: Ressurs;
+  hasWriteAccessForRessurs: boolean;
 }) {
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(orgTilknytning.orgEnhetId),
     queryFn: () => getOrgEnhet.queryFn(orgTilknytning.orgEnhetId),
   });
+
+  const hasAdminAccess = useHasAdminAccess();
+
+  const hasSelfServiceAccess =
+    useGetSession().data?.navident === ressurs.navident;
 
   const orgEnhet = orgEnhetQuery.data;
 
@@ -336,9 +370,18 @@ function OrganisationHierarchyTree({
 
   const orgEnhetLeder = orgEnhet.ledere[0];
 
-  const { gyldigTom, gyldigFom, erDagligOppfolging } = orgTilknytning;
+  const {
+    gyldigTom,
+    gyldigFom,
+    erDagligOppfolging,
+    sektor,
+    orgtilknytningType,
+  } = orgTilknytning;
 
   const startsInTheFuture = gyldigFom && isAfterToday(new Date(gyldigFom));
+
+  const kanSeTilknytningstype =
+    hasWriteAccessForRessurs || hasSelfServiceAccess || hasAdminAccess;
 
   return (
     <ExpansionCard
@@ -413,10 +456,45 @@ function OrganisationHierarchyTree({
           ) : undefined}
         </ExpansionCard.Description>
       </ExpansionCard.Header>
+
       <ExpansionCard.Content>
-        {gyldigFom && <span>Fra og med: {formatDisplayDate(gyldigFom)}</span>}
-        <br />
-        {gyldigTom && <span>Til og med: {formatDisplayDate(gyldigTom)}</span>}
+        <div
+          css={css`
+            display: flex;
+            justify-content: space-between;
+          `}
+        >
+          <div>
+            {gyldigFom && (
+              <span>
+                <b>Fra og med:</b> {formatDisplayDate(gyldigFom)}
+              </span>
+            )}
+            <br />
+            {gyldigTom && (
+              <span>
+                <b>Til og med:</b> {formatDisplayDate(gyldigTom)}
+              </span>
+            )}
+          </div>
+
+          <div>
+            {sektor && (
+              <span>
+                <b>Sektor</b>: {SektorNameMapping[sektor]}
+              </span>
+            )}
+            <br />
+            {orgtilknytningType &&
+              orgtilknytningType !== Tilknytningtype.INGEN &&
+              kanSeTilknytningstype && (
+                <span>
+                  <b>Tilknytningstype:</b>{" "}
+                  {TilknytningtypeNameMapping[orgtilknytningType]}
+                </span>
+              )}
+          </div>
+        </div>
         <Divider size="small" />
         <CompactOrganisasjonHierarki orgEnhet={orgEnhet} ressurs={ressurs} />
       </ExpansionCard.Content>
@@ -546,9 +624,18 @@ function TeamCatSection({ navident }: { navident: string }) {
   );
 }
 
-function TerminateButton({ ressurs }: { ressurs: Ressurs }) {
+function TerminateButton({
+  ressurs,
+  hasWriteAccessForRessurs,
+}: {
+  ressurs: Ressurs;
+  hasWriteAccessForRessurs: boolean;
+}) {
   return (
-    <EditButtonWrapperRessursSlutter ressurs={ressurs}>
+    <EditButtonWrapperRessursSlutter
+      hasWriteAccessForRessurs={hasWriteAccessForRessurs}
+      ressurs={ressurs}
+    >
       <Divider noMargins />
       <ReactRouterLink
         css={css`

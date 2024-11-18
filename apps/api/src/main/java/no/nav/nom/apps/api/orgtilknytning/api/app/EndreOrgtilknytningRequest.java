@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.Builder;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 
 import java.time.LocalDate;
@@ -17,6 +18,8 @@ public record EndreOrgtilknytningRequest(
     @NotNull
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     LocalDate gyldigFom,
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    Sektor sektor,
     @NotNull
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     Boolean erDagligOppfolging,

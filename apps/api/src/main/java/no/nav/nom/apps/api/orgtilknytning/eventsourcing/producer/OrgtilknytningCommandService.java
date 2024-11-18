@@ -5,17 +5,19 @@ import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytningCommand;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDatoCommand;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningSektorCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningAvsluttetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
-import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningSektorEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningTilknytningtypeEndretEventV1;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -42,6 +44,7 @@ public class OrgtilknytningCommandService {
             new OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData(
                 opprettOrgtilknytning.navident(),
                 opprettOrgtilknytning.orgenhetId(),
+                opprettOrgtilknytning.sektor(),
                 opprettOrgtilknytning.gyldigFom()
             ),
             opprettOrgtilknytning.inputMetadata(),
@@ -150,6 +153,19 @@ public class OrgtilknytningCommandService {
             ),
             fjernOrgtilknytning.inputMetadata(),
             fjernOrgtilknytning.additionalAgressoData()
+        ));
+    }
+
+    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreOrgtilknytningSektor(EndreOrgtilknytningSektorCommand endreOrgtilknytningSektorCommand) {
+        return eventProducer.sendMessage(new OrgtilknytningSektorEndretEventV1(
+            endreOrgtilknytningSektorCommand.fid(),
+            new OrgtilknytningSektorEndretEventV1.OrgtilknytningSektorEndretEventData(
+                endreOrgtilknytningSektorCommand.navident(),
+                endreOrgtilknytningSektorCommand.orgenhetId(),
+                endreOrgtilknytningSektorCommand.sektor()
+            ),
+            endreOrgtilknytningSektorCommand.inputMetadata(),
+            endreOrgtilknytningSektorCommand.additionalAgressoData()
         ));
     }
 }

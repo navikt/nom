@@ -12,15 +12,14 @@ import { queryOptions } from "@tanstack/react-query";
 
 import type {
   AvvikleRessursRequest,
-  EndreOrgtilknytningDatoRequest,
   GetPersonRequest,
   LederTilgangForOrgenhetRequest,
   LederTilgangState,
-  LeggTilOrgtilknytningRequestOld,
   OppdaterOrgtilknytningerForRessursRequest,
   OpprettRessursRequest,
   OpprettRessursResponse,
   OrgEnhet,
+  OrgEnhetMedLedernavn,
   OrgtilknytningState,
   Person,
   Ressurs,
@@ -294,6 +293,18 @@ export function getOrgEnheterLedetAvOptions(navident: string) {
   });
 }
 
+export const getOrgEnheterSomKanHaRessurser = {
+  gcTime: CACHE_FOR.anHour,
+  staleTime: CACHE_FOR.aMinute * 5,
+  queryKey: ["ORGENHETER_KAN_HA_RESSURSER"],
+  queryFn: async () =>
+    (
+      await axios.get<OrgEnhetMedLedernavn[]>(
+        `${NOM_API_BASE_PATH}/app/orgenheter/kanHaRessurser`,
+      )
+    ).data,
+};
+
 export const getOrgTilknytninger = {
   queryKey: (navident: string) => orgtilknytningerKeys.navident(navident),
   queryFn: async (navident: string) =>
@@ -402,26 +413,27 @@ export const fornyDelegering = async (
   );
 };
 
-export const updateOrgtilknytningDato = async (
-  fid: string,
-  endreOrgtilknytningDatoRequest: EndreOrgtilknytningDatoRequest,
-) => {
-  await axios.post<EndreOrgtilknytningDatoRequest, AxiosResponse<unknown>>(
-    `${NOM_API_BASE_PATH}/app/orgtilknytninger/${fid}/dato`,
-    endreOrgtilknytningDatoRequest,
-  );
-  await hopeForKafkaStateToUpdate();
-};
-
-export const leggTilOrgtilknytning = async (
-  leggTilOrgtilknytningRequest: LeggTilOrgtilknytningRequestOld,
-) => {
-  await axios.post<LeggTilOrgtilknytningRequestOld, AxiosResponse<unknown>>(
-    `${NOM_API_BASE_PATH}/app/orgtilknytninger`,
-    leggTilOrgtilknytningRequest,
-  );
-  await hopeForKafkaStateToUpdate();
-};
+// Skal antakelig bort, men i tilfelle
+// export const updateOrgtilknytningDato = async (
+//   fid: string,
+//   endreOrgtilknytningDatoRequest: EndreOrgtilknytningDatoRequest,
+// ) => {
+//   await axios.post<EndreOrgtilknytningDatoRequest, AxiosResponse<unknown>>(
+//     `${NOM_API_BASE_PATH}/app/orgtilknytninger/${fid}/dato`,
+//     endreOrgtilknytningDatoRequest,
+//   );
+//   await hopeForKafkaStateToUpdate();
+// };
+//
+// export const leggTilOrgtilknytning = async (
+//   leggTilOrgtilknytningRequest: LeggTilOrgtilknytningRequestOld,
+// ) => {
+//   await axios.post<LeggTilOrgtilknytningRequestOld, AxiosResponse<unknown>>(
+//     `${NOM_API_BASE_PATH}/app/orgtilknytninger`,
+//     leggTilOrgtilknytningRequest,
+//   );
+//   await hopeForKafkaStateToUpdate();
+// };
 
 export const avvikleRessurs = async (
   fid: string,

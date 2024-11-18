@@ -146,7 +146,7 @@ export function ConfirmStep() {
           />
           <LabelWithValue label="NAV-ident" value={navident} />
           <LabelWithValue
-            label="Tilknytningtype"
+            label="Tilknytningstype"
             value={
               tilknytningtype &&
               (tilknytningtype === Tilknytningtype.INGEN

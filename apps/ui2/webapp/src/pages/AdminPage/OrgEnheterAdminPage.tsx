@@ -298,7 +298,6 @@ function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhet }) {
       );
       showToast({ text: "OrgEnhetsType endret" });
     },
-
     onError: () =>
       showToast({ text: "OrgEnhetsType endring feilet", variant: "error" }),
   });

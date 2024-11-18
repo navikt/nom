@@ -35,19 +35,17 @@ public class RessursStillingStrukturerer {
     public static final String UNLEASH_RESSURS_STILLING_STRUKTURER_FIKS_INKONSISTENS = "nom.ressurs-stilling-strukturer.fiks_inkonsistens";
 
     private final OrgenhetService orgenhetService;
-    private final RessursStillingLoadStatus ressursStillingLoadStatus;
     private final RessursStateRepository ressursStateRepository;
     private final Environment environment;
     private final Unleash unleash;
 
     public RessursStillingStrukturerer(
-        OrgenhetService orgenhetService, RessursStillingLoadStatus ressursStillingLoadStatus,
+        OrgenhetService orgenhetService,
         RessursStateRepository ressursStateRepository,
         Environment environment,
         Unleash unleash
     ) {
         this.orgenhetService = orgenhetService;
-        this.ressursStillingLoadStatus = ressursStillingLoadStatus;
         this.ressursStateRepository = ressursStateRepository;
         this.environment = environment;
         this.unleash = unleash;
@@ -319,7 +317,6 @@ public class RessursStillingStrukturerer {
                             navident,
                             stillingPeriode
                         );
-                        ressursStillingLoadStatus.addError(navident, msg);
                         log.warn(msg);
                     }
                 }
@@ -336,7 +333,6 @@ public class RessursStillingStrukturerer {
                             navident,
                             stillingPeriode
                         );
-                        ressursStillingLoadStatus.addError(navident, msg);
                         log.warn(msg);
                     }
                 } else if (nomEnheter.size() == 1) {
@@ -540,7 +536,6 @@ public class RessursStillingStrukturerer {
                                     nomEnheterString,
                                     stillingPeriode
                                 );
-                                ressursStillingLoadStatus.addError(navident, msg);
                                 log.error(msg);
                             } else {
                                 nyeStillingPerioder.add(new StillingPeriode(

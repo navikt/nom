@@ -70,6 +70,7 @@ public class KommunaleRessurserProcessor {
                 fid,
                 kommunalRessurs.getNavIdent(),
                 orgenhetPaaRessurs.get().getId(),
+                null,
                 true,
                 startDatoPaaTmpOT,
                 Optional.ofNullable(sluttDatoPaaTmpOT),

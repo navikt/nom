@@ -1,4 +1,9 @@
 app:
+  kafka:
+    ressurs:
+      stateTopic: org.nom.intern-ressurs-state
+    orgEnhet:
+      stateTopic: org.nom.intern-orgenhet-state
   clients:
     nom-proxy:
       base-url: http://localhost:${wiremock.server.port}

@@ -16,6 +16,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreT
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.pdl.PdlClient;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.ressurs.api.exceptions.DuplicateRessursException;
@@ -32,7 +33,6 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSekto
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
-import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import no.nav.nom.contract.nom.Sektor;
@@ -416,6 +416,7 @@ public class RessursRestService {
                 new OpprettOrgtilknytning(
                     opprettetRessurs.navident(),
                     request.orgEnhetId(),
+                    request.sektor(),
                     request.startDato(),
                     metaData,
                     null
@@ -502,6 +503,7 @@ public class RessursRestService {
             new OpprettOrgtilknytning(
                 existingRessurs.navident(),
                 request.orgEnhetId(),
+                request.sektor(),
                 request.startDato(),
                 metadata,
                 null

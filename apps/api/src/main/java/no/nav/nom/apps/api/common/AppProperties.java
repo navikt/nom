@@ -23,7 +23,6 @@ public record AppProperties(
     public record NomProxy(
             String baseUrl,
             String enhetPath,
-            String orgtilknytningPath,
             String ressursStillingerPath,
             String eksterneRessurserPath,
             String kommunaleRessurserPath,

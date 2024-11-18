@@ -478,6 +478,8 @@ public class SanityCheck {
         return result.toString();
     }
 
+
+    //TODO: (Test Testesen 4) Denne er ferdig implementert i nom-admin, kan fjernes.
     @Operation(
         description = "List duplikate ressurser på samme navident",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -512,6 +514,7 @@ public class SanityCheck {
         return result.toString();
     }
 
+    //TODO: (Test Testesen 4) Denne er ferdig implementert i nom-admin, kan fjernes.
     @Operation(
         description = "List orgtilknytninger med negativ periode (gyldigTom < gyldigFom)",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -528,6 +531,7 @@ public class SanityCheck {
             .toList();
     }
 
+    //TODO: (Test Testesen 4) Denne er ferdig implementert i nom-admin, kan fjernes.
     @Operation(
         description = "List orgtilknytninger med flere dagligOppfolging i current periode (gyldigFom < now < gyldigTom)",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)

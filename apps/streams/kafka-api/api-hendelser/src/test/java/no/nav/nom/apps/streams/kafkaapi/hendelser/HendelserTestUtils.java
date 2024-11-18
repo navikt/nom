@@ -238,6 +238,7 @@ public class HendelserTestUtils {
         final OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData eventData = new OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData(
             navident,
             "orgEnhetId",
+            Sektor.NAV_KOMMUNAL,
             LocalDate.now()
         );
 

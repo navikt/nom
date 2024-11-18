@@ -370,6 +370,7 @@ public class EksterneRessurserProcessor {
         var opprettOrgtilknytning = new OpprettOrgtilknytning(
             eksternRessurs.navident(),
             orgenhet.getId(),
+            null,
             gyldigFom,
             metadata,
             null

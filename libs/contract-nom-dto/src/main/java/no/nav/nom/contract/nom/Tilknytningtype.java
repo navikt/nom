@@ -4,7 +4,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(enumAsRef = true)
 public enum Tilknytningtype {
-    KONSULENT,
+    ARBEIDSTRENING,
     EKSTERN_SAMARBEIDSPARTNER,
-    INGEN
+    FAST,
+    INGEN,
+    KONSULENT,
+    LAERLING,
+    MIDLERTIDLIG,
+    PENSJONIST
 }
