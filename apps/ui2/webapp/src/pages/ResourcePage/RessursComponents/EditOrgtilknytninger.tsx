@@ -387,33 +387,27 @@ function OrgtilknytningForm({
             !!gyldigTom &&
             isBeforeToday(dateWithoutTimezone(new Date(gyldigTom)));
 
-          const fremtidig = !!gyldigFom && isAfterToday(gyldigFom);
-
-          const velgSektor =
-            !existingOt ||
-            fremtidig ||
-            !otOriginalSektor(field) ||
-            hasAdminAccess;
-
-          if (
-            existingOt &&
-            !hasOtTomChanged(field) &&
-            !hasAdminAccess &&
+          const overToMndGammel =
             !!field.gyldigTom &&
             isBeforeDate(
               dateWithoutTimezone(new Date(field.gyldigTom)),
               dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
-            )
-          ) {
-            return (
-              <div
-                css={css`
-                  display: none;
-                `}
-                key={field.id}
-              />
             );
-          }
+
+          const fremtidig = !!gyldigFom && isAfterToday(gyldigFom);
+
+          const disabled =
+            existingOt &&
+            !hasOtTomChanged(field) &&
+            !hasAdminAccess &&
+            overToMndGammel;
+
+          const velgSektor =
+            (!existingOt ||
+              fremtidig ||
+              !otOriginalSektor(field) ||
+              hasAdminAccess) &&
+            !disabled;
 
           return (
             <div
@@ -442,6 +436,7 @@ function OrgtilknytningForm({
               <HStack gap="8">
                 <FormDateWrapper
                   defaultDate={field.gyldigFom ?? undefined}
+                  disabled={disabled}
                   error={
                     errors?.mappedeOrgtilknytninger?.[index]?.gyldigFom
                       ?.message ?? ""
@@ -453,6 +448,7 @@ function OrgtilknytningForm({
 
                 <FormDateWrapper
                   defaultDate={field.gyldigTom ?? undefined}
+                  disabled={disabled}
                   error={
                     errors?.mappedeOrgtilknytninger?.[index]?.gyldigTom
                       ?.message ?? ""
@@ -476,6 +472,7 @@ function OrgtilknytningForm({
                   align-items: center;
                   margin-top: var(--a-spacing-2);
                 `}
+                disabled={disabled}
                 {...register(
                   `mappedeOrgtilknytninger.${index}.erDagligOppfolging`,
                 )}
@@ -695,6 +692,7 @@ function FormDateWrapper({
   error,
   triggerOthers,
   labelHelpText,
+  disabled,
 }: {
   name: string;
   defaultDate?: string;
@@ -702,6 +700,7 @@ function FormDateWrapper({
   error?: string;
   triggerOthers?: string[];
   labelHelpText?: string | undefined;
+  disabled?: boolean;
 }) {
   const { trigger } = useFormContext();
   const { field } = useController({
@@ -726,6 +725,7 @@ function FormDateWrapper({
     <DatePicker {...datePickerProperties.datepickerProps}>
       <DatePicker.Input
         data-cy={label.replaceAll(" ", "-")}
+        disabled={disabled}
         error={error}
         ref={field.ref}
         {...datePickerProperties.inputProps}
@@ -780,6 +780,10 @@ function FormSektorSelectWrapper({
   });
 
   const hasAdminAccess = useHasAdminAccess();
+
+  if (disabled && !field.value) {
+    return;
+  }
 
   return (
     <div
