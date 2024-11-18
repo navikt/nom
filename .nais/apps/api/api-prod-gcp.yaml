@@ -77,6 +77,7 @@ spec:
           - id: "2d91b26c-d412-440b-9122-0fafc594db89" # nom-admin
           - id: "b32023b5-4644-4b52-b6fc-bbb7723b8fbf" # 0000-GA-NOM-WRITE-DELEGERT
           - id: "f267e0a5-1ef6-4ef1-9303-4543b34f3b05" # 0000-GA-NOM-WRITE-LEDER
+          - id: "e219ba08-0685-40b5-95e6-5fd82ec7414a" # NOM-PILOT
         extra:
           - azp_name
           - NAVident
