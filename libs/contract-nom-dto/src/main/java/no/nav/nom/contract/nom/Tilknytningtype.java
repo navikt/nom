@@ -10,6 +10,6 @@ public enum Tilknytningtype {
     INGEN,
     KONSULENT,
     LAERLING,
-    MIDLERTIDLIG,
+    MIDLERTIDIG,
     PENSJONIST
 }

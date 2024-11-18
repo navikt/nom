@@ -61,7 +61,7 @@ authentication:
     nomLeder: ${NOM_LEDER_GROUPID:nomLederGroup}          # Den nye 0000-GA-NOM-WRITE-LEDER
     nomWrite: ${NOM_WRITE_GROUPID:nomWriteGroup}      # Gamle nom-write gruppen
     nomAdmin: ${NOM_ADMIN_GROUPID:nomAdminGroup}      #gamle nom-admin gruppen
-
+    nomPilot: ${NOM_PILOT_GROUPID:nomPilotGroup}      #gamle nom-admin gruppen
 server:
   shutdown: graceful
 
@@ -349,6 +349,7 @@ NOM_DELEGERT_GROUPID: "42d11885-1e29-4fc4-9eed-1b339c2c8e36" # 0000-GA-NOM-WRITE
 NOM_LEDER_GROUPID: "e9cd9267-9baf-4078-abb8-7251c4313d32" # 0000-GA-NOM-WRITE-LEDER
 NOM_WRITE_GROUPID: "c5752f26-105a-460f-a538-1859273f5057" # nom-write
 NOM_ADMIN_GROUPID: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # nom-admin
+NOM_PILOT_GROUPID: "087625aa-d658-4b00-9d71-8538b1a8fd15" # NOM-PILOT
 
 --- # This is the same as having an application-prod.yaml file
 spring:
@@ -407,6 +408,7 @@ NOM_DELEGERT_GROUPID: "b32023b5-4644-4b52-b6fc-bbb7723b8fbf" # 0000-GA-NOM-WRITE
 NOM_LEDER_GROUPID: "f267e0a5-1ef6-4ef1-9303-4543b34f3b05" # 0000-GA-NOM-WRITE-LEDER
 NOM_WRITE_GROUPID: "1334a91a-c4e0-409e-a497-3c4453869874"
 NOM_ADMIN_GROUPID: "2d91b26c-d412-440b-9122-0fafc594db89"
+NOM_PILOT_GROUPID: "e219ba08-0685-40b5-95e6-5fd82ec7414a" # NOM-PILOT
 
 NOM_REMEDY_INTEGRASJON_BASEURL: "https://nom-remedy-integrasjon.prod-fss-pub.nais.io"
 NOM_REMEDY_INTEGRASJON_API_SCOPE: api://prod-fss.org.nom-remedy-integrasjon/.default

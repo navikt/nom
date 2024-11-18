@@ -513,9 +513,9 @@ public class NomIntegrasjonService {
 
         NomIntegrasjonEntity newNomIntegrasjonEntity = NomIntegrasjonEntity.builder()
             .enhetsId(remedyEnhetsId)
-            .etternavn(capitalizeNavn(ressursOpprettetEventData.visningsnavn().etternavn()))
+            .etternavn(capitalizeNavn(ressursOpprettetEventData.visningsnavn().etternavn()).trim())
             .fodselsnummer(ressursOpprettetEventData.personident())
-            .fornavn(capitalizeNavn(ressursOpprettetEventData.visningsnavn().getFornavnMellomnavn()))
+            .fornavn(capitalizeNavn(ressursOpprettetEventData.visningsnavn().getFornavnMellomnavn()).trim())
             .fysiskBrukerstedId(fysiskBrukerstedNr)
             .navId(ressursOpprettetAdditionalData.navident().orElseThrow(() -> RequiredValueMissingException.forField("navId")))
             .sektor(nomSektorToRemedyCode(ressursOpprettetEventData.sektor()))
@@ -544,8 +544,8 @@ public class NomIntegrasjonService {
 
         var newVisningsnavn = ressursPersonaliaOppdatertV1.getPersonaliaOppdatertEventData().visningsnavn();
         var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
-            .fornavn(capitalizeNavn(newVisningsnavn.getFornavnMellomnavn()))
-            .etternavn(capitalizeNavn(newVisningsnavn.etternavn()))
+            .fornavn(capitalizeNavn(newVisningsnavn.getFornavnMellomnavn()).trim())
+            .etternavn(capitalizeNavn(newVisningsnavn.etternavn()).trim())
             .build();
 
         saveNewNomIntegrasjonEntity(
@@ -622,10 +622,10 @@ public class NomIntegrasjonService {
 
         return NomIntegrasjonEntity.builder()
             .enhetsId(dagligOppfolgningOrgTilknytning.map(orgtilknytningState -> getRemedyEnhetId(orgtilknytningState.getOrgEnhetId())).orElse(null))
-            .etternavn(capitalizeNavn(ressurs.getVisningsnavn().getEtternavn()))
+            .etternavn(capitalizeNavn(ressurs.getVisningsnavn().getEtternavn()).trim())
             .fodselsnummer(ressurs.getPersonident())
             .fornavn(capitalizeNavn(
-                formatFornavnWithMellomnavn(ressurs.getVisningsnavn())
+                formatFornavnWithMellomnavn(ressurs.getVisningsnavn()).trim()
             ))
             .fysiskBrukerstedId(ressurs.getPrimaryFysiskBrukersted())
             .navId(ressurs.getNavident())

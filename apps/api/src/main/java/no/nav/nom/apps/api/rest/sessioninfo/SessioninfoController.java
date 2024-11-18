@@ -28,7 +28,8 @@ public class SessioninfoController {
             env.getRequiredProperty("authentication.groups.nomDelegert"), UserRoles.ROLE_WRITE,
             env.getRequiredProperty("authentication.groups.nomLeder"), UserRoles.ROLE_WRITE,
             env.getRequiredProperty("authentication.groups.nomWrite"), UserRoles.ROLE_WRITE,
-            env.getRequiredProperty("authentication.groups.nomAdmin"), UserRoles.ROLE_ADMIN
+            env.getRequiredProperty("authentication.groups.nomAdmin"), UserRoles.ROLE_ADMIN,
+            env.getRequiredProperty("authentication.groups.nomPilot"), UserRoles.ROLE_PILOT
         );
         log.debug("authentication.groups Environment (claimToRoleMap): {}", claimToRoleMap);
     }
@@ -55,7 +56,8 @@ public class SessioninfoController {
     @Schema(enumAsRef = true)
     public enum UserRoles {
         ROLE_WRITE,
-        ROLE_ADMIN
+        ROLE_ADMIN,
+        ROLE_PILOT
     }
 
     public record SessionInfoResponse(
