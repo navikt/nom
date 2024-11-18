@@ -89,7 +89,9 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       auto-offset-reset: latest
       properties:
-        spring.json.trusted.packages: 'no.nav.nom.contract.nom.eventsource'
+        spring.json.trusted.packages:
+          - 'no.nav.nom.contract.nom.eventsource'
+          - 'java.time.LocalDateTime'
       isolation-level: read_committed
       group-id: ${app.name}
   security:
