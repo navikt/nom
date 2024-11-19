@@ -1,12 +1,15 @@
 package no.nav.nom.libs.state.orgtilknytning;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.common.AbstractNomStateListener;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.PartitionOffset;
 import org.springframework.kafka.annotation.TopicPartition;
+
+import java.util.Optional;
 
 @Slf4j
 public class NomStateOrgtilknytningListener extends AbstractNomStateListener<OrgtilknytningState> {
@@ -30,6 +33,18 @@ public class NomStateOrgtilknytningListener extends AbstractNomStateListener<Org
 
     @Override
     protected void registerMessageWithState(String key, OrgtilknytningState orgtilknytningState) {
+        if (orgtilknytningState.orgtilknytningType().isPresent() && orgtilknytningState.orgtilknytningType().get() == Tilknytningtype.MIDLERTIDLIG) {
+            orgtilknytningState = new OrgtilknytningState(
+                orgtilknytningState.fid(),
+                orgtilknytningState.navident(),
+                orgtilknytningState.orgEnhetId(),
+                orgtilknytningState.sektor(),
+                orgtilknytningState.erDagligOppfolging(),
+                orgtilknytningState.gyldigFom(),
+                orgtilknytningState.gyldigTom(),
+                Optional.of(Tilknytningtype.MIDLERTIDIG)
+            );
+        }
         orgtilknytningStateRepository.update(key, orgtilknytningState);
     }
 
