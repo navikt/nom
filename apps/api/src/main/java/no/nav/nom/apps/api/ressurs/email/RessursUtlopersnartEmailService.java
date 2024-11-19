@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+
 @Component
 public class RessursUtlopersnartEmailService {
 
@@ -106,7 +108,7 @@ public class RessursUtlopersnartEmailService {
             Set<String> recipientNavidents = new HashSet<>(utlopendeRessurs.orgenhetData().values());
             var adRessurser = adClient.getAdRessurser(recipientNavidents);
             var recipientList = adRessurser.getRessurser().stream().map(AdRessurs::getEmail).toList();
-            log.info("Sender epose varsel om utløpende ressurs: {}({}), til navidents og eposts: {}, {}"
+            log.info(SECURE_LOGS, "Sender epost varsel om utløpende ressurs: {}({}), til navidents og eposts: {}, {}"
                 ,utlopendeRessurs.ressurNavn(), utlopendeRessurs.ressursNavident(), recipientNavidents, recipientList);
 
             String subject = String.format("Varsel før utløpsdato for %s (%s)", utlopendeRessurs.ressurNavn(), utlopendeRessurs.ressursNavident());
@@ -116,7 +118,7 @@ public class RessursUtlopersnartEmailService {
                 return;
             }
 
-            log.info("Sender ressurs sluttdato utløper epost subject: {}, recipients: {}, message: {}", subject, recipientList, emailBody);
+            log.info(SECURE_LOGS, "Sender ressurs sluttdato utløper epost subject: {}, recipients: {}, message: {}", subject, recipientList, emailBody);
             EmailMessage message = new EmailMessage(subject, emailBody, recipientList);
             emailClient.sendEmail(message).subscribe();
         } catch (ADResponseException e) {
@@ -134,7 +136,7 @@ public class RessursUtlopersnartEmailService {
         var ressursSluttdato = DateUtils.formatDateTime(utlopendeRessurs.ressursSluttdato());
         var ressursSluttdatoPlus1dag = DateUtils.formatDateTime(utlopendeRessurs.ressursSluttdato().plusDays(1));
         var ressursNavn = utlopendeRessurs.ressurNavn();
-        log.info("Genererer epost varsel body om utløpsdato for ressurs: {}, {}, {}, {}, {}", orgenhetNavn, ressursNavn, ressursNavnOgNavIdent, ressursSluttdato, ressursSluttdatoPlus1dag);
+        log.info(SECURE_LOGS, "Genererer epost varsel body om utløpsdato for ressurs: {}, {}, {}, {}, {}", orgenhetNavn, ressursNavn, ressursNavnOgNavIdent, ressursSluttdato, ressursSluttdatoPlus1dag);
 
         var model = Map.of(
             "orgenhetNavn", orgenhetNavn,
