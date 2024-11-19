@@ -585,10 +585,7 @@ public class OrgtilknytningRestService {
         }
 
         endreTilknytningtypeRequest.tilknytningtype().ifPresent(
-            orgtilknytningType -> {
-                orgtilknytningType = orgtilknytningType == Tilknytningtype.MIDLERTIDLIG ? Tilknytningtype.MIDLERTIDIG : orgtilknytningType;
-                validateOrgtilknytningTypeSektorCombination(orgtilknytningType, tilknyttetRessurs.sektor());
-            }
+            orgtilknytningType -> validateOrgtilknytningTypeSektorCombination(orgtilknytningType, tilknyttetRessurs.sektor())
         );
 
         orgtilknytningCommandService.endreTilknytningtype(

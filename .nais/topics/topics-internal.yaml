@@ -52,6 +52,7 @@ spec:
     partitions: 1
     replication: 3
     cleanupPolicy: compact
+    maxCompactionLagMs: 7200000  # 1000 * 60 * 60 * 2 = 7200000 = 2 hours
   acl:
     - team: org
       application: nom-intern-ressurs-state
@@ -153,6 +154,7 @@ spec:
     partitions: 1
     replication: 3
     cleanupPolicy: compact
+    maxCompactionLagMs: 7200000  # 1000 * 60 * 60 * 2 = 7200000 = 2 hours
   acl:
     - team: org
       application: nom-intern-orgenhet-state
@@ -226,7 +228,7 @@ spec:
     partitions: 1
     replication: 3
     cleanupPolicy: compact
-    maxCompactionLagMs: 60000  # 1000 * 60 * 10 = 60000 = 10 minutes
+    maxCompactionLagMs: 7200000  # 1000 * 60 * 60 * 2 = 7200000 = 2 hours
   acl:
     - team: org
       application: nom-intern-orgtilknytning-state
@@ -294,6 +296,7 @@ spec:
     partitions: 1
     replication: 3
     cleanupPolicy: compact
+    maxCompactionLagMs: 7200000  # 1000 * 60 * 60 * 2 = 7200000 = 2 hours
   acl:
     - team: org
       application: nom-intern-organisering-state
