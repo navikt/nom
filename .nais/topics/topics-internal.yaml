@@ -69,6 +69,9 @@ spec:
     - team: org
       application: nom-remedy-integrasjon
       access: read
+    - team: org
+      application: nom-rdbms-data
+      access: read
 
 ---
 
@@ -99,6 +102,9 @@ spec:
       access: read
     - team: org
       application: nom-remedy-integrasjon
+      access: read
+    - team: org
+      application: nom-rdbms-data
       access: read
 
 ---
@@ -170,6 +176,9 @@ spec:
       access: read
     - team: org
       application: nom-remedy-integrasjon
+      access: read
+    - team: org
+      application: nom-rdbms-data
       access: read
 
 ---
@@ -245,6 +254,9 @@ spec:
     - team: org
       application: nom-remedy-integrasjon
       access: read
+    - team: org
+      application: nom-rdbms-data
+      access: read
 
 ---
 
@@ -310,6 +322,9 @@ spec:
     - team: org
       application: nom-admin
       access: read
+    - team: org
+      application: nom-rdbms-data
+      access: read
 
 ---
 
@@ -337,6 +352,9 @@ spec:
       access: read
     - team: org
       application: nom-admin
+      access: read
+    - team: org
+      application: nom-rdbms-data
       access: read
 
 ---
@@ -372,6 +390,8 @@ spec:
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
+  annotations:
+    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
   name: nom.intern-gml-dvh-last-result
   namespace: org
   labels:

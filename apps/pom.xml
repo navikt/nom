@@ -23,5 +23,6 @@
         <module>streams</module>
         <module>nom-remedy-integrasjon</module>
         <module>admin</module>
+        <module>nom-rdbms-data</module>
     </modules>
 </project>

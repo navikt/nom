@@ -1,0 +1,19 @@
+name: 'verify: nom-rdbms-data'
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'apps/nom-rdbms-data/**'
+      - 'libs/utils-common/**'
+      - 'libs/contract-nom-dto/**'
+      - '.github/*/verify-api.yaml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
+
+jobs:
+  verify:
+    uses: ./.github/workflows/verify-spring-app.yml
+    with:
+      maven-project: api

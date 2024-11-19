@@ -1,0 +1,73 @@
+app:
+  name: ${NAIS_APP_NAME:nom-rdbms-data}
+  kafka:
+    ressurs:
+      state-topic: org.nom.intern-ressurs-state
+    orgenhet:
+      state-topic: org.nom.intern-orgenhet-state
+    orgtilknytning:
+      state-topic: org.nom.intern-orgtilknytning-state
+    organisering:
+      state-topic: org.nom.intern-organisering-state
+    mastered-ressurs:
+      evtsrc-topic: org.nom.nom-mastered-ressurs
+
+nom.libs.state.delegert-leder.enabled: true
+
+
+management:
+  metrics:
+    tags:
+      app: ${app.name}
+  endpoints:
+    web:
+      base-path: /internal
+      exposure:
+        include: prometheus, info, health, metrics, loggers, mappings
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+
+spring:
+  main:
+    banner-mode: "log"
+    cloud-platform: kubernetes
+
+  datasource:
+    url: ${DATABASE_JDBC_URL}
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 5
+
+  flyway:
+    enabled: true
+    schemas: public
+    table: schema_version
+    baselineOnMigrate: true
+
+  kafka:
+    security.protocol: SSL
+    ssl:
+      key-store-type: PKCS12
+      key-store-location: file:${KAFKA_KEYSTORE_PATH}
+      key-store-password: ${KAFKA_CREDSTORE_PASSWORD}
+      trust-store-type: JKS
+      trust-store-location: file:${KAFKA_TRUSTSTORE_PATH}
+      trust-store-password: ${KAFKA_CREDSTORE_PASSWORD}
+    bootstrap-servers: ${KAFKA_BROKERS}
+    admin:
+      client-id: ${app.name}
+    consumer:
+      max-poll-records: 1000
+      auto-offset-reset: earliest
+      group-id: ${app.name}
+    listener:
+      missing-topics-fatal: true
+    client-id: ${app.name}
+
+unleash:
+  endpoint:
+    url: ${UNLEASH_SERVER_API_URL}/api
+  api-key: ${UNLEASH_SERVER_API_TOKEN}

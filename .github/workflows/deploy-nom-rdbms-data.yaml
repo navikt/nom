@@ -1,0 +1,45 @@
+name: 'deploy: nom-rdbms-data'
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'dev/*'
+    paths:
+      - 'apps/nom-rdbms-data/**'
+      - 'libs/utils-common/**'
+      - 'libs/nom-state/**'
+      - 'libs/contract-nom-dto/**'
+      - '.nais/apps/nom-rdbms-data/*.yaml'
+      - '.github/*/deploy-nom-rdbms-data.yaml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
+      - 'Dockerfile_distroless'
+  workflow_dispatch:
+    inputs:
+      skip-tests:
+        type: boolean
+        required: false
+        default: false
+        description: Skip tests.
+
+jobs:
+  deploy-spring-app:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    uses: ./.github/workflows/deploy-spring-app.yaml
+    with:
+      maven-project: nom-rdbms-data
+      jar-path: apps/nom-rdbms-data/target/app.jar
+      image-suffix: nom-rdbms-data
+      nais-config-file-path-dev: .nais/apps/nom-rdbms-data/nom-rdbms-data-dev-gcp.yaml
+      nais-config-file-path-prod: .nais/apps/nom-rdbms-data/nom-rdbms-data-prod-gcp.yaml
+      unleash-vars-file-path: .nais/apps/nom-rdbms-data/unleash-vars.yaml
+      deploy-timeout: 20m
+      skip-tests: ${{ github.event.inputs.skip-tests == 'true'}}
+      dockerfile: Dockerfile_distroless
+    secrets:
+      GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+      NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+

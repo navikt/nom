@@ -26,6 +26,13 @@ services:
     environment:
       POSTGRES_PASSWORD: 'password'
       POSTGRES_DB: 'postgres-navident'
+  postgres-rdbms-data:
+    image: postgres
+    ports:
+      - '5435:5432'
+    environment:
+      POSTGRES_PASSWORD: 'password'
+      POSTGRES_DB: 'postgres-rdbms-data'
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest

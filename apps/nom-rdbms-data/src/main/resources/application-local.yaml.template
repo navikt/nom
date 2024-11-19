@@ -1,0 +1,22 @@
+server.port: 8091
+
+NAIS_APP_NAME: nom-rdbms-data-local
+
+KAFKA_BROKERS: localhost:39092
+spring.kafka.properties.security.protocol: PLAINTEXT
+
+logging:
+  config: classpath:logback-local.xml
+
+UNLEASH_SERVER_API_TOKEN: 'DUMMY'
+UNLEASH_SERVER_API_URL: https://teamorg-unleash-api.nav.cloud.nais.io
+
+DATABASE_DATABASE: postgres-rdbms-data
+DATABASE_HOST: localhost
+DATABASE_PASSWORD: password
+DATABASE_PORT: 5435
+DATABASE_USERNAME: postgres
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DATABASE}?password=${DATABASE_PASSWORD}&user=${DATABASE_USERNAME}

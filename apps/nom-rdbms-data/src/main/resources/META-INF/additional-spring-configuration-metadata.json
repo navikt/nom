@@ -1,0 +1,29 @@
+{
+  "properties": [
+    {
+      "name": "app.kafka.ressurs.state-topic",
+      "type": "java.lang.String",
+      "description": "Ressurs state topic name."
+    },
+    {
+      "name": "app.kafka.orgenhet.state-topic",
+      "type": "java.lang.String",
+      "description": "Orgenhet state topic name."
+    },
+    {
+      "name": "app.kafka.organisering.state-topic",
+      "type": "java.lang.String",
+      "description": "Organisering state topic name."
+    },
+    {
+      "name": "app.kafka.orgtilknytning.state-topic",
+      "type": "java.lang.String",
+      "description": "Orgtilknytning state topic name."
+    },
+    {
+      "name": "app.kafka.nom-mastered.evtsrc-topic",
+      "type": "java.lang.String",
+      "description": "NomMastered state topic name."
+    }
+  ]
+}
