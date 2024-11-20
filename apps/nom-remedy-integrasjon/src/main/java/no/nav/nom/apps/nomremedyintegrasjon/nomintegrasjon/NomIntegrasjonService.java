@@ -812,13 +812,11 @@ public class NomIntegrasjonService {
     }
 
     public void handleNomMasteredRessursEvent(String navIdent, LocalDateTime nomMasteredRessursEvent) {
-        var ressursState = nomApiClient.getRessursByNavident(navIdent);
-        var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
-
-        logger.info("Handling mastered ressurs event for navident {}, masterer at: {}", navIdent, nomMasteredRessursEvent);
-
-        // TODO how to reflect that the ressurs is nor mastered in NOM?
         if(unleash.isEnabled("nom.sende-manuelle-mastringer-av-ressurs-til-remedy")){
+            var ressursState = nomApiClient.getRessursByNavident(navIdent);
+            var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
+            logger.info("Handling mastered ressurs event for navident {}, masterer at: {}, nomIntegrasjonEntity : {}",
+                navIdent, nomMasteredRessursEvent, nomIntegrasjonEntityWithDefaultDataFromNom);
             saveNewNomIntegrasjonEntity(nomIntegrasjonEntityWithDefaultDataFromNom, getAuthenticatedNavIdent());
         }
     }
