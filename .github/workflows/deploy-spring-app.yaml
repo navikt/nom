@@ -58,8 +58,6 @@ on:
         default: Dockerfile
         description: Dockerfile to use for building the docker image
     secrets:
-      GITHUB_PAT:
-        required: true
       NAIS_WORKLOAD_IDENTITY_PROVIDER:
         required: true
 
@@ -78,8 +76,8 @@ jobs:
           cache: maven
       - name: Build java app
         env:
-          GITHUB_USERNAME: x-access-token
-          GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
+          GITHUB_USERNAME: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.READER_TOKEN }}
         run: mvn clean package --projects :${{ inputs.maven-project }} --also-make -Dmaven.test.skip=${{ inputs.skip-tests }} --batch-mode
       - name: Build and push Docker image
         uses: nais/docker-build-push@v0

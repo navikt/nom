@@ -39,6 +39,5 @@ jobs:
       skip-tests: ${{ github.event.inputs.skip-tests == 'true'}}
       dockerfile: Dockerfile_distroless
     secrets:
-      GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
 

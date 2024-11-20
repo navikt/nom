@@ -20,6 +20,6 @@ jobs:
           cache: maven
       - name: Run tests
         env:
-          GITHUB_USERNAME: x-access-token
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_USERNAME: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.READER_TOKEN }}
         run: mvn verify --projects :${{ inputs.maven-project }} --also-make --batch-mode

@@ -29,5 +29,4 @@ jobs:
       nais-config-file-path-prod: .nais/apps/nav-ident/nav-ident-prod-gcp.yaml
       dockerfile: Dockerfile_distroless
     secrets:
-      GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
