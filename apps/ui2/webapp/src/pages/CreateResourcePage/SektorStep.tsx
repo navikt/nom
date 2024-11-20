@@ -60,10 +60,10 @@ export function SektorStep() {
   }).data;
 
   const [selectedSektor, setSelectedSektor] = useState(
-    sektor ?? Sektor.EKSTERN,
+    sektor ?? Sektor.NAV_KOMMUNAL,
   );
   const [selectedTilknytningtype, setSelectedTilknytningtype] = useState(
-    tilknytningtype ?? Tilknytningtype.KONSULENT,
+    tilknytningtype ?? Tilknytningtype.INGEN,
   );
 
   const saveValuesAndNavigate = (step: string) => {
@@ -165,7 +165,8 @@ export function SektorStep() {
               if (
                 tilknytningstype ===
                   Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER &&
-                !brukerJobberIDirektoratet
+                !brukerJobberIDirektoratet &&
+                !hasAdminAccess
               ) {
                 return;
               }
