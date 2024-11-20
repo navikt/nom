@@ -32,13 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -817,20 +812,8 @@ public class NomIntegrasjonService {
             var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
             logger.info("Handling mastered ressurs event for navident {}, masterer at: {}, nomIntegrasjonEntity : {}",
                 navIdent, nomMasteredRessursEvent, nomIntegrasjonEntityWithDefaultDataFromNom);
-            saveNewNomIntegrasjonEntity(nomIntegrasjonEntityWithDefaultDataFromNom, getAuthenticatedNavIdent());
+            // there is no user authentification context here, so we use the default user "nom-admin"
+            saveNewNomIntegrasjonEntity(nomIntegrasjonEntityWithDefaultDataFromNom, "nom-admin");
         }
-    }
-
-    public String getAuthenticatedNavIdent() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return getNavIdent(authentication).orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Couldn't find %s in Claims", NAVIDENT)));
-    }
-
-    public Optional<String> getNavIdent(Authentication authentication) {
-        logger.info("At NomIntegrasjonService, authentication: {}", authentication);
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        logger.info("At NomIntegrasjonService, jwt: {}, Claims: {}", jwt, jwt.getClaims());
-        return Optional.ofNullable(jwt.getClaimAsString(NAVIDENT));
     }
 }
