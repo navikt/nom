@@ -821,19 +821,14 @@ public class NomIntegrasjonService {
         }
     }
 
-    public String getAuthenticatedNavIdent() {
+    public static String getAuthenticatedNavIdent() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return getNavIdent(authentication).orElseThrow(
             () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Couldn't find %s in Claims", NAVIDENT)));
     }
 
-    public Optional<String> getNavIdent(Authentication authentication) {
-        try {
-            Jwt jwt = (Jwt) authentication.getPrincipal();
-            return Optional.ofNullable(jwt.getClaimAsString(NAVIDENT));
-        } catch (Exception e) {
-            logger.warn("Authentication principal is not available! {}", e.getMessage());
-            return Optional.empty();
-        }
+    public static Optional<String> getNavIdent(Authentication authentication) {
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        return Optional.ofNullable(jwt.getClaimAsString(NAVIDENT));
     }
 }
