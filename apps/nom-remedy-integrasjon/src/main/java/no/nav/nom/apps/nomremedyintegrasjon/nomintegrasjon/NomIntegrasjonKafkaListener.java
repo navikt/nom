@@ -18,6 +18,8 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class NomIntegrasjonKafkaListener {
 
@@ -93,6 +95,21 @@ public class NomIntegrasjonKafkaListener {
 
         MDC.clear();
     }
+
+    @KafkaListener(
+        topics = "${app.kafka-topics.nom-mastered-ressurs.topic-name}",
+        autoStartup = "${app.kafka-topics.nom-mastered-ressurs.auto-startup}",
+        containerFactory = "nomMasteredRessursEventKafkaListenerContainerFactory"
+    )
+    public void nomMasteredRessursEventListener(LocalDateTime nomMasteredRessursEvent, @Header(KafkaHeaders.RECEIVED_KEY) String recordId) {
+        logger.info("Waiting for NOM states to be ready");
+        waitForNomStates();
+        logger.info("Received nomMasteredRessurs event with navident: {} and mastered timestamp: {}", recordId, nomMasteredRessursEvent.toString());
+        putMDCContext(recordId, nomMasteredRessursEvent.toString());
+        nomIntegrasjonService.handleNomMasteredRessursEvent(recordId, nomMasteredRessursEvent);
+        MDC.clear();
+    }
+
 
     private void waitForNomStates() {
         while (!isInitialStateReady()) {

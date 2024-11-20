@@ -15,6 +15,9 @@ app:
     orgtilknytning-eventsource:
       topic-name: org.nom.orgtilknytning-eventsource
       auto-startup: true
+    nom-mastered-ressurs:
+      topic-name: org.nom.nom-mastered-ressurs
+      auto-startup: true
   clients:
     nom-api:
       url: ${NOM_API_URL}
@@ -86,7 +89,7 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       auto-offset-reset: latest
       properties:
-        spring.json.trusted.packages: 'no.nav.nom.contract.nom.eventsource'
+        spring.json.trusted.packages: '*'
       isolation-level: read_committed
       group-id: ${app.name}
   security:

@@ -32,10 +32,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +72,7 @@ public class NomIntegrasjonService {
 
     private final ObjectMapper objectMapper;
     private final Unleash unleash;
+    public static final String NAVIDENT = "NAVident";
 
 
     public NomIntegrasjonService(
@@ -802,5 +809,26 @@ public class NomIntegrasjonService {
             case NAV_KOMMUNAL -> 1;
             case EKSTERN -> 2;
         };
+    }
+
+    public void handleNomMasteredRessursEvent(String navIdent, LocalDateTime nomMasteredRessursEvent) {
+        if(unleash.isEnabled("nom.sende-manuelle-mastringer-av-ressurs-til-remedy")){
+            var ressursState = nomApiClient.getRessursByNavident(navIdent);
+            var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
+            logger.info("Handling mastered ressurs event for navident {}, masterer at: {}, nomIntegrasjonEntity : {}",
+                navIdent, nomMasteredRessursEvent, nomIntegrasjonEntityWithDefaultDataFromNom);
+            saveNewNomIntegrasjonEntity(nomIntegrasjonEntityWithDefaultDataFromNom, getAuthenticatedNavIdent());
+        }
+    }
+
+    public static String getAuthenticatedNavIdent() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return getNavIdent(authentication).orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Couldn't find %s in Claims", NAVIDENT)));
+    }
+
+    public static Optional<String> getNavIdent(Authentication authentication) {
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        return Optional.ofNullable(jwt.getClaimAsString(NAVIDENT));
     }
 }
