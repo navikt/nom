@@ -821,14 +821,16 @@ public class NomIntegrasjonService {
         }
     }
 
-    public static String getAuthenticatedNavIdent() {
+    public String getAuthenticatedNavIdent() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return getNavIdent(authentication).orElseThrow(
             () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Couldn't find %s in Claims", NAVIDENT)));
     }
 
-    public static Optional<String> getNavIdent(Authentication authentication) {
+    public Optional<String> getNavIdent(Authentication authentication) {
+        logger.info("At NomIntegrasjonService, authentication: {}", authentication);
         Jwt jwt = (Jwt) authentication.getPrincipal();
+        logger.info("At NomIntegrasjonService, jwt: {}, Claims: {}", jwt, jwt.getClaims());
         return Optional.ofNullable(jwt.getClaimAsString(NAVIDENT));
     }
 }
