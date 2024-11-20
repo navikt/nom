@@ -20,7 +20,7 @@ export const SektorNameMapping = {
 
 export const TilknytningtypeNameMapping = {
   [Tilknytningtype.FAST]: "Fast",
-  [Tilknytningtype.MIDLERTIDLIG]: "Midlertidig",
+  [Tilknytningtype.MIDLERTIDIG]: "Midlertidig",
   [Tilknytningtype.PENSJONIST]: "Pensjonist",
   [Tilknytningtype.LAERLING]: "Lærling",
   [Tilknytningtype.KONSULENT]: "Konsulent",
@@ -28,6 +28,20 @@ export const TilknytningtypeNameMapping = {
   [Tilknytningtype.ARBEIDSTRENING]: "Arbeidstrening",
   [Tilknytningtype.INGEN]: "Annet",
 };
+
+export const tilknytningstyperStatlige = [
+  Tilknytningtype.FAST,
+  Tilknytningtype.MIDLERTIDIG,
+  Tilknytningtype.LAERLING,
+  Tilknytningtype.PENSJONIST,
+];
+
+export const tilknytningstyperEksterne = [
+  Tilknytningtype.KONSULENT,
+  Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER,
+  Tilknytningtype.ARBEIDSTRENING,
+  Tilknytningtype.INGEN,
+];
 
 export function SektorStep() {
   const { sektor, tilknytningtype } = useSearch({
@@ -38,6 +52,7 @@ export function SektorStep() {
   const navident = useGetSession().data?.navident;
   const navigate = useNavigate();
 
+  // TODO: Forbedre logikk; sjekke om navident har redigeringstilgang til enhet i direktoratet
   const dinOrgenhetId = useQuery({
     queryKey: getOrgTilknytninger.queryKey(navident as string),
     queryFn: () => getOrgTilknytninger.queryFn(navident as string),
@@ -95,20 +110,6 @@ export function SektorStep() {
   };
 
   const canEditStatlige = hasAdminAccess;
-
-  const tilknytningstyperStatlige = [
-    Tilknytningtype.FAST,
-    Tilknytningtype.MIDLERTIDLIG,
-    Tilknytningtype.LAERLING,
-    Tilknytningtype.PENSJONIST,
-  ];
-
-  const tilknytningstyperEksterne = [
-    Tilknytningtype.KONSULENT,
-    Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER,
-    Tilknytningtype.ARBEIDSTRENING,
-    Tilknytningtype.INGEN,
-  ];
 
   return (
     <ContainerWithHighlightedTop icon={opprettRessursIcon} title="Sektor">

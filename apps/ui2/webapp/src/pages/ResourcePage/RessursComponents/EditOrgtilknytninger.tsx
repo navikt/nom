@@ -22,7 +22,12 @@ import {
   Tag,
   useDatepicker,
 } from "@navikt/ds-react";
-import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { addYears, subMonths } from "date-fns";
@@ -43,8 +48,10 @@ import {
   getOrgEnheterSomKanHaRessurser,
   getOrgTilknytninger,
   oppdaterOrgtilknytningerForRessurs,
+  ressurserKeys,
 } from "~/api/react-query-endpoints";
 import {
+  useGetSession,
   useHasAdminAccess,
   useHasAdminOrWriteAccess,
 } from "~/api/useGetSession";
@@ -53,7 +60,12 @@ import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { showToast } from "~/hooks/showToast";
-import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
+import {
+  SektorNameMapping,
+  tilknytningstyperEksterne,
+  tilknytningstyperStatlige,
+  TilknytningtypeNameMapping,
+} from "~/pages/CreateResourcePage/SektorStep";
 import {
   dolValidering,
   otCustomStortByDate,
@@ -69,7 +81,8 @@ import type {
   OrgtilknytningState,
   Ressurs,
 } from "~/types/api-models";
-import { Sektor } from "~/types/api-models";
+import { OrgEnhetsType } from "~/types/api-models";
+import { Sektor, Tilknytningtype } from "~/types/api-models";
 import {
   dateWithoutTimezone,
   earliestDateInList,
@@ -79,6 +92,7 @@ import {
   isAfterToday,
   isBeforeDate,
   isBeforeToday,
+  isGyldighetsPeriodeActive,
   isSameDateOrAfter,
   isSameDateOrBefore,
   todayWithoutTimezone,
@@ -191,6 +205,12 @@ function defaultNyOrgtilknytning(sektor: Sektor) {
     gyldigFom: "",
     gyldigTom: "",
     sektor: sektor,
+    orgtilknytningType:
+      sektor === Sektor.NAV_KOMMUNAL
+        ? Tilknytningtype.INGEN
+        : (sektor === Sektor.NAV_STATLIG
+            ? tilknytningstyperStatlige
+            : tilknytningstyperEksterne)[0],
   };
 }
 
@@ -277,6 +297,8 @@ function OrgtilknytningForm({
     name: "mappedeOrgtilknytninger",
   });
 
+  const queryClient = useQueryClient();
+
   const oppdaterOrgtilknytningerMutation = useMutation<
     unknown,
     AxiosError<Error>,
@@ -287,6 +309,10 @@ function OrgtilknytningForm({
     },
     onSuccess: async () => {
       showToast({ text: "Lagret" });
+
+      await queryClient.invalidateQueries({
+        queryKey: ressurserKeys.id(ressurs.navident),
+      });
 
       navigate({
         params: { id: ressurs.navident },
@@ -402,7 +428,7 @@ function OrgtilknytningForm({
             !hasAdminAccess &&
             overToMndGammel;
 
-          const velgSektor =
+          const editSektorTilknytningstype =
             (!existingOt ||
               fremtidig ||
               !otOriginalSektor(field) ||
@@ -460,7 +486,10 @@ function OrgtilknytningForm({
                       : undefined
                   }
                   name={`mappedeOrgtilknytninger.${index}.gyldigTom`}
-                  triggerOthers={[`mappedeOrgtilknytninger.${index}.sektor`]}
+                  triggerOthers={[
+                    `mappedeOrgtilknytninger.${index}.sektor`,
+                    `mappedeOrgtilknytninger.${index}.orgtilknytningType`,
+                  ]}
                 />
               </HStack>
 
@@ -470,7 +499,7 @@ function OrgtilknytningForm({
                 css={css`
                   display: flex;
                   align-items: center;
-                  margin-top: var(--a-spacing-2);
+                  margin-top: var(--a-spacing-0);
                 `}
                 disabled={disabled}
                 {...register(
@@ -484,15 +513,38 @@ function OrgtilknytningForm({
               </Checkbox>
 
               {hasAdminAccess && (
-                <FormSektorSelectWrapper
-                  disabled={!velgSektor}
-                  error={
-                    errors?.mappedeOrgtilknytninger?.[index]?.sektor?.message ??
-                    ""
-                  }
-                  name={`mappedeOrgtilknytninger.${index}.sektor`}
-                  triggerOthers={[`mappedeOrgtilknytninger.${index}.gyldigTom`]}
-                />
+                <div
+                  css={css`
+                    display: flex;
+                    margin-top: var(--a-spacing-4);
+                  `}
+                >
+                  <FormSektorSelectWrapper
+                    disabled={!editSektorTilknytningstype}
+                    error={
+                      errors?.mappedeOrgtilknytninger?.[index]?.sektor
+                        ?.message ?? ""
+                    }
+                    name={`mappedeOrgtilknytninger.${index}.sektor`}
+                    otOriginalSektor={otOriginalSektor(field)}
+                    tilknytningstypeField={`mappedeOrgtilknytninger.${index}.orgtilknytningType`}
+                    triggerOthers={[
+                      `mappedeOrgtilknytninger.${index}.gyldigTom`,
+                    ]}
+                  />
+
+                  <FormTilknytningstypeSelectWrapper
+                    disabled={!editSektorTilknytningstype}
+                    error={
+                      errors?.mappedeOrgtilknytninger?.[index]
+                        ?.orgtilknytningType?.message ?? ""
+                    }
+                    name={`mappedeOrgtilknytninger.${index}.orgtilknytningType`}
+                    selectedSektor={watch(
+                      `mappedeOrgtilknytninger.${index}.sektor`,
+                    )}
+                  />
+                </div>
               )}
             </div>
           );
@@ -712,7 +764,7 @@ function FormDateWrapper({
 
       await trigger(name);
 
-      if (triggerOthers) {
+      if (triggerOthers && triggerOthers.length > 0) {
         triggerOthers.map((otherField) => {
           trigger(otherField);
         });
@@ -768,13 +820,17 @@ function FormSektorSelectWrapper({
   error,
   disabled,
   triggerOthers,
+  tilknytningstypeField,
+  otOriginalSektor,
 }: {
   name: string;
   error: string;
   disabled?: boolean;
   triggerOthers?: string[];
+  tilknytningstypeField: string;
+  otOriginalSektor: Sektor | undefined;
 }) {
-  const { trigger } = useFormContext();
+  const { trigger, setValue } = useFormContext();
   const { field } = useController({
     name,
   });
@@ -803,8 +859,8 @@ function FormSektorSelectWrapper({
       {!disabled && (
         <Select
           css={css`
-            width: 20%;
             margin-left: var(--a-spacing-1);
+            height: fit-content;
           `}
           disabled={disabled}
           error={error}
@@ -815,24 +871,167 @@ function FormSektorSelectWrapper({
 
             await trigger(name);
 
-            if (triggerOthers) {
+            if (triggerOthers && triggerOthers.length > 0) {
               triggerOthers.map((otherField) => {
                 trigger(otherField);
               });
             }
+
+            const newValue = value.target.value;
+
+            if (newValue === Sektor.NAV_KOMMUNAL) {
+              setValue(tilknytningstypeField, Tilknytningtype.INGEN);
+            } else {
+              setValue(
+                tilknytningstypeField,
+                (newValue === Sektor.NAV_STATLIG
+                  ? tilknytningstyperStatlige
+                  : tilknytningstyperEksterne)[0],
+              );
+            }
           }}
+          ref={field.ref}
           size="small"
           value={field.value}
         >
           {!field.value && <option value="" />}
           {Object.values(Sektor).map((sektor) => {
-            if (sektor === Sektor.NAV_STATLIG && !hasAdminAccess) {
+            if (
+              sektor === Sektor.NAV_STATLIG &&
+              !hasAdminAccess &&
+              otOriginalSektor !== Sektor.NAV_STATLIG
+            ) {
               return;
             }
 
             return (
               <option key={sektor} value={sektor}>
                 {SektorNameMapping[sektor]}
+              </option>
+            );
+          })}
+        </Select>
+      )}
+    </div>
+  );
+}
+
+function FormTilknytningstypeSelectWrapper({
+  name,
+  error,
+  disabled,
+  triggerOthers,
+  selectedSektor,
+}: {
+  name: string;
+  error: string;
+  disabled?: boolean;
+  triggerOthers?: string[];
+  selectedSektor: Sektor | undefined;
+}) {
+  const { trigger } = useFormContext();
+
+  const { field } = useController({
+    name,
+  });
+
+  const hasAdminAccess = useHasAdminAccess();
+
+  const navident = useGetSession().data?.navident;
+
+  // TODO: Forbedre logikk; sjekke om navident har redigeringstilgang til enhet i direktoratet
+  const dinOrgenhetId = useQuery({
+    queryKey: getOrgTilknytninger.queryKey(navident as string),
+    queryFn: () => getOrgTilknytninger.queryFn(navident as string),
+    select: (organiseringer) =>
+      organiseringer
+        .filter((organisering) =>
+          isGyldighetsPeriodeActive(
+            organisering.gyldigFom,
+            organisering.gyldigTom,
+          ),
+        )
+        .find((organisering) => organisering.erDagligOppfolging)?.orgEnhetId,
+  }).data;
+
+  const brukerJobberIDirektoratet = useQuery({
+    queryKey: getOrgEnhet.queryKey(dinOrgenhetId as string),
+    queryFn: () => getOrgEnhet.queryFn(dinOrgenhetId as string),
+    enabled: !!dinOrgenhetId,
+    select: (orgEnhet) => orgEnhet.orgEnhetsType === OrgEnhetsType.DIREKTORAT,
+  }).data;
+
+  if (
+    (disabled && !field.value) ||
+    !selectedSektor ||
+    selectedSektor === Sektor.NAV_KOMMUNAL
+  ) {
+    return;
+  }
+
+  return (
+    <div
+      css={css`
+        display: flex;
+        margin-left: var(--a-spacing-8);
+      `}
+    >
+      <Label
+        css={css`
+          margin-top: 6px;
+        `}
+        size="small"
+      >
+        Tilknytningstype:
+        {disabled
+          ? ` ${TilknytningtypeNameMapping[field.value as Tilknytningtype]}`
+          : ""}
+      </Label>
+
+      {!disabled && (
+        <Select
+          css={css`
+            margin-left: var(--a-spacing-1);
+            height: fit-content;
+          `}
+          disabled={disabled}
+          error={error}
+          hideLabel
+          label={selectedSektor}
+          onChange={async (value) => {
+            field.onChange(value);
+
+            await trigger(name);
+
+            if (triggerOthers && triggerOthers.length > 0) {
+              triggerOthers.map((otherField) => {
+                trigger(otherField);
+              });
+            }
+          }}
+          ref={field.ref}
+          size="small"
+          value={field.value ?? ""}
+        >
+          {(!field.value ||
+            (selectedSektor === Sektor.NAV_STATLIG &&
+              field.value === Tilknytningtype.INGEN)) && <option value="" />}
+
+          {(selectedSektor === Sektor.EKSTERN
+            ? tilknytningstyperEksterne
+            : tilknytningstyperStatlige
+          ).map((tilknytningstype) => {
+            if (
+              tilknytningstype === Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER &&
+              !brukerJobberIDirektoratet &&
+              !hasAdminAccess
+            ) {
+              return;
+            }
+
+            return (
+              <option key={tilknytningstype} value={tilknytningstype}>
+                {TilknytningtypeNameMapping[tilknytningstype]}
               </option>
             );
           })}
@@ -1021,7 +1220,10 @@ function lagOppdaterOrgtilknytningerRequest(
         fid: orgtilknytning.fid ?? "",
         gyldigFom: orgtilknytning.gyldigFom,
         gyldigTom: orgtilknytning.gyldigTom,
-        tilknytningtype: orgtilknytning.orgtilknytningType,
+        tilknytningtype:
+          orgtilknytning.sektor === Sektor.NAV_KOMMUNAL
+            ? Tilknytningtype.INGEN
+            : orgtilknytning.orgtilknytningType,
         sektor: orgtilknytning.sektor,
       }),
     ),
@@ -1030,6 +1232,10 @@ function lagOppdaterOrgtilknytningerRequest(
       gyldigFom: orgtilknytning.gyldigFom,
       gyldigTom: orgtilknytning.gyldigTom,
       orgEnhetId: orgtilknytning.orgEnhetId,
+      tilknytningtype:
+        orgtilknytning.sektor === Sektor.NAV_KOMMUNAL
+          ? Tilknytningtype.INGEN
+          : orgtilknytning.orgtilknytningType,
       sektor: orgtilknytning.sektor ?? ressursSektor,
     })),
     setRessursSluttdato: true,
@@ -1083,7 +1289,7 @@ const orgtilknytningSchema = yup.object().shape({
       },
     }),
   sektor: yup.mixed().test({
-    name: "sektor-obligatorisk-fremtid",
+    name: "sektor-obligatorisk-fremtid-aktiv",
     message: "Obligatorisk",
     test: function (value, context) {
       const hasAdminAccess = context?.options?.context?.hasAdminAccess;
@@ -1099,6 +1305,34 @@ const orgtilknytningSchema = yup.object().shape({
       return required ? !!value : true;
     },
   }),
+  orgtilknytningType: yup
+    .mixed()
+    .nullable()
+    .test({
+      name: "tilknytningstype-obligatorisk-fremtid-aktiv",
+      message: "Obligatorisk",
+      test: function (value, context) {
+        const hasAdminAccess = context?.options?.context?.hasAdminAccess;
+
+        const otSektor = context?.parent?.sektor ?? undefined;
+
+        if (!hasAdminAccess || otSektor === Sektor.NAV_KOMMUNAL) {
+          return true;
+        }
+
+        const otTom = context?.parent?.gyldigTom ?? undefined;
+
+        const required = (otTom ? !isBeforeToday(otTom) : true) && !!otSektor;
+
+        return required
+          ? !!value &&
+              !(
+                otSektor === Sektor.NAV_STATLIG &&
+                value === Tilknytningtype.INGEN
+              )
+          : true;
+      },
+    }),
 });
 
 const formValuesSchema = yup.object().shape({

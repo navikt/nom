@@ -308,7 +308,7 @@ export enum Tilknytningtype {
   INGEN = "INGEN",
   KONSULENT = "KONSULENT",
   LAERLING = "LAERLING",
-  MIDLERTIDLIG = "MIDLERTIDLIG",
+  MIDLERTIDIG = "MIDLERTIDIG",
   PENSJONIST = "PENSJONIST",
 }
 
@@ -331,6 +331,7 @@ export interface UpdateVisningsnavnRequest {
 export enum UserRoles {
   ROLE_WRITE = "ROLE_WRITE",
   ROLE_ADMIN = "ROLE_ADMIN",
+  ROLE_PILOT = "ROLE_PILOT",
 }
 
 export interface Visningsnavn {
