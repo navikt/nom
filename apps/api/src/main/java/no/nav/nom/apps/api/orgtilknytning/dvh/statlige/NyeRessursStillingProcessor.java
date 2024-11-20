@@ -38,18 +38,13 @@ public class NyeRessursStillingProcessor {
     private final OrgtilknytningService orgtilknytningService;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final RessursStateRepository ressursStateRepository;
-    private final Unleash unleash;
-
-    public static final String LAGRE_ORGTILKNYTNINGER_I_NY_PROSESSERING_FOR_DVH_LAST = "nom.dvh-last.lagre-orgtilknytninger-i-ny-prosessering";
 
     public NyeRessursStillingProcessor(
-        OrgtilknytningService orgtilknytningService, OrgtilknytningCommandService orgtilknytningCommandService, RessursStateRepository ressursStateRepository,
-        Unleash unleash
+        OrgtilknytningService orgtilknytningService, OrgtilknytningCommandService orgtilknytningCommandService, RessursStateRepository ressursStateRepository
     ) {
         this.orgtilknytningService = orgtilknytningService;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.ressursStateRepository = ressursStateRepository;
-        this.unleash = unleash;
     }
 
     public Map<String, StrukturerteStillingPerioderForNavident>  process(Map<String, StrukturerteStillingPerioderForNavident> stillingPerioderPerNavident) {
@@ -87,7 +82,7 @@ public class NyeRessursStillingProcessor {
         endringer.addAll(opprettNye(stillingPerioderAaOpprette, sspForNavident));
         endringer.addAll(fjerngamle(eksisterendeAaFjerne));
 
-        if (!endringer.isEmpty() && unleash.isEnabled(LAGRE_ORGTILKNYTNINGER_I_NY_PROSESSERING_FOR_DVH_LAST, false)) {
+        if (!endringer.isEmpty()) {
             endringer = utfoerEndringer(endringer);
         }
 

@@ -14,7 +14,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.NyeRessursStillingProcessor.LAGRE_ORGTILKNYTNINGER_I_NY_PROSESSERING_FOR_DVH_LAST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -235,8 +234,7 @@ class E2eFraDvhTilEventsTest extends TestBase {
         prosserer = new NyeRessursStillingProcessor(
             orgtilknytningService,
             orgtilknytningCommandService,
-            ressursStateRepository,
-            unleash
+            ressursStateRepository
         );
         when(ressursStateRepository.findByNavident("A000001")).thenReturn(Optional.of(RESSURS_1));
 
@@ -246,7 +244,6 @@ class E2eFraDvhTilEventsTest extends TestBase {
         when(orgenhetService.exactMatchByAgressoId(ENHET_D1.getAgressoId())).thenReturn(List.of(ENHET_D1, ENHET_D2));
 
         when(orgtilknytningCommandService.opprettOrgtilknytning(any())).thenReturn("FID_1", "FID_2", "FID_3", "FID_4", "FID_5");
-        when(unleash.isEnabled(eq(LAGRE_ORGTILKNYTNINGER_I_NY_PROSESSERING_FOR_DVH_LAST), anyBoolean())).thenReturn(true);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(RESSURS_1));
     }
 

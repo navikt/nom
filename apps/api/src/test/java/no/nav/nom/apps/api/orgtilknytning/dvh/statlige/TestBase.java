@@ -45,8 +45,6 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
     OrgtilknytningService orgtilknytningService;
     @MockBean
     NomMastered nomMastered;
-    @MockBean
-    Unleash unleash;
 
     private Random rnd = new Random();
 
