@@ -1,6 +1,15 @@
 app:
   name: nom-paarorende
 
+spring:
+  datasource:
+    url: ${DATABASE_JDBC_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+  flyway:
+    schemas: public
+    table: schema_version
+
 management:
   metrics:
     tags:

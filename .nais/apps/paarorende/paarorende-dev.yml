@@ -40,3 +40,10 @@ spec:
     path: /internal/prometheus
   secureLogs:
     enabled: true
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_15
+        tier: db-custom-1-3840
+        databases:
+          - name: paarorende
+            envVarPrefix: DATABASE

@@ -33,7 +33,13 @@ services:
     environment:
       POSTGRES_PASSWORD: 'password'
       POSTGRES_DB: 'postgres-rdbms-data'
-
+  postgres-paarorende:
+    image: postgres
+    ports:
+      - '5436:5432'
+    environment:
+      POSTGRES_PASSWORD: 'password'
+      POSTGRES_DB: 'postgres-paarorende'
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     environment:
