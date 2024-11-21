@@ -1,0 +1,17 @@
+app:
+  name: nom-paarorende
+
+management:
+  metrics:
+    tags:
+      app: ${app.name}
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,health
+      base-path: /internal
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true

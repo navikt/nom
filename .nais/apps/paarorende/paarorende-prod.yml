@@ -1,0 +1,42 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: nom-paarorende
+  namespace: org
+  annotations:
+    nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
+    nais.io/run-as-user: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
+  labels:
+    team: org
+spec:
+  image: "{{image}}"
+  port: 8080
+  ingresses:
+    - https://paarorende.intern.nav.no
+  replicas:
+    min: 2
+    max: 2
+    cpuThresholdPercentage: 50
+  liveness:
+    path: internal/health/liveness
+    initialDelay: 30
+    periodSeconds: 5
+    failureThreshold: 5
+  readiness:
+    path: internal/health/readiness
+    initialDelay: 30
+    periodSeconds: 3
+    timeout: 4
+    failureThreshold: 2
+  resources:
+    requests:
+      cpu: 300m
+      memory: 500Mi
+    limits:
+      memory: 1Gi
+  leaderElection: true
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  secureLogs:
+    enabled: true

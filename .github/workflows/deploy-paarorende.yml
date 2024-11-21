@@ -1,0 +1,34 @@
+name: 'deploy: api'
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'dev/*'
+    paths:
+      - 'apps/paarorende/**'
+      - '.nais/apps/paarorende/paarorende*.yml'
+      - '.github/*/deploy-paarorende.yml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
+      - 'Dockerfile_distroless'
+
+jobs:
+  deploy-spring-app:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    uses: ./.github/workflows/deploy-spring-app.yaml
+    with:
+      maven-project: paarorende
+      jar-path: apps/paarorende/target/app.jar
+      image-suffix: nom-paarorende
+      nais-config-file-path-dev: .nais/apps/paarorende/paarorende-dev.yml
+      nais-config-file-path-prod: .nais/apps/paarorende/paarorende-prod.yml
+      unleash-vars-file-path: .nais/apps/paarorende/unleash-vars.yml
+      deploy-timeout: 20m
+      skip-tests: ${{ github.event.inputs.skip-tests == 'true'}}
+      dockerfile: Dockerfile_distroless
+    secrets:
+      NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+
