@@ -9,6 +9,7 @@ public enum NomApiAccessScope {
     ADMIN("ADMIN"),
     TEAMCAT("TEAMCAT"),
     NOM_UI_APP("NOM_UI_APP"),
+    NOM_PILOT("NOM_PILOT"),
     NOM_REMEDY_INTEGRASJON_APP("NOM_REMEDY_INTEGRASJON_APP");
 
     private final String scope;

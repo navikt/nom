@@ -252,6 +252,9 @@ app:
       nom-admin:
         group-id: "${NOM_ADMIN_GROUPID}"
         scopes: ["ADMIN", "MUTATE_RESSURS"]
+      nom-pilot:
+        group-id: "${NOM_PILOT_GROUPID}"
+        scopes: ["NOM_PILOT"]
   orgenhet:
     linjeenhetene: me177r,su645c,hu797w,tu734a
   google-storage-bucket-name:
@@ -390,6 +393,9 @@ app:
       nom-admin:
         group-id: "${NOM_ADMIN_GROUPID}"
         scopes: ["ADMIN", "MUTATE_RESSURS"]
+      nom-pilot:
+        group-id: "${NOM_PILOT_GROUPID}"
+        scopes: ["NOM_PILOT"]
   orgenhet:
     linjeenhetene: ry630r,ky110z,se232x,ne994m
   google-storage-bucket-name:

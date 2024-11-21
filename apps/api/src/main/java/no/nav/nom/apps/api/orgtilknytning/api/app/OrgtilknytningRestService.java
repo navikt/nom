@@ -120,7 +120,7 @@ public class OrgtilknytningRestService {
         var ressursState = ressursStateRepository.findByNavident(navident)
             .orElseThrow(() -> RessursNotFoundException.navident(navident));
         if (unleash.isEnabled("nom.ressurs.opprett_statlig")
-            && loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)) {
+            && (loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) || loggedInUserHasAccessScope(NomApiAccessScope.NOM_PILOT))) {
             log.info("Feature flag nom.ressurs.opprett_statlig is enabled, allowing update of ressurs with sektor NAV_STATLIG");
         } else if (ressursState.sektor().erStatlig()) {
             throw InvalidSektorException.actionNotAllowedForSektor(Sektor.NAV_STATLIG);
@@ -578,7 +578,7 @@ public class OrgtilknytningRestService {
             .orElseThrow(() -> RessursNotFoundException.navident(orgtilknytning.navident()));
 
         if (unleash.isEnabled("nom.ressurs.opprett_statlig")
-            && loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)) {
+            && (loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) || loggedInUserHasAccessScope(NomApiAccessScope.NOM_PILOT))) {
             log.info("Bruker har tilgang til å opprette statlig ressurs");
         } else if (tilknyttetRessurs.sektor().erStatlig()) {
             throw InvalidSektorException.actionNotAllowedForSektor(tilknyttetRessurs.sektor());
