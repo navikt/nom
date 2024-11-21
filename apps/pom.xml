@@ -24,5 +24,6 @@
         <module>nom-remedy-integrasjon</module>
         <module>admin</module>
         <module>nom-rdbms-data</module>
+        <module>paarorende</module>
     </modules>
 </project>
