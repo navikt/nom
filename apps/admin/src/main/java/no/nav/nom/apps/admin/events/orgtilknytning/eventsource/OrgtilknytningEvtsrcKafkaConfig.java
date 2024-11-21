@@ -2,7 +2,9 @@ package no.nav.nom.apps.admin.events.orgtilknytning.eventsource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +14,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JsonSerde;
 
 import java.time.Duration;
 
@@ -20,19 +23,19 @@ import java.time.Duration;
 @EnableKafka
 public class OrgtilknytningEvtsrcKafkaConfig {
     @Bean
-    ConsumerFactory<String, OrgtilknytningEvent> orgtilknytningEvtsrcConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+    ConsumerFactory<String, String> orgtilknytningEvtsrcConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
         return new DefaultKafkaConsumerFactory<>(
-            properties.buildConsumerProperties(),
+            properties.buildConsumerProperties(null),
             new StringDeserializer(),
-            new JsonDeserializer<>(OrgtilknytningEvent.class, objectMapper)
+            new StringDeserializer()
         );
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, OrgtilknytningEvent> orgtilknytningEvtsrcKafkaListenerContainerFactory(
-        ConsumerFactory<String, OrgtilknytningEvent> consumerFactory
+    ConcurrentKafkaListenerContainerFactory<String, String> orgtilknytningEvtsrcKafkaListenerContainerFactory(
+        ConsumerFactory<String, String> consumerFactory
     ) {
-        final var factory = new ConcurrentKafkaListenerContainerFactory<String, OrgtilknytningEvent>();
+        final var factory = new ConcurrentKafkaListenerContainerFactory<String, String>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);
         factory.getContainerProperties().setIdleEventInterval(5 * 1000L);
@@ -43,7 +46,40 @@ public class OrgtilknytningEvtsrcKafkaConfig {
                 log.info(container.toString());
             }
         );
-
         return factory;
     }
+
+//    @Bean
+//    public JsonSerde<S> orgtilknytningObjectSerde(ObjectMapper objectMapper){
+//        final var objectSerde = new JsonSerde<>(Object.class, objectMapper);
+//        objectSerde.deserializer().addTrustedPackages(OrgtilknytningEvent.class.getPackageName());
+//        return objectSerde;
+//    }
+
+//    @Bean
+//    ConsumerFactory<String, OrgtilknytningEvent> orgtilknytningEvtsrcConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+//        return new DefaultKafkaConsumerFactory<>(
+//            properties.buildConsumerProperties(),
+//            new StringDeserializer(),
+//            new JsonDeserializer<>(OrgtilknytningEvent.class, objectMapper)
+//        );
+//    }
+//
+//    @Bean
+//    ConcurrentKafkaListenerContainerFactory<String, OrgtilknytningEvent> orgtilknytningEvtsrcKafkaListenerContainerFactory(
+//        ConsumerFactory<String, OrgtilknytningEvent> consumerFactory
+//    ) {
+//        final var factory = new ConcurrentKafkaListenerContainerFactory<String, OrgtilknytningEvent>();
+//        factory.setConsumerFactory(consumerFactory);
+//        factory.setBatchListener(true);
+//        factory.getContainerProperties().setIdleEventInterval(5 * 1000L);
+//
+//        // If authentication towards kafka broker topic fails, retry every 10s
+//        factory.setContainerCustomizer(container -> {
+//                container.getContainerProperties().setAuthExceptionRetryInterval(Duration.ofSeconds(10));
+//                log.info(container.toString());
+//            }
+//        );
+//        return factory;
+//    }
 }
