@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8081",
+      "url": "https://nom-api.intern.dev.nav.no",
       "description": "Generated server url"
     }
   ],
@@ -367,6 +367,35 @@
         ]
       }
     },
+    "/app/orgenheter/kanHaRessurser": {
+      "get": {
+        "description": "Henter alle aktive orgenheter (har overenhet) som er løvnoder (ikke har underenheter)",
+        "operationId": "hentOrgEnheterMedLeder",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrgEnhetMedLedernavn"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "OrgEnheter"
+        ]
+      }
+    },
     "/app/orgenheter/ledetAv/{navident}": {
       "get": {
         "description": "Henter alle orgenheter som er ledet av en gitt leder",
@@ -629,6 +658,52 @@
               }
             },
             "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Orgtilknytning"
+        ]
+      }
+    },
+    "/app/orgtilknytninger/masseflytting": {
+      "post": {
+        "description": "Masseflytting av ressurs fra en enhet til en annen",
+        "operationId": "masseflytting",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MasseFlyttingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MasseFlyttingRequest"
+                }
+              }
+            },
+            "description": "Flyttingen ble utført"
+          },
+          "400": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MasseFlyttingRequest"
+                }
+              }
+            },
+            "description": "Feil i input"
           }
         },
         "security": [
@@ -908,6 +983,38 @@
               }
             },
             "description": "List of Ressurs if found or empty list"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      }
+    },
+    "/app/ressurser/byListNavident/export": {
+      "post": {
+        "description": "Genererer regneark med oversikt over ressurser for liste av navidenter",
+        "operationId": "getRessursByListNavidentExport",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Exported file"
           }
         },
         "security": [
@@ -1287,6 +1394,9 @@
             "type": "string",
             "format": "date"
           },
+          "sektor": {
+            "$ref": "#/components/schemas/Sektor"
+          },
           "tilknytningtype": {
             "$ref": "#/components/schemas/Tilknytningtype"
           }
@@ -1463,6 +1573,28 @@
           },
           "tilknytningtype": {
             "$ref": "#/components/schemas/Tilknytningtype"
+          }
+        }
+      },
+      "MasseFlyttingRequest": {
+        "required": [
+          "beholdTilganger",
+          "nyOrgenhetId",
+          "ressurserNavident"
+        ],
+        "type": "object",
+        "properties": {
+          "beholdTilganger": {
+            "type": "boolean"
+          },
+          "nyOrgenhetId": {
+            "type": "string"
+          },
+          "ressurserNavident": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -1654,6 +1786,31 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "OrgEnhetMedLedernavn": {
+        "required": [
+          "id",
+          "ledere",
+          "navn"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "ledere": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "navn": {
+            "type": "string"
+          },
+          "remedyEnhetId": {
+            "type": "string"
           }
         }
       },
@@ -2001,9 +2158,14 @@
       "Tilknytningtype": {
         "type": "string",
         "enum": [
-          "KONSULENT",
+          "ARBEIDSTRENING",
           "EKSTERN_SAMARBEIDSPARTNER",
-          "INGEN"
+          "FAST",
+          "INGEN",
+          "KONSULENT",
+          "LAERLING",
+          "MIDLERTIDIG",
+          "PENSJONIST"
         ]
       },
       "UpdateFysiskeBrukerstederRequest": {
@@ -2054,7 +2216,8 @@
         "type": "string",
         "enum": [
           "ROLE_WRITE",
-          "ROLE_ADMIN"
+          "ROLE_ADMIN",
+          "ROLE_PILOT"
         ]
       },
       "Visningsnavn": {
