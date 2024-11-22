@@ -20,15 +20,18 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationRepository;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
+import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepositoryImpl;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
@@ -57,6 +60,8 @@ import org.springframework.kafka.annotation.EnableKafka;
     , KafkaProperties.class
     , LocalConfiguration.class
     , LeaderElection.class
+    , OTUtenforHierarki.class
+    , OrgtilknytningService.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 @EnableKafka
@@ -64,6 +69,8 @@ import org.springframework.kafka.annotation.EnableKafka;
 public class OrganiseringTestConfig {
     @MockBean
     OrganiseringEventSourceRepository organiseringEventSourceRepository;
+    @MockBean
+    OrgtilknytningStateRepository orgtilknytningStateRepository;
     @MockBean
     NomStateRessursListener nomStateRessursListener;
     @MockBean

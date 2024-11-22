@@ -31,6 +31,7 @@ import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
+import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
@@ -79,6 +80,8 @@ import org.springframework.kafka.annotation.EnableKafka;
     , KafkaAutoConfiguration.class
     , EmbeddeKafkaAdminClient.class
     , LeaderElection.class
+    , OTUtenforHierarki.class
+    ,OrgtilknytningService.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 @EnableKafka

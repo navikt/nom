@@ -14,15 +14,18 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationRepository;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
+import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
@@ -41,6 +44,8 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
     , NomProxyClient.class
     , LeaderElection.class
     , ObjectMapper.class
+    , OTUtenforHierarki.class
+    , OrgtilknytningService.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 public class DvhTestConfig {
@@ -50,6 +55,8 @@ public class DvhTestConfig {
     OrgenhetService orgenhetService;
     @MockBean
     OrgEnhetStateRepository orgEnhetStateRepository;
+    @MockBean
+    OrgtilknytningStateRepository orgtilknytningStateRepository;
     @MockBean
     NomProxyRestClient nomProxyRestClient;
     @MockBean

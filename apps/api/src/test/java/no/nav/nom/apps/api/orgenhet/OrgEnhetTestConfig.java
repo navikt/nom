@@ -24,15 +24,18 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.recoverybackup.OrgEnhetEventSo
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationRepository;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
+import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
@@ -68,6 +71,8 @@ import org.springframework.kafka.annotation.EnableKafka;
     , EmbeddeKafkaAdminClient.class
     , LocalConfiguration.class
     , LeaderElection.class
+    , OTUtenforHierarki.class
+    , OrgtilknytningService.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 @EnableKafka
@@ -78,6 +83,9 @@ public class OrgEnhetTestConfig {
 
     @MockBean
     RessursStateRepository ressursStateRepository;
+
+    @MockBean
+    OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @MockBean
     NomStateRessursListener nomStateRessursListener;
