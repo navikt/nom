@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
+import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -41,6 +42,8 @@ public class DvhOrgenhetsLast {
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrgEnhetCommandService orgEnhetCommandService;
     private final OrgEnhetIdGenerator orgEnhetIdGenerator;
+
+    private final OTUtenforHierarki otUtenforHierarki;
 
     /*
     1. Enhter blir avsluttet hos oss ved at maxstillingsdato settes. sluttdato settes ikke.
@@ -196,6 +199,9 @@ public class DvhOrgenhetsLast {
                 }
             );
             log.info("Ferdig med orgenhet last");
+
+            // Finn OTer utenfor hierarki
+            otUtenforHierarki.findOTUtenforHierarki();
         } catch (Exception e) {
             log.error("Failure loading data from DVH", e);
         }
