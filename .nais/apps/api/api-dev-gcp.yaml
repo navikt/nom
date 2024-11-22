@@ -214,11 +214,11 @@ spec:
         - application: nom-remedy-integrasjon
           namespace: org
           cluster: dev-fss
-        - application: org-okonomi-mapping-backend
-          namespace: org
+        - application: orgenhet-kostnadssted-mapping-api
+          namespace: team-nof
           cluster: dev-gcp
-        - application: org-okonomi-mapping-ui
-          namespace: org
+        - application: oorgenhet-kostnadssted-mapping-web
+          namespace: team-nof
           cluster: dev-gcp
         - application: kodeverk-web
           namespace: team-rocket

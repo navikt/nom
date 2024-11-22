@@ -61,8 +61,8 @@ spec:
     - team: org
       application: org-kafka-manager
       access: read
-    - team: org
-      application: org-okonomi-mapping-backend
+    - team: team-nof
+      application: orgenhet-kostnadssted-mapping-api
       access: read
     - team: idm
       application: idm-kafka-omada-integration
