@@ -1,6 +1,9 @@
 package no.nav.nom.apps.api.orgtilknytning.api.admin;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgtilknytning.job.ImportMissingOrgtilknytninger;
 import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
@@ -28,6 +31,10 @@ public class OrgtilknytningerUtenforHierarkiController {
         this.otUtenforHierarki = otUtenforHierarki;
     }
 
+    @Operation(
+        description = "List orgtilknytninger som ligger utenfor aktiv organisasjonshierarki",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
     @GetMapping("/OrgtilknytningerUtenforHierarki")
     public ResponseEntity<HashMap<OrgtilknytningState, IOrgenhet>> OrgtilknytningerUtenforHierarki() {
         return ResponseEntity.ok(otUtenforHierarki.getOtUtenforHierarkiMedAlternativOrgenhet());
