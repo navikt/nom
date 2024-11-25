@@ -32,7 +32,7 @@ public class OTUtenforHierarki {
     public void findOTUtenforHierarki() {
         otUtenforHierarkieMedAlternativOrgenhet.clear();
 
-        var aktiveOrgenheter = orgenhetService.getAllEnheter();
+        var aktiveOrgenheter = orgenhetService.getAllEnheterMedOrganisering();
         var aktiveOrgenhetIder = aktiveOrgenheter.stream().map(IOrgenhet::getId).toList();
         var oterUtenforHierarki = orgtilknytningService.getAll().stream()
             .filter(ot -> !aktiveOrgenhetIder.contains(ot.orgEnhetId()))
