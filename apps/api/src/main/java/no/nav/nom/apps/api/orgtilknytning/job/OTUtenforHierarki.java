@@ -64,7 +64,11 @@ public class OTUtenforHierarki {
         var logg = new StringBuilder();
         oterUtenforHierarki.forEach((ot, orgenhet) -> {
             logg.append("   Orgtilknytning: ").append(ot).append("\n");
-            logg.append("      Alternativ orgenhet: ").append(orgenhet).append("\n");
+            if (orgenhet == null) {
+                logg.append("      Fant ikke alternativ orgenhet\n");
+            } else {
+                logg.append("      Alternativ orgenhet: ").append(orgenhet.getId()).append(orgenhet.getNavn()).append("\n");
+            }
         });
         return logg.toString();
     }
