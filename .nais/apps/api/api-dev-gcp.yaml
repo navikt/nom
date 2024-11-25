@@ -217,7 +217,7 @@ spec:
         - application: orgenhet-kostnadssted-mapping-api
           namespace: team-nof
           cluster: dev-gcp
-        - application: oorgenhet-kostnadssted-mapping-web
+        - application: orgenhet-kostnadssted-mapping-web
           namespace: team-nof
           cluster: dev-gcp
         - application: kodeverk-web
