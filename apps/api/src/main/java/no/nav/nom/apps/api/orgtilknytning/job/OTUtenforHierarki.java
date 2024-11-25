@@ -67,7 +67,7 @@ public class OTUtenforHierarki {
             if (orgenhet == null) {
                 logg.append("      Fant ikke alternativ orgenhet\n");
             } else {
-                logg.append("      Alternativ orgenhet: ").append(orgenhet.getId()).append(orgenhet.getNavn()).append("\n");
+                logg.append("      Alternativ orgenhet: ").append(orgenhet.getId()).append(" ").append(orgenhet.getNavn()).append("\n");
             }
         });
         return logg.toString();
