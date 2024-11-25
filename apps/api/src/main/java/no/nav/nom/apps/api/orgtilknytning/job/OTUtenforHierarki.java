@@ -57,7 +57,6 @@ public class OTUtenforHierarki {
         return aktiveOrgenheter.stream()
             .filter(oe -> oe.getAgressoId().equals(faktiskOrgenhet.getAgressoId()))
             .filter(oe -> oe.getOrgNiv().equals(faktiskOrgenhet.getOrgNiv()))
-            .filter(oe -> oe.getGyldigFom().isEqual(faktiskOrgenhet.getGyldigFom()))
             .findFirst().orElse(null);
     }
 
