@@ -95,7 +95,11 @@ function OrgEnhetSanityChecks() {
         <option value={"DuplikateEnheter"}>
           List Duplikate enheter på samme unike agressoId
         </option>
-        <option value={"Bunn enheter som ikke har eksakt 1 arbeidsområde hierarkiet i stier"}>
+        <option
+          value={
+            "Bunn enheter som ikke har eksakt 1 arbeidsområde hierarkiet i stier"
+          }
+        >
           Bunn enheter som ikke har eksakt 1 arbeidsområde hierarkiet i stier
         </option>
       </Select>
