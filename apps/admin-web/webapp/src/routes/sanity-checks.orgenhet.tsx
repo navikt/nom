@@ -59,7 +59,9 @@ function ListSelector(props: { selected: string }) {
       return <DuplikateEnheter />;
     }
     case "Bunn enheter som ikke har eksakt 1 arbeidsområde hierarkiet i stier": {
-      const orgEnhetOrganisering = useQuery(getBunEnheterUtenEksakt1ArbeidsomradeIHierarkiet());
+      const orgEnhetOrganisering = useQuery(
+        getBunEnheterUtenEksakt1ArbeidsomradeIHierarkiet(),
+      );
       return (
         <OrgEnhetOrganiseringTabell
           orgEnhetOrganisering={orgEnhetOrganisering}
