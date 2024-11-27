@@ -291,7 +291,7 @@ public class OrgEnhetSanityCheckService {
         List<OrganiseringState> aktiveOrganiseringer
     ) {
         OrganiseringState organiseringState = getOrganiseringState(orgEnhetState.id(), aktiveOrganiseringer);
-        log.info("In findAllOrgenheterOver orgEnhetState: {}, organiseringState: {}", orgEnhetState, organiseringState);
+        //log.info("In findAllOrgenheterOver orgEnhetState: {}, organiseringState: {}", orgEnhetState, organiseringState);
 
         if(organiseringState == null) {
             return orgenheterSoFar;
