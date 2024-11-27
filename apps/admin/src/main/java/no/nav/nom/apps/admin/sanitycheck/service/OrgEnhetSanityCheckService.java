@@ -291,12 +291,18 @@ public class OrgEnhetSanityCheckService {
         List<OrganiseringState> aktiveOrganiseringer
     ) {
         OrganiseringState organiseringState = getOrganiseringState(orgEnhetState.id(), aktiveOrganiseringer);
-        Optional<OrgEnhetState> overOrgEnhenState = Optional.ofNullable(getOrgEnhetState(organiseringState.idOver(), aktiveEnheter));
-        return overOrgEnhenState
-            .map(ooe -> {
-                orgenheterSoFar.add(ooe);
-                return findAllOrgenheterOver(ooe, orgenheterSoFar, aktiveEnheter, aktiveOrganiseringer);
-            })
-            .orElse(orgenheterSoFar);
+        log.info("In findAllOrgenheterOver orgEnhetState: {}, organiseringState: {}", orgEnhetState, organiseringState);
+
+        if(organiseringState == null) {
+            return orgenheterSoFar;
+        } else {
+            Optional<OrgEnhetState> overOrgEnhenState = Optional.ofNullable(getOrgEnhetState(organiseringState.idOver(), aktiveEnheter));
+            return overOrgEnhenState
+                .map(ooe -> {
+                    orgenheterSoFar.add(ooe);
+                    return findAllOrgenheterOver(ooe, orgenheterSoFar, aktiveEnheter, aktiveOrganiseringer);
+                })
+                .orElse(orgenheterSoFar);
+        }
     }
 }
