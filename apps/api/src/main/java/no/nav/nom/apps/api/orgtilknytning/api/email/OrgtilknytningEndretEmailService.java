@@ -34,6 +34,7 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class OrgtilknytningEndretEmailService {
@@ -108,9 +109,7 @@ public class OrgtilknytningEndretEmailService {
         Map<String, List<OTEndretData>> otEndringer = cacheQueueService.getOTEndringerFromCache();
         //Note: print the queue for debugging. To be removed later
         log.info("otEndringer size: {}", otEndringer.size());
-        otEndringer.forEach((navident, endringer) -> {
-            log.info("navident: {}, endringer: {}", navident, endringer);
-        });
+        otEndringer.forEach((navident, endringer) -> log.info("navident: {}, endringer: {}", navident, endringer));
 
         otEndringer.forEach((navident, endringer) -> {
             var endretRessurs = ressursStateRepository.findByNavident(navident);
@@ -169,8 +168,13 @@ public class OrgtilknytningEndretEmailService {
                 .map(RessursState::visningsnavn)
                 .map(Visningsnavn::getFormattedVisningsnavn)
                 .orElse("UKJENT");
-            var recipientList = adClient.getAdRessurser(Set.of(innsenderNavident)).getRessurser().stream().map(AdRessurs::getEmail).toList();
-            var gammelOrgEnhet = orgEnhetStateRepository.findByFid(masseFlyttingRequest.orgtilknytningerFid().getFirst()).map(OrgEnhetState::navn).orElse("Ukjent");
+            var recipientList = adClient.getAdRessurser(Set.of(innsenderNavident)).getRessurser().stream()
+                .map(AdRessurs::getEmail)
+                .collect(Collectors.toList());
+            recipientList.addAll(getAdditionalRecipientsEmails());
+            var gammelOrgEnhet = orgEnhetStateRepository.findByFid(masseFlyttingRequest.orgtilknytningerFid().getFirst())
+                .map(OrgEnhetState::navn)
+                .orElse("Ukjent");
 
             String subject = String.format("Masseflytting av ressurser fra %s til %s", gammelOrgEnhet, masseFlyttingRequest.nyOrgenhetId());
             String body = getFormattedEmailBody(masseFlyttingRequest, failedAvvikleOrgtilknytninger, antallFlyttet, gammelOrgEnhet, innsenderVisningsnavn);
@@ -206,7 +210,7 @@ public class OrgtilknytningEndretEmailService {
             "feiletAntall", failedAvvikleOrgtilkninger.size(),
             "total", masseFlyttingRequest.orgtilknytningerFid().size(),
             "gammelOrgEnhet", gammelOrgEnhet,
-            "feiletNavidenter", failedAvvikleOrgtilkninger.stream().map(OrgtilknytningState::navident).toList(),
+            "feiletNavidenter", failedAvvikleOrgtilkninger.stream().map(OrgtilknytningState::navident).collect(Collectors.joining(",\n")),
             "innsenderVisningsnavn", innsenderVisningsnavn
         );
         log.info("Masseflytting epost body: {}", model);
@@ -230,12 +234,12 @@ public class OrgtilknytningEndretEmailService {
             var orgtilknytningState =  orgtilknytningStateRepository.findByFid(event.fid());
             var utfortAvNavIdent = event.changedByNavIdent();
             var utfortAvRessurs = ressursStateRepository.findByNavident(utfortAvNavIdent);
-            String utfortAvRessursNavn = utfortAvRessurs.isPresent()? utfortAvRessurs.get().visningsnavn().getFormattedVisningsnavn() : "Ukjent";
+            String utfortAvRessursNavn = utfortAvRessurs.map(ressursState -> ressursState.visningsnavn().getFormattedVisningsnavn()).orElse("Ukjent");
             if(orgtilknytningState.isPresent()){
                 var ot = orgtilknytningState.get();
                 log.info("Sender OT endringer for navident:{} orgtilknytningState: {}, and formated dates: {}, {}", event.navident() , ot, formatDateTime(ot.gyldigFom()), formatDateTime(ot.gyldigTom().isPresent()?ot.gyldigTom().get():null));
                 log.info("Sender OT endringer utfortAv: {}, {}, {}", utfortAvNavIdent, utfortAvRessurs, utfortAvRessursNavn);
-                var orgenhetNavn = orgEnhetStateRepository.findById(ot.orgEnhetId()).map(orgEnhet -> orgEnhet.navn()).orElse("Ukjent");
+                var orgenhetNavn = orgEnhetStateRepository.findById(ot.orgEnhetId()).map(OrgEnhetState::navn).orElse("Ukjent");
                 String endring = MessageFormat.format(epost_body_item_template,
                     orgenhetNavn, ot.orgEnhetId(), formatDateTime(ot.gyldigFom()), formatDateTime(ot.gyldigTom().isPresent()?ot.gyldigTom().get():null), utfortAvRessursNavn, event.timestamp());
                 otEndringer.append(endring);
@@ -282,7 +286,7 @@ public class OrgtilknytningEndretEmailService {
                     log.info("Orgenhet og leder ved OT endriner: {}, {}", orgenhetState.get(), leader);
                     if(!leader.isEmpty()) {
                         // add the leader of the orgenhet
-                        recipientNavidents.add(leader.get(0).getRessurs().getNavIdent());
+                        recipientNavidents.add(leader.getFirst().getRessurs().getNavIdent());
                     }
                 }
             }
@@ -295,6 +299,7 @@ public class OrgtilknytningEndretEmailService {
         List<String> additionalRecipients = new ArrayList<>();
         additionalRecipients.add("Line.Eeg-Larsen@nav.no");
         additionalRecipients.add("Linn.Renate.Fredriksen@nav.no");
+        additionalRecipients.add("Mugunthan.Dharmadas@nav.no");
         return additionalRecipients;
     }
 }

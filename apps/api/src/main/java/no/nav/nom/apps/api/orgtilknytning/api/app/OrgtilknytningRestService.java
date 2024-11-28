@@ -41,6 +41,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -623,22 +624,25 @@ public class OrgtilknytningRestService {
         List<OrgtilknytningState> orgtilknytninger = orgtilknytningStateRepository.findByFidIn(masseFlyttingRequest.orgtilknytningerFid());
 
         orgtilknytninger.forEach(orgtilknytningState -> {
-            orgtilknytningCommandService.avvikleOrgtilknytning(
-                orgtilknytningState.fid(),
-                new AvvikleOrgtilknytning(
-                    orgtilknytningState.navident(),
-                    orgtilknytningState.orgEnhetId(),
-                    LocalDate.now().minusDays(1),
-                    new InputMetadata(
-                        "REST",
-                        "masseflytting",
-                        null,
-                        origination
-                    ),
-                    null
-                )
-            );
-            nomMastered.markRessursAsMasteredInNom(orgtilknytningState.navident());
+            if ((orgtilknytningState.gyldigTom().isPresent() && orgtilknytningState.gyldigTom().get().isAfter(LocalDate.now()))
+                || orgtilknytningState.gyldigTom().isEmpty()) {
+                orgtilknytningCommandService.avvikleOrgtilknytning(
+                    orgtilknytningState.fid(),
+                    new AvvikleOrgtilknytning(
+                        orgtilknytningState.navident(),
+                        orgtilknytningState.orgEnhetId(),
+                        LocalDate.now().minusDays(1),
+                        new InputMetadata(
+                            "REST",
+                            "masseflytting",
+                            null,
+                            origination
+                        ),
+                        null
+                    )
+                );
+                nomMastered.markRessursAsMasteredInNom(orgtilknytningState.navident());
+            }
         });
         orgtilknytninger.forEach(orgtilknytningState -> {
             if ((orgtilknytningState.gyldigTom().isPresent() && orgtilknytningState.gyldigTom().get().isAfter(LocalDate.now()))
@@ -700,8 +704,14 @@ public class OrgtilknytningRestService {
                 );
             }
         });
+        List<OrgtilknytningState> ikkeAvsluttedeOrgtilknytninger = new ArrayList<>(orgtilknytningStateRepository.findByFidIn(masseFlyttingRequest.orgtilknytningerFid())
+            .stream()
+            .filter(orgtilknytningState -> orgtilknytningState.gyldigTom().isPresent() && orgtilknytningState.gyldigTom()
+                .get()
+                .equals(LocalDate.now().minusDays(1)))
+            .toList());
 
-        orgtilknytningEndretEmailService.sendEmail(masseFlyttingRequest, orgtilknytninger, innsenderNavident, antallRessurserFlyttet);
+        orgtilknytningEndretEmailService.sendEmail(masseFlyttingRequest, ikkeAvsluttedeOrgtilknytninger, innsenderNavident, antallRessurserFlyttet);
 
     }
 
