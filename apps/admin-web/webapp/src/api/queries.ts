@@ -254,6 +254,18 @@ export function getEnheterUtenOverenheter() {
   });
 }
 
+export function getBunEnheterUtenEksakt1ArbeidsomradeIHierarkiet() {
+  return queryOptions({
+    queryKey: ["API", "ORGENHETUTENOVERENHET"],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/SanityCheck/orgenhet/bunnEnheterSomIkkeHarEksakt1ArbeidsomradeIOrghierarkietStier`,
+        )
+      ).json<OrgEnhetOrganisering[]>(),
+  });
+}
+
 export function getEnheterUtenOverenheterMedUnderEnheter() {
   return queryOptions({
     queryKey: ["API", "ORGENHETUTENOVERENHETMEDUNDERENHETER"],

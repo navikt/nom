@@ -101,4 +101,18 @@ public class OrgEnhetSanityCheckController {
     public ResponseEntity<List<OrgEnhetState>> listDuplikateEnheter() {
         return ResponseEntity.ok(orgEnhetSanityCheckService.finnDuplikateEnheter());
     }
+
+    @Operation(
+        description = "List bunn enheter uten eksakt 1 arbeidsområde i hierarkiet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/bunnEnheterSomIkkeHarEksakt1ArbeidsomradeIOrghierarkietStier")
+    public ResponseEntity<List<OrgEnhetOrganisering>> bunnEnheterSomIkkeHarEksakt1ArbeidsomradeIOrghierarkietStier() {
+        return ResponseEntity.ok(orgEnhetSanityCheckService.bunnEnheterSomIkkeHarEksakt1ArbeidsomradeIOrghierarkietStier());
+    }
 }

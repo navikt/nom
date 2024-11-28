@@ -5,6 +5,7 @@ import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import {
+  getBunEnheterUtenEksakt1ArbeidsomradeIHierarkiet,
   getEnheterUtenOverenheter,
   getEnheterUtenOverenheterMedUnderEnheter,
 } from "~/api/queries.ts";
@@ -57,6 +58,16 @@ function ListSelector(props: { selected: string }) {
     case "DuplikateEnheter": {
       return <DuplikateEnheter />;
     }
+    case "Bunn enheter som ikke har eksakt 1 arbeidsområde hierarkiet i stier": {
+      const orgEnhetOrganisering = useQuery(
+        getBunEnheterUtenEksakt1ArbeidsomradeIHierarkiet(),
+      );
+      return (
+        <OrgEnhetOrganiseringTabell
+          orgEnhetOrganisering={orgEnhetOrganisering}
+        />
+      );
+    }
     default: {
       return <></>;
     }
@@ -83,6 +94,13 @@ function OrgEnhetSanityChecks() {
         </option>
         <option value={"DuplikateEnheter"}>
           List Duplikate enheter på samme unike agressoId
+        </option>
+        <option
+          value={
+            "Bunn enheter som ikke har eksakt 1 arbeidsområde hierarkiet i stier"
+          }
+        >
+          Bunn enheter som ikke har eksakt 1 arbeidsområde hierarkiet i stier
         </option>
       </Select>
       <ListSelector selected={handleChange} />

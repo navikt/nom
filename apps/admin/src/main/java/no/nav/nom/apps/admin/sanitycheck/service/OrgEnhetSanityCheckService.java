@@ -3,6 +3,7 @@ package no.nav.nom.apps.admin.sanitycheck.service;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.EnheterOgOrganisering;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetStartOgSluttdato;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetOrganisering;
+import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Comparator.comparing;
@@ -208,5 +210,99 @@ public class OrgEnhetSanityCheckService {
 
     private static List<OrgEnhetState> enheterIkkeBlantEnhetIder(List<OrgEnhetState> enheter, List<String> enehtIder) {
         return enheter.stream().filter(e -> !enehtIder.contains(e.id())).toList();
+    }
+
+
+    public List<OrgEnhetOrganisering> bunnEnheterSomIkkeHarEksakt1ArbeidsomradeIOrghierarkietStier() {
+        List<OrgEnhetState> alleEnheter =  orgEnhetStateRepository.getAll().stream().toList();
+        List<OrgEnhetState> aktiveEnheter = aktiveEnheter(alleEnheter);
+        List<OrganiseringState> aktiveOrganiseringer = organiseringStateRepository.getOrganiseringer();
+
+        List<String> bunnEnheter = aktiveOrganiseringer
+            .stream()
+            .map(OrganiseringState::id)
+            .filter(id -> !hasUnderEnhet(id, aktiveOrganiseringer))
+            .toList();
+        log.info("Lister bunn enheter: {}", bunnEnheter);
+
+        List<OrgEnhetState> bunnEnheterUtenEksakt1arbeidsomradeIHierarkiet = bunnEnheter
+            .stream()
+            .filter(bunnEnhet -> !hasExactly1ArbeidsomradeIOrganisasjonshierarkietStier(bunnEnhet, aktiveEnheter, aktiveOrganiseringer))
+            .map(bunnEnhet -> getOrgEnhetState(bunnEnhet, aktiveEnheter))
+            .filter(Objects::nonNull)
+            .toList();
+        log.info("Lister bunn enheter som ikke har kksakt 1 arbeidsomrade i orghierarkiet: {}", bunnEnheterUtenEksakt1arbeidsomradeIHierarkiet);
+
+
+        return bunnEnheterUtenEksakt1arbeidsomradeIHierarkiet.stream()
+            .map(oe ->
+                new OrgEnhetOrganisering(
+                    oe.id(),
+                    oe.uniqueAgressoId().orElse(""),
+                    oe.gyldigFom(),
+                    oe.gyldigTom().orElse(null)))
+            .toList();
+    }
+
+    private static OrgEnhetState getOrgEnhetState(String orgEnhetId, List<OrgEnhetState> aktiveEnheter) {
+        return aktiveEnheter.
+            stream()
+            .filter(oe -> oe.id().equals(orgEnhetId))
+            .findFirst().orElse(null);
+    }
+
+    private static OrganiseringState getOrganiseringState(String orgEnhetId, List<OrganiseringState> aktiveOrganiseringer) {
+        return aktiveOrganiseringer.
+            stream()
+            .filter(oe -> oe.id().equals(orgEnhetId))
+            .findFirst().orElse(null);
+    }
+
+    private boolean hasUnderEnhet(String orgEnhetId, List<OrganiseringState> organiseringer) {
+        return organiseringer.stream().anyMatch(organisering -> orgEnhetId.equals(organisering.idOver()));
+    }
+
+
+    // return true if the orgEnhetId has exactly one arbeidsomrade in the organisasjonshierarkiet stier
+    // return false otherwise
+    private boolean hasExactly1ArbeidsomradeIOrganisasjonshierarkietStier(
+        String orgEnhetId,
+        List<OrgEnhetState> aktiveEnheter,
+        List<OrganiseringState> aktiveOrganiseringer
+    ) {
+        OrgEnhetState orgEnhetState = getOrgEnhetState(orgEnhetId, aktiveEnheter);
+        List<OrgEnhetState> orgenheterOver = findAllOrgenheterOver(orgEnhetState, aktiveEnheter, aktiveOrganiseringer);
+        return orgenheterOver
+            .stream()
+            .filter(oe -> oe.nomNivaa().equals(Optional.of(NomNivaa.ARBEIDSOMRAADE)))
+            .count() == 1;
+    }
+
+    private List<OrgEnhetState> findAllOrgenheterOver(OrgEnhetState orgEnhetState,
+                                                      List<OrgEnhetState> aktiveEnheter,
+                                                      List<OrganiseringState> aktiveOrganiseringer) {
+        return findAllOrgenheterOver(orgEnhetState, new ArrayList<>(), aktiveEnheter, aktiveOrganiseringer);
+    }
+
+    private List<OrgEnhetState> findAllOrgenheterOver(
+        OrgEnhetState orgEnhetState,
+        ArrayList<OrgEnhetState> orgenheterSoFar,
+        List<OrgEnhetState> aktiveEnheter,
+        List<OrganiseringState> aktiveOrganiseringer
+    ) {
+        OrganiseringState organiseringState = getOrganiseringState(orgEnhetState.id(), aktiveOrganiseringer);
+        //log.info("In findAllOrgenheterOver orgEnhetState: {}, organiseringState: {}", orgEnhetState, organiseringState);
+
+        if(organiseringState == null) {
+            return orgenheterSoFar;
+        } else {
+            Optional<OrgEnhetState> overOrgEnhenState = Optional.ofNullable(getOrgEnhetState(organiseringState.idOver(), aktiveEnheter));
+            return overOrgEnhenState
+                .map(ooe -> {
+                    orgenheterSoFar.add(ooe);
+                    return findAllOrgenheterOver(ooe, orgenheterSoFar, aktiveEnheter, aktiveOrganiseringer);
+                })
+                .orElse(orgenheterSoFar);
+        }
     }
 }
