@@ -45,7 +45,8 @@ public class OrgtilknytningCommandService {
                 opprettOrgtilknytning.navident(),
                 opprettOrgtilknytning.orgenhetId(),
                 opprettOrgtilknytning.sektor(),
-                opprettOrgtilknytning.gyldigFom()
+                opprettOrgtilknytning.gyldigFom(),
+                opprettOrgtilknytning.masseflyttetFraFid()
             ),
             opprettOrgtilknytning.inputMetadata(),
             opprettOrgtilknytning.additionalAgressoData()

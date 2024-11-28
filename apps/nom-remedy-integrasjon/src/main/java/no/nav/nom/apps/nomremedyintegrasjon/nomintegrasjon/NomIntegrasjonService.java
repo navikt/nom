@@ -12,6 +12,7 @@ import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.Nom
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
@@ -332,6 +333,7 @@ public class NomIntegrasjonService {
             .enhetsId(remedyEnhetIdForOrgenhet)
             .tiltredelsesdato(epochSecondsNorwegianTimeNoon(orgtilknytningDatoEndretEventData.gyldigFom()))
             .utlopsdato(isNull(gyldigTom) ? null : epochSecondsNorwegianTimeEndOfDay(gyldigTom))
+            .masseflytting(!isNull(orgtilknytningState.getMasseflyttetFraFid()) ? "X" : null)
             .build();
 
         saveNewNomIntegrasjonEntity(
@@ -342,6 +344,10 @@ public class NomIntegrasjonService {
 
     private void updateOrgtilknytning(OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
         logger.info("Updating remedy data for OrgtilknytningDagligOppfolgingEndretEventV1 with fid {}", orgtilknytningDagligOppfolgingEndretEventV1.getFid());
+
+        var ressursSkalBeholdeTilganger =
+            orgtilknytningDagligOppfolgingEndretEventV1.getMetadata().inputMetadata().inputInterfaceMethodName().equals("masseflytting")
+                && erMasseflytting(orgtilknytningDagligOppfolgingEndretEventV1.getMetadata().inputMetadata());
 
         var orgtilknytningDagligOppfolgingEndretEventData = orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData();
 
@@ -358,6 +364,7 @@ public class NomIntegrasjonService {
             .enhetsId(newRemedyEnhetId)
             .tiltredelsesdato(epochSecondsNorwegianTimeNoon(orgtilknytningDagligOppfolgingEndretEventData.gyldigFom()))
             .utlopsdato(isNull(gyldigTom) ? null : epochSecondsNorwegianTimeEndOfDay(gyldigTom))
+            .masseflytting(ressursSkalBeholdeTilganger ? "X" : null)
             .build();
 
         saveNewNomIntegrasjonEntity(
@@ -834,6 +841,14 @@ public class NomIntegrasjonService {
                     .build()
             )
             .toList();
+    }
+
+    private boolean erMasseflytting(InputMetadata inputMetadata) {
+        Map<String, Object> inputInterfaceMethodArguments = objectMapper.convertValue(
+            inputMetadata.inputInterfaceMethodArguments(),
+            new TypeReference<>() {}
+        );
+        return (boolean) inputInterfaceMethodArguments.get("beholdTilgang");
     }
 
     protected Integer nomSektorToRemedyCode(no.nav.nom.generated.model.Sektor sektor) {

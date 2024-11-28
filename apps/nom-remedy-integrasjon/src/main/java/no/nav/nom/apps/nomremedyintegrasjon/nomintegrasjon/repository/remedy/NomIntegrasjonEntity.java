@@ -68,4 +68,10 @@ public class NomIntegrasjonEntity {
     @Column(name = "MOBIL")
     private String mobil;
 
+    @Column(name = "DIREKTE_TELEFON")
+    private String direkteTelefon;
+
+    @Column(name = "MASSEFLYTTING")
+    private String masseflytting;
+
 }

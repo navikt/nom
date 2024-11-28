@@ -372,6 +372,7 @@ public class EksterneRessurserProcessor {
             orgenhet.getId(),
             null,
             gyldigFom,
+            null,
             metadata,
             null
         );

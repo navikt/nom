@@ -12,6 +12,7 @@ import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilkn
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytningCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDatoCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningSektorCommand;
@@ -42,6 +43,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -58,17 +60,17 @@ import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAcc
 
 @Service
 public class OrgtilknytningRestService {
+    private final static Logger log = LoggerFactory.getLogger(OrgtilknytningRestService.class);
 
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
-    private final OrgtilknytningCommandService orgtilknytningCommandService;
-    private final RessursCommandService ressursCommandService;
     private final RessursStateRepository ressursStateRepository;
     private final NomMastered nomMastered;
-    private final static Logger log = LoggerFactory.getLogger(OrgtilknytningRestService.class);
+    private final OrgtilknytningCommandService orgtilknytningCommandService;
+    private final RessursCommandService ressursCommandService;
     private final AuthorizedNavident authorizedNavident;
     private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
-    private final Unleash unleash;
 
+    private final Unleash unleash;
     private final Environment env;
 
     public OrgtilknytningRestService(
@@ -611,6 +613,96 @@ public class OrgtilknytningRestService {
             fid,
             OTEndretData.OTEndretDataType.OT_ENDRET,
             SecurityUtil.getAuthenticatedAzpName());
+    }
+
+    public void masseflyttingAvRessurser(MasseFlyttingRequest masseFlyttingRequest) {
+        var innsenderNavident = SecurityUtil.getAuthenticatedNavIdent();
+        int antallRessurserFlyttet = masseFlyttingRequest.orgtilknytningerFid().size();
+        var origination = new Origination(innsenderNavident, SecurityUtil.getAuthenticatedAzpName());
+
+        List<OrgtilknytningState> orgtilknytninger = orgtilknytningStateRepository.findByFidIn(masseFlyttingRequest.orgtilknytningerFid());
+
+        orgtilknytninger.forEach(orgtilknytningState -> {
+            orgtilknytningCommandService.avvikleOrgtilknytning(
+                orgtilknytningState.fid(),
+                new AvvikleOrgtilknytning(
+                    orgtilknytningState.navident(),
+                    orgtilknytningState.orgEnhetId(),
+                    LocalDate.now().minusDays(1),
+                    new InputMetadata(
+                        "REST",
+                        "masseflytting",
+                        null,
+                        origination
+                    ),
+                    null
+                )
+            );
+            nomMastered.markRessursAsMasteredInNom(orgtilknytningState.navident());
+        });
+        orgtilknytninger.forEach(orgtilknytningState -> {
+            if ((orgtilknytningState.gyldigTom().isPresent() && orgtilknytningState.gyldigTom().get().isAfter(LocalDate.now()))
+                || orgtilknytningState.gyldigTom().isEmpty()) {
+                var inputMetadata = new InputMetadata(
+                    "REST",
+                    "masseflytting",
+                    new HashMap<>(
+                        Map.of(
+                            "beholdTilgang", masseFlyttingRequest.beholdTilganger(),
+                            "fraOrgtilknytningFid", orgtilknytningState.fid()
+                        )),
+                    origination
+                );
+                var opprettetOrgtilknytningFid = orgtilknytningCommandService.opprettOrgtilknytning(
+                    new OpprettOrgtilknytning(
+                        orgtilknytningState.navident(),
+                        masseFlyttingRequest.nyOrgenhetId(),
+                        orgtilknytningState.sektor(),
+                        LocalDate.now(),
+                        masseFlyttingRequest.beholdTilganger() ? orgtilknytningState.fid() : null,
+                        inputMetadata,
+                        null
+                    )
+                );
+                orgtilknytningState.gyldigTom().ifPresent(gyldigTom -> orgtilknytningCommandService.avvikleOrgtilknytning(
+                    opprettetOrgtilknytningFid,
+                    new AvvikleOrgtilknytning(
+                        orgtilknytningState.navident(),
+                        masseFlyttingRequest.nyOrgenhetId(),
+                        gyldigTom,
+                        inputMetadata,
+                        null
+                    )
+                ));
+
+                if (orgtilknytningState.erDagligOppfolging()) {
+                    orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(
+                        EndreDagligOppfolgingOrgtilknytningCommand.builder()
+                            .fid(opprettetOrgtilknytningFid)
+                            .navident(orgtilknytningState.navident())
+                            .orgenhetId(masseFlyttingRequest.nyOrgenhetId())
+                            .gyldigFom(LocalDate.now())
+                            .gyldigTom(orgtilknytningState.gyldigTom())
+                            .erDagligOppfolging(true)
+                            .inputMetadata(inputMetadata)
+                            .additionalAgressoData(null)
+                            .build()
+                    );
+                }
+
+                orgtilknytningCommandService.endreTilknytningtype(
+                    EndreTilknytningtypeCommand.builder()
+                        .fid(opprettetOrgtilknytningFid)
+                        .tilknytningtype(orgtilknytningState.orgtilknytningType().isPresent() ? orgtilknytningState.orgtilknytningType() : Optional.of(
+                            Tilknytningtype.INGEN))
+                        .inputMetadata(inputMetadata)
+                        .build()
+                );
+            }
+        });
+
+        orgtilknytningEndretEmailService.sendEmail(masseFlyttingRequest, orgtilknytninger, innsenderNavident, antallRessurserFlyttet);
+
     }
 
     public static void validateOrgtilknytningTypeSektorCombination(Tilknytningtype tilknytningtype, Sektor sektor) {

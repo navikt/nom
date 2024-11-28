@@ -149,11 +149,12 @@ public class OrgtilknytningController {
         @ApiResponse(responseCode = "400", description = "Feil i input"),
     })
     @PreAuthorize(
-        "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
+        /*"hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP') &&*/ "hasAuthority('ADMIN')"
     )
     public ResponseEntity<MasseFlyttingRequest> masseflytting(
         @Valid @RequestBody MasseFlyttingRequest masseFlyttingRequest
     ) {
+        orgtilknytningRestService.masseflyttingAvRessurser(masseFlyttingRequest);
         return ResponseEntity.ok(masseFlyttingRequest);
     }
 

@@ -288,6 +288,7 @@ public class TestData {
             v1.getOrgtilknytningDagligOppfolgingEndretEventData().dagligOppfolging(),
             v1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom(),
             v1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom(),
+            Optional.empty(),
             Optional.empty()
         );
     }

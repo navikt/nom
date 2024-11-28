@@ -131,7 +131,7 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
         String orgtilknytningFid = "OT_FID_1";
 
         final RessursOpprettetEventV1 ressursEvent = ressursOpprettetEvent(ressursFid, navident);
-        final OrgtilknytningOpprettetEventV1 orgtilknytningEvent = orgtilknytningOpprettetEvent(orgtilknytningFid, navident, enhet, sektor);
+        final OrgtilknytningOpprettetEventV1 orgtilknytningEvent = orgtilknytningOpprettetEvent(orgtilknytningFid, navident, enhet, sektor, null);
 
         ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursEvent);
         orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), orgtilknytningEvent);
@@ -164,7 +164,7 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
         String orgtilknytningFid = "OT_FID_1";
 
         final RessursOpprettetEventV1 ressursEvent = ressursOpprettetEvent(ressursFid, navident);
-        final OrgtilknytningOpprettetEventV1 orgtilknytningEvent = orgtilknytningOpprettetEvent(orgtilknytningFid, navident, enhet, sektor);
+        final OrgtilknytningOpprettetEventV1 orgtilknytningEvent = orgtilknytningOpprettetEvent(orgtilknytningFid, navident, enhet, sektor, null);
 
         orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), orgtilknytningEvent);
         ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursEvent);
@@ -197,7 +197,7 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
         LocalDate sluttdato = LocalDate.now().plusMonths(2);
 
         final RessursOpprettetEventV1 ressursEvent = ressursOpprettetEvent(ressursFid, navident);
-        final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEvent = orgtilknytningOpprettetEvent(orgtilknytningFid, navident, enhet, sektor);
+        final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEvent = orgtilknytningOpprettetEvent(orgtilknytningFid, navident, enhet, sektor, null);
         final OrgtilknytningDagligOppfolgingEndretEventV1 dagligOppfolgingEvent = dagligOppfolgingEvent(orgtilknytningOpprettetEvent, true);
         final RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertEvent = ressursPersonaliaOppdatertEvent(ressursFid,
             new Visningsnavn(
@@ -257,9 +257,9 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
         LocalDate sluttdato = LocalDate.now().plusMonths(2);
 
         final RessursOpprettetEventV1 ressursEvent = ressursOpprettetEvent(ressursFid, navident);
-        final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEvent_1 = orgtilknytningOpprettetEvent(orgtilknytningFid_1, navident, enhet_1, sektor);
-        final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEvent_2 = orgtilknytningOpprettetEvent(orgtilknytningFid_2, navident, enhet_2, sektor);
-        final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEvent_3 = orgtilknytningOpprettetEvent(orgtilknytningFid_3, navident, enhet_3, sektor);
+        final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEvent_1 = orgtilknytningOpprettetEvent(orgtilknytningFid_1, navident, enhet_1, sektor, null);
+        final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEvent_2 = orgtilknytningOpprettetEvent(orgtilknytningFid_2, navident, enhet_2, sektor, null);
+        final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEvent_3 = orgtilknytningOpprettetEvent(orgtilknytningFid_3, navident, enhet_3, sektor, null);
         final OrgtilknytningDagligOppfolgingEndretEventV1 dagligOppfolgingEvent = dagligOppfolgingEvent(orgtilknytningOpprettetEvent_2, true);
         final OrgtilknytningAvsluttetEventV1 orgtilknytningAvsluttetEvent =  orgtilknytningAvsluttetEvent(orgtilknytningOpprettetEvent_1, sluttdato);
 
@@ -339,7 +339,7 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
         String orgtilknytningFid = "OT_FID_1";
 
         final RessursOpprettetEventV1 ressursEvent = ressursOpprettetEvent(ressursFid, navident);
-        final OrgtilknytningOpprettetEventV1 orgtilknytningEvent = orgtilknytningOpprettetEvent(orgtilknytningFid, navident, enhet, sektor);
+        final OrgtilknytningOpprettetEventV1 orgtilknytningEvent = orgtilknytningOpprettetEvent(orgtilknytningFid, navident, enhet, sektor, null);
 
         when(appProperties.skipProducingStateEventsUntilRessursEvtsrcOffset()).thenReturn(1);
 
@@ -375,7 +375,7 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
         LocalDate sluttdato = LocalDate.now().plusMonths(2);
 
         final RessursOpprettetEventV1 ressursEvent = ressursOpprettetEvent(ressursFid, navident);
-        final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEvent = orgtilknytningOpprettetEvent(orgtilknytningFid, navident, enhet, sektor);
+        final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEvent = orgtilknytningOpprettetEvent(orgtilknytningFid, navident, enhet, sektor, null);
         final OrgtilknytningDagligOppfolgingEndretEventV1 dagligOppfolgingEvent = dagligOppfolgingEvent(orgtilknytningOpprettetEvent, true);
         final RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertEvent = ressursPersonaliaOppdatertEvent(ressursFid,
             new Visningsnavn(
@@ -446,12 +446,13 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
         );
     }
 
-    private OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEvent(String fid, String navident, String enhet, Sektor sektor) {
+    private OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEvent(String fid, String navident, String enhet, Sektor sektor, String masseflyttetFraFid) {
         final OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData eventData = new OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData(
             navident,
             enhet,
             sektor,
-            LocalDate.now()
+            LocalDate.now(),
+            masseflyttetFraFid
         );
 
         return new OrgtilknytningOpprettetEventV1(

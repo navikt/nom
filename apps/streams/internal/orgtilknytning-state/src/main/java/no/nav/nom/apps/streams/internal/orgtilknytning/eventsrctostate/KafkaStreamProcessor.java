@@ -79,7 +79,8 @@ class KafkaStreamProcessor {
                 Boolean.parseBoolean(eventStateAggregate.hasNonNull("dagligOppfolging") ? eventStateAggregate.get("dagligOppfolging").asText() : null),
                 LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
                 Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null),
-                Optional.ofNullable(tilknytningType)
+                Optional.ofNullable(tilknytningType),
+                Optional.ofNullable(eventStateAggregate.hasNonNull("masseflyttetFraFid") ? eventStateAggregate.get("masseflyttetFraFid").asText() : null)
             );
         } catch (Exception e) {
             log.error("Error mapping to OrgtilknytningState", e);

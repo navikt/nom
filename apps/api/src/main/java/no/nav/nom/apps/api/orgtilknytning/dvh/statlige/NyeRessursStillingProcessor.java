@@ -185,6 +185,7 @@ public class NyeRessursStillingProcessor {
             orgenhetId,
             null,
             stillingPeriode.gyldigFom(),
+            null,
             metadata,
             additionalData
         );

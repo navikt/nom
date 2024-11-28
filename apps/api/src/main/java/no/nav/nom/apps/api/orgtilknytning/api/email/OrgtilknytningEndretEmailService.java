@@ -11,10 +11,13 @@ import no.nav.nom.apps.api.common.cache.CacheQueueService;
 import no.nav.nom.apps.api.common.cache.CacheType;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
+import no.nav.nom.apps.api.orgtilknytning.api.app.MasseFlyttingRequest;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
-import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
@@ -160,6 +163,57 @@ public class OrgtilknytningEndretEmailService {
         }
     }
 
+    public void sendEmail(MasseFlyttingRequest masseFlyttingRequest, List<OrgtilknytningState> failedAvvikleOrgtilknytninger, String innsenderNavident, int antallFlyttet) {
+        try {
+            var innsenderVisningsnavn = ressursStateRepository.findByNavident(innsenderNavident)
+                .map(RessursState::visningsnavn)
+                .map(Visningsnavn::getFormattedVisningsnavn)
+                .orElse("UKJENT");
+            var recipientList = adClient.getAdRessurser(Set.of(innsenderNavident)).getRessurser().stream().map(AdRessurs::getEmail).toList();
+            var gammelOrgEnhet = orgEnhetStateRepository.findByFid(masseFlyttingRequest.orgtilknytningerFid().getFirst()).map(OrgEnhetState::navn).orElse("Ukjent");
+
+            String subject = String.format("Masseflytting av ressurser fra %s til %s", gammelOrgEnhet, masseFlyttingRequest.nyOrgenhetId());
+            String body = getFormattedEmailBody(masseFlyttingRequest, failedAvvikleOrgtilknytninger, antallFlyttet, gammelOrgEnhet, innsenderVisningsnavn);
+
+            if(body.isBlank()) {
+                log.warn("Epost body er tom, OR endringer epost varsel vil ikke bli sendt");
+                return;
+            }
+
+            log.info("Sender OT endringer epost subject: {}, recipients: {}, message: {}", subject, recipientList, body);
+            if (unleash.isEnabled(UNLEASH_USE_SEND_OT_ENDRINGER_EMAIL)) {
+                EmailMessage message = new EmailMessage(subject, body, getAdditionalRecipientsEmails());
+                emailClient.sendEmail(message).subscribe();
+            }
+        } catch (ADResponseException e) {
+            log.error("Fant ikke innsender sin epost adresse for masseflytting", e);
+        } catch (IOException | TemplateException e) {
+            log.error("Feil ved generering av epost innhold", e);
+        }
+    }
+
+    private String getFormattedEmailBody(
+        MasseFlyttingRequest masseFlyttingRequest,
+        List<OrgtilknytningState> failedAvvikleOrgtilkninger,
+        int antallFlyttet,
+        String gammelOrgEnhet,
+        String innsenderVisningsnavn
+    ) throws IOException, TemplateException {
+        var stringWriter = new StringWriter();
+        var model = Map.of(
+            "nyOrgEnhetId", masseFlyttingRequest.nyOrgenhetId(),
+            "antallFlyttet", antallFlyttet,
+            "feiletAntall", failedAvvikleOrgtilkninger.size(),
+            "total", masseFlyttingRequest.orgtilknytningerFid().size(),
+            "gammelOrgEnhet", gammelOrgEnhet,
+            "feiletNavidenter", failedAvvikleOrgtilkninger.stream().map(OrgtilknytningState::navident).toList(),
+            "innsenderVisningsnavn", innsenderVisningsnavn
+        );
+        log.info("Masseflytting epost body: {}", model);
+        freemarkerConfig.getTemplate("masseflytting-varsel.ftlh").process(model, stringWriter);
+        return stringWriter.getBuffer().toString();
+    }
+
     private String getFormattetEmailBody(String resursName, String navIdent, String otEndringer) throws IOException, TemplateException {
         var stringWriter = new StringWriter();
         var model = Map.of(
@@ -236,4 +290,11 @@ public class OrgtilknytningEndretEmailService {
         return recipientNavidents;
     }
 
+    private List<String> getAdditionalRecipientsEmails() {
+        // add Line and Mugge for testing purposes. This will be deleted later when tests are confirmed
+        List<String> additionalRecipients = new ArrayList<>();
+        additionalRecipients.add("Line.Eeg-Larsen@nav.no");
+        additionalRecipients.add("Linn.Renate.Fredriksen@nav.no");
+        return additionalRecipients;
+    }
 }

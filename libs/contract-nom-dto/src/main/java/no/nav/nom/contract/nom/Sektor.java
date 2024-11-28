@@ -9,10 +9,18 @@ public enum Sektor{
     EKSTERN;
 
     public boolean kanOppretteRessurs(){
-        return this == EKSTERN || this == NAV_KOMMUNAL;
+        return this.erEkstern() || this.erKommunal();
     }
 
     public boolean erStatlig() {
         return this == NAV_STATLIG;
+    }
+
+    public boolean erKommunal() {
+        return this == NAV_KOMMUNAL;
+    }
+
+    public boolean erEkstern() {
+        return this == EKSTERN;
     }
 }

@@ -42,6 +42,7 @@ import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NE
 @RestController
 @RequestMapping("/api/v1/uttrekk/omada")
 public class OmadaUttrekk {
+    public static final String UNLEASH_FOR_OMADA_EXPORT_ADD_STARTDATO = "nom.omada.uttrekk.add_startdato";
     private final String EXCLUDE_ORG_ENHET = "bu282j"; // bu282j;0000000;ORGENHET;;Deltar i Rekruttering;01-05-2019;;;;
     private final Logger log = LoggerFactory.getLogger(OmadaUttrekk.class);
     private final RessursStateRepository ressursStateRepository;
@@ -54,13 +55,15 @@ public class OmadaUttrekk {
     private final Unleash unleash;
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
-    public static final String UNLEASH_FOR_OMADA_EXPORT_ADD_STARTDATO = "nom.omada.uttrekk.add_startdato";
-
     public OmadaUttrekk(
         RessursStateRepository ressursStateRepository,
         OrgenhetService orgenhetService,
-        OrgtilknytningService orgtilknytningService, ShadowOrgtilknytningerKommunaleRepository shadowOrgtilknytningerKommunaleRepository,
-        RemedyEnhetIdResolver remedyEnhetIdResolver, DvhRepository dvhRepository, OrganiseringStateRepository organiseringStateRepository, Unleash unleash
+        OrgtilknytningService orgtilknytningService,
+        ShadowOrgtilknytningerKommunaleRepository shadowOrgtilknytningerKommunaleRepository,
+        RemedyEnhetIdResolver remedyEnhetIdResolver,
+        DvhRepository dvhRepository,
+        OrganiseringStateRepository organiseringStateRepository,
+        Unleash unleash
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
@@ -85,9 +88,9 @@ public class OmadaUttrekk {
     public @ResponseBody byte[] exportRessurs() throws IOException {
         StringWriter writer = new StringWriter();
 
-        var addStartdatoFeatureFlag = unleash.isEnabled(UNLEASH_FOR_OMADA_EXPORT_ADD_STARTDATO,false);
-        if(addStartdatoFeatureFlag) {
-            final var cSVFormat = getCSVFormat("nomId", "navident", "fornavn", "mellomnavn", "etternavn", "visningsnavn", "sektor", "sluttdato","startdato");
+        var addStartdatoFeatureFlag = unleash.isEnabled(UNLEASH_FOR_OMADA_EXPORT_ADD_STARTDATO, false);
+        if (addStartdatoFeatureFlag) {
+            final var cSVFormat = getCSVFormat("nomId", "navident", "fornavn", "mellomnavn", "etternavn", "visningsnavn", "sektor", "sluttdato", "startdato");
 
             try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
                 ressursStateRepository.getAll().forEach(ressurs -> {
@@ -95,9 +98,9 @@ public class OmadaUttrekk {
                         printer.printRecord(
                             ressurs.fid(),
                             ressurs.navident(),
-                            ressurs.visningsnavn().fornavn(),
-                            ressurs.visningsnavn().mellomnavn().orElse(""),
-                            ressurs.visningsnavn().etternavn(),
+                            ressurs.visningsnavn().fornavn().trim(),
+                            ressurs.visningsnavn().mellomnavn().filter(s -> !s.isBlank()).orElse(""),
+                            ressurs.visningsnavn().etternavn().trim(),
                             ressurs.visningsnavn().getFormattedVisningsnavn(),
                             ressurs.sektor(),
                             ressurs.sluttdato().map(dateTimeFormatter::format).orElse(""),
@@ -112,8 +115,17 @@ public class OmadaUttrekk {
                 });
                 return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
             }
-        }else {
-            final var cSVFormat = getCSVFormat("nomId", "navident", "fornavn", "mellomnavn", "etternavn", "visningsnavn", "sektor", "sluttdato");
+        } else {
+            final var cSVFormat = getCSVFormat(
+                "nomId",
+                "navident",
+                "fornavn",
+                "mellomnavn",
+                "etternavn",
+                "visningsnavn",
+                "sektor",
+                "sluttdato"
+            );
 
             try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
                 ressursStateRepository.getAll().forEach(ressurs -> {
@@ -155,7 +167,15 @@ public class OmadaUttrekk {
     ) throws IOException {
         StringWriter writer = new StringWriter();
 
-        final var cSVFormat = getCSVFormat("navident", "org_enhet_id", "fid", "erDagligOppfolging", "gyldig_fom", "gyldig_tom");
+        final var cSVFormat = getCSVFormat(
+            "navident",
+            "org_enhet_id",
+            "fid",
+            "erDagligOppfolging",
+            "gyldig_fom",
+            "gyldig_tom",
+            "masseflyttet_fra_org_enhet_id"
+        );
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
             orgtilknytningService.getAll()
@@ -168,7 +188,8 @@ public class OmadaUttrekk {
                             kobling.fid(),
                             kobling.erDagligOppfolging(),
                             kobling.gyldigFom().format(dateTimeFormatter),
-                            kobling.gyldigTom().map(dateTimeFormatter::format).orElse("")
+                            kobling.gyldigTom().map(dateTimeFormatter::format).orElse(""),
+                            kobling.masseflyttetFraFid().orElse("")
                         );
 
                         writer.close();

@@ -20,7 +20,8 @@ public class OrgtilknytningOpprettetEventV1 extends OrgtilknytningEvent {
             String navident,
             String orgEnhetId,
             Sektor sektor,
-            LocalDate gyldigFom
+            LocalDate gyldigFom,
+            String masseflyttetFraFid
     ) implements Data{ }
 
 

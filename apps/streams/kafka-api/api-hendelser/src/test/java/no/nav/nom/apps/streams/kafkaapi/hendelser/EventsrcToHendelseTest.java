@@ -86,7 +86,7 @@ public class EventsrcToHendelseTest extends EventsrcToHendelseTestTopology {
         final OrganiseringEvent avsluttOrganiseringEvent = HendelserTestUtils.getAvsluttetOrganiseringEvent(organiseringFid, eventMetadata);
 
         // orgtilknytning events
-        final OrgtilknytningEvent orgtilknytningOpprettetEvent = HendelserTestUtils.getOrgtilknytningOpprettetEvent(orgTilknytningFid, navident, eventMetadata);
+        final OrgtilknytningEvent orgtilknytningOpprettetEvent = HendelserTestUtils.getOrgtilknytningOpprettetEvent(orgTilknytningFid, navident, eventMetadata, null);
         final OrgtilknytningEvent getOrgtilknytningFjernetEvent = HendelserTestUtils.getOrgtilknytningFjernetEvent(orgTilknytningFid, navident, eventMetadata);
         final OrgtilknytningEvent getOrgtilknytningAvsluttetEvent = HendelserTestUtils.getOrgtilknytningAvsluttetEvent(
             orgTilknytningFid,
@@ -202,7 +202,7 @@ public class EventsrcToHendelseTest extends EventsrcToHendelseTestTopology {
         final Hendelse slettResursHendelseWithNullId = new Hendelse(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.FJERNET);
 
         // orgtilknytning events and hendelser
-        final OrgtilknytningEvent orgtilknytningOpprettetEvent = HendelserTestUtils.getOrgtilknytningOpprettetEvent(orgTilknytningFid, navident, eventMetadata);
+        final OrgtilknytningEvent orgtilknytningOpprettetEvent = HendelserTestUtils.getOrgtilknytningOpprettetEvent(orgTilknytningFid, navident, eventMetadata, null);
         final OrgtilknytningEvent getOrgtilknytningFjernetEvent = HendelserTestUtils.getOrgtilknytningFjernetEvent(orgTilknytningFid, navident, eventMetadata);
         final OrgtilknytningEvent getOrgtilknytningAvsluttetEvent = HendelserTestUtils.getOrgtilknytningAvsluttetEvent(
             orgTilknytningFid,

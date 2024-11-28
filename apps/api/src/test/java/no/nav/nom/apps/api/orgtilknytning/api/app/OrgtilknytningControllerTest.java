@@ -1071,6 +1071,42 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         );
     }
 
+    @Test
+    void test_masseflytting_should_return_200_OK() {
+        var masseflyttingRequest = new MasseFlyttingRequest(
+            List.of("fid1", "fid2"),
+            "newOrgEnhetId",
+            true
+        );
+
+        var orgtilknytningState1 = new OrgtilknytningState("fid1", "navident1", "orgEnhetId1", Sektor.NAV_STATLIG, false, LocalDate.now(), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty());
+        var orgtilknytningState2 = new OrgtilknytningState("fid2", "navident2", "orgEnhetId2", Sektor.NAV_STATLIG, true, LocalDate.now(), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty());
+        saveOrgtilknytninger(List.of(orgtilknytningState1, orgtilknytningState2));
+
+        postMasseflyttingRequest(
+            testToken.nomAdminUser(),
+            masseflyttingRequest
+        ).expectStatus().isOk();
+
+        verify(orgtilknytningCommandService, times(2)).avvikleOrgtilknytning(any(), any());
+        verify(orgtilknytningCommandService, times(1)).endreDagligOppfolgingOrgtilknytning(any());
+        verify(orgtilknytningCommandService, times(2)).opprettOrgtilknytning(any());
+    }
+
+    @Test
+    void test_masseflytting_should_return_401_UNAUTHENTICATED() {
+        var masseflyttingRequest = new MasseFlyttingRequest(
+            List.of("fid1", "fid2"),
+            "newOrgEnhetId",
+            true
+        );
+
+        postMasseflyttingRequest(
+            testToken.nomWriteGroupAndNomUiAzp(),
+            masseflyttingRequest
+        ).expectStatus().isForbidden();
+    }
+
     // TODO: Påse at kun brukere med hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP') kan kalle POST /forRessurs/{navident}
 
     private static EndreTilknytningtypeRequest endreTilknytningtypeRequest() {
@@ -1152,6 +1188,21 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 httpHeaders.setBearerAuth(accessToken);
             })
             .bodyValue(oppdaterOrgtilknytningerForRessursRequest)
+            .exchange();
+    }
+
+    private WebTestClient.ResponseSpec postMasseflyttingRequest(
+        String accessToken,
+        MasseFlyttingRequest masseflyttingRequest
+    ) {
+        return webTestClient
+            .post()
+            .uri("/app/orgtilknytninger/masseflytting")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(accessToken);
+            })
+            .bodyValue(masseflyttingRequest)
             .exchange();
     }
 }

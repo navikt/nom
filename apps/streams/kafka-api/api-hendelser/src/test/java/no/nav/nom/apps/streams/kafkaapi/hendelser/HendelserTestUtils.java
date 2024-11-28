@@ -234,12 +234,13 @@ public class HendelserTestUtils {
         );
     }
 
-    static OrgtilknytningEvent getOrgtilknytningOpprettetEvent(String fid, String navident, Event.Metadata eventMetadata) {
+    static OrgtilknytningEvent getOrgtilknytningOpprettetEvent(String fid, String navident, Event.Metadata eventMetadata, String masseflyttingFid) {
         final OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData eventData = new OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData(
             navident,
             "orgEnhetId",
             Sektor.NAV_KOMMUNAL,
-            LocalDate.now()
+            LocalDate.now(),
+            masseflyttingFid
         );
 
         final OrgtilknytningEvent.AdditionalAgressoData additionalData = new OrgtilknytningEvent.AdditionalAgressoData(

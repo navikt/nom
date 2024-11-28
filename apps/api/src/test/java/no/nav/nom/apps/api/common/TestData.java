@@ -25,6 +25,7 @@ public class TestData {
             .gyldigFom(LocalDate.now().minusMonths(1))
             .gyldigTom(Optional.empty())
             .orgtilknytningType(Optional.empty())
+            .masseflyttetFraFid(Optional.empty())
             .build();
     }
 

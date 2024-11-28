@@ -1580,7 +1580,8 @@
         "required": [
           "beholdTilganger",
           "nyOrgenhetId",
-          "ressurserNavident"
+          "orgtilknytningerFid"
+
         ],
         "type": "object",
         "properties": {
@@ -1590,7 +1591,7 @@
           "nyOrgenhetId": {
             "type": "string"
           },
-          "ressurserNavident": {
+          "orgtilknytningerFid": {
             "type": "array",
             "items": {
               "type": "string"
@@ -1856,6 +1857,9 @@
           "gyldigTom": {
             "type": "string",
             "format": "date"
+          },
+          "masseflyttetFraFid": {
+            "type": "string"
           },
           "navident": {
             "type": "string"

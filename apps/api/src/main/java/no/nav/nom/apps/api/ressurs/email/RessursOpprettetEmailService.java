@@ -154,14 +154,6 @@ public class RessursOpprettetEmailService {
         }
         return Collections.unmodifiableList(updatedRecipients);
     }
-
-    private List<String> getAdditionalRecipientsEmails() {
-        // add Line and Renate for testing purposes. This will be deleted later when tests are confirmed
-        List<String> additionalRecipients = new ArrayList<>();
-        additionalRecipients.add("Line.Eeg-Larsen@nav.no");
-        additionalRecipients.add("Linn.Renate.Fredriksen@nav.no");
-        return additionalRecipients;
-    }
 }
 
 

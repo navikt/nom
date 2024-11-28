@@ -49,7 +49,8 @@ public record ManuelleRessurserOgLedereProperties(
                 true,
                 LocalDate.of(2022, 1, 1),
                 Optional.empty(),
-                Optional.empty()
+                Optional.empty(),
+                null
             );
         }
 

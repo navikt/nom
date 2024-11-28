@@ -418,6 +418,7 @@ public class RessursRestService {
                     request.orgEnhetId(),
                     request.sektor(),
                     request.startDato(),
+                    null,
                     metaData,
                     null
                 )
@@ -505,6 +506,7 @@ public class RessursRestService {
                 request.orgEnhetId(),
                 request.sektor(),
                 request.startDato(),
+                null,
                 metadata,
                 null
             )

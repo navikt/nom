@@ -13,6 +13,7 @@ public record OpprettOrgtilknytning (
     String orgenhetId,
     Sektor sektor,
     LocalDate gyldigFom,
+    String masseflyttetFraFid,
     InputMetadata inputMetadata,
     OrgtilknytningEvent.AdditionalAgressoData additionalAgressoData
 ) implements OrgtilknytningCommand {}

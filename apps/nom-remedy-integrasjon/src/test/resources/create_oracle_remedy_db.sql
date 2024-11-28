@@ -18,5 +18,7 @@ create table if not exists NOM_INTEGRASJON
     FYSISK_BRUKERSTED_NAVN VARCHAR2(255),
     TILTREDELSESDATO       NUMBER,
     UTLOPSDATO             NUMBER,
-    MOBIL                  VARCHAR2(15)
+    MOBIL                  VARCHAR2(15),
+    DIREKTE_TELEFON        VARCHAR2(15),
+    MASSEFLYTTING          VARCHAR2(30)
 );

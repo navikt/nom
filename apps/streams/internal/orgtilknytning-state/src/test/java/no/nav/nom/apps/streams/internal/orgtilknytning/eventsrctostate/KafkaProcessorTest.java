@@ -308,18 +308,246 @@ public class KafkaProcessorTest {
 
     }
 
-    private OrgtilknytningOpprettetEventV1 lagOpprettEvent(String navident, String orgEnhetId, Sektor sektor, LocalDate gyldigFom) {
-        return lagOpprettEvent("FID_1", navident, orgEnhetId, sektor, gyldigFom);
+    @Test
+    @DisplayName("Masseflytting - Avslutt gammel OT, Opprett ny OT, sett avsluttDato hvis tomDato satt, sett DOL, og til sist sett tilknytningtype")
+    public void test_006() {
+        String otFidEn = "OT-1234";
+        String otFidTo = "OT-5678";
+        String gammelOrgEnhetId = "'123ab";
+        String nyOrgEnhetId = "'123bc";
+        Sektor sektor = Sektor.NAV_STATLIG;
+        LocalDate gammelGyldigFom = LocalDate.of(2022, 1, 1);
+        LocalDate gyldigTom = LocalDate.now().plusYears(1);
+
+        final OrgtilknytningEvent opprettEventGammelEn = lagOpprettEvent(otFidEn, "A000001", gammelOrgEnhetId, sektor, gammelGyldigFom, null);
+        final OrgtilknytningEvent opprettEventGammelTo = lagOpprettEvent(otFidTo, "A000002", gammelOrgEnhetId, sektor, gammelGyldigFom, null);
+        final OrgtilknytningEvent dolEventGammelEn = lagDagligOppfolgingEndretEvent(otFidEn, "A000001", gammelOrgEnhetId, gammelGyldigFom, null, true);
+        final OrgtilknytningEvent dolEventGammelTo = lagDagligOppfolgingEndretEvent(otFidTo, "A000002", gammelOrgEnhetId, gammelGyldigFom, gyldigTom, true);
+        final OrgtilknytningEvent avsluttEventGammelEn = lagAvsluttEvent(otFidEn, "A000001", gammelOrgEnhetId, LocalDate.now().minusDays(1));
+        final OrgtilknytningEvent avsluttEventGammelTo = lagAvsluttEvent(otFidTo, "A000002", gammelOrgEnhetId, LocalDate.now().minusDays(1));
+
+        final OrgtilknytningEvent opprettEventEn = lagMasseflyttetOpprettEvent("FID_1", "A000001", nyOrgEnhetId, sektor, LocalDate.now(), otFidEn);
+        final OrgtilknytningEvent opprettEventTo = lagMasseflyttetOpprettEvent("FID_2", "A000002", nyOrgEnhetId, sektor, LocalDate.now(), otFidTo);
+        final OrgtilknytningEvent avsluttetEventTo = lagAvsluttEvent("FID_2", "A000002", nyOrgEnhetId, gyldigTom);
+        final OrgtilknytningEvent opprettDagligOppfolgingEventEn = lagDagligOppfolgingEndretEvent("FID_1", "A000001", nyOrgEnhetId, LocalDate.now(), null, true);
+        final OrgtilknytningEvent opprettDagligOppfolgingEventTo = lagDagligOppfolgingEndretEvent("FID_2", "A000002", nyOrgEnhetId, LocalDate.now(), gyldigTom, true);
+        final OrgtilknytningEvent endreTilnytningTypeEventEn = new OrgtilknytningTypeEndretEventV1(
+            "FID_1",
+            new OrgtilknytningTypeEndretEventV1.OrgtilknytningTypeEndretEventData(Optional.of(Tilknytningtype.INGEN)),
+            (Event.Metadata) null
+        );
+        final OrgtilknytningEvent endreTilnytningTypeEventTo = new OrgtilknytningTypeEndretEventV1(
+            "FID_2",
+            new OrgtilknytningTypeEndretEventV1.OrgtilknytningTypeEndretEventData(Optional.of(Tilknytningtype.INGEN)),
+            (Event.Metadata) null
+        );
+
+        final OrgtilknytningState expectedOpprettetGammelEn = lagStateObjekt(
+            otFidEn,
+            "A000001",
+            gammelOrgEnhetId,
+            sektor,
+            false,
+            gammelGyldigFom,
+            null,
+            null,
+            null
+        );
+
+        final OrgtilknytningState expectedOpprettetGammelTo = lagStateObjekt(
+            otFidTo,
+            "A000002",
+            gammelOrgEnhetId,
+            sektor,
+            false,
+            gammelGyldigFom,
+            null,
+            null,
+            null
+        );
+
+        final OrgtilknytningState expectedDolGammelEn = lagStateObjekt(
+            otFidEn,
+            "A000001",
+            gammelOrgEnhetId,
+            sektor,
+            true,
+            gammelGyldigFom,
+            null,
+            null,
+            null
+        );
+
+        final OrgtilknytningState expectedDolGammelTo = lagStateObjekt(
+            otFidTo,
+            "A000002",
+            gammelOrgEnhetId,
+            sektor,
+            true,
+            gammelGyldigFom,
+            gyldigTom,
+            null,
+            null
+        );
+
+        final OrgtilknytningState expectedAvsluttetGammelEn = lagStateObjekt(
+            otFidEn,
+            "A000001",
+            gammelOrgEnhetId,
+            sektor,
+            true,
+            gammelGyldigFom,
+            LocalDate.now().minusDays(1),
+            null,
+            null
+        );
+
+        final OrgtilknytningState expectedAvsluttetGammelTo = lagStateObjekt(
+            otFidTo,
+            "A000002",
+            gammelOrgEnhetId,
+            sektor,
+            true,
+            gammelGyldigFom,
+            LocalDate.now().minusDays(1),
+            null,
+            null
+        );
+
+        final OrgtilknytningState expectedOpprettetEn = lagStateObjekt(
+            "FID_1",
+            "A000001",
+            nyOrgEnhetId,
+            sektor,
+            false,
+            LocalDate.now(),
+            null,
+            null,
+            otFidEn
+        );
+
+        final OrgtilknytningState expectedOpprettetTo = lagStateObjekt(
+            "FID_2",
+            "A000002",
+            nyOrgEnhetId,
+            sektor,
+            false,
+            LocalDate.now(),
+            null,
+            null,
+            otFidTo
+        );
+
+        final OrgtilknytningState expectedAvsluttet = lagStateObjekt(
+            "FID_2",
+            "A000002",
+            nyOrgEnhetId,
+            sektor,
+            false,
+            LocalDate.now(),
+            gyldigTom,
+            null,
+            otFidTo
+        );
+
+        final OrgtilknytningState expectedDagligOppfolgingEn = lagStateObjekt(
+            "FID_1",
+            "A000001",
+            nyOrgEnhetId,
+            sektor,
+            true,
+            LocalDate.now(),
+            null,
+            null,
+            otFidEn
+        );
+
+        final OrgtilknytningState expectedDagligOppfolgingTo = lagStateObjekt(
+            "FID_2",
+            "A000002",
+            nyOrgEnhetId,
+            sektor,
+            true,
+            LocalDate.now(),
+            gyldigTom,
+            null,
+            otFidTo
+        );
+
+        final OrgtilknytningState expectedTilknytningEndretEn = lagStateObjekt(
+            "FID_1",
+            "A000001",
+            nyOrgEnhetId,
+            sektor,
+            true,
+            LocalDate.now(),
+            null,
+            Tilknytningtype.INGEN,
+            otFidEn
+        );
+
+        final OrgtilknytningState expectedTilknytningEndretTo = lagStateObjekt(
+            "FID_2",
+            "A000002",
+            nyOrgEnhetId,
+            sektor,
+            true,
+            LocalDate.now(),
+            gyldigTom,
+            Tilknytningtype.INGEN,
+            otFidTo
+        );
+
+
+        inputTopic.pipeInput(opprettEventGammelEn.getFid(), opprettEventGammelEn);
+        inputTopic.pipeInput(opprettEventGammelTo.getFid(), opprettEventGammelTo);
+        inputTopic.pipeInput(dolEventGammelEn.getFid(), dolEventGammelEn);
+        inputTopic.pipeInput(dolEventGammelTo.getFid(), dolEventGammelTo);
+        inputTopic.pipeInput(avsluttEventGammelEn.getFid(), avsluttEventGammelEn);
+        inputTopic.pipeInput(avsluttEventGammelTo.getFid(), avsluttEventGammelTo);
+        inputTopic.pipeInput(opprettEventEn.getFid(), opprettEventEn);
+        inputTopic.pipeInput(opprettEventTo.getFid(), opprettEventTo);
+        inputTopic.pipeInput(avsluttetEventTo.getFid(), avsluttetEventTo);
+        inputTopic.pipeInput(opprettDagligOppfolgingEventEn.getFid(), opprettDagligOppfolgingEventEn);
+        inputTopic.pipeInput(opprettDagligOppfolgingEventTo.getFid(), opprettDagligOppfolgingEventTo);
+        inputTopic.pipeInput(endreTilnytningTypeEventEn.getFid(), endreTilnytningTypeEventEn);
+        inputTopic.pipeInput(endreTilnytningTypeEventTo.getFid(), endreTilnytningTypeEventTo);
+
+        Assertions.assertThat(outputTopic.readKeyValuesToList())
+            .containsExactly(
+                KeyValue.pair(opprettEventGammelEn.getFid(), expectedOpprettetGammelEn),
+                KeyValue.pair(opprettEventGammelTo.getFid(), expectedOpprettetGammelTo),
+                KeyValue.pair(dolEventGammelEn.getFid(), expectedDolGammelEn),
+                KeyValue.pair(dolEventGammelTo.getFid(), expectedDolGammelTo),
+                KeyValue.pair(avsluttEventGammelEn.getFid(), expectedAvsluttetGammelEn),
+                KeyValue.pair(avsluttEventGammelTo.getFid(), expectedAvsluttetGammelTo),
+                KeyValue.pair(opprettEventEn.getFid(), expectedOpprettetEn),
+                KeyValue.pair(opprettEventTo.getFid(), expectedOpprettetTo),
+                KeyValue.pair(avsluttetEventTo.getFid(), expectedAvsluttet),
+                KeyValue.pair(opprettDagligOppfolgingEventEn.getFid(), expectedDagligOppfolgingEn),
+                KeyValue.pair(opprettDagligOppfolgingEventTo.getFid(), expectedDagligOppfolgingTo),
+                KeyValue.pair(endreTilnytningTypeEventEn.getFid(), expectedTilknytningEndretEn),
+                KeyValue.pair(endreTilnytningTypeEventTo.getFid(), expectedTilknytningEndretTo)
+            );
     }
 
-    private OrgtilknytningOpprettetEventV1 lagOpprettEvent(String fid, String navident, String orgEnhetId, Sektor sektor, LocalDate gyldigFom) {
+    private OrgtilknytningOpprettetEventV1 lagMasseflyttetOpprettEvent(String fid, String navident, String orgEnhetId, Sektor sektor, LocalDate gyldigFom, String masseflyttetFraFid) {
+        return lagOpprettEvent(fid, navident, orgEnhetId, sektor, gyldigFom, masseflyttetFraFid);
+    }
+
+    private OrgtilknytningOpprettetEventV1 lagOpprettEvent(String navident, String orgEnhetId, Sektor sektor, LocalDate gyldigFom) {
+        return lagOpprettEvent("FID_1", navident, orgEnhetId, sektor, gyldigFom, null);
+    }
+
+    private OrgtilknytningOpprettetEventV1 lagOpprettEvent(String fid, String navident, String orgEnhetId, Sektor sektor, LocalDate gyldigFom, String masseflyttetFraFid) {
         return new OrgtilknytningOpprettetEventV1(
             fid,
             new OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData(
                 navident,
                 orgEnhetId,
                 sektor,
-                gyldigFom
+                gyldigFom,
+                masseflyttetFraFid
             ),
             (Event.Metadata) null,
             dummyAdditionalAgressoData
@@ -410,6 +638,23 @@ public class KafkaProcessorTest {
             .gyldigFom(gyldigFom)
             .gyldigTom(Optional.ofNullable(gyldigTom))
             .orgtilknytningType(Optional.empty())
+            .masseflyttetFraFid(Optional.empty())
+            .build();
+    }
+
+    private static OrgtilknytningState lagStateObjekt(String fid, String navident, String orgEnhetId, Sektor sektor, boolean erDagligOppfolging, LocalDate gyldigFom, LocalDate gyldigTom, Tilknytningtype tilknytningtype, String masseflyttetFraFid) {
+
+        return OrgtilknytningState
+            .builder()
+            .fid(fid)
+            .navident(navident)
+            .orgEnhetId(orgEnhetId)
+            .sektor(sektor)
+            .erDagligOppfolging(erDagligOppfolging)
+            .gyldigFom(gyldigFom)
+            .gyldigTom(Optional.ofNullable(gyldigTom))
+            .orgtilknytningType(Optional.ofNullable(tilknytningtype))
+            .masseflyttetFraFid(Optional.ofNullable(masseflyttetFraFid))
             .build();
     }
 
