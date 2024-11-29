@@ -38,6 +38,13 @@ app:
       backoff-duration-millis: 2000
     nom-remedy-integrasjon:
       base-url: ${NOM_REMEDY_INTEGRASJON_BASEURL}
+    dvh-ords:
+      client_-id: ${DVH_ORDS_CLIENT_ID:dvh_client_id}
+      client-secret: ${DVH_ORDS_CLIENT_SECRET:dvh_client_secret}
+      token-uri: https://dvh.adeo.no/ords/dvh/oauth/token
+      base-url: https://dvh.adeo.no/ords/dvh
+      eksterne-ressurser-path: /dvh_nom/nom_ords_eksterne.json
+
   manuelle-ressurser-og-ledere:
     enabled: false
   dvh-load:
@@ -121,9 +128,16 @@ spring:
             authorization-grant-type: client_credentials
             scope:
               - ${NOM_REMEDY_INTEGRASJON_API_SCOPE}
+          dvh-ords:
+            provider: dvh-ords
+            client-id:  ${DVH_ORDS_CLIENT_ID:dvh_client_id}
+            client-secret:  ${DVH_ORDS_CLIENT_SECRET:dvh_client_secret}
+            authorization-grant-type: client_credentials
         provider:
           azure:
             issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
+          dvh-ords:
+            token-uri: ${app.clients.dvh-ords.token-uri}
   graphql:
     graphiql:
       enabled: true # Enable playground
@@ -189,7 +203,7 @@ server.tomcat.mbeanregistry.enabled: true
 
 logging:
   level:
-     no.nav.nom: INFO
+    no.nav.nom: INFO
     # Kjør med ekstra logging i oppstarten av orgtilknytning
 #    no.nav.nom.apps.api.orgtilknytning: DEBUG
     # Ekstra logging for test av ny organisering
@@ -239,6 +253,10 @@ app:
       org-token-tool:
         client-id: "18c1d86b-4635-461c-8718-62c130087211"
         scopes: ["TEAMCAT"]
+      # For scope fra lokal kjøring, mot nom-api dvh ORDS datalast endepunkter
+      local-nom-api:
+        client-id: "17487989-d874-4b22-ab20-3fd7b99785d6"
+        scopes: ["LOCAL_NOM_API"]
     groups:
       nom-leder:
         group-id: "${NOM_LEDER_GROUPID}"

@@ -20,6 +20,7 @@ spec:
       value: none
   envFrom:
     - secret: nom-api-unleash-api-token
+    - secret: dvh-ords-secret
   image: "{{image}}"
   port: 8080
   ingresses:
@@ -270,6 +271,7 @@ spec:
         - host: nom-proxy.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
         - host: nom-remedy-integrasjon.dev-fss-pub.nais.io
+        - host: dvh.adeo.no
   gcp:
     sqlInstances:
       - type: POSTGRES_12

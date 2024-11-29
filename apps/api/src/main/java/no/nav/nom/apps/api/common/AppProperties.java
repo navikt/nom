@@ -17,7 +17,8 @@ public record AppProperties(
         Nik nik,
         Pdl pdl,
         Email email,
-        NomRemedyIntegrasjon nomRemedyIntegrasjon
+        NomRemedyIntegrasjon nomRemedyIntegrasjon,
+        DvhOrds dvhOrds
     ) {}
 
     public record NomProxy(
@@ -53,5 +54,13 @@ public record AppProperties(
 
     public record NomRemedyIntegrasjon(
         String baseUrl
+    ) {}
+
+    public record DvhOrds(
+        String clientId,
+        String clientSecret,
+        String tokenUri,
+        String baseUrl,
+        String eksterneRessurserPath
     ) {}
 }
