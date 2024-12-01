@@ -3,8 +3,8 @@ package no.nav.nom.apps.api.ressurs.email;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
-import no.nav.nom.apps.api.orgtilknytning.api.email.OTEndretData;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -297,6 +297,17 @@ public class RessursUtlopersnartEmailServiceTest {
         assertEquals(expected.size(), 2);
         assertEquals(result.size(), 0);
         assertNotEquals(expected.size(), result.size());
+    }
+
+    @Test
+    public void testUtloperDato(){
+        String utloperDato = "2021-09-01";
+        String formattedUtloperDato = DateUtils.formatDateTime(LocalDate.parse(utloperDato));
+        assertEquals("01.09.2021", formattedUtloperDato);
+
+        String utloperDato2 = "2024-12-31";
+        String formattedUtloperDato2 = DateUtils.formatDateTime(LocalDate.parse(utloperDato2));
+        assertEquals("31.12.2024", formattedUtloperDato2);
     }
 
 }

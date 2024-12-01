@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.orgtilknytning.api.email;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -130,7 +131,7 @@ public class OrgtilknytningEndretEmailServiceTest {
         );
 
         // verify
-        String expected = MessageFormat.format(orgtilknytningEndretEmailService.epost_body_item_template,"Ukjent", orgEnhet,orgtilknytningEndretEmailService.formatDateTime(LocalDate.now().minusDays(10)), orgtilknytningEndretEmailService.formatDateTime(LocalDate.now().plusDays(10)), navidentChangedByVisningsnavn.getFormattedVisningsnavn(), timestamp);
+        String expected = MessageFormat.format(orgtilknytningEndretEmailService.epost_body_item_template,"Ukjent", orgEnhet, DateUtils.formatDateTime(LocalDate.now().minusDays(10)), DateUtils.formatDateTime(LocalDate.now().plusDays(10)), navidentChangedByVisningsnavn.getFormattedVisningsnavn(), timestamp);
         var result = orgtilknytningEndretEmailService.composeOTChangesMessage(otEndringerData);
         assertEquals(expected, result.trim());
     }

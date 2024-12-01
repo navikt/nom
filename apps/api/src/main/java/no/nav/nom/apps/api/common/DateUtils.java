@@ -14,7 +14,7 @@ public class DateUtils {
         if(localDate == null || localDate.toString().isEmpty() || localDate.toString().isBlank()){
             return "";
         }
-        return DateTimeFormatter.ofPattern("dd.MM.YYYY").format(localDate);
+        return DateTimeFormatter.ofPattern("dd.MM.yyyy").format(localDate);
     }
 
     public static boolean isPeriodsOverlapping(LocalDate period1Start, Optional<LocalDate> period1End, LocalDate period2Start, Optional<LocalDate> period2End) {

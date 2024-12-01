@@ -7,6 +7,7 @@ import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.email.EmailClient;
 import no.nav.nom.apps.api.clients.email.EmailMessage;
+import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.common.cache.CacheQueueService;
 import no.nav.nom.apps.api.common.cache.CacheType;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
@@ -248,16 +249,16 @@ public class OrgtilknytningEndretEmailService {
                     "Sender OT endringer for navident:{} orgtilknytningState: {}, and formated dates: {}, {}",
                     event.navident(),
                     ot,
-                    formatDateTime(ot.gyldigFom()),
-                    formatDateTime(ot.gyldigTom().isPresent() ? ot.gyldigTom().get() : null)
+                    DateUtils.formatDateTime(ot.gyldigFom()),
+                    DateUtils.formatDateTime(ot.gyldigTom().isPresent() ? ot.gyldigTom().get() : null)
                 );
                 log.info("Sender OT endringer utfortAv: {}, {}, {}", utfortAvNavIdent, utfortAvRessurs, utfortAvRessursNavn);
                 var orgenhetNavn = orgEnhetStateRepository.findById(ot.orgEnhetId()).map(OrgEnhetState::navn).orElse("Ukjent");
                 String endring = MessageFormat.format(epost_body_item_template,
                     orgenhetNavn,
                     ot.orgEnhetId(),
-                    formatDateTime(ot.gyldigFom()),
-                    formatDateTime(ot.gyldigTom().isPresent() ? ot.gyldigTom().get() : null),
+                    DateUtils.formatDateTime(ot.gyldigFom()),
+                    DateUtils.formatDateTime(ot.gyldigTom().isPresent() ? ot.gyldigTom().get() : null),
                     utfortAvRessursNavn,
                     event.timestamp()
                 );
@@ -275,13 +276,6 @@ public class OrgtilknytningEndretEmailService {
             }
         }
         return otEndringer.toString();
-    }
-
-    public String formatDateTime(LocalDate localDate) {
-        if (localDate == null || localDate.toString().isEmpty() || localDate.toString().isBlank()) {
-            return "";
-        }
-        return DateTimeFormatter.ofPattern("dd.MM.YYYY").format(localDate);
     }
 
     public Set<String> getReceiptionNavidents(List<OTEndretData> otEndringerData) {
