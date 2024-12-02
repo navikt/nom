@@ -133,9 +133,6 @@ spec:
         - application: modiacontextholder
           namespace: personoversikt
           cluster: prod-fss
-        - application: pdl-fullmakt
-          namespace: pdl
-          cluster: prod-fss
         - application: repr-fullmakt
           namespace: repr
           cluster: prod-fss

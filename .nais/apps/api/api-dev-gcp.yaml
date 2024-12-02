@@ -167,9 +167,6 @@ spec:
         - application: testnav-nom-proxy-trygdeetaten
           namespace: dolly
           cluster: dev-fss
-        - application: pdl-fullmakt
-          namespace: pdl
-          cluster: dev-fss
         - application: repr-fullmakt
           namespace: repr
           cluster: dev-fss
