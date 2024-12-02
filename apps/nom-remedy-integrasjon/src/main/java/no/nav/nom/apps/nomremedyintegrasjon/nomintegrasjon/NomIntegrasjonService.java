@@ -68,7 +68,6 @@ public class NomIntegrasjonService {
 
     private final ObjectMapper objectMapper;
     private final Unleash unleash;
-    public static final String NAVIDENT = "NAVident";
 
 
     public NomIntegrasjonService(
@@ -323,8 +322,8 @@ public class NomIntegrasjonService {
         var ressursState = nomApiClient.getRessursByNavident(orgtilknytningState.getNavident());
         var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
 
-        var gyldigTom = orgtilknytningDatoEndretEventData.gyldigTom()
-            .filter(dato -> ressursState.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN))
+        var gyldigTom = orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigTom()
+            .filter(dato -> remedyCodeToNomSektor(nomIntegrasjonEntityWithDefaultDataFromNom.getSektor()).equals(Sektor.EKSTERN))
             .orElse(null);
 
         var remedyEnhetIdForOrgenhet = getRemedyEnhetId(orgtilknytningState.getOrgEnhetId());
@@ -357,7 +356,7 @@ public class NomIntegrasjonService {
         var newRemedyEnhetId = getRemedyEnhetId(orgtilknytningDagligOppfolgingEndretEventData.orgEnhetId());
 
         var gyldigTom = orgtilknytningDagligOppfolgingEndretEventData.gyldigTom()
-            .filter(dato -> ressursState.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN))
+            .filter(dato -> remedyCodeToNomSektor(nomIntegrasjonEntityWithDefaultDataFromNom.getSektor()).equals(Sektor.EKSTERN))
             .orElse(null);
 
         var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
@@ -679,6 +678,7 @@ public class NomIntegrasjonService {
                 : dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getGyldigTom).map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null)
             )
             .mobil(isNull(ressurs.getPrimaryTelefonnummer()) || ressurs.getPrimaryTelefonnummer().isBlank() ? null : ressurs.getPrimaryTelefonnummer())
+            .masseflytting(dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getMasseflyttetFraFid).isPresent() ? "X" : null)
             .build();
     }
 
@@ -749,6 +749,8 @@ public class NomIntegrasjonService {
                     && Objects.equals(latestEntityForNavident.getTiltredelsesdato(), newNomIntegrasjonEntity.getTiltredelsesdato())
                     && Objects.equals(latestEntityForNavident.getUtlopsdato(), newNomIntegrasjonEntity.getUtlopsdato())
                     && Objects.equals(latestEntityForNavident.getMobil(), newNomIntegrasjonEntity.getMobil())
+                    && Objects.equals(latestEntityForNavident.getMasseflytting(), newNomIntegrasjonEntity.getMasseflytting())
+                    && Objects.equals(latestEntityForNavident.getDirekteTelefon(), newNomIntegrasjonEntity.getDirekteTelefon())
             ))
             .orElse(true);
     }
@@ -860,6 +862,15 @@ public class NomIntegrasjonService {
             case NAV_STATLIG -> 0;
             case NAV_KOMMUNAL -> 1;
             case EKSTERN -> 2;
+        };
+    }
+
+    protected Sektor remedyCodeToNomSektor(Integer code) {
+        return switch (code) {
+            case 0 -> Sektor.NAV_STATLIG;
+            case 1 -> Sektor.NAV_KOMMUNAL;
+            case 2 -> Sektor.EKSTERN;
+            default -> throw new IllegalArgumentException("Invalid code for Sektor");
         };
     }
 

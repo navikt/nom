@@ -641,7 +641,6 @@ public class OrgtilknytningRestService {
                         null
                     )
                 );
-                nomMastered.markRessursAsMasteredInNom(orgtilknytningState.navident());
             }
         });
         orgtilknytninger.forEach(orgtilknytningState -> {
@@ -703,6 +702,7 @@ public class OrgtilknytningRestService {
                         .build()
                 );
             }
+            nomMastered.markRessursAsMasteredInNom(orgtilknytningState.navident());
         });
         List<OrgtilknytningState> ikkeAvsluttedeOrgtilknytninger = new ArrayList<>(orgtilknytningStateRepository.findByFidIn(masseFlyttingRequest.orgtilknytningerFid())
             .stream()
