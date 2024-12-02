@@ -28,12 +28,12 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
 
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
-        <gcp.libraries-bom.version>26.34.0</gcp.libraries-bom.version>
+        <gcp.libraries-bom.version>26.50.0</gcp.libraries-bom.version>
         <springdoc.version>2.5.0</springdoc.version>
         <springdoc-openapi-security.version>1.8.0</springdoc-openapi-security.version>
-        <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
+        <hypersistence-utils-hibernate-63.version>3.9.0</hypersistence-utils-hibernate-63.version>
         <graphql-extended-scalars.version>22.0</graphql-extended-scalars.version>
-        <unleash.version>9.2.0</unleash.version>
+        <unleash.version>9.2.6</unleash.version>
         <opencsv.version>5.9</opencsv.version>
         <apache.common.csv.version>1.12.0</apache.common.csv.version>
         <commons-fileupload.version>1.5</commons-fileupload.version>
@@ -44,10 +44,10 @@
         <org.wiremock.version>3.4.2</org.wiremock.version>
         <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
         <spring-cloud-contract-wiremock.version>4.1.1</spring-cloud-contract-wiremock.version>
-        <mock-oauth2-server.version>2.1.3</mock-oauth2-server.version>
-        <nimbus-jose-jwt.version>9.37.3</nimbus-jose-jwt.version>
+        <mock-oauth2-server.version>2.1.10</mock-oauth2-server.version>
+        <nimbus-jose-jwt.version>9.47</nimbus-jose-jwt.version>
         <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
-        <ojdbc.version>23.3.0.23.09</ojdbc.version>
+        <ojdbc.version>23.6.0.24.10</ojdbc.version>
 
         <!-- Override spring-boot-dependencies version -->
             <!-- note - local precedence import in utils-common, api, proxy, nom-ressurser, Unit4, nav-ident, og streams appene -->
