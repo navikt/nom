@@ -27,19 +27,121 @@ public class DvhOrds {
     }
 
     @Operation(
-        description = "Test epost sending",
-        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+            description = "Hent enheter",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
-        {
-            @ApiResponse(responseCode = "200", description = "Success")
-        }
+            {
+                    @ApiResponse(responseCode = "200", description = "Success")
+            }
     )
-    @GetMapping(value = "/eksterneRessurser", produces="application/json")
-    public String eksterneRessurser(@RequestParam(defaultValue ="1") int numRows, @RequestParam(required = false) String ordsFilter) {
+    @GetMapping(value = "/enheter", produces="application/json")
+    public String enheter(@RequestParam(defaultValue ="1") int numRows, @RequestParam(required = false) String ordsFilter) {
         if (ordsFilter != null) {
-            return dvhOrdsService.getEksterneRessurserJson(ordsFilter).toString();
+            return dvhOrdsService.getOrgenheterJson(ordsFilter).toString();
         }
-        return dvhOrdsService.getEksterneRessurserJson(numRows).toString();
+        return dvhOrdsService.getOrgenheterJson(numRows).toString();
+    }
+
+    @Operation(
+            description = "Hent organisering og ledere",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+            {
+                    @ApiResponse(responseCode = "200", description = "Success")
+            }
+    )
+    @GetMapping(value = "/organiseringOgLedere", produces="application/json")
+    public String organiseringOgLedere(@RequestParam(defaultValue ="1") int numRows, @RequestParam(required = false) String ordsFilter) {
+        if (ordsFilter != null) {
+            return dvhOrdsService.getOrganiseringOgLedereJson(ordsFilter).toString();
+        }
+        return dvhOrdsService.getOrganiseringOgLedereJson(numRows).toString();
+    }
+
+    @Operation(
+            description = "Hent ressurser",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+            {
+                    @ApiResponse(responseCode = "200", description = "Success")
+            }
+    )
+    @GetMapping(value = "/ressurser", produces="application/json")
+    public String ressurser(@RequestParam(defaultValue ="1") int numRows, @RequestParam(required = false) String ordsFilter) {
+        if (ordsFilter != null) {
+            return dvhOrdsService.getRessurserJson(ordsFilter).toString();
+        }
+        return dvhOrdsService.getRessurserJson(numRows).toString();
+    }
+
+    @Operation(
+            description = "Hent statlige ressurser tilknytninger",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+            {
+                    @ApiResponse(responseCode = "200", description = "Success")
+            }
+    )
+    @GetMapping(value = "/statligeRessurserTilknytninger", produces="application/json")
+    public String statligeRessurserTilknytninger(@RequestParam(defaultValue ="1") int numRows, @RequestParam(required = false) String ordsFilter) {
+        if (ordsFilter != null) {
+            return dvhOrdsService.getStatligeTilknytningerJson(ordsFilter).toString();
+        }
+        return dvhOrdsService.getStatligeTilknytningerJson(numRows).toString();
+    }
+
+    @Operation(
+            description = "Hent kommunale ressurser tilknytninger",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+            {
+                    @ApiResponse(responseCode = "200", description = "Success")
+            }
+    )
+    @GetMapping(value = "/kommunaleRessurserTilknytninger", produces="application/json")
+    public String kommunaleRessurserTilknytninger(@RequestParam(defaultValue ="1") int numRows, @RequestParam(required = false) String ordsFilter) {
+        if (ordsFilter != null) {
+            return dvhOrdsService.getKommunaleTilknytningerJson(ordsFilter).toString();
+        }
+        return dvhOrdsService.getKommunaleTilknytningerJson(numRows).toString();
+    }
+
+    @Operation(
+            description = "Hent eksterne ressurser tilknytninger",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+            {
+                    @ApiResponse(responseCode = "200", description = "Success")
+            }
+    )
+    @GetMapping(value = "/eksterneRessurserTilknytninger", produces="application/json")
+    public String eksterneRessurserTilknytninger(@RequestParam(defaultValue ="1") int numRows, @RequestParam(required = false) String ordsFilter) {
+        if (ordsFilter != null) {
+            return dvhOrdsService.getEksterneTilknytningerJson(ordsFilter).toString();
+        }
+        return dvhOrdsService.getEksterneTilknytningerJson(numRows).toString();
+    }
+
+    @Operation(
+            description = "Hent telefoner",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+            {
+                    @ApiResponse(responseCode = "200", description = "Success")
+            }
+    )
+    @GetMapping(value = "/telefoner", produces="application/json")
+    public String telefoner(@RequestParam(defaultValue ="1") int numRows, @RequestParam(required = false) String ordsFilter) {
+        if (ordsFilter != null) {
+            return dvhOrdsService.getTlfJson(ordsFilter).toString();
+        }
+        return dvhOrdsService.getTlfJson(numRows).toString();
     }
 }

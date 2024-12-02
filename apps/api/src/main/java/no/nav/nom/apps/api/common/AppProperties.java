@@ -61,6 +61,12 @@ public record AppProperties(
         String clientSecret,
         String tokenUri,
         String baseUrl,
-        String eksterneRessurserPath
+        String enhetPath,
+        String ressursStillingerPath,
+        String eksterneRessurserPath,
+        String kommunaleRessurserPath,
+        String ansatteBucketsPath,
+        String tlfPath,
+        String orgHierarkiPath
     ) {}
 }
