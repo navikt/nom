@@ -212,7 +212,10 @@ export async function commonSearch(
 
   // fritekst søk på navn
   // Får bedre resultat av en eller annen grunn når man tar termene i single-quotes
-  const wrappedInputValue = "'" + inputValue + "'";
+  const inputHasWhitespace = /\s/.test(inputValue.trim());
+  const wrappedInputValue = inputHasWhitespace
+    ? "'" + inputValue + "'"
+    : inputValue;
   const searchResults = await performSearch(wrappedInputValue);
   return searchResults.filter((element) => rawResultFilter(element));
 }
