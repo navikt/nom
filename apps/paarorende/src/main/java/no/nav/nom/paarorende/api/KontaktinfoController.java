@@ -1,9 +1,17 @@
 package no.nav.nom.paarorende.api;
 
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.paarorende.common.SecurityUtil;
+import no.nav.nom.paarorende.common.SwaggerConfig;
 import no.nav.nom.paarorende.jpa.KontaktinfoRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,9 +26,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.List;
 
-
+@Tag(name = "Kontaktinfo")
 @RestController
-@RequestMapping(KontaktinfoController.BASE_URL)
+@RequestMapping(
+    value = KontaktinfoController.BASE_URL,
+    produces = MediaType.APPLICATION_JSON_VALUE,
+    consumes = MediaType.APPLICATION_JSON_VALUE
+)
 public class KontaktinfoController {
 
     public final static String BASE_URL = "/api/kontaktinfo";
@@ -34,6 +46,15 @@ public class KontaktinfoController {
     }
 
     @GetMapping
+    @Operation(
+        description = "Henter alle kontaktinfo til pårørende av brukeren",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Liste av kontaktinfo"),
+        @ApiResponse(responseCode = "403", description = "Uatorisert"),
+
+    })
     public List<KontaktinfoDTO> getAllKontaktinfo() {
         var navident = securityUtil.getNavIdent();
 
@@ -41,6 +62,15 @@ public class KontaktinfoController {
     }
 
     @PutMapping
+    @Operation(
+        description = "Oppdaterer kontaktinfo til en pårørende",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Oppdatert kontaktinfo"),
+        @ApiResponse(responseCode = "403", description = "Uatorisert"),
+
+    })
     public KontaktinfoDTO oppdaterKontakinfo(@RequestBody KontaktinfoDTO kontaktInfoDTO) {
         var kontaktInfo = kontaktInfoRepository.findDistinctByKontakId(kontaktInfoDTO.kontaktId())
             .orElseThrow(() -> new AccessDeniedException("Unauthorized"));
@@ -52,6 +82,15 @@ public class KontaktinfoController {
     }
 
     @PostMapping
+    @Operation(
+        description = "Oppretter nytt kontaktinfo til en pårørende",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Opprettet kontaktinfo"),
+        @ApiResponse(responseCode = "403", description = "Uatorisert"),
+
+    })
     public ResponseEntity<KontaktinfoDTO> opprettPaarorende(@RequestBody KontaktinfoDTO kontaktInfoDTO) {
         securityUtil.assertAuthorized();
 
@@ -64,6 +103,14 @@ public class KontaktinfoController {
     }
 
     @DeleteMapping("/{kontaktId}")
+    @Operation(
+        description = "Slettetr kontaktinfo til en pårørende",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200"),
+        @ApiResponse(responseCode = "403", description = "Uatorisert")
+    })
     public void markForDeletion(@PathVariable String kontaktId) throws AccessDeniedException {
         var kontaktinfo = kontaktInfoRepository.findDistinctByKontakId(kontaktId)
             .orElseThrow(() -> new AccessDeniedException("Unauthorized"));
