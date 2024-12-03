@@ -56,7 +56,7 @@ public class KontaktinfoController {
     public List<KontaktinfoDTO> getAllKontaktinfo() {
         var navident = securityUtil.getNavIdent();
 
-        return KontaktinfoDTO.fromEntityList(kontaktInfoRepository.findAllByNavident(navident));
+        return KontaktinfoDTO.fromEntityList(kontaktInfoRepository.findAllByNavidentAndDatoSlettetIsNull(navident));
     }
 
     @PutMapping

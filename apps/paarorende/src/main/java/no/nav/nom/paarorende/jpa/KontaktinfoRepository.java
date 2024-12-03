@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface KontaktinfoRepository extends JpaRepository<Kontaktinfo, Long> {
 
-    List<Kontaktinfo> findAllByNavident(String navident);
+    List<Kontaktinfo> findAllByNavidentAndDatoSlettetIsNull(String navident);
     Optional<Kontaktinfo> findDistinctByKontakId(String kontaktId);
 
     @Modifying
