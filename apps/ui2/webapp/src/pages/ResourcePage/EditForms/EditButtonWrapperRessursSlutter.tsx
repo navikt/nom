@@ -1,7 +1,11 @@
 import { useSearch } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
+import {
+  useHasAdminAccess,
+  useHasPilotAccess,
+  useHasWriteAccess,
+} from "~/api/useGetSession";
 import type { Ressurs } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
 
@@ -17,17 +21,18 @@ export function EditButtonWrapperRessursSlutter({
   const { editPersonopplysninger } = useSearch({
     from: "/ressurs/$id",
   });
+
   const hasWriteAccess = useHasWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
+  const hasPilotAccess = useHasPilotAccess();
 
-  const ressursCanBeEdited =
-    ressurs.sektor !== Sektor.NAV_STATLIG || hasAdminAccess;
+  const canEditStatlige = hasAdminAccess || hasPilotAccess;
 
-  if (
-    !editPersonopplysninger &&
-    ressursCanBeEdited &&
-    (hasAdminAccess || (hasWriteAccess && hasWriteAccessForRessurs))
-  ) {
+  const canEditRessurs =
+    (ressurs.sektor !== Sektor.NAV_STATLIG || canEditStatlige) &&
+    (hasAdminAccess || (hasWriteAccess && hasWriteAccessForRessurs));
+
+  if (!editPersonopplysninger && canEditRessurs) {
     return children;
   }
 

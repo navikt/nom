@@ -54,6 +54,7 @@ import {
   useGetSession,
   useHasAdminAccess,
   useHasAdminOrWriteAccess,
+  useHasPilotAccess,
 } from "~/api/useGetSession";
 import { ApiResponseError } from "~/components/ApiResponseError";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
@@ -99,6 +100,12 @@ import {
 } from "~/utils";
 
 export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
+  const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
+
+  if (!hasAdminOrWriteAccess) {
+    return;
+  }
+
   const ressursOrgtilknytningerQuery = useQuery({
     queryKey: getOrgTilknytninger.queryKey(ressurs.navident),
     queryFn: () => getOrgTilknytninger.queryFn(ressurs.navident),
@@ -225,9 +232,11 @@ function OrgtilknytningForm({
   dagensRemedyEnhetId: string | undefined;
   dagensDolOrgEnhet: OrgEnhet | undefined;
 }) {
-  const navigate = useNavigate();
   const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
+  const hasPilotAccess = useHasPilotAccess();
+
+  const navigate = useNavigate();
 
   const nomSharepointLenke: string =
     "https://navno.sharepoint.com/sites/intranett-organisasjon/SitePages/Organisasjonsmaster-(NOM).aspx";
@@ -276,7 +285,7 @@ function OrgtilknytningForm({
     // @ts-expect-error -- Type inferred fra resolver er typen etter submit der flere felter er required, men under utfylling av formet vil flere verdier kunne være undefined. Derfor bruker vi heller eksplisitt type til UseForm
     resolver: yupResolver(formValuesSchema),
     context: {
-      hasAdminAccess,
+      canEditSektorTilknytningstype: hasAdminAccess || hasPilotAccess,
     },
   });
 
@@ -422,18 +431,18 @@ function OrgtilknytningForm({
 
           const fremtidig = !!gyldigFom && isAfterToday(gyldigFom);
 
-          const disabled =
+          const editOtDisabled =
             existingOt &&
             !hasOtTomChanged(field) &&
-            !hasAdminAccess &&
-            overToMndGammel;
+            overToMndGammel &&
+            !hasAdminAccess;
 
           const editSektorTilknytningstype =
             (!existingOt ||
               fremtidig ||
               !otOriginalSektor(field) ||
               hasAdminAccess) &&
-            !disabled;
+            !editOtDisabled;
 
           return (
             <div
@@ -462,7 +471,7 @@ function OrgtilknytningForm({
               <HStack gap="8">
                 <FormDateWrapper
                   defaultDate={field.gyldigFom ?? undefined}
-                  disabled={disabled}
+                  disabled={editOtDisabled}
                   error={
                     errors?.mappedeOrgtilknytninger?.[index]?.gyldigFom
                       ?.message ?? ""
@@ -474,7 +483,7 @@ function OrgtilknytningForm({
 
                 <FormDateWrapper
                   defaultDate={field.gyldigTom ?? undefined}
-                  disabled={disabled}
+                  disabled={editOtDisabled}
                   error={
                     errors?.mappedeOrgtilknytninger?.[index]?.gyldigTom
                       ?.message ?? ""
@@ -499,9 +508,8 @@ function OrgtilknytningForm({
                 css={css`
                   display: flex;
                   align-items: center;
-                  margin-top: var(--a-spacing-0);
                 `}
-                disabled={disabled}
+                disabled={editOtDisabled}
                 {...register(
                   `mappedeOrgtilknytninger.${index}.erDagligOppfolging`,
                 )}
@@ -512,7 +520,7 @@ function OrgtilknytningForm({
                 </BodyShort>
               </Checkbox>
 
-              {hasAdminAccess && (
+              {(hasAdminAccess || hasPilotAccess) && (
                 <div
                   css={css`
                     display: flex;
@@ -836,6 +844,7 @@ function FormSektorSelectWrapper({
   });
 
   const hasAdminAccess = useHasAdminAccess();
+  const hasPilotAccess = useHasPilotAccess();
 
   if (disabled && !field.value) {
     return;
@@ -862,7 +871,6 @@ function FormSektorSelectWrapper({
             margin-left: var(--a-spacing-1);
             height: fit-content;
           `}
-          disabled={disabled}
           error={error}
           hideLabel
           label="Sektor"
@@ -898,8 +906,9 @@ function FormSektorSelectWrapper({
           {Object.values(Sektor).map((sektor) => {
             if (
               sektor === Sektor.NAV_STATLIG &&
+              otOriginalSektor !== Sektor.NAV_STATLIG &&
               !hasAdminAccess &&
-              otOriginalSektor !== Sektor.NAV_STATLIG
+              !hasPilotAccess
             ) {
               return;
             }
@@ -964,7 +973,9 @@ function FormTilknytningstypeSelectWrapper({
   if (
     (disabled && !field.value) ||
     !selectedSektor ||
-    selectedSektor === Sektor.NAV_KOMMUNAL
+    selectedSektor === Sektor.NAV_KOMMUNAL ||
+    (selectedSektor === Sektor.NAV_STATLIG &&
+      field.value === Tilknytningtype.INGEN)
   ) {
     return;
   }
@@ -994,7 +1005,6 @@ function FormTilknytningstypeSelectWrapper({
             margin-left: var(--a-spacing-1);
             height: fit-content;
           `}
-          disabled={disabled}
           error={error}
           hideLabel
           label={selectedSektor}
@@ -1292,9 +1302,10 @@ const orgtilknytningSchema = yup.object().shape({
     name: "sektor-obligatorisk-fremtid-aktiv",
     message: "Obligatorisk",
     test: function (value, context) {
-      const hasAdminAccess = context?.options?.context?.hasAdminAccess;
+      const canEditSektorTilknytningstype =
+        context?.options?.context?.canEditSektorTilknytningstype;
 
-      if (!hasAdminAccess) {
+      if (!canEditSektorTilknytningstype) {
         return true;
       }
 
@@ -1312,11 +1323,15 @@ const orgtilknytningSchema = yup.object().shape({
       name: "tilknytningstype-obligatorisk-fremtid-aktiv",
       message: "Obligatorisk",
       test: function (value, context) {
-        const hasAdminAccess = context?.options?.context?.hasAdminAccess;
+        const canEditSektorTilknytningstype =
+          context?.options?.context?.canEditSektorTilknytningstype;
 
         const otSektor = context?.parent?.sektor ?? undefined;
 
-        if (!hasAdminAccess || otSektor === Sektor.NAV_KOMMUNAL) {
+        if (
+          !canEditSektorTilknytningstype ||
+          otSektor === Sektor.NAV_KOMMUNAL
+        ) {
           return true;
         }
 

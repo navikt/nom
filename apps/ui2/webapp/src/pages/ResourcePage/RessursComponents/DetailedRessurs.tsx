@@ -33,7 +33,7 @@ import {
 import {
   useGetSession,
   useHasAdminAccess,
-  useHasAdminOrWriteAccess,
+  useHasWriteAccess,
 } from "~/api/useGetSession";
 import { Divider } from "~/components/Divider";
 import { ModalProvider } from "~/components/modalProvider/ModalProvider";
@@ -96,7 +96,10 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
         </ModalProvider>
       ) : (
         <>
-          <SummarySection ressurs={ressurs} />
+          <SummarySection
+            hasWriteAccessForRessurs={hasWriteAccessForRessurs}
+            ressurs={ressurs}
+          />
           <LeaderForSection ressurs={ressurs} />
           <OrgTilknytningSection
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
@@ -559,18 +562,28 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
   );
 }
 
-function SummarySection({ ressurs }: { ressurs: Ressurs }) {
+function SummarySection({
+  ressurs,
+  hasWriteAccessForRessurs,
+}: {
+  ressurs: Ressurs;
+  hasWriteAccessForRessurs: boolean;
+}) {
   const { editPersonopplysninger } = useSearch({
     from: "/ressurs/$id",
   });
-  const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
+
+  const hasWriteAccess = useHasWriteAccess();
+  const hasAdminAccess = useHasAdminAccess();
 
   const hasSelfServiceAccess =
     useGetSession().data?.navident === ressurs.navident;
 
   if (
     editPersonopplysninger &&
-    (hasAdminOrWriteAccess || hasSelfServiceAccess)
+    (hasAdminAccess ||
+      (hasWriteAccess && hasWriteAccessForRessurs) ||
+      hasSelfServiceAccess)
   ) {
     return (
       <ModalProvider>

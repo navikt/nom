@@ -20,6 +20,7 @@ import {
 import {
   useGetSession,
   useHasAdminAccess,
+  useHasPilotAccess,
   useHasWriteAccess,
 } from "~/api/useGetSession";
 import { LabelWithValue } from "~/components/LabelWithValue";
@@ -85,6 +86,7 @@ function EditButton({ ressurs }: { ressurs: Ressurs }) {
 
   const hasWriteAccess = useHasWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
+  const hasPilotAccess = useHasPilotAccess();
 
   const hasWriteAccessForRessurs =
     useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
@@ -97,11 +99,14 @@ function EditButton({ ressurs }: { ressurs: Ressurs }) {
     (hasWriteAccess && hasWriteAccessForRessurs) ||
     hasWriteAccessForSelvbetjening
   ) {
-    const ressursCanBeEdited =
-      ressurs.sektor !== Sektor.NAV_STATLIG || hasAdminAccess;
+    const canEditStatlige = hasAdminAccess || hasPilotAccess;
+
+    const canEditRessurs =
+      ressurs.sektor !== Sektor.NAV_STATLIG || canEditStatlige;
+
     return (
       <HStack align="center" gap="2">
-        {!ressursCanBeEdited && (
+        {!canEditRessurs && (
           <HelpText title="Hvorfor er dette utilgjengelig?">
             Statlige ansatte kan ikke opprettes eller endres i NOM på dette
             tidspunktet. Disse kan endres i tråd med gjeldende rutiner i
@@ -111,7 +116,7 @@ function EditButton({ ressurs }: { ressurs: Ressurs }) {
 
         <Button
           data-cy="endre-personopplysninger-button"
-          disabled={!ressursCanBeEdited}
+          disabled={!canEditRessurs}
           icon={<PencilIcon aria-hidden />}
           onClick={() =>
             navigate({
