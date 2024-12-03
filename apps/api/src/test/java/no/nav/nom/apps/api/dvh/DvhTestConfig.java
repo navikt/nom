@@ -2,6 +2,8 @@ package no.nav.nom.apps.api.dvh;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
+import no.nav.nom.apps.api.clients.dvhords.DvhOrdsClient;
+import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.NomProxyRestClient;
@@ -40,6 +42,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
     , DvhRepository.class
     , DvhService.class
     , DvhOrgenhetsLast.class
+    , DvhOrdsService.class
     , ValidationService.class
     , NomProxyClient.class
     , LeaderElection.class
@@ -59,6 +62,8 @@ public class DvhTestConfig {
     OrgtilknytningStateRepository orgtilknytningStateRepository;
     @MockBean
     NomProxyRestClient nomProxyRestClient;
+    @MockBean
+    DvhOrdsClient dvHOrdsClient;
     @MockBean
     NomStateRessursListener nomStateRessursListener;
     @MockBean

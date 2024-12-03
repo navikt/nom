@@ -7,6 +7,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
+import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
@@ -37,7 +38,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -78,7 +81,7 @@ public class DvhRestConsumer {
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
     private final Unleash unleash;
     private final NomStateDelegertLederListener nomStateDelegertLederListener;
-
+    private final DvhOrdsService dvhOrdsService;
 
     @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
     public void scheduledOppdateringFraDvh() {
@@ -193,10 +196,69 @@ public class DvhRestConsumer {
                 .flatMap(Collection::stream)
                 .toList();
 
+            getOrdsJsonRessurserAndCompare(dvhRessurs, jsonRessurser);
+
             ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
             dvhRepository.saveAnnenStatNavIdenter(findAnnenStatNavIdenter(dvhRessurs));
         } catch (Exception e) {
             log.error("Feilet i last av ressurser fra dvh", e);
+        }
+    }
+
+    private void getOrdsJsonRessurserAndCompare(List<DvhRessurs> dvhRessurs, JsonNode jsonRessurser) {
+        try {
+            var ordsJonRessurser = dvhOrdsService.getRessurserJson();
+
+            val ordsDvhRessurs = StreamSupport.stream(ordsJonRessurser.get("items").spliterator(), false)
+                .map( n -> new DvhRessurs(n, false, true))
+                .distinct()
+                .collect(Collectors.groupingBy(DvhRessurs::getPersonIdent))
+                .values()
+                .stream()
+                .peek(l -> {
+                    if (l.size() > 1) {
+                        l.removeAll(l.stream().filter(Predicate.not(DvhRessurs::getRemedyAktiv)).toList());
+                        if (l.size() > 1) {
+                            val personIdent = l.get(0).getPersonIdent();
+                            val navIdenter = l.stream().map(DvhRessurs::getNavIdent).toList();
+                            l.clear();
+                        }
+                    }
+                })
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(DvhRessurs::getNavIdent))
+                .values()
+                .stream()
+                .filter(l -> l.size() == 1)
+                .flatMap(Collection::stream)
+                .toList();
+
+            boolean erLikt = true;
+            if (ordsDvhRessurs.size() != dvhRessurs.size()) {
+                log.error("Antall ressurser fra TDV og ORDS er ulik. TDV: {}, ORDS: {}", dvhRessurs.size(), ordsDvhRessurs.size());
+                erLikt = false;
+            }
+
+            val ordsMap = ordsDvhRessurs.stream().collect(Collectors.toMap(DvhRessurs::getNavIdent, Function.identity()));
+            int idxSkip = dvhRessurs.size()/20;
+            for (int i = 0; i < 20; i++) {
+                int idx = i * idxSkip;
+                val dvhRessursTdv = dvhRessurs.get(idx);
+                val dvhRessursOrds = ordsMap.get(dvhRessursTdv.getNavIdent());
+                if (!DvhRessurs.compare(dvhRessursTdv, dvhRessursOrds)) {
+                    log.error("Ressurs fra TDV og ORDS er ulik. \n\tTDV: \n\t{}, \n\tORDS: \n\t{}"
+                        , dvhRessursTdv.getRawData().toPrettyString()
+                        , dvhRessursOrds.getRawData().toPrettyString());
+                    erLikt = false;
+                }
+            }
+            if (erLikt) {
+                log.info("Last av ressurser fra ORDS (nom_ords_ansatte_buckets.json) er lik en last fra TDV (NOM_ANSATTE_BUCKETS_v2)");
+            } else {
+                log.error("Last av ressurser fra ORDS (nom_ords_ansatte_buckets.json) er annerledes en last fra TDV (NOM_ANSATTE_BUCKETS_v2)");
+            }
+        } catch (Exception e) {
+            log.error("Feilet i last av ressurser fra ORDS (nom_ords_ansatte_buckets.json)", e);
         }
     }
 

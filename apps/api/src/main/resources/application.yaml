@@ -405,6 +405,10 @@ app:
       teamcat:
         client-id: "f1931989-7a09-496c-8e2d-111b56faa242"
         scopes: ["TEAMCAT"]
+      # For scope fra lokal kjøring, mot nom-api dvh ORDS datalast endepunkter
+      local-nom-api:
+        client-id: "3e962532-1cd2-4bb4-8222-515c83df854a"
+        scopes: ["LOCAL_NOM_API"]
     groups:
       nom-leder:
         group-id: "${NOM_LEDER_GROUPID}"

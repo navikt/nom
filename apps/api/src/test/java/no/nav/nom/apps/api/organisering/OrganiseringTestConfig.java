@@ -1,6 +1,8 @@
 package no.nav.nom.apps.api.organisering;
 
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
+import no.nav.nom.apps.api.clients.dvhords.DvhOrdsClient;
+import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.LocalConfiguration;
@@ -48,6 +50,7 @@ import org.springframework.kafka.annotation.EnableKafka;
     , DvhRepository.class
     , DvhService.class
     , DvhOrgenhetsLast.class
+    , DvhOrdsService.class
     , ValidationService.class
     , NomProxyClient.class
     , NomProxyRestClient.class
@@ -110,5 +113,8 @@ public class OrganiseringTestConfig {
 
     @MockBean
     ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState;
+
+    @MockBean
+    DvhOrdsClient dvHOrdsClient;
 }
 

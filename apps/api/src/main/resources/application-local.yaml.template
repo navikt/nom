@@ -24,13 +24,13 @@ app:
       client-secret: DUMMY
       token-uri: DUMMY
       base-url: ${NOM_API_BASEURL}/api/admin/dvhOrds
-      enhet-path:
-      ressurs-stillinger-path:
+      enhet-path: /enheter
+      ressurs-stillinger-path: /statligeRessurserTilknytninger
       eksterne-ressurser-path: /eksterneRessurserTilknytninger
-      kommunale-ressurser-path:
-      ansatte-buckets-path:
-      tlf-path:
-      org-hierarki-path:
+      kommunale-ressurser-path: /kommunaleRessurserTilknytninger
+      ansatte-buckets-path: /ressurser
+      tlf-path: /telefoner
+      org-hierarki-path: /organiseringOgLedere
   granted-authorities:
     clients:
       nom-ui2:
