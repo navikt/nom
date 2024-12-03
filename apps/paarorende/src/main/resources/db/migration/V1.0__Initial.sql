@@ -2,7 +2,7 @@ CREATE SEQUENCE KONTAKTINFO_SEQ START WITH 100000000 increment by 1;
 
 CREATE TABLE KONTAKTINFO (
     ID              BIGINT          PRIMARY KEY,
-    KONTAKT_ID      UUID            NOT NULL,
+    KONTAKT_ID      TEXT            UNIQUE,
     NAVIDENT        TEXT            NOT NULL,
     FORNAVN         TEXT            NOT NULL,
     ETTERNAVN       TEXT            NOT NULL,

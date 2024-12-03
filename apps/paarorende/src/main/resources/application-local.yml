@@ -1,3 +1,6 @@
 DATABASE_JDBC_URL: jdbc:postgresql://localhost:5436/postgres-paarorende
 DATABASE_USERNAME: postgres
 DATABASE_PASSWORD: password
+
+AZURE_APP_TENANT_ID: none
+AZURE_APP_CLIENT_ID: none

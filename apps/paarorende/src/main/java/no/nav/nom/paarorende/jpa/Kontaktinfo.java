@@ -3,6 +3,7 @@ package no.nav.nom.paarorende.jpa;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -15,16 +16,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Data
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Kontaktinfo {
+@EntityListeners(AuditingEntityListener.class)
+public class Kontaktinfo extends AuditingMetadata {
 
     @Id
     @SequenceGenerator(name = "idGenerator", sequenceName = "KONTAKTINFO_SEQ", allocationSize = 1)
@@ -32,7 +34,7 @@ public class Kontaktinfo {
     private Long id;
 
     @Column(name = "KONTAKT_ID")
-    private UUID kontakId;
+    private String kontakId;
     private String navident;
     private String fornavn;
     private String etternavn;
@@ -43,5 +45,6 @@ public class Kontaktinfo {
 
     @Embedded
     private Adresse adresse;
+
     private LocalDate datoSlettet;
 }

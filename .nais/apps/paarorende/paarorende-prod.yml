@@ -40,6 +40,13 @@ spec:
     path: /internal/prometheus
   secureLogs:
     enabled: true
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: true
+      claims:
+        extra:
+          - NAVident
   gcp:
     sqlInstances:
       - type: POSTGRES_15
@@ -47,3 +54,9 @@ spec:
         databases:
           - name: paarorende
             envVarPrefix: DATABASE
+  accessPolicy:
+    inbound:
+      rules:
+        - application: org-token-tool
+          namespace: org
+          cluster: prod-gcp
