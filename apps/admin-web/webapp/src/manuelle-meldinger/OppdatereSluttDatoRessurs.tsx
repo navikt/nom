@@ -22,7 +22,7 @@ import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
 
 const schema = z.object({
   navident: navidentValidator(),
-  sluttdato: z.date().optional(),
+  sluttDato: z.date().optional(),
   confirm: confirmTextValidator(),
 });
 
@@ -40,7 +40,7 @@ export function OppdatereSluttDatoRessurs() {
 
   const mutation = useMutation<string, HTTPError, SchemaType>({
     mutationFn: async (v) => {
-      const formattedDate = v.sluttdato && format(v.sluttdato, "yyyy-MM-dd");
+      const formattedDate = v.sluttDato && format(v.sluttDato, "yyyy-MM-dd");
 
       return (
         await ky.post(
@@ -81,7 +81,7 @@ export function OppdatereSluttDatoRessurs() {
               />
               <DatePickerWrapped
                 label="Sluttdato på Ressurs"
-                name="sluttdato"
+                name="sluttDato"
               />
               <ConfirmTextField />
               {(() => {

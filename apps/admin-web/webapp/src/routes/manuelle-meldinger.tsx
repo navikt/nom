@@ -7,6 +7,7 @@ import { EndreDagligOppfolging } from "~/manuelle-meldinger/EndreDagligOppfolgin
 import { FjernOrgtilknytning } from "~/manuelle-meldinger/FjernOrgtilknytning.tsx";
 import { OppdatereRessursSektor } from "~/manuelle-meldinger/OppdatereRessursSektor.tsx";
 import { OppdatereSluttDatoRessurs } from "~/manuelle-meldinger/OppdatereSluttDatoRessurs.tsx";
+import { OppdatereStartdato } from "~/manuelle-meldinger/OppdatereStartdato.tsx";
 import { OppdaterPersonalia } from "~/manuelle-meldinger/OppdaterPersonalia.tsx";
 import { OppdaterPersonidentRessurs } from "~/manuelle-meldinger/OppdaterPersonidentRessurs.tsx";
 import { SettNomMaster } from "~/manuelle-meldinger/SettNomMaster.tsx";
@@ -28,6 +29,7 @@ function ManuelleMeldingerPage() {
         <OppdaterPersonalia />
         <SettNomMaster />
         <AvvikleRessurs />
+        <OppdatereStartdato />
         <OppdatereSluttDatoRessurs />
         <OppdatereRessursSektor />
       </div>
