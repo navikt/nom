@@ -33,6 +33,10 @@ public class SecurityUtil {
     }
 
     public String getNavIdent() {
-        return ((Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getClaimAsString(NAVIDENT);
+        try {
+            return ((Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getClaimAsString(NAVIDENT);
+        } catch (Exception e) {
+            throw new AccessDeniedException("Unauthorized");
+        }
     }
 }
