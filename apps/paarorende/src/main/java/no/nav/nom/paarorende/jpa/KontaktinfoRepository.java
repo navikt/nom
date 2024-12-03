@@ -19,7 +19,7 @@ public interface KontaktinfoRepository extends JpaRepository<Kontaktinfo, Long> 
     @Modifying
     @Transactional
     @Query(
-        value = "DELETE FROM KONTAKTINFO WHERE (DATO_SLETTET + 7) < CURRENT_DATE",
+        value = "DELETE FROM KONTAKTINFO WHERE DATE(DATO_SLETTET + INTERVAL '2 month') < CURRENT_DATE",
         nativeQuery = true
     )
     int deleteOldKontaktInfo();
