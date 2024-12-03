@@ -29,8 +29,7 @@ import java.util.List;
 @RestController
 @RequestMapping(
     value = KontaktinfoController.BASE_URL,
-    produces = MediaType.APPLICATION_JSON_VALUE,
-    consumes = MediaType.APPLICATION_JSON_VALUE
+    produces = MediaType.APPLICATION_JSON_VALUE
 )
 public class KontaktinfoController {
 
