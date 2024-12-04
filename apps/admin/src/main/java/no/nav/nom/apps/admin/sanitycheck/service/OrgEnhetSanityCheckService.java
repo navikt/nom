@@ -297,6 +297,9 @@ public class OrgEnhetSanityCheckService {
             return orgenheterSoFar;
         } else {
             Optional<OrgEnhetState> overOrgEnhenState = Optional.ofNullable(getOrgEnhetState(organiseringState.idOver(), aktiveEnheter));
+            if(overOrgEnhenState.isPresent()) {
+                return orgenheterSoFar;
+            }
             return overOrgEnhenState
                 .map(ooe -> {
                     orgenheterSoFar.add(ooe);
