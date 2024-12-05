@@ -15,6 +15,7 @@ import type {
   GetPersonRequest,
   LederTilgangForOrgenhetRequest,
   LederTilgangState,
+  MasseFlyttingRequest,
   OppdaterOrgtilknytningerForRessursRequest,
   OpprettRessursRequest,
   OpprettRessursResponse,
@@ -543,6 +544,13 @@ export const updateFysiskeBrukersteder = async (
 export const createRessurs = async (request: OpprettRessursRequest) => {
   return axios.post<unknown, AxiosResponse<OpprettRessursResponse>>(
     `${NOM_API_BASE_PATH}/app/ressurser`,
+    request,
+  );
+};
+
+export const masseflytting = async (request: MasseFlyttingRequest) => {
+  await axios.post<unknown, AxiosResponse<unknown>>(
+    `${NOM_API_BASE_PATH}/app/orgtilknytninger/masseflytting`,
     request,
   );
 };

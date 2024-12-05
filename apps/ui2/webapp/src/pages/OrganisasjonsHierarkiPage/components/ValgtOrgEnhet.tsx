@@ -7,6 +7,7 @@ import {
   Heading,
   HGrid,
   Link,
+  Loader,
   ReadMore,
   VStack,
 } from "@navikt/ds-react";
@@ -16,37 +17,56 @@ import partition from "lodash/partition";
 import React from "react";
 
 import {
-  getRessurserForOrgenhet,
+  getRessurserByListNavident,
   isOrgEnhetArbeidsomraade,
 } from "~/api/react-query-endpoints";
+import { useHasAdminAccess } from "~/api/useGetSession";
 import { UserImage } from "~/components/UserImage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import building from "~/resources/building.svg";
 import type { OrgEnhet, Ressurs } from "~/types/api-models";
 import { NomNivaa, OrgEnhetsType, Sektor } from "~/types/api-models";
-import { formatDisplayDate, formatVisningsnavn } from "~/utils";
+import {
+  formatDisplayDate,
+  formatVisningsnavn,
+  isPeriodActive,
+  isTodayOrAfter,
+} from "~/utils";
 
 export const ValgtOrgEnhet = ({
-  ressurser,
   orgEnhet,
+  hideRessurser,
 }: {
-  ressurser: string[];
   orgEnhet: OrgEnhet;
+  hideRessurser?: boolean;
 }) => {
-  const isOrgEnhetArbeidsomraadeQuery = (id: string) =>
-    useQuery({
-      queryKey: isOrgEnhetArbeidsomraade.queryKey(id as string),
-      queryFn: () => isOrgEnhetArbeidsomraade.queryFn(id as string),
-      enabled: !!id,
-    });
+  const ressurserNavidents = orgEnhet.ressursKoblinger
+    .filter((orgtilknytning) =>
+      isPeriodActive(orgtilknytning.gyldigFom, orgtilknytning.gyldigTom),
+    )
+    .map((orgtilknytning) => orgtilknytning.navident);
+
+  const hentedeRessurserQuery = useQuery({
+    queryKey: getRessurserByListNavident.queryKey(ressurserNavidents),
+    queryFn: () => getRessurserByListNavident.queryFn(ressurserNavidents),
+    enabled: ressurserNavidents.length > 0,
+  });
 
   const hentedeRessurser =
-    useQuery({
-      queryKey: getRessurserForOrgenhet.queryKey(orgEnhet.id),
-      queryFn: () => getRessurserForOrgenhet.queryFn(ressurser),
-    }).data ?? [];
+    hentedeRessurserQuery.data?.filter(
+      (ressurs) => !ressurs.sluttdato || isTodayOrAfter(ressurs.sluttdato),
+    ) ?? [];
 
-  const visTabellKnapp = isOrgEnhetArbeidsomraadeQuery(orgEnhet.id).data;
+  const isOrgEnhetArbeidsomraadeQuery = useQuery({
+    queryKey: isOrgEnhetArbeidsomraade.queryKey(orgEnhet.id),
+    queryFn: () => isOrgEnhetArbeidsomraade.queryFn(orgEnhet.id),
+    enabled: !!orgEnhet.id,
+  });
+
+  const visTabellKnapp = isOrgEnhetArbeidsomraadeQuery.data ?? false;
+
+  const loading =
+    hentedeRessurserQuery.isLoading || isOrgEnhetArbeidsomraadeQuery.isLoading;
 
   return (
     <div
@@ -139,11 +159,20 @@ export const ValgtOrgEnhet = ({
           </div>
         </div>
 
-        <MedarbeidereList
-          orgEnhet={orgEnhet}
-          ressurser={hentedeRessurser}
-          visTabellKnapp={visTabellKnapp ?? false}
-        />
+        {loading ? (
+          <Loader
+            css={css`
+              margin: var(--a-spacing-8) auto auto;
+            `}
+            size="3xlarge"
+          />
+        ) : (
+          <MedarbeidereList
+            orgEnhet={orgEnhet}
+            ressurser={hideRessurser ? [] : hentedeRessurser}
+            visTabellKnapp={visTabellKnapp ?? false}
+          />
+        )}
       </div>
     </div>
   );
@@ -217,6 +246,7 @@ function MedarbeidereList({
                 Interne medarbeidere
               </Heading>
             </div>
+
             <div
               css={css`
                 display: grid;
@@ -226,10 +256,7 @@ function MedarbeidereList({
             >
               {interneRessurser.map((ressurs) => {
                 return (
-                  <ResourceLink
-                    key={ressurs.navident}
-                    navident={ressurs.navident}
-                  />
+                  <ResourceLink key={ressurs.navident} ressurs={ressurs} />
                 );
               })}
             </div>
@@ -265,10 +292,7 @@ function MedarbeidereList({
               >
                 {eksterneRessurser.map((ressurs) => {
                   return (
-                    <ResourceLink
-                      key={ressurs.navident}
-                      navident={ressurs.navident}
-                    />
+                    <ResourceLink key={ressurs.navident} ressurs={ressurs} />
                   );
                 })}
               </div>
@@ -281,6 +305,8 @@ function MedarbeidereList({
 }
 
 function DropdownMeny({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+  const hasAdminAccess = useHasAdminAccess();
+
   return (
     <Dropdown>
       <Button
@@ -291,6 +317,7 @@ function DropdownMeny({ orgEnhet }: { orgEnhet: OrgEnhet }) {
         icon={<MenuElipsisHorizontalCircleIcon title="Rediger" />}
         variant="tertiary"
       />
+
       <Dropdown.Menu
         css={css`
           width: 460px;
@@ -300,16 +327,32 @@ function DropdownMeny({ orgEnhet }: { orgEnhet: OrgEnhet }) {
           <Dropdown.Menu.GroupedList.Heading>
             Administrering av medarbeidere
           </Dropdown.Menu.GroupedList.Heading>
+
           <Dropdown.Menu.GroupedList.Item
             as={Link}
             href={`/org/table/${orgEnhet.id}`}
           >
             Tabellvisning av ansatte i denne enheten og underliggende enheter
           </Dropdown.Menu.GroupedList.Item>
+
           <Dropdown.Menu.Divider />
+
           <Dropdown.Menu.GroupedList.Item as={Link} href="/ressurs/create/1">
             Opprett medarbeider
           </Dropdown.Menu.GroupedList.Item>
+
+          {hasAdminAccess && (
+            <>
+              <Dropdown.Menu.Divider />
+
+              <Dropdown.Menu.GroupedList.Item
+                as={Link}
+                href={`/masseflytting/${orgEnhet.id}`}
+              >
+                Flytt én eller flere medarbeidere
+              </Dropdown.Menu.GroupedList.Item>
+            </>
+          )}
         </Dropdown.Menu.GroupedList>
       </Dropdown.Menu>
     </Dropdown>

@@ -31,79 +31,6 @@ import {
   isPeriodActiveOrFuture,
 } from "~/utils";
 
-export function TelefonNummere({ ressurs }: { ressurs: CustomRessurs }) {
-  const telefonnummere = ressurs.primaryTelefonnummer
-    ? [{ nummer: ressurs.primaryTelefonnummer }, ...ressurs.telefoner]
-    : ressurs.telefoner;
-
-  const uniqueTelefonnummere = uniqBy(telefonnummere, "nummer");
-
-  return uniqueTelefonnummere.map(({ nummer }) => formatTlf(nummer)).join(", ");
-}
-
-function customSortByOrgEnhetName(
-  customRessurser: CustomRessurs[],
-  sortState: SortState,
-): CustomRessurs[] {
-  if (sortState.orderBy !== "orgEnhet.name") {
-    return customRessurser;
-  }
-  const sortedData = [...customRessurser];
-  sortedData.sort((a, b) => {
-    const nameA = a.orgEnheter[0]?.name.toLowerCase() || "";
-    const nameB = b.orgEnheter[0]?.name.toLowerCase() || "";
-
-    return sortState.direction === "ascending"
-      ? nameA.localeCompare(nameB)
-      : nameB.localeCompare(nameA);
-  });
-
-  return sortedData;
-}
-
-const createCustomRessurser = (
-  orgEnheter: OrgEnhet[],
-  hentedeRessurser: Ressurs[],
-): CustomRessurs[] | undefined => {
-  return hentedeRessurser?.map((ressurs) => {
-    const correspondingOrgEnheter = orgEnheter.filter((orgEnhet) =>
-      orgEnhet.ressursKoblinger.some(
-        (kobling) =>
-          kobling.navident === ressurs.navident &&
-          isPeriodActiveOrFuture(kobling.gyldigFom, kobling.gyldigTom),
-      ),
-    );
-
-    const fomDatoer = correspondingOrgEnheter.map(
-      (orgEnhet) =>
-        orgEnhet.ressursKoblinger.find(
-          (kobling) => kobling.navident === ressurs.navident,
-        )?.gyldigFom,
-    );
-
-    const tidligsteFomDato = earliestDateInList(fomDatoer);
-
-    const customOrgEnheter: CustomOrgEnhet[] = correspondingOrgEnheter.map(
-      (orgEnhet) => ({
-        id: orgEnhet.id,
-        name: orgEnhet.navn,
-      }),
-    );
-
-    const customRessurs: CustomRessurs = {
-      navident: ressurs.navident,
-      visningsnavn: ressurs.visningsnavn,
-      primaryTelefonnummer: ressurs.primaryTelefonnummer,
-      sektor: ressurs.sektor,
-      telefoner: ressurs.telefoner,
-      orgEnheter: customOrgEnheter,
-      tidligsteFom: tidligsteFomDato,
-    };
-
-    return customRessurs;
-  });
-};
-
 export const OrgRessursTabellPageInner = ({
   orgEnheter = [],
   ressurserNavidents,
@@ -304,4 +231,77 @@ interface CustomRessurs {
   sektor: Sektor;
   orgEnheter: CustomOrgEnhet[];
   tidligsteFom?: Date | string;
+}
+
+const createCustomRessurser = (
+  orgEnheter: OrgEnhet[],
+  hentedeRessurser: Ressurs[],
+): CustomRessurs[] | undefined => {
+  return hentedeRessurser?.map((ressurs) => {
+    const correspondingOrgEnheter = orgEnheter.filter((orgEnhet) =>
+      orgEnhet.ressursKoblinger.some(
+        (kobling) =>
+          kobling.navident === ressurs.navident &&
+          isPeriodActiveOrFuture(kobling.gyldigFom, kobling.gyldigTom),
+      ),
+    );
+
+    const fomDatoer = correspondingOrgEnheter.map(
+      (orgEnhet) =>
+        orgEnhet.ressursKoblinger.find(
+          (kobling) => kobling.navident === ressurs.navident,
+        )?.gyldigFom,
+    );
+
+    const tidligsteFomDato = earliestDateInList(fomDatoer);
+
+    const customOrgEnheter: CustomOrgEnhet[] = correspondingOrgEnheter.map(
+      (orgEnhet) => ({
+        id: orgEnhet.id,
+        name: orgEnhet.navn,
+      }),
+    );
+
+    const customRessurs: CustomRessurs = {
+      navident: ressurs.navident,
+      visningsnavn: ressurs.visningsnavn,
+      primaryTelefonnummer: ressurs.primaryTelefonnummer,
+      sektor: ressurs.sektor,
+      telefoner: ressurs.telefoner,
+      orgEnheter: customOrgEnheter,
+      tidligsteFom: tidligsteFomDato,
+    };
+
+    return customRessurs;
+  });
+};
+
+export function TelefonNummere({ ressurs }: { ressurs: CustomRessurs }) {
+  const telefonnummere = ressurs.primaryTelefonnummer
+    ? [{ nummer: ressurs.primaryTelefonnummer }, ...ressurs.telefoner]
+    : ressurs.telefoner;
+
+  const uniqueTelefonnummere = uniqBy(telefonnummere, "nummer");
+
+  return uniqueTelefonnummere.map(({ nummer }) => formatTlf(nummer)).join(", ");
+}
+
+function customSortByOrgEnhetName(
+  customRessurser: CustomRessurs[],
+  sortState: SortState,
+): CustomRessurs[] {
+  if (sortState.orderBy !== "orgEnhet.name") {
+    return customRessurser;
+  }
+  const sortedData = [...customRessurser];
+  sortedData.sort((a, b) => {
+    const nameA = a.orgEnheter[0]?.name.toLowerCase() || "";
+    const nameB = b.orgEnheter[0]?.name.toLowerCase() || "";
+
+    return sortState.direction === "ascending"
+      ? nameA.localeCompare(nameB)
+      : nameB.localeCompare(nameA);
+  });
+
+  return sortedData;
 }

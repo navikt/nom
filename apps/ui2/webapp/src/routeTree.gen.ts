@@ -17,6 +17,7 @@ import { Route as IndexImport } from './routes/index'
 import { Route as RessursIdImport } from './routes/ressurs.$id'
 import { Route as RessursTerminateIdImport } from './routes/ressurs-terminate.$id'
 import { Route as OrgIdImport } from './routes/org.$id'
+import { Route as MasseflyttingIdImport } from './routes/masseflytting.$id'
 import { Route as AdminRessurserImport } from './routes/admin.ressurser'
 import { Route as AdminOrgenheterImport } from './routes/admin.orgenheter'
 import { Route as AdminHistoryRessurserImport } from './routes/admin.history-ressurser'
@@ -53,6 +54,11 @@ const RessursTerminateIdRoute = RessursTerminateIdImport.update({
 
 const OrgIdRoute = OrgIdImport.update({
   path: '/org/$id',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MasseflyttingIdRoute = MasseflyttingIdImport.update({
+  path: '/masseflytting/$id',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -139,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRessurserImport
       parentRoute: typeof AdminImport
     }
+    '/masseflytting/$id': {
+      id: '/masseflytting/$id'
+      path: '/masseflytting/$id'
+      fullPath: '/masseflytting/$id'
+      preLoaderRoute: typeof MasseflyttingIdImport
+      parentRoute: typeof rootRoute
+    }
     '/org/$id': {
       id: '/org/$id'
       path: '/org/$id'
@@ -188,6 +201,7 @@ export const routeTree = rootRoute.addChildren({
     AdminRessurserRoute,
   }),
   TilgangerRoute,
+  MasseflyttingIdRoute,
   OrgIdRoute,
   RessursTerminateIdRoute,
   RessursIdRoute,
@@ -206,6 +220,7 @@ export const routeTree = rootRoute.addChildren({
         "/",
         "/admin",
         "/tilganger",
+        "/masseflytting/$id",
         "/org/$id",
         "/ressurs-terminate/$id",
         "/ressurs/$id",
@@ -243,6 +258,9 @@ export const routeTree = rootRoute.addChildren({
     "/admin/ressurser": {
       "filePath": "admin.ressurser.tsx",
       "parent": "/admin"
+    },
+    "/masseflytting/$id": {
+      "filePath": "masseflytting.$id.tsx"
     },
     "/org/$id": {
       "filePath": "org.$id.tsx"

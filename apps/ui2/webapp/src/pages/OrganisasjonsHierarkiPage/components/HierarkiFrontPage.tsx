@@ -20,7 +20,7 @@ export function HierarkiFrontPage({ orgEnhet }: { orgEnhet: OrgEnhet }) {
 
   return (
     <>
-      <ValgtOrgEnhet orgEnhet={orgEnhet} ressurser={[]} />
+      <ValgtOrgEnhet hideRessurser orgEnhet={orgEnhet} />
       <UnderEnheterGraphic valgtEnhet={orgEnhet} />
       <div
         css={css`

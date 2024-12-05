@@ -6,10 +6,11 @@ import { Link as ReactRouterLink } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import React, { useEffect, useRef } from "react";
 
-import { getOrgEnhet, getRessurs } from "~/api/react-query-endpoints";
+import { getOrgEnhet } from "~/api/react-query-endpoints";
 import { UserImage } from "~/components/UserImage";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import building from "~/resources/building.svg";
+import type { Ressurs } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
 
 export function OrgEnhetView({
@@ -67,14 +68,7 @@ export function OrgEnhetView({
   );
 }
 
-export function ResourceLink({ navident }: { navident: string }) {
-  const ressursQuery = useQuery({
-    queryKey: getRessurs.queryKey(navident),
-    queryFn: () => getRessurs.queryFn(navident),
-  });
-
-  const ressurs = ressursQuery.data;
-
+export function ResourceLink({ ressurs }: { ressurs: Ressurs }) {
   if (!ressurs) {
     return <></>;
   }
@@ -102,6 +96,7 @@ export function ResourceLink({ navident }: { navident: string }) {
           <Heading level="2" size="small">
             {formatVisningsnavn(ressurs.visningsnavn)}
           </Heading>
+
           <BodyShort size="small">
             {SektorNameMapping[ressurs.sektor]}
           </BodyShort>

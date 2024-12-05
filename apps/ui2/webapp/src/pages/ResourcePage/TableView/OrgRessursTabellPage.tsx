@@ -124,6 +124,7 @@ export const OrgRessursTabellPage = () => {
     return (
       <>
         <PageBanner text={"Medarbeidere i " + orgEnhetQuery.data?.navn || ""} />
+
         <ContentWrapper limitWidth={false}>
           <Link
             css={css`
@@ -144,8 +145,8 @@ export const OrgRessursTabellPage = () => {
                 font-size: 1.2rem;
                 margin-bottom: 20px;
               `}
-              onChange={() => {
-                setIncludeUnderliggende(!includeUnderliggende);
+              onChange={(event) => {
+                setIncludeUnderliggende(event.target.checked);
               }}
               value="underliggende-organisasjonsenheter"
             >

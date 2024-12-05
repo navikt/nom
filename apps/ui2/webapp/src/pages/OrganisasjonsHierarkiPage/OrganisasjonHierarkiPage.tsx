@@ -8,7 +8,6 @@ import { getOrgEnhet } from "~/api/react-query-endpoints";
 import { PageBanner } from "~/components/PageBanner";
 import { HierarkiFrontPage } from "~/pages/OrganisasjonsHierarkiPage/components/HierarkiFrontPage";
 import type { OrgEnhet } from "~/types/api-models";
-import { isGyldighetsPeriodeActive } from "~/utils";
 
 import ContentWrapper from "../../components/ContentWrapper";
 import { OrgEnhetView, OverEnheterDivider } from "./components/CardViews";
@@ -16,13 +15,6 @@ import { ValgtOrgEnhet } from "./components/ValgtOrgEnhet";
 
 function OrganisasjonHierarkiPageInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const underEnheter = orgEnhet.underordnedeOrgEnhetId;
-
-  const ressurserNavidents = orgEnhet.ressursKoblinger
-    .filter((kobling) =>
-      isGyldighetsPeriodeActive(kobling.gyldigFom, kobling.gyldigTom),
-    )
-    .map((tilknytning) => tilknytning.navident)
-    .sort();
 
   return (
     <div
@@ -33,7 +25,7 @@ function OrganisasjonHierarkiPageInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     >
       <OverEnheter isRoot orgEnhetId={orgEnhet.id} />
 
-      <ValgtOrgEnhet orgEnhet={orgEnhet} ressurser={ressurserNavidents} />
+      <ValgtOrgEnhet orgEnhet={orgEnhet} />
       {underEnheter.length > 0 && <UnderEnheterGraphic valgtEnhet={orgEnhet} />}
 
       <div

@@ -103,7 +103,7 @@ export interface LeggTilOrgtilknytningRequest {
 export interface MasseFlyttingRequest {
   beholdTilganger: boolean;
   nyOrgenhetId: string;
-  ressurserNavident: string[];
+  orgtilknytningerFid: string[];
 }
 
 export enum NomNivaa {
@@ -195,6 +195,7 @@ export interface OrgtilknytningState {
   gyldigFom: string;
   /** @format date */
   gyldigTom?: string;
+  masseflyttetFraFid?: string;
   navident: string;
   orgEnhetId: string;
   orgtilknytningType?: Tilknytningtype;
