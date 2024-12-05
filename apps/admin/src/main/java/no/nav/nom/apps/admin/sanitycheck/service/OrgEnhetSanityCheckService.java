@@ -221,9 +221,11 @@ public class OrgEnhetSanityCheckService {
         List<String> bunnEnheter = aktiveOrganiseringer
             .stream()
             .map(OrganiseringState::id)
-            .filter(id -> !hasUnderEnhet(id, aktiveOrganiseringer))
+            .filter(id -> !givenOrgenhetIsOverenhetToSome(id, aktiveOrganiseringer)) //rules out those who has underenheter
+            .filter(this::givenOrgenhetHasOverenhet) // also rules out single orphan orgenheter outside the hierarchy
             .toList();
-        log.info("Lister bunn enheter: {}", bunnEnheter);
+        //log.info("Lister bunn enheter: {}", bunnEnheter);
+
 
         List<OrgEnhetState> bunnEnheterUtenEksakt1arbeidsomradeIHierarkiet = bunnEnheter
             .stream()
@@ -231,6 +233,7 @@ public class OrgEnhetSanityCheckService {
             .map(bunnEnhet -> getOrgEnhetState(bunnEnhet, aktiveEnheter))
             .filter(Objects::nonNull)
             .toList();
+
         log.info("Lister bunn enheter som ikke har kksakt 1 arbeidsomrade i orghierarkiet: {}", bunnEnheterUtenEksakt1arbeidsomradeIHierarkiet);
 
 
@@ -258,8 +261,13 @@ public class OrgEnhetSanityCheckService {
             .findFirst().orElse(null);
     }
 
-    private boolean hasUnderEnhet(String orgEnhetId, List<OrganiseringState> organiseringer) {
+    private boolean givenOrgenhetIsOverenhetToSome(String orgEnhetId, List<OrganiseringState> organiseringer) {
         return organiseringer.stream().anyMatch(organisering -> orgEnhetId.equals(organisering.idOver()));
+    }
+
+    private boolean givenOrgenhetHasOverenhet(String orgEnhetId) {
+        Optional<OrganiseringState> organiseringState = organiseringStateRepository.findActiveById(orgEnhetId);
+        return organiseringState.isPresent() && organiseringState.get().idOver() != null;
     }
 
 
