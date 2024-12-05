@@ -298,22 +298,27 @@ public class OrgEnhetSanityCheckService {
         List<OrgEnhetState> aktiveEnheter,
         List<OrganiseringState> aktiveOrganiseringer
     ) {
+        if (orgEnhetState == null) {
+            return orgenheterSoFar;
+        }
+
         OrganiseringState organiseringState = getOrganiseringState(orgEnhetState.id(), aktiveOrganiseringer);
         //log.info("In findAllOrgenheterOver orgEnhetState: {}, organiseringState: {}", orgEnhetState, organiseringState);
 
         if(organiseringState == null) {
             return orgenheterSoFar;
-        } else {
-            Optional<OrgEnhetState> overOrgEnhenState = Optional.ofNullable(getOrgEnhetState(organiseringState.idOver(), aktiveEnheter));
-            if(overOrgEnhenState.isPresent()) {
-                return orgenheterSoFar;
-            }
-            return overOrgEnhenState
-                .map(ooe -> {
-                    orgenheterSoFar.add(ooe);
-                    return findAllOrgenheterOver(ooe, orgenheterSoFar, aktiveEnheter, aktiveOrganiseringer);
-                })
-                .orElse(orgenheterSoFar);
         }
+
+        Optional<OrgEnhetState> overOrgEnhenState = Optional.ofNullable(getOrgEnhetState(organiseringState.idOver(), aktiveEnheter));
+        if(overOrgEnhenState.isPresent()) {
+                return orgenheterSoFar;
+        }
+        return overOrgEnhenState
+            .map(ooe -> {
+                orgenheterSoFar.add(ooe);
+                return findAllOrgenheterOver(ooe, orgenheterSoFar, aktiveEnheter, aktiveOrganiseringer);
+            })
+            .orElse(orgenheterSoFar);
     }
+
 }
