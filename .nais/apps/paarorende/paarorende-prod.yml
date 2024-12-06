@@ -60,3 +60,6 @@ spec:
         - application: org-token-tool
           namespace: org
           cluster: prod-gcp
+        - application: nom-ui2
+          namespace: org
+          cluster: prod-gcp
