@@ -4,6 +4,7 @@ import { setupActuators } from "./actuators.js";
 import {
   setupNomApiProxy,
   setupNomRemedyIntegrasjonProxy,
+  setupPaarorendeProxy,
   setupTeamcatApiProxy,
 } from "./apiProxy.js";
 import { errorHandling } from "./errorHandler.js";
@@ -26,6 +27,7 @@ app.use(verifyJWTToken);
 setupNomApiProxy(app);
 setupTeamcatApiProxy(app);
 setupNomRemedyIntegrasjonProxy(app);
+setupPaarorendeProxy(app);
 
 // Catch all route, må være sist
 setupStaticRoutes(app);

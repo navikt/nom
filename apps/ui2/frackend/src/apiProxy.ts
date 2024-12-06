@@ -26,3 +26,11 @@ export const setupNomRemedyIntegrasjonProxy = (app: Express) =>
     scope: config.proxy.nomRemedyIntegrasjonApiScope,
     flow: "ON_BEHALF_OF",
   });
+
+export const setupPaarorendeProxy = (app: Express) =>
+  addProxyHandler(app, {
+    ingoingUrl: "/frackend/paarorende",
+    outgoingUrl: config.proxy.paarorendeApiUrl,
+    scope: config.proxy.paarorendeApiScope,
+    flow: "ON_BEHALF_OF",
+  });

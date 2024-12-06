@@ -19,6 +19,8 @@ const proxy = {
   nomRemedyIntegrasjonApiUrl: requireEnvironment(
     "NOM_REMEDY_INTEGRASJON_API_URL",
   ),
+  paarorendeApiScope: requireEnvironment("PAARORENDE_API_SCOPE"),
+  paarorendeApiUrl: requireEnvironment("PAARORENDE_API_URL"),
 };
 
 const app = {
