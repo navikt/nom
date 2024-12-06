@@ -279,11 +279,25 @@ public class OrgEnhetSanityCheckService {
         List<OrganiseringState> aktiveOrganiseringer
     ) {
         OrgEnhetState orgEnhetState = getOrgEnhetState(orgEnhetId, aktiveEnheter);
+        if (orgEnhetState == null) {
+            return false;
+        }
+
         List<OrgEnhetState> orgenheterOver = findAllOrgenheterOver(orgEnhetState, aktiveEnheter, aktiveOrganiseringer);
-        return orgenheterOver
+
+        var hasOneAndOnlyOneArbeideomradeInHierarchy = orgenheterOver
             .stream()
             .filter(oe -> oe.nomNivaa().equals(Optional.of(NomNivaa.ARBEIDSOMRAADE)))
             .count() == 1;
+
+        var hasValidHierarchy = orgenheterOver
+            .stream()
+            .filter(oe ->
+                oe.agressoOrgNivaa().isPresent() && oe.agressoOrgNivaa().get().equals("ORGNIV0")
+                    && oe.agressoId().isPresent() && oe.agressoId().get().equals("NAV"))
+            .count() == 1;
+
+        return hasOneAndOnlyOneArbeideomradeInHierarchy && hasValidHierarchy;
     }
 
     private List<OrgEnhetState> findAllOrgenheterOver(OrgEnhetState orgEnhetState,
@@ -310,9 +324,10 @@ public class OrgEnhetSanityCheckService {
         }
 
         Optional<OrgEnhetState> overOrgEnhenState = Optional.ofNullable(getOrgEnhetState(organiseringState.idOver(), aktiveEnheter));
-        if(overOrgEnhenState.isPresent()) {
+        if(overOrgEnhenState.isEmpty()) {
                 return orgenheterSoFar;
         }
+
         return overOrgEnhenState
             .map(ooe -> {
                 orgenheterSoFar.add(ooe);
