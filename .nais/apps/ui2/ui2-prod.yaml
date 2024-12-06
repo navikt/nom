@@ -34,6 +34,9 @@ spec:
         - application: team-catalog-backend
           namespace: org
           cluster: prod-gcp
+        - application: nom-paarorende
+          namespace: org
+          cluster: prod-gcp
       external:
         - host: unpkg.com
         - host: nom-remedy-integrasjon.prod-fss-pub.nais.io
