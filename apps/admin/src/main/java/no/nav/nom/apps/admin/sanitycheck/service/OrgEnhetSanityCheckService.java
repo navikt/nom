@@ -229,7 +229,7 @@ public class OrgEnhetSanityCheckService {
 
         List<OrgEnhetState> bunnEnheterUtenEksakt1arbeidsomradeIHierarkiet = bunnEnheter
             .stream()
-            .filter(bunnEnhet -> !hasExactly1ArbeidsomradeIOrganisasjonshierarkietStier(bunnEnhet, aktiveEnheter, aktiveOrganiseringer))
+            .filter(bunnEnhet -> !hasExactly1ArbeidsomradeIOrHierarki(bunnEnhet, aktiveEnheter, aktiveOrganiseringer))
             .map(bunnEnhet -> getOrgEnhetState(bunnEnhet, aktiveEnheter))
             .filter(Objects::nonNull)
             .toList();
@@ -273,7 +273,7 @@ public class OrgEnhetSanityCheckService {
 
     // return true if the orgEnhetId has exactly one arbeidsomrade in the organisasjonshierarkiet stier
     // return false otherwise
-    private boolean hasExactly1ArbeidsomradeIOrganisasjonshierarkietStier(
+    private boolean hasExactly1ArbeidsomradeIOrHierarki(
         String orgEnhetId,
         List<OrgEnhetState> aktiveEnheter,
         List<OrganiseringState> aktiveOrganiseringer
@@ -284,6 +284,11 @@ public class OrgEnhetSanityCheckService {
         }
 
         List<OrgEnhetState> orgenheterOver = findAllOrgenheterOver(orgEnhetState, aktiveEnheter, aktiveOrganiseringer);
+
+        //just for testing and to be deleted
+        if(orgEnhetId.equals("va730n")) {
+            log.info("orgenheterOver for {} are: {}",orgEnhetId, orgenheterOver);
+        }
 
         var hasOneAndOnlyOneArbeideomradeInHierarchy = orgenheterOver
             .stream()
