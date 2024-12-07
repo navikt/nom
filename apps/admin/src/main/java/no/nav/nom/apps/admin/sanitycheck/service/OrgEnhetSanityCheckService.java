@@ -284,6 +284,12 @@ public class OrgEnhetSanityCheckService {
         }
 
         List<OrgEnhetState> orgenheterOver = findAllOrgenheterOver(orgEnhetState, aktiveEnheter, aktiveOrganiseringer);
+
+        //check je305h (Helfo), ke602d (Riks), ru664y (vikafossen), ne938h (skatt)...
+        if(orgEnhetId.equals("je305h") || orgEnhetId.equals("ke602d") || orgEnhetId.equals("ru664y") || orgEnhetId.equals("ne938h")) {
+            log.info("orphan hierarchy orgEnhetId: {}, orgenheterOver: {}", orgEnhetId, orgenheterOver);
+        }
+
         long countArbeidsomradeOver = orgenheterOver
             .stream()
             .filter(oe -> oe.nomNivaa().equals(Optional.of(NomNivaa.ARBEIDSOMRAADE)))
