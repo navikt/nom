@@ -267,26 +267,6 @@ public class OrgEnhetSanityCheckService {
         return organiseringState.isPresent() && organiseringState.get().idOver() != null;
     }
 
-    private boolean validHierarchy(
-        String orgEnhetId,
-        List<OrgEnhetState> aktiveEnheter,
-        List<OrganiseringState> aktiveOrganiseringer) {
-
-        OrgEnhetState orgEnhetState = getOrgEnhetState(orgEnhetId, aktiveEnheter);
-        if (orgEnhetState == null) {
-            return false;
-        }
-
-        List<OrgEnhetState> orgenheterOver = findAllOrgenheterOver(orgEnhetState, aktiveEnheter, aktiveOrganiseringer);
-
-        return orgenheterOver
-            .stream()
-            .filter(oe ->
-                oe.agressoOrgNivaa().isPresent() && oe.agressoOrgNivaa().get().equals("ORGNIV0")
-                    && oe.agressoId().isPresent() && oe.agressoId().get().equals("NAV"))
-            .count() == 1;
-    }
-
     private boolean validHierarchyAndInvalidArbeidsomradeConfig(
         String orgEnhetId,
         List<OrgEnhetState> aktiveEnheter,
@@ -315,43 +295,6 @@ public class OrgEnhetSanityCheckService {
         var invalidArbeidomradeConfig = countArbeidsomrade != 1;
 
         return validHierarchy && invalidArbeidomradeConfig;
-    }
-
-    // return true if the orgEnhetId has exactly one arbeidsomrade in the organisasjonshierarkiet and the hierarchy is valid
-    // return false otherwise
-    private boolean hasExactly1ArbeidsomradeIOrHierarki(
-        String orgEnhetId,
-        List<OrgEnhetState> aktiveEnheter,
-        List<OrganiseringState> aktiveOrganiseringer
-    ) {
-        OrgEnhetState orgEnhetState = getOrgEnhetState(orgEnhetId, aktiveEnheter);
-        if (orgEnhetState == null) {
-            return false;
-        }
-
-        List<OrgEnhetState> orgenheterOver = findAllOrgenheterOver(orgEnhetState, aktiveEnheter, aktiveOrganiseringer);
-
-        long countArbeidsomradeOver = orgenheterOver
-            .stream()
-            .filter(oe -> oe.nomNivaa().equals(Optional.of(NomNivaa.ARBEIDSOMRAADE)))
-            .count();
-
-        long countArbeidsomrade = orgEnhetState.nomNivaa().equals(Optional.of(NomNivaa.ARBEIDSOMRAADE))? 1 : 0;
-        countArbeidsomrade += countArbeidsomradeOver;
-
-        var hasValidHierarchy = orgenheterOver
-            .stream()
-            .filter(oe ->
-                oe.agressoOrgNivaa().isPresent() && oe.agressoOrgNivaa().get().equals("ORGNIV0")
-                    && oe.agressoId().isPresent() && oe.agressoId().get().equals("NAV"))
-            .count() == 1;
-
-        //check je305h (Helfo), ke602d (Riks), ru664y (vikafossen), ne938h (skatt)...
-        if(orgEnhetId.equals("je305h") || orgEnhetId.equals("ke602d") || orgEnhetId.equals("ru664y") || orgEnhetId.equals("ne938h")) {
-            log.info("orphan hierarchy orgEnhetId: {}, countArbeidsomrade:{}, hasValidHierarchy:{} orgenheterOver: {}, return: {}", orgEnhetId, countArbeidsomrade, hasValidHierarchy, orgenheterOver, countArbeidsomrade == 1 && hasValidHierarchy);
-        }
-
-        return countArbeidsomrade == 1 && hasValidHierarchy;
     }
 
     private List<OrgEnhetState> findAllOrgenheterOver(OrgEnhetState orgEnhetState,
