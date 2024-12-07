@@ -212,7 +212,6 @@ public class OrgEnhetSanityCheckService {
         return enheter.stream().filter(e -> !enehtIder.contains(e.id())).toList();
     }
 
-
     public List<OrgEnhetOrganisering> bunnEnheterSomIkkeHarEksakt1ArbeidsomradeIOrghierarkietStier() {
         List<OrgEnhetState> alleEnheter =  orgEnhetStateRepository.getAll().stream().toList();
         List<OrgEnhetState> aktiveEnheter = aktiveEnheter(alleEnheter);
@@ -226,16 +225,14 @@ public class OrgEnhetSanityCheckService {
             .toList();
         //log.info("Lister bunn enheter: {}", bunnEnheter);
 
-
         List<OrgEnhetState> bunnEnheterUtenEksakt1arbeidsomradeIHierarkiet = bunnEnheter
             .stream()
-            .filter(bunnEnhet -> !hasExactly1ArbeidsomradeIOrHierarki(bunnEnhet, aktiveEnheter, aktiveOrganiseringer))
+            .filter(bunnEnhet -> validHierarchyAndInvalidArbeidsomradeConfig(bunnEnhet, aktiveEnheter, aktiveOrganiseringer))
             .map(bunnEnhet -> getOrgEnhetState(bunnEnhet, aktiveEnheter))
             .filter(Objects::nonNull)
             .toList();
 
         log.info("Lister bunn enheter som ikke har kksakt 1 arbeidsomrade i orghierarkiet: {}", bunnEnheterUtenEksakt1arbeidsomradeIHierarkiet);
-
 
         return bunnEnheterUtenEksakt1arbeidsomradeIHierarkiet.stream()
             .map(oe ->
@@ -270,6 +267,55 @@ public class OrgEnhetSanityCheckService {
         return organiseringState.isPresent() && organiseringState.get().idOver() != null;
     }
 
+    private boolean validHierarchy(
+        String orgEnhetId,
+        List<OrgEnhetState> aktiveEnheter,
+        List<OrganiseringState> aktiveOrganiseringer) {
+
+        OrgEnhetState orgEnhetState = getOrgEnhetState(orgEnhetId, aktiveEnheter);
+        if (orgEnhetState == null) {
+            return false;
+        }
+
+        List<OrgEnhetState> orgenheterOver = findAllOrgenheterOver(orgEnhetState, aktiveEnheter, aktiveOrganiseringer);
+
+        return orgenheterOver
+            .stream()
+            .filter(oe ->
+                oe.agressoOrgNivaa().isPresent() && oe.agressoOrgNivaa().get().equals("ORGNIV0")
+                    && oe.agressoId().isPresent() && oe.agressoId().get().equals("NAV"))
+            .count() == 1;
+    }
+
+    private boolean validHierarchyAndInvalidArbeidsomradeConfig(
+        String orgEnhetId,
+        List<OrgEnhetState> aktiveEnheter,
+        List<OrganiseringState> aktiveOrganiseringer
+    ) {
+        OrgEnhetState orgEnhetState = getOrgEnhetState(orgEnhetId, aktiveEnheter);
+        if (orgEnhetState == null) {
+            return false;
+        }
+
+        List<OrgEnhetState> orgenheterOver = findAllOrgenheterOver(orgEnhetState, aktiveEnheter, aktiveOrganiseringer);
+
+        var validHierarchy = orgenheterOver
+            .stream()
+            .filter(oe ->
+                oe.agressoOrgNivaa().isPresent() && oe.agressoOrgNivaa().get().equals("ORGNIV0")
+                    && oe.agressoId().isPresent() && oe.agressoId().get().equals("NAV"))
+            .count() == 1;
+
+        long countArbeidsomrade = orgEnhetState.nomNivaa().equals(Optional.of(NomNivaa.ARBEIDSOMRAADE))? 1 : 0;
+        long countArbeidsomradeOver = orgenheterOver
+            .stream()
+            .filter(oe -> oe.nomNivaa().equals(Optional.of(NomNivaa.ARBEIDSOMRAADE)))
+            .count();
+        countArbeidsomrade += countArbeidsomradeOver;
+        var invalidArbeidomradeConfig = countArbeidsomrade != 1;
+
+        return validHierarchy && invalidArbeidomradeConfig;
+    }
 
     // return true if the orgEnhetId has exactly one arbeidsomrade in the organisasjonshierarkiet and the hierarchy is valid
     // return false otherwise
