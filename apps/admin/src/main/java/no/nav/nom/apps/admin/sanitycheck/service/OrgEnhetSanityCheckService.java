@@ -271,7 +271,7 @@ public class OrgEnhetSanityCheckService {
     }
 
 
-    // return true if the orgEnhetId has exactly one arbeidsomrade in the organisasjonshierarkiet stier
+    // return true if the orgEnhetId has exactly one arbeidsomrade in the organisasjonshierarkiet and the hierarchy is valid
     // return false otherwise
     private boolean hasExactly1ArbeidsomradeIOrHierarki(
         String orgEnhetId,
@@ -284,16 +284,13 @@ public class OrgEnhetSanityCheckService {
         }
 
         List<OrgEnhetState> orgenheterOver = findAllOrgenheterOver(orgEnhetState, aktiveEnheter, aktiveOrganiseringer);
-
-        //just for testing and to be deleted
-        if(orgEnhetId.equals("va730n")) {
-            log.info("orgenheterOver for {} are: {}",orgEnhetId, orgenheterOver);
-        }
-
-        var hasOneAndOnlyOneArbeideomradeInHierarchy = orgenheterOver
+        long countArbeidsomradeOver = orgenheterOver
             .stream()
             .filter(oe -> oe.nomNivaa().equals(Optional.of(NomNivaa.ARBEIDSOMRAADE)))
-            .count() == 1;
+            .count();
+
+        long countArbeidsomrade = orgEnhetState.nomNivaa().equals(Optional.of(NomNivaa.ARBEIDSOMRAADE))? 1 : 0;
+        countArbeidsomrade += countArbeidsomradeOver;
 
         var hasValidHierarchy = orgenheterOver
             .stream()
@@ -302,7 +299,7 @@ public class OrgEnhetSanityCheckService {
                     && oe.agressoId().isPresent() && oe.agressoId().get().equals("NAV"))
             .count() == 1;
 
-        return hasOneAndOnlyOneArbeideomradeInHierarchy && hasValidHierarchy;
+        return countArbeidsomrade == 1 && hasValidHierarchy;
     }
 
     private List<OrgEnhetState> findAllOrgenheterOver(OrgEnhetState orgEnhetState,
