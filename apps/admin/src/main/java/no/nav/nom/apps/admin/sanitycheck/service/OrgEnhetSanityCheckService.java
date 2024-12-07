@@ -285,11 +285,6 @@ public class OrgEnhetSanityCheckService {
 
         List<OrgEnhetState> orgenheterOver = findAllOrgenheterOver(orgEnhetState, aktiveEnheter, aktiveOrganiseringer);
 
-        //check je305h (Helfo), ke602d (Riks), ru664y (vikafossen), ne938h (skatt)...
-        if(orgEnhetId.equals("je305h") || orgEnhetId.equals("ke602d") || orgEnhetId.equals("ru664y") || orgEnhetId.equals("ne938h")) {
-            log.info("orphan hierarchy orgEnhetId: {}, orgenheterOver: {}", orgEnhetId, orgenheterOver);
-        }
-
         long countArbeidsomradeOver = orgenheterOver
             .stream()
             .filter(oe -> oe.nomNivaa().equals(Optional.of(NomNivaa.ARBEIDSOMRAADE)))
@@ -304,6 +299,11 @@ public class OrgEnhetSanityCheckService {
                 oe.agressoOrgNivaa().isPresent() && oe.agressoOrgNivaa().get().equals("ORGNIV0")
                     && oe.agressoId().isPresent() && oe.agressoId().get().equals("NAV"))
             .count() == 1;
+
+        //check je305h (Helfo), ke602d (Riks), ru664y (vikafossen), ne938h (skatt)...
+        if(orgEnhetId.equals("je305h") || orgEnhetId.equals("ke602d") || orgEnhetId.equals("ru664y") || orgEnhetId.equals("ne938h")) {
+            log.info("orphan hierarchy orgEnhetId: {}, countArbeidsomrade:{}, hasValidHierarchy:{} orgenheterOver: {}, return: {}", orgEnhetId, countArbeidsomrade, hasValidHierarchy, orgenheterOver, countArbeidsomrade == 1 && hasValidHierarchy);
+        }
 
         return countArbeidsomrade == 1 && hasValidHierarchy;
     }
