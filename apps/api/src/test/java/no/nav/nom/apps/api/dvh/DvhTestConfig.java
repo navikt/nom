@@ -49,6 +49,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
     , ObjectMapper.class
     , OTUtenforHierarki.class
     , OrgtilknytningService.class
+    , DvhOldTdvService.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 public class DvhTestConfig {

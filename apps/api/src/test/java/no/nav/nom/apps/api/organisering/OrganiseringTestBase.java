@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.organisering;
 
 import no.nav.nom.apps.api.MockOAuth2ServerInitializer;
+import no.nav.nom.apps.api.dvh.DvhOldTdvService;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventKafkaConfig;
 import no.nav.nom.libs.state.organisering.OrganiseringStateAutoconfiguration;
 import no.nav.nom.libs.state.ressurs.RessursStateAutoconfiguration;
@@ -30,7 +31,8 @@ import org.springframework.test.context.ContextConfiguration;
         OrganiseringTestConfig.class,
         OrganiseringEventKafkaConfig.class,
         RessursStateAutoconfiguration.class,
-        OrganiseringStateAutoconfiguration.class
+        OrganiseringStateAutoconfiguration.class,
+        DvhOldTdvService.class
     },
     initializers = MockOAuth2ServerInitializer.class)
 @EmbeddedKafka(partitions = 1,  topics = {"org.nom.organisering-eventsource", "org.nom.intern-ressurs-state"},  controlledShutdown = true)

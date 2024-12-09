@@ -1,0 +1,127 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/dvh_nom/nom_ords_ansatte_buckets.json"
+  },
+  "response": {
+    "status": 200,
+    "transformers": [
+      "response-template"
+    ],
+    "jsonBody": {
+      "items": [
+        {
+          "nav_ident": "O123456",
+          "fnr": "12345678901",
+          "fornavn": "Navn 1",
+          "etternavn": "ENavn 1",
+          "epost": "epost1@nav.no",
+          "remedy_start_dato": "2008-05-23",
+          "remedy_slutt_dato": "2099-12-31",
+          "agresso_start_dato": "2008-07-01",
+          "agresso_slutt_dato": "2099-12-31",
+          "ansatt_per_idag": "JA",
+          "ansettelsestype_besk": "Fast",
+          "ansatt_type": "NAV Statlig",
+          "fysisk_brukersted": "0400",
+          "ansatt_ressurs_kode": "F",
+          "remedy_permisjon": "NEI",
+          "remedy_aktiv": "JA",
+          "ident_type": "STANDARD"
+        },
+        {
+          "nav_ident": "O123457",
+          "fnr": "12345678902",
+          "fornavn": "Navn 2",
+          "etternavn": "ENavn 2",
+          "epost": "epost2@nav.no",
+          "remedy_start_dato": "2008-05-26",
+          "remedy_slutt_dato": null,
+          "agresso_start_dato": "2008-07-01",
+          "agresso_slutt_dato": "2099-12-31",
+          "ansatt_per_idag": "JA",
+          "ansettelsestype_besk": "Fast",
+          "ansatt_type": "NAV Statlig",
+          "fysisk_brukersted": null,
+          "ansatt_ressurs_kode": "F",
+          "remedy_permisjon": "NEI",
+          "ident_type": "STANDARD"
+        },
+        {
+          "nav_ident": "O123458",
+          "fnr": "12345678903",
+          "fornavn": "Navn 3",
+          "etternavn": "ENavn 3",
+          "epost": "epost3@nav.no",
+          "remedy_start_dato": "2008-05-28",
+          "remedy_slutt_dato": "2019-01-29",
+          "agresso_start_dato": "2008-07-01",
+          "agresso_slutt_dato": "2010-11-13",
+          "ansatt_per_idag": "NEI",
+          "ansettelsestype_besk": null,
+          "ansatt_type": "NAV Statlig",
+          "fysisk_brukersted": "0400",
+          "ansatt_ressurs_kode": "N",
+          "remedy_permisjon": "NEI",
+          "remedy_aktiv": null,
+          "ident_type": "STANDARD"
+        },
+        {
+          "nav_ident": "O123459",
+          "fnr": "92345678904",
+          "fornavn": "Navn 4",
+          "etternavn": "ENavn 4",
+          "epost": "epost4@nav.no",
+          "remedy_start_dato": "2008-05-30",
+          "remedy_slutt_dato": "2099-12-31",
+          "agresso_start_dato": "2008-07-01",
+          "agresso_slutt_dato": "2099-12-31",
+          "ansatt_per_idag": "JA",
+          "ansettelsestype_besk": "Kommunalt ansatt",
+          "ansatt_type": "NAV Kommunalt",
+          "fysisk_brukersted": "0400",
+          "ansatt_ressurs_kode": "N",
+          "remedy_permisjon": "JA",
+          "remedy_aktiv": "JA",
+          "ident_type": "STANDARD"
+        },
+        {
+          "nav_ident": "O123460",
+          "fnr": "12345678905",
+          "fornavn": "Navn 5",
+          "etternavn": "ENavn 5",
+          "epost": "epost5@nav.no",
+          "remedy_start_dato": "2008-05-30",
+          "remedy_slutt_dato": "2099-12-31",
+          "agresso_start_dato": "2008-07-01",
+          "agresso_slutt_dato": "2099-12-31",
+          "ansatt_per_idag": "JA",
+          "ansettelsestype_besk": "Kommunalt ansatt",
+          "ansatt_type": "NAV Kommunalt",
+          "fysisk_brukersted": "0400",
+          "ansatt_ressurs_kode": "N",
+          "remedy_permisjon": "JA",
+          "remedy_aktiv": "JA",
+          "ident_type": "STANDARD"
+        }
+      ],
+      "hasMore": false,
+      "limit": 0,
+      "offset": 0,
+      "count": 10,
+      "links": [
+        {
+          "rel": "self",
+          "href": "https://dvh.adeo.no/ords/dvh/dvh_nom/nom_ords_ansatte_buckets.json?q=%7B%22rownum%22:%7B%22%24lte%22:10%7D%7D"
+        },
+        {
+          "rel": "describedby",
+          "href": "https://dvh.adeo.no/ords/dvh/metadata-catalog/dvh_nom/item"
+        }
+      ]
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

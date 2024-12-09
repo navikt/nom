@@ -1,9 +1,8 @@
 package no.nav.nom.apps.api.ressurs.implementations.dvh;
 
-import no.nav.nom.apps.api.DvhRessursUtils;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
-import no.nav.nom.apps.api.dvh.OldDvhTestBase;
-import no.nav.nom.apps.api.ressurs.NomMastered;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.kafka.core.KafkaTemplate;
 
@@ -33,155 +31,177 @@ import java.util.stream.Collectors;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@DisplayName("dvh-diffing")
-public class RessursEndringFraDvhTest extends OldDvhTestBase {
-
+@DisplayName("Last DvhRessurser og behandling av disse")
+public class RessursEndringFraDvhTest extends DvhTestBase {
     @SpyBean
-    private KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate;
-    @MockBean
-    NomMastered nomMastered;
+    RessursCommandService ressursCommandService;
+    @SpyBean
+    KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate;
 
     @BeforeEach
     public void setup() {
-        // Default mock svar på nomMastered ressurs
         when(nomMastered.isMastered(any())).thenReturn(false);
-
-        Mockito.reset(ressursEventProducerTemplate);
     }
 
     @Test
     @DisplayName("Ressurser fra datavarehus trigger opprett event")
     public void test1() {
-        final var response = List.of(
-                new DvhRessursUtils.RessursMock(
-                        "O123456",
-                        "12345678901",
-                        "Navn 1",
-                        "ENavn 1",
-                        "NAV Statlig",
-                        LocalDate.parse("2099-12-31")
-                ),
-                new DvhRessursUtils.RessursMock(
-                        "O123457",
-                        "12345678902",
-                        "Navn 2",
-                        "ENavn 2",
-                        "NAV Statlig",
-                        LocalDate.parse("2099-12-31")
-                )
+        var dvhRessurser = List.of(
+            DvhRessurs.builder()
+                .navIdent("O123456")
+                .personIdent("12345678901")
+                .fornavn("Navn 1")
+                .etternavn("ENavn 1")
+                .remedyAnsattType("NAV Statlig")
+                .remedySluttdato(LocalDate.of(2099, 12, 31))
+                .build(),
+            DvhRessurs.builder()
+                .navIdent("O123457")
+                .personIdent("12345678902")
+                .fornavn("Navn 2")
+                .etternavn("ENavn 2")
+                .remedyAnsattType("NAV Statlig")
+                .remedySluttdato(LocalDate.of(2099, 12, 31))
+                .build()
         );
-        dvhRessursUtils.addToResponse(response);
 
-        ArgumentCaptor<RessursOpprettetEventV1> eventArgumentCaptor = ArgumentCaptor.forClass(RessursOpprettetEventV1.class);
+        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
 
-        loadFromDvh();
-        Mockito.verify(ressursEventProducerTemplate, Mockito.times(response.size())).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
-        final var eventsByPersonident = eventArgumentCaptor.getAllValues()
-                .stream()
-                .collect(Collectors.toMap(e -> ((RessursOpprettetEventV1.RessursOpprettetEventData) e.getData()).personident(), Function.identity()));
+        ArgumentCaptor<OpprettRessursCommand> opprettRessursArgumentCaptor = ArgumentCaptor.forClass(OpprettRessursCommand.class);
 
-        response.forEach(r -> assertOpprettetEventFromDvhRessurs(eventsByPersonident.get(r.FNR()), r));
+        dvhRestConsumer.loadRessurserFromDvh();
+
+        Mockito.verify(ressursCommandService, Mockito.times(dvhRessurser.size())).createRessursEvent(opprettRessursArgumentCaptor.capture());
+
+
+        final var opprettRessursCommands = opprettRessursArgumentCaptor.getAllValues()
+            .stream()
+            .collect(Collectors.toMap(OpprettRessursCommand::personident, Function.identity()));
+
+        dvhRessurser.forEach(r -> assertOpprettetEventFromDvhRessurs(opprettRessursCommands.get(r.getPersonIdent()), r));
     }
 
     @Test
     @DisplayName("Prøver ikke opprette hvis eksisterende Ressurs")
     public void test2() {
-        RessursState existingRessurs = kafkaUtils.createRessursHendelseEventSource("");
+        RessursState existingRessurs = createRessursState("");
 
-        dvhRessursUtils.addToResponse(
-                new DvhRessursUtils.RessursMock(
-                        existingRessurs.navident(),
-                        existingRessurs.personident(),
-                        existingRessurs.visningsnavn().getFornavnMellomnavn(),
-                        existingRessurs.visningsnavn().etternavn(),
-                        "NAV Statlig",
-                        LocalDate.parse("2099-12-31")
-                )
+        var dvhRessurser = List.of(
+            DvhRessurs.builder()
+                .navIdent(existingRessurs.navident())
+                .personIdent(existingRessurs.personident())
+                .fornavn(existingRessurs.visningsnavn().getFornavnMellomnavn())
+                .etternavn(existingRessurs.visningsnavn().etternavn())
+                .remedyAnsattType("NAV Statlig")
+                .remedySluttdato(LocalDate.of(2099, 12, 31))
+                .build()
         );
-        loadFromDvh();
-        Mockito.verifyNoInteractions(ressursEventProducerTemplate);
+
+        when(ressursStateRepository.findByNavident(existingRessurs.navident())).thenReturn(Optional.of(existingRessurs));
+        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
+
+        dvhRestConsumer.loadRessurserFromDvh();
+
+        Mockito.verifyNoInteractions(ressursCommandService);
     }
 
     @Test
     @DisplayName("Sluttet ansatt trigger opprett og sluttet event")
     public void test3() {
-        final var response = List.of(
-                new DvhRessursUtils.RessursMock(
-                        "O123456",
-                        "12345678901",
-                        "Navn 1",
-                        "ENavn 1",
-                        "NAV Statlig",
-                        LocalDate.parse("2021-12-31")
-                )
+        var dvhRessurser = List.of(
+            DvhRessurs.builder()
+                .navIdent("O123456")
+                .personIdent("12345678901")
+                .fornavn("Navn 1")
+                .etternavn("ENavn 1")
+                .remedyAnsattType("NAV Statlig")
+                .remedySluttdato(LocalDate.of(2021, 12, 31))
+                .build()
         );
-        dvhRessursUtils.addToResponse(response);
+
+        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
+
+        ArgumentCaptor<OpprettRessursCommand> opprettRessursArgumentCaptor = ArgumentCaptor.forClass(OpprettRessursCommand.class);
 
         ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
 
-        loadFromDvh();
+        dvhRestConsumer.loadRessurserFromDvh();
+
+        Mockito.verify(ressursCommandService, Mockito.times(dvhRessurser.size())).createRessursEvent(opprettRessursArgumentCaptor.capture());
+        Mockito.verify(ressursCommandService, Mockito.times(dvhRessurser.size())).avsluttRessursEvent(any(), any());
+
         Mockito.verify(ressursEventProducerTemplate, Mockito.times(2)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
 
 
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursSluttetEventV1));
+
+        final var opprettRessursCommands = opprettRessursArgumentCaptor.getAllValues()
+            .stream()
+            .collect(Collectors.toMap(OpprettRessursCommand::personident, Function.identity()));
+
+        dvhRessurser.forEach(r -> assertOpprettetEventFromDvhRessurs(opprettRessursCommands.get(r.getPersonIdent()), r));
     }
+
 
     @Test
     @DisplayName("Ansatt som slutter i etterkant trigger sluttet event")
     public void test4() {
         ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
 
-        final var response = List.of(
-                new DvhRessursUtils.RessursMock(
-                        "O123456",
-                        "12345678901",
-                        "Navn 1",
-                        "ENavn 1",
-                        "NAV Statlig",
-                        LocalDate.parse("2099-12-31")
-                )
-        );
-        dvhRessursUtils.addToResponse(response);
-        loadFromDvh();
-
-
-        kafkaUtils.createRessursHendelseEventSource(
-                new RessursState(
-                        PrefixedUlidCreator.createRessursUlid(),
-                        "12345678901",
-                        "O123456",
-                        Sektor.NAV_STATLIG,
-                        new Visningsnavn(
-                                "Navn 1",
-                                Optional.empty(),
-                                "ENavn 1"
-                        ),
-                        Optional.empty(),
-                        Optional.empty(),
-                        Optional.empty(),
-                    null,
-                    Collections.emptyList(),
-                    IdentType.STANDARD
-                )
+        var dvhRessurser = List.of(
+            DvhRessurs.builder()
+                .navIdent("O123456")
+                .personIdent("12345678901")
+                .fornavn("Navn 1")
+                .etternavn("ENavn 1")
+                .remedyAnsattType("NAV Statlig")
+                .remedySluttdato(LocalDate.of(2099, 12, 31))
+                .build()
         );
 
-        dvhRessursUtils.createEmptyResponse();
+        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
 
-        final var response2 = List.of(
-                new DvhRessursUtils.RessursMock(
-                        "O123456",
-                        "12345678901",
-                        "Navn 1",
-                        "ENavn 1",
-                        "NAV Statlig",
-                        LocalDate.now()
-                )
+        dvhRestConsumer.loadRessurserFromDvh();
+
+        RessursState existingRessurs = new RessursState(
+            PrefixedUlidCreator.createRessursUlid(),
+            "12345678901",
+            "O123456",
+            Sektor.NAV_STATLIG,
+            new Visningsnavn(
+                "Navn 1",
+                Optional.empty(),
+                "ENavn 1"
+            ),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Collections.emptyList(),
+            IdentType.STANDARD
         );
-        dvhRessursUtils.addToResponse(response2);
-        loadFromDvh();
 
-        Mockito.verify(ressursEventProducerTemplate, Mockito.times(3)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+        dvhRessurser = List.of(
+            DvhRessurs.builder()
+                .navIdent("O123456")
+                .personIdent("12345678901")
+                .fornavn("Navn 1")
+                .etternavn("ENavn 1")
+                .remedyAnsattType("NAV Statlig")
+                .remedySluttdato(LocalDate.now())
+                .build()
+        );
+
+        when(ressursStateRepository.findByPersonident(existingRessurs.personident())).thenReturn(Optional.of(existingRessurs));
+        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
+
+        dvhRestConsumer.loadRessurserFromDvh();
+
+        Mockito.verify(ressursCommandService, Mockito.times(1)).createRessursEvent(any());
+        Mockito.verify(ressursCommandService, Mockito.times(1)).avsluttRessursEvent(any(), any());
+
+        Mockito.verify(ressursEventProducerTemplate, Mockito.times(2)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
 
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursSluttetEventV1));
@@ -192,58 +212,42 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
     public void test5() {
         ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
 
-        final var response = List.of(
-                new DvhRessursUtils.RessursMock(
-                        "O123456",
-                        "12345678901",
-                        "Navn 1",
-                        "ENavn 1",
-                        "NAV Statlig",
-                        LocalDate.parse("2099-12-31")
-                )
-        );
-        dvhRessursUtils.addToResponse(response);
-        loadFromDvh();
-
-
-        final var ressursv1 = new RessursState(
-                PrefixedUlidCreator.createRessursUlid(),
-                "12345678901",
-                "O123456",
-                Sektor.NAV_STATLIG,
-                new Visningsnavn(
-                        "Navn 1",
-                        Optional.empty(),
-                        "ENavn 1"
-                ),
+        RessursState existingRessurs = new RessursState(
+            PrefixedUlidCreator.createRessursUlid(),
+            "12345678901",
+            "O123456",
+            Sektor.NAV_STATLIG,
+            new Visningsnavn(
+                "Navn 1",
                 Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-            null,
+                "ENavn 1"
+            ),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
             Collections.emptyList(),
             IdentType.STANDARD
         );
 
-        kafkaUtils.createRessursHendelseEventSource(ressursv1);
-
-        dvhRessursUtils.createEmptyResponse();
-
-        final var response2 = List.of(
-                new DvhRessursUtils.RessursMock(
-                        "O123456",
-                        "12345678901",
-                        "Navn 1 ENDRET",
-                        ressursv1.visningsnavn().etternavn(),
-                        "NAV Statlig",
-                        LocalDate.parse("2099-12-31")
-                )
+        var dvhRessurser = List.of(
+            DvhRessurs.builder()
+                .navIdent("O123456")
+                .personIdent("12345678901")
+                .fornavn("Navn 1 Endret")
+                .etternavn("ENavn 1")
+                .remedyAnsattType("NAV Statlig")
+                .remedySluttdato(LocalDate.of(2099, 12, 31))
+                .build()
         );
-        dvhRessursUtils.addToResponse(response2);
-        loadFromDvh();
 
-        Mockito.verify(ressursEventProducerTemplate, Mockito.times(3)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+        when(ressursStateRepository.findByPersonident(existingRessurs.personident())).thenReturn(Optional.of(existingRessurs));
+        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
 
-        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
+        dvhRestConsumer.loadRessurserFromDvh();
+
+        Mockito.verify(ressursEventProducerTemplate, Mockito.times(1)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursPersonaliaOppdatertV1));
     }
 
@@ -252,60 +256,89 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
     public void test6() {
         ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
 
-        final var response = List.of(
-                new DvhRessursUtils.RessursMock(
-                        "O123456",
-                        "12345678901",
-                        "Navn 1",
-                        "ENavn 1",
-                        "NAV Statlig",
-                        LocalDate.parse("2099-12-31")
-                )
-        );
-        dvhRessursUtils.addToResponse(response);
-        loadFromDvh();
-
-
-        final var ressursv1 = new RessursState(
-                PrefixedUlidCreator.createRessursUlid(),
-                "12345678901",
-                "O123456",
-                Sektor.NAV_STATLIG,
-                new Visningsnavn(
-                        "Navn 1",
-                        Optional.empty(),
-                        "ENavn 1"
-                ),
+        RessursState existingRessurs = new RessursState(
+            PrefixedUlidCreator.createRessursUlid(),
+            "12345678901",
+            "O123456",
+            Sektor.NAV_STATLIG,
+            new Visningsnavn(
+                "Navn 1",
                 Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-            null,
+                "ENavn 1"
+            ),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
             Collections.emptyList(),
             IdentType.STANDARD
         );
 
-        kafkaUtils.createRessursHendelseEventSource(ressursv1);
-
-        dvhRessursUtils.createEmptyResponse();
-
-        final var response2 = List.of(
-                new DvhRessursUtils.RessursMock(
-                        "O123456",
-                        "12345678901",
-                        ressursv1.visningsnavn().fornavn(),
-                        "ENavn 1 ENDRET",
-                        "NAV Statlig",
-                        LocalDate.parse("2099-12-31")
-                )
+        var dvhRessurser = List.of(
+            DvhRessurs.builder()
+                .navIdent("O123456")
+                .personIdent("12345678901")
+                .fornavn("Navn 1")
+                .etternavn("ENavn 1 ENDRET")
+                .remedyAnsattType("NAV Statlig")
+                .remedySluttdato(LocalDate.of(2099, 12, 31))
+                .build()
         );
-        dvhRessursUtils.addToResponse(response2);
-        loadFromDvh();
 
-        Mockito.verify(ressursEventProducerTemplate, Mockito.times(3)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+        when(ressursStateRepository.findByPersonident(existingRessurs.personident())).thenReturn(Optional.of(existingRessurs));
+        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
 
-        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
+        dvhRestConsumer.loadRessurserFromDvh();
+
+        Mockito.verify(ressursEventProducerTemplate, Mockito.times(1)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursPersonaliaOppdatertV1));
     }
+
+    @Test
+    @DisplayName("Ansatt som endrer sektor RessursSektorOppdatertEvent")
+    public void test7() {
+        ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
+
+        RessursState existingRessurs = new RessursState(
+            PrefixedUlidCreator.createRessursUlid(),
+            "12345678901",
+            "O123456",
+            Sektor.NAV_STATLIG,
+            new Visningsnavn(
+                "Navn 1",
+                Optional.empty(),
+                "ENavn 1"
+            ),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Collections.emptyList(),
+            IdentType.STANDARD
+        );
+
+        var dvhRessurser = List.of(
+            DvhRessurs.builder()
+                .navIdent("O123456")
+                .personIdent("12345678901")
+                .fornavn("Navn 1")
+                .etternavn("ENavn 1")
+                .remedyAnsattType("NAV Kommunalt")
+                .remedySluttdato(LocalDate.of(2099, 12, 31))
+                .build()
+        );
+
+        when(ressursStateRepository.findByPersonident(existingRessurs.personident())).thenReturn(Optional.of(existingRessurs));
+        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
+
+        dvhRestConsumer.loadRessurserFromDvh();
+
+        Mockito.verify(ressursEventProducerTemplate, Mockito.times(1)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+
+        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursSektorOppdatertV1));
+    }
+
 
     /*************************************************************************
      * Tester for NomMastered og ulike settinger av unleash flag
@@ -314,108 +347,50 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
      @Test
      @DisplayName("Ansatt som slutter i etterkant trigger sluttet event - når navident er markert som mastret")
      public void test_104a() {
-         final var response = List.of(
-             new DvhRessursUtils.RessursMock(
-                 "O123456",
-                 "12345678901",
+         RessursState existingRessurs = new RessursState(
+             PrefixedUlidCreator.createRessursUlid(),
+             "12345678901",
+             "O123456",
+             Sektor.NAV_STATLIG,
+             new Visningsnavn(
                  "Navn 1",
-                 "ENavn 1",
-                 "NAV Statlig",
-                 LocalDate.parse("2099-12-31")
-             )
+                 Optional.empty(),
+                 "ENavn 1"
+             ),
+             Optional.empty(),
+             Optional.empty(),
+             Optional.empty(),
+             Optional.empty(),
+             Collections.emptyList(),
+             IdentType.STANDARD
          );
-         dvhRessursUtils.addToResponse(response);
 
-         //Uident er mastret
+         var dvhRessurser = List.of(
+             DvhRessurs.builder()
+                 .navIdent("O123456")
+                 .personIdent("12345678901")
+                 .fornavn("Navn 1")
+                 .etternavn("ENavn 1")
+                 .remedyAnsattType("NAV Statlig")
+                 .remedySluttdato(LocalDate.of(2099, 12, 31))
+                 .build()
+         );
+
+         when(ressursStateRepository.findByPersonident(existingRessurs.personident())).thenReturn(Optional.of(existingRessurs));
+         when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
          when(nomMastered.isMastered(any())).thenReturn(true);
 
-         loadFromDvh();
+         Mockito.reset(ressursEventProducerTemplate);
+         dvhRestConsumer.loadRessurserFromDvh();
+
          Mockito.verifyNoInteractions(ressursEventProducerTemplate);
+         Mockito.verifyNoInteractions(ressursCommandService);
      }
-
-    @Test
-    @DisplayName("Ansatt som slutter i etterkant trigger sluttet event - når navident ikke er markert som mastret")
-    public void test_104c() {
-        ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
-
-        final var response = List.of(
-            new DvhRessursUtils.RessursMock(
-                "O123456",
-                "12345678901",
-                "Navn 1",
-                "ENavn 1",
-                "NAV Statlig",
-                LocalDate.parse("2099-12-31")
-            )
-        );
-        dvhRessursUtils.addToResponse(response);
-
-        //ident ikke er mastret
-        when(nomMastered.isMastered(any())).thenReturn(false);
-
-        loadFromDvh();
-
-        kafkaUtils.createRessursHendelseEventSource(
-            new RessursState(
-                PrefixedUlidCreator.createRessursUlid(),
-                "12345678901",
-                "O123456",
-                Sektor.NAV_STATLIG,
-                new Visningsnavn(
-                    "Navn 1",
-                    Optional.empty(),
-                    "ENavn 1"
-                ),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                null,
-                Collections.emptyList(),
-                IdentType.STANDARD
-            )
-        );
-
-        dvhRessursUtils.createEmptyResponse();
-
-        final var response2 = List.of(
-            new DvhRessursUtils.RessursMock(
-                "O123456",
-                "12345678901",
-                "Navn 1",
-                "ENavn 1",
-                "NAV Statlig",
-                LocalDate.now()
-            )
-        );
-        dvhRessursUtils.addToResponse(response2);
-        loadFromDvh();
-
-        Mockito.verify(ressursEventProducerTemplate, Mockito.times(3)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
-
-        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
-        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursSluttetEventV1));
-    }
 
     @Test
     @DisplayName("Ansatt som endrer fornavn PesonopplysningerEndretEvent - når navident er markert som mastret")
     public void test_105a() {
-        ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
-
-        final var response = List.of(
-            new DvhRessursUtils.RessursMock(
-                "O123456",
-                "12345678901",
-                "Navn 1",
-                "ENavn 1",
-                "NAV Statlig",
-                LocalDate.parse("2099-12-31")
-            )
-        );
-        dvhRessursUtils.addToResponse(response);
-        loadFromDvh();
-
-
-        final var ressursv1 = new RessursState(
+        RessursState existingRessurs = new RessursState(
             PrefixedUlidCreator.createRessursUlid(),
             "12345678901",
             "O123456",
@@ -428,176 +403,62 @@ public class RessursEndringFraDvhTest extends OldDvhTestBase {
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
-            null,
+            Optional.empty(),
             Collections.emptyList(),
             IdentType.STANDARD
         );
 
-        kafkaUtils.createRessursHendelseEventSource(ressursv1);
-
-        dvhRessursUtils.createEmptyResponse();
-
-        final var response2 = List.of(
-            new DvhRessursUtils.RessursMock(
-                "O123456",
-                "12345678901",
-                "Navn 1 ENDRET",
-                ressursv1.visningsnavn().etternavn(),
-                "NAV Statlig",
-                LocalDate.parse("2099-12-31")
-            )
+        var dvhRessurser = List.of(
+            DvhRessurs.builder()
+                .navIdent("O123456")
+                .personIdent("12345678901")
+                .fornavn("Navn 1")
+                .etternavn("ENavn 1 ENDRET")
+                .remedyAnsattType("NAV Statlig")
+                .remedySluttdato(LocalDate.of(2099, 12, 31))
+                .build()
         );
-        dvhRessursUtils.addToResponse(response2);
+
+        when(ressursStateRepository.findByPersonident(existingRessurs.personident())).thenReturn(Optional.of(existingRessurs));
+        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
 
         // ident er mastret
         when(nomMastered.isMastered(any())).thenReturn(true);
 
         Mockito.reset(ressursEventProducerTemplate);
 
-        loadFromDvh();
+        dvhRestConsumer.loadRessurserFromDvh();
+
         Mockito.verifyNoInteractions(ressursEventProducerTemplate);
+        Mockito.verifyNoInteractions(ressursCommandService);
     }
 
-
-    @Test
-    @DisplayName("Ansatt som endrer fornavn PesonopplysningerEndretEvent - når navident ikke er markert som mastret")
-    public void test_105c() {
-        ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
-
-        final var response = List.of(
-            new DvhRessursUtils.RessursMock(
-                "O123456",
-                "12345678901",
-                "Navn 1",
-                "ENavn 1",
-                "NAV Statlig",
-                LocalDate.parse("2099-12-31")
-            )
-        );
-        dvhRessursUtils.addToResponse(response);
-        loadFromDvh();
-
-
-        final var ressursv1 = new RessursState(
+    public RessursState createRessursState(String suffix) {
+        final var ressursState = new RessursState(
             PrefixedUlidCreator.createRessursUlid(),
-            "12345678901",
-            "O123456",
+            "testPersonIdent" + suffix,
+            "testNavIdent" + suffix,
             Sektor.NAV_STATLIG,
             new Visningsnavn(
-                "Navn 1",
-                Optional.empty(),
-                "ENavn 1"
+                "fornavn" + suffix,
+                Optional.of("mellomnavn" + suffix),
+                "etternavn" + suffix
             ),
             Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
+            null,
+            Optional.of(LocalDate.now()),
             null,
             Collections.emptyList(),
             IdentType.STANDARD
         );
-
-        kafkaUtils.createRessursHendelseEventSource(ressursv1);
-
-        dvhRessursUtils.createEmptyResponse();
-
-        final var response2 = List.of(
-            new DvhRessursUtils.RessursMock(
-                "O123456",
-                "12345678901",
-                "Navn 1 ENDRET",
-                ressursv1.visningsnavn().etternavn(),
-                "NAV Statlig",
-                LocalDate.parse("2099-12-31")
-            )
-        );
-        dvhRessursUtils.addToResponse(response2);
-
-        //ident ikke er mastret
-        when(nomMastered.isMastered(any())).thenReturn(false);
-
-        loadFromDvh();
-
-        Mockito.verify(ressursEventProducerTemplate, Mockito.times(3)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
-
-        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
-        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursPersonaliaOppdatertV1));
+        return ressursState;
     }
 
-
-    private void assertOpprettetEventFromDvhRessurs(RessursOpprettetEventV1 ressursSluttetEvent, DvhRessursUtils.RessursMock ressursMock) {
-
-        Assertions.assertNotNull(ressursSluttetEvent.getFid());
-
-        RessursOpprettetEventV1.RessursOpprettetEventData eventData = (RessursOpprettetEventV1.RessursOpprettetEventData) ressursSluttetEvent.getData();
-
-        Assertions.assertEquals(
-                ressursMock.NAV_IDENT(),
-                ((RessursOpprettetEventV1.RessursOpprettetAdditionalData) ressursSluttetEvent.getAdditionalData()).navident().get()
-        );
-        Assertions.assertEquals(ressursMock.FNR(), eventData.personident());
-        Assertions.assertEquals(DvhRessurs.toSektor(ressursMock.ANSATT_TYPE()), eventData.sektor());
-        Assertions.assertEquals(ressursMock.FORNAVN(), eventData.visningsnavn().fornavn());
-        Assertions.assertEquals(ressursMock.ETTERNAVN(), eventData.visningsnavn().etternavn());
-        Assertions.assertTrue(eventData.visningsnavn().mellomnavn().isEmpty());
-    }
-
-    @Test
-    @DisplayName("Ansatt som endrer sektor RessursSektorOppdatertEvent")
-    public void test7() {
-        ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
-
-        final var response = List.of(
-            new DvhRessursUtils.RessursMock(
-                "O123456",
-                "12345678901",
-                "Navn 1",
-                "ENavn 1",
-                "NAV Statlig",
-                LocalDate.parse("2099-12-31")
-            )
-        );
-        dvhRessursUtils.addToResponse(response);
-        loadFromDvh();
-
-
-        final var ressursv1 = new RessursState(
-            PrefixedUlidCreator.createRessursUlid(),
-            "12345678901",
-            "O123456",
-            Sektor.NAV_STATLIG,
-            new Visningsnavn(
-                "Navn 1",
-                Optional.empty(),
-                "ENavn 1"
-            ),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            null,
-            Collections.emptyList(),
-            IdentType.STANDARD
-        );
-
-        kafkaUtils.createRessursHendelseEventSource(ressursv1);
-
-        dvhRessursUtils.createEmptyResponse();
-
-        final var response2 = List.of(
-            new DvhRessursUtils.RessursMock(
-                "O123456",
-                "12345678901",
-                ressursv1.visningsnavn().fornavn(),
-                ressursv1.visningsnavn().etternavn(),
-                "NAV Kommunalt",
-                LocalDate.parse("2099-12-31")
-            )
-        );
-        dvhRessursUtils.addToResponse(response2);
-        loadFromDvh();
-
-        Mockito.verify(ressursEventProducerTemplate, Mockito.times(3)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
-
-        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
-        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursSektorOppdatertV1));
+    private void assertOpprettetEventFromDvhRessurs(OpprettRessursCommand opprettRessursCommand, DvhRessurs dvhRessurs) {
+        Assertions.assertEquals(dvhRessurs.getPersonIdent(), opprettRessursCommand.personident());
+        Assertions.assertEquals(DvhRessurs.toSektor(dvhRessurs.getRemedyAnsattType()), opprettRessursCommand.sektor());
+        Assertions.assertEquals(dvhRessurs.getFornavn(), opprettRessursCommand.visningsnavn().fornavn());
+        Assertions.assertEquals(dvhRessurs.getEtternavn(), opprettRessursCommand.visningsnavn().etternavn());
+        Assertions.assertTrue(opprettRessursCommand.visningsnavn().mellomnavn().isEmpty());
     }
 }

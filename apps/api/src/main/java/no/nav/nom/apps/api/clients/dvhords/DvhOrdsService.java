@@ -3,7 +3,11 @@ package no.nav.nom.apps.api.clients.dvhords;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.StreamSupport;
 
 @Service
 @Slf4j
@@ -50,6 +54,12 @@ public class DvhOrdsService {
     }
 
     // Ansatte buckets/Ressurser
+    public List<DvhRessurs> getRessurser() {
+        return StreamSupport.stream(getRessurserJson().get("items").spliterator(), false)
+                .map(DvhRessurs::fromOrdsRessurs)
+                .toList();
+    }
+
     public JsonNode getRessurserJson() {
         return dvhOrdsClient.dvhGetJsonData(dvhOrdsProperties.ansatteBucketsPath());
     }

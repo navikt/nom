@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.common.EmbeddeKafkaAdminClient;
 import no.nav.nom.apps.api.common.LocalConfiguration;
 import no.nav.nom.apps.api.common.NomProxyRestClient;
 import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
+import no.nav.nom.apps.api.dvh.DvhOldTdvService;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.DvhService;
@@ -84,7 +85,8 @@ import org.springframework.kafka.annotation.EnableKafka;
     , EmbeddeKafkaAdminClient.class
     , LeaderElection.class
     , OTUtenforHierarki.class
-    ,OrgtilknytningService.class
+    , OrgtilknytningService.class
+    , DvhOldTdvService.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 @EnableKafka

@@ -118,7 +118,7 @@ public class KommunaleRessurserLoader {
 
         var jsonRessurser = dvhExchange(url);
         var dvhKommunaleRessurser = StreamSupport.stream(jsonRessurser.get(kommunaleRessurserResponseNode).spliterator(), true)
-            .map(r -> new DvhRessurs(r, true, false))
+            .map(r -> new DvhRessurs(r, true))
             .distinct()
             .filter(r -> aktiveKommunaleNavidenter.contains(r.getNavIdent()))
             .toList();

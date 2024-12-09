@@ -45,6 +45,4 @@ public class DvhOrganiseringMockUtils {
         stubFor(get("/proxy/dvh/json/Hr/NOM2/NOM_HRORG_HIERARKI2_v2").willReturn(aResponse().withHeader("Content-Type", "application/json")
             .withBody(response)));
     }
-
-
 }

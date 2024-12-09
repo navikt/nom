@@ -55,11 +55,9 @@ public class DvhRestConsumer {
     public static final String CACHE = "cache-source-dvh";
     public static final String UNLEASH_PRODUSERE_NYE_ORGANISERING_MELDINGER = "nom.organisering.enable_new_topics";
     private final long LOAD_INTERVAL = 30 * 60 * 1000; // sync hvert 30min
-    private final AppProperties appProperties;
 
     private final DvhRepository dvhRepository;
     private final DvhService dvhService;
-    private final NomProxyClient nomProxyClient;
     private final NomStateRessursListener nomStateRessursListener;
     private final NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
     private final NomStateOrganiseringListener nomStateOrganiseringListener;
@@ -82,6 +80,7 @@ public class DvhRestConsumer {
     private final Unleash unleash;
     private final NomStateDelegertLederListener nomStateDelegertLederListener;
     private final DvhOrdsService dvhOrdsService;
+    private final DvhOldTdvService dvhOldTdvService;
 
     @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
     public void scheduledOppdateringFraDvh() {
@@ -169,10 +168,14 @@ public class DvhRestConsumer {
     public void loadRessurserFromDvh() {
         log.info("Laster ressurser fra dvh");
         try {
-            var jsonRessurser = dvhExchange(appProperties.clients().nomProxy().ansatteBucketsPath());
+            List<DvhRessurs> dvhRessurser = null;
+            if (unleash.isEnabled("nom.dvh.last_ressurser_fra_ords")) {
+                dvhRessurser = dvhOrdsService.getRessurser();
+            } else {
+                dvhRessurser = dvhOldTdvService.getTdvRessurser();
+            }
 
-            val dvhRessurs = StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v2Response").spliterator(), false)
-                .map(DvhRessurs::new)
+            val dvhRessurs = dvhRessurser.stream()
                 .distinct()
                 .collect(Collectors.groupingBy(DvhRessurs::getPersonIdent))
                 .values()
@@ -196,7 +199,7 @@ public class DvhRestConsumer {
                 .flatMap(Collection::stream)
                 .toList();
 
-            getOrdsJsonRessurserAndCompare(dvhRessurs, jsonRessurser);
+            getOrdsJsonRessurserAndCompare(dvhRessurs);
 
             ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
             dvhRepository.saveAnnenStatNavIdenter(findAnnenStatNavIdenter(dvhRessurs));
@@ -205,12 +208,9 @@ public class DvhRestConsumer {
         }
     }
 
-    private void getOrdsJsonRessurserAndCompare(List<DvhRessurs> dvhRessurs, JsonNode jsonRessurser) {
+    private void getOrdsJsonRessurserAndCompare(List<DvhRessurs> tdvDvhRessurser) {
         try {
-            var ordsJonRessurser = dvhOrdsService.getRessurserJson();
-
-            val ordsDvhRessurs = StreamSupport.stream(ordsJonRessurser.get("items").spliterator(), false)
-                .map( n -> new DvhRessurs(n, false, true))
+            val ordsDvhRessurser = dvhOrdsService.getRessurser().stream()
                 .distinct()
                 .collect(Collectors.groupingBy(DvhRessurs::getPersonIdent))
                 .values()
@@ -219,8 +219,6 @@ public class DvhRestConsumer {
                     if (l.size() > 1) {
                         l.removeAll(l.stream().filter(Predicate.not(DvhRessurs::getRemedyAktiv)).toList());
                         if (l.size() > 1) {
-                            val personIdent = l.get(0).getPersonIdent();
-                            val navIdenter = l.stream().map(DvhRessurs::getNavIdent).toList();
                             l.clear();
                         }
                     }
@@ -234,16 +232,16 @@ public class DvhRestConsumer {
                 .toList();
 
             boolean erLikt = true;
-            if (ordsDvhRessurs.size() != dvhRessurs.size()) {
-                log.error("Antall ressurser fra TDV og ORDS er ulik. TDV: {}, ORDS: {}", dvhRessurs.size(), ordsDvhRessurs.size());
+            if (ordsDvhRessurser.size() != tdvDvhRessurser.size()) {
+                log.error("Antall ressurser fra TDV og ORDS er ulik. TDV: {}, ORDS: {}", tdvDvhRessurser.size(), ordsDvhRessurser.size());
                 erLikt = false;
             }
 
-            val ordsMap = ordsDvhRessurs.stream().collect(Collectors.toMap(DvhRessurs::getNavIdent, Function.identity()));
-            int idxSkip = dvhRessurs.size()/20;
+            val ordsMap = ordsDvhRessurser.stream().collect(Collectors.toMap(DvhRessurs::getNavIdent, Function.identity()));
+            int idxSkip = tdvDvhRessurser.size()/20;
             for (int i = 0; i < 20; i++) {
                 int idx = i * idxSkip;
-                val dvhRessursTdv = dvhRessurs.get(idx);
+                val dvhRessursTdv = tdvDvhRessurser.get(idx);
                 val dvhRessursOrds = ordsMap.get(dvhRessursTdv.getNavIdent());
                 if (!DvhRessurs.compare(dvhRessursTdv, dvhRessursOrds)) {
                     log.error("Ressurs fra TDV og ORDS er ulik. \n\tTDV: \n\t{}, \n\tORDS: \n\t{}"
@@ -253,9 +251,9 @@ public class DvhRestConsumer {
                 }
             }
             if (erLikt) {
-                log.info("Last av ressurser fra ORDS (nom_ords_ansatte_buckets.json) er lik en last fra TDV (NOM_ANSATTE_BUCKETS_v2)");
+                log.info("Last av ressurser fra ORDS (nom_ords_ansatte_buckets.json) er lik last fra TDV (NOM_ANSATTE_BUCKETS_v2)");
             } else {
-                log.error("Last av ressurser fra ORDS (nom_ords_ansatte_buckets.json) er annerledes en last fra TDV (NOM_ANSATTE_BUCKETS_v2)");
+                log.error("Last av ressurser fra ORDS (nom_ords_ansatte_buckets.json) er annerledes enn last fra TDV (NOM_ANSATTE_BUCKETS_v2)");
             }
         } catch (Exception e) {
             log.error("Feilet i last av ressurser fra ORDS (nom_ords_ansatte_buckets.json)", e);
@@ -301,11 +299,8 @@ public class DvhRestConsumer {
     public void loadTlfFromDvh() {
         log.info("Laster tlf fra dvh");
         try {
-            val jsonTlfNr = dvhExchange(appProperties.clients().nomProxy().tlfPath());
-            val tlfRader = StreamSupport.stream(jsonTlfNr.get("NOM_TLF_v1Result").spliterator(), false)
-                .filter(this::validateTlf)
-                .map(DvhTelefon::new)
-                .collect(Collectors.toList());
+            val tlfRader = dvhOldTdvService.getTdvTelefoner();
+
             log.info("Telefonnr lastet: Antall rader = " + tlfRader.size());
             dvhRepository.saveTlf(tlfRader);
         } catch (Exception e) {
@@ -313,32 +308,11 @@ public class DvhRestConsumer {
         }
     }
 
-    private boolean validateTlf(JsonNode jsonNode) {
-        val isSecretNumber = !jsonNode.hasNonNull("issecretnumber") || (jsonNode.hasNonNull("issecretnumber") && !jsonNode.get("issecretnumber").asBoolean());
-        val userRef1 = jsonNode.get("userreference1");
-
-        return isSecretNumber && (userRef1.asText().startsWith("PT-") || userRef1.asText().startsWith("PK-"));
-    }
-
     public void loadLedereAndOrganiseringerFromDvh() {
         log.info("Laster ledere og Organisering fra dvh");
         try {
-            val jsonOrgenheter = dvhExchange(appProperties.clients().nomProxy().orgHierarkiPath());
-            val ledere = new LinkedList<DvhLeder>();
-            val organiseringer = new LinkedList<DvhOrganisering>();
-
-            StreamSupport.stream(jsonOrgenheter.get("NOM_HRORG_HIERARKI2_v2Response").spliterator(), false)
-                .filter(this::determineEnhetActive)
-                .filter(this::determineEnhetNotIgnored)
-                .forEach(e -> {
-                    if (validateOrganisering(e)) {
-                        organiseringer.add(new DvhOrganisering(e));
-                    }
-
-                    if (validateLeder(e)) {
-                        ledere.add(new DvhLeder(e));
-                    }
-                });
+            var ledere = dvhOldTdvService.getTdvLedere();
+            var organiseringer = dvhOldTdvService.getTdvOrganisering();
 
             dvhService.saveLedere(ledere);
             dvhService.saveOrganiseringerAndSetOrganiserteOrgenheter(organiseringer);
@@ -349,49 +323,6 @@ public class DvhRestConsumer {
         } catch (Exception e) {
             log.error("Failure loading ledere og Organisering data from DVH", e);
         }
-    }
-
-    private boolean determineEnhetNotIgnored(JsonNode jsonNode) {
-        // 'deltar i rekruttering' og 'nav ventelønn' er kun for intern bruk i agresso.
-        val orgnodeKode = jsonNode.get("ORGNODE_KODE").asText();
-        val deltarIRekruttering = orgnodeKode.matches("0+");
-        val navVenteloenn = orgnodeKode.equals("9999920");
-        return !(deltarIRekruttering || navVenteloenn);
-    }
-
-    private JsonNode dvhExchange(String urlPath) {
-        return nomProxyClient.getWebClient().get()
-            .uri(urlPath)
-            .retrieve()
-            .bodyToMono(JsonNode.class)
-            .block();
-
-    }
-
-    private boolean determineEnhetActive(JsonNode e) {
-        return e.get("ORGNODE_STATUS").asText().equals("N");
-    }
-
-    private boolean validateOrganisering(JsonNode e) {
-        final var validate = e.hasNonNull("ORGNODE_KODE_OVER") && e.hasNonNull("ORGNODE_KODE")
-            && e.hasNonNull("ORGNODE_NIVA_OVER") && e.hasNonNull("ORGNODE_NIVA");
-        if (!validate) {
-            log.info("Ugyldig organisering fra dvh, ORGNODE_KODE_OVER: {}, ORGNODE_KODE: {}", getAsText(e, "ORGNODE_KODE_OVER"), getAsText(e, "ORGNODE_KODE"));
-        }
-        return validate;
-    }
-
-    private boolean validateLeder(JsonNode e) {
-        final var validate = e.hasNonNull("LEDER_NAVIDENT") && e.hasNonNull("ORGNODE_KODE") && e.hasNonNull("ORGNODE_NIVA");
-        if (!validate) {
-            log.info("Ugyldig leder fra dvh, LEDER_NAVIDENT: {}, ORGNODE_KODE: {}", getAsText(e, "LEDER_NAVIDENT"), getAsText(e, "ORGNODE_KODE"));
-        }
-        return validate;
-    }
-
-    private String getAsText(JsonNode e, String field) {
-        JsonNode jsonNode = e.get(field);
-        return jsonNode == null ? "<null>" : jsonNode.asText();
     }
 
     private boolean isInitialStateReady() {
