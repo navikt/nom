@@ -6,6 +6,7 @@ import no.nav.nom.paarorende.jpa.Kontaktinfo;
 import no.nav.nom.paarorende.jpa.Relasjon;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Builder
@@ -23,16 +24,18 @@ public record KontaktinfoDTO(
 ) {
 
     public static KontaktinfoDTO fromEntity(Kontaktinfo kontaktinfo) {
+        var adresse = Optional.ofNullable(kontaktinfo.getAdresse()).orElse(new Adresse());
+
         return KontaktinfoDTO.builder()
             .kontaktId(kontaktinfo.getKontakId())
             .fornavn(kontaktinfo.getFornavn())
             .etternavn(kontaktinfo.getEtternavn())
             .relasjon(kontaktinfo.getRelasjon().name())
             .telefon(kontaktinfo.getTelefon())
-            .gateadresse(kontaktinfo.getAdresse().getAdresse())
-            .postnr(kontaktinfo.getAdresse().getPostnr())
-            .poststed(kontaktinfo.getAdresse().getPoststed())
-            .land(kontaktinfo.getAdresse().getLand())
+            .gateadresse(adresse.getAdresse())
+            .postnr(adresse.getPostnr())
+            .poststed(adresse.getPoststed())
+            .land(adresse.getLand())
             .build();
     }
 

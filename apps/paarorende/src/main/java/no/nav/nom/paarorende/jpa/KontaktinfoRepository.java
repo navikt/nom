@@ -15,6 +15,7 @@ public interface KontaktinfoRepository extends JpaRepository<Kontaktinfo, Long> 
 
     List<Kontaktinfo> findAllByNavidentAndDatoSlettetIsNull(String navident);
     Optional<Kontaktinfo> findDistinctByKontakId(String kontaktId);
+    int countByNavident(String navident);
 
     @Modifying
     @Transactional

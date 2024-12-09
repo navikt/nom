@@ -92,6 +92,10 @@ public class KontaktinfoController {
     public ResponseEntity<KontaktinfoDTO> opprettPaarorende(@RequestBody KontaktinfoDTO kontaktInfoDTO) {
         securityUtil.assertAuthorized();
 
+        if (kontaktInfoRepository.countByNavident(securityUtil.getNavIdent()) > 2) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
         var kontakInfo = KontaktinfoDTO.toEntity(kontaktInfoDTO);
         kontakInfo.setNavident(securityUtil.getNavIdent());
 
