@@ -1,12 +1,11 @@
 package no.nav.nom.paarorende.jpa;
 
-import jakarta.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,8 +13,14 @@ import java.util.Optional;
 public interface KontaktinfoRepository extends JpaRepository<Kontaktinfo, Long> {
 
     List<Kontaktinfo> findAllByNavidentAndDatoSlettetIsNull(String navident);
+
     Optional<Kontaktinfo> findDistinctByKontakId(String kontaktId);
-    int countByNavident(String navident);
+
+    @Query(
+        value = "SELECT COUN(*) FROM KONTAKTINFO WHERE NAVIDENT = :navident AND DATO_SLETTET IS NULL",
+        nativeQuery = true
+    )
+    int countActiveByNavident(String navident);
 
     @Modifying
     @Transactional

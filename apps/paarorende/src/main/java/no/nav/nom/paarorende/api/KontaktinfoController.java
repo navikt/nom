@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.paarorende.common.SecurityUtil;
 import no.nav.nom.paarorende.common.SwaggerConfig;
+import no.nav.nom.paarorende.jpa.Adresse;
 import no.nav.nom.paarorende.jpa.KontaktinfoRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -70,13 +71,22 @@ public class KontaktinfoController {
 
     })
     public KontaktinfoDTO oppdaterKontakinfo(@RequestBody KontaktinfoDTO kontaktInfoDTO) {
-        var kontaktInfo = kontaktInfoRepository.findDistinctByKontakId(kontaktInfoDTO.kontaktId())
+        var kontaktinfo = kontaktInfoRepository.findDistinctByKontakId(kontaktInfoDTO.kontaktId())
             .orElseThrow(() -> new AccessDeniedException("Unauthorized"));
-        kontaktInfo.setKontakId(kontaktInfoDTO.kontaktId());
+        kontaktinfo.setFornavn(kontaktInfoDTO.fornavn());
+        kontaktinfo.setEtternavn(kontaktInfoDTO.etternavn());
+        kontaktinfo.setTelefon(kontaktInfoDTO.telefon());
+        kontaktinfo.setAdresse(
+            Adresse.builder().adresse(kontaktInfoDTO.gateadresse())
+                .poststed(kontaktInfoDTO.postnr())
+                .poststed(kontaktInfoDTO.poststed())
+                .land(kontaktInfoDTO.land())
+                .build()
+        );
 
-        securityUtil.assertAuthorized(kontaktInfo.getNavident());
+        securityUtil.assertAuthorized(kontaktinfo.getNavident());
 
-        return KontaktinfoDTO.fromEntity(kontaktInfoRepository.save(kontaktInfo));
+        return KontaktinfoDTO.fromEntity(kontaktInfoRepository.save(kontaktinfo));
     }
 
     @PostMapping
@@ -92,7 +102,7 @@ public class KontaktinfoController {
     public ResponseEntity<KontaktinfoDTO> opprettPaarorende(@RequestBody KontaktinfoDTO kontaktInfoDTO) {
         securityUtil.assertAuthorized();
 
-        if (kontaktInfoRepository.countByNavident(securityUtil.getNavIdent()) > 2) {
+        if (kontaktInfoRepository.countActiveByNavident(securityUtil.getNavIdent()) > 2) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
