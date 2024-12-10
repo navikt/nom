@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.common.LogConfig;
-import no.nav.nom.apps.navident.common.security.AADTokenRepository;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -26,8 +25,6 @@ import static no.nav.nom.libs.utils.common.mdc.MdcConfig.*;
 public class PdlServiceImpl implements PdlService {
 
     private final String pdlHentIdentQry;
-
-    private final AADTokenRepository tokenRepository;
     private final WebClient pdlWebClient;
     private final PdlConfig pdlConfig;
 
@@ -38,18 +35,13 @@ public class PdlServiceImpl implements PdlService {
 
     @Override
     public List<String> getKnownPersonider(String id) {
-        String token = tokenRepository.getOboOrClientCredToken(pdlConfig.getAadClientId());
-        if (token == null) {
-            log.error("Fikk ingen token fra tokenRepository. Skipper oppslag mot PDL");
-            return Collections.emptyList();
-        }
 
         String qryBody = getQuery(pdlHentIdentQry, "ident", id).toPrettyString();
 
-        String pdlResponse = null;
+        String pdlResponse;
 
         try {
-            pdlResponse = postToPdl(qryBody, token);
+            pdlResponse = postToPdl(qryBody);
         } catch (RuntimeException e) {
             log.error(LogConfig.SECURE_LOGS, "PDL GraphQL failed with RuntimeException for qry:\n{}\nwith ident = {}. Exception message: {}", pdlHentIdentQry, id, e.getMessage());
             log.error("PDL GraphQL failed with RuntimeException for qry:\n{}\nwith ident = {}***. Exception message: {}", pdlHentIdentQry, id.substring(0,5), e.getMessage());
@@ -91,7 +83,7 @@ public class PdlServiceImpl implements PdlService {
         }
     }
 
-    private String postToPdl(String qryBody, String token) {
+    private String postToPdl(String qryBody) {
         return pdlWebClient
                 .post()
                 .uri(pdlConfig.getBaseUrl() + "/graphql")
@@ -99,7 +91,6 @@ public class PdlServiceImpl implements PdlService {
                     headers.add(HEADER_CALL_ID_KEY, MDC.get(MDC_CALL_ID_KEY));
                     headers.add(HEADER_CONSUMER_ID_KEY, MDC.get(MDC_CONSUMER_ID_KEY));
                     headers.add(HEADER_X_REQUEST_ID_KEY, MDC.get(HEADER_X_REQUEST_ID_KEY));
-                    headers.setBearerAuth(token);
                 })
                 .body(Mono.just(qryBody), String.class)
                 .retrieve()
@@ -129,7 +120,7 @@ public class PdlServiceImpl implements PdlService {
     private ObjectNode getVariableNode(String name, List<String> values) {
         ObjectNode node = mapper.createObjectNode();
         if (values.size() == 1) {
-            node.put(name, values.get(0));
+            node.put(name, values.getFirst());
         } else {
             ArrayNode array = mapper.createArrayNode();
             values.forEach(array::add);

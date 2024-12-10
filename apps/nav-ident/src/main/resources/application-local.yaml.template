@@ -1,12 +1,14 @@
 AZURE_APP_TENANT_ID: 'placeholder'
 AZURE_APP_CLIENT_ID: 'placeholder'
 AZURE_APP_JWK: 'placeholder'
+AZURE_APP_CLIENT_SECRET: 'placeholder'
 
 NAIS_APP_NAME: 'nav-ident'
 HOSTNAME: "localhost"
 
 PDL_BASEURL: https://pdl-api.dev-fss-pub.nais.io
 PDL_CLIENT_ID: dev-fss.pdl.pdl-api
+PDL_API_SCOPE: api://dev-fss.pdl.pdl-api/.default
 
 # Embedded kafka
 KAFKA_BROKERS: localhost:39092

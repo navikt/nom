@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgenhet;
 
-import no.nav.nom.apps.api.organisering.OrgEnhetTestBase;
 import no.nav.nom.apps.api.organisering.OrganiseringConfig;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;

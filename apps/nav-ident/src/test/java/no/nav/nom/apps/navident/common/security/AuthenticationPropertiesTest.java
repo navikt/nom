@@ -13,6 +13,6 @@ class AuthenticationPropertiesTest extends SpringBootTestBase {
 
     @Test
     public void authProperties() {
-        assertEquals("test", authProperties.getAad().getClientId());
+        assertEquals("issuer1", authProperties.getAad().getClientId());
     }
 }

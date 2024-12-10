@@ -1,7 +1,6 @@
 package no.nav.nom.apps.navident.job;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.getunleash.Unleash;
 import no.nav.nom.apps.navident.SpringBootTestBase;
 import no.nav.nom.apps.navident.domain.Navident;
 import no.nav.nom.apps.navident.eventsource.EventPayload;
@@ -48,10 +47,7 @@ import static org.mockito.Mockito.when;
 public class ImportNavIdenterKafkaTest extends SpringBootTestBase {
 
     private static final String TOPIC = "embedded-test-topic";
-
-
-    @MockBean
-    protected Unleash unleash;
+    
 
     @Autowired
     private EmbeddedKafkaBroker embeddedKafkaBroker;
@@ -74,9 +70,6 @@ public class ImportNavIdenterKafkaTest extends SpringBootTestBase {
 
     @BeforeEach
     public void setUp() {
-        // enable features for tests
-        when(unleash.isEnabled(any())).thenReturn(true);
-
         Map<String, Object> consumerProps = new HashMap<>(KafkaTestUtils
             .consumerProps("consumerGroup", "false", embeddedKafkaBroker));
 

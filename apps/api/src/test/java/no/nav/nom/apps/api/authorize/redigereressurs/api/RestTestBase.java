@@ -2,8 +2,8 @@ package no.nav.nom.apps.api.authorize.redigereressurs.api;
 
 import com.nimbusds.jose.JOSEObjectType;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.MockOAuth2ServerInitializer;
 import no.nav.nom.apps.api.authorize.redigereressurs.MockBasisTestOrganisering;
+import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
 import org.junit.jupiter.api.BeforeEach;

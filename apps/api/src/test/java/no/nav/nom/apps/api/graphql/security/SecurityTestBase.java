@@ -1,8 +1,8 @@
 package no.nav.nom.apps.api.graphql.security;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.MockOAuth2ServerInitializer;
 import no.nav.nom.apps.api.graphql.GraphqlTestConfig;
+import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureHttpGraphQlTester;

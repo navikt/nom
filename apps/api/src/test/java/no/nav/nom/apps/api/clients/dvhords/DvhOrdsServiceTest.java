@@ -1,11 +1,10 @@
 package no.nav.nom.apps.api.clients.dvhords;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.MockOAuth2ServerInitializer;
 import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;

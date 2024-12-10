@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgenhet;
 
-import no.nav.nom.apps.api.organisering.OrgEnhetTestBase;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.contract.nom.OrgEnhetsType;

@@ -1,14 +1,12 @@
 package no.nav.nom.apps.navident.job;
 
-import io.getunleash.Unleash;
 import lombok.SneakyThrows;
 import no.nav.nom.apps.navident.SpringBootTestBase;
 import no.nav.nom.apps.navident.domain.Navident;
-import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.apps.navident.eventsource.EventSourceService;
 import no.nav.nom.apps.navident.eventsource.SourceEvent;
 import no.nav.nom.apps.navident.eventsource.SourceEventRepository;
-import org.junit.jupiter.api.BeforeEach;
+import no.nav.nom.contract.nom.IdentType;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +18,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.file.Files;
@@ -31,9 +28,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class ImportNavIdenterTest extends SpringBootTestBase {
 
@@ -51,15 +46,6 @@ class ImportNavIdenterTest extends SpringBootTestBase {
 
     @Captor
     ArgumentCaptor<SourceEvent> eventCaptor;
-
-    @MockBean
-    protected Unleash unleash;
-
-    @BeforeEach
-    public void setUp() throws IOException {
-        // Always enable features for tests
-        when(unleash.isEnabled(any())).thenReturn(true);
-    }
 
     @Test()
     @SneakyThrows

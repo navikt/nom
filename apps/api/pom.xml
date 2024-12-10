@@ -215,6 +215,7 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- TODO Kan fjernes da vuln er fikset -->
         <dependency> <!-- Bruk denne for mock-oauth2-server - har transitiv vuln - https://github.com/navikt/nom/security/dependabot/95 -->
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk18on</artifactId>
@@ -224,6 +225,12 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-contract-wiremock</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>utils-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
