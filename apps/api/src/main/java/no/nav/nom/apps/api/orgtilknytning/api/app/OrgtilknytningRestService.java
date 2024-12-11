@@ -518,7 +518,7 @@ public class OrgtilknytningRestService {
         EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState
     ) {
         if (unleash.isEnabled("nom.ny-sette-sektor-logikk")) {
-            validateSektorCanBeChangedNyValidering(currentOrgtilknytningState);
+            validateSektorCanBeChangedNyValidering(endreOrgtilknytningRequest, currentOrgtilknytningState);
         } else {
             validateSektorCanBeChanged(endreOrgtilknytningRequest, currentOrgtilknytningState);
         }
@@ -532,9 +532,10 @@ public class OrgtilknytningRestService {
         );
     }
 
-    private static void validateSektorCanBeChangedNyValidering(OrgtilknytningState currentOrgtilknytningState) {
+    private static void validateSektorCanBeChangedNyValidering(EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState) {
         if (!loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)
-            && isNotNull(currentOrgtilknytningState.sektor())) {
+            && isNotNull(endreOrgtilknytningRequest.sektor())
+            && (!endreOrgtilknytningRequest.sektor().equals(currentOrgtilknytningState.sektor()) && isNotNull(currentOrgtilknytningState.sektor()))) {
             throw InvalidSektorException.sektorCannotBeChanged();
         }
     }
