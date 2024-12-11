@@ -55,7 +55,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
-import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 import static no.nav.nom.apps.api.common.DateUtils.isPerioderOverlapping;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
@@ -519,7 +518,7 @@ public class OrgtilknytningRestService {
         EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState
     ) {
         if (unleash.isEnabled("nom.ny-sette-sektor-logikk")) {
-            validateSektorCanBeChangedNyValidering(endreOrgtilknytningRequest, currentOrgtilknytningState);
+            validateSektorCanBeChangedNyValidering(currentOrgtilknytningState);
         } else {
             validateSektorCanBeChanged(endreOrgtilknytningRequest, currentOrgtilknytningState);
         }
@@ -533,11 +532,9 @@ public class OrgtilknytningRestService {
         );
     }
 
-    private static void validateSektorCanBeChangedNyValidering(EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState) {
+    private static void validateSektorCanBeChangedNyValidering(OrgtilknytningState currentOrgtilknytningState) {
         if (!loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)
-            && isNotNull(currentOrgtilknytningState.sektor())
-            && (!isPeriodActive(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())
-            && endreOrgtilknytningRequest.gyldigTom().isBefore(LocalDate.now().minusMonths(2)))) {
+            && isNotNull(currentOrgtilknytningState.sektor())) {
             throw InvalidSektorException.sektorCannotBeChanged();
         }
     }
@@ -741,13 +738,6 @@ public class OrgtilknytningRestService {
             throw InvalidOrgtilknytningTypeAndSektorCombinationException.forCombination(tilknytningtype, sektor);
         }
 
-    }
-
-    private void validateEksternOrgtilknytningPeriode(Optional<LocalDate> gyldigTom) {
-        var requestedGyldigTomIsMoreThan1YearFromNow = gyldigTom.orElse(LocalDate.MAX).isAfter(LocalDate.now().plusYears(1));
-        if (requestedGyldigTomIsMoreThan1YearFromNow) {
-            throw new IllegalArgumentException("Sluttdato kan være maks 1 år frem i tid");
-        }
     }
 
     private void addToOTEndretDataEmailQueue(String navident, String fid, OTEndretData.OTEndretDataType eventType, String initiatedFromMetadata) {
