@@ -55,6 +55,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
+import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 import static no.nav.nom.apps.api.common.DateUtils.isPerioderOverlapping;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
@@ -517,7 +518,11 @@ public class OrgtilknytningRestService {
     private boolean endreOrgtilknytningRequestProvidesChangesToState(
         EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState
     ) {
-        validateSektorCanBeChanged(endreOrgtilknytningRequest, currentOrgtilknytningState);
+        if (unleash.isEnabled("nom.ny-sette-sektor-logikk")) {
+            validateSektorCanBeChangedNyValidering(endreOrgtilknytningRequest, currentOrgtilknytningState);
+        } else {
+            validateSektorCanBeChanged(endreOrgtilknytningRequest, currentOrgtilknytningState);
+        }
 
         return !(
             endreOrgtilknytningRequest.gyldigFom().equals(currentOrgtilknytningState.gyldigFom())
@@ -526,6 +531,15 @@ public class OrgtilknytningRestService {
                 && Optional.ofNullable(endreOrgtilknytningRequest.tilknytningtype()).equals(currentOrgtilknytningState.orgtilknytningType())
                 && (endreOrgtilknytningRequest.sektor() != null && endreOrgtilknytningRequest.sektor().equals(currentOrgtilknytningState.sektor()))
         );
+    }
+
+    private static void validateSektorCanBeChangedNyValidering(EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState) {
+        if (!loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)
+            && isNotNull(currentOrgtilknytningState.sektor())
+            && (!isPeriodActive(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())
+            && endreOrgtilknytningRequest.gyldigTom().isBefore(LocalDate.now().minusMonths(2)))) {
+            throw InvalidSektorException.sektorCannotBeChanged();
+        }
     }
 
     private static void validateSektorCanBeChanged(EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState) {
@@ -764,6 +778,10 @@ public class OrgtilknytningRestService {
                 .timestamp(DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now()))
                 .build()
         );
+    }
+
+    private static boolean isNotNull(Object object) {
+        return !isNull(object);
     }
 
     private String getClusterName() {
