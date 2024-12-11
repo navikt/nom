@@ -10,6 +10,7 @@ import no.nav.nom.paarorende.common.SecurityUtil;
 import no.nav.nom.paarorende.common.SwaggerConfig;
 import no.nav.nom.paarorende.jpa.Adresse;
 import no.nav.nom.paarorende.jpa.KontaktinfoRepository;
+import no.nav.nom.paarorende.jpa.Relasjon;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -76,6 +77,7 @@ public class KontaktinfoController {
         kontaktinfo.setFornavn(kontaktInfoDTO.fornavn());
         kontaktinfo.setEtternavn(kontaktInfoDTO.etternavn());
         kontaktinfo.setTelefon(kontaktInfoDTO.telefon());
+        kontaktinfo.setRelasjon(Relasjon.valueOf(kontaktInfoDTO.relasjon()));
         kontaktinfo.setAdresse(
             Adresse.builder().adresse(kontaktInfoDTO.gateadresse())
                 .poststed(kontaktInfoDTO.postnr())
