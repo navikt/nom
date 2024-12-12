@@ -1,10 +1,10 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: "nom-ui2"
-  namespace: "org"
+  name: nom-ui2
+  namespace: org
   labels:
-    team: "org"
+    team: org
 spec:
   image: "{{image}}"
   port: 8080
