@@ -10,6 +10,12 @@ on:
       - 'apps/ui2/**'
       - '.nais/apps/ui2/**'
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      unleash-vars-file-path:
+        type: string
+        required: false
+        default: skip
 
 defaults:
   run:
@@ -79,10 +85,7 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: .nais/unleash/unlease-token.yaml
           VAR: env=development
-          VARS:
-            type: string
-            required: false
-            default: skip
+          VARS: ${{ inputs.unleash-vars-file-path }}
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
