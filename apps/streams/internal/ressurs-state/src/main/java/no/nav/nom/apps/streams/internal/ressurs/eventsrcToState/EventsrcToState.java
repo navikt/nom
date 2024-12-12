@@ -149,20 +149,20 @@ class EventsrcToState {
             var identTypeFromJson = parseNullableFromJson(eventStateAggregate,"identType");
 
             return new RessursState(
-                    fid,
-                    eventStateAggregate.get("personident").asText(),
-                    eventStateAggregate.get("navident").asText(),
-                    Sektor.valueOf(eventStateAggregate.get("sektor").asText()),
-                    new Visningsnavn(
-                            visningsnavn.get("fornavn").asText(),
-                            Optional.ofNullable(parseNullableFromJson(visningsnavn, "mellomnavn")),
-                            visningsnavn.get("etternavn").asText()
-                    ),
-                    Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "primaryTelefonnummer")),
-                    Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "sluttdato", LocalDate::parse)),
-                    Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "startdato", LocalDate::parse)),
-                    Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "primaryFysiskBrukersted")),
-                    fysiskBrukerstedList,
+                fid,
+                eventStateAggregate.get("personident").asText(),
+                eventStateAggregate.get("navident").asText(),
+                eventStateAggregate.hasNonNull("sektor") ? Sektor.valueOf(eventStateAggregate.get("sektor").asText()) : Sektor.NAV_STATLIG,
+                new Visningsnavn(
+                    visningsnavn.get("fornavn").asText(),
+                    Optional.ofNullable(parseNullableFromJson(visningsnavn, "mellomnavn")),
+                    visningsnavn.get("etternavn").asText()
+                ),
+                Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "primaryTelefonnummer")),
+                Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "sluttdato", LocalDate::parse)),
+                Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "startdato", LocalDate::parse)),
+                Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "primaryFysiskBrukersted")),
+                fysiskBrukerstedList,
 
                 identTypeFromJson != null ? IdentType.valueOf(identTypeFromJson) : null
             );

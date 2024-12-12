@@ -1,0 +1,66 @@
+package no.nav.nom.apps.api.common.speiling;
+
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.utils.common.platform.LeaderElection;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import static java.util.Objects.isNull;
+import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
+
+@Service
+public class SpeilingService {
+
+    private final OrgtilknytningStateRepository orgtilknytningStateRepository;
+    private final RessursStateRepository ressursStateRepository;
+    private final LeaderElection leaderElection;
+    private final RessursCommandService ressursCommandService;
+
+    public SpeilingService(
+        OrgtilknytningStateRepository orgtilknytningStateRepository,
+        RessursStateRepository ressursStateRepository,
+        LeaderElection leaderElection,
+        RessursCommandService ressursCommandService
+    ) {
+        this.orgtilknytningStateRepository = orgtilknytningStateRepository;
+        this.ressursStateRepository = ressursStateRepository;
+        this.leaderElection = leaderElection;
+        this.ressursCommandService = ressursCommandService;
+    }
+
+    @Scheduled(cron = "0 0 1 * * *")
+    public void speilOrgtilknytningSektorTilRessursScheduler() {
+        if (leaderElection.isLeader()) {
+            speilSektorOrgtilknytning();
+        }
+    }
+
+    private void speilSektorOrgtilknytning() {
+        var dolOrgtilknytninger = orgtilknytningStateRepository.getAll()
+            .stream()
+            .filter(OrgtilknytningState::erDagligOppfolging)
+            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
+            .filter(orgtilknytningState -> orgtilknytningState.sektor() != null)
+            .toList();
+
+        InputMetadata inputMetadata = InputMetadata.builder()
+            .inputInterfaceName("nom-api BatchJob")
+            .inputInterfaceMethodName("speilOrgtilknytningSektorTilRessursScheduler")
+            .origination(new Origination("nom-api", "nom-api"))
+            .build();
+
+        dolOrgtilknytninger.forEach(orgtilknytningState -> ressursStateRepository.findByNavident(orgtilknytningState.navident()).ifPresent(ressursState -> {
+            if (isNull(ressursState.sektor()) || !ressursState.sektor().equals(orgtilknytningState.sektor())) {
+                OppdaterSektorCommand oppdaterSektorCommand = new OppdaterSektorCommand(ressursState.fid(), orgtilknytningState.sektor());
+                ressursCommandService.oppdaterSektorEvent(oppdaterSektorCommand, inputMetadata);
+            }
+        }));
+    }
+
+}

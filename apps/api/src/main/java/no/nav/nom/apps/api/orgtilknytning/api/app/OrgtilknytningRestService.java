@@ -22,6 +22,7 @@ import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
 import no.nav.nom.contract.nom.Sektor;
@@ -55,6 +56,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
+import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 import static no.nav.nom.apps.api.common.DateUtils.isPerioderOverlapping;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
@@ -391,6 +393,15 @@ public class OrgtilknytningRestService {
             );
         }
 
+        ressursStateRepository.findByNavident(orgtilknytningStateBeforeChanges.navident()).ifPresent(ressursState -> {
+            if (endreOrgtilknytningRequest.erDagligOppfolging()
+                && isPeriodActive(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())
+                && (isNull(ressursState.sektor()) || !ressursState.sektor().equals(endreOrgtilknytningRequest.sektor()))) {
+                OppdaterSektorCommand oppdaterSektorCommand = new OppdaterSektorCommand(ressursState.fid(), endreOrgtilknytningRequest.sektor());
+                ressursCommandService.oppdaterSektorEvent(oppdaterSektorCommand, inputMetadata);
+            }
+        });
+
         //update OTendretData for e-post varsel
         addToOTEndretDataEmailQueue(orgtilknytningStateBeforeChanges.navident(),
             endreOrgtilknytningRequest.fid(),
@@ -437,6 +448,14 @@ public class OrgtilknytningRestService {
                     .additionalAgressoData(null)
                     .build()
             );
+
+            ressursStateRepository.findByNavident(navident).ifPresent(ressursState -> {
+                if (isPeriodActive(leggTilOrgtilknytningRequest.gyldigFom(), leggTilOrgtilknytningRequest.gyldigTom())
+                    && (isNull(ressursState.sektor()) || !ressursState.sektor().equals(leggTilOrgtilknytningRequest.sektor()))) {
+                    OppdaterSektorCommand oppdaterSektorCommand = new OppdaterSektorCommand(ressursState.fid(), leggTilOrgtilknytningRequest.sektor());
+                    ressursCommandService.oppdaterSektorEvent(oppdaterSektorCommand, inputMetadata);
+                }
+            });
         } else {
             orgtilknytningCommandService.endreOrgtilknytningDato(EndreOrgtilknytningDatoCommand.builder()
                 .fid(opprettetOrgtilknytningFid)
