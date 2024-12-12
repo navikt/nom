@@ -77,14 +77,14 @@ jobs:
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
-          RESOURCE: .nais/apps/ui2/ui2-dev.yaml
-          VAR: image=${{needs.build-app-docker.outputs.image}}
-      - uses: nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: dev-gcp
           RESOURCE: .nais/unleash/unlease-token.yaml
           VAR: env=development
           VARS: .nais/unleash/unleash-vars.yaml
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/apps/ui2/ui2-dev.yaml
+          VAR: image=${{needs.build-app-docker.outputs.image}}
 
   deploy-prod:
     name: Deploy prod-gcp
