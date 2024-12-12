@@ -99,3 +99,5 @@ spec:
       value: http://nom-paarorende.org.svc.cluster.local
     - name: PAARORENDE_API_SCOPE
       value: api://dev-gcp.org.nom-paarorende/.default
+  envFrom:
+    - secret: nom-ui2-unleash-api-token
