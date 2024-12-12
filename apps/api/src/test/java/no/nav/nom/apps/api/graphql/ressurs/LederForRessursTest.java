@@ -4,19 +4,22 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
+import no.nav.nom.apps.api.dvh.DvhOldTdvService;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.dvh.dto.DvhLeder;
+import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
-import no.nav.nom.apps.api.organisering.DvhOrganiseringMock;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
-import no.nav.nom.apps.api.organisering.OrganiseringConfig;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
@@ -38,6 +41,9 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
 
     @Autowired
     OrgtilknytningStateRepository orgtilknytningStateRepository;
+
+    @MockBean
+    DvhOldTdvService dvhOldTdvService;
 
     @Test
     @DisplayName("Hente leder gjennom flere nivåer for ressurs som er leder av sin enhet ")
@@ -95,17 +101,31 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
         dvhOrgenhetMockUtils.addToResponse(ressursSinNedersteEnhet, ressursSinOvreEnhet, ledersEnhet);
 
         // Streams-app er ikke aktiv, så må legge manuelt inn i repository
-        addToOrgEnhetStateRepository(1, ressursSinNedersteEnhet);
-        addToOrgEnhetStateRepository(2, ressursSinOvreEnhet);
-        addToOrgEnhetStateRepository(3, ledersEnhet);
+        var ressursSinNedersteEnhetState = addToOrgEnhetStateRepository(1, ressursSinNedersteEnhet);
+        var ressursSinOvreEnhetState = addToOrgEnhetStateRepository(2, ressursSinOvreEnhet);
+        var ledersEnhetState = addToOrgEnhetStateRepository(3, ledersEnhet);
+        var enhetPaHoyereNivaState = addToOrgEnhetStateRepository(4, enhetPaHoyereNiva);
 
+        var dvhOrganisering1 = mockOrganisering(ressursSinNedersteEnhet, ressursSinOvreEnhet);
+        var dvhOrganisering2 = mockOrganisering(ressursSinOvreEnhet, ledersEnhet);
+        var dvhOrganisering3 = mockOrganisering(ledersEnhet, enhetPaHoyereNiva);
 
-        dvhOrganiseringMockUtils.clearResponse(); // Ikke bruke responser i JSON-filer
-        dvhOrganiseringMockUtils.addToResponse(
-            getDvhOrganiseringMock(ressursSinNedersteEnhet, ressursSinOvreEnhet, ressurs.navident()),
-            getDvhOrganiseringMock(ressursSinOvreEnhet, ledersEnhet, ressurs.navident()),
-            getDvhOrganiseringMock(ledersEnhet, enhetPaHoyereNiva, leder.navident())
-        );
+        var dvhLeder1 = mockLeder(ressursSinNedersteEnhet);
+        var dvhLeder2 = mockLeder(ressursSinOvreEnhet);
+        var dvhLeder3 = mockLeder(ledersEnhet);
+
+        // Streams-app er ikke aktiv, så må legge manuelt inn i repository
+        addToOrganiseringStateRepository(1, ressursSinNedersteEnhetState, ressursSinOvreEnhetState);
+        addToOrganiseringStateRepository(2, ressursSinOvreEnhetState, ledersEnhetState);
+        addToOrganiseringStateRepository(3, ledersEnhetState, enhetPaHoyereNivaState);
+
+        when(dvhOldTdvService.getTdvOrganiseringer()).thenReturn(List.of(dvhOrganisering1, dvhOrganisering2, dvhOrganisering3));
+        when(dvhOldTdvService.getTdvLedere()).thenReturn(List.of(dvhLeder1, dvhLeder2, dvhLeder3));
+
+        when(dvhOldTdvService.getTdvOrganiseringer()).thenReturn(List.of(dvhOrganisering1, dvhOrganisering2, dvhOrganisering3));
+        when(dvhOldTdvService.getTdvLedere()).thenReturn(List.of(dvhLeder1, dvhLeder2, dvhLeder3));
+        when(dvhOldTdvService.getTdvOrganiseringer()).thenReturn(List.of(dvhOrganisering1, dvhOrganisering2, dvhOrganisering3));
+        when(dvhOldTdvService.getTdvLedere()).thenReturn(List.of(dvhLeder1, dvhLeder2, dvhLeder3));
 
         // Knytte ressurs til org. enhet på laveste nivå
         orgtilknytningStateRepository.update(
@@ -120,7 +140,6 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
-
         final var response = postForResource("ressurs/leder_over_rekursivt.graphql");
 
         final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
@@ -134,12 +153,9 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
         assertThat(ledere.get(0).get("ressurs").get("personident").textValue()).endsWith("*****");
     }
 
-
     @Test
     @DisplayName("Ny organisering: Hente leder gjennom flere nivåer for ressurs som er leder av sin enhet ")
     void hente_leder_gjennom_flere_nivaer_for_ressurs_som_leder_enhet_med_ny_organisering() throws JsonProcessingException {
-        when(unleash.isEnabled(OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE)).thenReturn(true);
-
         // Ressursen vi skal hente leder for er leder på to nivåer
         final String ressursNedersteEnhetId = "idRessursEnhet";
         final String ressursNedersteEnhetNavn = "Ressurs sin nederste enhet";
@@ -201,13 +217,16 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
         orgEnhetStateRepository.update(ressursSinOvreEnhetState);
         orgEnhetStateRepository.update(ledersEnhetState);
 
+        var dvhOrganisering1 = mockOrganisering(ressursSinNedersteEnhet, ressursSinOvreEnhet);
+        var dvhOrganisering2 = mockOrganisering(ressursSinOvreEnhet, ledersEnhet);
+        var dvhOrganisering3 = mockOrganisering(ledersEnhet, enhetPaHoyereNiva);
 
-        dvhOrganiseringMockUtils.clearResponse(); // Ikke bruke responser i JSON-filer
-        dvhOrganiseringMockUtils.addToResponse(
-            getDvhOrganiseringMock(ressursSinNedersteEnhet, ressursSinOvreEnhet, ressurs.navident()),
-            getDvhOrganiseringMock(ressursSinOvreEnhet, ledersEnhet, ressurs.navident()),
-            getDvhOrganiseringMock(ledersEnhet, enhetPaHoyereNiva, leder.navident())
-        );
+        var dvhLeder1 = mockLeder(ressursSinNedersteEnhet);
+        var dvhLeder2 = mockLeder(ressursSinOvreEnhet);
+        var dvhLeder3 = mockLeder(ledersEnhet);
+
+        when(dvhOldTdvService.getTdvOrganiseringer()).thenReturn(List.of(dvhOrganisering1, dvhOrganisering2, dvhOrganisering3));
+        when(dvhOldTdvService.getTdvLedere()).thenReturn(List.of(dvhLeder1, dvhLeder2, dvhLeder3));
 
         // Knytte ressurs til org. enhet på laveste nivå
         orgtilknytningStateRepository.update(
@@ -237,13 +256,26 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
         assertThat(ledere.get(0).get("ressurs").get("navident").textValue()).isEqualTo(leder.navident());
     }
 
-    private void addToOrgEnhetStateRepository(int idSuffix, DvhOrgEnhetMock dvhOrgEnhetMock) {
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(
+    private OrgEnhetState addToOrgEnhetStateRepository(int idSuffix, DvhOrgEnhetMock dvhOrgEnhetMock) {
+        var state = dvhOrgenhetMockUtils.dvhMockToState(
             dvhOrgEnhetMock,
             idSuffix,
             String.valueOf(dvhOrgEnhetMock.getORGENHET_FRA_PERIODE()),
             Optional.of(String.valueOf(dvhOrgEnhetMock.getORGENHET_TIL_PERIODE()))
-        ));
+        );
+        orgEnhetStateRepository.update(state);
+        return state;
+    }
+
+    private void addToOrganiseringStateRepository(int idSuffix, OrgEnhetState enhetUnder, OrgEnhetState enhetOver) {
+        organiseringStateRepository.update(
+            orgEnhetStateToOrganiseringState(
+                idSuffix,
+                enhetUnder,
+                enhetOver
+            )
+        );
+
     }
 
     private OrgEnhetState toOrgEnhetStateWithId(int idSuffix, DvhOrgEnhetMock dvhOrgEnhetMock) {
@@ -255,16 +287,25 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
         );
     }
 
-    private DvhOrganiseringMock getDvhOrganiseringMock(DvhOrgEnhetMock orgEnhet, DvhOrgEnhetMock orgEnhetOver, String leder) {
-        return DvhOrganiseringMock.getBuilderWithDefault()
-            .ORGNODE_KODE(orgEnhet.getORGENHET_KODE())
-            .ORGNODE_NAVN(orgEnhet.getORGENHET_NAVN())
-            .ORGNODE_NIVA(orgEnhet.getORGNODE_NIV())
-            .LEDER_NAVIDENT(leder)
-            .ORGNODE_KODE_OVER(orgEnhetOver.getORGENHET_KODE())
-            .ORGNODE_NAVN_OVER(orgEnhetOver.getORGENHET_NAVN())
-            .ORGNODE_NIVA_OVER(orgEnhetOver.getORGNODE_NIV())
-            .build();
+    private DvhOrganisering mockOrganisering(DvhOrgEnhetMock underEnhet, DvhOrgEnhetMock overEnhet) {
+        return new DvhOrganisering(
+            overEnhet.getORGENHET_KODE(),
+            overEnhet.getORGNODE_NIV(),
+            overEnhet.getORGENHET_NAVN(),
+            underEnhet.getORGENHET_KODE(),
+            underEnhet.getORGNODE_NIV(),
+            underEnhet.getORGENHET_NAVN(),
+            LocalDate.now().minusDays(1),
+            null
+        );
     }
 
+    private DvhLeder mockLeder(DvhOrgEnhetMock enhet) {
+        return new DvhLeder(
+            enhet.getLEDER_RESSURSNR(),
+            enhet.getORGENHET_KODE(),
+            enhet.getORGNODE_NIV(),
+            enhet.getORGENHET_NAVN()
+        );
+    }
 }

@@ -1,9 +1,7 @@
 package no.nav.nom.apps.api.orgenhet;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
@@ -25,15 +23,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
 import static java.util.Comparator.comparing;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedAzpName;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
-import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
 
 @Service
 public class OrgenhetService {
@@ -43,7 +46,6 @@ public class OrgenhetService {
     private final OrgEnhetCommandService orgEnhetCommandService;
     private final DvhRepository dvhRepository;
     private final KafkaTopicReader kafkaTopicReader;
-    private final Unleash unleash;
     private final OrganiseringStateRepository organiseringStateRepository;
     private List<IOrgenhet> organiserteEnheter = emptyList();
 
@@ -52,14 +54,12 @@ public class OrgenhetService {
                            OrgEnhetCommandService orgEnhetCommandService, 
                            DvhRepository dvhRepository, 
                            KafkaTopicReader kafkaTopicReader, 
-                           Unleash unleash,
                            OrganiseringStateRepository organiseringStateRepository
     ) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgEnhetCommandService = orgEnhetCommandService;
         this.dvhRepository = dvhRepository;
         this.kafkaTopicReader = kafkaTopicReader;
-        this.unleash = unleash;
         this.organiseringStateRepository = organiseringStateRepository;
     }
 
@@ -139,24 +139,9 @@ public class OrgenhetService {
             .toList();
     }
 
-
-    public List<IOrgenhet> matchByNavn(String navn) {
-        return orgEnhetStateRepository.getAll().stream()
-            .filter(orgEnhetState -> orgEnhetState.navn().toLowerCase().contains(navn))
-            .map(this::map)
-            .toList();
-    }
-
-
     public Map<String, IOrgenhet> getByIdBulk(List<String> ids) {
         return orgEnhetStateRepository.findByIdIn(ids).stream().collect(Collectors.toMap(OrgEnhetState::id, this::map));
     }
-
-
-    public Map<String, IOrgenhet> getByFidBulk(List<String> fids) {
-        return orgEnhetStateRepository.findByIdIn(fids).stream().collect(Collectors.toMap(OrgEnhetState::id, this::map));
-    }
-
 
     public Collection<IOrgenhet> getByAgressoIdForEnheterMedOrganisering(String agressoId) {
         return getAllEnheterMedOrganisering().stream()
@@ -172,7 +157,6 @@ public class OrgenhetService {
             .toList();
     }
 
-
     public void setOrganiserteEnheter(List<IOrgenhet> organiserteEnheter) {
         this.organiserteEnheter = organiserteEnheter;
     }
@@ -186,53 +170,25 @@ public class OrgenhetService {
     }
 
     public List<String> findAllUnderliggendeOrgenheter(String id) {
-        if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {
-            logger.debug("Finner underliggende org.enheter for {} med ny implementasjon", id);
+        logger.debug("Finner underliggende org.enheter for {} med ny implementasjon", id);
 
-            Set<String> underliggendeIds = orgEnhetStateRepository.findById(id).map(parent -> {
+        Set<String> underliggendeIds = orgEnhetStateRepository.findById(id).map(parent -> {
 
-                List<OrganiseringState> organiseringer = organiseringStateRepository.getOrganiseringerContainingId(parent.id());
-                ArrayList<String> allUnderliggende = new java.util.ArrayList<>(emptyList());
+            List<OrganiseringState> organiseringer = organiseringStateRepository.getOrganiseringerContainingId(parent.id());
+            ArrayList<String> allUnderliggende = new java.util.ArrayList<>(emptyList());
 
-                Set<OrganiseringState> nextLevelChildren = organiseringer.stream().filter(organisering -> organisering.idOver().equals(parent.id()))
-                    .collect(Collectors.toSet());
+            Set<OrganiseringState> nextLevelChildren = organiseringer.stream().filter(organisering -> organisering.idOver().equals(parent.id()))
+                .collect(Collectors.toSet());
 
-                while (!nextLevelChildren.isEmpty()) {
-                    allUnderliggende.addAll(nextLevelChildren.stream().map(OrganiseringState::id).toList());
-                    nextLevelChildren = findChildOrganiseringerUsingNewOrganisering(nextLevelChildren);
-                }
+            while (!nextLevelChildren.isEmpty()) {
+                allUnderliggende.addAll(nextLevelChildren.stream().map(OrganiseringState::id).toList());
+                nextLevelChildren = findChildOrganiseringerUsingNewOrganisering(nextLevelChildren);
+            }
 
-                return new HashSet<>(allUnderliggende);
-            }).orElse(new HashSet<>());
+            return new HashSet<>(allUnderliggende);
+        }).orElse(new HashSet<>());
 
-            return orgEnhetStateRepository.findByIdIn(underliggendeIds).stream().map(OrgEnhetState::id).toList();
-
-        } else {
-            logger.debug("Finner underliggende org.enheter for {} med gammel implementasjon", id);
-
-            Set<String> underliggendeAgressoIds = orgEnhetStateRepository.findById(id).map(parent -> {
-                if (parent.agressoId().isEmpty() | parent.agressoOrgNivaa().isEmpty()) {
-                    return Collections.<String>emptySet();
-                }
-                var organiseringer = dvhRepository.getOrganiseringer(parent.agressoId().get(), parent.agressoOrgNivaa().get(), parent.navn());
-                var allUnderliggende = new java.util.ArrayList<String>(emptyList());
-
-                var nextLevelChildren = organiseringer.stream()
-                    .filter(organisering -> organisering.getAgressoIdOver().equals(parent.agressoId().get()))
-                    .collect(
-                        Collectors.toSet());
-
-
-                while (!nextLevelChildren.isEmpty()) {
-                    allUnderliggende.addAll(nextLevelChildren.stream().map(DvhOrganisering::getAgressoIdUnder).toList());
-                    nextLevelChildren = findChildOrganiseringer(nextLevelChildren);
-                }
-
-                return new HashSet<>(allUnderliggende);
-            }).orElse(emptySet());
-
-            return orgEnhetStateRepository.findAllByAgressoIdIn(underliggendeAgressoIds).stream().map(OrgEnhetState::id).toList();
-        }
+        return orgEnhetStateRepository.findByIdIn(underliggendeIds).stream().map(OrgEnhetState::id).toList();
     }
 
     public List<IOrgenhet> getAllUnderliggendeOrgEnhetById(String id) {
@@ -268,19 +224,6 @@ public class OrgenhetService {
         var organisering = organiseringStateRepository.findActiveById(orgenhetState.get().id());
 
         return organisering.filter(organiseringState -> isOrgEnhetInArbeidsomraade(organiseringState.idOver())).isPresent();
-    }
-
-    private Set<DvhOrganisering> findChildOrganiseringer(Set<DvhOrganisering> parentOrganiseringer) {
-        return parentOrganiseringer.stream()
-            .map(organisering ->
-                dvhRepository.getOrganiseringer(organisering.getAgressoIdUnder(), organisering.getOrgNivUnder(), organisering.getNavnUnder())
-                    .stream()
-                    .filter(
-                        lowerOrganisering ->
-                            !lowerOrganisering.equals(organisering) &&
-                                lowerOrganisering.getAgressoIdOver().equals(organisering.getAgressoIdUnder())
-                    ).toList()
-            ).flatMap(List::stream).collect(Collectors.toSet());
     }
 
     private Set<OrganiseringState> findChildOrganiseringerUsingNewOrganisering(Set<OrganiseringState> parentOrganiseringer) {

@@ -1,19 +1,14 @@
 package no.nav.nom.apps.api.dvh;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
-import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
-import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
-import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
@@ -36,14 +31,11 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
 import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyRessursType.ANNEN_STATLIG;
@@ -53,7 +45,6 @@ import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyR
 @RequiredArgsConstructor
 public class DvhRestConsumer {
     public static final String CACHE = "cache-source-dvh";
-    public static final String UNLEASH_PRODUSERE_NYE_ORGANISERING_MELDINGER = "nom.organisering.enable_new_topics";
     private final long LOAD_INTERVAL = 30 * 60 * 1000; // sync hvert 30min
 
     private final DvhRepository dvhRepository;
@@ -168,14 +159,14 @@ public class DvhRestConsumer {
     public void loadRessurserFromDvh() {
         log.info("Laster ressurser fra dvh");
         try {
-            List<DvhRessurs> dvhRessurser = null;
+            List<DvhRessurs> dvhRessurser;
             if (unleash.isEnabled("nom.dvh.last_ressurser_fra_ords")) {
                 dvhRessurser = dvhOrdsService.getRessurser();
             } else {
                 dvhRessurser = dvhOldTdvService.getTdvRessurser();
             }
 
-            val dvhRessurs = dvhRessurser.stream()
+            var dvhRessurs = dvhRessurser.stream()
                 .distinct()
                 .collect(Collectors.groupingBy(DvhRessurs::getPersonIdent))
                 .values()
@@ -184,8 +175,8 @@ public class DvhRestConsumer {
                     if (l.size() > 1) {
                         l.removeAll(l.stream().filter(Predicate.not(DvhRessurs::getRemedyAktiv)).toList());
                         if (l.size() > 1) {
-                            val personIdent = l.get(0).getPersonIdent();
-                            val navIdenter = l.stream().map(DvhRessurs::getNavIdent).toList();
+                            var personIdent = l.get(0).getPersonIdent();
+                            var navIdenter = l.stream().map(DvhRessurs::getNavIdent).toList();
                             log.warn(SECURE_LOGS, "Forkastet lesing av ansatt med personident " + personIdent + " har flere aktive navidenter: " + navIdenter);
                             l.clear();
                         }
@@ -210,7 +201,7 @@ public class DvhRestConsumer {
 
     private void getOrdsJsonRessurserAndCompare(List<DvhRessurs> tdvDvhRessurser) {
         try {
-            val ordsDvhRessurser = dvhOrdsService.getRessurser().stream()
+            var ordsDvhRessurser = dvhOrdsService.getRessurser().stream()
                 .distinct()
                 .collect(Collectors.groupingBy(DvhRessurs::getPersonIdent))
                 .values()
@@ -237,12 +228,12 @@ public class DvhRestConsumer {
                 erLikt = false;
             }
 
-            val ordsMap = ordsDvhRessurser.stream().collect(Collectors.toMap(DvhRessurs::getNavIdent, Function.identity()));
+            var ordsMap = ordsDvhRessurser.stream().collect(Collectors.toMap(DvhRessurs::getNavIdent, Function.identity()));
             int idxSkip = tdvDvhRessurser.size()/20;
             for (int i = 0; i < 20; i++) {
                 int idx = i * idxSkip;
-                val dvhRessursTdv = tdvDvhRessurser.get(idx);
-                val dvhRessursOrds = ordsMap.get(dvhRessursTdv.getNavIdent());
+                var dvhRessursTdv = tdvDvhRessurser.get(idx);
+                var dvhRessursOrds = ordsMap.get(dvhRessursTdv.getNavIdent());
                 if (!DvhRessurs.compare(dvhRessursTdv, dvhRessursOrds)) {
                     log.error("Ressurs fra TDV og ORDS er ulik. \n\tTDV: \n\t{}, \n\tORDS: \n\t{}"
                         , dvhRessursTdv.getRawData().toPrettyString()
@@ -299,7 +290,7 @@ public class DvhRestConsumer {
     public void loadTlfFromDvh() {
         log.info("Laster tlf fra dvh");
         try {
-            val tlfRader = dvhOldTdvService.getTdvTelefoner();
+            var tlfRader = dvhOldTdvService.getTdvTelefoner();
 
             log.info("Telefonnr lastet: Antall rader = " + tlfRader.size());
             dvhRepository.saveTlf(tlfRader);
@@ -311,17 +302,81 @@ public class DvhRestConsumer {
     public void loadLedereAndOrganiseringerFromDvh() {
         log.info("Laster ledere og Organisering fra dvh");
         try {
-            var ledere = dvhOldTdvService.getTdvLedere();
-            var organiseringer = dvhOldTdvService.getTdvOrganisering();
+            List<DvhLeder> ledere;
+            List<DvhOrganisering> organiseringer;
+            if (unleash.isEnabled("nom.dvh.last_ledere_fra_ords")) {
+                ledere = dvhOrdsService.getLedere();
+            } else {
+                ledere = dvhOldTdvService.getTdvLedere();
+            }
+            if (unleash.isEnabled("nom.dvh.last_organiseringer_fra_ords")) {
+                organiseringer = dvhOrdsService.getOrganiseringer();
+            } else {
+                organiseringer = dvhOldTdvService.getTdvOrganiseringer();
+            }
 
             dvhService.saveLedere(ledere);
-            dvhService.saveOrganiseringerAndSetOrganiserteOrgenheter(organiseringer);
+            dvhService.setOrganiserteOrgenheter(organiseringer); // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState
 
-            if (unleash.isEnabled(UNLEASH_PRODUSERE_NYE_ORGANISERING_MELDINGER)) {
-                organiseringService.saveOrganiseringer(organiseringer);
-            }
+            getOrdsJsonLedereAndOrganiseringAndCompare(ledere, organiseringer);
+
+            organiseringService.saveOrganiseringer(organiseringer);
         } catch (Exception e) {
             log.error("Failure loading ledere og Organisering data from DVH", e);
+        }
+    }
+
+    public void getOrdsJsonLedereAndOrganiseringAndCompare(List<DvhLeder> tdvLedere, List<DvhOrganisering> tdvOrganiseringer) {
+        try {
+            var ordsLedere = dvhOrdsService.getLedere();
+            var ordsOrganiseringer = dvhOrdsService.getOrganiseringer();
+
+            boolean erLikt = true;
+            if (ordsLedere.size() != tdvLedere.size()) {
+                log.error("Antall ledere fra TDV og ORDS er ulik. TDV: {}, ORDS: {}", tdvLedere.size(), ordsLedere.size());
+                erLikt = false;
+            }
+
+            var ordsLederMap = ordsLedere.stream().collect(Collectors.toMap(DvhLeder::getUniqueKey, Function.identity()));
+            int idxSkip = tdvLedere.size()/20;
+            for (int i = 0; i < 20; i++) {
+                int idx = i * idxSkip;
+                var tdvLeder = tdvLedere.get(idx);
+                var ordsLeder = ordsLederMap.get(tdvLeder.getUniqueKey());
+                if (ordsLeder == null || !DvhLeder.compare(tdvLeder, ordsLeder)) {
+                    log.error("Leder fra TDV og ORDS er ulik. \n\tTDV: \n\t{}, \n\tORDS: \n\t{}"
+                        , tdvLeder
+                        , ordsLeder);
+                    erLikt = false;
+                }
+            }
+
+            if (ordsOrganiseringer.size() != tdvOrganiseringer.size()) {
+                log.error("Antall organiseringer fra TDV og ORDS er ulik. TDV: {}, ORDS: {}", tdvOrganiseringer.size(), ordsOrganiseringer.size());
+                erLikt = false;
+            }
+
+            var ordsOrganiseringMap = ordsOrganiseringer.stream().collect(Collectors.toMap(DvhOrganisering::uniqueId, Function.identity()));
+            idxSkip = tdvOrganiseringer.size()/20;
+            for (int i = 0; i < 20; i++) {
+                int idx = i * idxSkip;
+                var tdvOrganisering = tdvOrganiseringer.get(idx);
+                var ordsOrganisering = ordsOrganiseringMap.get(tdvOrganisering.uniqueId());
+                if (ordsOrganisering == null || !DvhOrganisering.compare(tdvOrganisering, ordsOrganisering)) {
+                    log.error("Organisering fra TDV og ORDS er ulik. \n\tTDV: \n\t{}, \n\tORDS: \n\t{}"
+                        , tdvOrganisering
+                        , ordsOrganisering);
+                    erLikt = false;
+                }
+            }
+
+            if (erLikt) {
+                log.info("Last av ledere og organisering fra ORDS (nom_ords_hrorg_hierarki.json) er lik last fra TDV (NOM_ORDS_HRORG_HIERARKI)");
+            } else {
+                log.error("Last av ledere og organisering fra ORDS (nom_ords_hrorg_hierarki.json) er annerledes enn last fra TDV (NOM_ORDS_HRORG_HIERARKI)");
+            }
+        } catch (Exception e) {
+            log.error("Feilet i last av  og organisering fra ORDS (nom_ords_hrorg_hierarki.json)", e);
         }
     }
 

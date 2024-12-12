@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgenhet;
 
-import no.nav.nom.apps.api.organisering.OrganiseringConfig;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import org.junit.jupiter.api.DisplayName;
@@ -24,8 +23,6 @@ public class OrgEnhetUnderordnetResolverTest extends OrgEnhetTestBase {
     @Test
     @DisplayName("Returner underordnede orgenheter, men ikke orgenheten selv")
     public void should_return_list_of_subordinate_orgenheter() {
-        when(unleash.isEnabled(OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE)).thenReturn(true);
-
         final String idOrgEnhet = "orgEnhet";
         final String idUnderordnet1 = "under1";
         final String idUnderordnet2 = "under2";
@@ -85,8 +82,6 @@ public class OrgEnhetUnderordnetResolverTest extends OrgEnhetTestBase {
     @Test
     @DisplayName("Ikke returner duplikate underordnede orgenheter")
     public void should_not_return_duplicate_subordinate_orgenheter() {
-        when(unleash.isEnabled(OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE)).thenReturn(true);
-
         final String idOrgEnhet = "orgEnhet";
         final String idUnderordnet = "under";
 
@@ -126,8 +121,6 @@ public class OrgEnhetUnderordnetResolverTest extends OrgEnhetTestBase {
     @Test
     @DisplayName("Ikke returner utgåtte orgenheter")
     public void should_not_return_expired_subordinate_orgenheter() {
-        when(unleash.isEnabled(OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE)).thenReturn(true);
-
         final String idOrgEnhet = "orgEnhet";
         final String idOrgEnhetOver = "orgEnhet_idOver";
 
@@ -155,8 +148,6 @@ public class OrgEnhetUnderordnetResolverTest extends OrgEnhetTestBase {
     @Test
     @DisplayName("Ikke returner utgåtte orgenheter")
     public void should_not_return_subordinate_orgenheter_with_null_gyldigTOM() {
-        when(unleash.isEnabled(OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE)).thenReturn(true);
-
         final String idOrgEnhet = "orgEnhet";
         final String idOrgEnhetOver = "orgEnhet_idOver";
 

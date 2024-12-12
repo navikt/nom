@@ -71,6 +71,7 @@ public class DvhOrganisering {
     public String uniqueAgressoIdOver() {
         return agressoIdOver + "-" + navnOver + "-" + orgNivOver;
     }
+    public String uniqueId() { return uniqueAgressoIdOver() + "-" + uniqueAgressoIdUnder();  }
 
     @Override
     public boolean equals(Object o) {
@@ -87,4 +88,26 @@ public class DvhOrganisering {
     public int hashCode() {
         return Objects.hash(agressoIdOver, orgNivOver, navnOver, agressoIdUnder, orgNivUnder, navnUnder);
     }
+
+    public static DvhOrganisering fromOrds(JsonNode jsonNode) {
+        return DvhOrganisering.builder()
+            .agressoIdOver(jsonNode.get("orgnode_kode_over").asText())
+            .orgNivOver(jsonNode.get("orgnode_niva_over").asText())
+            .navnOver(jsonNode.get("orgnode_navn_over").asText())
+            .agressoIdUnder(jsonNode.get("orgnode_kode").asText())
+            .orgNivUnder(jsonNode.get("orgnode_niva").asText())
+            .navnUnder(jsonNode.get("orgnode_navn").asText())
+            .gyldigFom(LocalDate.now().minusDays(1))
+            .build();
+    }
+
+    public static boolean compare(DvhOrganisering tdvOrganisering, DvhOrganisering ordsOrganisering) {
+        return Objects.equals(tdvOrganisering.getAgressoIdOver(), ordsOrganisering.getAgressoIdOver()) &&
+            Objects.equals(tdvOrganisering.getOrgNivOver(), ordsOrganisering.getOrgNivOver()) &&
+            Objects.equals(tdvOrganisering.getNavnOver(), ordsOrganisering.getNavnOver()) &&
+            Objects.equals(tdvOrganisering.getAgressoIdUnder(), ordsOrganisering.getAgressoIdUnder()) &&
+            Objects.equals(tdvOrganisering.getOrgNivUnder(), ordsOrganisering.getOrgNivUnder()) &&
+            Objects.equals(tdvOrganisering.getNavnUnder(), ordsOrganisering.getNavnUnder());
+    }
+
 }

@@ -36,8 +36,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.time.format.DateTimeFormatter;
 
-import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
-
 @Tag(name = "Omada uttrekk")
 @RestController
 @RequestMapping("/api/v1/uttrekk/omada")
@@ -288,8 +286,7 @@ public class OmadaUttrekk {
     public @ResponseBody byte[] exportOrgenhet() throws IOException {
         StringWriter writer = new StringWriter();
 
-        boolean useNewOrganisering = unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE);
-        log.debug("Eksporterer orgenheter. Bruke ny organisering: {}", useNewOrganisering);
+        log.debug("Eksporterer orgenheter. Bruker ny organisering");
 
         final var cSVFormat =
             getCSVFormat(
@@ -329,7 +326,7 @@ public class OmadaUttrekk {
                             orgenhet.getNomNivaa().map(NomNivaa::name).orElse(""),
                             orgenhet.getOrgEnhetsType().map(OrgEnhetsType::name).orElse(""),
                             orgenhet.endedOnStartDate() ? "" : // Hvis enhet er avsluttet samme dag som den er opprettet, så er den ikke i organiseringen
-                                useNewOrganisering ? getOrgenhetOverUsingNewOrganisering(orgenhet) : getOrgenhetOver(orgenhet),
+                                getOrgenhetOver(orgenhet),
                             remedyEnhetIdResolver.remedyEnhetId(orgenhet)
                         );
                         writer.close();
@@ -344,22 +341,6 @@ public class OmadaUttrekk {
     }
 
     private String getOrgenhetOver(IOrgenhet orgenhet) {
-        return dvhRepository.getOrganiseringer(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn()).stream()
-            .filter(organisering ->
-                organisering.getAgressoIdUnder().equals(orgenhet.getAgressoId()) &&
-                    organisering.getOrgNivUnder().equals(orgenhet.getOrgNiv()) &&
-                    organisering.getNavnUnder().equals(orgenhet.getNavn())
-            )
-            .findAny()
-            .map(organisering -> orgenhetService.getEnhetByAgressoIdNivaAndName(
-                organisering.getAgressoIdOver(),
-                organisering.getOrgNivOver(),
-                organisering.getNavnOver()
-            ).map(IOrgenhet::getId).orElse(null))
-            .orElse("");
-    }
-
-    private String getOrgenhetOverUsingNewOrganisering(IOrgenhet orgenhet) {
         return organiseringStateRepository.findActiveById(orgenhet.getId())
             .map(OrganiseringState::idOver)
             .orElse("");

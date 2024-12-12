@@ -7,9 +7,9 @@ import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
+import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import no.nav.nom.contract.nom.IdentType;
-import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
@@ -21,7 +21,6 @@ import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
@@ -38,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 
 @DisplayName("GraphQL.HentRessursEventsource")
@@ -351,6 +351,8 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
             Optional.of(String.valueOf(enhet.getORGENHET_TIL_PERIODE()))
         ));
 
+        when(unleash.isEnabled("nom.dvh.last_ledere_fra_ords")).thenReturn(true);
+        when(unleash.isEnabled("nom.dvh.last_organiseringer_fra_ords")).thenReturn(true);
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         final var response = postForResource("ressurs/scenario6.graphql");

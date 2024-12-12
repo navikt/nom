@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearch;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnheterSearch;
@@ -18,7 +17,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
 
 @Component
 public class OrgEnhetResolver {
@@ -26,14 +24,11 @@ public class OrgEnhetResolver {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final OrgenhetService orgenhetService;
-    private final Unleash unleash;
 
     OrgEnhetResolver(
-        OrgenhetService orgenhetService,
-        Unleash unleash
+        OrgenhetService orgenhetService
     ) {
         this.orgenhetService = orgenhetService;
-        this.unleash = unleash;
     }
 
     public Optional<OrgEnhet> orgEnhet(OrgEnhetSearch search) {
@@ -64,17 +59,10 @@ public class OrgEnhetResolver {
     }
 
     public OrgEnhet orgEnhet(Organisering organisering) {
-        if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {
-            logger.debug("Ny implementasjon henter orgEnhet for {}", organisering);
-            return orgenhetService.getById(organisering.getId())
-                .map(MappingUtils::toOrgEnhet)
-                .orElseThrow();
-        } else {
-            logger.debug("Gammel implementasjon henter orgEnhet for {}", organisering);
-            return orgenhetService.getEnhetByAgressoIdNivaAndName(organisering.getOrgEnhetNr(), organisering.getOrgNiv(), organisering.getOrgEnhetNavn())
-                .map(MappingUtils::toOrgEnhet)
-                .orElseThrow();
-        }
+        logger.debug("Ny implementasjon henter orgEnhet for {}", organisering);
+        return orgenhetService.getById(organisering.getId())
+            .map(MappingUtils::toOrgEnhet)
+            .orElseThrow();
     }
 
     private List<OrgEnhetResult> orgenheterByAgressoData(OrgEnheterSearch search){

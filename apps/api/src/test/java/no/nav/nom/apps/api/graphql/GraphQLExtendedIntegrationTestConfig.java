@@ -4,7 +4,7 @@ import io.getunleash.Unleash;
 import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
 import no.nav.nom.apps.api.KafkaUtils;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
-import no.nav.nom.apps.api.clients.dvhords.DvhOrdsClient;
+import no.nav.nom.apps.api.clients.dvhords.DvhOrdsClientImpl;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.EmbeddeKafkaAdminClient;
@@ -87,6 +87,7 @@ import org.springframework.kafka.annotation.EnableKafka;
     , OTUtenforHierarki.class
     , OrgtilknytningService.class
     , DvhOldTdvService.class
+    , DvhOrdsClientImpl.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 @EnableKafka
@@ -148,6 +149,6 @@ public class GraphQLExtendedIntegrationTestConfig {
     @MockBean
     ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState;
 
-    @MockBean
-    DvhOrdsClient dvHOrdsClient;
+//    @MockBean
+//    DvhOrdsClient dvHOrdsClient;
 }

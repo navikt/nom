@@ -56,4 +56,36 @@ class DvhOrdsServiceTest {
         assertEquals("N", ressurser.get(2).getAnsattRessursKode());
         assertFalse(ressurser.get(2).getRemedyAktiv());
     }
+
+    @Test
+    void getLedere() {
+        var ledere = dvhOrdsService.getLedere();
+        assertNotNull(ledere);
+        assertEquals(6, ledere.size());
+
+        assertEquals("A100221", ledere.getFirst().getNavIdent());
+        assertEquals("0105002", ledere.getFirst().getOrgEnhetNr());
+        assertEquals("Sarpsborg Tverrfaglig 4", ledere.getFirst().getOrgenhetNavn());
+
+        assertEquals("A100305", ledere.get(1).getNavIdent());
+        assertEquals("2519003", ledere.get(1).getOrgEnhetNr());
+        assertEquals("Kontaktsenter Troms og Finnmark 3", ledere.get(1).getOrgenhetNavn());
+    }
+
+    @Test
+    void getOrganiseringer() {
+        var organiseringer = dvhOrdsService.getOrganiseringer();
+        assertNotNull(organiseringer);
+        assertEquals(6, organiseringer.size());
+
+        assertEquals("0105002", organiseringer.getFirst().getAgressoIdUnder());
+        assertEquals("0105002", organiseringer.getFirst().getAgressoIdOver());
+        assertEquals("Sarpsborg Tverrfaglig 4", organiseringer.getFirst().getNavnUnder());
+        assertEquals("Sarpsborg Team 2", organiseringer.getFirst().getNavnOver());
+
+        assertEquals("2519003", organiseringer.get(1).getAgressoIdUnder());
+        assertEquals("251900", organiseringer.get(1).getAgressoIdOver());
+        assertEquals("Kontaktsenter Troms og Finnmark 3", organiseringer.get(1).getNavnUnder());
+        assertEquals("Kontaktsenter Troms og Finnmark", organiseringer.get(1).getNavnOver());
+    }
 }

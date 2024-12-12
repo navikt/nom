@@ -2,7 +2,10 @@ package no.nav.nom.apps.api.clients.dvhords;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.apps.api.dvh.dto.DvhLeder;
+import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +41,34 @@ public class DvhOrdsService {
     }
 
     // Hierarki/Organisering og ledere
+    public List<DvhLeder> getLedere() {
+        var jsonOrgenheter = getOrganiseringOgLedereJson();
+
+        var ledere = StreamSupport.stream(jsonOrgenheter.get("items").spliterator(), false)
+            .filter(this::determineEnhetActive)
+            .filter(this::determineEnhetNotIgnored)
+            .filter(this::validateLeder)
+            .map(DvhLeder::fromOrds)
+            .toList();
+
+        log.info("Antall ledere hentet fra DVH: {}", ledere.size());
+        return ledere;
+    }
+
+    public List<DvhOrganisering> getOrganiseringer() {
+        var jsonOrgenheter = getOrganiseringOgLedereJson();
+
+        var organiseringer = StreamSupport.stream(jsonOrgenheter.get("items").spliterator(), false)
+            .filter(this::determineEnhetActive)
+            .filter(this::determineEnhetNotIgnored)
+            .filter(this::validateOrganisering)
+            .map(DvhOrganisering::fromOrds)
+            .toList();
+
+        log.info("Antall organiseringer hentet fra DVH: {}", organiseringer.size());
+        return organiseringer;
+    }
+
     public JsonNode getOrganiseringOgLedereJson() {
         return dvhOrdsClient.dvhGetJsonData(dvhOrdsProperties.orgHierarkiPath());
     }
@@ -137,5 +168,40 @@ public class DvhOrdsService {
 
     public JsonNode getTlfJson(String ordsFilter) {
         return dvhOrdsClient.dvhGetJsonDataOrdsFilter(dvhOrdsProperties.tlfPath(), ordsFilter);
+    }
+
+
+    private boolean validateLeder(JsonNode e) {
+        final var validate = e.hasNonNull("leder_navident") && e.hasNonNull("orgnode_kode") && e.hasNonNull("orgnode_niva");
+        if (!validate) {
+            log.info("Ugyldig leder fra dvh, LEDER_NAVIDENT: {}, ORGNODE_KODE: {}", getAsText(e, "leder_navident"), getAsText(e, "orgnode_kode"));
+        }
+        return validate;
+    }
+
+    private boolean validateOrganisering(JsonNode e) {
+        final var validate = e.hasNonNull("orgnode_kode_over") && e.hasNonNull("orgnode_kode")
+            && e.hasNonNull("orgnode_niva_over") && e.hasNonNull("orgnode_niva");
+        if (!validate) {
+            log.info("Ugyldig organisering fra dvh, ORGNODE_KODE_OVER: {}, ORGNODE_KODE: {}", getAsText(e, "orgnode_kode_over"), getAsText(e, "orgnode_kode"));
+        }
+        return validate;
+    }
+
+    private boolean determineEnhetActive(JsonNode e) {
+        return e.get("orgnode_status").asText().equals("N");
+    }
+
+    private boolean determineEnhetNotIgnored(JsonNode jsonNode) {
+        // 'deltar i rekruttering' og 'nav ventelønn' er kun for intern bruk i agresso.
+        val orgnodeKode = jsonNode.get("orgnode_kode").asText();
+        val deltarIRekruttering = orgnodeKode.matches("0+");
+        val navVenteloenn = orgnodeKode.equals("9999920");
+        return !(deltarIRekruttering || navVenteloenn);
+    }
+
+    private String getAsText(JsonNode e, String field) {
+        JsonNode jsonNode = e.get(field);
+        return jsonNode == null ? "<null>" : jsonNode.asText();
     }
 }

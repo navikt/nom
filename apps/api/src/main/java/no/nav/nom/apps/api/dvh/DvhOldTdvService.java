@@ -51,7 +51,7 @@ public class DvhOldTdvService {
         return ledere;
     }
 
-    public List<DvhOrganisering> getTdvOrganisering() {
+    public List<DvhOrganisering> getTdvOrganiseringer() {
         var jsonOrgenheter = dvhExchange(appProperties.clients().nomProxy().orgHierarkiPath());
 
         var organisering = StreamSupport.stream(jsonOrgenheter.get("NOM_HRORG_HIERARKI2_v2Response").spliterator(), false)

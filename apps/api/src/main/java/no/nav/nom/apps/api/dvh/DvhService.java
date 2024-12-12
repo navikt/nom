@@ -76,7 +76,8 @@ public class DvhService {
         log.info(ressursMissing.size() + " leder koblinger hvor ressurs mangler");
     }
 
-    public void saveOrganiseringerAndSetOrganiserteOrgenheter(List<DvhOrganisering> organiseringer) {
+    // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState
+    public void setOrganiserteOrgenheter(List<DvhOrganisering> organiseringer) {
         val cachedEnheter =
             orgenhetService.getAllEnheter().stream()
                 .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId))
@@ -89,7 +90,7 @@ public class DvhService {
                 .map(Optional::get)
                 .collect(toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
 
-        var organiseringerToSave = organiseringer.stream()
+        var organiseringerMedMatchPaaOrgenhet = organiseringer.stream()
             .distinct()
             .filter(o -> {
                 final var overEnhet = cachedEnheter.get(o.uniqueAgressoIdOver());
@@ -119,10 +120,8 @@ public class DvhService {
             })
             .toList();
 
-        dvhRepository.saveOrganiseringer(organiseringerToSave);
-
-        var overEnheter = dvhRepository.getOrganiseringer().stream().map(o -> cachedEnheter.get(o.uniqueAgressoIdOver())).toList();
-        var underEnheter = dvhRepository.getOrganiseringer().stream().map(o -> cachedEnheter.get(o.uniqueAgressoIdUnder())).toList();
+        var overEnheter = organiseringerMedMatchPaaOrgenhet.stream().map(o -> cachedEnheter.get(o.uniqueAgressoIdOver())).toList();
+        var underEnheter = organiseringerMedMatchPaaOrgenhet.stream().map(o -> cachedEnheter.get(o.uniqueAgressoIdUnder())).toList();
 
         // Add alle overEnheter og underEnheter to organiserteEnheter og behold unike enheter
         var organiserteEnheter = Stream.concat(overEnheter.stream(), underEnheter.stream())

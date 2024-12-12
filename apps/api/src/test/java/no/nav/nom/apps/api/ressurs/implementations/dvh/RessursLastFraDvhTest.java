@@ -32,7 +32,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @DisplayName("Last DvhRessurser og behandling av disse")
-public class RessursEndringFraDvhTest extends DvhTestBase {
+public class RessursLastFraDvhTest extends DvhTestBase {
     @SpyBean
     RessursCommandService ressursCommandService;
     @SpyBean

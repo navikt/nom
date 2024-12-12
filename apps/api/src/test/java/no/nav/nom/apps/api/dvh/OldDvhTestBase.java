@@ -20,10 +20,4 @@ public abstract class OldDvhTestBase extends TestBase {
     protected void clearRepository() {
         dvhRepository.clearRepository();
     }
-
-    protected void loadFromDvh() {
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
-        dvhRestConsumer.loadTlfFromDvh();
-    }
 }

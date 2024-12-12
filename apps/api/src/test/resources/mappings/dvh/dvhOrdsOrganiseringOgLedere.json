@@ -1,0 +1,165 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/dvh_nom/nom_ords_hrorg_hierarki.json"
+  },
+  "response": {
+    "status": 200,
+    "transformers": [
+      "response-template"
+    ],
+    "jsonBody": {
+      "items": [
+        {
+          "orgnode_kode": "0105002",
+          "orgnode_niva": "ORGENHET",
+          "agresso_orgnode_type": "31",
+          "orgnode_navn": "Sarpsborg Tverrfaglig 4",
+          "leder_navident": "A100221",
+          "orgnode_kode_over": "0105002",
+          "orgnode_niva_over": "ORGNIV4",
+          "orgnode_navn_over": "Sarpsborg Team 2",
+          "orgnode_status": "N"
+        },
+        {
+          "orgnode_kode": "2519003",
+          "orgnode_niva": "ORGENHET",
+          "agresso_orgnode_type": "42",
+          "orgnode_navn": "Kontaktsenter Troms og Finnmark 3",
+          "leder_navident": "A100305",
+          "orgnode_kode_over": "251900",
+          "orgnode_niva_over": "ORGNIV3",
+          "orgnode_navn_over": "Kontaktsenter Troms og Finnmark",
+          "orgnode_status": "N"
+        },
+        {
+          "orgnode_kode": "4732212",
+          "orgnode_niva": "ORGENHET",
+          "agresso_orgnode_type": null,
+          "orgnode_navn": "HJM-Huset Oslo/Akershus Kundesenter A",
+          "leder_navident": "A100407",
+          "orgnode_kode_over": "473201",
+          "orgnode_niva_over": "ORGNIV3",
+          "orgnode_navn_over": "HJM-Huset Oslo/Akershus",
+          "orgnode_status": "P"
+        },
+        {
+          "orgnode_kode": "2101455",
+          "orgnode_niva": "ORGENHET",
+          "agresso_orgnode_type": "54",
+          "orgnode_navn": "Internasjonalt Bidrag",
+          "leder_navident": "A100425",
+          "orgnode_kode_over": "210145",
+          "orgnode_niva_over": "ORGNIV3",
+          "orgnode_navn_over": "Internasjonalt Uføre",
+          "orgnode_status": "P"
+        },
+        {
+          "orgnode_kode": "0620000",
+          "orgnode_niva": "ORGENHET",
+          "agresso_orgnode_type": "31",
+          "orgnode_navn": "Hol",
+          "leder_navident": "A100602",
+          "orgnode_kode_over": "062000",
+          "orgnode_niva_over": "ORGNIV3",
+          "orgnode_navn_over": "Hol",
+          "orgnode_status": "P"
+        },
+        {
+          "orgnode_kode": "1736000",
+          "orgnode_niva": "ORGENHET",
+          "agresso_orgnode_type": "31",
+          "orgnode_navn": "Snåsa",
+          "leder_navident": "A100642",
+          "orgnode_kode_over": "173600",
+          "orgnode_niva_over": "ORGNIV3",
+          "orgnode_navn_over": "Snåsa",
+          "orgnode_status": "P"
+        },
+        {
+          "orgnode_kode": "4711812",
+          "orgnode_niva": "ORGENHET",
+          "agresso_orgnode_type": "83",
+          "orgnode_navn": "Hms Nordland Logistikk",
+          "leder_navident": "B100648",
+          "orgnode_kode_over": "471180",
+          "orgnode_niva_over": "ORGNIV3",
+          "orgnode_navn_over": "Hms Nordland",
+          "orgnode_status": "P"
+        },
+        {
+          "leder_navident": "testNavIdent",
+          "orgnode_kode": "testId1",
+          "orgnode_kode_over": null,
+          "orgnode_navn": "testNavn",
+          "orgnode_navn_over": "testNavnOver",
+          "orgnode_niva": "ORGENHET",
+          "orgnode_niva_over": "ORGNIV3",
+          "orgnode_status": "N",
+          "agresso_orgnode_type": "11"
+        },
+        {
+          "leder_navident": "testNavIdent1",
+          "orgnode_kode": "testId2",
+          "orgnode_kode_over": "testId3",
+          "orgnode_navn": "testNavn",
+          "orgnode_niva": "ORGENHET",
+          "orgnode_navn_over": "testNavn",
+          "orgnode_niva_over": "ORGNIV3",
+          "orgnode_status": "N",
+          "agresso_orgnode_type": null
+        },
+        {
+          "leder_navident": null,
+          "orgnode_kode": "testId3",
+          "orgnode_kode_over": "testId4",
+          "orgnode_navn": "testNavn",
+          "orgnode_niva": "ORGNIV3",
+          "orgnode_niva_over": "ORGNIV2",
+          "orgnode_navn_over": "testNavn4",
+          "orgnode_status": "N",
+          "agresso_orgnode_type": "54"
+        },
+        {
+          "leder_navident": "testNavIdent1",
+          "orgnode_kode": "testId4",
+          "orgnode_kode_over": "testId6",
+          "orgnode_navn": "testNavn4",
+          "orgnode_niva": "ORGNIV2",
+          "orgnode_niva_over": "ORGNIV1",
+          "orgnode_navn_over": "testNavn6",
+          "orgnode_status": "N",
+          "agresso_orgnode_type": "54"
+        },
+        {
+          "leder_navident": "testNavIdent4",
+          "orgnode_kode": "testId5",
+          "orgnode_kode_over": "testId4",
+          "orgnode_navn": "testNavn",
+          "orgnode_niva": "ORGENHET",
+          "orgnode_niva_over": "ORGNIV2",
+          "orgnode_navn_over": "testNavn4",
+          "orgnode_status": "N",
+          "agresso_orgnode_type": "54"
+        }
+      ],
+      "hasMore": false,
+      "limit": 0,
+      "offset": 0,
+      "count": 7,
+      "links": [
+        {
+          "rel": "self",
+          "href": "https://dvh.adeo.no/ords/dvh/dvh_nom/nom_ords_hrorg_hierarki.json"
+        },
+        {
+          "rel": "describedby",
+          "href": "https://dvh.adeo.no/ords/dvh/metadata-catalog/dvh_nom/item"
+        }
+      ]
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

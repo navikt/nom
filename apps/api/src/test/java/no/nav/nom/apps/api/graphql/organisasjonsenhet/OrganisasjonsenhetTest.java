@@ -6,12 +6,13 @@ import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
-import no.nav.nom.apps.api.organisering.OrganiseringConfig;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
@@ -19,7 +20,6 @@ import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,7 +33,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
 // TODO: Integrasjonstest - plasser og navngi riktig
 
@@ -207,11 +206,20 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet1, 1, String.valueOf(mockEnhet1.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet1.getORGENHET_TIL_PERIODE()))));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet2, 2, String.valueOf(mockEnhet2.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet2.getORGENHET_TIL_PERIODE()))));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet3, 3, String.valueOf(mockEnhet3.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet3.getORGENHET_TIL_PERIODE()))));
+        var mockEnhetState1 = dvhOrgenhetMockUtils.dvhMockToState(mockEnhet1, 1, String.valueOf(mockEnhet1.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet1.getORGENHET_TIL_PERIODE())));
+        var mockEnhetState2 = dvhOrgenhetMockUtils.dvhMockToState(mockEnhet2, 2, String.valueOf(mockEnhet2.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet2.getORGENHET_TIL_PERIODE())));
+        var mockEnhetState3 = dvhOrgenhetMockUtils.dvhMockToState(mockEnhet3, 3, String.valueOf(mockEnhet3.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet3.getORGENHET_TIL_PERIODE())));
 
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        orgEnhetStateRepository.update(mockEnhetState1);
+        orgEnhetStateRepository.update(mockEnhetState2);
+        orgEnhetStateRepository.update(mockEnhetState3);
+
+        OrganiseringState organiseringState1 = getOrganiseringState("organisering_1", mockEnhetState2, mockEnhetState3, LocalDate.now(), Optional.empty());
+        OrganiseringState organiseringState2 = getOrganiseringState("organisering_2", mockEnhetState3, mockEnhetState1, LocalDate.now(), Optional.empty());
+        organiseringStateRepository.update(organiseringState1);
+        organiseringStateRepository.update(organiseringState2);
+
+        // The organisering is now present in the state
 
         final var response = postForResource("organisasjonsenhet/scenario3.graphql");
         final var enhetResponse = response.path("organisasjonsenhet").entity(JsonNode.class).get();
@@ -231,8 +239,6 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
     @Test
     @DisplayName("Ny organisering: Laster inn organisasjonsenheter organisert i hierarki fra dvh, leser og validerer organiseringene")
     void scenario21_new_organisering() {
-        when(unleash.isEnabled(OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE)).thenReturn(true);
-
         final var mockEnhetOver = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testIdOver").ORGNODE_NIV("ORGNIV2").ORGENHET_NAVN("testNavnOver").build();
         final var mockEnhetUnder = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testIdUnder").ORGNODE_NIV("ORGENHET").ORGENHET_NAVN("testNavnUnder").build();
         final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGNODE_NIV("ORGNIV3").ORGENHET_NAVN("testNavn").build();
@@ -286,8 +292,14 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet1, 1, String.valueOf(mockEnhet1.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet1.getORGENHET_TIL_PERIODE()))));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet2, 2, String.valueOf(mockEnhet2.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet2.getORGENHET_TIL_PERIODE()))));
+        var mockEnhetState1 = dvhOrgenhetMockUtils.dvhMockToState(mockEnhet1, 1, String.valueOf(mockEnhet1.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet1.getORGENHET_TIL_PERIODE())));
+        var mockEnhetState2 = dvhOrgenhetMockUtils.dvhMockToState(mockEnhet2, 2, String.valueOf(mockEnhet2.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet2.getORGENHET_TIL_PERIODE())));
+
+        orgEnhetStateRepository.update(mockEnhetState1);
+        orgEnhetStateRepository.update(mockEnhetState2);
+
+        OrganiseringState organiseringState = getOrganiseringState("organisering_1", mockEnhetState1, mockEnhetState2, LocalDate.now(), Optional.empty());
+        organiseringStateRepository.update(organiseringState);
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -307,8 +319,6 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
     @Test
     @DisplayName("Ny organisering: Laster inn organisasjonsenheter organisert i hierarki fra dvh, filtrerer på retning")
     void scenario33_new_organisering() {
-        when(unleash.isEnabled(OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE)).thenReturn(true);
-
         final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         final var mockEnhetOver = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGNIV3").build();
 
@@ -520,4 +530,19 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
         return personident.replaceFirst(".{5}$","*****");
     }
 
+    private static OrganiseringState getOrganiseringState(String fid, OrgEnhetState orgeEnhetState, OrgEnhetState orgeEnhetStateOver, LocalDate gyldigFom, Optional<LocalDate> gyldigTom) {
+        return getOrganiseringState(fid, orgeEnhetState.id(), orgeEnhetState.navn(), orgeEnhetStateOver.id(), orgeEnhetStateOver.navn(), gyldigFom, gyldigTom);
+    }
+
+    private static OrganiseringState getOrganiseringState(String fid, String id, String navn, String idOver, String navnOver, LocalDate gyldigFom, Optional<LocalDate> gyldigTom) {
+        return OrganiseringState.builder()
+            .fid(fid)
+            .id(id)
+            .navn(navn)
+            .idOver(idOver)
+            .navnOver(navnOver)
+            .gyldigFom(gyldigFom)
+            .gyldigTom(gyldigTom)
+            .build();
+    }
 }

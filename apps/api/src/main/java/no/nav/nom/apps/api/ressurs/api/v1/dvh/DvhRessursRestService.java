@@ -20,42 +20,34 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
-
 @Service
 @Slf4j
 public class DvhRessursRestService {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private final NomMastered nomMastered;
     private final MasteredRessursStateRepository masteredRessursStateRepository;
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningService orgtilknytningService;
     private final OrgenhetService orgenhetService;
     private final RemedyEnhetIdResolver remedyEnhetIdResolver;
-    private final DvhRepository dvhRepository;
 
     private final OrganiseringStateRepository organiseringStateRepository;
-    private final Unleash unleash;
 
     public DvhRessursRestService(
-        NomMastered nomMastered, MasteredRessursStateRepository masteredRessursStateRepository,
+        MasteredRessursStateRepository masteredRessursStateRepository,
         RessursStateRepository ressursStateRepository,
         OrgtilknytningService orgtilknytningService,
         OrgenhetService orgenhetService,
         RemedyEnhetIdResolver remedyEnhetIdResolver,
-        DvhRepository dvhRepository, OrganiseringStateRepository organiseringStateRepository, Unleash unleash
+        OrganiseringStateRepository organiseringStateRepository
     ) {
-        this.nomMastered = nomMastered;
         this.masteredRessursStateRepository = masteredRessursStateRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningService = orgtilknytningService;
         this.orgenhetService = orgenhetService;
         this.remedyEnhetIdResolver = remedyEnhetIdResolver;
-        this.dvhRepository = dvhRepository;
         this.organiseringStateRepository = organiseringStateRepository;
-        this.unleash = unleash;
     }
 
     public List<DvhRessursDTO> nomMasteredRessurser() {
@@ -66,11 +58,10 @@ public class DvhRessursRestService {
     }
 
     public List<DvhOrgenhetDTO> orgenheter() {
-        boolean useNewOrganisering = unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE);
-        logger.debug("Henter orgenheter. Bruke ny organisering: {}", useNewOrganisering);
+        logger.debug("Henter orgenheter. Bruke ny organisering");
 
         return orgenhetService.getAllEnheterMedOrganisering().stream()
-            .map(oe -> toDTO(oe, useNewOrganisering))
+            .map(oe -> toDTO(oe))
             .toList();
     }
 
@@ -102,10 +93,10 @@ public class DvhRessursRestService {
         );
     }
 
-    DvhOrgenhetDTO toDTO(IOrgenhet orgenhet, boolean useNewOrganisering) {
+    DvhOrgenhetDTO toDTO(IOrgenhet orgenhet) {
         var remedyEnhetId = remedyEnhetIdResolver.remedyEnhetId(orgenhet);
 
-        String overordnet = useNewOrganisering ? getOverordnetEnhetUsingNewOrganisering(orgenhet) : getOverordnetEnhet(orgenhet);
+        String overordnet = getOverordnetEnhetUsingNewOrganisering(orgenhet);
 
         return new DvhOrgenhetDTO(
             orgenhet.getId(),
@@ -119,24 +110,6 @@ public class DvhRessursRestService {
             orgenhet.getOrgNiv(),
             remedyEnhetId
         );
-    }
-
-    private String getOverordnetEnhet(IOrgenhet orgenhet) {
-        var overordnet = dvhRepository.getOrganiseringer(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn())
-            .stream()
-            .filter(o ->
-                o.getAgressoIdUnder().equals(orgenhet.getAgressoId())
-                    && o.getOrgNivUnder().equals(orgenhet.getOrgNiv())
-                    && o.getNavnUnder().equals(orgenhet.getNavn()))
-            .findFirst();
-
-        if (overordnet.isPresent()) {
-            var o = overordnet.get();
-            return orgenhetService.getEnhetByAgressoIdNivaAndName(o.getAgressoIdOver(), o.getOrgNivOver(), o.getNavnOver())
-                .map(IOrgenhet::getId)
-                .orElse(null);
-        }
-        return null;
     }
 
     private String getOverordnetEnhetUsingNewOrganisering(IOrgenhet orgenhet) {

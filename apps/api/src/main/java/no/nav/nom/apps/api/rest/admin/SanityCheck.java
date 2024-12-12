@@ -51,8 +51,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
-
 @Tag(name = "Admin for å kjøre en sanity check på data")
 @RestController
 @RequestMapping("/api/admin/SanityCheck")
@@ -156,23 +154,12 @@ public class SanityCheck {
 
         List<IOrgenhet> aktiveEnheterUtenAktivOverEnhet;
 
-        if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {
-            log.info("Lister enheter uten overenheter med ny implementasjon");
+        log.info("Lister enheter uten overenheter med ny implementasjon");
 
-            List<OrganiseringState> aktiveOrganiseringer = organiseringStateRepository.getOrganiseringer();
+        List<OrganiseringState> aktiveOrganiseringer = organiseringStateRepository.getOrganiseringer();
 
-            List<String> aktiveUnderEnheterUniqueIder = uniqueIdForUnderEnhet(aktiveOrganiseringer);
-            aktiveEnheterUtenAktivOverEnhet = enheterIkkeBlantEnhetIder(aktiveEnheter, aktiveUnderEnheterUniqueIder);
-
-        } else {
-            log.info("Lister enheter uten overenheter med gammel implementasjon");
-
-            List<DvhOrganisering> alleOrganiseringer = dvhRepository.getOrganiseringer();
-            List<DvhOrganisering> aktiveOrganiseringer = aktiveOrganiseringer(alleOrganiseringer);
-
-            List<String> aktiveUnderEnheterUniqueAgressoIder = uniqueAgressoIdForUnderEnhet(aktiveOrganiseringer);
-            aktiveEnheterUtenAktivOverEnhet = enheterIkkeBlandtAgressoIder(aktiveEnheter, aktiveUnderEnheterUniqueAgressoIder);
-        }
+        List<String> aktiveUnderEnheterUniqueIder = uniqueIdForUnderEnhet(aktiveOrganiseringer);
+        aktiveEnheterUtenAktivOverEnhet = enheterIkkeBlantEnhetIder(aktiveEnheter, aktiveUnderEnheterUniqueIder);
 
         aktiveEnheterUtenAktivOverEnhet.forEach(oe ->
             result.append(oe.getId())
@@ -207,27 +194,14 @@ public class SanityCheck {
 
         List<IOrgenhet> aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet;
 
-        if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {
-            log.info("Lister enheter uten overenheter med ny implementasjon");
+        log.info("Lister enheter uten overenheter med ny implementasjon");
 
-            List<OrganiseringState> aktiveOrganiseringer = organiseringStateRepository.getOrganiseringer();
+        List<OrganiseringState> aktiveOrganiseringer = organiseringStateRepository.getOrganiseringer();
 
-            List<String> aktiveUnderEnheterUniqueIder = uniqueIdForUnderEnhet(aktiveOrganiseringer);
-            List<IOrgenhet> aktiveEnheterUtenAktivOverEnhet = enheterIkkeBlantEnhetIder(aktiveEnheter, aktiveUnderEnheterUniqueIder);
+        List<String> aktiveUnderEnheterUniqueIder = uniqueIdForUnderEnhet(aktiveOrganiseringer);
+        List<IOrgenhet> aktiveEnheterUtenAktivOverEnhet = enheterIkkeBlantEnhetIder(aktiveEnheter, aktiveUnderEnheterUniqueIder);
 
-            aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet = enheterBlantEnhetIder(aktiveEnheterUtenAktivOverEnhet, aktiveUnderEnheterUniqueIder);
-
-        } else {
-            log.info("Lister enheter uten overenheter med gammel implementasjon");
-
-            List<DvhOrganisering> alleOrganiseringer = dvhRepository.getOrganiseringer();
-            List<DvhOrganisering> aktiveOrganiseringer = aktiveOrganiseringer(alleOrganiseringer);
-
-            List<String> aktiveUnderEnheterUniqueAgressoIder = uniqueAgressoIdForUnderEnhet(aktiveOrganiseringer);
-            List<IOrgenhet> aktiveEnheterUtenAktivOverEnhet = enheterIkkeBlandtAgressoIder(aktiveEnheter, aktiveUnderEnheterUniqueAgressoIder);
-
-            aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet = enheterForAgressoIder(aktiveEnheterUtenAktivOverEnhet, aktiveUnderEnheterUniqueAgressoIder);
-        }
+        aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet = enheterBlantEnhetIder(aktiveEnheterUtenAktivOverEnhet, aktiveUnderEnheterUniqueIder);
 
         aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet.stream().forEach(oe ->
             result.append(oe.getId() + ";" + oe.getUniqueAgressoId() + ";" + oe.getGyldigFom() + ";" + (oe.getGyldigTom().isPresent() ? oe.getGyldigTom()
@@ -259,33 +233,17 @@ public class SanityCheck {
 
         List<IOrgenhet> enheterIkkeAktiveEllerUtenOrganisering;
 
-        if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {
-            log.info("Finner ressurser knyttet til ikke-aktiv enhet med ny implementasjon");
+        log.info("Finner ressurser knyttet til ikke-aktiv enhet med ny implementasjon");
 
-            List<OrganiseringState> aktiveOrganiseringer = organiseringStateRepository.getOrganiseringer();
+        List<OrganiseringState> aktiveOrganiseringer = organiseringStateRepository.getOrganiseringer();
 
-            List<String> aktiveOverEnheterUniqueIder = uniqueIdForOverEnhet(aktiveOrganiseringer);
-            List<String> aktiveUnderEnheterUniqueIder = uniqueIdForUnderEnhet(aktiveOrganiseringer);
+        List<String> aktiveOverEnheterUniqueIder = uniqueIdForOverEnhet(aktiveOrganiseringer);
+        List<String> aktiveUnderEnheterUniqueIder = uniqueIdForUnderEnhet(aktiveOrganiseringer);
 
-            List<String> aktiveOrganiseringerUniqueIder = new ArrayList<>(aktiveOverEnheterUniqueIder);
-            aktiveOrganiseringerUniqueIder.addAll(aktiveUnderEnheterUniqueIder);
+        List<String> aktiveOrganiseringerUniqueIder = new ArrayList<>(aktiveOverEnheterUniqueIder);
+        aktiveOrganiseringerUniqueIder.addAll(aktiveUnderEnheterUniqueIder);
 
-            enheterIkkeAktiveEllerUtenOrganisering = enheterIkkeBlantEnhetIder(alleEnheter, aktiveOrganiseringerUniqueIder);
-
-        } else {
-            log.info("Finner ressurser knyttet til ikke-aktiv enhet med gammel implementasjon");
-
-            List<DvhOrganisering> alleOrganiseringer = dvhRepository.getOrganiseringer();
-            List<DvhOrganisering> aktiveOrganiseringer = aktiveOrganiseringer(alleOrganiseringer);
-
-            List<String> aktiveOverEnheterUniqueAgressoIder = uniqueAgressoIdForOverEnhet(aktiveOrganiseringer);
-            List<String> aktiveUnderEnheterUniqueAgressoIder = uniqueAgressoIdForUnderEnhet(aktiveOrganiseringer);
-
-            List<String> aktiveOrganiseringerUniqueAgressoIder = new ArrayList<>(aktiveOverEnheterUniqueAgressoIder);
-            aktiveOrganiseringerUniqueAgressoIder.addAll(aktiveUnderEnheterUniqueAgressoIder);
-
-            enheterIkkeAktiveEllerUtenOrganisering = enheterIkkeBlandtAgressoIder(alleEnheter, aktiveOrganiseringerUniqueAgressoIder);
-        }
+        enheterIkkeAktiveEllerUtenOrganisering = enheterIkkeBlantEnhetIder(alleEnheter, aktiveOrganiseringerUniqueIder);
 
         var alleOrgtilknytningState = orgtilknytningService.getAll();
         var aktiveOrgtilknytningState = aktiveOrgtilknytninger(alleOrgtilknytningState);
@@ -326,20 +284,6 @@ public class SanityCheck {
         );
 
         result.append("\n");
-
-        //        if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {
-        //            List<String> uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering = enheterIkkeAktiveEllerUtenOrganisering.stream()
-        //                .map(IOrgenhet::getUniqueAgressoId)
-        //                .toList();
-        //
-        //            uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering.forEach(s -> result.append(s).append("\n"));
-        //        } else {
-        //            List<String> uniqueIderEnheterIkkeAktiveEllerUtenOrganisering = enheterIkkeAktiveEllerUtenOrganisering.stream()
-        //                .map(IOrgenhet::getId)
-        //                .toList();
-        //
-        //            uniqueIderEnheterIkkeAktiveEllerUtenOrganisering.forEach(s -> result.append(s).append("\n"));
-        //        }
 
         return result.toString();
     }
@@ -989,60 +933,30 @@ public class SanityCheck {
         List<IOrgenhet> aktiveEnheterUtenOrganisering;
         Map<String, List<IOrgenhet>> aktiveEnheterDuplikatAvSammeUniqueAgressoId;
 
-        if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {
-            log.info("Beregner aktive enheter og organisering med ny implementasjon");
+        log.info("Beregner aktive enheter og organisering med ny implementasjon");
 
-            List<OrganiseringState> aktiveOrganiseringer = organiseringStateRepository.getOrganiseringer();
-            numberOfAktiveOrganiseringer = aktiveOrganiseringer.size();
+        List<OrganiseringState> aktiveOrganiseringer = organiseringStateRepository.getOrganiseringer();
+        numberOfAktiveOrganiseringer = aktiveOrganiseringer.size();
 
-            List<String> aktiveOverEnheterUniqueIder = uniqueIdForOverEnhet(aktiveOrganiseringer);
-            numberOfAktiveOverEnheter = aktiveOverEnheterUniqueIder.size();
+        List<String> aktiveOverEnheterUniqueIder = uniqueIdForOverEnhet(aktiveOrganiseringer);
+        numberOfAktiveOverEnheter = aktiveOverEnheterUniqueIder.size();
 
-            List<String> aktiveUnderEnheterUniqueIder = uniqueIdForUnderEnhet(aktiveOrganiseringer);
-            numberOfAktiveUnderEnheter = aktiveUnderEnheterUniqueIder.size();
-
-
-            List<String> aktiveOrganiseringerUniqueIder = new ArrayList<>(aktiveOverEnheterUniqueIder);
-            aktiveOrganiseringerUniqueIder.addAll(aktiveUnderEnheterUniqueIder);
+        List<String> aktiveUnderEnheterUniqueIder = uniqueIdForUnderEnhet(aktiveOrganiseringer);
+        numberOfAktiveUnderEnheter = aktiveUnderEnheterUniqueIder.size();
 
 
-            aktiveEnheterUtenAktivOverEnhet = enheterIkkeBlantEnhetIder(aktiveEnheter, aktiveUnderEnheterUniqueIder);
-            aktiveEnheterUtenAktivUnderEnhet = enheterIkkeBlantEnhetIder(aktiveEnheter, aktiveOverEnheterUniqueIder);
+        List<String> aktiveOrganiseringerUniqueIder = new ArrayList<>(aktiveOverEnheterUniqueIder);
+        aktiveOrganiseringerUniqueIder.addAll(aktiveUnderEnheterUniqueIder);
 
 
-            aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet = enheterBlantEnhetIder(aktiveEnheterUtenAktivOverEnhet, aktiveUnderEnheterUniqueIder);
-            aktiveEnheterUtenOrganisering = enheterIkkeBlantEnhetIder(aktiveEnheter, aktiveOrganiseringerUniqueIder);
+        aktiveEnheterUtenAktivOverEnhet = enheterIkkeBlantEnhetIder(aktiveEnheter, aktiveUnderEnheterUniqueIder);
+        aktiveEnheterUtenAktivUnderEnhet = enheterIkkeBlantEnhetIder(aktiveEnheter, aktiveOverEnheterUniqueIder);
 
 
-            aktiveEnheterDuplikatAvSammeUniqueAgressoId = Collections.emptyMap();
+        aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet = enheterBlantEnhetIder(aktiveEnheterUtenAktivOverEnhet, aktiveUnderEnheterUniqueIder);
+        aktiveEnheterUtenOrganisering = enheterIkkeBlantEnhetIder(aktiveEnheter, aktiveOrganiseringerUniqueIder);
 
-        } else {
-            log.info("Beregner aktive enheter og organisering med gammel implementasjon");
-
-            List<DvhOrganisering> alleOrganiseringer = dvhRepository.getOrganiseringer();
-
-            List<DvhOrganisering> aktiveOrganiseringer = aktiveOrganiseringer(alleOrganiseringer);
-            numberOfAktiveOrganiseringer = aktiveOrganiseringer.size();
-
-            List<String> aktiveOverEnheterUniqueAgressoIder = uniqueAgressoIdForOverEnhet(aktiveOrganiseringer);
-            numberOfAktiveOverEnheter = aktiveOverEnheterUniqueAgressoIder.size();
-
-            List<String> aktiveUnderEnheterUniqueAgressoIder = uniqueAgressoIdForUnderEnhet(aktiveOrganiseringer);
-            numberOfAktiveUnderEnheter = aktiveUnderEnheterUniqueAgressoIder.size();
-
-            List<String> aktiveOrganiseringerUniqueAgressoIder = new ArrayList<>(aktiveOverEnheterUniqueAgressoIder);
-            aktiveOrganiseringerUniqueAgressoIder.addAll(aktiveUnderEnheterUniqueAgressoIder);
-
-            aktiveEnheterUtenAktivOverEnhet = enheterIkkeBlandtAgressoIder(aktiveEnheter, aktiveUnderEnheterUniqueAgressoIder);
-            aktiveEnheterUtenAktivUnderEnhet = enheterIkkeBlandtAgressoIder(aktiveEnheter, aktiveOverEnheterUniqueAgressoIder);
-
-            aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet = enheterForAgressoIder(aktiveEnheterUtenAktivOverEnhet, aktiveUnderEnheterUniqueAgressoIder);
-            aktiveEnheterUtenOrganisering = enheterIkkeBlandtAgressoIder(aktiveEnheter, aktiveOrganiseringerUniqueAgressoIder);
-
-            aktiveEnheterDuplikatAvSammeUniqueAgressoId = duplikatPaaSammeUniqueAgresssoId(aktiveEnheter);
-
-        }
-
+        aktiveEnheterDuplikatAvSammeUniqueAgressoId = Collections.emptyMap();
 
         result.append("Aktive enheter: %s\n".formatted(aktiveEnheter.size()));
 
@@ -1070,37 +984,18 @@ public class SanityCheck {
 
         List<IOrgenhet> enheterIkkeAktiveEllerUtenOrganisering;
 
-        if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {
-            log.info("Beregner aktive ressurser med ny implementasjon");
+        log.info("Beregner aktive ressurser med ny implementasjon");
 
-            List<OrganiseringState> aktiveOrganiseringer = organiseringStateRepository.getOrganiseringer();
+        List<OrganiseringState> aktiveOrganiseringer = organiseringStateRepository.getOrganiseringer();
 
-            List<String> aktiveOverEnheterUniqueIder = uniqueIdForOverEnhet(aktiveOrganiseringer);
-            List<String> aktiveUnderEnheterUniqueIder = uniqueIdForUnderEnhet(aktiveOrganiseringer);
+        List<String> aktiveOverEnheterUniqueIder = uniqueIdForOverEnhet(aktiveOrganiseringer);
+        List<String> aktiveUnderEnheterUniqueIder = uniqueIdForUnderEnhet(aktiveOrganiseringer);
 
-            List<String> aktiveOrganiseringerUniqueIder = new ArrayList<>(aktiveOverEnheterUniqueIder);
-            aktiveOrganiseringerUniqueIder.addAll(aktiveUnderEnheterUniqueIder);
+        List<String> aktiveOrganiseringerUniqueIder = new ArrayList<>(aktiveOverEnheterUniqueIder);
+        aktiveOrganiseringerUniqueIder.addAll(aktiveUnderEnheterUniqueIder);
 
-            enheterIkkeAktiveEllerUtenOrganisering = enheterIkkeBlantEnhetIder(alleEnheter, aktiveOrganiseringerUniqueIder);
+        enheterIkkeAktiveEllerUtenOrganisering = enheterIkkeBlantEnhetIder(alleEnheter, aktiveOrganiseringerUniqueIder);
 
-        } else {
-            log.info("Beregner aktive ressurser med gammel implementasjon");
-            List<DvhOrganisering> alleOrganiseringer = dvhRepository.getOrganiseringer();
-
-            List<DvhOrganisering> aktiveOrganiseringer = aktiveOrganiseringer(alleOrganiseringer);
-            List<String> aktiveOverEnheterUniqueAgressoIder = uniqueAgressoIdForOverEnhet(aktiveOrganiseringer);
-            List<String> aktiveUnderEnheterUniqueAgressoIder = uniqueAgressoIdForUnderEnhet(aktiveOrganiseringer);
-
-            List<String> aktiveOrganiseringerUniqueAgressoIder = new ArrayList<>(aktiveOverEnheterUniqueAgressoIder);
-            aktiveOrganiseringerUniqueAgressoIder.addAll(aktiveUnderEnheterUniqueAgressoIder);
-
-            enheterIkkeAktiveEllerUtenOrganisering = enheterIkkeBlandtAgressoIder(alleEnheter, aktiveOrganiseringerUniqueAgressoIder);
-        }
-
-
-        List<String> uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering = enheterIkkeAktiveEllerUtenOrganisering.stream()
-            .map(IOrgenhet::getUniqueAgressoId)
-            .toList();
 
         var alleOrgtilknytningState = orgtilknytningService.getAll();
         var aktiveOrgtilknytningState = aktiveOrgtilknytninger(alleOrgtilknytningState);
@@ -1185,41 +1080,20 @@ public class SanityCheck {
             }).toList();
     }
 
-    public List<String> uniqueAgressoIdForOverEnhet(List<DvhOrganisering> organiseringer) {
-        return organiseringer.stream().map(o -> o.uniqueAgressoIdOver()).distinct().toList();
-    }
-
     public List<String> uniqueIdForOverEnhet(List<OrganiseringState> organiseringer) {
         return organiseringer.stream().map(OrganiseringState::idOver).distinct().toList();
-    }
-
-    public List<String> uniqueAgressoIdForUnderEnhet(List<DvhOrganisering> organiseringer) {
-        return organiseringer.stream().map(o -> o.uniqueAgressoIdUnder()).distinct().toList();
     }
 
     public List<String> uniqueIdForUnderEnhet(List<OrganiseringState> organiseringer) {
         return organiseringer.stream().map(OrganiseringState::id).distinct().toList();
     }
 
-    private static List<IOrgenhet> enheterForEnhetIder(List<IOrgenhet> enheter, List<String> enehtIder) {
-        return enheter.stream().filter(e -> enehtIder.contains(e.getId())).toList();
-    }
-
     private static List<IOrgenhet> enheterIkkeBlantEnhetIder(List<IOrgenhet> enheter, List<String> enehtIder) {
         return enheter.stream().filter(e -> !enehtIder.contains(e.getId())).toList();
     }
 
-    private List<IOrgenhet> enheterForAgressoIder(List<IOrgenhet> enheter, List<String> uniqueAgessoIder) {
-        return enheter.stream().filter(oe -> uniqueAgessoIder.contains(oe.getUniqueAgressoId())).toList();
-    }
-
     private List<IOrgenhet> enheterBlantEnhetIder(List<IOrgenhet> enheter, List<String> enhetIder) {
         return enheter.stream().filter(orgenhet -> enhetIder.contains(orgenhet.getId())).toList();
-    }
-
-    private List<IOrgenhet> enheterIkkeBlandtAgressoIder(List<IOrgenhet> enheter, List<String> uniqueAgessoIder) {
-        // Enheter som ikke er enhet i angitte organiseringer
-        return enheter.stream().filter(oe -> !uniqueAgessoIder.contains(oe.getUniqueAgressoId())).toList();
     }
 
     private Map<String, List<IOrgenhet>> duplikatPaaSammeUniqueAgresssoId(List<IOrgenhet> aktiveEnheter) {
@@ -1244,10 +1118,6 @@ public class SanityCheck {
             ot.gyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
                 (!ot.gyldigTom().isPresent() || ot.gyldigTom().get().isAfter(LocalDate.now()))
         ).toList();
-    }
-
-    private List<RessursState> ressurserForKoblinger(List<RessursState> ressurser, List<Orgtilknytning> orgtilknytninger) {
-        return ressurser.stream().filter(r -> orgtilknytninger.stream().anyMatch(ot -> r.navident().equals(ot.getNavIdent()))).toList();
     }
 
     private List<RessursState> ressursKoblingDagensDatoForEnhetIder(
@@ -1286,11 +1156,6 @@ public class SanityCheck {
             .map(leder -> alleRessurserWithSluttDatoBeforeToday.get(leder.getNavIdent()))
             .filter(Objects::nonNull)
             .findFirst();
-    }
-
-    public static <T>Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
-        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
-        return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 }
 

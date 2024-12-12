@@ -3,9 +3,13 @@ package no.nav.nom.apps.api.organisering;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getunleash.Unleash;
+import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
+import no.nav.nom.apps.api.dvh.DvhOldTdvService;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrganiseringAvsluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData;
@@ -37,11 +41,13 @@ import org.springframework.kafka.test.utils.KafkaTestUtils;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static java.util.Collections.emptyList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils.orgEnhetStateBuilderWithDefaultValues;
@@ -71,6 +77,9 @@ public class OrganiseringTest extends OrganiseringTestBase {
     @MockBean
     Unleash unleash;
 
+    @MockBean
+    DvhOrdsService dvhOrdsService;
+
     @Autowired
     private OrganiseringStateRepository organiseringStateRepository;
 
@@ -84,8 +93,6 @@ public class OrganiseringTest extends OrganiseringTestBase {
 
         // Always enable features for tests
         when(unleash.isEnabled(any())).thenReturn(true);
-
-        dvhOrganiseringMockUtils.clearResponse();
 
         organiseringStateRepository.clear();
 
@@ -116,19 +123,27 @@ public class OrganiseringTest extends OrganiseringTestBase {
 
     @Test
     @DisplayName("Opprett en organisering")
-    void opprett_en_organisering() throws JsonProcessingException, InterruptedException {
+    void opprett_en_organisering() throws  InterruptedException {
 
         // Mock DVH API response
-        var mockedOrganisering = getMockedOrganisering("1", "Navn_1", "Niva_1", "2", "Navn_2", "Niva_2");
-        dvhOrganiseringMockUtils.addToResponse(mockedOrganisering);
+        var dvhOrganisering = DvhOrganisering.builder()
+                .agressoIdUnder("1")
+                .navnUnder("Navn_1")
+                .orgNivUnder("Niva_1")
+                .agressoIdOver("2")
+                .navnOver("Navn_2")
+                .orgNivOver("Niva_2")
+                .build();
+
+        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(dvhOrganisering));
 
         // Mock OrgenhetService where we find NOM id
-        var orgeEnhetState = mockOrgenhetServiceGetEnhet("mock_id", mockedOrganisering.getORGNODE_KODE(),
-            mockedOrganisering.getORGNODE_NIVA(), mockedOrganisering.getORGNODE_NAVN()
+        var orgeEnhetState = mockOrgenhetServiceGetEnhet("mock_id", dvhOrganisering.getAgressoIdUnder(),
+            dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder()
         );
 
-        var orgeEnhetStateOver = mockOrgenhetServiceGetEnhet("mock_id_over", mockedOrganisering.getORGNODE_KODE_OVER(),
-            mockedOrganisering.getORGNODE_NIVA_OVER(), mockedOrganisering.getORGNODE_NAVN_OVER()
+        var orgeEnhetStateOver = mockOrgenhetServiceGetEnhet("mock_id_over", dvhOrganisering.getAgressoIdOver(),
+            dvhOrganisering.getOrgNivOver(), dvhOrganisering.getNavnOver()
         );
 
         // Get organiseringer from DVH
@@ -141,9 +156,9 @@ public class OrganiseringTest extends OrganiseringTestBase {
         var eventData = (OrganiseringOpprettetEventData) singleRecord.value().getData();
 
         assertThat(eventData.idOver()).isEqualTo(orgeEnhetStateOver.id());
-        assertThat(eventData.navnOver()).isEqualTo(mockedOrganisering.getORGNODE_NAVN_OVER());
+        assertThat(eventData.navnOver()).isEqualTo(dvhOrganisering.getNavnOver());
         assertThat(eventData.id()).isEqualTo(orgeEnhetState.id());
-        assertThat(eventData.navn()).isEqualTo(mockedOrganisering.getORGNODE_NAVN());
+        assertThat(eventData.navn()).isEqualTo(dvhOrganisering.getNavnUnder());
         assertThat(eventData.gyldigFom()).isEqualTo(LocalDate.now());
     }
 
@@ -152,27 +167,35 @@ public class OrganiseringTest extends OrganiseringTestBase {
     void ignorerer_processering_organisering_nar_tom_lista_mottas_fra_dvh() throws JsonProcessingException {
 
         // Receive organisering from DVH
-        var mockedOrganisering = getMockedOrganisering("1", "Navn_1", "Niva_1", "2", "Navn_2", "Niva_2");
-        dvhOrganiseringMockUtils.addToResponse(mockedOrganisering);
+        var dvhOrganisering = DvhOrganisering.builder()
+            .agressoIdUnder("1")
+            .navnUnder("Navn_1")
+            .orgNivUnder("Niva_1")
+            .agressoIdOver("2")
+            .navnOver("Navn_2")
+            .orgNivOver("Niva_2")
+            .build();
+
+        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(dvhOrganisering));
 
         // Mock OrgenhetService where we find NOM id
-        var orgeEnhetState = mockOrgenhetServiceGetEnhet("mock_id", mockedOrganisering.getORGNODE_KODE(),
-            mockedOrganisering.getORGNODE_NIVA(), mockedOrganisering.getORGNODE_NAVN()
+        var orgEnhetState = mockOrgenhetServiceGetEnhet("mock_id", dvhOrganisering.getAgressoIdUnder(),
+            dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder()
         );
 
-        var orgeEnhetStateOver = mockOrgenhetServiceGetEnhet("mock_id_over", mockedOrganisering.getORGNODE_KODE_OVER(),
-            mockedOrganisering.getORGNODE_NIVA_OVER(), mockedOrganisering.getORGNODE_NAVN_OVER()
+        var orgEnhetStateOver = mockOrgenhetServiceGetEnhet("mock_id_over", dvhOrganisering.getAgressoIdOver(),
+            dvhOrganisering.getOrgNivOver(), dvhOrganisering.getNavnOver()
         );
 
         // First import from DVH, creates the organisering
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         // The organisering is now present in the state
-        OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgeEnhetState, orgeEnhetStateOver, LocalDate.now(), Optional.empty());
+        OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgEnhetState, orgEnhetStateOver, LocalDate.now(), Optional.empty());
         organiseringStateRepository.update(organiseringState);
 
         // No longer receive organisering from DVH
-        dvhOrganiseringMockUtils.clearResponse();
+        when(dvhOrdsService.getOrganiseringer()).thenReturn(emptyList());
 
         // Second import from DVH, this should not create avslutt organisering event
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
@@ -191,28 +214,37 @@ public class OrganiseringTest extends OrganiseringTestBase {
     @DisplayName("Avslutt en organisering og opprett på nytt")
     void avslutt_og_opprett_en_organisering() throws JsonProcessingException {
 
-        // 1. Receive organisering from DVH
-        var mockedOrganisering = getMockedOrganisering("1", "Navn_1", "Niva_1", "2", "Navn_2", "Niva_2");
-        dvhOrganiseringMockUtils.addToResponse(mockedOrganisering);
+        // Receive organisering from DVH
+        var dvhOrganisering = DvhOrganisering.builder()
+            .agressoIdUnder("1")
+            .navnUnder("Navn_1")
+            .orgNivUnder("Niva_1")
+            .agressoIdOver("2")
+            .navnOver("Navn_2")
+            .orgNivOver("Niva_2")
+            .build();
+
+        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(dvhOrganisering));
 
         // Mock OrgenhetService where we find NOM id
-        var orgeEnhetState = mockOrgenhetServiceGetEnhet("mock_id", mockedOrganisering.getORGNODE_KODE(),
-            mockedOrganisering.getORGNODE_NIVA(), mockedOrganisering.getORGNODE_NAVN()
+        var orgEnhetState = mockOrgenhetServiceGetEnhet("mock_id", dvhOrganisering.getAgressoIdUnder(),
+            dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder()
         );
 
-        var orgeEnhetStateOver = mockOrgenhetServiceGetEnhet("mock_id_over", mockedOrganisering.getORGNODE_KODE_OVER(),
-            mockedOrganisering.getORGNODE_NIVA_OVER(), mockedOrganisering.getORGNODE_NAVN_OVER()
+        var orgEnhetStateOver = mockOrgenhetServiceGetEnhet("mock_id_over", dvhOrganisering.getAgressoIdOver(),
+            dvhOrganisering.getOrgNivOver(), dvhOrganisering.getNavnOver()
         );
 
         // First import from DVH, creates the organisering
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         // The organisering is now present in the state
-        OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgeEnhetState, orgeEnhetStateOver, LocalDate.now(), Optional.empty());
+        OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgEnhetState, orgEnhetStateOver, LocalDate.now(), Optional.empty());
         organiseringStateRepository.update(organiseringState);
 
         // 2. No longer receive organisering from DVH
-        dvhOrganiseringMockUtils.clearResponse();
+        when(dvhOrdsService.getOrganiseringer()).thenReturn(emptyList());
+
         // Second import from DVH, this should not create avslutt organisering event
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -224,8 +256,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         organiseringStateRepository.putEventAggregate(organiseringState_avsluttet);
 
         // Change organisering from DVH. Organisering is same as the one received in step 1, but it will have new fid
-        dvhOrganiseringMockUtils.clearResponse();
-        dvhOrganiseringMockUtils.addToResponse(mockedOrganisering);
+        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(dvhOrganisering));
 
         // Third import from DVH, creates avslutt organisering event
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
@@ -255,17 +286,24 @@ public class OrganiseringTest extends OrganiseringTestBase {
     void endring_av_en_organisering() throws JsonProcessingException {
 
         // Receive organisering from DVH
-        var mockedOrganisering = getMockedOrganisering("1", "Navn_1", "Niva_1", "2", "Navn_2", "Niva_2");
+        var dvhOrganisering = DvhOrganisering.builder()
+            .agressoIdUnder("1")
+            .navnUnder("Navn_1")
+            .orgNivUnder("Niva_1")
+            .agressoIdOver("2")
+            .navnOver("Navn_2")
+            .orgNivOver("Niva_2")
+            .build();
 
-        dvhOrganiseringMockUtils.addToResponse(mockedOrganisering);
+        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(dvhOrganisering));
 
         // Mock OrgenhetService where we find NOM id
-        var orgEnhetState = mockOrgenhetServiceGetEnhet("mock_id", mockedOrganisering.getORGNODE_KODE(),
-            mockedOrganisering.getORGNODE_NIVA(), mockedOrganisering.getORGNODE_NAVN()
+        var orgEnhetState = mockOrgenhetServiceGetEnhet("mock_id", dvhOrganisering.getAgressoIdUnder(),
+            dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder()
         );
 
-        var orgEnhetStateOver = mockOrgenhetServiceGetEnhet("mock_id_over", mockedOrganisering.getORGNODE_KODE_OVER(),
-            mockedOrganisering.getORGNODE_NIVA_OVER(), mockedOrganisering.getORGNODE_NAVN_OVER()
+        var orgEnhetStateOver = mockOrgenhetServiceGetEnhet("mock_id_over", dvhOrganisering.getAgressoIdOver(),
+            dvhOrganisering.getOrgNivOver(), dvhOrganisering.getNavnOver()
         );
 
         // Import organiseringer from DVH
@@ -276,18 +314,17 @@ public class OrganiseringTest extends OrganiseringTestBase {
         organiseringStateRepository.update(organiseringState);
 
         // Change organisering from DVH
-        var mockedOrganisering_modified = mockedOrganisering.toBuilder()
-            .ORGNODE_KODE_OVER("4000000")
-            .ORGNODE_NAVN_OVER("Navn_4000000")
-            .ORGNODE_NIVA_OVER("Niva_4000000")
+        var dvhOrganisering_modified = dvhOrganisering.toBuilder()
+            .agressoIdOver("4000000")
+            .navnOver("Navn_4000000")
+            .orgNivOver("Niva_4000000")
             .build();
 
-        mockOrgenhetServiceGetEnhet("mock_id_over_modified", mockedOrganisering_modified.getORGNODE_KODE_OVER(),
-            mockedOrganisering_modified.getORGNODE_NIVA_OVER(), mockedOrganisering_modified.getORGNODE_NAVN_OVER()
+        mockOrgenhetServiceGetEnhet("mock_id_over_modified", dvhOrganisering_modified.getAgressoIdOver(),
+            dvhOrganisering_modified.getOrgNivOver(), dvhOrganisering_modified.getNavnOver()
         );
 
-        dvhOrganiseringMockUtils.clearResponse();
-        dvhOrganiseringMockUtils.addToResponse(mockedOrganisering_modified);
+        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(dvhOrganisering_modified));
 
         // Import organiseringer from DVH again
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
@@ -311,21 +348,37 @@ public class OrganiseringTest extends OrganiseringTestBase {
     void endringer_av_organiseringer() throws JsonProcessingException {
 
         // Initial configuration with node 1 as parent for node 3, and node 3 as parent for 2
-        var organisering3 = getMockedOrganisering("3", "Navn_3", "Niva_3", "1", "Navn_1", "Niva_1");
-        var organisering2 = getMockedOrganisering("2", "Navn_2", "Niva_2", "3", "Navn_3", "Niva_3");
-        dvhOrganiseringMockUtils.addToResponse(organisering2, organisering3);
+        var organisering3 = DvhOrganisering.builder()
+            .agressoIdUnder("3")
+            .navnUnder("Navn_3")
+            .orgNivUnder("Niva_3")
+            .agressoIdOver("1")
+            .navnOver("Navn_1")
+            .orgNivOver("Niva_1")
+            .build();
+
+        var organisering2 = DvhOrganisering.builder()
+            .agressoIdUnder("2")
+            .navnUnder("Navn_2")
+            .orgNivUnder("Niva_2")
+            .agressoIdOver("3")
+            .navnOver("Navn_3")
+            .orgNivOver("Niva_3")
+            .build();
+
+        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(organisering2, organisering3));
 
         // Setup response from orgEnhet state lookup where we find NOM id
-        var overEnhetTilOrgEnhet3 = mockOrgenhetServiceGetEnhet("nom_id_1", organisering3.getORGNODE_KODE_OVER(),
-            organisering3.getORGNODE_NIVA_OVER(), organisering3.getORGNODE_NAVN_OVER()
+        var overEnhetTilOrgEnhet3 = mockOrgenhetServiceGetEnhet("nom_id_1", organisering3.getAgressoIdOver(),
+            organisering3.getOrgNivOver(), organisering3.getNavnOver()
         );
 
-        var orgEnhet2 = mockOrgenhetServiceGetEnhet("nom_id_2", organisering2.getORGNODE_KODE(),
-            organisering2.getORGNODE_NIVA(), organisering2.getORGNODE_NAVN()
+        var orgEnhet2 = mockOrgenhetServiceGetEnhet("nom_id_2", organisering2.getAgressoIdUnder(),
+            organisering2.getOrgNivUnder(), organisering2.getNavnUnder()
         );
 
-        var orgEnhet3 = mockOrgenhetServiceGetEnhet("nom_id_3", organisering3.getORGNODE_KODE(),
-            organisering3.getORGNODE_NIVA(), organisering3.getORGNODE_NAVN()
+        var orgEnhet3 = mockOrgenhetServiceGetEnhet("nom_id_3", organisering3.getAgressoIdUnder(),
+            organisering3.getOrgNivUnder(), organisering3.getNavnUnder()
         );
 
         // Get organiseringer from DVH, should generate two opprettet messages (organisering 2 + 3)
@@ -336,19 +389,30 @@ public class OrganiseringTest extends OrganiseringTestBase {
 
         organiseringStateRepository.update(organiseringState3);
 
-        OrganiseringState organiseringState2 = getOrganiseringState("organisering_2", orgEnhet2.id(), organisering2.getORGNODE_NAVN(), orgEnhet3.id(),
-            organisering2.getORGNODE_NAVN_OVER(), LocalDate.now().minusDays(1), Optional.empty());
+        OrganiseringState organiseringState2 = getOrganiseringState("organisering_2", orgEnhet2.id(), organisering2.getNavnUnder(), orgEnhet3.id(),
+            organisering2.getNavnOver(), LocalDate.now().minusDays(1), Optional.empty());
         organiseringStateRepository.update(organiseringState2);
 
         // New node 4 gets 3 as parent and node 2 is moved and gets 4 as new parent
-        var organisering4 = getMockedOrganisering("4", "Navn_4", "Niva_4", "3", "Navn_3", "Niva_3");
-        var organisering2_modified = getMockedOrganisering("2", "Navn_2", "Niva_2", "4", "Navn_4", "Niva_4");
+        var organisering4 = DvhOrganisering.builder()
+            .agressoIdUnder("4")
+            .navnUnder("Navn_4")
+            .orgNivUnder("Niva_4")
+            .agressoIdOver("3")
+            .navnOver("Navn_3")
+            .orgNivOver("Niva_3")
+            .build();
 
-        dvhOrganiseringMockUtils.clearResponse();
-        dvhOrganiseringMockUtils.addToResponse(organisering3, organisering2_modified, organisering4);
+        var organisering2_modified = organisering2.toBuilder()
+            .agressoIdOver("4")
+            .navnOver("Navn_4")
+            .orgNivOver("Niva_4")
+            .build();
 
-        var orgEnhetState4 = mockOrgenhetServiceGetEnhet("nom_id_4", organisering4.getORGNODE_KODE(),
-            organisering4.getORGNODE_NIVA(), organisering4.getORGNODE_NAVN()
+        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(organisering3, organisering2_modified, organisering4));
+
+        var orgEnhetState4 = mockOrgenhetServiceGetEnhet("nom_id_4", organisering4.getAgressoIdUnder(),
+            organisering4.getOrgNivUnder(), organisering4.getNavnUnder()
         );
 
         // Get organiseringer from DVH again
@@ -380,7 +444,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         assertThat(replacementNode2Message.id()).isEqualTo(initialNode2Message.id());
         assertThat(replacementNode2Message.navn()).isEqualTo(initialNode2Message.navn());
         assertThat(replacementNode2Message.idOver()).isEqualTo(orgEnhetState4.id());
-        assertThat(replacementNode2Message.navnOver()).isEqualTo(organisering2_modified.getORGNODE_NAVN_OVER());
+        assertThat(replacementNode2Message.navnOver()).isEqualTo(organisering2_modified.getNavnOver());
 
         // Check that the initial node 2 organisering has ended
         assertThat(terminateNode2Message.gyldigTom()).isEqualTo(LocalDate.now().minusDays(1));
@@ -390,38 +454,52 @@ public class OrganiseringTest extends OrganiseringTestBase {
     @DisplayName("Avslutt en eksisterende organisering og oppretter ny når id endret")
     void avslutt_en_organisering_og_oppretter_ny() throws JsonProcessingException {
         // node 1 som parent for node 3
-        var organisering3 = getMockedOrganisering("3", "Navn_3", "Niva_3", "1", "Navn_1", "Niva_1");
+        var organisering3 = DvhOrganisering.builder()
+            .agressoIdUnder("3")
+            .navnUnder("Navn_3")
+            .orgNivUnder("Niva_3")
+            .agressoIdOver("1")
+            .navnOver("Navn_1")
+            .orgNivOver("Niva_1")
+            .build();
 
         // stub organisering3 fra DVH
-        dvhOrganiseringMockUtils.addToResponse(organisering3);
+        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(organisering3));
 
         // mock orgEnhetService hvor vi finner NOM id
-        var overEnhetTilOrgEnhet3 = mockOrgenhetServiceGetEnhet("nom_id_1", organisering3.getORGNODE_KODE_OVER(),
-            organisering3.getORGNODE_NIVA_OVER(), organisering3.getORGNODE_NAVN_OVER()
+        var overEnhetTilOrgEnhet3 = mockOrgenhetServiceGetEnhet("nom_id_1", organisering3.getAgressoIdOver(),
+            organisering3.getOrgNivOver(), organisering3.getNavnOver()
         );
-        var orgEnhet3 = mockOrgenhetServiceGetEnhet("nom_id_3", organisering3.getORGNODE_KODE(),
-            organisering3.getORGNODE_NIVA(), organisering3.getORGNODE_NAVN()
+
+        var orgEnhet3 = mockOrgenhetServiceGetEnhet("nom_id_3", organisering3.getAgressoIdUnder(),
+            organisering3.getOrgNivUnder(), organisering3.getNavnUnder()
         );
 
         // opprette organisering (1 - 3)
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         // oppdatere state
-        OrganiseringState organiseringState3 = getOrganiseringState("organisering_3", orgEnhet3.id(), organisering3.getORGNODE_NAVN(),
-            overEnhetTilOrgEnhet3.id(), organisering3.getORGNODE_NAVN_OVER(), LocalDate.now().minusDays(1), Optional.empty());
+        OrganiseringState organiseringState3 = getOrganiseringState("organisering_3", orgEnhet3.id(), organisering3.getNavnUnder(),
+            overEnhetTilOrgEnhet3.id(), organisering3.getNavnOver(), LocalDate.now().minusDays(1), Optional.empty());
         organiseringStateRepository.update(organiseringState3);
 
-        dvhOrganiseringMockUtils.clearResponse();
 
         // simulerer at id endret -  f eks navn på orgEnhet3 modifisert
-        var organisering3_modified = getMockedOrganisering("3", "Navn_3_modified", "Niva_3", "1", "Navn_1", "Niva_1");
+        var organisering3_modified = DvhOrganisering.builder()
+            .agressoIdUnder("3")
+            .navnUnder("Navn_3_modified")
+            .orgNivUnder("Niva_3")
+            .agressoIdOver("1")
+            .navnOver("Navn_1")
+            .orgNivOver("Niva_1")
+            .build();
 
         // da kommer bare organisering3_modified fra DVH
-        dvhOrganiseringMockUtils.addToResponse(organisering3_modified);
+        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(organisering3_modified));
 
         // mock orgEnhetService hvor vi finner NOM id
-        var orgEnhet3_modified = mockOrgenhetServiceGetEnhet("nom_id_3_modified", organisering3_modified.getORGNODE_KODE(),
-            organisering3_modified.getORGNODE_NIVA(), organisering3_modified.getORGNODE_NAVN()
+        var orgEnhet3_modified = mockOrgenhetServiceGetEnhet("nom_id_3_modified", organisering3_modified.getAgressoIdUnder(),
+            organisering3_modified.getOrgNivUnder(), organisering3_modified.getNavnUnder()
         );
 
         // hente organiseringer from DVH igjen
@@ -458,16 +536,24 @@ public class OrganiseringTest extends OrganiseringTestBase {
     @DisplayName("Avslutt en eksisterende organisering")
     void avslutt_en_organisering() throws JsonProcessingException {
         // 1. Receive organisering from DVH
-        var mockedOrganisering = getMockedOrganisering("1", "Navn_1", "Niva_1", "2", "Navn_2", "Niva_2");
-        dvhOrganiseringMockUtils.addToResponse(mockedOrganisering);
+        var mockedOrganisering = DvhOrganisering.builder()
+            .agressoIdUnder("1")
+            .navnUnder("Navn_1")
+            .orgNivUnder("Niva_1")
+            .agressoIdOver("2")
+            .navnOver("Navn_2")
+            .orgNivOver("Niva_2")
+            .build();
+
+        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(mockedOrganisering));
 
         // Mock OrgenhetService where we find NOM id
-        var orgeEnhetState = mockOrgenhetServiceGetEnhet("mock_id", mockedOrganisering.getORGNODE_KODE(),
-            mockedOrganisering.getORGNODE_NIVA(), mockedOrganisering.getORGNODE_NAVN()
+        var orgeEnhetState = mockOrgenhetServiceGetEnhet("mock_id", mockedOrganisering.getAgressoIdUnder(),
+            mockedOrganisering.getOrgNivUnder(), mockedOrganisering.getNavnUnder()
         );
 
-        var orgeEnhetStateOver = mockOrgenhetServiceGetEnhet("mock_id_over", mockedOrganisering.getORGNODE_KODE_OVER(),
-            mockedOrganisering.getORGNODE_NIVA_OVER(), mockedOrganisering.getORGNODE_NAVN_OVER()
+        var orgeEnhetStateOver = mockOrgenhetServiceGetEnhet("mock_id_over", mockedOrganisering.getAgressoIdOver(),
+            mockedOrganisering.getOrgNivOver(), mockedOrganisering.getNavnOver()
         );
 
         // First import from DVH, creates the organisering
@@ -478,19 +564,25 @@ public class OrganiseringTest extends OrganiseringTestBase {
         OrganiseringState organiseringState = getOrganiseringState(fid_organisering1, orgeEnhetState, orgeEnhetStateOver, LocalDate.now(), Optional.empty());
         organiseringStateRepository.update(organiseringState);
 
-        dvhOrganiseringMockUtils.clearResponse();
-
         // 2. eksisterende organisering avsluttes og ikke kommer fra DVH
-        var mockedOrganisering_new = getMockedOrganisering("3", "Navn_3", "Niva_3", "4", "Navn_4", "Niva_4");
-        dvhOrganiseringMockUtils.addToResponse(mockedOrganisering_new);
+        var mockedOrganisering_new = DvhOrganisering.builder()
+            .agressoIdUnder("3")
+            .navnUnder("Navn_3")
+            .orgNivUnder("Niva_3")
+            .agressoIdOver("4")
+            .navnOver("Navn_4")
+            .orgNivOver("Niva_4")
+            .build();
+
+        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(mockedOrganisering_new));
 
         // Mock OrgenhetService where we find NOM id
-        mockOrgenhetServiceGetEnhet("mock_id_new", mockedOrganisering_new.getORGNODE_KODE(),
-            mockedOrganisering_new.getORGNODE_NIVA(), mockedOrganisering_new.getORGNODE_NAVN()
+        mockOrgenhetServiceGetEnhet("mock_id_new", mockedOrganisering_new.getAgressoIdUnder(),
+            mockedOrganisering_new.getOrgNivUnder(), mockedOrganisering_new.getNavnUnder()
         );
 
-        mockOrgenhetServiceGetEnhet("mock_id_over_new", mockedOrganisering_new.getORGNODE_KODE_OVER(),
-            mockedOrganisering_new.getORGNODE_NIVA_OVER(), mockedOrganisering_new.getORGNODE_NAVN_OVER()
+        mockOrgenhetServiceGetEnhet("mock_id_over_new", mockedOrganisering_new.getAgressoIdOver(),
+            mockedOrganisering_new.getOrgNivOver(), mockedOrganisering_new.getNavnOver()
         );
 
         // Second import from DVH, creates the organisering and terminates the old one
@@ -513,23 +605,12 @@ public class OrganiseringTest extends OrganiseringTestBase {
         // assert values og metadata
         var terminateMessage = (OrganiseringAvsluttetEventData) terminateFirstOrganiseringRecord.value().getData();
         assertThat(terminateMessage.gyldigTom()).isEqualTo(LocalDate.now());
-        var terminateMessageMetadata = (Event.Metadata) terminateFirstOrganiseringRecord.value().getMetadata();
+        var terminateMessageMetadata = terminateFirstOrganiseringRecord.value().getMetadata();
         var rawData = terminateMessageMetadata.inputMetadata().inputInterfaceMethodArguments();
         assertThat(((LinkedHashMap<?, ?>) rawData).get("fid")).isEqualTo(fid_organisering1);
         assertThat(((LinkedHashMap<?, ?>) rawData).get("id")).isEqualTo(orgeEnhetState.id());
     }
 
-
-    private static DvhOrganiseringMock getMockedOrganisering(String kode, String navn, String niva, String kodeOver, String navnOver, String nivaOver) {
-        return DvhOrganiseringMock.getBuilderWithDefault()
-            .ORGNODE_KODE(kode)
-            .ORGNODE_NAVN(navn)
-            .ORGNODE_NIVA(niva)
-            .ORGNODE_KODE_OVER(kodeOver)
-            .ORGNODE_NAVN_OVER(navnOver)
-            .ORGNODE_NIVA_OVER(nivaOver)
-            .build();
-    }
 
     private OrgEnhetState mockOrgenhetServiceGetEnhet(String id, String kode, String niva, String navn) {
         var orgEnhetState = orgEnhetStateBuilderWithDefaultValues().toBuilder()

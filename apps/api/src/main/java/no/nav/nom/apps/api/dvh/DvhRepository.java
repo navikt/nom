@@ -23,17 +23,11 @@ import java.util.function.Supplier;
 @Component
 @RequiredArgsConstructor
 public class DvhRepository {
-
     private List<DvhLeder> ledere = Collections.emptyList();
-    private List<DvhOrganisering> organiseringer = Collections.emptyList();
     private Collection<String> annenStatNavIdenter = Collections.emptyList();
     private List<DvhTelefon> navidentTelefonNrMap = Collections.emptyList();
 
     private final List<Supplier<Boolean>> listeners = new ArrayList<>();
-
-    public List<DvhOrganisering> getOrganiseringer(String agressoId, String orgNiv, String navn) {
-        return organiseringer.stream().filter(e -> e.containsEnhet(agressoId, orgNiv, navn)).toList();
-    }
 
     public List<DvhLeder> getLederByAgressoIdAndNivAndNavn(String agressoId, String orgNiv, String navn) {
         return ledere.stream().filter(l -> l.getOrgEnhetNr().equals(agressoId) && l.getOrgNiv().equals(orgNiv) && l.getOrgenhetNavn().equals(navn)).toList();
@@ -57,23 +51,16 @@ public class DvhRepository {
         }
     }
 
-
-    protected void saveOrganiseringer(List<DvhOrganisering> organiseringer) {
-        this.organiseringer = organiseringer;
-        updateListeners();
-    }
-
     public void saveTlf(List<DvhTelefon> tlfList) {
         this.navidentTelefonNrMap = tlfList;
         this.updateListeners();
     }
 
     public void saveAnnenStatNavIdenter(Collection<String> navidentCollection){
-        this.annenStatNavIdenter = new HashSet<String>(navidentCollection);
+        this.annenStatNavIdenter = new HashSet<>(navidentCollection);
     }
 
     public void clearRepository() {
-        organiseringer = Collections.emptyList();
         this.updateListeners();
     }
 

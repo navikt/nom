@@ -3,18 +3,16 @@ package no.nav.nom.apps.api.ressurs.api.app;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
-import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
-import no.nav.nom.apps.api.organisering.OrganiseringConfig;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
-import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,12 +50,7 @@ public class RessursLedereResolverTest {
     private static final String ORG_ENHET_3_AGRESSO_ID = "orgEnhet_3_agresso_id";
     private static final String ORG_ENHET_3_ORG_NIV = "ORGNIV2";
 
-
     private static final String NAV_IDENT_LEDER = "L999999";
-
-
-    @Mock
-    private Unleash unleash;
 
     @Mock
     private OrganiseringStateRepository organiseringStateRepositoryMock;
@@ -115,7 +108,7 @@ public class RessursLedereResolverTest {
         when(ressursStateRepositoryMock.findByNavident(NAV_IDENT_LEDER)).thenReturn(Optional.ofNullable(lederRessursState));
 
 
-        List<RessursState> ledereReturned = ressursLedereResolver.lederForRecursiveUsingNewOrganisering(ORG_ENHET_1_ID, NAV_IDENT_RESSURS);
+        List<RessursState> ledereReturned = ressursLedereResolver.lederForRecursive(ORG_ENHET_1_ID, NAV_IDENT_RESSURS);
 
         assertThat(ledereReturned.size()).isEqualTo(1);
         assertThat(ledereReturned.get(0).navident()).isEqualTo(NAV_IDENT_LEDER);
@@ -184,7 +177,7 @@ public class RessursLedereResolverTest {
         when(ressursStateRepositoryMock.findByNavident(NAV_IDENT_LEDER)).thenReturn(Optional.ofNullable(lederRessursState));
 
 
-        List<RessursState> ledereReturned = ressursLedereResolver.lederForRecursiveUsingNewOrganisering(ORG_ENHET_1_ID, NAV_IDENT_RESSURS);
+        List<RessursState> ledereReturned = ressursLedereResolver.lederForRecursive(ORG_ENHET_1_ID, NAV_IDENT_RESSURS);
 
         assertThat(ledereReturned.size()).isEqualTo(1);
         assertThat(ledereReturned.get(0).navident()).isEqualTo(NAV_IDENT_LEDER);
@@ -194,12 +187,7 @@ public class RessursLedereResolverTest {
     @ParameterizedTest(name = "Bruke ny implementasjon: {0}")
     @MethodSource("use_new_implementation")
     @DisplayName("Finne leder for ressurs rekursivt")
-    void finn_leder_for_ressurs(boolean useNewImplementation) {
-        if (useNewImplementation) {
-            when(unleash.isEnabled(OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE)).thenReturn(true);
-        } else {
-            when(unleash.isEnabled(OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE)).thenReturn(false);
-        }
+    void finn_leder_for_ressurs() {
 
         OrgEnhet orgEnhetRessurs = new OrgEnhet(OrgEnhetState.builder()
             .id(ORG_ENHET_1_ID)
@@ -214,34 +202,15 @@ public class RessursLedereResolverTest {
             .agressoOrgNivaa(Optional.of(ORG_ENHET_2_ORG_NIV))
             .build());
         when(orgenhetServiceMock.getById(ORG_ENHET_1_ID)).thenReturn(Optional.of(orgEnhetRessurs));
-        if (useNewImplementation) {
-            when(orgenhetServiceMock.getById(ORG_ENHET_2_ID)).thenReturn(Optional.of(orgEnhetOver));
-        } else {
-            when(orgenhetServiceMock.getEnhetByAgressoIdNivaAndName(ORG_ENHET_2_AGRESSO_ID, ORG_ENHET_2_ORG_NIV, ORG_ENHET_2_NAVN))
-                .thenReturn(Optional.of(orgEnhetOver));
-        }
+        when(orgenhetServiceMock.getById(ORG_ENHET_2_ID)).thenReturn(Optional.of(orgEnhetOver));
 
-
-        if (useNewImplementation) {
-            OrganiseringState organisering = OrganiseringState.builder()
-                .id(ORG_ENHET_1_ID)
-                .navn(ORG_ENHET_1_NAVN)
-                .idOver(ORG_ENHET_2_ID)
-                .navnOver(ORG_ENHET_2_NAVN)
-                .build();
-            when(organiseringStateRepositoryMock.findActiveById(ORG_ENHET_1_ID)).thenReturn(Optional.of(organisering));
-        } else {
-            DvhOrganisering dvhOrganisering = DvhOrganisering.builder()
-                .agressoIdUnder(ORG_ENHET_1_AGRESSO_ID)
-                .navnUnder(ORG_ENHET_1_NAVN)
-                .orgNivUnder(ORG_ENHET_1_ORG_NIV)
-                .agressoIdOver(ORG_ENHET_2_AGRESSO_ID)
-                .navnOver(ORG_ENHET_2_NAVN)
-                .orgNivOver(ORG_ENHET_2_ORG_NIV)
-                .build();
-            when(dvhRepositoryMock.getOrganiseringer(ORG_ENHET_1_AGRESSO_ID, ORG_ENHET_1_ORG_NIV, ORG_ENHET_1_NAVN))
-                .thenReturn(List.of(dvhOrganisering));
-        }
+        OrganiseringState organisering = OrganiseringState.builder()
+            .id(ORG_ENHET_1_ID)
+            .navn(ORG_ENHET_1_NAVN)
+            .idOver(ORG_ENHET_2_ID)
+            .navnOver(ORG_ENHET_2_NAVN)
+            .build();
+        when(organiseringStateRepositoryMock.findActiveById(ORG_ENHET_1_ID)).thenReturn(Optional.of(organisering));
 
         DvhLeder dvhRessurs = DvhLeder.builder()
             .navIdent(NAV_IDENT_RESSURS)
