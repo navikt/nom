@@ -83,7 +83,7 @@ jobs:
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
-          RESOURCE: .nais/unleash/unlease-token.yaml
+          RESOURCE: .nais/unleash/unleash-token.yaml
           VAR: env=development
           VARS: ${{ inputs.unleash-vars-file-path }}
       - uses: nais/deploy/actions/deploy@v2
