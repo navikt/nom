@@ -41,7 +41,6 @@ spec:
         - host: unpkg.com
         - host: nom-remedy-integrasjon.dev-fss-pub.nais.io
         - host: static.hotjar.com
-        - host: teamorg-unleash-web.iap.nav.cloud.nais.io
     inbound:
       rules:
         - application: org-token-tool
@@ -100,5 +99,3 @@ spec:
       value: http://nom-paarorende.org.svc.cluster.local
     - name: PAARORENDE_API_SCOPE
       value: api://dev-gcp.org.nom-paarorende/.default
-  envFrom:
-    - secret: nom-ui2-unleash-api-token
