@@ -79,7 +79,10 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: .nais/unleash/unlease-token.yaml
           VAR: env=development
-          VARS: .nais/unleash/unleash-vars.yaml
+          VARS:
+            type: string
+            required: false
+            default: skip
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
