@@ -220,6 +220,9 @@ spec:
         - application: brev-administrasjon
           namespace: isa
           cluster: prod-gcp
+        - application: nom-paarorende
+          namespace: org
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
