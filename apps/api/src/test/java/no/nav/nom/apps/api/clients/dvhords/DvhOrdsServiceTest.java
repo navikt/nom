@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.clients.dvhords;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,5 +108,22 @@ class DvhOrdsServiceTest {
         assertEquals("ORGNIV3", orgenheter.get(3).getOrgNiv());
         assertEquals(LocalDate.of(2016,10,28), orgenheter.get(3).getGyldigFom());
         assertEquals(Optional.empty(), orgenheter.get(3).getGyldigTom());
+    }
+
+    @Test
+    void getTelefoner() {
+        var telefoner = dvhOrdsService.getTelefoner();
+        assertNotNull(telefoner);
+        assertEquals(5, telefoner.size());
+
+        assertEquals("S000001", telefoner.getFirst().getNavIdent());
+        assertEquals("4740000000", telefoner.getFirst().getNummer());
+        assertEquals(DvhTelefon.DvhTelefonType.TJENESTETELEFON, telefoner.getFirst().getType());
+        assertEquals("Bedrift Total A (50 GB)", telefoner.getFirst().getBeskrivelse());
+
+        assertEquals("S000002", telefoner.get(3).getNavIdent());
+        assertEquals("4740000003", telefoner.get(3).getNummer());
+        assertEquals(DvhTelefon.DvhTelefonType.KONTORTELEFON, telefoner.get(3).getType());
+        assertEquals("Bedrift Total B (50 GB)", telefoner.get(3).getBeskrivelse());
     }
 }

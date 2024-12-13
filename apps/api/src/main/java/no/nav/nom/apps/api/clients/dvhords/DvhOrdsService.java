@@ -6,6 +6,7 @@ import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
+import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetV2;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import org.springframework.stereotype.Service;
@@ -162,6 +163,13 @@ public class DvhOrdsService {
     }
 
     // Telefoner
+    public List<DvhTelefon> getTelefoner() {
+        return StreamSupport.stream(getTlfJson().get("items").spliterator(), false)
+            .filter(this::validateTlf)
+            .map(DvhTelefon::fromOrds)
+            .toList();
+    }
+
     public JsonNode getTlfJson() {
         return dvhOrdsClient.dvhGetJsonData(dvhOrdsProperties.tlfPath());
     }
@@ -210,5 +218,12 @@ public class DvhOrdsService {
     private String getAsText(JsonNode e, String field) {
         JsonNode jsonNode = e.get(field);
         return jsonNode == null ? "<null>" : jsonNode.asText();
+    }
+
+    private boolean validateTlf(JsonNode jsonNode) {
+        var isSecretNumber = !jsonNode.hasNonNull("issecretnumber") || (jsonNode.hasNonNull("issecretnumber") && !jsonNode.get("issecretnumber").asBoolean());
+        var userRef1 = jsonNode.get("userrefeerence1");
+
+        return isSecretNumber && (userRef1.asText().startsWith("PT-") || userRef1.asText().startsWith("PK-"));
     }
 }

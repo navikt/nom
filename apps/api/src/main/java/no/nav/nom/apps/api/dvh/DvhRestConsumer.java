@@ -9,8 +9,10 @@ import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
+import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
+import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetV2;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
@@ -290,7 +292,14 @@ public class DvhRestConsumer {
     public void loadTlfFromDvh() {
         log.info("Laster tlf fra dvh");
         try {
-            var tlfRader = dvhOldTdvService.getTdvTelefoner();
+            List<DvhTelefon> tlfRader;
+            if (unleash.isEnabled("nom.dvh.last_tlf_fra_ords")) {
+                tlfRader = dvhOrdsService.getTelefoner();
+            } else {
+                tlfRader = dvhOldTdvService.getTdvTelefoner();
+            }
+
+            getOrdsTelefonerAndCompare(tlfRader);
 
             log.info("Telefonnr lastet: Antall rader = " + tlfRader.size());
             dvhRepository.saveTlf(tlfRader);
@@ -298,6 +307,40 @@ public class DvhRestConsumer {
             log.error("Failure loading tlf data from DVH", e);
         }
     }
+
+    private void getOrdsTelefonerAndCompare(List<DvhTelefon> tdvTelefoner) {
+        try {
+            var ordsTelefoner = dvhOrdsService.getTelefoner();
+
+            boolean erLikt = true;
+            if (ordsTelefoner.size() != tdvTelefoner.size()) {
+                log.error("Antall telefoner fra TDV og ORDS er ulik. TDV: {}, ORDS: {}", tdvTelefoner.size(), ordsTelefoner.size());
+                erLikt = false;
+            }
+
+            var ordsMap = ordsTelefoner.stream().collect(Collectors.toMap(DvhTelefon::geUniqueKey, Function.identity()));
+            int idxSkip = tdvTelefoner.size()/20;
+            for (int i = 0; i < 20; i++) {
+                int idx = i * idxSkip;
+                var dvhTelefonTdv = tdvTelefoner.get(idx);
+                var dvhTelefonOrds = ordsMap.get(dvhTelefonTdv.geUniqueKey());
+                if (dvhTelefonOrds == null || !DvhTelefon.compare(dvhTelefonTdv, dvhTelefonOrds)) {
+                    log.error("Telefon fra TDV og ORDS er ulik. \n\tTDV: \n\t{}, \n\tORDS: \n\t{}"
+                        , dvhTelefonTdv
+                        , dvhTelefonOrds);
+                    erLikt = false;
+                }
+            }
+            if (erLikt) {
+                log.info("Last av telefoner fra ORDS (NOM_ORDS_TLF.json) er lik last fra TDV (NOM_TLF_v1)");
+            } else {
+                log.error("Last av telefoner fra ORDS (NOM_ORDS_TLF.json) er annerledes enn last fra TDV (NOM_TLF_v1)");
+            }
+        } catch (Exception e) {
+            log.error("Feilet i last av telefoner fra ORDS (NOM_ORDS_TLF.json)", e);
+        }
+    }
+
 
     public void loadLedereAndOrganiseringerFromDvh() {
         log.info("Laster ledere og Organisering fra dvh");

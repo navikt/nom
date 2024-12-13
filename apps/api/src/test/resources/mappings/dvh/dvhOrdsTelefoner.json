@@ -1,0 +1,98 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/dvh_nom/nom_ords_tlf.json"
+  },
+  "response": {
+    "status": 200,
+    "transformers": [
+      "response-template"
+    ],
+    "jsonBody": {
+      "items": [
+        {
+          "msisdn": "4740000000",
+          "navident": "S000001",
+          "userrefeerence1": "PT-S000001",
+          "typeid": "53175",
+          "typename": "Bedrift Total A (50 GB)",
+          "typeaccesstype": "MOBILE",
+          "status": "ACTIVE",
+          "issecretnumber": "false",
+          "validfromdate": "2020-10-04T22:00:00Z",
+          "lastetdato": "2024-01-17T11:00:25Z",
+          "res_mobil_tlf_kontroll": null
+        },
+        {
+          "msisdn": "4740000001",
+          "navident": "P000001",
+          "userrefeerence1": "PK-P000001",
+          "typeid": "53200",
+          "typename": "Bedrift Total B (50 GB)",
+          "typeaccesstype": "MOBILE",
+          "status": "ACTIVE",
+          "issecretnumber": "false",
+          "validfromdate": "2020-11-10T23:00:00Z",
+          "lastetdato": "2024-10-28T07:00:30Z",
+          "res_mobil_tlf_kontroll": null
+        },
+        {
+          "msisdn": "4740000002",
+          "navident": "O000001",
+          "userrefeerence1": "PT-O000001",
+          "typeid": "53175",
+          "typename": "Bedrift Total A (50 GB)",
+          "typeaccesstype": "MOBILE",
+          "status": "ACTIVE",
+          "issecretnumber": "false",
+          "validfromdate": "2021-01-31T23:00:00Z",
+          "lastetdato": "2024-01-17T11:00:25Z",
+          "res_mobil_tlf_kontroll": null
+        },
+        {
+          "msisdn": "4740000003",
+          "navident": "S000002",
+          "userrefeerence1": "PK-S000002",
+          "typeid": "53200",
+          "typename": "Bedrift Total B (50 GB)",
+          "typeaccesstype": "MOBILE",
+          "status": "ACTIVE",
+          "issecretnumber": "false",
+          "validfromdate": "2020-10-20T22:00:00Z",
+          "lastetdato": "2024-04-05T05:00:29Z",
+          "res_mobil_tlf_kontroll": null
+        },
+        {
+          "msisdn": "4740000004",
+          "navident": "H000001",
+          "userrefeerence1": "PT-H000001",
+          "typeid": "53175",
+          "typename": "Bedrift Total A (50 GB)",
+          "typeaccesstype": "MOBILE",
+          "status": "ACTIVE",
+          "issecretnumber": "false",
+          "validfromdate": "2021-04-25T22:00:00Z",
+          "lastetdato": "2024-01-17T11:00:25Z",
+          "res_mobil_tlf_kontroll": null
+        }
+      ],
+      "hasMore": false,
+      "limit": 0,
+      "offset": 0,
+      "count": 5,
+      "links": [
+        {
+          "rel": "self",
+          "href": "https://dvh.adeo.no/ords/dvh/dvh_nom/nom_ords_tlf.json?q=%7B%22rownum%22:%7B%22%24lte%22:5%7D%7D"
+        },
+        {
+          "rel": "describedby",
+          "href": "https://dvh.adeo.no/ords/dvh/metadata-catalog/dvh_nom/item"
+        }
+      ]
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
