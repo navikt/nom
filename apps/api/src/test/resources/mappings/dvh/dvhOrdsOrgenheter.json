@@ -1,0 +1,98 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/dvh_nom/nom_ords_hrorg_orgenhet.json"
+  },
+  "response": {
+    "status": 200,
+    "transformers": [
+      "response-template"
+    ],
+    "jsonBody": {
+      "items": [
+        {
+          "orgenhet_kode": "0319005",
+          "orgenhet_navn": "Søndre Nordstrand AAP",
+          "orgnode_niv": "ORGENHET",
+          "enhettype_kode": "31",
+          "enhettype_navn": "Lokal",
+          "orgenhet_status": "P",
+          "orgenhet_fra_dato": 201507,
+          "orgenhet_til_dato": 201702,
+          "lastet_dato": "2015-07-06T22:00:00Z",
+          "stilling_maks_gyldig_til_dato": "2099-12-30T23:00:00Z",
+          "leder_ressursnr": "147397"
+        },
+        {
+          "orgenhet_kode": "0319005",
+          "orgenhet_navn": "Søndre Nordstrand Fellestjenester",
+          "orgnode_niv": "ORGENHET",
+          "enhettype_kode": "31",
+          "enhettype_navn": "Lokal",
+          "orgenhet_status": "P",
+          "orgenhet_fra_dato": 201806,
+          "orgenhet_til_dato": 202109,
+          "lastet_dato": "2015-07-06T22:00:00Z",
+          "stilling_maks_gyldig_til_dato": "2099-12-30T23:00:00Z",
+          "leder_ressursnr": "147397"
+        },
+        {
+          "orgenhet_kode": "0319005",
+          "orgenhet_navn": "Søndre Nordstrand Stab og støtte",
+          "orgnode_niv": "ORGENHET",
+          "enhettype_kode": "31",
+          "enhettype_navn": "Lokal",
+          "orgenhet_status": "N",
+          "orgenhet_fra_dato": 202110,
+          "orgenhet_til_dato": 209912,
+          "lastet_dato": "2015-07-06T22:00:00Z",
+          "stilling_maks_gyldig_til_dato": "2099-12-30T23:00:00Z",
+          "leder_ressursnr": "147397"
+        },
+        {
+          "orgenhet_kode": "865200",
+          "orgenhet_navn": "IT applikasjonsplattformer",
+          "orgnode_niv": "ORGNIV3",
+          "enhettype_kode": null,
+          "enhettype_navn": null,
+          "orgenhet_status": "P",
+          "orgenhet_fra_dato": 0,
+          "orgenhet_til_dato": 209999,
+          "lastet_dato": "2016-10-27T22:00:00Z",
+          "stilling_maks_gyldig_til_dato": null,
+          "leder_ressursnr": "138132"
+        },
+        {
+          "orgenhet_kode": "865200",
+          "orgenhet_navn": "Applikasjonsplattformer",
+          "orgnode_niv": "ORGENHET",
+          "enhettype_kode": null,
+          "enhettype_navn": null,
+          "orgenhet_status": "P",
+          "orgenhet_fra_dato": 201610,
+          "orgenhet_til_dato": 201610,
+          "lastet_dato": "2016-10-27T22:00:00Z",
+          "stilling_maks_gyldig_til_dato": null,
+          "leder_ressursnr": null
+        }
+      ],
+      "hasMore": false,
+      "limit": 0,
+      "offset": 0,
+      "count": 5,
+      "links": [
+        {
+          "rel": "self",
+          "href": "https://dvh.adeo.no/ords/dvh/dvh_nom/nom_ords_hrorg_orgenhet.json?q=%7B%22rownum%22:%7B%22%24lte%22:5%7D%7D"
+        },
+        {
+          "rel": "describedby",
+          "href": "https://dvh.adeo.no/ords/dvh/metadata-catalog/dvh_nom/item"
+        }
+      ]
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

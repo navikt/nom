@@ -14,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -87,5 +88,24 @@ class DvhOrdsServiceTest {
         assertEquals("251900", organiseringer.get(1).getAgressoIdOver());
         assertEquals("Kontaktsenter Troms og Finnmark 3", organiseringer.get(1).getNavnUnder());
         assertEquals("Kontaktsenter Troms og Finnmark", organiseringer.get(1).getNavnOver());
+    }
+
+    @Test
+    void getOrgenheter() {
+        var orgenheter = dvhOrdsService.getOrgenheter();
+        assertNotNull(orgenheter);
+        assertEquals(5, orgenheter.size());
+
+        assertEquals("0319005", orgenheter.getFirst().getAgressoId());
+        assertEquals("Søndre Nordstrand AAP", orgenheter.getFirst().getNavn());
+        assertEquals("ORGENHET", orgenheter.getFirst().getOrgNiv());
+        assertEquals(LocalDate.of(2015,7, 1), orgenheter.getFirst().getGyldigFom());
+        assertEquals(Optional.of(LocalDate.of(2017,2,28)), orgenheter.getFirst().getGyldigTom());
+
+        assertEquals("865200", orgenheter.get(3).getAgressoId());
+        assertEquals("IT applikasjonsplattformer", orgenheter.get(3).getNavn());
+        assertEquals("ORGNIV3", orgenheter.get(3).getOrgNiv());
+        assertEquals(LocalDate.of(2016,10,28), orgenheter.get(3).getGyldigFom());
+        assertEquals(Optional.empty(), orgenheter.get(3).getGyldigTom());
     }
 }

@@ -6,6 +6,7 @@ import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
+import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetV2;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,12 @@ public class DvhOrdsService {
     }
 
     // Enheter
+    public List<DvhOrgenhetV2> getOrgenheter() {
+        return StreamSupport.stream(getOrgenheterJson().get("items").spliterator(), false)
+            .map(DvhOrgenhetV2::fromOrds)
+            .toList();
+    }
+
     public JsonNode getOrgenheterJson() {
         return dvhOrdsClient.dvhGetJsonData(dvhOrdsProperties.enhetPath());
     }

@@ -4,19 +4,24 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.libs.utils.common.util.DateValidator;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.function.Predicate.not;
 
 @Data
+@NoArgsConstructor
 public class DvhOrgenhetV2 implements IOrgenhet {
     private String agressoId;
     private String orgNiv;
@@ -142,5 +147,46 @@ public class DvhOrgenhetV2 implements IOrgenhet {
     @Override
     public Optional<String> getOverordnetOrgEnhetFid() {
         return Optional.empty();
+    }
+
+    public static DvhOrgenhetV2 fromOrds(JsonNode node) {
+        var enhet = new DvhOrgenhetV2();
+        enhet.setRawData(node);
+        enhet.setAgressoId(node.get("orgenhet_kode").asText());
+        enhet.setOrgNiv(node.get("orgnode_niv").asText());
+        enhet.navn = node.get("orgenhet_navn").asText();
+        enhet.agressoOrgenhetType = node.get("enhettype_navn").asText(null);
+        enhet.agressoGyldigFom = node.get("orgenhet_fra_dato").asText();
+        val tempGyldigTom = node.get("orgenhet_til_dato").asText();
+        enhet.agressoGyldigTom = tempGyldigTom.equals("209999") ? "209912" : tempGyldigTom;
+        enhet.orgenhetStatus = node.get("orgenhet_status").asText().toUpperCase();
+        enhet.stillingMaksDato = node.hasNonNull("stilling_maks_gyldig_til_dato") ?
+            localDateOf(node.get("stilling_maks_gyldig_til_dato").asText()) : null;
+        enhet.dvhLastetDato = localDateOf(node.get("lastet_dato").asText());
+        enhet.lederRessursNr = node.hasNonNull("leder_ressursnr") ? node.get("leder_ressursnr").asText() : null;
+
+        // Hvis stillingMaksDato er før Agresso sin gyldigFom dato, er den nok knyttet
+        // til en tidligere enhet med samme agressoId.
+        if (enhet.getStillingMaksDato() != null && enhet.getGyldigFom().isAfter(enhet.getStillingMaksDato())) {
+            enhet.setStillingMaksDato(null);
+        }
+        return enhet;
+    }
+
+    public static LocalDate localDateOf(String date) {
+        return LocalDate.ofInstant(Instant.parse(date), ZoneId.systemDefault());
+    }
+
+    public static boolean compare(DvhOrgenhetV2 tdvOrgenhet, DvhOrgenhetV2 ordsOrgenhet) {
+        return Objects.equals(tdvOrgenhet.getAgressoId(),ordsOrgenhet.getAgressoId()) &&
+            Objects.equals(tdvOrgenhet.getOrgNiv(),ordsOrgenhet.getOrgNiv()) &&
+            Objects.equals(tdvOrgenhet.getNavn(),ordsOrgenhet.getNavn()) &&
+            Objects.equals(tdvOrgenhet.getAgressoOrgenhetType(),ordsOrgenhet.getAgressoOrgenhetType()) &&
+            Objects.equals(tdvOrgenhet.getAgressoGyldigFom(),ordsOrgenhet.getAgressoGyldigFom()) &&
+            Objects.equals(tdvOrgenhet.getAgressoGyldigTom(),ordsOrgenhet.getAgressoGyldigTom()) &&
+            Objects.equals(tdvOrgenhet.getOrgenhetStatus(),ordsOrgenhet.getOrgenhetStatus()) &&
+            Objects.equals(tdvOrgenhet.getStillingMaksDato(),ordsOrgenhet.getStillingMaksDato()) &&
+            Objects.equals(tdvOrgenhet.getDvhLastetDato(),ordsOrgenhet.getDvhLastetDato()) &&
+            Objects.equals(tdvOrgenhet.getLederRessursNr(),ordsOrgenhet.getLederRessursNr());
     }
 }
