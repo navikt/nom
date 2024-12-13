@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.common.speiling;
 
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
@@ -19,17 +20,20 @@ public class SpeilingService {
 
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final RessursStateRepository ressursStateRepository;
+    private final NomMastered nomMastered;
     private final LeaderElection leaderElection;
     private final RessursCommandService ressursCommandService;
 
     public SpeilingService(
         OrgtilknytningStateRepository orgtilknytningStateRepository,
         RessursStateRepository ressursStateRepository,
+        NomMastered nomMastered,
         LeaderElection leaderElection,
         RessursCommandService ressursCommandService
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.ressursStateRepository = ressursStateRepository;
+        this.nomMastered = nomMastered;
         this.leaderElection = leaderElection;
         this.ressursCommandService = ressursCommandService;
     }
@@ -47,6 +51,7 @@ public class SpeilingService {
             .filter(OrgtilknytningState::erDagligOppfolging)
             .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
             .filter(orgtilknytningState -> orgtilknytningState.sektor() != null)
+            .filter(orgtilknytningState -> nomMastered.isMastered(orgtilknytningState.navident()))
             .toList();
 
         InputMetadata inputMetadata = InputMetadata.builder()
