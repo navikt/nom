@@ -17,6 +17,7 @@ public record KontaktinfoDTO(
     String etternavn,
     String relasjon,
     String telefon,
+    Integer prioritet,
     String gateadresse,
     String postnr,
     String poststed,
@@ -32,6 +33,7 @@ public record KontaktinfoDTO(
             .etternavn(kontaktinfo.getEtternavn())
             .relasjon(kontaktinfo.getRelasjon().name())
             .telefon(kontaktinfo.getTelefon())
+            .prioritet(kontaktinfo.getPrioritet())
             .gateadresse(adresse.getAdresse())
             .postnr(adresse.getPostnr())
             .poststed(adresse.getPoststed())
@@ -52,6 +54,7 @@ public record KontaktinfoDTO(
             .etternavn(kontaktInfoDTO.etternavn)
             .relasjon(Relasjon.valueOf(kontaktInfoDTO.relasjon))
             .telefon(kontaktInfoDTO.telefon)
+            .prioritet(kontaktInfoDTO.prioritet)
             .adresse(
                 Adresse.builder()
                     .adresse(kontaktInfoDTO.gateadresse())

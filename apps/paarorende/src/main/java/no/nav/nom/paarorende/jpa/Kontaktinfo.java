@@ -42,7 +42,7 @@ public class Kontaktinfo extends AuditingMetadata {
     @Enumerated(EnumType.STRING)
     private Relasjon relasjon;
     private String telefon;
-
+    private Integer prioritet;
     @Embedded
     private Adresse adresse;
 
