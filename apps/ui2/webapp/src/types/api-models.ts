@@ -304,6 +304,7 @@ export enum TelefonType {
 
 export enum Tilknytningtype {
   ARBEIDSTRENING = "ARBEIDSTRENING",
+  ANNET = "ANNET",
   EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER",
   FAST = "FAST",
   INGEN = "INGEN",
@@ -311,6 +312,7 @@ export enum Tilknytningtype {
   LAERLING = "LAERLING",
   MIDLERTIDIG = "MIDLERTIDIG",
   PENSJONIST = "PENSJONIST",
+  STUDENT = "STUDENT",
 }
 
 export interface UpdateFysiskeBrukerstederRequest {

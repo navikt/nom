@@ -30,7 +30,9 @@ export const TilknytningtypeNameMapping = {
   [Tilknytningtype.KONSULENT]: "Konsulent",
   [Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER]: "Ekstern samarbeidspartner",
   [Tilknytningtype.ARBEIDSTRENING]: "Arbeidstrening",
-  [Tilknytningtype.INGEN]: "Annet",
+  [Tilknytningtype.STUDENT]: "Student",
+  [Tilknytningtype.ANNET]: "Annet",
+  [Tilknytningtype.INGEN]: "Ingen",
 };
 
 export const tilknytningstyperStatlige = [
@@ -44,7 +46,8 @@ export const tilknytningstyperEksterne = [
   Tilknytningtype.KONSULENT,
   Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER,
   Tilknytningtype.ARBEIDSTRENING,
-  Tilknytningtype.INGEN,
+  Tilknytningtype.STUDENT,
+  Tilknytningtype.ANNET,
 ];
 
 export function SektorStep() {
