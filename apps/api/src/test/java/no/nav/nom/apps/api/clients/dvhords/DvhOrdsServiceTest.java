@@ -95,7 +95,7 @@ class DvhOrdsServiceTest {
     @Test
     void getOrgenheter() {
         TimeZone.setDefault(TimeZone.getTimeZone("Europe/Oslo")); // Github test/build har ikke samme timezone som satt i Dockerfile
-        
+
         var orgenheter = dvhOrdsService.getOrgenheter();
         assertNotNull(orgenheter);
         assertEquals(5, orgenheter.size());
@@ -128,5 +128,30 @@ class DvhOrdsServiceTest {
         assertEquals("4740000003", telefoner.get(3).getNummer());
         assertEquals(DvhTelefon.DvhTelefonType.KONTORTELEFON, telefoner.get(3).getType());
         assertEquals("Bedrift Total B (50 GB)", telefoner.get(3).getBeskrivelse());
+    }
+
+    @Test
+    void getRessursStillinger() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Oslo")); // Github test/build har ikke samme timezone som satt i Dockerfile
+
+        var ressursStillinger = dvhOrdsService.getStatligeTilknytninger();
+        assertNotNull(ressursStillinger);
+        assertEquals(5, ressursStillinger.size());
+
+        assertEquals("A100036", ressursStillinger.getFirst().getNavident().get());
+        assertEquals("0499000", ressursStillinger.getFirst().getStillingAgressoId().get());
+        assertEquals("Innlandet Arbeidslivssenter", ressursStillinger.getFirst().getStillingOrgenhetNavn());
+        assertEquals(LocalDate.of(2021,7,1), ressursStillinger.getFirst().getStillingDatoFom());
+        assertEquals(LocalDate.of(2021,12,31), ressursStillinger.getFirst().getStillingDatoTom());
+        assertEquals(LocalDate.of(2006,4,4), ressursStillinger.getFirst().getRessursDvhDatoFom());
+        assertEquals(LocalDate.of(2099,12,31), ressursStillinger.getFirst().getRessursDvhDatoTom());
+
+        assertEquals("A100180", ressursStillinger.get(4).getNavident().get());
+        assertEquals("0521000", ressursStillinger.get(4).getStillingAgressoId().get());
+        assertEquals("Øyer", ressursStillinger.get(4).getStillingOrgenhetNavn());
+        assertEquals(LocalDate.of(2024,6,1), ressursStillinger.get(4).getStillingDatoFom());
+        assertEquals(LocalDate.of(2024,6,30), ressursStillinger.get(4).getStillingDatoTom());
+        assertEquals(LocalDate.of(1980,5,19), ressursStillinger.get(4).getRessursDvhDatoFom());
+        assertEquals(LocalDate.of(2099,12,31), ressursStillinger.get(4).getRessursDvhDatoTom());
     }
 }

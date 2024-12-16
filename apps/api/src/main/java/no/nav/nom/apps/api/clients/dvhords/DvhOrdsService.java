@@ -6,6 +6,7 @@ import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
+import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetV2;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
@@ -115,6 +116,22 @@ public class DvhOrdsService {
     }
 
     // RessursStillinger/Statlige ressurser tilknytninger
+    public List<DvhRessursStilling> getStatligeTilknytningerPaginated(int offset, int limit) {
+        return StreamSupport.stream(getStatligeTilknytningerJson().get("items").spliterator(), false)
+            .map(DvhRessursStilling::fromOrdsRessursStilling)
+            .toList();
+    }
+
+    public List<DvhRessursStilling> getStatligeTilknytninger() {
+        return StreamSupport.stream(getStatligeTilknytningerJson().get("items").spliterator(), false)
+            .map(DvhRessursStilling::fromOrdsRessursStilling)
+            .toList();
+    }
+
+    public JsonNode getStatligeTilknytningerJsonPaginated(int offset, int limit) {
+        return dvhOrdsClient.dvhGetJsonDataOrdsPaginated(dvhOrdsProperties.ressursStillingerPath(), offset, limit);
+    }
+
     public JsonNode getStatligeTilknytningerJson() {
         return dvhOrdsClient.dvhGetJsonData(dvhOrdsProperties.ressursStillingerPath());
     }

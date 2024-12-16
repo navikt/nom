@@ -8,4 +8,6 @@ public interface DvhOrdsClient {
     JsonNode dvhGetJsonDataLimitRows(String urlPath, int numRowsToFetch);
 
     JsonNode dvhGetJsonDataOrdsFilter(String urlPath, String ordsFilter);
+
+    JsonNode dvhGetJsonDataOrdsPaginated(String urlPath, int offset, int limit);
 }

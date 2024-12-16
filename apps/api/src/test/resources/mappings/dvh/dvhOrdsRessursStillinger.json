@@ -1,0 +1,163 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/dvh_nom/nom_ords_ressurs_stillinger.json"
+  },
+  "response": {
+    "status": 200,
+    "transformers": [
+      "response-template"
+    ],
+    "jsonBody": {
+      "items": [
+        {
+          "nav_id": "A100036",
+          "resource_id": "100036",
+          "first_name": "Anja",
+          "surname": "Amundsen",
+          "fra_dato": "2021-06-30T22:00:00Z",
+          "til_dato": "2021-12-30T23:00:00Z",
+          "post_date_to": "2022-02-27T23:00:00Z",
+          "ansettelsestype_besk": "Fast",
+          "parttime_pct": 75,
+          "orgenhet": "0499000",
+          "orgenhet_besk": "Innlandet Arbeidslivssenter",
+          "leder_paa_stilling": "139435",
+          "perm_kode": "ARB(EGEN)",
+          "last_update": "2022-03-31T11:12:04Z",
+          "orgenhet_paa_ressurs": "0499002",
+          "orgenhet_paa_ressurs_niva": "ORGENHET",
+          "remedy_enhet_id": "0491",
+          "stilling_orgenhet_paa_ressurs": "0499000",
+          "agresso_date_from": "2006-04-17T22:00:00Z",
+          "agresso_date_to": "2099-12-30T23:00:00Z",
+          "date_from": "2006-04-04T04:37:10Z",
+          "date_to": "2099-12-30T23:00:00Z",
+          "leder_resource_id": "168962",
+          "sykemleder_resource_id": "168962"
+        },
+        {
+          "nav_id": "A100036",
+          "resource_id": "100036",
+          "first_name": "Navn 1",
+          "surname": "ENavn 1",
+          "fra_dato": "2021-06-30T22:00:00Z",
+          "til_dato": "2021-12-30T23:00:00Z",
+          "post_date_to": "2022-02-27T23:00:00Z",
+          "ansettelsestype_besk": "Midlertidig karakter § 9a",
+          "parttime_pct": 25,
+          "orgenhet": "0499000",
+          "orgenhet_besk": "Innlandet Arbeidslivssenter",
+          "leder_paa_stilling": "139435",
+          "perm_kode": " ",
+          "last_update": "2022-03-31T11:12:05Z",
+          "orgenhet_paa_ressurs": "0499002",
+          "orgenhet_paa_ressurs_niva": "ORGENHET",
+          "remedy_enhet_id": "0491",
+          "stilling_orgenhet_paa_ressurs": "0499000",
+          "agresso_date_from": "2006-04-17T22:00:00Z",
+          "agresso_date_to": "2099-12-30T23:00:00Z",
+          "date_from": "2006-04-04T04:37:10Z",
+          "date_to": "2099-12-30T23:00:00Z",
+          "leder_resource_id": "168962",
+          "sykemleder_resource_id": "168962"
+        },
+        {
+          "nav_id": "A100036",
+          "resource_id": "100036",
+          "first_name": "Navn 1",
+          "surname": "ENavn 1",
+          "fra_dato": "2021-12-31T23:00:00Z",
+          "til_dato": "2022-02-27T23:00:00Z",
+          "post_date_to": "2022-02-27T23:00:00Z",
+          "ansettelsestype_besk": "Midlertidig karakter § 9a",
+          "parttime_pct": 25,
+          "orgenhet": "0499000",
+          "orgenhet_besk": "Innlandet Arbeidslivssenter",
+          "leder_paa_stilling": "139435",
+          "perm_kode": " ",
+          "last_update": "2022-03-31T11:12:05Z",
+          "orgenhet_paa_ressurs": "0499002",
+          "orgenhet_paa_ressurs_niva": "ORGENHET",
+          "remedy_enhet_id": "0491",
+          "stilling_orgenhet_paa_ressurs": "0499000",
+          "agresso_date_from": "2006-04-17T22:00:00Z",
+          "agresso_date_to": "2099-12-30T23:00:00Z",
+          "date_from": "2006-04-04T04:37:10Z",
+          "date_to": "2099-12-30T23:00:00Z",
+          "leder_resource_id": "168962",
+          "sykemleder_resource_id": "168962"
+        },
+        {
+          "nav_id": "A100036",
+          "resource_id": "100036",
+          "first_name": "Navn 1",
+          "surname": "ENavn 1",
+          "fra_dato": "2021-12-31T23:00:00Z",
+          "til_dato": "2022-02-27T23:00:00Z",
+          "post_date_to": "2022-02-27T23:00:00Z",
+          "ansettelsestype_besk": "Fast",
+          "parttime_pct": 75,
+          "orgenhet": "0499000",
+          "orgenhet_besk": "Innlandet Arbeidslivssenter",
+          "leder_paa_stilling": "139435",
+          "perm_kode": "ARB(EGEN)",
+          "last_update": "2022-03-31T11:12:04Z",
+          "orgenhet_paa_ressurs": "0499002",
+          "orgenhet_paa_ressurs_niva": "ORGENHET",
+          "remedy_enhet_id": "0491",
+          "stilling_orgenhet_paa_ressurs": "0499000",
+          "agresso_date_from": "2006-04-17T22:00:00Z",
+          "agresso_date_to": "2099-12-30T23:00:00Z",
+          "date_from": "2006-04-04T04:37:10Z",
+          "date_to": "2099-12-30T23:00:00Z",
+          "leder_resource_id": "168962",
+          "sykemleder_resource_id": "168962"
+        },
+        {
+          "nav_id": "A100180",
+          "resource_id": "100180",
+          "first_name": "Navn 2",
+          "surname": "ENavn 2",
+          "fra_dato": "2024-05-31T22:00:00Z",
+          "til_dato": "2024-06-29T22:00:00Z",
+          "post_date_to": "2024-07-30T22:00:00Z",
+          "ansettelsestype_besk": "Fast",
+          "parttime_pct": 100,
+          "orgenhet": "0521000",
+          "orgenhet_besk": "Øyer",
+          "leder_paa_stilling": "113081",
+          "perm_kode": " ",
+          "last_update": "2024-07-15T06:07:29Z",
+          "orgenhet_paa_ressurs": "0521000",
+          "orgenhet_paa_ressurs_niva": "ORGENHET",
+          "remedy_enhet_id": "0521",
+          "stilling_orgenhet_paa_ressurs": "0521000",
+          "agresso_date_from": "1980-05-18T22:00:00Z",
+          "agresso_date_to": "2099-12-30T23:00:00Z",
+          "date_from": "1980-05-18T22:00:00Z",
+          "date_to": "2099-12-30T23:00:00Z",
+          "leder_resource_id": "113081",
+          "sykemleder_resource_id": "113081"
+        }
+      ],
+      "hasMore": false,
+      "limit": 0,
+      "offset": 0,
+      "count": 5,
+      "links": [
+        {
+          "rel": "self",
+          "href": "https://dvh.adeo.no/ords/dvh/dvh_nom/nom_ords_ressurs_stillinger.json?q=%7B%22rownum%22:%7B%22%24lte%22:5%7D%7D"
+        },
+        {
+          "rel": "describedby",
+          "href": "https://dvh.adeo.no/ords/dvh/metadata-catalog/dvh_nom/item"
+        }
+      ]
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

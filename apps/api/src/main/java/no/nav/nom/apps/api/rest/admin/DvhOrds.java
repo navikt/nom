@@ -95,6 +95,20 @@ public class DvhOrds {
     }
 
     @Operation(
+        description = "Hent statlige ressurser tilknytninger - paginert",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/statligeRessurserTilknytningerPaginated", produces="application/json")
+    public String statligeRessurserTilknytningerPaginated(@RequestParam(defaultValue ="0") int offset, @RequestParam(defaultValue ="100000") int limit) {
+        return dvhOrdsService.getStatligeTilknytningerJsonPaginated(offset, limit).toString();
+    }
+
+    @Operation(
             description = "Hent kommunale ressurser tilknytninger",
             security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )

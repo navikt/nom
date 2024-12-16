@@ -72,6 +72,22 @@ public class DvhOrdsClientImpl implements DvhOrdsClient {
             .block();
     }
 
+    @Override
+    public JsonNode dvhGetJsonDataOrdsPaginated(String urlPath, int offset, int limit) {
+        return webClient
+            .get()
+            .uri(uriBuilder -> uriBuilder
+                .path(urlPath)
+                .queryParam("offset", UriUtils.encodeQueryParam(Integer.toString(offset), StandardCharsets.UTF_8))
+                .queryParam("limit", UriUtils.encodeQueryParam(Integer.toString(limit), StandardCharsets.UTF_8))
+                .build()
+            )
+            .retrieve()
+            .bodyToMono(JsonNode.class)
+            .block();
+    }
+
+
     private ExchangeFilterFunction logRequest() {
         return (clientRequest, next) -> {
             log.info("Request: {} {}", clientRequest.method(), clientRequest.url());

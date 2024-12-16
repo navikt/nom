@@ -4,8 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
+import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetV2;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Objects;
 import java.util.Optional;
 
 @Value
@@ -79,17 +83,63 @@ public class DvhRessursStilling {
         ressursDvhDatoTom = LocalDate.parse(json.get("DATE_TO").asText());
     }
 
-    private Optional<String> getNullableOrErrorStringNode(JsonNode json, String field_name) {
+    private static Optional<String> getNullableOrErrorStringNode(JsonNode json, String field_name) {
         JsonNode node = json.get(field_name);
         return (node.isNull() || node.asText().startsWith("-")) ?
             Optional.empty() :
             Optional.of(node.asText());
     }
 
-    private Optional<LocalDate> getNullableDateNode(JsonNode json, String field_name) {
+    private static Optional<LocalDate> getNullableDateNode(JsonNode json, String field_name) {
         JsonNode node = json.get(field_name);
         return (node.isNull() || node.asText().startsWith("-")) ?
             Optional.empty() :
             Optional.of(LocalDate.parse(node.asText()));
+    }
+
+    public static DvhRessursStilling fromOrdsRessursStilling(JsonNode json) {
+        var navident = getNullableOrErrorStringNode(json, "nav_id");
+
+        var dvhRessursStillingBuilder = DvhRessursStilling.builder()
+            .payload(json.toPrettyString())
+            .navident(navident);
+
+        if (!navident.isEmpty()) {
+            dvhRessursStillingBuilder
+                .stillingDatoFom(localDateOf(json.get("fra_dato").asText()))
+                .stillingDatoTom(localDateOf(json.get("til_dato").asText()))
+                .stillingAgressoId(getNullableOrErrorStringNode(json, "orgenhet"))
+                .stillingOrgenhetNavn(json.get("orgenhet_besk").asText())
+                .ressursAgressoId(getNullableOrErrorStringNode(json, "orgenhet_paa_ressurs"))
+                .ressursOrgenhetNiv(getNullableOrErrorStringNode(json, "orgenhet_paa_ressurs_niva"))
+                .ressursRemedyEnhetId(getNullableOrErrorStringNode(json, "remedy_enhet_id"))
+                .stillingRessursAgressoId(getNullableOrErrorStringNode(json, "stilling_orgenhet_paa_ressurs"))
+                .ressursAgressoDatoFom(localDateOf(json.get("agresso_date_from").asText()))
+                .ressursAgressoDatoTom(localDateOf(json.get("agresso_date_to").asText()))
+                .ressursDvhDatoFom(localDateOf(json.get("date_from").asText()))
+                .ressursDvhDatoTom(localDateOf(json.get("date_to").asText()));
+        }
+
+        return dvhRessursStillingBuilder.build();
+    }
+
+    public static LocalDate localDateOf(String date) {
+        return LocalDate.ofInstant(Instant.parse(date), ZoneId.systemDefault());
+    }
+
+    public static boolean compare(DvhRessursStilling tdvDvhRessursStilling, DvhRessursStilling ordsDvhRessursStilling) {
+        return Objects.equals(tdvDvhRessursStilling.getNavident(), ordsDvhRessursStilling.getNavident()) &&
+            Objects.equals(tdvDvhRessursStilling.getStillingDatoFom(), ordsDvhRessursStilling.getStillingDatoFom()) &&
+            Objects.equals(tdvDvhRessursStilling.getStillingDatoTom(), ordsDvhRessursStilling.getStillingDatoTom()) &&
+            Objects.equals(tdvDvhRessursStilling.getStillingAgressoId(), ordsDvhRessursStilling.getStillingAgressoId()) &&
+            Objects.equals(tdvDvhRessursStilling.getStillingOrgenhetNavn(), ordsDvhRessursStilling.getStillingOrgenhetNavn()) &&
+            Objects.equals(tdvDvhRessursStilling.getRessursAgressoId(), ordsDvhRessursStilling.getRessursAgressoId()) &&
+            Objects.equals(tdvDvhRessursStilling.getRessursOrgenhetNiv(), ordsDvhRessursStilling.getRessursOrgenhetNiv()) &&
+            Objects.equals(tdvDvhRessursStilling.getRessursRemedyEnhetId(), ordsDvhRessursStilling.getRessursRemedyEnhetId()) &&
+            Objects.equals(tdvDvhRessursStilling.getStillingRessursAgressoId(), ordsDvhRessursStilling.getStillingRessursAgressoId()) &&
+            Objects.equals(tdvDvhRessursStilling.getRessursAgressoDatoFom(), ordsDvhRessursStilling.getRessursAgressoDatoFom()) &&
+            Objects.equals(tdvDvhRessursStilling.getRessursAgressoDatoTom(), ordsDvhRessursStilling.getRessursAgressoDatoTom()) &&
+            Objects.equals(tdvDvhRessursStilling.getRessursDvhDatoFom(), ordsDvhRessursStilling.getRessursDvhDatoFom()) &&
+            Objects.equals(tdvDvhRessursStilling.getRessursDvhDatoTom(), ordsDvhRessursStilling.getRessursDvhDatoTom());
     }
 }
