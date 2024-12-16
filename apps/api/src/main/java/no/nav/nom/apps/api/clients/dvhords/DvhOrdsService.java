@@ -116,12 +116,6 @@ public class DvhOrdsService {
     }
 
     // RessursStillinger/Statlige ressurser tilknytninger
-    public List<DvhRessursStilling> getStatligeTilknytningerPaginated(int offset, int limit) {
-        return StreamSupport.stream(getStatligeTilknytningerJson().get("items").spliterator(), false)
-            .map(DvhRessursStilling::fromOrdsRessursStilling)
-            .toList();
-    }
-
     public List<DvhRessursStilling> getStatligeTilknytninger() {
         return StreamSupport.stream(getStatligeTilknytningerJson().get("items").spliterator(), false)
             .map(DvhRessursStilling::fromOrdsRessursStilling)
@@ -130,6 +124,10 @@ public class DvhOrdsService {
 
     public JsonNode getStatligeTilknytningerJsonPaginated(int offset, int limit) {
         return dvhOrdsClient.dvhGetJsonDataOrdsPaginated(dvhOrdsProperties.ressursStillingerPath(), offset, limit);
+    }
+
+    public JsonNode getStatligeTilknytningerJsonRowsBetween(int from, int to) {
+        return dvhOrdsClient.dvhGetJsonDataBetweenRowNums(dvhOrdsProperties.ressursStillingerPath(), from, to);
     }
 
     public JsonNode getStatligeTilknytningerJson() {
@@ -148,18 +146,27 @@ public class DvhOrdsService {
     }
 
     // Kommunale ressurser tilknytninger
-    public JsonNode getKommunaleTilknytningerJson() {
+    public List<DvhRessurs> getKommunaleRessurser(List<String> aktiveKommunaleNavidenter) {
+        return StreamSupport.stream(getKommunaleRessurserJson().get("items").spliterator(), true)
+            .map(DvhRessurs::fromOrdsKommunalRessurs)
+            .distinct()
+            .filter(r -> aktiveKommunaleNavidenter.contains(r.getNavIdent()))
+            .toList();
+    }
+
+
+    public JsonNode getKommunaleRessurserJson() {
         return dvhOrdsClient.dvhGetJsonData(dvhOrdsProperties.kommunaleRessurserPath());
     }
 
-    public JsonNode getKommunaleTilknytningerJson(int numRowsToFetch) {
+    public JsonNode getKommunaleRessurserJson(int numRowsToFetch) {
         if (numRowsToFetch < 1) {
-            return getKommunaleTilknytningerJson();
+            return getKommunaleRessurserJson();
         }
         return dvhOrdsClient.dvhGetJsonDataLimitRows(dvhOrdsProperties.kommunaleRessurserPath(), numRowsToFetch);
     }
 
-    public JsonNode getKommunaleTilknytningerJson(String ordsFilter) {
+    public JsonNode getKommunaleRessurserJson(String ordsFilter) {
         return dvhOrdsClient.dvhGetJsonDataOrdsFilter(dvhOrdsProperties.kommunaleRessurserPath(), ordsFilter);
     }
 

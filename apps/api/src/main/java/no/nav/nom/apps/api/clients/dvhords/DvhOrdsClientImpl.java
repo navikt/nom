@@ -59,6 +59,12 @@ public class DvhOrdsClientImpl implements DvhOrdsClient {
     }
 
     @Override
+    public JsonNode dvhGetJsonDataBetweenRowNums(String urlPath, int from, int to) {
+        String filter = "{\"rownum\":{\"$between\":[" + from + "," + to + "]}}";
+        return dvhGetJsonDataOrdsFilter(urlPath, filter);
+    }
+
+    @Override
     public JsonNode dvhGetJsonDataOrdsFilter(String urlPath, String ordsFilter) {
         return webClient
             .get()

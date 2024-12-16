@@ -23,7 +23,6 @@ public class DvhOrdsClientLocalImpl implements DvhOrdsClient {
     private static final int MAX_IN_MEMORY_MB = 300;
     private final WebClient webClient;
 
-
     public DvhOrdsClientLocalImpl(OAuth2AuthorizedClientManager authorizedClientManager, AppProperties appProperties) {
         dvhOrdsProperties = appProperties.clients().dvhOrds();
 
@@ -43,6 +42,7 @@ public class DvhOrdsClientLocalImpl implements DvhOrdsClient {
             .build();
     }
 
+    @Override
     public JsonNode dvhGetJsonData(String urlPath) {
         return webClient
             .get()
@@ -52,6 +52,7 @@ public class DvhOrdsClientLocalImpl implements DvhOrdsClient {
             .block();
     }
 
+    @Override
     public JsonNode dvhGetJsonDataLimitRows(String urlPath, int numRowsToFetch) {
         return webClient
             .get()
@@ -65,6 +66,7 @@ public class DvhOrdsClientLocalImpl implements DvhOrdsClient {
             .block();
     }
 
+    @Override
     public JsonNode dvhGetJsonDataOrdsFilter(String urlPath, String ordsFilter) {
         return webClient
             .get()
@@ -79,11 +81,26 @@ public class DvhOrdsClientLocalImpl implements DvhOrdsClient {
     }
 
     @Override
+    public JsonNode dvhGetJsonDataBetweenRowNums(String urlPath, int from, int to) {
+        return webClient
+            .get()
+            .uri(uriBuilder -> uriBuilder
+                .path(urlPath.replace("?numRows=0", "RowsBetween"))
+                .queryParam("from", Integer.toString(from))
+                .queryParam("to", Integer.toString(to))
+                .build()
+            )
+            .retrieve()
+            .bodyToMono(JsonNode.class)
+            .block();
+    }
+
+    @Override
     public JsonNode dvhGetJsonDataOrdsPaginated(String urlPath, int offset, int limit) {
         return webClient
             .get()
             .uri(uriBuilder -> uriBuilder
-                .path(urlPath)
+                .path(urlPath.replace("?numRows=0", "Paginated"))
                 .queryParam("offset", UriUtils.encodeQueryParam(Integer.toString(offset), StandardCharsets.UTF_8))
                 .queryParam("limit", UriUtils.encodeQueryParam(Integer.toString(limit), StandardCharsets.UTF_8))
                 .build()

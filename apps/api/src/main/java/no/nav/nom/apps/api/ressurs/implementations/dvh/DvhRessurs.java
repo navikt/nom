@@ -119,6 +119,30 @@ public class DvhRessurs {
         // orgenhetPaaRessursNiva = null;
     }
 
+    public static DvhRessurs fromOrdsKommunalRessurs(JsonNode ordsKommunalRessurs) {
+        return DvhRessurs.builder()
+            .navIdent(ordsKommunalRessurs.get("navid").asText())
+            .personIdent(ordsKommunalRessurs.get("fnr ").asText())
+            .fornavn(ordsKommunalRessurs.get("navn ").asText())
+            .etternavn(ordsKommunalRessurs.get("etternavn ").asText())
+            .remedyAktiv(ordsKommunalRessurs.hasNonNull("aktiv") && ordsKommunalRessurs.get("aktiv").asText().equals("JA"))
+            .remedyAnsattType(ordsKommunalRessurs.get("ansatt_type").asText())
+            .rawData(ordsKommunalRessurs)
+            .ansattRessursKode(ordsKommunalRessurs.get("type").asText())
+            .remedyStartDato(parseNullableDateFromJson(ordsKommunalRessurs, "start_dato"))
+            .remedySluttdato(parseNullableDateFromJson(ordsKommunalRessurs, "slutt_dato"))
+            .agressoStartDato(parseNullableDateFromJson(ordsKommunalRessurs, "date_from"))
+            .agressoSluttdato(parseNullableDateFromJson(ordsKommunalRessurs, "date_to"))
+            .remedyPermisjon(ordsKommunalRessurs.get("permisjon").asText("NEI").equals("JA"))
+            .identType(ordsKommunalRessurs.get("identtype").asText())
+            .epost(ordsKommunalRessurs.get("epost ").asText())
+            .fysiskBrukersted(parseNullableFromJson(ordsKommunalRessurs, "fysisk_brukersted"))
+            .orgenhetPaaRessurs(parseNullableFromJson(ordsKommunalRessurs, "orgenhet_paa_ressurs"))
+            .orgenhetPaaRessursBeskrivelse(parseNullableFromJson(ordsKommunalRessurs, "orgenhet_paa_ressurs_beskrivelse"))
+            .orgenhetPaaRessursNiva(parseNullableFromJson(ordsKommunalRessurs, "orgenhet_paa_ressurs_niva"))
+            .build();
+    }
+
     public enum RemedyRessursType {
         EKSTERN("Eksternt"),
         STATLIG("NAV Statlig"),

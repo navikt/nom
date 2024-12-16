@@ -1,7 +1,9 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
@@ -20,6 +22,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
@@ -42,6 +46,8 @@ public class KommunaleRessurserLoader {
     private RessursStillingStrukturerer ressursStillingStrukturerer;
     private ShadowOrgtilknytningerKommunaleRepository shadowOrgtilknytningerKommunaleRepository;
     private final RessursStateRepository ressursStateRepository;
+    private final DvhOrdsService dvhOrdsService;
+    private final Unleash unleash;
 
     public KommunaleRessurserLoader(
         NomProxyClient nomProxyClient, AppProperties appProperties, KommunaleRessurserProcessor kommunaleRessurserProcessor,
@@ -49,7 +55,7 @@ public class KommunaleRessurserLoader {
         RessursStillingLoader ressursStillingLoader,
         RessursStillingStrukturerer ressursStillingStrukturerer,
         ShadowOrgtilknytningerKommunaleRepository shadowOrgtilknytningerKommunaleRepository,
-        RessursStateRepository ressursStateRepository
+        RessursStateRepository ressursStateRepository, DvhOrdsService dvhOrdsService, Unleash unleash
     ) {
         this.nomProxyClient = nomProxyClient;
         this.appProperties = appProperties;
@@ -59,6 +65,8 @@ public class KommunaleRessurserLoader {
         this.ressursStillingStrukturerer = ressursStillingStrukturerer;
         this.shadowOrgtilknytningerKommunaleRepository = shadowOrgtilknytningerKommunaleRepository;
         this.ressursStateRepository = ressursStateRepository;
+        this.dvhOrdsService = dvhOrdsService;
+        this.unleash = unleash;
     }
 
     public void loadAndProcess() {
@@ -111,20 +119,59 @@ public class KommunaleRessurserLoader {
     }
 
     List<DvhRessurs> loadKommunaleForNavidenter(List<String> aktiveKommunaleNavidenter) {
-        String url = appProperties.clients().nomProxy().kommunaleRessurserPath();
-
-        log.info("Laster Dvh Kommunale Ressurser fra {}", url);
         LocalDateTime start = LocalDateTime.now();
 
-        var jsonRessurser = dvhExchange(url);
-        var dvhKommunaleRessurser = StreamSupport.stream(jsonRessurser.get(kommunaleRessurserResponseNode).spliterator(), true)
-            .map(r -> new DvhRessurs(r, true))
-            .distinct()
-            .filter(r -> aktiveKommunaleNavidenter.contains(r.getNavIdent()))
-            .toList();
+        List<DvhRessurs> dvhKommunaleRessurser;
+        if (unleash.isEnabled("nom.dvh.last_kommunale_fra_ords")) {
+            dvhKommunaleRessurser = dvhOrdsService.getKommunaleRessurser(aktiveKommunaleNavidenter);
+        } else {
+            String url = appProperties.clients().nomProxy().kommunaleRessurserPath();
+            log.info("Laster Dvh Kommunale Ressurser fra {}", url);
+            var jsonRessurser = dvhExchange(url);
+            dvhKommunaleRessurser = StreamSupport.stream(jsonRessurser.get(kommunaleRessurserResponseNode).spliterator(), true)
+                .map(r -> new DvhRessurs(r, true))
+                .distinct()
+                .filter(r -> aktiveKommunaleNavidenter.contains(r.getNavIdent()))
+                .toList();
+        }
+
+        getOrdsKommunaleRessurserAndCompare(dvhKommunaleRessurser, aktiveKommunaleNavidenter);
 
         log.info("Lastet {} Dvh Kommunale Ressurser. Tok {}", dvhKommunaleRessurser.size(), durationAsH24(start));
         return dvhKommunaleRessurser;
+    }
+
+    private void getOrdsKommunaleRessurserAndCompare(List<DvhRessurs> tdvDvhRessurser, List<String> aktiveKommunaleNavidenter) {
+        try {
+            var ordsDvhRessurser = dvhOrdsService.getKommunaleRessurser(aktiveKommunaleNavidenter);
+
+            boolean erLikt = true;
+            if (ordsDvhRessurser.size() != tdvDvhRessurser.size()) {
+                log.error("Antall kommunale ressurser fra TDV og ORDS er ulik. TDV: {}, ORDS: {}", tdvDvhRessurser.size(), ordsDvhRessurser.size());
+                erLikt = false;
+            }
+
+            var ordsMap = ordsDvhRessurser.stream().collect(Collectors.toMap(DvhRessurs::getNavIdent, Function.identity()));
+            int idxSkip = tdvDvhRessurser.size()/200;
+            for (int i = 0; i < 200; i++) {
+                int idx = i * idxSkip;
+                var dvhRessursTdv = tdvDvhRessurser.get(idx);
+                var dvhRessursOrds = ordsMap.get(dvhRessursTdv.getNavIdent());
+                if (!DvhRessurs.compare(dvhRessursTdv, dvhRessursOrds)) {
+                    log.error("kommunale ressurs fra TDV og ORDS er ulik. \n\tTDV: \n\t{}, \n\tORDS: \n\t{}"
+                        , dvhRessursTdv.getRawData().toPrettyString()
+                        , dvhRessursOrds.getRawData().toPrettyString());
+                    erLikt = false;
+                }
+            }
+            if (erLikt) {
+                log.info("Last av kommunale ressurser fra ORDS (nom_ords_ansatte_buckets.json) er lik last fra TDV (NOM_ANSATTE_BUCKETS_v2)");
+            } else {
+                log.error("Last av kommunale ressurser fra ORDS (nom_ords_ansatte_buckets.json) er annerledes enn last fra TDV (NOM_ANSATTE_BUCKETS_v2)");
+            }
+        } catch (Exception e) {
+            log.error("Feilet i last av kommunale ressurser fra ORDS (nom_ords_ansatte_buckets.json)", e);
+        }
     }
 
     // Shameless duplication from DvhRestConsumer

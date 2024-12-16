@@ -1,0 +1,143 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/dvh_nom/nom_ords_kommunale.json"
+  },
+  "response": {
+    "status": 200,
+    "transformers": [
+      "response-template"
+    ],
+    "jsonBody": {
+      "items": [
+        {
+          "navid": "A321001",
+          "fnr ": "12345678901",
+          "navn ": "Navn 1",
+          "etternavn ": "ENavn 1",
+          "epost ": "epost1@nav.no",
+          "start_dato": "2013-01-09",
+          "slutt_dato": "2020-01-02",
+          "date_from": "2016-12-01",
+          "date_to": "2019-12-31",
+          "ansatt_idag": "NEI",
+          "ansettelsestype_besk ": null,
+          "ansatt_type": "NAV Kommunalt",
+          "fysisk_brukersted": "0806",
+          "type": null,
+          "permisjon": "NEI",
+          "aktiv": "NEI",
+          "identtype": "STANDARD",
+          "orgenhet_paa_ressurs": "080600",
+          "orgenhet_paa_ressurs_beskrivelse": "Skien",
+          "orgenhet_paa_ressurs_niva": "ORGNIV3"
+        },
+        {
+          "navid": "A321002",
+          "fnr ": "12345678902",
+          "navn ": "Navn 2",
+          "etternavn ": "ENavn 2",
+          "epost ": "epost2@nav.no",
+          "start_dato": "2024-05-08",
+          "slutt_dato": "2099-12-31",
+          "date_from": "2024-08-01",
+          "date_to": "2099-12-31",
+          "ansatt_idag": "JA",
+          "ansettelsestype_besk ": "Kommunalt ansatt",
+          "ansatt_type": "NAV Kommunalt",
+          "fysisk_brukersted": "0906",
+          "type": "N",
+          "permisjon": "NEI",
+          "aktiv": "JA",
+          "identtype": "STANDARD",
+          "orgenhet_paa_ressurs": "0906003",
+          "orgenhet_paa_ressurs_beskrivelse": "Arendal Ungdom",
+          "orgenhet_paa_ressurs_niva": "ORGENHET"
+        },
+        {
+          "navid": "A321003",
+          "fnr ": "12345678903",
+          "navn ": "Navn 3",
+          "etternavn ": "ENavn 3",
+          "epost ": "epost3@nav.no",
+          "start_dato": "2019-07-16",
+          "slutt_dato": "2021-10-22",
+          "date_from": "2019-08-01",
+          "date_to": "2021-09-30",
+          "ansatt_idag": "NEI",
+          "ansettelsestype_besk ": null,
+          "ansatt_type": "NAV Kommunalt",
+          "fysisk_brukersted": "1001",
+          "type": null,
+          "permisjon": "NEI",
+          "aktiv": "NEI",
+          "identtype": "STANDARD",
+          "orgenhet_paa_ressurs": "100110",
+          "orgenhet_paa_ressurs_beskrivelse": "Kristiansand",
+          "orgenhet_paa_ressurs_niva": "ORGNIV3"
+        },
+        {
+          "navid": "A321004",
+          "fnr ": "12345678904",
+          "navn ": "Navn 4",
+          "etternavn ": "ENavn 4",
+          "epost ": "epost4@nav.no",
+          "start_dato": "2010-01-29",
+          "slutt_dato": "2024-09-06",
+          "date_from": "2021-02-01",
+          "date_to": "2024-09-10",
+          "ansatt_idag": "NEI",
+          "ansettelsestype_besk ": null,
+          "ansatt_type": "NAV Kommunalt",
+          "fysisk_brukersted": "0906",
+          "type": null,
+          "permisjon": "JA",
+          "aktiv": "JA",
+          "identtype": "STANDARD",
+          "orgenhet_paa_ressurs": "0906006",
+          "orgenhet_paa_ressurs_beskrivelse": "Arendal Inkludering",
+          "orgenhet_paa_ressurs_niva": "ORGENHET"
+        },
+        {
+          "navid": "A321005",
+          "fnr ": "12345678905",
+          "navn ": "Navn 5",
+          "etternavn ": "ENavn 5",
+          "epost ": "epost5@nav.no",
+          "start_dato": "2009-08-04",
+          "slutt_dato": "2099-12-31",
+          "date_from": "2018-01-01",
+          "date_to": "2099-12-31",
+          "ansatt_idag": "JA",
+          "ansettelsestype_besk ": "Kommunalt ansatt",
+          "ansatt_type": "NAV Kommunalt",
+          "fysisk_brukersted": "0326",
+          "type": "N",
+          "permisjon": "NEI",
+          "aktiv": "JA",
+          "identtype": "STANDARD",
+          "orgenhet_paa_ressurs": "0326006",
+          "orgenhet_paa_ressurs_beskrivelse": "Alna Inngang",
+          "orgenhet_paa_ressurs_niva": "ORGENHET"
+        }
+      ],
+      "hasMore": false,
+      "limit": 0,
+      "offset": 0,
+      "count": 5,
+      "links": [
+        {
+          "rel": "self",
+          "href": "https://dvh.adeo.no/ords/dvh/dvh_nom/nom_ords_kommunale.json?q=%7B%22rownum%22:%7B%22%24lte%22:5%7D%7D"
+        },
+        {
+          "rel": "describedby",
+          "href": "https://dvh.adeo.no/ords/dvh/metadata-catalog/dvh_nom/item"
+        }
+      ]
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

@@ -109,7 +109,22 @@ public class DvhOrds {
     }
 
     @Operation(
-            description = "Hent kommunale ressurser tilknytninger",
+        description = "Hent statlige ressurser tilknytninger - rownum between",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/statligeRessurserTilknytningerRowsBetween", produces="application/json")
+    public String statligeRessurserTilknytningerRowsBetween(@RequestParam(defaultValue ="0") int from, @RequestParam(defaultValue ="100000") int to) {
+        return dvhOrdsService.getStatligeTilknytningerJsonRowsBetween(from, to).toString();
+    }
+
+
+    @Operation(
+            description = "Hent kommunale ressurser",
             security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -117,12 +132,12 @@ public class DvhOrds {
                     @ApiResponse(responseCode = "200", description = "Success")
             }
     )
-    @GetMapping(value = "/kommunaleRessurserTilknytninger", produces="application/json")
-    public String kommunaleRessurserTilknytninger(@RequestParam(defaultValue ="1") int numRows, @RequestParam(required = false) String ordsFilter) {
+    @GetMapping(value = "/kommunaleRessurser", produces="application/json")
+    public String kommunaleRessurser(@RequestParam(defaultValue ="1") int numRows, @RequestParam(required = false) String ordsFilter) {
         if (ordsFilter != null) {
-            return dvhOrdsService.getKommunaleTilknytningerJson(ordsFilter).toString();
+            return dvhOrdsService.getKommunaleRessurserJson(ordsFilter).toString();
         }
-        return dvhOrdsService.getKommunaleTilknytningerJson(numRows).toString();
+        return dvhOrdsService.getKommunaleRessurserJson(numRows).toString();
     }
 
     @Operation(
