@@ -17,7 +17,7 @@ public interface KontaktinfoRepository extends JpaRepository<Kontaktinfo, Long> 
     Optional<Kontaktinfo> findDistinctByKontakId(String kontaktId);
 
     @Query(
-        value = "SELECT COUN(*) FROM KONTAKTINFO WHERE NAVIDENT = :navident AND DATO_SLETTET IS NULL",
+        value = "SELECT COUNT(*) FROM KONTAKTINFO WHERE NAVIDENT = :navident AND DATO_SLETTET IS NULL",
         nativeQuery = true
     )
     int countActiveByNavident(String navident);
