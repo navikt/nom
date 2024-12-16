@@ -102,6 +102,7 @@ public class KontaktinfoController {
         kontaktinfo.setEtternavn(kontaktInfoDTO.etternavn());
         kontaktinfo.setTelefon(kontaktInfoDTO.telefon());
         kontaktinfo.setRelasjon(Relasjon.valueOf(kontaktInfoDTO.relasjon()));
+        kontaktinfo.setPrioritet(kontaktInfoDTO.prioritet());
         kontaktinfo.setAdresse(
             Adresse.builder().adresse(kontaktInfoDTO.gateadresse())
                 .poststed(kontaktInfoDTO.postnr())
