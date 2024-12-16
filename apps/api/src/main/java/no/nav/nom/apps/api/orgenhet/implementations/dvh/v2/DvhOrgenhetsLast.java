@@ -233,7 +233,7 @@ public class DvhOrgenhetsLast {
                 int idx = i * idxSkip;
                 var dvhOrgenhetTdv = tdvDvhOrgenheter.get(idx);
                 var dvhOrgenhetOrds = ordsMap.get(getOrgenhetUniqueKey(dvhOrgenhetTdv));
-                if (!DvhOrgenhetV2.compare(dvhOrgenhetTdv, dvhOrgenhetOrds)) {
+                if (dvhOrgenhetOrds == null || !DvhOrgenhetV2.compare(dvhOrgenhetTdv, dvhOrgenhetOrds)) {
                     log.error("Orgenhet fra TDV og ORDS er ulik. \n\tTDV: \n\t{}, \n\tORDS: \n\t{}"
                         , dvhOrgenhetTdv.getRawData().toPrettyString()
                         , dvhOrgenhetOrds.getRawData().toPrettyString());
