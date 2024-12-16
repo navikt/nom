@@ -236,7 +236,7 @@ public class DvhOrgenhetsLast {
                 if (dvhOrgenhetOrds == null || !DvhOrgenhetV2.compare(dvhOrgenhetTdv, dvhOrgenhetOrds)) {
                     log.error("Orgenhet fra TDV og ORDS er ulik. \n\tTDV: \n\t{}, \n\tORDS: \n\t{}"
                         , dvhOrgenhetTdv.getRawData().toPrettyString()
-                        , dvhOrgenhetOrds.getRawData().toPrettyString());
+                        , dvhOrgenhetOrds == null ? null : dvhOrgenhetOrds.getRawData().toPrettyString());
                     erLikt = false;
                 }
             }

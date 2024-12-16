@@ -157,10 +157,10 @@ public class KommunaleRessurserLoader {
                 int idx = i * idxSkip;
                 var dvhRessursTdv = tdvDvhRessurser.get(idx);
                 var dvhRessursOrds = ordsMap.get(dvhRessursTdv.getNavIdent());
-                if (!DvhRessurs.compare(dvhRessursTdv, dvhRessursOrds)) {
+                if (dvhRessursOrds == null || !DvhRessurs.compare(dvhRessursTdv, dvhRessursOrds)) {
                     log.error("kommunale ressurs fra TDV og ORDS er ulik. \n\tTDV: \n\t{}, \n\tORDS: \n\t{}"
                         , dvhRessursTdv.getRawData().toPrettyString()
-                        , dvhRessursOrds.getRawData().toPrettyString());
+                        , dvhRessursOrds == null ? null : dvhRessursOrds.getRawData().toPrettyString());
                     erLikt = false;
                 }
             }
