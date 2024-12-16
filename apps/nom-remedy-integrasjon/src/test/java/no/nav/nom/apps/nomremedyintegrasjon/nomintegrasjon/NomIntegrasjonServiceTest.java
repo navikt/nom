@@ -302,7 +302,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .sektor(2)
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
                     .utlopsdato(epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()))
-                    .mobil(existingRessurs.getPrimaryTelefonnummer())
+                    .direkteTelefon(existingRessurs.getPrimaryTelefonnummer())
                     .build()
 
             ));
@@ -347,7 +347,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .sektor(2)
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
                     .utlopsdato(epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()))
-                    .mobil(existingRessurs.getPrimaryTelefonnummer())
+                    .direkteTelefon(existingRessurs.getPrimaryTelefonnummer())
                     .build()
 
             ));
@@ -389,7 +389,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .sektor(2)
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
                     .utlopsdato(epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()))
-                    .mobil(ressursPrimaryTelefonnummerOppdatertV1.getMobilnummerOppdatertEventData().primaryTelefonnummer())
+                    .direkteTelefon(ressursPrimaryTelefonnummerOppdatertV1.getMobilnummerOppdatertEventData().primaryTelefonnummer())
                     .build()
 
             ));
@@ -459,7 +459,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .sektor(2)
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
                     .utlopsdato(epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()))
-                    .mobil(existingRessurs.getPrimaryTelefonnummer())
+                    .direkteTelefon(existingRessurs.getPrimaryTelefonnummer())
                     .build()
             ));
     }
@@ -516,7 +516,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .utlopsdato(epochSecondsNorwegianTimeEndOfDay(
                         orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom().orElseThrow())
                     )
-                    .mobil(existingRessurs.getPrimaryTelefonnummer())
+                    .direkteTelefon(existingRessurs.getPrimaryTelefonnummer())
                     .build()
             ));
     }
@@ -865,7 +865,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .utlopsdato(epochSecondsNorwegianTimeEndOfDay(
                         orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigTom().orElseThrow())
                     )
-                    .mobil(ressurs().getPrimaryTelefonnummer())
+                    .direkteTelefon(ressurs().getPrimaryTelefonnummer())
                     .build()
             ));
     }

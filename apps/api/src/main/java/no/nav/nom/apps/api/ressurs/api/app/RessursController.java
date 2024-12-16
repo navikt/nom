@@ -140,7 +140,7 @@ public class RessursController {
 
     @PostMapping("{navident}/telefonnummer")
     @Operation(
-        description = "Endrer telefonnummer for en ressurs",
+        description = "Endrer primaryTelefonnummer for en ressurs",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses({
@@ -160,6 +160,20 @@ public class RessursController {
         ressursRestService.updateRessursPrimaryTelefonnummer(navident, updatePrimarytelefonnummer);
 
         return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
+    }
+
+    @GetMapping("/{navident}/telefonnummer")
+    @Operation(
+        description = "Henter telefonnummer for en ressurs",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Telefonnummer"),
+    })
+    public ResponseEntity<String> getTelefonnummer(
+        @PathVariable String navident
+    ) {
+        return ResponseEntity.ok(ressursRestService.getTelefonnummer(navident));
     }
 
     @GetMapping("/byNavident/{navident}")
@@ -231,7 +245,7 @@ public class RessursController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @PreAuthorize("hasAuthority('ADMIN')")
-     public ResponseEntity<List<JsonNode>> readRessursTopic(@Valid ReadTopicRequest request){
+    public ResponseEntity<List<JsonNode>> readRessursTopic(@Valid ReadTopicRequest request){
         return ResponseEntity.ok(ressursRestService.getRessursEvents(request));
     }
 

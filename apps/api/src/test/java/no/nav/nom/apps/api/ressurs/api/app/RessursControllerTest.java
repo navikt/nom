@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.NomMastered;
+import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.NomMasteredException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
@@ -22,6 +23,7 @@ import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.contract.nom.AnsettelsesType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -95,6 +97,9 @@ public class RessursControllerTest extends RestTestBase {
 
     @MockBean
     private NomMastered nomMastered;
+
+    @MockBean
+    private RessursContactDetailsResolver ressursContactDetailsResolver;
 
     @Autowired
     TestTokensGenerator testToken;
@@ -1060,5 +1065,26 @@ public class RessursControllerTest extends RestTestBase {
             })
             .bodyValue(updateFysiskeBrukerstederRequest)
             .exchange();
+    }
+
+    @Test
+    @DisplayName("Should return telefonnummer for given navident")
+    void test_getTelefonnummer() {
+        String navident = "x123456";
+        String expectedTelefonnummer = "12345678";
+
+        when(ressursContactDetailsResolver.fetchTelefoner(navident))
+            .thenReturn(List.of(new Ressurs.Telefon(expectedTelefonnummer, TelefonType.NAV_KONTOR_TELEFON)));
+
+        webTestClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/ressurser/{navident}/telefonnummer")
+                .build(navident)
+            )
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(String.class)
+            .isEqualTo(expectedTelefonnummer);
     }
 }

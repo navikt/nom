@@ -13,6 +13,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.WebClientUtils.defaultRetry;
 
@@ -66,8 +67,8 @@ public class NomApiClient {
     public OrgEnhet getOrgEnhet(String orgenhetId) {
         return nomApiAuthorizedWebClient.get()
             .uri(uriBuilder -> uriBuilder
-                        .path("/app/orgenheter/{orgenhetId}")
-                        .build(orgenhetId)
+                .path("/app/orgenheter/{orgenhetId}")
+                .build(orgenhetId)
             )
             .retrieve()
             .bodyToMono(OrgEnhet.class)
@@ -102,5 +103,17 @@ public class NomApiClient {
             .bodyToMono(OrgtilknytningState.class)
             .retryWhen(defaultRetry)
             .block();
+    }
+
+    public Optional<String> getTelefonnummer(String navident) {
+        return nomApiAuthorizedWebClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/ressurser/{navident}/telefonnummer")
+                .build(navident)
+            )
+            .retrieve()
+            .bodyToMono(String.class)
+            .retryWhen(defaultRetry)
+            .blockOptional();
     }
 }

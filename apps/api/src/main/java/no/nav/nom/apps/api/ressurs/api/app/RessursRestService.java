@@ -36,6 +36,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessur
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -188,7 +189,7 @@ public class RessursRestService {
         return new Ressurs(
             ressursState.toBuilder()
                 .personident(personident)
-                .primaryTelefonnummer(getPrimaryTelefonnummerOrFromTelefonList(ressursState, telefoner))
+                .primaryTelefonnummer(ressursState.primaryTelefonnummer())
                 .primaryFysiskBrukersted(showFysiskBrukerSted ? ressursState.primaryFysiskBrukersted() : Optional.empty())
                 .fysiskeBrukersteder(showFysiskBrukerSted ? ressursState.fysiskeBrukersteder() : Collections.emptyList())
                 .build(),
@@ -196,12 +197,6 @@ public class RessursRestService {
             epost.orElse(null),
             nomMastered.isMastered(ressursState.navident())
         );
-    }
-
-    private static Optional<String> getPrimaryTelefonnummerOrFromTelefonList(RessursState ressursState, List<Ressurs.Telefon> telefoner) {
-        if (ressursState.primaryTelefonnummer().isPresent()) return ressursState.primaryTelefonnummer();
-        if (!isNull(telefoner) && !telefoner.isEmpty()) return Optional.of(telefoner.getFirst().nummer());
-        return Optional.empty();
     }
 
     public void updateRessursNavn(String navident, UpdateVisningsnavnRequest updateVisningsnavnRequest) {
@@ -683,7 +678,6 @@ public class RessursRestService {
     private void validateOpprettRessursRequest(OpprettRessursRequest request) {
         switch (request.sektor()) {
             case EKSTERN -> validateOpprettEksternRessursRequest(request);
-            case NAV_KOMMUNAL -> validateOpprettKommunalRessursRequest(request);
             case NAV_STATLIG -> validateOpprettStatligRessursRequest(request);
         }
 
@@ -697,10 +691,6 @@ public class RessursRestService {
         if (request.sluttDato().isEmpty()) {
             throw new IllegalArgumentException("Sluttdato må oppgis for opprettelse av ekstern ressurs");
         }
-    }
-
-    private void validateOpprettKommunalRessursRequest(OpprettRessursRequest request) {
-        // Add validation constraints as necessary
     }
 
     private void validateOpprettStatligRessursRequest(OpprettRessursRequest request) {
@@ -717,4 +707,28 @@ public class RessursRestService {
             throw new IllegalArgumentException("Etternavn kan ikke inneholde linjeskift, mellomrom o.l");
         }
     }
+
+    public String getTelefonnummer(String navident) {
+        logger.info("Fetching telefonnummer for navident: {}", navident);
+        var telefoner = ressursContactDetailsResolver.fetchTelefoner(navident);
+        if (telefoner.size() == 1) return mapAndTrimNumber(telefoner.getFirst());
+        return telefoner.stream().filter(telefon -> {
+            if (telefon.type().equals(TelefonType.NAV_KONTOR_TELEFON)) return true;
+            return telefon.type().equals(TelefonType.NAV_TJENESTE_TELEFON);
+        }).findFirst().map(this::mapAndTrimNumber).orElse("");
+    }
+
+    private String mapAndTrimNumber(Ressurs.Telefon telefon) {
+        var nummer = telefon.nummer();
+        if (nummer.length() > 8) {
+            if (nummer.startsWith("47")) {
+                return nummer.substring(2);
+            }
+            if (nummer.startsWith("+47")) {
+                return nummer.substring(3);
+            }
+        }
+        return nummer;
+    }
+
 }

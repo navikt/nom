@@ -630,7 +630,7 @@ public class NomIntegrasjonService {
             .getMobilnummerOppdatertEventData()
             .primaryTelefonnummer();
         var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
-            .mobil((isNull(primaryTelefonnummer) || primaryTelefonnummer.isBlank()) ? null : primaryTelefonnummer)
+            .direkteTelefon((isNull(primaryTelefonnummer) || primaryTelefonnummer.isBlank()) ? null : primaryTelefonnummer)
             .build();
 
         saveNewNomIntegrasjonEntity(
@@ -677,7 +677,8 @@ public class NomIntegrasjonService {
                 ? null
                 : dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getGyldigTom).map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null)
             )
-            .mobil(isNull(ressurs.getPrimaryTelefonnummer()) || ressurs.getPrimaryTelefonnummer().isBlank() ? null : ressurs.getPrimaryTelefonnummer())
+            .direkteTelefon(isNull(ressurs.getPrimaryTelefonnummer()) || ressurs.getPrimaryTelefonnummer().isBlank() ? null : ressurs.getPrimaryTelefonnummer())
+            .mobil(nomApiClient.getTelefonnummer(ressurs.getNavident()).orElse(null))
             .masseflytting(dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getMasseflyttetFraFid).isPresent() ? "X" : null)
             .build();
     }
