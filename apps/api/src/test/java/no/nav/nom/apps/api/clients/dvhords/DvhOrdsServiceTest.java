@@ -16,6 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -93,6 +94,8 @@ class DvhOrdsServiceTest {
 
     @Test
     void getOrgenheter() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Oslo")); // Github test/build har ikke samme timezone som satt i Dockerfile
+        
         var orgenheter = dvhOrdsService.getOrgenheter();
         assertNotNull(orgenheter);
         assertEquals(5, orgenheter.size());
