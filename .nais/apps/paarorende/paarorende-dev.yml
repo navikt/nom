@@ -13,6 +13,11 @@ spec:
   port: 8080
   ingresses:
     - https://paarorende.intern.dev.nav.no
+  env:
+    - name: NOM_API_SCOPE
+      value: api://dev-gcp.nom.nom-api/.default
+    - name: NOM_ADMIN_GROUP
+      value: 9e0e2958-df7a-4376-83f3-9bcbec1f2650
   replicas:
     min: 2
     max: 2
@@ -46,6 +51,8 @@ spec:
       allowAllUsers: true
       tenant: trygdeetaten.no
       claims:
+        groups:
+          - id: 9e0e2958-df7a-4376-83f3-9bcbec1f2650
         extra:
           - NAVident
   gcp:
@@ -63,4 +70,9 @@ spec:
           cluster: dev-gcp
         - application: nom-ui2
           namespace: org
+          cluster: dev-gcp
+    outbound:
+      rules:
+        - application: nom-api
+          namespace: nom
           cluster: dev-gcp

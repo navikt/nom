@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.paarorende.common.SecurityUtil;
 import no.nav.nom.paarorende.common.SwaggerConfig;
+import no.nav.nom.paarorende.consumer.NomApiClient;
 import no.nav.nom.paarorende.jpa.Adresse;
 import no.nav.nom.paarorende.jpa.KontaktinfoRepository;
 import no.nav.nom.paarorende.jpa.Relasjon;
@@ -39,10 +40,12 @@ public class KontaktinfoController {
 
     private final KontaktinfoRepository kontaktInfoRepository;
     private final SecurityUtil securityUtil;
+    private final NomApiClient nomApiClient;
 
-    public KontaktinfoController(KontaktinfoRepository kontaktInfoRepository, SecurityUtil securityUtils) {
+    public KontaktinfoController(KontaktinfoRepository kontaktInfoRepository, SecurityUtil securityUtils, NomApiClient nomApiClient) {
         this.kontaktInfoRepository = kontaktInfoRepository;
         this.securityUtil = securityUtils;
+        this.nomApiClient = nomApiClient;
     }
 
     @GetMapping
@@ -50,13 +53,32 @@ public class KontaktinfoController {
         description = "Henter alle kontaktinfo til pårørende av brukeren",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Liste av kontaktinfo"),
-        @ApiResponse(responseCode = "403", description = "Uatorisert"),
-
-    })
-    public List<KontaktinfoDTO> getAllKontaktinfo() {
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Liste av kontaktinfo"),
+            @ApiResponse(responseCode = "403", description = "Uatorisert")
+        }
+    )
+    public List<KontaktinfoDTO> getKontaktinfo() {
         var navident = securityUtil.getNavIdent();
+
+        return KontaktinfoDTO.fromEntityList(kontaktInfoRepository.findAllByNavidentAndDatoSlettetIsNull(navident));
+    }
+
+    @GetMapping("/{navident}")
+    @Operation(
+        description = "Henter kontaktinfo til pårørende - brukes av admin og ledere",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Opprettet kontaktinfo"),
+            @ApiResponse(responseCode = "401", description = "Uautentisert"),
+            @ApiResponse(responseCode = "403", description = "Uatorisert")
+        }
+    )
+    public List<KontaktinfoDTO> getKontaktinfoForRessurs(@PathVariable String navident) {
+        securityUtil.assertAuthorizedAccessTo(navident);
 
         return KontaktinfoDTO.fromEntityList(kontaktInfoRepository.findAllByNavidentAndDatoSlettetIsNull(navident));
     }
@@ -66,11 +88,13 @@ public class KontaktinfoController {
         description = "Oppdaterer kontaktinfo til en pårørende",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Oppdatert kontaktinfo"),
-        @ApiResponse(responseCode = "403", description = "Uatorisert"),
-
-    })
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Oppdatert kontaktinfo"),
+            @ApiResponse(responseCode = "401", description = "Uautentisert"),
+            @ApiResponse(responseCode = "403", description = "Uatorisert")
+        }
+    )
     public KontaktinfoDTO oppdaterKontakinfo(@RequestBody KontaktinfoDTO kontaktInfoDTO) {
         var kontaktinfo = kontaktInfoRepository.findDistinctByKontakId(kontaktInfoDTO.kontaktId())
             .orElseThrow(() -> new AccessDeniedException("Unauthorized"));
@@ -96,11 +120,13 @@ public class KontaktinfoController {
         description = "Oppretter nytt kontaktinfo til en pårørende",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Opprettet kontaktinfo"),
-        @ApiResponse(responseCode = "403", description = "Uatorisert"),
-
-    })
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "201", description = "Opprettet kontaktinfo"),
+            @ApiResponse(responseCode = "401", description = "Uautentisert"),
+            @ApiResponse(responseCode = "403", description = "Uatorisert")
+        }
+    )
     public ResponseEntity<KontaktinfoDTO> opprettPaarorende(@RequestBody KontaktinfoDTO kontaktInfoDTO) {
         securityUtil.assertAuthorized();
 
@@ -121,10 +147,13 @@ public class KontaktinfoController {
         description = "Slettetr kontaktinfo til en pårørende",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200"),
-        @ApiResponse(responseCode = "403", description = "Uatorisert")
-    })
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "401", description = "Uautentisert"),
+            @ApiResponse(responseCode = "403", description = "Uatorisert")
+        }
+    )
     public void markForDeletion(@PathVariable String kontaktId) throws AccessDeniedException {
         var kontaktinfo = kontaktInfoRepository.findDistinctByKontakId(kontaktId)
             .orElseThrow(() -> new AccessDeniedException("Unauthorized"));

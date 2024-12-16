@@ -1,5 +1,10 @@
 app:
   name: nom-paarorende
+  client:
+    nom-api:
+      url: http://nom-api.nom
+  security:
+    nom-admin: ${NOM_ADMIN_GROUP}
 
 spring:
   datasource:
@@ -15,6 +20,18 @@ spring:
         jwt:
           issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
           audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
+      client:
+        registration:
+          nom-paarorende:
+            provider: azure
+            client-id: ${AZURE_APP_CLIENT_ID}
+            client-secret: ${AZURE_APP_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope:
+              - ${NOM_API_SCOPE}
+        provider:
+          azure:
+            issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
 management:
   metrics:
     tags:
