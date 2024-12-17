@@ -7,7 +7,7 @@ on:
       - 'dev/*'
     paths:
       - 'apps/api/**'
-      - 'libs/utils-common/**'
+      - 'libs/**'
       - 'libs/nom-state/**'
       - '.nais/apps/api/api*.yaml'
       - '.github/*/deploy-api.yaml'

@@ -7,9 +7,7 @@ on:
       - 'dev/*'
     paths:
       - 'apps/nom-rdbms-data/**'
-      - 'libs/utils-common/**'
-      - 'libs/nom-state/**'
-      - 'libs/contract-nom-dto/**'
+      - 'libs/**'
       - '.nais/apps/nom-rdbms-data/*.yaml'
       - '.github/*/deploy-nom-rdbms-data.yaml'
       - 'apps/pom.xml'

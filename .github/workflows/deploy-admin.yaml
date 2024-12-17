@@ -7,8 +7,7 @@ on:
       - 'dev/*'
     paths:
       - 'apps/admin/**'
-      - 'libs/utils-common/**'
-      - 'libs/nom-state/**'
+      - 'libs/**'
       - '.nais/apps/admin/*.yaml'
       - '.github/*/deploy-admin.yaml'
       - 'apps/pom.xml'

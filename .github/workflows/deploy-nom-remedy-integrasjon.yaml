@@ -6,6 +6,7 @@ on:
       - 'main'
     paths:
       - 'apps/nom-remedy-integrasjon/**'
+      - 'libs/**'
       - '.nais/apps/nom-remedy-integrasjon/nom-remedy-integrasjon*.yaml'
       - '.github/workflows/deploy-nom-remedy-integrasjon.yaml'
       - 'apps/pom.xml'
