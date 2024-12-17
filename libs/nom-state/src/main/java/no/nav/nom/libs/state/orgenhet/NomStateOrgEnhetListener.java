@@ -30,7 +30,9 @@ public class NomStateOrgEnhetListener extends AbstractNomStateListener<OrgEnhetS
 
     @Override
     protected void registerMessageWithState(String key, OrgEnhetState orgEnhetState) {
-        orgEnhetStateRepository.update(orgEnhetState);
+        if (orgEnhetState.uniqueAgressoId().isPresent()) {
+            orgEnhetStateRepository.update(orgEnhetState);
+        } else { log.info("OrgEnhetState with key {} has no uniqueAgressoId - will not add to state", key); }
     }
 
     @Override
