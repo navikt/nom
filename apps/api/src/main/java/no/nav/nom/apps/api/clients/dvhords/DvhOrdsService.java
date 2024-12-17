@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -129,6 +130,16 @@ public class DvhOrdsService {
 
         while (pagedJson.get("hasMore").asBoolean()) {
             log.info("Henter statlige tilknytninger fra ORDS DVH - page {}", page++);
+            AtomicReference<String> nextUrl = new AtomicReference<>();
+            pagedJson.get("links").forEach(n -> {
+                if (n.get("rel").asText().equals("next")) {
+                    nextUrl.set(n.get("href").asText());
+                }
+            });
+            if (nextUrl.get() == null) {
+                log.error("Resultset hasMore, but did not find next href. {}", pagedJson.get("links"));
+                break;
+            }
             pagedJson = dvhOrdsClient.dvhGetJsonData(pagedJson.get("next").asText());
             ressursStillinger.addAll(StreamSupport.stream(pagedJson.get("items").spliterator(), false)
                 .map(DvhRessursStilling::fromOrdsRessursStilling)
