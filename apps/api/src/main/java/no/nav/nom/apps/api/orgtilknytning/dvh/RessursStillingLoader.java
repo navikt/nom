@@ -122,7 +122,7 @@ public class RessursStillingLoader {
     }
 
     private String getRessursStillingUniqueKey(DvhRessursStilling dvhRessursStilling) {
-        return dvhRessursStilling.getNavident() + "-" + dvhRessursStilling.getStillingAgressoId() + "-" + dvhRessursStilling.getStillingDatoFom() + "-" + dvhRessursStilling.getStillingDatoTom();
+        return dvhRessursStilling.getNavident() + "-" + dvhRessursStilling.getStillingAgressoId() + "-" + dvhRessursStilling.getStillingOrgenhetNavn() + "-" + dvhRessursStilling.getStillingDatoFom() + "-" + dvhRessursStilling.getStillingDatoTom();
     }
 
     // Shameless duplication from DvhRestConsumer
