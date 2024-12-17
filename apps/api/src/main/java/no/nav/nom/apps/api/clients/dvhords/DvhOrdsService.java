@@ -140,7 +140,7 @@ public class DvhOrdsService {
                 log.error("Resultset hasMore, but did not find next href. {}", pagedJson.get("links"));
                 break;
             }
-            pagedJson = dvhOrdsClient.dvhGetJsonData(pagedJson.get("next").asText());
+            pagedJson = dvhOrdsClient.dvhGetJsonData(nextUrl.get());
             ressursStillinger.addAll(StreamSupport.stream(pagedJson.get("items").spliterator(), false)
                 .map(DvhRessursStilling::fromOrdsRessursStilling)
                 .toList());
