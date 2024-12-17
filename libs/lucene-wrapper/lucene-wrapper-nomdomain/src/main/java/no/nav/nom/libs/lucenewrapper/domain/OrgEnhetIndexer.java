@@ -37,7 +37,9 @@ public class OrgEnhetIndexer implements IEntityIndexer<LuceneOrgEnhet, LuceneOrg
         var doc = helper.createDocumentWithCommonFields(entity.id(), entity.navn());
 
         doc.add(new IntPoint("gyldigTom", encodedDate(entity.gyldigTom().orElse(null))));
-        doc.add(new Field("orgniv", entity.orgNiv(), TextField.TYPE_NOT_STORED));
+        if (entity.orgNiv() != null) {
+            doc.add(new Field("orgniv", entity.orgNiv(), TextField.TYPE_NOT_STORED));
+        }
 
         return doc;
     }
