@@ -8,7 +8,6 @@ import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
-import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetV2;
 import no.nav.nom.apps.api.orgtilknytning.dvh.statlige.AsyncNyeStrukturerOgProsesser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,8 +19,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
 
 @Slf4j
 @Service
@@ -85,13 +82,13 @@ public class RessursStillingLoader {
                 .collect(Collectors.toList());
         }
 
-//        getOrdsOrgenheterAndCompare(ressursStillinger);
+        getOrdsRessursStillingerAndCompare(ressursStillinger);
 
         log.info("Lastet {} ressursStillinger. Tok {}", ressursStillinger.size(), durationAsH24(start));
         return ressursStillinger;
     }
 
-    private void getOrdsOrgenheterAndCompare(List<DvhRessursStilling> tdvDvhRessursStillinger) {
+    private void getOrdsRessursStillingerAndCompare(List<DvhRessursStilling> tdvDvhRessursStillinger) {
         try {
             var ordsDvhRessursStillinger = dvhOrdsService.getStatligeTilknytninger();
 
