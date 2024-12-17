@@ -18,6 +18,7 @@ import { Route as RessursIdImport } from './routes/ressurs.$id'
 import { Route as RessursTerminateIdImport } from './routes/ressurs-terminate.$id'
 import { Route as OrgIdImport } from './routes/org.$id'
 import { Route as MasseflyttingIdImport } from './routes/masseflytting.$id'
+import { Route as KontaktpersonerIdImport } from './routes/kontaktpersoner.$id'
 import { Route as AdminRessurserImport } from './routes/admin.ressurser'
 import { Route as AdminOrgenheterImport } from './routes/admin.orgenheter'
 import { Route as AdminHistoryRessurserImport } from './routes/admin.history-ressurser'
@@ -59,6 +60,11 @@ const OrgIdRoute = OrgIdImport.update({
 
 const MasseflyttingIdRoute = MasseflyttingIdImport.update({
   path: '/masseflytting/$id',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const KontaktpersonerIdRoute = KontaktpersonerIdImport.update({
+  path: '/kontaktpersoner/$id',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -145,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRessurserImport
       parentRoute: typeof AdminImport
     }
+    '/kontaktpersoner/$id': {
+      id: '/kontaktpersoner/$id'
+      path: '/kontaktpersoner/$id'
+      fullPath: '/kontaktpersoner/$id'
+      preLoaderRoute: typeof KontaktpersonerIdImport
+      parentRoute: typeof rootRoute
+    }
     '/masseflytting/$id': {
       id: '/masseflytting/$id'
       path: '/masseflytting/$id'
@@ -201,6 +214,7 @@ export const routeTree = rootRoute.addChildren({
     AdminRessurserRoute,
   }),
   TilgangerRoute,
+  KontaktpersonerIdRoute,
   MasseflyttingIdRoute,
   OrgIdRoute,
   RessursTerminateIdRoute,
@@ -220,6 +234,7 @@ export const routeTree = rootRoute.addChildren({
         "/",
         "/admin",
         "/tilganger",
+        "/kontaktpersoner/$id",
         "/masseflytting/$id",
         "/org/$id",
         "/ressurs-terminate/$id",
@@ -258,6 +273,9 @@ export const routeTree = rootRoute.addChildren({
     "/admin/ressurser": {
       "filePath": "admin.ressurser.tsx",
       "parent": "/admin"
+    },
+    "/kontaktpersoner/$id": {
+      "filePath": "kontaktpersoner.$id.tsx"
     },
     "/masseflytting/$id": {
       "filePath": "masseflytting.$id.tsx"

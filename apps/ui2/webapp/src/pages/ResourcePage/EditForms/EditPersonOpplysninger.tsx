@@ -138,9 +138,11 @@ export function EditPersonOpplysninger({
     },
     onSettled: () => {
       showToast({ text: "Lagret" });
-      queryClient.invalidateQueries({
-        queryKey: ressurserKeys.id(ressurs.navident),
-      });
+      queryClient
+        .invalidateQueries({
+          queryKey: ressurserKeys.id(ressurs.navident),
+        })
+        .then();
       navigate({ search: {}, params: (previous) => previous }).then();
     },
   });

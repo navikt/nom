@@ -32,6 +32,7 @@ import type {
 
 const NOM_API_BASE_PATH = "/frackend/nom-api";
 const NOM_REMEDY_INTEGRATION_API_BASE_PATH = "/frackend/nom-remedy-integrasjon";
+const NOM_PAARORENDE_BASE_PATH = "/frackend/paarorende";
 
 /**
  * Intercept errors that are 401.
@@ -566,6 +567,49 @@ export const updateTelefonnummer = async (
   await hopeForKafkaStateToUpdate();
 };
 
+export const getParorendeForBruker = {
+  queryKey: () => ["paarorende"],
+  queryFn: async (): Promise<Kontaktinfo[]> =>
+    (
+      await axios.get<Kontaktinfo[]>(
+        `${NOM_PAARORENDE_BASE_PATH}/api/kontaktinfo`,
+      )
+    ).data,
+};
+
+export const getParorendeForNavident = {
+  queryKey: (navident: string) => ["paarorende", navident],
+  queryFn: async (navident: string): Promise<Kontaktinfo[]> =>
+    (
+      await axios.get<Kontaktinfo[]>(
+        `${NOM_PAARORENDE_BASE_PATH}/api/kontaktinfo/${navident}`,
+      )
+    ).data,
+};
+
+export const createParorendeForBruker = async (kontakt: Kontaktinfo) =>
+  (
+    await axios.post<Kontaktinfo, AxiosResponse<unknown>>(
+      `${NOM_PAARORENDE_BASE_PATH}/api/kontaktinfo`,
+      kontakt,
+    )
+  ).data;
+
+export const oppdaterParorendeForBruker = async (kontakt: Kontaktinfo) =>
+  (
+    await axios.put<Kontaktinfo, AxiosResponse<unknown>>(
+      `${NOM_PAARORENDE_BASE_PATH}/api/kontaktinfo`,
+      kontakt,
+    )
+  ).data;
+
+export const deleteParorendeForBruker = async (kontaktId: string) =>
+  (
+    await axios.delete<string, AxiosResponse<unknown>>(
+      `${NOM_PAARORENDE_BASE_PATH}/api/kontaktinfo/${kontaktId}`,
+    )
+  ).data;
+
 async function hopeForKafkaStateToUpdate() {
   await new Promise((r) => setTimeout(r, 1000));
 }
@@ -623,4 +667,17 @@ export type RessursFields = {
 export type FysiskBrukersted = {
   brukerstedNr: string;
   brukerstedNavn: string;
+};
+
+export type Kontaktinfo = {
+  kontaktId: string;
+  fornavn: string;
+  etternavn: string;
+  relasjon: string;
+  telefon: string;
+  prioritet: number;
+  gateadresse?: string;
+  postnr?: string;
+  poststed?: string;
+  land?: string;
 };

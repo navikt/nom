@@ -8,50 +8,67 @@ export function ContainerWithHighlightedTop({
   children,
   title,
   icon,
+  padding = 12,
+  verticalPadding,
+  horizontalPadding,
+  gap = 9,
 }: {
   children: ReactNode;
-  title: string | ReactNode;
-  icon: string;
+  title?: string | ReactNode;
+  icon?: string;
+  padding?: number;
+  verticalPadding?: number;
+  horizontalPadding?: number;
+  gap?: number;
 }) {
+  const paddingValue = `var(--a-spacing-${verticalPadding ?? padding}) var(--a-spacing-${horizontalPadding ?? padding})`;
+  const gapValue = `var(--a-spacing-${gap})`;
+
   return (
     <div
       css={[
         blueTopBorder,
         css`
-          min-height: 300px;
-          padding: var(--a-spacing-12);
+          padding: ${paddingValue};
           display: flex;
           flex-direction: column;
           background: white;
-          gap: var(--a-spacing-9);
+          gap: ${gapValue};
         `,
       ]}
     >
-      <div
-        css={css`
-          display: flex;
-          flex-direction: column;
-          gap: var(--a-spacing-4);
-        `}
-      >
-        <img
-          alt=""
+      {(!!title || !!icon) && (
+        <div
           css={css`
-            height: 65px;
-            width: 65px;
-            align-self: center;
+            display: flex;
+            flex-direction: column;
+            gap: var(--a-spacing-4);
           `}
-          src={icon}
-        />
-        <Heading
-          css={css`
-            align-self: center;
-          `}
-          size="large"
         >
-          {title}
-        </Heading>
-      </div>
+          {icon && (
+            <img
+              alt=""
+              css={css`
+                height: 65px;
+                width: 65px;
+                align-self: center;
+              `}
+              src={icon}
+            />
+          )}
+
+          {title && (
+            <Heading
+              css={css`
+                align-self: center;
+              `}
+              size="large"
+            >
+              {title}
+            </Heading>
+          )}
+        </div>
+      )}
       {children}
     </div>
   );

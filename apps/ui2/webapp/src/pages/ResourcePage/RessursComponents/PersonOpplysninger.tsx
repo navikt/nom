@@ -48,7 +48,9 @@ export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
         <Heading level="1" size="large">
           {formatVisningsnavn(ressurs.visningsnavn)}
         </Heading>
+
         <KortFortalt />
+
         <div
           css={css`
             display: grid;
@@ -68,6 +70,7 @@ export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
           <TelefonNummere ressurs={ressurs} />
         </div>
       </VStack>
+
       <VStack align="end" justify="space-between">
         <UserImage
           includeInstructionsWhenNotFound
@@ -75,6 +78,7 @@ export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
           navn={formatVisningsnavn(ressurs.visningsnavn)}
           size="126px"
         />
+
         <EditButton ressurs={ressurs} />
       </VStack>
     </HStack>

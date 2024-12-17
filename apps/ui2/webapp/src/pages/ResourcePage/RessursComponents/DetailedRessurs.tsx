@@ -2,6 +2,7 @@ import { css } from "@emotion/react";
 import {
   Buldings3Icon,
   PencilIcon,
+  PersonChatIcon,
   PersonSuitIcon,
   ReceptionIcon,
 } from "@navikt/aksel-icons";
@@ -100,16 +101,21 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
             ressurs={ressurs}
           />
+
           <LeaderForSection ressurs={ressurs} />
+
           <OrgTilknytningSection
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
             ressurs={ressurs}
           />
+
           <TeamCatSection navident={ressurs.navident} />
-          <TerminateButton
+
+          <BottomSection
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
             ressurs={ressurs}
           />
+
           {ressurs.isNomMastered && (
             <Tag
               css={css`
@@ -651,7 +657,6 @@ function TerminateButton({
       hasWriteAccessForRessurs={hasWriteAccessForRessurs}
       ressurs={ressurs}
     >
-      <Divider noMargins />
       <ReactRouterLink
         css={css`
           align-self: flex-end;
@@ -661,6 +666,9 @@ function TerminateButton({
         to="/ressurs-terminate/$id"
       >
         <Button
+          css={css`
+            float: right;
+          `}
           data-cy="avslutt-medarbeider-button"
           icon={<PencilIcon aria-hidden />}
           size="small"
@@ -671,5 +679,56 @@ function TerminateButton({
         </Button>
       </ReactRouterLink>
     </EditButtonWrapperRessursSlutter>
+  );
+}
+
+function BottomSection({
+  ressurs,
+  hasWriteAccessForRessurs,
+}: {
+  ressurs: Ressurs;
+  hasWriteAccessForRessurs: boolean;
+}) {
+  const hasAdminAccess = useHasAdminAccess();
+
+  const hasSelfServiceAccess =
+    useGetSession().data?.navident === ressurs.navident;
+
+  if (!hasWriteAccessForRessurs && !hasSelfServiceAccess && !hasAdminAccess) {
+    return;
+  }
+
+  return (
+    <>
+      <Divider />
+
+      <div>
+        {(hasWriteAccessForRessurs ||
+          hasSelfServiceAccess ||
+          hasAdminAccess) && (
+          <ReactRouterLink
+            params={{ id: ressurs.navident }}
+            to="/kontaktpersoner/$id"
+          >
+            <Button
+              css={css`
+                width: fit-content;
+              `}
+              icon={<PersonChatIcon title="a11y-title" />}
+              size="small"
+              type="button"
+              variant="secondary"
+            >
+              Kontaktpersoner
+            </Button>
+          </ReactRouterLink>
+        )}
+
+        <TerminateButton
+          hasWriteAccessForRessurs={hasWriteAccessForRessurs}
+          ressurs={ressurs}
+        />
+      </div>
+    </>
   );
 }
