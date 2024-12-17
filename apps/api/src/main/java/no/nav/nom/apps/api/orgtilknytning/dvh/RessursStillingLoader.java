@@ -98,7 +98,7 @@ public class RessursStillingLoader {
                 erLikt = false;
             }
 
-            var ordsMap = ordsDvhRessursStillinger.stream().collect(Collectors.toMap(this::getRessursStillingUniqueKey, Function.identity()));
+            var ordsMap = ordsDvhRessursStillinger.stream().collect(Collectors.toMap(this::getRessursStillingUniqueKey, Function.identity(), (first, second) -> first));
             int idxSkip = tdvDvhRessursStillinger.size()/200;
             for (int i = 0; i < 200; i++) {
                 int idx = i * idxSkip;
