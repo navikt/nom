@@ -130,6 +130,10 @@ public class OrgtilknytningRestService {
         } else if (ressursState.sektor().erStatlig()) {
             throw InvalidSektorException.actionNotAllowedForSektor(Sektor.NAV_STATLIG);
         }
+
+        // TODO - remote this log statement
+        log.info("Testing OT changes navident: {}, oppdaterOrgtilknytningerForRessursRequest: {}", navident, oppdaterOrgtilknytningerForRessursRequest);
+
         var orgEnheterTilLeder = authorizedNavident.orgenheterLederKanRedigere(getAuthenticatedNavIdent());
         validateOppdaterOrgtilknytningerForRessursRequest(oppdaterOrgtilknytningerForRessursRequest, orgEnheterTilLeder, isLeder);
         var tilknyttetRessurs = ressursStateRepository.findByNavident(navident)
