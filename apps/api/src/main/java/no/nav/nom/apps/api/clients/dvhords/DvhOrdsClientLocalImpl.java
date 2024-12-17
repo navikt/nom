@@ -81,21 +81,6 @@ public class DvhOrdsClientLocalImpl implements DvhOrdsClient {
     }
 
     @Override
-    public JsonNode dvhGetJsonDataBetweenRowNums(String urlPath, int from, int to) {
-        return webClient
-            .get()
-            .uri(uriBuilder -> uriBuilder
-                .path(urlPath.replace("?numRows=0", "RowsBetween"))
-                .queryParam("from", Integer.toString(from))
-                .queryParam("to", Integer.toString(to))
-                .build()
-            )
-            .retrieve()
-            .bodyToMono(JsonNode.class)
-            .block();
-    }
-
-    @Override
     public JsonNode dvhGetJsonDataOrdsPaginated(String urlPath, int offset, int limit) {
         return webClient
             .get()

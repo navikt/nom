@@ -32,7 +32,6 @@ import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
 @Slf4j
 @Service
 public class EksterneRessurserProcessor {
-
     public static final String ORGENHET_NAVN_HELFO = "Helfo";
     public static final String ORGENHET_NAVN_HELFO_ANSATTE = "Helfo ansatte";
     public static final String ORGENHET_NAVN_VIKAFOSSEN = "VikaFossen";

@@ -109,21 +109,6 @@ public class DvhOrds {
     }
 
     @Operation(
-        description = "Hent statlige ressurser tilknytninger - rownum between",
-        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-    )
-    @ApiResponses(
-        {
-            @ApiResponse(responseCode = "200", description = "Success")
-        }
-    )
-    @GetMapping(value = "/statligeRessurserTilknytningerRowsBetween", produces="application/json")
-    public String statligeRessurserTilknytningerRowsBetween(@RequestParam(defaultValue ="0") int from, @RequestParam(defaultValue ="100000") int to) {
-        return dvhOrdsService.getStatligeTilknytningerJsonRowsBetween(from, to).toString();
-    }
-
-
-    @Operation(
             description = "Hent kommunale ressurser",
             security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )

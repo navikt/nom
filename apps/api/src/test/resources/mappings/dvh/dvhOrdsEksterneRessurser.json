@@ -1,0 +1,88 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/dvh_nom/nom_ords_eksterne.json"
+  },
+  "response": {
+    "status": 200,
+    "transformers": [
+      "response-template"
+    ],
+    "jsonBody": {
+      "items": [
+        {
+          "nav_ident": "M000001",
+          "ansatt_type": "Eksternt",
+          "remedy_start_dato": "2013-04-02",
+          "remedy_slutt_dato": "2019-01-29",
+          "remedy_aktiv": "NEI",
+          "remedy_enhet_id": "1902",
+          "remedy_enhet": "Nav Tromsø",
+          "orgenhet_paa_ressurs": "190200",
+          "orgenhet_paa_ressurs_niva": "ORGNIV3"
+        },
+        {
+          "nav_ident": "S000001",
+          "ansatt_type": "Eksternt",
+          "remedy_start_dato": "2017-02-20",
+          "remedy_slutt_dato": "2019-01-29",
+          "remedy_aktiv": "NEI",
+          "remedy_enhet_id": "1902",
+          "remedy_enhet": "Nav Tromsø",
+          "orgenhet_paa_ressurs": "190200",
+          "orgenhet_paa_ressurs_niva": "ORGNIV3"
+        },
+        {
+          "nav_ident": "B000001",
+          "ansatt_type": "Eksternt",
+          "remedy_start_dato": "2013-06-05",
+          "remedy_slutt_dato": "2019-01-29",
+          "remedy_aktiv": "NEI",
+          "remedy_enhet_id": "2990",
+          "remedy_enhet": "IT-avdelingen",
+          "orgenhet_paa_ressurs": "855210",
+          "orgenhet_paa_ressurs_niva": "ORGNIV3"
+        },
+        {
+          "nav_ident": "H000001",
+          "ansatt_type": "Eksternt",
+          "remedy_start_dato": "2012-07-18",
+          "remedy_slutt_dato": "2019-05-03",
+          "remedy_aktiv": "NEI",
+          "remedy_enhet_id": "2990",
+          "remedy_enhet": "IT-avdelingen",
+          "orgenhet_paa_ressurs": "855210",
+          "orgenhet_paa_ressurs_niva": "ORGNIV3"
+        },
+        {
+          "nav_ident": "G000001",
+          "ansatt_type": "Eksternt",
+          "remedy_start_dato": "2012-11-14",
+          "remedy_slutt_dato": "2019-01-29",
+          "remedy_aktiv": "NEI",
+          "remedy_enhet_id": "2990",
+          "remedy_enhet": "IT-avdelingen",
+          "orgenhet_paa_ressurs": "855210",
+          "orgenhet_paa_ressurs_niva": "ORGNIV3"
+        }
+      ],
+      "hasMore": false,
+      "limit": 0,
+      "offset": 0,
+      "count": 5,
+      "links": [
+        {
+          "rel": "self",
+          "href": "https://dvh.adeo.no/ords/dvh/dvh_nom/nom_ords_eksterne.json?q=%7B%22rownum%22:%7B%22%24lte%22:5%7D%7D"
+        },
+        {
+          "rel": "describedby",
+          "href": "https://dvh.adeo.no/ords/dvh/metadata-catalog/dvh_nom/item"
+        }
+      ]
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

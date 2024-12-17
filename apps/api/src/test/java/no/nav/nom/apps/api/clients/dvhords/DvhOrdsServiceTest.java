@@ -96,6 +96,37 @@ class DvhOrdsServiceTest {
     }
 
     @Test
+    void getEksterneRessurser() {
+        var ressurser = dvhOrdsService.getEksterneTilknytninger();
+        assertNotNull(ressurser);
+        assertEquals(5, ressurser.size());
+
+        assertEquals("M000001", ressurser.getFirst().navident());
+        assertEquals(LocalDate.of(2013, 4, 2), ressurser.getFirst().remedyStart());
+        assertEquals(LocalDate.of(2019, 1, 29), ressurser.getFirst().remedySlutt());
+        assertFalse(ressurser.getFirst().remedyAktiv());
+        assertEquals("190200", ressurser.getFirst().orgenhetPaaRessurs());
+        assertEquals("ORGNIV3", ressurser.getFirst().orgenhetPaaRessursNivaa());
+        assertEquals("1902", ressurser.getFirst().remedyEnhetId());
+
+        assertEquals("S000001", ressurser.get(1).navident());
+        assertEquals(LocalDate.of(2017, 2, 20), ressurser.get(1).remedyStart());
+        assertEquals(LocalDate.of(2019, 1, 29), ressurser.get(1).remedySlutt());
+        assertFalse(ressurser.get(1).remedyAktiv());
+        assertEquals("190200", ressurser.get(1).orgenhetPaaRessurs());
+        assertEquals("ORGNIV3", ressurser.get(1).orgenhetPaaRessursNivaa());
+        assertEquals("1902", ressurser.get(1).remedyEnhetId());
+
+        assertEquals("G000001", ressurser.get(4).navident());
+        assertEquals(LocalDate.of(2012, 11, 14), ressurser.get(4).remedyStart());
+        assertEquals(LocalDate.of(2019, 1, 29), ressurser.get(4).remedySlutt());
+        assertFalse(ressurser.get(4).remedyAktiv());
+        assertEquals("855210", ressurser.get(4).orgenhetPaaRessurs());
+        assertEquals("ORGNIV3", ressurser.get(4).orgenhetPaaRessursNivaa());
+        assertEquals("2990", ressurser.get(4).remedyEnhetId());
+    }
+
+    @Test
     void getLedere() {
         var ledere = dvhOrdsService.getLedere();
         assertNotNull(ledere);

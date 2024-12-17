@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Slf4j
 public record DvhEksternRessurs(
@@ -36,6 +37,24 @@ public record DvhEksternRessurs(
         }
     }
 
+    public static DvhEksternRessurs fromOrds(JsonNode json) {
+        try {
+            return new DvhEksternRessurs(
+                json.toPrettyString(),
+                json.get("nav_ident").asText(),
+                getNullableStringNode(json, "remedy_enhet_id"),
+                getNullableStringNode(json, "orgenhet_paa_ressurs"),
+                getNullableStringNode(json, "orgenhet_paa_ressurs_niva"),
+                LocalDate.parse(json.get("remedy_start_dato").asText()),
+                getOrNullIfMaxDate(json, "remedy_slutt_dato"),
+                "JA".equals(json.get("remedy_aktiv").asText())
+            );
+        } catch (Exception e) {
+            log.error("Unable to parse DvhEksternRessurs from {}", json.toString(), e);
+            throw new IllegalArgumentException("Cannot parse json for ekstern ressurs:\n%s".formatted(json.toString()), e);
+        }
+    }
+
     private static LocalDate getOrNullIfMaxDate(JsonNode json, String field_name) {
         JsonNode node = json.get(field_name);
         LocalDate date = null;
@@ -48,5 +67,15 @@ public record DvhEksternRessurs(
     private static String getNullableStringNode(JsonNode json, String field_name) {
         JsonNode node = json.get(field_name);
         return node.isNull() ? null : node.asText();
+    }
+
+    public static boolean compare(DvhEksternRessurs dvhRessursTdv, DvhEksternRessurs dvhRessursOrds) {
+        return Objects.equals(dvhRessursTdv.navident, dvhRessursOrds.navident)
+            && Objects.equals(dvhRessursTdv.remedyEnhetId, dvhRessursOrds.remedyEnhetId)
+            && Objects.equals(dvhRessursTdv.orgenhetPaaRessurs, dvhRessursOrds.orgenhetPaaRessurs)
+            && Objects.equals(dvhRessursTdv.orgenhetPaaRessursNivaa, dvhRessursOrds.orgenhetPaaRessursNivaa)
+            && Objects.equals(dvhRessursTdv.remedyStart, dvhRessursOrds.remedyStart)
+            && Objects.equals(dvhRessursTdv.remedySlutt, dvhRessursOrds.remedySlutt)
+            && dvhRessursTdv.remedyAktiv == dvhRessursOrds.remedyAktiv;
     }
 }

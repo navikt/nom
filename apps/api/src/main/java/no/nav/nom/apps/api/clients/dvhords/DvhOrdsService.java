@@ -9,6 +9,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetV2;
+import no.nav.nom.apps.api.orgtilknytning.dvh.DvhEksternRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import org.springframework.stereotype.Service;
 
@@ -126,10 +127,6 @@ public class DvhOrdsService {
         return dvhOrdsClient.dvhGetJsonDataOrdsPaginated(dvhOrdsProperties.ressursStillingerPath(), offset, limit);
     }
 
-    public JsonNode getStatligeTilknytningerJsonRowsBetween(int from, int to) {
-        return dvhOrdsClient.dvhGetJsonDataBetweenRowNums(dvhOrdsProperties.ressursStillingerPath(), from, to);
-    }
-
     public JsonNode getStatligeTilknytningerJson() {
         return dvhOrdsClient.dvhGetJsonData(dvhOrdsProperties.ressursStillingerPath());
     }
@@ -171,6 +168,12 @@ public class DvhOrdsService {
     }
 
     // Eksterne ressurser tilknytninger
+    public List<DvhEksternRessurs> getEksterneTilknytninger() {
+        return StreamSupport.stream(getEksterneTilknytningerJson().get("items").spliterator(), false)
+            .map(DvhEksternRessurs::fromOrds)
+            .toList();
+    }
+
     public JsonNode getEksterneTilknytningerJson() {
         return dvhOrdsClient.dvhGetJsonData(dvhOrdsProperties.eksterneRessurserPath());
     }
