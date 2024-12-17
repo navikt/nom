@@ -13,6 +13,7 @@ import no.nav.nom.apps.api.orgtilknytning.dvh.DvhEksternRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
@@ -118,9 +119,23 @@ public class DvhOrdsService {
 
     // RessursStillinger/Statlige ressurser tilknytninger
     public List<DvhRessursStilling> getStatligeTilknytninger() {
-        return StreamSupport.stream(getStatligeTilknytningerJson().get("items").spliterator(), false)
+        int page = 1;
+        log.info("Henter statlige tilknytninger fra ORDS DVH - page {}", page++);
+        List<DvhRessursStilling> ressursStillinger = new ArrayList<>();
+        var pagedJson = getStatligeTilknytningerJson();
+        ressursStillinger.addAll(StreamSupport.stream(pagedJson.get("items").spliterator(), false)
             .map(DvhRessursStilling::fromOrdsRessursStilling)
-            .toList();
+            .toList());
+
+        while (pagedJson.get("hasMore").asBoolean()) {
+            log.info("Henter statlige tilknytninger fra ORDS DVH - page {}", page++);
+            pagedJson = dvhOrdsClient.dvhGetJsonData(pagedJson.get("next").asText());
+            ressursStillinger.addAll(StreamSupport.stream(pagedJson.get("items").spliterator(), false)
+                .map(DvhRessursStilling::fromOrdsRessursStilling)
+                .toList());
+        }
+        log.info("Hentet {} statlige tilknytninger fra ORDS DVH", ressursStillinger.size());
+        return ressursStillinger;
     }
 
     public JsonNode getStatligeTilknytningerJsonPaginated(int offset, int limit) {
