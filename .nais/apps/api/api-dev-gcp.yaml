@@ -48,7 +48,7 @@ spec:
     path: internal/health/startupState
     initialDelay: 15
     periodSeconds: 10
-    failureThreshold: 36 # 36*10sec = 6min
+    failureThreshold: 50 # 36*10sec = 6min
   resources:
     requests:
       cpu: 300m
