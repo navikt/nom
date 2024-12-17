@@ -9,6 +9,7 @@ public enum Tilknytningtype {
     EKSTERN_SAMARBEIDSPARTNER,
     FAST,
     INGEN,
+    JOBBSPESIALIST,
     KONSULENT,
     LAERLING,
     MIDLERTIDIG,

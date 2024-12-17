@@ -31,6 +31,7 @@ export const TilknytningtypeNameMapping = {
   [Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER]: "Ekstern samarbeidspartner",
   [Tilknytningtype.ARBEIDSTRENING]: "Arbeidstrening",
   [Tilknytningtype.STUDENT]: "Student",
+  [Tilknytningtype.JOBBSPESIALIST]: "Jobbspesialist",
   [Tilknytningtype.ANNET]: "Annet",
   [Tilknytningtype.INGEN]: "Ingen",
 };
@@ -44,9 +45,10 @@ export const tilknytningstyperStatlige = [
 
 export const tilknytningstyperEksterne = [
   Tilknytningtype.KONSULENT,
-  Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER,
-  Tilknytningtype.ARBEIDSTRENING,
   Tilknytningtype.STUDENT,
+  Tilknytningtype.ARBEIDSTRENING,
+  Tilknytningtype.JOBBSPESIALIST,
+  Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER,
   Tilknytningtype.ANNET,
 ];
 
