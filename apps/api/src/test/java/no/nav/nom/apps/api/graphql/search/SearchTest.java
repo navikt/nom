@@ -75,8 +75,8 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
     @Test
     @DisplayName("Søk på agressoId")
     public void scenario2() {
-        var e1 = new OrgEnhetStateBuilder(1).navn("testid").build();
-        var e2 = new OrgEnhetStateBuilder(2).navn("testid2").build();
+        var e1 = new OrgEnhetStateBuilder(1).navn("testid").uniqueAgressoId(Optional.of("unique-1")).build();
+        var e2 = new OrgEnhetStateBuilder(2).navn("testid2").uniqueAgressoId(Optional.of("unique-2")).build();
         List.of(e1, e2).forEach(kafkaUtils::createOrgenhetHendelseEventSource);
 
         luceneService.addInvalidatedEntitiesToIndex();
@@ -96,7 +96,7 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
     public void scenario3() {
 
         var mocknavn = "testenhet";
-        var e1 = new OrgEnhetStateBuilder(1).navn(mocknavn).build();
+        var e1 = new OrgEnhetStateBuilder(1).navn(mocknavn).uniqueAgressoId(Optional.of("unique-1")).build();
         kafkaUtils.createOrgenhetHendelseEventSource(e1);
         luceneService.addInvalidatedEntitiesToIndex();
 
@@ -113,7 +113,7 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
 
         var r1 = new RessursStateBuilder(1).build();
         var r2 = new RessursStateBuilder(2).visningsnavn("test1", "etternavn").build();
-        var e1 = new OrgEnhetStateBuilder(1).navn("testenhet").build();
+        var e1 = new OrgEnhetStateBuilder(1).navn("testenhet").uniqueAgressoId(Optional.of("unique-1")).build();
 
         List.of(r1,r2).forEach(kafkaUtils::createRessursHendelseEventSource);
         List.of(e1).forEach(kafkaUtils::createOrgenhetHendelseEventSource);
@@ -156,8 +156,8 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
         kafkaUtils.createRessursHendelseEventSource("1");
         kafkaUtils.createRessursHendelseEventSource("2");
 
-        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(1).navn("NAV City").build());
-        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(2).navn("Not-to-find").build());
+        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(1).navn("NAV City").uniqueAgressoId(Optional.of("unique-1")).build());
+        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(2).navn("Not-to-find").uniqueAgressoId(Optional.of("unique-2")).build());
 
         luceneService.addInvalidatedEntitiesToIndex();
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
@@ -197,8 +197,8 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
 
         kafkaUtils.createRessursHendelseEventSource("1");
         kafkaUtils.createRessursHendelseEventSource("2");
-        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(3).navn("test 3").gyldigTom(Optional.of(passedDate)).build());
-        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(4).navn("test 4").build());
+        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(3).navn("test 3").gyldigTom(Optional.of(passedDate)).uniqueAgressoId(Optional.of("unique-1")).build());
+        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(4).navn("test 4").uniqueAgressoId(Optional.of("unique-2")).build());
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
         luceneService.addInvalidatedEntitiesToIndex();
@@ -231,9 +231,9 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
     public void scenario71_orgniv() {
         var r1 = new RessursStateBuilder(1).visningsnavn("fornavn", "etternavn").build();
 
-        var e1 = new OrgEnhetStateBuilder(1).navn("fornavnene").agressoOrgNivaa(Optional.of("ORGNIV2")).build();
-        var e2 = new OrgEnhetStateBuilder(2).navn("fornavnet").build();
-        var e3 = new OrgEnhetStateBuilder(3).navn("fornavn").build();
+        var e1 = new OrgEnhetStateBuilder(1).navn("fornavnene").agressoOrgNivaa(Optional.of("ORGNIV2")).uniqueAgressoId(Optional.of("unique-1")).build();
+        var e2 = new OrgEnhetStateBuilder(2).navn("fornavnet").uniqueAgressoId(Optional.of("unique-2")).build();
+        var e3 = new OrgEnhetStateBuilder(3).navn("fornavn").uniqueAgressoId(Optional.of("unique-3")).build();
 
         List.of(e1, e2, e3).forEach(kafkaUtils::createOrgenhetHendelseEventSource);
         List.of(r1).forEach(kafkaUtils::createRessursHendelseEventSource);
