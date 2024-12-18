@@ -1,11 +1,12 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
+import no.nav.nom.apps.api.authorize.AuthResolver;
+import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -32,16 +33,19 @@ public class RessursExcelGenerator {
         "NAV_KOMMUNAL", "Kommunal",
         "EKSTERN", "Ekstern"
     );
+    private final AuthResolver authResolver;
 
     public RessursExcelGenerator(OrgtilknytningStateRepository orgtilknytningStateRepository,
                                  OrgEnhetStateRepository orgEnhetStateRepository,
-                                 RessursStateRepository ressursStateRepository
+                                 AuthResolver authResolver
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
+        this.authResolver = authResolver;
     }
 
-    public void generate(HttpServletResponse response, List<Ressurs> ressurser, List<String> navidenter) {
+    public void generate(HttpServletResponse response, List<Ressurs> ressurser, List<String> navidenter, String topOrgEnhetId) {
+        var kanSeSluttdato = authResolver.kanOppretteRessurs(topOrgEnhetId);
         var dolMap =  orgtilknytningStateRepository.findByNavidentIn(navidenter).stream()
             .filter(OrgtilknytningState::erDagligOppfolging)
             .collect(Collectors.groupingBy(
@@ -62,7 +66,7 @@ public class RessursExcelGenerator {
             var sheet = workbook.createSheet("Ressurser");
             var rowcount = 0;
 
-            addRow(sheet.createRow(rowcount++), null, null, null);
+            addRow(sheet.createRow(rowcount++), null, null, null, kanSeSluttdato);
 
             for (Ressurs ressurs : ressurser) {
                 var orgEnhetId = dolMap.get(ressurs.state().navident()).orgEnhetId();
@@ -71,7 +75,8 @@ public class RessursExcelGenerator {
                     sheet.createRow(rowcount++),
                     ressurs,
                     String.format("%s (%s)", orgEnhetNavnMap.get(orgEnhetId), orgEnhetId),
-                    dolMap.get(ressurs.state().navident()).gyldigFom()
+                    dolMap.get(ressurs.state().navident()).gyldigFom(),
+                    kanSeSluttdato
                 );
             }
 
@@ -89,13 +94,14 @@ public class RessursExcelGenerator {
         }
     }
 
-    private static void addRow(Row row, Ressurs ressurs, String orgEnhetNavn, LocalDate gyldigFom) {
+    private static void addRow(Row row, Ressurs ressurs, String orgEnhetNavn, LocalDate gyldigFom, boolean kanSeSluttdato) {
         var navident = row.createCell(0, CellType.STRING);
         var navn = row.createCell(1, CellType.STRING);
         var sektor = row.createCell(2, CellType.STRING);
         var orgEnhet = row.createCell(3, CellType.STRING);
         var fom = row.createCell(4, CellType.STRING);
-        var tlf = row.createCell(5, CellType.STRING);
+        var sluttdato = row.createCell(5, CellType.STRING);
+        var tlf = row.createCell(kanSeSluttdato ? 6 : 5, CellType.STRING);
 
 
         if (ressurs == null) {
@@ -104,6 +110,7 @@ public class RessursExcelGenerator {
             sektor.setCellValue("Sektor");
             orgEnhet.setCellValue("Organisasjonsenhet");
             fom.setCellValue("Fra og med");
+            if (kanSeSluttdato) sluttdato.setCellValue("Sluttdato");
             tlf.setCellValue("Epost");
         } else {
             navident.setCellValue(ressurs.state().navident());
@@ -111,6 +118,12 @@ public class RessursExcelGenerator {
             sektor.setCellValue(sektorMap.get(ressurs.state().sektor().name()));
             orgEnhet.setCellValue(orgEnhetNavn);
             fom.setCellValue(gyldigFom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+            if (kanSeSluttdato) {
+                ressurs.state().sluttdato().ifPresentOrElse(
+                    gyldigTom -> sluttdato.setCellValue(gyldigTom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))),
+                    () -> sluttdato.setCellValue("")
+                );
+            }
             tlf.setCellValue(ressurs.epost());
         }
     }

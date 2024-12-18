@@ -212,7 +212,7 @@ logging:
   level:
     no.nav.nom: INFO
     # Kjør med ekstra logging i oppstarten av orgtilknytning
-#    no.nav.nom.apps.api.orgtilknytning: DEBUG
+    #    no.nav.nom.apps.api.orgtilknytning: DEBUG
     # Ekstra logging for test av ny organisering
 #    no.nav.nom.apps.api.organisering: DEBUG
 #    no.nav.nom.apps.api.graphql.organisasjonsenhet: DEBUG
@@ -256,7 +256,7 @@ app:
       teamcat:
         client-id: "16bf0ab5-d09b-4c38-ad6d-71f8d93ff7e4"
         scopes: ["TEAMCAT"]
-#     For testing av endepunkter under /api/v1/teamcat
+      #     For testing av endepunkter under /api/v1/teamcat
       org-token-tool:
         client-id: "18c1d86b-4635-461c-8718-62c130087211"
         scopes: ["TEAMCAT"]
@@ -283,7 +283,7 @@ app:
   orgenhet:
     linjeenhetene: me177r,su645c,hu797w,tu734a
   google-storage-bucket-name:
-    missing-ot: no-nav-org-dev-missing-orgtilnytninger-storage-bucket    
+    missing-ot: no-nav-org-dev-missing-orgtilnytninger-storage-bucket
   clients:
     nom-proxy:
       enhet-path: /proxy/dvh/json/Hr/NOM3_Dev/NOM_HRORG_ORGENHET
@@ -429,7 +429,7 @@ app:
     linjeenhetene: ry630r,ky110z,se232x,ne994m
   google-storage-bucket-name:
     missing-ot: no-nav-org-prod-missing-orgtilnytninger-storage-bucket
-    
+
 NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
 NIK_API_SCOPE: api://prod-gcp.org.nav-ident/.default
 

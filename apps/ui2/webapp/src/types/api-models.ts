@@ -34,6 +34,11 @@ export interface EndreTilknytningtypeRequest {
   tilknytningtype?: Tilknytningtype;
 }
 
+export interface ExcelExportRequest {
+  navidenter?: string[];
+  topOrgEnhetId?: string;
+}
+
 export interface FolkeregisterPerson {
   navn: RessursNavn;
 }

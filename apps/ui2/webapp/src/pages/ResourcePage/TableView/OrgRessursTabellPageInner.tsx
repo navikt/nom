@@ -12,7 +12,11 @@ import { useQuery } from "@tanstack/react-query";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
 
-import { getRessurserByListNavident } from "~/api/react-query-endpoints";
+import {
+  getRessurserByListNavident,
+  harLederTilgangForOrgenhetOptions,
+} from "~/api/react-query-endpoints";
+import { useHasAdminAccess } from "~/api/useGetSession";
 import { useTableSort } from "~/hooks/useTableSort";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import type {
@@ -34,9 +38,11 @@ import {
 export const OrgRessursTabellPageInner = ({
   orgEnheter = [],
   ressurserNavidents,
+  toppOrgEnhetId,
 }: {
   orgEnheter: OrgEnhet[];
   ressurserNavidents: string[];
+  toppOrgEnhetId: string;
 }) => {
   const hentedeRessurserQuery = useQuery({
     queryKey: getRessurserByListNavident.queryKey(ressurserNavidents),
@@ -47,7 +53,9 @@ export const OrgRessursTabellPageInner = ({
   const [page, setPage] = useState(1);
   const rowsPerPage = 300;
   const ressursData = hentedeRessurserQuery.data;
-
+  const isLeader =
+    useQuery(harLederTilgangForOrgenhetOptions(toppOrgEnhetId)).data || false;
+  const isLeaderOrHasAdmin = useHasAdminAccess() || isLeader;
   const customRessurser = createCustomRessurser(
     orgEnheter,
     ressursData as Ressurs[],
@@ -139,6 +147,11 @@ export const OrgRessursTabellPageInner = ({
               <Table.ColumnHeader scope="col" sortKey="tidligsteFom" sortable>
                 Fra og med
               </Table.ColumnHeader>
+              {isLeaderOrHasAdmin && (
+                <Table.ColumnHeader scope="col" sortKey="sluttdato" sortable>
+                  Sluttdato
+                </Table.ColumnHeader>
+              )}
               <Table.ColumnHeader scope="col" sortKey="telefonnumer">
                 Telefonnr.
               </Table.ColumnHeader>
@@ -189,6 +202,15 @@ export const OrgRessursTabellPageInner = ({
                       )
                     : undefined}
                 </Table.DataCell>
+                {isLeaderOrHasAdmin && (
+                  <Table.DataCell>
+                    {ressurs.sluttdato
+                      ? formatDisplayDate(
+                          dateWithoutTimezone(ressurs.sluttdato),
+                        )
+                      : undefined}
+                  </Table.DataCell>
+                )}
                 <Table.DataCell
                   css={css`
                     min-width: 110px;
@@ -231,6 +253,7 @@ interface CustomRessurs {
   sektor: Sektor;
   orgEnheter: CustomOrgEnhet[];
   tidligsteFom?: Date | string;
+  sluttdato?: Date | string;
 }
 
 const createCustomRessurser = (
@@ -270,6 +293,7 @@ const createCustomRessurser = (
       telefoner: ressurs.telefoner,
       orgEnheter: customOrgEnheter,
       tidligsteFom: tidligsteFomDato,
+      sluttdato: ressurs.sluttdato === null ? undefined : ressurs.sluttdato,
     };
 
     return customRessurs;

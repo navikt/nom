@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
@@ -40,6 +41,9 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
+
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
 
 @Tag(name = "Ressurs")
 @RestController
@@ -227,12 +231,12 @@ public class RessursController {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Exported file"),
     })
-    public void getRessursByListNavidentExport(HttpServletResponse response, @Valid @RequestBody List<String> navidenter) throws IOException {
+    public void getRessursByListNavidentExport(HttpServletResponse response, @Valid @RequestBody ExcelExportRequest excelExportRequest) throws IOException {
         try {
+            var navidenter = excelExportRequest.navidenter();
             var ressurser = ressursRestService.findRessurserByNavident(navidenter);
-
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=skjerminger.xlsx");
-            ressursExcelGenerator.generate(response, ressurser, navidenter);
+            ressursExcelGenerator.generate(response, ressurser, navidenter, excelExportRequest.topOrgEnhetId());
         } catch (Exception e) {
             log.error("Failed to generate export file");
             response.sendError(500);

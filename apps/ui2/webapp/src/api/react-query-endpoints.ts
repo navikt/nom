@@ -12,6 +12,7 @@ import { queryOptions } from "@tanstack/react-query";
 
 import type {
   AvvikleRessursRequest,
+  ExcelExportRequest,
   GetPersonRequest,
   LederTilgangForOrgenhetRequest,
   LederTilgangState,
@@ -215,12 +216,12 @@ export const getRessurserByListNavident = {
 };
 
 export const downloadExcelByListNavident = async (
-  navidenter: string[],
+  request: ExcelExportRequest,
   orgenhetNavn: string,
 ) => {
   const response = await axios.post(
     `${NOM_API_BASE_PATH}/app/ressurser/byListNavident/export`,
-    navidenter,
+    request,
     {
       responseType: "blob",
     },

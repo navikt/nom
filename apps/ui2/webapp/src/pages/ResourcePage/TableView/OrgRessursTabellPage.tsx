@@ -21,7 +21,7 @@ import {
 import ContentWrapper from "~/components/ContentWrapper";
 import { PageBanner } from "~/components/PageBanner";
 import { OrgRessursTabellPageInner } from "~/pages/ResourcePage/TableView/OrgRessursTabellPageInner";
-import type { OrgEnhet } from "~/types/api-models";
+import type { ExcelExportRequest, OrgEnhet } from "~/types/api-models";
 import { isPeriodActiveOrFuture } from "~/utils";
 
 export const OrgRessursTabellPage = () => {
@@ -79,7 +79,14 @@ export const OrgRessursTabellPage = () => {
   };
 
   const handleDownloadExcel = async () => {
-    await downloadExcelByListNavident(ressurserNavidents, excelFilNavn());
+    const excelExportRequest = {
+      navidenter: ressurserNavidents,
+      topOrgEnhetId: orgEnhetQuery.data?.id,
+    };
+    await downloadExcelByListNavident(
+      excelExportRequest as ExcelExportRequest,
+      excelFilNavn(),
+    );
   };
 
   if (orgEnhetQuery.isLoading || underliggendeOrgEnhetQuery.isLoading) {
@@ -165,6 +172,7 @@ export const OrgRessursTabellPage = () => {
           <OrgRessursTabellPageInner
             orgEnheter={filteredOrgEnheter}
             ressurserNavidents={ressurserNavidents}
+            toppOrgEnhetId={orgEnhetQuery.data?.id}
           />
         </ContentWrapper>
       </>
