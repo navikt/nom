@@ -42,7 +42,7 @@ public class SecurityUtil {
     }
 
     public void assertAuthorizedAccessTo(String navident) throws AccessDeniedException {
-        if (!isAuthenticated() || getNavIdent() == null || !isLeaderFor(getNavIdent(), navident) && !isAdmin()) {
+        if (!isAuthenticated() || getNavIdent() == null || !isLeaderFor(getNavIdent(), navident) && !isAdmin() && !navident.equals(getNavIdent())) {
             throw new AccessDeniedException("Unauthorized");
         }
     }
