@@ -21,6 +21,7 @@ public class TestData {
             .fid(UUID.randomUUID().toString())
             .navident("X123456")
             .orgEnhetId("orgEnhet123")
+            .sektor(Sektor.NAV_STATLIG)
             .erDagligOppfolging(false)
             .gyldigFom(LocalDate.now().minusMonths(1))
             .gyldigTom(Optional.empty())

@@ -534,6 +534,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytningAnticipatingNewDate = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("1")
+            .sektor(tilknyttetRessurs.sektor())
             .erDagligOppfolging(false)
             .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
             .build();
@@ -541,6 +542,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytningAnticipatingDolChange = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("2")
+            .sektor(tilknyttetRessurs.sektor())
             .erDagligOppfolging(false)
             .gyldigFom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().orElseThrow().plusDays(1))
             .gyldigTom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(gyldigTom -> gyldigTom.plusMonths(1)))
@@ -549,6 +551,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytningAnticipatingNewTilknytningtype = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("3")
+            .sektor(tilknyttetRessurs.sektor())
             .erDagligOppfolging(false)
             .orgtilknytningType(Optional.empty())
             .build();
@@ -650,6 +653,214 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .additionalAgressoData(null)
                 .build()
             );
+    }
+
+    @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} should give exception when OT2 has same orgenhetId with startdate before OT1 enddate")
+    void test_update_orgtilknytninger_duplikate_for_ressurs1() {
+
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("1")
+            .sektor(tilknyttetRessurs.sektor())
+            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .erDagligOppfolging(true)
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .build();
+
+        saveOrgtilknytninger(List.of(
+            existingOrgtilknytning
+        ));
+
+        var existerendeOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
+            .build();
+
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+            .orgEnhetId("1")
+            .sektor(tilknyttetRessurs.sektor())
+            .tilknytningtype(Tilknytningtype.KONSULENT)
+            .erDagligOppfolging(false)
+            .gyldigFom(LocalDate.now().plusDays(1))
+            .gyldigTom(LocalDate.now().plusMonths(1).plusDays(1))
+            .build();
+
+        var opprettetOrgtilknytningFid = UUID.randomUUID().toString();
+
+        when(orgtilknytningCommandService.opprettOrgtilknytning(any())).thenReturn(opprettetOrgtilknytningFid);
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(existerendeOrgtilknytningRequest))
+            .nyeOrgtilknytninger(List.of(leggTilOrgtilknytningRequest))
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().isBadRequest();
+    }
+
+    @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} should give exception when OT2 is active and has same orgenhetId with OT1 which is also active")
+    void test_update_orgtilknytninger_duplikate_for_ressurs2() {
+
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("1")
+            .sektor(tilknyttetRessurs.sektor())
+            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .erDagligOppfolging(true)
+            .gyldigFom(LocalDate.now().minusMonths(1))
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .build();
+
+        saveOrgtilknytninger(List.of(
+            existingOrgtilknytning
+        ));
+
+        var existerendeOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
+            .build();
+
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+            .orgEnhetId("1")
+            .sektor(tilknyttetRessurs.sektor())
+            .tilknytningtype(Tilknytningtype.KONSULENT)
+            .erDagligOppfolging(false)
+            .gyldigFom(LocalDate.now().minusMonths(1).plusDays(1))
+            .gyldigTom(LocalDate.now().plusMonths(1).plusDays(1))
+            .build();
+
+        var opprettetOrgtilknytningFid = UUID.randomUUID().toString();
+
+        when(orgtilknytningCommandService.opprettOrgtilknytning(any())).thenReturn(opprettetOrgtilknytningFid);
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(existerendeOrgtilknytningRequest))
+            .nyeOrgtilknytninger(List.of(leggTilOrgtilknytningRequest))
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().isBadRequest();
+    }
+
+    @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} should give exception when OT2 is added and has same orgenhetId with OT1 which is has no end date")
+    void test_update_orgtilknytninger_duplikate_for_ressurs3() {
+        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(true);
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.NAV_STATLIG).build();
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("1")
+            .sektor(tilknyttetRessurs.sektor())
+            .orgtilknytningType(Optional.of(Tilknytningtype.FAST))
+            .erDagligOppfolging(true)
+            .gyldigFom(LocalDate.now().minusMonths(1))
+            .gyldigTom(Optional.empty())
+            .build();
+
+        saveOrgtilknytninger(List.of(
+            existingOrgtilknytning
+        ));
+
+        var existerendeOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
+            .build();
+
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+            .orgEnhetId("1")
+            .sektor(tilknyttetRessurs.sektor())
+            .tilknytningtype(Tilknytningtype.FAST)
+            .erDagligOppfolging(false)
+            .gyldigFom(LocalDate.now().plusMonths(1))
+            .gyldigTom(null)
+            .build();
+
+        var opprettetOrgtilknytningFid = UUID.randomUUID().toString();
+
+        when(orgtilknytningCommandService.opprettOrgtilknytning(any())).thenReturn(opprettetOrgtilknytningFid);
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(existerendeOrgtilknytningRequest))
+            .nyeOrgtilknytninger(List.of(leggTilOrgtilknytningRequest))
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomAdminUser(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().isBadRequest();
+    }
+
+    @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} should not exception when OT2 is added and has same orgenhetId with OT1 and both are active, but sektoer is different")
+    void test_update_orgtilknytninger_duplikate_for_ressurs4() {
+        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(true);
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.NAV_STATLIG).build();
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("1")
+            .sektor(tilknyttetRessurs.sektor())
+            .orgtilknytningType(Optional.of(Tilknytningtype.FAST))
+            .erDagligOppfolging(true)
+            .gyldigFom(LocalDate.now().minusMonths(1))
+            .gyldigTom(Optional.empty())
+            .build();
+
+        saveOrgtilknytninger(List.of(
+            existingOrgtilknytning
+        ));
+
+        var existerendeOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
+            .build();
+
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+            .orgEnhetId("1")
+            .sektor(Sektor.EKSTERN)
+            .tilknytningtype(Tilknytningtype.KONSULENT)
+            .erDagligOppfolging(false)
+            .gyldigFom(LocalDate.now().plusMonths(1))
+            .gyldigTom(LocalDate.now().plusMonths(2))
+            .build();
+
+        var opprettetOrgtilknytningFid = UUID.randomUUID().toString();
+
+        when(orgtilknytningCommandService.opprettOrgtilknytning(any())).thenReturn(opprettetOrgtilknytningFid);
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(existerendeOrgtilknytningRequest))
+            .nyeOrgtilknytninger(List.of(leggTilOrgtilknytningRequest))
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomAdminUser(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().is2xxSuccessful();
     }
 
     @Test
@@ -979,6 +1190,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .fid(fid)
                 .orgEnhetId(UUID.randomUUID().toString())
                 .erDagligOppfolging(false)
+                .sektor(tilknyttetRessurs.sektor())
                 .navident(tilknyttetRessurs.navident())
                 .build()
         ).toList());
@@ -1008,6 +1220,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             orgtilknytningState().toBuilder()
                 .fid(fid)
                 .orgEnhetId(UUID.randomUUID().toString())
+                .sektor(tilknyttetRessurs.sektor())
                 .erDagligOppfolging(false)
                 .navident(tilknyttetRessurs.navident())
                 .build()
@@ -1128,6 +1341,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     private static EndreOrgtilknytningRequest endreOrgtilknytningRequest() {
         return EndreOrgtilknytningRequest.builder()
             .fid(UUID.randomUUID().toString())
+            .sektor(Sektor.NAV_STATLIG)
             .gyldigFom(LocalDate.now().minusMonths(4))
             .gyldigTom(LocalDate.now().plusMonths(1))
             .erDagligOppfolging(false)
@@ -1140,6 +1354,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .gyldigFom(fromOrgtilknytningState.gyldigFom())
             .gyldigTom(fromOrgtilknytningState.gyldigTom().orElse(null))
             .erDagligOppfolging(fromOrgtilknytningState.erDagligOppfolging())
+            .sektor(fromOrgtilknytningState.sektor())
             .tilknytningtype(fromOrgtilknytningState.orgtilknytningType().orElse(null))
             .build();
     }

@@ -45,4 +45,10 @@ public class InvalidOppdaterOrgtilknytningerForRessursRequestException extends R
             )
         );
     }
+
+    public static InvalidOppdaterOrgtilknytningerForRessursRequestException duplikatOrgtilknytning(String orgenhetNavn, String orgenhetId) {
+        return new InvalidOppdaterOrgtilknytningerForRessursRequestException(
+            "Duplikat orgtilknytning for orgenhet %s (%s)".formatted(orgenhetNavn, orgenhetId)
+        );
+    }
 }

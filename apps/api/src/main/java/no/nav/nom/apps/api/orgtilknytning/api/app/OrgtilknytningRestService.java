@@ -174,6 +174,73 @@ public class OrgtilknytningRestService {
         nomMastered.markRessursAsMasteredInNom(navident);
     }
 
+    private void validateOrgtilknytningerHasNoActiveAndSektorAndTilknytningDuplicates(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
+        var nyeOrgtilknytninger = oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().stream()
+            .map(leggTilOrgtilknytningRequest ->
+                OrgtilknytningState.builder()
+                    .orgEnhetId(leggTilOrgtilknytningRequest.orgEnhetId())
+                    .sektor(leggTilOrgtilknytningRequest.sektor())
+                    .orgtilknytningType(Optional.ofNullable(leggTilOrgtilknytningRequest.tilknytningtype()))
+                    .gyldigFom(leggTilOrgtilknytningRequest.gyldigFom())
+                    .gyldigTom(Optional.ofNullable(leggTilOrgtilknytningRequest.gyldigTom()))
+                    .build())
+            .toList();
+
+        var eksisterendeOrgtilknytninger = oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().stream()
+            .map(endreOrgtilknytningRequest ->
+                OrgtilknytningState.builder()
+                    .orgEnhetId(orgtilknytningStateRepository.findByFid(endreOrgtilknytningRequest.fid()).map(OrgtilknytningState::orgEnhetId).orElse(""))
+                    .sektor(endreOrgtilknytningRequest.sektor())
+                    .orgtilknytningType(Optional.ofNullable(endreOrgtilknytningRequest.tilknytningtype()))
+                    .gyldigFom(endreOrgtilknytningRequest.gyldigFom())
+                    .gyldigTom(Optional.ofNullable(endreOrgtilknytningRequest.gyldigTom()))
+                    .build())
+            .toList();
+
+        Map<String, List<OrgtilknytningState>> possibleDuplicates = Stream.concat(nyeOrgtilknytninger.stream(), eksisterendeOrgtilknytninger.stream())
+            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()) || orgtilknytningState.gyldigFom().isAfter(LocalDate.now()))
+            .collect(Collectors.groupingBy(OrgtilknytningState::orgEnhetId))
+            .entrySet().stream()
+            .filter(entry -> entry.getValue().size() > 1)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        for (Map.Entry<String, List<OrgtilknytningState>> entry : possibleDuplicates.entrySet()) {
+            entry.getValue().sort(Comparator.comparing(OrgtilknytningState::gyldigFom));
+            var firstDuplicate = entry.getValue().getFirst();
+            for (int i = 1; i < entry.getValue().size(); i++) {
+                var duplicate = entry.getValue().get(i);
+                if (isPeriodActive(firstDuplicate.gyldigFom(), firstDuplicate.gyldigTom())
+                    && isPeriodActive(duplicate.gyldigFom(), duplicate.gyldigTom())
+                    && firstDuplicate.sektor().equals(duplicate.sektor())
+                    && firstDuplicate.orgtilknytningType().equals(duplicate.orgtilknytningType())) {
+                    throw InvalidOppdaterOrgtilknytningerForRessursRequestException.duplikatOrgtilknytning(
+                        firstDuplicate.orgEnhetId(),
+                        entry.getKey()
+                    );
+                }
+
+                if (firstDuplicate.gyldigTom().isPresent() && duplicate.gyldigFom().isBefore(firstDuplicate.gyldigTom().get())
+                    && firstDuplicate.sektor().equals(duplicate.sektor())
+                    && firstDuplicate.orgtilknytningType().equals(duplicate.orgtilknytningType())) {
+                    throw InvalidOppdaterOrgtilknytningerForRessursRequestException.duplikatOrgtilknytning(
+                        firstDuplicate.orgEnhetId(),
+                        entry.getKey()
+                    );
+                }
+
+                if (firstDuplicate.gyldigTom().isEmpty() && duplicate.gyldigFom().isAfter(firstDuplicate.gyldigFom())
+                    && firstDuplicate.sektor().equals(duplicate.sektor())
+                    && firstDuplicate.orgtilknytningType().equals(duplicate.orgtilknytningType())) {
+                    throw InvalidOppdaterOrgtilknytningerForRessursRequestException.duplikatOrgtilknytning(
+                        firstDuplicate.orgEnhetId(),
+                        entry.getKey()
+                    );
+                }
+                firstDuplicate = duplicate;
+            }
+        }
+    }
+
     private void oppdaterRessursStartdato(RessursState tilknyttetRessurs, OppdaterOrgtilknytningerForRessursRequest request) {
 
         var endredeFomDatoer = request.eksisterendeOrgtilknytninger().stream()
@@ -197,6 +264,10 @@ public class OrgtilknytningRestService {
         validateEndreOrgtilknytningUnderToMaaneder(oppdaterOrgtilknytningerForRessursRequest);
         validateChronologicalDates(oppdaterOrgtilknytningerForRessursRequest);
         validateNoOverlappingDagligeOppfolginger(oppdaterOrgtilknytningerForRessursRequest);
+        if (unleash.isEnabled("nom.validering_av_duplikate_orgenhet")) {
+            validateOrgtilknytningerHasNoActiveAndSektorAndTilknytningDuplicates(oppdaterOrgtilknytningerForRessursRequest);
+        }
+
     }
 
     private void validateEndreOrgtilknytningUnderToMaaneder(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
@@ -540,11 +611,7 @@ public class OrgtilknytningRestService {
     private boolean endreOrgtilknytningRequestProvidesChangesToState(
         EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState
     ) {
-        if (unleash.isEnabled("nom.ny-sette-sektor-logikk")) {
-            validateSektorCanBeChangedNyValidering(endreOrgtilknytningRequest, currentOrgtilknytningState);
-        } else {
-            validateSektorCanBeChanged(endreOrgtilknytningRequest, currentOrgtilknytningState);
-        }
+        validateSektorCanBeChanged(endreOrgtilknytningRequest, currentOrgtilknytningState);
 
         return !(
             endreOrgtilknytningRequest.gyldigFom().equals(currentOrgtilknytningState.gyldigFom())
@@ -555,19 +622,10 @@ public class OrgtilknytningRestService {
         );
     }
 
-    private static void validateSektorCanBeChangedNyValidering(EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState) {
+    private static void validateSektorCanBeChanged(EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState) {
         if (!loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)
             && isNotNull(endreOrgtilknytningRequest.sektor())
             && (!endreOrgtilknytningRequest.sektor().equals(currentOrgtilknytningState.sektor()) && isNotNull(currentOrgtilknytningState.sektor()))) {
-            throw InvalidSektorException.sektorCannotBeChanged();
-        }
-    }
-
-    private static void validateSektorCanBeChanged(EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState) {
-        if (!loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)
-            && !isNull(endreOrgtilknytningRequest.sektor())
-            && !endreOrgtilknytningRequest.sektor().equals(currentOrgtilknytningState.sektor())
-            && !endreOrgtilknytningRequest.gyldigFom().isAfter(LocalDate.now())) {
             throw InvalidSektorException.sektorCannotBeChanged();
         }
     }
