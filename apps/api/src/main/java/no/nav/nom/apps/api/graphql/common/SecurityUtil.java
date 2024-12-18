@@ -134,7 +134,6 @@ public class SecurityUtil {
 
 
     public static boolean loggedInUserHasAccessScope(NomApiAccessScope nomApiAccessScope) {
-        logger.info("logged in user has these authorities: {}", SecurityContextHolder.getContext().getAuthentication().getAuthorities());
         return SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(nomApiAccessScope.asGrantedAuthority());
     }
 
