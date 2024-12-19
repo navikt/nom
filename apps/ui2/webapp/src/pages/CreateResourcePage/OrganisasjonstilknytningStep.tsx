@@ -456,7 +456,7 @@ function Orgtilknytningsvarighet({
           <DatePicker.Input
             {...startDatePicker.inputProps}
             error={gyldigFomController.fieldState.error?.message?.toString()}
-            label="Startdato (første arbeidsdag)"
+            label="Startdato (første dag iht. kontrakt)"
             ref={gyldigFomController.field.ref}
           />
         </DatePicker>

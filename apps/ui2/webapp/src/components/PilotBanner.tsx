@@ -58,16 +58,19 @@ const PilotBanner = () => {
       </div>
 
       {isOpen && (
-        <List as="ul" css={textDivStyles} title="September 2024">
+        <List as="ul" css={textDivStyles} title="Desember 2024">
           <List.Item>
-            Alle kommunalt ansatte og eksterne konsulenter skal nå opprettes og
-            vedlikeholdes i NOM
+            Pilotenheter administrerer statlige medarbeidere i NOM.
+          </List.Item>
+          <List.Item>Støtte for sektorbytte.</List.Item>
+          <List.Item>
+            Støtte for å masseflytte medarbeidere fra én orgenhet til en annen.
           </List.Item>
           <List.Item>
-            Tabellvisning av medarbeidere i en organisasjonsenhet
+            Mulighet for å endre kontaktinfo for kontaktpersoner (pårørende).
           </List.Item>
           <List.Item>
-            Ny tilbakemeldingsfunksjon er lansert (nederst til høyre)
+            Administrering av alle statlige medarbeidere i NOM kommer i januar.
           </List.Item>
         </List>
       )}

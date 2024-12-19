@@ -147,7 +147,7 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
       </div>
       <PanelLink
         href="https://it-hjelpa.adeo.no/arsys/home"
-        label="Gi tilganger i Identrutinen"
+        label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
       />
       {/*TODO: disse burde ikke være hrefs, men bruker Routeren sine lenker slik at det ikke gjøres en sidenavigasjon og hele siden må lastes på nytt.*/}
       <PanelLink
@@ -164,7 +164,7 @@ function PanelLink({ label, href }: { label: string; href: string }) {
     <Link
       css={css`
         display: flex;
-        width: 60%;
+        width: 70%;
         margin: auto;
         padding: var(--a-spacing-4);
         border: 1px solid var(--a-border-default);

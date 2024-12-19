@@ -381,11 +381,10 @@ function OrgtilknytningForm({
 
   return (
     <FormProvider {...methods}>
+      <Informasjonsboks ressursSektor={ressurs.sektor} />
       <OrgtilknytningTimeline
         orgtilknytninger={watch("mappedeOrgtilknytninger")}
       />
-
-      <Informasjonsboks ressursSektor={ressurs.sektor} />
 
       <form autoComplete="false" onSubmit={handleSubmit(onValid)}>
         {hasAdminOrWriteAccess && (
@@ -1160,6 +1159,7 @@ function Informasjonsboks({ ressursSektor }: { ressursSektor: Sektor }) {
       aria-label="Veiledning for utfylling"
       css={css`
         margin-top: var(--a-spacing-9);
+        margin-bottom: var(--a-spacing-9);
       `}
       defaultOpen
     >
