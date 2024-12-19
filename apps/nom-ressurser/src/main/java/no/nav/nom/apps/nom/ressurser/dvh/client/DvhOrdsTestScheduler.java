@@ -20,7 +20,7 @@ public class DvhOrdsTestScheduler {
         this.dvhOrdsClient = dvhOrdsClient;
     }
 
-    @Scheduled(fixedDelay = DELAY)
+//    @Scheduled(fixedDelay = DELAY)
     public void dvhScheduler(){
         testOrds();
     }
@@ -53,7 +53,7 @@ public class DvhOrdsTestScheduler {
                 testSekvens.getAnsatteResultList().getLast().getOffset());
 
             var testSekvens2 = dvhOrdsClient.dvhGetDataInSekvens(417884, 418884);
-            log.info("Test av ORDS - lest sekvens [417884 - 418884] - antall lest: {}  (burde være 20 stk)", testSekvens2.getAnsatteResultList().size());
+            log.info("Test av ORDS - lest sekvens [417884 - 418884] - antall lest: {}  (burde være 32 stk)", testSekvens2.getAnsatteResultList().size());
             log.info("Test av ORDS - lest sekvens [417884 - 418884] - første pk: {}  siste pk: {}",
                 testSekvens2.getAnsatteResultList().getFirst().getOffset(),
                 testSekvens2.getAnsatteResultList().getLast().getOffset());
