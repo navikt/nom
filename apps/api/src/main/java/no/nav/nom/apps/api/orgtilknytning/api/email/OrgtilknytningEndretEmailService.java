@@ -16,6 +16,7 @@ import no.nav.nom.apps.api.orgtilknytning.api.app.MasseFlyttingRequest;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -32,8 +33,6 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.MessageFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -314,5 +313,10 @@ public class OrgtilknytningEndretEmailService {
         additionalRecipients.add("Line.Eeg-Larsen@nav.no");
         additionalRecipients.add("Mugunthan.Dharmadas@nav.no");
         return additionalRecipients;
+    }
+
+    public String getNavidentFromEvent(OrgtilknytningEvent event) {
+        var orgtilknytningState = orgtilknytningStateRepository.findByFid( event.getFid());
+        return orgtilknytningState.map(OrgtilknytningState::navident).orElse(null);
     }
 }
