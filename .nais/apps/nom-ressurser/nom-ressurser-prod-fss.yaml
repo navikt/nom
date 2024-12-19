@@ -16,6 +16,8 @@ spec:
       value: prod
     - name: LOGGING_CONFIG
       value: 'classpath:logback-nais.xml'
+  envFrom:
+    - secret: dvh-ords-secret
   image: "{{image}}"
   port: 8080
   ingresses:

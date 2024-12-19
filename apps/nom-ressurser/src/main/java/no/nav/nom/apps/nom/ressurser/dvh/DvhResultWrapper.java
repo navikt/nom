@@ -5,11 +5,13 @@ import lombok.Getter;
 
 import java.util.List;
 
-@Getter
 public class DvhResultWrapper {
     @JsonProperty("Nom_AnsatteResult")
-    private List<DvhRessursDTO> ansatteResultList;
-}
+    private List<DvhRessursTdvDTO> ansatteResultList;
 
+    public List<DvhRessursTdvDTO> getAnsatteResultList() {
+        return ansatteResultList;
+    }
+}
 
 

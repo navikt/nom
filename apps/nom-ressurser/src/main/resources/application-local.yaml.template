@@ -5,6 +5,7 @@ app:
 
 dvh:
   endpoint: dummyUrl
+  ords-endpoint: dummyUrl
 
 spring:
   datasource:
