@@ -11,6 +11,7 @@ app:
 
 dvh:
   endpoint: ${DVH_ENDPOINT}
+  ords-endpoint: https://dvh.adeo.no/ords/dvh/dvh_nom/nom_ords_ansatte_historikk.json
 
 server:
   error:
@@ -70,6 +71,16 @@ spring:
         jwt:
           issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
           audiences: ${AZURE_APP_CLIENT_ID}
+      client:
+        registration:
+          dvh-ords:
+            provider: dvh-ords
+            client-id:  ${DVH_ORDS_CLIENT_ID:dvh_client_id}
+            client-secret:  ${DVH_ORDS_CLIENT_SECRET:dvh_client_secret}
+            authorization-grant-type: client_credentials
+        provider:
+          dvh-ords:
+            token-uri: https://dvh.adeo.no/ords/dvh/oauth/token
 
 ---
 spring:

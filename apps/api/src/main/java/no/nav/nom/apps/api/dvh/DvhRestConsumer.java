@@ -102,7 +102,7 @@ public class DvhRestConsumer {
 
         log.info("State topics er lest, fortsetter schedulert oppdatering fra DVH etter {}", durationAsH24(start));
 
-        loadLedereAndOrganiseringerFromDvh();
+        var ledereLastOk = loadLedereAndOrganiseringerFromDvh();
         loadTlfFromDvh();
 
         updateShadowOrgtilknytningerForKommunaleFromDvh();
@@ -110,7 +110,7 @@ public class DvhRestConsumer {
 
         authorizedNavident.oppdaterLedereForOrgenheter();
 
-        if (!dvhStartupLoadMonitor.hasCompleted()) { // Pod kan markeres som klar etter oppstart
+        if (!dvhStartupLoadMonitor.hasCompleted() && ledereLastOk) { // Pod kan markeres som klar etter oppstart
             dvhStartupLoadMonitor.setCompleted();
             log.info("Initial oppdatering fra DVH er klar. Etter {}", durationAsH24(start));
         }
@@ -192,7 +192,7 @@ public class DvhRestConsumer {
                 .flatMap(Collection::stream)
                 .toList();
 
-            getOrdsJsonRessurserAndCompare(dvhRessurs);
+//            getOrdsJsonRessurserAndCompare(dvhRessurs);
 
             ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
             dvhRepository.saveAnnenStatNavIdenter(findAnnenStatNavIdenter(dvhRessurs));
@@ -299,7 +299,7 @@ public class DvhRestConsumer {
                 tlfRader = dvhOldTdvService.getTdvTelefoner();
             }
 
-            getOrdsTelefonerAndCompare(tlfRader);
+//            getOrdsTelefonerAndCompare(tlfRader);
 
             log.info("Telefonnr lastet: Antall rader = " + tlfRader.size());
             dvhRepository.saveTlf(tlfRader);
@@ -342,7 +342,7 @@ public class DvhRestConsumer {
     }
 
 
-    public void loadLedereAndOrganiseringerFromDvh() {
+    public boolean loadLedereAndOrganiseringerFromDvh() {
         log.info("Laster ledere og Organisering fra dvh");
         try {
             List<DvhLeder> ledere;
@@ -361,12 +361,14 @@ public class DvhRestConsumer {
             dvhService.saveLedere(ledere);
             dvhService.setOrganiserteOrgenheter(organiseringer); // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState
 
-            getOrdsJsonLedereAndOrganiseringAndCompare(ledere, organiseringer);
+//            getOrdsJsonLedereAndOrganiseringAndCompare(ledere, organiseringer);
 
             organiseringService.saveOrganiseringer(organiseringer);
+            return true;
         } catch (Exception e) {
             log.error("Failure loading ledere og Organisering data from DVH", e);
         }
+        return false;
     }
 
     public void getOrdsJsonLedereAndOrganiseringAndCompare(List<DvhLeder> tdvLedere, List<DvhOrganisering> tdvOrganiseringer) {

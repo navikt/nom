@@ -16,12 +16,11 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class DvhConsumerProcessorService {
-
     private static final LocalDate D2099 = LocalDate.of(2099, 12, 31);
 
     private final RessursRepository ressursRepository;
 
-    public void processRessurser(final List<DvhRessursDTO> dvhRessurser) {
+    public void processRessurser(final List<? extends DvhRessursDTO> dvhRessurser) {
         dvhRessurser.sort(Comparator.comparingLong(DvhRessursDTO::getOffset));
         dvhRessurser.stream()
                 .filter(ressurs -> {

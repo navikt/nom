@@ -10,8 +10,7 @@ class DvhResponseWrapper {
     @JsonProperty("Nom_AnsatteResponse")
     private DvhResultWrapper dvhResultWrapper;
 
-
-    List<DvhRessursDTO> getAnsattResultList(){
+    List<DvhRessursTdvDTO> getAnsattResultList(){
         return (dvhResultWrapper != null) ? dvhResultWrapper.getAnsatteResultList() : null;
     }
 }

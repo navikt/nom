@@ -18,9 +18,9 @@ import {
   harLederTilgangForNavidentOptions,
 } from "~/api/react-query-endpoints";
 import {
-  useGetSession,
   useHasAdminAccess,
   useHasPilotAccess,
+  useHasSelvbetjeningAccess,
   useHasWriteAccess,
 } from "~/api/useGetSession";
 import { LabelWithValue } from "~/components/LabelWithValue";
@@ -28,6 +28,7 @@ import { UserImage } from "~/components/UserImage";
 import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import type { Ressurs } from "~/types/api-models";
+import { TelefonType } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
 import { formatDisplayDate, formatTlf, formatVisningsnavn } from "~/utils";
 
@@ -95,13 +96,12 @@ function EditButton({ ressurs }: { ressurs: Ressurs }) {
   const hasWriteAccessForRessurs =
     useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
 
-  const hasWriteAccessForSelvbetjening =
-    useGetSession().data?.navident === ressurs.navident;
+  const hasSelvbetjeningAccess = useHasSelvbetjeningAccess(ressurs.navident);
 
   if (
     hasAdminAccess ||
     (hasWriteAccess && hasWriteAccessForRessurs) ||
-    hasWriteAccessForSelvbetjening
+    hasSelvbetjeningAccess
   ) {
     const canEditStatlige = hasAdminAccess || hasPilotAccess;
 
@@ -163,7 +163,7 @@ export function Navident({ ressurs }: { ressurs: Ressurs }) {
 export function StartDato({ ressurs }: { ressurs: Ressurs }) {
   return (
     <LabelWithValue
-      helpText="Første arbeidsdag medarbeideren jobbet for NAV. Datoen kan være fra tidligere arbeidsforhold i NAV. (Historiske startdatoer fra noen år tilbake kan avvike noe fra den faktiske første arbeidsdagen. Datoen vil da vanligvis representere dagen NAV-identen ble opprettet.) "
+      helpText="Første arbeidsdag medarbeideren jobbet for NAV. Datoen kan være fra tidligere arbeidsforhold i NAV. (Historiske startdatoer fra noen år tilbake kan avvike noe fra den faktiske første arbeidsdagen. Datoen vil da vanligvis representere dagen NAV-identen ble opprettet.)"
       label="Startdato"
       value={formatDisplayDate(ressurs.startdato)}
     />
@@ -177,10 +177,13 @@ export function SluttDato({ ressurs }: { ressurs: Ressurs }) {
   const hasWriteAccessForRessurs =
     useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
 
+  const hasSelvbetjeningAccess = useHasSelvbetjeningAccess(ressurs.navident);
+
   if (
     ressurs.sluttdato &&
     (hasAdminAccess ||
       (hasWriteAccess && hasWriteAccessForRessurs) ||
+      hasSelvbetjeningAccess ||
       ressurs.sektor === "EKSTERN")
   ) {
     return (
@@ -201,7 +204,7 @@ export function SektorView({ ressurs }: { ressurs: Ressurs }) {
 }
 
 export function Epost({ ressurs }: { ressurs: Ressurs }) {
-  return <LabelWithValue label="E-post" value={ressurs.epost} />;
+  return <LabelWithValue label="E-post" value={ressurs.epost?.toLowerCase()} />;
 }
 
 export function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {
@@ -216,14 +219,54 @@ export function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {
   );
 }
 
-export function TelefonNummere({ ressurs }: { ressurs: Ressurs }) {
-  return ressurs.primaryTelefonnummer ? (
-    <LabelWithValue
-      label="Telefon"
-      value={formatTlf(ressurs.primaryTelefonnummer)}
-    />
-  ) : (
-    <></>
+export function TelefonNummere({
+  ressurs,
+  hidePrivat,
+}: {
+  ressurs: Ressurs;
+  hidePrivat?: boolean;
+}) {
+  const formaterOgFjernDuplikater = (numre: string[]) =>
+    Array.from(new Set(numre.map((nummer) => formatTlf(nummer))));
+
+  const kontorTelefoner = formaterOgFjernDuplikater(
+    ressurs.telefoner
+      .filter(
+        (telefonnummer) =>
+          telefonnummer.type === TelefonType.NAV_KONTOR_TELEFON,
+      )
+      .map((telefonnummer) => telefonnummer.nummer),
+  );
+
+  const tjenesteTelefoner = formaterOgFjernDuplikater(
+    ressurs.telefoner
+      .filter(
+        (telefonnummer) =>
+          telefonnummer.type === TelefonType.NAV_TJENESTE_TELEFON,
+      )
+      .map((telefonnummer) => telefonnummer.nummer),
+  );
+
+  const privatTelefon = ressurs.primaryTelefonnummer
+    ? formatTlf(ressurs.primaryTelefonnummer)
+    : undefined;
+
+  return (
+    <>
+      <LabelWithValue
+        label="Kontortelefon"
+        value={kontorTelefoner.join(", ")}
+      />
+
+      <LabelWithValue
+        label="Tjenestetelefon"
+        value={tjenesteTelefoner.join(", ")}
+      />
+
+      {!hidePrivat && (
+        <LabelWithValue label="Privattelefon" value={privatTelefon} />
+      )}
+    </>
   );
 }
 

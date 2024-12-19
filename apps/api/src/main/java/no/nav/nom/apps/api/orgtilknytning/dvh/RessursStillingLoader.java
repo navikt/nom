@@ -82,7 +82,7 @@ public class RessursStillingLoader {
                 .collect(Collectors.toList());
         }
 
-        getOrdsRessursStillingerAndCompare(ressursStillinger);
+//        getOrdsRessursStillingerAndCompare(ressursStillinger);
 
         log.info("Lastet {} ressursStillinger. Tok {}", ressursStillinger.size(), durationAsH24(start));
         return ressursStillinger;

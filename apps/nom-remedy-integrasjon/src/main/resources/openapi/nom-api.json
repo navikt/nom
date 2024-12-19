@@ -1003,10 +1003,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
+                "$ref": "#/components/schemas/ExcelExportRequest"
               }
             }
           },
@@ -1280,8 +1277,42 @@
       }
     },
     "/app/ressurser/{navident}/telefonnummer": {
+      "get": {
+        "description": "Henter telefonnummer for en ressurs",
+        "operationId": "getTelefonnummer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "navident",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Telefonnummer"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      },
       "post": {
-        "description": "Endrer telefonnummer for en ressurs",
+        "description": "Endrer primaryTelefonnummer for en ressurs",
         "operationId": "updatePrimarytelefonnummer",
         "parameters": [
           {
@@ -1407,6 +1438,20 @@
         "properties": {
           "tilknytningtype": {
             "$ref": "#/components/schemas/Tilknytningtype"
+          }
+        }
+      },
+      "ExcelExportRequest": {
+        "type": "object",
+        "properties": {
+          "navidenter": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "topOrgEnhetId": {
+            "type": "string"
           }
         }
       },
@@ -1581,7 +1626,6 @@
           "beholdTilganger",
           "nyOrgenhetId",
           "orgtilknytningerFid"
-
         ],
         "type": "object",
         "properties": {
@@ -2163,13 +2207,16 @@
         "type": "string",
         "enum": [
           "ARBEIDSTRENING",
+          "ANNET",
           "EKSTERN_SAMARBEIDSPARTNER",
           "FAST",
           "INGEN",
+          "JOBBSPESIALIST",
           "KONSULENT",
           "LAERLING",
           "MIDLERTIDIG",
-          "PENSJONIST"
+          "PENSJONIST",
+          "STUDENT"
         ]
       },
       "UpdateFysiskeBrukerstederRequest": {

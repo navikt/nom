@@ -135,7 +135,7 @@ public class KommunaleRessurserLoader {
                 .toList();
         }
 
-        getOrdsKommunaleRessurserAndCompare(dvhKommunaleRessurser, aktiveKommunaleNavidenter);
+//        getOrdsKommunaleRessurserAndCompare(dvhKommunaleRessurser, aktiveKommunaleNavidenter);
 
         log.info("Lastet {} Dvh Kommunale Ressurser. Tok {}", dvhKommunaleRessurser.size(), durationAsH24(start));
         return dvhKommunaleRessurser;

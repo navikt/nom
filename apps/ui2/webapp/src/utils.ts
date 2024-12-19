@@ -121,11 +121,27 @@ export function isPeriodActive(
   );
 }
 
+export function isPeriodPast(
+  gyldigFom: Date | string,
+  gyldigTom: Date | string | undefined,
+) {
+  return isBeforeToday(gyldigFom) && gyldigTom && isBeforeToday(gyldigFom);
+}
+
 export function isPeriodFuture(
   gyldigFom: Date | string,
   gyldigTom: Date | string | undefined,
 ) {
   return isAfterToday(gyldigFom) && (!gyldigTom || isAfterToday(gyldigFom));
+}
+
+export function isPeriodActiveOrPast(
+  gyldigFom: Date | string,
+  gyldigTom: Date | string | undefined,
+) {
+  return (
+    isPeriodActive(gyldigFom, gyldigTom) || isPeriodPast(gyldigFom, gyldigTom)
+  );
 }
 
 export function isPeriodActiveOrFuture(

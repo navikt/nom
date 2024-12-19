@@ -39,9 +39,10 @@ import {
   SektorView,
   SluttDato,
   StartDato,
+  TelefonNummere,
 } from "~/pages/ResourcePage/RessursComponents/PersonOpplysninger";
 import { type Ressurs } from "~/types/api-models";
-import { formatVisningsnavn } from "~/utils";
+import { formatTlf, formatVisningsnavn } from "~/utils";
 
 export function EditPersonOpplysninger({
   ressurs,
@@ -58,7 +59,9 @@ export function EditPersonOpplysninger({
     fornavn: ressurs.visningsnavn.fornavn,
     mellomnavn: ressurs.visningsnavn.mellomnavn ?? "",
     etternavn: ressurs.visningsnavn.etternavn,
-    primaryTelefonnummer: ressurs.primaryTelefonnummer ?? "",
+    primaryTelefonnummer: ressurs.primaryTelefonnummer
+      ? formatTlf(ressurs.primaryTelefonnummer).replaceAll(" ", "")
+      : "",
     primaryFysiskBrukersted: ressurs.primaryFysiskBrukersted ?? "",
   };
 
@@ -265,6 +268,7 @@ export function EditPersonOpplysninger({
             <SluttDato ressurs={ressurs} />
             <Epost ressurs={ressurs} />
             <DagligLeder ressurs={ressurs} />
+            <TelefonNummere hidePrivat ressurs={ressurs} />
           </div>
           <UserImage
             includeInstructionsWhenNotFound
@@ -287,8 +291,9 @@ export function EditPersonOpplysninger({
             `}
             data-cy="telefon-textfield"
             error={methods.formState.errors.primaryTelefonnummer?.message}
-            label="Telefon"
+            label="Privattelefon"
           />
+
           {hasSelfServiceAccess && !isUserAdmin ? (
             <FysiskBrukersted ressurs={ressurs} />
           ) : (

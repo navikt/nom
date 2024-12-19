@@ -3,7 +3,7 @@ package no.nav.nom.apps.nom.ressurser;
 import lombok.val;
 import no.nav.nom.apps.nom.ressurser.dvh.DvhConstants;
 import no.nav.nom.apps.nom.ressurser.dvh.DvhConsumerProcessorService;
-import no.nav.nom.apps.nom.ressurser.dvh.DvhRessursDTO;
+import no.nav.nom.apps.nom.ressurser.dvh.DvhRessursTdvDTO;
 import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
 import no.nav.nom.apps.nom.ressurser.ressurser.RessursRepository;
 import no.nav.nom.contract.nom.dto.Ressurstype;
@@ -35,7 +35,7 @@ public class DvhConsumerProcessorServiceTest {
     private static final String NAVIDENT = "A000000";
     private static final String FNR = "12345678910";
 
-    private DvhRessursDTO dvhRessursDTO;
+    private DvhRessursTdvDTO dvhRessursDTO;
 
     @MockBean
     private RessursRepository ressursRepository;
@@ -45,7 +45,7 @@ public class DvhConsumerProcessorServiceTest {
 
     @BeforeEach
     public void init() {
-        dvhRessursDTO = DvhRessursDTO.builder()
+        dvhRessursDTO = DvhRessursTdvDTO.builder()
                 .navident(NAVIDENT)
                 .personIdent(FNR)
                 .remedySluttDato(LocalDate.now())
