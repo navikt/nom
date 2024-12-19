@@ -20,7 +20,7 @@ public class DvhOrdsTestScheduler {
         this.dvhOrdsClient = dvhOrdsClient;
     }
 
-    @Scheduled(fixedDelay = DELAY)
+//    @Scheduled(fixedDelay = DELAY)
     public void dvhScheduler(){
         testOrds();
     }

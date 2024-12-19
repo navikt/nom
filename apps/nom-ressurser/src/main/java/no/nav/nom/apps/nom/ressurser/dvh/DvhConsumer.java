@@ -31,7 +31,7 @@ public class DvhConsumer {
 
     private final long incrementValue = 1000L;
 
-    private final long DELAY = 60*1000;
+    private final long DELAY = 10*60*1000; // 10 minutter
 
     public DvhConsumer(
         @Value("${dvh.endpoint}") String dvhEndpoint,
@@ -58,7 +58,7 @@ public class DvhConsumer {
     @Scheduled(initialDelay = 180000, fixedDelay = DELAY)
     @Transactional(value = "transactionManager")
     public void dvhScheduler(){
-        testOrds();
+//        testOrds();
         if(leaderElection.isLeader()) {
             log.info("Oppdaterer fra datavarehus..");
             while (hentBulkOppdatering() == incrementValue);
