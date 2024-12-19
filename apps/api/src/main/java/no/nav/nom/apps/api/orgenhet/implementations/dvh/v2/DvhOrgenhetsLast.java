@@ -64,7 +64,7 @@ public class DvhOrgenhetsLast {
                 dvhOrgenheter = nomProxyRestClient.getTdvOrgenheter();
             }
 
-            getOrdsOrgenheterAndCompare(dvhOrgenheter);
+//            getOrdsOrgenheterAndCompare(dvhOrgenheter);
 
             val validations = Arrays.stream(ValidationType.values()).collect(Collectors.toMap(Function.identity(), a -> new LinkedList<DvhOrgenhetV2>()));
 

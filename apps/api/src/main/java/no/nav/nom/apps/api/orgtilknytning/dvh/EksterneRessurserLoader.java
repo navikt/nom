@@ -62,7 +62,7 @@ public class EksterneRessurserLoader {
                 .collect(Collectors.toList());
         }
 
-        getOrdsEksterneRessurserAndCompare(eksterneRessurser);
+//        getOrdsEksterneRessurserAndCompare(eksterneRessurser);
 
         log.info("Lastet {} eksterneRessurser. Tok {}", eksterneRessurser.size(), durationAsH24(start));
         return eksterneRessurser;

@@ -192,7 +192,7 @@ public class DvhRestConsumer {
                 .flatMap(Collection::stream)
                 .toList();
 
-            getOrdsJsonRessurserAndCompare(dvhRessurs);
+//            getOrdsJsonRessurserAndCompare(dvhRessurs);
 
             ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
             dvhRepository.saveAnnenStatNavIdenter(findAnnenStatNavIdenter(dvhRessurs));
@@ -299,7 +299,7 @@ public class DvhRestConsumer {
                 tlfRader = dvhOldTdvService.getTdvTelefoner();
             }
 
-            getOrdsTelefonerAndCompare(tlfRader);
+//            getOrdsTelefonerAndCompare(tlfRader);
 
             log.info("Telefonnr lastet: Antall rader = " + tlfRader.size());
             dvhRepository.saveTlf(tlfRader);
@@ -361,7 +361,7 @@ public class DvhRestConsumer {
             dvhService.saveLedere(ledere);
             dvhService.setOrganiserteOrgenheter(organiseringer); // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState
 
-            getOrdsJsonLedereAndOrganiseringAndCompare(ledere, organiseringer);
+//            getOrdsJsonLedereAndOrganiseringAndCompare(ledere, organiseringer);
 
             organiseringService.saveOrganiseringer(organiseringer);
         } catch (Exception e) {
