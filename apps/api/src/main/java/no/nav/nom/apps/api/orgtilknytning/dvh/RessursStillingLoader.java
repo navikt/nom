@@ -71,8 +71,7 @@ public class RessursStillingLoader {
         LocalDateTime start = LocalDateTime.now();
 
         List<DvhRessursStilling> ressursStillinger;
-        if (unleash.isEnabled("nom.dvh.last_ressursstillinger_fra_ords")) {
-            // TODO: Fix paginering
+        if (unleash.isEnabled("nom.dvh.last_ressursstillinger_fra_ords", true)) {
             ressursStillinger = dvhOrdsService.getStatligeTilknytninger();
         } else {
             log.info("Laster ressursStillinger fra {}", appProperties.clients().nomProxy().ressursStillingerPath());

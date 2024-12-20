@@ -58,7 +58,7 @@ public class DvhOrgenhetsLast {
         log.info("Laster orgenhet v2 fra dvh");
         try {
             List<DvhOrgenhetV2> dvhOrgenheter;
-            if (unleash.isEnabled("nom.dvh.last_orgenheter_fra_ords")) {
+            if (unleash.isEnabled("nom.dvh.last_orgenheter_fra_ords", true)) {
                 dvhOrgenheter = dvhOrdsService.getOrgenheter();
             } else {
                 dvhOrgenheter = nomProxyRestClient.getTdvOrgenheter();

@@ -162,7 +162,7 @@ public class DvhRestConsumer {
         log.info("Laster ressurser fra dvh");
         try {
             List<DvhRessurs> dvhRessurser;
-            if (unleash.isEnabled("nom.dvh.last_ressurser_fra_ords")) {
+            if (unleash.isEnabled("nom.dvh.last_ressurser_fra_ords", true)) {
                 dvhRessurser = dvhOrdsService.getRessurser();
             } else {
                 dvhRessurser = dvhOldTdvService.getTdvRessurser();
@@ -293,7 +293,7 @@ public class DvhRestConsumer {
         log.info("Laster tlf fra dvh");
         try {
             List<DvhTelefon> tlfRader;
-            if (unleash.isEnabled("nom.dvh.last_tlf_fra_ords")) {
+            if (unleash.isEnabled("nom.dvh.last_tlf_fra_ords", true)) {
                 tlfRader = dvhOrdsService.getTelefoner();
             } else {
                 tlfRader = dvhOldTdvService.getTdvTelefoner();
@@ -347,12 +347,12 @@ public class DvhRestConsumer {
         try {
             List<DvhLeder> ledere;
             List<DvhOrganisering> organiseringer;
-            if (unleash.isEnabled("nom.dvh.last_ledere_fra_ords")) {
+            if (unleash.isEnabled("nom.dvh.last_ledere_fra_ords", true)) {
                 ledere = dvhOrdsService.getLedere();
             } else {
                 ledere = dvhOldTdvService.getTdvLedere();
             }
-            if (unleash.isEnabled("nom.dvh.last_organiseringer_fra_ords")) {
+            if (unleash.isEnabled("nom.dvh.last_organiseringer_fra_ords", true)) {
                 organiseringer = dvhOrdsService.getOrganiseringer();
             } else {
                 organiseringer = dvhOldTdvService.getTdvOrganiseringer();

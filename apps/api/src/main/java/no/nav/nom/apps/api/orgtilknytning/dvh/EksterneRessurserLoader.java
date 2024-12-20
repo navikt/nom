@@ -50,7 +50,7 @@ public class EksterneRessurserLoader {
         LocalDateTime start = LocalDateTime.now();
 
         List<DvhEksternRessurs> eksterneRessurser;
-        if (unleash.isEnabled("nom.dvh.last_eksterne_fra_ords")) {
+        if (unleash.isEnabled("nom.dvh.last_eksterne_fra_ords", true)) {
             eksterneRessurser = dvhOrdsService.getEksterneTilknytninger();
         } else {
             val jsonEksterneRessurser = dvhExchange(appProperties.clients().nomProxy().eksterneRessurserPath());
