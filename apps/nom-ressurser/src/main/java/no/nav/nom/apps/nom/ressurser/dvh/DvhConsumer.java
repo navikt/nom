@@ -85,22 +85,22 @@ public class DvhConsumer {
         val dvhOffset = offsetRepository.findByOffsetName("DVH_OFFSET");
 
         log.info("Leser fra sekvens {} til sekvens {}", dvhOffset.getOffset(), dvhOffset.getOffset() + incrementValue);
-        DvhResponseWrapper result = webClient.get()
-            .uri(uriBuilder -> uriBuilder
-                .queryParam("in_sekvensnummer_fra", dvhOffset.getOffset())
-                .queryParam("in_sekvensnummer_til", dvhOffset.getOffset() + incrementValue)
-                .build()
-            )
-            .retrieve()
-            .bodyToMono(DvhResponseWrapper.class)
-            .block();
+//        DvhResponseWrapper result = webClient.get()
+//            .uri(uriBuilder -> uriBuilder
+//                .queryParam("in_sekvensnummer_fra", dvhOffset.getOffset())
+//                .queryParam("in_sekvensnummer_til", dvhOffset.getOffset() + incrementValue)
+//                .build()
+//            )
+//            .retrieve()
+//            .bodyToMono(DvhResponseWrapper.class)
+//            .block();
 
-        var ordsResult = dvhOrdsClient.dvhGetDataInSekvens(dvhOffset.getOffset(), dvhOffset.getOffset() + incrementValue);
+        var result = dvhOrdsClient.dvhGetDataInSekvens(dvhOffset.getOffset(), dvhOffset.getOffset() + incrementValue);
 
-        if (result != null && result.getAnsattResultList() != null && !result.getAnsattResultList().isEmpty()) {
-            compareTdvWithOrds(result, ordsResult);
+        if (result != null && result.getAnsatteResultList() != null && !result.getAnsatteResultList().isEmpty()) {
+//            compareTdvWithOrds(result, ordsResult);
 
-            val resultList = result.getAnsattResultList();
+            val resultList = result.getAnsatteResultList();
             dvhConsumerProcessorService.processRessurser(resultList);
 
             dvhOffset.setOffset(resultList.get(resultList.size() - 1).getOffset());
