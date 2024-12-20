@@ -122,7 +122,7 @@ public class KommunaleRessurserLoader {
         LocalDateTime start = LocalDateTime.now();
 
         List<DvhRessurs> dvhKommunaleRessurser;
-        if (unleash.isEnabled("nom.dvh.last_kommunale_fra_ords", true)) {
+        if (unleash.isEnabled("nom.dvh.last_kommunale_fra_ords")) {
             dvhKommunaleRessurser = dvhOrdsService.getKommunaleRessurser(aktiveKommunaleNavidenter);
         } else {
             String url = appProperties.clients().nomProxy().kommunaleRessurserPath();
