@@ -26,11 +26,11 @@ public class CacheQueueService {
         this.cacheQueueRepository = cacheQueueRepository;
     }
 
-    public void save(String navident, OTEndretData otEndretData) throws IOException {
-        CacheQueue existingCacheQueue = findQueue(navident, CacheType.OTENDRINGER.toString());
+    public void save(String cacheKey, OTEndretData otEndretData) throws IOException {
+        CacheQueue existingCacheQueue = findQueue(cacheKey, CacheType.OTENDRINGER.toString());
 
         if(existingCacheQueue != null) {
-            log.info("CacheQueue already exists for {}. Cache will be updated. Existing: {}, to be added: {}", navident, existingCacheQueue, otEndretData);
+            log.info("CacheQueue already exists for {}. Cache will be updated. Existing: {}, to be added: {}", cacheKey, existingCacheQueue, otEndretData);
             ObjectReader reader = new ObjectMapper().readerFor(new TypeReference<List<OTEndretData>>() {});
             List<OTEndretData> payload = reader.readValue(existingCacheQueue.getPayload());
             payload.add(otEndretData);
@@ -39,10 +39,10 @@ public class CacheQueueService {
             log.info("CacheQueue updated: {}", existingCacheQueue);
             cacheQueueRepository.save(existingCacheQueue);
         } else {
-            log.info("CacheQueue does not exists for {}. New element will be added: {}", navident, otEndretData);
+            log.info("CacheQueue does not exists for {}. New element will be added: {}", cacheKey, otEndretData);
             ArrayList<OTEndretData> payload = new ArrayList<>() {{add(otEndretData);}};
             CacheQueue cacheQueue = new CacheQueue();
-            cacheQueue.setCacheKey(navident);
+            cacheQueue.setCacheKey(cacheKey);
             cacheQueue.setCacheType(CacheType.OTENDRINGER.toString());
             cacheQueue.setPayload(new ObjectMapper().convertValue(payload, JsonNode.class));
             log.info("CacheQueue added: {}", cacheQueue);

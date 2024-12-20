@@ -13,10 +13,10 @@ import no.nav.nom.apps.api.common.cache.CacheType;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
 import no.nav.nom.apps.api.orgtilknytning.api.app.MasseFlyttingRequest;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
-import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,7 @@ public class OrgtilknytningEndretEmailService {
     private final CacheQueueService cacheQueueService;
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
     private final LeaderElection leaderElection;
+    private final NomMastered nomMastered;
 
     public OrgtilknytningEndretEmailService(
         EmailClient emailClient,
@@ -70,7 +72,8 @@ public class OrgtilknytningEndretEmailService {
         LederResolver lederResolver,
         CacheQueueService cacheQueueService,
         DvhStartupLoadMonitor dvhStartupLoadMonitor,
-        LeaderElection leaderElection
+        LeaderElection leaderElection,
+        NomMastered nomMastered
     ) {
         this.emailClient = emailClient;
         this.unleash = unleash;
@@ -83,21 +86,22 @@ public class OrgtilknytningEndretEmailService {
         this.cacheQueueService = cacheQueueService;
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
         this.leaderElection = leaderElection;
+        this.nomMastered = nomMastered;
     }
 
-    public void addToOrgtilknytningEndringerQueue(String navident, OTEndretData otEndretData) {
+    public void addToOrgtilknytningEndringerQueue(String fid, OTEndretData otEndretData) {
         // save to database
         try {
-            log.info("Adding to cache: navident: {}, otEndretData: {}", navident, otEndretData);
-            cacheQueueService.save(navident, otEndretData);
+            log.info("Adding to cache: fid: {}, otEndretData: {}", fid, otEndretData);
+            cacheQueueService.save(fid, otEndretData);
         } catch (IOException e) {
             // log error and ignore
             log.error("Error while saving to cache", e);
         }
     }
 
-    public void removeFromOrgtilknytningEndringerQueue(String navident) {
-        cacheQueueService.delete(navident, CacheType.OTENDRINGER.toString());
+    public void removeFromOrgtilknytningEndringerQueue(String fid) {
+        cacheQueueService.delete(fid, CacheType.OTENDRINGER.toString());
     }
 
     @Scheduled(cron = "0 0 18 * * ?") // every day at 18:00
@@ -111,23 +115,44 @@ public class OrgtilknytningEndretEmailService {
             return;
         }
 
-        Map<String, List<OTEndretData>> otEndringer = cacheQueueService.getOTEndringerFromCache();
+        Map<String, List<OTEndretData>> otEndringerByFid = cacheQueueService.getOTEndringerFromCache();
         //Note: print the queue for debugging. To be removed later
-        log.info("otEndringer size: {}", otEndringer.size());
-        otEndringer.forEach((navident, endringer) -> log.info("navident: {}, endringer: {}", navident, endringer));
+        log.info("otEndringerByFid size, keys, values: {}, {}, {}", otEndringerByFid.size(), otEndringerByFid.keySet(), otEndringerByFid.values());
 
-        otEndringer.forEach((navident, endringer) -> {
+        // as OT changes are per orgenhet, group them by navident
+        Map<String, List<OTEndretData>> otEndringerByNavident =  new HashMap<>();
+        otEndringerByFid.forEach((fid, endringer) -> {
+            var navident = getNavidentFromOrgtilknytningStateRepository(fid);
+            if (navident != null) {
+                otEndringerByNavident.putIfAbsent(navident, new ArrayList<>());
+                otEndringerByNavident.get(navident).addAll(endringer);
+            } else {
+                log.warn("Failed to get navident from OrgtilknytningStateRepository for fid: {}", fid);
+                removeFromOrgtilknytningEndringerQueue(fid);
+            }
+        });
+
+        otEndringerByNavident.forEach((navident, endringer) -> {
             var endretRessurs = ressursStateRepository.findByNavident(navident);
             if (endretRessurs.isEmpty()) {
                 log.error("Fant ikke ressurs med navident {} og epost varsel vil ikke bli sendt.", navident);
                 // not cleared from the queue! will be retried next time
             } else {
-                log.info("endretRessurs i OrgtilknytningEndretEmailService: {} ", endretRessurs.get());
-                sendEmail(endretRessurs.get(), endringer);
-                removeFromOrgtilknytningEndringerQueue(navident);
+                // check if the navident is mastered in nom
+                if(nomMastered.isMastered(navident)) {
+                    sendEmail(endretRessurs.get(), endringer);
+                } else {
+                    log.info("Navident {} is not mastered in nom. OT changes email will not be sent!", navident);
+                }
+
+                // remove from the queue in any case
+                otEndringerByFid.forEach((fid, otEndringer) -> {
+                    if(navident.equals(getNavidentFromOrgtilknytningStateRepository(fid))) {
+                        removeFromOrgtilknytningEndringerQueue(fid);
+                    }
+                });
             }
         });
-
     }
 
     private void sendEmail(RessursState endretRessurs, List<OTEndretData> otEndringerData) {
@@ -315,8 +340,8 @@ public class OrgtilknytningEndretEmailService {
         return additionalRecipients;
     }
 
-    public String getNavidentFromEvent(OrgtilknytningEvent event) {
-        var orgtilknytningState = orgtilknytningStateRepository.findByFid( event.getFid());
+    public String getNavidentFromOrgtilknytningStateRepository(String fid) {
+        var orgtilknytningState = orgtilknytningStateRepository.findByFid(fid);
         return orgtilknytningState.map(OrgtilknytningState::navident).orElse(null);
     }
 }
