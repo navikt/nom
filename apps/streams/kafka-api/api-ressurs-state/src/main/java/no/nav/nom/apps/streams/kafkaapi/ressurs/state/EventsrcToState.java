@@ -205,7 +205,7 @@ class EventsrcToState {
                     visningsnavn.get("etternavn").asText()
                 ),
                 Optional.ofNullable(eventStateAggregate.hasNonNull("primaryTelefonnummer") ? eventStateAggregate.get("primaryTelefonnummer").asText() : null),
-                Sektor.valueOf(eventStateAggregate.get("sektor").asText()),
+                eventStateAggregate.hasNonNull("sektor") ? Sektor.valueOf(eventStateAggregate.get("sektor").asText()) : Sektor.NAV_STATLIG,
                 orgtilknytninger,
                 Optional.ofNullable(eventStateAggregate.hasNonNull("startdato") ? LocalDate.parse(eventStateAggregate.get("startdato").asText()) : null),
                 Optional.ofNullable(eventStateAggregate.hasNonNull("sluttdato") ? LocalDate.parse(eventStateAggregate.get("sluttdato").asText()) : null)
