@@ -78,7 +78,7 @@ public class OrgtilknytningEvtsrcListener {
     private void addToOTEndretDataEmailQueue(OrgtilknytningEvent event) {
         String initiatedFrom = event.getMetadata().inputMetadata().origination().initiatedFrom();
         if(!initiatedFrom.equals(getClusterName()+":org:nom-ui2")) {
-            log.info("OT-endringer operation is not performed nom frontend. OTendretData won´t be added to the email queue");
+            log.info("OT-endringer operation is not performed nom frontend: {}. OTendretData won´t be added to the email queue", initiatedFrom);
             return;
         }
 
