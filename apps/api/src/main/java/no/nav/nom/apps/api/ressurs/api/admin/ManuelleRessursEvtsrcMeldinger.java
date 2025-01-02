@@ -28,7 +28,6 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
-import org.flywaydb.core.internal.util.HtmlUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -38,6 +37,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -92,13 +92,13 @@ public class ManuelleRessursEvtsrcMeldinger {
 
         var ressursState = ressursStateRepository.findByFid(fid);
         if (ressursState.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + HtmlUtils.htmlEncode(fid));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + HtmlUtils.htmlEscape(fid));
         }
 
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Ressurs med FID %s er funnet for navident %s og personident %s. Men vil ikke slettes da handling ikke er bekreftet".formatted(
-                    HtmlUtils.htmlEncode(fid),
+                    HtmlUtils.htmlEscape(fid),
                     ressursState.get().navident(),
                     ressursState.get().personident()
                 ));
@@ -119,7 +119,7 @@ public class ManuelleRessursEvtsrcMeldinger {
 
         return ResponseEntity.ok()
             .body("Ressurs med FID %s er funnet for navident %s og personident %s. Slett event er nå sendt".formatted(
-                HtmlUtils.htmlEncode(fid),
+                HtmlUtils.htmlEscape(fid),
                 ressursState.get().navident(),
                 ressursState.get().personident()
             ));
@@ -156,13 +156,13 @@ public class ManuelleRessursEvtsrcMeldinger {
 
         var ressursState = ressursStateRepository.findByFid(fid);
         if (ressursState.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + HtmlUtils.htmlEncode(fid));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + HtmlUtils.htmlEscape(fid));
         }
 
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Ressurs med FID %s er funnet for navident %s og personident %s. Men vil ikke endres da handling ikke er bekreftet".formatted(
-                    HtmlUtils.htmlEncode(fid),
+                    HtmlUtils.htmlEscape(fid),
                     ressursState.get().navident(),
                     ressursState.get().personident()
                 ));
@@ -183,10 +183,10 @@ public class ManuelleRessursEvtsrcMeldinger {
 
         return ResponseEntity.ok()
             .body("Ressurs med FID %s er funnet for navident %s og personident %s. Endre personident til %s event er nå sendt".formatted(
-                HtmlUtils.htmlEncode(fid),
+                HtmlUtils.htmlEscape(fid),
                 ressursState.get().navident(),
                 ressursState.get().personident(),
-                HtmlUtils.htmlEncode(nyPersonident)
+                HtmlUtils.htmlEscape(nyPersonident)
             ));
     }
 
@@ -219,13 +219,13 @@ public class ManuelleRessursEvtsrcMeldinger {
 
         var ressursState = ressursStateRepository.findByFid(fid);
         if (ressursState.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + HtmlUtils.htmlEncode(fid));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + HtmlUtils.htmlEscape(fid));
         }
 
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Ressurs med FID %s er funnet for navident %s med navn %s. Men vil ikke endres da handling ikke er bekreftet".formatted(
-                    HtmlUtils.htmlEncode(fid),
+                    HtmlUtils.htmlEscape(fid),
                     ressursState.get().navident(),
                     ressursState.get().visningsnavn().toString()
                 ));
@@ -237,7 +237,7 @@ public class ManuelleRessursEvtsrcMeldinger {
 
         ressursCommandService.oppdaterPersonaliaEvent(
             new OppdaterPersonaliaCommand(
-                HtmlUtils.htmlEncode(fid),
+                HtmlUtils.htmlEscape(fid),
                 new Visningsnavn(fornavn, Optional.ofNullable(mellomnavn), etternavn)
             ),
             new InputMetadata(
@@ -253,7 +253,7 @@ public class ManuelleRessursEvtsrcMeldinger {
 
         return ResponseEntity.ok()
             .body("Ressurs med FID %s er funnet for navident %s med navn %s. Endre personalia event er nå sendt".formatted(
-                HtmlUtils.htmlEncode(fid),
+                HtmlUtils.htmlEscape(fid),
                 ressursState.get().navident(),
                 ressursState.get().visningsnavn().toString()
             ));
@@ -289,7 +289,7 @@ public class ManuelleRessursEvtsrcMeldinger {
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Ressurs med navident %s er funnet og er ikke allerede Mastret i NOM. Men event vil ikke sendes for å mastre da handling ikke er bekreftet".formatted(
-                    HtmlUtils.htmlEncode(navident)
+                    HtmlUtils.htmlEscape(navident)
                 ));
         }
 
@@ -298,12 +298,12 @@ public class ManuelleRessursEvtsrcMeldinger {
         if (ok) {
             return ResponseEntity.ok()
                 .body("Ressurs med navident %s er nå mastret i NOM".formatted(
-                    HtmlUtils.htmlEncode(navident)
+                    HtmlUtils.htmlEscape(navident)
                 ));
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Feil ved forsøk på å merke navident %s som mastret".formatted(
-                    HtmlUtils.htmlEncode(navident)
+                    HtmlUtils.htmlEscape(navident)
                 ));
         }
     }
@@ -338,7 +338,7 @@ public class ManuelleRessursEvtsrcMeldinger {
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Ressurs med navident %s er funnet og er Mastret i NOM. Men event vil ikke sendes for å av-merke da handling ikke er bekreftet".formatted(
-                    HtmlUtils.htmlEncode(navident)
+                    HtmlUtils.htmlEscape(navident)
                 ));
         }
 
@@ -347,12 +347,12 @@ public class ManuelleRessursEvtsrcMeldinger {
         if (ok) {
             return ResponseEntity.ok()
                 .body("Ressurs med navident %s er nå av-merket som mastret i NOM".formatted(
-                    HtmlUtils.htmlEncode(navident)
+                    HtmlUtils.htmlEscape(navident)
                 ));
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Feil ved forsøk på å av-merke navident %s som mastret".formatted(
-                    HtmlUtils.htmlEncode(navident)
+                    HtmlUtils.htmlEscape(navident)
                 ));
         }
     }
@@ -390,7 +390,7 @@ public class ManuelleRessursEvtsrcMeldinger {
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Ressurs med FID %s er funnet for navident %s med navn %s. Men vil ikke endres da handling ikke er bekreftet".formatted(
-                    HtmlUtils.htmlEncode(ressursState.get().fid()),
+                    HtmlUtils.htmlEscape(ressursState.get().fid()),
                     ressursState.get().navident(),
                     ressursState.get().visningsnavn().toString()
                 ));
@@ -413,7 +413,7 @@ public class ManuelleRessursEvtsrcMeldinger {
 
         return ResponseEntity.ok()
             .body("Ressurs med FID %s er funnet for navident %s med navn %s. Avvikle ressurs event er nå sendt".formatted(
-                HtmlUtils.htmlEncode(ressursState.get().fid()),
+                HtmlUtils.htmlEscape(ressursState.get().fid()),
                 ressursState.get().navident(),
                 ressursState.get().visningsnavn().toString()
             ));
@@ -456,7 +456,7 @@ public class ManuelleRessursEvtsrcMeldinger {
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Ressurs med FID %s er funnet for navident %s med navn %s. Men vil ikke endres da handling ikke er bekreftet".formatted(
-                    HtmlUtils.htmlEncode(ressursState.get().fid()),
+                    HtmlUtils.htmlEscape(ressursState.get().fid()),
                     ressursState.get().navident(),
                     ressursState.get().visningsnavn().toString()
                 ));
@@ -476,15 +476,6 @@ public class ManuelleRessursEvtsrcMeldinger {
             new OppdaterSluttdatoCommand(ressursState.get().fid(),
                    isNull(sluttDato)? Optional.empty() : Optional.of(sluttDato), metaData)
         );
-
-        /*
-        return ResponseEntity.ok()
-            .body("Ressurs med FID %s er funnet for navident %s med navn %s. RessursSluttdatoOppdatertEvent er nå sendt".formatted(
-                HtmlUtils.htmlEncode(ressursState.get().fid()),
-                ressursState.get().navident(),
-                ressursState.get().visningsnavn().toString()
-            ));
-        */
 
         var response = OppdaterSluttdatoRessursResponse.builder()
             .fid(ressursState.get().fid())
@@ -533,7 +524,7 @@ public class ManuelleRessursEvtsrcMeldinger {
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Ressurs med FID %s er funnet for navident %s med navn %s og startdato %s. Men vil ikke endres da handling ikke er bekreftet".formatted(
-                    HtmlUtils.htmlEncode(ressursState.get().fid()),
+                    HtmlUtils.htmlEscape(ressursState.get().fid()),
                     ressursState.get().navident(),
                     ressursState.get().visningsnavn().toString(),
                     ressursState.get().startdato()
@@ -557,7 +548,7 @@ public class ManuelleRessursEvtsrcMeldinger {
 
         return ResponseEntity.ok().body(
             "Ressurs med FID %s er funnet for navident %s med navn %s og startdato %s har fått ny startdato %s".formatted(
-                HtmlUtils.htmlEncode(ressursState.get().fid()),
+                HtmlUtils.htmlEscape(ressursState.get().fid()),
                 ressursState.get().navident(),
                 ressursState.get().visningsnavn().toString(),
                 ressursState.get().startdato(),
@@ -602,7 +593,7 @@ public class ManuelleRessursEvtsrcMeldinger {
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Ressurs med FID %s er funnet for navident %s med navn %s og sektor %s. Men vil ikke endres da handling ikke er bekreftet".formatted(
-                    HtmlUtils.htmlEncode(ressursState.get().fid()),
+                    HtmlUtils.htmlEscape(ressursState.get().fid()),
                     ressursState.get().navident(),
                     ressursState.get().visningsnavn().toString(),
                     ressursState.get().sektor()

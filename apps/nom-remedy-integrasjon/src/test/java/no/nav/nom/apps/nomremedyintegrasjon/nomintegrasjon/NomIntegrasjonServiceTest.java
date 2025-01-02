@@ -529,7 +529,6 @@ public class NomIntegrasjonServiceTest extends TestBase {
 
         delayedEventRepository.save(
             DelayedEvent.builder()
-                .delayedEventId(UUID.randomUUID())
                 .delayedUntil(LocalDate.now())
                 .event(orgtilknytningDagligOppfolgingEndretEventV1)
                 .build()
@@ -661,7 +660,6 @@ public class NomIntegrasjonServiceTest extends TestBase {
 
         delayedEventRepository.save(
             DelayedEvent.builder()
-                .delayedEventId(UUID.randomUUID())
                 .delayedUntil(LocalDate.now())
                 .event(orgtilknytningEvent)
                 .build());
@@ -690,7 +688,6 @@ public class NomIntegrasjonServiceTest extends TestBase {
 
         delayedEventRepository.save(
             DelayedEvent.builder()
-                .delayedEventId(UUID.randomUUID())
                 .delayedUntil(LocalDate.now())
                 .event(orgtilknytningEvent)
                 .build());
@@ -745,7 +742,6 @@ public class NomIntegrasjonServiceTest extends TestBase {
         return Stream.of(
             Arguments.of(
                 DelayedEvent.builder()
-                    .delayedEventId(UUID.randomUUID())
                     .delayedUntil(LocalDate.now())
                     .event(
                         orgtilknytningDagligOppfolgingEndretEventV1(
@@ -760,7 +756,6 @@ public class NomIntegrasjonServiceTest extends TestBase {
             ),
             Arguments.of(
                 DelayedEvent.builder()
-                    .delayedEventId(UUID.randomUUID())
                     .delayedUntil(LocalDate.now())
                     .event(
                         orgtilknytningDagligOppfolgingEndretEventV1(
@@ -783,7 +778,6 @@ public class NomIntegrasjonServiceTest extends TestBase {
         return Stream.of(
             Arguments.of(
                 DelayedEvent.builder()
-                    .delayedEventId(UUID.randomUUID())
                     .delayedUntil(LocalDate.now())
                     .event(
                         orgtilknytningDatoEndretEventV2(
@@ -796,7 +790,6 @@ public class NomIntegrasjonServiceTest extends TestBase {
             ),
             Arguments.of(
                 DelayedEvent.builder()
-                    .delayedEventId(UUID.randomUUID())
                     .delayedUntil(LocalDate.now())
                     .event(
                         orgtilknytningDatoEndretEventV2(
