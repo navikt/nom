@@ -39,7 +39,7 @@
         <commons-fileupload.version>1.5</commons-fileupload.version>
         <ulid-creator.version>5.2.3</ulid-creator.version>
         <vault-jdbc.version>1.3.10</vault-jdbc.version>
-        <swagger-annotations-jakarta.version>2.2.26</swagger-annotations-jakarta.version>
+        <swagger-annotations-jakarta.version>2.2.27</swagger-annotations-jakarta.version>
         <wiremock.version>2.35.2</wiremock.version>
         <org.wiremock.version>3.4.2</org.wiremock.version>
         <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
