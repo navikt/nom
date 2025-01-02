@@ -53,7 +53,8 @@
         <postgresql.version>42.7.4</postgresql.version>
 
         <!-- Override spring transistive dependency -->
-        <logback-classic.version>1.5.12</logback-classic.version>  <!-- https://github.com/navikt/nom/security/dependabot/202 -->
+        <logback-classic.version>1.5.15</logback-classic.version>  <!-- https://github.com/navikt/nom/security/dependabot/202 -->
+        <logback-core.version>1.5.15</logback-core.version>  <!-- https://github.com/navikt/nom/security/dependabot/201 -->
     </properties>
 
     <dependencyManagement>
@@ -64,6 +65,14 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>${logback-classic.version}</version>
+                <scope>compile</scope>
+            </dependency>
+
+            <!-- https://github.com/navikt/nom/security/dependabot/201 -->
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>${logback-core.version}</version>
                 <scope>compile</scope>
             </dependency>
 
