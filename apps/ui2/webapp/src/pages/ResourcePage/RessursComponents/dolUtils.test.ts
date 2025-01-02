@@ -573,8 +573,8 @@ describe("dolValidation", () => {
     const orgtilknytning1: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "0",
-      gyldigFom: "2025-01-01",
-      gyldigTom: "2025-01-31",
+      gyldigFom: "2026-01-01",
+      gyldigTom: "2026-01-31",
     };
 
     const orgtilknytninger = [orgtilknytning1];
@@ -589,15 +589,15 @@ describe("dolValidation", () => {
     const orgtilknytning1: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "0",
-      gyldigFom: "2025-01-01",
-      gyldigTom: "2025-01-31",
+      gyldigFom: "2026-01-01",
+      gyldigTom: "2026-01-31",
     };
 
     const orgtilknytning2: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "1",
-      gyldigFom: "2025-01-01",
-      gyldigTom: "2025-01-31",
+      gyldigFom: "2026-01-01",
+      gyldigTom: "2026-01-31",
     };
 
     const orgtilknytninger = [orgtilknytning1, orgtilknytning2];
@@ -605,7 +605,7 @@ describe("dolValidation", () => {
     expect(dolValidering(orgtilknytninger)).toEqual({
       dolGaps: [],
       dolOverlaps: [
-        { fom: new Date("2025-01-01"), tom: new Date("2025-01-31") },
+        { fom: new Date("2026-01-01"), tom: new Date("2026-01-31") },
       ],
     });
   });
@@ -614,14 +614,14 @@ describe("dolValidation", () => {
     const orgtilknytning1: OrgtilknytningEtterValidering = {
       erDagligOppfolging: false,
       orgEnhetId: "0",
-      gyldigFom: "2025-01-01",
-      gyldigTom: "2025-01-31",
+      gyldigFom: "2026-01-01",
+      gyldigTom: "2026-01-31",
     };
 
     const orgtilknytninger = [orgtilknytning1];
 
     expect(dolValidering(orgtilknytninger)).toEqual({
-      dolGaps: [{ fom: new Date("2025-01-01"), tom: new Date("2025-01-31") }],
+      dolGaps: [{ fom: new Date("2026-01-01"), tom: new Date("2026-01-31") }],
       dolOverlaps: [],
     });
   });
@@ -630,14 +630,14 @@ describe("dolValidation", () => {
     const orgtilknytning1: OrgtilknytningEtterValidering = {
       erDagligOppfolging: false,
       orgEnhetId: "0",
-      gyldigFom: "2025-01-01",
+      gyldigFom: "2026-01-01",
       gyldigTom: undefined,
     };
 
     const orgtilknytninger = [orgtilknytning1];
 
     expect(dolValidering(orgtilknytninger)).toEqual({
-      dolGaps: [{ fom: new Date("2025-01-01"), tom: undefined }],
+      dolGaps: [{ fom: new Date("2026-01-01"), tom: undefined }],
       dolOverlaps: [],
     });
   });
@@ -646,21 +646,21 @@ describe("dolValidation", () => {
     const orgtilknytning1: OrgtilknytningEtterValidering = {
       erDagligOppfolging: false,
       orgEnhetId: "0",
-      gyldigFom: "2025-01-01",
-      gyldigTom: "2025-02-28",
+      gyldigFom: "2026-01-01",
+      gyldigTom: "2026-02-28",
     };
 
     const orgtilknytning2: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "1",
-      gyldigFom: "2025-02-01",
-      gyldigTom: "2025-02-28",
+      gyldigFom: "2026-02-01",
+      gyldigTom: "2026-02-28",
     };
 
     const orgtilknytninger = [orgtilknytning1, orgtilknytning2];
 
     expect(dolValidering(orgtilknytninger)).toEqual({
-      dolGaps: [{ fom: new Date("2025-01-01"), tom: new Date("2025-01-31") }],
+      dolGaps: [{ fom: new Date("2026-01-01"), tom: new Date("2026-01-31") }],
       dolOverlaps: [],
     });
   });
@@ -669,21 +669,21 @@ describe("dolValidation", () => {
     const orgtilknytning1: OrgtilknytningEtterValidering = {
       erDagligOppfolging: false,
       orgEnhetId: "0",
-      gyldigFom: "2025-01-01",
-      gyldigTom: "2025-02-28",
+      gyldigFom: "2026-01-01",
+      gyldigTom: "2026-02-28",
     };
 
     const orgtilknytning2: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "1",
-      gyldigFom: "2025-02-01",
-      gyldigTom: "2025-03-31",
+      gyldigFom: "2026-02-01",
+      gyldigTom: "2026-03-31",
     };
 
     const orgtilknytninger = [orgtilknytning1, orgtilknytning2];
 
     expect(dolValidering(orgtilknytninger)).toEqual({
-      dolGaps: [{ fom: new Date("2025-01-01"), tom: new Date("2025-01-31") }],
+      dolGaps: [{ fom: new Date("2026-01-01"), tom: new Date("2026-01-31") }],
       dolOverlaps: [],
     });
   });
@@ -692,22 +692,22 @@ describe("dolValidation", () => {
     const orgtilknytning1: OrgtilknytningEtterValidering = {
       erDagligOppfolging: false,
       orgEnhetId: "0",
-      gyldigFom: "2025-01-01",
-      gyldigTom: "2025-02-28",
+      gyldigFom: "2026-01-01",
+      gyldigTom: "2026-02-28",
     };
 
     const orgtilknytning2: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "1",
-      gyldigFom: "2025-02-01",
-      gyldigTom: "2025-03-31",
+      gyldigFom: "2026-02-01",
+      gyldigTom: "2026-03-31",
     };
 
     const orgtilknytning3: OrgtilknytningEtterValidering = {
       erDagligOppfolging: false,
       orgEnhetId: "2",
-      gyldigFom: "2025-03-01",
-      gyldigTom: "2025-04-30",
+      gyldigFom: "2026-03-01",
+      gyldigTom: "2026-04-30",
     };
 
     const orgtilknytninger = [
@@ -718,8 +718,8 @@ describe("dolValidation", () => {
 
     expect(dolValidering(orgtilknytninger)).toEqual({
       dolGaps: [
-        { fom: new Date("2025-01-01"), tom: new Date("2025-01-31") },
-        { fom: new Date("2025-04-01"), tom: new Date("2025-04-30") },
+        { fom: new Date("2026-01-01"), tom: new Date("2026-01-31") },
+        { fom: new Date("2026-04-01"), tom: new Date("2026-04-30") },
       ],
       dolOverlaps: [],
     });
@@ -729,23 +729,23 @@ describe("dolValidation", () => {
     const orgtilknytning1: OrgtilknytningEtterValidering = {
       erDagligOppfolging: false,
       orgEnhetId: "0",
-      gyldigFom: "2025-01-01",
-      gyldigTom: "2025-04-30",
+      gyldigFom: "2026-01-01",
+      gyldigTom: "2026-04-30",
     };
 
     const orgtilknytning2: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "1",
-      gyldigFom: "2025-02-01",
-      gyldigTom: "2025-03-31",
+      gyldigFom: "2026-02-01",
+      gyldigTom: "2026-03-31",
     };
 
     const orgtilknytninger = [orgtilknytning1, orgtilknytning2];
 
     expect(dolValidering(orgtilknytninger)).toEqual({
       dolGaps: [
-        { fom: new Date("2025-01-01"), tom: new Date("2025-01-31") },
-        { fom: new Date("2025-04-01"), tom: new Date("2025-04-30") },
+        { fom: new Date("2026-01-01"), tom: new Date("2026-01-31") },
+        { fom: new Date("2026-04-01"), tom: new Date("2026-04-30") },
       ],
       dolOverlaps: [],
     });
@@ -755,23 +755,23 @@ describe("dolValidation", () => {
     const orgtilknytning1: OrgtilknytningEtterValidering = {
       erDagligOppfolging: false,
       orgEnhetId: "0",
-      gyldigFom: "2025-01-01",
+      gyldigFom: "2026-01-01",
       gyldigTom: undefined,
     };
 
     const orgtilknytning2: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "1",
-      gyldigFom: "2025-02-01",
-      gyldigTom: "2025-03-31",
+      gyldigFom: "2026-02-01",
+      gyldigTom: "2026-03-31",
     };
 
     const orgtilknytninger = [orgtilknytning1, orgtilknytning2];
 
     expect(dolValidering(orgtilknytninger)).toEqual({
       dolGaps: [
-        { fom: new Date("2025-01-01"), tom: new Date("2025-01-31") },
-        { fom: new Date("2025-04-01"), tom: undefined },
+        { fom: new Date("2026-01-01"), tom: new Date("2026-01-31") },
+        { fom: new Date("2026-04-01"), tom: undefined },
       ],
       dolOverlaps: [],
     });
@@ -781,14 +781,14 @@ describe("dolValidation", () => {
     const orgtilknytning1: OrgtilknytningEtterValidering = {
       erDagligOppfolging: true,
       orgEnhetId: "0",
-      gyldigFom: "2025-01-01",
+      gyldigFom: "2026-01-01",
       gyldigTom: undefined,
     };
 
     const orgtilknytning2: OrgtilknytningEtterValidering = {
       erDagligOppfolging: false,
       orgEnhetId: "1",
-      gyldigFom: "2025-02-01",
+      gyldigFom: "2026-02-01",
       gyldigTom: undefined,
     };
 
