@@ -286,7 +286,10 @@ public class OrgtilknytningEndretEmailService {
                     utfortAvRessursNavn,
                     event.timestamp()
                 );
-                otEndringer.append(endring);
+                // update message if not blank and duplicate
+                if(!endring.isBlank() && !otEndringer.toString().contains(endring)) {
+                    otEndringer.append(endring);
+                }
             } else {
                 log.warn("Fant ikke orgtilknytning for OTEndretData: {} i orgtilknytningStateRepository. Sjekk!", event);
                 String endring = MessageFormat.format(epost_body_item_template_ot_notfound,
