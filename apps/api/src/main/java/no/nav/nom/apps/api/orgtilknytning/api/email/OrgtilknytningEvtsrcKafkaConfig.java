@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.orgtilknytning.eventsourcing.consumer;
+package no.nav.nom.apps.api.orgtilknytning.api.email;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
