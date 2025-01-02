@@ -86,7 +86,7 @@ management:
     web:
       base-path: /internal
       exposure:
-        include: prometheus,health,heapdump,scheduledtasks,threaddump
+        include: prometheus,health,scheduledtasks,threaddump
 
 unleash:
   endpoint:
