@@ -6,7 +6,6 @@ import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.apps.api.orgtilknytning.api.email.OTEndretData;
 import no.nav.nom.apps.api.orgtilknytning.api.email.OrgtilknytningEndretEmailService;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
@@ -41,7 +40,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -476,12 +474,6 @@ public class OrgtilknytningRestService {
                 ressursCommandService.oppdaterSektorEvent(oppdaterSektorCommand, inputMetadata);
             }
         });
-
-        //update OTendretData for e-post varsel
-        addToOTEndretDataEmailQueue(orgtilknytningStateBeforeChanges.navident(),
-            endreOrgtilknytningRequest.fid(),
-            OTEndretData.OTEndretDataType.OT_ENDRET,
-            inputMetadata.origination().initiatedFrom());
     }
 
 
@@ -560,12 +552,6 @@ public class OrgtilknytningRestService {
                     .build()
             );
         }
-
-        //update OTendretData for e-post varsel
-        addToOTEndretDataEmailQueue(navident,
-            opprettetOrgtilknytningFid,
-            OTEndretData.OTEndretDataType.OT_NY,
-            inputMetadata.origination().initiatedFrom());
     }
 
     private void oppdaterRessursSluttdato(
@@ -701,12 +687,6 @@ public class OrgtilknytningRestService {
         );
 
         nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
-
-        //update OTendretData for e-post varsel
-        addToOTEndretDataEmailQueue(orgtilknytning.navident(),
-            fid,
-            OTEndretData.OTEndretDataType.OT_ENDRET,
-            SecurityUtil.getAuthenticatedAzpName());
     }
 
     public void masseflyttingAvRessurser(MasseFlyttingRequest masseFlyttingRequest) {
@@ -820,36 +800,6 @@ public class OrgtilknytningRestService {
             throw InvalidOrgtilknytningTypeAndSektorCombinationException.forCombination(tilknytningtype, sektor);
         }
 
-    }
-
-    private void addToOTEndretDataEmailQueue(String navident, String fid, OTEndretData.OTEndretDataType eventType, String initiatedFromMetadata) {
-        if(navident == null  || navident.isBlank()) {
-            log.info("Navident is null. Cannot add OTendretData to the email queue");
-            return;
-        }
-
-        if(!nomMastered.isMastered(navident)) {
-            log.info("Navident {} is not mastered in nom. OTendretData won´t be added to the email queue", navident);
-            return;
-        }
-
-        var clusterName  = getClusterName();
-        if(!initiatedFromMetadata.equals(clusterName+":org:nom-ui2")) {
-            log.info("OT-endringer operation is not performed nom frontend. OTendretData won´t be added to the email queue");
-            return;
-        }
-
-        String changedByNavIdent = SecurityUtil.getAuthenticatedNavIdent();
-        orgtilknytningEndretEmailService.addToOrgtilknytningEndringerQueue(
-            navident,
-            OTEndretData.builder()
-                .fid(fid)
-                .navident(navident)
-                .changedByNavIdent(changedByNavIdent)
-                .eventType(eventType)
-                .timestamp(DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now()))
-                .build()
-        );
     }
 
     private static boolean isNotNull(Object object) {
