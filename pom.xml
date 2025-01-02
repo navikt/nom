@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.0</version> <!-- Ved oppdatering av Spring - sjekk changelog for nye versjoner, og om man da kan ta bort overstyrte versjoner under -->
+        <version>3.4.1</version> <!-- Ved oppdatering av Spring - sjekk changelog for nye versjoner, og om man da kan ta bort overstyrte versjoner under -->
     </parent>
 
     <groupId>no.nav.nom</groupId>
@@ -28,7 +28,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
 
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
-        <gcp.libraries-bom.version>26.50.0</gcp.libraries-bom.version>
+        <gcp.libraries-bom.version>26.52.0</gcp.libraries-bom.version>
         <springdoc.version>2.5.0</springdoc.version>
         <springdoc-openapi-security.version>1.8.0</springdoc-openapi-security.version>
         <hypersistence-utils-hibernate-63.version>3.9.0</hypersistence-utils-hibernate-63.version>
@@ -39,7 +39,7 @@
         <commons-fileupload.version>1.5</commons-fileupload.version>
         <ulid-creator.version>5.2.3</ulid-creator.version>
         <vault-jdbc.version>1.3.10</vault-jdbc.version>
-        <swagger-annotations-jakarta.version>2.2.21</swagger-annotations-jakarta.version>
+        <swagger-annotations-jakarta.version>2.2.27</swagger-annotations-jakarta.version>
         <wiremock.version>2.35.2</wiremock.version>
         <org.wiremock.version>3.4.2</org.wiremock.version>
         <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
@@ -48,32 +48,40 @@
         <nimbus-jose-jwt.version>9.47</nimbus-jose-jwt.version>
         <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
         <ojdbc.version>23.6.0.24.10</ojdbc.version>
+        <poi-ooxml.version>5.3.0</poi-ooxml.version>
+        <commons-compress.version>1.27.1</commons-compress.version>
+        <postgresql.version>42.7.4</postgresql.version>
 
-        <!-- Override spring-boot-dependencies version -->
-            <!-- note - local precedence import in utils-common, api, proxy, nom-ressurser, Unit4, nav-ident, og streams appene -->
-        <zookeeper.version>3.9.2</zookeeper.version>
+        <commons-io.version>2.18.0</commons-io.version> <!-- versjonskonflikt og https://github.com/navikt/nom/security/dependabot/172 -->
 
-        <!-- Override av andre transient dependencies -->
-        <orgjson.version>20240303</orgjson.version>  <!-- https://github.com/navikt/nom/security/dependabot/92 -->
-        <snappy-java.test.version>1.1.10.5</snappy-java.test.version>
-        <commons-compress.version>1.26.1</commons-compress.version> <!-- https://github.com/navikt/nom/security/dependabot/88 -->
-        <bcpkix-jdk18on.version>1.78.1</bcpkix-jdk18on.version> <!-- https://github.com/navikt/nom/security/dependabot/95 -->
+        <!-- Override spring transistive dependency -->
+        <logback-classic.version>1.5.15</logback-classic.version>  <!-- https://github.com/navikt/nom/security/dependabot/202 -->
+        <logback-core.version>1.5.15</logback-core.version>  <!-- https://github.com/navikt/nom/security/dependabot/201 -->
 
-        <postgresql.version>42.7.3</postgresql.version> <!-- https://github.com/navikt/nom/security/dependabot/110 -->
     </properties>
 
     <dependencyManagement>
         <dependencies>
+
+            <!-- https://github.com/navikt/nom/security/dependabot/202 -->
             <dependency>
-                <groupId>org.json</groupId>
-                <artifactId>json</artifactId>
-                <version>${orgjson.version}</version> <!-- https://github.com/navikt/nom/security/dependabot/92 -->
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback-classic.version}</version>
+                <scope>compile</scope>
+            </dependency>
+
+            <!-- https://github.com/navikt/nom/security/dependabot/201 -->
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>${logback-core.version}</version>
+                <scope>compile</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.xerial.snappy</groupId>
                 <artifactId>snappy-java</artifactId>
-                <version>${snappy-java.test.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.osgi</groupId>
@@ -146,8 +154,6 @@
             </dependency>
 
             <dependency>
-                <!-- previously named com.vladmihalcea:hibernate-types-55 -->
-                <!-- now https://github.com/vladmihalcea/hypersistence-utils -->
                 <groupId>io.hypersistence</groupId>
                 <artifactId>hypersistence-utils-hibernate-63</artifactId>
                 <version>${hypersistence-utils-hibernate-63.version}</version>
@@ -183,6 +189,12 @@
                 <version>${apache.common.csv.version}</version>
             </dependency>
 
+            <dependency> <!-- versjonskonflikt og https://github.com/navikt/nom/security/dependabot/172 -->
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>commons-fileupload</groupId>
                 <artifactId>commons-fileupload</artifactId>
@@ -211,6 +223,12 @@
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-vault-config-databases</artifactId>
                 <version>${spring-cloud-vault-config-databases.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi-ooxml.version}</version>
             </dependency>
 
             <!-- For å koble på Oracle datakilder  -->
@@ -267,18 +285,6 @@
                 <groupId>no.nav.security</groupId>
                 <artifactId>mock-oauth2-server</artifactId>
                 <version>${mock-oauth2-server.version}</version>
-                <exclusions>
-                    <exclusion>     <!-- Override denne - har transitiv vuln - https://github.com/navikt/nom/security/dependabot/95 -->
-                        <groupId>org.bouncycastle</groupId>
-                        <artifactId>bcpkix-jdk15on</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency> <!-- Bruk denne for mock-oauth2-server - har transitiv vuln - https://github.com/navikt/nom/security/dependabot/95 -->
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcpkix-jdk18on</artifactId>
-                <version>${bcpkix-jdk18on.version}</version>
             </dependency>
 
             <dependency>
@@ -287,18 +293,10 @@
                 <version>${spring-cloud-contract-wiremock.version}</version>
             </dependency>
 
-            <!-- fra org.springframework.kafka:spring-kafka-test-->
-            <dependency>
-                <groupId>org.apache.zookeeper</groupId>
-                <artifactId>zookeeper</artifactId>
-                <version>${zookeeper.version}</version>  <!-- https://github.com/navikt/nom/security/dependabot/91 -->
-            </dependency>
-
-            <!-- fra org.testcontainers:testcontainers:jar:1.18.3:test -->
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
-                <version>${commons-compress.version}</version>  <!-- https://github.com/navikt/nom/security/dependabot/88 -->
+                <version>${commons-compress.version}</version> <!-- Versjonskonflikt spring og poi-ooxml -->
             </dependency>
 
             <dependency> <!-- Påkrevd for mac M1  -->

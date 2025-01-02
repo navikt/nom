@@ -14,7 +14,7 @@
     <version>1.1.0</version>
 
     <properties>
-        <openapi-generator-maven-plugin.version>7.5.0</openapi-generator-maven-plugin.version>
+        <openapi-generator-maven-plugin.version>7.10.0</openapi-generator-maven-plugin.version>
     </properties>
 
     <dependencies>
@@ -151,12 +151,6 @@
         <dependency>
             <groupId>no.nav.security</groupId>
             <artifactId>mock-oauth2-server</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency> <!-- Bruk denne for mock-oauth2-server - har transitiv vuln - https://github.com/navikt/nom/security/dependabot/95 -->
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk18on</artifactId>
             <scope>test</scope>
         </dependency>
 

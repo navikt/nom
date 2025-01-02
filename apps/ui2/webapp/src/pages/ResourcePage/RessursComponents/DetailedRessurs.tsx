@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import {
-  Buldings3Icon,
+  Buildings3Icon,
   PencilIcon,
   PersonChatIcon,
   PersonSuitIcon,
@@ -187,7 +187,7 @@ function OrgTilknytningSection({
           `}
         >
           <Heading level="2" size="small">
-            <Buldings3Icon />
+            <Buildings3Icon />
             Organisatorisk tilhørighet
           </Heading>
 

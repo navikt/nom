@@ -19,7 +19,6 @@ import no.nav.nom.apps.navident.domain.Navident;
 import no.nav.nom.apps.navident.eventsource.EventSourceProducer;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.libs.utils.common.mdc.MdcConfig;
-import org.flywaydb.core.internal.util.HtmlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -29,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 
 import java.text.Normalizer;
 import java.util.Map;
@@ -156,6 +156,6 @@ public class NavidentController {
 
         eventSourceProducer.produceSlettEvent(navident, identType, personid);
 
-        return ResponseEntity.ok("Navident %s er slettet".formatted(HtmlUtils.htmlEncode(navident)));
+        return ResponseEntity.ok("Navident %s er slettet".formatted(HtmlUtils.htmlEscape(navident)));
     }
 }

@@ -14,12 +14,9 @@ import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytningCommand;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
-import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
-import org.flywaydb.core.internal.util.HtmlUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -79,12 +77,12 @@ public class ManuelleAutorizedEvtsrcMeldinger {
 
         var authorization = delegertLederStateRepository.findByFid(fid).orElse(null);
         if (authorization == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen authorization/delegering med FID: " +  HtmlUtils.htmlEncode(fid));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen authorization/delegering med FID: " +  HtmlUtils.htmlEscape(fid));
         }
 
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body("Authorization/delegering med FID %s er funnet.. Men vil ikke avsluttes da handling ikke er bekreftet".formatted(HtmlUtils.htmlEncode(fid)));
+                .body("Authorization/delegering med FID %s er funnet.. Men vil ikke avsluttes da handling ikke er bekreftet".formatted(HtmlUtils.htmlEscape(fid)));
         }
 
         var inputMetadata = new InputMetadata(
@@ -109,7 +107,7 @@ public class ManuelleAutorizedEvtsrcMeldinger {
 
         authorizeCommandService.avsluttDelegertAuthorization(authorization.fid(), avsluttDelegertAuthorization);
 
-        return ResponseEntity.ok().body("Authorization/delegering med FID %s er funnet. Avslutt event på dagens dato er nå sendt".formatted(HtmlUtils.htmlEncode(fid)));
+        return ResponseEntity.ok().body("Authorization/delegering med FID %s er funnet. Avslutt event på dagens dato er nå sendt".formatted(HtmlUtils.htmlEscape(fid)));
     }
 
     @Operation(
@@ -135,7 +133,7 @@ public class ManuelleAutorizedEvtsrcMeldinger {
     ) {
         var orgenhet = orgenhetService.getById(orgenhetId);
         if (orgenhet.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen orgenhet med ID: " +  HtmlUtils.htmlEncode(orgenhetId));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen orgenhet med ID: " +  HtmlUtils.htmlEscape(orgenhetId));
         }
 
         authorizedNavident.sjekkParametereDelegertLeder(lederNavident, delegertNavident, orgenhetId, gyldigTom);

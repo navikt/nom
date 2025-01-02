@@ -17,7 +17,6 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernO
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
-import org.flywaydb.core.internal.util.HtmlUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -27,6 +26,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 
 import static java.util.Objects.isNull;
 
@@ -70,12 +70,12 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
 
         var orgtilknytning = orgtilknytningService.findByFid(fid);
         if (orgtilknytning.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen orgtilknytning med FID: " +  HtmlUtils.htmlEncode(fid));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen orgtilknytning med FID: " + HtmlUtils.htmlEscape(fid));
         }
 
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body("Orgtilknytning med FID %s er funnet.. Men vil ikke slettes da handling ikke er bekreftet".formatted(HtmlUtils.htmlEncode(fid)));
+                .body("Orgtilknytning med FID %s er funnet.. Men vil ikke slettes da handling ikke er bekreftet".formatted(HtmlUtils.htmlEscape(fid)));
         }
 
         orgtilknytningCommandService.fjernOrgtilknytning(
@@ -97,7 +97,7 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
                 null
             )
         );
-        return ResponseEntity.ok().body("Orgtilknytning med FID %s er funnet. Fjern event er nå sendt".formatted(HtmlUtils.htmlEncode(fid)));
+        return ResponseEntity.ok().body("Orgtilknytning med FID %s er funnet. Fjern event er nå sendt".formatted(HtmlUtils.htmlEscape(fid)));
     }
 
     @Operation(
@@ -125,12 +125,12 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
 
         var orgtilknytning = orgtilknytningService.findByFid(fid);
         if (orgtilknytning.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen orgtilknytning med FID: " +  HtmlUtils.htmlEncode(fid));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen orgtilknytning med FID: " +  HtmlUtils.htmlEscape(fid));
         }
 
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body("Orgtilknytning med FID %s er funnet.. Men vil ikke endres da handling ikke er bekreftet".formatted(HtmlUtils.htmlEncode(fid)));
+                .body("Orgtilknytning med FID %s er funnet.. Men vil ikke endres da handling ikke er bekreftet".formatted(HtmlUtils.htmlEscape(fid)));
         }
 
         orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(
@@ -153,7 +153,7 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
                 null
             )
         );
-        return ResponseEntity.ok().body("Orgtilknytning med FID %s er endret med daglig oppfølging til {}.".formatted(HtmlUtils.htmlEncode(erDagligOppfolging.toString())));
+        return ResponseEntity.ok().body("Orgtilknytning med FID %s er endret med daglig oppfølging til {}.".formatted(HtmlUtils.htmlEscape(erDagligOppfolging.toString())));
     }
 
     @Operation(
@@ -182,12 +182,12 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
 
         var orgtilknytning = orgtilknytningService.findByFid(fid);
         if (orgtilknytning.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen orgtilknytning med FID: " +  HtmlUtils.htmlEncode(fid));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen orgtilknytning med FID: " +  HtmlUtils.htmlEscape(fid));
         }
 
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body("Orgtilknytning med FID %s er funnet, men vil ikke endres da handling ikke er bekreftet".formatted(HtmlUtils.htmlEncode(fid)));
+                .body("Orgtilknytning med FID %s er funnet, men vil ikke endres da handling ikke er bekreftet".formatted(HtmlUtils.htmlEscape(fid)));
         }
         orgtilknytningCommandService.endreOrgtilknytningSektor(
             new EndreOrgtilknytningSektorCommand(
@@ -207,7 +207,7 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
                 null
             )
         );
-        return ResponseEntity.ok().body("Orgtilknytning med FID %s er endret med sektor til %s.".formatted(HtmlUtils.htmlEncode(fid), HtmlUtils.htmlEncode(sektor)));
+        return ResponseEntity.ok().body("Orgtilknytning med FID %s er endret med sektor til %s.".formatted(HtmlUtils.htmlEscape(fid), HtmlUtils.htmlEscape(sektor)));
     }
 
     private boolean validFid(String fid) {
