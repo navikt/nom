@@ -31,7 +31,6 @@ public class OrgtilknytningEvtsrcKafkaConfig {
         final var factory = new ConcurrentKafkaListenerContainerFactory<String, String>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);
-        factory.getContainerProperties().setIdleEventInterval(5 * 1000L);
 
         // If authentication towards kafka broker topic fails, retry every 10s
         factory.setContainerCustomizer(container -> {
