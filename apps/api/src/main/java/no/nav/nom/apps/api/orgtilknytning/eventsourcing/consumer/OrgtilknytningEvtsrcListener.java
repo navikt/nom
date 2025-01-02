@@ -85,19 +85,6 @@ public class OrgtilknytningEvtsrcListener {
         String initiatedBy = event.getMetadata().inputMetadata().origination().initiatedBy();
         String navident =  orgtilknytningEndretEmailService.getNavidentFromOrgtilknytningStateRepository(event.getFid());
 
-        /*
-
-        if(navident == null || navident.isBlank()) {
-            log.warn("Failed to get navident from OrgtilknytningEvent event: {}", event);
-            return;
-        }
-
-        if(!nomMastered.isMastered(navident)) {
-            log.info("Navident {} is not mastered in nom. OTendretData won´t be added to the email queue", navident);
-            return;
-        }
-        */
-
         // loggin now for checking
         log.info("Adding to the OT changes email cache for fid: {}, event: {}", event.getFid(), event);
         orgtilknytningEndretEmailService.addToOrgtilknytningEndringerQueue(
