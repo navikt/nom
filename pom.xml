@@ -52,7 +52,7 @@
         <commons-compress.version>1.27.1</commons-compress.version>
         <postgresql.version>42.7.4</postgresql.version>
 
-        <commons-io.version>2.17</commons-io.version> <!-- versjonskonflikt og https://github.com/navikt/nom/security/dependabot/172 -->
+        <commons-io.version>2.18.0</commons-io.version> <!-- versjonskonflikt og https://github.com/navikt/nom/security/dependabot/172 -->
 
         <!-- Override spring transistive dependency -->
         <logback-classic.version>1.5.15</logback-classic.version>  <!-- https://github.com/navikt/nom/security/dependabot/202 -->
