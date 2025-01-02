@@ -52,9 +52,12 @@
         <commons-compress.version>1.27.1</commons-compress.version>
         <postgresql.version>42.7.4</postgresql.version>
 
+        <commons-io.version>2.17</commons-io.version> <!-- versjonskonflikt og https://github.com/navikt/nom/security/dependabot/172 -->
+
         <!-- Override spring transistive dependency -->
         <logback-classic.version>1.5.15</logback-classic.version>  <!-- https://github.com/navikt/nom/security/dependabot/202 -->
         <logback-core.version>1.5.15</logback-core.version>  <!-- https://github.com/navikt/nom/security/dependabot/201 -->
+
     </properties>
 
     <dependencyManagement>
@@ -184,6 +187,12 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-csv</artifactId>
                 <version>${apache.common.csv.version}</version>
+            </dependency>
+
+            <dependency> <!-- versjonskonflikt og https://github.com/navikt/nom/security/dependabot/172 -->
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
             </dependency>
 
             <dependency>
