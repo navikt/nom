@@ -51,28 +51,14 @@
         <poi-ooxml.version>5.3.0</poi-ooxml.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <postgresql.version>42.7.4</postgresql.version>
-
-        <!-- Override spring-boot-dependencies version -->
-            <!-- note - local precedence import in utils-common, api, proxy, nom-ressurser, Unit4, nav-ident, og streams appene -->
-<!--        <zookeeper.version>3.9.2</zookeeper.version>-->
-
-        <!-- Override av andre transient dependencies -->
-<!--        <snappy-java.test.version>1.1.10.5</snappy-java.test.version>-->
-<!--        <bcpkix-jdk18on.version>1.78.1</bcpkix-jdk18on.version> &lt;!&ndash; https://github.com/navikt/nom/security/dependabot/95 &ndash;&gt;-->
-
     </properties>
 
     <dependencyManagement>
         <dependencies>
-<!--            <dependency>-->
-<!--                <groupId>org.json</groupId>-->
-<!--                <artifactId>json</artifactId>-->
-<!--            </dependency>-->
 
             <dependency>
                 <groupId>org.xerial.snappy</groupId>
                 <artifactId>snappy-java</artifactId>
-<!--                <version>${snappy-java.test.version}</version>-->
                 <exclusions>
                     <exclusion>
                         <groupId>org.osgi</groupId>
@@ -270,32 +256,13 @@
                 <groupId>no.nav.security</groupId>
                 <artifactId>mock-oauth2-server</artifactId>
                 <version>${mock-oauth2-server.version}</version>
-<!--                <exclusions>-->
-<!--                    <exclusion>     &lt;!&ndash; Override denne - har transitiv vuln - https://github.com/navikt/nom/security/dependabot/95 &ndash;&gt;-->
-<!--                        <groupId>org.bouncycastle</groupId>-->
-<!--                        <artifactId>bcpkix-jdk15on</artifactId>-->
-<!--                    </exclusion>-->
-<!--                </exclusions>-->
             </dependency>
-
-<!--            <dependency> &lt;!&ndash; Bruk denne for mock-oauth2-server - har transitiv vuln - https://github.com/navikt/nom/security/dependabot/95 &ndash;&gt;-->
-<!--                <groupId>org.bouncycastle</groupId>-->
-<!--                <artifactId>bcpkix-jdk18on</artifactId>-->
-<!--                <version>${bcpkix-jdk18on.version}</version>-->
-<!--            </dependency>-->
 
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-contract-wiremock</artifactId>
                 <version>${spring-cloud-contract-wiremock.version}</version>
             </dependency>
-
-            <!-- fra org.springframework.kafka:spring-kafka-test-->
-<!--            <dependency>-->
-<!--                <groupId>org.apache.zookeeper</groupId>-->
-<!--                <artifactId>zookeeper</artifactId>-->
-<!--                <version>${zookeeper.version}</version>  &lt;!&ndash; https://github.com/navikt/nom/security/dependabot/91 &ndash;&gt;-->
-<!--            </dependency>-->
 
             <dependency>
                 <groupId>org.apache.commons</groupId>

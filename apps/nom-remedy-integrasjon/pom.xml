@@ -154,12 +154,6 @@
             <scope>test</scope>
         </dependency>
 
-<!--        <dependency> &lt;!&ndash; Bruk denne for mock-oauth2-server - har transitiv vuln - https://github.com/navikt/nom/security/dependabot/95 &ndash;&gt;-->
-<!--            <groupId>org.bouncycastle</groupId>-->
-<!--            <artifactId>bcpkix-jdk18on</artifactId>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
-
         <!--suppress VulnerableLibrariesLocal -->
         <!-- https://github.com/jeremylong/DependencyCheck/issues/5608 -->
         <dependency>
