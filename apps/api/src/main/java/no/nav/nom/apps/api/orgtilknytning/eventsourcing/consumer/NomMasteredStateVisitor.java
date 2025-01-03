@@ -9,6 +9,7 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.PartitionOffset;
@@ -27,17 +28,20 @@ public class NomMasteredStateVisitor {
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
+    private final LeaderElection leaderElection;
 
     public NomMasteredStateVisitor(
         OrgtilknytningStateRepository orgtilknytningStateRepository,
         RessursStateRepository ressursStateRepository,
         OrgtilknytningCommandService orgtilknytningCommandService,
-        DvhStartupLoadMonitor dvhStartupLoadMonitor
+        DvhStartupLoadMonitor dvhStartupLoadMonitor,
+        LeaderElection leaderElection
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
+        this.leaderElection = leaderElection;
     }
 
     @KafkaListener(
@@ -48,12 +52,14 @@ public class NomMasteredStateVisitor {
         )
     )
     public void onMessage(ConsumerRecords<String, LocalDateTime> records) {
-        dvhStartupLoadMonitor.awaitInitialLoadComplete();
-        records.forEach(record -> {
-            if (!isNull(record.value())) {
-                ressursStateRepository.findByNavident(record.key()).ifPresent(this::setSektorPaaEksisterendeOrgtilknytning);
-            }
-        });
+        if (leaderElection.isLeader()) {
+            dvhStartupLoadMonitor.awaitInitialLoadComplete();
+            records.forEach(record -> {
+                if (!isNull(record.value())) {
+                    ressursStateRepository.findByNavident(record.key()).ifPresent(this::setSektorPaaEksisterendeOrgtilknytning);
+                }
+            });
+        }
     }
 
     private void setSektorPaaEksisterendeOrgtilknytning(RessursState ressursState) {

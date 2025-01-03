@@ -149,8 +149,11 @@ public class RessursRestService {
     }
 
     public List<Ressurs> findRessurserByNavident(List<String> navidenter) {
-        return ressursStateRepository.findByNavidentBulk(navidenter).values().stream()
-            .map(this::hideSensitiveDataAndEnrichRessursStateWithDvhData)
+        var ressursStates = ressursStateRepository.findByNavidentBulk(navidenter);
+        var eposter = ressursContactDetailsResolver.fetchEmails(navidenter);
+
+        return ressursStates.values().stream()
+            .map(ressursState -> hideSensitiveDataAndEnrichRessursStateWithDvhData(ressursState, eposter.get(ressursState.navident())))
             .toList();
     }
 
@@ -185,6 +188,36 @@ public class RessursRestService {
             ? ressursState.personident()
             : ressursState.personident().replaceFirst(".{5}$", "*****");
 
+
+        return new Ressurs(
+            ressursState.toBuilder()
+                .personident(personident)
+                .primaryTelefonnummer(ressursState.primaryTelefonnummer())
+                .primaryFysiskBrukersted(showFysiskBrukerSted ? ressursState.primaryFysiskBrukersted() : Optional.empty())
+                .fysiskeBrukersteder(showFysiskBrukerSted ? ressursState.fysiskeBrukersteder() : Collections.emptyList())
+                .build(),
+            telefoner,
+            epost.orElse(null),
+            nomMastered.isMastered(ressursState.navident())
+        );
+    }
+
+    private Ressurs hideSensitiveDataAndEnrichRessursStateWithDvhData(RessursState ressursState, Optional<String> epost) {
+
+        var showPersonident = loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
+            loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP) ||
+            getAuthenticatedNavIdent().equals(ressursState.navident());
+
+        var showFysiskBrukerSted = loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
+            loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP) ||
+            authResolver.kanRedigereRessurs(ressursState.navident()) ||
+            getAuthenticatedNavIdent().equals(ressursState.navident());
+
+        var telefoner = ressursContactDetailsResolver.fetchTelefoner(ressursState.navident());
+
+        var personident = showPersonident
+            ? ressursState.personident()
+            : ressursState.personident().replaceFirst(".{5}$", "*****");
 
         return new Ressurs(
             ressursState.toBuilder()

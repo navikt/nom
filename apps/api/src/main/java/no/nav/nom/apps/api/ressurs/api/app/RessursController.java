@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
@@ -41,9 +40,6 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
-
-import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
-import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
 
 @Tag(name = "Ressurs")
 @RestController

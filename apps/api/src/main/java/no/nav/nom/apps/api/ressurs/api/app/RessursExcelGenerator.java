@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
 import no.nav.nom.apps.api.authorize.AuthResolver;
-import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -99,24 +98,25 @@ public class RessursExcelGenerator {
         var navn = row.createCell(1, CellType.STRING);
         var sektor = row.createCell(2, CellType.STRING);
         var orgEnhet = row.createCell(3, CellType.STRING);
-        var fom = row.createCell(4, CellType.STRING);
-        var sluttdato = row.createCell(5, CellType.STRING);
-        var tlf = row.createCell(kanSeSluttdato ? 6 : 5, CellType.STRING);
+        var epost = row.createCell(4, CellType.STRING);
+        var fom = row.createCell(5, CellType.STRING);
+        var sluttdato = row.createCell(6, CellType.STRING);
 
 
         if (ressurs == null) {
-            navident.setCellValue("Nav-ident");
+            navident.setCellValue("Navident");
             navn.setCellValue("Navn");
             sektor.setCellValue("Sektor");
             orgEnhet.setCellValue("Organisasjonsenhet");
+            epost.setCellValue("Epost");
             fom.setCellValue("Fra og med");
             if (kanSeSluttdato) sluttdato.setCellValue("Sluttdato");
-            tlf.setCellValue("Epost");
         } else {
             navident.setCellValue(ressurs.state().navident());
             navn.setCellValue(ressurs.state().visningsnavn().toString());
             sektor.setCellValue(sektorMap.get(ressurs.state().sektor().name()));
             orgEnhet.setCellValue(orgEnhetNavn);
+            epost.setCellValue(ressurs.epost());
             fom.setCellValue(gyldigFom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
             if (kanSeSluttdato) {
                 ressurs.state().sluttdato().ifPresentOrElse(
@@ -124,7 +124,6 @@ public class RessursExcelGenerator {
                     () -> sluttdato.setCellValue("")
                 );
             }
-            tlf.setCellValue(ressurs.epost());
         }
     }
 }
