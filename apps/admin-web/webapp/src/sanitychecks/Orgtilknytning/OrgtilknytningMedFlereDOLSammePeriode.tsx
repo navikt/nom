@@ -7,7 +7,7 @@ import { useTableSort } from "~/hooks/useTableSort.ts";
 import { OrgtilknytningStateTabell } from "~/sanitychecks/Orgtilknytning/OrgtilknytningStateTabell.tsx";
 
 export function OrgtilknytningMedFlereDOLSammePeriode() {
-  const ressursMedBlankMellomnavn = useQuery(
+  const orgtilknytningMedFlereAktivDOL = useQuery(
     getOrgtilknytningMedFlereAktivDOL(),
   );
   const [page, setPage] = useState(1);
@@ -18,7 +18,7 @@ export function OrgtilknytningMedFlereDOLSammePeriode() {
   const rowsPerPage = 50;
 
   const { data, sort, handleSort } = useTableSort(
-    ressursMedBlankMellomnavn.data ?? [],
+    orgtilknytningMedFlereAktivDOL.data ?? [],
     "navident",
   );
 

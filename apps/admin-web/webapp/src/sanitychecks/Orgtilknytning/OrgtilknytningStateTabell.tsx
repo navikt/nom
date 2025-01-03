@@ -21,7 +21,8 @@ export function OrgtilknytningStateTabell({
         <Table.ColumnHeader scope="col">
           Er daglig oppfølging
         </Table.ColumnHeader>
-        <Table.ColumnHeader scope="col">Orgtilknytning type</Table.ColumnHeader>
+        <Table.ColumnHeader scope="col">Sektor</Table.ColumnHeader>
+        <Table.ColumnHeader scope="col">Tilknytningtype</Table.ColumnHeader>
       </Table.Header>
       <Table.Body>
         {sortedData.map((orgtilknytning) => (
@@ -50,6 +51,7 @@ export function OrgtilknytningStateTabell({
             <Table.DataCell>
               {orgtilknytning.erDagligOppfolging ? "Ja" : "Nei"}
             </Table.DataCell>
+            <Table.DataCell>{orgtilknytning.sektor}</Table.DataCell>
             <Table.DataCell>
               {orgtilknytning.orgtilknytningType === null
                 ? Tilknytningtype.INGEN.valueOf()

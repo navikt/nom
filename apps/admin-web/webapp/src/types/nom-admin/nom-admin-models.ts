@@ -68,18 +68,28 @@ export interface OrgtilknytningState {
   fid: string;
   navident: string;
   orgEnhetId: string;
+  sektor?: Sektor;
   erDagligOppfolging: boolean;
   /** @format date */
   gyldigFom: string;
   /** @format date */
   gyldigTom?: string;
   orgtilknytningType?: Tilknytningtype;
+  masseflyttetFraFid?: string;
 }
 
 export enum Tilknytningtype {
-  KONSULENT = "KONSULENT",
+  ARBEIDSTRENING = "ARBEIDSTRENING",
+  ANNET = "ANNET",
   EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER",
+  FAST = "FAST",
   INGEN = "INGEN",
+  JOBBSPESIALIST = "JOBBSPESIALIST",
+  KONSULENT = "KONSULENT",
+  LAERLING = "LAERLING",
+  MIDLERTIDIG = "MIDLERTIDIG",
+  PENSJONIST = "PENSJONIST",
+  STUDENT = "STUDENT",
 }
 
 export interface OrgenhetStateSearchParams {
@@ -235,6 +245,8 @@ export interface OrgtilknytningEvent {
 export type OrgtilknytningFjernetEventV1 = OrgtilknytningEvent;
 
 export type OrgtilknytningOpprettetEventV1 = OrgtilknytningEvent;
+
+export type OrgtilknytningSektorEndretEventV1 = OrgtilknytningEvent;
 
 export type OrgtilknytningTilknytningtypeEndretEventV1 = OrgtilknytningEvent;
 

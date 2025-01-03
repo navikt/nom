@@ -1,6 +1,8 @@
 package no.nav.nom.apps.admin.sanitycheck.service;
 
 import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OrgtilknytningMedOrgEnhet;
+import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
@@ -14,6 +16,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.isNull;
 
 @Service
 public class OrgtilknytningSanityCheckService {
@@ -70,6 +74,13 @@ public class OrgtilknytningSanityCheckService {
             .toList();
     }
 
+    public List<OrgtilknytningState> orgtilknytningStatesMedUgyldigeSektorTilknytninger() {
+        return aktiveOrgtilknytninger(orgtilknytningStateRepository.getAll()).stream()
+            .filter(ot -> !isNull(ot.sektor()) && ot.orgtilknytningType().isPresent())
+            .filter(this::validateOrgtilknytningTypeSektorCombination)
+            .toList();
+    }
+
     private List<OrgtilknytningState> aktiveOrgtilknytninger(Collection<OrgtilknytningState> orgtilknytninger) {
         return orgtilknytninger.stream().filter(ot ->
             ot.gyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
@@ -89,5 +100,15 @@ public class OrgtilknytningSanityCheckService {
                 }
                 return t.gyldigTom().isEmpty() && orgEnhet.isPresent() && orgEnhet.get().gyldigTom().isPresent(); // orgEnhet avsluttet > tilknytning ikke avsluttet
             }).toList();
+    }
+
+    public boolean validateOrgtilknytningTypeSektorCombination(OrgtilknytningState orgtilknytningState) {
+
+        Map<Sektor, List<Tilknytningtype>> allowedOrgtilknytningTypeForSektorMap = Map.of(
+            Sektor.EKSTERN, List.of(Tilknytningtype.KONSULENT, Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER, Tilknytningtype.ARBEIDSTRENING, Tilknytningtype.ANNET, Tilknytningtype.STUDENT, Tilknytningtype.JOBBSPESIALIST),
+            Sektor.NAV_KOMMUNAL, List.of(Tilknytningtype.INGEN),
+            Sektor.NAV_STATLIG, List.of(Tilknytningtype.FAST, Tilknytningtype.MIDLERTIDIG, Tilknytningtype.PENSJONIST, Tilknytningtype.LAERLING)
+        );
+        return !allowedOrgtilknytningTypeForSektorMap.get(orgtilknytningState.sektor()).contains(orgtilknytningState.orgtilknytningType().get());
     }
 }

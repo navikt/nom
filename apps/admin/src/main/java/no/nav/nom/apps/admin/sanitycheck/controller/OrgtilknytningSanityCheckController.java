@@ -72,4 +72,18 @@ public class OrgtilknytningSanityCheckController {
         // Group by navident for current period and dagligOppfolging
         return ResponseEntity.ok(orgtilknytningSanityCheckService.orgtilknytningerMedFlereDOLSammePeriode());
     }
+
+    @Operation(
+        description = "List orgtilknytninger med feil kombinasjon av sektor og tilknytningstype",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/orgtilknytningStatesMedUgyldigeSektorTilknytninger")
+    public ResponseEntity<List<OrgtilknytningState>> orgtilknytningStatesMedUgyldigeSektorTilknytninger() {
+        return ResponseEntity.ok(orgtilknytningSanityCheckService.orgtilknytningStatesMedUgyldigeSektorTilknytninger());
+    }
 }

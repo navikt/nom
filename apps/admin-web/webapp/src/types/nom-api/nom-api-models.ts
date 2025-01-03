@@ -19,14 +19,6 @@ export interface AvvikleRessursRequest {
   sluttDato: string;
 }
 
-export interface EndreOrgtilknytningDatoRequest {
-  /** @format date */
-  gyldigFom: string;
-  /** @format date */
-  gyldigTom?: string;
-  setRessursSluttdato?: boolean;
-}
-
 export interface EndreOrgtilknytningRequest {
   erDagligOppfolging: boolean;
   fid: string;
@@ -34,11 +26,17 @@ export interface EndreOrgtilknytningRequest {
   gyldigFom: string;
   /** @format date */
   gyldigTom?: string;
+  sektor?: Sektor;
   tilknytningtype?: Tilknytningtype;
 }
 
 export interface EndreTilknytningtypeRequest {
   tilknytningtype?: Tilknytningtype;
+}
+
+export interface ExcelExportRequest {
+  navidenter?: string[];
+  topOrgEnhetId?: string;
 }
 
 export interface FolkeregisterPerson {
@@ -103,18 +101,14 @@ export interface LeggTilOrgtilknytningRequest {
   /** @format date */
   gyldigTom?: string;
   orgEnhetId: string;
+  sektor: Sektor;
   tilknytningtype?: Tilknytningtype;
 }
 
-export interface LeggTilOrgtilknytningRequestOld {
-  erDagligOppfolging?: boolean;
-  /** @format date */
-  gyldigFom: string;
-  /** @format date */
-  gyldigTom?: string;
-  navident: string;
-  orgEnhetId: string;
-  setRessursSluttdato?: boolean;
+export interface MasseFlyttingRequest {
+  beholdTilganger: boolean;
+  nyOrgenhetId: string;
+  orgtilknytningerFid: string[];
 }
 
 export enum NomNivaa {
@@ -175,6 +169,13 @@ export interface OrgEnhet {
   underordnedeOrgEnhetId: string[];
 }
 
+export interface OrgEnhetMedLedernavn {
+  id: string;
+  ledere: string[];
+  navn: string;
+  remedyEnhetId?: string;
+}
+
 export enum OrgEnhetsType {
   ARBEIDSLIVSSENTER = "ARBEIDSLIVSSENTER",
   NAV_ARBEID_OG_YTELSER = "NAV_ARBEID_OG_YTELSER",
@@ -199,9 +200,11 @@ export interface OrgtilknytningState {
   gyldigFom: string;
   /** @format date */
   gyldigTom?: string;
+  masseflyttetFraFid?: string;
   navident: string;
   orgEnhetId: string;
   orgtilknytningType?: Tilknytningtype;
+  sektor?: Sektor;
 }
 
 export interface Person {
@@ -305,9 +308,17 @@ export enum TelefonType {
 }
 
 export enum Tilknytningtype {
-  KONSULENT = "KONSULENT",
+  ARBEIDSTRENING = "ARBEIDSTRENING",
+  ANNET = "ANNET",
   EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER",
+  FAST = "FAST",
   INGEN = "INGEN",
+  JOBBSPESIALIST = "JOBBSPESIALIST",
+  KONSULENT = "KONSULENT",
+  LAERLING = "LAERLING",
+  MIDLERTIDIG = "MIDLERTIDIG",
+  PENSJONIST = "PENSJONIST",
+  STUDENT = "STUDENT",
 }
 
 export interface UpdateFysiskeBrukerstederRequest {
@@ -329,6 +340,7 @@ export interface UpdateVisningsnavnRequest {
 export enum UserRoles {
   ROLE_WRITE = "ROLE_WRITE",
   ROLE_ADMIN = "ROLE_ADMIN",
+  ROLE_PILOT = "ROLE_PILOT",
 }
 
 export interface Visningsnavn {
