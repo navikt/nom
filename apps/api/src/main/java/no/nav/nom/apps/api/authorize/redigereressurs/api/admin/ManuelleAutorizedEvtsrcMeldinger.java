@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.AvsluttDelegertAuthorization;
+import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.FornyDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.OpprettDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.SwaggerConfig;
@@ -168,7 +169,67 @@ public class ManuelleAutorizedEvtsrcMeldinger {
         return ResponseEntity.ok().body("Authorization/delegering med FID %s er opprettet".formatted(fid));
     }
 
+    @Operation(
+        description = "Forny en Authorization/delegering Eventsrc melding på vegne av en leder med ny gyldig til og med dato",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+        }
+    )
+    @PostMapping(value = "/fornyAuthorization")
+    public ResponseEntity<String> fornyAuthorization(
+        @Parameter(description = "FID for opprinnelig delegeringen") @RequestParam String fid,
+        @Parameter(description = "Ny gyldig til og med dato for delegeringen") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate nyGyldigTom,
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
+        @NonNull JwtAuthenticationToken token
+    ) {
+        if (!validFid(fid)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("FID er ikke gyldig");
+        }
+        
+        String finalFid = fid;
+        var delegering = delegertLederStateRepository.findByFid(fid)
+            .orElseThrow(() -> new RuntimeException("Finner ingen authorization/delegering med FID: " +  HtmlUtils.htmlEscape(finalFid)));
+
+        if (!"CONFIRM".equals(confirm)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body("Authorization/Delegering kan endres - parameterene er korrekte.. Men vil ikke endres da handling ikke er bekreftet");
+        }
+
+        var inputMetadata = new InputMetadata(
+            "/api/admin/manuelleEvtsrcMeldinger",
+            "fornyAuthorization",
+            Map.of("leder", delegering.av(), "Delegert til", delegering.til(), "Orgenhet", delegering.orgenhetId(),
+                "Opprinnelig Gyldig fra", delegering.gyldigFom(), "Opprinnelig Gyldig til", delegering.gyldigTom(), "Ny Gyldig til", nyGyldigTom),
+            new Origination(
+                SecurityUtil.getAuthenticatedNavIdent(),
+                "Admin swagger/rest"
+            )
+        );
+
+        FornyDelegertAuthorization fornyDelegertAuthorization = FornyDelegertAuthorization.builder()
+            .av(delegering.av())
+            .til(delegering.til())
+            .forOrgenhet(delegering.orgenhetId())
+            .gyldigFom(delegering.gyldigFom())
+            .opprinneligGyldigTom(delegering.gyldigTom())
+            .nyGyldigTom(nyGyldigTom)
+            .inputMetadata(inputMetadata)
+            .build();
+
+        fid = authorizeCommandService.fornyDelegertAuthorization(delegering.fid(), fornyDelegertAuthorization);
+
+        return ResponseEntity.ok().body("Authorization/delegering med FID %s er fornyet".formatted(fid));
+    }
+
     private boolean validFid(String fid) {
         return fid.matches("[a-zA-Z0-9\\-]+");
     }
 }
+
+
