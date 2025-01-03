@@ -1,13 +1,6 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import {
-  BodyLong,
-  Heading,
-  HStack,
-  Label,
-  TextField,
-  VStack,
-} from "@navikt/ds-react";
+import { Heading, HStack, Label, TextField, VStack } from "@navikt/ds-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import intersection from "lodash/intersection";
@@ -22,9 +15,7 @@ import {
   updateTelefonnummer,
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
-import { BekreftModal } from "~/components/BekreftModal";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
-import { useModal } from "~/components/modalProvider/ModalProvider";
 import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBrukerstedSelect";
 import { UserImage } from "~/components/UserImage";
 import { showToast } from "~/hooks/showToast";
@@ -154,8 +145,6 @@ export function EditPersonOpplysninger({
     ressurs.primaryFysiskBrukersted,
   );
 
-  const { showModal } = useModal();
-
   const onValid = async (values: {
     primaryTelefonnummer?: string | undefined;
     mellomnavn?: string | undefined;
@@ -163,33 +152,7 @@ export function EditPersonOpplysninger({
     fornavn: string;
     primaryFysiskBrukersted: string;
   }) => {
-    if (
-      values.fornavn.charAt(0) !== ressurs.visningsnavn.fornavn.charAt(0) ||
-      values.etternavn.charAt(0) !== ressurs.visningsnavn.etternavn.charAt(0)
-    ) {
-      await showModal(
-        <BekreftModal
-          content={
-            <HStack gap="6">
-              <BodyLong>
-                Du er i ferd med å registrere et nytt visningsnavn hvor
-                initialene er endret. Det innebærer at medarbeideren får ny
-                trygdeident og at alle tilganger må gis på nytt for vedkommende.
-                Endringen vil ha umiddelbar virkning.
-              </BodyLong>
-              <BodyLong>
-                Trykk <b>Bekreft</b> for å gå videre med denne endringen.
-              </BodyLong>
-            </HStack>
-          }
-          heading="Bekreft endringer"
-        />,
-      ).then(() => {
-        mutate(values);
-      });
-    } else {
-      mutate(values);
-    }
+    mutate(values);
   };
 
   return (

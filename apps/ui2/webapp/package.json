@@ -17,7 +17,7 @@
     "stylelint:fix": "stylelint --fix '**/*.{tsx,css}'",
     "lint:fix": "eslint --fix --ext .js,.jsx,.ts,.tsx .",
     "generate-types": "swagger-typescript-api --path https://nom-api.intern.dev.nav.no/v3/api-docs/internal --output ./src/types --no-client -r -n api-models",
-    "all-checks": "npm run check-types && npm run cy:run && npm run test && npm run lint"
+    "all-checks": "npm run check-types && npm run cy:run && npm run test && npm run lint && npm run stylelint"
   },
   "dependencies": {
     "@apollo/client": "3.11.5",

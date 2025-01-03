@@ -1,7 +1,12 @@
-import { addYears, isBefore } from "date-fns";
+import { addYears } from "date-fns";
 import * as yup from "yup";
 
-import { isTodayOrAfter } from "~/utils";
+import {
+  dateWithoutTimezone,
+  isSameDateOrAfter,
+  isTodayOrAfter,
+  todayWithoutTimezone,
+} from "~/utils";
 
 declare module "yup" {
   interface StringSchema {
@@ -34,7 +39,10 @@ yup.addMethod(yup.string, "max1YearInTheFuture", function () {
         return true;
       }
 
-      return isBefore(new Date(dateString), addYears(new Date(), 1));
+      return !isSameDateOrAfter(
+        dateWithoutTimezone(dateString),
+        dateWithoutTimezone(addYears(todayWithoutTimezone(), 1)),
+      );
     },
   );
 });

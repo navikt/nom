@@ -17,7 +17,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { isSameDay, subDays } from "date-fns";
+import { addYears, isSameDay, subDays } from "date-fns";
 import sortBy from "lodash/sortBy";
 import React, { useState } from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
@@ -52,11 +52,13 @@ import type {
   OrgEnhet,
 } from "~/types/api-models";
 import {
+  dateWithoutTimezone,
   formatDateWithoutTimezone,
   formatDisplayDate,
   isSameDateOrAfter,
   promiseIsFulfilled,
   promiseIsRejected,
+  todayWithoutTimezone,
 } from "~/utils";
 
 export const Route = createFileRoute("/tilganger")({
@@ -351,6 +353,7 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               singleForm="person"
             />
           </Heading>
+
           <Table>
             <Table.Header>
               <Table.Row>
@@ -475,7 +478,7 @@ function TilgangRowEditable({ tilgang }: { tilgang: LederTilgangState }) {
   >({
     mutationFn: async (values) => fornyDelegering(values),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: tilgangerKeys.me });
+      queryClient.invalidateQueries({ queryKey: tilgangerKeys.me }).then();
     },
   });
 
@@ -485,17 +488,45 @@ function TilgangRowEditable({ tilgang }: { tilgang: LederTilgangState }) {
         <NavidentNameLookup navident={tilgang.til} />
       </Table.DataCell>
       <Table.DataCell align="right">
-        <DatePicker {...gyldigTomDatePicker.datepickerProps}>
-          <DatePicker.Input
-            data-cy="gyldig-tom-datepicker"
-            {...gyldigTomDatePicker.inputProps}
-            error={fieldState.error?.message?.toString()}
-            hideLabel
-            label="Gyldig til og med"
-            ref={field.ref}
+        <div
+          css={css`
+            display: flex;
+          `}
+        >
+          <DatePicker {...gyldigTomDatePicker.datepickerProps}>
+            <DatePicker.Input
+              css={css`
+                max-width: 158px;
+              `}
+              data-cy="gyldig-tom-datepicker"
+              {...gyldigTomDatePicker.inputProps}
+              error={fieldState.error?.message?.toString()}
+              hideLabel
+              label="Gyldig til og med"
+              ref={field.ref}
+              size="small"
+            />
+          </DatePicker>
+
+          <Button
+            css={css`
+              height: fit-content;
+              margin-left: var(--a-spacing-2);
+            `}
+            onClick={() => {
+              gyldigTomDatePicker.setSelected(
+                dateWithoutTimezone(
+                  subDays(addYears(todayWithoutTimezone(), 1), 1),
+                ),
+              );
+            }}
             size="small"
-          />
-        </DatePicker>
+            type="button"
+            variant="secondary"
+          >
+            Maks gyldighetstid
+          </Button>
+        </div>
       </Table.DataCell>
       <Table.DataCell align="right">
         <Button
@@ -583,16 +614,45 @@ function ActiveAddTilgangRow({ onClose }: { onClose: () => void }) {
         />
       </Table.DataCell>
       <Table.DataCell>
-        <DatePicker {...gyldigTomDatePicker.datepickerProps}>
-          <DatePicker.Input
-            {...gyldigTomDatePicker.inputProps}
-            data-cy="newTilgang-gyldigTom-datepicker"
-            error={fieldState.error?.message?.toString()}
-            label="Gyldig til og med"
-            ref={field.ref}
+        <div
+          css={css`
+            display: flex;
+          `}
+        >
+          <DatePicker {...gyldigTomDatePicker.datepickerProps}>
+            <DatePicker.Input
+              {...gyldigTomDatePicker.inputProps}
+              css={css`
+                max-width: 158px;
+              `}
+              data-cy="newTilgang-gyldigTom-datepicker"
+              error={fieldState.error?.message?.toString()}
+              label="Gyldig til og med"
+              ref={field.ref}
+              size="small"
+            />
+          </DatePicker>
+
+          <Button
+            css={css`
+              height: fit-content;
+              margin-top: var(--a-spacing-7);
+              margin-left: var(--a-spacing-2);
+            `}
+            onClick={() => {
+              gyldigTomDatePicker.setSelected(
+                dateWithoutTimezone(
+                  subDays(addYears(todayWithoutTimezone(), 1), 1),
+                ),
+              );
+            }}
             size="small"
-          />
-        </DatePicker>
+            type="button"
+            variant="secondary"
+          >
+            Maks gyldighetstid
+          </Button>
+        </div>
       </Table.DataCell>
       <Table.DataCell align="right">
         <Button

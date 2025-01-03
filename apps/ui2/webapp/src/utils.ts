@@ -210,11 +210,11 @@ export function isSameDate(
 }
 
 export function isSameDateOrAfter(checkDate: Date, compareDate: Date) {
-  return isSameDay(checkDate, compareDate) || isAfter(checkDate, compareDate);
+  return isSameDate(checkDate, compareDate) || isAfter(checkDate, compareDate);
 }
 
 export function isSameDateOrBefore(checkDate: Date, compareDate: Date) {
-  return isSameDay(checkDate, compareDate) || isBefore(checkDate, compareDate);
+  return isSameDate(checkDate, compareDate) || isBefore(checkDate, compareDate);
 }
 
 export function earliestDateInList(dates: (Date | string | undefined)[]) {
