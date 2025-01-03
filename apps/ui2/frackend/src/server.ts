@@ -10,7 +10,7 @@ import {
 import { errorHandling } from "./errorHandler.js";
 import { setupStaticRoutes } from "./frontendRoute.js";
 import { setupGqlPlaygroundProxy } from "./gqlplaygroundproxy.js";
-import { verifyJWTToken } from "./tokenValidation.js";
+import { verifyToken } from "./tokenValidation.js";
 
 const app = express();
 
@@ -23,7 +23,7 @@ app.set("trust proxy", 1);
 
 setupGqlPlaygroundProxy(app);
 
-app.use(verifyJWTToken);
+app.use(verifyToken);
 setupNomApiProxy(app);
 setupTeamcatApiProxy(app);
 setupNomRemedyIntegrasjonProxy(app);

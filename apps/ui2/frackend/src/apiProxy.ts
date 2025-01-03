@@ -1,14 +1,20 @@
-import { Express } from "express";
+import { getToken, requestOboToken } from "@navikt/oasis";
+import { Express, NextFunction, Request, Response } from "express";
+import { createProxyMiddleware } from "http-proxy-middleware";
 
 import config from "./config.js";
-import { addProxyHandler } from "./vendor/backend-for-frontend-utils/apiProxy.js";
+
+type ProxyOptions = {
+  ingoingUrl: string;
+  outgoingUrl: string;
+  scope: string;
+};
 
 export const setupNomApiProxy = (app: Express) =>
   addProxyHandler(app, {
     ingoingUrl: "/frackend/nom-api",
     outgoingUrl: config.proxy.nomApiUrl,
     scope: config.proxy.nomApiScope,
-    flow: "ON_BEHALF_OF",
   });
 
 export const setupTeamcatApiProxy = (app: Express) =>
@@ -16,7 +22,6 @@ export const setupTeamcatApiProxy = (app: Express) =>
     ingoingUrl: "/frackend/teamcat",
     outgoingUrl: config.proxy.teamcatApiUrl,
     scope: config.proxy.teamcatApiScope,
-    flow: "ON_BEHALF_OF",
   });
 
 export const setupNomRemedyIntegrasjonProxy = (app: Express) =>
@@ -24,7 +29,6 @@ export const setupNomRemedyIntegrasjonProxy = (app: Express) =>
     ingoingUrl: "/frackend/nom-remedy-integrasjon",
     outgoingUrl: config.proxy.nomRemedyIntegrasjonApiUrl,
     scope: config.proxy.nomRemedyIntegrasjonApiScope,
-    flow: "ON_BEHALF_OF",
   });
 
 export const setupPaarorendeProxy = (app: Express) =>
@@ -32,5 +36,43 @@ export const setupPaarorendeProxy = (app: Express) =>
     ingoingUrl: "/frackend/paarorende",
     outgoingUrl: config.proxy.paarorendeApiUrl,
     scope: config.proxy.paarorendeApiScope,
-    flow: "ON_BEHALF_OF",
   });
+
+export function addProxyHandler(
+  server: Express,
+  { ingoingUrl, outgoingUrl, scope }: ProxyOptions,
+) {
+  server.use(
+    ingoingUrl,
+    async (request: Request, response: Response, next: NextFunction) => {
+      const token = getToken(request);
+      if (!token) {
+        return response.status(401).send();
+      }
+      const obo = await requestOboToken(token, scope);
+      if (obo.ok) {
+        request.headers["obo-token"] = obo.token;
+        return next();
+      } else {
+        return response.status(403).send();
+      }
+    },
+    createProxyMiddleware({
+      target: outgoingUrl,
+      changeOrigin: true,
+      logger: console,
+      on: {
+        proxyReq: (proxyRequest, request) => {
+          const obo = request.headers["obo-token"];
+          if (obo) {
+            proxyRequest.setHeader("Authorization", `Bearer ${obo}`);
+          } else {
+            console.log(
+              `Access token var not present in session for scope ${scope}`,
+            );
+          }
+        },
+      },
+    }),
+  );
+}
