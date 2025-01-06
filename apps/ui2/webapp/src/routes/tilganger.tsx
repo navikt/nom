@@ -302,7 +302,7 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             <BodyShort>
               Du har nå endret medarbeideres redigeringstilgang i NOM. For å få
               tilgang til lønsingen, kreves det også at medarbeidere har fått
-              tilgang i Mine Tilganger. Brukerveiledning for Mine Tilgganger
+              tilgang i Mine Tilganger. Brukerveiledning for Mine Tilganger
               finner du her:{" "}
               <Link target="_blank" to={brukerveiledningLenke}>
                 Brukerveiledninger Mine Tilganger

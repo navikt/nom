@@ -51,7 +51,6 @@ import { EditOrgtilknytninger } from "~/pages/ResourcePage/RessursComponents/Edi
 import { PersonOpplysninger } from "~/pages/ResourcePage/RessursComponents/PersonOpplysninger";
 import { blueTopBorder } from "~/resources/NomStyles";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
-import { Sektor } from "~/types/api-models";
 import { Tilknytningtype } from "~/types/api-models";
 import {
   formatDisplayDate,
@@ -390,7 +389,7 @@ function OrganisationHierarchyTree({
 
   const startsInTheFuture = gyldigFom && isAfterToday(new Date(gyldigFom));
 
-  const kanSeTilknytningstype =
+  const kanAlltidSeTilknytningstype =
     hasWriteAccessForRessurs || hasSelfServiceAccess || hasAdminAccess;
 
   return (
@@ -496,9 +495,9 @@ function OrganisationHierarchyTree({
             )}
             <br />
             {orgtilknytningType &&
-              (orgtilknytningType !== Tilknytningtype.INGEN ||
-                sektor === Sektor.EKSTERN) &&
-              kanSeTilknytningstype && (
+              orgtilknytningType !== Tilknytningtype.INGEN &&
+              (orgtilknytningType !== Tilknytningtype.ARBEIDSTRENING ||
+                kanAlltidSeTilknytningstype) && (
                 <span>
                   <b>Tilknytningstype:</b>{" "}
                   {TilknytningtypeNameMapping[orgtilknytningType]}
