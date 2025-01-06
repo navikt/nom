@@ -48,6 +48,24 @@ public class KontaktinfoController {
         this.nomApiClient = nomApiClient;
     }
 
+    @GetMapping("/tilgang/{navident}")
+    @Operation(
+        description = "Sjekker hvorvidt innehaver av tokenet har tilgang til pårørende kontaktinfo til oppgitt ansatt",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Liste av kontaktinfo"),
+            @ApiResponse(responseCode = "401", description = "Uautentisert"),
+            @ApiResponse(responseCode = "403", description = "Uatorisert")
+        }
+    )
+    public ResponseEntity<Void> verifiserHarTilgang(@PathVariable String navident) {
+        securityUtil.assertAuthorizedAccessTo(navident);
+
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping
     @Operation(
         description = "Henter alle kontaktinfo til pårørende av brukeren",
