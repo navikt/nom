@@ -19,6 +19,7 @@ import React from "react";
 import {
   getRessurserByListNavident,
   isOrgEnhetArbeidsomraade,
+  isOrgEnhetDriftsenhet,
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { UserImage } from "~/components/UserImage";
@@ -63,10 +64,19 @@ export const ValgtOrgEnhet = ({
     enabled: !!orgEnhet.id,
   });
 
-  const visTabellKnapp = isOrgEnhetArbeidsomraadeQuery.data ?? false;
+  const isOrgEnhetDriftsenhetQuery = useQuery({
+    queryKey: isOrgEnhetDriftsenhet.queryKey(orgEnhet.id),
+    queryFn: () => isOrgEnhetDriftsenhet.queryFn(orgEnhet.id),
+    enabled: !!orgEnhet.id,
+  });
+
+  const visTabellKnapp = isOrgEnhetDriftsenhetQuery.data ?? false;
+
+  const visRessursAdministeringKnapper =
+    isOrgEnhetArbeidsomraadeQuery.data ?? false;
 
   const loading =
-    hentedeRessurserQuery.isLoading || isOrgEnhetArbeidsomraadeQuery.isLoading;
+    hentedeRessurserQuery.isLoading || isOrgEnhetDriftsenhetQuery.isLoading;
 
   return (
     <div
@@ -170,6 +180,7 @@ export const ValgtOrgEnhet = ({
           <MedarbeidereList
             orgEnhet={orgEnhet}
             ressurser={hideRessurser ? [] : hentedeRessurser}
+            visRessursAdministeringKnapper={visRessursAdministeringKnapper}
             visTabellKnapp={visTabellKnapp ?? false}
           />
         )}
@@ -181,10 +192,12 @@ export const ValgtOrgEnhet = ({
 function MedarbeidereList({
   orgEnhet,
   ressurser,
+  visRessursAdministeringKnapper,
   visTabellKnapp,
 }: {
   orgEnhet: OrgEnhet;
   ressurser: Ressurs[];
+  visRessursAdministeringKnapper: boolean;
   visTabellKnapp: boolean;
 }) {
   if (ressurser.length === 0) {
@@ -197,7 +210,10 @@ function MedarbeidereList({
           margin-top: var(--a-spacing-6);
         `}
       >
-        <DropdownMeny orgEnhet={orgEnhet} />
+        <DropdownMeny
+          orgEnhet={orgEnhet}
+          visRessursAdministeringKnapper={visRessursAdministeringKnapper}
+        />
       </div>
     ) : (
       <></>
@@ -229,8 +245,14 @@ function MedarbeidereList({
         <Heading level="3" size="medium">
           Medarbeidere i {orgEnhet.navn}
         </Heading>
-
-        <DropdownMeny orgEnhet={orgEnhet} />
+        {visTabellKnapp && (
+          <>
+            <DropdownMeny
+              orgEnhet={orgEnhet}
+              visRessursAdministeringKnapper={visRessursAdministeringKnapper}
+            />
+          </>
+        )}
       </div>
       <VStack gap="4">
         {interneRessurser.length > 0 && (
@@ -304,7 +326,13 @@ function MedarbeidereList({
   );
 }
 
-function DropdownMeny({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+function DropdownMeny({
+  orgEnhet,
+  visRessursAdministeringKnapper,
+}: {
+  orgEnhet: OrgEnhet;
+  visRessursAdministeringKnapper: boolean;
+}) {
   const hasAdminAccess = useHasAdminAccess();
 
   return (
@@ -334,23 +362,29 @@ function DropdownMeny({ orgEnhet }: { orgEnhet: OrgEnhet }) {
           >
             Tabellvisning av ansatte i denne enheten og underliggende enheter
           </Dropdown.Menu.GroupedList.Item>
-
-          <Dropdown.Menu.Divider />
-
-          <Dropdown.Menu.GroupedList.Item as={Link} href="/ressurs/create/1">
-            Opprett medarbeider
-          </Dropdown.Menu.GroupedList.Item>
-
-          {hasAdminAccess && (
+          {visRessursAdministeringKnapper && (
             <>
               <Dropdown.Menu.Divider />
 
               <Dropdown.Menu.GroupedList.Item
                 as={Link}
-                href={`/masseflytting/${orgEnhet.id}`}
+                href="/ressurs/create/1"
               >
-                Flytt én eller flere medarbeidere
+                Opprett medarbeider
               </Dropdown.Menu.GroupedList.Item>
+
+              {hasAdminAccess && (
+                <>
+                  <Dropdown.Menu.Divider />
+
+                  <Dropdown.Menu.GroupedList.Item
+                    as={Link}
+                    href={`/masseflytting/${orgEnhet.id}`}
+                  >
+                    Flytt én eller flere medarbeidere
+                  </Dropdown.Menu.GroupedList.Item>
+                </>
+              )}
             </>
           )}
         </Dropdown.Menu.GroupedList>

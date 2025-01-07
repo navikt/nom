@@ -279,7 +279,17 @@ export const isOrgEnhetArbeidsomraade = {
   queryFn: async (orgEnhetId: string) =>
     (
       await axios.get<boolean>(
-        `${NOM_API_BASE_PATH}/app/orgenheter/finn-arbeidsomraade/${orgEnhetId}`,
+        `${NOM_API_BASE_PATH}/app/orgenheter/isArbeidsomraade/${orgEnhetId}`,
+      )
+    ).data,
+};
+
+export const isOrgEnhetDriftsenhet = {
+  queryKey: (orgEnhetId: string) => ["IS_DRIFTSENHET", orgEnhetId],
+  queryFn: async (orgEnhetId: string) =>
+    (
+      await axios.get<boolean>(
+        `${NOM_API_BASE_PATH}/app/orgenheter/isDriftsenhet/${orgEnhetId}`,
       )
     ).data,
 };

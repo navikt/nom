@@ -16,7 +16,7 @@ import {
   downloadExcelByListNavident,
   getAlleUnderliggendeOrgEnheter,
   getOrgEnhet,
-  isOrgEnhetArbeidsomraade,
+  isOrgEnhetDriftsenhet,
 } from "~/api/react-query-endpoints";
 import ContentWrapper from "~/components/ContentWrapper";
 import { PageBanner } from "~/components/PageBanner";
@@ -27,16 +27,16 @@ import { isPeriodActiveOrFuture } from "~/utils";
 export const OrgRessursTabellPage = () => {
   const { id } = useParams({ from: "/org/table/$id" });
 
-  const isOrgEnhetArbeidsomraadeQuery = useQuery({
-    queryKey: isOrgEnhetArbeidsomraade.queryKey(id as string),
-    queryFn: () => isOrgEnhetArbeidsomraade.queryFn(id as string),
+  const isOrgEnhetDriftsenhetQuery = useQuery({
+    queryKey: isOrgEnhetDriftsenhet.queryKey(id as string),
+    queryFn: () => isOrgEnhetDriftsenhet.queryFn(id as string),
     enabled: !!id,
   });
 
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(id as string),
     queryFn: () => getOrgEnhet.queryFn(id as string),
-    enabled: !!id && isOrgEnhetArbeidsomraadeQuery.isSuccess,
+    enabled: !!id && isOrgEnhetDriftsenhetQuery.isSuccess,
   });
 
   const underliggendeOrgEnhetQuery = useQuery({
@@ -103,7 +103,7 @@ export const OrgRessursTabellPage = () => {
     );
   }
 
-  if (isOrgEnhetArbeidsomraadeQuery.data?.valueOf() === false) {
+  if (isOrgEnhetDriftsenhetQuery.data?.valueOf() === false) {
     return (
       <Alert variant="error">
         <Heading level="3" size="small">
@@ -124,7 +124,7 @@ export const OrgRessursTabellPage = () => {
   }
 
   if (
-    isOrgEnhetArbeidsomraadeQuery.data?.valueOf() === true &&
+    isOrgEnhetDriftsenhetQuery.data?.valueOf() === true &&
     orgEnhetQuery.data &&
     underliggendeOrgEnhetQuery.data
   ) {

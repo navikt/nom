@@ -226,6 +226,21 @@ public class OrgenhetService {
         return organisering.filter(organiseringState -> isOrgEnhetInArbeidsomraade(organiseringState.idOver())).isPresent();
     }
 
+    public boolean isOrgenhetInDriftsenhet(String orgenhetId) {
+        var orgenhetState = orgEnhetStateRepository.findById(orgenhetId);
+        if (orgenhetState.isEmpty()) {
+            return false;
+        }
+
+        if (orgenhetState.get().nomNivaa().isPresent() && orgenhetState.get().nomNivaa().get().equals(NomNivaa.DRIFTSENHET)) {
+            return true;
+        }
+
+        var organisering = organiseringStateRepository.findActiveById(orgenhetState.get().id());
+
+        return organisering.filter(organiseringState -> isOrgenhetInDriftsenhet(organiseringState.idOver())).isPresent();
+    }
+
     private Set<OrganiseringState> findChildOrganiseringerUsingNewOrganisering(Set<OrganiseringState> parentOrganiseringer) {
         return parentOrganiseringer.stream()
             .map(organisering ->

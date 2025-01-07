@@ -99,13 +99,22 @@ public class OrgEnhetController {
         return ResponseEntity.ok(orgenhetService.getAllUnderliggendeOrgEnhetById(parentId).stream().map(orgEnhetMapper::mapToOrgEnhet).collect(Collectors.toList()));
     }
 
-    @GetMapping("/finn-arbeidsomraade/{orgEnhetId}")
+    @GetMapping("/isArbeidsomraade/{orgEnhetId}")
     @Operation(
         description = "Sjekk om Organisasjonen tilhøerer et arbeidsområde.",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     public ResponseEntity<Boolean> checkIfOrgEnhetIsArbeidsomraade(@PathVariable("orgEnhetId") String orgEnhetId) {
         return ResponseEntity.ok(orgenhetService.isOrgEnhetInArbeidsomraade(orgEnhetId));
+    }
+
+    @GetMapping("/isDriftsenhet/{orgEnhetId}")
+    @Operation(
+        description = "Sjekk om Organisasjonen tilhøerer et arbeidsområde.",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    public ResponseEntity<Boolean> checkIfOrgEnhetIsDriftsenhet(@PathVariable("orgEnhetId") String orgEnhetId) {
+        return ResponseEntity.ok(orgenhetService.isOrgenhetInDriftsenhet(orgEnhetId));
     }
 
     @GetMapping("/read-topic")
