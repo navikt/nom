@@ -30,7 +30,7 @@ public class DvhOrdsRessursDTO implements DvhRessursDTO{
     @JsonProperty("etternavn")
     private String etternavn;
 
-    @JsonProperty("epost")
+    @JsonProperty("e_post")
     private String epost;
 
     @JsonProperty("remedy_start_dato")
