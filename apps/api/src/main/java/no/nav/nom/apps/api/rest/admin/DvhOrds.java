@@ -158,4 +158,21 @@ public class DvhOrds {
         }
         return dvhOrdsService.getTlfJson(numRows).toString();
     }
+
+    @Operation(
+        description = "Hent gamle nom-ressurser",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/nom-ressurser", produces="application/json")
+    public String nomRessurser(@RequestParam(defaultValue ="1") int numRows, @RequestParam(required = false) String ordsFilter) {
+        if (ordsFilter != null) {
+            return dvhOrdsService.getNomRessurserJson(ordsFilter).toString();
+        }
+        return dvhOrdsService.getNomRessurserJson(numRows).toString();
+    }
 }

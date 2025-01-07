@@ -67,6 +67,7 @@ public record AppProperties(
         String kommunaleRessurserPath,
         String ansatteBucketsPath,
         String tlfPath,
-        String orgHierarkiPath
+        String orgHierarkiPath,
+        String nomRessurserPath
     ) {}
 }

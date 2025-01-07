@@ -238,6 +238,19 @@ public class DvhOrdsService {
         return dvhOrdsClient.dvhGetJsonDataOrdsFilter(dvhOrdsProperties.tlfPath(), ordsFilter);
     }
 
+    // Nom Ressurser - for swagger oppslag
+    public JsonNode getNomRessurserJson(int numRowsToFetch) {
+        if (numRowsToFetch < 1) {
+            return getRessurserJson();
+        }
+        return dvhOrdsClient.dvhGetJsonDataLimitRows(dvhOrdsProperties.nomRessurserPath(), numRowsToFetch);
+    }
+
+    public JsonNode getNomRessurserJson(String ordsFilter) {
+        return dvhOrdsClient.dvhGetJsonDataOrdsFilter(dvhOrdsProperties.nomRessurserPath(), ordsFilter);
+    }
+
+
 
     private boolean validateLeder(JsonNode e) {
         final var validate = e.hasNonNull("leder_navident") && e.hasNonNull("orgnode_kode") && e.hasNonNull("orgnode_niva");

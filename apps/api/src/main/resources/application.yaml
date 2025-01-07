@@ -50,6 +50,7 @@ app:
       ansatte-buckets-path: /dvh_nom/nom_ords_ansatte_buckets.json
       tlf-path: /dvh_nom/nom_ords_tlf.json
       org-hierarki-path: /dvh_nom/nom_ords_hrorg_hierarki.json
+      nom-ressurser-path: /dvh_nom/nom_ords_ansatte_historikk.json
 
 
   manuelle-ressurser-og-ledere:
