@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
@@ -20,7 +19,6 @@ import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.ressurs.api.exceptions.DuplicateRessursException;
-import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.NomMasteredException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
@@ -56,6 +54,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -89,7 +88,6 @@ public class RessursRestService {
     private final KafkaTopicReader kafkaTopicReader;
     private final NomMastered nomMastered;
     private final AuthResolver authResolver;
-    private final Unleash unleash;
 
     public RessursRestService(
         RessursStateRepository ressursStateRepository,
@@ -105,8 +103,7 @@ public class RessursRestService {
         RessursLedereResolver ressursLedereResolver,
         KafkaTopicReader kafkaTopicReader,
         NomMastered nomMastered,
-        AuthResolver authResolver,
-        Unleash unleash
+        AuthResolver authResolver
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -123,7 +120,6 @@ public class RessursRestService {
         this.ressursLedereResolver = ressursLedereResolver;
         this.nomMastered = nomMastered;
         this.authResolver = authResolver;
-        this.unleash = unleash;
     }
 
     public List<RessursState> findRessurser(RessursFilter ressursFilter) {
@@ -234,14 +230,6 @@ public class RessursRestService {
 
     public void updateRessursNavn(String navident, UpdateVisningsnavnRequest updateVisningsnavnRequest) {
         var ressursState = findRessursStateByNavident(navident);
-
-        if (unleash.isEnabled("nom.ressurs.opprett_statlig")
-            && (loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) || loggedInUserHasAccessScope(NomApiAccessScope.NOM_PILOT))) {
-            logger.info("Feature flag nom.ressurs.opprett_statlig is enabled, allowing update of ressurs with sektor NAV_STATLIG");
-        } else if (ressursState.sektor().erStatlig()) {
-            throw InvalidSektorException.actionNotAllowedForSektor(Sektor.NAV_STATLIG);
-        }
-
         validateIngenMellomromEtternavn(updateVisningsnavnRequest.etternavn());
 
         var oppdaterPersonaliaCommand = new OppdaterPersonaliaCommand(
@@ -264,13 +252,6 @@ public class RessursRestService {
 
     public void updateRessursPrimaryTelefonnummer(String navident, UpdatePrimarytelefonnummer updatePrimarytelefonnummer) {
         var ressursState = findRessursStateByNavident(navident);
-
-        if (unleash.isEnabled("nom.ressurs.opprett_statlig")
-            && (loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) || loggedInUserHasAccessScope(NomApiAccessScope.NOM_PILOT))) {
-            logger.info("Feature flag nom.ressurs.opprett_statlig is enabled, allowing update of ressurs with sektor NAV_STATLIG");
-        } else if (ressursState.sektor().erStatlig()) {
-            throw InvalidSektorException.actionNotAllowedForSektor(Sektor.NAV_STATLIG);
-        }
 
         if (!loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)) {
             if (authResolver.kanSelvbetjene(navident) && !nomMastered.isMastered(ressursState.navident())) {
@@ -304,13 +285,6 @@ public class RessursRestService {
         validateFysiskeBrukerstederExists(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());
 
         var ressursState = ressursStateRepository.findByFid(fid).orElseThrow(() -> RessursNotFoundException.fid(fid));
-
-        if (unleash.isEnabled("nom.ressurs.opprett_statlig")
-            && (loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) || loggedInUserHasAccessScope(NomApiAccessScope.NOM_PILOT))) {
-            logger.info("Feature flag nom.ressurs.opprett_statlig is enabled, allowing update of ressurs with sektor NAV_STATLIG");
-        } else if (ressursState.sektor().erStatlig()) {
-            throw InvalidSektorException.actionNotAllowedForSektor(Sektor.NAV_STATLIG);
-        }
 
         var existingFysiskeBrukerstederForRessurs = Optional.ofNullable(ressursState.fysiskeBrukersteder()).orElse(Collections.emptyList());
 
@@ -653,13 +627,6 @@ public class RessursRestService {
     public void avvikleRessurs(String fid, AvvikleRessursRequest request) {
         var ressursState = findRessursStateByFid(fid);
 
-        if (unleash.isEnabled("nom.ressurs.opprett_statlig")
-            && (loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) || loggedInUserHasAccessScope(NomApiAccessScope.NOM_PILOT))) {
-            logger.info("Feature flag nom.ressurs.opprett_statlig is enabled, allowing update of ressurs with sektor NAV_STATLIG");
-        } else if (ressursState.sektor().erStatlig()) {
-            throw InvalidSektorException.actionNotAllowedForSektor(Sektor.NAV_STATLIG);
-        }
-
         var metadata = new InputMetadata(
             "REST",
             "avvikleRessurs",
@@ -709,9 +676,8 @@ public class RessursRestService {
     }
 
     private void validateOpprettRessursRequest(OpprettRessursRequest request) {
-        switch (request.sektor()) {
-            case EKSTERN -> validateOpprettEksternRessursRequest(request);
-            case NAV_STATLIG -> validateOpprettStatligRessursRequest(request);
+        if (Objects.requireNonNull(request.sektor()) == Sektor.EKSTERN) {
+            validateOpprettEksternRessursRequest(request);
         }
 
         validateChronologicalDates(request.startDato(), request.sluttDato().orElse(null));
@@ -723,15 +689,6 @@ public class RessursRestService {
     private void validateOpprettEksternRessursRequest(OpprettRessursRequest request) {
         if (request.sluttDato().isEmpty()) {
             throw new IllegalArgumentException("Sluttdato må oppgis for opprettelse av ekstern ressurs");
-        }
-    }
-
-    private void validateOpprettStatligRessursRequest(OpprettRessursRequest request) {
-        if (unleash.isEnabled("nom.ressurs.opprett_statlig")
-            && (loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) || loggedInUserHasAccessScope(NomApiAccessScope.NOM_PILOT))) {
-            logger.info("Feature flag nom.ressurs.opprett_statlig is enabled, allowing update of ressurs with sektor NAV_STATLIG");
-        } else if (request.sektor().erStatlig()) {
-            throw InvalidSektorException.actionNotAllowedForSektor(request.sektor());
         }
     }
 

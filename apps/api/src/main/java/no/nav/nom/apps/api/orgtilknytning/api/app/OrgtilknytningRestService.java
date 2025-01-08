@@ -120,18 +120,6 @@ public class OrgtilknytningRestService {
     public void oppdaterOrgtilknytningerForRessurs(String navident,
                                                    OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
                                                    boolean isLeder) {
-        var ressursState = ressursStateRepository.findByNavident(navident)
-            .orElseThrow(() -> RessursNotFoundException.navident(navident));
-        if (unleash.isEnabled("nom.ressurs.opprett_statlig")
-            && (loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) || loggedInUserHasAccessScope(NomApiAccessScope.NOM_PILOT))) {
-            log.info("Feature flag nom.ressurs.opprett_statlig is enabled, allowing update of ressurs with sektor NAV_STATLIG");
-        } else if (ressursState.sektor().erStatlig()) {
-            throw InvalidSektorException.actionNotAllowedForSektor(Sektor.NAV_STATLIG);
-        }
-
-        // TODO - remote this log statement
-        log.info("Testing OT changes navident: {}, oppdaterOrgtilknytningerForRessursRequest: {}", navident, oppdaterOrgtilknytningerForRessursRequest);
-
         var orgEnheterTilLeder = authorizedNavident.orgenheterLederKanRedigere(getAuthenticatedNavIdent());
         validateOppdaterOrgtilknytningerForRessursRequest(oppdaterOrgtilknytningerForRessursRequest, orgEnheterTilLeder, isLeder);
         var tilknyttetRessurs = ressursStateRepository.findByNavident(navident)
@@ -658,13 +646,6 @@ public class OrgtilknytningRestService {
 
         var tilknyttetRessurs = ressursStateRepository.findByNavident(orgtilknytning.navident())
             .orElseThrow(() -> RessursNotFoundException.navident(orgtilknytning.navident()));
-
-        if (unleash.isEnabled("nom.ressurs.opprett_statlig")
-            && (loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) || loggedInUserHasAccessScope(NomApiAccessScope.NOM_PILOT))) {
-            log.info("Bruker har tilgang til å opprette statlig ressurs");
-        } else if (tilknyttetRessurs.sektor().erStatlig()) {
-            throw InvalidSektorException.actionNotAllowedForSektor(tilknyttetRessurs.sektor());
-        }
 
         endreTilknytningtypeRequest.tilknytningtype().ifPresent(
             orgtilknytningType -> validateOrgtilknytningTypeSektorCombination(orgtilknytningType, tilknyttetRessurs.sektor())

@@ -52,6 +52,7 @@ import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSec
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.fifteenCharLengthZeroPaddedNumber;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.formatFornavnWithMellomnavn;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.isActive;
+import static org.apache.kafka.common.utils.Utils.isBlank;
 
 @Service
 public class NomIntegrasjonService {
@@ -102,85 +103,34 @@ public class NomIntegrasjonService {
     }
 
     public void handleRessursEvent(RessursEvent ressursEvent) {
+        if (ressursEvent instanceof RessursOpprettetEventV1 ressursOpprettetEventV1) {
+            createRessurs(ressursOpprettetEventV1);
+        } else if (ressursEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1) {
+            handleRessursSluttetEventV1(ressursSluttetEventV1);
 
-        if (unleash.isEnabled("nom.ressurs.opprett_statlig")) {
-            if (ressursEvent instanceof RessursOpprettetEventV1 ressursOpprettetEventV1) {
-                createRessurs(ressursOpprettetEventV1);
-
-            } else if (ressursEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1) {
-                handleRessursSluttetEventV1(ressursSluttetEventV1);
-
-            } else if (ressursEvent instanceof RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
-                handleRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
-
-            } else if (ressursEvent instanceof RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertV1) {
-                updateRessursPersonalia(ressursPersonaliaOppdatertV1);
-
-            } else if (ressursEvent instanceof RessursFysiskeBrukerstederOppdatertEventV1 ressursFysiskeBrukerstederOppdatertEventV1) {
-                updateRessursFysiskeBrukersteder(ressursFysiskeBrukerstederOppdatertEventV1);
-            } else if (ressursEvent instanceof RessursPrimaryTelefonnummerOppdatertEventV1 ressursPrimaryTelefonnummerOppdatertEventV1) {
-                updateRessursTelefonnummer(ressursPrimaryTelefonnummerOppdatertEventV1);
-            }
-        } else {
-            if (ressursEvent instanceof RessursOpprettetEventV1 ressursOpprettetEventV1
-                && ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().kanOppretteRessurs()) {
-                createRessurs(ressursOpprettetEventV1);
-
-            } else if (ressursEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1
-                && isFidEksternEllerKommunalRessurs(ressursEvent.getFid())
-            ) {
-                handleRessursSluttetEventV1(ressursSluttetEventV1);
-
-            } else if (ressursEvent instanceof RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
-                handleRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
-
-            } else if (ressursEvent instanceof RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertV1
-                && isFidEksternEllerKommunalRessurs(ressursEvent.getFid())
-            ) {
-                updateRessursPersonalia(ressursPersonaliaOppdatertV1);
-
-            } else if (ressursEvent instanceof RessursFysiskeBrukerstederOppdatertEventV1 ressursFysiskeBrukerstederOppdatertEventV1
-                && isFidEksternEllerKommunalRessurs(ressursEvent.getFid())) {
-                updateRessursFysiskeBrukersteder(ressursFysiskeBrukerstederOppdatertEventV1);
-            } else if (ressursEvent instanceof RessursPrimaryTelefonnummerOppdatertEventV1 ressursPrimaryTelefonnummerOppdatertEventV1
-                && isFidEksternEllerKommunalRessurs(ressursEvent.getFid())) {
-                updateRessursTelefonnummer(ressursPrimaryTelefonnummerOppdatertEventV1);
-            }
+        } else if (ressursEvent instanceof RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
+            handleRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
+        } else if (ressursEvent instanceof RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertV1) {
+            updateRessursPersonalia(ressursPersonaliaOppdatertV1);
+        } else if (ressursEvent instanceof RessursFysiskeBrukerstederOppdatertEventV1 ressursFysiskeBrukerstederOppdatertEventV1) {
+            updateRessursFysiskeBrukersteder(ressursFysiskeBrukerstederOppdatertEventV1);
+        } else if (ressursEvent instanceof RessursPrimaryTelefonnummerOppdatertEventV1 ressursPrimaryTelefonnummerOppdatertEventV1) {
+            updateRessursTelefonnummer(ressursPrimaryTelefonnummerOppdatertEventV1);
         }
     }
 
     public void handleOrgtilknytningEvent(OrgtilknytningEvent orgtilknytningEvent) {
-
-        if (unleash.isEnabled("nom.ressurs.opprett_statlig")) {
-            if (orgtilknytningEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1
-                && orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().dagligOppfolging()) {
-                handleOrgtilknytningDagligOppfolgingEndretEvent(orgtilknytningDagligOppfolgingEndretEventV1);
-            } else if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2
-                && isOrgtilknytningDOL(orgtilknytningDatoEndretEventV2.getFid())) {
-                handleOrgtilknytningDatoEndretEvent(orgtilknytningDatoEndretEventV2);
-            } else if (orgtilknytningEvent instanceof  OrgtilknytningSektorEndretEventV1 orgtilknytningSektorEndretEventV1
-                && isOrgtilknytningDOL(orgtilknytningSektorEndretEventV1.getFid())) {
-                handleOrgtilknytningSektorEndretEvent(orgtilknytningSektorEndretEventV1);
-            } else if (orgtilknytningEvent instanceof OrgtilknytningFjernetEventV1 orgtilknytningFjernetEventV1) {
-                deleteOrgtilknytningEvents(orgtilknytningFjernetEventV1.getFid());
-            }
-        } else {
-            if (orgtilknytningEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1
-                && orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().dagligOppfolging()
-                && isNavidentEksternEllerKommunalRessurs(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData()
-                .navident())) {
-
-                handleOrgtilknytningDagligOppfolgingEndretEvent(orgtilknytningDagligOppfolgingEndretEventV1);
-            } else if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2
-                && isOrgtilknytningEksternEllerKommunalAndDagligOppfolgning(orgtilknytningDatoEndretEventV2.getFid())) {
-
-                handleOrgtilknytningDatoEndretEvent(orgtilknytningDatoEndretEventV2);
-            } else if (orgtilknytningEvent instanceof  OrgtilknytningSektorEndretEventV1 orgtilknytningSektorEndretEventV1
-                && isOrgtilknytningEksternEllerKommunalAndDagligOppfolgning(orgtilknytningSektorEndretEventV1.getFid())) {
-                handleOrgtilknytningSektorEndretEvent(orgtilknytningSektorEndretEventV1);
-            } else if (orgtilknytningEvent instanceof OrgtilknytningFjernetEventV1 orgtilknytningFjernetEventV1) {
-                deleteOrgtilknytningEvents(orgtilknytningFjernetEventV1.getFid());
-            }
+        if (orgtilknytningEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1
+            && orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().dagligOppfolging()) {
+            handleOrgtilknytningDagligOppfolgingEndretEvent(orgtilknytningDagligOppfolgingEndretEventV1);
+        } else if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2
+            && isOrgtilknytningDOL(orgtilknytningDatoEndretEventV2.getFid())) {
+            handleOrgtilknytningDatoEndretEvent(orgtilknytningDatoEndretEventV2);
+        } else if (orgtilknytningEvent instanceof OrgtilknytningSektorEndretEventV1 orgtilknytningSektorEndretEventV1
+            && isOrgtilknytningDOL(orgtilknytningSektorEndretEventV1.getFid())) {
+            handleOrgtilknytningSektorEndretEvent(orgtilknytningSektorEndretEventV1);
+        } else if (orgtilknytningEvent instanceof OrgtilknytningFjernetEventV1 orgtilknytningFjernetEventV1) {
+            deleteOrgtilknytningEvents(orgtilknytningFjernetEventV1.getFid());
         }
     }
 
@@ -530,24 +480,25 @@ public class NomIntegrasjonService {
     private void createRessurs(RessursOpprettetEventV1 ressursOpprettetEventV1) {
         var ressursOpprettetEventData = ressursOpprettetEventV1.getRessursOpprettetEventData();
         var ressursOpprettetAdditionalData = ressursOpprettetEventV1.getRessursOpprettetAdditionalData();
-        Map<String, Object> inputInterfaceMethodArguments = objectMapper.convertValue(
-            ressursOpprettetEventV1.getMetadata().inputMetadata().inputInterfaceMethodArguments(),
+        var inputInterfaceMethodArguments = ressursOpprettetEventV1.getMetadata().inputMetadata().inputInterfaceMethodArguments();
+        Map<String, Object> inputInterfaceMethodArgumentsMap = !isBlank(inputInterfaceMethodArguments.toString()) ? objectMapper.convertValue(
+            inputInterfaceMethodArguments,
             new TypeReference<>() {}
-        );
+        ) : Map.of();
 
         logger.info("Creating ressurs for RessursOpprettetEventV1 with fid: {}", ressursOpprettetEventV1.getFid());
 
         var remedyEnhetsId = getRemedyEnhetId(
-            Optional.ofNullable((String) inputInterfaceMethodArguments.get("orgEnhetId"))
+            Optional.ofNullable((String) inputInterfaceMethodArgumentsMap.get("orgEnhetId"))
                 .orElseThrow(() -> RequiredValueMissingException.forField("orgEnhetId"))
         );
 
-        var sluttDato = Optional.ofNullable((String) inputInterfaceMethodArguments.get("sluttDato"))
+        var sluttDato = Optional.ofNullable((String) inputInterfaceMethodArgumentsMap.get("sluttDato"))
             .filter(ressursSluttdato -> ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().equals(Sektor.EKSTERN))
             .map(LocalDate::parse)
             .orElse(null);
 
-        var fysiskBrukerstedNr = Optional.ofNullable((String) inputInterfaceMethodArguments.get("fysiskBrukerstedNr"))
+        var fysiskBrukerstedNr = Optional.ofNullable((String) inputInterfaceMethodArgumentsMap.get("fysiskBrukerstedNr"))
             .orElseThrow(() -> RequiredValueMissingException.forField("fysiskBrukerstedNr"));
 
         NomIntegrasjonEntity newNomIntegrasjonEntity = NomIntegrasjonEntity.builder()
@@ -681,32 +632,6 @@ public class NomIntegrasjonService {
             .mobil(nomApiClient.getTelefonnummer(ressurs.getNavident()).orElse(null))
             .masseflytting(dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getMasseflyttetFraFid).isPresent() ? "X" : null)
             .build();
-    }
-
-    private boolean isNavidentEksternEllerKommunalRessurs(String navident) {
-        var orgtilknytning = getDolOrgtilknytningStateByNavident(navident);
-        var sektor = orgtilknytning.map(OrgtilknytningState::getSektor).orElse(null);
-        if (isNull(sektor)) {
-            sektor = nomApiClient.getRessursByNavident(navident).getSektor();
-        }
-        return sektor.equals(no.nav.nom.generated.model.Sektor.EKSTERN)
-            || sektor.equals(no.nav.nom.generated.model.Sektor.NAV_KOMMUNAL);
-    }
-
-    private boolean isFidEksternEllerKommunalRessurs(String fid) {
-        var orgtilknytning = getDolOrgtilknytningStateByFid(fid);
-        var sektor = orgtilknytning.map(OrgtilknytningState::getSektor).orElse(null);
-        if (isNull(sektor)) {
-            sektor = nomApiClient.getRessursByFid(fid).getSektor();
-        }
-        return sektor.equals(no.nav.nom.generated.model.Sektor.EKSTERN)
-            || sektor.equals(no.nav.nom.generated.model.Sektor.NAV_KOMMUNAL);
-    }
-
-    private boolean isOrgtilknytningEksternEllerKommunalAndDagligOppfolgning(String orgtilknytningFid) {
-        var orgtilknytning = nomApiClient.getOrgtilknytning(orgtilknytningFid);
-
-        return orgtilknytning.getErDagligOppfolging() && isNavidentEksternEllerKommunalRessurs(orgtilknytning.getNavident());
     }
 
     protected void saveNewNomIntegrasjonEntity(NomIntegrasjonEntity newNomIntegrasjonEntity, String initiatedByNavident) {

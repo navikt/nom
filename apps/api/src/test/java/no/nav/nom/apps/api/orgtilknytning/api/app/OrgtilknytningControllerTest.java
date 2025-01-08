@@ -28,8 +28,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.LocalDate;
@@ -50,23 +50,23 @@ import static org.mockito.Mockito.when;
 
 public class OrgtilknytningControllerTest extends RestTestBase {
 
-    @MockBean
-    private OrgtilknytningCommandService orgtilknytningCommandService;
+    @MockitoBean
+    OrgtilknytningCommandService orgtilknytningCommandService;
 
-    @MockBean
-    private RessursCommandService ressursCommandService;
+    @MockitoBean
+    RessursCommandService ressursCommandService;
 
-    @MockBean
-    private NomStateRessursListener nomStateRessursListener;
+    @MockitoBean
+    NomStateRessursListener nomStateRessursListener;
 
-    @MockBean
-    private OrgenhetService orgenhetService;
+    @MockitoBean
+    OrgenhetService orgenhetService;
 
-    @MockBean
-    private AuthResolver authResolver;
+    @MockitoBean
+    AuthResolver authResolver;
 
-    @MockBean
-    private RessursStateRepository ressursStateRepository;
+    @MockitoBean
+    RessursStateRepository ressursStateRepository;
 
     @Autowired
     TestTokensGenerator testToken;
@@ -198,9 +198,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should block update tilknytningtype for orgtilknytning if tilknyttet ressurs is not EKSTERN")
+    @DisplayName("Should block update tilknytningtype for orgtilknytning if tilknyttet ressurs is not EKSTERN or NAV_STATLIG")
     void test_update_orgtilknytning_type_for_ekstern_only() {
-        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(false);
         when(ressursStateRepository.findByNavident("X123456")).thenReturn(Optional.of(ressursState().toBuilder().sektor(Sektor.NAV_STATLIG).build()));
         var orgtilknytningToUpdate = orgtilknytningState();
         saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
@@ -216,7 +215,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             orgtilknytningToUpdate.fid(),
             testToken.nomWriteGroupAndNomUiAzp(),
             endreTilknytningtypeRequest()
-        ).expectStatus().isBadRequest();
+        ).expectStatus().isOk();
     }
 
     @Test
@@ -762,7 +761,6 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @Test
     @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} should give exception when OT2 is added and has same orgenhetId with OT1 which is has no end date")
     void test_update_orgtilknytninger_duplikate_for_ressurs3() {
-        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(true);
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.NAV_STATLIG).build();
         when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
@@ -814,7 +812,6 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @Test
     @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} should not exception when OT2 is added and has same orgenhetId with OT1 and both are active, but sektoer is different")
     void test_update_orgtilknytninger_duplikate_for_ressurs4() {
-        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(true);
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.NAV_STATLIG).build();
         when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
@@ -1111,7 +1108,6 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @DisplayName("Should return 400 if request has overlapping daglige oppfolginger")
     @MethodSource("test_no_overlapping_daglig_oppfolginger_input")
     void test_no_overlapping_daglig_oppfolginger_ny(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
-        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(true);
         when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         when(ressursStateRepository.findByNavident("whatever")).thenReturn(Optional.of(ressursState().toBuilder().sektor(Sektor.EKSTERN).build()));
         postOppdaterOrgtilknytningerForRessursRequest(

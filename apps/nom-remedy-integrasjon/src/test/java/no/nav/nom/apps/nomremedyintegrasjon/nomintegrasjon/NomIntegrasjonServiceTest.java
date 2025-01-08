@@ -26,7 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -68,8 +68,8 @@ public class NomIntegrasjonServiceTest extends TestBase {
     @Autowired
     private NomIntegrasjonService nomIntegrasjonService;
 
-    @MockBean
-    private NomApiClient nomApiClient;
+    @MockitoBean
+    NomApiClient nomApiClient;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -87,7 +87,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
             );
     }
 
-    @ParameterizedTest(name = "Test should create ressurs for non NAV_STATLIG sektor")
+    @ParameterizedTest(name = "Test should create ressurs for all Sektor")
     @MethodSource(value = "testShouldHandleRessursOpprettetEventIfNonStatligInput")
     @DisplayName("Should create new entry with correct data for RessursOpprettetEventV1")
     void testShouldCreateForRessursOpprettetEventV1(RessursOpprettetEventV1 ressursOpprettetEventV1) {
@@ -184,6 +184,16 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     "sluttDato", sluttDato.toString()
                 )).build(),
                 ressursOpprettetEventV1.getRessursOpprettetAdditionalData()
+            )),
+            Arguments.of(new RessursOpprettetEventV1(
+                UUID.randomUUID().toString(),
+                ressursOpprettetEventV1.getRessursOpprettetEventData().toBuilder().sektor(Sektor.NAV_STATLIG).build(),
+                ressursOpprettetEventV1.getMetadata().inputMetadata().toBuilder().inputInterfaceMethodArguments(Map.of(
+                    "orgEnhetId", orgEnhetId,
+                    "fysiskBrukerstedNr", fysiskBrukerstedNr,
+                    "sluttDato", sluttDato.toString()
+                )).build(),
+                ressursOpprettetEventV1.getRessursOpprettetAdditionalData()
             ))
         );
     }
@@ -263,11 +273,12 @@ public class NomIntegrasjonServiceTest extends TestBase {
         );
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("testAllSektors")
     @DisplayName("Should write new entity with correctly updated values for RessursPersonaliaOppdatertV1")
-    void testShouldUpdateForRessursPersonaliaOppdatertV1() {
+    void testShouldUpdateForRessursPersonaliaOppdatertV1(no.nav.nom.generated.model.Sektor sektor) {
 
-        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+        var existingRessurs = ressurs().sektor(sektor);
         var dagligOppfolgingOrgtilknytning = orgtilknytningState().erDagligOppfolging(true);
         var dagligOppfolgingOrgenhet = orgenhet();
 
@@ -299,20 +310,21 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .fornavn(capitalizeNavn(ressursPersonaliaOppdatertV1.getPersonaliaOppdatertEventData().visningsnavn().getFornavnMellomnavn()))
                     .fysiskBrukerstedId(existingRessurs.getPrimaryFysiskBrukersted())
                     .navId(existingRessurs.getNavident())
-                    .sektor(2)
+                    .sektor(nomSektorToRemedyCode(existingRessurs.getSektor()))
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
-                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()))
+                    .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()): null)
                     .direkteTelefon(existingRessurs.getPrimaryTelefonnummer())
                     .build()
 
             ));
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("testAllSektors")
     @DisplayName("Should write new entity with correctly updated values for RessursPersonaliaOppdatertV1 with no active DOL, but future DOL")
-    void testShouldUpdateForWithNoActiveDOLRessursPersonaliaOppdatertV1() {
+    void testShouldUpdateForWithNoActiveDOLRessursPersonaliaOppdatertV1(no.nav.nom.generated.model.Sektor sektor) {
 
-        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+        var existingRessurs = ressurs().sektor(sektor);
         var dagligOppfolgingOrgtilknytning = orgtilknytningState().gyldigFom(LocalDate.now().plusDays(2)).erDagligOppfolging(true);
         var dagligOppfolgingOrgenhet = orgenhet();
 
@@ -344,19 +356,20 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .fornavn(capitalizeNavn(ressursPersonaliaOppdatertV1.getPersonaliaOppdatertEventData().visningsnavn().getFornavnMellomnavn()))
                     .fysiskBrukerstedId(existingRessurs.getPrimaryFysiskBrukersted())
                     .navId(existingRessurs.getNavident())
-                    .sektor(2)
+                    .sektor(nomSektorToRemedyCode(existingRessurs.getSektor()))
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
-                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()))
+                    .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()): null)
                     .direkteTelefon(existingRessurs.getPrimaryTelefonnummer())
                     .build()
 
             ));
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("testAllSektors")
     @DisplayName("Should write new entity with correctly updated values for RessursPrimaryTelefonnummerOppdatertV1")
-    void testShouldUpdateForRessursPrimaryTelefonnummerOppdatertV1() {
-        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+    void testShouldUpdateForRessursPrimaryTelefonnummerOppdatertV1(no.nav.nom.generated.model.Sektor sektor) {
+        var existingRessurs = ressurs().sektor(sektor);
         var dagligOppfolgingOrgtilknytning = orgtilknytningState().erDagligOppfolging(true);
         var dagligOppfolgingOrgenhet = orgenhet();
 
@@ -386,45 +399,21 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .fornavn(capitalizeNavn(existingRessurs.getVisningsnavn().getFornavn()))
                     .fysiskBrukerstedId(existingRessurs.getPrimaryFysiskBrukersted())
                     .navId(existingRessurs.getNavident())
-                    .sektor(2)
+                    .sektor(nomSektorToRemedyCode(existingRessurs.getSektor()))
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
-                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()))
+                    .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()): null)
                     .direkteTelefon(ressursPrimaryTelefonnummerOppdatertV1.getMobilnummerOppdatertEventData().primaryTelefonnummer())
                     .build()
 
             ));
     }
 
-    @ParameterizedTest(name = "Should not handle RessursEvent if ressurs is NAV_STATLIG")
-    @MethodSource("testShouldNotHandleRessursEventIfStatligInput")
-    void testShouldNotHandleRessursEventIfNotEkstern(RessursEvent ressursEvent) {
-        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(false);
-        when(nomApiClient.getRessursByFid(ressursEvent.getFid()))
-            .thenReturn(new Ressurs().sektor(no.nav.nom.generated.model.Sektor.NAV_STATLIG));
-
-        nomIntegrasjonService.handleRessursEvent(ressursEvent);
-
-        assertThat(nomIntegrasjonRepository.findAll()).isEmpty();
-    }
-
-    private static Stream<Arguments> testShouldNotHandleRessursEventIfStatligInput() {
-        return Stream.of(
-            Arguments.of(new RessursOpprettetEventV1(
-                UUID.randomUUID().toString(),
-                ressursOpprettetEventData().toBuilder().sektor(Sektor.NAV_STATLIG).build(),
-                inputMetadata(),
-                ressursOpprettetAdditionalData()
-            )),
-            Arguments.of(ressursPersonaliaOppdatertV1()),
-            Arguments.of(ressursFysiskeBrukerstederOppdatertEventV1())
-        );
-    }
-
-    @Test
+    @ParameterizedTest
+    @MethodSource("testAllSektors")
     @DisplayName("Should write new entity with correctly updated values for RessursFysiskeBrukerstederOppdatertEventV1")
-    void testShouldUpdateForRessursFysiskeBrukerstederOppdatertEventV1() {
+    void testShouldUpdateForRessursFysiskeBrukerstederOppdatertEventV1(no.nav.nom.generated.model.Sektor sektor) {
 
-        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+        var existingRessurs = ressurs().sektor(sektor);
         var dagligOppfolgingOrgtilknytning = orgtilknytningState().erDagligOppfolging(true);
         var dagligOppfolgingOrgenhet = orgenhet();
 
@@ -456,19 +445,20 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .fornavn(capitalizeNavn(formatFornavnWithMellomnavn(existingRessurs.getVisningsnavn())))
                     .fysiskBrukerstedId(ressursFysiskeBrukerstederOppdatertEventV1.getRessursFysiskeBrukerstederOppdatertEventData().primaryFysiskBrukersted())
                     .navId(existingRessurs.getNavident())
-                    .sektor(2)
+                    .sektor(nomSektorToRemedyCode(existingRessurs.getSektor()))
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
-                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()))
+                    .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()): null)
                     .direkteTelefon(existingRessurs.getPrimaryTelefonnummer())
                     .build()
             ));
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("testAllSektors")
     @DisplayName("Should write new entity with correctly updated values for OrgtilknytningDagligOppfolgingEndretEventV1")
-    void testShouldUpdateForOrgtilknytningDagligOppfolgingEndretEventV1() {
+    void testShouldUpdateForOrgtilknytningDagligOppfolgingEndretEventV1(no.nav.nom.generated.model.Sektor sektor) {
 
-        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+        var existingRessurs = ressurs().sektor(sektor);
         var previousDagligOppfolgingOrgtilknytning = orgtilknytningState().erDagligOppfolging(true);
         var previousDagligOppfolgingOrgenhet = orgenhet();
 
@@ -509,13 +499,11 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .fornavn(capitalizeNavn(formatFornavnWithMellomnavn(existingRessurs.getVisningsnavn())))
                     .fysiskBrukerstedId(existingRessurs.getPrimaryFysiskBrukersted())
                     .navId(existingRessurs.getNavident())
-                    .sektor(2)
+                    .sektor(nomSektorToRemedyCode(existingRessurs.getSektor()))
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(
                         orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom())
                     )
-                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(
-                        orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom().orElseThrow())
-                    )
+                    .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom().get()): null)
                     .direkteTelefon(existingRessurs.getPrimaryTelefonnummer())
                     .build()
             ));
@@ -538,11 +526,12 @@ public class NomIntegrasjonServiceTest extends TestBase {
         assertThat(delayedEventRepository.findAll()).isEmpty();
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("testAllSektors")
     @DisplayName("Should write new entity with correctly updated values for OrgtilknytningDagligOppfolgingEndretEventV1")
-    void testShouldNotSendEventToRemedyTable() {
+    void testShouldNotSendEventToRemedyTable(no.nav.nom.generated.model.Sektor sektor) {
 
-        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+        var existingRessurs = ressurs().sektor(sektor);
         var previousDagligOppfolgingOrgtilknytning = orgtilknytningState()
             .gyldigFom(LocalDate.now().minusYears(1))
             .gyldigTom(LocalDate.now().minusMonths(2));
@@ -575,23 +564,6 @@ public class NomIntegrasjonServiceTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Should skip handling OrgtilknytningDagligOppfolgingEndretEventV1 if ressurs is not EKSTERN")
-    void testSkipUpdateForOrgtilknytningDagligOppfolgingEndretEventV1IfRessursIsNotEkstern() {
-        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(false);
-
-        var orgtilknytningDagligOppfolgingEndretEventV1 = orgtilknytningDagligOppfolgingEndretEventV1(
-            orgtilknytningDagligOppfolgingEndretEventData().toBuilder().dagligOppfolging(true).build()
-        );
-
-        when(nomApiClient.getRessursByNavident(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().navident()))
-            .thenReturn(new Ressurs().sektor(no.nav.nom.generated.model.Sektor.NAV_STATLIG));
-
-        nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
-
-        assertThat(nomIntegrasjonRepository.findAll()).isEmpty();
-    }
-
-    @Test
     @DisplayName("Should skip handling OrgtilknytningDagligOppfolgingEndretEventV1 if orgtilknytning is not dagligOppfolgning")
     void testSkipUpdateForOrgtilknytningDagligOppfolgingEndretEventV1IfRessursIsNotDagligOppfolgning() {
 
@@ -604,10 +576,11 @@ public class NomIntegrasjonServiceTest extends TestBase {
         assertThat(nomIntegrasjonRepository.findAll()).isEmpty();
     }
 
-    @Test
+    @ParameterizedTest(name = "Should test that all sektors can be delayed")
     @DisplayName("Should delay remedy update for OrgtilknytningDagligOppfolgingEndretEventV1")
-    void testShouldDelayUpdateForOrgtilknytningDagligOppfolgingEndretEventV1() {
-        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+    @MethodSource(value = "testAllSektors")
+    void testShouldDelayUpdateForOrgtilknytningDagligOppfolgingEndretEventV1(no.nav.nom.generated.model.Sektor sektor) {
+        var existingRessurs = ressurs().sektor(sektor);
 
         var orgtilknytningDagligOppfolgingEndretEventV1 = orgtilknytningDagligOppfolgingEndretEventV1(
             orgtilknytningDagligOppfolgingEndretEventData().toBuilder()
@@ -629,6 +602,14 @@ public class NomIntegrasjonServiceTest extends TestBase {
         assertThat(delayedEventRepository.findAll()).hasSize(1);
     }
 
+    private static Stream<Arguments> testAllSektors() {
+        return Stream.of(
+            Arguments.of(no.nav.nom.generated.model.Sektor.EKSTERN),
+            Arguments.of(no.nav.nom.generated.model.Sektor.NAV_KOMMUNAL),
+            Arguments.of(no.nav.nom.generated.model.Sektor.NAV_STATLIG)
+        );
+    }
+
     @Test
     @DisplayName("Should delay remedy update for OrgtilknytningDatoEndretEventV2")
     void testShouldDelayUpdateForOrgtilknytningDatoEndretEventV2 () {
@@ -645,10 +626,11 @@ public class NomIntegrasjonServiceTest extends TestBase {
         assertThat(nomIntegrasjonRepository.findAll()).hasSize(0);
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("testAllSektors")
     @DisplayName("Should update for delayed OrgtilknytningDagligOppfolgingEndretEventV1")
-    void testShouldUpdateForDelayedOrgtilknytningDagligOppfolgingEndretEventV1() {
-        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+    void testShouldUpdateForDelayedOrgtilknytningDagligOppfolgingEndretEventV1(no.nav.nom.generated.model.Sektor sektor) {
+        var existingRessurs = ressurs().sektor(sektor);
         var orgtilknytning = orgtilknytningState();
         var orgtilknytningEvent = orgtilknytningDagligOppfolgingEndretEventV1(
             orgtilknytningDagligOppfolgingEndretEventData().toBuilder()
@@ -675,10 +657,11 @@ public class NomIntegrasjonServiceTest extends TestBase {
         assertThat(delayedEventRepository.findAll()).hasSize(0);
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("testAllSektors")
     @DisplayName("Should update for delayed OrgtilknytningDatoEndretEventV2")
-    void testShouldUpdateForDelayedOrgtilknytningDatoEndretEventV2() {
-        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+    void testShouldUpdateForDelayedOrgtilknytningDatoEndretEventV2(no.nav.nom.generated.model.Sektor sektor) {
+        var existingRessurs = ressurs().sektor(sektor);
         var orgtilknytning = orgtilknytningState();
         var orgtilknytningEvent = orgtilknytningDatoEndretEventV2(
             orgtilknytningDatoEndretEventData().toBuilder()
@@ -803,11 +786,12 @@ public class NomIntegrasjonServiceTest extends TestBase {
         );
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("testAllSektors")
     @DisplayName("Should write new entity with correctly updated values for OrgtilknytningDatoEndretEventV2")
-    void testShouldUpdateForOrgtilknytningDatoEndretEventV2() {
+    void testShouldUpdateForOrgtilknytningDatoEndretEventV2(no.nav.nom.generated.model.Sektor sektor) {
 
-        var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+        var existingRessurs = ressurs().sektor(sektor);
         var dagligOppfolgingOrgtilknytning = orgtilknytningState()
             .navident(existingRessurs.getNavident())
             .erDagligOppfolging(true);
@@ -851,42 +835,19 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .fornavn(capitalizeNavn(formatFornavnWithMellomnavn(existingRessurs.getVisningsnavn())))
                     .fysiskBrukerstedId(existingRessurs.getPrimaryFysiskBrukersted())
                     .navId(existingRessurs.getNavident())
-                    .sektor(2)
+                    .sektor(nomSektorToRemedyCode(existingRessurs.getSektor()))
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(
                         orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom())
                     )
-                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(
-                        orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigTom().orElseThrow())
-                    )
+                    .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigTom().get()): null)
                     .direkteTelefon(ressurs().getPrimaryTelefonnummer())
                     .build()
             ));
     }
 
     @Test
-    @DisplayName("Should skip handling OrgtilknytningDatoEndretEventV2 if ressurs is not EKSTERN")
-    void testSkipUpdateForOrgtilknytningDatoEndretEventV2IfRessursIsNotEkstern() {
-        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(false);
-        var navident = "X123456";
-
-        var orgtilknytningDatoEndretEventV2 = orgtilknytningDatoEndretEventV2();
-
-        when(nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid()))
-            .thenReturn(new OrgtilknytningState().navident(navident).erDagligOppfolging(true));
-
-        when(nomApiClient.getRessursByNavident(navident)).thenReturn(
-            new Ressurs().sektor(no.nav.nom.generated.model.Sektor.NAV_STATLIG)
-        );
-
-        nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDatoEndretEventV2);
-
-        assertThat(nomIntegrasjonRepository.findAll()).isEmpty();
-    }
-
-    @Test
     @DisplayName("Should skip updating values for OrgtilknytningDatoEndretEventV2 if orgtilknytning is not dagligOppfolgning")
     void testSkipUpdateForOrgtilknytningDatoEndretEventV2IfRessursIsNotDagligOppfolgning() {
-        when(unleash.isEnabled("nom.ressurs.opprett_statlig")).thenReturn(false);
         var orgtilknytningDatoEndretEventV2 = orgtilknytningDatoEndretEventV2();
 
         when(nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid()))
@@ -1049,6 +1010,14 @@ public class NomIntegrasjonServiceTest extends TestBase {
     }
 
     private Integer nomSektorToRemedyCode(Sektor sektor) {
+        return switch (sektor) {
+            case NAV_STATLIG -> 0;
+            case NAV_KOMMUNAL -> 1;
+            case EKSTERN -> 2;
+        };
+    }
+
+    private Integer nomSektorToRemedyCode(no.nav.nom.generated.model.Sektor sektor) {
         return switch (sektor) {
             case NAV_STATLIG -> 0;
             case NAV_KOMMUNAL -> 1;
