@@ -804,8 +804,8 @@ public class NomIntegrasjonService {
         if(unleash.isEnabled("nom.sende-manuelle-mastringer-av-ressurs-til-remedy")){
             var ressursState = nomApiClient.getRessursByNavident(navIdent);
             var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
-            logger.info("Handling mastered ressurs event for navident {}, masterer at: {}, nomIntegrasjonEntity : {}",
-                navIdent, nomMasteredRessursEvent, nomIntegrasjonEntityWithDefaultDataFromNom);
+            logger.info("Handling mastered ressurs event for navident {}, masterer at: {}",
+                navIdent, nomMasteredRessursEvent);
             // there is no user authentification context here, so we use the default user "nom-admin"
             saveNewNomIntegrasjonEntity(nomIntegrasjonEntityWithDefaultDataFromNom, "nom-admin");
         }
