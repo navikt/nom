@@ -60,7 +60,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 041950;0419;ORGNIV3;Odal;Beholdt;;;JA;041950;ORGNIV3;leggInn;
 042000;0420;ORGNIV3;Eidskog;Beholdt;;;JA;042000;ORGNIV3;leggInn;
 042300;0423;ORGNIV3;Grue;Beholdt;;;JA;042300;ORGNIV3;leggInn;
-042500;0425;ORGNIV3;Åsnes;Beholdt;;;JA;042500;ORGNIV3;leggInn;
+042550;0425;ORGNIV3;Solør;Beholdt;;;JA;042550;ORGNIV3;se342r; 08.01.2025: Oppdatert med riktig agressoId og nomId for Nav Solør. 
 042600;0426;ORGNIV3;Våler i Solør;Beholdt;;;JA;042600;ORGNIV3;leggInn;
 042700;0427;ORGNIV3;Elverum;Beholdt;;;JA;042700;ORGNIV3;leggInn;
 042800;0428;ORGNIV3;Trysil;Beholdt;;;JA;042800;ORGNIV3;leggInn;
