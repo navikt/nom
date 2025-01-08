@@ -26,6 +26,7 @@ import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPrimaryTelefonnummerCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
@@ -339,17 +340,17 @@ public class RessursRestService {
 
     public RessursState createRessursAndNotify(OpprettRessursRequest request) {
         validateOpprettRessursRequest(request);
+        final var navident = createNavident(request);
+        final var existingRessursByNavident = ressursStateRepository.findByNavident(navident);
 
-        final var existingRessurs = ressursStateRepository.findByPersonident(request.personident());
-
-        if (existingRessurs.isPresent() && isActive(existingRessurs.get())) {
+        if (existingRessursByNavident.isPresent() && isActive(existingRessursByNavident.get())) {
             throw new DuplicateRessursException(
                 String.format("Det finnes allerede en aktiv ressurs med personident %s", request.personident())
             );
         }
 
-        final var createdRessurs = existingRessurs.map(ressursState -> reactivateRessurs(request, ressursState))
-            .orElseGet(() -> createRessurs(request, existingRessurs));
+        final var createdRessurs = existingRessursByNavident.map(ressursState -> reactivateRessurs(request, ressursState))
+            .orElseGet(() -> createRessurs(request, navident));
 
         try {
             final var orgEnhet = orgEnhetStateRepository.findById(request.orgEnhetId())
@@ -369,9 +370,7 @@ public class RessursRestService {
     }
 
 
-    private RessursState createRessurs(OpprettRessursRequest request, Optional<RessursState> existingRessurs) {
-        final var navident = existingRessurs.isPresent() ? existingRessurs.get().navident() : createNavident(request);
-        final var startdato = existingRessurs.isPresent() ? existingRessurs.get().startdato().orElse(null) : request.startDato();
+    private RessursState createRessurs(OpprettRessursRequest request, String navident) {
         final var pdlPerson = pdlClient.hentPerson(request.personident());
 
         if (!isNull(request.visningsmellomnavn()) && request.visningsmellomnavn().isBlank()) {
@@ -400,7 +399,7 @@ public class RessursRestService {
             ),
             Optional.ofNullable(trimToNull(request.primaryTelefonnummer())),
             metaData,
-            startdato,
+            request.startDato(),
             Optional.ofNullable(request.orgEnhetId())
                 .flatMap(orgEnhetStateRepository::findById)
                 .flatMap(OrgEnhetState::agressoId)
@@ -478,6 +477,7 @@ public class RessursRestService {
     private RessursState reactivateRessurs(OpprettRessursRequest request, RessursState existingRessurs) {
 
         final var reaktivertRessurs = existingRessurs.toBuilder()
+            .personident(request.personident())
             .visningsnavn(
                 new Visningsnavn(
                     request.visningsfornavn(),
@@ -589,6 +589,13 @@ public class RessursRestService {
         ), () -> ressursCommandService.oppdaterRessursSluttdatoEvent(
             new OppdaterSluttdatoCommand(reaktivertRessurs.fid(), Optional.empty(), metadata)
         ));
+
+        if (!reaktivertRessurs.personident().equals(existingRessurs.personident())) {
+            ressursCommandService.oppdaterPersonidentCommand(
+                new OppdaterPersonidentCommand(reaktivertRessurs.fid(), reaktivertRessurs.personident()),
+                metadata
+            );
+        }
 
         logger.debug("createRessurs for {} - {}", reaktivertRessurs.navident(), request.visningsetternavn());
 

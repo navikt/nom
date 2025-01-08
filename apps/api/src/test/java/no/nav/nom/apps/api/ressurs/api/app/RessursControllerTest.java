@@ -8,7 +8,9 @@ import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
+import no.nav.nom.apps.api.pdl.Kjonn;
 import no.nav.nom.apps.api.pdl.PdlClient;
+import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.exceptions.NomMasteredException;
@@ -296,6 +298,17 @@ public class RessursControllerTest extends RestTestBase {
         val navn = pdlUtils.mockSinglePersonResponse();
         String primaryTelefonnummer = "12345678";
 
+        when(nikClient.opprettNavidentOnBehalfOfUser(
+            eq(OpprettNavidentRequest.builder()
+                .personid(personident)
+                .identPrefix(navn.getEtternavn().substring(0, 1))
+                .identType("STANDARD")
+                .build())
+        )).thenReturn(ResponseEntity.ok(
+            OpprettNavidentResponse.builder()
+                .navident(navident)
+                .build()));
+
         when(pdlClient.hentPerson(eq(personident))).thenReturn(Optional.empty());
 
         var request = opprettRessursRequest().toBuilder()
@@ -331,7 +344,7 @@ public class RessursControllerTest extends RestTestBase {
             .fysiskeBrukersteder(List.of())
             .build();
 
-        when(ressursStateRepository.findByPersonident(request.personident())).thenReturn(Optional.of(existingRessurs));
+        when(ressursStateRepository.findByNavident(navident)).thenReturn(Optional.of(existingRessurs));
 
         when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
             .thenReturn(Set.of(request.fysiskBrukerstedNr()));
@@ -1119,5 +1132,93 @@ public class RessursControllerTest extends RestTestBase {
             .expectStatus().isOk()
             .expectBody(String.class)
             .isEqualTo(expectedTelefonnummer);
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Should reactivate same ressurs that has changed personident")
+    void test_changed_personident() {
+        String personident = "12345678910";
+        String nyPersonident = "12345678911";
+        String navident = "x123456";
+        val navn = pdlUtils.mockSinglePersonResponse();
+        String primaryTelefonnummer = "12345678";
+
+        when(nikClient.opprettNavidentOnBehalfOfUser(
+            eq(OpprettNavidentRequest.builder()
+                .personid(nyPersonident)
+                .identPrefix(navn.getEtternavn().substring(0, 1))
+                .identType("STANDARD")
+                .build())
+        )).thenReturn(ResponseEntity.ok(
+            OpprettNavidentResponse.builder()
+                .navident(navident)
+                .build()));
+
+        when(pdlClient.hentPerson(eq(personident)))
+            .thenReturn(Optional.of(Person.builder()
+                .fornavn(navn.getFornavn())
+                .mellomnavn(navn.getMellomnavn())
+                .etternavn(navn.getEtternavn())
+                .foedselsdato(LocalDate.of(1956, 1, 1))
+                .kjonn(Kjonn.MANN)
+                .build()));
+
+        var request = opprettRessursRequest().toBuilder()
+            .personident(nyPersonident)
+            .visningsfornavn(navn.getFornavn())
+            .visningsmellomnavn(null)
+            .visningsetternavn(navn.getEtternavn())
+            .primaryTelefonnummer(primaryTelefonnummer)
+            .sektor(Sektor.NAV_KOMMUNAL)
+            .startDato(LocalDate.now())
+            .sluttDato(Optional.empty())
+            .tilknytningtype(Tilknytningtype.INGEN)
+            .ansettelsesType(null)
+            .fysiskBrukerstedNr("")
+            .orgEnhetId("")
+            .build();
+
+        RessursState existingRessurs = RessursState.builder()
+            .fid("Ressurs-XvSgpsGRF")
+            .personident(personident)
+            .navident(navident)
+            .sektor(Sektor.EKSTERN)
+            .visningsnavn(
+                new Visningsnavn(
+                    request.visningsfornavn(),
+                    Optional.empty(),
+                    request.visningsetternavn()
+                ))
+            .primaryTelefonnummer(Optional.of("87654321"))
+            .sluttdato(Optional.of(LocalDate.MIN))
+            .startdato(Optional.of(LocalDate.MIN.plusYears(1)))
+            .primaryFysiskBrukersted(Optional.of("2700"))
+            .fysiskeBrukersteder(List.of())
+            .build();
+
+        when(ressursStateRepository.findByNavident(navident)).thenReturn(Optional.of(existingRessurs));
+
+        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+            .thenReturn(Set.of(request.fysiskBrukerstedNr()));
+
+        postOpprettRessursRequest(
+            testToken.nomWriteGroupAndNomUiAzp(),
+            request
+        )
+            .expectStatus().is2xxSuccessful()
+            .expectBody(OpprettRessursResponse.class);
+
+        verify(orgtilknytningCommandService, times(1)).opprettOrgtilknytning(any());
+        verify(orgtilknytningCommandService, times(1)).endreDagligOppfolgingOrgtilknytning(any(), any());
+        verify(orgtilknytningCommandService, times(1)).endreTilknytningtype(any());
+
+
+        verify(ressursCommandService, times(0)).oppdaterPersonaliaEvent(any(), any());
+        verify(ressursCommandService, times(1)).oppdatertPrimaryTelefonnummer(any(), any());
+        verify(ressursCommandService, times(1)).oppdaterSektorEvent(any(), any());
+        verify(ressursCommandService, times(1)).oppdaterFysiskeBrukerstederCommand(any(), any());
+        verify(ressursCommandService, times(1)).oppdaterPersonidentCommand(any(), any());
+
     }
 }
