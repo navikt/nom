@@ -5,11 +5,7 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { getOrgEnhet, getOrgTilknytninger } from "~/api/react-query-endpoints";
-import {
-  useGetSession,
-  useHasAdminAccess,
-  useHasPilotAccess,
-} from "~/api/useGetSession";
+import { useGetSession, useHasAdminAccess } from "~/api/useGetSession";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
@@ -61,7 +57,6 @@ export function SektorStep() {
   const navigate = useNavigate();
 
   const hasAdminAccess = useHasAdminAccess();
-  const hasPilotAccess = useHasPilotAccess();
 
   // TODO: Forbedre logikk; sjekke om navident har redigeringstilgang til enhet i direktoratet
   const dinOrgenhetId = useQuery({
@@ -120,8 +115,6 @@ export function SektorStep() {
     }
   };
 
-  const canEditStatlige = hasAdminAccess || hasPilotAccess;
-
   return (
     <ContainerWithHighlightedTop icon={opprettRessursIcon} title="Sektor">
       <Alert variant="info">
@@ -148,8 +141,8 @@ export function SektorStep() {
           onChange={handleSektorChange}
           value={selectedSektor}
         >
-          <Radio disabled={!canEditStatlige} value={Sektor.NAV_STATLIG}>
-            {`${SektorNameMapping[Sektor.NAV_STATLIG]}${canEditStatlige ? "" : " (Ikke tilgjengelig ennå)"}`}
+          <Radio value={Sektor.NAV_STATLIG}>
+            {SektorNameMapping[Sektor.NAV_STATLIG]}
           </Radio>
           <Radio value={Sektor.NAV_KOMMUNAL}>
             {SektorNameMapping[Sektor.NAV_KOMMUNAL]}

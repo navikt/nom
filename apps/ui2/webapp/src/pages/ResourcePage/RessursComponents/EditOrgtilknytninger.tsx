@@ -54,7 +54,6 @@ import {
   useGetSession,
   useHasAdminAccess,
   useHasAdminOrWriteAccess,
-  useHasPilotAccess,
 } from "~/api/useGetSession";
 import { ApiResponseError } from "~/components/ApiResponseError";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
@@ -234,7 +233,6 @@ function OrgtilknytningForm({
 }) {
   const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
-  const hasPilotAccess = useHasPilotAccess();
 
   const navigate = useNavigate();
 
@@ -262,14 +260,6 @@ function OrgtilknytningForm({
     return !(orgtilknytning.gyldigTom === originalOt?.gyldigTom);
   };
 
-  const otOriginalSektor = (orgtilknytning: Partial<OrgtilknytningState>) => {
-    const originalOt = orgtilknytninger.find(
-      (tilknytning) => tilknytning.fid === orgtilknytning.fid,
-    );
-
-    return originalOt?.sektor ?? undefined;
-  };
-
   // Hvis det ikke finnes noen orgtilknytninger, legger vi automatisk til en ny
   const defaultOrgtilknytninger =
     orgtilknytninger.length > 0
@@ -284,9 +274,6 @@ function OrgtilknytningForm({
     },
     // @ts-expect-error -- Type inferred fra resolver er typen etter submit der flere felter er required, men under utfylling av formet vil flere verdier kunne være undefined. Derfor bruker vi heller eksplisitt type til UseForm
     resolver: yupResolver(formValuesSchema),
-    context: {
-      canEditSektorTilknytningstype: hasAdminAccess || hasPilotAccess,
-    },
   });
 
   useEffect(() => {
@@ -436,13 +423,6 @@ function OrgtilknytningForm({
             overToMndGammel &&
             !hasAdminAccess;
 
-          const editSektorTilknytningstype =
-            (!existingOt ||
-              fremtidig ||
-              !otOriginalSektor(field) ||
-              hasAdminAccess) &&
-            !editOtDisabled;
-
           return (
             <div
               css={css`
@@ -519,40 +499,35 @@ function OrgtilknytningForm({
                 </BodyShort>
               </Checkbox>
 
-              {(hasAdminAccess || hasPilotAccess) && (
-                <div
-                  css={css`
-                    display: flex;
-                    margin-top: var(--a-spacing-4);
-                  `}
-                >
-                  <FormSektorSelectWrapper
-                    disabled={!editSektorTilknytningstype}
-                    error={
-                      errors?.mappedeOrgtilknytninger?.[index]?.sektor
-                        ?.message ?? ""
-                    }
-                    name={`mappedeOrgtilknytninger.${index}.sektor`}
-                    otOriginalSektor={otOriginalSektor(field)}
-                    tilknytningstypeField={`mappedeOrgtilknytninger.${index}.orgtilknytningType`}
-                    triggerOthers={[
-                      `mappedeOrgtilknytninger.${index}.gyldigTom`,
-                    ]}
-                  />
+              <div
+                css={css`
+                  display: flex;
+                  margin-top: var(--a-spacing-4);
+                `}
+              >
+                <FormSektorSelectWrapper
+                  disabled={editOtDisabled}
+                  error={
+                    errors?.mappedeOrgtilknytninger?.[index]?.sektor?.message ??
+                    ""
+                  }
+                  name={`mappedeOrgtilknytninger.${index}.sektor`}
+                  tilknytningstypeField={`mappedeOrgtilknytninger.${index}.orgtilknytningType`}
+                  triggerOthers={[`mappedeOrgtilknytninger.${index}.gyldigTom`]}
+                />
 
-                  <FormTilknytningstypeSelectWrapper
-                    disabled={!editSektorTilknytningstype}
-                    error={
-                      errors?.mappedeOrgtilknytninger?.[index]
-                        ?.orgtilknytningType?.message ?? ""
-                    }
-                    name={`mappedeOrgtilknytninger.${index}.orgtilknytningType`}
-                    selectedSektor={watch(
-                      `mappedeOrgtilknytninger.${index}.sektor`,
-                    )}
-                  />
-                </div>
-              )}
+                <FormTilknytningstypeSelectWrapper
+                  disabled={editOtDisabled}
+                  error={
+                    errors?.mappedeOrgtilknytninger?.[index]?.orgtilknytningType
+                      ?.message ?? ""
+                  }
+                  name={`mappedeOrgtilknytninger.${index}.orgtilknytningType`}
+                  selectedSektor={watch(
+                    `mappedeOrgtilknytninger.${index}.sektor`,
+                  )}
+                />
+              </div>
             </div>
           );
         })}
@@ -828,22 +803,17 @@ function FormSektorSelectWrapper({
   disabled,
   triggerOthers,
   tilknytningstypeField,
-  otOriginalSektor,
 }: {
   name: string;
   error: string;
   disabled?: boolean;
   triggerOthers?: string[];
   tilknytningstypeField: string;
-  otOriginalSektor: Sektor | undefined;
 }) {
   const { trigger, setValue } = useFormContext();
   const { field } = useController({
     name,
   });
-
-  const hasAdminAccess = useHasAdminAccess();
-  const hasPilotAccess = useHasPilotAccess();
 
   if (disabled && !field.value) {
     return;
@@ -903,15 +873,6 @@ function FormSektorSelectWrapper({
         >
           {!field.value && <option value="" />}
           {Object.values(Sektor).map((sektor) => {
-            if (
-              sektor === Sektor.NAV_STATLIG &&
-              otOriginalSektor !== Sektor.NAV_STATLIG &&
-              !hasAdminAccess &&
-              !hasPilotAccess
-            ) {
-              return;
-            }
-
             return (
               <option key={sektor} value={sektor}>
                 {SektorNameMapping[sektor]}
@@ -1302,13 +1263,6 @@ const orgtilknytningSchema = yup.object().shape({
     name: "sektor-obligatorisk-fremtid-aktiv",
     message: "Obligatorisk",
     test: function (value, context) {
-      const canEditSektorTilknytningstype =
-        context?.options?.context?.canEditSektorTilknytningstype;
-
-      if (!canEditSektorTilknytningstype) {
-        return true;
-      }
-
       const otTom = context?.parent?.gyldigTom ?? undefined;
 
       const required = otTom ? !isBeforeToday(otTom) : true;
@@ -1323,15 +1277,9 @@ const orgtilknytningSchema = yup.object().shape({
       name: "tilknytningstype-obligatorisk-fremtid-aktiv",
       message: "Obligatorisk",
       test: function (value, context) {
-        const canEditSektorTilknytningstype =
-          context?.options?.context?.canEditSektorTilknytningstype;
-
         const otSektor = context?.parent?.sektor ?? undefined;
 
-        if (
-          !canEditSektorTilknytningstype ||
-          otSektor === Sektor.NAV_KOMMUNAL
-        ) {
+        if (otSektor === Sektor.NAV_KOMMUNAL) {
           return true;
         }
 
@@ -1339,13 +1287,7 @@ const orgtilknytningSchema = yup.object().shape({
 
         const required = (otTom ? !isBeforeToday(otTom) : true) && !!otSektor;
 
-        return required
-          ? !!value &&
-              !(
-                otSektor === Sektor.NAV_STATLIG &&
-                value === Tilknytningtype.INGEN
-              )
-          : true;
+        return required ? !!value : true;
       },
     }),
 });

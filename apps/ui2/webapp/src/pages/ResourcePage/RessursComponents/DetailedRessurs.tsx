@@ -190,7 +190,7 @@ function OrgTilknytningSection({
             Organisatorisk tilhørighet
           </Heading>
 
-          <EditButtonWrapperOrgtilknytning ressurs={ressurs}>
+          <EditButtonWrapperOrgtilknytning>
             <Button
               data-cy="endre-orgtilknytninger-button"
               icon={<PencilIcon aria-hidden />}
@@ -654,7 +654,6 @@ function TerminateButton({
   return (
     <EditButtonWrapperRessursSlutter
       hasWriteAccessForRessurs={hasWriteAccessForRessurs}
-      ressurs={ressurs}
     >
       <ReactRouterLink
         css={css`

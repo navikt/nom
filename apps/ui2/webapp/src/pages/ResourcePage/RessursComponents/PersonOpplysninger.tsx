@@ -19,7 +19,6 @@ import {
 } from "~/api/react-query-endpoints";
 import {
   useHasAdminAccess,
-  useHasPilotAccess,
   useHasSelvbetjeningAccess,
   useHasWriteAccess,
 } from "~/api/useGetSession";
@@ -29,7 +28,6 @@ import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import type { Ressurs } from "~/types/api-models";
 import { TelefonType } from "~/types/api-models";
-import { Sektor } from "~/types/api-models";
 import { formatDisplayDate, formatTlf, formatVisningsnavn } from "~/utils";
 
 // Det er kanskje litt unødvendig å ha en wrapper komponent rundt hver detalj (navident, sluttdato, etc)
@@ -91,7 +89,6 @@ function EditButton({ ressurs }: { ressurs: Ressurs }) {
 
   const hasWriteAccess = useHasWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
-  const hasPilotAccess = useHasPilotAccess();
 
   const hasWriteAccessForRessurs =
     useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
@@ -103,37 +100,21 @@ function EditButton({ ressurs }: { ressurs: Ressurs }) {
     (hasWriteAccess && hasWriteAccessForRessurs) ||
     hasSelvbetjeningAccess
   ) {
-    const canEditStatlige = hasAdminAccess || hasPilotAccess;
-
-    const canEditRessurs =
-      ressurs.sektor !== Sektor.NAV_STATLIG || canEditStatlige;
-
     return (
-      <HStack align="center" gap="2">
-        {!canEditRessurs && (
-          <HelpText title="Hvorfor er dette utilgjengelig?">
-            Statlige ansatte kan ikke opprettes eller endres i NOM på dette
-            tidspunktet. Disse kan endres i tråd med gjeldende rutiner i
-            Identrutina og Unit4.
-          </HelpText>
-        )}
-
-        <Button
-          data-cy="endre-personopplysninger-button"
-          disabled={!canEditRessurs}
-          icon={<PencilIcon aria-hidden />}
-          onClick={() =>
-            navigate({
-              search: { editPersonopplysninger: true },
-              params: (previous) => previous,
-            })
-          }
-          size="small"
-          variant="secondary"
-        >
-          Endre personopplysninger
-        </Button>
-      </HStack>
+      <Button
+        data-cy="endre-personopplysninger-button"
+        icon={<PencilIcon aria-hidden />}
+        onClick={() =>
+          navigate({
+            search: { editPersonopplysninger: true },
+            params: (previous) => previous,
+          })
+        }
+        size="small"
+        variant="secondary"
+      >
+        Endre personopplysninger
+      </Button>
     );
   }
 
