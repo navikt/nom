@@ -46,7 +46,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
+          issuer-uri: ${azure.issuer-uri}
           audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
   ldap:
     urls: ${LDAP_URL}
@@ -55,6 +55,9 @@ spring:
     base: ${LDAP_BASE}
     template:
       ignore-partial-result-exception: true
+
+azure:
+  issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
 
 server:
   shutdown: graceful

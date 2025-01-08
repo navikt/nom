@@ -7,16 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import reactor.core.publisher.Mono;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.created;
-import static com.github.tomakehurst.wiremock.client.WireMock.delete;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.jsonResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.ok;
-import static com.github.tomakehurst.wiremock.client.WireMock.patch;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static no.nav.nom.apps.proxy.TestUtils.getValidToken;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ApiTest extends ApiTestBase {
@@ -39,7 +31,7 @@ public class ApiTest extends ApiTestBase {
         webTestClient
             .get()
             .uri(DVH_ENHETER_URL)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.getValidToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk();
@@ -51,7 +43,7 @@ public class ApiTest extends ApiTestBase {
         webTestClient
             .get()
             .uri("/proxy/tel")
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.getValidToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk();
@@ -63,7 +55,7 @@ public class ApiTest extends ApiTestBase {
         webTestClient
             .get()
             .uri("/proxy/dvh/get-proxy-test-mapping")
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.getValidToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk();
@@ -75,7 +67,7 @@ public class ApiTest extends ApiTestBase {
         webTestClient
             .get()
             .uri("/proxy/dvh/get-proxy-test-mapping?testParamOne=1&testParamTwo=2")
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.getValidToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk();
@@ -92,7 +84,7 @@ public class ApiTest extends ApiTestBase {
             .post()
             .uri("/proxy/unit4/ressurs")
             .body(Mono.just(SOME_JSON_BODY), String.class)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.getValidToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isCreated();
@@ -106,7 +98,7 @@ public class ApiTest extends ApiTestBase {
             .post()
             .uri("/proxy/unit4/ressurs")
             .body(Mono.just(SOME_JSON_BODY), String.class)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.getValidToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.CONFLICT);
@@ -120,7 +112,7 @@ public class ApiTest extends ApiTestBase {
             .post()
             .uri("/proxy/unit4/ressurs")
             .body(Mono.just(SOME_JSON_BODY), String.class)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.getValidToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
@@ -138,7 +130,7 @@ public class ApiTest extends ApiTestBase {
         webTestClient
             .get()
             .uri("/proxy/unit4/ressurs/123456")
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.getValidToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk()
@@ -158,7 +150,7 @@ public class ApiTest extends ApiTestBase {
         webTestClient
             .get()
             .uri("/proxy/unit4/ressurs/123ASD")
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.getValidToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isNotFound()
@@ -179,7 +171,7 @@ public class ApiTest extends ApiTestBase {
         webTestClient
             .get()
             .uri("/proxy/unit4/some/path")
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.getValidToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk()
@@ -196,7 +188,7 @@ public class ApiTest extends ApiTestBase {
             .post()
             .uri("/proxy/unit4/ressurs")
             .body(Mono.just(SOME_JSON_BODY), String.class)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.getValidToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isCreated();
@@ -216,7 +208,7 @@ public class ApiTest extends ApiTestBase {
             .post()
             .uri("/proxy/unit4/ressurs")
             .body(Mono.just(SOME_JSON_BODY), String.class)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.getValidToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isBadRequest()
@@ -235,7 +227,7 @@ public class ApiTest extends ApiTestBase {
             .patch()
             .uri("/proxy/unit4/ressurs/123456")
             .body(Mono.just(SOME_JSON_BODY), String.class)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.getValidToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk();
@@ -250,7 +242,7 @@ public class ApiTest extends ApiTestBase {
         webTestClient
             .delete()
             .uri("/proxy/unit4/ressurs/123456")
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.getValidToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk();

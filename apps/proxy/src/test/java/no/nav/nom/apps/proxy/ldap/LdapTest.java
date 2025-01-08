@@ -10,6 +10,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+import static no.nav.nom.apps.proxy.TestUtils.getValidToken;
 import static no.nav.nom.libs.utils.common.util.StreamUtils.find;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,7 +28,7 @@ public class LdapTest extends ApiTestBase {
             .post()
             .uri(AD_URL)
             .body(Mono.just(List.of("A123456", "A123457", "A123458")), List.class)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.getValidToken()))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk()
