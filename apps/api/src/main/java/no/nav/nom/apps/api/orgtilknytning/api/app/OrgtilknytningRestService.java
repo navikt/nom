@@ -258,7 +258,7 @@ public class OrgtilknytningRestService {
 
     private void validateOrgtilknytningHasSektor(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
         oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {
-            if (!isPeriodActive(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom()) || !endreOrgtilknytningRequest.gyldigFom().isAfter(LocalDate.now())) return;
+            if (!isActiveOrFuture(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) return;
             if (isNull(endreOrgtilknytningRequest.sektor())) {
                 orgtilknytningStateRepository.findByFid(endreOrgtilknytningRequest.fid()).ifPresent(orgtilknytningState -> {
                     throw InvalidOrgtilknytningSektorException.sektorIsNull(orgtilknytningState.orgEnhetId());
@@ -268,7 +268,7 @@ public class OrgtilknytningRestService {
         });
 
         oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {
-            if (!isPeriodActive(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom()) || !endreOrgtilknytningRequest.gyldigFom().isAfter(LocalDate.now())) return;
+            if (!isActiveOrFuture(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) return;
             if (isNull(endreOrgtilknytningRequest.sektor())) {
                 throw InvalidOrgtilknytningSektorException.sektorIsNull(endreOrgtilknytningRequest.orgEnhetId());
             }
@@ -277,7 +277,7 @@ public class OrgtilknytningRestService {
 
     private void validateOrgtilknytningHasTilknytningtype(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
         oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {
-            if (!isPeriodActive(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom()) || !endreOrgtilknytningRequest.gyldigFom().isAfter(LocalDate.now())) return;
+            if (!isActiveOrFuture(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) return;
             if (endreOrgtilknytningRequest.sektor().erKommunal()) return;
             if (isNull(endreOrgtilknytningRequest.tilknytningtype())) {
                 orgtilknytningStateRepository.findByFid(endreOrgtilknytningRequest.fid()).ifPresent(orgtilknytningState -> {
@@ -288,7 +288,7 @@ public class OrgtilknytningRestService {
         });
 
         oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {
-            if (!isPeriodActive(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom()) || !endreOrgtilknytningRequest.gyldigFom().isAfter(LocalDate.now())) return;
+            if (!isActiveOrFuture(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) return;
             if (endreOrgtilknytningRequest.sektor().erKommunal()) return;
             if (isNull(endreOrgtilknytningRequest.tilknytningtype())) {
                 throw InvalidOrgtilknytningTilknytningtypeException.tilknytningtypeIsNull(endreOrgtilknytningRequest.orgEnhetId());
@@ -823,6 +823,22 @@ public class OrgtilknytningRestService {
             throw InvalidOrgtilknytningTypeAndSektorCombinationException.forCombination(tilknytningtype, sektor);
         }
 
+    }
+
+    private boolean isActiveOrFuture(LocalDate gyldigFom, Optional<LocalDate> gyldigTom) {
+        return isActiveOrFuture(gyldigFom, gyldigTom.orElse(null));
+    }
+
+    private boolean isActiveOrFuture(LocalDate gyldigFom, LocalDate gyldigTom) {
+        return isActive(gyldigFom, gyldigTom) || isFuture(gyldigFom);
+    }
+
+    private boolean isFuture(LocalDate gyldigFom) {
+        return gyldigFom.isAfter(LocalDate.now());
+    }
+
+    private boolean isActive(LocalDate gyldigFom, LocalDate gyldigTom) {
+        return isPeriodActive(gyldigFom, gyldigTom);
     }
 
     private static boolean isNotNull(Object object) {

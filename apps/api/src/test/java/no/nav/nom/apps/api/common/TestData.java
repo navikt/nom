@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.common;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
@@ -25,7 +26,7 @@ public class TestData {
             .erDagligOppfolging(false)
             .gyldigFom(LocalDate.now().minusMonths(1))
             .gyldigTom(Optional.empty())
-            .orgtilknytningType(Optional.empty())
+            .orgtilknytningType(Optional.of(Tilknytningtype.FAST))
             .masseflyttetFraFid(Optional.empty())
             .build();
     }
