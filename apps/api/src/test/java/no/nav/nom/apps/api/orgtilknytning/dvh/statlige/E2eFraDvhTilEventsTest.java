@@ -228,13 +228,14 @@ class E2eFraDvhTilEventsTest extends TestBase {
             ressursStateRepository,
             new GrupperOgSlaaSammenDvhStillinger(ressursStateRepository),
             new MatchStrukturerteStillingPerioderTilNOM(orgtilknytningStateRepository, orgenhetService),
-            new SettDOLPerioderPaaStrukturerteStillinger(orgtilknytningStateRepository),
-            nomMastered
+            new SettDOLPerioderPaaStrukturerteStillinger(orgtilknytningStateRepository)
         );
         prosserer = new NyeRessursStillingProcessor(
             orgtilknytningService,
             orgtilknytningCommandService,
-            ressursStateRepository
+            ressursStateRepository,
+            nomMastered,
+            u4DiffPaaMastrede
         );
         when(ressursStateRepository.findByNavident("A000001")).thenReturn(Optional.of(RESSURS_1));
 

@@ -5,7 +5,6 @@ import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident;
-import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Component;
 
@@ -26,18 +25,16 @@ public class NyeRessursStillingStrukturerer {
     private final GrupperOgSlaaSammenDvhStillinger grupperOgSlaaSammenDvhStillinger;
     private final MatchStrukturerteStillingPerioderTilNOM matchStillingPerioderTilNomEnheter;
     private final SettDOLPerioderPaaStrukturerteStillinger settDOLPerioderPaaStrukturerteStillinger;
-    private final NomMastered nomMastered;
 
     public NyeRessursStillingStrukturerer(
         RessursStateRepository ressursStateRepository, GrupperOgSlaaSammenDvhStillinger grupperOgSlaaSammenDvhStillinger,
         MatchStrukturerteStillingPerioderTilNOM matchStillingPerioderTilNomEnheter,
-        SettDOLPerioderPaaStrukturerteStillinger settDOLPerioderPaaStrukturerteStillinger, NomMastered nomMastered
+        SettDOLPerioderPaaStrukturerteStillinger settDOLPerioderPaaStrukturerteStillinger
     ) {
         this.matchStillingPerioderTilNomEnheter = matchStillingPerioderTilNomEnheter;
         this.ressursStateRepository = ressursStateRepository;
         this.grupperOgSlaaSammenDvhStillinger = grupperOgSlaaSammenDvhStillinger;
         this.settDOLPerioderPaaStrukturerteStillinger = settDOLPerioderPaaStrukturerteStillinger;
-        this.nomMastered = nomMastered;
     }
 
     public Map<String, StrukturerteStillingPerioderForNavident> strukturerStilingPerioderPerNavident(List<DvhRessursStilling> dvhRessursStillinger) {
@@ -45,11 +42,6 @@ public class NyeRessursStillingStrukturerer {
 
         Map<String, StrukturerteStillingPerioderForNavident> stillingPerioderPerNavident = new HashMap<>();
         dvhRessursStillingPerNavident.forEach((navident, navidentensDvhRessursStillinger) -> {
-            if (nomMastered.isMastered(navident)) {
-                log.debug("Navident {} er mastered. Vi behandler ikke orgtilknytning fra DVH for denne", navident);
-                return;
-            }
-
             var sspForNavident = strukturerStillingPerioderFraDvhRessursStillinger(navident, navidentensDvhRessursStillinger);
             if (sspForNavident != null) {
                 stillingPerioderPerNavident.put(navident, sspForNavident);

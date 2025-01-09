@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 
-import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
@@ -12,6 +11,8 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreO
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OrgtilknytningCommand;
+import no.nav.nom.apps.api.orgtilknytning.u4diff.U4DiffPaaMastrede;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -38,13 +39,19 @@ public class NyeRessursStillingProcessor {
     private final OrgtilknytningService orgtilknytningService;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final RessursStateRepository ressursStateRepository;
+    private final NomMastered nomMastered;
+    private final U4DiffPaaMastrede u4DiffPaaMastrede;
 
     public NyeRessursStillingProcessor(
-        OrgtilknytningService orgtilknytningService, OrgtilknytningCommandService orgtilknytningCommandService, RessursStateRepository ressursStateRepository
+        OrgtilknytningService orgtilknytningService, OrgtilknytningCommandService orgtilknytningCommandService, RessursStateRepository ressursStateRepository,
+        NomMastered nomMastered,
+        U4DiffPaaMastrede u4DiffPaaMastrede
     ) {
         this.orgtilknytningService = orgtilknytningService;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.ressursStateRepository = ressursStateRepository;
+        this.nomMastered = nomMastered;
+        this.u4DiffPaaMastrede = u4DiffPaaMastrede;
     }
 
     public Map<String, StrukturerteStillingPerioderForNavident>  process(Map<String, StrukturerteStillingPerioderForNavident> stillingPerioderPerNavident) {
@@ -55,6 +62,7 @@ public class NyeRessursStillingProcessor {
                 stillingPerioderPerNavidentResultat.put(navident, resultat);
             }
         });
+        u4DiffPaaMastrede.rapporterU4NavidenterBehandlet(stillingPerioderPerNavident.keySet().stream().toList());
         return stillingPerioderPerNavidentResultat;
     }
 
@@ -83,7 +91,14 @@ public class NyeRessursStillingProcessor {
         endringer.addAll(fjerngamle(eksisterendeAaFjerne));
 
         if (!endringer.isEmpty()) {
-            endringer = utfoerEndringer(endringer);
+            if (nomMastered.isMastered(navident)) {
+                log.debug("Navident {} er mastered. Vi endrer ikke orgtilknytning(er) fra DVH for denne", navident);
+                u4DiffPaaMastrede.rapporterU4Diff(navident, matchedeOTer, eksisterendeAaFjerne, stillingPerioderAaOpprette);
+            } else {
+                endringer = utfoerEndringer(endringer);
+            }
+        } else if (nomMastered.isMastered(navident)) {
+            u4DiffPaaMastrede.rapporterIngenU4Diff(navident);
         }
 
         return new StrukturerteStillingPerioderForNavident(sspForNavident, eksisterendeOTer, endringer);

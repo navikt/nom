@@ -153,18 +153,4 @@ public record StrukturerteStillingPerioderForNavident(
         });
         return result;
     }
-
-
-    public List<String> diff(StrukturerteStillingPerioderForNavident gmlSSPFN, boolean debugEndringer) {
-        List<String> differanser = new ArrayList<>();
-        if (stillingPerioder.size() != gmlSSPFN.stillingPerioder.size()) {
-            differanser.add("Antall stillingPerioder er ulik (Nye/gml): " + stillingPerioder.size() + " / " + gmlSSPFN.stillingPerioder.size());
-        }
-        if (debugEndringer && endringer.size() != gmlSSPFN.endringer.size()) {
-            differanser.add("Antall endringer er ulik (Nye/gml): " + endringer.size() + " / " + gmlSSPFN.endringer.size());
-            differanser.add("Nye endringer: " + endringer);
-            differanser.add("Gml endringer: " + gmlSSPFN.endringer);
-        }
-        return differanser;
-    }
 }

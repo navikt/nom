@@ -11,9 +11,11 @@ import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetV2;
 import no.nav.nom.apps.api.orgtilknytning.dvh.DvhEksternRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.StreamSupport;
@@ -24,10 +26,14 @@ public class DvhOrdsService {
     private final DvhOrdsClient dvhOrdsClient;
     private AppProperties.DvhOrds dvhOrdsProperties;
 
+    private final boolean isLocal;
 
-    public DvhOrdsService(DvhOrdsClient dvhOrdsClient, AppProperties appProperties) {
+    public DvhOrdsService(DvhOrdsClient dvhOrdsClient, AppProperties appProperties, Environment environment) {
         dvhOrdsProperties = appProperties.clients().dvhOrds();
         this.dvhOrdsClient = dvhOrdsClient;
+
+        List<String> profiles = Arrays.asList(environment.getActiveProfiles());
+        isLocal = profiles.contains("local") || profiles.contains("test");
     }
 
     // Enheter
@@ -139,6 +145,14 @@ public class DvhOrdsService {
             if (nextUrl.get() == null) {
                 log.error("Resultset hasMore, but did not find next href. {}", pagedJson.get("links"));
                 break;
+            }
+            if (isLocal) {
+                nextUrl.set(
+                    nextUrl.get().replace( // lokalt proxier vi via nom-api, og kan ikke bruke dvh-ords next url direkte
+                        "https://dvh.adeo.no/ords/dvh/dvh_nom/nom_ords_ressurs_stillinger.json",
+                        dvhOrdsProperties.ressursStillingerPath().split("\\?")[0]
+                    )
+                );
             }
             pagedJson = dvhOrdsClient.dvhGetJsonData(nextUrl.get());
             ressursStillinger.addAll(StreamSupport.stream(pagedJson.get("items").spliterator(), false)

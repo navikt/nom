@@ -34,7 +34,9 @@ class NyeRessursStillingProcessorTest extends TestBase {
         CUT = new NyeRessursStillingProcessor(
             orgtilknytningService,
             orgtilknytningCommandService,
-            ressursStateRepository
+            ressursStateRepository,
+            nomMastered,
+            u4DiffPaaMastrede
         );
 
         when(orgtilknytningCommandService.opprettOrgtilknytning(any())).thenReturn("FID_1", "FID_2", "FID_3", "FID_4", "FID_5");

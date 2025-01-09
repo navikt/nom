@@ -100,7 +100,7 @@ public class RessursHendelseForEventsourceService {
                 return;
             }
 
-            log.info(SECURE_LOGS, "Ny personident {} fra DVH, kjenner ikke identen så oppretter ny", ressurs.getPersonIdent());
+            log.debug(SECURE_LOGS, "Ny personident {} fra DVH, kjenner ikke identen så oppretter ny", ressurs.getPersonIdent());
             final var taskEvent = opprettRessurs(ressurs);
             opprettetRessuser.put(taskEvent.getKey(), taskEvent.getValue());
         });

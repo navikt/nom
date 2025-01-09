@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
@@ -8,7 +7,7 @@ import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.OrgtilknytningCmdServiceTestBase;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
+import no.nav.nom.apps.api.orgtilknytning.u4diff.U4DiffPaaMastrede;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -17,9 +16,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -35,16 +32,18 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
     static final LocalDate MAX_DATE = LocalDate.of(2099, 12, 31);
     static final String A000001 = "A000001";
 
-    @MockBean
+    @MockitoBean
     OrgenhetService orgenhetService;
-    @MockBean
+    @MockitoBean
     RessursStateRepository ressursStateRepository;
-    @MockBean
+    @MockitoBean
     OrgtilknytningStateRepository orgtilknytningStateRepository;
-    @MockBean
+    @MockitoBean
     OrgtilknytningService orgtilknytningService;
-    @MockBean
+    @MockitoBean
     NomMastered nomMastered;
+    @MockitoBean
+    U4DiffPaaMastrede u4DiffPaaMastrede;
 
     private Random rnd = new Random();
 

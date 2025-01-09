@@ -62,7 +62,7 @@ public class RessursStillingLoader {
     private void loggErrorsFraNyLast(Map<String, StrukturerteStillingPerioderForNavident> nyeStillingPerioderPerNavident) {
         nyeStillingPerioderPerNavident.forEach((navident, sspfn) -> {
             if (!sspfn.errors().isEmpty()) {
-                log.info("Feil ved NYE lasting og prosessering av ressursStillinger for navident {}: {}", navident, sspfn.errors());
+                log.debug("Feil ved NYE lasting og prosessering av ressursStillinger for navident {}: {}", navident, sspfn.errors());
             }
         });
     }
@@ -72,7 +72,6 @@ public class RessursStillingLoader {
 
         List<DvhRessursStilling> ressursStillinger;
         if (unleash.isEnabled("nom.dvh.last_ressursstillinger_fra_ords")) {
-            // TODO: Fix paginering
             ressursStillinger = dvhOrdsService.getStatligeTilknytninger();
         } else {
             log.info("Laster ressursStillinger fra {}", appProperties.clients().nomProxy().ressursStillingerPath());

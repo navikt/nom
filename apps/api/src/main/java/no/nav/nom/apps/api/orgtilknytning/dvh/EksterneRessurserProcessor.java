@@ -195,13 +195,13 @@ public class EksterneRessurserProcessor {
                 }
             ).orElseGet(
                 () -> {
-                    log.info("For navident {} - Fant ikke orgenhet for remedyEnhet {}", navident, remedyEnhet);
+                    log.debug("For navident {} - Fant ikke orgenhet for remedyEnhet {}", navident, remedyEnhet);
                     return null;
                 }
             );
 
         if (orgenhetPaaRessurs.startsWith("-")) {
-            log.info(
+            log.debug(
                 "For navident {} - ORGENHET_PAA_RESSURS i DVH er ikke angitt. DVH Kode: {}. Faller tilbake på å bruke remedyEnhet {}.",
                 navident,
                 orgenhetPaaRessurs,
@@ -214,7 +214,7 @@ public class EksterneRessurserProcessor {
                 .filter(o -> Objects.equals(o.getOrgNiv(), orgenhetPaaRessursNivaa))
                 .toList();
             if (nomOrgenheterByOrgenhetPaaRessurs.size() == 1) {
-                log.info(
+                log.debug(
                     "For navident {} - Fant orgenhet {} for ORGENHET_PAA_RESSURS i DVH. DVH agressoId/Nivå: {}/{}.",
                     navident,
                     nomOrgenheterByOrgenhetPaaRessurs.get(0).getId(),
@@ -228,7 +228,7 @@ public class EksterneRessurserProcessor {
                 nomOrgenhetPaaRessurs = hvisVikafossenPlasserPaaVikafossen(nomOrgenhetPaaRessurs, remedyEnhet);
                 return nomOrgenhetPaaRessurs;
             } else if (nomOrgenheterByOrgenhetPaaRessurs.isEmpty()) {
-                log.info(
+                log.debug(
                     "For navident {} - Fant ikke orgenhet for agressoId/Nivå: {}/{}. Faller tilbake på å bruke remedyEnhet {}.",
                     navident,
                     orgenhetPaaRessurs,
@@ -236,7 +236,7 @@ public class EksterneRessurserProcessor {
                     remedyEnhet
                 );
             } else {
-                log.info(
+                log.debug(
                     "For navident {} - Fant flere orgenheter for agressoId/Nivå: {}/{}. Faller tilbake på å bruke remedyEnhet {}.",
                     navident,
                     orgenhetPaaRessurs,
@@ -362,7 +362,7 @@ public class EksterneRessurserProcessor {
 
     private void opprettOrgtilknytning(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet, LocalDate gyldigFom, InputMetadata metadata) {
         if (nomMastered.isMastered(eksternRessurs.navident())) {
-            log.info("Navident {} er mastered. Vi lager ikke orgtilknytning for denne", eksternRessurs.navident());
+            log.debug("Navident {} er mastered. Vi lager ikke orgtilknytning for denne", eksternRessurs.navident());
             return;
         }
 
@@ -418,7 +418,7 @@ public class EksterneRessurserProcessor {
 
     private void endreSluttdatoPaaEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
         if (nomMastered.isMastered(orgtilknytning.navident())) {
-            log.info("Navident {} er mastered. Vi endrer ikke sluttdato på orgtilknytning for denne", orgtilknytning.navident());
+            log.debug("Navident {} er mastered. Vi endrer ikke sluttdato på orgtilknytning for denne", orgtilknytning.navident());
             return;
         }
 
@@ -440,7 +440,7 @@ public class EksterneRessurserProcessor {
 
     private void avsluttOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
         if (nomMastered.isMastered(orgtilknytning.navident())) {
-            log.info("Navident {} er mastered. Vi avslutter ikke orgtilknytning for denne", orgtilknytning.navident());
+            log.debug("Navident {} er mastered. Vi avslutter ikke orgtilknytning for denne", orgtilknytning.navident());
             return;
         }
 
@@ -459,7 +459,7 @@ public class EksterneRessurserProcessor {
 
     private void settTilknytningtype(Tilknytningtype type, String orgtilknytningFid, String navident, InputMetadata metadata) {
         if (nomMastered.isMastered(navident)) {
-            log.info("Navident {} er mastered. Vi avslutter ikke orgtilknytning for denne", navident);
+            log.debug("Navident {} er mastered. Vi avslutter ikke orgtilknytning for denne", navident);
             return;
         }
 
@@ -477,7 +477,7 @@ public class EksterneRessurserProcessor {
 
     private void fjernEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
         if (nomMastered.isMastered(orgtilknytning.navident())) {
-            log.info("Navident {} er mastered. Vi fjerner ikke orgtilknytning for denne", orgtilknytning.navident());
+            log.debug("Navident {} er mastered. Vi fjerner ikke orgtilknytning for denne", orgtilknytning.navident());
             return;
         }
 
