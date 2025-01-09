@@ -36,6 +36,8 @@ spec:
         - application: nom-api
           namespace: nom
           cluster: prod-gcp
+      external:
+        - host: nom-remedy-integrasjon.prod-fss-pub.nais.io
   ingresses:
     - https://nom-admin.ansatt.nav.no
   replicas:
@@ -80,3 +82,7 @@ spec:
       value: http://nom-api.nom.svc.cluster.local
     - name: NOM_API_SCOPE
       value: api://prod-gcp.nom.nom-api/.default
+    - name: NOM_REMEDY_INTEGRASJON_API_URL
+      value: https://nom-remedy-integrasjon.prod-fss-pub.nais.io
+    - name: NOM_REMEDY_INTEGRASJON_API_SCOPE
+      value: api://prod-fss.org.nom-remedy-integrasjon/.default
