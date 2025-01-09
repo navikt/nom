@@ -8,6 +8,8 @@ import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgtilknytning.api.email.OrgtilknytningEndretEmailService;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningSektorException;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTilknytningtypeException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
@@ -35,7 +37,6 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -72,7 +73,6 @@ public class OrgtilknytningRestService {
     private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
 
     private final Unleash unleash;
-    private final Environment env;
 
     public OrgtilknytningRestService(
         OrgtilknytningStateRepository orgtilknytningStateRepository,
@@ -82,8 +82,7 @@ public class OrgtilknytningRestService {
         NomMastered nomMastered,
         AuthorizedNavident authorizedNavident,
         OrgtilknytningEndretEmailService orgtilknytningEndretEmailService,
-        Unleash unleash,
-        Environment env
+        Unleash unleash
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
@@ -93,7 +92,6 @@ public class OrgtilknytningRestService {
         this.authorizedNavident = authorizedNavident;
         this.orgtilknytningEndretEmailService = orgtilknytningEndretEmailService;
         this.unleash = unleash;
-        this.env = env;
     }
 
     public List<OrgtilknytningState> getOrgtilknytninger(Optional<String> navident) {
@@ -250,10 +248,52 @@ public class OrgtilknytningRestService {
         validateEndreOrgtilknytningUnderToMaaneder(oppdaterOrgtilknytningerForRessursRequest);
         validateChronologicalDates(oppdaterOrgtilknytningerForRessursRequest);
         validateNoOverlappingDagligeOppfolginger(oppdaterOrgtilknytningerForRessursRequest);
+        validateOrgtilknytningHasSektor(oppdaterOrgtilknytningerForRessursRequest);
+        validateOrgtilknytningHasTilknytningtype(oppdaterOrgtilknytningerForRessursRequest);
         if (unleash.isEnabled("nom.validering_av_duplikate_orgenhet")) {
             validateOrgtilknytningerHasNoActiveAndSektorAndTilknytningDuplicates(oppdaterOrgtilknytningerForRessursRequest);
         }
 
+    }
+
+    private void validateOrgtilknytningHasSektor(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
+        oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {
+            if (!isPeriodActive(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) return;
+            if (isNull(endreOrgtilknytningRequest.sektor())) {
+                orgtilknytningStateRepository.findByFid(endreOrgtilknytningRequest.fid()).ifPresent(orgtilknytningState -> {
+                    throw InvalidOrgtilknytningSektorException.sektorIsNull(orgtilknytningState.orgEnhetId());
+                });
+                throw new InvalidOrgtilknytningSektorException("Aktive Orgtilknytninger må ha en sektor");
+            }
+        });
+
+        oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {
+            if (!isPeriodActive(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) return;
+            if (isNull(endreOrgtilknytningRequest.sektor())) {
+                throw InvalidOrgtilknytningSektorException.sektorIsNull(endreOrgtilknytningRequest.orgEnhetId());
+            }
+        });
+    }
+
+    private void validateOrgtilknytningHasTilknytningtype(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
+        oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {
+            if (!isPeriodActive(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) return;
+            if (endreOrgtilknytningRequest.sektor().erKommunal()) return;
+            if (isNull(endreOrgtilknytningRequest.tilknytningtype())) {
+                orgtilknytningStateRepository.findByFid(endreOrgtilknytningRequest.fid()).ifPresent(orgtilknytningState -> {
+                    throw InvalidOrgtilknytningTilknytningtypeException.tilknytningtypeIsNull(orgtilknytningState.orgEnhetId());
+                });
+                throw new InvalidOrgtilknytningTilknytningtypeException("Tilknytningstype er ikke satt på Orgtilknytning");
+            }
+        });
+
+        oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {
+            if (!isPeriodActive(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) return;
+            if (endreOrgtilknytningRequest.sektor().erKommunal()) return;
+            if (isNull(endreOrgtilknytningRequest.tilknytningtype())) {
+                throw InvalidOrgtilknytningTilknytningtypeException.tilknytningtypeIsNull(endreOrgtilknytningRequest.orgEnhetId());
+            }
+        });
     }
 
     private void validateEndreOrgtilknytningUnderToMaaneder(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
@@ -521,15 +561,17 @@ public class OrgtilknytningRestService {
             );
         }
 
-        if (ressursStateRepository.findByNavident(navident).get().sektor().equals(Sektor.NAV_KOMMUNAL)) {
-            orgtilknytningCommandService.endreTilknytningtype(
-                EndreTilknytningtypeCommand.builder()
-                    .fid(opprettetOrgtilknytningFid)
-                    .tilknytningtype(Optional.of(Tilknytningtype.INGEN))
-                    .inputMetadata(inputMetadata)
-                    .build()
-            );
-        }
+        ressursStateRepository.findByNavident(navident).ifPresent(ressursState -> {
+            if (ressursState.sektor().erKommunal()) {
+                orgtilknytningCommandService.endreTilknytningtype(
+                    EndreTilknytningtypeCommand.builder()
+                        .fid(opprettetOrgtilknytningFid)
+                        .tilknytningtype(Optional.of(Tilknytningtype.INGEN))
+                        .inputMetadata(inputMetadata)
+                        .build()
+                );
+            }
+        });
 
         if (Optional.ofNullable(leggTilOrgtilknytningRequest.tilknytningtype()).isPresent()) {
             orgtilknytningCommandService.endreTilknytningtype(
@@ -785,11 +827,5 @@ public class OrgtilknytningRestService {
 
     private static boolean isNotNull(Object object) {
         return !isNull(object);
-    }
-
-    private String getClusterName() {
-        var isProd = "prod-gcp".equals(env.getProperty("NAIS_CLUSTER_NAME"));
-        if(isProd) return "prod-gcp";
-        return "dev-gcp";
     }
 }

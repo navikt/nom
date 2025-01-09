@@ -534,6 +534,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("1")
             .sektor(tilknyttetRessurs.sektor())
+            .orgtilknytningType(Optional.of(Tilknytningtype.MIDLERTIDIG))
             .erDagligOppfolging(false)
             .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
             .build();
@@ -542,23 +543,15 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("2")
             .sektor(tilknyttetRessurs.sektor())
+            .orgtilknytningType(Optional.of(Tilknytningtype.MIDLERTIDIG))
             .erDagligOppfolging(false)
             .gyldigFom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().orElseThrow().plusDays(1))
             .gyldigTom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(gyldigTom -> gyldigTom.plusMonths(1)))
             .build();
 
-        var existingOrgtilknytningAnticipatingNewTilknytningtype = orgtilknytningState().toBuilder()
-            .navident(tilknyttetRessurs.navident())
-            .orgEnhetId("3")
-            .sektor(tilknyttetRessurs.sektor())
-            .erDagligOppfolging(false)
-            .orgtilknytningType(Optional.empty())
-            .build();
-
         saveOrgtilknytninger(List.of(
             existingOrgtilknytningAnticipatingNewDate,
-            existingOrgtilknytningAnticipatingDolChange,
-            existingOrgtilknytningAnticipatingNewTilknytningtype
+            existingOrgtilknytningAnticipatingDolChange
         ));
 
         var endreDatoOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingNewDate).toBuilder()
@@ -571,15 +564,11 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .erDagligOppfolging(true)
             .build();
 
-        var endreTilknytningtypeRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingNewTilknytningtype).toBuilder()
-            .tilknytningtype(Tilknytningtype.KONSULENT)
-            .build();
-
         var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
             .erDagligOppfolging(false)
             .orgEnhetId("4")
             .sektor(tilknyttetRessurs.sektor())
-            .tilknytningtype(null)
+            .tilknytningtype(Tilknytningtype.KONSULENT)
             .build();
 
         var opprettetOrgtilknytningFid = UUID.randomUUID().toString();
@@ -589,8 +578,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
             .eksisterendeOrgtilknytninger(List.of(
                 endreDatoOrgtilknytningRequest,
-                endreDolOrgtilknytningRequest,
-                endreTilknytningtypeRequest
+                endreDolOrgtilknytningRequest
             ))
             .nyeOrgtilknytninger(List.of(leggTilOrgtilknytningRequest))
             .build();
@@ -620,8 +608,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         assertThat(endreTilknytningtypeCommandArgumentCaptor.getValue()).usingRecursiveComparison()
             .ignoringFields("inputMetadata")
             .isEqualTo(EndreTilknytningtypeCommand.builder()
-                .fid(endreTilknytningtypeRequest.fid())
-                .tilknytningtype(Optional.ofNullable(endreTilknytningtypeRequest.tilknytningtype()))
+                .fid(opprettetOrgtilknytningFid)
+                .tilknytningtype(Optional.ofNullable(leggTilOrgtilknytningRequest.tilknytningtype()))
                 .build()
             );
 
@@ -874,6 +862,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("1")
             .erDagligOppfolging(false)
+            .sektor(tilknyttetRessurs.sektor())
+            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
             .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
             .build();
 
@@ -881,6 +871,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("2")
             .erDagligOppfolging(false)
+            .sektor(tilknyttetRessurs.sektor())
             .gyldigFom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().orElseThrow().plusDays(1))
             .gyldigTom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(gyldigTom -> gyldigTom.plusMonths(1)))
             .build();
@@ -889,6 +880,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("3")
             .erDagligOppfolging(false)
+            .sektor(tilknyttetRessurs.sektor())
             .orgtilknytningType(Optional.empty())
             .build();
 
@@ -916,7 +908,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .erDagligOppfolging(false)
             .orgEnhetId("4")
             .sektor(tilknyttetRessurs.sektor())
-            .tilknytningtype(null)
+            .tilknytningtype(Tilknytningtype.KONSULENT)
             .build();
 
         var opprettetOrgtilknytningFid = UUID.randomUUID().toString();
@@ -953,13 +945,19 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build()
             );
 
-        verify(orgtilknytningCommandService, times(1)).endreTilknytningtype(endreTilknytningtypeCommandArgumentCaptor.capture());
-        assertThat(endreTilknytningtypeCommandArgumentCaptor.getValue()).usingRecursiveComparison()
+        verify(orgtilknytningCommandService, times(2)).endreTilknytningtype(endreTilknytningtypeCommandArgumentCaptor.capture());
+        assertThat(endreTilknytningtypeCommandArgumentCaptor.getAllValues()).usingRecursiveComparison()
             .ignoringFields("inputMetadata")
-            .isEqualTo(EndreTilknytningtypeCommand.builder()
-                .fid(endreTilknytningtypeRequest.fid())
-                .tilknytningtype(Optional.ofNullable(endreTilknytningtypeRequest.tilknytningtype()))
-                .build()
+            .isEqualTo(
+                List.of(
+                    EndreTilknytningtypeCommand.builder()
+                        .fid(endreTilknytningtypeRequest.fid())
+                        .tilknytningtype(Optional.ofNullable(endreTilknytningtypeRequest.tilknytningtype()))
+                        .build(),
+                    EndreTilknytningtypeCommand.builder()
+                        .fid(opprettetOrgtilknytningFid)
+                        .tilknytningtype(Optional.ofNullable(leggTilOrgtilknytningRequest.tilknytningtype()))
+                        .build())
             );
 
         verify(orgtilknytningCommandService, times(2)).endreOrgtilknytningDato(endreOrgtilknytningDatoCommandArgumentCaptor.capture());
@@ -1117,6 +1115,258 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         ).expectStatus().isBadRequest();
     }
 
+    @Test
+    @DisplayName("Should throw InvalidSektorException if sektor is null in active existing OT")
+    void test_throw_exception_if_sektor_is_null_01() {
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytningAnticipatingNewDate = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("1")
+            .sektor(tilknyttetRessurs.sektor())
+            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .erDagligOppfolging(false)
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .build();
+
+        var existingOrgtilknytningAnticipatingDolChange = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("2")
+            .sektor(tilknyttetRessurs.sektor())
+            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .erDagligOppfolging(false)
+            .gyldigFom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().orElseThrow().plusDays(1))
+            .gyldigTom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(gyldigTom -> gyldigTom.plusMonths(1)))
+            .build();
+
+        var existingOrgtilknytningAnticipatingNewTilknytningtype = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("3")
+            .sektor(tilknyttetRessurs.sektor())
+            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .erDagligOppfolging(false)
+            .orgtilknytningType(Optional.empty())
+            .build();
+
+        saveOrgtilknytninger(List.of(
+            existingOrgtilknytningAnticipatingNewDate,
+            existingOrgtilknytningAnticipatingDolChange,
+            existingOrgtilknytningAnticipatingNewTilknytningtype
+        ));
+
+        var endreDatoOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingNewDate).toBuilder()
+            .gyldigTom(
+                existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(localDate -> localDate.plusMonths(1)).orElseThrow()
+            )
+            .build();
+
+        var endreDolOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingDolChange).toBuilder()
+            .erDagligOppfolging(true)
+            .build();
+
+        var endreTilknytningtypeRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingNewTilknytningtype).toBuilder()
+            .tilknytningtype(Tilknytningtype.KONSULENT)
+            .build();
+
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+            .erDagligOppfolging(false)
+            .orgEnhetId("4")
+            .sektor(tilknyttetRessurs.sektor())
+            .tilknytningtype(Tilknytningtype.KONSULENT)
+            .build();
+
+        var opprettetOrgtilknytningFid = UUID.randomUUID().toString();
+
+        when(orgtilknytningCommandService.opprettOrgtilknytning(any())).thenReturn(opprettetOrgtilknytningFid);
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(
+                endreDatoOrgtilknytningRequest.toBuilder().sektor(null).build(),
+                endreDolOrgtilknytningRequest.toBuilder().sektor(null).build(),
+                endreTilknytningtypeRequest.toBuilder().sektor(null).build()
+            ))
+            .nyeOrgtilknytninger(List.of(leggTilOrgtilknytningRequest))
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().isBadRequest();
+    }
+
+    @Test
+    @DisplayName("Should throw InvalidSektorException if sektor is null in active or future new OT")
+    void test_throw_exception_if_sektor_is_null_02() {
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytningAnticipatingNewDate = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("1")
+            .sektor(tilknyttetRessurs.sektor())
+            .erDagligOppfolging(false)
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .build();
+
+        var existingOrgtilknytningAnticipatingDolChange = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("2")
+            .sektor(tilknyttetRessurs.sektor())
+            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .erDagligOppfolging(false)
+            .gyldigFom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().orElseThrow().plusDays(1))
+            .gyldigTom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(gyldigTom -> gyldigTom.plusMonths(1)))
+            .build();
+
+        var existingOrgtilknytningAnticipatingNewTilknytningtype = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("3")
+            .sektor(tilknyttetRessurs.sektor())
+            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .erDagligOppfolging(false)
+            .orgtilknytningType(Optional.empty())
+            .build();
+
+        saveOrgtilknytninger(List.of(
+            existingOrgtilknytningAnticipatingNewDate,
+            existingOrgtilknytningAnticipatingDolChange,
+            existingOrgtilknytningAnticipatingNewTilknytningtype
+        ));
+
+        var endreDatoOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingNewDate).toBuilder()
+            .gyldigTom(
+                existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(localDate -> localDate.plusMonths(1)).orElseThrow()
+            )
+            .build();
+
+        var endreDolOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingDolChange).toBuilder()
+            .erDagligOppfolging(true)
+            .build();
+
+        var endreTilknytningtypeRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingNewTilknytningtype).toBuilder()
+            .tilknytningtype(Tilknytningtype.KONSULENT)
+            .build();
+
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+            .erDagligOppfolging(false)
+            .orgEnhetId("4")
+            .sektor(null)
+            .tilknytningtype(null)
+            .build();
+
+        var opprettetOrgtilknytningFid = UUID.randomUUID().toString();
+
+        when(orgtilknytningCommandService.opprettOrgtilknytning(any())).thenReturn(opprettetOrgtilknytningFid);
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(
+                endreDatoOrgtilknytningRequest,
+                endreDolOrgtilknytningRequest,
+                endreTilknytningtypeRequest
+            ))
+            .nyeOrgtilknytninger(List.of(leggTilOrgtilknytningRequest))
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().isBadRequest();
+    }
+
+    @Test
+    @DisplayName("Should not throw InavlidOrgtilknytningTileException if Tilknytningtype is null or INGEN if Sektor is NAV_KOMMUNAL")
+    void test_should_not_throw_exception_if_sektor_is_nav_kommunal() {
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.NAV_KOMMUNAL).build();
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytningAnticipatingNewDate = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("1")
+            .sektor(tilknyttetRessurs.sektor())
+            .erDagligOppfolging(false)
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .orgtilknytningType(Optional.empty())
+            .build();
+
+        saveOrgtilknytninger(List.of(
+            existingOrgtilknytningAnticipatingNewDate
+        ));
+
+        var endreDatoOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingNewDate).toBuilder()
+            .gyldigTom(
+                existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(localDate -> localDate.plusMonths(1)).orElseThrow()
+            )
+            .build();
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(
+                endreDatoOrgtilknytningRequest
+            ))
+            .nyeOrgtilknytninger(List.of())
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().is2xxSuccessful();
+    }
+
+    @Test
+    @DisplayName("Should throw InavlidOrgtilknytningTileException if Tilknytningtype is null or INGEN if Sektor is NOT NAV_KOMMUNAL")
+    void test_should_not_throw_exception_if_sektor_is_nav_not_kommunal() {
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.NAV_STATLIG).build();
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytningAnticipatingNewDate = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("1")
+            .sektor(tilknyttetRessurs.sektor())
+            .erDagligOppfolging(false)
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .orgtilknytningType(Optional.empty())
+            .build();
+
+        saveOrgtilknytninger(List.of(
+            existingOrgtilknytningAnticipatingNewDate
+        ));
+
+        var endreDatoOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingNewDate).toBuilder()
+            .gyldigTom(
+                existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(localDate -> localDate.plusMonths(1)).orElseThrow()
+            )
+            .build();
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(
+                endreDatoOrgtilknytningRequest
+            ))
+            .nyeOrgtilknytninger(List.of())
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().is4xxClientError();
+    }
+
     private static Stream<Arguments> test_no_overlapping_daglig_oppfolginger_input() {
         var gyldigFom = LocalDate.now();
         var gyldigTom = LocalDate.now().plusMonths(11);
@@ -1219,6 +1469,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .sektor(tilknyttetRessurs.sektor())
                 .erDagligOppfolging(false)
                 .navident(tilknyttetRessurs.navident())
+                .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
                 .build()
         ).toList());
 
@@ -1328,6 +1579,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         return LeggTilOrgtilknytningRequest.builder()
             .orgEnhetId("some-new-orgenhet")
             .erDagligOppfolging(false)
+            .sektor(Sektor.EKSTERN)
+            .tilknytningtype(Tilknytningtype.KONSULENT)
             .gyldigFom(LocalDate.now())
             .gyldigTom(LocalDate.now().plusMonths(12))
             .tilknytningtype(null)
@@ -1337,9 +1590,10 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     private static EndreOrgtilknytningRequest endreOrgtilknytningRequest() {
         return EndreOrgtilknytningRequest.builder()
             .fid(UUID.randomUUID().toString())
-            .sektor(Sektor.NAV_STATLIG)
+            .sektor(Sektor.EKSTERN)
             .gyldigFom(LocalDate.now().minusMonths(4))
             .gyldigTom(LocalDate.now().plusMonths(1))
+            .tilknytningtype(Tilknytningtype.KONSULENT)
             .erDagligOppfolging(false)
             .build();
     }

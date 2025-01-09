@@ -8,7 +8,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningSektorException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTilknytningtypeException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOverlapException;
@@ -165,6 +167,8 @@ public class OrgtilknytningController {
             IllegalArgumentException.class,
             NoSuchElementException.class,
             InvalidSektorException.class,
+            InvalidOrgtilknytningSektorException.class,
+            InvalidOrgtilknytningTilknytningtypeException.class,
             InvalidOrgtilknytningTypeAndSektorCombinationException.class,
             InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException.class,
             InvalidOppdaterOrgtilknytningerForRessursRequestException.class
