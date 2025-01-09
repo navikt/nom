@@ -38,6 +38,13 @@ export const setupPaarorendeProxy = (app: Express) =>
     scope: config.proxy.paarorendeApiScope,
   });
 
+export const setupUnleashEdgeProxy = (app: Express) =>
+  addProxyHandler(app, {
+    ingoingUrl: "/frackend/unleash-edge",
+    outgoingUrl: config.proxy.unleashEdgeApiUrl,
+    scope: "unleash",
+  });
+
 export function addProxyHandler(
   server: Express,
   { ingoingUrl, outgoingUrl, scope }: ProxyOptions,

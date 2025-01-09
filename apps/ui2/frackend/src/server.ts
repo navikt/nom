@@ -6,6 +6,7 @@ import {
   setupNomRemedyIntegrasjonProxy,
   setupPaarorendeProxy,
   setupTeamcatApiProxy,
+  setupUnleashEdgeProxy,
 } from "./apiProxy.js";
 import { errorHandling } from "./errorHandler.js";
 import { setupStaticRoutes } from "./frontendRoute.js";
@@ -28,6 +29,7 @@ setupNomApiProxy(app);
 setupTeamcatApiProxy(app);
 setupNomRemedyIntegrasjonProxy(app);
 setupPaarorendeProxy(app);
+setupUnleashEdgeProxy(app);
 
 // Catch all route, må være sist
 setupStaticRoutes(app);

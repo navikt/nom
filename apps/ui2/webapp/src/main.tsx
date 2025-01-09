@@ -14,6 +14,7 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
+import FlagProvider from "@unleash/proxy-client-react";
 import React, { type ReactNode, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Toaster } from "react-hot-toast";
@@ -85,17 +86,32 @@ declare module "@tanstack/react-router" {
   }
 }
 
+const UNLEASH_URL = process.env["UNLEASH_SERVER_API_URL"];
+const UNLEASH_CLIENT_KEY = process.env["UNLEASH_SERVER_API_TOKEN"];
+
+const config = {
+  url: UNLEASH_URL as string, // Your front-end API URL or the Unleash proxy's URL (https://<proxy-url>/proxy)
+  clientKey: UNLEASH_CLIENT_KEY as string, // A client-side API token OR one of your proxy's designated client keys (previously known as proxy secrets)
+  refreshInterval: 15, // How often (in seconds) the client should poll the proxy for updates
+  appName: "nom-ui2", // The name of your application. It's only used for identifying your application
+};
+
 createRoot(document.querySelector("#root") as HTMLElement).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools buttonPosition="bottom-left" initialIsOpen={false} />
-      <ApolloProvider client={apolloClient}>
-        <LoadSession>
-          <RouterProvider router={router} />
-        </LoadSession>
-      </ApolloProvider>
-      <Toaster toastOptions={{ position: "top-right" }} />
-    </QueryClientProvider>
+    <FlagProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <ReactQueryDevtools
+          buttonPosition="bottom-left"
+          initialIsOpen={false}
+        />
+        <ApolloProvider client={apolloClient}>
+          <LoadSession>
+            <RouterProvider router={router} />
+          </LoadSession>
+        </ApolloProvider>
+        <Toaster toastOptions={{ position: "top-right" }} />
+      </QueryClientProvider>
+    </FlagProvider>
   </StrictMode>,
 );
 

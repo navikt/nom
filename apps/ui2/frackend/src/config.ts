@@ -29,6 +29,7 @@ const proxy = {
   ),
   paarorendeApiScope: requireEnvironment("PAARORENDE_API_SCOPE"),
   paarorendeApiUrl: requireEnvironment("PAARORENDE_API_URL"),
+  unleashEdgeApiUrl: requireEnvironment("UNLEASH_SERVER_API_URL"),
 };
 
 const app = {

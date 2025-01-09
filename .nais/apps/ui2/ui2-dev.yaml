@@ -100,5 +100,7 @@ spec:
       value: http://nom-paarorende.org.svc.cluster.local
     - name: PAARORENDE_API_SCOPE
       value: api://dev-gcp.org.nom-paarorende/.default
+    - name: UNLEASH_SERVER_API_URL
+      value: https://teamorg-unleash-web.iap.nav.cloud/api
   envFrom:
     - secret: nom-ui2-unleash-api-token
