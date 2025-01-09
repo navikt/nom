@@ -447,3 +447,7 @@ NOM_PILOT_GROUPID: "e219ba08-0685-40b5-95e6-5fd82ec7414a" # NOM-PILOT
 
 NOM_REMEDY_INTEGRASJON_BASEURL: "https://nom-remedy-integrasjon.prod-fss-pub.nais.io"
 NOM_REMEDY_INTEGRASJON_API_SCOPE: api://prod-fss.org.nom-remedy-integrasjon/.default
+
+logging:
+  level:
+    no.nav.nom.apps.api.orgtilknytning.u4diff: DEBUG
