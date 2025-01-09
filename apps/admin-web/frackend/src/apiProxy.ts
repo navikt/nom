@@ -24,6 +24,13 @@ export const setupNomApiProxy = (app: Express) =>
     scope: config.proxy.nomApiScope,
   });
 
+export const setupNomRemedyProxy = (app: Express) =>
+  addProxyHandler(app, {
+    ingoingUrl: "/frackend/remedy",
+    outgoingUrl: config.proxy.nomRemedyUrl,
+    scope: config.proxy.nomRemedyScope,
+  });
+
 export function addProxyHandler(
   server: Express,
   { ingoingUrl, outgoingUrl, scope }: ProxyOptions,

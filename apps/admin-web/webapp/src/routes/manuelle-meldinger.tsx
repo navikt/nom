@@ -11,6 +11,7 @@ import { OppdatereStartdato } from "~/manuelle-meldinger/OppdatereStartdato.tsx"
 import { OppdaterPersonalia } from "~/manuelle-meldinger/OppdaterPersonalia.tsx";
 import { OppdaterPersonidentRessurs } from "~/manuelle-meldinger/OppdaterPersonidentRessurs.tsx";
 import { SettNomMaster } from "~/manuelle-meldinger/SettNomMaster.tsx";
+import { SjekkRessursStateRemedy } from "~/manuelle-meldinger/SjekkRessursStateRemedy.tsx";
 import { SlettRessursMelding } from "~/manuelle-meldinger/SlettRessursMelding.tsx";
 
 export const Route = createFileRoute("/manuelle-meldinger")({
@@ -45,6 +46,12 @@ function ManuelleMeldingerPage() {
       </Heading>
       <div className="flex gap-2 flex-wrap mb-4">
         <FjernOrgtilknytning />
+      </div>
+      <Heading level="2" size="medium" spacing>
+        Remedy Admin Controller
+      </Heading>
+      <div className="flex gap-2 flex-wrap mb-4">
+        <SjekkRessursStateRemedy />
       </div>
     </div>
   );

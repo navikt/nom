@@ -18,6 +18,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningSektorEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
@@ -712,34 +713,6 @@ public class NomIntegrasjonService {
         }
     }
 
-    private Optional<OrgtilknytningState> getDolOrgtilknytningStateByNavident(String navident) {
-        var dagligOppfolgningOrgTilknytning = nomApiClient.getOrgtilknytningerForNavident(navident).stream()
-            .filter(orgtilknytningState -> isActive(orgtilknytningState.getGyldigFom(), orgtilknytningState.getGyldigTom()))
-            .filter(OrgtilknytningState::getErDagligOppfolging)
-            .findFirst();
-
-        if (dagligOppfolgningOrgTilknytning.isEmpty()) {
-            logger.info("Ingen aktiv DOL funnet for ressurs med navident {}, prøver å finne fremtidig DOL", navident);
-            dagligOppfolgningOrgTilknytning = nomApiClient.getOrgtilknytningerForNavident(navident).stream()
-                .sorted(Comparator.comparing(OrgtilknytningState::getGyldigFom))
-                .filter(orgtilknytningState -> orgtilknytningState.getGyldigFom().isAfter(LocalDate.now()))
-                .filter(OrgtilknytningState::getErDagligOppfolging)
-                .findFirst();
-            dagligOppfolgningOrgTilknytning.ifPresent(orgtilknytningState -> logger.info(
-                "Fant fremtidig DOL funnet for ressurs med navident {}, orgenhetId {}",
-                navident,
-                orgtilknytningState.getOrgEnhetId()
-            ));
-        }
-
-        return dagligOppfolgningOrgTilknytning;
-    }
-
-    private Optional<OrgtilknytningState> getDolOrgtilknytningStateByFid(String fid) {
-        return getDolOrgtilknytningStateByNavident(nomApiClient.getRessursByNavident(fid).getNavident());
-
-    }
-
     private boolean isOrgtilknytningDOL(String fid) {
         return nomApiClient.getOrgtilknytning(fid).getErDagligOppfolging();
     }
@@ -809,5 +782,32 @@ public class NomIntegrasjonService {
             // there is no user authentification context here, so we use the default user "nom-admin"
             saveNewNomIntegrasjonEntity(nomIntegrasjonEntityWithDefaultDataFromNom, "nom-admin");
         }
+    }
+
+    public void lesOgEksekverRessursState(String entryBestiller, String navident) {
+        var ressursState = nomApiClient.getRessursByNavident(navident);
+        if (!ressursState.getIsNomMastered()) {
+            logger.info("Ressurs with navident {} is not mastered, skipping", navident);
+            return;
+        }
+        if (!isNull(ressursState.getSluttdato()) && ressursState.getSluttdato().isAfter(LocalDate.now())) {
+            delayEventUpdate(
+                new RessursSluttetEventV1(
+                    ressursState.getFid(),
+                    new RessursSluttetEventV1.RessursSluttetEventData(ressursState.getSluttdato()),
+                    new InputMetadata(
+                        "AdminController - NomIntegrasjon",
+                        "lesOgEksekverRessursState",
+                        null,
+                        new Origination(entryBestiller, "lesOgEksekverRessursState")
+                    )
+                ),
+                ressursState.getSluttdato().plusDays(1)
+            );
+        }
+        var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
+        logger.info("Leser og eksekverer ressursState for navident {}", navident);
+        // there is no user authentification context here, so we use the default user "nom-admin"
+        saveNewNomIntegrasjonEntity(nomIntegrasjonEntityWithDefaultDataFromNom, entryBestiller);
     }
 }

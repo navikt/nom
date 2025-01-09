@@ -1,7 +1,11 @@
 import express from "express";
 
 import { setupActuators } from "./actuators.js";
-import { setupNomAdminApiProxy, setupNomApiProxy } from "./apiProxy.js";
+import {
+  setupNomAdminApiProxy,
+  setupNomApiProxy,
+  setupNomRemedyProxy,
+} from "./apiProxy.js";
 import { setupStaticRoutes } from "./frontendRoute.js";
 import { verifyToken } from "./tokenValidation.js";
 
@@ -18,6 +22,7 @@ app.use(verifyToken);
 
 setupNomAdminApiProxy(app);
 setupNomApiProxy(app);
+setupNomRemedyProxy(app);
 
 // Catch all route, må være sist
 setupStaticRoutes(app);

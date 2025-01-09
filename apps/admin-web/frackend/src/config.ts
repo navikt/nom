@@ -21,6 +21,8 @@ const proxy = {
   nomAdminApiUrl: requireEnvironment("NOM_ADMIN_API_URL"),
   nomApiScope: requireEnvironment("NOM_API_SCOPE"),
   nomApiUrl: requireEnvironment("NOM_API_URL"),
+  nomRemedyScope: requireEnvironment("NOM_REMEDY_INTEGRASJON_API_SCOPE"),
+  nomRemedyUrl: requireEnvironment("NOM_REMEDY_INTEGRASJON_API_URL"),
 };
 
 const app = {

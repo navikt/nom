@@ -28,6 +28,7 @@ import type {
 } from "~/types/nom-api/nom-api-models.ts";
 const API_BASE_URL = "/frackend/admin-api";
 const NOM_API_BASE_URL = "/frackend/api";
+export const NOM_REMEDY_INTEGRASJON_BASE_URL = "/frackend/remedy";
 
 export const searchSchema = z.object({
   filterText: z.string().optional(),

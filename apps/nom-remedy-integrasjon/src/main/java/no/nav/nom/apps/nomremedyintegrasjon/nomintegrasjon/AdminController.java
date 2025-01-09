@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -83,6 +84,24 @@ public class AdminController {
         return ResponseEntity.ok(nomIntegrasjonService.getNomIntegrasjonEntities());
     }
 
+    @Operation(
+        description = "Les og eksekver ressurserState til remedy",
+        security = @SecurityRequirement(name = BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+        }
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PostMapping(value = "lesOgEksekverRessursState/{navident}")
+    public ResponseEntity<String> lesOgEksekverRessursState(@PathVariable String navident) {
+        nomIntegrasjonService.lesOgEksekverRessursState(getAuthenticatedNavIdent(), navident);
+        return ResponseEntity.ok("RessursState er lest og eksekvert");
+    }
+
     public static String getAuthenticatedNavIdent() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Jwt jwt = (Jwt) authentication.getPrincipal();
@@ -90,6 +109,4 @@ public class AdminController {
             () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Couldn't find %s in Claims", NAVIDENT_CLAIM_NAME))
         );
     }
-
-
 }

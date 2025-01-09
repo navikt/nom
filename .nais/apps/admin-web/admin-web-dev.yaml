@@ -36,6 +36,8 @@ spec:
         - application: nom-api
           namespace: nom
           cluster: dev-gcp
+      external:
+        - host: nom-remedy-integrasjon.dev-fss-pub.nais.io
   ingresses:
     - https://nom-admin.ansatt.dev.nav.no
     - https://nom-admin.intern.dev.nav.no
@@ -81,4 +83,8 @@ spec:
       value: http://nom-api.nom.svc.cluster.local
     - name: NOM_API_SCOPE
       value: api://dev-gcp.nom.nom-api/.default
+    - name: NOM_REMEDY_INTEGRASJON_API_URL
+      value: https://nom-remedy-integrasjon.dev-fss-pub.nais.io
+    - name: NOM_REMEDY_INTEGRASJON_API_SCOPE
+      value: api://dev-fss.org.nom-remedy-integrasjon/.default
 
