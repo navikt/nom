@@ -5,11 +5,11 @@ import no.nav.nom.apps.proxy.common.AppProperties;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.Instant;
@@ -29,7 +29,7 @@ public class ApiTestBase extends TestBase {
     @Autowired
     AppProperties appProperties;
 
-    @MockBean
+    @MockitoBean
     protected OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
     protected final OAuth2AuthorizedClient oAuth2AuthorizedClient = mock(OAuth2AuthorizedClient.class);

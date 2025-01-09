@@ -25,6 +25,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+
+// TODO Kan trolig erstattes av standard Spring OAuth2 klient
+
 @Component
 @RequiredArgsConstructor
 public class TokenRepository {

@@ -1,76 +1,53 @@
 package no.nav.nom.libs.test;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.crypto.RSASSASigner;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
-import org.springframework.context.annotation.Bean;
-import org.springframework.core.env.Environment;
+import com.nimbusds.jose.JOSEObjectType;
+import no.nav.security.mock.oauth2.MockOAuth2Server;
+import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.util.Date;
-import java.util.UUID;
+import java.util.List;
+import java.util.Map;
 
-import static java.lang.String.format;
-import static no.nav.nom.libs.test.RsaStub.RSA_KEY;
 
 @Component
 public class SecurityTestUtils {
 
-    private final Environment env;
+    private static final String VALID_AUDIENCE = "valid-audience";
+    private static final String VALID_ISSUER = "issuer1";
 
-    public SecurityTestUtils(Environment env) {
-        this.env = env;
+
+    public static String getValidToken(MockOAuth2Server oAuth2Server) {
+        return getToken(oAuth2Server, VALID_ISSUER, List.of(VALID_AUDIENCE), Map.of());
     }
 
-    public JWTClaimsSet.Builder validJwtClaims() {
-        return validJwtClaims("testSubject", "test");
+    public static String getTokenWithInvalidAudience(MockOAuth2Server oAuth2Server) {
+        return getToken(oAuth2Server, VALID_ISSUER, List.of("some-audience"), Map.of());
     }
 
-    public JWTClaimsSet.Builder validJwtClaims(String subject, String audience) {
-        return validJwtClaims(subject, subject, audience); // sub==oid -> Systemtoken , sub!=oid -> Usertoken
+    public static String getTokenWithUnknownIssuer(MockOAuth2Server oAuth2Server) {
+        return getToken(oAuth2Server, "different_issuer", List.of(VALID_AUDIENCE), Map.of());
     }
 
-    public JWTClaimsSet.Builder validJwtClaims(String subject, String oid, String audience) {
-        final var wiremockPort = env.getRequiredProperty("wiremock.server.port");
-
-        return new JWTClaimsSet.Builder()
-            .subject(subject)
-            .audience(audience)
-            .claim("oid", oid)
-            .jwtID(UUID.randomUUID().toString())
-            .issueTime(new Date())
-            .issuer(format("http://localhost:%s/aad", wiremockPort))
-            .expirationTime(Date.from(Instant.now().plusSeconds(60 * 60)));
+    public static String getExpiredToken(MockOAuth2Server oAuth2Server) {
+        return getToken(oAuth2Server, VALID_ISSUER, List.of(VALID_AUDIENCE), Map.of(), -1000L);
     }
 
-    public SignedJWT createSignedJWT(JWTClaimsSet.Builder builder) throws JOSEException {
-        final var signer = new RSASSASigner(RSA_KEY);
-        final var signedJWT = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(RSA_KEY.getKeyID()).build(), builder.build());
-        signedJWT.sign(signer);
-        return signedJWT;
+    private static String getToken(MockOAuth2Server oAuth2Server, String issuerId, List<String> audiences, Map<String, Object> claims) {
+        return getToken(oAuth2Server, issuerId, audiences, claims, 3600L);
     }
 
-    public String createToken(JWTClaimsSet.Builder builder) {
-        try {
-            return createSignedJWT(builder).serialize();
-        }
-        catch (JOSEException exception) {
-            throw new RuntimeException(exception);
-        }
-
-    }
-
-    public String getValidToken() {
-        return createToken(validJwtClaims());
-    }
-
-    @Bean
-    public RSAKey rsaKey() {
-        return RSA_KEY;
+    private static String getToken(MockOAuth2Server oAuth2Server, String issuerId, List<String> audiences, Map<String, Object> claims, Long expiry) {
+        return oAuth2Server.issueToken(
+                issuerId,
+                "clientId",
+                new DefaultOAuth2TokenCallback(
+                        issuerId,
+                        "subjectId",
+                        JOSEObjectType.JWT.getType(),
+                        audiences,
+                        claims,
+                        expiry
+                )
+        ).serialize();
     }
 }

@@ -1,34 +1,22 @@
 package no.nav.nom.apps.nom.unit4.unit4;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.SneakyThrows;
-import no.nav.nom.libs.test.RsaStub;
+import no.nav.nom.apps.nom.unit4.TestBase;
 import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
-import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ActiveProfiles("test")
-@WireMockStubs(RsaStub.class)
-@SpringBootTest
-@EmbeddedKafka(partitions = 1, topics = {"nom-ressurser"}, controlledShutdown = true)
 @ExtendWith(OutputCaptureExtension.class)
-class Unit4ClientTest {
+class Unit4ClientTest extends TestBase {
 
     @Autowired
     Unit4Client unit4Client;
-
-    @Autowired
-    ObjectMapper objectMapper;
 
     @Test
     @SneakyThrows
@@ -50,7 +38,8 @@ class Unit4ClientTest {
     void createRessurs_422_BadRequest_Logging(CapturedOutput output) {
         try {
             unit4Client.createRessurs(dummyRessurs("010199000003"));
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         assertTrue(output.getOut().contains("Leverandør-ID og ressurs-ID må være identiske, i henhold til systemparameteren HS_EQUAL_ID."));
     }
 
@@ -62,9 +51,10 @@ class Unit4ClientTest {
     @Test
     @SneakyThrows
     void createRessurs_422_BadRequest2_Logging(CapturedOutput output) {
-        try  {
+        try {
             unit4Client.createRessurs(dummyRessurs("010199000004"));
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         assertTrue(output.getOut().contains("Obligatorisk relasjon for begrepet FELLES."));
     }
 
