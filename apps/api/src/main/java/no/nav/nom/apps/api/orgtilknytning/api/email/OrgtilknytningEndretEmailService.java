@@ -182,13 +182,13 @@ public class OrgtilknytningEndretEmailService {
 
             log.info("Sender OT endringer epost subject: {}, recipients: {}, message: {}", subject, recipientList, body);
             if (unleash.isEnabled(UNLEASH_USE_SEND_OT_ENDRINGER_EMAIL)) {
-                // add Line for testing purposes. This will be deleted later when tests are confirmed
-                List<String> toLineOnly = new ArrayList<>();;
-                toLineOnly.add("Line.Eeg-Larsen@nav.no");
-                EmailMessage message = new EmailMessage(subject + " skulle vært sendt til " + recipientList, body, toLineOnly);
-
-                // TODO uncomment next line and delete above line when tests are confirmed
-                //EmailMessage message = new EmailMessage(subject, body, recipientList);
+                /*
+                    // add Line for testing purposes. This will be deleted later when tests are confirmed
+                    List<String> toLineOnly = new ArrayList<>();;
+                    toLineOnly.add("Line.Eeg-Larsen@nav.no");
+                    EmailMessage message = new EmailMessage(subject + " skulle vært sendt til " + recipientList, body, toLineOnly);
+                    */
+                EmailMessage message = new EmailMessage(subject, body, recipientList);
                 emailClient.sendEmail(message).subscribe();
             }
         } catch (ADResponseException e) {
