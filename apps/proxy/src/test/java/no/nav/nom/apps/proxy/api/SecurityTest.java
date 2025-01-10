@@ -7,7 +7,8 @@ import org.springframework.http.MediaType;
 
 import java.util.List;
 
-import static no.nav.nom.apps.proxy.TestUtils.*;
+import static no.nav.nom.libs.test.SecurityTestUtils.*;
+
 
 public class SecurityTest extends ApiTestBase {
 

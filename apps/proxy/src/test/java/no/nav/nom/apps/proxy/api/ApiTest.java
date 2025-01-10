@@ -8,7 +8,7 @@ import org.springframework.http.MediaType;
 import reactor.core.publisher.Mono;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static no.nav.nom.apps.proxy.TestUtils.getValidToken;
+import static no.nav.nom.libs.test.SecurityTestUtils.getValidToken;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ApiTest extends ApiTestBase {

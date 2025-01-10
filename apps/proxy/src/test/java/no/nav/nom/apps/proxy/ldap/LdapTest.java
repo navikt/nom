@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-import static no.nav.nom.apps.proxy.TestUtils.getValidToken;
+import static no.nav.nom.libs.test.SecurityTestUtils.getValidToken;
 import static no.nav.nom.libs.utils.common.util.StreamUtils.find;
 import static org.assertj.core.api.Assertions.assertThat;
 

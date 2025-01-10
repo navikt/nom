@@ -32,13 +32,6 @@
             <artifactId>nimbus-jose-jwt</artifactId>
         </dependency>
         
-        <!-- TODO Remove -->
-        <dependency>
-            <groupId>com.thomaskasene.wiremock</groupId>
-            <artifactId>wiremock-junit-extension</artifactId>
-        </dependency>
-        
-        <!-- TODO Update (?) -->
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8-standalone</artifactId>

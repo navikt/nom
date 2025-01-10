@@ -42,7 +42,6 @@
         <swagger-annotations-jakarta.version>2.2.27</swagger-annotations-jakarta.version>
         <wiremock.version>2.35.2</wiremock.version>
         <org.wiremock.version>3.4.2</org.wiremock.version>
-        <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
         <spring-cloud-contract-wiremock.version>4.1.1</spring-cloud-contract-wiremock.version>
         <mock-oauth2-server.version>2.1.10</mock-oauth2-server.version>
         <nimbus-jose-jwt.version>9.47</nimbus-jose-jwt.version>
@@ -249,12 +248,6 @@
                 <groupId>no.nav.nom</groupId>
                 <artifactId>utils-test</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.thomaskasene.wiremock</groupId>
-                <artifactId>wiremock-junit-extension</artifactId>
-                <version>${wiremock-extension.version}</version>
             </dependency>
 
             <dependency>

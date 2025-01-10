@@ -2,7 +2,7 @@ DVH_BASE_URL: http://localhost:${wiremock.server.port}
 UNIT4_BASE_URL: http://localhost:${wiremock.server.port}
 UNIT4_EMPLOYEES_PATH: '/agrt01-web-api/v1/employees'
 UNIT4_API_PATH: '/agrt01-web-api/v1'
-AZURE_APP_CLIENT_ID: proxy-test
+AZURE_APP_CLIENT_ID: valid-audience
 
 app:
   pdl:
