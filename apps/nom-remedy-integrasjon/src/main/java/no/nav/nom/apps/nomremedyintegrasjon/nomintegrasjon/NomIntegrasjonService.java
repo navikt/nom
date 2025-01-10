@@ -513,8 +513,9 @@ public class NomIntegrasjonService {
             .tiltredelsesdato(ressursOpprettetAdditionalData.startdato()
                 .map(Utils::epochSecondsNorwegianTimeNoon)
                 .orElseThrow(() -> RequiredValueMissingException.forField("tiltredelsesdato")))
-            .utlopsdato(isNull(sluttDato) ? null : epochSecondsNorwegianTimeEndOfDay(sluttDato))
-            .mobil(ressursOpprettetEventData.primaryTelefonnummer().orElse(null))
+            .utlopsdato(ressursOpprettetEventData.sektor().erEkstern() && !isNull(sluttDato)? epochSecondsNorwegianTimeEndOfDay(sluttDato) : null)
+            .direkteTelefon(ressursOpprettetEventData.primaryTelefonnummer().isPresent() ? ressursOpprettetEventData.primaryTelefonnummer().get() : null)
+            .mobil(nomApiClient.getTelefonnummer(ressursOpprettetAdditionalData.navident().get()).orElse(null))
             .build();
 
         saveNewNomIntegrasjonEntity(

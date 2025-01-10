@@ -129,7 +129,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .sektor(nomSektorToRemedyCode(ressursOpprettetEventV1.getRessursOpprettetEventData().sektor()))
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(ressursOpprettetAdditionalData.startdato().get()))
                     .utlopsdato((!ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().equals(Sektor.EKSTERN) || isNull(sluttDato)) ? null : epochSecondsNorwegianTimeEndOfDay(sluttDato))
-                    .mobil(ressursOpprettetEventData.primaryTelefonnummer().get())
+                    .direkteTelefon(ressursOpprettetEventData.primaryTelefonnummer().get())
                     .build()
             ));
 

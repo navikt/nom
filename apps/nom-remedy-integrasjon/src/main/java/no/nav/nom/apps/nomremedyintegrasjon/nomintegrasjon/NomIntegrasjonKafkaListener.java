@@ -106,6 +106,11 @@ public class NomIntegrasjonKafkaListener {
         waitForNomStates();
         logger.info("Received nomMasteredRessurs event with navident: {} and mastered timestamp: {}", recordId, nomMasteredRessursEvent.toString());
         putMDCContext(recordId, nomMasteredRessursEvent.toString());
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            logger.error("Thread interrupted while waiting for NomStateMasteredRessursListener to read to end on startup", e);
+        }
         nomIntegrasjonService.handleNomMasteredRessursEvent(recordId, nomMasteredRessursEvent);
         MDC.clear();
     }
