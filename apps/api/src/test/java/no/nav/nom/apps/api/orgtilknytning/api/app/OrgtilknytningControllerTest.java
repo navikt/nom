@@ -849,7 +849,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} should update update and add new orgtilknytninger for ressurs")
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} should update orgilknytninger and add one new orgtilknytninger for ressurs")
     void test_update_orgtilknytninger_for_ressurs_ny() {
 
         when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
@@ -1446,6 +1446,48 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             testToken.nomWriteGroupAndNomUiAzp(),
             oppdaterOrgtilknytningerForRessursRequest
         ).expectStatus().isBadRequest();
+    }
+
+    @Test
+    @DisplayName("Should return bad request if request changes already set tilknytningtype")
+    void test_tilknytningtype_change_returns_bad_request() {
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.NAV_STATLIG).build();
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytningAnticipatingNewTilknytningtype = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("1")
+            .sektor(tilknyttetRessurs.sektor())
+            .erDagligOppfolging(false)
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .orgtilknytningType(Optional.of(Tilknytningtype.FAST))
+            .build();
+
+        saveOrgtilknytninger(List.of(
+            existingOrgtilknytningAnticipatingNewTilknytningtype
+        ));
+
+        var endreDatoOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingNewTilknytningtype).toBuilder()
+            .tilknytningtype(Tilknytningtype.PENSJONIST)
+            .build();
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(
+                endreDatoOrgtilknytningRequest
+            ))
+            .nyeOrgtilknytninger(List.of())
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().is4xxClientError()
+            .expectBody().jsonPath("$.message").isEqualTo("Tilknytningstype kan ikke endres når den allerede er satt på eksisterende Orgtilknytninger");
+
     }
 
     @ParameterizedTest(name = "existing fids: {0} \noppdaterOrgtilknytningerForRessursRequest: {1}")

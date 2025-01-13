@@ -8,4 +8,8 @@ public class InvalidOrgtilknytningTilknytningtypeException extends RuntimeExcept
     public static InvalidOrgtilknytningTilknytningtypeException tilknytningtypeIsNull(String orgEnhetId) {
         return new InvalidOrgtilknytningTilknytningtypeException(String.format("Tilknytningstype er ikke satt på Orgtilknytning %s", orgEnhetId));
     }
+
+    public static InvalidOrgtilknytningTilknytningtypeException tilknytningtypeCannotBeChanged() {
+        return new InvalidOrgtilknytningTilknytningtypeException("Tilknytningstype kan ikke endres når den allerede er satt på eksisterende Orgtilknytninger");
+    }
 }

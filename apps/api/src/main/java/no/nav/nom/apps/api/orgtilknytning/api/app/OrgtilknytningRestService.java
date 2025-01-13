@@ -248,6 +248,7 @@ public class OrgtilknytningRestService {
         validateEndreOrgtilknytningUnderToMaaneder(oppdaterOrgtilknytningerForRessursRequest);
         validateChronologicalDates(oppdaterOrgtilknytningerForRessursRequest);
         validateNoOverlappingDagligeOppfolginger(oppdaterOrgtilknytningerForRessursRequest);
+
         validateOrgtilknytningHasSektor(oppdaterOrgtilknytningerForRessursRequest);
         validateOrgtilknytningHasTilknytningtype(oppdaterOrgtilknytningerForRessursRequest);
         if (unleash.isEnabled("nom.validering_av_duplikate_orgenhet")) {
@@ -628,6 +629,7 @@ public class OrgtilknytningRestService {
         EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState
     ) {
         validateSektorCanBeChanged(endreOrgtilknytningRequest, currentOrgtilknytningState);
+        validateTilknytningCanBeChanged(endreOrgtilknytningRequest, currentOrgtilknytningState);
 
         return !(
             endreOrgtilknytningRequest.gyldigFom().equals(currentOrgtilknytningState.gyldigFom())
@@ -642,7 +644,15 @@ public class OrgtilknytningRestService {
         if (!loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)
             && isNotNull(endreOrgtilknytningRequest.sektor())
             && (!endreOrgtilknytningRequest.sektor().equals(currentOrgtilknytningState.sektor()) && isNotNull(currentOrgtilknytningState.sektor()))) {
-            throw InvalidSektorException.sektorCannotBeChanged();
+            throw InvalidOrgtilknytningSektorException.sektorCannotBeChanged();
+        }
+    }
+
+    private static void validateTilknytningCanBeChanged(EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState) {
+        if (!loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)
+            && isNotNull(endreOrgtilknytningRequest.tilknytningtype())
+            && (currentOrgtilknytningState.orgtilknytningType().isPresent() && !endreOrgtilknytningRequest.tilknytningtype().equals(currentOrgtilknytningState.orgtilknytningType().get()))) {
+            throw InvalidOrgtilknytningTilknytningtypeException.tilknytningtypeCannotBeChanged();
         }
     }
 
