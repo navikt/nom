@@ -17,7 +17,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { addYears, isSameDay, subDays } from "date-fns";
+import { isSameDay, subDays } from "date-fns";
 import sortBy from "lodash/sortBy";
 import React, { useState } from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
@@ -52,13 +52,11 @@ import type {
   OrgEnhet,
 } from "~/types/api-models";
 import {
-  dateWithoutTimezone,
   formatDateWithoutTimezone,
   formatDisplayDate,
   isSameDateOrAfter,
   promiseIsFulfilled,
   promiseIsRejected,
-  todayWithoutTimezone,
 } from "~/utils";
 
 export const Route = createFileRoute("/tilganger")({
@@ -222,8 +220,10 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
         const relevanteTilganger = tilganger.filter(
           (tilgang) => tilgang.orgenhetId === orgEnhet.id,
         );
-        const aktiveTilganger = relevanteTilganger.filter((tilgang) =>
-          isSameDateOrAfter(new Date(tilgang.gyldigTom), new Date()),
+        const aktiveTilganger = relevanteTilganger.filter(
+          (tilgang) =>
+            isSameDateOrAfter(new Date(tilgang.gyldigTom), new Date()) ||
+            tilgang.gyldigTom === null,
         );
         return sortBy(aktiveTilganger, "gyldigTom");
       },
@@ -465,7 +465,9 @@ function TilgangRowEditable({ tilgang }: { tilgang: LederTilgangState }) {
   });
 
   const gyldigTomDatePicker = useDatepicker({
-    defaultSelected: new Date(tilgang.gyldigTom),
+    defaultSelected: tilgang.gyldigTom
+      ? new Date(tilgang.gyldigTom)
+      : undefined,
     onDateChange: (date) => {
       field.onChange(date ? formatDateWithoutTimezone(date) : "");
     },
@@ -507,25 +509,6 @@ function TilgangRowEditable({ tilgang }: { tilgang: LederTilgangState }) {
               size="small"
             />
           </DatePicker>
-
-          <Button
-            css={css`
-              height: fit-content;
-              margin-left: var(--a-spacing-2);
-            `}
-            onClick={() => {
-              gyldigTomDatePicker.setSelected(
-                dateWithoutTimezone(
-                  subDays(addYears(todayWithoutTimezone(), 1), 1),
-                ),
-              );
-            }}
-            size="small"
-            type="button"
-            variant="secondary"
-          >
-            Maks gyldighetstid
-          </Button>
         </div>
       </Table.DataCell>
       <Table.DataCell align="right">
@@ -557,7 +540,11 @@ function TilgangRowReadOnly({ tilgang }: { tilgang: LederTilgangState }) {
         <NavidentNameLookup navident={tilgang.til} />
       </Table.DataCell>
       <Table.DataCell>
-        <b>{formatDisplayDate(tilgang.gyldigTom)}</b>
+        <b>
+          {tilgang.gyldigTom === null
+            ? "Ingen utløpsdato"
+            : formatDisplayDate(tilgang.gyldigTom)}
+        </b>
       </Table.DataCell>
       <Table.DataCell />
     </Table.Row>
@@ -623,35 +610,15 @@ function ActiveAddTilgangRow({ onClose }: { onClose: () => void }) {
             <DatePicker.Input
               {...gyldigTomDatePicker.inputProps}
               css={css`
-                max-width: 158px;
+                max-width: 258px;
               `}
               data-cy="newTilgang-gyldigTom-datepicker"
               error={fieldState.error?.message?.toString()}
-              label="Gyldig til og med"
+              label="Gyldig til og med (valgfritt)"
               ref={field.ref}
               size="small"
             />
           </DatePicker>
-
-          <Button
-            css={css`
-              height: fit-content;
-              margin-top: var(--a-spacing-7);
-              margin-left: var(--a-spacing-2);
-            `}
-            onClick={() => {
-              gyldigTomDatePicker.setSelected(
-                dateWithoutTimezone(
-                  subDays(addYears(todayWithoutTimezone(), 1), 1),
-                ),
-              );
-            }}
-            size="small"
-            type="button"
-            variant="secondary"
-          >
-            Maks gyldighetstid
-          </Button>
         </div>
       </Table.DataCell>
       <Table.DataCell align="right">
@@ -679,17 +646,9 @@ const tilgangSchema = yup.lazy((values) => {
 
 const newTilgangSchema = yup.object({
   delegertTilNavident: yup.string().required("Må oppgis"),
-  gyldigTom: yup
-    .string()
-    .required("Må oppgis")
-    .futureOrPresent()
-    .max1YearInTheFuture(),
+  gyldigTom: yup.string().notRequired().futureOrPresent(),
 });
 
 const renewTilgangSchema = yup.object({
-  gyldigTom: yup
-    .string()
-    .required("Må oppgis")
-    .futureOrPresent()
-    .max1YearInTheFuture(),
+  gyldigTom: yup.string().notRequired().futureOrPresent(),
 });

@@ -10,7 +10,7 @@ public record LederTilgangState(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String av,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String orgenhetId,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate gyldigFom,
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate gyldigTom
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) LocalDate gyldigTom
 ) {
     public boolean isActive() {
         return (gyldigFom == null || gyldigFom.minusDays(1).isBefore(LocalDate.now())) &&

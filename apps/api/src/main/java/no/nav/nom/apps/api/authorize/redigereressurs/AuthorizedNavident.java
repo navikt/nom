@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
 /**
@@ -219,9 +220,8 @@ public class AuthorizedNavident {
     }
 
     private void sjekkGyldigTomDato(LocalDate localDate) {
-        if (localDate == null) {
-            throw new IllegalArgumentException("Gyldig tom dato kan ikke være null");
-        }
+        if (isNull(localDate)) return;
+
         if (localDate.isBefore(LocalDate.now().minusDays(1))) {
             throw new IllegalArgumentException("Gyldig tom dato kan ikke være før gårsdagens dato");
         }

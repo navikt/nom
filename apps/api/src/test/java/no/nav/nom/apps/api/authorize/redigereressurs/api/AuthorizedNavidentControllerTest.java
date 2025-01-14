@@ -4,15 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
-import no.nav.nom.apps.api.authorize.redigereressurs.api.app.AuthorizedNavidentController;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrgenhetRequest;
 import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,9 +30,9 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
     private ObjectMapper objectMapper;
     @Autowired
     AuthorizedNavident authorizedNavident;
-    @MockBean
+    @MockitoBean
     AuthorizeCommandService authorizeCommandService;
-    @MockBean
+    @MockitoBean
     DelegertLederStateRepository delegertLederStateRepository;
 
     @Test
@@ -134,16 +132,18 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Verifiser at gyldigTom må være med i requesten")
+    @DisplayName("Verifiser at gyldigTom kan være null i requesten")
     public void test_0015() throws Exception {
-        var request = LederTilgangForOrgenhetRequest.builder().orgenhetId("a").delegertTilNavident("b").build();
-
+        var request = LederTilgangForOrgenhetRequest.builder()
+            .orgenhetId("B")
+            .delegertTilNavident("HR")
+            .build();
 
         mockMvc.perform(post(API_URL + "/addDelegatedAuthorization")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
-                .header("Authorization", "Bearer " + nomAdminUserToken()))
-            .andExpect(status().isBadRequest());
+                .header("Authorization", "Bearer " + nomWriteUserToken_Leder_B()))
+            .andExpect(status().isOk());
     }
 
     @Test
