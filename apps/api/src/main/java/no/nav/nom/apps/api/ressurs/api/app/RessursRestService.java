@@ -19,7 +19,6 @@ import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.ressurs.api.exceptions.DuplicateRessursException;
-import no.nav.nom.apps.api.ressurs.api.exceptions.NomMasteredException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
@@ -254,16 +253,9 @@ public class RessursRestService {
     public void updateRessursPrimaryTelefonnummer(String navident, UpdatePrimarytelefonnummer updatePrimarytelefonnummer) {
         var ressursState = findRessursStateByNavident(navident);
 
-        if (!loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)) {
-            if (authResolver.kanSelvbetjene(navident) && !nomMastered.isMastered(ressursState.navident())) {
-                throw NomMasteredException.actionNotAllowedForNonNomMastered();
-            }
-        }
-
-
         var oppdaterMobilnummerCommand = new OppdaterPrimaryTelefonnummerCommand(
             ressursState.fid(),
-            updatePrimarytelefonnummer.nummer()
+            trimToNull(updatePrimarytelefonnummer.nummer())
         );
 
         var inputMetadata = new InputMetadata("REST", "updateRessursMobilnummer", updatePrimarytelefonnummer, new Origination(

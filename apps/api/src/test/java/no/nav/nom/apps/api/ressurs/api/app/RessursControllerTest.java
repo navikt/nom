@@ -724,7 +724,7 @@ public class RessursControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Skal ikke kunne endre primarytelefonnnummer på seg selv, ikke nom-mastered")
+    @DisplayName("Skal kunne endre primarytelefonnnummer på seg selv")
     void skal_ikke_kunne_endre_telefonnummer_selv_2() {
         var existingRessurs = ressursState().toBuilder()
             .sektor(Sektor.NAV_KOMMUNAL)
@@ -735,7 +735,6 @@ public class RessursControllerTest extends RestTestBase {
 
         when(authResolver.kanSelvbetjene(anyString())).thenReturn(true);
         when(authResolver.kanRedigereRessurs(anyString())).thenReturn(false);
-        when(nomMastered.isMastered(anyString())).thenReturn(false);
 
         var updatePrimaryTelefonnummer = new UpdatePrimarytelefonnummer(
             "12345678"
@@ -746,10 +745,10 @@ public class RessursControllerTest extends RestTestBase {
             testToken.nomUiClient(existingRessurs.navident()),
             updatePrimaryTelefonnummer
         )
-            .expectStatus().is4xxClientError();
+            .expectStatus().isOk();
 
         var oppdaterMobilnummerCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterPrimaryTelefonnummerCommand.class);
-        verify(ressursCommandService, times(0))
+        verify(ressursCommandService, times(1))
             .oppdatertPrimaryTelefonnummer(oppdaterMobilnummerCommandArgumentCaptor.capture(), any());
 
         assertThrows(NomMasteredException.class, () -> {
