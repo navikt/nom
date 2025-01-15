@@ -1,12 +1,7 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
-import React from "react";
+import { createFileRoute } from "@tanstack/react-router";
 
-import { isInDevelopment } from "~/utils";
-
-const rootOrgEnhet = isInDevelopment() ? "sa312u" : "py437s";
+import { FrontPage } from "~/pages/FrontPage/FrontPage";
 
 export const Route = createFileRoute("/")({
-  component: () => (
-    <Navigate from="/" params={{ id: rootOrgEnhet }} to={"/org/$id"} />
-  ),
+  component: FrontPage,
 });

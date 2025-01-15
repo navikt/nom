@@ -8,7 +8,7 @@ import { getOrgEnhet, getOrgTilknytninger } from "~/api/react-query-endpoints";
 import { useGetSession, useHasAdminAccess } from "~/api/useGetSession";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
-import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
+import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
 import { OrgEnhetsType, Sektor, Tilknytningtype } from "~/types/api-models";
 import { isGyldighetsPeriodeActive } from "~/utils";
 
@@ -116,7 +116,10 @@ export function SektorStep() {
   };
 
   return (
-    <ContainerWithHighlightedTop icon={opprettRessursIcon} title="Sektor">
+    <ContainerWithHighlightedTop
+      icon={opprettRessursIconRoundedBackground}
+      title="Sektor"
+    >
       <Alert variant="info">
         For øyeblikket kan du kun bruke NOM til å opprette kommunalt ansatte og
         eksterne konsulenter. Eksterne konsulenter er ansatte i konsulentselskap

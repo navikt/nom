@@ -220,11 +220,13 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
         const relevanteTilganger = tilganger.filter(
           (tilgang) => tilgang.orgenhetId === orgEnhet.id,
         );
+
         const aktiveTilganger = relevanteTilganger.filter(
           (tilgang) =>
-            isSameDateOrAfter(new Date(tilgang.gyldigTom), new Date()) ||
-            tilgang.gyldigTom === null,
+            !tilgang.gyldigTom ||
+            isSameDateOrAfter(new Date(tilgang.gyldigTom), new Date()),
         );
+
         return sortBy(aktiveTilganger, "gyldigTom");
       },
     }).data ?? [];

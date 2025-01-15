@@ -14,6 +14,7 @@ import type {
   AvvikleRessursRequest,
   ExcelExportRequest,
   GetPersonRequest,
+  GlobalStatistikkResponse,
   LederTilgangForOrgenhetRequest,
   LederTilgangState,
   MasseFlyttingRequest,
@@ -576,6 +577,16 @@ export const updateTelefonnummer = async (
     request,
   );
   await hopeForKafkaStateToUpdate();
+};
+
+export const getGlobalStatistikk = {
+  queryKey: () => ["GLOBAL_STATISTIKK"],
+  queryFn: async () =>
+    (
+      await axios.get<GlobalStatistikkResponse>(
+        `${NOM_API_BASE_PATH}/app/statistikk`,
+      )
+    ).data,
 };
 
 export const getParorendeForBruker = {

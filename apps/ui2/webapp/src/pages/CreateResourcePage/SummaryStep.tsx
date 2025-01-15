@@ -6,7 +6,7 @@ import { Link, useSearch } from "@tanstack/react-router";
 
 import { getRessurs } from "~/api/react-query-endpoints";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
-import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
+import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
 import type { Ressurs } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
 import { formatVisningsnavn, isInDevelopment } from "~/utils";
@@ -61,7 +61,7 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
 
   return (
     <ContainerWithHighlightedTop
-      icon={opprettRessursIcon}
+      icon={opprettRessursIconRoundedBackground}
       title={
         <HStack gap="4">
           <CheckmarkCircleFillIcon

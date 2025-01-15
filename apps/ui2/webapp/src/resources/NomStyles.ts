@@ -29,8 +29,8 @@ export const fullwidthRow = css`
 `;
 
 export const blueTopBorder = css`
-  border: 1px solid var(--a-lightblue-800);
-  border-top: 7px solid var(--a-lightblue-800);
+  border: 1px solid var(--a-icon-info);
+  border-top: 7px solid var(--a-icon-info);
   border-radius: 5px;
   background-color: var(--nom-secondary-hover);
 `;

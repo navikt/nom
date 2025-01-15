@@ -10,7 +10,7 @@ import {
 } from "date-fns";
 import { maxTime, minTime } from "date-fns/constants";
 
-import type { Visningsnavn } from "~/types/api-models";
+import type { OrgEnhet, Visningsnavn } from "~/types/api-models";
 
 /**
  * Very primitive function for checking if we are in a dev or production environment by checking if the hostname includes "localhost" or ".dev."
@@ -46,6 +46,10 @@ export function formatVisningsnavn(visningsNavn?: Visningsnavn) {
     visningsNavn.mellomnavn ?? "",
     visningsNavn.etternavn,
   ].join(" ");
+}
+
+export function orgEnhetLederNavn(orgEnhet: OrgEnhet) {
+  return formatVisningsnavn(orgEnhet.ledere[0].visningsnavn);
 }
 
 export function formatTlf(nummer: string) {
@@ -100,6 +104,14 @@ export function formatDisplayDatetime(dateTime?: string) {
     return "";
   }
   return format(new Date(dateTime), DATE_FORMATS.noLong);
+}
+
+export function formatDisplayNumber(number: number | string) {
+  if (!number) return "";
+
+  const cleanedNumber = number.toString().replaceAll(/\D/g, "");
+
+  return cleanedNumber.replaceAll(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 
 export function isGyldighetsPeriodeActive(

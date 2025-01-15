@@ -21,7 +21,7 @@ import { FolkeregisterPersonInfo } from "~/pages/CreateResourcePage/components/F
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
 import { SearchForPerson } from "~/pages/CreateResourcePage/components/SearchForPerson";
 import { fullwidthRow } from "~/resources/NomStyles";
-import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
+import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
 import type { FolkeregisterPerson, Person } from "~/types/api-models";
 import { capitalizeName, isTodayOrAfter } from "~/utils";
 
@@ -32,7 +32,7 @@ export function PersonopplysningerStep() {
 
   return (
     <ContainerWithHighlightedTop
-      icon={opprettRessursIcon}
+      icon={opprettRessursIconRoundedBackground}
       title="Personopplysninger"
     >
       <SearchForPerson />

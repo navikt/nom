@@ -32,7 +32,7 @@ import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
 import { defaultFormStyle, fullwidthRow } from "~/resources/NomStyles";
-import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
+import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
 import { Sektor } from "~/types/api-models";
 import { formatDateWithoutTimezone } from "~/utils";
 
@@ -40,7 +40,7 @@ export function OrganisasjonstilknytningStep() {
   const { sektor } = useSearch({ from: "/ressurs/create/$step" });
   return (
     <ContainerWithHighlightedTop
-      icon={opprettRessursIcon}
+      icon={opprettRessursIconRoundedBackground}
       title="Organisasjonstilknytninger"
     >
       {(() => {
