@@ -117,6 +117,14 @@ public class OrgenhetService {
                 .map(this::map).toList();
     }
 
+    public Collection<IOrgenhet> getAllOrgEnheterThatCanHaveRessurser(String orgEnhetId) {
+        var underliggendeOrgEnhet = getAllUnderliggendeOrgEnhetById(orgEnhetId).stream().map(iOrgenhet -> orgEnhetStateRepository.findById(iOrgenhet.getId()).get()).toList();
+        return underliggendeOrgEnhet.stream()
+            .filter(orgEnhetState -> organiseringStateRepository.orgEnhetHasParent(orgEnhetState.id()))
+            .filter(orgEnhetState -> !organiseringStateRepository.orgEnhetHasChildren(orgEnhetState.id()))
+            .map(this::map).toList();
+    }
+
     public Collection<IOrgenhet> getAllEnheterMedOrganisering() {
         return organiserteEnheter;
     }
