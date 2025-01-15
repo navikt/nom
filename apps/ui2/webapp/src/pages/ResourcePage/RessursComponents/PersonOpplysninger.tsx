@@ -202,10 +202,10 @@ export function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {
 
 export function TelefonNummere({
   ressurs,
-  hidePrivat,
+  redigering,
 }: {
   ressurs: Ressurs;
-  hidePrivat?: boolean;
+  redigering?: boolean;
 }) {
   const formaterOgFjernDuplikater = (numre: string[]) =>
     Array.from(new Set(numre.map((nummer) => formatTlf(nummer))));
@@ -244,7 +244,7 @@ export function TelefonNummere({
         value={tjenesteTelefoner.join(", ")}
       />
 
-      {!hidePrivat && (
+      {!redigering && (
         <LabelWithValue label="Privattelefon" value={privatTelefon} />
       )}
     </>

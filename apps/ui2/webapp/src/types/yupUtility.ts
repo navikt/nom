@@ -50,7 +50,7 @@ yup.addMethod(yup.string, "max1YearInTheFuture", function () {
 yup.addMethod(yup.string, "optionalPhoneNumber", function () {
   return this.test(
     "optional-phone-number",
-    "Må være 8 siffer",
+    "Ikke gyldig telefonnummer",
     function (nummer) {
       if (nummer?.length === 0) {
         return true;
@@ -58,9 +58,10 @@ yup.addMethod(yup.string, "optionalPhoneNumber", function () {
 
       const nummerUtenSpaces = nummer?.replaceAll(" ", "");
 
-      const enkelTelefonnummerRegex = /^\d{8}$/;
+      // Enten 8 siffer langt, ellers kreves "+" or "00" på starten
+      const telefonnummerRegex = /^(\d{8}|(\+|00)\d{5,21})$/;
 
-      return enkelTelefonnummerRegex.test(nummerUtenSpaces ?? "");
+      return telefonnummerRegex.test(nummerUtenSpaces ?? "");
     },
   );
 });

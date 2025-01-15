@@ -1,10 +1,17 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Alert, BodyShort, Loader, TextField } from "@navikt/ds-react";
+import {
+  Alert,
+  BodyShort,
+  HelpText,
+  Label,
+  Loader,
+  TextField,
+} from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -239,7 +246,25 @@ function VisningsnavnForm({
           data-cy="telefon-textfield"
           description="Telefonnummer er valgfritt"
           error={errors.primaryTelefonnummer?.message}
-          label="Telefonnummer"
+          label={
+            <div
+              css={css`
+                display: flex;
+              `}
+            >
+              <Label>Privattelefonnummer</Label>
+
+              <HelpText
+                css={css`
+                  margin-left: var(--a-spacing-2);
+                `}
+                title="Regler for telefonnummer"
+              >
+                Norsk telefonnummer kan legges inn som 8 siffer. Utenlandsk
+                nummer må starte med landkode, og ha maks 21 siffer.
+              </HelpText>
+            </div>
+          }
         />
         <NavigationButtons goBackCallback={() => {}} />
       </form>

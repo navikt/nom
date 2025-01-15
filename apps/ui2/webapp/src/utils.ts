@@ -48,14 +48,27 @@ export function formatVisningsnavn(visningsNavn?: Visningsnavn) {
   ].join(" ");
 }
 
-export function formatTlf(nr: string) {
-  const temporaryNumber =
-    nr.startsWith("47") && nr.length === 10 ? nr.slice(2) : nr;
-  const out = [];
-  for (let k = 0; k < 8; k += 2) {
-    out.push(temporaryNumber.slice(k, k + 2));
+export function formatTlf(nummer: string) {
+  let temporaryNumber = nummer;
+
+  if (nummer.startsWith("47") && nummer.length === 10) {
+    temporaryNumber = nummer.slice(2);
+  } else if (nummer.startsWith("+47") && nummer.length === 11) {
+    temporaryNumber = nummer.slice(3);
+  } else if (nummer.startsWith("0047") && nummer.length === 12) {
+    temporaryNumber = nummer.slice(4);
   }
-  return out.join(" ");
+
+  if (/^\d{8}$/.test(temporaryNumber)) {
+    const out = [];
+    for (let k = 0; k < 8; k += 2) {
+      out.push(temporaryNumber.slice(k, k + 2));
+    }
+
+    return out.join(" ");
+  }
+
+  return nummer;
 }
 
 export const DATE_FORMATS = {

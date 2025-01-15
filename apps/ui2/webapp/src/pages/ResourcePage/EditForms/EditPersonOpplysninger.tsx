@@ -1,6 +1,13 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Heading, HStack, Label, TextField, VStack } from "@navikt/ds-react";
+import {
+  Heading,
+  HelpText,
+  HStack,
+  Label,
+  TextField,
+  VStack,
+} from "@navikt/ds-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import intersection from "lodash/intersection";
@@ -33,7 +40,7 @@ import {
   TelefonNummere,
 } from "~/pages/ResourcePage/RessursComponents/PersonOpplysninger";
 import { type Ressurs } from "~/types/api-models";
-import { formatTlf, formatVisningsnavn } from "~/utils";
+import { formatVisningsnavn } from "~/utils";
 
 export function EditPersonOpplysninger({
   ressurs,
@@ -50,9 +57,7 @@ export function EditPersonOpplysninger({
     fornavn: ressurs.visningsnavn.fornavn,
     mellomnavn: ressurs.visningsnavn.mellomnavn ?? "",
     etternavn: ressurs.visningsnavn.etternavn,
-    primaryTelefonnummer: ressurs.primaryTelefonnummer
-      ? formatTlf(ressurs.primaryTelefonnummer).replaceAll(" ", "")
-      : "",
+    primaryTelefonnummer: ressurs.primaryTelefonnummer ?? "",
     primaryFysiskBrukersted: ressurs.primaryFysiskBrukersted ?? "",
   };
 
@@ -70,6 +75,7 @@ export function EditPersonOpplysninger({
   >({
     mutationFn: async (values) => {
       let promises: Promise<unknown>[] = [];
+
       if (hasSelfServiceAccess && !isUserAdmin) {
         if (
           checkIfDirtyField(
@@ -128,6 +134,7 @@ export function EditPersonOpplysninger({
           promises = [...promises, updateNamePromise];
         }
       }
+
       await Promise.allSettled(promises);
     },
     onSettled: () => {
@@ -215,7 +222,9 @@ export function EditPersonOpplysninger({
             </div>
           </>
         )}
+
         <KortFortalt />
+
         <HStack>
           <div
             css={css`
@@ -231,8 +240,9 @@ export function EditPersonOpplysninger({
             <SluttDato ressurs={ressurs} />
             <Epost ressurs={ressurs} />
             <DagligLeder ressurs={ressurs} />
-            <TelefonNummere hidePrivat ressurs={ressurs} />
+            <TelefonNummere redigering ressurs={ressurs} />
           </div>
+
           <UserImage
             includeInstructionsWhenNotFound
             navident={ressurs.navident}
@@ -254,7 +264,26 @@ export function EditPersonOpplysninger({
             `}
             data-cy="telefon-textfield"
             error={methods.formState.errors.primaryTelefonnummer?.message}
-            label="Privattelefon"
+            label={
+              <div
+                css={css`
+                  display: flex;
+                `}
+              >
+                <Label>Privattelefonnummer</Label>
+
+                <HelpText
+                  css={css`
+                    margin-left: var(--a-spacing-2);
+                  `}
+                  title="Regler for telefonnummer"
+                >
+                  Norsk telefonnummer kan legges inn som 8 siffer. Utenlandsk
+                  nummer må starte med landkode, og ha maks 21 siffer. Nummer
+                  kan fjernes ved å lagre med tomt felt.
+                </HelpText>
+              </div>
+            }
           />
 
           {hasSelfServiceAccess && !isUserAdmin ? (
