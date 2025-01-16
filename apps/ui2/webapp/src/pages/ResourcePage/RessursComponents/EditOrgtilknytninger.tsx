@@ -443,13 +443,15 @@ function OrgtilknytningForm({
           const originalOt = otBeforeEdit(field);
 
           const editSektorDisabled =
-            editOtDisabled || (!fremtidig && !!originalOt?.sektor);
+            editOtDisabled ||
+            (!fremtidig && originalOt?.sektor && !hasAdminAccess);
 
           const editTilknytningstypeDisabled =
             editOtDisabled ||
             (!fremtidig &&
-              !!originalOt?.sektor &&
-              !!originalOt?.orgtilknytningType);
+              originalOt?.sektor &&
+              originalOt?.orgtilknytningType &&
+              !hasAdminAccess);
 
           return (
             <div
