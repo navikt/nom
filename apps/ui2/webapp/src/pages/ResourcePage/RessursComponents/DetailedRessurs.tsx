@@ -2,7 +2,6 @@ import { css } from "@emotion/react";
 import {
   Buildings3Icon,
   PencilIcon,
-  PersonChatIcon,
   PersonSuitIcon,
   ReceptionIcon,
 } from "@navikt/aksel-icons";
@@ -698,35 +697,12 @@ function BottomSection({
 
   return (
     <>
-      <Divider />
+      <Divider noMargins />
 
-      <div>
-        {(hasWriteAccessForRessurs ||
-          hasSelfServiceAccess ||
-          hasAdminAccess) && (
-          <ReactRouterLink
-            params={{ id: ressurs.navident }}
-            to="/kontaktpersoner/$id"
-          >
-            <Button
-              css={css`
-                width: fit-content;
-              `}
-              icon={<PersonChatIcon title="a11y-title" />}
-              size="small"
-              type="button"
-              variant="secondary"
-            >
-              Kontaktpersoner
-            </Button>
-          </ReactRouterLink>
-        )}
-
-        <TerminateButton
-          hasWriteAccessForRessurs={hasWriteAccessForRessurs}
-          ressurs={ressurs}
-        />
-      </div>
+      <TerminateButton
+        hasWriteAccessForRessurs={hasWriteAccessForRessurs}
+        ressurs={ressurs}
+      />
     </>
   );
 }

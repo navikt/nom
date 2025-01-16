@@ -1,5 +1,9 @@
 import { css } from "@emotion/react";
-import { PencilIcon, PersonIcon } from "@navikt/aksel-icons";
+import {
+  PencilIcon,
+  PersonIcon,
+  PersonTallShortIcon,
+} from "@navikt/aksel-icons";
 import {
   Button,
   Heading,
@@ -14,10 +18,12 @@ import capitalize from "lodash/capitalize";
 import React from "react";
 
 import {
+  getHarParorendeTilgang,
   getLedereForRessurs,
   harLederTilgangForNavidentOptions,
 } from "~/api/react-query-endpoints";
 import {
+  useGetSession,
   useHasAdminAccess,
   useHasSelvbetjeningAccess,
   useHasWriteAccess,
@@ -37,6 +43,21 @@ import { formatDisplayDate, formatTlf, formatVisningsnavn } from "~/utils";
 // men ikke i et annet fordi man glemte ordne logikk begge steder.
 
 export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
+  const navident = ressurs.navident;
+
+  const kontaktinfoTilgangQuery = useQuery({
+    queryKey: getHarParorendeTilgang.queryKey(navident),
+    queryFn: () => getHarParorendeTilgang.queryFn(navident),
+    enabled: !!navident,
+  });
+
+  const hasKontaktinfoAccessForRessurs = kontaktinfoTilgangQuery.isSuccess;
+
+  const hasSelfServiceAccess =
+    useGetSession().data?.navident === ressurs.navident;
+
+  const hasAdminAccess = useHasAdminAccess();
+
   return (
     <HStack>
       <VStack
@@ -67,6 +88,33 @@ export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
             <FysiskBrukersted ressurs={ressurs} />
           )}
           <TelefonNummere ressurs={ressurs} />
+          {(hasKontaktinfoAccessForRessurs ||
+            hasSelfServiceAccess ||
+            hasAdminAccess) && (
+            <>
+              <span>Kontaktpersoner:</span>
+
+              <ReactRouterLink
+                params={{ id: ressurs.navident }}
+                to="/kontaktpersoner/$id"
+              >
+                {/* Egentlig ikke anbefalt å bruke negativ margin, men det er den eneste måten jeg klarte å oppnå designet som var ønsket */}
+                <Button
+                  css={css`
+                    width: fit-content;
+                    margin-left: -12px;
+                    margin-top: -4px;
+                  `}
+                  icon={<PersonTallShortIcon title="a11y-title" />}
+                  size="small"
+                  type="button"
+                  variant="tertiary"
+                >
+                  Se kontaktpersoner
+                </Button>
+              </ReactRouterLink>
+            </>
+          )}
         </div>
       </VStack>
 

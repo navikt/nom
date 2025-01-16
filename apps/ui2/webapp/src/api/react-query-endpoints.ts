@@ -609,6 +609,16 @@ export const getParorendeForNavident = {
     ).data,
 };
 
+export const getHarParorendeTilgang = {
+  queryKey: (navident: string) => ["paarorendeTilgang", navident],
+  queryFn: async (navident: string): Promise<Kontaktinfo[]> =>
+    (
+      await axios.get<Kontaktinfo[]>(
+        `${NOM_PAARORENDE_BASE_PATH}/api/kontaktinfo/tilgang/${navident}`,
+      )
+    ).data,
+};
+
 export const createParorendeForBruker = async (kontakt: Kontaktinfo) =>
   (
     await axios.post<Kontaktinfo, AxiosResponse<unknown>>(

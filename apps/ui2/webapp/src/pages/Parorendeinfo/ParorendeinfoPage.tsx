@@ -13,15 +13,16 @@ import {
   BodyShort,
   Button,
   Heading,
+  HGrid,
   Loader,
   Select,
   TextField,
   VStack,
 } from "@navikt/ds-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import React from "react";
+import React, { type ReactNode } from "react";
 import {
   FormProvider,
   useController,
@@ -66,35 +67,6 @@ export const ParorendeinfoPage = () => {
 
   const { editKontaktpersoner } = useSearch({ from: "/kontaktpersoner/$id" });
 
-  return (
-    <ContentWrapper>
-      <BodyLong>
-        Denne informasjonen kan leses av din nærmeste leder og kan bli brukt
-        dersom noe skulle tilstøte deg i arbeidstiden, og en kontaktperson burde
-        bli varslet. I et slik tilfelle vil én eller flere av dine kontakter
-        kunne bli kontaktet. Du kan ha opptil tre kontakter.
-      </BodyLong>
-
-      {editKontaktpersoner ? (
-        <ModalProvider>
-          <ParorendeFormWrapper id={id} />
-
-          <ModalComponent />
-        </ModalProvider>
-      ) : (
-        <ParorendeList id={id} />
-      )}
-    </ContentWrapper>
-  );
-};
-
-function ParorendeList({ id }: { id: string }) {
-  const ressursQuery = useQuery({
-    queryKey: getRessurs.queryKey(id as string),
-    queryFn: () => getRessurs.queryFn(id as string),
-    enabled: !!id,
-  });
-
   const kontaktinfoQuery = useQuery({
     queryKey: getParorendeForNavident.queryKey(id),
     queryFn: () => getParorendeForNavident.queryFn(id),
@@ -109,39 +81,87 @@ function ParorendeList({ id }: { id: string }) {
     })
     .sort((a, b) => a.prioritet - b.prioritet);
 
-  const ressurs = ressursQuery.data;
-
-  const navigate = useNavigate();
-
-  const innloggetBruker = useGetSession().data?.navident === id;
-
   if (kontaktinfoQuery.isLoading) {
     return (
-      <div
-        css={css`
-          width: fit-content;
-          margin: var(--a-spacing-8) auto auto;
-        `}
-      >
-        <Loader size="3xlarge" />
-      </div>
+      <StaticContentWrapper>
+        <div
+          css={css`
+            width: fit-content;
+            margin: var(--a-spacing-8) auto auto;
+          `}
+        >
+          <Loader size="3xlarge" />
+        </div>
+      </StaticContentWrapper>
     );
   }
 
   if (kontaktinfoQuery.isError) {
     return (
-      <Alert
-        css={css`
-          margin-top: var(--a-spacing-8);
-        `}
-        variant="error"
-      >
-        <Heading level="3" size="small">
-          Det oppstod en feil ved henting av kontaktpersoner
-        </Heading>
-      </Alert>
+      <StaticContentWrapper>
+        <Alert
+          css={css`
+            margin-top: var(--a-spacing-8);
+          `}
+          variant="error"
+        >
+          <Heading level="3" size="small">
+            Det oppstod en feil ved henting av kontaktpersoner
+          </Heading>
+        </Alert>
+      </StaticContentWrapper>
     );
   }
+
+  return (
+    <StaticContentWrapper>
+      {editKontaktpersoner ? (
+        <ModalProvider>
+          <ParorendeForm kontaktinfo={sortedKontaktinfo} navident={id} />
+
+          <ModalComponent />
+        </ModalProvider>
+      ) : (
+        <ParorendeList id={id} kontaktinformasjon={sortedKontaktinfo} />
+      )}
+    </StaticContentWrapper>
+  );
+};
+
+function StaticContentWrapper({ children }: { children: ReactNode }) {
+  return (
+    <ContentWrapper>
+      <BodyLong>
+        Denne informasjonen kan leses av din nærmeste leder og leders leder.
+        Informasjonen kan bli brukt dersom noe skulle tilstøte deg i
+        arbeidstiden eller i en beredskapssituasjon, slik at en kontaktperson
+        bør varsles. I dette tilfellet vil én eller flere av dine kontakter
+        kunne bli kontaktet. Du kan ha opptil tre kontaktpersoner.
+      </BodyLong>
+
+      {children}
+    </ContentWrapper>
+  );
+}
+
+function ParorendeList({
+  id,
+  kontaktinformasjon,
+}: {
+  id: string;
+  kontaktinformasjon: Kontaktinfo[];
+}) {
+  const ressursQuery = useQuery({
+    queryKey: getRessurs.queryKey(id as string),
+    queryFn: () => getRessurs.queryFn(id as string),
+    enabled: !!id,
+  });
+
+  const ressurs = ressursQuery.data;
+
+  const navigate = useNavigate();
+
+  const innloggetBruker = useGetSession().data?.navident === id;
 
   return (
     <VStack
@@ -152,12 +172,42 @@ function ParorendeList({ id }: { id: string }) {
       `}
       gap="4"
     >
-      <Heading level="1" size="medium">
-        {`Kontaktpersoner for ${ressurs ? formatVisningsnavn(ressurs.visningsnavn) : id}`}
-      </Heading>
+      <div
+        css={css`
+          display: flex;
+          justify-content: space-between;
+        `}
+      >
+        <Heading level="1" size="medium">
+          {innloggetBruker
+            ? "Dine kontaktpersoner:"
+            : `Kontaktpersoner for ${ressurs ? formatVisningsnavn(ressurs.visningsnavn) : id}:`}
+        </Heading>
+
+        {innloggetBruker && (
+          <Button
+            css={css`
+              height: fit-content;
+              align-self: end;
+              width: fit-content;
+            `}
+            icon={<PencilIcon title="a11y-title" />}
+            onClick={() =>
+              navigate({
+                search: { editKontaktpersoner: true },
+              })
+            }
+            size="small"
+            type="button"
+            variant="secondary"
+          >
+            Administrer kontaktpersoner
+          </Button>
+        )}
+      </div>
 
       <VStack gap="6">
-        {sortedKontaktinfo.map((kontaktinfo, index) => {
+        {kontaktinformasjon.map((kontaktinfo, index) => {
           return (
             <ContainerWithHighlightedTop
               gap={6}
@@ -233,83 +283,24 @@ function ParorendeList({ id }: { id: string }) {
           );
         })}
       </VStack>
-
-      {innloggetBruker && (
-        <Button
-          css={css`
-            height: fit-content;
-            align-self: end;
-            width: fit-content;
-          `}
-          icon={<PencilIcon title="a11y-title" />}
-          onClick={() =>
-            navigate({
-              search: { editKontaktpersoner: true },
-            })
-          }
-          size="small"
-          type="button"
-          variant="secondary"
-        >
-          Endre
-        </Button>
-      )}
     </VStack>
   );
 }
 
-function ParorendeFormWrapper({ id }: { id: string }) {
-  const kontaktinfoQuery = useQuery({
-    queryKey: getParorendeForNavident.queryKey(id),
-    queryFn: () => getParorendeForNavident.queryFn(id),
-    enabled: !!id,
-  });
-
-  const kontaktinfo = kontaktinfoQuery.data ?? [];
-
-  const sortedKontaktinfo = kontaktinfo
-    .map((kontaktperson) => {
-      return { ...kontaktperson, prioritet: kontaktperson.prioritet ?? 1 };
-    })
-    .sort((a, b) => a.prioritet - b.prioritet);
-
-  if (kontaktinfoQuery.isLoading) {
-    return (
-      <div
-        css={css`
-          width: fit-content;
-          margin: var(--a-spacing-8) auto auto;
-        `}
-      >
-        <Loader size="3xlarge" />
-      </div>
-    );
-  }
-
-  if (kontaktinfoQuery.isError) {
-    return (
-      <Alert
-        css={css`
-          margin-top: var(--a-spacing-8);
-        `}
-        variant="error"
-      >
-        <Heading level="3" size="small">
-          Det oppstod en feil ved henting av kontaktpersoner
-        </Heading>
-      </Alert>
-    );
-  }
-
-  return <ParorendeForm kontaktinfo={sortedKontaktinfo} />;
-}
-
-function ParorendeForm({ kontaktinfo }: { kontaktinfo: Kontaktinfo[] }) {
+function ParorendeForm({
+  kontaktinfo,
+  navident,
+}: {
+  kontaktinfo: Kontaktinfo[];
+  navident: string;
+}) {
   const eksisterendeKontaktinfo = kontaktinfo;
 
   const { showModal } = useModal();
 
   const navigate = useNavigate();
+
+  const queryClient = useQueryClient();
 
   const methods = useForm<{
     kontaktinfo: Kontaktinfo[];
@@ -440,11 +431,15 @@ function ParorendeForm({ kontaktinfo }: { kontaktinfo: Kontaktinfo[] }) {
           search: { editKontaktpersoner: undefined },
         });
       } catch {
+        showToast({ text: "Noe gikk galt", variant: "error" });
+
         await navigate({
           search: { editKontaktpersoner: undefined },
         });
-
-        showToast({ text: "Noe gikk galt", variant: "error" });
+      } finally {
+        await queryClient.invalidateQueries({
+          queryKey: ["paarorende", navident],
+        });
       }
     });
   }
@@ -467,48 +462,24 @@ function ParorendeForm({ kontaktinfo }: { kontaktinfo: Kontaktinfo[] }) {
             `}
           >
             <Heading level="1" size="medium">
-              Dine kontaktpersoner
+              Dine kontaktpersoner:
             </Heading>
 
             <div>
-              <Button
-                css={css`
-                  width: fit-content;
-                  float: right;
-                  margin-left: var(--a-spacing-4);
-                `}
-                icon={<FloppydiskIcon title="a11y-title" />}
-                size="small"
-                type="submit"
-              >
-                Lagre endringer
-              </Button>
-
-              <Button
-                css={css`
-                  width: fit-content;
-                  float: right;
-                `}
-                onClick={async () =>
-                  await showModal(
-                    <BekreftModal
-                      content="Er du sikker på at du vil forkaste endringene dine?"
-                      heading="Forkast endringer"
-                    />,
-                  )
-                    .then(() =>
-                      navigate({
-                        search: { editKontaktpersoner: undefined },
-                      }),
-                    )
-                    .catch(() => {})
-                }
-                size="small"
-                type="button"
-                variant="secondary"
-              >
-                Avbryt
-              </Button>
+              {fields.length < 3 && (
+                <Button
+                  css={css`
+                    float: right;
+                  `}
+                  icon={<PlusCircleIcon title="a11y-title" />}
+                  onClick={() => append(tomKontaktinfo)}
+                  size="small"
+                  type="button"
+                  variant="secondary"
+                >
+                  Legg til ny kontaktperson
+                </Button>
+              )}
             </div>
           </div>
 
@@ -522,12 +493,12 @@ function ParorendeForm({ kontaktinfo }: { kontaktinfo: Kontaktinfo[] }) {
                 <div
                   css={css`
                     display: flex;
-                    justify-content: space-between;
                   `}
                 >
-                  <VStack
+                  <HGrid
+                    columns={2}
                     css={css`
-                      width: 40%;
+                      width: 100%;
                     `}
                     gap="4"
                   >
@@ -567,39 +538,65 @@ function ParorendeForm({ kontaktinfo }: { kontaktinfo: Kontaktinfo[] }) {
                       }
                       name={`kontaktinfo.${index}.prioritet`}
                     />
-                  </VStack>
 
-                  <Button
-                    css={css`
-                      height: fit-content;
-                    `}
-                    icon={<TrashIcon title="a11y-title" />}
-                    onClick={() => remove(index)}
-                    size="small"
-                    type="button"
-                    variant="secondary"
-                  >
-                    Slett kontaktperson
-                  </Button>
+                    <Button
+                      css={css`
+                        height: fit-content;
+                        width: fit-content;
+                        place-self: end end;
+                      `}
+                      icon={<TrashIcon title="a11y-title" />}
+                      onClick={() => remove(index)}
+                      size="small"
+                      type="button"
+                      variant="secondary"
+                    >
+                      Slett kontaktperson
+                    </Button>
+                  </HGrid>
                 </div>
               </ContainerWithHighlightedTop>
             ))}
 
             <div>
-              {fields.length < 3 && (
-                <Button
-                  css={css`
-                    float: right;
-                  `}
-                  icon={<PlusCircleIcon title="a11y-title" />}
-                  onClick={() => append(tomKontaktinfo)}
-                  size="small"
-                  type="button"
-                  variant="secondary"
-                >
-                  Legg til ny kontaktperson
-                </Button>
-              )}
+              <Button
+                css={css`
+                  width: fit-content;
+                  float: right;
+                  margin-left: var(--a-spacing-4);
+                `}
+                icon={<FloppydiskIcon title="a11y-title" />}
+                size="small"
+                type="submit"
+              >
+                Lagre endringer
+              </Button>
+
+              <Button
+                css={css`
+                  width: fit-content;
+                  float: right;
+                `}
+                onClick={async () =>
+                  await showModal(
+                    <BekreftModal
+                      content="Er du sikker på at du vil forkaste endringene dine?"
+                      heading="Forkast endringer"
+                    />,
+                  )
+                    .then(() =>
+                      navigate({
+                        search: { editKontaktpersoner: undefined },
+                      }),
+                    )
+                    .catch(() => {})
+                }
+                size="small"
+                type="button"
+                variant="secondary"
+              >
+                Avbryt uten å lagre
+              </Button>
             </div>
           </VStack>
         </VStack>
@@ -638,6 +635,9 @@ function PrioritetFormPart({ name, error }: { name: string; error?: string }) {
 
   return (
     <Select
+      css={css`
+        width: 70px;
+      `}
       error={error}
       label="Prioritet"
       onChange={(value) => field.onChange(value)}
