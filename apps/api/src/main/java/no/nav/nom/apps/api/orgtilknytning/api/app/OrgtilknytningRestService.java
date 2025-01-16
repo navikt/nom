@@ -646,11 +646,22 @@ public class OrgtilknytningRestService {
     }
 
     private static void validateTilknytningCanBeChanged(EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState) {
+        var currentTilknytningType = setCorrectTilknytningtype(currentOrgtilknytningState);
         if (!loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)
             && isNotNull(endreOrgtilknytningRequest.tilknytningtype())
-            && (currentOrgtilknytningState.orgtilknytningType().isPresent() && !endreOrgtilknytningRequest.tilknytningtype().equals(currentOrgtilknytningState.orgtilknytningType().get()))) {
+            && (currentTilknytningType.isPresent() && !endreOrgtilknytningRequest.tilknytningtype().equals(currentOrgtilknytningState.orgtilknytningType().get()))) {
             throw InvalidOrgtilknytningTilknytningtypeException.tilknytningtypeCannotBeChanged();
         }
+    }
+
+    private static Optional<Tilknytningtype> setCorrectTilknytningtype(OrgtilknytningState currentOrgtilknytningState) {
+
+        if (currentOrgtilknytningState.orgtilknytningType().isPresent()
+            && currentOrgtilknytningState.orgtilknytningType().get().equals(Tilknytningtype.INGEN)
+            && !currentOrgtilknytningState.sektor().erKommunal()) {
+            return Optional.empty();
+        }
+        return currentOrgtilknytningState.orgtilknytningType();
     }
 
     private void validateOrgTilknytningerToUpdateHasNoDuplicateFidsAndIncludesAllExistingOrgtilknytningerForRessurs(

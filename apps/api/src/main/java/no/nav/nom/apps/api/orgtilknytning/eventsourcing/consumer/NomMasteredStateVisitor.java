@@ -11,6 +11,8 @@ import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.PartitionOffset;
 import org.springframework.kafka.annotation.TopicPartition;
@@ -23,6 +25,7 @@ import static java.util.Objects.isNull;
 
 @Component
 public class NomMasteredStateVisitor {
+    private final static Logger log = LoggerFactory.getLogger(NomMasteredStateVisitor.class);
 
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final RessursStateRepository ressursStateRepository;
@@ -54,6 +57,11 @@ public class NomMasteredStateVisitor {
     public void onMessage(ConsumerRecords<String, LocalDateTime> records) {
         if (leaderElection.isLeader()) {
             dvhStartupLoadMonitor.awaitInitialLoadComplete();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                log.error("Thread interrupted", e);
+            }
             records.forEach(record -> {
                 if (!isNull(record.value())) {
                     ressursStateRepository.findByNavident(record.key()).ifPresent(this::setSektorPaaEksisterendeOrgtilknytning);
