@@ -53,7 +53,7 @@ public class TestData {
         return new OrgEnhetState(
             UUID.randomUUID().toString(),
             orgEnhetId,
-            "Test enhet",
+            orgEnhetId+" enhet",
             LocalDate.now().minusMonths(1),
             Optional.empty(),
             Optional.empty(),
