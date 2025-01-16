@@ -238,8 +238,11 @@ export function OrghierarkiItem({
   return to ? (
     <Link
       css={css`
-        text-decoration: none;
         color: #000;
+
+        :hover {
+          text-decoration: none;
+        }
       `}
       to={to}
     >
@@ -262,6 +265,7 @@ export function OrghierarkiItemContent({
       css={css`
         height: 100%;
         background: #fff;
+        border: 2px solid #deecef;
         border-radius: 10px;
         align-items: center;
         justify-content: center;
