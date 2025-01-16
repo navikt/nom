@@ -283,7 +283,6 @@ public class NomIntegrasjonService {
             .enhetsId(remedyEnhetIdForOrgenhet)
             .tiltredelsesdato(epochSecondsNorwegianTimeNoon(orgtilknytningDatoEndretEventData.gyldigFom()))
             .utlopsdato(isNull(gyldigTom) ? null : epochSecondsNorwegianTimeEndOfDay(gyldigTom))
-            .masseflytting(!isNull(orgtilknytningState.getMasseflyttetFraFid()) ? "X" : null)
             .build();
 
         saveNewNomIntegrasjonEntity(
@@ -632,7 +631,7 @@ public class NomIntegrasjonService {
             )
             .direkteTelefon(isNull(ressurs.getPrimaryTelefonnummer()) || ressurs.getPrimaryTelefonnummer().isBlank() ? null : ressurs.getPrimaryTelefonnummer())
             .mobil(nomApiClient.getTelefonnummer(ressurs.getNavident()).orElse(null))
-            .masseflytting(dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getMasseflyttetFraFid).isPresent() ? "X" : null)
+            .masseflytting(null)
             .build();
     }
 
