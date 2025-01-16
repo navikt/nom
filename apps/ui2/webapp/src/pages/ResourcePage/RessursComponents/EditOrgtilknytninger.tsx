@@ -18,6 +18,7 @@ import {
   HelpText,
   HStack,
   Label,
+  Loader,
   Select,
   Tag,
   useDatepicker,
@@ -195,6 +196,7 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
       <OrgtilknytningForm
         dagensDolOrgEnhet={dagensDolOrgEnhet}
         dagensRemedyEnhetId={dagensRemedyEnhetId}
+        isLoading={ressursOrgtilknytningerQuery.isLoading}
         orgtilknytninger={orgtilknytninger}
         ressurs={ressurs}
       />
@@ -204,13 +206,19 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
   );
 }
 
-function defaultNyOrgtilknytning() {
+function defaultNyOrgtilknytning(sektor: Sektor) {
   return {
     erDagligOppfolging: false,
     orgEnhetId: "",
     gyldigFom: "",
     gyldigTom: "",
-    sektor: "" as unknown as undefined,
+    sektor: sektor,
+    orgtilknytningType:
+      sektor === Sektor.NAV_KOMMUNAL
+        ? Tilknytningtype.INGEN
+        : (sektor === Sektor.NAV_STATLIG
+            ? tilknytningstyperStatlige
+            : tilknytningstyperEksterne)[0],
   };
 }
 
@@ -219,11 +227,13 @@ function OrgtilknytningForm({
   ressurs,
   dagensRemedyEnhetId,
   dagensDolOrgEnhet,
+  isLoading,
 }: {
   orgtilknytninger: Partial<OrgtilknytningState>[];
   ressurs: Ressurs;
   dagensRemedyEnhetId: string | undefined;
   dagensDolOrgEnhet: OrgEnhet | undefined;
+  isLoading: boolean;
 }) {
   const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
@@ -264,7 +274,7 @@ function OrgtilknytningForm({
   const defaultOrgtilknytninger =
     orgtilknytninger.length > 0
       ? orgtilknytninger
-      : [defaultNyOrgtilknytning()];
+      : [defaultNyOrgtilknytning(ressurs.sektor)];
 
   const methods = useForm<{
     mappedeOrgtilknytninger: Partial<OrgtilknytningState>[];
@@ -366,6 +376,21 @@ function OrgtilknytningForm({
     }
   };
 
+  if (isLoading) {
+    return (
+      <div
+        css={css`
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        `}
+      >
+        <Loader size="3xlarge" />
+        <span>Laster...</span>
+      </div>
+    );
+  }
+
   return (
     <FormProvider {...methods}>
       <Informasjonsboks ressursSektor={ressurs.sektor} />
@@ -385,7 +410,7 @@ function OrgtilknytningForm({
             <Button
               icon={<PlusCircleIcon />}
               onClick={() => {
-                prepend(defaultNyOrgtilknytning(), {
+                prepend(defaultNyOrgtilknytning(ressurs.sektor), {
                   focusIndex: 0,
                 });
               }}
@@ -524,7 +549,10 @@ function OrgtilknytningForm({
                   }
                   name={`mappedeOrgtilknytninger.${index}.sektor`}
                   tilknytningstypeField={`mappedeOrgtilknytninger.${index}.orgtilknytningType`}
-                  triggerOthers={[`mappedeOrgtilknytninger.${index}.gyldigTom`]}
+                  triggerOthers={[
+                    `mappedeOrgtilknytninger.${index}.gyldigTom`,
+                    `mappedeOrgtilknytninger.${index}.orgtilknytningType`,
+                  ]}
                 />
 
                 <FormTilknytningstypeSelectWrapper
@@ -859,12 +887,6 @@ function FormSektorSelectWrapper({
 
             await trigger(name);
 
-            if (triggerOthers && triggerOthers.length > 0) {
-              triggerOthers.map((otherField) => {
-                trigger(otherField);
-              });
-            }
-
             const newValue = value.target.value;
 
             if (newValue === Sektor.NAV_KOMMUNAL) {
@@ -876,6 +898,12 @@ function FormSektorSelectWrapper({
                   ? tilknytningstyperStatlige
                   : tilknytningstyperEksterne)[0],
               );
+            }
+
+            if (triggerOthers && triggerOthers.length > 0) {
+              triggerOthers.map((otherField) => {
+                trigger(otherField);
+              });
             }
           }}
           ref={field.ref}
