@@ -204,19 +204,13 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
   );
 }
 
-function defaultNyOrgtilknytning(sektor: Sektor) {
+function defaultNyOrgtilknytning() {
   return {
     erDagligOppfolging: false,
     orgEnhetId: "",
     gyldigFom: "",
     gyldigTom: "",
-    sektor: sektor,
-    orgtilknytningType:
-      sektor === Sektor.NAV_KOMMUNAL
-        ? Tilknytningtype.INGEN
-        : (sektor === Sektor.NAV_STATLIG
-            ? tilknytningstyperStatlige
-            : tilknytningstyperEksterne)[0],
+    sektor: "" as unknown as undefined,
   };
 }
 
@@ -252,6 +246,12 @@ function OrgtilknytningForm({
     ? formatDateWithoutTimezone(tidligsteOrgtilknytningStartdato)
     : undefined;
 
+  const otBeforeEdit = (orgtilknytning: Partial<OrgtilknytningState>) => {
+    return orgtilknytninger.find(
+      (tilknytning) => tilknytning.fid === orgtilknytning.fid,
+    );
+  };
+
   const hasOtTomChanged = (orgtilknytning: Partial<OrgtilknytningState>) => {
     const originalOt = orgtilknytninger.find(
       (tilknytning) => tilknytning.fid === orgtilknytning.fid,
@@ -264,7 +264,7 @@ function OrgtilknytningForm({
   const defaultOrgtilknytninger =
     orgtilknytninger.length > 0
       ? orgtilknytninger
-      : [defaultNyOrgtilknytning(ressurs.sektor)];
+      : [defaultNyOrgtilknytning()];
 
   const methods = useForm<{
     mappedeOrgtilknytninger: Partial<OrgtilknytningState>[];
@@ -385,7 +385,7 @@ function OrgtilknytningForm({
             <Button
               icon={<PlusCircleIcon />}
               onClick={() => {
-                prepend(defaultNyOrgtilknytning(ressurs.sektor), {
+                prepend(defaultNyOrgtilknytning(), {
                   focusIndex: 0,
                 });
               }}
@@ -422,6 +422,17 @@ function OrgtilknytningForm({
             !hasOtTomChanged(field) &&
             overToMndGammel &&
             !hasAdminAccess;
+
+          const originalOt = otBeforeEdit(field);
+
+          const editSektorDisabled =
+            editOtDisabled || (!fremtidig && !!originalOt?.sektor);
+
+          const editTilknytningstypeDisabled =
+            editOtDisabled ||
+            (!fremtidig &&
+              !!originalOt?.sektor &&
+              !!originalOt?.orgtilknytningType);
 
           return (
             <div
@@ -506,7 +517,7 @@ function OrgtilknytningForm({
                 `}
               >
                 <FormSektorSelectWrapper
-                  disabled={editOtDisabled}
+                  disabled={editSektorDisabled}
                   error={
                     errors?.mappedeOrgtilknytninger?.[index]?.sektor?.message ??
                     ""
@@ -517,7 +528,7 @@ function OrgtilknytningForm({
                 />
 
                 <FormTilknytningstypeSelectWrapper
-                  disabled={editOtDisabled}
+                  disabled={editTilknytningstypeDisabled}
                   error={
                     errors?.mappedeOrgtilknytninger?.[index]?.orgtilknytningType
                       ?.message ?? ""
