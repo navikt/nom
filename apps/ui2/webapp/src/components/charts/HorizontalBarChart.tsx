@@ -94,10 +94,6 @@ export function HorizontalBarChart({
                     background: var(--a-deepblue-500);
                     width: ${barWidth};
                     border-radius: 5px;
-
-                    :hover {
-                      background: var(--a-deepblue-300);
-                    }
                   `}
                   ref={isWidest ? widestBarReference : null}
                 />

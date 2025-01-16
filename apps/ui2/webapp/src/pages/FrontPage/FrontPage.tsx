@@ -1,13 +1,6 @@
 import { css } from "@emotion/react";
 import { Buildings3FillIcon, PersonFillIcon } from "@navikt/aksel-icons";
-import {
-  BodyLong,
-  BodyShort,
-  Heading,
-  HStack,
-  Label,
-  VStack,
-} from "@navikt/ds-react";
+import { BodyShort, Heading, HStack, Label, VStack } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
@@ -48,40 +41,7 @@ export const FrontPage = () => {
 
   return (
     <ContentWrapper>
-      <div
-        css={css`
-          margin-bottom: var(--a-spacing-10);
-        `}
-      >
-        <Heading
-          css={css`
-            justify-self: center;
-          `}
-          level="1"
-          size="xlarge"
-        >
-          Velkommen til NOM!
-        </Heading>
-
-        <BodyLong
-          css={css`
-            text-align: center;
-            width: 90%;
-            margin: var(--a-spacing-2) auto auto;
-          `}
-          size="medium"
-        >
-          NAV Organisasjonsmaster (NOM) skal bli masterkilde for medarbeidere
-          (statlige ansatte, kommunalt ansatte og eksterne) og
-          organisasjonsenheter i NAV. Dette innebærer at NOM skal inneholde
-          grunnleggende opplysninger om de som jobber i NAV,
-          organisasjonshierarkiet, og tilknytningen mellom medarbeidere og
-          organisasjonsenheter. Som masterkilde skal NOM forsyne andre
-          applikasjoner med data. NOM er under utvikling.
-        </BodyLong>
-      </div>
-
-      <VStack gap="8">
+      <VStack gap="12">
         {hasAdminAccess && (
           <OrgEnhetStatistikk
             orgEnhet={orgEnhet}
@@ -121,7 +81,7 @@ function OrgEnhetStatistikk({
   return (
     <div>
       <Heading level="2" size="large">
-        Nøkkelinfo for {orgEnhet.navn}
+        Nøkkelinfo for hele Nav
       </Heading>
 
       <div
@@ -186,7 +146,7 @@ function Orghierarki({
   return (
     <div>
       <Heading level="2" size="large">
-        Organisasjonshierarkiet i {orgEnhet.navn}
+        Organisasjonshierarkiet i Nav
       </Heading>
 
       <div
