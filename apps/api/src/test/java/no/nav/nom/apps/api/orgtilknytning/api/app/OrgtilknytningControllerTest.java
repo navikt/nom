@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgtilknytning.api.app;
 
 import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.authorize.AuthResolver;
+import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytningCommand;
@@ -64,6 +65,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     @MockitoBean
     AuthResolver authResolver;
+
+    @MockitoBean
+    AuthorizedNavident authorizedNavident;
 
     @MockitoBean
     RessursStateRepository ressursStateRepository;
@@ -408,6 +412,150 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             oppdaterOrgtilknytningerForRessursRequest
         )
             .expectStatus().isForbidden();
+    }
+
+    @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan ikke redigere orgtilknytning du ikke er leder for")
+    void test_rediger_orgtilknytning_som_ikke_er_leder_for() {
+        OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
+        when(authResolver.kanRedigereRessurs(any())).thenReturn(false);
+        when(authorizedNavident.orgenheterLederKanRedigere(any())).thenReturn(List.of(orgEnhet("orgEnhet321")));
+        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
+            .build();
+
+
+        saveOrgtilknytninger(List.of(existingOrgtilknytning));
+        when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
+
+        var newStartdato = existingOrgtilknytning.gyldigFom().minusMonths(24);
+        LocalDate newSluttdato = existingOrgtilknytning.gyldigTom().isPresent() ? existingOrgtilknytning.gyldigTom().get().minusMonths(3).minusDays(1) : null;
+
+        var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
+            .gyldigFom(
+                newStartdato
+            )
+            .gyldigTom(newSluttdato)
+            .build();
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(endreOrgtilknytningRequest))
+            .nyeOrgtilknytninger(Collections.emptyList())
+            .setRessursStartdato(true)
+            .setRessursSluttdato(true)
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().isForbidden();
+    }
+
+    @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan ikke legge til orgtilknytning hvis du ikke er leder for gammel eller ny OT")
+    void test_legg_til_orgtilknytning_som_ikke_er_leder_for() {
+        OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
+        when(authResolver.kanRedigereRessurs(any())).thenReturn(false);
+        when(authorizedNavident.orgenheterLederKanRedigere(any())).thenReturn(List.of(orgEnhet("orgEnhet321")));
+        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .erDagligOppfolging(true)
+            .build();
+
+        saveOrgtilknytninger(List.of(existingOrgtilknytning));
+        when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
+
+        var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning);
+        var nyOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+            .orgEnhetId("orgEnhet456")
+            .sektor(Sektor.NAV_STATLIG)
+            .gyldigFom(LocalDate.now().plusYears(1).plusDays(1))
+            .erDagligOppfolging(true)
+            .gyldigTom(null)
+            .tilknytningtype(Tilknytningtype.FAST)
+            .build();
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(endreOrgtilknytningRequest))
+            .nyeOrgtilknytninger(List.of(nyOrgtilknytningRequest))
+            .setRessursStartdato(true)
+            .setRessursSluttdato(true)
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().isForbidden();
+    }
+
+    @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan legge til orgtilknytning hvis du er leder for gammel OT")
+    void test_legg_til_orgtilknytning_leder_for_eksisterende() {
+        OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
+        when(authResolver.kanRedigereRessurs(any())).thenReturn(false);
+        when(authorizedNavident.orgenheterLederKanRedigere(any())).thenReturn(List.of(orgEnhet("orgEnhet123")));
+        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .erDagligOppfolging(true)
+            .build();
+
+        saveOrgtilknytninger(List.of(existingOrgtilknytning));
+        when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
+
+        var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning);
+        var nyOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+            .orgEnhetId("orgEnhet456")
+            .sektor(Sektor.NAV_STATLIG)
+            .gyldigFom(LocalDate.now().plusYears(1).plusDays(1))
+            .erDagligOppfolging(true)
+            .gyldigTom(null)
+            .tilknytningtype(Tilknytningtype.FAST)
+            .build();
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(endreOrgtilknytningRequest))
+            .nyeOrgtilknytninger(List.of(nyOrgtilknytningRequest))
+            .setRessursStartdato(true)
+            .setRessursSluttdato(true)
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().isOk();
     }
 
     @Test

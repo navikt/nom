@@ -330,35 +330,32 @@ public class OrgtilknytningRestService {
                                                            List<IOrgenhet> alleUnderliggendeEnheterTilLeder,
                                                            boolean isLeder) {
 
-        Set<String> fid = alleUnderliggendeEnheterTilLeder.stream().map(IOrgenhet::getFid).collect(Collectors.toSet());
-        Set<String> orgenhetId = alleUnderliggendeEnheterTilLeder.stream().map(IOrgenhet::getId).collect(Collectors.toSet());
-        log.info("Leder har tilgang til orgenhetene: {}", orgenhetId);
+        Set<String> orgenhetIds = alleUnderliggendeEnheterTilLeder.stream().map(IOrgenhet::getId).collect(Collectors.toSet());
+        var orgtilknytningFids = oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().stream()
+            .map(EndreOrgtilknytningRequest::fid)
+            .distinct()
+            .toList();
+
+        var eksisterendeOrgtilknytninger = orgtilknytningStateRepository.findByFidIn(orgtilknytningFids);
+        log.info("Leder har tilgang til orgenhetene: {}", orgenhetIds);
 
         if (!isLeder) {
             if (!oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().isEmpty()) {
                 boolean hasAccessToAddOrgtilknytning = oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger()
                     .stream()
-                    .anyMatch(leggTilOrgtilknytningRequest -> orgenhetId.contains(leggTilOrgtilknytningRequest.orgEnhetId()));
-                log.info("Sjekket om leder har tilgang til orgenhet i nyeOrgtilknytninger: {}", hasAccessToAddOrgtilknytning);
-                if (!hasAccessToAddOrgtilknytning) {
-                    hasAccessToAddOrgtilknytning = oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger()
-                        .stream()
-                        .anyMatch(endreOrgtilknytningRequest -> fid.contains(endreOrgtilknytningRequest.fid()));
-                }
-                log.info("Sjekket om leder har tilgang til orgenhet i eksisterendeOrgtilknytninger: {}", hasAccessToAddOrgtilknytning);
+                    .anyMatch(leggTilOrgtilknytningRequest -> orgenhetIds.contains(leggTilOrgtilknytningRequest.orgEnhetId()));
 
                 if (!hasAccessToAddOrgtilknytning) {
-                    throw new AccessDeniedException("Du har lagt til og/eller prøvd å endre en organisasjonstilknytning for en orgenhet som du ikke har tilgang til.");
+                    eksisterendeOrgtilknytninger.stream()
+                        .filter(endreOrgtilknytningRequest -> orgenhetIds.contains(endreOrgtilknytningRequest.orgEnhetId()))
+                        .findAny()
+                        .orElseThrow(() -> new AccessDeniedException("Du har lagt til og/eller prøvd å endre en organisasjonstilknytning for en orgenhet som du ikke har tilgang til."));
                 }
             } else {
-                oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(orgtilknytningRequest -> orgtilknytningStateRepository.findByFid(orgtilknytningRequest.fid())
-                    .ifPresent(orgtilknytningState -> {
-                        if (!fid.contains(orgtilknytningState.fid())) {
-                            throw new AccessDeniedException("Du er ikke leder for denne medarbeideren og kan derfor ikke endre personens orgtilknytning.");
-                        }
-                    })
-                );
-                log.info("Sjekket ferdig om leder har tilgang til orgenhet i eksisterendeOrgtilknytninger");
+                eksisterendeOrgtilknytninger.stream()
+                    .filter(eksisterendeOrgtilknytning -> orgenhetIds.contains(eksisterendeOrgtilknytning.orgEnhetId()))
+                    .findAny()
+                    .orElseThrow(() -> new AccessDeniedException("Du er ikke leder for en eksisterende Orgtilknytning til denne medarbeideren og kan derfor ikke endre personens orgtilknytning."));
             }
         }
     }

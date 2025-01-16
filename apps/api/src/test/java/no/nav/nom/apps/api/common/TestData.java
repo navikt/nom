@@ -49,6 +49,24 @@ public class TestData {
         );
     }
 
+    public static OrgEnhetState orgEnhetState(String orgEnhetId) {
+        return new OrgEnhetState(
+            UUID.randomUUID().toString(),
+            orgEnhetId,
+            "Test enhet",
+            LocalDate.now().minusMonths(1),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty()
+        );
+    }
+
     public static RessursState ressursState() {
         return new RessursState(
             UUID.randomUUID().toString(),
@@ -80,5 +98,9 @@ public class TestData {
 
     public static OrgEnhet orgEnhet() {
         return new OrgEnhet(orgEnhetState());
+    }
+
+    public static OrgEnhet orgEnhet(String orgEnhetId) {
+        return new OrgEnhet(orgEnhetState(orgEnhetId));
     }
 }
