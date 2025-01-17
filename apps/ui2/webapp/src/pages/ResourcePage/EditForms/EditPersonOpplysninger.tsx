@@ -270,7 +270,7 @@ export function EditPersonOpplysninger({
                   display: flex;
                 `}
               >
-                <Label>Privattelefonnummer</Label>
+                <Label>Telefonnummer</Label>
 
                 <HelpText
                   css={css`

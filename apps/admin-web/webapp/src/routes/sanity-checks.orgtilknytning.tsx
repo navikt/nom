@@ -5,6 +5,7 @@ import { ErrorBoundary } from "react-error-boundary";
 
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { OrgtilknytningMedFlereDOLSammePeriode } from "~/sanitychecks/Orgtilknytning/OrgtilknytningMedFlereDOLSammePeriode.tsx";
+import { OrgtilknytningMedTilknytningtypeUtenSektor } from "~/sanitychecks/Orgtilknytning/OrgtilknytningMedTilknytningtypeUtenSektor.tsx";
 import { OrgtilknytningMedUgyldigSektorTilknytningtypeKombinasjon } from "~/sanitychecks/Orgtilknytning/OrgtilknytningMedUgyldigSektorTilknytningtypeKombinasjon.tsx";
 import { OrgtilknytningNegativPeriode } from "~/sanitychecks/Orgtilknytning/OrgtilknytningNegativPeriode.tsx";
 import { OrgtilknytningOrgGyldighet } from "~/sanitychecks/Orgtilknytning/OrgtilknytningOrgGyldighet.tsx";
@@ -37,6 +38,9 @@ function ListSelector(props: { selected: string }) {
     case "OrgtilknytningMedUgyldigSektorTilknytningtypeKombinasjon": {
       return <OrgtilknytningMedUgyldigSektorTilknytningtypeKombinasjon />;
     }
+    case "OrgtilknytningMedTilknytningtypeUtenSektor": {
+      return <OrgtilknytningMedTilknytningtypeUtenSektor />;
+    }
     default: {
       return <></>;
     }
@@ -65,6 +69,9 @@ function OrgtilknytningSanityChecks() {
         </option>
         <option value="OrgtilknytningMedUgyldigSektorTilknytningtypeKombinasjon">
           List orgtilknytninger med ugyldig sektor-tilknytningtype kombinasjon
+        </option>
+        <option value="OrgtilknytningMedTilknytningtypeUtenSektor">
+          List alle orgtilknytninger med tilknytningtype, men uten sektor
         </option>
       </Select>
       <ListSelector selected={selected} />

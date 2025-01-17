@@ -649,7 +649,7 @@ public class OrgtilknytningRestService {
         var currentTilknytningType = setCorrectTilknytningtype(currentOrgtilknytningState);
         if (!loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)
             && isNotNull(endreOrgtilknytningRequest.tilknytningtype())
-            && (currentTilknytningType.isPresent() && !endreOrgtilknytningRequest.tilknytningtype().equals(currentOrgtilknytningState.orgtilknytningType().get()))) {
+            && (currentTilknytningType.isPresent() && !endreOrgtilknytningRequest.tilknytningtype().equals(currentTilknytningType.get()))) {
             throw InvalidOrgtilknytningTilknytningtypeException.tilknytningtypeCannotBeChanged();
         }
     }
@@ -658,6 +658,7 @@ public class OrgtilknytningRestService {
 
         if (currentOrgtilknytningState.orgtilknytningType().isPresent()
             && currentOrgtilknytningState.orgtilknytningType().get().equals(Tilknytningtype.INGEN)
+            && isNotNull(currentOrgtilknytningState.sektor())
             && !currentOrgtilknytningState.sektor().erKommunal()) {
             return Optional.empty();
         }
