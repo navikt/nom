@@ -7,6 +7,7 @@ import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytningCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDatoCommand;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningSektorCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
@@ -92,6 +93,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     @Captor
     ArgumentCaptor<EndreDagligOppfolgingOrgtilknytningCommand> endreDagligOppfolgingOrgtilknytningCommandArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<EndreOrgtilknytningSektorCommand> endreOrgtilknytningSektorCommandArgumentCaptor;
 
     @BeforeEach
     void setInitialLoadCompleteAndEnableUnleashAndClearData() {
@@ -787,6 +791,134 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .gyldigFom(leggTilOrgtilknytningRequest.gyldigFom())
                 .additionalAgressoData(null)
                 .build()
+            );
+    }
+
+    @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} Should update sektor and tilknytningtype even if tilknytningtype is already set")
+    void test_set_sektor_and_tilknytning_when_tilknytningtype_is_already_set() {
+
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.NAV_STATLIG).build();
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingExpiredOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("1")
+            .sektor(null)
+            .orgtilknytningType(Optional.empty())
+            .erDagligOppfolging(true)
+            .gyldigFom(LocalDate.now().minusMonths(3))
+            .gyldigTom(Optional.of(LocalDate.now().minusMonths(2).minusDays(2)))
+            .build();
+
+        var existingOrgtilknytningAnticipatingGyldigTomChange = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("2")
+            .sektor(null)
+            .orgtilknytningType(Optional.of(Tilknytningtype.INGEN))
+            .erDagligOppfolging(true)
+            .gyldigFom(existingExpiredOrgtilknytning.gyldigTom().orElseThrow().plusDays(1))
+            .gyldigTom(Optional.empty())
+            .build();
+
+        saveOrgtilknytninger(List.of(
+            existingExpiredOrgtilknytning,
+            existingOrgtilknytningAnticipatingGyldigTomChange
+        ));
+
+        var endreDatoOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingGyldigTomChange).toBuilder()
+            .sektor(Sektor.NAV_STATLIG)
+            .tilknytningtype(Tilknytningtype.FAST)
+            .gyldigTom(existingExpiredOrgtilknytning.gyldigTom().orElseThrow().plusDays(2))
+            .build();
+
+        var expiredOrgtilknytningRequest = endreOrgtilknytningRequest(existingExpiredOrgtilknytning);
+
+        var leggTilOrgtilknytningRequest = leggTilOrgtilknytningRequest().toBuilder()
+            .tilknytningtype(Tilknytningtype.FAST)
+            .sektor(Sektor.NAV_STATLIG)
+            .orgEnhetId("3")
+            .gyldigFom(endreDatoOrgtilknytningRequest.gyldigTom().plusDays(1))
+            .gyldigTom(null)
+            .erDagligOppfolging(true)
+            .build();
+
+        var opprettetOrgtilknytningFid = UUID.randomUUID().toString();
+
+        when(orgtilknytningCommandService.opprettOrgtilknytning(any())).thenReturn(opprettetOrgtilknytningFid);
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(
+                expiredOrgtilknytningRequest,
+                endreDatoOrgtilknytningRequest
+            ))
+            .nyeOrgtilknytninger(List.of(leggTilOrgtilknytningRequest))
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().is2xxSuccessful();
+
+        verify(orgtilknytningCommandService, times(1)).endreDagligOppfolgingOrgtilknytning(endreDagligOppfolgingOrgtilknytningCommandArgumentCaptor.capture());
+        assertThat(endreDagligOppfolgingOrgtilknytningCommandArgumentCaptor.getValue()).usingRecursiveComparison()
+            .ignoringFields("inputMetadata", "additionalAgressoData")
+            .isEqualTo(EndreDagligOppfolgingOrgtilknytningCommand.builder()
+                .fid(opprettetOrgtilknytningFid)
+                .orgenhetId(leggTilOrgtilknytningRequest.orgEnhetId())
+                .gyldigFom(leggTilOrgtilknytningRequest.gyldigFom())
+                .gyldigTom(Optional.ofNullable(leggTilOrgtilknytningRequest.gyldigTom()))
+                .erDagligOppfolging(leggTilOrgtilknytningRequest.erDagligOppfolging())
+                .navident(tilknyttetRessurs.navident())
+                .additionalAgressoData(null)
+                .build());
+
+        verify(orgtilknytningCommandService, times(2)).endreTilknytningtype(endreTilknytningtypeCommandArgumentCaptor.capture());
+        assertThat(endreTilknytningtypeCommandArgumentCaptor.getValue()).usingRecursiveComparison()
+            .ignoringFields("inputMetadata")
+            .isEqualTo(EndreTilknytningtypeCommand.builder()
+                .fid(opprettetOrgtilknytningFid)
+                .tilknytningtype(Optional.ofNullable(leggTilOrgtilknytningRequest.tilknytningtype()))
+                .build()
+            );
+
+        verify(orgtilknytningCommandService, times(1)).endreOrgtilknytningDato(endreOrgtilknytningDatoCommandArgumentCaptor.capture());
+        assertThat(endreOrgtilknytningDatoCommandArgumentCaptor.getAllValues()).usingRecursiveComparison()
+            .ignoringFields("inputMetadata")
+            .isEqualTo(List.of(
+                EndreOrgtilknytningDatoCommand.builder()
+                    .fid(endreDatoOrgtilknytningRequest.fid())
+                    .gyldigFom(endreDatoOrgtilknytningRequest.gyldigFom())
+                    .gyldigTom(Optional.of(endreDatoOrgtilknytningRequest.gyldigTom()))
+                    .build()
+            ));
+
+        verify(orgtilknytningCommandService, times(1)).opprettOrgtilknytning(opprettOrgtilknytningArgumentCaptor.capture());
+        assertThat(opprettOrgtilknytningArgumentCaptor.getValue()).usingRecursiveComparison()
+            .ignoringFields("inputMetadata")
+            .isEqualTo(OpprettOrgtilknytning.builder()
+                .navident(tilknyttetRessurs.navident())
+                .orgenhetId(leggTilOrgtilknytningRequest.orgEnhetId())
+                .sektor(leggTilOrgtilknytningRequest.sektor())
+                .gyldigFom(leggTilOrgtilknytningRequest.gyldigFom())
+                .additionalAgressoData(null)
+                .build()
+            );
+
+        verify(orgtilknytningCommandService, times(1)).endreOrgtilknytningSektor(endreOrgtilknytningSektorCommandArgumentCaptor.capture());
+        assertThat(endreOrgtilknytningSektorCommandArgumentCaptor.getValue()).usingRecursiveComparison()
+            .ignoringFields("inputMetadata")
+            .isEqualTo(
+                EndreOrgtilknytningSektorCommand.builder()
+                    .orgenhetId(existingOrgtilknytningAnticipatingGyldigTomChange.orgEnhetId())
+                    .navident(tilknyttetRessurs.navident())
+                    .fid(endreDatoOrgtilknytningRequest.fid())
+                    .sektor(endreDatoOrgtilknytningRequest.sektor())
+                    .build()
             );
     }
 
