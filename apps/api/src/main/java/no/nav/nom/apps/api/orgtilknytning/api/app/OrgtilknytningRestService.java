@@ -658,6 +658,7 @@ public class OrgtilknytningRestService {
 
         if (currentOrgtilknytningState.orgtilknytningType().isPresent()
             && currentOrgtilknytningState.orgtilknytningType().get().equals(Tilknytningtype.INGEN)
+            && isNotNull(currentOrgtilknytningState.sektor())
             && !currentOrgtilknytningState.sektor().erKommunal()) {
             return Optional.empty();
         }
