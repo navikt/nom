@@ -81,6 +81,12 @@ public class OrgtilknytningSanityCheckService {
             .toList();
     }
 
+    public List<OrgtilknytningState> orgtilknytningStatesMedTilknytningtypeUtenSektor() {
+        return aktiveOrgtilknytninger(orgtilknytningStateRepository.getAll()).stream()
+            .filter(ot -> isNull(ot.sektor()) && ot.orgtilknytningType().isPresent())
+            .toList();
+    }
+
     private List<OrgtilknytningState> aktiveOrgtilknytninger(Collection<OrgtilknytningState> orgtilknytninger) {
         return orgtilknytninger.stream().filter(ot ->
             ot.gyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
