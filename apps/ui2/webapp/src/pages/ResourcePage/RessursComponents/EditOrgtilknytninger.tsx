@@ -262,9 +262,7 @@ function OrgtilknytningForm({
   };
 
   const hasOtTomChanged = (orgtilknytning: Partial<OrgtilknytningState>) => {
-    const originalOt = orgtilknytninger.find(
-      (tilknytning) => tilknytning.fid === orgtilknytning.fid,
-    );
+    const originalOt = otBeforeEdit(orgtilknytning);
 
     return !(orgtilknytning.gyldigTom === originalOt?.gyldigTom);
   };
