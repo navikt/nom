@@ -392,3 +392,15 @@ export function getOrgtilknytningMedUgyldigSektorTilknytningKombinasjon() {
       ).json<OrgtilknytningState[]>(),
   });
 }
+
+export function getOrgtilknytningMedTilknytningtypeUtenSektor() {
+  return queryOptions({
+    queryKey: ["API", "OTMEDTILKNYTNINGTYPEUTENSEKTOR"],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/SanityCheck/orgtilknytning/orgtilknytningStatesMedTilknytningtypeUtenSektor`,
+        )
+      ).json<OrgtilknytningState[]>(),
+  });
+}

@@ -86,4 +86,9 @@ public class OrgtilknytningSanityCheckController {
     public ResponseEntity<List<OrgtilknytningState>> orgtilknytningStatesMedUgyldigeSektorTilknytninger() {
         return ResponseEntity.ok(orgtilknytningSanityCheckService.orgtilknytningStatesMedUgyldigeSektorTilknytninger());
     }
+
+    @GetMapping(value = "/orgtilknytningStatesMedTilknytningtypeUtenSektor")
+    public ResponseEntity<List<OrgtilknytningState>> orgtilknytningStatesMedTilknytningtypeUtenSektor() {
+        return ResponseEntity.ok(orgtilknytningSanityCheckService.orgtilknytningStatesMedTilknytningtypeUtenSektor());
+    }
 }
