@@ -3,6 +3,8 @@ package no.nav.nom.libs.state.authorize;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.eventsource.AuthorizationEvent;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.libs.state.common.DefaultStateAutoconfiguration;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,22 +19,15 @@ import org.springframework.core.env.Environment;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
 
 @Slf4j
 @AutoConfiguration
 @Conditional(DelegertLederStateAutoconfiguration.DelegertLederStateEnabledCondition.class)
-public class DelegertLederStateAutoconfiguration {
-    final Environment environment;
-
-    public DelegertLederStateAutoconfiguration(Environment environment) {
-        this.environment = environment;
+public class DelegertLederStateAutoconfiguration extends DefaultStateAutoconfiguration<AuthorizationEvent> {
+    public DelegertLederStateAutoconfiguration(Environment environment, @Value("${nom.libs.state.idle-event-interval-seconds}") int idleEventIntervalSeconds) {
+        super(environment, idleEventIntervalSeconds);
     }
 
     @Bean(name = "nomStateDelegertLederRepository")
@@ -61,51 +56,29 @@ public class DelegertLederStateAutoconfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(name = "nomStateDelegertLederConsumerFactory") // NOTE: May be removed when old ConsumerFactory in nom-api is deleted.
+    @ConditionalOnMissingBean(name = "nomStateDelegertLederConsumerFactory")
     @ConditionalOnProperty(value = "nom.libs.state.delegert-leder.enabled")
     ConsumerFactory<String, AuthorizationEvent> nomStateDelegertLederConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        return new DefaultKafkaConsumerFactory<>(
-            properties.buildConsumerProperties(),
-            new StringDeserializer(),
-            new JsonDeserializer<>(AuthorizationEvent.class, objectMapper)
+        return getDefaultDelegertLederConsumerFactory(properties.buildConsumerProperties(), objectMapper);
+    }
+
+    static ConsumerFactory<String, AuthorizationEvent> getDefaultDelegertLederConsumerFactory(java. util. Map<String, Object> configs, ObjectMapper objectMapper) {
+        return new DefaultKafkaConsumerFactory<>(configs,
+            new StringDeserializer(), new ErrorHandlingDeserializer<>(new JsonDeserializer<>(AuthorizationEvent.class, objectMapper))
         );
     }
 
     @Bean
     @ConditionalOnProperty(value = "nom.libs.state.delegert-leder.enabled")
     ConcurrentKafkaListenerContainerFactory<String, AuthorizationEvent> nomStateDelegertLederKafkaListenerContainerFactory(
-        @Qualifier("nomStateDelegertLederConsumerFactory") ConsumerFactory<String, AuthorizationEvent> consumerFactory,
-        @Value("${nom.libs.state.idle-event-interval-seconds}") int idleEventIntervalSeconds
-
+        @Qualifier("nomStateDelegertLederConsumerFactory") ConsumerFactory<String, AuthorizationEvent> consumerFactory
     ) {
-        final var factory = new ConcurrentKafkaListenerContainerFactory<String, AuthorizationEvent>();
-        factory.setConsumerFactory(consumerFactory);
-        factory.setBatchListener(true);
-        factory.getContainerProperties().setIdleEventInterval(idleEventIntervalSeconds * 1000L);
-
-        // If authentication towards kafka broker topic fails, retry every 10s
-        factory.setContainerCustomizer(container -> {
-                container.getContainerProperties().setAuthExceptionRetryInterval(Duration.ofSeconds(10));
-                log.info(container.toString());
-            }
-        );
-
-        return factory;
+        return defaultContainerFactorySettings(consumerFactory, new ConcurrentKafkaListenerContainerFactory<>());
     }
 
     @Bean
     @ConditionalOnProperty(value = "nom.libs.state.delegert-leder.enabled")
-    public String delegertLederStateListenerId(@Value("${nom.libs.state.delegert-leder.listener-id}") String listenerId) {
-        if (isLocal()) {
-            return listenerId + "-" + Math.abs(new Random().nextInt());
-        }
-        return listenerId;
-    }
-
-    private boolean isLocal() {
-        List<String> profiles = Arrays.asList(environment.getActiveProfiles());
-        return profiles.contains("local") || profiles.contains("test");
-    }
+    public String delegertLederStateListenerId(@Value("${nom.libs.state.delegert-leder.listener-id}") String listenerId) {return getListenerIdString(listenerId); }
 
     static class DelegertLederStateEnabledCondition extends AllNestedConditions {
         DelegertLederStateEnabledCondition() {

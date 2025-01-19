@@ -1,9 +1,13 @@
 package no.nav.nom.libs.state.common;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.common.header.Header;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.log.LogAccessor;
 import org.springframework.kafka.event.ListenerContainerIdleEvent;
+import org.springframework.kafka.listener.BatchListenerFailedException;
+import org.springframework.kafka.support.serializer.DeserializationException;
+import org.springframework.kafka.support.serializer.SerializationUtils;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Collections;
@@ -14,14 +18,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.StreamSupport;
 
 @Slf4j
 public abstract class AbstractNomStateListener<T> {
     protected final String stateTopic;
     protected final String listenerId;
 
-    private final AtomicBoolean hasReadToEndOnStartup = new AtomicBoolean(false);
+    private AtomicBoolean hasReadToEndOnStartup = new AtomicBoolean(false);
+    private AtomicBoolean abortedStateConsumption = new AtomicBoolean(false);
     private boolean started = false;
     private final List<Visitor<T>> visitors = new CopyOnWriteArrayList<>();
     private final Map<String, CompletableFuture<T>> waitingMapByKey = Collections.synchronizedMap(new HashMap<>());
@@ -38,10 +42,43 @@ public abstract class AbstractNomStateListener<T> {
 
     protected abstract void doneReadToEndOnStartup();
 
-    protected void onMessage(ConsumerRecords<String, T> records) {
-        StreamSupport.stream(records.spliterator(), false).forEach(it -> {
-            processMessage(it.key(), it.value());
-        });
+    protected void onMessageWithHeaders(List<T> events, List<String> keys, List<Map<String, Object>> headers) {
+        for (int idx = 0; idx < events.size(); idx++) {
+            T event = events.get(idx);
+            String key = keys.get(idx);
+            var header = headers.get(idx);
+            var deserException = getDeserializationException(header);
+            if (event == null && deserException != null) {
+                String msg = "Conversion/deserialization error in BatchListener %s for event key: %s".formatted(listenerId, key);
+                handleMessageListerError(msg, deserException, idx);
+            }
+            try {
+                processMessage(key, event);
+            } catch (RuntimeException e) {
+                String msg = "Error in processing in BatchListener %s for event key: %s".formatted(listenerId, key);
+                handleMessageListerError(msg, e, idx);
+            }
+        }
+    }
+
+    private DeserializationException getDeserializationException(Map<String, Object> header) {
+        return header.get(SerializationUtils.VALUE_DESERIALIZER_EXCEPTION_HEADER) != null ?
+            SerializationUtils.byteArrayToDeserializationException(
+                new LogAccessor(this.getClass()),
+                (Header)header.get(SerializationUtils.VALUE_DESERIALIZER_EXCEPTION_HEADER))
+            : null;
+    }
+
+    private void handleMessageListerError(String msg, Exception e, int idx) {
+        if (!hasReadToEndOnStartup()) {
+            // Unrecoverable - do not end up setting hasReadToEndOnStartup to true
+            setAbortedOnStartup();
+            log.error("ALERTING STATE LISTENER ERROR - on startup for listener {}:  {}",listenerId, msg, e); // NB! Alert in kibana for the text 'ALERTING STATE LISTENER ERROR'
+        } else {
+            log.error("ALERTING STATE LISTENER ERROR - during normal run for listener {}:  {}",listenerId, msg, e);
+        }
+        // Fail gracefully - e.g. keep processing: Container DefaultErrorHandler(new FixedBackOff(0L, 0L))); // No retry on error - just log and continue
+        throw new BatchListenerFailedException(msg, e, idx);
     }
 
     private void processMessage(String key, T value) {
@@ -50,14 +87,15 @@ public abstract class AbstractNomStateListener<T> {
             started = true;
         }
 
-        registerMessageWithState(key, (T) value);
+        registerMessageWithState(key, value);
+
+        notifyVisitors(key, value);
 
         if (waitingMapByKey.containsKey(key)) {
             waitingMapByKey.remove(key).complete(value);
             log.debug("Done waiting for event key in listener: {}", key);
         }
 
-        notifyVisitors(key, value);
         consumedMessages.incrementAndGet();
     }
 
@@ -77,7 +115,23 @@ public abstract class AbstractNomStateListener<T> {
     }
 
     private void notifyVisitors(String key, T stateObject) {
-        visitors.forEach(v -> v.visit(key, stateObject));
+        var visitorErrors = new HashMap<Visitor<T>, VisitorError<T>>();
+        visitors.forEach(v -> {
+            try {
+                v.visit(key, stateObject);
+            } catch (Exception e) {
+                log.warn("Error in visitor {} for key {}", v.visitorName(), key, e);
+                visitorErrors.put(v, new VisitorError<>(key, stateObject, e));
+                // Keep processing other visitors
+            }
+        });
+        if (!visitorErrors.isEmpty()) {
+            throw new StateVisitorException(
+                "Error in visitors %s in Listener %s, for key %s".formatted( 
+                    visitorErrors.keySet().stream().map(Visitor::visitorName).toList(), listenerId, key
+                )
+            );
+        }
     }
 
     public CompletableFuture<T> waitForStateAfterEventCreation(String key) {
@@ -95,20 +149,41 @@ public abstract class AbstractNomStateListener<T> {
         return hasReadToEndOnStartup.get();
     }
 
+    public boolean isAbortedOnStartup() {
+        return abortedStateConsumption.get();
+    }
+
+    public void resetStateConsumption() {
+        hasReadToEndOnStartup.set(false);
+        abortedStateConsumption.set(false);
+    }
+
+    public void setHasReadToEndOnStartup() {
+        hasReadToEndOnStartup.set(true);
+    }
+
+    public synchronized void setAbortedOnStartup() {
+        abortedStateConsumption.set(true);
+    }
+
     @EventListener
     public void hasReadToEndOnStartupEventHandler(ListenerContainerIdleEvent event) {
-        if (hasReadToEndOnStartup.get()) {
+        if (hasReadToEndOnStartup() || isAbortedOnStartup()) {
             return;
         }
 
         log.debug("Idle event received for listener {}. Waiting for listener {}", event.getListenerId(), listenerId);
         if (event.getListenerId().startsWith(listenerId)) {
+            if (isAbortedOnStartup()) {
+                log.warn("Idle event received for listener {} - but state consumption has been aborted", listenerId);
+                return;
+            }
+
             log.info(
                 "All Events from topic [{}] has now been read on startup by listener [{}]. Number of {} messages consumed: {}", stateTopic, listenerId, reflectedClassTypeName, consumedMessages
             );
-            hasReadToEndOnStartup.set(true);
+            setHasReadToEndOnStartup();
             doneReadToEndOnStartup();
         }
     }
-
 }

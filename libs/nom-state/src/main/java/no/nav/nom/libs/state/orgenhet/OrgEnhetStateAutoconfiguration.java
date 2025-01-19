@@ -3,6 +3,7 @@ package no.nav.nom.libs.state.orgenhet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.libs.state.common.DefaultStateAutoconfiguration;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,21 +18,15 @@ import org.springframework.core.env.Environment;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
-
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
 
 @Slf4j
 @AutoConfiguration
 @Conditional(OrgEnhetStateAutoconfiguration.OrgEnhetStateEnabledCondition.class)
-public class OrgEnhetStateAutoconfiguration {
-    final Environment environment;
-
-    public OrgEnhetStateAutoconfiguration(Environment environment) {
-        this.environment = environment;
+public class OrgEnhetStateAutoconfiguration extends DefaultStateAutoconfiguration<OrgEnhetState> {
+    public OrgEnhetStateAutoconfiguration(Environment environment, @Value("${nom.libs.state.idle-event-interval-seconds}") int idleEventIntervalSeconds) {
+        super(environment, idleEventIntervalSeconds);
     }
 
     @Bean(name = "nomStateOrgEnhetRepository")
@@ -60,51 +55,29 @@ public class OrgEnhetStateAutoconfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(name = "nomStateOrgEnhetConsumerFactory") // NOTE: May be removed when old ConsumerFactory in nom-api is deleted.
+    @ConditionalOnMissingBean(name = "nomStateOrgEnhetConsumerFactory")
     @ConditionalOnProperty(value = "nom.libs.state.orgenhet.enabled")
     ConsumerFactory<String, OrgEnhetState> nomStateOrgEnhetConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        return new DefaultKafkaConsumerFactory<>(
-            properties.buildConsumerProperties(),
-            new StringDeserializer(),
-            new JsonDeserializer<>(OrgEnhetState.class, objectMapper)
+        return getDefaultOrgEnhetConsumerFactory(properties.buildConsumerProperties(), objectMapper);
+    }
+
+    static ConsumerFactory<String, OrgEnhetState> getDefaultOrgEnhetConsumerFactory(java. util. Map<String, Object> configs, ObjectMapper objectMapper) {
+        return new DefaultKafkaConsumerFactory<>(configs,
+            new StringDeserializer(), new ErrorHandlingDeserializer<>(new JsonDeserializer<>(OrgEnhetState.class, objectMapper))
         );
     }
 
     @Bean
     @ConditionalOnProperty(value = "nom.libs.state.orgenhet.enabled")
     ConcurrentKafkaListenerContainerFactory<String, OrgEnhetState> nomStateOrgEnhetKafkaListenerContainerFactory(
-        @Qualifier("nomStateOrgEnhetConsumerFactory") ConsumerFactory<String, OrgEnhetState> consumerFactory,
-        @Value("${nom.libs.state.idle-event-interval-seconds}") int idleEventIntervalSeconds
-
+        @Qualifier("nomStateOrgEnhetConsumerFactory") ConsumerFactory<String, OrgEnhetState> consumerFactory
     ) {
-        final var factory = new ConcurrentKafkaListenerContainerFactory<String, OrgEnhetState>();
-        factory.setConsumerFactory(consumerFactory);
-        factory.setBatchListener(true);
-        factory.getContainerProperties().setIdleEventInterval(idleEventIntervalSeconds * 1000L);
-
-        // If authentication towards kafka broker topic fails, retry every 10s
-        factory.setContainerCustomizer(container -> {
-                container.getContainerProperties().setAuthExceptionRetryInterval(Duration.ofSeconds(10));
-                log.info(container.toString());
-            }
-        );
-
-        return factory;
+        return defaultContainerFactorySettings(consumerFactory, new ConcurrentKafkaListenerContainerFactory<>());
     }
 
     @Bean
     @ConditionalOnProperty(value = "nom.libs.state.orgenhet.enabled")
-    public String orgEnhetStateListenerId(@Value("${nom.libs.state.orgenhet.listener-id}") String listenerId) {
-        if (isLocal()) {
-            return listenerId + "-" + Math.abs(new Random().nextInt());
-        }
-        return listenerId;
-    }
-
-    private boolean isLocal() {
-        List<String> profiles = Arrays.asList(environment.getActiveProfiles());
-        return profiles.contains("local") || profiles.contains("test");
-    }
+    public String orgEnhetStateListenerId(@Value("${nom.libs.state.orgenhet.listener-id}") String listenerId) {return getListenerIdString(listenerId); }
 
     static class OrgEnhetStateEnabledCondition extends AllNestedConditions {
         OrgEnhetStateEnabledCondition() {
@@ -114,5 +87,4 @@ public class OrgEnhetStateAutoconfiguration {
         @ConditionalOnProperty(value = "nom.libs.state.orgenhet.enabled")
         static class isEnabled {}
     }
-
 }

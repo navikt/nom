@@ -3,6 +3,7 @@ package no.nav.nom.libs.state.ressurs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.common.DefaultStateAutoconfiguration;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,21 +18,15 @@ import org.springframework.core.env.Environment;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
-
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
 
 @Slf4j
 @AutoConfiguration
 @Conditional(RessursStateAutoconfiguration.RessursStateEnabledCondition.class)
-public class RessursStateAutoconfiguration {
-    final Environment environment;
-
-    public RessursStateAutoconfiguration(Environment environment) {
-        this.environment = environment;
+public class RessursStateAutoconfiguration extends DefaultStateAutoconfiguration<RessursState> {
+    public RessursStateAutoconfiguration(Environment environment, @Value("${nom.libs.state.idle-event-interval-seconds}") int idleEventIntervalSeconds) {
+        super(environment, idleEventIntervalSeconds);
     }
 
     @Bean(name = "nomStateRessursRepository")
@@ -60,50 +55,29 @@ public class RessursStateAutoconfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(name = "nomStateRessursConsumerFactory") // NOTE: May be removed when old ConsumerFactory in nom-api is deleted.
+    @ConditionalOnMissingBean(name = "nomStateRessursConsumerFactory")
     @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
     ConsumerFactory<String, RessursState> nomStateRessursConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        return new DefaultKafkaConsumerFactory<>(
-            properties.buildConsumerProperties(),
-            new StringDeserializer(),
-            new JsonDeserializer<>(RessursState.class, objectMapper)
+        return getDefaultRessursConsumerFactory(properties.buildConsumerProperties(), objectMapper);
+    }
+
+    static ConsumerFactory<String, RessursState> getDefaultRessursConsumerFactory(java. util. Map<String, Object> configs, ObjectMapper objectMapper) {
+        return new DefaultKafkaConsumerFactory<>(configs,
+            new StringDeserializer(), new ErrorHandlingDeserializer<>(new JsonDeserializer<>(RessursState.class, objectMapper))
         );
     }
 
     @Bean
     @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
     ConcurrentKafkaListenerContainerFactory<String, RessursState> nomStateRessursKafkaListenerContainerFactory(
-        @Qualifier("nomStateRessursConsumerFactory") ConsumerFactory<String, RessursState> consumerFactory,
-        @Value("${nom.libs.state.idle-event-interval-seconds}") int idleEventIntervalSeconds
+        @Qualifier("nomStateRessursConsumerFactory") ConsumerFactory<String, RessursState> consumerFactory
     ) {
-        final var factory = new ConcurrentKafkaListenerContainerFactory<String, RessursState>();
-        factory.setConsumerFactory(consumerFactory);
-        factory.setBatchListener(true);
-        factory.getContainerProperties().setIdleEventInterval(idleEventIntervalSeconds * 1000L);
-
-        // If authentication towards kafka broker topic fails, retry every 10s
-        factory.setContainerCustomizer(container -> {
-                container.getContainerProperties().setAuthExceptionRetryInterval(Duration.ofSeconds(10));
-                log.info(container.toString());
-            }
-        );
-
-        return factory;
+        return defaultContainerFactorySettings(consumerFactory, new ConcurrentKafkaListenerContainerFactory<>());
     }
 
     @Bean
     @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
-    public String ressursStateListenerId(@Value("${nom.libs.state.ressurs.listener-id}") String listenerId) {
-        if (isLocal()) {
-            return listenerId + "-" + Math.abs(new Random().nextInt());
-        }
-        return listenerId;
-    }
-
-    private boolean isLocal() {
-        List<String> profiles = Arrays.asList(environment.getActiveProfiles());
-        return profiles.contains("local") || profiles.contains("test");
-    }
+    public String ressursStateListenerId(@Value("${nom.libs.state.ressurs.listener-id}") String listenerId) { return getListenerIdString(listenerId); }
 
     static class RessursStateEnabledCondition extends AllNestedConditions {
         RessursStateEnabledCondition() {
