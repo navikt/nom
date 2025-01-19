@@ -5,23 +5,22 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 import java.time.LocalDateTime;
+
+import static no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateAutoconfiguration.getDefaultMasteredRessursConsumerFactory;
 
 @Configuration
 public class KafkaTestFactoryConfiguration {
@@ -33,11 +32,7 @@ public class KafkaTestFactoryConfiguration {
 
     @Bean
     ConsumerFactory<String, LocalDateTime> nomStateMasteredRessursConsumerFactory() {
-        return new DefaultKafkaConsumerFactory<>(
-            KafkaTestUtils.producerProps(embeddedKafka),
-            new StringDeserializer(),
-            new JsonDeserializer<>(LocalDateTime.class, objectMapper)
-        );
+        return getDefaultMasteredRessursConsumerFactory(KafkaTestUtils.producerProps(embeddedKafka), objectMapper);
     }
 
     @Bean
@@ -53,6 +48,13 @@ public class KafkaTestFactoryConfiguration {
         eventsourceTemplate.setDefaultTopic(eventsourceTopic);
 
         return eventsourceTemplate;
+    }
+
+    @Bean
+    KafkaTemplate<String, String> stringProducerTemplate() {
+        ProducerFactory<String, String> stringStateProducerFactory =
+            new DefaultKafkaProducerFactory<>(KafkaTestUtils.producerProps(embeddedKafka), new StringSerializer(), new StringSerializer());
+        return new KafkaTemplate<>(stringStateProducerFactory);
     }
 
     private static ObjectMapper configureObjectMapper() {

@@ -7,15 +7,14 @@ import no.nav.nom.contract.nom.eventsource.DelegertAuthorizationFornyetEventV1;
 import no.nav.nom.contract.nom.eventsource.DelegertAuthorizationOpprettetEventV1;
 import no.nav.nom.contract.nom.state.LederTilgangState;
 import no.nav.nom.libs.state.common.AbstractNomStateListener;
-import no.nav.nom.libs.utils.common.kafka.KafkaUtils;
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.PartitionOffset;
 import org.springframework.kafka.annotation.TopicPartition;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 
-import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class NomStateDelegertLederListener extends AbstractNomStateListener<AuthorizationEvent> {
@@ -33,8 +32,8 @@ public class NomStateDelegertLederListener extends AbstractNomStateListener<Auth
             topic = "${nom.libs.state.delegert-leder.state-topic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
         )
     )
-    public void onMessage(ConsumerRecords<String, AuthorizationEvent> records) {
-        super.onMessage(records);
+    public void onMessage(List<AuthorizationEvent> events, @Header(KafkaHeaders.RECEIVED_KEY) List<String> keys, @Header(KafkaHeaders.BATCH_CONVERTED_HEADERS) List<Map<String, Object>> headers) {
+        super.onMessageWithHeaders(events, keys, headers);
     }
 
     @Override

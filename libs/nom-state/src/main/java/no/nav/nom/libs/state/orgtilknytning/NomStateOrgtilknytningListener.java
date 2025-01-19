@@ -3,10 +3,14 @@ package no.nav.nom.libs.state.orgtilknytning;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.common.AbstractNomStateListener;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.PartitionOffset;
 import org.springframework.kafka.annotation.TopicPartition;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
+
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class NomStateOrgtilknytningListener extends AbstractNomStateListener<OrgtilknytningState> {
@@ -24,8 +28,8 @@ public class NomStateOrgtilknytningListener extends AbstractNomStateListener<Org
             topic = "${nom.libs.state.orgtilknytning.state-topic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
         )
     )
-    public void onMessage(ConsumerRecords<String, OrgtilknytningState> records) {
-        super.onMessage(records);
+    public void onMessage(List<OrgtilknytningState> events, @Header(KafkaHeaders.RECEIVED_KEY) List<String> keys, @Header(KafkaHeaders.BATCH_CONVERTED_HEADERS) List<Map<String, Object>> headers) {
+        super.onMessageWithHeaders(events, keys, headers);
     }
 
     @Override
