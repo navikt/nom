@@ -91,7 +91,7 @@ public class MissingEksternSluttdatoer {
                 stats.append(";");
 
                 if (ressurs.sluttdato().isPresent()) {
-                    stats.append(("x\n"));
+                    stats.append(("x"));
                 } else if (!dryRun) {
                     avvikleRessurs(ressurs.fid(), remedyRessurs);
 
@@ -101,6 +101,7 @@ public class MissingEksternSluttdatoer {
 
                     nomMastered.markRessursAsMasteredInNom(remedyRessurs.navident());
                 }
+                stats.append("\n");
             } else {
                 stats.append("x;x\n");
             }
