@@ -8,6 +8,7 @@ import java.util.List;
 @Repository
 public interface U4DiffRepository extends JpaRepository<U4Diff, Integer> {
     List<U4Diff> findByNavident(String navident);
+    List<U4Diff> findByType(U4DiffType type);
 
     Long deleteByNavident(String name);
 }
