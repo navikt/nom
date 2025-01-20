@@ -52,6 +52,45 @@ public class NomApiClientTest extends TestBase {
     }
 
     @Test
+    @DisplayName("getTelefon should perform request as expected")
+    void testGetTelefon() {
+
+        var navident = "X123456";
+
+        String responseBody = """
+                              [
+                                {
+                                  "nummer": "12345678",
+                                  "type": "NAV_TJENESTE_TELEFON"
+                                }
+                              ]
+                              """;
+
+        stubFor(
+            get(anyUrl())
+                .willReturn(
+                    aResponse()
+                        .withBody(responseBody)
+                        .withHeader("Content-Type", "application/json")
+                )
+        );
+
+        assertThat(nomApiClient.getTelefonnummer(navident))
+            .isNotNull();
+
+        verify(
+            getRequestedFor(
+                urlEqualTo(
+                    String.format(
+                        "/app/ressurser/%s/telefonnummer",
+                        navident
+                    )
+                )
+            ).withHeader("authorization", matching("Bearer tokenValue"))
+        );
+    }
+
+    @Test
     @DisplayName("getOrgEnhet should perform request as expected")
     void testGetOrgEnhet() {
 

@@ -6,6 +6,7 @@ import no.nav.nom.generated.model.OrgtilknytningState;
 import no.nav.nom.generated.model.Ressurs;
 import no.nav.nom.generated.model.RessursState;
 import no.nav.nom.generated.model.Sektor;
+import no.nav.nom.generated.model.Telefon;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -13,7 +14,6 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.WebClientUtils.defaultRetry;
 
@@ -105,15 +105,15 @@ public class NomApiClient {
             .block();
     }
 
-    public Optional<String> getTelefonnummer(String navident) {
+    public List<Telefon> getTelefonnummer(String navident) {
         return nomApiAuthorizedWebClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/app/ressurser/{navident}/telefonnummer")
                 .build(navident)
             )
             .retrieve()
-            .bodyToMono(String.class)
+            .toEntityList(Telefon.class)
             .retryWhen(defaultRetry)
-            .blockOptional();
+            .block().getBody();
     }
 }

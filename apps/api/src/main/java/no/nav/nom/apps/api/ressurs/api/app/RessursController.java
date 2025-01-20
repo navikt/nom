@@ -164,13 +164,13 @@ public class RessursController {
 
     @GetMapping("/{navident}/telefonnummer")
     @Operation(
-        description = "Henter telefonnummer for en ressurs",
+        description = "Henter en liste over alle telefonnummere til ressursen",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Telefonnummer"),
     })
-    public ResponseEntity<String> getTelefonnummer(
+    public ResponseEntity<List<Ressurs.Telefon>> getTelefonnummer(
         @PathVariable String navident
     ) {
         return ResponseEntity.ok(ressursRestService.getTelefonnummer(navident));

@@ -50,6 +50,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -697,27 +698,11 @@ public class RessursRestService {
         }
     }
 
-    public String getTelefonnummer(String navident) {
+    public List<Ressurs.Telefon> getTelefonnummer(String navident) {
         logger.info("Fetching telefonnummer for navident: {}", navident);
-        var telefoner = ressursContactDetailsResolver.fetchTelefoner(navident);
-        if (telefoner.size() == 1) return mapAndTrimNumber(telefoner.getFirst());
-        return telefoner.stream().filter(telefon -> {
-            if (telefon.type().equals(TelefonType.NAV_KONTOR_TELEFON)) return true;
-            return telefon.type().equals(TelefonType.NAV_TJENESTE_TELEFON);
-        }).findFirst().map(this::mapAndTrimNumber).orElse("");
+        var telefoner = new ArrayList<>(ressursContactDetailsResolver.fetchTelefoner(navident));
+        var ressursState = findRessursStateByNavident(navident);
+        ressursState.primaryTelefonnummer().ifPresent(s -> telefoner.add(new Ressurs.Telefon(s, TelefonType.PRIVAT_TELEFON)));
+        return telefoner.isEmpty() ? Collections.emptyList() : telefoner;
     }
-
-    private String mapAndTrimNumber(Ressurs.Telefon telefon) {
-        var nummer = telefon.nummer();
-        if (nummer.length() > 8) {
-            if (nummer.startsWith("47")) {
-                return nummer.substring(2);
-            }
-            if (nummer.startsWith("+47")) {
-                return nummer.substring(3);
-            }
-        }
-        return nummer;
-    }
-
 }

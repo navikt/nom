@@ -29,6 +29,8 @@ import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.generated.model.OrgtilknytningState;
 import no.nav.nom.generated.model.Ressurs;
 import no.nav.nom.generated.model.RessursState;
+import no.nav.nom.generated.model.Telefon;
+import no.nav.nom.generated.model.TelefonType;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,7 +110,6 @@ public class NomIntegrasjonService {
             createRessurs(ressursOpprettetEventV1);
         } else if (ressursEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1) {
             handleRessursSluttetEventV1(ressursSluttetEventV1);
-
         } else if (ressursEvent instanceof RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
             handleRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
         } else if (ressursEvent instanceof RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertV1) {
@@ -501,20 +502,24 @@ public class NomIntegrasjonService {
         var fysiskBrukerstedNr = Optional.ofNullable((String) inputInterfaceMethodArgumentsMap.get("fysiskBrukerstedNr"))
             .orElseThrow(() -> RequiredValueMissingException.forField("fysiskBrukerstedNr"));
 
+        var telefoner = getTelefonerFromNom(ressursOpprettetAdditionalData.navident().orElseThrow(() -> RequiredValueMissingException.forField("navId")));
+        var mobil = telefoner.isEmpty() ? null : mapAndTrimNumber(telefoner.getFirst());
+        var direkteTelefon = telefoner.size() > 1 ? mapAndTrimNumber(telefoner.get(1)) : null;
+
         NomIntegrasjonEntity newNomIntegrasjonEntity = NomIntegrasjonEntity.builder()
             .enhetsId(remedyEnhetsId)
             .etternavn(capitalizeNavn(ressursOpprettetEventData.visningsnavn().etternavn()).trim())
             .fodselsnummer(ressursOpprettetEventData.personident())
             .fornavn(capitalizeNavn(ressursOpprettetEventData.visningsnavn().getFornavnMellomnavn()).trim())
             .fysiskBrukerstedId(fysiskBrukerstedNr)
-            .navId(ressursOpprettetAdditionalData.navident().orElseThrow(() -> RequiredValueMissingException.forField("navId")))
+            .navId(ressursOpprettetAdditionalData.navident().get())
             .sektor(nomSektorToRemedyCode(ressursOpprettetEventData.sektor()))
             .tiltredelsesdato(ressursOpprettetAdditionalData.startdato()
                 .map(Utils::epochSecondsNorwegianTimeNoon)
                 .orElseThrow(() -> RequiredValueMissingException.forField("tiltredelsesdato")))
             .utlopsdato(ressursOpprettetEventData.sektor().erEkstern() && !isNull(sluttDato)? epochSecondsNorwegianTimeEndOfDay(sluttDato) : null)
-            .direkteTelefon(ressursOpprettetEventData.primaryTelefonnummer().isPresent() ? ressursOpprettetEventData.primaryTelefonnummer().get() : null)
-            .mobil(nomApiClient.getTelefonnummer(ressursOpprettetAdditionalData.navident().get()).orElse(null))
+            .direkteTelefon(direkteTelefon)
+            .mobil(mobil)
             .build();
 
         saveNewNomIntegrasjonEntity(
@@ -578,11 +583,12 @@ public class NomIntegrasjonService {
 
         var ressursState = nomApiClient.getRessursByFid(ressursPrimaryTelefonnummerOppdatertEventV1.getFid());
         var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
-        var primaryTelefonnummer = ressursPrimaryTelefonnummerOppdatertEventV1
-            .getMobilnummerOppdatertEventData()
-            .primaryTelefonnummer();
+        var telefoner = getTelefonerFromNom(ressursState.getNavident());
+        var mobil = telefoner.isEmpty() ? null : mapAndTrimNumber(telefoner.getFirst());
+        var direkteTelefon = telefoner.size() > 1 ? telefoner.get(1).getNummer() : null;
         var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
-            .direkteTelefon((isNull(primaryTelefonnummer) || primaryTelefonnummer.isBlank()) ? null : primaryTelefonnummer)
+            .mobil(mobil)
+            .direkteTelefon(direkteTelefon)
             .build();
 
         saveNewNomIntegrasjonEntity(
@@ -611,6 +617,10 @@ public class NomIntegrasjonService {
             ));
         }
 
+        var telefoner = getTelefonerFromNom(ressurs.getNavident());
+        var mobil = telefoner.isEmpty() ? null : mapAndTrimNumber(telefoner.getFirst());
+        var direkteTelefon = telefoner.size() > 1 ? mapAndTrimNumber(telefoner.get(1)) : null;
+
         return NomIntegrasjonEntity.builder()
             .enhetsId(dagligOppfolgningOrgTilknytning.map(orgtilknytningState -> getRemedyEnhetId(orgtilknytningState.getOrgEnhetId())).orElse(null))
             .etternavn(capitalizeNavn(ressurs.getVisningsnavn().getEtternavn()).trim())
@@ -629,8 +639,8 @@ public class NomIntegrasjonService {
                 ? null
                 : dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getGyldigTom).map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null)
             )
-            .direkteTelefon(isNull(ressurs.getPrimaryTelefonnummer()) || ressurs.getPrimaryTelefonnummer().isBlank() ? null : ressurs.getPrimaryTelefonnummer())
-            .mobil(nomApiClient.getTelefonnummer(ressurs.getNavident()).orElse(null))
+            .direkteTelefon(direkteTelefon)
+            .mobil(mobil)
             .masseflytting(null)
             .build();
     }
@@ -809,5 +819,33 @@ public class NomIntegrasjonService {
         logger.info("Leser og eksekverer ressursState for navident {}", navident);
         // there is no user authentification context here, so we use the default user "nom-admin"
         saveNewNomIntegrasjonEntity(nomIntegrasjonEntityWithDefaultDataFromNom, entryBestiller);
+    }
+
+    private List<Telefon> getTelefonerFromNom(String navident) {
+        return nomApiClient.getTelefonnummer(navident).stream().sorted(
+            (o1, o2) -> {
+                if (o1.getType().equals(o2.getType())) return 0;
+                if (o1.getType().equals(TelefonType.NAV_TJENESTE_TELEFON)) return -1;
+                if (o2.getType().equals(TelefonType.NAV_TJENESTE_TELEFON)) return 1;
+                if (o1.getType().equals(TelefonType.NAV_KONTOR_TELEFON)) return -1;
+                if (o2.getType().equals(TelefonType.NAV_KONTOR_TELEFON)) return 1;
+                if (o1.getType().equals(TelefonType.PRIVAT_TELEFON)) return -1;
+                if (o2.getType().equals(TelefonType.PRIVAT_TELEFON)) return 1;
+                return 0;
+            }).toList();
+    }
+
+    private String mapAndTrimNumber(Telefon telefon) {
+        if (telefon.getType().equals(TelefonType.PRIVAT_TELEFON)) return telefon.getNummer();
+        var nummer = telefon.getNummer();
+        if (nummer.length() >= 10) {
+            if (nummer.startsWith("47")) {
+                return nummer.substring(2);
+            }
+            if (nummer.startsWith("+47")) {
+                return nummer.substring(3);
+            }
+        }
+        return nummer;
     }
 }
