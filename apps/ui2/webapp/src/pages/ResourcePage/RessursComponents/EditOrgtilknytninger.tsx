@@ -285,7 +285,7 @@ function OrgtilknytningForm({
   });
 
   useEffect(() => {
-    methods.reset({ mappedeOrgtilknytninger: orgtilknytninger });
+    methods.reset({ mappedeOrgtilknytninger: defaultOrgtilknytninger });
   }, [orgtilknytninger.length]);
 
   const {
