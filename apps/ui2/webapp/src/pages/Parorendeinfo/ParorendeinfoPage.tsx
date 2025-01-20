@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
+  ChevronLeftIcon,
   FloppydiskIcon,
   PencilIcon,
   PersonIcon,
@@ -14,6 +15,7 @@ import {
   Button,
   Heading,
   HGrid,
+  Link,
   Loader,
   Select,
   TextField,
@@ -51,6 +53,7 @@ import {
 import { Pluralize } from "~/components/Pluralize";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
+import type { Ressurs } from "~/types/api-models";
 import { formatTlf, formatVisningsnavn } from "~/utils";
 
 const tomKontaktinfo: Kontaktinfo = {
@@ -66,6 +69,14 @@ export const ParorendeinfoPage = () => {
   const { id } = useParams({ from: "/kontaktpersoner/$id" });
 
   const { editKontaktpersoner } = useSearch({ from: "/kontaktpersoner/$id" });
+
+  const ressursQuery = useQuery({
+    queryKey: getRessurs.queryKey(id as string),
+    queryFn: () => getRessurs.queryFn(id as string),
+    enabled: !!id,
+  });
+
+  const ressurs = ressursQuery.data;
 
   const kontaktinfoQuery = useQuery({
     queryKey: getParorendeForNavident.queryKey(id),
@@ -83,7 +94,7 @@ export const ParorendeinfoPage = () => {
 
   if (kontaktinfoQuery.isLoading) {
     return (
-      <StaticContentWrapper>
+      <StaticContentWrapper ressurs={ressurs}>
         <div
           css={css`
             width: fit-content;
@@ -98,7 +109,7 @@ export const ParorendeinfoPage = () => {
 
   if (kontaktinfoQuery.isError) {
     return (
-      <StaticContentWrapper>
+      <StaticContentWrapper ressurs={ressurs}>
         <Alert
           css={css`
             margin-top: var(--a-spacing-8);
@@ -114,7 +125,7 @@ export const ParorendeinfoPage = () => {
   }
 
   return (
-    <StaticContentWrapper>
+    <StaticContentWrapper ressurs={ressurs}>
       {editKontaktpersoner ? (
         <ModalProvider>
           <ParorendeForm kontaktinfo={sortedKontaktinfo} navident={id} />
@@ -122,15 +133,40 @@ export const ParorendeinfoPage = () => {
           <ModalComponent />
         </ModalProvider>
       ) : (
-        <ParorendeList id={id} kontaktinformasjon={sortedKontaktinfo} />
+        <ParorendeList
+          id={id}
+          kontaktinformasjon={sortedKontaktinfo}
+          ressurs={ressurs}
+        />
       )}
     </StaticContentWrapper>
   );
 };
 
-function StaticContentWrapper({ children }: { children: ReactNode }) {
+function StaticContentWrapper({
+  children,
+  ressurs,
+}: {
+  children: ReactNode;
+  ressurs: Ressurs | undefined;
+}) {
   return (
     <ContentWrapper>
+      <Link
+        css={css`
+          color: #000;
+          font-size: 1.2rem;
+          margin-bottom: var(--a-spacing-6);
+        `}
+        href={`/ressurs/${ressurs?.navident}`}
+      >
+        <ChevronLeftIcon fontSize="1.8rem" />
+        <b>
+          Tilbake til{" "}
+          {formatVisningsnavn(ressurs?.visningsnavn) ?? ressurs?.navident}
+        </b>
+      </Link>
+
       <BodyLong>
         Denne informasjonen kan leses av din nærmeste leder og leders leder.
         Informasjonen kan bli brukt dersom noe skulle tilstøte deg i
@@ -147,18 +183,12 @@ function StaticContentWrapper({ children }: { children: ReactNode }) {
 function ParorendeList({
   id,
   kontaktinformasjon,
+  ressurs,
 }: {
   id: string;
   kontaktinformasjon: Kontaktinfo[];
+  ressurs: Ressurs | undefined;
 }) {
-  const ressursQuery = useQuery({
-    queryKey: getRessurs.queryKey(id as string),
-    queryFn: () => getRessurs.queryFn(id as string),
-    enabled: !!id,
-  });
-
-  const ressurs = ressursQuery.data;
-
   const navigate = useNavigate();
 
   const innloggetBruker = useGetSession().data?.navident === id;
