@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.orgtilknytning.u4diff.U4Diff;
 import no.nav.nom.apps.api.orgtilknytning.u4diff.U4DiffService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,10 +20,10 @@ import java.util.List;
 @PreAuthorize("hasAuthority('ADMIN')")
 @RequestMapping("/api/admin/u4diff")
 @Slf4j
-public class U4Diff {
+public class U4DiffController {
     private final U4DiffService u4DiffService;
 
-    public U4Diff(U4DiffService u4DiffService) {
+    public U4DiffController(U4DiffService u4DiffService) {
         this.u4DiffService = u4DiffService;
     }
 
@@ -31,7 +32,7 @@ public class U4Diff {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @GetMapping("/identerUtenStillingIU4")
-    public ResponseEntity<List<no.nav.nom.apps.api.orgtilknytning.u4diff.U4Diff>> OrgtilknytningerUtenforHierarki() {
+    public ResponseEntity<List<U4Diff>> OrgtilknytningerUtenforHierarki() {
         return ResponseEntity.ok(u4DiffService.getStatligeIkkeIU4());
     }
 }
