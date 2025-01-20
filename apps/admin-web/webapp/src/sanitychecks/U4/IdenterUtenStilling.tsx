@@ -87,64 +87,64 @@ export function IdenterUtenStilling() {
     <div>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
-          <Table.ColumnHeader scope="col" sortKey="id">
+          <Table.ColumnHeader scope="col" sortKey="id" sortable>
             ID
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="navident">
+          <Table.ColumnHeader scope="col" sortKey="navident" sortable>
             Navident
           </Table.ColumnHeader>
           <Table.ColumnHeader scope="col" sortKey="DOL">
             DOL
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="nom-gyldigFom">
+          <Table.ColumnHeader scope="col" sortKey="nom-gyldigFom" sortable>
             NOM Gyldig FOM
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="nom-gyldigTom">
+          <Table.ColumnHeader scope="col" sortKey="nom-gyldigTom" sortable>
             NOM Gyldig TOM
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="nomOrgEnhetId">
+          <Table.ColumnHeader scope="col" sortKey="nomOrgEnhetId" sortable>
             NOM OrgEnhet ID
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="nomOrgEnhetNavn">
+          <Table.ColumnHeader scope="col" sortKey="nomOrgEnhetNavn" sortable>
             NOM OrgEnhet Navn
           </Table.ColumnHeader>
           <Table.ColumnHeader scope="col" sortKey="nomOrgtilknytning">
             NOM Orgtilknytning
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="nomOtSektor">
+          <Table.ColumnHeader scope="col" sortKey="nomOtSektor" sortable>
             NOM OT Sektor
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="nomSektor">
+          <Table.ColumnHeader scope="col" sortKey="nomSektor" sortable>
             NOM Sektor
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="type">
+          <Table.ColumnHeader scope="col" sortKey="type" sortable>
             Type
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="U4Dol">
+          <Table.ColumnHeader scope="col" sortKey="U4Dol" sortable>
             U4 DOL
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="U4GyldigFom">
+          <Table.ColumnHeader scope="col" sortKey="U4GyldigFom" sortable>
             U4 Gyldig FOM
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="U4GyldigTom">
+          <Table.ColumnHeader scope="col" sortKey="U4GyldigTom" sortable>
             U4 Gyldig TOM
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="U4OrgEnhetId">
+          <Table.ColumnHeader scope="col" sortKey="U4OrgEnhetId" sortable>
             U4 OrgEnhet ID
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="U4OrgEnhetNavn">
+          <Table.ColumnHeader scope="col" sortKey="U4OrgEnhetNavn" sortable>
             U4 OrgEnhet Navn
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="U4Sektor">
+          <Table.ColumnHeader scope="col" sortKey="U4Sektor" sortable>
             U4 Sektor
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="U4stillingsperiode">
+          <Table.ColumnHeader scope="col" sortKey="U4stillingsperiode" sortable>
             U4 Stillingsperiode
           </Table.ColumnHeader>
         </Table.Header>
         <Table.Body>
           {sortedData.map((ident) => (
-            <Table.Row key={ident.id} shadeOnHover={false}>
+            <Table.Row key={ident.navident} shadeOnHover={false}>
               <Table.DataCell>{ident.id}</Table.DataCell>
               <Table.DataCell>
                 <NomLink path={`ressurs/${ident.navident}`}>
