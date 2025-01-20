@@ -41,7 +41,9 @@ function U4DiffSanityChecks() {
         onChange={(e) => setSelected(e.target.value)}
         style={{ width: "650px", paddingBottom: "20px" }}
       >
-        <option value="IdenterUtenStilling">Identer uten stilling</option>
+        <option value="IdenterUtenStilling">
+          Statlige Identer uten stilling i Unit 4
+        </option>
       </Select>
       <ListSelector selected={selected} />
     </div>

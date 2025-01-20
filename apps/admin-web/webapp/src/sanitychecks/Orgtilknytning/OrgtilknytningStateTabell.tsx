@@ -13,16 +13,30 @@ export function OrgtilknytningStateTabell({
   return (
     <>
       <Table.Header>
-        <Table.ColumnHeader scope="col">FID</Table.ColumnHeader>
-        <Table.ColumnHeader scope="col">NAV ident</Table.ColumnHeader>
-        <Table.ColumnHeader scope="col">OrgEnhet ID</Table.ColumnHeader>
-        <Table.ColumnHeader scope="col">Gyldig fra</Table.ColumnHeader>
-        <Table.ColumnHeader scope="col">Gyldig til</Table.ColumnHeader>
+        <Table.ColumnHeader scope="col" sortKey="fid" sortable>
+          FID
+        </Table.ColumnHeader>
+        <Table.ColumnHeader scope="col" sortKey="navident" sortable>
+          NAV ident
+        </Table.ColumnHeader>
+        <Table.ColumnHeader scope="col" sortKey="orgenhetid" sortable>
+          OrgEnhet ID
+        </Table.ColumnHeader>
+        <Table.ColumnHeader scope="col" sortKey="gyldigFom" sortable>
+          Gyldig fra
+        </Table.ColumnHeader>
+        <Table.ColumnHeader scope="col" sortKey="gyldigTom" sortable>
+          Gyldig til
+        </Table.ColumnHeader>
         <Table.ColumnHeader scope="col">
           Er daglig oppfølging
         </Table.ColumnHeader>
-        <Table.ColumnHeader scope="col">Sektor</Table.ColumnHeader>
-        <Table.ColumnHeader scope="col">Tilknytningtype</Table.ColumnHeader>
+        <Table.ColumnHeader scope="col" sortKey="sektor" sortable>
+          Sektor
+        </Table.ColumnHeader>
+        <Table.ColumnHeader scope="col" sortKey="tilknytningtype" sortable>
+          Tilknytningtype
+        </Table.ColumnHeader>
       </Table.Header>
       <Table.Body>
         {sortedData.map((orgtilknytning) => (
