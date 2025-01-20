@@ -2,6 +2,7 @@ import { queryOptions } from "@tanstack/react-query";
 import ky from "ky";
 
 import type { OrgEnhetsType } from "~/types/nom-admin/nom-admin-models";
+import type { U4Diff } from "~/types/nom-api/nom-api-admin-models.ts";
 import type { OrgEnhet, Ressurs } from "~/types/nom-api/nom-api-models.ts";
 
 export const API_BASE_URL = "/frackend/api";
@@ -74,4 +75,12 @@ export function getOrgEnhetOptions(orgenhet: string) {
         await ky.get(`${API_BASE_URL}/app/orgenheter/${orgenhet}`)
       ).json<OrgEnhet>(),
   });
+}
+
+export async function identerUtenStillingIU4Options(): Promise<U4Diff[]> {
+  return await ky
+    .get(`${API_BASE_URL}/api/admin/u4diff/identerUtenStillingIU4`, {
+      timeout: 60_000,
+    })
+    .json<U4Diff[]>();
 }
