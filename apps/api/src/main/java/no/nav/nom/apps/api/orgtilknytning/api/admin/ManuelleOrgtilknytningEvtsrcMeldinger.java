@@ -12,6 +12,7 @@ import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytningCommand;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDatoCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningSektorCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.contract.nom.Sektor;
@@ -27,6 +28,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.HtmlUtils;
+
+import java.time.LocalDate;
+import java.util.Optional;
 
 import static java.util.Objects.isNull;
 
@@ -208,6 +212,73 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
             )
         );
         return ResponseEntity.ok().body("Orgtilknytning med FID %s er endret med sektor til %s.".formatted(HtmlUtils.htmlEscape(fid), HtmlUtils.htmlEscape(sektor)));
+    }
+
+    @Operation(
+        description = "Lag en OrgtilknytningDatoEndret Eventsrc melding",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+        }
+    )
+    @PostMapping(value = "/endreSluttdatoOrgtilknytning")
+    public ResponseEntity<String> endreSluttdatoOrgtilknytning(
+        @Parameter(description = "FID for orgtilknytningen som skal endre sluttdato") @RequestParam String fid,
+        @Parameter(description = "Ny sluttdato for ressursen") @RequestParam LocalDate nySluttDato,
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
+    ) {
+        if (!validFid(fid)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("FID er ikke gyldig");
+        }
+
+        var orgtilknytning = orgtilknytningService.findByFid(fid);
+        if (orgtilknytning.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen orgtilknytning med FID: " +  HtmlUtils.htmlEscape(fid));
+        }
+
+        if (orgtilknytning.get().gyldigFom().isAfter(nySluttDato)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ny sluttdato kan ikke være før startdato");
+        }
+
+        if (orgtilknytning.get().gyldigTom().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Orgtilknytning uten sluttdato kan ikke få endret sluttdato, den må avvikles i stedet");
+        }
+
+        if (!"CONFIRM".equals(confirm)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body("Orgtilknytning med FID %s og sluttdato %s er funnet, men vil ikke endres da handling ikke er bekreftet".formatted(
+                    HtmlUtils.htmlEscape(fid),
+                    orgtilknytning.get().gyldigTom().get())
+                );
+        }
+
+        orgtilknytningCommandService.endreOrgtilknytningDato(
+            new EndreOrgtilknytningDatoCommand(
+                fid,
+                orgtilknytning.get().gyldigFom(),
+                Optional.of(nySluttDato),
+                new InputMetadata(
+                    "/api/admin/manuelleEvtsrcMeldinger",
+                    "endreSektorOrgtilknytning",
+                    fid,
+                    new Origination(
+                        SecurityUtil.getAuthenticatedNavIdent(),
+                        "Admin swagger/rest"
+                    )
+                )
+            )
+        );
+        return ResponseEntity.ok()
+            .body("Orgtilknytning med FID %s og sluttdato %s er funnet, og sluttdato er endret til %s".formatted(
+                HtmlUtils.htmlEscape(fid),
+                orgtilknytning.get().gyldigTom().get(),
+                nySluttDato)
+            );
     }
 
     private boolean validFid(String fid) {
