@@ -94,25 +94,36 @@ export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
             <>
               <span>Kontaktpersoner:</span>
 
-              <ReactRouterLink
-                params={{ id: ressurs.navident }}
-                to="/kontaktpersoner/$id"
+              <div
+                css={css`
+                  display: flex;
+                `}
               >
-                {/* Egentlig ikke anbefalt å bruke negativ margin, men det er den eneste måten jeg klarte å oppnå designet som var ønsket */}
-                <Button
-                  css={css`
-                    width: fit-content;
-                    margin-left: -12px;
-                    margin-top: -4px;
-                  `}
-                  icon={<PersonTallShortIcon title="a11y-title" />}
-                  size="small"
-                  type="button"
-                  variant="tertiary"
+                <ReactRouterLink
+                  params={{ id: ressurs.navident }}
+                  to="/kontaktpersoner/$id"
                 >
-                  Se kontaktpersoner
-                </Button>
-              </ReactRouterLink>
+                  {/* Egentlig ikke anbefalt å bruke negativ margin, men det er den eneste måten jeg klarte å oppnå designet som var ønsket */}
+                  <Button
+                    css={css`
+                      width: fit-content;
+                      margin-left: -12px;
+                      margin-top: -4px;
+                    `}
+                    icon={<PersonTallShortIcon title="a11y-title" />}
+                    size="small"
+                    type="button"
+                    variant="tertiary"
+                  >
+                    Se kontaktpersoner
+                  </Button>
+                </ReactRouterLink>
+
+                <HelpText title="Hvem kan se denne informasjonen?">
+                  Kun synlig for medarbeideren selv, nærmeste leder og leders
+                  leder.
+                </HelpText>
+              </div>
             </>
           )}
         </div>
@@ -192,7 +203,9 @@ export function Navident({ ressurs }: { ressurs: Ressurs }) {
 export function StartDato({ ressurs }: { ressurs: Ressurs }) {
   return (
     <LabelWithValue
-      helpText="Første arbeidsdag medarbeideren jobbet for NAV. Datoen kan være fra tidligere arbeidsforhold i NAV. (Historiske startdatoer fra noen år tilbake kan avvike noe fra den faktiske første arbeidsdagen. Datoen vil da vanligvis representere dagen NAV-identen ble opprettet.)"
+      helpText="Første arbeidsdag medarbeideren jobbet for NAV. Datoen kan være fra tidligere arbeidsforhold i NAV.
+      (Historiske startdatoer fra noen år tilbake kan avvike noe fra den faktiske første arbeidsdagen. Datoen vil
+      da vanligvis representere dagen NAV-identen ble opprettet.)"
       label="Startdato"
       value={formatDisplayDate(ressurs.startdato)}
     />
@@ -331,7 +344,7 @@ export function DagligLeder({ ressurs }: { ressurs: Ressurs }) {
           <>
             <span>-</span>
             <span>Daglig oppfølging</span>
-            <HelpText title="Hva er daglig leder">
+            <HelpText title="Hva er daglig leder?">
               Denne lederen har det daglige ansvaret for sykefraværsoppfølging,
               godkjenning i MinWinTid, og har tilgang til den ansatte i
               Læringsportalen.
