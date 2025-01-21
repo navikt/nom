@@ -15,7 +15,6 @@ import {
   Button,
   Heading,
   HGrid,
-  Link,
   Loader,
   Select,
   TextField,
@@ -23,6 +22,7 @@ import {
 } from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
+import { Link as ReactRouterLink } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import React, { type ReactNode } from "react";
 import {
@@ -92,7 +92,15 @@ export const ParorendeinfoPage = () => {
     })
     .sort((a, b) => a.prioritet - b.prioritet);
 
-  if (kontaktinfoQuery.isLoading) {
+  const isLoading = kontaktinfoQuery.isLoading || ressursQuery.isLoading;
+
+  const isError =
+    kontaktinfoQuery.isError ||
+    kontaktinfoQuery.status !== "success" ||
+    ressursQuery.isError ||
+    ressursQuery.status !== "success";
+
+  if (isLoading) {
     return (
       <StaticContentWrapper ressurs={ressurs}>
         <div
@@ -107,7 +115,7 @@ export const ParorendeinfoPage = () => {
     );
   }
 
-  if (kontaktinfoQuery.isError) {
+  if (isError) {
     return (
       <StaticContentWrapper ressurs={ressurs}>
         <Alert
@@ -152,20 +160,23 @@ function StaticContentWrapper({
 }) {
   return (
     <ContentWrapper>
-      <Link
-        css={css`
-          color: #000;
-          font-size: 1.2rem;
-          margin-bottom: var(--a-spacing-6);
-        `}
-        href={`/ressurs/${ressurs?.navident}`}
-      >
-        <ChevronLeftIcon fontSize="1.8rem" />
-        <b>
-          Tilbake til{" "}
-          {formatVisningsnavn(ressurs?.visningsnavn) ?? ressurs?.navident}
-        </b>
-      </Link>
+      {ressurs && (
+        <ReactRouterLink
+          css={css`
+            display: flex;
+            align-items: center;
+            color: #000;
+            font-size: 1.2rem;
+            margin-bottom: var(--a-spacing-4);
+          `}
+          params={{ id: ressurs?.navident }}
+          to="/ressurs/$id"
+        >
+          <ChevronLeftIcon fontSize="1.8rem" />
+
+          <b>Tilbake til {formatVisningsnavn(ressurs.visningsnavn)}</b>
+        </ReactRouterLink>
+      )}
 
       <BodyLong>
         Denne informasjonen kan leses av din nærmeste leder og leders leder.
