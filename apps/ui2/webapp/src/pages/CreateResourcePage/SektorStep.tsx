@@ -81,10 +81,15 @@ export function SektorStep() {
   }).data;
 
   const [selectedSektor, setSelectedSektor] = useState(
-    sektor ?? Sektor.NAV_KOMMUNAL,
+    sektor ?? Sektor.NAV_STATLIG,
   );
+
   const [selectedTilknytningtype, setSelectedTilknytningtype] = useState(
-    tilknytningtype ?? Tilknytningtype.INGEN,
+    tilknytningtype ?? sektor === Sektor.NAV_KOMMUNAL
+      ? Tilknytningtype.INGEN
+      : (sektor === Sektor.NAV_STATLIG
+          ? tilknytningstyperStatlige
+          : tilknytningstyperEksterne)[0],
   );
 
   const saveValuesAndNavigate = (step: string) => {
