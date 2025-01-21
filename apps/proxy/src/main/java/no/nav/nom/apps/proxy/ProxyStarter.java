@@ -14,6 +14,5 @@ public class ProxyStarter {
     public static void main(String[] args) {
         PropertyUtils.readVaultSrvProps(Map.of("srvnomad", "app.ldap"));
         SpringApplication.run(ProxyStarter.class, args);
-
     }
 }

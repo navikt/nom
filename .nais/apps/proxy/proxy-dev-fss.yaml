@@ -80,4 +80,6 @@ spec:
     paths:
       - kvPath: /serviceuser/data/dev/srvnomad
         mountPath: /var/run/secrets/nais.io/srvnomad
+  secureLogs:
+    enabled: true
 
