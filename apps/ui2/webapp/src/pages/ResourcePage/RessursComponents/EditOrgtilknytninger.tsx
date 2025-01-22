@@ -18,6 +18,7 @@ import {
   HelpText,
   HStack,
   Label,
+  Loader,
   Select,
   Tag,
   useDatepicker,
@@ -195,6 +196,7 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
       <OrgtilknytningForm
         dagensDolOrgEnhet={dagensDolOrgEnhet}
         dagensRemedyEnhetId={dagensRemedyEnhetId}
+        isLoading={ressursOrgtilknytningerQuery.isLoading}
         orgtilknytninger={orgtilknytninger}
         ressurs={ressurs}
       />
@@ -225,11 +227,13 @@ function OrgtilknytningForm({
   ressurs,
   dagensRemedyEnhetId,
   dagensDolOrgEnhet,
+  isLoading,
 }: {
   orgtilknytninger: Partial<OrgtilknytningState>[];
   ressurs: Ressurs;
   dagensRemedyEnhetId: string | undefined;
   dagensDolOrgEnhet: OrgEnhet | undefined;
+  isLoading: boolean;
 }) {
   const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
@@ -252,10 +256,14 @@ function OrgtilknytningForm({
     ? formatDateWithoutTimezone(tidligsteOrgtilknytningStartdato)
     : undefined;
 
-  const hasOtTomChanged = (orgtilknytning: Partial<OrgtilknytningState>) => {
-    const originalOt = orgtilknytninger.find(
+  const otBeforeEdit = (orgtilknytning: Partial<OrgtilknytningState>) => {
+    return orgtilknytninger.find(
       (tilknytning) => tilknytning.fid === orgtilknytning.fid,
     );
+  };
+
+  const hasOtTomChanged = (orgtilknytning: Partial<OrgtilknytningState>) => {
+    const originalOt = otBeforeEdit(orgtilknytning);
 
     return !(orgtilknytning.gyldigTom === originalOt?.gyldigTom);
   };
@@ -277,7 +285,7 @@ function OrgtilknytningForm({
   });
 
   useEffect(() => {
-    methods.reset({ mappedeOrgtilknytninger: orgtilknytninger });
+    methods.reset({ mappedeOrgtilknytninger: defaultOrgtilknytninger });
   }, [orgtilknytninger.length]);
 
   const {
@@ -366,6 +374,21 @@ function OrgtilknytningForm({
     }
   };
 
+  if (isLoading) {
+    return (
+      <div
+        css={css`
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        `}
+      >
+        <Loader size="3xlarge" />
+        <span>Laster...</span>
+      </div>
+    );
+  }
+
   return (
     <FormProvider {...methods}>
       <Informasjonsboks ressursSektor={ressurs.sektor} />
@@ -422,6 +445,19 @@ function OrgtilknytningForm({
             !hasOtTomChanged(field) &&
             overToMndGammel &&
             !hasAdminAccess;
+
+          const originalOt = otBeforeEdit(field);
+
+          const editSektorDisabled =
+            editOtDisabled ||
+            (!fremtidig && originalOt?.sektor && !hasAdminAccess);
+
+          const editTilknytningstypeDisabled =
+            editOtDisabled ||
+            (!fremtidig &&
+              originalOt?.sektor &&
+              originalOt?.orgtilknytningType &&
+              !hasAdminAccess);
 
           return (
             <div
@@ -506,18 +542,21 @@ function OrgtilknytningForm({
                 `}
               >
                 <FormSektorSelectWrapper
-                  disabled={editOtDisabled}
+                  disabled={editSektorDisabled}
                   error={
                     errors?.mappedeOrgtilknytninger?.[index]?.sektor?.message ??
                     ""
                   }
                   name={`mappedeOrgtilknytninger.${index}.sektor`}
                   tilknytningstypeField={`mappedeOrgtilknytninger.${index}.orgtilknytningType`}
-                  triggerOthers={[`mappedeOrgtilknytninger.${index}.gyldigTom`]}
+                  triggerOthers={[
+                    `mappedeOrgtilknytninger.${index}.gyldigTom`,
+                    `mappedeOrgtilknytninger.${index}.orgtilknytningType`,
+                  ]}
                 />
 
                 <FormTilknytningstypeSelectWrapper
-                  disabled={editOtDisabled}
+                  disabled={editTilknytningstypeDisabled}
                   error={
                     errors?.mappedeOrgtilknytninger?.[index]?.orgtilknytningType
                       ?.message ?? ""
@@ -848,12 +887,6 @@ function FormSektorSelectWrapper({
 
             await trigger(name);
 
-            if (triggerOthers && triggerOthers.length > 0) {
-              triggerOthers.map((otherField) => {
-                trigger(otherField);
-              });
-            }
-
             const newValue = value.target.value;
 
             if (newValue === Sektor.NAV_KOMMUNAL) {
@@ -865,6 +898,12 @@ function FormSektorSelectWrapper({
                   ? tilknytningstyperStatlige
                   : tilknytningstyperEksterne)[0],
               );
+            }
+
+            if (triggerOthers && triggerOthers.length > 0) {
+              triggerOthers.map((otherField) => {
+                trigger(otherField);
+              });
             }
           }}
           ref={field.ref}
