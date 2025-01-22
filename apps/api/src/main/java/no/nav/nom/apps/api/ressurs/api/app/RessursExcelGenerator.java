@@ -10,13 +10,13 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.stereotype.Component;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -45,11 +45,15 @@ public class RessursExcelGenerator {
 
     public void generate(HttpServletResponse response, List<Ressurs> ressurser, List<String> navidenter, String topOrgEnhetId) {
         var kanSeSluttdato = authResolver.kanOppretteRessurs(topOrgEnhetId);
-        var dolMap =  orgtilknytningStateRepository.findByNavidentIn(navidenter).stream()
+        var dolMap = orgtilknytningStateRepository.findByNavidentIn(navidenter).stream()
             .filter(OrgtilknytningState::erDagligOppfolging)
             .collect(Collectors.groupingBy(
                 OrgtilknytningState::navident,
-                Collectors.collectingAndThen(Collectors.toList(), dol -> dol.get(0))));
+                Collectors.collectingAndThen(
+                    Collectors.toList(),
+                    dol -> Collections.max(dol, Comparator.comparing(OrgtilknytningState::gyldigFom))
+                )
+            ));
         var orgEnhetNavnMap = orgEnhetStateRepository.findByIdIn(
                 dolMap.values().stream()
                     .map(OrgtilknytningState::orgEnhetId)
