@@ -658,8 +658,7 @@ public class OrgtilknytningRestService {
 
         if (currentOrgtilknytningState.orgtilknytningType().isPresent()
             && currentOrgtilknytningState.orgtilknytningType().get().equals(Tilknytningtype.INGEN)
-            && isNotNull(currentOrgtilknytningState.sektor())
-            && !currentOrgtilknytningState.sektor().erKommunal()) {
+            && (isNull(currentOrgtilknytningState.sektor()) || !currentOrgtilknytningState.sektor().erKommunal())) {
             return Optional.empty();
         }
         return currentOrgtilknytningState.orgtilknytningType();
@@ -811,8 +810,7 @@ public class OrgtilknytningRestService {
                 orgtilknytningCommandService.endreTilknytningtype(
                     EndreTilknytningtypeCommand.builder()
                         .fid(opprettetOrgtilknytningFid)
-                        .tilknytningtype(orgtilknytningState.orgtilknytningType().isPresent() ? orgtilknytningState.orgtilknytningType() : Optional.of(
-                            Tilknytningtype.INGEN))
+                        .tilknytningtype(orgtilknytningState.orgtilknytningType().isPresent() ? orgtilknytningState.orgtilknytningType() : Optional.empty())
                         .inputMetadata(inputMetadata)
                         .build()
                 );

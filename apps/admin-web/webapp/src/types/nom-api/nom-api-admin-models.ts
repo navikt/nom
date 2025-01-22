@@ -1,0 +1,144 @@
+/* eslint-disable */
+/* tslint:disable */
+/*
+ * ---------------------------------------------------------------
+ * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
+ * ##                                                           ##
+ * ## AUTHOR: acacode                                           ##
+ * ## SOURCE: https://github.com/acacode/swagger-typescript-api ##
+ * ---------------------------------------------------------------
+ */
+
+export interface EnhetsOrganisasjonSanityCheckResponse {
+  agressoId?: string;
+  id?: string;
+  navn?: string;
+}
+
+export interface EnhtetMedRessursSomHarSluttetOgErLederSanityCheckResponse {
+  enhetsOrganisasjonSanityCheckResponse?: EnhetsOrganisasjonSanityCheckResponse[];
+  navident?: string;
+  /** @format date */
+  sluttdato?: string;
+  visningsnavn?: string;
+}
+
+export interface IOrgenhet {
+  agressoId?: string;
+  agressoOrgenhetType?: string;
+  fid?: string;
+  /** @format date */
+  gyldigFom?: string;
+  /** @format date */
+  gyldigTom?: string;
+  id?: string;
+  navn?: string;
+  nomNivaa?: NomNivaa;
+  orgEnhetsType?: OrgEnhetsType;
+  orgNiv?: string;
+  overordnetOrgEnhetFid?: string;
+  uniqueAgressoId?: string;
+}
+
+export enum NomNivaa {
+  LINJEENHET = "LINJEENHET",
+  DRIFTSENHET = "DRIFTSENHET",
+  ARBEIDSOMRAADE = "ARBEIDSOMRAADE",
+}
+
+export enum OrgEnhetsType {
+  ARBEIDSLIVSSENTER = "ARBEIDSLIVSSENTER",
+  NAV_ARBEID_OG_YTELSER = "NAV_ARBEID_OG_YTELSER",
+  ARBEIDSRAADGIVNING = "ARBEIDSRAADGIVNING",
+  DIREKTORAT = "DIREKTORAT",
+  DIR = "DIR",
+  FYLKE = "FYLKE",
+  NAV_FAMILIE_OG_PENSJONSYTELSER = "NAV_FAMILIE_OG_PENSJONSYTELSER",
+  HJELPEMIDLER_OG_TILRETTELEGGING = "HJELPEMIDLER_OG_TILRETTELEGGING",
+  KLAGEINSTANS = "KLAGEINSTANS",
+  NAV_KONTAKTSENTER = "NAV_KONTAKTSENTER",
+  KONTROLL_KONTROLLENHET = "KONTROLL_KONTROLLENHET",
+  NAV_KONTOR = "NAV_KONTOR",
+  TILTAK = "TILTAK",
+  NAV_OKONOMITJENESTE = "NAV_OKONOMITJENESTE",
+}
+
+export interface OrgtilknytningState {
+  erDagligOppfolging: boolean;
+  fid: string;
+  /** @format date */
+  gyldigFom: string;
+  /** @format date */
+  gyldigTom?: string;
+  masseflyttetFraFid?: string;
+  navident: string;
+  orgEnhetId: string;
+  orgtilknytningType?: Tilknytningtype;
+  sektor?: Sektor;
+}
+
+export interface RobotOrgtilknytningSanityCheckResponse {
+  /** @format date */
+  gyldigFom?: string;
+  /** @format date */
+  gyldigTom?: string;
+  orgenhetId?: string;
+  orgenhetNavn?: string;
+}
+
+export interface RobotRessursSanityCheckResponse {
+  navident?: string;
+  robotOrgtilknytningSanityCheckResponse?: RobotOrgtilknytningSanityCheckResponse[];
+  sektor?: Sektor;
+  /** @format date */
+  sluttdato?: string;
+  /** @format date */
+  startdato?: string;
+  visningsnavn?: string;
+}
+
+export enum Sektor {
+  NAV_STATLIG = "NAV_STATLIG",
+  NAV_KOMMUNAL = "NAV_KOMMUNAL",
+  EKSTERN = "EKSTERN",
+}
+
+export enum Tilknytningtype {
+  ARBEIDSTRENING = "ARBEIDSTRENING",
+  ANNET = "ANNET",
+  EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER",
+  FAST = "FAST",
+  INGEN = "INGEN",
+  JOBBSPESIALIST = "JOBBSPESIALIST",
+  KONSULENT = "KONSULENT",
+  LAERLING = "LAERLING",
+  MIDLERTIDIG = "MIDLERTIDIG",
+  PENSJONIST = "PENSJONIST",
+  STUDENT = "STUDENT",
+}
+
+export interface U4Diff {
+  /** @format int32 */
+  id?: number;
+  navident: string;
+  nomDol?: boolean;
+  /** @format date */
+  nomGyldigFom?: string;
+  /** @format date */
+  nomGyldigTom?: string;
+  nomOrgenhetId?: string;
+  nomOrgenhetNavn?: string;
+  nomOrgtilknytning?: string;
+  nomOtSektor?: Sektor;
+  nomSektor?: Sektor;
+  type?: "MANGLENDE_U4_PERIODE" | "EKSTRA_U4_PERIODE" | "FORSKJELL_I_U4_PERIODE" | "MANGLENDE_STATLIG_I_U4";
+  u4Dol?: boolean;
+  /** @format date */
+  u4GyldigFom?: string;
+  /** @format date */
+  u4GyldigTom?: string;
+  u4OrgenhetId?: string;
+  u4OrgenhetNavn?: string;
+  u4Sektor?: Sektor;
+  u4StillingPeriode?: string;
+}

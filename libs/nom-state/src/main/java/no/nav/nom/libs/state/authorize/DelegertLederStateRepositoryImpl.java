@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.state.LederTilgangState;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;

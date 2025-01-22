@@ -47,6 +47,28 @@ export interface GetPersonRequest {
   personident: string;
 }
 
+export interface GlobalStatistikkResponse {
+  /** @format int32 */
+  antallFylkekontor?: number;
+  /** @format int32 */
+  antallHjelpemidlerOgTilrettelegging?: number;
+  /** @format int32 */
+  antallKlageinstanser?: number;
+  /** @format int32 */
+  antallKontrollKonrollenheter?: number;
+  /** @format int32 */
+  antallLovNoder?: number;
+  /** @format int32 */
+  antallNavArbeidOgYtelser?: number;
+  /** @format int32 */
+  antallNavFamilieOgPensjonsytelser?: number;
+  /** @format int32 */
+  antallNavKontaktsenter?: number;
+  /** @format int32 */
+  antallNavKontorer?: number;
+  ressursStatistikk?: RessursStatistikk;
+}
+
 export interface IOrgenhet {
   agressoId?: string;
   agressoOrgenhetType?: string;
@@ -78,7 +100,7 @@ export type JsonNode = object;
 export interface LederTilgangForOrgenhetRequest {
   delegertTilNavident: string;
   /** @format date */
-  gyldigTom: string;
+  gyldigTom?: string;
   orgenhetId: string;
 }
 
@@ -89,7 +111,7 @@ export interface LederTilgangState {
   /** @format date */
   gyldigFom: string;
   /** @format date */
-  gyldigTom: string;
+  gyldigTom?: string;
   orgenhetId: string;
   til: string;
 }
@@ -174,6 +196,34 @@ export interface OrgEnhetMedLedernavn {
   ledere: string[];
   navn: string;
   remedyEnhetId?: string;
+}
+
+export interface OrgEnhetStatistikkResponse {
+  /** @format int32 */
+  antallArbeidslivssenter?: number;
+  /** @format int32 */
+  antallArbeidsraadgivning?: number;
+  /** @format int32 */
+  antallFylkekontor?: number;
+  /** @format int32 */
+  antallHjelpemidlerOgTilrettelegging?: number;
+  /** @format int32 */
+  antallKlageinstanser?: number;
+  /** @format int32 */
+  antallKontrollKonrollenheter?: number;
+  /** @format int32 */
+  antallLovNoder?: number;
+  /** @format int32 */
+  antallNavArbeidOgYtelser?: number;
+  /** @format int32 */
+  antallNavFamilieOgPensjonsytelser?: number;
+  /** @format int32 */
+  antallNavKontaktsenter?: number;
+  /** @format int32 */
+  antallNavKontorer?: number;
+  /** @format int32 */
+  antallTiltak?: number;
+  ressursStatistikk?: RessursStatistikk;
 }
 
 export enum OrgEnhetsType {
@@ -273,6 +323,17 @@ export interface RessursState {
   /** @format date */
   startdato?: string;
   visningsnavn: Visningsnavn;
+}
+
+export interface RessursStatistikk {
+  /** @format int64 */
+  antallAktiveRessurser?: number;
+  /** @format int64 */
+  antallEksterneRessurser?: number;
+  /** @format int64 */
+  antallKommunaleRessurser?: number;
+  /** @format int64 */
+  antallStatligeRessurser?: number;
 }
 
 export enum Sektor {

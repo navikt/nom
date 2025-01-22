@@ -94,7 +94,7 @@ public class RessursStateRepositoryImpl implements RessursStateRepository {
         ressursByFid.put(ressursEventData.fid(), ressursEventData);
         ressursByPersonident.put(ressursEventData.personident(), ressursEventData);
         ressursByNavident.put(ressursEventData.navident(), ressursEventData);
-        if (ressursEventData.sektor().equals(Sektor.EKSTERN)) {
+        if (ressursEventData.sektor() != null && ressursEventData.sektor() == Sektor.EKSTERN) {
             ressursByNavidentBareEksterne.put(ressursEventData.navident(), ressursEventData);
         }
     }

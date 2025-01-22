@@ -14,7 +14,8 @@
     "stylelint:fix": "stylelint --fix '**/*.{tsx,css}'",
     "generate-types:nom-admin": "swagger-typescript-api --path https://nom-admin-api.intern.dev.nav.no/v3/api-docs/internal --output ./src/types/nom-admin --no-client -r -n nom-admin-models",
     "generate-types:nom-api": "swagger-typescript-api --path https://nom-api.intern.dev.nav.no/v3/api-docs/internal --output ./src/types/nom-api --no-client -r -n nom-api-models",
-    "generate-types": "npm run generate-types:nom-admin && npm run generate-types:nom-api",
+    "generate-types:nom-api-admin": "swagger-typescript-api --path https://nom-api.intern.dev.nav.no/v3/api-docs/internal_admin --output ./src/types/nom-api --no-client -r -n nom-api-admin-models",
+    "generate-types": "npm run generate-types:nom-admin && npm run generate-types:nom-api && npm run generate-types:nom-api-admin",
     "all-checks": "npm run check-types && npm run lint"
   },
   "dependencies": {

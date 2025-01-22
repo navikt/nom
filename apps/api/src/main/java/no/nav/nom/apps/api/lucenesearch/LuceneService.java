@@ -100,7 +100,7 @@ public class LuceneService {
                         "tlf-nr",
                         "epost",
                         ressurs.sluttdato().map(date -> date.isAfter(LocalDate.now())).orElse(true),
-                        ressurs.sektor().toString()
+                        ressurs.sektor() != null ? ressurs.sektor().toString() : null
                     )
                 );
 

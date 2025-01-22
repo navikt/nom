@@ -2,12 +2,15 @@ package no.nav.nom.libs.state.ressurs.mastered;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.libs.state.common.AbstractNomStateListener;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.PartitionOffset;
 import org.springframework.kafka.annotation.TopicPartition;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class NomStateMasteredRessursListener extends AbstractNomStateListener<LocalDateTime> {
@@ -25,8 +28,8 @@ public class NomStateMasteredRessursListener extends AbstractNomStateListener<Lo
             topic = "${nom.libs.state.mastered-ressurs.state-topic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
         )
     )
-    public void onMessage(ConsumerRecords<String, LocalDateTime> records) {
-        super.onMessage(records);
+    public void onMessage(List<LocalDateTime> events, @Header(KafkaHeaders.RECEIVED_KEY) List<String> keys, @Header(KafkaHeaders.BATCH_CONVERTED_HEADERS) List<Map<String, Object>> headers) {
+        super.onMessageWithHeaders(events, keys, headers);
     }
 
     @Override
