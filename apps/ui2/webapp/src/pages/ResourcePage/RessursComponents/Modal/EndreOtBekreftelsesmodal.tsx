@@ -27,7 +27,7 @@ import {
   todayWithoutTimezone,
 } from "~/utils";
 
-export function OtBekreftelsesmodal({
+export function EndreOtBekreftelsesmodal({
   onCancel,
   onConfirm,
   orgtilknytninger,
