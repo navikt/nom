@@ -371,9 +371,12 @@ export function EndreOtBekreftelsesmodal({
                   ) : (
                     <>
                       <span>
-                        Etter {formatDisplayDate(senesteTomDato)} vil
-                        medarbeideren ikke lenger være registrert som ansatt i
-                        Nav
+                        Fra{" "}
+                        {senesteTomDato
+                          ? formatDisplayDate(addDays(senesteTomDato, 1))
+                          : "den valgte datoen"}{" "}
+                        vil medarbeideren ikke lenger være registrert som ansatt
+                        i Nav
                       </span>
 
                       <InformationSquareFillIcon
