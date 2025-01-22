@@ -285,10 +285,10 @@ export function EndreOtBekreftelsesmodal({
 
                       <ExclamationmarkTriangleFillIcon
                         css={css`
-                          color: orangered;
+                          color: var(--a-icon-warning);
                           float: right;
                         `}
-                        font-size="2rem"
+                        fontSize="2rem"
                         title="a11y-title"
                       />
                     </>
@@ -303,9 +303,9 @@ export function EndreOtBekreftelsesmodal({
 
                       <InformationSquareFillIcon
                         css={css`
-                          color: blue;
+                          color: var(--nom-primary);
                         `}
-                        font-size="2rem"
+                        fontSize="2rem"
                         title="a11y-title"
                       />
                     </>
@@ -362,9 +362,9 @@ export function EndreOtBekreftelsesmodal({
 
                       <ExclamationmarkTriangleFillIcon
                         css={css`
-                          color: orangered;
+                          color: var(--a-icon-warning);
                         `}
-                        font-size="2rem"
+                        fontSize="2rem"
                         title="a11y-title"
                       />
                     </>
@@ -378,9 +378,9 @@ export function EndreOtBekreftelsesmodal({
 
                       <InformationSquareFillIcon
                         css={css`
-                          color: blue;
+                          color: var(--nom-primary);
                         `}
-                        font-size="2rem"
+                        fontSize="2rem"
                         title="a11y-title"
                       />
                     </>
