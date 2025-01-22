@@ -187,11 +187,11 @@ spec:
         - application: salesforce
           namespace: teamcrm
           cluster: prod-external
-        - application: org-okonomi-mapping-backend
-          namespace: org
+        - application: orgenhet-kostnadssted-mapping-api
+          namespace: team-nof
           cluster: prod-gcp
-        - application: org-okonomi-mapping-ui
-          namespace: org
+        - application: orgenhet-kostnadssted-mapping-web
+          namespace: team-nof
           cluster: prod-gcp
         - application: kodeverk-web
           namespace: team-rocket
