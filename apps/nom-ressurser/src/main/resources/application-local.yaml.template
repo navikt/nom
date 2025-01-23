@@ -4,7 +4,6 @@ app:
     password: NO_VALUE
 
 dvh:
-  endpoint: dummyUrl
   ords-endpoint: dummyUrl
 
 spring:

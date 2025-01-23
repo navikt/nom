@@ -22,14 +22,7 @@ public record AppProperties(
     ) {}
 
     public record NomProxy(
-            String baseUrl,
-            String enhetPath,
-            String ressursStillingerPath,
-            String eksterneRessurserPath,
-            String kommunaleRessurserPath,
-            String ansatteBucketsPath,
-            String tlfPath,
-            String orgHierarkiPath
+            String baseUrl
         ) {}
 
     public record Pdl(

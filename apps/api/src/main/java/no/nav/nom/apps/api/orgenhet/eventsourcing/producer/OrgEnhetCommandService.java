@@ -48,12 +48,7 @@ public class OrgEnhetCommandService {
             var input = objectMapper.valueToTree(opprettOrgEnhet.inputMetadata().inputInterfaceMethodArguments());
             try {
                 var raw = input.isArray() ? input.get(0): input;
-                DvhOrgenhetV2 dvhOrgenhet2;
-                if (raw.has("ORGENHET_KODE")) {
-                    dvhOrgenhet2 = new DvhOrgenhetV2(raw);
-                } else {
-                    dvhOrgenhet2 = DvhOrgenhetV2.fromOrds(raw);
-                }
+                DvhOrgenhetV2 dvhOrgenhet2 = DvhOrgenhetV2.fromOrds(raw);
                 additionalAgressoData = new OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData(
                     dvhOrgenhet2.getAgressoId(),
                     dvhOrgenhet2.getNavn(),
@@ -96,12 +91,7 @@ public class OrgEnhetCommandService {
         if (korrigerOrgEnhet.inputMetadata().inputInterfaceMethodName().equals("Datavarehus")) {
             var input = objectMapper.valueToTree(korrigerOrgEnhet.inputMetadata().inputInterfaceMethodArguments());
             var raw = input.isArray() ? input.get(0): input;
-            DvhOrgenhetV2 dvhOrgenhet2;
-            if (raw.has("ORGENHET_KODE")) {
-                dvhOrgenhet2 = new DvhOrgenhetV2(raw);
-            } else {
-                dvhOrgenhet2 = DvhOrgenhetV2.fromOrds(raw);
-            }
+            DvhOrgenhetV2 dvhOrgenhet2 = DvhOrgenhetV2.fromOrds(raw);
             additionalAgressoData = new OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData(
                     dvhOrgenhet2.getAgressoId(),
                     dvhOrgenhet2.getNavn(),

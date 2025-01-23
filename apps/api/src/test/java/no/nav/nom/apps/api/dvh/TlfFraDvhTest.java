@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
@@ -16,7 +18,6 @@ public class TlfFraDvhTest extends DvhTestBase {
     @DisplayName("hent telefonnr")
     public void test1() {
         stubTlfFromString(tlfDvhPayload);
-        stubResourcesFromString(resourceInitDvhPayload);
 
         dvhRestConsumer.loadTlfFromDvh();
 
@@ -27,23 +28,22 @@ public class TlfFraDvhTest extends DvhTestBase {
         Assertions.assertTrue(tlfList2.isEmpty());
 
         var tlfList3 = this.dvhRepository.getTelefonNrListByNavIdent("J509999");
-        Assertions.assertTrue(tlfList2.isEmpty());
+        assertThat(tlfList3.get(0).getNummer()).isEqualTo("4733008888");
 
         var tlfList4 = this.dvhRepository.getTelefonNrListByNavIdent("J501111");
-        Assertions.assertTrue(tlfList2.isEmpty());
+        assertThat(tlfList4.get(0).getNummer()).isEqualTo("4733001111");
     }
 
     @Test
     @DisplayName("hent telefonnr, sjekk flere")
     public void test21() {
         stubTlfFromString(tlfDvhPayload);
-        stubResourcesFromString(resourceInitDvhPayload);
 
         dvhRestConsumer.loadTlfFromDvh();
 
-        val resourceList = this.ressursStateRepository.getAll();
-        for (val r : resourceList) {
-            assertThat(this.dvhRepository.getTelefonNrListByNavIdent(r.navident())).hasSize(1);
+        val navidenter = List.of("A123123", "A321321", "A321320", "A440022", "A503020");
+        for (val navident : navidenter) {
+            assertThat(this.dvhRepository.getTelefonNrListByNavIdent(navident)).hasSize(1);
         }
 
     }
@@ -51,7 +51,7 @@ public class TlfFraDvhTest extends DvhTestBase {
 
     private void stubTlfFromString(String payload) {
         stubFor(
-                get("/proxy/dvh/json/Hr/NOM2/NOM_TLF_v1")
+            get("/dvh_nom/nom_ords_tlf.json")
                         .willReturn(
                                 aResponse()
                                         .withStatus(200)
@@ -61,115 +61,14 @@ public class TlfFraDvhTest extends DvhTestBase {
         );
     }
 
-    private void stubResourcesFromString(String payload) {
-        stubFor(
-                get("/proxy/dvh/json/Hr/NOM3/NOM_ANSATTE_BUCKETS_v2").
-                        willReturn(
-                                aResponse()
-                                        .withStatus(200)
-                                        .withHeader("Content-Type", "application/json;charset=UTF-8")
-                                        .withBody(payload)
-                        )
-        );
-    }
-
-
-    private static final String resourceInitDvhPayload = // language=json
-            """
-            {
-                  "NOM_ANSATTE_BUCKETS_v2Response": [
-                    {
-                      "NAV_IDENT": "A123123",
-                      "FNR": "12345678901",
-                      "FORNAVN": "Navn 1",
-                      "ETTERNAVN": "ENavn 1",
-                      "EPOST": "epost1@nav.no",
-                      "REMEDY_START_DATO": "2008-05-23",
-                      "REMEDY_SLUTT_DATO": "2099-12-31",
-                      "AGRESSO_SLUTT_DATO": "2099-12-31",
-                      "ANSATT_PER_IDAG": "JA",
-                      "ANSETTELSESTYPE_BESK": "Fast",
-                      "ANSATT_TYPE": "NAV Statlig",
-                      "ANSATT_RESSURS_KODE": "F",
-                      "REMEDY_PERMISJON": "NEI",
-                      "IDENT_TYPE": "STANDARD"
-                    },
-                    {
-                      "NAV_IDENT": "A321321",
-                      "FNR": "12345678902",
-                      "FORNAVN": "Navn 2",
-                      "ETTERNAVN": "ENavn 2",
-                      "EPOST": "epost2@nav.no",
-                      "REMEDY_START_DATO": "2008-05-26",
-                      "REMEDY_SLUTT_DATO": "2099-12-31",
-                      "AGRESSO_SLUTT_DATO": "2099-12-31",
-                      "ANSATT_PER_IDAG": "JA",
-                      "ANSETTELSESTYPE_BESK": "Fast",
-                      "ANSATT_TYPE": "NAV Statlig",
-                      "ANSATT_RESSURS_KODE": "F",
-                      "REMEDY_PERMISJON": "NEI",
-                      "IDENT_TYPE": "STANDARD"
-                    },
-                    {
-                      "NAV_IDENT": "A321320",
-                      "FNR": "12345678903",
-                      "FORNAVN": "Navn 3",
-                      "ETTERNAVN": "ENavn 3",
-                      "EPOST": "epost3@nav.no",
-                      "REMEDY_START_DATO": "2008-05-28",
-                      "REMEDY_SLUTT_DATO": "2019-01-29",
-                      "AGRESSO_SLUTT_DATO": "2010-11-13",
-                      "ANSATT_PER_IDAG": "NEI",
-                      "ANSETTELSESTYPE_BESK": null,
-                      "ANSATT_TYPE": "NAV Statlig",
-                      "ANSATT_RESSURS_KODE": null,
-                      "REMEDY_PERMISJON": "NEI",
-                      "IDENT_TYPE": "STANDARD"
-                    },
-                    {
-                      "NAV_IDENT": "A440022",
-                      "FNR": "92345678904",
-                      "FORNAVN": "Navn 4",
-                      "ETTERNAVN": "ENavn 4",
-                      "EPOST": "epost4@nav.no",
-                      "REMEDY_START_DATO": "2008-05-30",
-                      "REMEDY_SLUTT_DATO": "2099-12-31",
-                      "AGRESSO_SLUTT_DATO": "2099-12-31",
-                      "ANSATT_PER_IDAG": "JA",
-                      "ANSETTELSESTYPE_BESK": "Kommunalt ansatt",
-                      "ANSATT_TYPE": "NAV Kommunalt",
-                      "ANSATT_RESSURS_KODE": "N",
-                      "REMEDY_PERMISJON": "JA",
-                      "IDENT_TYPE": "STANDARD"
-                    },
-                    {
-                      "NAV_IDENT": "A503020",
-                      "FNR": "12345678905",
-                      "FORNAVN": "Navn 5",
-                      "ETTERNAVN": "ENavn 5",
-                      "EPOST": "epost5@nav.no",
-                      "REMEDY_START_DATO": "2008-05-30",
-                      "REMEDY_SLUTT_DATO": "2099-12-31",
-                      "AGRESSO_SLUTT_DATO": "2099-12-31",
-                      "ANSATT_PER_IDAG": "JA",
-                      "ANSETTELSESTYPE_BESK": "Kommunalt ansatt",
-                      "ANSATT_TYPE": "NAV Kommunalt",
-                      "ANSATT_RESSURS_KODE": "N",
-                      "REMEDY_PERMISJON": "JA",
-                      "IDENT_TYPE": "STANDARD"
-                    }
-                  ]
-                }
-                """;
-
     private static final String tlfDvhPayload = // language=json
             """
             {
-              "NOM_TLF_v1Result": [
+              "items": [
                 {
                   "msisdn": "4711220033",
                   "navident": "A123123",
-                  "userreference1": "PK-A123123",
+                  "userrefeerence1": "PK-A123123",
                   "typeid": "53200",
                   "typename": "Bedrift Total B (50 GB)",
                   "typeaccesstype": "MOBILE",
@@ -182,7 +81,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                 {
                   "msisdn": "4711330022",
                   "navident": "A321321",
-                  "userreference1": "PK-A321321",
+                  "userrefeerence1": "PK-A321321",
                   "typeid": "53200",
                   "typename": "Bedrift Total B (50 GB)",
                   "typeaccesstype": "MOBILE",
@@ -195,7 +94,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                 {
                   "msisdn": "4721002102",
                   "navident": "A321320",
-                  "userreference1": "PT-A321320",
+                  "userrefeerence1": "PT-A321320",
                   "typeid": "53175",
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",
@@ -208,7 +107,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                 {
                   "msisdn": "4722330011",
                   "navident": "A440022",
-                  "userreference1": "PK-A440022",
+                  "userrefeerence1": "PK-A440022",
                   "typeid": "53200",
                   "typename": "Bedrift Total B (50 GB)",
                   "typeaccesstype": "MOBILE",
@@ -221,7 +120,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                 {
                   "msisdn": "4733002200",
                   "navident": "A503020",
-                  "userreference1": "PT-A503020",
+                  "userrefeerence1": "PT-A503020",
                   "typeid": "53175",
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",
@@ -234,7 +133,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                 {
                   "msisdn": "4733002999",
                   "navident": "A503999",
-                  "userreference1": "PT-A503020",
+                  "userrefeerence1": "PT-A503020",
                   "typeid": "53175",
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",
@@ -247,7 +146,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                 {
                   "msisdn": "4733008888",
                   "navident": "J509999",
-                  "userreference1": "PT-A503020",
+                  "userrefeerence1": "PT-A503020",
                   "typeid": "53175",
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",
@@ -260,7 +159,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                 {
                   "msisdn": "4733001111",
                   "navident": "J501111",
-                  "userreference1": "PT-A503020",
+                  "userrefeerence1": "PT-A503020",
                   "typeid": "53175",
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",

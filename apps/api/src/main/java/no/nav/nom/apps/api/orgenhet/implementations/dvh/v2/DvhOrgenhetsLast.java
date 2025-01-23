@@ -1,12 +1,10 @@
 package no.nav.nom.apps.api.orgenhet.implementations.dvh.v2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
-import no.nav.nom.apps.api.common.NomProxyRestClient;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
@@ -14,7 +12,6 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEn
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
-import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -40,31 +37,22 @@ import java.util.stream.Collectors;
 public class DvhOrgenhetsLast {
     private final ObjectMapper objectMapper;
     private final ValidationService validationService;
-    private final NomProxyRestClient nomProxyRestClient;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrgEnhetCommandService orgEnhetCommandService;
     private final OrgEnhetIdGenerator orgEnhetIdGenerator;
 
     private final OTUtenforHierarki otUtenforHierarki;
-    private final Unleash unleash;
     private final DvhOrdsService dvhOrdsService;
 
     /*
-    1. Enhter blir avsluttet hos oss ved at maxstillingsdato settes. sluttdato settes ikke.
+    1. Enheter blir avsluttet hos oss ved at maxstillingsdato settes. sluttdato settes ikke.
     2. ØT puncher feil og oppretter ny stilling på enheten etter den er avsluttet.
     3. Man kan gjenoppstarte enheten HVIS det opprettes ny rad i agresso innenfor 1mnd av den gamle
      */
     public void lastOrgenhetsDataFraDvhTilEvtsrc() {
         log.info("Laster orgenhet v2 fra dvh");
         try {
-            List<DvhOrgenhetV2> dvhOrgenheter;
-            if (unleash.isEnabled("nom.dvh.last_orgenheter_fra_ords")) {
-                dvhOrgenheter = dvhOrdsService.getOrgenheter();
-            } else {
-                dvhOrgenheter = nomProxyRestClient.getTdvOrgenheter();
-            }
-
-//            getOrdsOrgenheterAndCompare(dvhOrgenheter);
+            var dvhOrgenheter = dvhOrdsService.getOrgenheter();
 
             val validations = Arrays.stream(ValidationType.values()).collect(Collectors.toMap(Function.identity(), a -> new LinkedList<DvhOrgenhetV2>()));
 
@@ -215,43 +203,6 @@ public class DvhOrgenhetsLast {
         } catch (Exception e) {
             log.error("Failure loading data from DVH", e);
         }
-    }
-
-    private void getOrdsOrgenheterAndCompare(List<DvhOrgenhetV2> tdvDvhOrgenheter) {
-        try {
-            var ordsDvhOrgenheter = dvhOrdsService.getOrgenheter();
-
-            boolean erLikt = true;
-            if (ordsDvhOrgenheter.size() != tdvDvhOrgenheter.size()) {
-                log.error("Antall orgenheter fra TDV og ORDS er ulik. TDV: {}, ORDS: {}", tdvDvhOrgenheter.size(), ordsDvhOrgenheter.size());
-                erLikt = false;
-            }
-
-            var ordsMap = ordsDvhOrgenheter.stream().collect(Collectors.toMap(this::getOrgenhetUniqueKey, Function.identity()));
-            int idxSkip = tdvDvhOrgenheter.size()/200;
-            for (int i = 0; i < 200; i++) {
-                int idx = i * idxSkip;
-                var dvhOrgenhetTdv = tdvDvhOrgenheter.get(idx);
-                var dvhOrgenhetOrds = ordsMap.get(getOrgenhetUniqueKey(dvhOrgenhetTdv));
-                if (dvhOrgenhetOrds == null || !DvhOrgenhetV2.compare(dvhOrgenhetTdv, dvhOrgenhetOrds)) {
-                    log.error("Orgenhet fra TDV og ORDS er ulik. \n\tTDV: \n\t{}, \n\tORDS: \n\t{}"
-                        , dvhOrgenhetTdv.getRawData().toPrettyString()
-                        , dvhOrgenhetOrds == null ? null : dvhOrgenhetOrds.getRawData().toPrettyString());
-                    erLikt = false;
-                }
-            }
-            if (erLikt) {
-                log.info("Last av orgenheter fra ORDS (NOM_ORDS_HRORG_ORGENHET.json) er lik last fra TDV (NOM_HRORG_ORGENHET)");
-            } else {
-                log.error("Last av orgenheter fra ORDS (NOM_ORDS_HRORG_ORGENHET.json) er annerledes enn last fra TDV (NOM_HRORG_ORGENHET)");
-            }
-        } catch (Exception e) {
-            log.error("Feilet i last av orgenheter fra ORDS (NOM_ORDS_HRORG_ORGENHET.json)", e);
-        }
-    }
-
-    private String getOrgenhetUniqueKey(DvhOrgenhetV2 dvhOrgenhetV2) {
-        return dvhOrgenhetV2.getUniqueAgressoId() + "-" + dvhOrgenhetV2.getOrgenhetStatus() + "-" + dvhOrgenhetV2.getGyldigFom();
     }
 
     private void debugLogDuplikaterPaaUniqueAgressoId(Map<String, List<DvhOrgenhetV2>> parsedEnheter) {

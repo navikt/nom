@@ -1,18 +1,17 @@
 package no.nav.nom.apps.api.organisering;
 
-import no.nav.nom.apps.api.dvh.DvhOldTdvService;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventKafkaConfig;
 import no.nav.nom.libs.state.organisering.OrganiseringStateAutoconfiguration;
 import no.nav.nom.libs.state.ressurs.RessursStateAutoconfiguration;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -31,8 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
         OrganiseringTestConfig.class,
         OrganiseringEventKafkaConfig.class,
         RessursStateAutoconfiguration.class,
-        OrganiseringStateAutoconfiguration.class,
-        DvhOldTdvService.class
+        OrganiseringStateAutoconfiguration.class
     },
     initializers = MockOAuth2ServerInitializer.class)
 @EmbeddedKafka(partitions = 1,  topics = {"org.nom.organisering-eventsource", "org.nom.intern-ressurs-state"},  controlledShutdown = true)
@@ -41,7 +39,7 @@ public class OrganiseringTestBase {
     @Autowired
     public DvhOrganiseringMockUtils dvhOrganiseringMockUtils;
 
-    @MockBean
+    @MockitoBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 }
 

@@ -9,9 +9,7 @@ import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.EmbeddeKafkaAdminClient;
 import no.nav.nom.apps.api.common.LocalConfiguration;
-import no.nav.nom.apps.api.common.NomProxyRestClient;
 import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
-import no.nav.nom.apps.api.dvh.DvhOldTdvService;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.DvhService;
@@ -52,9 +50,9 @@ import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @Import({
     DvhRestConsumer.class
@@ -76,7 +74,6 @@ import org.springframework.kafka.annotation.EnableKafka;
     , DvhStartupLoadMonitor.class
     , KafkaUtils.class
     , ValidationService.class
-    , NomProxyRestClient.class
     , PdlUtils.class
     , LocalConfiguration.class
     , DvhOrgEnhetMockUtils.class
@@ -86,69 +83,68 @@ import org.springframework.kafka.annotation.EnableKafka;
     , LeaderElection.class
     , OTUtenforHierarki.class
     , OrgtilknytningService.class
-    , DvhOldTdvService.class
     , DvhOrdsClientImpl.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 @EnableKafka
 public class GraphQLExtendedIntegrationTestConfig {
-    @MockBean
+    @MockitoBean
     NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
-    @MockBean
+    @MockitoBean
     NomStateOrganiseringListener nomStateOrganiseringListener;
-    @MockBean
+    @MockitoBean
     NomStateMasteredRessursListener nomStateMasteredRessursListener;
-    @MockBean
+    @MockitoBean
     NomStateDelegertLederListener nomStateDelegertLederListener;
 
-    @MockBean
+    @MockitoBean
     OrgEnhetEventProducer orgEnhetEventProducer;
 
-    @MockBean
+    @MockitoBean
     OrgEnhetCommandService orgEnhetCommandService;
 
-    @MockBean
+    @MockitoBean
     KafkaTopicReader kafkaTopicReader;
 
-    @MockBean
+    @MockitoBean
     RessursEventSourceRepository ressursEventSourceRepository;
 
-    @MockBean
+    @MockitoBean
     NomMastered nomMastered;
 
-    @MockBean
+    @MockitoBean
     ValidationRepository validationRepository;
 
-    @MockBean
+    @MockitoBean
     OrgEnhetTypeHandler orgEnhetTypeHandler;
 
-    @MockBean
+    @MockitoBean
     RessursStillingLoader ressursStillingLoader;
 
-    @MockBean
+    @MockitoBean
     EksterneRessurserLoader eksterneRessurserLoader;
 
-    @MockBean
+    @MockitoBean
     KommunaleRessurserLoader kommunaleRessurserLoader;
 
-    @MockBean
+    @MockitoBean
     OrganiseringService organiseringService;
 
-    @MockBean
+    @MockitoBean
     AuthorizedNavident authorizedNavident;
 
-    @MockBean
+    @MockitoBean
     RemedyEnhetMapperService remedyEnhetMapperService;
 
-    @MockBean
+    @MockitoBean
     GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
 
-    @MockBean
+    @MockitoBean
     Unleash unleash;
 
-    @MockBean
+    @MockitoBean
     ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState;
 
-//    @MockBean
+//    @MockitoBean
 //    DvhOrdsClient dvHOrdsClient;
 }

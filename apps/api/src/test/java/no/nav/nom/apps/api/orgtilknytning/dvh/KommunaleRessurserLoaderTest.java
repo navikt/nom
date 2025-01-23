@@ -6,7 +6,7 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,23 +18,19 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 class KommunaleRessurserLoaderTest  extends TestBase {
     @Autowired
     private KommunaleRessurserLoader kommunaleRessurserLoader;
-    @MockBean
-    OrgenhetService orgenhetService;
-    @MockBean
-    RessursStateRepository ressursStateRepository;
 
     @Test
     @DisplayName("Test last fra Dvh json")
     public void testLoad() {
 
-        var result = kommunaleRessurserLoader.loadKommunaleForNavidenter(List.of("N123321","G123321"));;
+        var result = kommunaleRessurserLoader.loadKommunaleForNavidenter(List.of("A321003","A321004"));;
 
         assertEquals(2, result.size());
-        var kari = result.stream().filter(r -> r.getNavIdent().equals("N123321")).findFirst().get();
-        assertEquals("N123321", kari.getNavIdent());
-        assertEquals("Kari", kari.getFornavn());
-        assertNull(kari.getAgressoStartDato());
-        assertEquals(LocalDate.of(2022, 1, 10), kari.getStartDato());
-        assertEquals(LocalDate.of(2022, 1, 10), kari.getRemedyStartDato());
+        var A321003 = result.stream().filter(r -> r.getNavIdent().equals("A321003")).findFirst().get();
+        assertEquals("A321003", A321003.getNavIdent());
+        assertEquals("Navn 3", A321003.getFornavn());
+        assertNull(A321003.getAgressoStartDato());
+        assertEquals(LocalDate.of(2022, 1, 10), A321003.getStartDato());
+        assertEquals(LocalDate.of(2022, 1, 10), A321003.getRemedyStartDato());
     }
 }

@@ -64,12 +64,12 @@ public record ManuelleRessurserOgLedereProperties(
         String orgenhet
     ) {
         public DvhLeder asDvhLeder(OrgenhetService orgenhetService) {
-            return new DvhLeder(
-                navident,
-                orgenhetService.getById(orgenhet).orElseThrow().getAgressoId(),
-                orgenhetService.getById(orgenhet).orElseThrow().getOrgNiv(),
-                orgenhetService.getById(orgenhet).orElseThrow().getNavn()
-            );
+            return DvhLeder.builder()
+                .navIdent(navident)
+                .orgEnhetNr(orgenhetService.getById(orgenhet).orElseThrow().getAgressoId())
+                .orgenhetNavn(orgenhetService.getById(orgenhet).orElseThrow().getOrgNiv())
+                .orgNiv(orgenhetService.getById(orgenhet).orElseThrow().getNavn())
+                .build();
         }
     }
 }

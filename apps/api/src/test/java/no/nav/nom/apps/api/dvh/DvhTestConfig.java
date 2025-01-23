@@ -2,11 +2,10 @@ package no.nav.nom.apps.api.dvh;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
-import no.nav.nom.apps.api.clients.dvhords.DvhOrdsClient;
+import no.nav.nom.apps.api.clients.dvhords.DvhOrdsClientImpl;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
-import no.nav.nom.apps.api.common.NomProxyRestClient;
 import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
 import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
@@ -43,13 +42,13 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
     , DvhService.class
     , DvhOrgenhetsLast.class
     , DvhOrdsService.class
+    , DvhOrdsClientImpl.class
     , ValidationService.class
     , NomProxyClient.class
     , LeaderElection.class
     , ObjectMapper.class
     , OTUtenforHierarki.class
     , OrgtilknytningService.class
-    , DvhOldTdvService.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 public class DvhTestConfig {
@@ -61,10 +60,8 @@ public class DvhTestConfig {
     OrgEnhetStateRepository orgEnhetStateRepository;
     @MockBean
     OrgtilknytningStateRepository orgtilknytningStateRepository;
-    @MockBean
-    NomProxyRestClient nomProxyRestClient;
-    @MockBean
-    DvhOrdsClient dvHOrdsClient;
+//    @MockBean
+//    DvhOrdsClient dvHOrdsClient;
     @MockBean
     NomStateRessursListener nomStateRessursListener;
     @MockBean

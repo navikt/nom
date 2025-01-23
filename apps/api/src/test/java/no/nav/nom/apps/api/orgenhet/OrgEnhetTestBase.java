@@ -11,12 +11,12 @@ import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -37,7 +37,7 @@ public class OrgEnhetTestBase {
     @Autowired
     public DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;
 
-    @MockBean
+    @MockitoBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
     @Autowired

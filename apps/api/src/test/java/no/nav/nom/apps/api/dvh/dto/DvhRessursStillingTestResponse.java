@@ -22,38 +22,38 @@ class DvhRessursStillingTestResponse {
     public void testStdDvhObjekt() {
         String json = """
         {
-            "NAV_ID": "A112343",
-            "RESOURCE_ID": "112343",
-            "FIRST_NAME": "Ola",
-            "SURNAME": "Nordmann",
-            "FRA_DATO": "2020-01-01",
-            "TIL_DATO": "2020-09-30",
-            "POST_DATE_TO": "2020-11-18",
-            "ANSETTELSESTYPE_BESK": "Fast",
-            "PARTTIME_PCT": 70.00000000,
-            "ORGENHET": "0499000",
-            "ORGENHET_BESK": "Innlandet Arbeidslivssenter",
-            "LEDER_PAA_STILLING": "123456",
-            "PERM_KODE": "ARB(EGEN)",
-            "LAST_UPDATE": "2020-11-23T08:32:12.000Z",
-            "ORGENHET_PAA_RESSURS": "0499000",
-            "ORGENHET_PAA_RESSURS_NIVA": "ORGENHET",
-            "REMEDY_ENHET_ID": "0491",
-            "STILLING_ORGENHET_PAA_RESSURS": "0499000",
-            "AGRESSO_DATE_FROM": "2006-04-18",
-            "AGRESSO_DATE_TO": "2099-12-31",
-            "DATE_FROM": "2006-04-04",
-            "DATE_TO": "2099-12-31",
-            "LEDER_RESOURCE_ID": "123456",
-            "SYKEMLEDER_RESOURCE_ID": "123456"
+            "nav_id": "A112343",
+            "resource_id": "112343",
+            "first_name": "Ola",
+            "surname": "Nordmann",
+            "fra_dato": "2019-12-31T23:00:00Z",
+            "til_dato": "2020-09-29T23:00:00Z",
+            "post_date_to": "2020-11-17T23:00:00Z",
+            "ansettelsestype_besk": "Fast",
+            "parttime_pct": 70.00000000,
+            "orgenhet": "0499000",
+            "orgenhet_besk": "Innlandet Arbeidslivssenter",
+            "leder_paa_stilling": "123456",
+            "perm_kode": "ARB(EGEN)",
+            "last_update": "2020-11-23T08:32:12.000Z",
+            "orgenhet_paa_ressurs": "0499000",
+            "orgenhet_paa_ressurs_niva": "ORGENHET",
+            "remedy_enhet_id": "0491",
+            "stilling_orgenhet_paa_ressurs": "0499000",
+            "agresso_date_from": "2006-04-17T23:00:00Z",
+            "agresso_date_to": "2099-12-30T23:00:00Z",
+            "date_from": "2006-04-03T23:00:00Z",
+            "date_to": "2099-12-30T23:00:00Z",
+            "leder_resource_id": "123456",
+            "sykemleder_resource_id": "123456"
         }
         """;
         JsonNode node = mapper.readTree(json);
 
-        DvhRessursStilling actual = new DvhRessursStilling(node);
+        DvhRessursStilling actual = DvhRessursStilling.fromOrdsRessursStilling(node);
         DvhRessursStilling expected =
             DvhRessursStilling.builder()
-                .payload(node.toString())
+                .payload(node.toPrettyString())
                 .navident(Optional.of("A112343"))
                 .stillingDatoFom(LocalDate.of(2020,1,1))
                 .stillingDatoTom(LocalDate.of(2020, 9,30))
@@ -77,38 +77,38 @@ class DvhRessursStillingTestResponse {
     public void testStdMedTommeVeriderDvhObjekt() {
         String json = """
         {
-            "NAV_ID":"A112343",
-            "RESOURCE_ID": "112343",
-            "FIRST_NAME": "Ola",
-            "SURNAME": "Nordmann",
-            "FRA_DATO": "2020-01-01",
-            "TIL_DATO": "2020-09-30",
-            "POST_DATE_TO": "2020-11-18",
-            "ANSETTELSESTYPE_BESK": "Fast",
-            "PARTTIME_PCT": 70.00000000,
-            "ORGENHET": "0499000",
-            "ORGENHET_BESK": "Innlandet Arbeidslivssenter",
-            "LEDER_PAA_STILLING": "123456",
-            "PERM_KODE": "ARB(EGEN)",
-            "LAST_UPDATE": "2020-11-23T08:32:12.000Z",
-            "ORGENHET_PAA_RESSURS": "-4",
-            "ORGENHET_PAA_RESSURS_NIVA": "Mangler",
-            "REMEDY_ENHET_ID": "-4",
-            "STILLING_ORGENHET_PAA_RESSURS": "0499000",
-            "AGRESSO_DATE_FROM": "2006-04-18",
-            "AGRESSO_DATE_TO": "2099-12-31",
-            "DATE_FROM": "2006-04-04",
-            "DATE_TO": "2099-12-31",
-            "LEDER_RESOURCE_ID": "123456",
-            "SYKEMLEDER_RESOURCE_ID": "123456"
+            "nav_id":"A112343",
+            "resource_id": "112343",
+            "first_name": "Ola",
+            "surname": "Nordmann",
+            "fra_dato": "2019-12-31T23:00:00Z",
+            "til_dato": "2020-09-29T23:00:00Z",
+            "post_date_to": "2020-11-17T23:00:00Z",
+            "ansettelsestype_besk": "Fast",
+            "parttime_pct": 70.00000000,
+            "orgenhet": "0499000",
+            "orgenhet_besk": "Innlandet Arbeidslivssenter",
+            "leder_paa_stilling": "123456",
+            "perm_kode": "ARB(EGEN)",
+            "last_update": "2020-11-23T08:32:12.000Z",
+            "orgenhet_paa_ressurs": "-4",
+            "orgenhet_paa_ressurs_niva": "Mangler",
+            "remedy_enhet_id": "-4",
+            "stilling_orgenhet_paa_ressurs": "0499000",
+            "agresso_date_from": "2006-04-17T23:00:00Z",
+            "agresso_date_to": "2099-12-30T23:00:00Z",
+            "date_from": "2006-04-03T23:00:00Z",
+            "date_to": "2099-12-30T23:00:00Z",
+            "leder_resource_id": "123456",
+            "sykemleder_resource_id": "123456"
         }
         """;
         JsonNode node = mapper.readTree(json);
 
-        DvhRessursStilling actual = new DvhRessursStilling(node);
+        DvhRessursStilling actual = DvhRessursStilling.fromOrdsRessursStilling(node);
         DvhRessursStilling expected =
             DvhRessursStilling.builder()
-                .payload(node.toString())
+                .payload(node.toPrettyString())
                 .navident(Optional.of("A112343"))
                 .stillingDatoFom(LocalDate.of(2020,1,1))
                 .stillingDatoTom(LocalDate.of(2020, 9,30))
@@ -132,38 +132,38 @@ class DvhRessursStillingTestResponse {
     public void testStdMedNullNavIdDvhObjekt() {
         String json = """
         {
-            "NAV_ID": null,
-            "RESOURCE_ID": "112343",
-            "FIRST_NAME": "Ola",
-            "SURNAME": "Nordmann",
-            "FRA_DATO": "2020-01-01",
-            "TIL_DATO": "2020-09-30",
-            "POST_DATE_TO": "2020-11-18",
-            "ANSETTELSESTYPE_BESK": "Fast",
-            "PARTTIME_PCT": 70.00000000,
-            "ORGENHET": "0499000",
-            "ORGENHET_BESK": "Innlandet Arbeidslivssenter",
-            "LEDER_PAA_STILLING": "123456",
-            "PERM_KODE": "ARB(EGEN)",
-            "LAST_UPDATE": "2020-11-23T08:32:12.000Z",
-            "ORGENHET_PAA_RESSURS": "-4",
-            "ORGENHET_PAA_RESSURS_NIVA": "Mangler",
-            "REMEDY_ENHET_ID": "-4",
-            "STILLING_ORGENHET_PAA_RESSURS": "0499000",
-            "AGRESSO_DATE_FROM": "2006-04-18",
-            "AGRESSO_DATE_TO": "2099-12-31",
-            "DATE_FROM": "2006-04-04",
-            "DATE_TO": "2099-12-31",
-            "LEDER_RESOURCE_ID": "123456",
-            "SYKEMLEDER_RESOURCE_ID": "123456"
+            "nav_id": null,
+            "resource_id": "112343",
+            "first_name": "Ola",
+            "surname": "Nordmann",
+            "fra_dato": "2020-12-311T23:00:00Z",
+            "til_dato": "2020-09-29T23:00:00Z",
+            "post_date_to": "2020-11-17T23:00:00Z",
+            "ansettelsestype_besk": "Fast",
+            "parttime_pct": 70.00000000,
+            "orgenhet": "0499000",
+            "orgenhet_besk": "Innlandet Arbeidslivssenter",
+            "leder_paa_stilling": "123456",
+            "perm_kode": "ARB(EGEN)",
+            "last_update": "2020-11-23T08:32:12.000Z",
+            "orgenhet_paa_ressurs": "-4",
+            "orgenhet_paa_ressurs_niva": "Mangler",
+            "remedy_enhet_id": "-4",
+            "stilling_orgenhet_paa_ressurs": "0499000",
+            "agresso_date_from": "2006-04-18",
+            "agresso_date_to": "2099-12-31",
+            "date_from": "2006-04-04",
+            "date_to": "2099-12-31",
+            "leder_resource_id": "123456",
+            "sykemleder_resource_id": "123456"
         }
         """;
         JsonNode node = mapper.readTree(json);
 
-        DvhRessursStilling actual = new DvhRessursStilling(node);
+        DvhRessursStilling actual = DvhRessursStilling.fromOrdsRessursStilling(node);
         DvhRessursStilling expected =
             DvhRessursStilling.builder()
-                .payload(node.toString())
+                .payload(node.toPrettyString())
                 .navident(Optional.empty())
                 // Null på resten
                 .build();

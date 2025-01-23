@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.function.Predicate.not;
@@ -40,28 +39,6 @@ public class DvhOrgenhetV2 implements IOrgenhet {
     private final static DateTimeFormatter yyyyMMdd_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private final static DateTimeFormatter YYYY_MM_DD_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final DateValidator dateValidator = new DateValidator(yyyyMMdd_FORMATTER);
-
-    public DvhOrgenhetV2(JsonNode node) {
-        this.rawData = node;
-        this.agressoId = node.get("ORGENHET_KODE").asText();
-        this.orgNiv = node.get("ORGNODE_NIV").asText();
-        this.navn = node.get("ORGENHET_NAVN").asText();
-        this.agressoOrgenhetType = node.get("ENHETTYPE_NAVN").asText(null);
-        this.agressoGyldigFom = node.get("ORGENHET_FRA_PERIODE").asText();
-        val tempGyldigTom = node.get("ORGENHET_TIL_PERIODE").asText();
-        this.agressoGyldigTom = tempGyldigTom.equals("209999") ? "209912" : tempGyldigTom;
-        this.orgenhetStatus = node.get("ORGENHET_STATUS").asText().toUpperCase();
-        this.stillingMaksDato = node.hasNonNull("STILLING_MAKS_GYLDIG_TIL_DATO") ?
-            LocalDate.parse(node.get("STILLING_MAKS_GYLDIG_TIL_DATO").asText(), YYYY_MM_DD_FORMATTER) : null;
-        this.dvhLastetDato = LocalDate.parse(node.get("LASTET_DATO").asText());
-        this.lederRessursNr = node.hasNonNull("LEDER_RESSURSNR") ? node.get("LEDER_RESSURSNR").asText() : null;
-
-        // Hvis stillingMaksDato er før Agresso sin gyldigFom dato, er den nok knyttet
-        // til en tidligere enhet med samme agressoId.
-        if (stillingMaksDato != null && getGyldigFom().isAfter(stillingMaksDato)) {
-            stillingMaksDato = null;
-        }
-    }
 
     @Override
     public String getFid() {
@@ -175,18 +152,5 @@ public class DvhOrgenhetV2 implements IOrgenhet {
 
     public static LocalDate localDateOf(String date) {
         return LocalDate.ofInstant(Instant.parse(date), ZoneId.systemDefault());
-    }
-
-    public static boolean compare(DvhOrgenhetV2 tdvOrgenhet, DvhOrgenhetV2 ordsOrgenhet) {
-        return Objects.equals(tdvOrgenhet.getAgressoId(),ordsOrgenhet.getAgressoId()) &&
-            Objects.equals(tdvOrgenhet.getOrgNiv(),ordsOrgenhet.getOrgNiv()) &&
-            Objects.equals(tdvOrgenhet.getNavn(),ordsOrgenhet.getNavn()) &&
-            Objects.equals(tdvOrgenhet.getAgressoOrgenhetType(),ordsOrgenhet.getAgressoOrgenhetType()) &&
-            Objects.equals(tdvOrgenhet.getAgressoGyldigFom(),ordsOrgenhet.getAgressoGyldigFom()) &&
-            Objects.equals(tdvOrgenhet.getAgressoGyldigTom(),ordsOrgenhet.getAgressoGyldigTom()) &&
-            Objects.equals(tdvOrgenhet.getOrgenhetStatus(),ordsOrgenhet.getOrgenhetStatus()) &&
-            Objects.equals(tdvOrgenhet.getStillingMaksDato(),ordsOrgenhet.getStillingMaksDato()) &&
-            Objects.equals(tdvOrgenhet.getDvhLastetDato(),ordsOrgenhet.getDvhLastetDato()) &&
-            Objects.equals(tdvOrgenhet.getLederRessursNr(),ordsOrgenhet.getLederRessursNr());
     }
 }

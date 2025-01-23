@@ -351,8 +351,6 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
             Optional.of(String.valueOf(enhet.getORGENHET_TIL_PERIODE()))
         ));
 
-        when(unleash.isEnabled("nom.dvh.last_ledere_fra_ords")).thenReturn(true);
-        when(unleash.isEnabled("nom.dvh.last_organiseringer_fra_ords")).thenReturn(true);
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         final var response = postForResource("ressurs/scenario6.graphql");
@@ -454,10 +452,11 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
         RessursState ressursState = kafkaUtils.createRessursHendelseEventSource("1");
 
         String telefonNummer = "4712345678";
-        DvhTelefon mockDvhTelefon = new DvhTelefon();
-        mockDvhTelefon.setNummer(telefonNummer);
-        mockDvhTelefon.setNavIdent(ressursState.navident());
-        mockDvhTelefon.setType(DvhTelefon.DvhTelefonType.TJENESTETELEFON);
+        DvhTelefon mockDvhTelefon = DvhTelefon.builder()
+            .nummer(telefonNummer)
+            .navIdent(ressursState.navident())
+            .type(DvhTelefon.DvhTelefonType.TJENESTETELEFON)
+            .build();
 
         dvhRepository.saveTlf(List.of(mockDvhTelefon));
 
@@ -474,10 +473,11 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
         RessursState ressursState = kafkaUtils.createRessursHendelseEventSource("1");
 
         String telefonNummer = "4712345678";
-        DvhTelefon mockDvhTelefon = new DvhTelefon();
-        mockDvhTelefon.setNummer(telefonNummer);
-        mockDvhTelefon.setNavIdent(ressursState.navident());
-        mockDvhTelefon.setType(DvhTelefon.DvhTelefonType.TJENESTETELEFON);
+        DvhTelefon mockDvhTelefon = DvhTelefon.builder()
+            .nummer(telefonNummer)
+            .navIdent(ressursState.navident())
+            .type(DvhTelefon.DvhTelefonType.TJENESTETELEFON)
+            .build();
 
         dvhRepository.saveTlf(List.of(mockDvhTelefon));
 
@@ -491,6 +491,4 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
     private String sladdetPersonident(String personident){
         return personident.replaceFirst(".{5}$","*****");
     }
-
-
 }
