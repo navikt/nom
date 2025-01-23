@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.ressurs.api.app;
 
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
-import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
@@ -45,8 +44,9 @@ public class RessursExcelGenerator {
 
     public void generate(HttpServletResponse response, List<Ressurs> ressurser, List<String> navidenter, String topOrgEnhetId) {
         var kanSeSluttdato = authResolver.kanOppretteRessurs(topOrgEnhetId);
-        var dolMap = orgtilknytningStateRepository.findByNavidentIn(navidenter).stream()
-            .filter(OrgtilknytningState::erDagligOppfolging)
+        var otNavn = orgEnhetStateRepository.findByFid(topOrgEnhetId).get();
+        var otMap = orgtilknytningStateRepository.findByNavidentIn(navidenter).stream()
+            .filter(ot -> ot.orgEnhetId().equals(topOrgEnhetId))
             .collect(Collectors.groupingBy(
                 OrgtilknytningState::navident,
                 Collectors.collectingAndThen(
@@ -54,16 +54,6 @@ public class RessursExcelGenerator {
                     dol -> Collections.max(dol, Comparator.comparing(OrgtilknytningState::gyldigFom))
                 )
             ));
-        var orgEnhetNavnMap = orgEnhetStateRepository.findByIdIn(
-                dolMap.values().stream()
-                    .map(OrgtilknytningState::orgEnhetId)
-                    .collect(Collectors.toSet()))
-            .stream().collect(
-                Collectors.groupingBy(
-                    OrgEnhetState::id,
-                    Collectors.collectingAndThen(Collectors.toList(), orgEnehetState -> orgEnehetState.get(0).navn())
-                )
-            );
 
         try (Workbook workbook = new XSSFWorkbook()) {
             var sheet = workbook.createSheet("Ressurser");
@@ -72,13 +62,11 @@ public class RessursExcelGenerator {
             addRow(sheet.createRow(rowcount++), null, null, null, kanSeSluttdato);
 
             for (Ressurs ressurs : ressurser) {
-                var orgEnhetId = dolMap.get(ressurs.state().navident()).orgEnhetId();
-
                 addRow(
                     sheet.createRow(rowcount++),
                     ressurs,
-                    String.format("%s (%s)", orgEnhetNavnMap.get(orgEnhetId), orgEnhetId),
-                    dolMap.get(ressurs.state().navident()).gyldigFom(),
+                    String.format("%s (%s)", otNavn, topOrgEnhetId),
+                    otMap.get(ressurs.state().navident()).gyldigFom(),
                     kanSeSluttdato
                 );
             }
