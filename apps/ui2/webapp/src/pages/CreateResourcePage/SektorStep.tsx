@@ -2,7 +2,7 @@ import { css } from "@emotion/react";
 import { Alert, Radio, RadioGroup, Select } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { getOrgEnhet, getOrgTilknytninger } from "~/api/react-query-endpoints";
 import { useGetSession, useHasAdminAccess } from "~/api/useGetSession";
@@ -92,6 +92,10 @@ export function SektorStep() {
           : tilknytningstyperEksterne)[0],
   );
 
+  useEffect(() => {
+    handleSektorChange(selectedSektor);
+  }, [selectedSektor]);
+
   const saveValuesAndNavigate = (step: string) => {
     // TilknytningsType gir ikke mening for kommunale, derfor vises ikke dette som et valg i gui, og i state lagrer vi dette som "INGEN"
     const tilknytningtype =
@@ -111,12 +115,24 @@ export function SektorStep() {
   };
 
   const handleSektorChange = (value: Sektor) => {
-    setSelectedSektor(value);
-
     if (value === Sektor.NAV_STATLIG) {
-      setSelectedTilknytningtype(tilknytningstyperStatlige[0]);
+      if (
+        tilknytningtype &&
+        tilknytningstyperStatlige.includes(tilknytningtype)
+      ) {
+        setSelectedTilknytningtype(tilknytningtype);
+      } else {
+        setSelectedTilknytningtype(tilknytningstyperStatlige[0]);
+      }
     } else if (value === Sektor.EKSTERN) {
-      setSelectedTilknytningtype(tilknytningstyperEksterne[0]);
+      if (
+        tilknytningtype &&
+        tilknytningstyperEksterne.includes(tilknytningtype)
+      ) {
+        setSelectedTilknytningtype(tilknytningtype);
+      } else {
+        setSelectedTilknytningtype(tilknytningstyperEksterne[0]);
+      }
     }
   };
 
@@ -146,7 +162,9 @@ export function SektorStep() {
           data-cy="sektor-radio"
           legend="Velg hvilken sektor medarbeideren skal tilhøre"
           name="sektor"
-          onChange={handleSektorChange}
+          onChange={(value) => {
+            setSelectedSektor(value);
+          }}
           value={selectedSektor}
         >
           <Radio value={Sektor.NAV_STATLIG}>
