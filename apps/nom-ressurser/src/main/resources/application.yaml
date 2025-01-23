@@ -6,11 +6,9 @@ app:
       ressurs:
         name: org.nom-ressurser
   scheduledTasks:
-    dvhConsumer: 0 0 5 ? * *  # Every day 5AM
     repositoryMetrics: 0 59 * ? * *  # Every hour
 
 dvh:
-  endpoint: ${DVH_ENDPOINT}
   ords-endpoint: https://dvh.adeo.no/ords/dvh/dvh_nom/nom_ords_ansatte_historikk.json
 
 server:
@@ -91,8 +89,6 @@ spring:
 DB_HOST: b27dbvl031.preprod.local
 DB_NAME: nom-ressurser
 DB_ENV: preprod-fss
-KAFKA_BOOTSTRAP_SERVERS: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
-DVH_ENDPOINT: https://tdv-u.adeo.no/json/Hr/Nom/NOM_ANSATTE
 
 ---
 spring:
@@ -103,5 +99,3 @@ spring:
 DB_HOST: A01DBVL033.adeo.no
 DB_NAME: nom-ressurser
 DB_ENV: prod-fss
-KAFKA_BOOTSTRAP_SERVERS: a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443,a01apvl00148.adeo.no:8443,a01apvl00149.adeo.no:8443,a01apvl00150.adeo.no:8443
-DVH_ENDPOINT: https://tdv-p.adeo.no:9402/json/Hr/Nom/Nom_Ansatte

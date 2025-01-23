@@ -6,7 +6,6 @@ import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.LocalConfiguration;
-import no.nav.nom.apps.api.common.NomProxyRestClient;
 import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
@@ -53,7 +52,6 @@ import org.springframework.kafka.annotation.EnableKafka;
     , DvhOrdsService.class
     , ValidationService.class
     , NomProxyClient.class
-    , NomProxyRestClient.class
     , OrgEnhetStateRepositoryImpl.class
     , OrgEnhetIdGenerator.class
     , DvhStartupLoadMonitor.class

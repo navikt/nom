@@ -11,10 +11,8 @@ import java.util.Objects;
 
 @Getter
 @Builder(toBuilder = true)
-@AllArgsConstructor
 @ToString
 public class DvhOrganisering {
-
     String agressoIdOver;
     String orgNivOver;
     String navnOver;
@@ -25,53 +23,12 @@ public class DvhOrganisering {
     LocalDate gyldigTom;
     JsonNode rawData;
 
-    public DvhOrganisering(
-            String agressoIdOver,
-            String orgNivOver,
-            String navnOver,
-            String agressoIdUnder,
-            String orgNivUnder,
-            String navnUnder,
-            LocalDate gyldigFom,
-            LocalDate gyldigTom
-    ) {
-        this.agressoIdOver = agressoIdOver;
-        this.orgNivOver = orgNivOver;
-        this.navnOver = navnOver;
-        this.agressoIdUnder = agressoIdUnder;
-        this.orgNivUnder = orgNivUnder;
-        this.navnUnder = navnUnder;
-        this.gyldigFom = gyldigFom;
-        this.gyldigTom = gyldigTom;
-    }
-
-    public DvhOrganisering(JsonNode node) {
-        agressoIdOver = node.get("ORGNODE_KODE_OVER").asText();
-        orgNivOver = node.get("ORGNODE_NIVA_OVER").asText();
-        navnOver = node.get("ORGNODE_NAVN_OVER").asText();
-        agressoIdUnder = node.get("ORGNODE_KODE").asText();
-        orgNivUnder = node.get("ORGNODE_NIVA").asText();
-        navnUnder = node.get("ORGNODE_NAVN").asText();
-
-        gyldigFom = LocalDate.now().minusDays(1);
-        gyldigTom = null;
-        //gyldigFom = LocalDate.parse(node.get("GYLDIG_FRA_ORG").asText());
-        //gyldigTom = LocalDate.parse(node.get("GYLDIG_TIL_ORG").asText());
-        this.rawData = node;
-    }
-
-    public boolean containsEnhet(String agressoId, String orgNiv, String navn) {
-        return (Objects.equals(agressoId, agressoIdOver) && Objects.equals(orgNiv, orgNivOver) && Objects.equals(navn, navnOver))
-                || (Objects.equals(agressoId, agressoIdUnder) && Objects.equals(orgNiv, orgNivUnder) && Objects.equals(navn, navnUnder));
-    }
-
     public String uniqueAgressoIdUnder() {
         return agressoIdUnder + "-" + navnUnder + "-" + orgNivUnder;
     }
     public String uniqueAgressoIdOver() {
         return agressoIdOver + "-" + navnOver + "-" + orgNivOver;
     }
-    public String uniqueId() { return uniqueAgressoIdOver() + "-" + uniqueAgressoIdUnder();  }
 
     @Override
     public boolean equals(Object o) {
@@ -100,14 +57,4 @@ public class DvhOrganisering {
             .gyldigFom(LocalDate.now().minusDays(1))
             .build();
     }
-
-    public static boolean compare(DvhOrganisering tdvOrganisering, DvhOrganisering ordsOrganisering) {
-        return Objects.equals(tdvOrganisering.getAgressoIdOver(), ordsOrganisering.getAgressoIdOver()) &&
-            Objects.equals(tdvOrganisering.getOrgNivOver(), ordsOrganisering.getOrgNivOver()) &&
-            Objects.equals(tdvOrganisering.getNavnOver(), ordsOrganisering.getNavnOver()) &&
-            Objects.equals(tdvOrganisering.getAgressoIdUnder(), ordsOrganisering.getAgressoIdUnder()) &&
-            Objects.equals(tdvOrganisering.getOrgNivUnder(), ordsOrganisering.getOrgNivUnder()) &&
-            Objects.equals(tdvOrganisering.getNavnUnder(), ordsOrganisering.getNavnUnder());
-    }
-
 }

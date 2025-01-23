@@ -16,13 +16,6 @@ app:
   clients:
     nom-proxy:
       base-url: ${NOM_PROXY_BASEURL}
-      enhet-path: /proxy/dvh/json/Hr/NOM3/NOM_HRORG_ORGENHET
-      ressurs-stillinger-path: /proxy/dvh/json/Hr/Nom/NOM_RESSURS_STILLINGER
-      eksterne-ressurser-path: /proxy/dvh/json/Hr/NOM3/NOM_EKSTERNE_V1
-      kommunale-ressurser-path: /proxy/dvh/json/Hr/NOM3/NOM_KOMMUNALE_V1
-      ansatte-buckets-path: /proxy/dvh/json/Hr/NOM3/NOM_ANSATTE_BUCKETS_v2
-      tlf-path: /proxy/dvh/json/Hr/NOM2/NOM_TLF_v1
-      org-hierarki-path: /proxy/dvh/json/Hr/NOM2/NOM_HRORG_HIERARKI2_v2
     nik:
       base-url: ${NIK_BASEURL}
       aad-scope: ${NIK_API_SCOPE}
@@ -55,9 +48,6 @@ app:
 
   manuelle-ressurser-og-ledere:
     enabled: false
-  dvh-load:
-    nom-ressurser-stillinger-respons-navn: "NOM_RESSURS_STILLINGERResponse"
-    nom-kommunale-ressurser-respons-navn: "NOM_KOMMUNALE_V1Response"
 
 nom.libs.state.ressurs.enabled: true
 nom.libs.state.orgenhet.enabled: true
@@ -212,7 +202,7 @@ server.tomcat.mbeanregistry.enabled: true
 logging:
   level:
     no.nav.nom: INFO
-    no.nav.nom.apps.api.orgtilknytning.u4diff: DEBUG
+#    no.nav.nom.apps.api.orgtilknytning.u4diff: DEBUG
 #    no.nav.nom.apps.api.orgtilknytning: DEBUG
 #    no.nav.nom.apps.api.organisering: DEBUG
 #    no.nav.nom.apps.api.graphql.organisasjonsenhet: DEBUG
@@ -285,15 +275,6 @@ app:
   google-storage-bucket-name:
     missing-ot: no-nav-org-dev-missing-orgtilnytninger-storage-bucket
     missing-ekstern-sluttdato: remedy-ressurs-sluttdato
-  clients:
-    nom-proxy:
-      enhet-path: /proxy/dvh/json/Hr/NOM3_Dev/NOM_HRORG_ORGENHET
-      ressurs-stillinger-path: /proxy/dvh/json/Hr/Nom_Dev/NOM_RESSURS_STILLINGER
-      eksterne-ressurser-path: /proxy/dvh/json/Hr/NOM3_Dev/NOM_EKSTERNE_V1
-      kommunale-ressurser-path: /proxy/dvh/json/Hr/NOM3_Dev/NOM_KOMMUNALE_V1
-      ansatte-buckets-path: /proxy/dvh/json/Hr/NOM3_Dev/NOM_ANSATTE_BUCKETS_v2
-      tlf-path: /proxy/dvh/json/Hr/NOM2_Dev/NOM_TLF_v1
-      org-hierarki-path: /proxy/dvh/json/Hr/NOM2_Dev/NOM_HRORG_HIERARKI2_v2
   manuelle-ressurser-og-ledere:
     enabled: true
     ressurser:
@@ -448,7 +429,3 @@ NOM_PILOT_GROUPID: "e219ba08-0685-40b5-95e6-5fd82ec7414a" # NOM-PILOT
 
 NOM_REMEDY_INTEGRASJON_BASEURL: "https://nom-remedy-integrasjon.prod-fss-pub.nais.io"
 NOM_REMEDY_INTEGRASJON_API_SCOPE: api://prod-fss.org.nom-remedy-integrasjon/.default
-
-logging:
-  level:
-    no.nav.nom.apps.api.orgtilknytning.u4diff: DEBUG

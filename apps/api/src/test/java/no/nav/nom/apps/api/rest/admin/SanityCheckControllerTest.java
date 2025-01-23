@@ -381,12 +381,12 @@ public class SanityCheckControllerTest extends RestTestBase {
 
     private List<DvhLeder> getMockLeaders() throws JsonProcessingException {
         String jsonStr = "{" +
-            "\"LEDER_NAVIDENT\": \"JohnDoe\"," +
-            "\"ORGNODE_KODE\": \"B\"," +
-            "\"ORGNODE_NIVA\": \"ORGNIV3\"," +
-            "\"ORGNODE_NAVN\": \"OrgEnhet B\"" +
+            "\"leder_navident\": \"JohnDoe\"," +
+            "\"orgnode_kode\": \"B\"," +
+            "\"orgnode_niva\": \"ORGNIV3\"," +
+            "\"orgnode_navn\": \"OrgEnhet B\"" +
             "}";
-        DvhLeder leder = new DvhLeder(new ObjectMapper().readTree(jsonStr));
+        DvhLeder leder = DvhLeder.fromOrds(new ObjectMapper().readTree(jsonStr));
         return new ArrayList<>(){{add(leder);}};
     }
 

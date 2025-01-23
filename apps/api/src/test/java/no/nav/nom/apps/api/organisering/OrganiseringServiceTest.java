@@ -214,16 +214,15 @@ class OrganiseringServiceTest {
     }
 
     private static DvhOrganisering initialDvhOrganisering() {
-        return new DvhOrganisering(
-            "agressoIdOver",
-            "orgNivOver",
-            "navnOver",
-            "agressoId",
-            "orgNiv",
-            "navn",
-            LocalDate.now(),
-            null
-        );
+        return DvhOrganisering.builder()
+            .agressoIdOver("agressoIdOver")
+            .orgNivOver("orgNivOver")
+            .navnOver("navnOver")
+            .agressoIdUnder("agressoId")
+            .orgNivUnder("orgNiv")
+            .navnUnder("navn")
+            .gyldigFom(LocalDate.now())
+            .build();
     }
 
     @Test

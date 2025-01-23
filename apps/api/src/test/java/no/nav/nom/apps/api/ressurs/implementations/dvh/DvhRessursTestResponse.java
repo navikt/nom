@@ -17,30 +17,30 @@ class DvhRessursTestResponse {
     @Test
     @SneakyThrows
     @DisplayName("Standard ekstern aktiv/permisjon DVH objekt")
-    public void testStdDvhObjekt() {
+    public void testStdOrdsObjekt() {
         //language=json
         String json = """
             {
-              "NAV_IDENT": "L123456",
-              "FNR": "01019012345",
-              "FORNAVN": "Tom",
-              "ETTERNAVN": "Bombadil",
-              "EPOST": null,
-              "REMEDY_START_DATO": "2021-07-06",
-              "REMEDY_SLUTT_DATO": "2023-03-21",
-              "AGRESSO_SLUTT_DATO": "2099-12-31",
-              "ANSATT_PER_IDAG": "JA",
-              "ANSETTELSESTYPE_BESK": null,
-              "ANSATT_TYPE": "Eksternt",
-              "ANSATT_RESSURS_KODE": "E",
-              "REMEDY_PERMISJON": "JA",
-              "REMEDY_AKTIV": "JA",
-              "IDENT_TYPE": "STANDARD"
+              "nav_ident": "L123456",
+              "fnr": "01019012345",
+              "fornavn": "Tom",
+              "etternavn": "Bombadil",
+              "epost": null,
+              "remedy_start_dato": "2021-07-06",
+              "remedy_slutt_dato": "2023-03-21",
+              "agresso_slutt_dato": "2099-12-31",
+              "ansatt_per_idag": "JA",
+              "ansettelsestype_besk": null,
+              "ansatt_type": "Eksternt",
+              "ansatt_ressurs_kode": "E",
+              "remedy_permisjon": "JA",
+              "remedy_aktiv": "JA",
+              "ident_type": "STANDARD"
             }
         """;
         JsonNode node = mapper.readTree(json);
 
-        DvhRessurs dvhRessurs = new DvhRessurs(node);
+        DvhRessurs dvhRessurs = DvhRessurs.fromOrdsRessurs(node);
         assertFalse(dvhRessurs.hasPermisjon());
         assertNotNull(dvhRessurs.getSluttdato());
     }

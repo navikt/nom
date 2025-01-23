@@ -3,7 +3,7 @@ package no.nav.nom.apps.api.orgenhet.implementations.dvh.v2;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.apps.api.common.NomProxyRestClient;
+import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import org.springframework.stereotype.Service;
@@ -14,24 +14,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DvhDuplikatAgressoIdAnalyse {
-    private final NomProxyRestClient nomProxyRestClient;
     private final OrgenhetService orgenhetService;
-    private HashSet<String> enhetIdForEnheterIOrganisering = new HashSet<>();
+    private final HashSet<String> enhetIdForEnheterIOrganisering = new HashSet<>();
+    private final DvhOrdsService dvhOrdsService;
 
     public String analyserDvhOrgenheterOgStateEnheter(String year) {
         enhetIdForEnheterIOrganisering.clear();
         enhetIdForEnheterIOrganisering.addAll(orgenhetService.getAllEnheterMedOrganisering().stream().map(IOrgenhet::getId).collect(Collectors.toSet()));
 
         log.info("Laster orgenhet v2 fra dvh");
-        var response = nomProxyRestClient.getEnheterResponse();
-        val parsedDvhEnheter = StreamSupport.stream(response.spliterator(), false)
-                .map(DvhOrgenhetV2::new)
+        var dvhOrgenheter = dvhOrdsService.getOrgenheter();
+
+        val parsedDvhEnheter = dvhOrgenheter.stream()
                 // Validation: Orgenhetstatus should only be P and N
                 .filter(e -> {
                     return e.getOrgenhetStatus().equals("P") || e.getOrgenhetStatus().equals("N");
