@@ -39,15 +39,15 @@ public class DvhRepository {
     }
 
     public void updateLeder(DvhLeder nyLeder) {
-        var orginalLederForEnhet = ledere.stream().filter(l -> l.getOrgEnhetNr().equals(nyLeder.getOrgEnhetNr()) && l.getOrgNiv().equals(nyLeder.getOrgNiv())).findFirst();
+        var orginalLederForEnhet = getLederByAgressoIdAndNivAndNavn(nyLeder.getOrgEnhetNr(), nyLeder.getOrgNiv(), nyLeder.getOrgenhetNavn()).getFirst();
         List<DvhLeder> nyLedereList = new ArrayList<>(ledere);
-        if (orginalLederForEnhet.isPresent()) {
-            nyLedereList.remove(orginalLederForEnhet.get());
+        if (orginalLederForEnhet != null) {
+            nyLedereList.remove(orginalLederForEnhet);
             log.info("bytter ut leder [{}] med [{}]", orginalLederForEnhet, nyLeder);
             nyLedereList.add(nyLeder);
             saveLedere(nyLedereList);
         } else {
-            log.error("Fant ikke original leder objekt for orgenhet {}", nyLeder.getOrgEnhetNr());
+            log.error("Fant ikke original leder objekt for orgenhet til ny leder [{}]", nyLeder);
         }
     }
 
