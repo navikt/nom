@@ -39,11 +39,11 @@ public class DvhRepository {
     }
 
     public void updateLeder(DvhLeder nyLeder) {
-        var orginalLederForEnhet = getLederByAgressoIdAndNivAndNavn(nyLeder.getOrgEnhetNr(), nyLeder.getOrgNiv(), nyLeder.getOrgenhetNavn()).getFirst();
+        var orginalLederForEnhet = getLederByAgressoIdAndNivAndNavn(nyLeder.getOrgEnhetNr(), nyLeder.getOrgNiv(), nyLeder.getOrgenhetNavn()).stream().findFirst();
         List<DvhLeder> nyLedereList = new ArrayList<>(ledere);
-        if (orginalLederForEnhet != null) {
-            nyLedereList.remove(orginalLederForEnhet);
-            log.info("bytter ut leder [{}] med [{}]", orginalLederForEnhet, nyLeder);
+        if (orginalLederForEnhet.isPresent()) {
+            nyLedereList.remove(orginalLederForEnhet.get());
+            log.info("bytter ut leder [{}] med [{}]", orginalLederForEnhet.get(), nyLeder);
             nyLedereList.add(nyLeder);
             saveLedere(nyLedereList);
         } else {
