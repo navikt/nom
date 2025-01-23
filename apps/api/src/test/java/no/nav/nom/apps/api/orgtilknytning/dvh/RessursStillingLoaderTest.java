@@ -21,7 +21,6 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,8 +42,6 @@ class RessursStillingLoaderTest extends TestBase {
 
     @BeforeAll
     public static void init() {
-        Locale.setDefault(new Locale("en", "UK"));
-
         agr_8620005 = new OrgEnhet(new OrgEnhetState(
             "FID_1",
             "x111yz",
