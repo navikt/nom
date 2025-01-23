@@ -67,8 +67,8 @@ public record ManuelleRessurserOgLedereProperties(
             return DvhLeder.builder()
                 .navIdent(navident)
                 .orgEnhetNr(orgenhetService.getById(orgenhet).orElseThrow().getAgressoId())
-                .orgenhetNavn(orgenhetService.getById(orgenhet).orElseThrow().getOrgNiv())
-                .orgNiv(orgenhetService.getById(orgenhet).orElseThrow().getNavn())
+                .orgNiv(orgenhetService.getById(orgenhet).orElseThrow().getOrgNiv())
+                .orgenhetNavn(orgenhetService.getById(orgenhet).orElseThrow().getNavn())
                 .build();
         }
     }
