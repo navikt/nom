@@ -293,7 +293,7 @@ export function TelefonNummere({
       />
 
       {!redigering && (
-        <LabelWithValue label="Privattelefon" value={privatTelefon} />
+        <LabelWithValue label="Telefonnummer" value={privatTelefon} />
       )}
     </>
   );
