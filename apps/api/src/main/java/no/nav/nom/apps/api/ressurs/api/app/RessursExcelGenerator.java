@@ -44,7 +44,7 @@ public class RessursExcelGenerator {
 
     public void generate(HttpServletResponse response, List<Ressurs> ressurser, List<String> navidenter, String topOrgEnhetId) {
         var kanSeSluttdato = authResolver.kanOppretteRessurs(topOrgEnhetId);
-        var otNavn = orgEnhetStateRepository.findById(topOrgEnhetId).get();
+        var otNavn = orgEnhetStateRepository.findById(topOrgEnhetId).get().navn();
         var otMap = orgtilknytningStateRepository.findByNavidentIn(navidenter).stream()
             .filter(ot -> ot.orgEnhetId().equals(topOrgEnhetId))
             .collect(Collectors.groupingBy(
