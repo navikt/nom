@@ -73,6 +73,6 @@ public class DvhRessursStilling {
     }
 
     public static LocalDate localDateOf(String date) {
-        return LocalDate.ofInstant(Instant.parse(date), ZoneId.systemDefault());
+        return LocalDate.ofInstant(Instant.parse(date), ZoneId.of("Europe/Oslo")); // timstamped datoer fra ORDS er i Oslo tid levert som UTC, E.g datoen 2025-12-31 leveres som 2025-12-30T23:00:00Z
     }
 }
