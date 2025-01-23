@@ -4,13 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
-import no.nav.nom.apps.api.dvh.DvhOldTdvService;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
-import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
-import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrganiseringAvsluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
@@ -28,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
@@ -37,6 +33,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -71,13 +68,13 @@ public class OrganiseringTest extends OrganiseringTestBase {
     @Autowired
     private DvhRestConsumer dvhRestConsumer;
 
-    @MockBean
+    @MockitoBean
     private OrgenhetService orgenhetService;
 
-    @MockBean
+    @MockitoBean
     Unleash unleash;
 
-    @MockBean
+    @MockitoBean
     DvhOrdsService dvhOrdsService;
 
     @Autowired

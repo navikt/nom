@@ -1,38 +1,48 @@
 package no.nav.nom.apps.api;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 @Data
 @Builder
 public class DvhOrgEnhetMock {
-    @JsonProperty("ORGENHET_KODE")
+    @JsonProperty("orgenhet_kode")
     private String ORGENHET_KODE;
-    @JsonProperty("ORGENHET_NAVN")
+    @JsonProperty("orgenhet_navn")
     private String ORGENHET_NAVN;
-    @JsonProperty("ORGNODE_NIV")
+    @JsonProperty("orgnode_niv")
     private String ORGNODE_NIV;
-    @JsonProperty("ENHETTYPE_KODE")
+    @JsonProperty("enhettype_kode")
     private String ENHETTYPE_KODE;
-    @JsonProperty("ENHETTYPE_NAVN")
+    @JsonProperty("enhettype_navn")
     private String ENHETTYPE_NAVN;
-    @JsonProperty("ORGENHET_STATUS")
+    @JsonProperty("orgenhet_status")
     private String ORGENHET_STATUS;
-    @JsonProperty("ORGENHET_FRA_PERIODE")
+    @JsonProperty("orgenhet_fra_dato")
     private int ORGENHET_FRA_PERIODE;
-    @JsonProperty("ORGENHET_TIL_PERIODE")
+    @JsonProperty("orgenhet_til_dato")
     private int ORGENHET_TIL_PERIODE;
-    @JsonProperty("STILLING_MAKS_GYLDIG_TIL_DATO")
-    private LocalDate STILLING_MAKS_GYLDIG_TIL_DATO;
-    @JsonProperty("LEDER_RESSURSNR")
+    @JsonProperty("stilling_maks_gyldig_til_dato")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSSXXXX")
+    private OffsetDateTime STILLING_MAKS_GYLDIG_TIL_DATO;
+    @JsonProperty("leder_ressursnr")
     private String LEDER_RESSURSNR;
-    @JsonProperty("LASTET_DATO")
-    private LocalDate LASTET_DATO;
-    @JsonProperty("ORGENHET_TYPE")
+    @JsonProperty("lastet_dato")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSSXXXX")
+    private OffsetDateTime LASTET_DATO;
+    @JsonProperty("orgenhet_type")
     private OrgEnhetsType ORGENHET_TYPE;
 
     public static DvhOrgEnhetMockBuilder getBuilderWithDefault() {
@@ -45,7 +55,13 @@ public class DvhOrgEnhetMock {
                 .ORGENHET_STATUS("N")
                 .ORGENHET_FRA_PERIODE(202204)
                 .ORGENHET_TIL_PERIODE(209912)
-                .LASTET_DATO(LocalDate.parse("2022-04-01"))
-                .STILLING_MAKS_GYLDIG_TIL_DATO(LocalDate.parse("2099-12-31"));
+                .LASTET_DATO(getOffsetDateTime(2022,4,1))
+                .STILLING_MAKS_GYLDIG_TIL_DATO(getOffsetDateTime(2099,12,31));
+    }
+
+    public static OffsetDateTime getOffsetDateTime(int year, int month, int day) {
+        var ldt = LocalDateTime.of(LocalDate.of(year, month, day), LocalTime.MIDNIGHT);
+        var zdt = ZonedDateTime.of(ldt, ZoneOffset.systemDefault());
+        return zdt.withZoneSameInstant(ZoneId.of("Z")).toOffsetDateTime();
     }
 }

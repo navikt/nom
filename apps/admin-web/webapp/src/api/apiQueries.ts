@@ -84,3 +84,20 @@ export async function identerUtenStillingIU4Options(): Promise<U4Diff[]> {
     })
     .json<U4Diff[]>();
 }
+
+export async function identerUtenStillingIU4ExcelExportOptions() {
+  const blob = await ky
+    .get(`${API_BASE_URL}/api/admin/u4diff/identerUtenStillingIU4/excel`, {
+      timeout: 60_000,
+    })
+    .blob();
+  const today = new Date().toISOString().split("T")[0];
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Statlige_Identer_Uten_Stilling_I_U4_${today}.xlsx`;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}

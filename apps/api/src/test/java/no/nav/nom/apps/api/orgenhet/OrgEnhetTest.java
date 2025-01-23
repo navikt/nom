@@ -13,9 +13,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,6 +30,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+// TODO: Fiks disse testene - ingen grunn til så mye test gjennom mange ledd/sevicer
 public class OrgEnhetTest extends OrgEnhetTestBase {
 
     @Autowired
@@ -38,7 +42,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
     @Autowired
     private OrgenhetService orgenhetService;
 
-    @MockBean
+    @MockitoBean
     private OrgEnhetCommandService orgEnhetCommandService;
 
     @Captor
@@ -685,7 +689,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
     @SneakyThrows
     @DisplayName("Parkert enhet: Persistert enhet har ikke gyldigTOM, ny last så har enheten StillingMaks gyldig til dato")
     void scenario35() {
-        LocalDate stillingMaxTil = LocalDate.of(2022,7,26);
+        OffsetDateTime stillingMaxTil = DvhOrgEnhetMock.getOffsetDateTime(2022,7,26);
         val mockedEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault()
             .ORGENHET_KODE("testId")
             .ORGENHET_NAVN("testNavn")
@@ -707,14 +711,14 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         verify(orgEnhetCommandService, times(0)).opprettOrgEnhet(any());
         verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), avvikleOrgEnhetCaptor.capture());
 
-        assertEquals(stillingMaxTil, avvikleOrgEnhetCaptor.getValue().gyldigTom());
+        assertEquals(localDateOf(stillingMaxTil), avvikleOrgEnhetCaptor.getValue().gyldigTom());
     }
 
     @Test
     @SneakyThrows
     @DisplayName("Parkert enhet: Persistert enhet har ikke gyldigTOM, ny last så har enheten StillingMaks gyldig til dato. Dvh har dette som to splittede enheter")
     void scenario36() {
-        LocalDate stillingMaxTil = LocalDate.of(2022,7,26);
+        OffsetDateTime stillingMaxTil = DvhOrgEnhetMock.getOffsetDateTime(2022,7,26);
         val mockedEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault()
             .ORGENHET_KODE("testId")
             .ORGENHET_NAVN("testNavn")
@@ -746,6 +750,10 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         verify(orgEnhetCommandService, times(0)).opprettOrgEnhet(any());
         verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), avvikleOrgEnhetCaptor.capture());
 
-        assertEquals(stillingMaxTil, avvikleOrgEnhetCaptor.getValue().gyldigTom());
+        assertEquals(localDateOf(stillingMaxTil), avvikleOrgEnhetCaptor.getValue().gyldigTom());
+    }
+
+    public static LocalDate localDateOf(OffsetDateTime date) {
+        return LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault());
     }
 }

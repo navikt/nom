@@ -19,6 +19,7 @@ import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateAutoconfiguration;
 import no.nav.nom.libs.state.ressurs.RessursStateAutoconfiguration;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateAutoconfiguration;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +52,8 @@ import static java.util.Collections.emptyMap;
         RessursStateAutoconfiguration.class,
         OrgEnhetStateAutoconfiguration.class,
         OrganiseringStateAutoconfiguration.class,
-        OrgtilknytningStateAutoconfiguration.class
+        OrgtilknytningStateAutoconfiguration.class,
+        MasteredRessursStateAutoconfiguration.class
     },
     initializers = MockOAuth2ServerInitializer.class)
 @EmbeddedKafka(partitions = 1,  topics = {"org.nom.intern-ressurs-state", "org.nom.intern-orgenhet-state", "org.nom.intern-organisering-state", "org.nom.intern-orgtilknytning-state"},  controlledShutdown = true)
@@ -70,7 +72,10 @@ import static java.util.Collections.emptyMap;
         "nom.libs.state.organisering.listener-id: nomStateOrganiseringListener_test",
         "nom.libs.state.orgtilknytning.enabled: true",
         "nom.libs.state.orgtilknytning.state-topic: org.nom.intern-organisering-state",
-        "nom.libs.state.orgtilknytning.listener-id: nomStateOrgtilknytningListener_test"
+        "nom.libs.state.orgtilknytning.listener-id: nomStateOrgtilknytningListener_test",
+        "nom.libs.state.mastered-ressurs.enabled: true",
+        "nom.libs.state.mastered-ressurs.state-topic: org.nom.nom-mastered-ressurs",
+        "nom.libs.state.mastered-ressurs.listener-id: nomStateMasteredRessursListener_test"
     }
     , controllers = {GraphQLRessursController.class, GraphQLPersonController.class, GraphQLOrgEnhetController.class, GraphQLSearchController.class})
 public class GraphQLExtendedIntegrationTestBase {

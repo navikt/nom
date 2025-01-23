@@ -7,12 +7,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import reactor.core.publisher.Mono;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.created;
+import static com.github.tomakehurst.wiremock.client.WireMock.delete;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.jsonResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.ok;
+import static com.github.tomakehurst.wiremock.client.WireMock.patch;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static no.nav.nom.libs.test.SecurityTestUtils.getValidToken;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ApiTest extends ApiTestBase {
-    private static final String DVH_ENHETER_URL = "/proxy/dvh/json/Hr/NOM2/NOM_HRORG_HIERARKI_v1";
     public static final String SOME_JSON_BODY = "{\"some\": \"data\"}";
     public static final String SOME_UNIT4_ERROR_MESSAGE = "There was an error";
 
@@ -24,54 +32,6 @@ public class ApiTest extends ApiTestBase {
 
     @Value("${UNIT4_API_PATH}")
     String unit4ApiPath;
-
-    @Test
-    @DisplayName("Tester dvh kall")
-    public void scenario21() {
-        webTestClient
-            .get()
-            .uri(DVH_ENHETER_URL)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus().isOk();
-    }
-
-    @Test
-    @DisplayName("Tester tel kall")
-    public void scenario31() {
-        webTestClient
-            .get()
-            .uri("/proxy/tel")
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus().isOk();
-    }
-
-    @Test
-    @DisplayName("Tester generelt DVH proxy kall")
-    public void scenario32() {
-        webTestClient
-            .get()
-            .uri("/proxy/dvh/get-proxy-test-mapping")
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus().isOk();
-    }
-
-    @Test
-    @DisplayName("Tester generelt DVH proxy kall med query parametre")
-    public void scenario33() {
-        webTestClient
-            .get()
-            .uri("/proxy/dvh/get-proxy-test-mapping?testParamOne=1&testParamTwo=2")
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus().isOk();
-    }
 
     @Test
     @DisplayName("Tester at response koder og melding blir videreført")

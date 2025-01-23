@@ -4,19 +4,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
-import no.nav.nom.apps.api.dvh.DvhOldTdvService;
+import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
-import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -36,14 +35,11 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
     @Autowired
     public DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;
 
-    @Autowired
-    public DvhOrganiseringMockUtils dvhOrganiseringMockUtils;
+    @MockitoBean
+    public DvhOrdsService dvhOrdsService;
 
     @Autowired
     OrgtilknytningStateRepository orgtilknytningStateRepository;
-
-    @MockBean
-    DvhOldTdvService dvhOldTdvService;
 
     @Test
     @DisplayName("Hente leder gjennom flere nivåer for ressurs som er leder av sin enhet ")
@@ -119,13 +115,8 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
         addToOrganiseringStateRepository(2, ressursSinOvreEnhetState, ledersEnhetState);
         addToOrganiseringStateRepository(3, ledersEnhetState, enhetPaHoyereNivaState);
 
-        when(dvhOldTdvService.getTdvOrganiseringer()).thenReturn(List.of(dvhOrganisering1, dvhOrganisering2, dvhOrganisering3));
-        when(dvhOldTdvService.getTdvLedere()).thenReturn(List.of(dvhLeder1, dvhLeder2, dvhLeder3));
-
-        when(dvhOldTdvService.getTdvOrganiseringer()).thenReturn(List.of(dvhOrganisering1, dvhOrganisering2, dvhOrganisering3));
-        when(dvhOldTdvService.getTdvLedere()).thenReturn(List.of(dvhLeder1, dvhLeder2, dvhLeder3));
-        when(dvhOldTdvService.getTdvOrganiseringer()).thenReturn(List.of(dvhOrganisering1, dvhOrganisering2, dvhOrganisering3));
-        when(dvhOldTdvService.getTdvLedere()).thenReturn(List.of(dvhLeder1, dvhLeder2, dvhLeder3));
+        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(dvhOrganisering1, dvhOrganisering2, dvhOrganisering3));
+        when(dvhOrdsService.getLedere()).thenReturn(List.of(dvhLeder1, dvhLeder2, dvhLeder3));
 
         // Knytte ressurs til org. enhet på laveste nivå
         orgtilknytningStateRepository.update(
@@ -225,8 +216,8 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
         var dvhLeder2 = mockLeder(ressursSinOvreEnhet);
         var dvhLeder3 = mockLeder(ledersEnhet);
 
-        when(dvhOldTdvService.getTdvOrganiseringer()).thenReturn(List.of(dvhOrganisering1, dvhOrganisering2, dvhOrganisering3));
-        when(dvhOldTdvService.getTdvLedere()).thenReturn(List.of(dvhLeder1, dvhLeder2, dvhLeder3));
+        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(dvhOrganisering1, dvhOrganisering2, dvhOrganisering3));
+        when(dvhOrdsService.getLedere()).thenReturn(List.of(dvhLeder1, dvhLeder2, dvhLeder3));
 
         // Knytte ressurs til org. enhet på laveste nivå
         orgtilknytningStateRepository.update(
@@ -288,24 +279,23 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
     }
 
     private DvhOrganisering mockOrganisering(DvhOrgEnhetMock underEnhet, DvhOrgEnhetMock overEnhet) {
-        return new DvhOrganisering(
-            overEnhet.getORGENHET_KODE(),
-            overEnhet.getORGNODE_NIV(),
-            overEnhet.getORGENHET_NAVN(),
-            underEnhet.getORGENHET_KODE(),
-            underEnhet.getORGNODE_NIV(),
-            underEnhet.getORGENHET_NAVN(),
-            LocalDate.now().minusDays(1),
-            null
-        );
+        return DvhOrganisering.builder()
+            .agressoIdOver(overEnhet.getORGENHET_KODE())
+            .orgNivOver(overEnhet.getORGNODE_NIV())
+            .navnOver(overEnhet.getORGENHET_NAVN())
+            .agressoIdUnder(underEnhet.getORGENHET_KODE())
+            .orgNivUnder(underEnhet.getORGNODE_NIV())
+            .navnUnder(underEnhet.getORGENHET_NAVN())
+            .gyldigFom(LocalDate.now().minusDays(1))
+            .build();
     }
 
     private DvhLeder mockLeder(DvhOrgEnhetMock enhet) {
-        return new DvhLeder(
-            enhet.getLEDER_RESSURSNR(),
-            enhet.getORGENHET_KODE(),
-            enhet.getORGNODE_NIV(),
-            enhet.getORGENHET_NAVN()
-        );
+        return DvhLeder.builder()
+            .navIdent(enhet.getLEDER_RESSURSNR())
+            .orgEnhetNr(enhet.getORGENHET_KODE())
+            .orgNiv(enhet.getORGNODE_NIV())
+            .orgenhetNavn(enhet.getORGENHET_NAVN())
+            .build();
     }
 }

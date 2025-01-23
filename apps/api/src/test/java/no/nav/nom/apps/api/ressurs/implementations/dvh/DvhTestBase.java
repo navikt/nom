@@ -6,13 +6,10 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import io.getunleash.Unleash;
-import no.nav.nom.apps.api.DvhRessursUtils;
-import no.nav.nom.apps.api.KafkaUtils;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.common.LocalConfiguration;
 import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
-import no.nav.nom.apps.api.dvh.DvhOldTdvService;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.DvhService;
@@ -42,10 +39,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -89,50 +86,48 @@ public abstract class DvhTestBase {
     }
 
     // MOCKS
-    @MockBean
+    @MockitoBean
     DvhService dvhService;
-    @MockBean
+    @MockitoBean
     NomStateRessursListener nomStateRessursListener;
-    @MockBean
+    @MockitoBean
     NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
-    @MockBean
+    @MockitoBean
     NomStateOrganiseringListener nomStateOrganiseringListener;
-    @MockBean
+    @MockitoBean
     NomStateOrgEnhetListener nomStateOrgEnhetListener;
-    @MockBean
+    @MockitoBean
     NomStateMasteredRessursListener nomStateMasteredRessursListener;
-    @MockBean
+    @MockitoBean
     LeaderElection leaderElection;
-    @MockBean
+    @MockitoBean
     DvhOrgenhetsLast dvhOrgenhetsLast;
-    @MockBean
+    @MockitoBean
     OrgEnhetTypeHandler orgEnhetTypeHandler;
-    @MockBean
+    @MockitoBean
     RessursStillingLoader ressursStillingLoader;
-    @MockBean
+    @MockitoBean
     EksterneRessurserLoader eksterneRessurserLoader;
-    @MockBean
+    @MockitoBean
     OrganiseringService organiseringService;
-    @MockBean
+    @MockitoBean
     KommunaleRessurserLoader kommunaleRessurserLoader;
-    @MockBean
+    @MockitoBean
     AuthorizedNavident authorizedNavident;
-    @MockBean
+    @MockitoBean
     ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState;
-    @MockBean
+    @MockitoBean
     DvhStartupLoadMonitor dvhStartupLoadMonitor;
-    @MockBean
+    @MockitoBean
     NomStateDelegertLederListener nomStateDelegertLederListener;
-    @MockBean
+    @MockitoBean
     NomMastered nomMastered;
-    @MockBean
+    @MockitoBean
     Unleash unleash;
-    @MockBean
+    @MockitoBean
     DvhOrdsService dvhOrdsService;
-    @MockBean
-    DvhOldTdvService dvhOldTdvService;
-    @MockBean
+    @MockitoBean
     RessursStateRepository ressursStateRepository;
-    @MockBean
+    @MockitoBean
     RessursEventSourceRepository ressursEventSourceRepository;
 }

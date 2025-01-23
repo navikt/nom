@@ -9,10 +9,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @Slf4j
 @ActiveProfiles("test")
@@ -33,7 +33,7 @@ public class DvhTestBase {
     @Autowired
     protected RessursStateRepository ressursStateRepository;
 
-    @MockBean
+    @MockitoBean
     protected Unleash unleash;
 
     @AfterEach

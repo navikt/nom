@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +28,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
 
     @Autowired
@@ -37,10 +36,10 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
     @Autowired
     private OrgEnhetTypeHandler orgEnhetTypeHandler;
 
-    @MockBean
+    @MockitoBean
     private OrgEnhetCommandService orgEnhetCommandService;
 
-    @MockBean
+    @MockitoBean
     OrgEnhetOverordnetResolver orgEnhetOverordnetResolver;
 
     @Captor

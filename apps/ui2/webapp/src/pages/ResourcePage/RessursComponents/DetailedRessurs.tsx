@@ -494,6 +494,7 @@ function OrganisationHierarchyTree({
             )}
             <br />
             {orgtilknytningType &&
+              sektor &&
               orgtilknytningType !== Tilknytningtype.INGEN &&
               (orgtilknytningType !== Tilknytningtype.ARBEIDSTRENING ||
                 kanAlltidSeTilknytningstype) && (
