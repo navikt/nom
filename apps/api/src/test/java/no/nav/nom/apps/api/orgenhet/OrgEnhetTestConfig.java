@@ -4,15 +4,13 @@ import io.getunleash.Unleash;
 import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
 import no.nav.nom.apps.api.KafkaUtils;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
-import no.nav.nom.apps.api.clients.dvhords.DvhOrdsClient;
+import no.nav.nom.apps.api.clients.dvhords.DvhOrdsClientImpl;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.EmbeddeKafkaAdminClient;
 import no.nav.nom.apps.api.common.LocalConfiguration;
-import no.nav.nom.apps.api.common.NomProxyRestClient;
 import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
-import no.nav.nom.apps.api.dvh.DvhOldTdvService;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.DvhService;
@@ -59,7 +57,6 @@ import org.springframework.kafka.annotation.EnableKafka;
     , DvhOrdsService.class
     , ValidationService.class
     , NomProxyClient.class
-    , NomProxyRestClient.class
     , OrgenhetService.class
     , OrgEnhetCommandService.class
     , OrgEnhetEventProducer.class
@@ -77,7 +74,7 @@ import org.springframework.kafka.annotation.EnableKafka;
     , LeaderElection.class
     , OTUtenforHierarki.class
     , OrgtilknytningService.class
-    , DvhOldTdvService.class
+    , DvhOrdsClientImpl.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 @EnableKafka
@@ -138,8 +135,5 @@ public class OrgEnhetTestConfig {
 
     @MockBean
     ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState;
-
-    @MockBean
-    DvhOrdsClient dvHOrdsClient;
 }
 

@@ -11,30 +11,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("app")
 public class AppProperties {
 
-    private final Dvh dvh;
-    private final Tel tel;
     private final Unit4 unit4;
     private final int webClientMaxBytesInMemorySize;
-
-    @Value
-    public static class Tel {
-        String telUsername;
-        String telPassword;
-        String url;
-    }
-
-    @Value
-    public static class Dvh {
-        String tdvUsername;
-        String tdvPassword;
-        String baseUrl;
-
-        Stilling stilling;
-        Ressurser ressurser;
-        Enheter enheter;
-        TelDvh telDvh;
-
-    }
 
     @Value
     public static class Unit4 {
@@ -43,27 +21,5 @@ public class AppProperties {
         String baseUrl;
         String employeesPath;
         String apiPath;
-    }
-
-    @Value
-    public static class Stilling {
-        String url;
-    }
-
-    @Value
-    public static class Ressurser {
-        String url;
-        Integer bucketCount;
-    }
-
-    @Value
-    public static class Enheter {
-        String url;
-        String urlV2;
-    }
-
-    @Value
-    public static class TelDvh {
-        String url;
     }
 }

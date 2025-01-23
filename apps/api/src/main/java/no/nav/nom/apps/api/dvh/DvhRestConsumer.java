@@ -1,18 +1,13 @@
 package no.nav.nom.apps.api.dvh;
 
-import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
-import no.nav.nom.apps.api.dvh.dto.DvhLeder;
-import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
-import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
-import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetV2;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
@@ -35,7 +30,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -70,10 +64,8 @@ public class DvhRestConsumer {
     private final ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState;
 
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
-    private final Unleash unleash;
     private final NomStateDelegertLederListener nomStateDelegertLederListener;
     private final DvhOrdsService dvhOrdsService;
-    private final DvhOldTdvService dvhOldTdvService;
 
     @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
     public void scheduledOppdateringFraDvh() {
@@ -161,12 +153,7 @@ public class DvhRestConsumer {
     public void loadRessurserFromDvh() {
         log.info("Laster ressurser fra dvh");
         try {
-            List<DvhRessurs> dvhRessurser;
-            if (unleash.isEnabled("nom.dvh.last_ressurser_fra_ords")) {
-                dvhRessurser = dvhOrdsService.getRessurser();
-            } else {
-                dvhRessurser = dvhOldTdvService.getTdvRessurser();
-            }
+            var dvhRessurser = dvhOrdsService.getRessurser();
 
             var dvhRessurs = dvhRessurser.stream()
                 .distinct()
@@ -192,64 +179,10 @@ public class DvhRestConsumer {
                 .flatMap(Collection::stream)
                 .toList();
 
-//            getOrdsJsonRessurserAndCompare(dvhRessurs);
-
             ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
             dvhRepository.saveAnnenStatNavIdenter(findAnnenStatNavIdenter(dvhRessurs));
         } catch (Exception e) {
             log.error("Feilet i last av ressurser fra dvh", e);
-        }
-    }
-
-    private void getOrdsJsonRessurserAndCompare(List<DvhRessurs> tdvDvhRessurser) {
-        try {
-            var ordsDvhRessurser = dvhOrdsService.getRessurser().stream()
-                .distinct()
-                .collect(Collectors.groupingBy(DvhRessurs::getPersonIdent))
-                .values()
-                .stream()
-                .peek(l -> {
-                    if (l.size() > 1) {
-                        l.removeAll(l.stream().filter(Predicate.not(DvhRessurs::getRemedyAktiv)).toList());
-                        if (l.size() > 1) {
-                            l.clear();
-                        }
-                    }
-                })
-                .flatMap(Collection::stream)
-                .collect(Collectors.groupingBy(DvhRessurs::getNavIdent))
-                .values()
-                .stream()
-                .filter(l -> l.size() == 1)
-                .flatMap(Collection::stream)
-                .toList();
-
-            boolean erLikt = true;
-            if (ordsDvhRessurser.size() != tdvDvhRessurser.size()) {
-                log.error("Antall ressurser fra TDV og ORDS er ulik. TDV: {}, ORDS: {}", tdvDvhRessurser.size(), ordsDvhRessurser.size());
-                erLikt = false;
-            }
-
-            var ordsMap = ordsDvhRessurser.stream().collect(Collectors.toMap(DvhRessurs::getNavIdent, Function.identity()));
-            int idxSkip = tdvDvhRessurser.size()/20;
-            for (int i = 0; i < 20; i++) {
-                int idx = i * idxSkip;
-                var dvhRessursTdv = tdvDvhRessurser.get(idx);
-                var dvhRessursOrds = ordsMap.get(dvhRessursTdv.getNavIdent());
-                if (!DvhRessurs.compare(dvhRessursTdv, dvhRessursOrds)) {
-                    log.error("Ressurs fra TDV og ORDS er ulik. \n\tTDV: \n\t{}, \n\tORDS: \n\t{}"
-                        , dvhRessursTdv.getRawData().toPrettyString()
-                        , dvhRessursOrds.getRawData().toPrettyString());
-                    erLikt = false;
-                }
-            }
-            if (erLikt) {
-                log.info("Last av ressurser fra ORDS (nom_ords_ansatte_buckets.json) er lik last fra TDV (NOM_ANSATTE_BUCKETS_v2)");
-            } else {
-                log.error("Last av ressurser fra ORDS (nom_ords_ansatte_buckets.json) er annerledes enn last fra TDV (NOM_ANSATTE_BUCKETS_v2)");
-            }
-        } catch (Exception e) {
-            log.error("Feilet i last av ressurser fra ORDS (nom_ords_ansatte_buckets.json)", e);
         }
     }
 
@@ -292,14 +225,7 @@ public class DvhRestConsumer {
     public void loadTlfFromDvh() {
         log.info("Laster tlf fra dvh");
         try {
-            List<DvhTelefon> tlfRader;
-            if (unleash.isEnabled("nom.dvh.last_tlf_fra_ords")) {
-                tlfRader = dvhOrdsService.getTelefoner();
-            } else {
-                tlfRader = dvhOldTdvService.getTdvTelefoner();
-            }
-
-//            getOrdsTelefonerAndCompare(tlfRader);
+            var tlfRader = dvhOrdsService.getTelefoner();
 
             log.info("Telefonnr lastet: Antall rader = " + tlfRader.size());
             dvhRepository.saveTlf(tlfRader);
@@ -308,60 +234,14 @@ public class DvhRestConsumer {
         }
     }
 
-    private void getOrdsTelefonerAndCompare(List<DvhTelefon> tdvTelefoner) {
-        try {
-            var ordsTelefoner = dvhOrdsService.getTelefoner();
-
-            boolean erLikt = true;
-            if (ordsTelefoner.size() != tdvTelefoner.size()) {
-                log.error("Antall telefoner fra TDV og ORDS er ulik. TDV: {}, ORDS: {}", tdvTelefoner.size(), ordsTelefoner.size());
-                erLikt = false;
-            }
-
-            var ordsMap = ordsTelefoner.stream().collect(Collectors.toMap(DvhTelefon::geUniqueKey, Function.identity()));
-            int idxSkip = tdvTelefoner.size()/20;
-            for (int i = 0; i < 20; i++) {
-                int idx = i * idxSkip;
-                var dvhTelefonTdv = tdvTelefoner.get(idx);
-                var dvhTelefonOrds = ordsMap.get(dvhTelefonTdv.geUniqueKey());
-                if (dvhTelefonOrds == null || !DvhTelefon.compare(dvhTelefonTdv, dvhTelefonOrds)) {
-                    log.error("Telefon fra TDV og ORDS er ulik. \n\tTDV: \n\t{}, \n\tORDS: \n\t{}"
-                        , dvhTelefonTdv
-                        , dvhTelefonOrds);
-                    erLikt = false;
-                }
-            }
-            if (erLikt) {
-                log.info("Last av telefoner fra ORDS (NOM_ORDS_TLF.json) er lik last fra TDV (NOM_TLF_v1)");
-            } else {
-                log.error("Last av telefoner fra ORDS (NOM_ORDS_TLF.json) er annerledes enn last fra TDV (NOM_TLF_v1)");
-            }
-        } catch (Exception e) {
-            log.error("Feilet i last av telefoner fra ORDS (NOM_ORDS_TLF.json)", e);
-        }
-    }
-
-
     public boolean loadLedereAndOrganiseringerFromDvh() {
         log.info("Laster ledere og Organisering fra dvh");
         try {
-            List<DvhLeder> ledere;
-            List<DvhOrganisering> organiseringer;
-            if (unleash.isEnabled("nom.dvh.last_ledere_fra_ords")) {
-                ledere = dvhOrdsService.getLedere();
-            } else {
-                ledere = dvhOldTdvService.getTdvLedere();
-            }
-            if (unleash.isEnabled("nom.dvh.last_organiseringer_fra_ords")) {
-                organiseringer = dvhOrdsService.getOrganiseringer();
-            } else {
-                organiseringer = dvhOldTdvService.getTdvOrganiseringer();
-            }
+            var ledere = dvhOrdsService.getLedere();
+            var organiseringer = dvhOrdsService.getOrganiseringer();
 
             dvhService.saveLedere(ledere);
             dvhService.setOrganiserteOrgenheter(organiseringer); // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState
-
-//            getOrdsJsonLedereAndOrganiseringAndCompare(ledere, organiseringer);
 
             organiseringService.saveOrganiseringer(organiseringer);
             return true;
@@ -369,60 +249,6 @@ public class DvhRestConsumer {
             log.error("Failure loading ledere og Organisering data from DVH", e);
         }
         return false;
-    }
-
-    public void getOrdsJsonLedereAndOrganiseringAndCompare(List<DvhLeder> tdvLedere, List<DvhOrganisering> tdvOrganiseringer) {
-        try {
-            var ordsLedere = dvhOrdsService.getLedere();
-            var ordsOrganiseringer = dvhOrdsService.getOrganiseringer();
-
-            boolean erLikt = true;
-            if (ordsLedere.size() != tdvLedere.size()) {
-                log.error("Antall ledere fra TDV og ORDS er ulik. TDV: {}, ORDS: {}", tdvLedere.size(), ordsLedere.size());
-                erLikt = false;
-            }
-
-            var ordsLederMap = ordsLedere.stream().collect(Collectors.toMap(DvhLeder::getUniqueKey, Function.identity()));
-            int idxSkip = tdvLedere.size()/20;
-            for (int i = 0; i < 20; i++) {
-                int idx = i * idxSkip;
-                var tdvLeder = tdvLedere.get(idx);
-                var ordsLeder = ordsLederMap.get(tdvLeder.getUniqueKey());
-                if (ordsLeder == null || !DvhLeder.compare(tdvLeder, ordsLeder)) {
-                    log.error("Leder fra TDV og ORDS er ulik. \n\tTDV: \n\t{}, \n\tORDS: \n\t{}"
-                        , tdvLeder
-                        , ordsLeder);
-                    erLikt = false;
-                }
-            }
-
-            if (ordsOrganiseringer.size() != tdvOrganiseringer.size()) {
-                log.error("Antall organiseringer fra TDV og ORDS er ulik. TDV: {}, ORDS: {}", tdvOrganiseringer.size(), ordsOrganiseringer.size());
-                erLikt = false;
-            }
-
-            var ordsOrganiseringMap = ordsOrganiseringer.stream().collect(Collectors.toMap(DvhOrganisering::uniqueId, Function.identity()));
-            idxSkip = tdvOrganiseringer.size()/20;
-            for (int i = 0; i < 20; i++) {
-                int idx = i * idxSkip;
-                var tdvOrganisering = tdvOrganiseringer.get(idx);
-                var ordsOrganisering = ordsOrganiseringMap.get(tdvOrganisering.uniqueId());
-                if (ordsOrganisering == null || !DvhOrganisering.compare(tdvOrganisering, ordsOrganisering)) {
-                    log.error("Organisering fra TDV og ORDS er ulik. \n\tTDV: \n\t{}, \n\tORDS: \n\t{}"
-                        , tdvOrganisering
-                        , ordsOrganisering);
-                    erLikt = false;
-                }
-            }
-
-            if (erLikt) {
-                log.info("Last av ledere og organisering fra ORDS (nom_ords_hrorg_hierarki.json) er lik last fra TDV (NOM_ORDS_HRORG_HIERARKI)");
-            } else {
-                log.error("Last av ledere og organisering fra ORDS (nom_ords_hrorg_hierarki.json) er annerledes enn last fra TDV (NOM_ORDS_HRORG_HIERARKI)");
-            }
-        } catch (Exception e) {
-            log.error("Feilet i last av  og organisering fra ORDS (nom_ords_hrorg_hierarki.json)", e);
-        }
     }
 
     private boolean isInitialStateReady() {

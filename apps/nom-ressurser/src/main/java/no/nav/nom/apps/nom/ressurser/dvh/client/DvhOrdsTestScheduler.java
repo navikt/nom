@@ -1,9 +1,7 @@
 package no.nav.nom.apps.nom.ressurser.dvh.client;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -14,7 +12,6 @@ public class DvhOrdsTestScheduler {
     private final long DELAY = 60*1000;
 
     public DvhOrdsTestScheduler(
-        @Value("${dvh.endpoint}") String dvhEndpoint,
          DvhOrdsClient dvhOrdsClient
     ) {
         this.dvhOrdsClient = dvhOrdsClient;

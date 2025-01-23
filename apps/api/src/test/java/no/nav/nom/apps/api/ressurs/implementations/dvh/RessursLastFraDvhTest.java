@@ -18,8 +18,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -33,9 +33,9 @@ import static org.mockito.Mockito.when;
 
 @DisplayName("Last DvhRessurser og behandling av disse")
 public class RessursLastFraDvhTest extends DvhTestBase {
-    @SpyBean
+    @MockitoSpyBean
     RessursCommandService ressursCommandService;
-    @SpyBean
+    @MockitoSpyBean
     KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate;
 
     @BeforeEach
@@ -65,7 +65,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
                 .build()
         );
 
-        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
+        when(dvhOrdsService.getRessurser()).thenReturn(dvhRessurser);
 
         ArgumentCaptor<OpprettRessursCommand> opprettRessursArgumentCaptor = ArgumentCaptor.forClass(OpprettRessursCommand.class);
 
@@ -98,7 +98,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
         );
 
         when(ressursStateRepository.findByNavident(existingRessurs.navident())).thenReturn(Optional.of(existingRessurs));
-        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
+        when(dvhOrdsService.getRessurser()).thenReturn(dvhRessurser);
 
         dvhRestConsumer.loadRessurserFromDvh();
 
@@ -119,7 +119,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
                 .build()
         );
 
-        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
+        when(dvhOrdsService.getRessurser()).thenReturn(dvhRessurser);
 
         ArgumentCaptor<OpprettRessursCommand> opprettRessursArgumentCaptor = ArgumentCaptor.forClass(OpprettRessursCommand.class);
 
@@ -160,7 +160,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
                 .build()
         );
 
-        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
+        when(dvhOrdsService.getRessurser()).thenReturn(dvhRessurser);
 
         dvhRestConsumer.loadRessurserFromDvh();
 
@@ -194,7 +194,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
         );
 
         when(ressursStateRepository.findByPersonident(existingRessurs.personident())).thenReturn(Optional.of(existingRessurs));
-        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
+        when(dvhOrdsService.getRessurser()).thenReturn(dvhRessurser);
 
         dvhRestConsumer.loadRessurserFromDvh();
 
@@ -242,7 +242,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
         );
 
         when(ressursStateRepository.findByPersonident(existingRessurs.personident())).thenReturn(Optional.of(existingRessurs));
-        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
+        when(dvhOrdsService.getRessurser()).thenReturn(dvhRessurser);
 
         dvhRestConsumer.loadRessurserFromDvh();
 
@@ -286,7 +286,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
         );
 
         when(ressursStateRepository.findByPersonident(existingRessurs.personident())).thenReturn(Optional.of(existingRessurs));
-        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
+        when(dvhOrdsService.getRessurser()).thenReturn(dvhRessurser);
 
         dvhRestConsumer.loadRessurserFromDvh();
 
@@ -330,7 +330,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
         );
 
         when(ressursStateRepository.findByPersonident(existingRessurs.personident())).thenReturn(Optional.of(existingRessurs));
-        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
+        when(dvhOrdsService.getRessurser()).thenReturn(dvhRessurser);
 
         dvhRestConsumer.loadRessurserFromDvh();
 
@@ -377,7 +377,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
          );
 
          when(ressursStateRepository.findByPersonident(existingRessurs.personident())).thenReturn(Optional.of(existingRessurs));
-         when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
+         when(dvhOrdsService.getRessurser()).thenReturn(dvhRessurser);
          when(nomMastered.isMastered(any())).thenReturn(true);
 
          Mockito.reset(ressursEventProducerTemplate);
@@ -420,7 +420,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
         );
 
         when(ressursStateRepository.findByPersonident(existingRessurs.personident())).thenReturn(Optional.of(existingRessurs));
-        when(dvhOldTdvService.getTdvRessurser()).thenReturn(dvhRessurser);
+        when(dvhOrdsService.getRessurser()).thenReturn(dvhRessurser);
 
         // ident er mastret
         when(nomMastered.isMastered(any())).thenReturn(true);

@@ -23,6 +23,7 @@ public class AdController {
 
     private final OnpremAdConsumer adConsumer;
 
+    //- Brukes kun av NOM-API til hente epost adresser
     @PostMapping("/ad")
     public ResponseEntity<AdRessurser> hentAdRessurser(@AuthenticationPrincipal Jwt jwt, @RequestBody List<String> body) {
         if (body.size() > 100) {
