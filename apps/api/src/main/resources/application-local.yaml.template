@@ -31,6 +31,10 @@ app:
       ansatte-buckets-path: /ressurser?numRows=0
       tlf-path: /telefoner?numRows=0
       org-hierarki-path: /organiseringOgLedere?numRows=0
+    microsoft-graph:
+      groups:
+        nom-delegert: "42d11885-1e29-4fc4-9eed-1b339c2c8e36"
+        nom-leder: "e9cd9267-9baf-4078-abb8-7251c4313d32"     
   granted-authorities:
     clients:
       nom-ui2:
@@ -63,7 +67,7 @@ app:
 # DB. Bruk cloud-proxy mot miljø, eller kjør postgres lokalt
 
 DATABASE_HOST: localhost
-DATABASE_PORT: 5432
+DATABASE_PORT: 5438
 DATABASE_DATABASE: postgres-api
 DATABASE_USERNAME: postgres
 DATABASE_PASSWORD: password
@@ -85,7 +89,7 @@ spring:
     security.protocol: PLAINTEXT
   security:
     oauth2:
-      client:c
+      client:
         registration:
           nom-api:
             provider: azure

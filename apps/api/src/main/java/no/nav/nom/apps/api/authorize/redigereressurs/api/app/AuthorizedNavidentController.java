@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.authorize.redigereressurs.api.app;
 
 
-import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.authorize.redigereressurs.NotAuthorizedToDelegateLeder;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.ressurs.api.dto.MinimalRessurs;
 import no.nav.nom.contract.nom.state.LederTilgangState;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.SwaggerConfig;
@@ -135,6 +135,16 @@ public class AuthorizedNavidentController {
     @PreAuthorize("hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')")
     public List<IOrgenhet> isAuthorizedToDelegate(@PathVariable String navident) {
         return authorizedNavident.isAuthorizedToDelegate(navident);
+    }
+
+    @GetMapping("getRessurserWhichCanBeDelegatedTo")
+    @Operation(
+            description = "Returner en liste med navn og navIdent for ressurser som har AD-gruppe NOM-WRITE-DELEGERT og/eller NOM-WRITE-LEDER og dermed kan delegeres til.",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+//    @PreAuthorize("hasAuthority('NOM_UI_APP')")
+    public List<MinimalRessurs> getRessurserWhichCanBeDelegatedTo() {
+        return authorizedNavident.getRessurserWhichCanBeDelegatedTo();
     }
 
     @ExceptionHandler(

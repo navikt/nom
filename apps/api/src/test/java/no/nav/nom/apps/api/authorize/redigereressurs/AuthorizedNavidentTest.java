@@ -2,25 +2,44 @@ package no.nav.nom.apps.api.authorize.redigereressurs;
 
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrgenhetRequest;
+import no.nav.nom.apps.api.clients.msgraph.EntraIdUser;
+import no.nav.nom.apps.api.ressurs.api.dto.MinimalRessurs;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = AuthorizedNavident.class)
+@TestPropertySource(properties = {
+        "app.clients.microsoft-graph.groups.nom-delegert=42d11885-1e29-4fc4-9eed-1b339c2c8e36",
+        "app.clients.microsoft-graph.groups.nom-leder=e9cd9267-9baf-4078-abb8-7251c4313d32",
+})
 class AuthorizedNavidentTest extends MockBasisTestOrganisering {
-    @MockBean
+
+    private static final String ENTRA_USER_1_NAVIDENT = "A123456";
+    private static final String ENTRA_USER_2_NAVIDENT = "B234567";
+    private static final String ENTRA_MANAGER_NAVIDENT = "C345678";
+    public static final String AD_GROUP_NOM_WRITE_DELEGERT = "42d11885-1e29-4fc4-9eed-1b339c2c8e36";
+    public static final String AD_GROUP_NOM_WRITE_LEDER = "e9cd9267-9baf-4078-abb8-7251c4313d32";
+
+    @MockitoBean
     AuthorizeCommandService authorizeCommandService;
-    @MockBean
+
+    @MockitoBean
     DelegertLederStateRepository delegertLederStateRepository;
 
     @Test
@@ -99,9 +118,9 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
     @DisplayName("Verifiser at Leder B ikke har auth til å delegere rettighet til ressurs HR for enhet D")
     void test_0009() {
         Exception exception = assertThrows(NotAuthorizedToDelegateLeder.class, () ->
-            authorizedNavident.addLederTilgangForOrgenhet(
-                "B",
-                getDefaultRequest().toBuilder().orgenhetId("D").delegertTilNavident("HR").build())
+                authorizedNavident.addLederTilgangForOrgenhet(
+                        "B",
+                        getDefaultRequest().toBuilder().orgenhetId("D").delegertTilNavident("HR").build())
         );
     }
 
@@ -109,9 +128,9 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
     @DisplayName("Verifiser at man ikke kan delegere rettighet til ressurs-redigering for enhet som ikke finnes")
     void test_0010() {
         Exception exception = assertThrows(IllegalArgumentException.class, () ->
-            authorizedNavident.addLederTilgangForOrgenhet(
-                "A",
-                getDefaultRequest().toBuilder().orgenhetId("UKJENT").delegertTilNavident("HR").build())
+                authorizedNavident.addLederTilgangForOrgenhet(
+                        "A",
+                        getDefaultRequest().toBuilder().orgenhetId("UKJENT").delegertTilNavident("HR").build())
         );
     }
 
@@ -119,9 +138,9 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
     @DisplayName("Verifiser at man ikke kan delegere rettighet til ressurs-redigering for enhet som er lavere enn arb.område")
     void test_0011() {
         Exception exception = assertThrows(IllegalArgumentException.class, () ->
-            authorizedNavident.addLederTilgangForOrgenhet(
-                "A",
-                getDefaultRequest().toBuilder().orgenhetId("B1").delegertTilNavident("HR").build())
+                authorizedNavident.addLederTilgangForOrgenhet(
+                        "A",
+                        getDefaultRequest().toBuilder().orgenhetId("B1").delegertTilNavident("HR").build())
         );
     }
 
@@ -129,9 +148,9 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
     @DisplayName("Verifiser at man ikke kan delegere rettighet til ressurs-redigering for ressurs som ikke er aktiv")
     void test_0012() {
         Exception exception = assertThrows(IllegalArgumentException.class, () ->
-            authorizedNavident.addLederTilgangForOrgenhet(
-                "D",
-                getDefaultRequest().toBuilder().delegertTilNavident("INGEN_ANSATT").build())
+                authorizedNavident.addLederTilgangForOrgenhet(
+                        "D",
+                        getDefaultRequest().toBuilder().delegertTilNavident("INGEN_ANSATT").build())
         );
     }
 
@@ -139,8 +158,8 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
     @DisplayName("Verifiser at man ikke kan delegere rettighet til seg selv")
     void test_0013() {
         Exception exception = assertThrows(IllegalArgumentException.class, () ->
-            authorizedNavident.addLederTilgangForOrgenhet("D",
-                getDefaultRequest().toBuilder().delegertTilNavident("D").build())
+                authorizedNavident.addLederTilgangForOrgenhet("D",
+                        getDefaultRequest().toBuilder().delegertTilNavident("D").build())
         );
     }
 
@@ -258,4 +277,47 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
         assertTrue(enheterLederKanRedigere.stream().anyMatch(orgenhet -> orgenhet.getId().equals("C22")));
     }
 
+    @Test
+    void should_join_results_for_ad_groups() {
+        when(microsoftGraphClient.getUsersForGroup(AD_GROUP_NOM_WRITE_DELEGERT)).thenReturn(List.of(user1(), user2()));
+        when(microsoftGraphClient.getUsersForGroup(AD_GROUP_NOM_WRITE_LEDER)).thenReturn(List.of(manager()));
+        
+        when(ressursStateRepository.findByNavident(ENTRA_USER_1_NAVIDENT)).
+                thenReturn(Optional.of(getRessursState("Ansatt1", "Ansatt")));
+        when(ressursStateRepository.findByNavident(ENTRA_USER_2_NAVIDENT)).
+                thenReturn(Optional.of(getRessursState("Ansatt1", "Ansatt")));
+        when(ressursStateRepository.findByNavident(ENTRA_MANAGER_NAVIDENT)).
+                thenReturn(Optional.of(getRessursState("Leder", "Leder")));
+        
+        List<MinimalRessurs> ressurser = authorizedNavident.getRessurserWhichCanBeDelegatedTo();
+        assertThat(ressurser).hasSize(3);
+        assertThat(ressurser).anyMatch(ressurs -> ressurs.navident().equals(ENTRA_USER_1_NAVIDENT));
+    }
+
+    private EntraIdUser user1() {
+        return EntraIdUser.builder()
+                .email("user1@nav.no")
+                .navIdent(ENTRA_USER_1_NAVIDENT)
+                .build();
+    }
+
+    private EntraIdUser user2() {
+        return EntraIdUser.builder()
+                .email("user2@nav.no")
+                .navIdent(ENTRA_USER_2_NAVIDENT)
+                .build();
+    }
+
+    private EntraIdUser manager() {
+        return EntraIdUser.builder()
+                .email("manager@nav.no")
+                .navIdent(ENTRA_MANAGER_NAVIDENT)
+                .build();
+    }
+    
+    private RessursState getRessursState(String fornavn, String etternavn) {
+        return RessursState.builder()
+                .visningsnavn(new Visningsnavn(fornavn, Optional.empty(), etternavn))
+                .build();
+    }
 }
