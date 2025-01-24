@@ -29,7 +29,7 @@ app:
       max-attempts: 3
       backoff-duration-millis: 2000
       send-email: true
-      ad-groups:
+      groups:
         nom-delegert: ${NOM_DELEGERT_GROUPID:nomDelegertGroup}
         nom-leder: ${NOM_LEDER_GROUPID:nomLederGroup}
     
