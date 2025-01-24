@@ -12,9 +12,12 @@ app:
     pdl:
       tema: GEN
       base-url: http://localhost:${wiremock.server.port}
-    email:
-      url: http://localhost:${wiremock.server.port}
+    microsoft-graph:
+      base-url: http://localhost:${wiremock.server.port}
       max-attempts: 1
+      groups:
+        nom-delegert: "42d11885-1e29-4fc4-9eed-1b339c2c8e36"
+        nom-leder: "e9cd9267-9baf-4078-abb8-7251c4313d32"
     nom-remedy-integrasjon:
       base-url: http://localhost:${wiremock.server.port}
     dvh-ords:

@@ -4,8 +4,8 @@ import freemarker.template.TemplateException;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
-import no.nav.nom.apps.api.clients.email.EmailClient;
-import no.nav.nom.apps.api.clients.email.EmailMessage;
+import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
+import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.common.exception.LederNotFoundException;
@@ -39,7 +39,7 @@ public class RessursOpprettetEmailService {
     public static final String NAVIDENT = "NAVident";
 
     private final Logger log = LoggerFactory.getLogger(RessursOpprettetEmailService.class);
-    private final EmailClient emailClient;
+    private final MicrosoftGraphClient microsoftGraphClient;
     private final AdClient adClient;
     private final RessursStateRepository ressursStateRepository;
     private final DvhRepository dvhRepository;
@@ -47,14 +47,14 @@ public class RessursOpprettetEmailService {
     private final Unleash unleash;
 
     public RessursOpprettetEmailService(
-        EmailClient emailClient,
+        MicrosoftGraphClient microsoftGraphClient,
         AdClient adClient,
         RessursStateRepository ressursStateRepository,
         DvhRepository dvhRepository,
         Configuration freemarkerConfig,
         Unleash unleash
     ) {
-        this.emailClient = emailClient;
+        this.microsoftGraphClient = microsoftGraphClient;
         this.adClient = adClient;
         this.ressursStateRepository = ressursStateRepository;
         this.dvhRepository = dvhRepository;
@@ -101,7 +101,7 @@ public class RessursOpprettetEmailService {
             log.info("Sender epost subject: {} recipients: {}", subject, recipientList);
 
             EmailMessage message = new EmailMessage(subject, body, recipientList);
-            emailClient.sendEmail(message).subscribe();
+            microsoftGraphClient.sendEmail(message).subscribe();
 
         } catch (ADResponseException e) {
             throw new RessursOpprettetEmailException("Fant ikke leder epost adresse for leder");

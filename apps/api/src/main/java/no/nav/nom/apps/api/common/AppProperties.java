@@ -16,7 +16,7 @@ public record AppProperties(
         NomProxy nomProxy,
         Nik nik,
         Pdl pdl,
-        Email email,
+        MicrosoftGraph microsoftGraph,
         NomRemedyIntegrasjon nomRemedyIntegrasjon,
         DvhOrds dvhOrds
     ) {}
@@ -37,12 +37,12 @@ public record AppProperties(
             String aadScope
     ) {}
 
-    public record Email(
+    public record MicrosoftGraph(
         String baseUrl,
         String aadClientId,
         Integer maxAttempts,
         Integer backoffDurationMillis,
-        Boolean isEnabled
+        Boolean sendEmail
     ) {}
 
     public record NomRemedyIntegrasjon(

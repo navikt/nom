@@ -5,8 +5,8 @@ import freemarker.template.TemplateException;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
-import no.nav.nom.apps.api.clients.email.EmailClient;
-import no.nav.nom.apps.api.clients.email.EmailMessage;
+import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
+import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.common.cache.CacheQueueService;
 import no.nav.nom.apps.api.common.cache.CacheType;
@@ -48,7 +48,7 @@ public class OrgtilknytningEndretEmailService {
     public final String epost_body_item_template = "{0}({1}), fra og med {2}, til og med {3}. Endring utført av {4}, på {5}.";
     public final String epost_body_item_template_ot_notfound = "Endring({0}) utført av {1}, på {2}.";
     private final Logger log = LoggerFactory.getLogger(OrgtilknytningEndretEmailService.class);
-    private final EmailClient emailClient;
+    private final MicrosoftGraphClient microsoftGraphClient;
     private final Unleash unleash;
     private final Configuration freemarkerConfig;
     private final AdClient adClient;
@@ -62,7 +62,7 @@ public class OrgtilknytningEndretEmailService {
     private final NomMastered nomMastered;
 
     public OrgtilknytningEndretEmailService(
-        EmailClient emailClient,
+        MicrosoftGraphClient microsoftGraphClient,
         Unleash unleash,
         Configuration freemarkerConfig,
         AdClient adClient,
@@ -75,7 +75,7 @@ public class OrgtilknytningEndretEmailService {
         LeaderElection leaderElection,
         NomMastered nomMastered
     ) {
-        this.emailClient = emailClient;
+        this.microsoftGraphClient = microsoftGraphClient;
         this.unleash = unleash;
         this.freemarkerConfig = freemarkerConfig;
         this.adClient = adClient;
@@ -189,7 +189,7 @@ public class OrgtilknytningEndretEmailService {
                     EmailMessage message = new EmailMessage(subject + " skulle vært sendt til " + recipientList, body, toLineOnly);
                     */
                 EmailMessage message = new EmailMessage(subject, body, recipientList);
-                emailClient.sendEmail(message).subscribe();
+                microsoftGraphClient.sendEmail(message).subscribe();
             }
         } catch (ADResponseException e) {
             throw new RessursOpprettetEmailException("Fant ikke leder epost adresse for leder");
@@ -224,7 +224,7 @@ public class OrgtilknytningEndretEmailService {
             String subject = String.format("Masseflytting av ressurser fra %s til %s", gammelOrgEnhet, masseFlyttingRequest.nyOrgenhetId());
             String body = getFormattedEmailBody(masseFlyttingRequest, failedAvvikleOrgtilknytninger, antallFlyttet, gammelOrgEnhet, innsenderVisningsnavn);
             EmailMessage message = new EmailMessage(subject, body, recipientList);
-            emailClient.sendEmail(message).subscribe();
+            microsoftGraphClient.sendEmail(message).subscribe();
 
         } catch (ADResponseException e) {
             log.error("Fant ikke innsender sin epost adresse for masseflytting", e);

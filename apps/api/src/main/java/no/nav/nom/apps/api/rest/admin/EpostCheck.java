@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import no.nav.nom.apps.api.clients.email.EmailClient;
-import no.nav.nom.apps.api.clients.email.EmailMessage;
+import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
+import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.api.email.OrgtilknytningEndretEmailService;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
@@ -27,16 +27,16 @@ import java.util.List;
 @PreAuthorize("hasAuthority('ADMIN')")
 public class EpostCheck {
 
-    private final EmailClient emailClient;
+    private final MicrosoftGraphClient microsoftGraphClient;
     private final RessursOpprettetEmailService opprettetRessurs;
     private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
     private final RessursUtlopersnartEmailService ressursUtlopersnartEmailService;
 
-    public EpostCheck(EmailClient emailClient,
+    public EpostCheck(MicrosoftGraphClient microsoftGraphClient,
                       RessursOpprettetEmailService opprettetRessurs,
                       OrgtilknytningEndretEmailService orgtilknytningEndretEmailService,
                       RessursUtlopersnartEmailService ressursUtlopersnartEmailService) {
-        this.emailClient = emailClient;
+        this.microsoftGraphClient = microsoftGraphClient;
         this.opprettetRessurs = opprettetRessurs;
         this.orgtilknytningEndretEmailService = orgtilknytningEndretEmailService;
         this.ressursUtlopersnartEmailService = ressursUtlopersnartEmailService;
@@ -62,7 +62,7 @@ public class EpostCheck {
         );
 
         EmailMessage message = new EmailMessage("subject", testBody, recipientList);
-        emailClient.sendEmail(message).subscribe();
+        microsoftGraphClient.sendEmail(message).subscribe();
         return "Email sent to: " + recipientList;
     }
 
