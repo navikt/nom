@@ -260,6 +260,7 @@ export function EndreOtBekreftelsesmodal({
                   display: flex;
                   align-items: center;
                   background: #fff;
+                  font-size: var(--a-font-size-heading-small);
 
                   :hover {
                     background: var(--a-border-divider);
@@ -335,6 +336,7 @@ export function EndreOtBekreftelsesmodal({
                   display: flex;
                   align-items: center;
                   background: #fff;
+                  font-size: var(--a-font-size-heading-small);
 
                   :hover {
                     background: var(--a-border-divider);
