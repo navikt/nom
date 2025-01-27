@@ -35,9 +35,10 @@ public class RessursExcelGenerator {
     );
     private final AuthResolver authResolver;
 
-    public RessursExcelGenerator(OrgtilknytningStateRepository orgtilknytningStateRepository,
-                                 OrgEnhetStateRepository orgEnhetStateRepository, OrgenhetService orgenhetService,
-                                 AuthResolver authResolver
+    public RessursExcelGenerator(
+        OrgtilknytningStateRepository orgtilknytningStateRepository,
+        OrgEnhetStateRepository orgEnhetStateRepository, OrgenhetService orgenhetService,
+        AuthResolver authResolver
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
@@ -64,14 +65,8 @@ public class RessursExcelGenerator {
             otMap.values().stream()
                 .flatMap(List::stream)
                 .map(OrgtilknytningState::orgEnhetId)
-                .distinct()
-                .collect(Collectors.toList())
-        ).stream().collect(
-            Collectors.groupingBy(
-                OrgEnhetState::id,
-                Collectors.toList()
-            )
-        );
+                .collect(Collectors.toSet())
+        ).stream().collect(Collectors.toMap(OrgEnhetState::id, OrgEnhetState::navn));
 
         try (Workbook workbook = new XSSFWorkbook()) {
             var sheet = workbook.createSheet("Ressurser");
@@ -82,7 +77,7 @@ public class RessursExcelGenerator {
             for (Ressurs ressurs : ressurser) {
                 var gyldigFom = Collections.min(otMap.get(ressurs.state().navident()).stream().map(OrgtilknytningState::gyldigFom).toList());
                 var orgEnhet = otMap.get(ressurs.state().navident()).stream()
-                    .map(ot -> String.format("%s (%s)", orgenhetNavnMap.get(ot.orgEnhetId()).getFirst().navn(), ot.orgEnhetId()))
+                    .map(ot -> String.format("%s (%s)", orgenhetNavnMap.get(ot.orgEnhetId()), ot.orgEnhetId()))
                     .collect(Collectors.joining(", "));
 
                 addRow(
@@ -125,7 +120,9 @@ public class RessursExcelGenerator {
             orgEnhet.setCellValue("Organisasjonsenhet");
             epost.setCellValue("Epost");
             fom.setCellValue("Fra og med");
-            if (kanSeSluttdato) sluttdato.setCellValue("Sluttdato");
+            if (kanSeSluttdato) {
+                sluttdato.setCellValue("Sluttdato");
+            }
         } else {
             navident.setCellValue(ressurs.state().navident());
             navn.setCellValue(ressurs.state().visningsnavn().toString());
