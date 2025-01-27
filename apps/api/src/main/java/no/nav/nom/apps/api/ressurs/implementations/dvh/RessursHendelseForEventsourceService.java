@@ -90,7 +90,8 @@ public class RessursHendelseForEventsourceService {
     private void checkDiffPaaSektor(RessursState r, DvhRessurs dvhRessurs) {
         if (nomMastered.isMastered(r.navident())
             && dvhRessurs.isAktivIU4()  // Sjekker om startdato for ressurs finnes i agresso, og om sluttdato er fremtidig
-            && !Objects.equals(r.sektor(), dvhRessurs.getU4Sektor())) {
+            && !Objects.equals(r.sektor(), dvhRessurs.getU4Sektor())
+        ) {
             if (dvhRessurs.getU4Sektor() == null) {
                 log.info("Ressurs {} i U4 har en ikke tolket U4 Sektor. {}", r.navident(), dvhRessurs.getAnsattRessursKode());
             }
