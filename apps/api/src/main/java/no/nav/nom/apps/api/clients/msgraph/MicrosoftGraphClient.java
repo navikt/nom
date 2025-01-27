@@ -15,6 +15,7 @@ import reactor.util.retry.Retry;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -93,6 +94,7 @@ public class MicrosoftGraphClient {
     }
 
     private ODataResponse<EntraIdUser> getUsersFromUri(String uri) {
+        logger.debug("Getting users from URI: {}", uri);
         return webClient.get()
                 .uri(uri)
                 .retrieve()
@@ -100,8 +102,8 @@ public class MicrosoftGraphClient {
                 })
                 .retryWhen(defaultRetry(msGraphClientProperties.maxAttempts(), msGraphClientProperties.backoffDurationMillis()))
                 .doOnError(Exception.class, exception ->
-                        logger.warn("GET failed for URI '{}': {}", uri, exception.getMessage()))
-                .onErrorReturn(ODataResponse.<EntraIdUser>builder().build())
+                        logger.warn("GET failed for URI '{}': {}", uri, exception.getMessage(), exception))
+                .onErrorReturn(ODataResponse.<EntraIdUser>builder().value(Collections.emptyList()).build())
                 .block();
     }
 
