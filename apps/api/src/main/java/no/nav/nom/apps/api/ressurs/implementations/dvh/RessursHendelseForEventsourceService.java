@@ -1,8 +1,8 @@
 package no.nav.nom.apps.api.ressurs.implementations.dvh;
 
-import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
@@ -12,7 +12,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSlutt
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
-import no.nav.nom.apps.api.ressurs.NomMastered;
+import no.nav.nom.apps.api.u4diff.U4DiffPaaMastrede;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
@@ -41,14 +41,17 @@ public class RessursHendelseForEventsourceService {
     private final RessursCommandService ressursCommandService;
 
     private final NomMastered nomMastered;
+    private final U4DiffPaaMastrede u4DiffPaaMastrede;
 
     public RessursHendelseForEventsourceService(
         RessursStateRepository ressursStateRepository,
-        RessursCommandService ressursCommandService, NomMastered nomMastered
+        RessursCommandService ressursCommandService, NomMastered nomMastered,
+        U4DiffPaaMastrede u4DiffPaaMastrede
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.ressursCommandService = ressursCommandService;
         this.nomMastered = nomMastered;
+        this.u4DiffPaaMastrede = u4DiffPaaMastrede;
     }
 
     public void handterRessursIderFraDvh(List<DvhRessurs> dvhRessurs) {
@@ -57,10 +60,14 @@ public class RessursHendelseForEventsourceService {
         log.info("State repository size " + ressursStateRepository.getAll().size());
         Map<DvhRessurs, CompletableFuture<SendResult<String, RessursEvent>>> opprettetRessuser = new ConcurrentHashMap<>();
 
+        u4DiffPaaMastrede.deleteDiffForSektorPaa();
         dvhRessurs.forEach(ressurs -> {
             val ressursByPersonident = ressursStateRepository.findByPersonident(ressurs.getPersonIdent());
             ressursByPersonident.ifPresentOrElse(
-                (r) -> createEndreHendelse(r, ressurs),
+                (r) -> {
+                    createEndreHendelse(r, ressurs);
+                    checkDiffPaaSektor(r, ressurs);
+                },
                 () -> handterNyPersonident(ressurs, opprettetRessuser)
             );
         });
@@ -77,6 +84,15 @@ public class RessursHendelseForEventsourceService {
             })
             .filter(Objects::nonNull)
             .forEach(entry -> ressursSluttet(entry.getValue().getFid(), entry.getKey()));
+    }
+
+    private void checkDiffPaaSektor(RessursState r, DvhRessurs dvhRessurs) {
+        if (nomMastered.isMastered(r.navident()) && dvhRessurs.getAgressoAnsattIDag() && !Objects.equals(r.sektor(), dvhRessurs.getU4Sektor())) {
+            if (dvhRessurs.getU4Sektor() == null) {
+                log.info("Ressurs {} i U4 har en ikke tolket U4 Sektor. {}", r.navident(), dvhRessurs.getAnsattRessursKode());
+            }
+            u4DiffPaaMastrede.rapporterU4DiffRessursSektor(r.navident(), r.sektor(), dvhRessurs.getU4Sektor(), dvhRessurs.getAnsettelsesTypeBesk());
+        }
     }
 
     private void handterNyPersonident(DvhRessurs ressurs, Map<DvhRessurs, CompletableFuture<SendResult<String, RessursEvent>>> opprettetRessuser) {

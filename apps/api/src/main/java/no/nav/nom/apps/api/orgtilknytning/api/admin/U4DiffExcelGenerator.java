@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.orgtilknytning.api.admin;
 
 import jakarta.servlet.http.HttpServletResponse;
 
-import no.nav.nom.apps.api.orgtilknytning.u4diff.U4Diff;
+import no.nav.nom.apps.api.u4diff.U4Diff;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;

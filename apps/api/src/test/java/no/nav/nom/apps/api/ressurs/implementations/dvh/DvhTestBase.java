@@ -25,6 +25,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursEventKafkaConfig;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursEventProducer;
 import no.nav.nom.apps.api.ressurs.eventsourcing.recoverybackup.RessursEventSourceRepository;
+import no.nav.nom.apps.api.u4diff.U4DiffPaaMastrede;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
@@ -130,4 +131,6 @@ public abstract class DvhTestBase {
     RessursStateRepository ressursStateRepository;
     @MockitoBean
     RessursEventSourceRepository ressursEventSourceRepository;
+    @MockitoBean
+    U4DiffPaaMastrede u4DiffPaaMastrede;
 }

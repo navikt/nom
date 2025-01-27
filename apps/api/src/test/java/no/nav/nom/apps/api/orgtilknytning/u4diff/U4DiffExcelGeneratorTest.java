@@ -1,6 +1,8 @@
 package no.nav.nom.apps.api.orgtilknytning.u4diff;
 
 import no.nav.nom.apps.api.orgtilknytning.api.admin.U4DiffExcelGenerator;
+import no.nav.nom.apps.api.u4diff.U4Diff;
+import no.nav.nom.apps.api.u4diff.U4DiffType;
 import no.nav.nom.contract.nom.Sektor;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;

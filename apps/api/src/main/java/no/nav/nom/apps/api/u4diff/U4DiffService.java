@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.orgtilknytning.u4diff;
+package no.nav.nom.apps.api.u4diff;
 
 import org.springframework.stereotype.Service;
 
@@ -13,6 +13,6 @@ public class U4DiffService {
     }
 
     public List<U4Diff> getStatligeIkkeIU4() {
-        return u4DiffRepository.findByType(U4DiffType.MANGLENDE_STATLIG_I_U4);
+        return u4DiffRepository.findByKildeAndType(U4DiffKilde.STILLINGER, U4DiffType.MANGLENDE_STATLIG_I_U4);
     }
 }
