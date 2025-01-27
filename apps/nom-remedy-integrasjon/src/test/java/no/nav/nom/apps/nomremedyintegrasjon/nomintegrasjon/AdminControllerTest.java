@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verify;
 public class AdminControllerTest extends TestBase {
 
     @MockBean
-    NomIntegrasjonService nomIntegrasjonService;
+    NomRemedyIntegrasjonService nomRemedyIntegrasjonService;
 
     @Test
     @DisplayName("POST /admin/slettFraRemedy should delete inactive ressurser from remedy")
@@ -39,7 +39,7 @@ public class AdminControllerTest extends TestBase {
             .exchange()
             .expectStatus().isOk();
 
-        verify(nomIntegrasjonService).findRessurserWithSluttdatoAndMarkForDeletion(
+        verify(nomRemedyIntegrasjonService).findRessurserWithSluttdatoAndMarkForDeletion(
             eq(sluttdato), eq(LOGGED_IN_USER_NAVIDENT)
         );
     }
@@ -61,7 +61,7 @@ public class AdminControllerTest extends TestBase {
             .exchange()
             .expectStatus().isBadRequest();
 
-        verify(nomIntegrasjonService, times(0)).findRessurserWithSluttdatoAndMarkForDeletion(any(), any());
+        verify(nomRemedyIntegrasjonService, times(0)).findRessurserWithSluttdatoAndMarkForDeletion(any(), any());
     }
 
     private static Stream<Arguments> testNotDeleteActiveRessurserFromRemedyInput() {

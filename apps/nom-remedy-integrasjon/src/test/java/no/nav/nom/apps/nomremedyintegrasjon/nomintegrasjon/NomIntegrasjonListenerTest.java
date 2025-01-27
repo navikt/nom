@@ -43,7 +43,7 @@ import static org.mockito.Mockito.when;
 public class NomIntegrasjonListenerTest extends TestBase {
 
     @MockBean
-    private NomIntegrasjonService nomIntegrasjonService;
+    private NomRemedyIntegrasjonService nomRemedyIntegrasjonService;
 
     @Autowired
     private KafkaTemplate<String, RessursEvent> ressursEventKafkaTemplate;
@@ -94,7 +94,7 @@ public class NomIntegrasjonListenerTest extends TestBase {
         doAnswer(invocation -> {
             countDownLatch.countDown();
             return null;
-        }).when(nomIntegrasjonService).handleRessursEvent(any());
+        }).when(nomRemedyIntegrasjonService).handleRessursEvent(any());
 
         ressursEventKafkaTemplate.send(
             ressursEventSourceTopic, UUID.randomUUID().toString(), ressursOpprettetEventV1
@@ -103,7 +103,7 @@ public class NomIntegrasjonListenerTest extends TestBase {
         countDownLatch.await(5, TimeUnit.SECONDS);
 
         Awaitility.await().until(() -> ressursStateRepository.findByFid(ressursOpprettetEventV1.getFid()).isPresent());
-        verify(nomIntegrasjonService, times(1))
+        verify(nomRemedyIntegrasjonService, times(1))
             .handleRessursEvent(any(RessursOpprettetEventV1.class));
     }
 
@@ -121,7 +121,7 @@ public class NomIntegrasjonListenerTest extends TestBase {
         doAnswer(invocation -> {
             countDownLatch.countDown();
             return null;
-        }).when(nomIntegrasjonService).handleRessursEvent(any());
+        }).when(nomRemedyIntegrasjonService).handleRessursEvent(any());
 
         ressursEventKafkaTemplate.send(
             ressursEventSourceTopic, UUID.randomUUID().toString(), ressursOpprettetEventV1
@@ -129,7 +129,7 @@ public class NomIntegrasjonListenerTest extends TestBase {
 
         countDownLatch.await(5, TimeUnit.SECONDS);
 
-        verify(nomIntegrasjonService, times(1))
+        verify(nomRemedyIntegrasjonService, times(1))
             .handleRessursEvent(any(RessursOpprettetEventV1.class));
     }
 
@@ -147,7 +147,7 @@ public class NomIntegrasjonListenerTest extends TestBase {
         doAnswer(invocation -> {
             countDownLatch.countDown();
             return null;
-        }).when(nomIntegrasjonService).handleRessursEvent(any());
+        }).when(nomRemedyIntegrasjonService).handleRessursEvent(any());
 
         orgtilknytningEventKafkaTemplate.send(
             orgtilknytningEventSourceTopic, UUID.randomUUID().toString(), orgtilknytningDagligOppfolgingEndretEventV1
@@ -155,7 +155,7 @@ public class NomIntegrasjonListenerTest extends TestBase {
 
         countDownLatch.await(5, TimeUnit.SECONDS);
 
-        verify(nomIntegrasjonService, times(1))
+        verify(nomRemedyIntegrasjonService, times(1))
             .handleOrgtilknytningEvent(any(OrgtilknytningEvent.class));
     }
 
@@ -173,7 +173,7 @@ public class NomIntegrasjonListenerTest extends TestBase {
         doAnswer(invocation -> {
             countDownLatch.countDown();
             return null;
-        }).when(nomIntegrasjonService).handleRessursEvent(any());
+        }).when(nomRemedyIntegrasjonService).handleRessursEvent(any());
 
         orgtilknytningEventKafkaTemplate.send(
             orgtilknytningEventSourceTopic, UUID.randomUUID().toString(), orgtilknytningDagligOppfolgingEndretEventV1
@@ -181,7 +181,7 @@ public class NomIntegrasjonListenerTest extends TestBase {
 
         countDownLatch.await(5, TimeUnit.SECONDS);
 
-        verify(nomIntegrasjonService, times(1))
+        verify(nomRemedyIntegrasjonService, times(1))
             .handleOrgtilknytningEvent(any(OrgtilknytningEvent.class));
     }
 
@@ -211,6 +211,6 @@ public class NomIntegrasjonListenerTest extends TestBase {
 
         Thread.sleep(700);
 
-        verifyNoInteractions(nomIntegrasjonService);
+        verifyNoInteractions(nomRemedyIntegrasjonService);
     }
 }
