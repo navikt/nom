@@ -68,6 +68,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Cache local Maven build-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/build-cache
+          key: ${{ runner.os }}-maven-build-cache-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-build-cache-
       - name: JDK
         uses: actions/setup-java@v4
         with:
