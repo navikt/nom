@@ -47,6 +47,25 @@ class MicrosoftGraphClientTest extends TestBase {
     }
 
     @Test
+    void should_handle_failing_call_to_follow_odata_nextLink() throws JsonProcessingException {
+        ODataResponse<EntraIdUser> firstResponse = ODataResponse.<EntraIdUser>builder()
+                .context("Some context")
+                .count(2)
+                .nextLink("/groups/nextPart")
+                .value(List.of(user1()))
+                .build();
+        stubForGet(ENTRA_ID_PATH, firstResponse);
+
+        stubFor(get(urlEqualTo("/groups/nextPart"))
+                .withHeader("authorization", matching("Bearer tokenValue"))
+                .willReturn(aResponse().withStatus(400))
+        );
+        
+        List<EntraIdUser> users = microsoftGraphClient.getUsersForGroup(ENTRA_ID_GROUP);
+        assertThat(users.size()).isEqualTo(1);
+    }
+
+    @Test
     void should_handle_response_with_no_odata_nextLink_and_return_group_users() throws JsonProcessingException {
         ODataResponse<EntraIdUser> response = ODataResponse.<EntraIdUser>builder()
                 .context("Some context")

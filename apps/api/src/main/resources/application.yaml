@@ -206,6 +206,7 @@ server.tomcat.mbeanregistry.enabled: true
 logging:
   level:
     no.nav.nom: INFO
+    no.nav.nom.apps.api.clients.msgraph: DEBUG
 #    no.nav.nom.apps.api.orgtilknytning.u4diff: DEBUG
 #    no.nav.nom.apps.api.orgtilknytning: DEBUG
 #    no.nav.nom.apps.api.organisering: DEBUG
