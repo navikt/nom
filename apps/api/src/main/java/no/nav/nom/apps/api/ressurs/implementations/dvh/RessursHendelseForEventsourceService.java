@@ -61,6 +61,7 @@ public class RessursHendelseForEventsourceService {
         Map<DvhRessurs, CompletableFuture<SendResult<String, RessursEvent>>> opprettetRessuser = new ConcurrentHashMap<>();
 
         u4DiffPaaMastrede.deleteDiffForSektorPaa();
+        
         dvhRessurs.forEach(ressurs -> {
             val ressursByPersonident = ressursStateRepository.findByPersonident(ressurs.getPersonIdent());
             ressursByPersonident.ifPresentOrElse(
