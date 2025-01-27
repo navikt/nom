@@ -56,10 +56,23 @@ class MicrosoftGraphClientTest extends TestBase {
                 .build();
         stubForGet(ENTRA_ID_PATH, firstResponse);
 
+        ODataError errorResponse = ODataError.builder()
+                .error(
+                        ODataError.ODataErrorBody.builder()
+                                .code("ErrorCode")
+                                .message("The detailed error message")
+                                .build()
+                )
+                .build();
+        
         stubFor(get(urlEqualTo("/groups/nextPart"))
                 .withHeader("authorization", matching("Bearer tokenValue"))
-                .willReturn(aResponse().withStatus(400))
-        );
+                .willReturn(aResponse()
+                        .withStatus(400)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(errorResponse)
+                )
+        ));
         
         List<EntraIdUser> users = microsoftGraphClient.getUsersForGroup(ENTRA_ID_GROUP);
         assertThat(users.size()).isEqualTo(1);
