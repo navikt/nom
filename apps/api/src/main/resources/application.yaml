@@ -24,11 +24,15 @@ app:
       behandlingsnummer: B348
       base-url: ${PDL_BASEURL}
       aad-scope: ${PDL_API_SCOPE}
-    email:
-      base-url: https://graph.microsoft.com/v1.0/users/ikke.svar.nom@nav.no/sendMail
-      is-enabled: true
+    microsoft-graph:
+      base-url: https://graph.microsoft.com/v1.0
       max-attempts: 3
       backoff-duration-millis: 2000
+      send-email: true
+      groups:
+        nom-delegert: ${NOM_DELEGERT_GROUPID:nomDelegertGroup}
+        nom-leder: ${NOM_LEDER_GROUPID:nomLederGroup}
+    
     nom-remedy-integrasjon:
       base-url: ${NOM_REMEDY_INTEGRASJON_BASEURL}
     dvh-ords:

@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.clients.email;
+package no.nav.nom.apps.api.clients.msgraph;
 
 import java.util.List;
 

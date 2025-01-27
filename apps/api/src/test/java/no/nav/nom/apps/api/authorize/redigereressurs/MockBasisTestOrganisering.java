@@ -4,6 +4,7 @@ import io.getunleash.Unleash;
 import lombok.Builder;
 import lombok.Getter;
 import no.nav.nom.apps.api.authorize.email.TilgangDelegertEmailService;
+import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
@@ -19,7 +20,7 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,20 +33,23 @@ import static org.mockito.Mockito.when;
 import static wiremock.org.hamcrest.Matchers.containsInAnyOrder;
 
 abstract public class MockBasisTestOrganisering {
-    @MockBean
+    @MockitoBean
     OrgtilknytningStateRepository orgtilknytningStateRepository;
-    @MockBean
+    @MockitoBean
     OrganiseringStateRepository organiseringStateRepository;
-    @MockBean
+    @MockitoBean
     RessursStateRepository ressursStateRepository;
-    @MockBean
+    @MockitoBean
     Unleash unleash;
-    @MockBean
+    @MockitoBean
     OrgenhetService orgenhetService;
-    @MockBean
+    @MockitoBean
     DvhRepository dvhRepository;
-    @MockBean
+    @MockitoBean
     TilgangDelegertEmailService tilgangDelegertEmailService;
+    @MockitoBean
+    MicrosoftGraphClient microsoftGraphClient;
+    
     @Autowired
     AuthorizedNavident authorizedNavident;
 

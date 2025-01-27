@@ -7,6 +7,9 @@ import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.AvsluttDele
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.FornyDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.OpprettDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrgenhetRequest;
+import no.nav.nom.apps.api.clients.msgraph.EntraIdUser;
+import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
@@ -14,26 +17,25 @@ import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
+import no.nav.nom.apps.api.ressurs.api.dto.MinimalRessurs;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.LederTilgangState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
+import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
@@ -49,6 +51,7 @@ import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNa
 @Slf4j
 @Service
 public class AuthorizedNavident {
+    
     // Delegert lederskap. Delegert leder for orgenhet, og alle underliggende enheter
     private final AuthorizeCommandService authorizeCommandService;
     private final DelegertLederStateRepository delegertLederStateRepository;
@@ -58,18 +61,24 @@ public class AuthorizedNavident {
     private final OrgenhetService orgenhetService;
     private final DvhRepository dvhRepository;
     private final TilgangDelegertEmailService tilgangDelegertEmailService;
+    private final MicrosoftGraphClient microsoftGraphClient;
+    private final String nomWriteDelegertAdGroup;
+    private final String nomWriteLederAdGroup;
     // Per leder for alle orgenheter på ARBEIDSOMRÅDE nivå og nedover. For den enkelte leder er alle under-nivåer lagt til.
     Map<String, HashSet<String>> lederForOrgenhetSomKanRedigere = new ConcurrentHashMap<>();
 
     public AuthorizedNavident(
-        AuthorizeCommandService authorizeCommandService,
-        DelegertLederStateRepository delegertLederStateRepository,
-        OrgtilknytningStateRepository orgtilknytningStateRepository,
-        OrganiseringStateRepository organiseringStateRepository,
-        RessursStateRepository ressursStateRepository,
-        OrgenhetService orgenhetService,
-        DvhRepository dvhRepository,
-        TilgangDelegertEmailService tilgangDelegertEmailService
+            AuthorizeCommandService authorizeCommandService,
+            DelegertLederStateRepository delegertLederStateRepository,
+            OrgtilknytningStateRepository orgtilknytningStateRepository,
+            OrganiseringStateRepository organiseringStateRepository,
+            RessursStateRepository ressursStateRepository,
+            OrgenhetService orgenhetService,
+            DvhRepository dvhRepository,
+            TilgangDelegertEmailService tilgangDelegertEmailService,
+            MicrosoftGraphClient microsoftGraphClient,
+            @Value("${app.clients.microsoft-graph.groups.nom-delegert}") String nomWriteDelegertAdGroup,
+            @Value("${app.clients.microsoft-graph.groups.nom-leder}") String nomWriteLederAdGroup
     ) {
         this.authorizeCommandService = authorizeCommandService;
         this.delegertLederStateRepository = delegertLederStateRepository;
@@ -79,6 +88,9 @@ public class AuthorizedNavident {
         this.orgenhetService = orgenhetService;
         this.dvhRepository = dvhRepository;
         this.tilgangDelegertEmailService = tilgangDelegertEmailService;
+        this.microsoftGraphClient = microsoftGraphClient;
+        this.nomWriteDelegertAdGroup = nomWriteDelegertAdGroup;
+        this.nomWriteLederAdGroup = nomWriteLederAdGroup;
     }
 
     public List<LederTilgangState> getLederTilgangerForUser() {
@@ -336,6 +348,23 @@ public class AuthorizedNavident {
         return orgenheterTilLeder.stream()
             .filter(orgenhet -> enheterMellomDriftOgArbomr.contains(orgenhet.getId()))
             .toList();
+    }
+    
+    public List<MinimalRessurs> getRessurserWhichCanBeDelegatedTo() {
+        List<EntraIdUser> ansatteSomKanDelegere = microsoftGraphClient.getUsersForGroup(nomWriteDelegertAdGroup);
+        List<EntraIdUser> ledere = microsoftGraphClient.getUsersForGroup(nomWriteLederAdGroup);
+
+
+        return Stream.concat(ansatteSomKanDelegere.stream(), ledere.stream())
+                .map(entraIdUser -> {
+                    String visningsnavn = ressursStateRepository
+                            .findByNavident(entraIdUser.navIdent())
+                            .map(RessursState::visningsnavn)
+                            .map(Visningsnavn::getFormattedVisningsnavn).orElse("Navn mangler");
+                    
+                    return new MinimalRessurs(entraIdUser.navIdent(), visningsnavn);
+                })
+                .toList();
     }
 
     private int orgenheterMedAuthedLederCount() {

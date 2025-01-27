@@ -5,8 +5,8 @@ import io.getunleash.Unleash;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrgenhetRequest;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
-import no.nav.nom.apps.api.clients.email.EmailClient;
-import no.nav.nom.apps.api.clients.email.EmailMessage;
+import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
+import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
 import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -28,7 +28,7 @@ public class TilgangDelegertEmailService {
     public static final String UNLEASH_INFORM_ADDITIONAL_RECIPIENTS = "nom.ressurs-create.inform_additional_recipients";
 
     private final Logger log = LoggerFactory.getLogger(TilgangDelegertEmailService.class);
-    private final EmailClient emailClient;
+    private final MicrosoftGraphClient microsoftGraphClient;
     private final AdClient adClient;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final Configuration freemarkerConfig;
@@ -36,13 +36,13 @@ public class TilgangDelegertEmailService {
 
 
     public TilgangDelegertEmailService(
-        EmailClient emailClient,
+        MicrosoftGraphClient microsoftGraphClient,
         AdClient adClient,
         OrgEnhetStateRepository orgEnhetStateRepository,
         Configuration freemarkerConfig,
         Unleash unleash
     ) {
-        this.emailClient = emailClient;
+        this.microsoftGraphClient = microsoftGraphClient;
         this.adClient = adClient;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.freemarkerConfig = freemarkerConfig;
@@ -81,7 +81,7 @@ public class TilgangDelegertEmailService {
         log.info("Sender epost emne {} til {}", subject, recipientList);
 
         var emailMessage = new EmailMessage(subject, body, recipientList);
-        emailClient.sendEmail(emailMessage).subscribe();
+        microsoftGraphClient.sendEmail(emailMessage).subscribe();
     }
 
     private String getFormattedEmailBody(

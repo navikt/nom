@@ -1,7 +1,9 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
 import no.nav.nom.apps.api.authorize.AuthResolver;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
@@ -15,7 +17,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ public class RessursExcelGenerator {
 
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
+    private final OrgenhetService orgenhetService;
 
     private static final Map<String, String> sektorMap = Map.of(
         "NAV_STATLIG", "Statlig",
@@ -33,27 +35,38 @@ public class RessursExcelGenerator {
     );
     private final AuthResolver authResolver;
 
-    public RessursExcelGenerator(OrgtilknytningStateRepository orgtilknytningStateRepository,
-                                 OrgEnhetStateRepository orgEnhetStateRepository,
-                                 AuthResolver authResolver
+    public RessursExcelGenerator(
+        OrgtilknytningStateRepository orgtilknytningStateRepository,
+        OrgEnhetStateRepository orgEnhetStateRepository, OrgenhetService orgenhetService,
+        AuthResolver authResolver
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
+        this.orgenhetService = orgenhetService;
         this.authResolver = authResolver;
     }
 
     public void generate(HttpServletResponse response, List<Ressurs> ressurser, List<String> navidenter, String topOrgEnhetId) {
         var kanSeSluttdato = authResolver.kanOppretteRessurs(topOrgEnhetId);
-        var otNavn = orgEnhetStateRepository.findById(topOrgEnhetId).get();
+        var underliggendeEnheter = orgenhetService.findAllUnderliggendeOrgenheter(topOrgEnhetId);
         var otMap = orgtilknytningStateRepository.findByNavidentIn(navidenter).stream()
-            .filter(ot -> ot.orgEnhetId().equals(topOrgEnhetId))
+            .filter(ot -> ot.orgEnhetId().equals(topOrgEnhetId) || underliggendeEnheter.contains(ot.orgEnhetId()))
             .collect(Collectors.groupingBy(
                 OrgtilknytningState::navident,
                 Collectors.collectingAndThen(
                     Collectors.toList(),
-                    dol -> Collections.max(dol, Comparator.comparing(OrgtilknytningState::gyldigFom))
+                    ot -> ot.stream()
+                        .filter(o -> o.gyldigTom().isEmpty() || o.gyldigTom().get().isAfter(LocalDate.now()))
+                        .toList()
                 )
             ));
+
+        var orgenhetNavnMap = orgEnhetStateRepository.findByIdIn(
+            otMap.values().stream()
+                .flatMap(List::stream)
+                .map(OrgtilknytningState::orgEnhetId)
+                .collect(Collectors.toSet())
+        ).stream().collect(Collectors.toMap(OrgEnhetState::id, OrgEnhetState::navn));
 
         try (Workbook workbook = new XSSFWorkbook()) {
             var sheet = workbook.createSheet("Ressurser");
@@ -62,11 +75,16 @@ public class RessursExcelGenerator {
             addRow(sheet.createRow(rowcount++), null, null, null, kanSeSluttdato);
 
             for (Ressurs ressurs : ressurser) {
+                var gyldigFom = Collections.min(otMap.get(ressurs.state().navident()).stream().map(OrgtilknytningState::gyldigFom).toList());
+                var orgEnhet = otMap.get(ressurs.state().navident()).stream()
+                    .map(ot -> String.format("%s (%s)", orgenhetNavnMap.get(ot.orgEnhetId()), ot.orgEnhetId()))
+                    .collect(Collectors.joining(", "));
+
                 addRow(
                     sheet.createRow(rowcount++),
                     ressurs,
-                    String.format("%s (%s)", otNavn, topOrgEnhetId),
-                    otMap.get(ressurs.state().navident()).gyldigFom(),
+                    orgEnhet,
+                    gyldigFom,
                     kanSeSluttdato
                 );
             }
@@ -102,7 +120,9 @@ public class RessursExcelGenerator {
             orgEnhet.setCellValue("Organisasjonsenhet");
             epost.setCellValue("Epost");
             fom.setCellValue("Fra og med");
-            if (kanSeSluttdato) sluttdato.setCellValue("Sluttdato");
+            if (kanSeSluttdato) {
+                sluttdato.setCellValue("Sluttdato");
+            }
         } else {
             navident.setCellValue(ressurs.state().navident());
             navn.setCellValue(ressurs.state().visningsnavn().toString());

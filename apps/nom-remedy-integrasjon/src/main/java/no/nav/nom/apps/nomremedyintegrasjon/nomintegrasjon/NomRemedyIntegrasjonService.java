@@ -9,7 +9,6 @@ import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredVa
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEvent;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEventRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
-import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
@@ -44,7 +43,6 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -52,17 +50,16 @@ import static java.util.Objects.isNull;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitalizeNavn;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeEndOfDay;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeNoon;
-import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.fifteenCharLengthZeroPaddedNumber;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.formatFornavnWithMellomnavn;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.isActive;
 import static org.apache.kafka.common.utils.Utils.isBlank;
 
 @Service
-public class NomIntegrasjonService {
+public class NomRemedyIntegrasjonService {
 
-    private final Logger logger = LoggerFactory.getLogger(NomIntegrasjonService.class);
+    private final Logger logger = LoggerFactory.getLogger(NomRemedyIntegrasjonService.class);
 
-    private final NomIntegrasjonRepository nomIntegrasjonRepository;
+    private final RemedyIntegrasjonRepositoryService remedyIntegrasjonRepositoryService;
 
     private final NomApiClient nomApiClient;
 
@@ -74,15 +71,15 @@ public class NomIntegrasjonService {
     private final Unleash unleash;
 
 
-    public NomIntegrasjonService(
-        NomIntegrasjonRepository nomIntegrasjonRepository,
+    public NomRemedyIntegrasjonService(
+        RemedyIntegrasjonRepositoryService remedyIntegrasjonRepositoryService,
         NomApiClient nomApiClient,
         LeaderElection leaderElection,
         DelayedEventRepository delayedEventRepository,
         ObjectMapper objectMapper,
         Unleash unleash
     ) {
-        this.nomIntegrasjonRepository = nomIntegrasjonRepository;
+        this.remedyIntegrasjonRepositoryService = remedyIntegrasjonRepositoryService;
         this.nomApiClient = nomApiClient;
         this.leaderElection = leaderElection;
         this.delayedEventRepository = delayedEventRepository;
@@ -159,17 +156,7 @@ public class NomIntegrasjonService {
     }
 
     private void handleOrgtilknytningDatoEndretEvent(OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
-        if (orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom().isAfter(LocalDate.now()) && sjekkAktivOrgTilknytning(
-            orgtilknytningDatoEndretEventV2)) {
-            logger.info("Delaying remedy update for OrgtilknytningDatoEndretEventV2 with fid {}", orgtilknytningDatoEndretEventV2.getFid());
-
-            delayEventUpdate(
-                orgtilknytningDatoEndretEventV2,
-                orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom()
-            );
-        } else if (!isOrgtilknytningHistorical(orgtilknytningDatoEndretEventV2)) {
-            updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
-        }
+        updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
     }
 
     private void handleOrgtilknytningSektorEndretEvent(OrgtilknytningSektorEndretEventV1 orgtilknytningSektorEndretEventV1) {
@@ -202,7 +189,7 @@ public class NomIntegrasjonService {
         if (orgtilknytningEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
             return nomApiClient.getOrgtilknytningerForNavident(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData()
                     .navident()).stream()
-                .anyMatch(NomIntegrasjonService::orgtilknytningIsActiveOnCurrentDate);
+                .anyMatch(NomRemedyIntegrasjonService::orgtilknytningIsActiveOnCurrentDate);
         }
 
         if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
@@ -248,23 +235,6 @@ public class NomIntegrasjonService {
         }
     }
 
-    private void handleDelayedOrgtiknytning(OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
-        logger.info("Handling delayed update of OrgtilknytningDatoEndretEventV2 with fid {}", orgtilknytningDatoEndretEventV2.getFid());
-
-        try {
-            var orgtilknytningEventData = orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData();
-            var orgtilknytningState = nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid());
-
-            if (orgtilknytningState.getErDagligOppfolging() &&
-                orgtilknytningEventData.gyldigFom().equals(orgtilknytningState.getGyldigFom()) &&
-                orgtilknytningEventData.gyldigTom().equals(Optional.ofNullable(orgtilknytningState.getGyldigTom()))) {
-                updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
-            }
-        } catch (OrgtilknytningNotFoundException e) {
-            logger.info("Delayed update of OrgtilknytningDatoEndretEventV2. {} cancelled", e.getMessage());
-        }
-    }
-
     private void updateOrgtilknytning(OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
         logger.info("Updating remedy data for OrgtilknytningDatoEndretEventV2 with fid {}", orgtilknytningDatoEndretEventV2.getFid());
 
@@ -274,19 +244,22 @@ public class NomIntegrasjonService {
         var ressursState = nomApiClient.getRessursByNavident(orgtilknytningState.getNavident());
         var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
 
-        var gyldigTom = orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigTom()
-            .filter(dato -> remedyCodeToNomSektor(nomIntegrasjonEntityWithDefaultDataFromNom.getSektor()).equals(Sektor.EKSTERN))
-            .orElse(null);
-
         var remedyEnhetIdForOrgenhet = getRemedyEnhetId(orgtilknytningState.getOrgEnhetId());
+        var nyTiltredelsesdato = epochSecondsNorwegianTimeNoon(orgtilknytningDatoEndretEventData.gyldigFom());
+
+        var latestEntry = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(ressursState.getNavident());
+        if (latestEntry.isPresent() && latestEntry.get().getTiltredelsesdato() != null && latestEntry.get().getTiltredelsesdato().equals(nyTiltredelsesdato)
+        ) {
+            logger.info("No changes detected for OrgtilknytningDatoEndretEventV2 with fid {}", orgtilknytningDatoEndretEventV2.getFid());
+            return;
+        }
 
         var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
             .enhetsId(remedyEnhetIdForOrgenhet)
-            .tiltredelsesdato(epochSecondsNorwegianTimeNoon(orgtilknytningDatoEndretEventData.gyldigFom()))
-            .utlopsdato(isNull(gyldigTom) ? null : epochSecondsNorwegianTimeEndOfDay(gyldigTom))
+            .tiltredelsesdato(nyTiltredelsesdato)
             .build();
 
-        saveNewNomIntegrasjonEntity(
+        remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntity(
             newNomIntegrasjonEntity,
             orgtilknytningDatoEndretEventV2.getMetadata().inputMetadata().origination().initiatedBy()
         );
@@ -317,7 +290,7 @@ public class NomIntegrasjonService {
             .masseflytting(ressursSkalBeholdeTilganger ? "X" : null)
             .build();
 
-        saveNewNomIntegrasjonEntity(
+        remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntity(
             newNomIntegrasjonEntity,
             orgtilknytningDagligOppfolgingEndretEventV1.getMetadata().inputMetadata().origination().initiatedBy()
         );
@@ -336,7 +309,7 @@ public class NomIntegrasjonService {
             .sektor(nomSektorToRemedyCode(orgtilknytningSektorEndretEventData.sektor()))
             .build();
 
-        saveNewNomIntegrasjonEntity(
+        remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntity(
             newNomIntegrasjonEntity,
             orgtilknytningSektorEndretEventV1.getMetadata().inputMetadata().origination().initiatedBy()
         );
@@ -380,6 +353,11 @@ public class NomIntegrasjonService {
             ressursSluttdatoOppdatertEventV1.getFid()
         );
 
+        var ressursState = nomApiClient.getRessursByFid(ressursSluttdatoOppdatertEventV1.getFid());
+        if (ressursState.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN)) {
+            updateUtlopsdatoEkstern(ressursSluttdatoOppdatertEventV1, ressursState);
+        }
+
         ressursSluttdatoOppdatertEventV1.getRessursSluttdatoOppdatertEventData().sluttdato().ifPresent(
             sluttdatoForRessurs -> {
                 if (sluttdatoForRessurs.isBefore(LocalDate.now())) {
@@ -393,6 +371,24 @@ public class NomIntegrasjonService {
                 }
             }
         );
+    }
+
+    private void updateUtlopsdatoEkstern(RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1, Ressurs ressursState) {
+        var ressursSluttdatoOppdatertEventData = ressursSluttdatoOppdatertEventV1.getRessursSluttdatoOppdatertEventData();
+        var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
+
+        ressursSluttdatoOppdatertEventData.sluttdato().ifPresent(sluttdato -> {
+            if (sluttdato.isAfter(LocalDate.now())) {
+                var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
+                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(sluttdato))
+                    .build();
+
+                remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntity(
+                    newNomIntegrasjonEntity,
+                    ressursSluttdatoOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy()
+                );
+            }
+        });
     }
 
     private void delayEventUpdate(Event event, LocalDate until) {
@@ -423,7 +419,7 @@ public class NomIntegrasjonService {
         if (sluttdatoForRessurs.isBefore(LocalDate.now())) {
             var ressursState = nomApiClient.getRessursByFid(ressursFid);
 
-            markRessursForDeletion(
+            remedyIntegrasjonRepositoryService.markRessursForDeletion(
                 ressursState.getNavident(),
                 initiatedBy
             );
@@ -440,14 +436,14 @@ public class NomIntegrasjonService {
             ).toList();
 
         var ressurserToDeleteFromRemedy = ressurserWithSluttdato.stream()
-            .filter(ressurs -> nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(ressurs.getNavident())
+            .filter(ressurs -> remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(ressurs.getNavident())
                 .map(existingNomIntegrasjonEntityForRessurs ->
                     existingNomIntegrasjonEntityForRessurs.getEntryOperasjon().equals("Slette"))
                 .orElse(true)
             ).toList();
 
         ressurserToDeleteFromRemedy.forEach(ressursSomSkalSlettes ->
-            markRessursForDeletion(ressursSomSkalSlettes.getNavident(), initiatedBy)
+            remedyIntegrasjonRepositoryService.markRessursForDeletion(ressursSomSkalSlettes.getNavident(), initiatedBy)
         );
 
         logger.info("Deleted following resssurser from remedy: {}", ressurserToDeleteFromRemedy.stream().map(RessursState::getNavident).toList());
@@ -469,8 +465,6 @@ public class NomIntegrasjonService {
             handleDelayedRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
         } else if (nomEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
             handleDelayedOrgtiknytning(orgtilknytningDagligOppfolgingEndretEventV1);
-        } else if (nomEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
-            handleDelayedOrgtiknytning(orgtilknytningDatoEndretEventV2);
         } else if (nomEvent instanceof OrgtilknytningSektorEndretEventV1 orgtilknytningSektorEndretEventV1) {
             handleDelayedOrgtiknytningSektor(orgtilknytningSektorEndretEventV1);
         }
@@ -522,7 +516,7 @@ public class NomIntegrasjonService {
             .mobil(mobil)
             .build();
 
-        saveNewNomIntegrasjonEntity(
+        remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntity(
             newNomIntegrasjonEntity,
             ressursOpprettetEventV1.getMetadata().inputMetadata().origination().initiatedBy()
         );
@@ -544,7 +538,7 @@ public class NomIntegrasjonService {
             .etternavn(capitalizeNavn(newVisningsnavn.etternavn()).trim())
             .build();
 
-        saveNewNomIntegrasjonEntity(
+        remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntity(
             newNomIntegrasjonEntity,
             ressursPersonaliaOppdatertV1.getMetadata().inputMetadata().origination().initiatedBy()
         );
@@ -568,7 +562,7 @@ public class NomIntegrasjonService {
             )
             .build();
 
-        saveNewNomIntegrasjonEntity(
+        remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntity(
             newNomIntegrasjonEntity,
             ressursFysiskeBrukerstederOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy()
         );
@@ -591,7 +585,7 @@ public class NomIntegrasjonService {
             .direkteTelefon(direkteTelefon)
             .build();
 
-        saveNewNomIntegrasjonEntity(
+        remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntity(
             newNomIntegrasjonEntity,
             ressursPrimaryTelefonnummerOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy()
         );
@@ -645,84 +639,6 @@ public class NomIntegrasjonService {
             .build();
     }
 
-    protected void saveNewNomIntegrasjonEntity(NomIntegrasjonEntity newNomIntegrasjonEntity, String initiatedByNavident) {
-
-        validateThatRequiredValuesAreSet(newNomIntegrasjonEntity);
-
-        if (nomIntegrasjonEntityProvidesNewDataFromNom(newNomIntegrasjonEntity)) {
-            nomIntegrasjonRepository.save(
-                newNomIntegrasjonEntity.toBuilder()
-                    .entryId(nextId())
-                    .entryOperasjon("Ny")
-                    .entryStatus("Ubehandlet")
-                    .entryBestiller(initiatedByNavident)
-                    .build()
-            );
-        }
-    }
-
-    private void markRessursForDeletion(String navident, String initiatedBy) {
-        nomIntegrasjonRepository.save(
-            NomIntegrasjonEntity.builder()
-                .entryId(nextId())
-                .navId(navident)
-                .entryOperasjon("Slette")
-                .entryStatus("Ubehandlet")
-                .entryBestiller(initiatedBy)
-                .build()
-        );
-    }
-
-    private boolean nomIntegrasjonEntityProvidesNewDataFromNom(NomIntegrasjonEntity newNomIntegrasjonEntity) {
-        return nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(newNomIntegrasjonEntity.getNavId())
-            .map(latestEntityForNavident -> !(
-                Objects.equals(latestEntityForNavident.getEnhetsId(), newNomIntegrasjonEntity.getEnhetsId())
-                    && Objects.equals(latestEntityForNavident.getEtternavn(), newNomIntegrasjonEntity.getEtternavn())
-                    && Objects.equals(latestEntityForNavident.getFodselsnummer(), newNomIntegrasjonEntity.getFodselsnummer())
-                    && Objects.equals(latestEntityForNavident.getFornavn(), newNomIntegrasjonEntity.getFornavn())
-                    && Objects.equals(latestEntityForNavident.getFysiskBrukerstedId(), newNomIntegrasjonEntity.getFysiskBrukerstedId())
-                    && Objects.equals(latestEntityForNavident.getNavId(), newNomIntegrasjonEntity.getNavId())
-                    && Objects.equals(latestEntityForNavident.getSektor(), newNomIntegrasjonEntity.getSektor())
-                    && Objects.equals(latestEntityForNavident.getTiltredelsesdato(), newNomIntegrasjonEntity.getTiltredelsesdato())
-                    && Objects.equals(latestEntityForNavident.getUtlopsdato(), newNomIntegrasjonEntity.getUtlopsdato())
-                    && Objects.equals(latestEntityForNavident.getMobil(), newNomIntegrasjonEntity.getMobil())
-                    && Objects.equals(latestEntityForNavident.getMasseflytting(), newNomIntegrasjonEntity.getMasseflytting())
-                    && Objects.equals(latestEntityForNavident.getDirekteTelefon(), newNomIntegrasjonEntity.getDirekteTelefon())
-            ))
-            .orElse(true);
-    }
-
-    private void validateThatRequiredValuesAreSet(NomIntegrasjonEntity nomIntegrasjonEntity) {
-        if (nomIntegrasjonEntity.getEnhetsId() == null) {
-            throw RequiredValueMissingException.forField("enhetsId");
-        }
-        if (nomIntegrasjonEntity.getEtternavn() == null) {
-            throw RequiredValueMissingException.forField("etternavn");
-        }
-        if (nomIntegrasjonEntity.getFodselsnummer() == null) {
-            throw RequiredValueMissingException.forField("fodselsnummer");
-        }
-        if (nomIntegrasjonEntity.getFornavn() == null) {
-            throw RequiredValueMissingException.forField("fornavn");
-        }
-        if (nomIntegrasjonEntity.getFysiskBrukerstedId() == null) {
-            throw RequiredValueMissingException.forField("fysiskBrukerstedId");
-        }
-        if (nomIntegrasjonEntity.getNavId() == null) {
-            throw RequiredValueMissingException.forField("navId");
-        }
-        if (nomIntegrasjonEntity.getSektor() == null) {
-            throw RequiredValueMissingException.forField("sektor");
-        }
-        if (nomIntegrasjonEntity.getTiltredelsesdato() == null) {
-            throw RequiredValueMissingException.forField("tiltredelsesdato");
-        }
-
-        if (nomIntegrasjonEntity.getSektor() == 2 && nomIntegrasjonEntity.getUtlopsdato() == null) {
-            throw RequiredValueMissingException.forField("utløpsdato");
-        }
-    }
-
     private boolean isOrgtilknytningDOL(String fid) {
         return nomApiClient.getOrgtilknytning(fid).getErDagligOppfolging();
     }
@@ -732,16 +648,8 @@ public class NomIntegrasjonService {
             .orElseThrow(() -> new RequiredValueMissingException(String.format("No remedyEnhetId set for orgEnhet with id %s", orgEnhetId)));
     }
 
-    // https://nav-it.slack.com/archives/C040RV7KCH5/p1696498426739059
-    protected String nextId() {
-        return nomIntegrasjonRepository.findTopByOrderByEntryIdDesc()
-            .map(latestEntry -> Long.parseLong(latestEntry.getEntryId()))
-            .map(latestId -> fifteenCharLengthZeroPaddedNumber(latestId + 1))
-            .orElse(fifteenCharLengthZeroPaddedNumber(0L));
-    }
-
     public List<NomIntegrasjonEntity> getNomIntegrasjonEntities() {
-        return nomIntegrasjonRepository.findAll().stream()
+        return remedyIntegrasjonRepositoryService.findAll().stream()
             .map(nomIntegrasjonEntity ->
                 nomIntegrasjonEntity.toBuilder()
                     .fodselsnummer(
@@ -790,7 +698,7 @@ public class NomIntegrasjonService {
             logger.info("Handling mastered ressurs event for navident {}, masterer at: {}",
                 navIdent, nomMasteredRessursEvent);
             // there is no user authentification context here, so we use the default user "nom-admin"
-            saveNewNomIntegrasjonEntity(nomIntegrasjonEntityWithDefaultDataFromNom, "nom-admin");
+            remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntity(nomIntegrasjonEntityWithDefaultDataFromNom, "nom-admin");
         }
     }
 
@@ -818,7 +726,7 @@ public class NomIntegrasjonService {
         var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
         logger.info("Leser og eksekverer ressursState for navident {}", navident);
         // there is no user authentification context here, so we use the default user "nom-admin"
-        saveNewNomIntegrasjonEntity(nomIntegrasjonEntityWithDefaultDataFromNom, entryBestiller);
+        remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntity(nomIntegrasjonEntityWithDefaultDataFromNom, entryBestiller);
     }
 
     private List<Telefon> getTelefonerFromNom(String navident) {

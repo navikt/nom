@@ -33,10 +33,10 @@ import static no.nav.nom.apps.nomremedyintegrasjon.config.SwaggerConfig.BEARER_T
 @RequestMapping(value = {"/admin"})
 public class AdminController {
 
-    private final NomIntegrasjonService nomIntegrasjonService;
+    private final NomRemedyIntegrasjonService nomRemedyIntegrasjonService;
 
-    public AdminController(NomIntegrasjonService nomIntegrasjonService) {
-        this.nomIntegrasjonService = nomIntegrasjonService;
+    public AdminController(NomRemedyIntegrasjonService nomRemedyIntegrasjonService) {
+        this.nomRemedyIntegrasjonService = nomRemedyIntegrasjonService;
     }
 
     @Operation(
@@ -61,7 +61,7 @@ public class AdminController {
             return ResponseEntity.badRequest().body("Ikke mulig å slette aktive ressurser fra remedy");
         }
 
-        nomIntegrasjonService.findRessurserWithSluttdatoAndMarkForDeletion(sluttdato, getAuthenticatedNavIdent());
+        nomRemedyIntegrasjonService.findRessurserWithSluttdatoAndMarkForDeletion(sluttdato, getAuthenticatedNavIdent());
 
         return ResponseEntity.ok("Fjernet ressurser med spesifisert sluttdato");
     }
@@ -81,7 +81,7 @@ public class AdminController {
     @GetMapping(value = "/bestillinger")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<NomIntegrasjonEntity>> getBestillinger() {
-        return ResponseEntity.ok(nomIntegrasjonService.getNomIntegrasjonEntities());
+        return ResponseEntity.ok(nomRemedyIntegrasjonService.getNomIntegrasjonEntities());
     }
 
     @Operation(
@@ -98,7 +98,7 @@ public class AdminController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping(value = "lesOgEksekverRessursState/{navident}")
     public ResponseEntity<String> lesOgEksekverRessursState(@PathVariable String navident) {
-        nomIntegrasjonService.lesOgEksekverRessursState(getAuthenticatedNavIdent(), navident);
+        nomRemedyIntegrasjonService.lesOgEksekverRessursState(getAuthenticatedNavIdent(), navident);
         return ResponseEntity.ok("RessursState er lest og eksekvert");
     }
 

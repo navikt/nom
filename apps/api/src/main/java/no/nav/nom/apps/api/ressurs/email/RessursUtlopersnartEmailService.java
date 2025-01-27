@@ -5,8 +5,8 @@ import freemarker.template.TemplateException;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
-import no.nav.nom.apps.api.clients.email.EmailClient;
-import no.nav.nom.apps.api.clients.email.EmailMessage;
+import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
+import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
@@ -38,7 +38,7 @@ public class RessursUtlopersnartEmailService {
     private static final String SLUTTDATO_UTLOPER_VARSEL_TEMPLATE = "epostvarsel-utlopsdato.ftlh";
     private static final String UNLEASH_SLUTTDATO_UTLOPER_EPOST_VARSEL = "nom.ressurs.sluttdato_utloper_email";
     private final Logger log = LoggerFactory.getLogger(RessursUtlopersnartEmailService.class);
-    private final EmailClient emailClient;
+    private final MicrosoftGraphClient microsoftGraphClient;
     private final AdClient adClient;
     private final RessursStateRepository ressursStateRepository;
     private final Configuration freemarkerConfig;
@@ -51,7 +51,7 @@ public class RessursUtlopersnartEmailService {
     private final LeaderElection leaderElection;
 
     public RessursUtlopersnartEmailService(
-        EmailClient emailClient,
+        MicrosoftGraphClient microsoftGraphClient,
         AdClient adClient,
         RessursStateRepository ressursStateRepository,
         Configuration freemarkerConfig,
@@ -63,7 +63,7 @@ public class RessursUtlopersnartEmailService {
         DvhStartupLoadMonitor dvhStartupLoadMonitor,
         LeaderElection leaderElection
     ) {
-        this.emailClient = emailClient;
+        this.microsoftGraphClient = microsoftGraphClient;
         this.adClient = adClient;
         this.ressursStateRepository = ressursStateRepository;
         this.freemarkerConfig = freemarkerConfig;
@@ -120,7 +120,7 @@ public class RessursUtlopersnartEmailService {
 
             log.info(SECURE_LOGS, "Sender ressurs sluttdato utløper epost subject: {}, recipients: {}, message: {}", subject, recipientList, emailBody);
             EmailMessage message = new EmailMessage(subject, emailBody, recipientList);
-            emailClient.sendEmail(message).subscribe();
+            microsoftGraphClient.sendEmail(message).subscribe();
         } catch (ADResponseException e) {
             throw new RessursOpprettetEmailException("UtloperRessurs: Fant ikke epost adresse for ressurs");
         } catch (IOException | TemplateException e) {
