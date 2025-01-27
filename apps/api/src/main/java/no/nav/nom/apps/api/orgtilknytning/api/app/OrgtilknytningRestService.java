@@ -433,8 +433,8 @@ public class OrgtilknytningRestService {
         var hasChangesInGyldighetsperiode = !endreOrgtilknytningRequest.gyldigFom().equals(orgtilknytningStateBeforeChanges.gyldigFom())
             || !Optional.ofNullable(endreOrgtilknytningRequest.gyldigTom()).equals(orgtilknytningStateBeforeChanges.gyldigTom());
 
-        // TODO: Burde innføre et nytt event OrgtilknytningDagligOppfolgingEndretEventV2 som kun setter feltene erDagligOppfolging, gyldigFom og gyldigTom
-        //  slik at man ikke ved et uhell endrer navident eller orgenhet for orgtilknytningen.
+        // TODO: Burder ikke oppdatere OrgtilknytningDagligOppfolgingEndretEventV2 med nye gyldigFom og gyldigTom, bare sende med orgtilknytningStateBeforeChanges verdiene
+        // TODO: Bør også fjerne else i else if statementet under, for å sende begge eventer hvis både DOL og dato har endret seg.
         if (endreOrgtilknytningRequest.erDagligOppfolging() != orgtilknytningStateBeforeChanges.erDagligOppfolging()) {
             orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(
                 EndreDagligOppfolgingOrgtilknytningCommand.builder()

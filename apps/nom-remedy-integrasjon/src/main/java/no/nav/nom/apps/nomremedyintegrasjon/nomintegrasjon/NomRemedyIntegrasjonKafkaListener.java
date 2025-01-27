@@ -21,9 +21,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 @Service
-public class NomIntegrasjonKafkaListener {
+public class NomRemedyIntegrasjonKafkaListener {
 
-    private final NomIntegrasjonService nomIntegrasjonService;
+    private final NomRemedyIntegrasjonService nomRemedyIntegrasjonService;
     private final MasteredRessursStateRepository masteredRessursStateRepository;
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
@@ -32,10 +32,10 @@ public class NomIntegrasjonKafkaListener {
     private final NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
     private final NomStateOrgEnhetListener nomStateOrgEnhetListener;
 
-    private final Logger logger = LoggerFactory.getLogger(NomIntegrasjonKafkaListener.class);
+    private final Logger logger = LoggerFactory.getLogger(NomRemedyIntegrasjonKafkaListener.class);
 
-    public NomIntegrasjonKafkaListener(
-        NomIntegrasjonService nomIntegrasjonService,
+    public NomRemedyIntegrasjonKafkaListener(
+        NomRemedyIntegrasjonService nomRemedyIntegrasjonService,
         MasteredRessursStateRepository masteredRessursStateRepository,
         RessursStateRepository ressursStateRepository,
         OrgtilknytningStateRepository orgtilknytningStateRepository,
@@ -44,7 +44,7 @@ public class NomIntegrasjonKafkaListener {
         NomStateOrgtilknytningListener nomStateOrgtilknytningListener,
         NomStateOrgEnhetListener nomStateOrgEnhetListener
     ) {
-        this.nomIntegrasjonService = nomIntegrasjonService;
+        this.nomRemedyIntegrasjonService = nomRemedyIntegrasjonService;
         this.masteredRessursStateRepository = masteredRessursStateRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -67,7 +67,7 @@ public class NomIntegrasjonKafkaListener {
         putMDCContext(recordId, ressursEvent.getClass().getSimpleName());
 
         if (isNomOriginationOrNomMastered(ressursEvent)) {
-            nomIntegrasjonService.handleRessursEvent(ressursEvent);
+            nomRemedyIntegrasjonService.handleRessursEvent(ressursEvent);
         } else {
             logger.info("Skipping event with fid {} since it is not originated from nom", ressursEvent.getFid());
         }
@@ -88,7 +88,7 @@ public class NomIntegrasjonKafkaListener {
         putMDCContext(recordId, orgtilknytningEvent.getClass().getSimpleName());
 
         if (isNomOriginationOrNomMastered(orgtilknytningEvent)) {
-            nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningEvent);
+            nomRemedyIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningEvent);
         } else {
             logger.info("Skipping event with fid {} since it is not originated from nom", orgtilknytningEvent.getFid());
         }
@@ -111,7 +111,7 @@ public class NomIntegrasjonKafkaListener {
         } catch (InterruptedException e) {
             logger.error("Thread interrupted while waiting for NomStateMasteredRessursListener to read to end on startup", e);
         }
-        nomIntegrasjonService.handleNomMasteredRessursEvent(recordId, nomMasteredRessursEvent);
+        nomRemedyIntegrasjonService.handleNomMasteredRessursEvent(recordId, nomMasteredRessursEvent);
         MDC.clear();
     }
 
