@@ -72,8 +72,7 @@ import {
   otCustomStortByDate,
   setRessursStartdato,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
-import { RemedyEndringModal } from "~/pages/ResourcePage/RessursComponents/Modal/RemedyEndringModal";
-import { TomDatoModal } from "~/pages/ResourcePage/RessursComponents/Modal/TomDatoModal";
+import { EndreOtBekreftelsesmodal } from "~/pages/ResourcePage/RessursComponents/Modal/EndreOtBekreftelsesmodal";
 import { OrgtilknytningTimeline } from "~/pages/ResourcePage/RessursComponents/OrgtilknytningTimeline";
 import infoikonNOM from "~/resources/infoikonNOM.svg";
 import type {
@@ -331,16 +330,9 @@ function OrgtilknytningForm({
     orgtilknytninger: Partial<OrgtilknytningState>[],
   ) => {
     await showModal(
-      <RemedyEndringModal
+      <EndreOtBekreftelsesmodal
         dagensDolOrgEnhet={dagensDolOrgEnhet}
         dagensRemedyEnhetId={dagensRemedyEnhetId}
-        navn={formatVisningsnavn(ressurs.visningsnavn)}
-        orgtilknytninger={orgtilknytninger}
-      />,
-    );
-
-    await showModal(
-      <TomDatoModal
         navn={formatVisningsnavn(ressurs.visningsnavn)}
         orgtilknytninger={orgtilknytninger}
       />,
