@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.contract.nom.Sektor;
 
 import java.time.LocalDate;
@@ -167,6 +168,10 @@ public class DvhRessurs {
             return Sektor.EKSTERN;
         }
         else return null;
+    }
+
+    public boolean isAktivIU4() {
+        return agressoStartDato != null && PeriodeUtil.isCurrentOrFuture(agressoSluttdato);
     }
 
     private LocalDate getDateOrNull(final LocalDate dato) {
