@@ -1,17 +1,11 @@
-package no.nav.nom.apps.api.orgtilknytning.u4diff;
+package no.nav.nom.apps.api.u4diff;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OrgtilknytningCommand;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -21,17 +15,15 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isCurrentOrFuturePeriod;
-import static no.nav.nom.apps.api.orgtilknytning.u4diff.U4DiffType.EKSTRA_U4_PERIODE;
-import static no.nav.nom.apps.api.orgtilknytning.u4diff.U4DiffType.FORSKJELL_I_U4_PERIODE;
-import static no.nav.nom.apps.api.orgtilknytning.u4diff.U4DiffType.MANGLENDE_STATLIG_I_U4;
-import static no.nav.nom.apps.api.orgtilknytning.u4diff.U4DiffType.MANGLENDE_U4_PERIODE;
-import static org.apache.commons.lang3.BooleanUtils.forEach;
+import static no.nav.nom.apps.api.u4diff.U4DiffType.EKSTRA_U4_PERIODE;
+import static no.nav.nom.apps.api.u4diff.U4DiffType.FORSKJELL_I_U4_PERIODE;
+import static no.nav.nom.apps.api.u4diff.U4DiffType.MANGLENDE_STATLIG_I_U4;
+import static no.nav.nom.apps.api.u4diff.U4DiffType.MANGLENDE_U4_PERIODE;
 
 @Slf4j
 @Service
@@ -57,7 +49,7 @@ public class U4DiffPaaMastrede {
     public void rapporterU4Diff(String navident, Map<StillingPeriode, OrgtilknytningState> endringer, List<OrgtilknytningState> perioderManglerIU4, List<StillingPeriode> ekstraPerioderIU4) {
         try {
             log.debug("Mottatt U4 diff for navident {}", navident);
-            var deleted = u4DiffRepository.deleteByNavident(navident);
+            var deleted = u4DiffRepository.deleteByKildeAndNavident(U4DiffKilde.STILLINGER, navident);
 
             var aktiveOgFremtidigeEkstraPerioder = ekstraPerioderIU4.stream().filter(PeriodeUtil::isCurrentOrFuturePeriod).toList();
             var aktiveOgFremtidigeManglendePerioder = perioderManglerIU4.stream().filter(PeriodeUtil::isCurrentOrFuturePeriod).toList();
@@ -78,7 +70,7 @@ public class U4DiffPaaMastrede {
     public void rapporterIngenU4Diff(String navident) {
         try {
             log.debug("Ingen U4 diff for navident {} - fjerner evt tidligere rapporterte differ", navident);
-            var deleted = u4DiffRepository.deleteByNavident(navident);
+            var deleted = u4DiffRepository.deleteByKildeAndNavident(U4DiffKilde.STILLINGER, navident);
             log.debug("Slettet {} tidligere rapporterte U4 diff for navident {}", deleted, navident);
         } catch (Exception e) {
             log.error("Feil ved rapportering av U4 diff for navident {}", navident, e);
@@ -103,7 +95,7 @@ public class U4DiffPaaMastrede {
 
             navidenterForOterManglendeIU4.forEach(navident -> {
                 log.debug("Funnet manglende U4 for statlig navident {}", navident);
-                var deleted = u4DiffRepository.deleteByNavident(navident);
+                var deleted = u4DiffRepository.deleteByKildeAndNavident(U4DiffKilde.STILLINGER, navident);
                 var oterForNavidentManglendeIU4 = oterManglendeIU4.stream().filter(ot -> ot.navident().equals(navident)).toList();
 
                 oterForNavidentManglendeIU4.forEach(ot -> periodeManglerIU4(ot, navident, MANGLENDE_STATLIG_I_U4));
@@ -124,8 +116,28 @@ public class U4DiffPaaMastrede {
         }
     }
 
+    @Transactional
+    public void deleteDiffForSektorPaa() {
+        long deleted = u4DiffRepository.deleteByKildeAndType(U4DiffKilde.RESSURS, U4DiffType.ULIK_SEKTOR_RESSURS);
+        log.debug("Slettet {} tidligere rapporterte U4 diff for ressurser med ulik sektor i U4", deleted);
+    }
+
+    @Transactional
+    public void rapporterU4DiffRessursSektor(String navident, Sektor nomSektor, Sektor u4RessursSektor, String ansettelsesTypeBesk) {
+        log.debug("Mottatt Sektor U4 diff for navident {}", navident);
+        u4DiffRepository.save(U4Diff.builder()
+            .kilde(U4DiffKilde.RESSURS)
+            .navident(navident)
+            .nomSektor(nomSektor)
+            .type(U4DiffType.ULIK_SEKTOR_RESSURS)
+            .u4Sektor(u4RessursSektor)
+            .u4AnsettelsestypeBesk(ansettelsesTypeBesk)
+            .build());
+    }
+
     private void ekstraPeriodeIU4(StillingPeriode sp, String navident) {
         u4DiffRepository.save(U4Diff.builder()
+                .kilde(U4DiffKilde.STILLINGER)
                 .navident(navident)
                 .nomSektor(getSektor(navident))
                 .type(EKSTRA_U4_PERIODE)
@@ -134,7 +146,7 @@ public class U4DiffPaaMastrede {
                 .u4GyldigFom(sp.gyldigFom())
                 .u4GyldigTom(sp.gyldigTom())
                 .u4Dol(sp.erDagligOppfolging())
-                .u4Sektor(Sektor.NAV_STATLIG) // Foreløpig kalles dette kun fra Statlig import sammenligning
+                .u4Sektor(null)
                 .u4StillingPeriode(sp.toString())
                 .build());
     }
@@ -143,6 +155,7 @@ public class U4DiffPaaMastrede {
         var orgenhet = orgEnhetStateRepository.findById(ot.orgEnhetId()).orElseThrow();
         var otJson = objectMapper.valueToTree(ot);
         u4DiffRepository.save(U4Diff.builder()
+                .kilde(U4DiffKilde.STILLINGER)
                 .navident(navident)
                 .nomSektor(getSektor(navident))
                 .type(diffType)
@@ -161,6 +174,7 @@ public class U4DiffPaaMastrede {
         var orgenhet = orgEnhetStateRepository.findById(ot.orgEnhetId()).orElseThrow();
         var otJson = objectMapper.valueToTree(ot);
         u4DiffRepository.save(U4Diff.builder()
+                .kilde(U4DiffKilde.STILLINGER)
                 .navident(navident)
                 .nomSektor(getSektor(navident))
                 .type(FORSKJELL_I_U4_PERIODE)
@@ -169,7 +183,7 @@ public class U4DiffPaaMastrede {
                 .u4GyldigFom(sp.gyldigFom())
                 .u4GyldigTom(sp.gyldigTom())
                 .u4Dol(sp.erDagligOppfolging())
-                .u4Sektor(Sektor.NAV_STATLIG) // Foreløpig kalles dette kun fra Statlig import sammenligning
+                .u4Sektor(null)
                 .u4StillingPeriode(sp.toString())
                 .nomOrgenhetId(orgenhet.id())
                 .nomOrgenhetNavn(orgenhet.navn())
@@ -194,5 +208,4 @@ public class U4DiffPaaMastrede {
     private Sektor getSektor(String navident) {
         return ressursStateRepository.findByNavident(navident).orElseThrow().sektor();
     }
-
 }

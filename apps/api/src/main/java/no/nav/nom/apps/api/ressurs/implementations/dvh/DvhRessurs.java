@@ -27,10 +27,12 @@ public class DvhRessurs {
     Boolean remedyAktiv;
     JsonNode rawData;
     String ansattRessursKode;
+    String ansettelsesTypeBesk;
     LocalDate remedyStartDato;
     LocalDate remedySluttdato;
     LocalDate agressoStartDato;
     LocalDate agressoSluttdato;
+    Boolean agressoAnsattIDag;      // Agressobruker start/slutt ift dagens dato
     boolean remedyPermisjon;
     String identType;
     String epost;
@@ -49,10 +51,12 @@ public class DvhRessurs {
             .remedyAnsattType(ordsRessurs.get("ansatt_type").asText())
             .rawData(ordsRessurs)
             .ansattRessursKode(ordsRessurs.get("ansatt_ressurs_kode").asText())
+            .ansettelsesTypeBesk(parseNullableFromJson(ordsRessurs, "ansettelsestype_besk"))
             .remedyStartDato(parseNullableDateFromJson(ordsRessurs, "remedy_start_dato"))
             .remedySluttdato(parseNullableDateFromJson(ordsRessurs, "remedy_slutt_dato"))
             .agressoStartDato(parseNullableDateFromJson(ordsRessurs, "agresso_start_dato"))
             .agressoSluttdato(parseNullableDateFromJson(ordsRessurs, "agresso_slutt_dato"))
+            .agressoAnsattIDag(ordsRessurs.hasNonNull("ansatt_per_idag") && ordsRessurs.get("ansatt_per_idag").asText().equals("JA"))
             .remedyPermisjon(ordsRessurs.get("remedy_permisjon").asText("NEI").equals("JA"))
             .identType(ordsRessurs.get("ident_type").asText())
             .epost(ordsRessurs.get("epost").asText())
@@ -74,10 +78,12 @@ public class DvhRessurs {
             .remedyAnsattType(ordsKommunalRessurs.get("ansatt_type").asText())
             .rawData(ordsKommunalRessurs)
             .ansattRessursKode(ordsKommunalRessurs.get("type").asText())
+            .ansettelsesTypeBesk(parseNullableFromJson(ordsKommunalRessurs, "ansettelsestype_besk"))
             .remedyStartDato(parseNullableDateFromJson(ordsKommunalRessurs, "start_dato"))
             .remedySluttdato(parseNullableDateFromJson(ordsKommunalRessurs, "slutt_dato"))
             .agressoStartDato(parseNullableDateFromJson(ordsKommunalRessurs, "date_from"))
             .agressoSluttdato(parseNullableDateFromJson(ordsKommunalRessurs, "date_to"))
+            .agressoAnsattIDag(ordsKommunalRessurs.hasNonNull("ansatt_idag") && ordsKommunalRessurs.get("ansatt_idag").asText().equals("JA"))
             .remedyPermisjon(ordsKommunalRessurs.get("permisjon").asText("NEI").equals("JA"))
             .identType(ordsKommunalRessurs.get("identtype").asText())
             .epost(ordsKommunalRessurs.get("epost ").asText())
@@ -145,6 +151,22 @@ public class DvhRessurs {
             }
         }
         return false;
+    }
+
+    public Sektor getU4Sektor() {
+        List<String> statligeSektorer = List.of("Fast");
+        List<String> kommunaleSektorer = List.of("Kommunalt ansatt", "Kommunal leder");
+        List<String> eksterneSektorer = List.of("Ekstern");
+        if (ansettelsesTypeBesk == null) {
+            return null;
+        } else if (statligeSektorer.contains(ansettelsesTypeBesk)) {
+            return Sektor.NAV_STATLIG;
+        } else if (kommunaleSektorer.contains(ansettelsesTypeBesk)) {
+            return Sektor.NAV_KOMMUNAL;
+        } else if (eksterneSektorer.contains(ansettelsesTypeBesk)) {
+            return Sektor.EKSTERN;
+        }
+        else return null;
     }
 
     private LocalDate getDateOrNull(final LocalDate dato) {

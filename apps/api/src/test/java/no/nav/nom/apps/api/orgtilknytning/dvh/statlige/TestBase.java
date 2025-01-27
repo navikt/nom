@@ -7,7 +7,7 @@ import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.OrgtilknytningCmdServiceTestBase;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
-import no.nav.nom.apps.api.orgtilknytning.u4diff.U4DiffPaaMastrede;
+import no.nav.nom.apps.api.u4diff.U4DiffPaaMastrede;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgEnhetState;

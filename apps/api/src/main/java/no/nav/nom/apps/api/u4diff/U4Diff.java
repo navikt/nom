@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.orgtilknytning.u4diff;
+package no.nav.nom.apps.api.u4diff;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -41,6 +41,10 @@ public class U4Diff {
     private Sektor nomSektor;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "kilde")
+    private U4DiffKilde kilde;
+
+    @Enumerated(EnumType.STRING)
     private U4DiffType type;
 
     @Column(name = "u4_orgenhet_id")
@@ -65,6 +69,9 @@ public class U4Diff {
 
     @Column(name = "u4_stilling_periode")
     private String u4StillingPeriode;
+
+    @Column(name = "u4_ansettelsestype_besk")
+    private String u4AnsettelsestypeBesk;
 
     @Column(name = "nom_orgenhet_id")
     private String nomOrgenhetId;

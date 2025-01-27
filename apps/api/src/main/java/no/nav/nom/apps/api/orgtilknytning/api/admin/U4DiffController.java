@@ -10,8 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.orgtilknytning.u4diff.U4Diff;
-import no.nav.nom.apps.api.orgtilknytning.u4diff.U4DiffService;
+import no.nav.nom.apps.api.u4diff.U4Diff;
+import no.nav.nom.apps.api.u4diff.U4DiffService;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
