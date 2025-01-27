@@ -85,8 +85,12 @@ public class MicrosoftGraphClient {
         while (nextLink != null) {
             response = getUsersFromUri(nextLink);
 
-            users.addAll(response.value());
-            nextLink = response.nextLink();
+            if (response != null) {
+                users.addAll(response.value());
+                nextLink = response.nextLink();
+            } else {
+                nextLink = null;
+            }
         }
 
         logger.info("Found {} users in group {}", users.size(), groupId);
@@ -98,13 +102,26 @@ public class MicrosoftGraphClient {
         return webClient.get()
                 .uri(uri)
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), clientResponse ->
+                        clientResponse.bodyToMono(ODataError.class)
+                                .flatMap(oDataError -> {
+                                    logger.warn("GET failed for URI '{}': Response code: '{}' Error code: '{}' Error message: '{}'",
+                                            uri, clientResponse.statusCode(), oDataError.error().code(), oDataError.error().message());
+                                    return Mono.empty();
+                                })
+                )
                 .bodyToMono(new ParameterizedTypeReference<ODataResponse<EntraIdUser>>() {
                 })
+                .defaultIfEmpty(emptyODataResponse())
                 .retryWhen(defaultRetry(msGraphClientProperties.maxAttempts(), msGraphClientProperties.backoffDurationMillis()))
                 .doOnError(Exception.class, exception ->
                         logger.warn("GET failed for URI '{}': {}", uri, exception.getMessage(), exception))
-                .onErrorReturn(ODataResponse.<EntraIdUser>builder().value(Collections.emptyList()).build())
+                .onErrorReturn(emptyODataResponse())
                 .block();
+    }
+
+    private <T> ODataResponse<T> emptyODataResponse() {
+        return ODataResponse.<T>builder().value(Collections.emptyList()).build();
     }
 
     private Retry defaultRetry(Integer maxAttempts, Integer backoffDurationMillis) {
