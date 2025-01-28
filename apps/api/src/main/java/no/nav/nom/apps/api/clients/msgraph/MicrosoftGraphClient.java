@@ -13,6 +13,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -99,8 +101,10 @@ public class MicrosoftGraphClient {
 
     private ODataResponse<EntraIdUser> getUsersFromUri(String uri) {
         logger.debug("Getting users from URI: {}", uri);
+        String decodedUri = decodeUri(uri);
+        logger.debug("Decoded URI: {}", decodedUri);
         return webClient.get()
-                .uri(uri)
+                .uri(decodedUri)
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), clientResponse ->
                         clientResponse.bodyToMono(ODataError.class)
@@ -122,6 +126,10 @@ public class MicrosoftGraphClient {
 
     private <T> ODataResponse<T> emptyODataResponse() {
         return ODataResponse.<T>builder().value(Collections.emptyList()).build();
+    }
+    
+    private String decodeUri(String url) {
+        return URLDecoder.decode(url, StandardCharsets.UTF_8);
     }
 
     private Retry defaultRetry(Integer maxAttempts, Integer backoffDurationMillis) {
