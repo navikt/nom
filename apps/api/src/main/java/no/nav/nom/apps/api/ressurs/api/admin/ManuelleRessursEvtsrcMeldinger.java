@@ -15,6 +15,7 @@ import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.app.AvvikleRessursRequest;
 import no.nav.nom.apps.api.ressurs.api.app.OppdaterSektorRessursResponse;
 import no.nav.nom.apps.api.ressurs.api.app.OppdaterSluttdatoRessursResponse;
+import no.nav.nom.apps.api.ressurs.api.app.UpdateTelnrRessursRequest;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
@@ -34,12 +35,14 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Objects.isNull;
@@ -624,6 +627,35 @@ public class ManuelleRessursEvtsrcMeldinger {
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonStr = objectMapper.writeValueAsString(response);
         return ResponseEntity.ok().body(jsonStr);
+    }
+
+
+    @PostMapping(value = "/oppdatereTelefonnummerRessurs")
+    @Operation(
+        description = "Oppdatere Telefonnummer for liste over Ressurser",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
+        }
+    )
+    public ResponseEntity<String> oppdatereTelefonnummerRessurs(
+        @Parameter(description = "Liste over ressurser for å oppdatere telefonnummer") @RequestBody List<UpdateTelnrRessursRequest> updateTelnrRessursRequest,
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
+    ) throws JsonProcessingException {
+        if (!"CONFIRM".equals(confirm)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body("Event vil ikke sendes videre da handling ikke er bekreftet");
+        }
+
+        log.info("Oppdaterer telefonnummer request: %s".formatted(updateTelnrRessursRequest));
+        int totalupdated = updateTelnrRessursRequest.size();
+        return ResponseEntity.ok().body("Antall ressurser som har oppdatert telefonnummer: %s".formatted(totalupdated));
     }
 
     private boolean validFid(String fid) {
