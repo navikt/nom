@@ -101,3 +101,28 @@ export async function identerUtenStillingIU4ExcelExportOptions() {
   a.remove();
   window.URL.revokeObjectURL(url);
 }
+
+export async function sektorDifferansePaaRessursOptions(): Promise<U4Diff[]> {
+  return await ky
+    .get(`${API_BASE_URL}/api/admin/u4diff/sektorDifferansePaaRessurs`, {
+      timeout: 60_000,
+    })
+    .json<U4Diff[]>();
+}
+
+export async function sektorDifferansePaaRessursExcelExportOptions() {
+  const blob = await ky
+    .get(`${API_BASE_URL}/api/admin/u4diff/sektorDifferansePaaRessurs/excel`, {
+      timeout: 60_000,
+    })
+    .blob();
+  const today = new Date().toISOString().split("T")[0];
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Sektor_differanse_paa_ressurs_${today}.xlsx`;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}

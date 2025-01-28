@@ -154,17 +154,38 @@ public class DvhRessurs {
         return false;
     }
 
+    /*
+        Statlig         B	Leder
+        Ekstern         E	Eksterne(E)
+        Statlig         F	Fast ansatte(F)
+        Ekstern         H	Ekstern honorar
+        Dropp denne     I	Ikkje relevant
+        Ekstern         J	Ekstern jobbintervju
+        Kommunal        K	Kommunal leder
+        Dropp denne     L	Lese og sekretærhjelp
+        Statlig         M	Midlertidig ansatte(M)
+        Kommunal        N	Kommunalt ansatt (N)
+        Ekstern         O	Ekstern Konsulent
+        Statlig         P	Pensjonister
+        ?               Q	RPA Robot
+        Statlig         R	Lærling
+        Statlig/ekstern S	Student
+        Statlig/ekstern T	Tolk
+        Ekstern         U	Arbeidstrening
+        Dropp denne     V	Ventelønn
+        Statlig/ekstern Y	Timelønna
+     */
     public Sektor getU4Sektor() {
-        List<String> statligeSektorer = List.of("Fast");
-        List<String> kommunaleSektorer = List.of("Kommunalt ansatt", "Kommunal leder");
-        List<String> eksterneSektorer = List.of("Ekstern");
-        if (ansettelsesTypeBesk == null) {
+        List<String> statligeSektorer = List.of("B", "F", "M", "P", "R");
+        List<String> kommunaleSektorer = List.of("K", "N");
+        List<String> eksterneSektorer = List.of("E", "H", "J", "O", "U");
+        if (ansattRessursKode == null) {
             return null;
-        } else if (statligeSektorer.contains(ansettelsesTypeBesk)) {
+        } else if (statligeSektorer.contains(ansattRessursKode)) {
             return Sektor.NAV_STATLIG;
-        } else if (kommunaleSektorer.contains(ansettelsesTypeBesk)) {
+        } else if (kommunaleSektorer.contains(ansattRessursKode)) {
             return Sektor.NAV_KOMMUNAL;
-        } else if (eksterneSektorer.contains(ansettelsesTypeBesk)) {
+        } else if (eksterneSektorer.contains(ansattRessursKode)) {
             return Sektor.EKSTERN;
         }
         else return null;

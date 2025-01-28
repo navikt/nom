@@ -120,6 +120,7 @@ export enum Tilknytningtype {
 export interface U4Diff {
   /** @format int32 */
   id?: number;
+  kilde?: "STILLINGER" | "RESSURS";
   navident: string;
   nomDol?: boolean;
   /** @format date */
@@ -131,7 +132,12 @@ export interface U4Diff {
   nomOrgtilknytning?: string;
   nomOtSektor?: Sektor;
   nomSektor?: Sektor;
-  type?: "MANGLENDE_U4_PERIODE" | "EKSTRA_U4_PERIODE" | "FORSKJELL_I_U4_PERIODE" | "MANGLENDE_STATLIG_I_U4";
+  type?:
+    | "MANGLENDE_U4_PERIODE"
+    | "EKSTRA_U4_PERIODE"
+    | "FORSKJELL_I_U4_PERIODE"
+    | "MANGLENDE_STATLIG_I_U4"
+    | "ULIK_SEKTOR_RESSURS";
   u4Dol?: boolean;
   /** @format date */
   u4GyldigFom?: string;
@@ -139,6 +145,10 @@ export interface U4Diff {
   u4GyldigTom?: string;
   u4OrgenhetId?: string;
   u4OrgenhetNavn?: string;
-  u4Sektor?: Sektor;
+  u4RessursAnsettelsestypeBesk?: string;
+  u4RessursType?: string;
+  u4SektorPaaRessurs?: Sektor;
+  u4SektorPaaStilling?: Sektor;
+  u4StillingAnsettelsestypeBesk?: string;
   u4StillingPeriode?: string;
 }

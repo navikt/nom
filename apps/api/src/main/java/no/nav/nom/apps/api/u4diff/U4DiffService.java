@@ -15,4 +15,6 @@ public class U4DiffService {
     public List<U4Diff> getStatligeIkkeIU4() {
         return u4DiffRepository.findByKildeAndType(U4DiffKilde.STILLINGER, U4DiffType.MANGLENDE_STATLIG_I_U4);
     }
+
+    public List<U4Diff> getSektorDifferanse() { return u4DiffRepository.findByKildeAndType(U4DiffKilde.RESSURS, U4DiffType.ULIK_SEKTOR_RESSURS); }
 }

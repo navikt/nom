@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.orgtilknytning.api.admin;
+package no.nav.nom.apps.api.u4diff.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -25,6 +25,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.List;
 
+import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.IDENTER_IKKE_I_U4;
+import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.SEKTOR_DIFF_PAA_RESSURS;
+
 @RestController
 @Tag(name = "Admin for U4 diff mot NOM")
 @PreAuthorize("hasAuthority('ADMIN')")
@@ -39,12 +42,15 @@ public class U4DiffController {
         this.u4DiffExcelGenerator = u4DiffExcelGenerator;
     }
 
+
+    // IDENTER_IKKE_I_U4
+
     @Operation(
         description = "List differanser for navidenter uten stillingperioder i U4",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @GetMapping("/identerUtenStillingIU4")
-    public ResponseEntity<List<U4Diff>> OrgtilknytningerUtenforHierarki() {
+    public ResponseEntity<List<U4Diff>> identerUtenStillingIU4() {
         return ResponseEntity.ok(u4DiffService.getStatligeIkkeIU4());
     }
 
@@ -56,9 +62,34 @@ public class U4DiffController {
         @ApiResponse(responseCode = "200", description = "Excel generert"),
     })
     @GetMapping("/identerUtenStillingIU4/excel")
-    public void OrgtilknytningerUtenforHierarkiExcel(HttpServletResponse response) {
+    public void identerUtenStillingIU4Excel(HttpServletResponse response) {
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=identerUtenStillingIU4.xlsx");
-        u4DiffExcelGenerator.generate(response, u4DiffService.getStatligeIkkeIU4());
+        u4DiffExcelGenerator.generate(response, u4DiffService.getStatligeIkkeIU4(), IDENTER_IKKE_I_U4);
+    }
+
+
+    // SEKTOR_DIFF_PAA_RESSURS
+
+    @Operation(
+        description = "List differanser i sektor på Ressurs mellom NOM og U4",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping("/sektorDifferansePaaRessurs")
+    public ResponseEntity<List<U4Diff>> sektorDifferansePaaRessurs() {
+        return ResponseEntity.ok(u4DiffService.getSektorDifferanse());
+    }
+
+    @Operation(
+        description = "Generer Excel for differanser i sektor på Ressurs mellom NOM og U4",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Excel generert"),
+    })
+    @GetMapping("/sektorDifferansePaaRessurs/excel")
+    public void sektorDifferansePaaRessursExcel(HttpServletResponse response) {
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=sektorDifferanse.xlsx");
+        u4DiffExcelGenerator.generate(response, u4DiffService.getSektorDifferanse(), SEKTOR_DIFF_PAA_RESSURS);
     }
 
     @ExceptionHandler({

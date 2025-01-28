@@ -133,6 +133,11 @@ export interface MasseFlyttingRequest {
   orgtilknytningerFid: string[];
 }
 
+export interface MinimalRessurs {
+  navident?: string;
+  visningsnavn?: string;
+}
+
 export enum NomNivaa {
   LINJEENHET = "LINJEENHET",
   DRIFTSENHET = "DRIFTSENHET",
