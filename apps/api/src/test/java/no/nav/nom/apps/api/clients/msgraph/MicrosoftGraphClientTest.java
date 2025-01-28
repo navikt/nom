@@ -30,7 +30,7 @@ class MicrosoftGraphClientTest extends TestBase {
         ODataResponse<EntraIdUser> firstResponse = ODataResponse.<EntraIdUser>builder()
                 .context("Some context")
                 .count(2)
-                .nextLink("/groups/nextPart")
+                .nextLink("/groups/nextPart%2canotherPart")
                 .value(List.of(user1()))
                 .build();
         stubForGet(ENTRA_ID_PATH, firstResponse);
@@ -39,7 +39,7 @@ class MicrosoftGraphClientTest extends TestBase {
                 .context("Some other context")
                 .value(List.of(user2()))
                 .build();
-        stubForGet("/groups/nextPart", secondResponse);
+        stubForGet("/groups/nextPart,anotherPart", secondResponse);
 
         List<EntraIdUser> users = microsoftGraphClient.getUsersForGroup(ENTRA_ID_GROUP);
         assertThat(users.size()).isEqualTo(2);
