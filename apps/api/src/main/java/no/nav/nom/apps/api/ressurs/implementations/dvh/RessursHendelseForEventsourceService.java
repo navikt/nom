@@ -93,9 +93,9 @@ public class RessursHendelseForEventsourceService {
             && !Objects.equals(r.sektor(), dvhRessurs.getU4Sektor())
         ) {
             if (dvhRessurs.getU4Sektor() == null) {
-                log.info("Ressurs {} i U4 har en ikke tolket U4 Sektor. {}", r.navident(), dvhRessurs.getAnsattRessursKode());
+                log.debug("Ressurs {} i U4 har en ikke tolket U4 Sektor. {}", r.navident(), dvhRessurs.getAnsattRessursKode());
             }
-            u4DiffPaaMastrede.rapporterU4DiffRessursSektor(r.navident(), r.sektor(), dvhRessurs.getU4Sektor(), dvhRessurs.getAnsettelsesTypeBesk());
+            u4DiffPaaMastrede.rapporterU4DiffRessursSektor(r.navident(), r.sektor(), dvhRessurs.getU4Sektor(), dvhRessurs.getAnsettelsesTypeBesk(), dvhRessurs.getAnsattRessursKode());
         }
     }
 

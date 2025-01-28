@@ -135,8 +135,11 @@ export function IdenterUtenStilling() {
           <Table.ColumnHeader scope="col" sortKey="U4OrgEnhetNavn" sortable>
             U4 OrgEnhet Navn
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="U4Sektor" sortable>
-            U4 Sektor
+          <Table.ColumnHeader scope="col" sortKey="U4SektorPaaRessurs" sortable>
+            U4 Sektor på ressurs
+          </Table.ColumnHeader>
+          <Table.ColumnHeader scope="col" sortKey="U4SektorPaaRessurs" sortable>
+            U4 Sektor på stilling
           </Table.ColumnHeader>
           <Table.ColumnHeader scope="col" sortKey="U4stillingsperiode" sortable>
             U4 Stillingsperiode
@@ -174,7 +177,8 @@ export function IdenterUtenStilling() {
               <Table.DataCell>{ident.u4GyldigTom}</Table.DataCell>
               <Table.DataCell>{ident.u4OrgenhetId}</Table.DataCell>
               <Table.DataCell>{ident.u4OrgenhetNavn}</Table.DataCell>
-              <Table.DataCell>{ident.u4Sektor}</Table.DataCell>
+              <Table.DataCell>{ident.u4SektorPaaRessurs}</Table.DataCell>
+              <Table.DataCell>{ident.u4SektorPaaStilling}</Table.DataCell>
               <Table.DataCell>{ident.u4StillingPeriode}</Table.DataCell>
             </Table.Row>
           ))}

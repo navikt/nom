@@ -4,9 +4,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { identerUtenStillingIU4ExcelExportOptions } from "~/api/apiQueries.ts";
+import {
+  identerUtenStillingIU4ExcelExportOptions,
+  sektorDifferansePaaRessursExcelExportOptions,
+} from "~/api/apiQueries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { IdenterUtenStilling } from "~/sanitychecks/U4/IdenterUtenStilling.tsx";
+import { SektorDiffPaaRessurs } from "~/sanitychecks/U4/SektorDiffPaaRessurs.tsx";
 
 export const Route = createFileRoute("/sanity-checks/u4diff")({
   component: () => {
@@ -27,15 +31,14 @@ function ListSelector(props: { selected: string }) {
     case "IdenterUtenStilling": {
       return <IdenterUtenStilling />;
     }
+    case "sektorDiffPaaRessurs": {
+      return <SektorDiffPaaRessurs />;
+    }
     default: {
       return <></>;
     }
   }
 }
-
-const excelExport = async () => {
-  await identerUtenStillingIU4ExcelExportOptions();
-};
 
 function U4DiffSanityChecks() {
   const [selected, setSelected] = useState("IdenterUtenStilling");
@@ -58,10 +61,27 @@ function U4DiffSanityChecks() {
           <option value="IdenterUtenStilling">
             Statlige Identer uten stilling i Unit 4
           </option>
+          <option value="sektorDiffPaaRessurs">
+            Sektor differanse på ressurs
+          </option>
         </Select>
         <Button
           icon={<FileExcelIcon />}
-          onClick={excelExport}
+          onClick={() => {
+            switch (selected) {
+              case "IdenterUtenStilling": {
+                identerUtenStillingIU4ExcelExportOptions();
+                break;
+              }
+              case "sektorDiffPaaRessurs": {
+                sektorDifferansePaaRessursExcelExportOptions();
+                break;
+              }
+              default: {
+                break;
+              }
+            }
+          }}
           style={{ height: "fit-content", alignSelf: "center" }}
           variant="secondary"
         >

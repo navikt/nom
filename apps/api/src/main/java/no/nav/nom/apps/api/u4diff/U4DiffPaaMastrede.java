@@ -123,15 +123,16 @@ public class U4DiffPaaMastrede {
     }
 
     @Transactional
-    public void rapporterU4DiffRessursSektor(String navident, Sektor nomSektor, Sektor u4RessursSektor, String ansettelsesTypeBesk) {
+    public void rapporterU4DiffRessursSektor(String navident, Sektor nomSektor, Sektor u4RessursSektor, String ansettelsesTypeBesk, String ressursType) {
         log.debug("Mottatt Sektor U4 diff for navident {}", navident);
         u4DiffRepository.save(U4Diff.builder()
             .kilde(U4DiffKilde.RESSURS)
             .navident(navident)
             .nomSektor(nomSektor)
             .type(U4DiffType.ULIK_SEKTOR_RESSURS)
-            .u4Sektor(u4RessursSektor)
-            .u4AnsettelsestypeBesk(ansettelsesTypeBesk)
+            .u4SektorPaaRessurs(u4RessursSektor)
+            .u4RessursAnsettelsestypeBesk(ansettelsesTypeBesk)
+            .u4RessursType(ressursType)
             .build());
     }
 
@@ -146,7 +147,7 @@ public class U4DiffPaaMastrede {
                 .u4GyldigFom(sp.gyldigFom())
                 .u4GyldigTom(sp.gyldigTom())
                 .u4Dol(sp.erDagligOppfolging())
-                .u4Sektor(null)
+                .u4SektorPaaStilling(null)
                 .u4StillingPeriode(sp.toString())
                 .build());
     }
@@ -183,7 +184,7 @@ public class U4DiffPaaMastrede {
                 .u4GyldigFom(sp.gyldigFom())
                 .u4GyldigTom(sp.gyldigTom())
                 .u4Dol(sp.erDagligOppfolging())
-                .u4Sektor(null)
+                .u4SektorPaaStilling(null)
                 .u4StillingPeriode(sp.toString())
                 .nomOrgenhetId(orgenhet.id())
                 .nomOrgenhetNavn(orgenhet.navn())

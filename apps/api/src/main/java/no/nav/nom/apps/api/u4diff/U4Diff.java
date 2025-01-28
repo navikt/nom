@@ -63,15 +63,25 @@ public class U4Diff {
     @Convert(converter = YesNoConverter.class)
     private Boolean u4Dol;
 
-    @Column(name = "u4_sektor")
+    @Column(name = "u4_sektor_paa_stilling")
     @Enumerated(EnumType.STRING)
-    private Sektor u4Sektor;
+    private Sektor u4SektorPaaStilling;
+
+    @Column(name = "u4_sektor_paa_ressurs")
+    @Enumerated(EnumType.STRING)
+    private Sektor u4SektorPaaRessurs;
 
     @Column(name = "u4_stilling_periode")
     private String u4StillingPeriode;
 
-    @Column(name = "u4_ansettelsestype_besk")
-    private String u4AnsettelsestypeBesk;
+    @Column(name = "u4_stilling_ansettelsestype_besk")
+    private String u4StillingAnsettelsestypeBesk;
+
+    @Column(name = "u4_ressurs_ansettelsestype_besk")
+    private String u4RessursAnsettelsestypeBesk;
+
+    @Column(name = "u4_ressurs_type")
+    private String u4RessursType;
 
     @Column(name = "nom_orgenhet_id")
     private String nomOrgenhetId;
