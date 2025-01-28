@@ -1,8 +1,16 @@
 import { css } from "@emotion/react";
 import { CheckmarkCircleFillIcon, ChevronRightIcon } from "@navikt/aksel-icons";
-import { Alert, BodyShort, HStack, Label, Loader } from "@navikt/ds-react";
+import {
+  Alert,
+  BodyShort,
+  HStack,
+  Label,
+  Loader,
+  VStack,
+} from "@navikt/ds-react";
+import { Link } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useSearch } from "@tanstack/react-router";
+import { useSearch } from "@tanstack/react-router";
 
 import { getRessurs } from "~/api/react-query-endpoints";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
@@ -56,6 +64,9 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
   const identskjemaLenke: string =
     "https://navno.sharepoint.com/:b:/r/sites/intranett-hr/Delte%20dokumenter/HR-skjemaer/Identbekreftelses%20skjema.pdf?csf=1&web=1&e=E4RvBs";
 
+  const lonnsskjemaLenke =
+    "https://agresso.adeo.no/agresso/ContentContainer.aspx?type=topgen&menu_id=002820&activityStepId=1-1&attribute_id=S108&client=HR";
+
   // Inntil vi vet bedre hvem som trenger å se denne teksten (f.eks antagelser fra hierarkiet) så skrur vi den av for nå. For majoriteten vil den heller være forvirrende
   const showTeamcatInstructions = false;
 
@@ -100,7 +111,7 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
           </BodyShort>
           <BodyShort>
             Alle nye medarbeidere må signere identskjema.{" "}
-            <Link to={identskjemaLenke}>
+            <Link href={identskjemaLenke}>
               Gå til skjemaet for å laste det ned
             </Link>
             .
@@ -116,6 +127,7 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
               også legge inn informasjon i Teamkatalogen.
             </BodyShort>
           )}
+
           {ressurs.sektor === Sektor.NAV_KOMMUNAL && (
             <Alert
               css={css`
@@ -135,7 +147,7 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
                     dekket utlegg eller skal være stedfortredere
                   </li>
                 </ul>
-                <Link to={sharepointLenke}>
+                <Link href={sharepointLenke}>
                   På denne siden på Navet kan du ser mer detaljert informasjon
                   om hvilke typer kommunalt ansatte som skal registreres både i
                   NOM og i Unit4.
@@ -143,8 +155,32 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
               </BodyShort>
             </Alert>
           )}
+
+          {ressurs.sektor === Sektor.NAV_STATLIG && (
+            <Alert
+              css={css`
+                margin-top: var(--a-spacing-4);
+                max-width: fit-content;
+                justify-self: center;
+              `}
+              variant="info"
+            >
+              <VStack gap="2">
+                <BodyShort>
+                  Alle statlig ansatte må også registreres i Unit4 for å få
+                  utbetalt lønn.
+                </BodyShort>
+                <BodyShort>
+                  Statlig ansatte registreres i Unit4 ved hjelp av lønnsskjema.
+                  Det aktuelle lønnsskjemaet{" "}
+                  <Link href={lonnsskjemaLenke}>finner du her</Link>.
+                </BodyShort>
+              </VStack>
+            </Alert>
+          )}
         </HStack>
       </div>
+
       <PanelLink
         href="https://it-hjelpa.adeo.no/arsys/home"
         label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
@@ -182,7 +218,7 @@ function PanelLink({ label, href }: { label: string; href: string }) {
           background: unset;
         }
       `}
-      to={href}
+      href={href}
     >
       <Label
         css={css`
