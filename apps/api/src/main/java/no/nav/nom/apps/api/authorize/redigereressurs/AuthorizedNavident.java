@@ -9,7 +9,6 @@ import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.OpprettDele
 import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrgenhetRequest;
 import no.nav.nom.apps.api.clients.msgraph.EntraIdUser;
 import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
-import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
@@ -34,7 +33,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
@@ -351,20 +352,36 @@ public class AuthorizedNavident {
     }
     
     public List<MinimalRessurs> getRessurserWhichCanBeDelegatedTo() {
-        List<EntraIdUser> ansatteSomKanDelegere = microsoftGraphClient.getUsersForGroup(nomWriteDelegertAdGroup);
-        List<EntraIdUser> ledere = microsoftGraphClient.getUsersForGroup(nomWriteLederAdGroup);
+        CompletableFuture<List<EntraIdUser>> ansatteCompletable = getRessurserWhichCanBeDelegatedToAsync(nomWriteDelegertAdGroup);
+        CompletableFuture<List<EntraIdUser>> ledereCompletable = getRessurserWhichCanBeDelegatedToAsync(nomWriteLederAdGroup);
 
+        CompletableFuture<Void> combinedFuture = CompletableFuture.allOf(ansatteCompletable, ledereCompletable);
+        combinedFuture.join();
 
-        return Stream.concat(ansatteSomKanDelegere.stream(), ledere.stream())
-                .map(entraIdUser -> {
-                    String visningsnavn = ressursStateRepository
-                            .findByNavident(entraIdUser.navIdent())
-                            .map(RessursState::visningsnavn)
-                            .map(Visningsnavn::getFormattedVisningsnavn).orElse("Navn mangler");
-                    
-                    return new MinimalRessurs(entraIdUser.navIdent(), visningsnavn);
-                })
-                .toList();
+        try {
+            return Stream.concat(ansatteCompletable.get().stream(), ledereCompletable.get().stream())
+                    .map(entraIdUser -> {
+                        String visningsnavn = ressursStateRepository
+                                .findByNavident(entraIdUser.navIdent())
+                                .map(RessursState::visningsnavn)
+                                .map(Visningsnavn::getFormattedVisningsnavn).orElse("Navn mangler");
+
+                        return new MinimalRessurs(entraIdUser.navIdent(), visningsnavn);
+                    })
+                    .toList();
+        } catch (InterruptedException | ExecutionException ex) {
+            log.error("Feil ved henting av Future med delegerbare ansatte: {}", ex.getMessage(), ex);
+            return Collections.emptyList();
+        }
+    }
+    
+    public CompletableFuture<List<EntraIdUser>> getRessurserWhichCanBeDelegatedToAsync(String adGroup) {
+        return CompletableFuture.supplyAsync(
+                        () -> microsoftGraphClient.getUsersForGroup(adGroup))
+                .exceptionally(ex -> {
+                    log.warn("Henting av delegerbare ansatte fra gruppen '{}' feilet: {}", adGroup, ex.getMessage(), ex);
+                    return Collections.emptyList();
+                });
     }
 
     private int orgenheterMedAuthedLederCount() {

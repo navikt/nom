@@ -278,20 +278,37 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
     }
 
     @Test
+    @DisplayName("Verifiserer at medarbeidere fra NOM_WRITE_DELEGERT og NOM_WRITE_LEDER hentes fra Azure AD og returneres samlet")
     void should_join_results_for_ad_groups() {
         when(microsoftGraphClient.getUsersForGroup(AD_GROUP_NOM_WRITE_DELEGERT)).thenReturn(List.of(user1(), user2()));
         when(microsoftGraphClient.getUsersForGroup(AD_GROUP_NOM_WRITE_LEDER)).thenReturn(List.of(manager()));
-        
+
         when(ressursStateRepository.findByNavident(ENTRA_USER_1_NAVIDENT)).
                 thenReturn(Optional.of(getRessursState("Ansatt1", "Ansatt")));
         when(ressursStateRepository.findByNavident(ENTRA_USER_2_NAVIDENT)).
                 thenReturn(Optional.of(getRessursState("Ansatt1", "Ansatt")));
         when(ressursStateRepository.findByNavident(ENTRA_MANAGER_NAVIDENT)).
                 thenReturn(Optional.of(getRessursState("Leder", "Leder")));
-        
+
         List<MinimalRessurs> ressurser = authorizedNavident.getRessurserWhichCanBeDelegatedTo();
         assertThat(ressurser).hasSize(3);
         assertThat(ressurser).anyMatch(ressurs -> ressurs.navident().equals(ENTRA_USER_1_NAVIDENT));
+    }
+
+    @Test
+    @DisplayName("Verifiserer at exception i ett av kallene til Azure AD håndteres og det fortsatt returneres medarbeidere")
+    void should_handle_exception_in_one_of_the_api_calls_when_getting_ad_groups() {
+        when(microsoftGraphClient.getUsersForGroup(AD_GROUP_NOM_WRITE_DELEGERT)).thenReturn(List.of(user1(), user2()));
+        when(microsoftGraphClient.getUsersForGroup(AD_GROUP_NOM_WRITE_LEDER))
+                .thenThrow(new RuntimeException("Something went wrong"));
+
+        when(ressursStateRepository.findByNavident(ENTRA_USER_1_NAVIDENT)).
+                thenReturn(Optional.of(getRessursState("Ansatt1", "Ansatt")));
+        when(ressursStateRepository.findByNavident(ENTRA_USER_2_NAVIDENT)).
+                thenReturn(Optional.of(getRessursState("Ansatt1", "Ansatt")));
+
+        List<MinimalRessurs> ressurser = authorizedNavident.getRessurserWhichCanBeDelegatedTo();
+        assertThat(ressurser).hasSize(2);
     }
 
     private EntraIdUser user1() {
@@ -314,7 +331,7 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
                 .navIdent(ENTRA_MANAGER_NAVIDENT)
                 .build();
     }
-    
+
     private RessursState getRessursState(String fornavn, String etternavn) {
         return RessursState.builder()
                 .visningsnavn(new Visningsnavn(fornavn, Optional.empty(), etternavn))
