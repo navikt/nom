@@ -5,13 +5,13 @@
 import pandas as pd
 
 # Load the Excel file
-# excel_file = 'Aktive medarb med direktenr og ikke mobilnr 20250106.xls'
-# col1 = 'NAV-ID'
-# col2 = 'Dir tlf_FINAL'
-
-excel_file = 'Eksterne med mobilnr satt og ingen direktenr 20250106.xls'
+excel_file = 'Aktive medarb med direktenr og ikke mobilnr 20250106.xls'
 col1 = 'NAV-ID'
-col2 = 'Dir tlf FINAL'
+col2 = 'Dir tlf_FINAL'
+
+#excel_file = 'Eksterne med mobilnr satt og ingen direktenr 20250106.xls'
+#col1 = 'NAV-ID'
+#col2 = 'Dir tlf FINAL'
 
 sheet_name = 'adhoc_list_table'
 
@@ -28,7 +28,7 @@ new_column_names = {
 selected_df.rename(columns=new_column_names, inplace=True)
 
 # Save to JSON file
-json_file = 'data.json'  
+json_file =  excel_file +'.json'  
 selected_df.to_json(json_file, orient='records', indent=4)
 
 print(f"Selected columns saved to {json_file}")
