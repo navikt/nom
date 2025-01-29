@@ -22,8 +22,8 @@ df = pd.read_excel(excel_file, sheet_name=sheet_name)
 columns_to_export = [col1, col2] 
 selected_df = df[columns_to_export]
 new_column_names = {
-    col1: 'NAV_ID',   
-    col2: 'DIR_TLF_FINAL'
+    col1: 'navident',   
+    col2: 'telefonummer'
 }
 selected_df.rename(columns=new_column_names, inplace=True)
 
