@@ -19,6 +19,7 @@ import no.nav.nom.apps.api.ressurs.api.app.UpdateTelnrRessursRequest;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPrimaryTelefonnummerCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
@@ -44,6 +45,7 @@ import org.springframework.web.util.HtmlUtils;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
@@ -647,15 +649,43 @@ public class ManuelleRessursEvtsrcMeldinger {
     public ResponseEntity<String> oppdatereTelefonnummerRessurs(
         @Parameter(description = "Liste over ressurser for å oppdatere telefonnummer") @RequestBody List<UpdateTelnrRessursRequest> updateTelnrRessursRequest,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
-    ) throws JsonProcessingException {
+    ) {
+        log.info("Oppdaterer telefonnummer request: %s".formatted(updateTelnrRessursRequest));
+
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Event vil ikke sendes videre da handling ikke er bekreftet");
         }
 
-        log.info("Oppdaterer telefonnummer request: %s".formatted(updateTelnrRessursRequest));
-        int totalupdated = updateTelnrRessursRequest.size();
-        return ResponseEntity.ok().body("Antall ressurser som har oppdatert telefonnummer: %s".formatted(totalupdated));
+        AtomicInteger totalupdated = new AtomicInteger();
+        updateTelnrRessursRequest.forEach(ressursTobeUpdated -> {
+            var ressursState = ressursStateRepository.findByNavident(ressursTobeUpdated.navident());
+            if (ressursState.isEmpty() || isNull(ressursTobeUpdated.telefonummer())) {
+                log.warn("Ressurs for navidenten %s finnes ikke eller telefonnummer er ikke gitt %s".formatted(ressursTobeUpdated.navident(), ressursTobeUpdated.telefonummer()));
+            } else {
+                var metaData = new InputMetadata(
+                    "/api/admin/manuelleEvtsrcMeldinger",
+                    "oppdatereTelefonnummerRessurs",
+                    ressursTobeUpdated.telefonummer(),
+                    new Origination(
+                        getAuthenticatedNavIdent(),
+                        "Admin swagger/rest"
+                    )
+                );
+
+                ressursCommandService.oppdatertPrimaryTelefonnummer(
+                    new OppdaterPrimaryTelefonnummerCommand(
+                        HtmlUtils.htmlEscape(ressursState.get().fid()),
+                        HtmlUtils.htmlEscape(ressursTobeUpdated.telefonummer())
+                    ),
+                    metaData
+                );
+
+                totalupdated.getAndIncrement();
+            }
+        });
+
+        return ResponseEntity.ok().body("Antall ressurser som har oppdatert telefonnummer: %s av %s".formatted(totalupdated, updateTelnrRessursRequest.size()));
     }
 
     private boolean validFid(String fid) {
