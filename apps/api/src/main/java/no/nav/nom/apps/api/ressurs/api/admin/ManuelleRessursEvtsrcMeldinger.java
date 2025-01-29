@@ -662,6 +662,8 @@ public class ManuelleRessursEvtsrcMeldinger {
             var ressursState = ressursStateRepository.findByNavident(ressursTobeUpdated.navident());
             if (ressursState.isEmpty() || isNull(ressursTobeUpdated.telefonummer())) {
                 log.warn("Ressurs for navidenten %s finnes ikke eller telefonnummer er ikke gitt %s".formatted(ressursTobeUpdated.navident(), ressursTobeUpdated.telefonummer()));
+            } else if(ressursState.get().primaryTelefonnummer().isPresent()) {
+                log.warn("Ressurs for navidenten %s allerede har telefonnummer %s".formatted(ressursTobeUpdated.navident(), ressursTobeUpdated.telefonummer()));
             } else {
                 var metaData = new InputMetadata(
                     "/api/admin/manuelleEvtsrcMeldinger",
