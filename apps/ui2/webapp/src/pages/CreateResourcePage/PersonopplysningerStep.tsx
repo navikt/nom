@@ -93,7 +93,7 @@ function CreateResourceForm({ personident }: { personident: string }) {
     return (
       <Alert variant="error">
         Denne personen finnes allerede som aktiv eller fremtidig medarbeider med
-        NAV-ident <b>{person?.navident}</b>. For å gjøre endringer, gå til{" "}
+        Nav-ident <b>{person?.navident}</b>. For å gjøre endringer, gå til{" "}
         <Link to={`/ressurs/${person?.navident}`}>
           medarbeiderens profilside
         </Link>
@@ -107,8 +107,8 @@ function CreateResourceForm({ personident }: { personident: string }) {
       <>
         {person.navident && (
           <Alert variant="info">
-            Medarbeideren har jobbet i NAV tidligere og vil beholde sin
-            tidligere NAV-ident <b>{person.navident}</b>.
+            Medarbeideren har jobbet i Nav tidligere og vil beholde sin
+            tidligere Nav-ident <b>{person.navident}</b>.
           </Alert>
         )}
         <FolkeregisterPersonInfo
@@ -203,7 +203,7 @@ function VisningsnavnForm({
       >
         <b>Visningnavn</b>
         <BodyShort spacing>
-          Visningsnavnet vil bli brukt i alle NAVs applikasjoner, og fornavn og
+          Visningsnavnet vil bli brukt i alle Navs applikasjoner, og fornavn og
           etternavn er obligatorisk. Navnet skal som hovedregel være samme som
           folkeregistrert navn, men man kan om ønskelig fjerne mellomnavn.
           Visningsnavnet blir benyttet til å generere medarbeiderens

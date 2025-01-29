@@ -84,7 +84,7 @@ function BekreftModalInnholdTomIFremtiden({
       <BodyLong>
         <b>
           Dette innebærer at etter {dato} vil {navn} ikke lenger være registrert
-          som medarbeider i NAV, og alle tilganger for medarbeideren vil bli
+          som medarbeider i Nav, og alle tilganger for medarbeideren vil bli
           fjernet.
         </b>
       </BodyLong>
@@ -113,7 +113,7 @@ function BekreftModalInnholdTomIFortiden({ navn }: { navn: string }) {
         <BodyLong>
           <b>
             Dette innebærer at fra i dag vil {navn} ikke lenger være registrert
-            som medarbeider i NAV, og alle tilganger for medarbeideren vil bli
+            som medarbeider i Nav, og alle tilganger for medarbeideren vil bli
             fjernet.
           </b>
         </BodyLong>

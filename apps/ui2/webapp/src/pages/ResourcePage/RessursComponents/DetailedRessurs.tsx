@@ -10,6 +10,7 @@ import {
   Button,
   ExpansionCard,
   Heading,
+  HelpText,
   Label,
   Link,
   Tag,
@@ -186,7 +187,7 @@ function OrgTilknytningSection({
         >
           <Heading level="2" size="small">
             <Buildings3Icon />
-            Organisatorisk tilhørighet
+            Organisasjonstilknytninger
           </Heading>
 
           <EditButtonWrapperOrgtilknytning>
@@ -287,9 +288,24 @@ function ExpiredOrgTilknytninger({
 
   return (
     <>
-      <Heading level="2" size="xsmall">
-        Avsluttede org.tilknytninger
-      </Heading>
+      <div
+        css={css`
+          display: flex;
+          align-content: center;
+        `}
+      >
+        <Heading level="2" size="xsmall">
+          Avsluttede org.tilknytninger
+        </Heading>
+        <HelpText
+          css={css`
+            margin-left: var(--a-spacing-2);
+          `}
+          title="Hvilke org.-tilknytninger vises her?"
+        >
+          NOM har kun avsluttede organisasjonstilknytninger fra og med 2021
+        </HelpText>
+      </div>
       {tilknyttingerToShow.map((orgtilknytning) => (
         <ExpiredOrgTilknytning
           expiredOrgTilknytning={orgtilknytning}

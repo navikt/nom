@@ -97,7 +97,7 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
           gap="2"
         >
           <BodyShort>
-            Medarbeideren er nå registrert i NOM og NAV-ident{" "}
+            Medarbeideren er nå registrert i NOM og Nav-ident{" "}
             <b>{ressurs.navident}</b> er opprettet for{" "}
             <b>{formatVisningsnavn(ressurs.visningsnavn)}</b>.
           </BodyShort>
@@ -111,7 +111,7 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
           </BodyShort>
           <BodyShort>
             Alle nye medarbeidere må signere identskjema.{" "}
-            <Link href={identskjemaLenke}>
+            <Link href={identskjemaLenke} target="_blank">
               Gå til skjemaet for å laste det ned
             </Link>
             .
@@ -147,7 +147,7 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
                     dekket utlegg eller skal være stedfortredere
                   </li>
                 </ul>
-                <Link href={sharepointLenke}>
+                <Link href={sharepointLenke} target="_blank">
                   På denne siden på Navet kan du ser mer detaljert informasjon
                   om hvilke typer kommunalt ansatte som skal registreres både i
                   NOM og i Unit4.

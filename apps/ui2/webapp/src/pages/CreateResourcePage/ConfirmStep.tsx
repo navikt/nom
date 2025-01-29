@@ -128,7 +128,7 @@ export function ConfirmStep() {
             medarbeider i NOM.{" "}
           </span>
           {navident && (
-            <span>NAV-ident blir videreført fra tidligere arbeidsforhold.</span>
+            <span>Nav-ident blir videreført fra tidligere arbeidsforhold.</span>
           )}
         </div>
         <div
@@ -144,7 +144,7 @@ export function ConfirmStep() {
             label="Sektor"
             value={sektor && SektorNameMapping[sektor]}
           />
-          <LabelWithValue label="NAV-ident" value={navident} />
+          <LabelWithValue label="Nav-ident" value={navident} />
           <LabelWithValue
             label="Tilknytningstype"
             value={

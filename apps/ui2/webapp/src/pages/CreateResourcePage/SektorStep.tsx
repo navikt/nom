@@ -141,14 +141,6 @@ export function SektorStep() {
       icon={opprettRessursIconRoundedBackground}
       title="Sektor"
     >
-      <Alert variant="info">
-        For øyeblikket kan du kun bruke NOM til å opprette kommunalt ansatte og
-        eksterne konsulenter. Eksterne konsulenter er ansatte i konsulentselskap
-        som selger tjenester til NAV. Studenter, personer i arbeidstrening og
-        andre eksterne opprettes som tidligere. Statlige ansatte opprettes i
-        Identrutina og Unit4 som tidligere.
-      </Alert>
-
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -179,34 +171,51 @@ export function SektorStep() {
         </RadioGroup>
 
         {selectedSektor !== Sektor.NAV_KOMMUNAL && (
-          <Select
-            label="Velg hvilken kategori medarbeideren tilhører innenfor denne sektoren"
-            name="tilknytningtype"
-            onChange={(event) =>
-              setSelectedTilknytningtype(event.target.value as Tilknytningtype)
-            }
-            value={selectedTilknytningtype}
-          >
-            {(selectedSektor === Sektor.EKSTERN
-              ? tilknytningstyperEksterne
-              : tilknytningstyperStatlige
-            ).map((tilknytningstype) => {
-              if (
-                tilknytningstype ===
-                  Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER &&
-                !brukerJobberIDirektoratet &&
-                !hasAdminAccess
-              ) {
-                return;
+          <>
+            <Select
+              label="Velg hvilken kategori medarbeideren tilhører innenfor denne sektoren"
+              name="tilknytningtype"
+              onChange={(event) =>
+                setSelectedTilknytningtype(
+                  event.target.value as Tilknytningtype,
+                )
               }
+              value={selectedTilknytningtype}
+            >
+              {(selectedSektor === Sektor.EKSTERN
+                ? tilknytningstyperEksterne
+                : tilknytningstyperStatlige
+              ).map((tilknytningstype) => {
+                if (
+                  tilknytningstype ===
+                    Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER &&
+                  !brukerJobberIDirektoratet &&
+                  !hasAdminAccess
+                ) {
+                  return;
+                }
 
-              return (
-                <option key={tilknytningstype} value={tilknytningstype}>
-                  {`${TilknytningtypeNameMapping[tilknytningstype]}${tilknytningstype === Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER ? " (f.eks. Helfo, Skatteetaten, osv.)" : ""}`}
-                </option>
-              );
-            })}
-          </Select>
+                return (
+                  <option key={tilknytningstype} value={tilknytningstype}>
+                    {`${TilknytningtypeNameMapping[tilknytningstype]}${tilknytningstype === Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER ? " (f.eks. Helfo, Skatteetaten, osv.)" : ""}`}
+                  </option>
+                );
+              })}
+            </Select>
+
+            {selectedSektor === Sektor.EKSTERN && (
+              <Alert
+                css={css`
+                  margin-top: var(--a-spacing-4);
+                `}
+                variant="info"
+              >
+                Øvrige kategorier av medarbeidere, som lese- og sekretærhjelper
+                og frilanstolker, må foreløpig registreres via Identrutina og
+                Unit4.
+              </Alert>
+            )}
+          </>
         )}
 
         <NavigationButtons goBackCallback={() => saveValuesAndNavigate("1")} />

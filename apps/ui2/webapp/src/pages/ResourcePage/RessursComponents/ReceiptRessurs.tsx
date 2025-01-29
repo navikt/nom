@@ -63,7 +63,7 @@ export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
             value={SektorNameMapping[ressurs.sektor]}
             wrapped
           />
-          <LabelWithValue label="NAV-ident" value={ressurs.navident} wrapped />
+          <LabelWithValue label="Nav-ident" value={ressurs.navident} wrapped />
           <LabelWithValue label="Org.enhet" value={orgEnhet?.navn} wrapped />
           <LabelWithValue
             label="Enhetsnummer"
