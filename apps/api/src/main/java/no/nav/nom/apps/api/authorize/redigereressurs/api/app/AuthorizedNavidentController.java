@@ -142,7 +142,7 @@ public class AuthorizedNavidentController {
             description = "Returner en liste med navn og navIdent for ressurser som har AD-gruppe NOM-WRITE-DELEGERT og/eller NOM-WRITE-LEDER og dermed kan delegeres til.",
             security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-//    @PreAuthorize("hasAuthority('NOM_UI_APP')")
+    @PreAuthorize("hasAuthority('NOM_UI_APP')")
     public List<MinimalRessurs> getRessurserWhichCanBeDelegatedTo() {
         return authorizedNavident.getRessurserWhichCanBeDelegatedTo();
     }
