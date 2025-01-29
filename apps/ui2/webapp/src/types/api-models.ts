@@ -133,6 +133,11 @@ export interface MasseFlyttingRequest {
   orgtilknytningerFid: string[];
 }
 
+export interface MinimalRessurs {
+  navident: string;
+  visningsnavn: string;
+}
+
 export enum NomNivaa {
   LINJEENHET = "LINJEENHET",
   DRIFTSENHET = "DRIFTSENHET",
@@ -196,6 +201,34 @@ export interface OrgEnhetMedLedernavn {
   ledere: string[];
   navn: string;
   remedyEnhetId?: string;
+}
+
+export interface OrgEnhetStatistikkResponse {
+  /** @format int32 */
+  antallArbeidslivssenter?: number;
+  /** @format int32 */
+  antallArbeidsraadgivning?: number;
+  /** @format int32 */
+  antallFylkekontor?: number;
+  /** @format int32 */
+  antallHjelpemidlerOgTilrettelegging?: number;
+  /** @format int32 */
+  antallKlageinstanser?: number;
+  /** @format int32 */
+  antallKontrollKonrollenheter?: number;
+  /** @format int32 */
+  antallLovNoder?: number;
+  /** @format int32 */
+  antallNavArbeidOgYtelser?: number;
+  /** @format int32 */
+  antallNavFamilieOgPensjonsytelser?: number;
+  /** @format int32 */
+  antallNavKontaktsenter?: number;
+  /** @format int32 */
+  antallNavKontorer?: number;
+  /** @format int32 */
+  antallTiltak?: number;
+  ressursStatistikk?: RessursStatistikk;
 }
 
 export enum OrgEnhetsType {

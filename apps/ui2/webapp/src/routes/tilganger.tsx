@@ -9,7 +9,9 @@ import {
   Heading,
   HGrid,
   HStack,
+  Label,
   List,
+  Loader,
   Table,
   useDatepicker,
   VStack,
@@ -28,27 +30,24 @@ import {
   fornyDelegering,
   getDelegerbareOrgEnheterForUserOptions,
   getOrgEnhet,
+  getRessurserWhichCanBeDelegatedTo,
   getSession,
   getTilgangerDelegertByUserOptions,
   getTilgangerDelegertTilMegOptions,
   tilgangerKeys,
 } from "~/api/react-query-endpoints";
 import { ApiResponseError } from "~/components/ApiResponseError";
-import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
-import {
-  ModalProvider,
-  useModal,
-} from "~/components/modalProvider/ModalProvider";
 import { NavidentNameLookup } from "~/components/NavidentNameLookup";
 import { PageBanner } from "~/components/PageBanner";
 import { Pluralize } from "~/components/Pluralize";
-import { NavidentSelectFormPart } from "~/components/select/NavidentSelect";
+import { DelegeringNavidentSelectFormPart } from "~/components/select/DelegeringNavidentSelect";
 import { blueTopBorder } from "~/resources/NomStyles";
 import type {
   LederTilgangForOrgenhetRequest,
   LederTilgangState,
+  MinimalRessurs,
   OrgEnhet,
 } from "~/types/api-models";
 import {
@@ -75,15 +74,18 @@ export const Route = createFileRoute("/tilganger")({
 });
 
 function TilgangerPageWrapper() {
-  return (
-    <ModalProvider>
-      <TilgangerPage />
-    </ModalProvider>
-  );
+  return <TilgangerPage />;
 }
 
 function TilgangerPage() {
   const { orgenheterLedetAvMegOgDelegerbart } = Route.useLoaderData();
+
+  const delegerbareRessurserQuery = useQuery({
+    queryKey: getRessurserWhichCanBeDelegatedTo.queryKey,
+    queryFn: () => getRessurserWhichCanBeDelegatedTo.queryFn(),
+  });
+
+  const delegerbareRessurser = delegerbareRessurserQuery?.data;
 
   const delegertTilMeg =
     useQuery(getTilgangerDelegertTilMegOptions()).data ?? [];
@@ -99,7 +101,7 @@ function TilgangerPage() {
           Arbeid og ytelser styringsenhet osv.)
         </List.Item>
         <List.Item>
-          Ledere på arbeidsområdenivå (Bjerke (NAV-kontor), Familie- og
+          Ledere på arbeidsområdenivå (Bjerke (Nav-kontor), Familie- og
           pensjonsytelser Ålesund, HMS Buskerud osv.)
         </List.Item>
         <List.Item>
@@ -118,7 +120,12 @@ function TilgangerPage() {
               Organisasjonsenheter du er leder for:
             </Heading>
             {orgenheterLedetAvMegOgDelegerbart.map((orgEnhet) => (
-              <OrgEnhetCard key={orgEnhet.id} orgEnhet={orgEnhet} />
+              <OrgEnhetCard
+                delegerbareRessurser={delegerbareRessurser}
+                isLoading={delegerbareRessurserQuery.isLoading}
+                key={orgEnhet.id}
+                orgEnhet={orgEnhet}
+              />
             ))}
           </>
         )}
@@ -192,21 +199,28 @@ function DelegertRolleCard({ tilgang }: { tilgang: LederTilgangState }) {
           organisasjonsenheter.
         </BodyShort>
         <BodyShort>
-          I tillegg til å ha delegert redigeringstilgang her i NOM, må du også
-          ha fått tilganger i Mine Tilganger. Brukerveiledning for Mine
+          For å få redigeringstilgang her i NOM, må du først ha fått
+          skrivetilgang til NOM i Mine Tilganger. Brukerveiledning for Mine
           Tilganger finner du her:{" "}
           <Link target="_blank" to={brukerveiledningLenke}>
             Brukerveiledning Mine Tilganger
           </Link>
-          . Du kan søke på NOM i Mine Tilganger for å finne riktig tilgang å
-          delegere.
+          .
         </BodyShort>
       </HStack>
     </VStack>
   );
 }
 
-function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+function OrgEnhetCard({
+  orgEnhet,
+  delegerbareRessurser,
+  isLoading,
+}: {
+  orgEnhet: OrgEnhet;
+  delegerbareRessurser: MinimalRessurs[] | undefined;
+  isLoading: boolean;
+}) {
   const [edit, setEdit] = useState(false);
   const queryClient = useQueryClient();
 
@@ -235,8 +249,6 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     shouldUnregister: true,
     resolver: yupResolver(tilgangSchema),
   });
-
-  const { showModal } = useModal();
 
   const { mutate, isPending, error } = useMutation<
     unknown,
@@ -296,26 +308,6 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     onSuccess: async () => {
       methods.reset();
       setEdit(false);
-
-      await showModal(
-        <BekreftModal
-          confirmOnly
-          content={
-            <BodyShort>
-              Du har nå endret medarbeideres redigeringstilgang i NOM. For å få
-              tilgang til lønsingen, kreves det også at medarbeidere har fått
-              tilgang i Mine Tilganger. Brukerveiledning for Mine Tilganger
-              finner du her:{" "}
-              <Link target="_blank" to={brukerveiledningLenke}>
-                Brukerveiledninger Mine Tilganger
-              </Link>
-              . Du kan søke på NOM inne i Mine Tilganger for å finne riktig
-              tilgang å delegere.
-            </BodyShort>
-          }
-          heading="Tilganger"
-        />,
-      );
     },
   });
 
@@ -385,7 +377,12 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
                   <TilgangRowReadOnly key={tilgang.fid} tilgang={tilgang} />
                 ),
               )}
-              {edit ? <AddTilgangRow /> : undefined}
+              {edit ? (
+                <AddTilgangRow
+                  delegerbareRessurser={delegerbareRessurser}
+                  isLoading={isLoading}
+                />
+              ) : undefined}
             </Table.Body>
           </Table>
           <HStack gap="2">
@@ -394,14 +391,13 @@ function OrgEnhetCard({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               organisasjonsenheter.
             </BodyShort>
             <BodyShort>
-              I tillegg til å delegere redigeringstilgang her i NOM, må
-              vedkommende også få tilganger i Mine Tilganger. Brukerveiledning
-              for Mine Tilganger finner du her:{" "}
+              For å delegere redigeringstilgang her i NOM, må medarbeideren
+              først ha fått skrivetilgang til NOM i Mine Tilganger.
+              Brukerveiledning for Mine Tilganger finner du her:{" "}
               <Link target="_blank" to={brukerveiledningLenke}>
                 Brukerveiledning Mine Tilganger
               </Link>
-              . Du kan søke på NOM i Mine Tilganger for å finne riktig tilgang å
-              delegere.
+              .
             </BodyShort>
           </HStack>
         </VStack>
@@ -553,7 +549,13 @@ function TilgangRowReadOnly({ tilgang }: { tilgang: LederTilgangState }) {
   );
 }
 
-function AddTilgangRow() {
+function AddTilgangRow({
+  delegerbareRessurser,
+  isLoading,
+}: {
+  delegerbareRessurser: MinimalRessurs[] | undefined;
+  isLoading: boolean;
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!isOpen) {
@@ -574,10 +576,45 @@ function AddTilgangRow() {
     );
   }
 
-  return <ActiveAddTilgangRow onClose={() => setIsOpen(false)} />;
+  return (
+    <ActiveAddTilgangRow
+      delegerbareRessurser={delegerbareRessurser}
+      isLoading={isLoading}
+      onClose={() => setIsOpen(false)}
+    />
+  );
 }
 
-function ActiveAddTilgangRow({ onClose }: { onClose: () => void }) {
+function ActiveAddTilgangRow({
+  onClose,
+  delegerbareRessurser,
+  isLoading,
+}: {
+  onClose: () => void;
+  delegerbareRessurser: MinimalRessurs[] | undefined;
+  isLoading: boolean;
+}) {
+  if (!delegerbareRessurser) {
+    return isLoading ? (
+      <Table.Row>
+        <Table.DataCell>
+          <div
+            css={css`
+              padding-left: var(--a-spacing-2);
+              padding-top: var(--a-spacing-3);
+            `}
+          >
+            <Loader />
+          </div>
+        </Table.DataCell>
+        <Table.DataCell />
+        <Table.DataCell />
+      </Table.Row>
+    ) : (
+      <Label size="small">Det oppstod en feil</Label>
+    );
+  }
+
   const { field, fieldState } = useController({
     name: "newTilgang.gyldigTom",
   });
@@ -597,8 +634,8 @@ function ActiveAddTilgangRow({ onClose }: { onClose: () => void }) {
       `}
     >
       <Table.DataCell>
-        <NavidentSelectFormPart
-          label="Søk opp medarbeider"
+        <DelegeringNavidentSelectFormPart
+          delegerbareRessurser={delegerbareRessurser}
           name="newTilgang.delegertTilNavident"
         />
       </Table.DataCell>

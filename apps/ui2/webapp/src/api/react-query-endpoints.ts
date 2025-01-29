@@ -18,6 +18,7 @@ import type {
   LederTilgangForOrgenhetRequest,
   LederTilgangState,
   MasseFlyttingRequest,
+  MinimalRessurs,
   OppdaterOrgtilknytningerForRessursRequest,
   OpprettRessursRequest,
   OpprettRessursResponse,
@@ -542,6 +543,16 @@ export function getDelegerbareOrgEnheterForUserOptions(navident: string) {
       ).data,
   });
 }
+
+export const getRessurserWhichCanBeDelegatedTo = {
+  queryKey: ["DELEGERBARE_RESSURSER"],
+  queryFn: async () =>
+    (
+      await axios.get<MinimalRessurs[]>(
+        `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/getRessurserWhichCanBeDelegatedTo`,
+      )
+    ).data,
+};
 
 export const updateFysiskeBrukersteder = async (
   fid: string,
