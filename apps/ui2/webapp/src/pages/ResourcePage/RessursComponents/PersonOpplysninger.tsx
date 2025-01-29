@@ -33,6 +33,7 @@ import { UserImage } from "~/components/UserImage";
 import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import type { Ressurs } from "~/types/api-models";
+import { Sektor } from "~/types/api-models";
 import { TelefonType } from "~/types/api-models";
 import { formatDisplayDate, formatTlf, formatVisningsnavn } from "~/utils";
 
@@ -197,15 +198,15 @@ export function KortFortalt() {
 }
 
 export function Navident({ ressurs }: { ressurs: Ressurs }) {
-  return <LabelWithValue label="NAV-ident" value={ressurs.navident} />;
+  return <LabelWithValue label="Nav-ident" value={ressurs.navident} />;
 }
 
 export function StartDato({ ressurs }: { ressurs: Ressurs }) {
   return (
     <LabelWithValue
-      helpText="Første arbeidsdag medarbeideren jobbet for NAV. Datoen kan være fra tidligere arbeidsforhold i NAV.
+      helpText="Første arbeidsdag medarbeideren jobbet for Nav. Datoen kan være fra tidligere arbeidsforhold i Nav.
       (Historiske startdatoer fra noen år tilbake kan avvike noe fra den faktiske første arbeidsdagen. Datoen vil
-      da vanligvis representere dagen NAV-identen ble opprettet.)"
+      da vanligvis representere dagen Nav-identen ble opprettet.)"
       label="Startdato"
       value={formatDisplayDate(ressurs.startdato)}
     />
@@ -230,7 +231,7 @@ export function SluttDato({ ressurs }: { ressurs: Ressurs }) {
   ) {
     return (
       <LabelWithValue
-        helpText="Medarbeiderens siste arbeidsdag i NAV."
+        helpText="Medarbeiderens siste arbeidsdag i Nav."
         label="Sluttdato"
         value={formatDisplayDate(ressurs.sluttdato)}
       />
@@ -241,7 +242,12 @@ export function SluttDato({ ressurs }: { ressurs: Ressurs }) {
 
 export function SektorView({ ressurs }: { ressurs: Ressurs }) {
   return (
-    <LabelWithValue label="Sektor" value={SektorNameMapping[ressurs.sektor]} />
+    <LabelWithValue
+      helpText="Medarbeiders sektor hentes fra sektoren som er registrert på organisasjonstilknytningen.
+      Dersom sektor er feil, må det opprettes en ny organisasjonstilknytning med korrekt sektor."
+      label="Sektor"
+      value={SektorNameMapping[ressurs.sektor]}
+    />
   );
 }
 
@@ -345,9 +351,25 @@ export function DagligLeder({ ressurs }: { ressurs: Ressurs }) {
             <span>-</span>
             <span>Daglig oppfølging</span>
             <HelpText title="Hva er daglig leder?">
-              Denne lederen har det daglige ansvaret for sykefraværsoppfølging,
-              godkjenning i MinWinTid, og har tilgang til den ansatte i
-              Læringsportalen.
+              {(() => {
+                switch (ressurs.sektor) {
+                  case Sektor.NAV_STATLIG: {
+                    return (
+                      "Denne lederen har det daglige ansvaret for sykefraværsoppfølging, " +
+                      "godkjenning av timeføring, og har tilgang til den ansatte i Kompasset."
+                    );
+                  }
+                  case Sektor.NAV_KOMMUNAL: {
+                    return (
+                      "Denne lederen har det daglige ansvaret for medarbeideren, " +
+                      "og har tilgang til medarbeideren i Kompasset."
+                    );
+                  }
+                  case Sektor.EKSTERN: {
+                    return "Denne lederen har det daglige ansvaret for den eksterne medarbeideren.";
+                  }
+                }
+              })()}
             </HelpText>
           </>
         )}

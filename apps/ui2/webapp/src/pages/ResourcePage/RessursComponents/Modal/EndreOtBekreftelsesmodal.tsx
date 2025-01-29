@@ -161,7 +161,7 @@ export function EndreOtBekreftelsesmodal({
   ) : null;
 
   const remedyMessage =
-    nyRemedyTilknytning && nyRemedyOrgEnhet ? (
+    nyRemedyTilknytning && nyRemedyOrgEnhet && dagensRemedyEnhetId ? (
       isNyRemedyTilknytningTodayOrBefore ? (
         <Alert variant="warning">
           <HStack gap="6">

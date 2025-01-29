@@ -267,9 +267,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
 
         <OrgEnhetSelect
           helpText="Med organisasjonsenhet menes hvilken enhet medarbeideren skal
-              tilhøre og dermed hvilken leder som er ansvarlig for vedkommende.
-              Organisasjonsenhet er ikke det samme som team. Teamtilhørighet kan
-              du legge i inn i Teamkatalogen."
+              tilhøre og dermed hvilken leder som er ansvarlig for vedkommende."
           label="Organisasjonsenhet"
           onChange={(value) => setMasseflyttingTilOrgEnhet(value)}
           orgEnheter={orgEnheterSomKanHaRessurser}

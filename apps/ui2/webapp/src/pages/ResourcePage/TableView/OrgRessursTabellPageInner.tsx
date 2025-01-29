@@ -129,7 +129,7 @@ export const OrgRessursTabellPageInner = ({
               `}
             >
               <Table.ColumnHeader scope="col" sortKey="navident" sortable>
-                NAV-ident
+                Nav-ident
               </Table.ColumnHeader>
               <Table.ColumnHeader
                 scope="col"

@@ -171,7 +171,7 @@ export function TerminateResourcePage() {
                 <RessursCard ressurs={ressurs} />
                 <BodyLong>
                   Ved å sette en endelig sluttdato for en medarbeider i NOM vil
-                  medarbeideren bli registrert som sluttet i NAV på angitt
+                  medarbeideren bli registrert som sluttet i Nav på angitt
                   sluttdato.
                 </BodyLong>
                 <SluttDatoPicker />
@@ -287,7 +287,7 @@ function ModalInnholdFremtiden({ navn, dato }: { navn: string; dato: string }) {
       <BodyLong>
         <b>
           Dette innebærer at etter {dato} vil {navn} ikke lenger være registrert
-          som medarbeider i NAV, og alle tilganger for medarbeideren vil bli
+          som medarbeider i Nav, og alle tilganger for medarbeideren vil bli
           fjernet.
         </b>
       </BodyLong>
@@ -313,7 +313,7 @@ function ModalInnholdFortiden({ navn }: { navn: string }) {
         <BodyLong>
           <b>
             Dette innebærer at fra i dag vil {navn} ikke lenger være registrert
-            som medarbeider i NAV, og alle tilganger for medarbeideren vil bli
+            som medarbeider i Nav, og alle tilganger for medarbeideren vil bli
             fjernet.
           </b>
         </BodyLong>

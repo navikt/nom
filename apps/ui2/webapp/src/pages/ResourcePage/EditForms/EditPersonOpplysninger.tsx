@@ -180,7 +180,7 @@ export function EditPersonOpplysninger({
             >
               <Label>Visningsnavn</Label>
               <span>
-                Visningsnavnet vil bli brukt i alle NAVs applikasjoner, og
+                Visningsnavnet vil bli brukt i alle Navs applikasjoner, og
                 fornavn og etternavn er obligatorisk. Navnet skal som hovedregel
                 være samme som folkeregistrert navn, men man kan om ønskelig
                 fjerne mellomnavn. Endring av visningsnavn vil innebære at det

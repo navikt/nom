@@ -109,7 +109,7 @@ export function OrganisasjonHierarkiPage() {
   let innerContent;
   if (orgEnhetQuery.data) {
     innerContent =
-      orgEnhetQuery.data.navn === "NAV" ? (
+      orgEnhetQuery.data.navn.toLowerCase() === "nav" ? (
         <HierarkiFrontPage orgEnhet={orgEnhetQuery.data} />
       ) : (
         <OrganisasjonHierarkiPageInner orgEnhet={orgEnhetQuery.data} />
@@ -136,7 +136,7 @@ export function OrganisasjonHierarkiPage() {
 
   return (
     <>
-      <PageBanner text="NAV organisasjon" />
+      <PageBanner text="Nav organisasjon" />
       <ContentWrapper>
         <div
           css={css`

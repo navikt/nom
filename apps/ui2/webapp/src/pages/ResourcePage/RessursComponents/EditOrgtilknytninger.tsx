@@ -176,7 +176,7 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
         `}
         size="small"
       >
-        NAV-ident: <b>{ressurs.navident}</b>
+        Nav-ident: <b>{ressurs.navident}</b>
       </Label>
 
       <Heading
@@ -189,7 +189,7 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
         spacing
       >
         <Buildings3Icon title="a11y-title" />
-        Organisatorisk tilhørighet
+        Organisasjonstilknytninger
       </Heading>
 
       <OrgtilknytningForm
@@ -1193,7 +1193,7 @@ function InnholdInformasjonsboks({ ressursSektor }: { ressursSektor: Sektor }) {
       </li>
       <li>
         Medarbeideren må ha en organisasjonstilknytning og en leder med daglig
-        oppfølging for å være registrert som medarbeider i NAV. Perioder med
+        oppfølging for å være registrert som medarbeider i Nav. Perioder med
         tilknytning og daglig oppfølging må derfor ligge inntil hverandre uten
         avbrekk i tid.
       </li>

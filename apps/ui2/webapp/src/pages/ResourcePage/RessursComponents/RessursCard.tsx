@@ -53,7 +53,7 @@ export function RessursCard({
           gap: var(--a-spacing-3);
         `}
       >
-        <LabelWithValue label="NAV-ident" value={ressurs.navident} />
+        <LabelWithValue label="Nav-ident" value={ressurs.navident} />
         <LabelWithValue
           label="Sektor"
           value={SektorNameMapping[ressurs.sektor]}
