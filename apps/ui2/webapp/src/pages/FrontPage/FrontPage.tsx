@@ -18,8 +18,6 @@ import { formatDisplayNumber, isInDevelopment } from "~/utils";
 export const FrontPage = () => {
   const inDevelopment = isInDevelopment();
 
-  const hasAdminAccess = useHasAdminAccess();
-
   const orgEnhetId = inDevelopment ? "sa312u" : "py437s";
 
   const developmentLenker = ["fa965e", "me177r", "su645c", "hu797w", "tu734a"];
@@ -42,12 +40,7 @@ export const FrontPage = () => {
   return (
     <ContentWrapper>
       <VStack gap="12">
-        {hasAdminAccess && (
-          <OrgEnhetStatistikk
-            orgEnhet={orgEnhet}
-            statistikk={globalStatistikk}
-          />
-        )}
+        <OrgEnhetStatistikk orgEnhet={orgEnhet} statistikk={globalStatistikk} />
 
         <Orghierarki
           lenker={isInDevelopment() ? developmentLenker : productionLenker}
@@ -68,6 +61,8 @@ function OrgEnhetStatistikk({
   if (!orgEnhet || !statistikk) {
     return;
   }
+
+  const hasAdminAccess = useHasAdminAccess();
 
   const ressursStatistikk = statistikk?.ressursStatistikk;
 
@@ -92,13 +87,15 @@ function OrgEnhetStatistikk({
           grid-template-columns: repeat(2, 1fr);
         `}
       >
-        <GridItem rows={2}>
+        <GridItem columns={hasAdminAccess ? 1 : 2} rows={2}>
           <MedarbeidereBarChart statistikk={MedarbeidereStatistikk} />
         </GridItem>
 
-        <GridItem>
-          <OrgEnheterStatistikk statistikk={statistikk} />
-        </GridItem>
+        {hasAdminAccess && (
+          <GridItem>
+            <OrgEnheterStatistikk statistikk={statistikk} />
+          </GridItem>
+        )}
       </div>
     </div>
   );
@@ -338,47 +335,57 @@ function MedarbeidereBarChart({
         <div
           css={css`
             display: flex;
-            align-items: center;
+            justify-content: space-between;
           `}
         >
           <div
             css={css`
-              background: var(--nom-secondary-hover);
-              border-radius: 50%;
-              height: 40px;
-              width: 40px;
-              justify-items: center;
-              align-content: center;
+              display: flex;
+              align-items: center;
             `}
           >
-            <PersonFillIcon
+            <div
               css={css`
-                background: #fff;
+                background: var(--nom-secondary-hover);
                 border-radius: 50%;
-                width: 37px;
-                height: 37px;
-                padding: var(--a-spacing-1);
+                height: 40px;
+                width: 40px;
+                justify-items: center;
+                align-content: center;
               `}
-              fontSize="1.75rem"
-              title="a11y-title"
-            />
+            >
+              <PersonFillIcon
+                css={css`
+                  background: #fff;
+                  border-radius: 50%;
+                  width: 37px;
+                  height: 37px;
+                  padding: var(--a-spacing-1);
+                `}
+                fontSize="1.75rem"
+                title="a11y-title"
+              />
+            </div>
+
+            <BodyShort
+              css={css`
+                margin-left: var(--a-spacing-4);
+              `}
+              size="large"
+            >
+              Antall medarbeidere:
+            </BodyShort>
+            <span
+              css={css`
+                margin-left: var(--a-spacing-4);
+              `}
+            >
+              <b>{formatDisplayNumber(statistikk.totalt)}</b>
+            </span>
           </div>
 
-          <BodyShort
-            css={css`
-              margin-left: var(--a-spacing-4);
-            `}
-            size="large"
-          >
-            Antall medarbeidere:
-          </BodyShort>
-          <span
-            css={css`
-              margin-left: var(--a-spacing-4);
-            `}
-          >
-            <b>{formatDisplayNumber(statistikk.totalt)}</b>
-          </span>
+          {/*Beholder dette til det antakelig skal inn senere
+          <HelpText title="Hvordan telles dette?"></HelpText>*/}
         </div>
       }
     />
