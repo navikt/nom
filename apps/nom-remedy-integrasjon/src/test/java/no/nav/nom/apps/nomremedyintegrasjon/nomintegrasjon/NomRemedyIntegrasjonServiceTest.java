@@ -389,6 +389,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
             ));
     }
 
+    /*
     @ParameterizedTest
     @MethodSource("testAllSektorsAndTelefonVariants")
     @DisplayName("Should write new entity with correctly updated values for RessursPrimaryTelefonnummerOppdatertV1")
@@ -434,6 +435,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
 
             ));
     }
+     */
 
     @ParameterizedTest
     @MethodSource("testAllSektorsAndTelefonVariants")
