@@ -95,6 +95,7 @@ import {
   isGyldighetsPeriodeActive,
   isSameDateOrAfter,
   isSameDateOrBefore,
+  isTodayOrAfter,
   todayWithoutTimezone,
 } from "~/utils";
 
@@ -159,6 +160,26 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
 
   const dagensRemedyEnhetId = dagensDolOrgEnhet?.remedyEnhetId;
 
+  const eksisterendeStatligeOrgEnhetIder = orgtilknytninger
+    .filter(
+      (tilknytning) =>
+        tilknytning.sektor === Sektor.NAV_STATLIG &&
+        (!tilknytning.gyldigTom || isTodayOrAfter(tilknytning.gyldigTom)),
+    )
+    .map((tilknytning) => tilknytning.orgEnhetId);
+
+  const eksisterendeStatligeOrgEnheter = useQueries({
+    queries: eksisterendeStatligeOrgEnhetIder.map((id) => ({
+      queryKey: getOrgEnhet.queryKey(id as string),
+      queryFn: () => getOrgEnhet.queryFn(id as string),
+    })),
+    combine: (results) => results.flatMap((r) => r.data ?? []),
+  });
+
+  const eksisterendeStatligeAgressoIder = eksisterendeStatligeOrgEnheter.map(
+    (enhet) => enhet.agressoId,
+  );
+
   return (
     <div>
       <Heading
@@ -195,6 +216,7 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
       <OrgtilknytningForm
         dagensDolOrgEnhet={dagensDolOrgEnhet}
         dagensRemedyEnhetId={dagensRemedyEnhetId}
+        eksisterendeStatligeAgressoIder={eksisterendeStatligeAgressoIder}
         isLoading={ressursOrgtilknytningerQuery.isLoading}
         orgtilknytninger={orgtilknytninger}
         ressurs={ressurs}
@@ -227,12 +249,14 @@ function OrgtilknytningForm({
   dagensRemedyEnhetId,
   dagensDolOrgEnhet,
   isLoading,
+  eksisterendeStatligeAgressoIder,
 }: {
   orgtilknytninger: Partial<OrgtilknytningState>[];
   ressurs: Ressurs;
   dagensRemedyEnhetId: string | undefined;
   dagensDolOrgEnhet: OrgEnhet | undefined;
   isLoading: boolean;
+  eksisterendeStatligeAgressoIder: string[];
 }) {
   const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
@@ -333,6 +357,7 @@ function OrgtilknytningForm({
       <EndreOtBekreftelsesmodal
         dagensDolOrgEnhet={dagensDolOrgEnhet}
         dagensRemedyEnhetId={dagensRemedyEnhetId}
+        eksisterendeStatligeAgressoIder={eksisterendeStatligeAgressoIder}
         navn={formatVisningsnavn(ressurs.visningsnavn)}
         orgtilknytninger={orgtilknytninger}
       />,
@@ -384,6 +409,7 @@ function OrgtilknytningForm({
   return (
     <FormProvider {...methods}>
       <Informasjonsboks ressursSektor={ressurs.sektor} />
+
       <OrgtilknytningTimeline
         orgtilknytninger={watch("mappedeOrgtilknytninger")}
       />
