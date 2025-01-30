@@ -15,9 +15,11 @@ import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.app.AvvikleRessursRequest;
 import no.nav.nom.apps.api.ressurs.api.app.OppdaterSektorRessursResponse;
 import no.nav.nom.apps.api.ressurs.api.app.OppdaterSluttdatoRessursResponse;
+import no.nav.nom.apps.api.ressurs.api.app.UpdateTelnrRessursRequest;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPrimaryTelefonnummerCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
@@ -34,13 +36,16 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
@@ -624,6 +629,65 @@ public class ManuelleRessursEvtsrcMeldinger {
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonStr = objectMapper.writeValueAsString(response);
         return ResponseEntity.ok().body(jsonStr);
+    }
+
+
+    @PostMapping(value = "/oppdatereTelefonnummerRessurs")
+    @Operation(
+        description = "Oppdatere Telefonnummer for liste over Ressurser",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
+        }
+    )
+    public ResponseEntity<String> oppdatereTelefonnummerRessurs(
+        @Parameter(description = "Liste over ressurser for å oppdatere telefonnummer") @RequestBody List<UpdateTelnrRessursRequest> updateTelnrRessursRequest,
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
+    ) {
+        log.info("Oppdaterer telefonnummer request: %s".formatted(updateTelnrRessursRequest));
+
+        if (!"CONFIRM".equals(confirm)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body("Event vil ikke sendes videre da handling ikke er bekreftet");
+        }
+
+        AtomicInteger totalupdated = new AtomicInteger();
+        updateTelnrRessursRequest.forEach(ressursTobeUpdated -> {
+            var ressursState = ressursStateRepository.findByNavident(ressursTobeUpdated.navident());
+            if (ressursState.isEmpty() || isNull(ressursTobeUpdated.telefonummer())) {
+                log.warn("Ressurs for navidenten %s finnes ikke eller telefonnummer er ikke gitt %s".formatted(ressursTobeUpdated.navident(), ressursTobeUpdated.telefonummer()));
+            } else if(ressursState.get().primaryTelefonnummer().isPresent()) {
+                log.warn("Ressurs for navidenten %s allerede har telefonnummer %s".formatted(ressursTobeUpdated.navident(), ressursTobeUpdated.telefonummer()));
+            } else {
+                var metaData = new InputMetadata(
+                    "/api/admin/manuelleEvtsrcMeldinger",
+                    "oppdatereTelefonnummerRessurs",
+                    ressursTobeUpdated.telefonummer(),
+                    new Origination(
+                        getAuthenticatedNavIdent(),
+                        "Admin swagger/rest"
+                    )
+                );
+
+                ressursCommandService.oppdatertPrimaryTelefonnummer(
+                    new OppdaterPrimaryTelefonnummerCommand(
+                        HtmlUtils.htmlEscape(ressursState.get().fid()),
+                        HtmlUtils.htmlEscape(ressursTobeUpdated.telefonummer())
+                    ),
+                    metaData
+                );
+
+                totalupdated.getAndIncrement();
+            }
+        });
+
+        return ResponseEntity.ok().body("Antall ressurser som har oppdatert telefonnummer: %s av %s".formatted(totalupdated, updateTelnrRessursRequest.size()));
     }
 
     private boolean validFid(String fid) {
