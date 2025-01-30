@@ -15,14 +15,18 @@ import {
 import { useQueries } from "@tanstack/react-query";
 import { addDays } from "date-fns";
 import sortBy from "lodash/sortBy";
+import type { ReactNode } from "react";
+import { useEffect } from "react";
 
 import { getOrgEnhet } from "~/api/react-query-endpoints";
 import { senesteTom } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { OrgEnhet, OrgtilknytningState } from "~/types/api-models";
+import { Sektor } from "~/types/api-models";
 import {
   dateWithoutTimezone,
   formatDisplayDate,
   isSameDateOrAfter,
+  isTodayOrAfter,
   isTodayOrBefore,
   todayWithoutTimezone,
 } from "~/utils";
@@ -34,6 +38,7 @@ export function EndreOtBekreftelsesmodal({
   navn,
   dagensRemedyEnhetId,
   dagensDolOrgEnhet,
+  eksisterendeStatligeAgressoIder,
 }: {
   onCancel?: () => void;
   onConfirm?: () => void;
@@ -41,6 +46,7 @@ export function EndreOtBekreftelsesmodal({
   navn: string;
   dagensRemedyEnhetId: string | undefined;
   dagensDolOrgEnhet: OrgEnhet | undefined;
+  eksisterendeStatligeAgressoIder: string[];
 }) {
   const senesteTomDato = senesteTom(orgtilknytninger);
 
@@ -87,15 +93,28 @@ export function EndreOtBekreftelsesmodal({
     (orgEnhet) => orgEnhet.id === nyRemedyTilknytning?.orgEnhetId,
   );
 
-  if (
-    !senesteTomDato &&
-    (!nyRemedyTilknytning || !nyRemedyOrgEnhet) &&
-    onConfirm
-  ) {
-    onConfirm();
+  const oppdaterteStatligeOrgEnhetIder = orgtilknytninger
+    .filter(
+      (tilknytning) =>
+        tilknytning.sektor === Sektor.NAV_STATLIG &&
+        (!tilknytning.gyldigTom || isTodayOrAfter(tilknytning.gyldigTom)),
+    )
+    .map((tilknytning) => tilknytning.orgEnhetId);
 
-    return;
-  }
+  const oppdaterteStatligeOrgEnheter = oppdaterteStatligeOrgEnhetIder.map(
+    (id) => orgEnheter.find((orgEnhet) => orgEnhet.id === id),
+  );
+
+  const oppdaterteStatligeAgressoIder = oppdaterteStatligeOrgEnheter.map(
+    (orgEnhet) => orgEnhet?.agressoId ?? "",
+  );
+
+  const eksisterendeSet = new Set(oppdaterteStatligeAgressoIder);
+  const oppdaterteSet = new Set(eksisterendeStatligeAgressoIder);
+
+  const endringAgressoIder =
+    eksisterendeSet.size !== oppdaterteSet.size ||
+    [...eksisterendeSet].some((id) => !oppdaterteSet.has(id));
 
   const isTomDatoTodayOrBefore = senesteTomDato
     ? isTodayOrBefore(dateWithoutTimezone(senesteTomDato))
@@ -104,6 +123,32 @@ export function EndreOtBekreftelsesmodal({
   const isNyRemedyTilknytningTodayOrBefore = nyRemedyTilknytning?.gyldigFom
     ? isTodayOrBefore(dateWithoutTimezone(nyRemedyTilknytning.gyldigFom))
     : false;
+
+  useEffect(() => {
+    if (
+      !senesteTomDato &&
+      (!nyRemedyTilknytning || !nyRemedyOrgEnhet) &&
+      !endringAgressoIder &&
+      onConfirm
+    ) {
+      onConfirm();
+    }
+  }, [
+    senesteTomDato,
+    nyRemedyTilknytning,
+    nyRemedyOrgEnhet,
+    onConfirm,
+    !endringAgressoIder,
+  ]);
+
+  if (
+    !senesteTomDato &&
+    (!nyRemedyTilknytning || !nyRemedyOrgEnhet) &&
+    !endringAgressoIder &&
+    onConfirm
+  ) {
+    return;
+  }
 
   const tomDatoMessage = senesteTomDato ? (
     isTomDatoTodayOrBefore ? (
@@ -227,6 +272,14 @@ export function EndreOtBekreftelsesmodal({
       )
     ) : null;
 
+  const endringAgressoMessage = endringAgressoIder ? (
+    <BodyLong>
+      Medarbeider har nå fått en ny organisasjonstilknytning på en ny
+      organisasjonsenhet. Denne endringen må også meldes til Nav Økonomitjeneste
+      ved hjelp av lønnsskjema i Unit4.
+    </BodyLong>
+  ) : null;
+
   return (
     <Modal
       css={css`
@@ -249,158 +302,47 @@ export function EndreOtBekreftelsesmodal({
           `}
         >
           {remedyMessage && (
-            <ReadMore
-              css={css`
-                width: 100%;
-                background: white;
-
-                .navds-read-more__button {
-                  width: 100%;
-                  color: #000;
-                  display: flex;
-                  align-items: center;
-                  background: #fff;
-                  font-size: var(--a-font-size-heading-small);
-
-                  :hover {
-                    background: var(--a-border-divider);
-                  }
-                }
-
-                span {
-                  width: 100%;
-                }
-              `}
+            <ModalReadMore
+              content={remedyMessage}
               header={
-                <div
-                  css={css`
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                  `}
-                >
-                  {isNyRemedyTilknytningTodayOrBefore ||
-                  !nyRemedyTilknytning ? (
-                    <>
-                      <span>Tilganger fjernes fra i dag</span>
-
-                      <ExclamationmarkTriangleFillIcon
-                        css={css`
-                          color: var(--a-icon-warning);
-                          float: right;
-                        `}
-                        fontSize="2rem"
-                        title="a11y-title"
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <span>
-                        Tilganger fjernes fra{" "}
-                        {nyRemedyTilknytning
-                          ? formatDisplayDate(nyRemedyTilknytning.gyldigFom)
-                          : "angitt dato"}
-                      </span>
-
-                      <InformationSquareFillIcon
-                        css={css`
-                          color: var(--nom-primary);
-                        `}
-                        fontSize="2rem"
-                        title="a11y-title"
-                      />
-                    </>
-                  )}
-                </div>
+                isNyRemedyTilknytningTodayOrBefore || !nyRemedyTilknytning
+                  ? "Tilganger fjernes fra i dag"
+                  : `Tilganger fjernes fra ${
+                      nyRemedyTilknytning
+                        ? formatDisplayDate(nyRemedyTilknytning.gyldigFom)
+                        : "angitt dato"
+                    }`
               }
-            >
-              <div
-                css={css`
-                  margin-bottom: var(--a-spacing-3);
-                `}
-              >
-                {remedyMessage}
-              </div>
-            </ReadMore>
+              icon={
+                isNyRemedyTilknytningTodayOrBefore || !nyRemedyTilknytning
+                  ? "warning"
+                  : "info"
+              }
+            />
           )}
 
           {tomDatoMessage && (
-            <ReadMore
-              css={css`
-                width: 100%;
-                background: white;
-
-                .navds-read-more__button {
-                  width: 100%;
-                  color: #000;
-                  display: flex;
-                  align-items: center;
-                  background: #fff;
-                  font-size: var(--a-font-size-heading-small);
-
-                  :hover {
-                    background: var(--a-border-divider);
-                  }
-                }
-
-                span {
-                  width: 100%;
-                }
-              `}
+            <ModalReadMore
+              content={tomDatoMessage}
               header={
-                <div
-                  css={css`
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                  `}
-                >
-                  {isTomDatoTodayOrBefore ? (
-                    <>
-                      <span>
-                        Fra i dag vil medarbeideren ikke lenger være registrert
-                        som ansatt i Nav
-                      </span>
-
-                      <ExclamationmarkTriangleFillIcon
-                        css={css`
-                          color: var(--a-icon-warning);
-                        `}
-                        fontSize="2rem"
-                        title="a11y-title"
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <span>
-                        Fra{" "}
-                        {senesteTomDato
-                          ? formatDisplayDate(addDays(senesteTomDato, 1))
-                          : "den valgte datoen"}{" "}
-                        vil medarbeideren ikke lenger være registrert som ansatt
-                        i Nav
-                      </span>
-
-                      <InformationSquareFillIcon
-                        css={css`
-                          color: var(--nom-primary);
-                        `}
-                        fontSize="2rem"
-                        title="a11y-title"
-                      />
-                    </>
-                  )}
-                </div>
+                isTomDatoTodayOrBefore
+                  ? "Fra i dag vil medarbeideren ikke lenger være registrert som ansatt i Nav"
+                  : `Fra ${
+                      senesteTomDato
+                        ? formatDisplayDate(addDays(senesteTomDato, 1))
+                        : "den valgte datoen"
+                    } vil medarbeideren ikke lenger være registrert som ansatt i Nav`
               }
-            >
-              <div
-                css={css`
-                  margin-bottom: var(--a-spacing-3);
-                `}
-              >
-                {tomDatoMessage}
-              </div>
-            </ReadMore>
+              icon={isTomDatoTodayOrBefore ? "warning" : "info"}
+            />
+          )}
+
+          {endringAgressoMessage && (
+            <ModalReadMore
+              content={endringAgressoMessage}
+              header="Må også registreres i Unit4"
+              icon="info"
+            />
           )}
         </div>
       </Modal.Body>
@@ -417,5 +359,79 @@ export function EndreOtBekreftelsesmodal({
         </Button>
       </Modal.Footer>
     </Modal>
+  );
+}
+
+function ModalReadMore({
+  header,
+  icon,
+  content,
+}: {
+  header: string;
+  icon: "warning" | "info";
+  content: ReactNode;
+}) {
+  return (
+    <ReadMore
+      css={css`
+        width: 100%;
+        background: white;
+
+        .navds-read-more__button {
+          width: 100%;
+          color: #000;
+          display: flex;
+          align-items: center;
+          background: #fff;
+          font-size: var(--a-font-size-heading-small);
+
+          :hover {
+            background: var(--a-border-divider);
+          }
+        }
+
+        span {
+          width: 100%;
+        }
+      `}
+      header={
+        <div
+          css={css`
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          `}
+        >
+          <span>{header}</span>
+
+          {icon === "warning" ? (
+            <ExclamationmarkTriangleFillIcon
+              css={css`
+                color: var(--a-icon-warning);
+                float: right;
+              `}
+              fontSize="2rem"
+              title="a11y-title"
+            />
+          ) : (
+            <InformationSquareFillIcon
+              css={css`
+                color: var(--nom-primary);
+              `}
+              fontSize="2rem"
+              title="a11y-title"
+            />
+          )}
+        </div>
+      }
+    >
+      <div
+        css={css`
+          margin-bottom: var(--a-spacing-3);
+        `}
+      >
+        {content}
+      </div>
+    </ReadMore>
   );
 }
