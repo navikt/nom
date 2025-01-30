@@ -114,11 +114,9 @@ public class NomRemedyIntegrasjonService {
         } else if (ressursEvent instanceof RessursFysiskeBrukerstederOppdatertEventV1 ressursFysiskeBrukerstederOppdatertEventV1) {
             updateRessursFysiskeBrukersteder(ressursFysiskeBrukerstederOppdatertEventV1);
         }
-        /*
         else if (ressursEvent instanceof RessursPrimaryTelefonnummerOppdatertEventV1 ressursPrimaryTelefonnummerOppdatertEventV1) {
             updateRessursTelefonnummer(ressursPrimaryTelefonnummerOppdatertEventV1);
         }
-        */
     }
 
     public void handleOrgtilknytningEvent(OrgtilknytningEvent orgtilknytningEvent) {
