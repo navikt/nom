@@ -34,6 +34,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
+
 @Tag(name = "Controller metode for å verifisere redigere ressurs tilgang og administrere delegerering av tilganger")
 @RestController
 @Slf4j
@@ -145,6 +147,16 @@ public class AuthorizedNavidentController {
     @PreAuthorize("hasAuthority('NOM_UI_APP')")
     public List<MinimalRessurs> getRessurserWhichCanBeDelegatedTo() {
         return authorizedNavident.getRessurserWhichCanBeDelegatedTo();
+    }
+
+    @GetMapping("getOrgEnheterLederCanEdit")
+    @Operation(
+        description = "Returner en liste med orgenheter innlogget bruker har tilgang til å redigere ressurser i.",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PreAuthorize("hasAuthority('NOM_UI_APP')")
+    public List<IOrgenhet> getOrgEnheterLederCanEdit() {
+        return authorizedNavident.orgenheterLederKanRedigere(getAuthenticatedNavIdent());
     }
 
     @ExceptionHandler(
