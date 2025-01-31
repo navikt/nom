@@ -303,7 +303,7 @@ function ExpiredOrgTilknytninger({
           `}
           title="Hvilke org.-tilknytninger vises her?"
         >
-          NOM har kun avsluttede organisasjonstilknytninger fra og med 2021
+          NOM har kun avsluttede organisasjonstilknytninger fra og med 2021.
         </HelpText>
       </div>
       {tilknyttingerToShow.map((orgtilknytning) => (
