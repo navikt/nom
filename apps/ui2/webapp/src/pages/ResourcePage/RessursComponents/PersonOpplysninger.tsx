@@ -356,7 +356,7 @@ export function DagligLeder({ ressurs }: { ressurs: Ressurs }) {
                   case Sektor.NAV_STATLIG: {
                     return (
                       "Denne lederen har det daglige ansvaret for sykefraværsoppfølging, " +
-                      "godkjenning av timeføring, og har tilgang til den ansatte i Kompasset."
+                      "godkjenning av timeføring, og har tilgang til medarbeideren i Kompasset."
                     );
                   }
                   case Sektor.NAV_KOMMUNAL: {

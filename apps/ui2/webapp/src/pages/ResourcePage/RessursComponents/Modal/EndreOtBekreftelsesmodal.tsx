@@ -274,7 +274,7 @@ export function EndreOtBekreftelsesmodal({
 
   const endringAgressoMessage = endringAgressoIder ? (
     <BodyLong>
-      Medarbeider har nå fått en ny organisasjonstilknytning på en ny
+      Medarbeider får nå en ny organisasjonstilknytning på en ny
       organisasjonsenhet. Denne endringen må også meldes til Nav Økonomitjeneste
       ved hjelp av lønnsskjema i Unit4.
     </BodyLong>
