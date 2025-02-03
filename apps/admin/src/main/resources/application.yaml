@@ -28,6 +28,14 @@ nom.libs.state.organisering.enabled: true
 nom.libs.state.mastered-ressurs.enabled: true
 nom.libs.state.delegert-leder.enabled: true
 
+authentication:
+  aad:
+    issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
+    clientId: ${AZURE_APP_CLIENT_ID}
+    jwk: ${AZURE_APP_JWK}
+  groups:
+    nomAdmin: ${NOM_ADMIN_GROUPID:nomAdminGroup}
+
 management:
   endpoint:
     health:
@@ -61,8 +69,44 @@ spring:
     listener:
       missing-topics-fatal: true
     client-id: ${HOSTNAME}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
+          audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
 
 unleash:
   endpoint:
     url: ${UNLEASH_SERVER_API_URL}/api
   api-key: ${UNLEASH_SERVER_API_TOKEN}
+
+--- # This is the same as having an application-dev.yaml file
+spring:
+  config:
+    activate:
+      on-profile: dev && !prod
+
+app:
+  granted-authorities:
+    groups:
+      nom-admin:
+        group-id: "${NOM_ADMIN_GROUPID}"
+        scopes: ["ADMIN"]
+
+NOM_ADMIN_GROUPID: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # nom-admin
+
+--- # This is the same as having an application-prod.yaml file
+spring:
+  config:
+    activate:
+      on-profile: prod && !dev
+
+app:
+  granted-authorities:
+    groups:
+      nom-admin:
+        group-id: "${NOM_ADMIN_GROUPID}"
+        scopes: ["ADMIN"]
+
+NOM_ADMIN_GROUPID: "2d91b26c-d412-440b-9122-0fafc594db89"
