@@ -7,13 +7,17 @@ import { useForm } from "react-hook-form";
 
 import type { searchTypeWithNavident } from "~/api/queries.ts";
 import {
-  getNomMasteredStateOptions,
-  getOrgtilknytninger,
-  getRessurs,
+  getOrgtilknytningerForListOfNavidents,
+  getRessurser,
 } from "~/api/queries.ts";
+import { getNomMasteredStateOptions } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
 import type { MasteredRessursDTO } from "~/types/nom-admin/nom-admin-models.ts";
+import type {
+  OrgtilknytningState,
+  Ressurs,
+} from "~/types/nom-api/nom-api-models.ts";
 import {
   formatDisplayDatetime,
   formatVisningsnavn,
@@ -87,6 +91,13 @@ export const Route = createFileRoute("/sinks/nom-mastered")({
   },
 });
 
+function getOrgtilknytning(
+  ressursMastered: MasteredRessursDTO,
+  orgtilknytninger: Map<string, OrgtilknytningState[]>,
+) {
+  return orgtilknytninger.get(ressursMastered.navident as string) ?? [];
+}
+
 function NomMasteredPage() {
   const search = Route.useSearch<searchTypeWithNavident>();
   const { navident, fromOffset: offset } = search;
@@ -99,6 +110,18 @@ function NomMasteredPage() {
     "opprettet",
     "descending",
   );
+
+  const alleNavidenter = nomMasteredObjekter.map(
+    (ressursEvent) => ressursEvent.navident,
+  ) as string[];
+
+  const ressurser = useSuspenseQuery({
+    ...getRessurser(alleNavidenter),
+  }).data;
+
+  const orgtilknytninger = useSuspenseQuery({
+    ...getOrgtilknytningerForListOfNavidents(alleNavidenter),
+  }).data;
 
   return (
     <>
@@ -123,11 +146,20 @@ function NomMasteredPage() {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {data.map((ressursEvent) => {
+          {data.map((ressursMastered) => {
             return (
               <RessursTableRow
-                key={ressursEvent.navident}
-                ressursEvent={ressursEvent}
+                key={ressursMastered.navident}
+                orgtilknytninger={getOrgtilknytning(
+                  ressursMastered,
+                  orgtilknytninger,
+                )}
+                ressurs={
+                  ressurser.find(
+                    (value) => value.navident === ressursMastered.navident,
+                  )!
+                }
+                ressursMastered={ressursMastered}
               />
             );
           })}
@@ -138,41 +170,38 @@ function NomMasteredPage() {
 }
 
 export function RessursTableRow({
-  ressursEvent,
+  ressursMastered,
+  orgtilknytninger,
+  ressurs,
 }: {
-  ressursEvent: MasteredRessursDTO;
+  orgtilknytninger: OrgtilknytningState[];
+  ressursMastered: MasteredRessursDTO;
+  ressurs: Ressurs;
 }) {
-  const ressurs = useSuspenseQuery({
-    ...getRessurs(ressursEvent.navident),
-  }).data;
-
-  const orgtilknytninger = useSuspenseQuery({
-    ...getOrgtilknytninger(ressursEvent.navident),
-  }).data;
-
-  const dolOrgtilknytning = orgtilknytninger.find(
-    (orgtilknytning) =>
-      orgtilknytning.erDagligOppfolging &&
-      isTodayOrBefore(new Date(orgtilknytning.gyldigFom)) &&
-      (!orgtilknytning.gyldigTom ||
-        isTodayOrAfter(new Date(orgtilknytning.gyldigTom))),
-  );
+  const dolOrgtilknytning =
+    orgtilknytninger?.find(
+      (orgtilknytning) =>
+        orgtilknytning.erDagligOppfolging &&
+        isTodayOrBefore(new Date(orgtilknytning.gyldigFom)) &&
+        (!orgtilknytning.gyldigTom ||
+          isTodayOrAfter(new Date(orgtilknytning.gyldigTom))),
+    ) ?? null;
 
   return (
     <Table.Row>
       <Table.HeaderCell scope="row">
         <Link
-          search={{ filterText: ressursEvent.navident }}
+          search={{ filterText: ressursMastered.navident }}
           to="/state/ressurs"
         >
-          {ressursEvent.navident}
+          {ressursMastered.navident}
         </Link>
       </Table.HeaderCell>
       <Table.DataCell scope="row">
         {formatVisningsnavn(ressurs.visningsnavn)}
       </Table.DataCell>
       <Table.DataCell scope="row">
-        {formatDisplayDatetime(ressursEvent.opprettet)}
+        {formatDisplayDatetime(ressursMastered.opprettet)}
       </Table.DataCell>
       <Table.DataCell scope="row">{ressurs.sektor}</Table.DataCell>
       <Table.DataCell scope="row">
