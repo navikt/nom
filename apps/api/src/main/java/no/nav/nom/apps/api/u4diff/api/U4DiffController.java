@@ -25,8 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.List;
 
+import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.ALLE_DIFFERANSER;
 import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.IDENTER_IKKE_I_U4;
+import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.IKKE_KLASSIFISERTE_DIFFERANSER;
 import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.SEKTOR_DIFF_PAA_RESSURS;
+import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.ULIK_ENHET;
 
 @RestController
 @Tag(name = "Admin for U4 diff mot NOM")
@@ -41,7 +44,6 @@ public class U4DiffController {
         this.u4DiffService = u4DiffService;
         this.u4DiffExcelGenerator = u4DiffExcelGenerator;
     }
-
 
     // IDENTER_IKKE_I_U4
 
@@ -90,6 +92,78 @@ public class U4DiffController {
     public void sektorDifferansePaaRessursExcel(HttpServletResponse response) {
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=sektorDifferanse.xlsx");
         u4DiffExcelGenerator.generate(response, u4DiffService.getSektorDifferanse(), SEKTOR_DIFF_PAA_RESSURS);
+    }
+
+    // Ulik enhet i NOM og U4
+
+    @Operation(
+        description = "List differanser i enhet mellom NOM og U4",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping("/ulikEnhet")
+    public ResponseEntity<List<U4Diff>> ulikEnhet() {
+        return ResponseEntity.ok(u4DiffService.getUlikEnhet());
+    }
+
+    @Operation(
+        description = "Generer Excel for differanser i enhet mellom NOM og U4",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Excel generert"),
+    })
+    @GetMapping("/ulikEnhet/excel")
+    public void ulikEnhetExcel(HttpServletResponse response) {
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ulikEnhet.xlsx");
+        u4DiffExcelGenerator.generate(response, u4DiffService.getUlikEnhet(), ULIK_ENHET);
+    }
+
+    // Ikke-klassifiserte differanser
+
+    @Operation(
+        description = "List alle ikke-klasssifiserte differanser mellom NOM og U4",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping("/ikkeKlassifiserteDifferanser")
+    public ResponseEntity<List<U4Diff>> ikkeKlassifiserteDifferanser() {
+        return ResponseEntity.ok(u4DiffService.getIkkeKlassifiserteDifferanser());
+    }
+
+    @Operation(
+        description = "Generer Excel for alle  ikke-klasssifiserte differanser mellom NOM og U4",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Excel generert"),
+    })
+    @GetMapping("/ikkeKlassifiserteDifferanser/excel")
+    public void ikkeKlassifiserteDifferanserExcel(HttpServletResponse response) {
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ikkeKlassifiserteDifferanser.xlsx");
+        u4DiffExcelGenerator.generate(response, u4DiffService.getIkkeKlassifiserteDifferanser(), IKKE_KLASSIFISERTE_DIFFERANSER);
+    }
+
+    // Alle differanser
+
+    @Operation(
+        description = "List alle differanser mellom NOM og U4",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping("/alleDifferanser")
+    public ResponseEntity<List<U4Diff>> alleDifferanser() {
+        return ResponseEntity.ok(u4DiffService.getAlleDiffRader());
+    }
+
+    @Operation(
+        description = "Generer Excel for alle differanser mellom NOM og U4",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Excel generert"),
+    })
+    @GetMapping("/alleDifferanser/excel")
+    public void alleDifferanserExcel(HttpServletResponse response) {
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=alleDifferanser.xlsx");
+        u4DiffExcelGenerator.generate(response, u4DiffService.getAlleDiffRader(), ALLE_DIFFERANSER);
     }
 
     @ExceptionHandler({
