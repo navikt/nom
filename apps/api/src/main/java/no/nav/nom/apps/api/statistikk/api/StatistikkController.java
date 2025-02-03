@@ -6,10 +6,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,8 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/app/statistikk")
 public class StatistikkController {
-
-    private final static Logger log = LoggerFactory.getLogger(StatistikkController.class);
 
     private final StatistikkRestService statistikkRestService;
 
@@ -52,7 +49,7 @@ public class StatistikkController {
             @ApiResponse(responseCode = "500", description = "Feil ved henting av statistikk")
         }
     )
-    public ResponseEntity<OrgEnhetStatistikkResponse> hentOrgEnhetStatistikk(String orgenhetId) {
+    public ResponseEntity<OrgEnhetStatistikkResponse> hentOrgEnhetStatistikk(@PathVariable String orgenhetId) {
         return ResponseEntity.ok(statistikkRestService.hentStatistikkForOrgEnhet(orgenhetId));
     }
 }
