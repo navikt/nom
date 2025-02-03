@@ -1,13 +1,10 @@
 package no.nav.nom.apps.api.ressurs.api.v1.dvh;
 
-import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
-import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -88,7 +85,9 @@ public class DvhRessursRestService {
             orgtilknytningState.orgEnhetId(),
             orgtilknytningState.gyldigFom(),
             orgtilknytningState.gyldigTom().orElse(null),
+            orgtilknytningState.sektor() != null ? orgtilknytningState.sektor().name() : null,
             orgtilknytningState.erDagligOppfolging(),
+            orgtilknytningState.orgtilknytningType().isPresent() ? orgtilknytningState.orgtilknytningType().get().name() : null,
             orgtilknytningState.fid()
         );
     }

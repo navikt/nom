@@ -6,6 +6,8 @@ public record DvhOrgtilknytningDTO(
     String orgenhetId,
     LocalDate startdato,
     LocalDate sluttdato,
+    String sektor,
     boolean erDagligOppfolging,
+    String orgtilknytningType,
     String orgtilknytningFid
 ) {}
