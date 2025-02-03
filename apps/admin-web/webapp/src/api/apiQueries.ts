@@ -126,3 +126,81 @@ export async function sektorDifferansePaaRessursExcelExportOptions() {
   a.remove();
   window.URL.revokeObjectURL(url);
 }
+
+export async function ulikeEnheterOptions(): Promise<U4Diff[]> {
+  return await ky
+    .get(`${API_BASE_URL}/api/admin/u4diff/ulikEnhet`, {
+      timeout: 60_000,
+    })
+    .json<U4Diff[]>();
+}
+
+export async function ulikeEnheterExcelExportOptions() {
+  const blob = await ky
+    .get(`${API_BASE_URL}/api/admin/u4diff/ulikEnhet/excel`, {
+      timeout: 60_000,
+    })
+    .blob();
+  const today = new Date().toISOString().split("T")[0];
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Ulike_enheter_mellom_NOM_og_U4_${today}.xlsx`;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}
+
+export async function ikkeKlassifiserteDifferanserOptions(): Promise<U4Diff[]> {
+  return await ky
+    .get(`${API_BASE_URL}/api/admin/u4diff/ikkeKlassifiserteDifferanser`, {
+      timeout: 60_000,
+    })
+    .json<U4Diff[]>();
+}
+
+export async function ikkeKlassifiserteDifferanserExcelExportOptions() {
+  const blob = await ky
+    .get(
+      `${API_BASE_URL}/api/admin/u4diff/ikkeKlassifiserteDifferanser/excel`,
+      {
+        timeout: 60_000,
+      },
+    )
+    .blob();
+  const today = new Date().toISOString().split("T")[0];
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Ikke_klassifiserte_differanser_mellom_NOM_og_U4_${today}.xlsx`;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}
+
+export async function alleDifferanserOptions(): Promise<U4Diff[]> {
+  return await ky
+    .get(`${API_BASE_URL}/api/admin/u4diff/alleDifferanser`, {
+      timeout: 60_000,
+    })
+    .json<U4Diff[]>();
+}
+
+export async function alleDifferanserExcelExportOptions() {
+  const blob = await ky
+    .get(`${API_BASE_URL}/api/admin/u4diff/alleDifferanser/excel`, {
+      timeout: 60_000,
+    })
+    .blob();
+  const today = new Date().toISOString().split("T")[0];
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Alle_differanser_mellom_NOM_og_U4_${today}.xlsx`;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}
