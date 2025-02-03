@@ -103,6 +103,11 @@ public class OrgtilknytningRestService {
             );
     }
 
+    public Map<String, List<OrgtilknytningState>> getOrgtilknytninger(List<String> navidenter) {
+        return orgtilknytningStateRepository.findByNavidentIn(navidenter).stream()
+            .collect(Collectors.groupingBy(OrgtilknytningState::navident));
+    }
+
     public OrgtilknytningState getOrgtilknytning(String fid) {
         return orgtilknytningStateRepository.findByFid(fid)
             .orElseThrow(() -> OrgtilknytningNotFoundException.fid(fid));

@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -72,6 +73,23 @@ public class OrgtilknytningController {
         return ResponseEntity.ok(
             orgtilknytningRestService.getOrgtilknytninger(navident)
         );
+    }
+
+    @PostMapping()
+    @Operation(
+        description = "Henter orgtilknytninger til liste av Navidenter",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200"),
+        }
+    )
+    public ResponseEntity<Map<String, List<OrgtilknytningState>>> getOrgtilknytningerForNavidenter(
+        @RequestBody List<String> navidenter
+    ) {
+        return ResponseEntity.ok(
+            orgtilknytningRestService.getOrgtilknytninger(navidenter));
     }
 
     @PostMapping("/{fid}/tilknytningtype")
