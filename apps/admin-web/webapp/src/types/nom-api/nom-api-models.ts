@@ -134,8 +134,8 @@ export interface MasseFlyttingRequest {
 }
 
 export interface MinimalRessurs {
-  navident?: string;
-  visningsnavn?: string;
+  navident: string;
+  visningsnavn: string;
 }
 
 export enum NomNivaa {

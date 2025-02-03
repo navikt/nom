@@ -152,3 +152,8 @@ export interface U4Diff {
   u4StillingAnsettelsestypeBesk?: string;
   u4StillingPeriode?: string;
 }
+
+export interface UpdateTelnrRessursRequest {
+  navident: string;
+  telefonummer?: string;
+}

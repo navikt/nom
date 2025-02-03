@@ -209,6 +209,18 @@ export function getRessurs(navident: string | undefined) {
   });
 }
 
+export function getRessurser(navidenter: string[]) {
+  return queryOptions({
+    queryKey: ["API", "RESSURSER", navidenter],
+    queryFn: async () =>
+      await ky
+        .post(`${NOM_API_BASE_URL}/app/ressurser/byListNavident`, {
+          json: navidenter,
+        })
+        .json<Ressurs[]>(),
+  });
+}
+
 export function getOrgtilknytninger(navident: string | undefined) {
   return queryOptions({
     queryKey: ["API", "ORGTILKNYTNING", navident],
@@ -218,6 +230,21 @@ export function getOrgtilknytninger(navident: string | undefined) {
           `${NOM_API_BASE_URL}/app/orgtilknytninger?navident=${navident}`,
         )
       ).json<OrgtilknytningState[]>(),
+  });
+}
+
+export function getOrgtilknytningerForListOfNavidents(navidenter: string[]) {
+  return queryOptions({
+    queryKey: ["API", "ORGTILKNYTNING", navidenter],
+    queryFn: async () => {
+      const response = await ky
+        .post(`${NOM_API_BASE_URL}/app/orgtilknytninger`, {
+          json: navidenter,
+        })
+        .json<Record<string, OrgtilknytningState[]>>();
+
+      return new Map(Object.entries(response));
+    },
   });
 }
 
