@@ -5,12 +5,18 @@ import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import {
+  alleDifferanserExcelExportOptions,
   identerUtenStillingIU4ExcelExportOptions,
+  ikkeKlassifiserteDifferanserExcelExportOptions,
   sektorDifferansePaaRessursExcelExportOptions,
+  ulikeEnheterExcelExportOptions,
 } from "~/api/apiQueries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
+import { AlleDifferanser } from "~/sanitychecks/U4/AlleDifferanser.tsx";
 import { IdenterUtenStilling } from "~/sanitychecks/U4/IdenterUtenStilling.tsx";
+import { IkkeKlassefiserteDifferanser } from "~/sanitychecks/U4/IkkeKlassefiserteDifferanser.tsx";
 import { SektorDiffPaaRessurs } from "~/sanitychecks/U4/SektorDiffPaaRessurs.tsx";
+import { UlikeEnheter } from "~/sanitychecks/U4/UlikeEnheter.tsx";
 
 export const Route = createFileRoute("/sanity-checks/u4diff")({
   component: () => {
@@ -33,6 +39,15 @@ function ListSelector(props: { selected: string }) {
     }
     case "sektorDiffPaaRessurs": {
       return <SektorDiffPaaRessurs />;
+    }
+    case "ulikeEnheter": {
+      return <UlikeEnheter />;
+    }
+    case "ikkeKlassifiserteDifferanser": {
+      return <IkkeKlassefiserteDifferanser />;
+    }
+    case "alleDifferanser": {
+      return <AlleDifferanser />;
     }
     default: {
       return <></>;
@@ -64,6 +79,13 @@ function U4DiffSanityChecks() {
           <option value="sektorDiffPaaRessurs">
             Sektor differanse på ressurs
           </option>
+          <option value="ulikeEnheter">Ulike enheter mellom NOM og U4</option>
+          <option value="ikkeKlassifiserteDifferanser">
+            Ikke klassifiserte differanser mellom NOM og U4
+          </option>
+          <option value="alleDifferanser">
+            Alle differanser mellom NOM og U4
+          </option>
         </Select>
         <Button
           icon={<FileExcelIcon />}
@@ -75,6 +97,18 @@ function U4DiffSanityChecks() {
               }
               case "sektorDiffPaaRessurs": {
                 sektorDifferansePaaRessursExcelExportOptions();
+                break;
+              }
+              case "ulikeEnheter": {
+                ulikeEnheterExcelExportOptions();
+                break;
+              }
+              case "ikkeKlassifiserteDifferanser": {
+                ikkeKlassifiserteDifferanserExcelExportOptions();
+                break;
+              }
+              case "alleDifferanser": {
+                alleDifferanserExcelExportOptions();
                 break;
               }
               default: {
