@@ -27,7 +27,7 @@ app:
       enhet-path: /enheter?numRows=0
       ressurs-stillinger-path: /statligeRessurserTilknytningerPaginated?offset=0&limit=100000
       eksterne-ressurser-path: /eksterneRessurserTilknytninger?numRows=0
-      kommunale-ressurser-path: /kommunaleRessurserTilknytninger?numRows=0
+      kommunale-ressurser-path: /kommunaleRessurser?numRows=0
       ansatte-buckets-path: /ressurser?numRows=0
       tlf-path: /telefoner?numRows=0
       org-hierarki-path: /organiseringOgLedere?numRows=0
