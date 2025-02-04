@@ -30,6 +30,7 @@ import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.IDE
 import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.IKKE_KLASSIFISERTE_DIFFERANSER;
 import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.SEKTOR_DIFF_PAA_RESSURS;
 import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.ULIK_ENHET;
+import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.ULIK_START_DATO;
 
 @RestController
 @Tag(name = "Admin for U4 diff mot NOM")
@@ -116,6 +117,30 @@ public class U4DiffController {
     public void ulikEnhetExcel(HttpServletResponse response) {
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ulikEnhet.xlsx");
         u4DiffExcelGenerator.generate(response, u4DiffService.getUlikEnhet(), ULIK_ENHET);
+    }
+
+    // Ulik start dato NOM og U4
+
+    @Operation(
+        description = "List differanser i startdato for samme enhet mellom NOM og U4",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping("/ulikStartDato")
+    public ResponseEntity<List<U4Diff>> ulikStartDato() {
+        return ResponseEntity.ok(u4DiffService.getUlikStartDato());
+    }
+
+    @Operation(
+        description = "Generer Excel for differanser i startdato for samme enhet mellom NOM og U4",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Excel generert"),
+    })
+    @GetMapping("/ulikStartDato/excel")
+    public void ulikStartDatoExcel(HttpServletResponse response) {
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ulikStartDato.xlsx");
+        u4DiffExcelGenerator.generate(response, u4DiffService.getUlikEnhet(), ULIK_START_DATO);
     }
 
     // Ikke-klassifiserte differanser
