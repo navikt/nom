@@ -49,10 +49,10 @@ export function HorizontalBarChart({
 
       <div
         css={css`
-          gap: 2rem;
+          gap: 1rem;
           display: grid;
           grid-template-columns: max-content 1fr;
-          margin-top: 2rem;
+          margin-top: 1rem;
         `}
       >
         {data.map((row) => {

@@ -610,6 +610,16 @@ export const getGlobalStatistikk = {
     ).data,
 };
 
+export const getStatistikkForOrgEnhet = {
+  queryKey: (id: string) => ["STATISTIKK_ORGENHET", id],
+  queryFn: async (id: string) =>
+    (
+      await axios.get<GlobalStatistikkResponse>(
+        `${NOM_API_BASE_PATH}/app/statistikk/${id}`,
+      )
+    ).data,
+};
+
 export const getParorendeForBruker = {
   queryKey: () => ["paarorende"],
   queryFn: async (): Promise<Kontaktinfo[]> =>
