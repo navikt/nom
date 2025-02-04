@@ -406,6 +406,16 @@ export function harLederTilgangForOrgenhetOptions(orgenhetId: string) {
   });
 }
 
+export const getOrgEnheterLederKanRedigere = {
+  queryKey: () => ["ORGENHETER_LEDER_KAN_REDIGERE"],
+  queryFn: async () =>
+    (
+      await axios.get<OrgEnhet[]>(
+        `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/getOrgEnheterLederCanEdit`,
+      )
+    ).data,
+};
+
 export function harLederTilgangForNavidentOptions(navident: string) {
   return queryOptions({
     queryKey: ["TILGANG", "NAVIDENT", navident],

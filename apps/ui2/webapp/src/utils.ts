@@ -234,12 +234,21 @@ export function isSameDate(
   );
 }
 
-export function isSameDateOrAfter(checkDate: Date, compareDate: Date) {
-  return isSameDate(checkDate, compareDate) || isAfter(checkDate, compareDate);
+export function isSameDateOrAfter(
+  checkDate: Date | string,
+  compareDate: Date | string,
+) {
+  return (
+    isSameDate(checkDate, compareDate) ||
+    isAfter(dateWithoutTimezone(checkDate), dateWithoutTimezone(compareDate))
+  );
 }
 
 export function isSameDateOrBefore(checkDate: Date, compareDate: Date) {
-  return isSameDate(checkDate, compareDate) || isBefore(checkDate, compareDate);
+  return (
+    isSameDate(checkDate, compareDate) ||
+    isBefore(dateWithoutTimezone(checkDate), dateWithoutTimezone(compareDate))
+  );
 }
 
 export function earliestDateInList(dates: (Date | string | undefined)[]) {

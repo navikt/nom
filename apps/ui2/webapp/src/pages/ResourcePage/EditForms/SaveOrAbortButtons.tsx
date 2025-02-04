@@ -24,6 +24,7 @@ export function SaveOrAbortButtons({ isLoading }: { isLoading: boolean }) {
       >
         Avbryt
       </Button>
+
       <Button
         data-cy="lagre-button"
         icon={<FloppydiskIcon aria-hidden />}

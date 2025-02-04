@@ -49,6 +49,7 @@ import {
   getOrgEnheterSomKanHaRessurser,
   getOrgTilknytninger,
   oppdaterOrgtilknytningerForRessurs,
+  orgtilknytningerKeys,
   ressurserKeys,
 } from "~/api/react-query-endpoints";
 import {
@@ -339,6 +340,10 @@ function OrgtilknytningForm({
 
       await queryClient.invalidateQueries({
         queryKey: ressurserKeys.id(ressurs.navident),
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: orgtilknytningerKeys.navident(ressurs.navident),
       });
 
       navigate({

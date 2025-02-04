@@ -21,11 +21,13 @@ import {
   useNavigate,
   useSearch,
 } from "@tanstack/react-router";
+import { subMonths } from "date-fns";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
 
 import {
   getOrgEnhet,
+  getOrgEnheterLederKanRedigere,
   getOrgEnheterLedetAvOptions,
   getOrgTilknytninger,
   getTeamcatMemberships,
@@ -43,8 +45,6 @@ import {
   TilknytningtypeNameMapping,
 } from "~/pages/CreateResourcePage/SektorStep";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
-import { EditButtonWrapperOrgtilknytning } from "~/pages/ResourcePage/EditForms/EditButtonWrapperOrgtilknytning";
-import { EditButtonWrapperRessursSlutter } from "~/pages/ResourcePage/EditForms/EditButtonWrapperRessursSlutter";
 import { EditPersonOpplysninger } from "~/pages/ResourcePage/EditForms/EditPersonOpplysninger";
 import { otCustomStortByDate } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { EditOrgtilknytninger } from "~/pages/ResourcePage/RessursComponents/EditOrgtilknytninger";
@@ -53,12 +53,15 @@ import { blueTopBorder } from "~/resources/NomStyles";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 import { Tilknytningtype } from "~/types/api-models";
 import {
+  dateWithoutTimezone,
   formatDisplayDate,
   formatVisningsnavn,
   isAfterToday,
   isBeforeToday,
   isGyldighetsPeriodeActive,
   isInDevelopment,
+  isSameDateOrAfter,
+  todayWithoutTimezone,
 } from "~/utils";
 
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
@@ -66,6 +69,45 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
 
   const hasWriteAccessForRessurs =
     useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
+
+  const harSluttet = !!ressurs.sluttdato && isBeforeToday(ressurs.sluttdato);
+
+  const orgtilknytningerQuery = useQuery({
+    queryKey: getOrgTilknytninger.queryKey(ressurs.navident),
+    queryFn: () => getOrgTilknytninger.queryFn(ressurs.navident),
+  });
+
+  const orgtilknytninger = orgtilknytningerQuery.data ?? [];
+
+  const orgenheterLederKanRedigereQuery = useQuery({
+    queryKey: getOrgEnheterLederKanRedigere.queryKey(),
+    queryFn: () => getOrgEnheterLederKanRedigere.queryFn(),
+  });
+
+  const orgenheterLederKanRedigere = orgenheterLederKanRedigereQuery.data ?? [];
+
+  const iderLederKanRedigere = orgenheterLederKanRedigere.map(
+    (enhet) => enhet.id,
+  );
+
+  const redigerbareOrgEnhetIder = new Set(
+    new Set(
+      orgtilknytninger
+        .filter(
+          (tilknytning) =>
+            tilknytning.gyldigTom &&
+            isSameDateOrAfter(
+              tilknytning.gyldigTom,
+              dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
+            ),
+        )
+        .map((tilknytning) => tilknytning.orgEnhetId),
+    ),
+  );
+
+  const lederKanRedigere = iderLederKanRedigere.some((id) =>
+    redigerbareOrgEnhetIder.has(id),
+  );
 
   return (
     <div
@@ -105,14 +147,17 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
 
           <OrgTilknytningSection
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
+            lederKanRedigere={lederKanRedigere}
+            orgtilknytninger={orgtilknytninger}
             ressurs={ressurs}
           />
 
           <TeamCatSection navident={ressurs.navident} />
 
           <BottomSection
+            harSluttet={harSluttet}
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
-            ressurs={ressurs}
+            ressursNavIdent={ressurs.navident}
           />
 
           {ressurs.isNomMastered && (
@@ -136,19 +181,14 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
 function OrgTilknytningSection({
   ressurs,
   hasWriteAccessForRessurs,
+  orgtilknytninger,
+  lederKanRedigere,
 }: {
   ressurs: Ressurs;
   hasWriteAccessForRessurs: boolean;
+  orgtilknytninger: OrgtilknytningState[];
+  lederKanRedigere: boolean;
 }) {
-  const orgtilknytningerQuery = useQuery({
-    queryKey: getOrgTilknytninger.queryKey(ressurs.navident),
-    queryFn: () => getOrgTilknytninger.queryFn(ressurs.navident),
-  });
-
-  const orgtilknytninger = orgtilknytningerQuery.data ?? [];
-
-  const navigate = useNavigate();
-
   const activeOrgtilknytninger = orgtilknytninger.filter((orgTilknytning) =>
     isGyldighetsPeriodeActive(
       orgTilknytning.gyldigFom,
@@ -168,9 +208,12 @@ function OrgTilknytningSection({
       isAfterToday(new Date(orgTilknytning.gyldigFom)),
   );
 
+  const harSluttet = !!ressurs.sluttdato && isBeforeToday(ressurs.sluttdato);
+
   return (
     <>
       <Divider noMargins />
+
       <div
         css={css`
           display: flex;
@@ -190,29 +233,17 @@ function OrgTilknytningSection({
             Organisasjonstilknytninger
           </Heading>
 
-          <EditButtonWrapperOrgtilknytning>
-            <Button
-              data-cy="endre-orgtilknytninger-button"
-              icon={<PencilIcon aria-hidden />}
-              onClick={() =>
-                navigate({
-                  search: { editOrgtilknytninger: true },
-                  params: (previous) => previous,
-                })
-              }
-              size="small"
-              variant="secondary"
-            >
-              Endre
-            </Button>
-          </EditButtonWrapperOrgtilknytning>
+          <EditOrgtilknytningerButton
+            harSluttet={harSluttet}
+            lederKanRedigere={lederKanRedigere}
+          />
         </div>
 
-        {orgtilknytninger.length === 0 ? (
+        {orgtilknytninger.length === 0 && (
           <BodyLong>
             Medarbeideren er ikke registrert på en organisasjonsenhet.
           </BodyLong>
-        ) : undefined}
+        )}
 
         {activeOrgtilknytninger.map((orgTilknytning) => (
           <OrganisationHierarchyTree
@@ -602,9 +633,9 @@ function SummarySection({
 
   if (
     editPersonopplysninger &&
-    (hasAdminAccess ||
-      (hasWriteAccess && hasWriteAccessForRessurs) ||
-      hasSelfServiceAccess)
+    ((hasWriteAccess && hasWriteAccessForRessurs) ||
+      hasSelfServiceAccess ||
+      hasAdminAccess)
   ) {
     return (
       <ModalProvider>
@@ -660,22 +691,103 @@ function TeamCatSection({ navident }: { navident: string }) {
   );
 }
 
-function TerminateButton({
-  ressurs,
-  hasWriteAccessForRessurs,
+function EditOrgtilknytningerButton({
+  lederKanRedigere,
+  harSluttet,
 }: {
-  ressurs: Ressurs;
-  hasWriteAccessForRessurs: boolean;
+  lederKanRedigere: boolean;
+  harSluttet: boolean;
 }) {
-  return (
-    <EditButtonWrapperRessursSlutter
-      hasWriteAccessForRessurs={hasWriteAccessForRessurs}
-    >
+  const { editPersonopplysninger } = useSearch({
+    from: "/ressurs/$id",
+  });
+
+  const navigate = useNavigate();
+
+  const hasWriteAccess = useHasWriteAccess();
+  const hasAdminAccess = useHasAdminAccess();
+  //const hasAdminAccess = false;
+
+  if (
+    !editPersonopplysninger &&
+    ((hasWriteAccess && !harSluttet) || lederKanRedigere || hasAdminAccess)
+  ) {
+    return (
+      <Button
+        data-cy="endre-orgtilknytninger-button"
+        icon={<PencilIcon aria-hidden />}
+        onClick={() =>
+          navigate({
+            search: { editOrgtilknytninger: true },
+            params: (previous) => previous,
+          })
+        }
+        size="small"
+        variant="secondary"
+      >
+        Endre
+      </Button>
+    );
+  }
+
+  if (harSluttet) {
+    return (
+      <Button
+        icon={<PencilIcon fontSize="1.5rem" />}
+        onClick={() =>
+          navigate({ to: "/ressurs/create/$step", params: { step: "1" } })
+        }
+        size="small"
+        variant="secondary"
+      >
+        Gjenopprett
+      </Button>
+    );
+  }
+
+  return;
+}
+
+function BottomSection({
+  ressursNavIdent,
+  hasWriteAccessForRessurs,
+  harSluttet,
+}: {
+  ressursNavIdent: string;
+  hasWriteAccessForRessurs: boolean;
+  harSluttet: boolean;
+}) {
+  const hasWriteAccess = useHasWriteAccess();
+  const hasAdminAccess = useHasAdminAccess();
+
+  const canEditRessurs =
+    (hasWriteAccess && hasWriteAccessForRessurs) || hasAdminAccess;
+
+  if (canEditRessurs && !harSluttet) {
+    return (
+      <>
+        <Divider noMargins />
+
+        <TerminateButton ressursNavIdent={ressursNavIdent} />
+      </>
+    );
+  }
+
+  return;
+}
+
+function TerminateButton({ ressursNavIdent }: { ressursNavIdent: string }) {
+  const { editPersonopplysninger } = useSearch({
+    from: "/ressurs/$id",
+  });
+
+  if (!editPersonopplysninger) {
+    return (
       <ReactRouterLink
         css={css`
           align-self: flex-end;
         `}
-        params={{ id: ressurs.navident }}
+        params={{ id: ressursNavIdent }}
         search={{}}
         to="/ressurs-terminate/$id"
       >
@@ -692,34 +804,8 @@ function TerminateButton({
           Medarbeider slutter i Nav
         </Button>
       </ReactRouterLink>
-    </EditButtonWrapperRessursSlutter>
-  );
-}
-
-function BottomSection({
-  ressurs,
-  hasWriteAccessForRessurs,
-}: {
-  ressurs: Ressurs;
-  hasWriteAccessForRessurs: boolean;
-}) {
-  const hasAdminAccess = useHasAdminAccess();
-
-  const hasSelfServiceAccess =
-    useGetSession().data?.navident === ressurs.navident;
-
-  if (!hasWriteAccessForRessurs && !hasSelfServiceAccess && !hasAdminAccess) {
-    return;
+    );
   }
 
-  return (
-    <>
-      <Divider noMargins />
-
-      <TerminateButton
-        hasWriteAccessForRessurs={hasWriteAccessForRessurs}
-        ressurs={ressurs}
-      />
-    </>
-  );
+  return;
 }
