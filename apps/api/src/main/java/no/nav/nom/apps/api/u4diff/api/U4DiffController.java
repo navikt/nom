@@ -140,7 +140,7 @@ public class U4DiffController {
     @GetMapping("/ulikStartDato/excel")
     public void ulikStartDatoExcel(HttpServletResponse response) {
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ulikStartDato.xlsx");
-        u4DiffExcelGenerator.generate(response, u4DiffService.getUlikEnhet(), ULIK_START_DATO);
+        u4DiffExcelGenerator.generate(response, u4DiffService.getUlikStartDato(), ULIK_START_DATO);
     }
 
     // Ikke-klassifiserte differanser
