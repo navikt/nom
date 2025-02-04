@@ -460,17 +460,25 @@ public class NomRemedyIntegrasjonService {
     private void handleDelayedEvent(DelayedEvent delayedEvent) {
         var nomEvent = delayedEvent.getEvent();
 
-        if (nomEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1) {
-            handleDelayedRessursSluttetEventV1(ressursSluttetEventV1);
-        } else if (nomEvent instanceof RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
-            handleDelayedRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
-        } else if (nomEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
-            handleDelayedOrgtiknytning(orgtilknytningDagligOppfolgingEndretEventV1);
-        } else if (nomEvent instanceof OrgtilknytningSektorEndretEventV1 orgtilknytningSektorEndretEventV1) {
-            handleDelayedOrgtiknytningSektor(orgtilknytningSektorEndretEventV1);
+        boolean deleteEvent = true;
+        try {
+            if (nomEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1) {
+                handleDelayedRessursSluttetEventV1(ressursSluttetEventV1);
+            } else if (nomEvent instanceof RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1) {
+                handleDelayedRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
+            } else if (nomEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
+                handleDelayedOrgtiknytning(orgtilknytningDagligOppfolgingEndretEventV1);
+            } else if (nomEvent instanceof OrgtilknytningSektorEndretEventV1 orgtilknytningSektorEndretEventV1) {
+                handleDelayedOrgtiknytningSektor(orgtilknytningSektorEndretEventV1);
+            }
+        } catch (RequiredValueMissingException e) {
+            logger.error("ALERT: Failed to handle delayed event: {}", delayedEvent, e);
+            deleteEvent = false;
         }
 
-        delayedEventRepository.deleteById(delayedEvent.getDelayedEventId());
+        if (deleteEvent) {
+            delayedEventRepository.deleteById(delayedEvent.getDelayedEventId());
+        }
     }
 
     private void createRessurs(RessursOpprettetEventV1 ressursOpprettetEventV1) {
