@@ -30,7 +30,14 @@ public class U4DiffExcelGenerator {
         "EKSTERN", "Ekstern"
     );
 
-    public enum ExportType { SEKTOR_DIFF_PAA_RESSURS, IDENTER_IKKE_I_U4, ULIK_ENHET, ALLE_DIFFERANSER, IKKE_KLASSIFISERTE_DIFFERANSER }
+    public enum ExportType {
+        SEKTOR_DIFF_PAA_RESSURS,
+        IDENTER_IKKE_I_U4,
+        ULIK_ENHET,
+        ULIK_START_DATO,
+        ALLE_DIFFERANSER,
+        IKKE_KLASSIFISERTE_DIFFERANSER
+    }
 
     public void generate(HttpServletResponse response, List<U4Diff> u4diff, ExportType type) {
         try (Workbook workbook = new XSSFWorkbook()) {
@@ -42,6 +49,7 @@ public class U4DiffExcelGenerator {
                 case IDENTER_IKKE_I_U4, IKKE_KLASSIFISERTE_DIFFERANSER, ALLE_DIFFERANSER -> addRowGeneric(sheet.createRow(rowcount++), null);
                 case SEKTOR_DIFF_PAA_RESSURS -> addRowSektorDiff(sheet.createRow(rowcount++), null);
                 case ULIK_ENHET -> addRowUlikEnhet(sheet.createRow(rowcount++), null);
+                case ULIK_START_DATO -> addRowUlikStartDato(sheet.createRow(rowcount++), null);
             }
 
             // RADER
@@ -50,6 +58,7 @@ public class U4DiffExcelGenerator {
                     case IDENTER_IKKE_I_U4, IKKE_KLASSIFISERTE_DIFFERANSER, ALLE_DIFFERANSER -> addRowGeneric(sheet.createRow(rowcount++), diff);
                     case SEKTOR_DIFF_PAA_RESSURS -> addRowSektorDiff(sheet.createRow(rowcount++), diff);
                     case ULIK_ENHET -> addRowUlikEnhet(sheet.createRow(rowcount++), diff);
+                    case ULIK_START_DATO -> addRowUlikStartDato(sheet.createRow(rowcount++), diff);
                 }
             }
 
@@ -116,6 +125,19 @@ public class U4DiffExcelGenerator {
         u4GyldigTom(col++, row, u4diff);
         u4OrgenhetId(col++, row, u4diff);
         u4OrgenhetNavn(col++, row, u4diff);
+        u4StillingPeriode(col++, row, u4diff);
+        nomOrgtilknytning(col++, row, u4diff);
+    }
+
+    private void addRowUlikStartDato(Row row, U4Diff u4diff) {
+        int col = 0;
+        navident(col++, row, u4diff);
+        nomOrgenhetId(col++, row, u4diff);
+        nomOrgenhetNavn(col++, row, u4diff);
+        nomGyldigFom(col++, row, u4diff);
+        nomGyldigTom(col++, row, u4diff);
+        u4GyldigFom(col++, row, u4diff);
+        u4GyldigTom(col++, row, u4diff);
         u4StillingPeriode(col++, row, u4diff);
         nomOrgtilknytning(col++, row, u4diff);
     }
