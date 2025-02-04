@@ -33,7 +33,8 @@ public class U4DiffService {
         var dobleRader = grupperteDifferMedKun2Rader();
         dobleRader.forEach((navident, u4Differ) -> {
             var diffTypes = u4Differ.stream().map(U4Diff::getType).toList();
-            if (erUlikEnhet(diffTypes) || erEnhetsBytteIU4IkkeINOM(diffTypes) || erEnhetsBytteINOMIkkeIU4(diffTypes)) {
+            if (harUlikeEnheter(u4Differ)
+                && (erUlikEnhetEndringstyper(diffTypes) || erEnhetsBytteIU4IkkeINOM(diffTypes) || erEnhetsBytteINOMIkkeIU4(diffTypes))) {
                 ulikEnhetDiffer.addAll(u4Differ);
             }
         });
@@ -80,7 +81,14 @@ public class U4DiffService {
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private boolean erUlikEnhet(List<U4DiffType> diffTyper) {
+    private boolean harUlikeEnheter(List<U4Diff> er) {
+        if (er.size() != 2) {
+            return false;
+        }
+        return Objects.equals(er.getFirst().getNomOrgenhetId(), er.getLast().getU4OrgenhetId());
+    }
+
+    private boolean erUlikEnhetEndringstyper(List<U4DiffType> diffTyper) {
         if (diffTyper.size() != 2) {
             return false;
         }
