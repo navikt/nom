@@ -6,7 +6,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.admin.SwaggerConfig;
+import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.DuplikateOrgtilknytninger;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OrgtilknytningMedOrgEnhet;
+import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OverlappendeOrgtilknytninger;
 import no.nav.nom.apps.admin.sanitycheck.service.OrgtilknytningSanityCheckService;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.springframework.http.ResponseEntity;
@@ -90,5 +92,33 @@ public class OrgtilknytningSanityCheckController {
     @GetMapping(value = "/orgtilknytningStatesMedTilknytningtypeUtenSektor")
     public ResponseEntity<List<OrgtilknytningState>> orgtilknytningStatesMedTilknytningtypeUtenSektor() {
         return ResponseEntity.ok(orgtilknytningSanityCheckService.orgtilknytningStatesMedTilknytningtypeUtenSektor());
+    }
+
+    @Operation(
+            description = "List orgtilknytninger med flere overlappende dagligOppfolging i aktiv eller fremtidig periode (gyldigTom > now)",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+            {
+                    @ApiResponse(responseCode = "200", description = "Success")
+            }
+    )
+    @GetMapping(value = "/orgtilknytningMedFlereOverlappendeDagligOppfolgingCurrentOgFuture")
+    public ResponseEntity<List<OverlappendeOrgtilknytninger>> orgtilknytningMedFlereOverlappendeDagligOppfolgingCurrentOgFuture() {
+        return ResponseEntity.ok(orgtilknytningSanityCheckService.orgtilknytningMedFlereOverlappendeDagligOppfolgingCurrentOgFuture());
+    }
+
+    @Operation(
+            description = "List duplikate orgtilknytninger på samme orgenhet og navident",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+            {
+                    @ApiResponse(responseCode = "200", description = "Success")
+            }
+    )
+    @GetMapping(value = "/duplikateOrgtilknytninger")
+    public ResponseEntity<List<DuplikateOrgtilknytninger>> duplikateOrgtilknytninger() {
+        return ResponseEntity.ok(orgtilknytningSanityCheckService.duplikateOrgtilknytninger());
     }
 }
