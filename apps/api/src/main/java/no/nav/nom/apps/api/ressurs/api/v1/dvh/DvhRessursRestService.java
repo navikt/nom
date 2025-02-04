@@ -87,7 +87,7 @@ public class DvhRessursRestService {
             orgtilknytningState.gyldigTom().orElse(null),
             orgtilknytningState.sektor() != null ? orgtilknytningState.sektor().name() : null,
             orgtilknytningState.erDagligOppfolging(),
-            orgtilknytningState.orgtilknytningType().isPresent() ? orgtilknytningState.orgtilknytningType().get().name() : null,
+            orgtilknytningState.orgtilknytningType() != null && orgtilknytningState.orgtilknytningType().isPresent() ? orgtilknytningState.orgtilknytningType().get().name() : null,
             orgtilknytningState.fid()
         );
     }
