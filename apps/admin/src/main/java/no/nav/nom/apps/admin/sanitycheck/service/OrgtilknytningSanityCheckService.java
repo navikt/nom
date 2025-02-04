@@ -1,6 +1,8 @@
 package no.nav.nom.apps.admin.sanitycheck.service;
 
+import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.DuplikateOrgtilknytninger;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OrgtilknytningMedOrgEnhet;
+import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OverlappendeOrgtilknytninger;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -11,13 +13,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
+import static no.nav.nom.apps.admin.sanitycheck.service.RessursSanityCheckService.today;
 
 @Service
 public class OrgtilknytningSanityCheckService {
@@ -86,6 +86,69 @@ public class OrgtilknytningSanityCheckService {
             .filter(ot -> isNull(ot.sektor()) && ot.orgtilknytningType().isPresent())
             .toList();
     }
+    
+    public List<OverlappendeOrgtilknytninger> orgtilknytningMedFlereOverlappendeDagligOppfolgingCurrentOgFuture() {
+        // Group by navident for current period and dagligOppfolging
+        Map<String, List<OrgtilknytningState>> groupedByNavidentForCurrentAndFuturePeriodWithDagligDagligOppfolging = 
+                orgtilknytningStateRepository.getAll().stream()
+                .filter(OrgtilknytningSanityCheckService::isCurrentOrFuturePeriod) // er current eller fremtidig
+                .filter(OrgtilknytningState::erDagligOppfolging) // er dagligoppfolging
+                .sorted(Comparator.comparing(OrgtilknytningState::gyldigFom))
+                .collect(Collectors.groupingBy(OrgtilknytningState::navident));
+
+        List<OverlappendeOrgtilknytninger> overlappendeOrgtilknytninger = new ArrayList<>();
+        // Filter out groups where there is more than one dagligOppfolging in current period
+        groupedByNavidentForCurrentAndFuturePeriodWithDagligDagligOppfolging.values().stream()
+                .filter(group -> group.size() > 1)
+                .forEach(otEr -> {
+                    OrgtilknytningState previous = null;
+                    for (OrgtilknytningState ot : otEr) {
+                        if (previous != null) {
+                            if (overlapsInterval(ot, previous)) {
+                                var overlappendeOTer = new OverlappendeOrgtilknytninger(
+                                        previous,
+                                        ot
+                                );
+                                overlappendeOrgtilknytninger.add(overlappendeOTer);
+                            }
+                        }
+                        previous = ot;
+                    }
+                });
+        
+        return overlappendeOrgtilknytninger;
+    }
+
+    public List<DuplikateOrgtilknytninger> duplikateOrgtilknytninger() {
+        // Group by navident
+        Map<String, List<OrgtilknytningState>> groupedByNavident = orgtilknytningStateRepository.getAll().stream()
+                .sorted(Comparator
+                        .comparing(OrgtilknytningState::orgEnhetId)
+                        .thenComparing(OrgtilknytningState::gyldigFom)
+                )
+                .collect(Collectors.groupingBy(OrgtilknytningState::navident));
+
+        List<DuplikateOrgtilknytninger> duplikateOTer = new ArrayList<>();
+        // Filter out groups where there is more than one dagligOppfolging in current period
+        groupedByNavident.values().stream()
+                .filter(group -> group.size() > 1)
+                .forEach(otEr -> {
+                    OrgtilknytningState original = null;
+                    for (OrgtilknytningState ot : otEr) {
+                        if (original != null) {
+                            if (original.orgEnhetId().equals(ot.orgEnhetId()) && original.gyldigFom().equals(ot.gyldigFom())) {
+                                var duplikatOT = new DuplikateOrgtilknytninger(original, ot);
+                                duplikateOTer.add(duplikatOT);
+                            } else {
+                                original = ot;
+                            }
+                        } else {
+                            original = ot;
+                        }
+                    }
+                });
+        return duplikateOTer;
+    }
 
     private List<OrgtilknytningState> aktiveOrgtilknytninger(Collection<OrgtilknytningState> orgtilknytninger) {
         return orgtilknytninger.stream().filter(ot ->
@@ -117,4 +180,25 @@ public class OrgtilknytningSanityCheckService {
         );
         return !allowedOrgtilknytningTypeForSektorMap.get(orgtilknytningState.sektor()).contains(orgtilknytningState.orgtilknytningType().get());
     }
+
+    public static final LocalDate NO_END_DATE = LocalDate.of(2099, 12, 31);
+    
+    public static boolean isCurrentOrFuturePeriod(OrgtilknytningState orgtilknytning) {
+        return orgtilknytning.gyldigTom().isEmpty() || orgtilknytning.gyldigTom().get().isAfter(yesterday());
+    }
+
+    public static LocalDate yesterday() { return today().minusDays(1); }
+
+    public static boolean overlapsInterval(OrgtilknytningState orgtilknytning1, OrgtilknytningState orgtilknytning2) {
+        return overlapsInterval(orgtilknytning1.gyldigFom(), orgtilknytning1.gyldigTom().orElse(NO_END_DATE), orgtilknytning2);
+    }
+
+    public static boolean overlapsInterval(LocalDate start, LocalDate end, OrgtilknytningState orgtilknytning) {
+        return orgtilknytning.gyldigFom().isBefore(dayAfter(end)) && orgtilknytning.gyldigTom().orElse(NO_END_DATE).isAfter(dayBefore(start));
+    }
+
+    public static LocalDate dayAfter(LocalDate localDate) { return localDate.plusDays(1); }
+
+    public static LocalDate dayBefore(LocalDate localDate) { return localDate.minusDays(1); }
+    
 }
