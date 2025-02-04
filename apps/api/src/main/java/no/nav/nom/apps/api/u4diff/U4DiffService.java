@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.u4diff;
 
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.etter;
 import static no.nav.nom.apps.api.u4diff.U4DiffKilde.STILLINGER;
 import static no.nav.nom.apps.api.u4diff.U4DiffType.EKSTRA_U4_PERIODE;
 import static no.nav.nom.apps.api.u4diff.U4DiffType.FORSKJELL_I_U4_PERIODE;
@@ -118,6 +120,11 @@ public class U4DiffService {
     private boolean erStartDatoUlik(List<U4Diff> differPaEnhet) {
         var nomStartDato = differPaEnhet.stream().filter(u4Diff -> u4Diff.getType().equals(MANGLENDE_U4_PERIODE)).findFirst().get().getNomGyldigFom();
         var u4StartDato = differPaEnhet.stream().filter(u4Diff -> u4Diff.getType().equals(EKSTRA_U4_PERIODE)).findFirst().get().getU4GyldigFom();
+
+        var nestenTreAarSiden = LocalDate.now().minusYears(3).plusMonths(1);
+        if (etter(nestenTreAarSiden, nomStartDato)) nomStartDato = nestenTreAarSiden;
+        if (etter(nestenTreAarSiden, u4StartDato)) u4StartDato = nestenTreAarSiden;
+
         return !Objects.equals(nomStartDato, u4StartDato);
     }
 }
