@@ -10,10 +10,12 @@ import {
   HelpText,
   HStack,
   Link,
+  Tag,
   VStack,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink, useNavigate } from "@tanstack/react-router";
+import { subMonths } from "date-fns";
 import capitalize from "lodash/capitalize";
 import React from "react";
 
@@ -35,7 +37,15 @@ import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import type { Ressurs } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
 import { TelefonType } from "~/types/api-models";
-import { formatDisplayDate, formatTlf, formatVisningsnavn } from "~/utils";
+import {
+  dateWithoutTimezone,
+  formatDisplayDate,
+  formatTlf,
+  formatVisningsnavn,
+  isBeforeToday,
+  isSameDateOrAfter,
+  todayWithoutTimezone,
+} from "~/utils";
 
 // Det er kanskje litt unødvendig å ha en wrapper komponent rundt hver detalj (navident, sluttdato, etc)
 // men det kommer stadig endringer i reglene for logikken rundt når noe skal vises og ikke.
@@ -59,6 +69,15 @@ export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
 
   const hasAdminAccess = useHasAdminAccess();
 
+  const harSluttet = !!ressurs.sluttdato && isBeforeToday(ressurs.sluttdato);
+
+  const sluttetUnderToMndSiden =
+    ressurs.sluttdato &&
+    isSameDateOrAfter(
+      ressurs.sluttdato,
+      dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
+    );
+
   return (
     <HStack>
       <VStack
@@ -66,9 +85,29 @@ export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
           flex: 1;
         `}
       >
-        <Heading level="1" size="large">
-          {formatVisningsnavn(ressurs.visningsnavn)}
-        </Heading>
+        <div
+          css={css`
+            display: flex;
+            align-items: center;
+          `}
+        >
+          <Heading level="1" size="large">
+            {formatVisningsnavn(ressurs.visningsnavn)}
+          </Heading>
+
+          {harSluttet && (
+            <Tag
+              css={css`
+                margin-left: var(--a-spacing-4);
+                height: fit-content;
+              `}
+              size="medium"
+              variant="warning"
+            >
+              Sluttet
+            </Tag>
+          )}
+        </div>
 
         <KortFortalt />
 
@@ -91,42 +130,43 @@ export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
           <TelefonNummere ressurs={ressurs} />
           {(hasKontaktinfoAccessForRessurs ||
             hasSelfServiceAccess ||
-            hasAdminAccess) && (
-            <>
-              <span>Kontaktpersoner:</span>
+            hasAdminAccess) &&
+            sluttetUnderToMndSiden && (
+              <>
+                <span>Kontaktpersoner:</span>
 
-              <div
-                css={css`
-                  display: flex;
-                `}
-              >
-                <ReactRouterLink
-                  params={{ id: ressurs.navident }}
-                  to="/kontaktpersoner/$id"
+                <div
+                  css={css`
+                    display: flex;
+                  `}
                 >
-                  {/* Egentlig ikke anbefalt å bruke negativ margin, men det er den eneste måten jeg klarte å oppnå designet som var ønsket */}
-                  <Button
-                    css={css`
-                      width: fit-content;
-                      margin-left: -12px;
-                      margin-top: -4px;
-                    `}
-                    icon={<PersonTallShortIcon title="a11y-title" />}
-                    size="small"
-                    type="button"
-                    variant="tertiary"
+                  <ReactRouterLink
+                    params={{ id: ressurs.navident }}
+                    to="/kontaktpersoner/$id"
                   >
-                    Se kontaktpersoner
-                  </Button>
-                </ReactRouterLink>
+                    {/* Egentlig ikke anbefalt å bruke negativ margin, men det er den eneste måten jeg klarte å oppnå designet som var ønsket */}
+                    <Button
+                      css={css`
+                        width: fit-content;
+                        margin-left: -12px;
+                        margin-top: -4px;
+                      `}
+                      icon={<PersonTallShortIcon title="a11y-title" />}
+                      size="small"
+                      type="button"
+                      variant="tertiary"
+                    >
+                      Se kontaktpersoner
+                    </Button>
+                  </ReactRouterLink>
 
-                <HelpText title="Hvem kan se denne informasjonen?">
-                  Kun synlig for medarbeideren selv, nærmeste leder og leders
-                  leder.
-                </HelpText>
-              </div>
-            </>
-          )}
+                  <HelpText title="Hvem kan se denne informasjonen?">
+                    Kun synlig for medarbeideren selv, nærmeste leder og leders
+                    leder.
+                  </HelpText>
+                </div>
+              </>
+            )}
         </div>
       </VStack>
 
@@ -138,13 +178,22 @@ export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
           size="126px"
         />
 
-        <EditButton ressurs={ressurs} />
+        <EditPersonopplysningerButton
+          harSluttet={harSluttet}
+          ressurs={ressurs}
+        />
       </VStack>
     </HStack>
   );
 }
 
-function EditButton({ ressurs }: { ressurs: Ressurs }) {
+function EditPersonopplysningerButton({
+  ressurs,
+  harSluttet,
+}: {
+  ressurs: Ressurs;
+  harSluttet: boolean;
+}) {
   const navigate = useNavigate();
 
   const hasWriteAccess = useHasWriteAccess();
@@ -156,9 +205,9 @@ function EditButton({ ressurs }: { ressurs: Ressurs }) {
   const hasSelvbetjeningAccess = useHasSelvbetjeningAccess(ressurs.navident);
 
   if (
-    hasAdminAccess ||
-    (hasWriteAccess && hasWriteAccessForRessurs) ||
-    hasSelvbetjeningAccess
+    (((hasWriteAccess && hasWriteAccessForRessurs) || hasSelvbetjeningAccess) &&
+      !harSluttet) ||
+    hasAdminAccess
   ) {
     return (
       <Button
@@ -222,21 +271,25 @@ export function SluttDato({ ressurs }: { ressurs: Ressurs }) {
 
   const hasSelvbetjeningAccess = useHasSelvbetjeningAccess(ressurs.navident);
 
+  const harSluttet = !!ressurs.sluttdato && isBeforeToday(ressurs.sluttdato);
+
   if (
     ressurs.sluttdato &&
-    (hasAdminAccess ||
-      (hasWriteAccess && hasWriteAccessForRessurs) ||
+    ((hasWriteAccess && hasWriteAccessForRessurs) ||
       hasSelvbetjeningAccess ||
-      ressurs.sektor === "EKSTERN")
+      hasAdminAccess ||
+      ressurs.sektor === "EKSTERN" ||
+      harSluttet)
   ) {
     return (
       <LabelWithValue
-        helpText="Medarbeiderens siste arbeidsdag i Nav."
+        helpText="Medarbeiderens siste arbeidsdag i Nav"
         label="Sluttdato"
         value={formatDisplayDate(ressurs.sluttdato)}
       />
     );
   }
+
   return;
 }
 

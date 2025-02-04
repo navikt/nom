@@ -14,10 +14,10 @@ import { DATE_FORMATS, formatVisningsnavn } from "~/utils";
 
 export function RessursCard({
   ressurs,
-  hasQuit = false,
+  sluttetOverEtArSiden = false,
 }: {
   ressurs: Ressurs;
-  hasQuit?: boolean;
+  sluttetOverEtArSiden?: boolean;
 }) {
   const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
 
@@ -43,7 +43,7 @@ export function RessursCard({
         <Heading size="large">
           {formatVisningsnavn(ressurs.visningsnavn)}
         </Heading>
-        {hasQuit && <Tag variant="warning">Sluttet</Tag>}
+        {sluttetOverEtArSiden && <Tag variant="warning">Sluttet</Tag>}
       </div>
 
       <div
@@ -80,7 +80,7 @@ export function RessursCard({
           justify-content: end;
         `}
       >
-        {hasQuit && hasAdminOrWriteAccess && (
+        {sluttetOverEtArSiden && hasAdminOrWriteAccess && (
           <Button
             icon={<PencilIcon fontSize="1.5rem" />}
             onClick={() =>
