@@ -1,13 +1,23 @@
 import { css } from "@emotion/react";
 import { Buildings3FillIcon, PersonFillIcon } from "@navikt/aksel-icons";
-import { BodyShort, Heading, HStack, Label, VStack } from "@navikt/ds-react";
+import {
+  BodyShort,
+  Heading,
+  HelpText,
+  HStack,
+  Label,
+  VStack,
+} from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import React from "react";
 
-import { getGlobalStatistikk, getOrgEnhet } from "~/api/react-query-endpoints";
-import { useHasAdminAccess } from "~/api/useGetSession";
+import {
+  getGlobalStatistikk,
+  getOrgEnhet,
+  getStatistikkForOrgEnhet,
+} from "~/api/react-query-endpoints";
 import type { ChartRow } from "~/components/charts/HorizontalBarChart";
 import { HorizontalBarChart } from "~/components/charts/HorizontalBarChart";
 import ContentWrapper from "~/components/ContentWrapper";
@@ -40,7 +50,11 @@ export const FrontPage = () => {
   return (
     <ContentWrapper>
       <VStack gap="12">
-        <OrgEnhetStatistikk orgEnhet={orgEnhet} statistikk={globalStatistikk} />
+        <OrgEnhetStatistikk
+          gittStatistikk={globalStatistikk}
+          header="Nøkkelinfo for hele Nav"
+          orgEnhet={orgEnhet}
+        />
 
         <Orghierarki
           lenker={isInDevelopment() ? developmentLenker : productionLenker}
@@ -51,18 +65,26 @@ export const FrontPage = () => {
   );
 };
 
-function OrgEnhetStatistikk({
+export function OrgEnhetStatistikk({
   orgEnhet,
-  statistikk,
+  gittStatistikk,
+  header,
 }: {
   orgEnhet: OrgEnhet | undefined;
-  statistikk: GlobalStatistikkResponse | undefined;
+  gittStatistikk?: GlobalStatistikkResponse | undefined;
+  header?: string;
 }) {
-  if (!orgEnhet || !statistikk) {
+  if (!orgEnhet) {
     return;
   }
 
-  const hasAdminAccess = useHasAdminAccess();
+  const orgEnhetStatistikkQuery = useQuery({
+    queryKey: getStatistikkForOrgEnhet.queryKey(orgEnhet.id),
+    queryFn: () => getStatistikkForOrgEnhet.queryFn(orgEnhet.id),
+    enabled: !gittStatistikk,
+  });
+
+  const statistikk = gittStatistikk ?? orgEnhetStatistikkQuery.data;
 
   const ressursStatistikk = statistikk?.ressursStatistikk;
 
@@ -75,9 +97,11 @@ function OrgEnhetStatistikk({
 
   return (
     <div>
-      <Heading level="2" size="large">
-        Nøkkelinfo for hele Nav
-      </Heading>
+      {!!header && (
+        <Heading level="2" size="large">
+          {header}
+        </Heading>
+      )}
 
       <div
         css={css`
@@ -87,15 +111,9 @@ function OrgEnhetStatistikk({
           grid-template-columns: repeat(2, 1fr);
         `}
       >
-        <GridItem columns={hasAdminAccess ? 1 : 2} rows={2}>
-          <MedarbeidereBarChart statistikk={MedarbeidereStatistikk} />
-        </GridItem>
+        <MedarbeidereBarChartGridWrapper statistikk={MedarbeidereStatistikk} />
 
-        {hasAdminAccess && (
-          <GridItem>
-            <OrgEnheterStatistikk statistikk={statistikk} />
-          </GridItem>
-        )}
+        <OrgEnheterStatistikkGridWrapper statistikk={statistikk} />
       </div>
     </div>
   );
@@ -125,6 +143,261 @@ function GridItem({
       `}
     >
       {children}
+    </div>
+  );
+}
+
+function MedarbeidereBarChartGridWrapper({
+  statistikk,
+}: {
+  statistikk: MedarbeidereStatistikk;
+}) {
+  if (
+    !statistikk ||
+    (statistikk.statlige === 0 &&
+      statistikk.kommunale === 0 &&
+      statistikk.eksterne === 0)
+  ) {
+    return;
+  }
+
+  return (
+    <GridItem rows={2}>
+      <MedarbeidereBarChart statistikk={statistikk} />
+    </GridItem>
+  );
+}
+
+function MedarbeidereBarChart({
+  statistikk,
+}: {
+  statistikk: MedarbeidereStatistikk;
+}) {
+  const medarbeidereData: ChartRow[] = [
+    {
+      label: "Statlige",
+      value: statistikk.statlige,
+    },
+    {
+      label: "Kommunale",
+      value: statistikk.kommunale,
+    },
+    {
+      label: "Eksterne",
+      value: statistikk.eksterne,
+    },
+  ].filter((sektor) => sektor.value !== 0);
+
+  return (
+    <HorizontalBarChart
+      rows={medarbeidereData}
+      title={
+        <div
+          css={css`
+            display: flex;
+            justify-content: space-between;
+          `}
+        >
+          <div
+            css={css`
+              display: flex;
+              align-items: center;
+              font-size: var(--a-font-size-large);
+            `}
+          >
+            <div
+              css={css`
+                background: var(--nom-secondary-hover);
+                border-radius: 50%;
+                height: 40px;
+                width: 40px;
+                justify-items: center;
+                align-content: center;
+              `}
+            >
+              <PersonFillIcon
+                css={css`
+                  background: #fff;
+                  border-radius: 50%;
+                  width: 37px;
+                  height: 37px;
+                  padding: var(--a-spacing-1);
+                `}
+                fontSize="1.75rem"
+                title="a11y-title"
+              />
+            </div>
+
+            <BodyShort
+              css={css`
+                margin-left: var(--a-spacing-4);
+                font-size: inherit;
+              `}
+              size="large"
+            >
+              Antall medarbeidere:
+            </BodyShort>
+            <span
+              css={css`
+                margin-left: var(--a-spacing-4);
+              `}
+            >
+              <b>{formatDisplayNumber(statistikk.totalt)}</b>
+            </span>
+          </div>
+        </div>
+      }
+    />
+  );
+}
+
+function OrgEnheterStatistikkGridWrapper({
+  statistikk,
+}: {
+  statistikk: GlobalStatistikkResponse | undefined;
+}) {
+  const antallNavKontorer = statistikk?.antallNavKontorer ?? 0;
+  const antallFylkekontor = statistikk?.antallFylkekontor ?? 0;
+  //const antallLovnoder = statistikk?.antallLovNoder ?? 0;
+
+  const statistikkItems: OrgEnhetStatistikkItem[] = [];
+
+  if (!!antallFylkekontor && antallFylkekontor > 0) {
+    statistikkItems.push({
+      label: "Antall fylkesenheter:",
+      value: antallFylkekontor,
+      helpText:
+        "Antall Nav-regioner. Navs regioner avviker noe fra den administrative inndelingen av landet i fylker.",
+    });
+  }
+  if (!!antallNavKontorer && antallNavKontorer > 0) {
+    statistikkItems.push({
+      label: "Antall Nav-kontor:",
+      value: antallNavKontorer,
+      helpText:
+        "Antallet kan avvike noe blant annet fordi det er bevegelser i start/slutt-dato for Nav-kontor ifm. vertskommunesamarbeid.",
+    });
+  }
+  // Beholder dette siden det senere skal vises andre steder i hierarkiet
+  // if (!!antallLovnoder && antallLovnoder > 0) {
+  //   statistikkItems.push({
+  //     label: "Organisasjonsenheter:",
+  //     value: antallLovnoder,
+  //     helpText:
+  //       "Antall enheter der det er registrert medarbeidere. På et Nav-kontor telles antall avdelinger.",
+  //   });
+  // }
+
+  if (statistikkItems.length === 0) {
+    return;
+  }
+
+  return (
+    <GridItem>
+      <OrgEnheterStatistikk statistikk={statistikkItems} />
+    </GridItem>
+  );
+}
+
+function OrgEnheterStatistikk({
+  statistikk,
+}: {
+  statistikk: OrgEnhetStatistikkItem[];
+}) {
+  return (
+    <HStack gap="4">
+      {statistikk.map((statistikkItem) => (
+        <OrgEnhetStatistikkVerdi
+          helpText={statistikkItem.helpText}
+          icon={
+            <Buildings3FillIcon
+              css={css`
+                background: #fff;
+                border-radius: 50%;
+                width: 37px;
+                height: 37px;
+                padding: var(--a-spacing-1);
+              `}
+              fontSize="1.75rem"
+              title="a11y-title"
+            />
+          }
+          key={statistikkItem.label}
+          label={statistikkItem.label}
+          value={statistikkItem.value}
+        />
+      ))}
+    </HStack>
+  );
+}
+
+function OrgEnhetStatistikkVerdi({
+  label,
+  value,
+  icon,
+  helpText,
+}: {
+  label: string;
+  value: string | number;
+  icon?: string | ReactNode;
+  helpText?: string;
+}) {
+  return (
+    <div
+      css={css`
+        display: flex;
+        align-items: center;
+      `}
+    >
+      {icon && (
+        <div
+          css={css`
+            background: var(--nom-secondary-hover);
+            border-radius: 50%;
+            height: 40px;
+            width: 40px;
+            justify-items: center;
+            align-content: center;
+          `}
+        >
+          {icon}
+        </div>
+      )}
+
+      <div
+        css={css`
+          font-size: var(--a-font-size-large);
+          display: flex;
+        `}
+      >
+        <BodyShort
+          css={css`
+            margin-left: var(--a-spacing-4);
+            font-size: inherit;
+          `}
+          size="large"
+        >
+          {`${label}${label.endsWith(":") ? "" : ":"}`}
+        </BodyShort>
+
+        <span
+          css={css`
+            margin-left: var(--a-spacing-4);
+          `}
+        >
+          <b>{value.toString()}</b>
+        </span>
+      </div>
+
+      {!!helpText && (
+        <HelpText
+          css={css`
+            margin-left: var(--a-spacing-4);
+          `}
+        >
+          {helpText}
+        </HelpText>
+      )}
     </div>
   );
 }
@@ -308,198 +581,16 @@ export function OrghierarkiItemContent({
   );
 }
 
-function MedarbeidereBarChart({
-  statistikk,
-}: {
-  statistikk: MedarbeidereStatistikk;
-}) {
-  const medarbeidereData: ChartRow[] = [
-    {
-      label: "Statlige",
-      value: statistikk.statlige,
-    },
-    {
-      label: "Kommunale",
-      value: statistikk.kommunale,
-    },
-    {
-      label: "Eksterne",
-      value: statistikk.eksterne,
-    },
-  ];
-
-  return (
-    <HorizontalBarChart
-      rows={medarbeidereData}
-      title={
-        <div
-          css={css`
-            display: flex;
-            justify-content: space-between;
-          `}
-        >
-          <div
-            css={css`
-              display: flex;
-              align-items: center;
-            `}
-          >
-            <div
-              css={css`
-                background: var(--nom-secondary-hover);
-                border-radius: 50%;
-                height: 40px;
-                width: 40px;
-                justify-items: center;
-                align-content: center;
-              `}
-            >
-              <PersonFillIcon
-                css={css`
-                  background: #fff;
-                  border-radius: 50%;
-                  width: 37px;
-                  height: 37px;
-                  padding: var(--a-spacing-1);
-                `}
-                fontSize="1.75rem"
-                title="a11y-title"
-              />
-            </div>
-
-            <BodyShort
-              css={css`
-                margin-left: var(--a-spacing-4);
-              `}
-              size="large"
-            >
-              Antall medarbeidere:
-            </BodyShort>
-            <span
-              css={css`
-                margin-left: var(--a-spacing-4);
-              `}
-            >
-              <b>{formatDisplayNumber(statistikk.totalt)}</b>
-            </span>
-          </div>
-
-          {/*Beholder dette til det antakelig skal inn senere
-          <HelpText title="Hvordan telles dette?"></HelpText>*/}
-        </div>
-      }
-    />
-  );
-}
-
-function OrgEnheterStatistikk({
-  statistikk,
-}: {
-  statistikk: GlobalStatistikkResponse;
-}) {
-  if (!statistikk) {
-    return;
-  }
-
-  return (
-    <HStack gap="6">
-      {statistikk.antallNavKontorer && statistikk.antallNavKontorer > 0 && (
-        <StatistikkVerdiIcon
-          icon={
-            <Buildings3FillIcon
-              css={css`
-                background: #fff;
-                border-radius: 50%;
-                width: 37px;
-                height: 37px;
-                padding: var(--a-spacing-1);
-              `}
-              fontSize="1.75rem"
-              title="a11y-title"
-            />
-          }
-          label="Antall Nav-kontorer"
-          value={statistikk.antallNavKontorer}
-        />
-      )}
-
-      {statistikk.antallFylkekontor && statistikk.antallFylkekontor > 0 && (
-        <StatistikkVerdiIcon
-          icon={
-            <Buildings3FillIcon
-              css={css`
-                background: #fff;
-                border-radius: 50%;
-                width: 37px;
-                height: 37px;
-                padding: var(--a-spacing-1);
-              `}
-              fontSize="1.75rem"
-              title="a11y-title"
-            />
-          }
-          label="Antall fylkeskontorer"
-          value={statistikk.antallFylkekontor}
-        />
-      )}
-    </HStack>
-  );
-}
-
-function StatistikkVerdiIcon({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string | number;
-  icon?: string | ReactNode;
-}) {
-  return (
-    <div
-      css={css`
-        display: flex;
-        align-items: center;
-      `}
-    >
-      {icon && (
-        <div
-          css={css`
-            background: var(--nom-secondary-hover);
-            border-radius: 50%;
-            height: 40px;
-            width: 40px;
-            justify-items: center;
-            align-content: center;
-          `}
-        >
-          {icon}
-        </div>
-      )}
-
-      <BodyShort
-        css={css`
-          margin-left: var(--a-spacing-4);
-        `}
-        size="large"
-      >
-        {`${label}${label.endsWith(":") ? "" : ":"}`}
-      </BodyShort>
-
-      <span
-        css={css`
-          margin-left: var(--a-spacing-4);
-        `}
-      >
-        <b>{value.toString()}</b>
-      </span>
-    </div>
-  );
-}
-
 export type MedarbeidereStatistikk = {
   statlige: number;
   kommunale: number;
   eksterne: number;
   totalt: number;
+};
+
+export type OrgEnhetStatistikkItem = {
+  label: string;
+  value: number;
+  icon?: string;
+  helpText?: string;
 };
