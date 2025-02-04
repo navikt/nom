@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -83,11 +84,10 @@ public class U4DiffService {
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private boolean harUlikeEnheter(List<U4Diff> er) {
-        if (er.size() != 2) {
-            return false;
-        }
-        return Objects.equals(er.getFirst().getNomOrgenhetId(), er.getLast().getU4OrgenhetId());
+    private boolean harUlikeEnheter(List<U4Diff> differ) {
+        var nonNullNomOrgenheter = differ.stream().map(U4Diff::getNomOrgenhetId).filter(Objects::nonNull).collect(Collectors.toSet());
+        var nonNullU4Orgenheter = differ.stream().map(U4Diff::getU4OrgenhetId).filter(Objects::nonNull).collect(Collectors.toSet());
+        return !nonNullNomOrgenheter.containsAll(nonNullU4Orgenheter);
     }
 
     private boolean erUlikEnhetEndringstyper(List<U4DiffType> diffTyper) {
