@@ -1,17 +1,24 @@
 package no.nav.nom.apps.admin.sanitycheck.service;
 
+import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -19,6 +26,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OrgtilknytningSanityCheckServiceTest {
 
+    private static final String ORGENHET_ID = "ab123c";
     @Mock
     private OrgtilknytningStateRepository orgtilknytningStateRepository;
 
@@ -27,13 +35,12 @@ class OrgtilknytningSanityCheckServiceTest {
 
     private OrgtilknytningSanityCheckService service;
 
-    private final LocalDate now = LocalDate.now();
+    private static final LocalDate now = LocalDate.now();
 
     @BeforeEach
     void setUp() {
         service = new OrgtilknytningSanityCheckService(orgtilknytningStateRepository, orgEnhetStateRepository);
     }
-
 
     @Test
     void orgtilknytninger_som_ikke_overlapper_skal_ikke_returneres() {
@@ -107,43 +114,48 @@ class OrgtilknytningSanityCheckServiceTest {
 
         var overlappendeOTer = service.orgtilknytningMedFlereOverlappendeDagligOppfolgingCurrentOgFuture();
 
-        assertThat(overlappendeOTer.size()).isEqualTo(2);
-    }
-
-    @Test
-    void duplikate_orgtilknytninger_skal_returneres() {
-        var orgTilknytning2 = orgTilknytning().toBuilder()
-                .fid("orgtilknytning-123abc")
-                .build();
-        when(orgtilknytningStateRepository.getAll()).thenReturn(List.of(orgTilknytning(), orgTilknytning2));
-
-        var duplikateOTer = service.duplikateOrgtilknytninger();
-
-        assertThat(duplikateOTer.size()).isEqualTo(1);
-    }
-
-    @Test
-    void orgtilknytninger_som_ikke_er_like_skal_ikke_returneres() {
-        var orgTilknytning2 = orgTilknytning().toBuilder()
-                .fid("orgtilknytning-123abc")
-                .gyldigFom(now.plusMonths(6))
-                .build();
-        when(orgtilknytningStateRepository.getAll()).thenReturn(List.of(orgTilknytning(), orgTilknytning2));
-
-        var duplikateOTer = service.duplikateOrgtilknytninger();
-
-        assertThat(duplikateOTer).isEmpty();
+        assertThat(overlappendeOTer.size()).as("Alle overlappende OTer skal returneres").isEqualTo(2);
     }
     
+    @DisplayName("Duplikate orgtilknytninger")
+    @ParameterizedTest(name = "Orgenhet {0}, sektor {1}, gyldigFom {2}, tilknytning {3} - forventet antall duplikater: {4}")
+    @MethodSource("duplikateOrgtilknytningerTestCases")
+    void orgtyilknytninger_som_er_duplikate_skal_returneres(String orgEnhetId, Sektor sektor, LocalDate gyldigFom, Tilknytningtype tilknytningtype, int expected) {
+        var orgTilknytning2 = orgTilknytning().toBuilder()
+                .fid("orgtilknytning-123abc")
+                .orgEnhetId(orgEnhetId)
+                .sektor(sektor)
+                .gyldigFom(gyldigFom)
+                .orgtilknytningType(Optional.of(tilknytningtype))
+                .build();
+        when(orgtilknytningStateRepository.getAll()).thenReturn(List.of(orgTilknytning(), orgTilknytning2));
+
+        var duplikateOTer = service.duplikateOrgtilknytninger();
+
+        assertThat(duplikateOTer.size()).isEqualTo(expected);
+    }
+
+    // navIdent er lik i alle testcasene
+    private static Stream<Arguments> duplikateOrgtilknytningerTestCases() {
+        return Stream.of(
+                Arguments.of(ORGENHET_ID, Sektor.NAV_STATLIG, now, Tilknytningtype.FAST, 1),
+                Arguments.of("de456f", Sektor.NAV_STATLIG, now, Tilknytningtype.FAST, 0),
+                Arguments.of(ORGENHET_ID, Sektor.NAV_KOMMUNAL, now, Tilknytningtype.FAST, 0),
+                Arguments.of(ORGENHET_ID, Sektor.NAV_STATLIG, now.plusMonths(3), Tilknytningtype.FAST, 0),
+                Arguments.of(ORGENHET_ID, Sektor.NAV_STATLIG, now, Tilknytningtype.MIDLERTIDIG, 0)
+        );
+    }
 
     private OrgtilknytningState orgTilknytning() {
         return OrgtilknytningState.builder()
                 .fid("orgtilknytning-acb123")
                 .navident("A123456")
-                .orgEnhetId("ab123c")
+                .orgEnhetId(ORGENHET_ID)
+                .sektor(Sektor.NAV_STATLIG)
                 .erDagligOppfolging(true)
                 .gyldigFom(now)
                 .gyldigTom(Optional.of(now.plusYears(1)))
+                .orgtilknytningType(Optional.of(Tilknytningtype.FAST))
                 .build();
     }
 }
