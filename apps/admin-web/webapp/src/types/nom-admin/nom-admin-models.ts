@@ -368,6 +368,11 @@ export interface RessursMedEnhet {
   uniqueAgressoId?: string;
 }
 
+export interface OverlappendeOrgtilknytninger {
+  en: OrgtilknytningState;
+  to: OrgtilknytningState;
+}
+
 export interface OrgtilknytningMedOrgEnhet {
   navident?: string;
   uniqueAgressoId?: string;
@@ -376,6 +381,18 @@ export interface OrgtilknytningMedOrgEnhet {
   gyldigTom?: string;
   orgEnhetGyldigFom?: string;
   orgEnhetGyldigTom?: string;
+}
+
+export interface DuplikatOrgtilknytning {
+  fid1: string;
+  fid2: string;
+  navident: string;
+  orgEnhetId: string;
+  sektor?: Sektor;
+  erDagligOppfolging: boolean;
+  /** @format date */
+  gyldigFom: string;
+  orgtilknytningType?: Tilknytningtype;
 }
 
 export interface OrgEnhetOrganisering {

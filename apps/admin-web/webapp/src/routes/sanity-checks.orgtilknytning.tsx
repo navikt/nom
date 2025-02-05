@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { BigLoader } from "~/components/BigLoader.tsx";
+import { OrgtilknytningDuplikat } from "~/sanitychecks/Orgtilknytning/OrgtilknytningDuplikat.tsx";
 import { OrgtilknytningMedFlereDOLSammePeriode } from "~/sanitychecks/Orgtilknytning/OrgtilknytningMedFlereDOLSammePeriode.tsx";
 import { OrgtilknytningMedTilknytningtypeUtenSektor } from "~/sanitychecks/Orgtilknytning/OrgtilknytningMedTilknytningtypeUtenSektor.tsx";
 import { OrgtilknytningMedUgyldigSektorTilknytningtypeKombinasjon } from "~/sanitychecks/Orgtilknytning/OrgtilknytningMedUgyldigSektorTilknytningtypeKombinasjon.tsx";
@@ -41,6 +42,9 @@ function ListSelector(props: { selected: string }) {
     case "OrgtilknytningMedTilknytningtypeUtenSektor": {
       return <OrgtilknytningMedTilknytningtypeUtenSektor />;
     }
+    case "OrgtilknytningDuplikat": {
+      return <OrgtilknytningDuplikat />;
+    }
     default: {
       return <></>;
     }
@@ -72,6 +76,9 @@ function OrgtilknytningSanityChecks() {
         </option>
         <option value="OrgtilknytningMedTilknytningtypeUtenSektor">
           List alle orgtilknytninger med tilknytningtype, men uten sektor
+        </option>
+        <option value="OrgtilknytningDuplikat">
+          List duplikate orgtilknytninger
         </option>
       </Select>
       <ListSelector selected={selected} />
