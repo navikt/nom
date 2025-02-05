@@ -116,17 +116,35 @@ class OrgtilknytningSanityCheckServiceTest {
 
         assertThat(overlappendeOTer.size()).as("Alle overlappende OTer skal returneres").isEqualTo(2);
     }
-    
+
+    @Test
+    void should_handle_null_value_in_orgtilknytningType() {
+        var orgTilknytning2 = new OrgtilknytningState("orgtilknytning-123abc", 
+                "A123456",
+                ORGENHET_ID, 
+                Sektor.NAV_STATLIG, 
+                true, 
+                LocalDate.now(), 
+                null, 
+                null, 
+                null);
+        when(orgtilknytningStateRepository.getAll()).thenReturn(List.of(orgTilknytning(), orgTilknytning2));
+
+        var duplikateOTer = service.duplikateOrgtilknytninger();
+        
+        assertThat(duplikateOTer).isEmpty();
+    }
+
     @DisplayName("Duplikate orgtilknytninger")
     @ParameterizedTest(name = "Orgenhet {0}, sektor {1}, gyldigFom {2}, tilknytning {3} - forventet antall duplikater: {4}")
     @MethodSource("duplikateOrgtilknytningerTestCases")
-    void orgtyilknytninger_som_er_duplikate_skal_returneres(String orgEnhetId, Sektor sektor, LocalDate gyldigFom, Tilknytningtype tilknytningtype, int expected) {
+    void orgtilknytninger_som_er_duplikate_skal_returneres(String orgEnhetId, Sektor sektor, LocalDate gyldigFom, Tilknytningtype tilknytningtype, int expected) {
         var orgTilknytning2 = orgTilknytning().toBuilder()
                 .fid("orgtilknytning-123abc")
                 .orgEnhetId(orgEnhetId)
                 .sektor(sektor)
                 .gyldigFom(gyldigFom)
-                .orgtilknytningType(Optional.of(tilknytningtype))
+                .orgtilknytningType(Optional.ofNullable(tilknytningtype))
                 .build();
         when(orgtilknytningStateRepository.getAll()).thenReturn(List.of(orgTilknytning(), orgTilknytning2));
 
@@ -142,7 +160,8 @@ class OrgtilknytningSanityCheckServiceTest {
                 Arguments.of("de456f", Sektor.NAV_STATLIG, now, Tilknytningtype.FAST, 0),
                 Arguments.of(ORGENHET_ID, Sektor.NAV_KOMMUNAL, now, Tilknytningtype.FAST, 0),
                 Arguments.of(ORGENHET_ID, Sektor.NAV_STATLIG, now.plusMonths(3), Tilknytningtype.FAST, 0),
-                Arguments.of(ORGENHET_ID, Sektor.NAV_STATLIG, now, Tilknytningtype.MIDLERTIDIG, 0)
+                Arguments.of(ORGENHET_ID, Sektor.NAV_STATLIG, now, Tilknytningtype.MIDLERTIDIG, 0),
+                Arguments.of(ORGENHET_ID, null, now, Tilknytningtype.FAST, 0)
         );
     }
 
