@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.admin.SwaggerConfig;
-import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.DuplikateOrgtilknytninger;
+import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.DuplikatOrgtilknytning;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OrgtilknytningMedOrgEnhet;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OverlappendeOrgtilknytninger;
 import no.nav.nom.apps.admin.sanitycheck.service.OrgtilknytningSanityCheckService;
@@ -118,7 +118,7 @@ public class OrgtilknytningSanityCheckController {
             }
     )
     @GetMapping(value = "/duplikateOrgtilknytninger")
-    public ResponseEntity<List<DuplikateOrgtilknytninger>> duplikateOrgtilknytninger() {
+    public ResponseEntity<List<DuplikatOrgtilknytning>> duplikateOrgtilknytninger() {
         return ResponseEntity.ok(orgtilknytningSanityCheckService.duplikateOrgtilknytninger());
     }
 }
