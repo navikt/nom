@@ -9,6 +9,7 @@ import type {
   OrganiseringState,
 } from "~/types.ts";
 import type {
+  DuplikatOrgtilknytning,
   EnheterOgOrganisering,
   HendelseDTO,
   MasteredRessursDTO,
@@ -430,4 +431,17 @@ export function getOrgtilknytningMedTilknytningtypeUtenSektor() {
         )
       ).json<OrgtilknytningState[]>(),
   });
+}
+
+export async function getDuplikateOrgtilknytninger(): Promise<
+  DuplikatOrgtilknytning[]
+> {
+  return await ky
+    .get(
+      `${API_BASE_URL}/SanityCheck/orgtilknytning/duplikateOrgtilknytninger`,
+      {
+        timeout: 120_000, // 120 seconds
+      },
+    )
+    .json<DuplikatOrgtilknytning[]>();
 }
