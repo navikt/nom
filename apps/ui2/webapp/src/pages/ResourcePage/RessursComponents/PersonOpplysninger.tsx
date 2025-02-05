@@ -71,9 +71,9 @@ export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
 
   const harSluttet = !!ressurs.sluttdato && isBeforeToday(ressurs.sluttdato);
 
-  const sluttetUnderToMndSiden =
-    ressurs.sluttdato &&
-    isSameDateOrAfter(
+  const sluttetOverToMndSiden =
+    !!ressurs.sluttdato &&
+    !isSameDateOrAfter(
       ressurs.sluttdato,
       dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
     );
@@ -131,7 +131,7 @@ export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
           {(hasKontaktinfoAccessForRessurs ||
             hasSelfServiceAccess ||
             hasAdminAccess) &&
-            sluttetUnderToMndSiden && (
+            !sluttetOverToMndSiden && (
               <>
                 <span>Kontaktpersoner:</span>
 
