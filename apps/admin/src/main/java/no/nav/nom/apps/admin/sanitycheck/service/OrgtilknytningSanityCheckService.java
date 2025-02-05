@@ -136,10 +136,10 @@ public class OrgtilknytningSanityCheckService {
                     OrgtilknytningState original = null;
                     for (OrgtilknytningState ot : otEr) {
                         if (original != null) {
-                            if (original.orgEnhetId().equals(ot.orgEnhetId()) &&
-                                    original.gyldigFom().equals(ot.gyldigFom()) &&
-                                    original.sektor().equals(ot.sektor()) &&
-                                    original.orgtilknytningType().equals(ot.orgtilknytningType())
+                            if (Objects.equals(original.orgEnhetId(), ot.orgEnhetId()) &&
+                                    Objects.equals(original.gyldigFom(), ot.gyldigFom()) &&
+                                    Objects.equals(original.sektor(), ot.sektor()) &&
+                                    Objects.equals(original.orgtilknytningType(), ot.orgtilknytningType())
                             ) {
                                 var duplikatOT = DuplikatOrgtilknytning.builder()
                                         .fid1(original.fid())
