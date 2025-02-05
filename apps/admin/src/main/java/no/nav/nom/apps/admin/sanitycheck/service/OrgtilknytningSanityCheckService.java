@@ -2,7 +2,7 @@ package no.nav.nom.apps.admin.sanitycheck.service;
 
 import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.DuplikatOrgtilknytning;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OrgtilknytningMedOrgEnhet;
-import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OverlappendeOrgtilknytninger;
+import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OverlappendeOrgtilknytning;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -87,7 +87,7 @@ public class OrgtilknytningSanityCheckService {
                 .toList();
     }
 
-    public List<OverlappendeOrgtilknytninger> orgtilknytningMedFlereOverlappendeDagligOppfolgingCurrentOgFuture() {
+    public List<OverlappendeOrgtilknytning> orgtilknytningMedFlereOverlappendeDagligOppfolgingCurrentOgFuture() {
         // Group by navident for current period and dagligOppfolging
         Map<String, List<OrgtilknytningState>> groupedByNavidentForCurrentAndFuturePeriodWithDagligDagligOppfolging =
                 orgtilknytningStateRepository.getAll().stream()
@@ -96,7 +96,7 @@ public class OrgtilknytningSanityCheckService {
                         .sorted(Comparator.comparing(OrgtilknytningState::gyldigFom))
                         .collect(Collectors.groupingBy(OrgtilknytningState::navident));
 
-        List<OverlappendeOrgtilknytninger> overlappendeOrgtilknytninger = new ArrayList<>();
+        List<OverlappendeOrgtilknytning> overlappendeOrgtilknytninger = new ArrayList<>();
         // Filter out groups where there is more than one dagligOppfolging in current period
         groupedByNavidentForCurrentAndFuturePeriodWithDagligDagligOppfolging.values().stream()
                 .filter(group -> group.size() > 1)
@@ -105,11 +105,7 @@ public class OrgtilknytningSanityCheckService {
                     for (OrgtilknytningState ot : otEr) {
                         if (previous != null) {
                             if (overlapsInterval(ot, previous)) {
-                                var overlappendeOTer = new OverlappendeOrgtilknytninger(
-                                        previous,
-                                        ot
-                                );
-                                overlappendeOrgtilknytninger.add(overlappendeOTer);
+                                overlappendeOrgtilknytninger.add(overlappendeOrgtilknytning(ot, previous));
                             }
                         }
                         previous = ot;
@@ -218,6 +214,23 @@ public class OrgtilknytningSanityCheckService {
 
     public static LocalDate dayBefore(LocalDate localDate) {
         return localDate.minusDays(1);
+    }
+
+    private OverlappendeOrgtilknytning overlappendeOrgtilknytning(OrgtilknytningState ot1, OrgtilknytningState ot2) {
+        return OverlappendeOrgtilknytning.builder()
+                .navident1(ot1.navident())
+                .orgEnhetId1(ot1.orgEnhetId())
+                .fid1(ot1.fid())
+                .gyldigFom1(ot1.gyldigFom())
+                .gyldigTom1(ot1.gyldigTom())
+                .erDagligOppfolging1(ot1.erDagligOppfolging())
+                .navident2(ot2.navident())
+                .orgEnhetId2(ot2.orgEnhetId())
+                .fid2(ot2.fid())
+                .gyldigFom2(ot2.gyldigFom())
+                .gyldigTom2(ot2.gyldigTom())
+                .erDagligOppfolging2(ot2.erDagligOppfolging())
+                .build();
     }
 
 }

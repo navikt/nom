@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.admin.SwaggerConfig;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.DuplikatOrgtilknytning;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OrgtilknytningMedOrgEnhet;
-import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OverlappendeOrgtilknytninger;
+import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OverlappendeOrgtilknytning;
 import no.nav.nom.apps.admin.sanitycheck.service.OrgtilknytningSanityCheckService;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.springframework.http.ResponseEntity;
@@ -104,7 +104,7 @@ public class OrgtilknytningSanityCheckController {
             }
     )
     @GetMapping(value = "/orgtilknytningMedFlereOverlappendeDagligOppfolgingCurrentOgFuture")
-    public ResponseEntity<List<OverlappendeOrgtilknytninger>> orgtilknytningMedFlereOverlappendeDagligOppfolgingCurrentOgFuture() {
+    public ResponseEntity<List<OverlappendeOrgtilknytning>> orgtilknytningMedFlereOverlappendeDagligOppfolgingCurrentOgFuture() {
         return ResponseEntity.ok(orgtilknytningSanityCheckService.orgtilknytningMedFlereOverlappendeDagligOppfolgingCurrentOgFuture());
     }
 

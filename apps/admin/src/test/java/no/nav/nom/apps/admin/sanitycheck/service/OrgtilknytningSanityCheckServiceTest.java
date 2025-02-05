@@ -119,19 +119,19 @@ class OrgtilknytningSanityCheckServiceTest {
 
     @Test
     void should_handle_null_value_in_orgtilknytningType() {
-        var orgTilknytning2 = new OrgtilknytningState("orgtilknytning-123abc", 
+        var orgTilknytning2 = new OrgtilknytningState("orgtilknytning-123abc",
                 "A123456",
-                ORGENHET_ID, 
-                Sektor.NAV_STATLIG, 
-                true, 
-                LocalDate.now(), 
-                null, 
-                null, 
+                ORGENHET_ID,
+                Sektor.NAV_STATLIG,
+                true,
+                LocalDate.now(),
+                null,
+                null,
                 null);
         when(orgtilknytningStateRepository.getAll()).thenReturn(List.of(orgTilknytning(), orgTilknytning2));
 
         var duplikateOTer = service.duplikateOrgtilknytninger();
-        
+
         assertThat(duplikateOTer).isEmpty();
     }
 
