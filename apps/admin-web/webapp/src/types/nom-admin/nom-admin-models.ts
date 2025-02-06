@@ -350,6 +350,15 @@ export interface RessursOrgtilknytningKoblingInfo {
   ressursMedTilknytningerUtoverEnhetGyldigPeriode?: number;
 }
 
+export interface RessursOrgtilknytningUlikSluttdato {
+  navident: string;
+  orgEnhetId: string;
+  /** @format date */
+  ressursSluttdato: string;
+  /** @format date */
+  orgtilknytningSluttdato: string;
+}
+
 export interface RessursMedEnhet {
   navident?: string;
   ressursFid?: string;

@@ -21,6 +21,7 @@ import type {
   OverlappendeOrgtilknytning,
   RessursMedEnhet,
   RessursOrgtilknytningKoblingInfo,
+  RessursOrgtilknytningUlikSluttdato,
   RessursStateKafkaDTO,
 } from "~/types/nom-admin/nom-admin-models.ts";
 import type {
@@ -458,4 +459,17 @@ export async function getOverlappendeOrgtilknytninger(): Promise<
       },
     )
     .json<OverlappendeOrgtilknytning[]>();
+}
+
+export async function getRessursOrgtilknytningUlikSluttdato(): Promise<
+  RessursOrgtilknytningUlikSluttdato[]
+> {
+  return await ky
+    .get(
+      `${API_BASE_URL}/SanityCheck/ressurs/ressursSluttdatoUlikOrgTilknytningSluttdato`,
+      {
+        timeout: 120_000, // 120 seconds
+      },
+    )
+    .json<RessursOrgtilknytningUlikSluttdato[]>();
 }
