@@ -368,9 +368,23 @@ export interface RessursMedEnhet {
   uniqueAgressoId?: string;
 }
 
-export interface OverlappendeOrgtilknytninger {
-  en: OrgtilknytningState;
-  to: OrgtilknytningState;
+export interface OverlappendeOrgtilknytning {
+  navident1: string;
+  orgEnhetId1: string;
+  fid1: string;
+  /** @format date */
+  gyldigFom1: string;
+  /** @format date */
+  gyldigTom1?: string;
+  erDagligOppfolging1: boolean;
+  navident2: string;
+  orgEnhetId2: string;
+  fid2: string;
+  /** @format date */
+  gyldigFom2: string;
+  /** @format date */
+  gyldigTom2?: string;
+  erDagligOppfolging2: boolean;
 }
 
 export interface OrgtilknytningMedOrgEnhet {

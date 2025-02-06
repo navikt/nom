@@ -10,6 +10,7 @@ import { OrgtilknytningMedTilknytningtypeUtenSektor } from "~/sanitychecks/Orgti
 import { OrgtilknytningMedUgyldigSektorTilknytningtypeKombinasjon } from "~/sanitychecks/Orgtilknytning/OrgtilknytningMedUgyldigSektorTilknytningtypeKombinasjon.tsx";
 import { OrgtilknytningNegativPeriode } from "~/sanitychecks/Orgtilknytning/OrgtilknytningNegativPeriode.tsx";
 import { OrgtilknytningOrgGyldighet } from "~/sanitychecks/Orgtilknytning/OrgtilknytningOrgGyldighet.tsx";
+import { OrgtilknytningOverlapp } from "~/sanitychecks/Orgtilknytning/OrgtilknytningOverlapp.tsx";
 
 export const Route = createFileRoute("/sanity-checks/orgtilknytning")({
   component: () => {
@@ -45,6 +46,9 @@ function ListSelector(props: { selected: string }) {
     case "OrgtilknytningDuplikat": {
       return <OrgtilknytningDuplikat />;
     }
+    case "OrgtilknytningOverlapp": {
+      return <OrgtilknytningOverlapp />;
+    }
     default: {
       return <></>;
     }
@@ -79,6 +83,9 @@ function OrgtilknytningSanityChecks() {
         </option>
         <option value="OrgtilknytningDuplikat">
           List duplikate orgtilknytninger
+        </option>
+        <option value="OrgtilknytningOverlapp">
+          List overlappende orgtilknytninger
         </option>
       </Select>
       <ListSelector selected={selected} />
