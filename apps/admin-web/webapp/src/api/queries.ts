@@ -18,6 +18,7 @@ import type {
   OrgEnhetState,
   OrgEnhetStateDTO,
   OrgtilknytningMedOrgEnhet,
+  OverlappendeOrgtilknytning,
   RessursMedEnhet,
   RessursOrgtilknytningKoblingInfo,
   RessursStateKafkaDTO,
@@ -444,4 +445,17 @@ export async function getDuplikateOrgtilknytninger(): Promise<
       },
     )
     .json<DuplikatOrgtilknytning[]>();
+}
+
+export async function getOverlappendeOrgtilknytninger(): Promise<
+  OverlappendeOrgtilknytning[]
+> {
+  return await ky
+    .get(
+      `${API_BASE_URL}/SanityCheck/orgtilknytning/orgtilknytningMedFlereOverlappendeDagligOppfolgingCurrentOgFuture`,
+      {
+        timeout: 120_000, // 120 seconds
+      },
+    )
+    .json<OverlappendeOrgtilknytning[]>();
 }
