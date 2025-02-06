@@ -2,6 +2,7 @@ package no.nav.nom.apps.admin.sanitycheck.service;
 
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedEnhet;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningKoblingInfo;
+import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningUlikSluttdato;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
@@ -16,11 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class RessursSanityCheckService {
@@ -181,6 +180,68 @@ public class RessursSanityCheckService {
         return alleRessurser.stream()
             .filter(n -> !fidNavidenter.add(n.navident()))
             .toList();
+    }
+    
+    public List<RessursOrgtilknytningUlikSluttdato> ressurserMedUlikOrgTilknytningSluttDato() {
+        Map<String, RessursState> alleRessurserSomErAktive = ressursStateRepository.findAllActiveRessurser();
+        Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger = getOrgtilknytningerForNavidenter(alleRessurserSomErAktive.keySet(), Function.identity());
+        Map<String, Collection<OrgtilknytningState>> sisteOrgtilknytninger = getSisteOrgtilknytninger(alleOrgTilknytninger);
+
+        List<RessursOrgtilknytningUlikSluttdato> ulikeSluttdatoer = new ArrayList<>();
+
+        for (OrgtilknytningState orgtilknytning : sisteOrgtilknytninger.values().stream().flatMap(Collection::stream).toList()) {
+            var ressurs = alleRessurserSomErAktive.get(orgtilknytning.navident());
+            if (orgtilknytning.gyldigTom().isPresent() && ressurs.sluttdato().isPresent()) {
+                if (!orgtilknytning.gyldigTom().get().isEqual(ressurs.sluttdato().get())) {
+                    ulikeSluttdatoer.add(getRessursOrgtilknytningUlikSluttdato(ressurs, orgtilknytning));
+                }
+            } else if (orgtilknytning.gyldigTom().isPresent()) {
+                ulikeSluttdatoer.add(getRessursOrgtilknytningUlikSluttdato(ressurs, orgtilknytning));
+            } else if (ressurs.sluttdato().isPresent()) {
+                ulikeSluttdatoer.add(getRessursOrgtilknytningUlikSluttdato(ressurs, orgtilknytning));
+            }
+        }
+        return ulikeSluttdatoer;
+    }
+
+    private Map<String, Collection<OrgtilknytningState>> getSisteOrgtilknytninger(Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger) {
+        Map<String, Collection<OrgtilknytningState>> result = new HashMap<>();
+        for (Map.Entry<String, Collection<OrgtilknytningState>> entry : alleOrgTilknytninger.entrySet()) {
+            String key = entry.getKey();
+            Collection<OrgtilknytningState> orgtilknytningState = entry.getValue();
+
+            Optional<LocalDate> latestDates = orgtilknytningState.stream()
+                    .map(OrgtilknytningState::gyldigTom)
+                    .flatMap(Optional::stream)
+                    .max(LocalDate::compareTo);
+
+            if (latestDates.isPresent()) {
+                Collection<OrgtilknytningState> filteredOrgtilknytningState = orgtilknytningState.stream()
+                        .filter(org -> org.gyldigTom().equals(latestDates))
+                        .toList();
+
+                if (!filteredOrgtilknytningState.isEmpty()) {
+                    result.put(key, filteredOrgtilknytningState);
+                }
+            }
+        }
+        return result;
+    }
+
+    private RessursOrgtilknytningUlikSluttdato getRessursOrgtilknytningUlikSluttdato(RessursState ressurs, OrgtilknytningState orgtilknytning) {
+        return RessursOrgtilknytningUlikSluttdato.builder()
+                .navident(ressurs.navident())
+                .orgEnhetId(orgtilknytning.orgEnhetId())
+                .ressursSluttdato(ressurs.sluttdato().isPresent() ? ressurs.sluttdato().get() : null)
+                .orgtilknytningSluttdato(orgtilknytning.gyldigTom().isPresent() ? orgtilknytning.gyldigTom().get() : null)
+                .build();
+    }
+
+    private <T> Map<String, Collection<T>> getOrgtilknytningerForNavidenter(Set<String> navidenter, Function<OrgtilknytningState, T> transformer) {
+        return navidenter.stream().collect(Collectors.toMap(navident -> navident, navident -> {
+            Collection<OrgtilknytningState> value = orgtilknytningStateRepository.findByNavident(navident);
+            return value == null ? Collections.emptyList() : value.stream().map(transformer).toList();
+        }));
     }
 
     private List<String> uniqueIdForOverEnhet(List<OrganiseringState> organiseringer) {

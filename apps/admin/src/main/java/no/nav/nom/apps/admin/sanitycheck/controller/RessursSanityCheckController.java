@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.admin.SwaggerConfig;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedEnhet;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningKoblingInfo;
+import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningUlikSluttdato;
 import no.nav.nom.apps.admin.sanitycheck.service.RessursSanityCheckService;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+
+import static org.springframework.http.ResponseEntity.ok;
 
 @Tag(name = "Admin for å kjøre sanity check på Ressurs")
 @RestController
@@ -42,7 +45,7 @@ public class RessursSanityCheckController {
     )
     @GetMapping(value = "/ressurser")
     public ResponseEntity<RessursOrgtilknytningKoblingInfo> dataSanityCheckRessurser() {
-        return ResponseEntity.ok(ressursSanityCheckService.aktiveRessurser());
+        return ok(ressursSanityCheckService.aktiveRessurser());
     }
 
     @Operation(
@@ -58,7 +61,7 @@ public class RessursSanityCheckController {
     public ResponseEntity<List<RessursMedEnhet>> listRessurserTilIkkeAktivEnhet(
         @RequestParam(defaultValue = "false") boolean inkluderEksterne,
         @RequestParam(defaultValue = "false") boolean inkluderHelfo) {
-        return ResponseEntity.ok(ressursSanityCheckService.ressurserMedAktivOrgtilknytningTilIkkeAktivEnhet(inkluderEksterne, inkluderHelfo));
+        return ok(ressursSanityCheckService.ressurserMedAktivOrgtilknytningTilIkkeAktivEnhet(inkluderEksterne, inkluderHelfo));
     }
 
     @Operation(
@@ -72,7 +75,7 @@ public class RessursSanityCheckController {
     )
     @GetMapping(value = "/listTilkoblingerUtoverRessursGyldighetPeriode")
     public ResponseEntity<List<RessursMedEnhet>> listTilkoblingerUtoverRessursGyldighetPeriode() {
-        return ResponseEntity.ok(ressursSanityCheckService.ressurserMedEnhetUtoverRessursSluttdato());
+        return ok(ressursSanityCheckService.ressurserMedEnhetUtoverRessursSluttdato());
     }
 
     @Operation(
@@ -86,7 +89,7 @@ public class RessursSanityCheckController {
     )
     @GetMapping(value = "/ressursMedBlankMellomNavn")
     public ResponseEntity<List<RessursState>> listRessurserMedBlankMellomNavn() {
-        return ResponseEntity.ok(ressursSanityCheckService.ressurserMedBlankMellomnavn());
+        return ok(ressursSanityCheckService.ressurserMedBlankMellomnavn());
     }
 
     @Operation(
@@ -100,7 +103,19 @@ public class RessursSanityCheckController {
     )
     @GetMapping(value = "/duplikateRessurserPaaNavident")
     public ResponseEntity<List<RessursState>> duplikateRessurserPaaNavident() {
-        return ResponseEntity.ok(ressursSanityCheckService.finnDuplikateRessurserPaaSammeNavident());
+        return ok(ressursSanityCheckService.finnDuplikateRessurserPaaSammeNavident());
+    }
+
+    @Operation(
+            description = "Valider ressurser som har en ulik sluttdato på organisasjonstilknytning og ressurs sluttdato",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+            @ApiResponse(responseCode = "200", description = "Success")
+    )
+    @GetMapping(value = "/ressursSluttdatoUlikOrgTilknytningSluttdato")
+    public ResponseEntity<List<RessursOrgtilknytningUlikSluttdato>> ressurserMedUlikOrgTilknytningSluttDato() {
+        return ok(ressursSanityCheckService.ressurserMedUlikOrgTilknytningSluttDato());
     }
 
 }
