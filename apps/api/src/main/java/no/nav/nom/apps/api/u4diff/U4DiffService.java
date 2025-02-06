@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.etter;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.lik;
 import static no.nav.nom.apps.api.u4diff.U4DiffKilde.STILLINGER;
 import static no.nav.nom.apps.api.u4diff.U4DiffType.EKSTRA_U4_PERIODE;
 import static no.nav.nom.apps.api.u4diff.U4DiffType.FORSKJELL_I_U4_PERIODE;
@@ -60,7 +61,7 @@ public class U4DiffService {
         return ulikStartDatoMerged;
     }
 
-    public List<U4Diff> getUlikStartDatoBasis() {
+    private List<U4Diff> getUlikStartDatoBasis() {
         List<U4Diff> ulikStartDato = new ArrayList<>();
         var perNavident = u4DiffRepository.findByKilde(STILLINGER).stream()
             .collect(Collectors.groupingBy(U4Diff::getNavident));
@@ -69,13 +70,29 @@ public class U4DiffService {
             u4Differ.stream()
                 .collect(groupingBy(diff -> diff.getNomOrgenhetId() != null ? diff.getNomOrgenhetId() : diff.getU4OrgenhetId()))
                 .forEach((enhet, differPaEnhet) -> { // per enhet
-                    if (erDetEkstraU4PeriodeOgManglendeU4Periode(differPaEnhet)
-                        && erStartDatoUlik(differPaEnhet)) {
+                    if (erDetEkstraU4PeriodeOgManglendeU4Periode(differPaEnhet) && erStartDatoUlik(differPaEnhet)) {
                         ulikStartDato.addAll(differPaEnhet);
                     }
                 });
         });
         return ulikStartDato;
+    }
+
+    public List<U4Diff> getUlikSluttDato() {
+        List<U4Diff> ulikSluttDato = new ArrayList<>();
+        var perNavident = u4DiffRepository.findByKilde(STILLINGER).stream()
+            .collect(Collectors.groupingBy(U4Diff::getNavident));
+
+        perNavident.forEach((navident, u4Differ) -> {
+            u4Differ.stream()
+                .collect(groupingBy(diff -> diff.getNomOrgenhetId() != null ? diff.getNomOrgenhetId() : diff.getU4OrgenhetId()))
+                .forEach((enhet, differPaEnhet) -> { // per enhet
+                    if (erDetKunForskjellIPeriode(differPaEnhet) && erSluttDatoUlik(differPaEnhet.getFirst())) {
+                        ulikSluttDato.addAll(differPaEnhet);
+                    }
+                });
+        });
+        return ulikSluttDato;
     }
 
     public List<U4Diff> getIkkeKlassifiserteDifferanser() {
@@ -84,6 +101,7 @@ public class U4DiffService {
         klassifiserteIder.addAll(getSektorDifferanse().stream().map(U4Diff::getId).toList());
         klassifiserteIder.addAll(getUlikEnhet().stream().map(U4Diff::getId).toList());
         klassifiserteIder.addAll(getUlikStartDatoBasis().stream().map(U4Diff::getId).toList());
+        klassifiserteIder.addAll(getUlikSluttDato().stream().map(U4Diff::getId).toList());
 
         return u4DiffRepository.findAll().stream()
             .filter(u4Diff -> !klassifiserteIder.contains(u4Diff.getId()))
@@ -143,6 +161,15 @@ public class U4DiffService {
         if (etter(nestenTreAarSiden, u4StartDato)) u4StartDato = nestenTreAarSiden;
 
         return !Objects.equals(nomStartDato, u4StartDato);
+    }
+
+    private boolean erDetKunForskjellIPeriode(List<U4Diff> differPaEnhet) {
+        if (differPaEnhet.size() != 1) return false;
+        return differPaEnhet.getFirst().getType().equals(FORSKJELL_I_U4_PERIODE);
+    }
+
+    private boolean erSluttDatoUlik(U4Diff diffPaaEnhet) {
+        return !lik(diffPaaEnhet.getNomGyldigTom(), diffPaaEnhet.getU4GyldigTom());
     }
 
     private Collection<? extends U4Diff> mergeIfPossible(List<U4Diff> differPaEnhet) {

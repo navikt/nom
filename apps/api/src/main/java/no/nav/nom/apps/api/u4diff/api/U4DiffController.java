@@ -30,6 +30,7 @@ import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.IDE
 import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.IKKE_KLASSIFISERTE_DIFFERANSER;
 import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.SEKTOR_DIFF_PAA_RESSURS;
 import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.ULIK_ENHET;
+import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.ULIK_SLUTT_DATO;
 import static no.nav.nom.apps.api.u4diff.api.U4DiffExcelGenerator.ExportType.ULIK_START_DATO;
 
 @RestController
@@ -141,6 +142,30 @@ public class U4DiffController {
     public void ulikStartDatoExcel(HttpServletResponse response) {
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ulikStartDato.xlsx");
         u4DiffExcelGenerator.generate(response, u4DiffService.getUlikStartDato(), ULIK_START_DATO);
+    }
+
+    // Ulik slutt dato NOM og U4
+
+    @Operation(
+        description = "List differanser i sluttdato for samme enhet mellom NOM og U4",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping("/ulikSluttDato")
+    public ResponseEntity<List<U4Diff>> ulikSluttDato() {
+        return ResponseEntity.ok(u4DiffService.getUlikSluttDato());
+    }
+
+    @Operation(
+        description = "Generer Excel for differanser i sluttdato for samme enhet mellom NOM og U4",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Excel generert"),
+    })
+    @GetMapping("/ulikSluttDato/excel")
+    public void ulikSluttDatoExcel(HttpServletResponse response) {
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ulikSluttDato.xlsx");
+        u4DiffExcelGenerator.generate(response, u4DiffService.getUlikSluttDato(), ULIK_SLUTT_DATO);
     }
 
     // Ikke-klassifiserte differanser

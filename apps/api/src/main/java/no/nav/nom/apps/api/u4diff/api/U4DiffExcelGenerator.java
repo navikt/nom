@@ -35,6 +35,7 @@ public class U4DiffExcelGenerator {
         IDENTER_IKKE_I_U4,
         ULIK_ENHET,
         ULIK_START_DATO,
+        ULIK_SLUTT_DATO,
         ALLE_DIFFERANSER,
         IKKE_KLASSIFISERTE_DIFFERANSER
     }
@@ -49,7 +50,7 @@ public class U4DiffExcelGenerator {
                 case IDENTER_IKKE_I_U4, IKKE_KLASSIFISERTE_DIFFERANSER, ALLE_DIFFERANSER -> addRowGeneric(sheet.createRow(rowcount++), null);
                 case SEKTOR_DIFF_PAA_RESSURS -> addRowSektorDiff(sheet.createRow(rowcount++), null);
                 case ULIK_ENHET -> addRowUlikEnhet(sheet.createRow(rowcount++), null);
-                case ULIK_START_DATO -> addRowUlikStartDato(sheet.createRow(rowcount++), null);
+                case ULIK_START_DATO, ULIK_SLUTT_DATO -> addRowUlikDato(sheet.createRow(rowcount++), null);
             }
 
             // RADER
@@ -58,7 +59,7 @@ public class U4DiffExcelGenerator {
                     case IDENTER_IKKE_I_U4, IKKE_KLASSIFISERTE_DIFFERANSER, ALLE_DIFFERANSER -> addRowGeneric(sheet.createRow(rowcount++), diff);
                     case SEKTOR_DIFF_PAA_RESSURS -> addRowSektorDiff(sheet.createRow(rowcount++), diff);
                     case ULIK_ENHET -> addRowUlikEnhet(sheet.createRow(rowcount++), diff);
-                    case ULIK_START_DATO -> addRowUlikStartDato(sheet.createRow(rowcount++), diff);
+                    case ULIK_START_DATO, ULIK_SLUTT_DATO -> addRowUlikDato(sheet.createRow(rowcount++), diff);
                 }
             }
 
@@ -129,7 +130,7 @@ public class U4DiffExcelGenerator {
         nomOrgtilknytning(col++, row, u4diff);
     }
 
-    private void addRowUlikStartDato(Row row, U4Diff u4diff) {
+    private void addRowUlikDato(Row row, U4Diff u4diff) {
         int col = 0;
         navident(col++, row, u4diff);
         nomOrgenhetId(col++, row, u4diff);
