@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -45,6 +45,22 @@ public class U4DiffService {
     }
 
     public List<U4Diff> getUlikStartDato() {
+        List<U4Diff> ulikStartDatoMerged = new ArrayList<>();
+
+        getUlikStartDatoBasis().stream()
+            .collect(Collectors.groupingBy(U4Diff::getNavident))
+            .forEach((navident, u4Differ) -> {
+                u4Differ.stream()
+                    .collect(groupingBy(diff -> diff.getNomOrgenhetId() != null ? diff.getNomOrgenhetId() : diff.getU4OrgenhetId()))
+                    .forEach((enhet, differPaEnhet) -> {
+                        ulikStartDatoMerged.addAll(mergeIfPossible(differPaEnhet));
+                    });
+                }
+            );
+        return ulikStartDatoMerged;
+    }
+
+    public List<U4Diff> getUlikStartDatoBasis() {
         List<U4Diff> ulikStartDato = new ArrayList<>();
         var perNavident = u4DiffRepository.findByKilde(STILLINGER).stream()
             .collect(Collectors.groupingBy(U4Diff::getNavident));
@@ -67,6 +83,7 @@ public class U4DiffService {
         klassifiserteIder.addAll(getStatligeIkkeIU4().stream().map(U4Diff::getId).toList());
         klassifiserteIder.addAll(getSektorDifferanse().stream().map(U4Diff::getId).toList());
         klassifiserteIder.addAll(getUlikEnhet().stream().map(U4Diff::getId).toList());
+        klassifiserteIder.addAll(getUlikStartDatoBasis().stream().map(U4Diff::getId).toList());
 
         return u4DiffRepository.findAll().stream()
             .filter(u4Diff -> !klassifiserteIder.contains(u4Diff.getId()))
@@ -127,4 +144,53 @@ public class U4DiffService {
 
         return !Objects.equals(nomStartDato, u4StartDato);
     }
+
+    private Collection<? extends U4Diff> mergeIfPossible(List<U4Diff> differPaEnhet) {
+        if (differPaEnhet.size() == 2) {
+            U4Diff nomDiffRad = null;
+            U4Diff u4DiffRad = null;
+            if (differPaEnhet.getFirst().getNomOrgenhetId() != null) {
+                nomDiffRad = differPaEnhet.getFirst();
+            } else if (differPaEnhet.getLast().getNomOrgenhetId() != null) {
+                nomDiffRad = differPaEnhet.getLast();
+            }
+            if (differPaEnhet.getFirst().getU4OrgenhetId() != null) {
+                u4DiffRad = differPaEnhet.getFirst();
+            } else if (differPaEnhet.getLast().getU4OrgenhetId() != null) {
+                u4DiffRad = differPaEnhet.getLast();
+            }
+            if (nomDiffRad == null || u4DiffRad == null) {
+                return differPaEnhet; // Kan ikke slå sammen
+            }
+            return List.of(U4Diff.builder()
+                .id(nomDiffRad.getId())
+                .navident(nomDiffRad.getNavident())
+                .nomSektor(nomDiffRad.getNomSektor())
+                .kilde(nomDiffRad.getKilde())
+                .nomDol(nomDiffRad.getNomDol())
+                .nomOrgenhetId(nomDiffRad.getNomOrgenhetId())
+                .nomOrgenhetNavn(nomDiffRad.getNomOrgenhetNavn())
+                .nomGyldigFom(nomDiffRad.getNomGyldigFom())
+                .nomGyldigTom(nomDiffRad.getNomGyldigTom())
+                .nomOtSektor(nomDiffRad.getNomOtSektor())
+                .nomOrgtilknytning(nomDiffRad.getNomOrgtilknytning())
+                .u4SektorPaaRessurs(u4DiffRad.getU4SektorPaaRessurs())
+                .u4RessursType(u4DiffRad.getU4RessursType())
+                .u4RessursAnsettelsestypeBesk(u4DiffRad.getU4RessursAnsettelsestypeBesk())
+                .u4StillingAnsettelsestypeBesk(u4DiffRad.getU4StillingAnsettelsestypeBesk())
+                .u4SektorPaaStilling(u4DiffRad.getU4SektorPaaStilling())
+                .u4Dol(u4DiffRad.getU4Dol())
+                .u4OrgenhetId(u4DiffRad.getU4OrgenhetId())
+                .u4OrgenhetNavn(u4DiffRad.getU4OrgenhetNavn())
+                .u4GyldigFom(u4DiffRad.getU4GyldigFom())
+                .u4GyldigTom(u4DiffRad.getU4GyldigTom())
+                .u4StillingPeriode(u4DiffRad.getU4StillingPeriode())
+                .build()
+            );
+        } else {
+            return differPaEnhet;
+        }
+
+    }
+
 }
