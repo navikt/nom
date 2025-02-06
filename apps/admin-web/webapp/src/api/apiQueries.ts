@@ -177,6 +177,31 @@ export async function ulikeStartDatoerExcelExportOptions() {
   window.URL.revokeObjectURL(url);
 }
 
+export async function ulikeSluttDatoerOptions(): Promise<U4Diff[]> {
+  return await ky
+    .get(`${API_BASE_URL}/api/admin/u4diff/ulikSluttDato`, {
+      timeout: 60_000,
+    })
+    .json<U4Diff[]>();
+}
+
+export async function ulikeSluttDatoerExcelExportOptions() {
+  const blob = await ky
+    .get(`${API_BASE_URL}/api/admin/u4diff/ulikSluttDato/excel`, {
+      timeout: 60_000,
+    })
+    .blob();
+  const today = new Date().toISOString().split("T")[0];
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Ulike_slutt_datoer_mellom_NOM_og_U4_${today}.xlsx`;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}
+
 export async function ikkeKlassifiserteDifferanserOptions(): Promise<U4Diff[]> {
   return await ky
     .get(`${API_BASE_URL}/api/admin/u4diff/ikkeKlassifiserteDifferanser`, {

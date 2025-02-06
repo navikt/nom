@@ -10,6 +10,7 @@ import {
   ikkeKlassifiserteDifferanserExcelExportOptions,
   sektorDifferansePaaRessursExcelExportOptions,
   ulikeEnheterExcelExportOptions,
+  ulikeSluttDatoerExcelExportOptions,
   ulikeStartDatoerExcelExportOptions,
 } from "~/api/apiQueries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
@@ -18,6 +19,7 @@ import { IdenterUtenStilling } from "~/sanitychecks/U4/IdenterUtenStilling.tsx";
 import { IkkeKlassefiserteDifferanser } from "~/sanitychecks/U4/IkkeKlassefiserteDifferanser.tsx";
 import { SektorDiffPaaRessurs } from "~/sanitychecks/U4/SektorDiffPaaRessurs.tsx";
 import { UlikeEnheter } from "~/sanitychecks/U4/UlikeEnheter.tsx";
+import { UlikeSluttDatoer } from "~/sanitychecks/U4/UlikeSluttDatoer.tsx";
 import { UlikeStartDatoer } from "~/sanitychecks/U4/UlikeStartDatoer.tsx";
 
 export const Route = createFileRoute("/sanity-checks/u4diff")({
@@ -47,6 +49,9 @@ function ListSelector(props: { selected: string }) {
     }
     case "ulikeStartDatoer": {
       return <UlikeStartDatoer />;
+    }
+    case "ulikeSluttDatoer": {
+      return <UlikeSluttDatoer />;
     }
     case "ikkeKlassifiserteDifferanser": {
       return <IkkeKlassefiserteDifferanser />;
@@ -88,6 +93,9 @@ function U4DiffSanityChecks() {
           <option value="ulikeStartDatoer">
             Ulike startdatoer mellom NOM og U4
           </option>
+          <option value="ulikeSluttDatoer">
+            Ulike sluttdatoer mellom NOM og U4
+          </option>
           <option value="ikkeKlassifiserteDifferanser">
             Ikke klassifiserte differanser mellom NOM og U4
           </option>
@@ -107,12 +115,16 @@ function U4DiffSanityChecks() {
                 sektorDifferansePaaRessursExcelExportOptions();
                 break;
               }
+              case "ulikeEnheter": {
+                ulikeEnheterExcelExportOptions();
+                break;
+              }
               case "ulikeStartDatoer": {
                 ulikeStartDatoerExcelExportOptions();
                 break;
               }
-              case "ulikeEnheter": {
-                ulikeEnheterExcelExportOptions();
+              case "ulikeSluttDatoer": {
+                ulikeSluttDatoerExcelExportOptions();
                 break;
               }
               case "ikkeKlassifiserteDifferanser": {
