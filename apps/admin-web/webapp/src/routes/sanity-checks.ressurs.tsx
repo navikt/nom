@@ -9,6 +9,7 @@ import { Ressurser } from "~/sanitychecks/Ressurs/Ressurser.tsx";
 import { RessursMedBlankMellomnavn } from "~/sanitychecks/Ressurs/RessursMedBlankMellomnavn.tsx";
 import { RessursMedOTUtenAktivEnhet } from "~/sanitychecks/Ressurs/RessursMedOTUtenAktivEnhet.tsx";
 import { RessursSluttetMedAktivOT } from "~/sanitychecks/Ressurs/RessursSluttetMedAktivOT.tsx";
+import { UlikSluttdatoRessursOrgtilknytning } from "~/sanitychecks/Ressurs/UlikSluttdatoRessursOrgtilknytning.tsx";
 
 export const Route = createFileRoute("/sanity-checks/ressurs")({
   component: () => {
@@ -62,6 +63,9 @@ function ListSelector(props: { selected: string }) {
     case "RessursDuplikat": {
       return <RessursDuplikat />;
     }
+    case "UlikSluttdatoRessursOrgtilknytning": {
+      return <UlikSluttdatoRessursOrgtilknytning />;
+    }
     default: {
       return <></>;
     }
@@ -90,6 +94,9 @@ function RessursSanityChecks() {
         </option>
         <option value="RessursDuplikat">
           Duplikate Ressurser på samme navident
+        </option>
+        <option value="UlikSluttdatoRessursOrgtilknytning">
+          Ulik sluttdato på ressurs og orgtilknytning
         </option>
       </Select>
       <ListSelector selected={selected} />
