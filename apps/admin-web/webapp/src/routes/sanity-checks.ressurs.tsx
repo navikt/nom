@@ -6,6 +6,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { RessursDuplikat } from "~/sanitychecks/Ressurs/RessursDuplikat.tsx";
 import { Ressurser } from "~/sanitychecks/Ressurs/Ressurser.tsx";
+import { RessurserMedOverlappendeDOL } from "~/sanitychecks/Ressurs/RessurserMedOverlappendeDOL.tsx";
 import { RessursMedBlankMellomnavn } from "~/sanitychecks/Ressurs/RessursMedBlankMellomnavn.tsx";
 import { RessursMedOTUtenAktivEnhet } from "~/sanitychecks/Ressurs/RessursMedOTUtenAktivEnhet.tsx";
 import { RessursSluttetMedAktivOT } from "~/sanitychecks/Ressurs/RessursSluttetMedAktivOT.tsx";
@@ -66,6 +67,9 @@ function ListSelector(props: { selected: string }) {
     case "UlikSluttdatoRessursOrgtilknytning": {
       return <UlikSluttdatoRessursOrgtilknytning />;
     }
+    case "RessurserMedOverlappendeDOL": {
+      return <RessurserMedOverlappendeDOL />;
+    }
     default: {
       return <></>;
     }
@@ -97,6 +101,9 @@ function RessursSanityChecks() {
         </option>
         <option value="UlikSluttdatoRessursOrgtilknytning">
           Ulik sluttdato på ressurs og orgtilknytning
+        </option>
+        <option value="RessurserMedOverlappendeDOL">
+          Ressurser med flere enn en DOL
         </option>
       </Select>
       <ListSelector selected={selected} />

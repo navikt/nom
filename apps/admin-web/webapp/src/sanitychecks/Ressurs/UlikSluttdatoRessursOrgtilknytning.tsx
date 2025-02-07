@@ -1,8 +1,10 @@
-import { Heading, Loader, Table } from "@navikt/ds-react";
+import { Table } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 
 import { getRessursOrgtilknytningUlikSluttdato } from "~/api/queries.ts";
 import { useTableSort } from "~/hooks/useTableSort.ts";
+import { EmptyTable } from "~/sanitychecks/components/EmptyTable.tsx";
+import { LoadingTable } from "~/sanitychecks/components/LoadingTable.tsx";
 import type { RessursOrgtilknytningUlikSluttdato } from "~/types/nom-admin/nom-admin-models.ts";
 
 export function UlikSluttdatoRessursOrgtilknytning() {
@@ -19,45 +21,11 @@ export function UlikSluttdatoRessursOrgtilknytning() {
   const { data, sort, handleSort } = useTableSort(dataset ?? [], "navident");
 
   if (isLoading) {
-    return (
-      <>
-        <Heading
-          align="center"
-          size="medium"
-          style={{ display: "grid", justifyContent: "center" }}
-        >
-          Laster inn tabellen...
-          <br />
-          Dette kan ta opptil et minutt...
-        </Heading>
-        <div
-          style={{
-            display: "grid",
-            justifyContent: "center",
-            paddingTop: "30px",
-          }}
-        >
-          <Loader size="3xlarge" variant="neutral" />
-        </div>
-      </>
-    );
+    return <LoadingTable />;
   }
 
   if (data.length === 0 && !isError) {
-    return (
-      <div>
-        <Heading
-          size="xlarge"
-          style={{
-            justifyContent: "center",
-            display: "flex",
-            paddingTop: "30xp",
-          }}
-        >
-          Listen er tom
-        </Heading>
-      </div>
-    );
+    return <EmptyTable />;
   }
 
   return (

@@ -359,6 +359,16 @@ export interface RessursOrgtilknytningUlikSluttdato {
   orgtilknytningSluttdato: string;
 }
 
+export interface RessursMedFlereDOL {
+  navident: string;
+  orgEnhetId: string;
+  orgEnhetNavn: string;
+  /** @format date */
+  gyldigFom: string;
+  /** @format date */
+  gyldigTom: string;
+}
+
 export interface RessursMedEnhet {
   navident?: string;
   ressursFid?: string;
