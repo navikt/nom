@@ -61,6 +61,15 @@ public class AuthorizedNavidentController {
     }
 
     @Operation(
+        description = "Om oppgitt bruker har tilgang til å redigere oppgitt ressurs",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PostMapping("/isAuthorized")
+    public boolean isAuthorizedForNavident(@RequestBody BrukerSkrivetilgangRessursRequest request) {
+        return authorizedNavident.kanBrukerRedigereRessurs(request.bruker(), request.ressurs());
+    }
+
+    @Operation(
         description = "om current bruker har tilgang til å opprette ressurser i angitt orgenhet",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
