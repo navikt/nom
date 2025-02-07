@@ -1,6 +1,7 @@
 package no.nav.nom.apps.admin.sanitycheck.service;
 
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedEnhet;
+import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedFlereDOL;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningKoblingInfo;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningUlikSluttdato;
 import no.nav.nom.contract.nom.Sektor;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 public class RessursSanityCheckService {
@@ -235,6 +237,57 @@ public class RessursSanityCheckService {
                 .ressursSluttdato(ressurs.sluttdato().isPresent() ? ressurs.sluttdato().get() : null)
                 .orgtilknytningSluttdato(orgtilknytning.gyldigTom().isPresent() ? orgtilknytning.gyldigTom().get() : null)
                 .build();
+    }
+    
+    public List<RessursMedFlereDOL> ressursMedFlereEnnEnDOL() {
+        Map<String, RessursState> alleRessurserSomErAktive = ressursStateRepository.findAllActiveRessurser();
+        Map<String, Collection<OrgtilknytningState>> alleOrgtilknytningerKobletTilRessurs = getOrgtilknytningerForNavidenter(alleRessurserSomErAktive.keySet(), Function.identity());
+
+        Map<String, List<OrgtilknytningState>> flereDolTilknytningerList = alleOrgtilknytningerKobletTilRessurs.entrySet().stream()
+                .filter(orgtilknytning -> orgtilknytning.getValue().size() > 1)
+                .filter(orgtilknytning -> validerOmRessursHarFlereDol(orgtilknytning.getValue()))
+                .filter(orgtilknytning -> validerDatoOverlapp(orgtilknytning.getValue().stream().filter(Objects::nonNull).toList()))
+                .flatMap(orgtilknytning -> orgtilknytning.getValue().stream())
+                .collect(Collectors.groupingBy(OrgtilknytningState::navident, Collectors.toList()));
+
+        List<RessursMedFlereDOL> ressursMedFlereDOL = new ArrayList<>();
+
+        flereDolTilknytningerList.forEach((navident, orgtilknytningStates) -> {
+            orgtilknytningStates.forEach(orgtilknytningState -> {
+                var ressurs = RessursMedFlereDOL.builder()
+                        .navident(navident)
+                        .orgEnhetId(orgtilknytningState.orgEnhetId())
+                        .orgEnhetNavn(orgEnhetStateRepository.findById(orgtilknytningState.orgEnhetId()).map(OrgEnhetState::navn).orElse(""))
+                        .gyldigFom(orgtilknytningState.gyldigFom())
+                        .gyldigTom(orgtilknytningState.gyldigTom().isPresent() ? orgtilknytningState.gyldigTom().get() : null)
+                        .build();
+
+                ressursMedFlereDOL.add(ressurs);
+            });
+        });
+        
+        return ressursMedFlereDOL;
+    }
+    
+    private boolean validerDatoOverlapp(List<OrgtilknytningState> orgtilknytningStates) {
+        List<OrgtilknytningState> sortedByFomDato = orgtilknytningStates.stream().sorted(Comparator.comparing(OrgtilknytningState::gyldigFom)).toList();
+        return IntStream.range(0, sortedByFomDato.size()).anyMatch(i ->  {
+            OrgtilknytningState orgtilknytningStateEn = orgtilknytningStates.get(i);
+            LocalDate sluttdatoEn = orgtilknytningStateEn.gyldigTom().orElse(LocalDate.MAX);
+
+            return IntStream.range(i + 1, sortedByFomDato.size()).anyMatch(j ->   {
+                OrgtilknytningState orgtilknytningStateTo = orgtilknytningStates.get(j);
+                LocalDate startdatoEn = orgtilknytningStateEn.gyldigFom();
+                LocalDate startdatoTo = orgtilknytningStateTo.gyldigFom();
+                LocalDate sluttdatoTo = orgtilknytningStateTo.gyldigTom().orElse(LocalDate.MAX);
+
+                return !startdatoEn.isAfter(sluttdatoTo) && !sluttdatoEn.isBefore(startdatoTo);
+            });
+        });
+    }
+
+    private boolean validerOmRessursHarFlereDol(Collection<OrgtilknytningState> orgtilknytningStates) {
+        return orgtilknytningStates.stream().allMatch(OrgtilknytningState::erDagligOppfolging);
     }
 
     private <T> Map<String, Collection<T>> getOrgtilknytningerForNavidenter(Set<String> navidenter, Function<OrgtilknytningState, T> transformer) {
