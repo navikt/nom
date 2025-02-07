@@ -502,6 +502,7 @@ public class SanityCheck {
             .toList();
     }
 
+    // TODO Lagt over til nom-admin, kan fjernes
     @Operation(
         description = "List orgtilknytninger med flere overlappende dagligOppfolging i aktiv eller fremtidig periode (gyldigTom > now)",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -540,6 +541,7 @@ public class SanityCheck {
         return result.toString();
     }
 
+    // TODO Lagt over til nom-admin, kan fjernes
     @Operation(
         description = "List duplikate orgtilknytninger på samme orgenhet og navident",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -674,6 +676,7 @@ public class SanityCheck {
         return EnhtetMedRessursSomHarSluttetOgErLederSanityCheckResponse.from(alleOrgEnheterMedLederSomHarSluttet);
     }
 
+    // TODO Lagt over til nom-admin, kan fjernes
     @Operation(
         description = "Valider ressurser som har en ulik sluttdato på organisasjonstilknytning og ressurs sluttdato",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -739,6 +742,7 @@ public class SanityCheck {
         return map;
     }
 
+    // TODO Lagt over til nom-admin, kan fjernes
     @Operation(
         description = "Valider ressurser som har flere enn en DOL",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)

@@ -20,6 +20,7 @@ import type {
   OrgtilknytningMedOrgEnhet,
   OverlappendeOrgtilknytning,
   RessursMedEnhet,
+  RessursMedFlereDOL,
   RessursOrgtilknytningKoblingInfo,
   RessursOrgtilknytningUlikSluttdato,
   RessursStateKafkaDTO,
@@ -472,4 +473,12 @@ export async function getRessursOrgtilknytningUlikSluttdato(): Promise<
       },
     )
     .json<RessursOrgtilknytningUlikSluttdato[]>();
+}
+
+export async function getRessursMedFlereDOL(): Promise<RessursMedFlereDOL[]> {
+  return await ky
+    .get(`${API_BASE_URL}/SanityCheck/ressurs/ressursMedFlereEnnEnDOL`, {
+      timeout: 120_000, // 120 seconds
+    })
+    .json<RessursMedFlereDOL[]>();
 }
