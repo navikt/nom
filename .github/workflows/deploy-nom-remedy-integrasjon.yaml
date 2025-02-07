@@ -36,6 +36,6 @@ jobs:
       dev-cluster: dev-fss
       prod-cluster: prod-fss
       skip-tests: ${{ github.event.inputs.skip-tests == 'true'}}
-      dockerfile: Dockerfile_distroless_debug
+      dockerfile: Dockerfile_distroless
     secrets:
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
