@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.admin.SwaggerConfig;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedEnhet;
+import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedFlereDOL;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningKoblingInfo;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningUlikSluttdato;
 import no.nav.nom.apps.admin.sanitycheck.service.RessursSanityCheckService;
@@ -118,4 +119,15 @@ public class RessursSanityCheckController {
         return ok(ressursSanityCheckService.ressurserMedUlikOrgTilknytningSluttDato());
     }
 
+    @Operation(
+            description = "Valider ressurser som har flere enn en DOL",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+            @ApiResponse(responseCode = "200", description = "Success")
+    )
+    @GetMapping(value = "ressursMedFlereEnnEnDOL")
+    public ResponseEntity<List<RessursMedFlereDOL>> ressursMedFlereEnnEnDOL() {
+        return ok(ressursSanityCheckService.ressursMedFlereEnnEnDOL());
+    }
 }
