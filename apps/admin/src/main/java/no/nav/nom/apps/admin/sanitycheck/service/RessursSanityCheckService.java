@@ -193,13 +193,7 @@ public class RessursSanityCheckService {
 
         for (OrgtilknytningState orgtilknytning : sisteOrgtilknytninger.values().stream().flatMap(Collection::stream).toList()) {
             var ressurs = alleRessurserSomErAktive.get(orgtilknytning.navident());
-            if (orgtilknytning.gyldigTom().isPresent() && ressurs.sluttdato().isPresent()) {
-                if (!orgtilknytning.gyldigTom().get().isEqual(ressurs.sluttdato().get())) {
-                    ulikeSluttdatoer.add(getRessursOrgtilknytningUlikSluttdato(ressurs, orgtilknytning));
-                }
-            } else if (orgtilknytning.gyldigTom().isPresent()) {
-                ulikeSluttdatoer.add(getRessursOrgtilknytningUlikSluttdato(ressurs, orgtilknytning));
-            } else if (ressurs.sluttdato().isPresent()) {
+            if (!orgtilknytning.gyldigTom().equals(ressurs.sluttdato())) {
                 ulikeSluttdatoer.add(getRessursOrgtilknytningUlikSluttdato(ressurs, orgtilknytning));
             }
         }
@@ -212,19 +206,16 @@ public class RessursSanityCheckService {
             String key = entry.getKey();
             Collection<OrgtilknytningState> orgtilknytningState = entry.getValue();
 
-            Optional<LocalDate> latestDates = orgtilknytningState.stream()
-                    .map(OrgtilknytningState::gyldigTom)
-                    .flatMap(Optional::stream)
+            Optional<LocalDate> latestDate = orgtilknytningState.stream()
+                    .map(ot -> ot.gyldigTom().orElse(LocalDate.MAX))
                     .max(LocalDate::compareTo);
 
-            if (latestDates.isPresent()) {
-                Collection<OrgtilknytningState> filteredOrgtilknytningState = orgtilknytningState.stream()
-                        .filter(org -> org.gyldigTom().equals(latestDates))
-                        .toList();
+            Collection<OrgtilknytningState> filteredOrgtilknytningState = orgtilknytningState.stream()
+                    .filter(org -> (org.gyldigTom().isEmpty() && latestDate.equals(Optional.of(LocalDate.MAX))) || org.gyldigTom().equals(latestDate))
+                    .toList();
 
-                if (!filteredOrgtilknytningState.isEmpty()) {
-                    result.put(key, filteredOrgtilknytningState);
-                }
+            if (!filteredOrgtilknytningState.isEmpty()) {
+                result.put(key, filteredOrgtilknytningState);
             }
         }
         return result;
