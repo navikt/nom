@@ -9,7 +9,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
-import java.util.List;
 
 
 @Service
@@ -42,7 +41,7 @@ public class SecurityUtil {
     }
 
     public void assertAuthorizedAccessTo(String navident) throws AccessDeniedException {
-        if (!isAuthenticated() || getNavIdent() == null || !isLeaderFor(getNavIdent(), navident) && !isAdmin() && !navident.equals(getNavIdent())) {
+        if (!isAuthenticated() || getNavIdent() == null || !hasAccess(getNavIdent(), navident)) {
             throw new AccessDeniedException("Unauthorized");
         }
     }
@@ -79,15 +78,7 @@ public class SecurityUtil {
                 && SecurityContextHolder.getContext().getAuthentication().isAuthenticated();
     }
 
-    private boolean isLeaderFor(String lederNavident, String navident) {
-        var ledere = nomApiClient.getLedereFor(navident);
-
-        if (ledere.stream().anyMatch(lederNavident::equals)) {
-            return true;
-        }
-
-        var lederesLedere = ledere.stream().map(nomApiClient::getLedereFor).flatMap(List::stream);
-
-        return lederesLedere.anyMatch(lederNavident::equals);
+    private boolean hasAccess(String bruker, String ressurs) {
+        return nomApiClient.hasAccess(bruker, ressurs) || isAdmin() || bruker.equals(ressurs);
     }
 }

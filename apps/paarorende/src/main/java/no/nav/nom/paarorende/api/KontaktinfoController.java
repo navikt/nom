@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.paarorende.common.SecurityUtil;
 import no.nav.nom.paarorende.common.SwaggerConfig;
-import no.nav.nom.paarorende.consumer.NomApiClient;
 import no.nav.nom.paarorende.jpa.Adresse;
 import no.nav.nom.paarorende.jpa.KontaktinfoRepository;
 import no.nav.nom.paarorende.jpa.Relasjon;
@@ -40,12 +39,10 @@ public class KontaktinfoController {
 
     private final KontaktinfoRepository kontaktInfoRepository;
     private final SecurityUtil securityUtil;
-    private final NomApiClient nomApiClient;
 
-    public KontaktinfoController(KontaktinfoRepository kontaktInfoRepository, SecurityUtil securityUtils, NomApiClient nomApiClient) {
+    public KontaktinfoController(KontaktinfoRepository kontaktInfoRepository, SecurityUtil securityUtils) {
         this.kontaktInfoRepository = kontaktInfoRepository;
         this.securityUtil = securityUtils;
-        this.nomApiClient = nomApiClient;
     }
 
     @GetMapping("/tilgang/{navident}")
