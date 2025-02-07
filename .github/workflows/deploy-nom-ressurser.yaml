@@ -28,6 +28,6 @@ jobs:
       nais-config-file-path-prod: .nais/apps/nom-ressurser/nom-ressurser-prod-fss.yaml
       dev-cluster: dev-fss
       prod-cluster: prod-fss
-      dockerfile: Dockerfile_distroless_debug
+      dockerfile: Dockerfile_distroless
     secrets:
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
