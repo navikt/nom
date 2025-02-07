@@ -19,6 +19,10 @@ export function OrgtilknytningOverlapp() {
   });
 
   const { data, sort, handleSort } = useTableSort(dataset ?? [], "fid1");
+  const dataWithKey = data.map((overlappendeOTer) => ({
+    ...overlappendeOTer,
+    key: crypto.randomUUID(),
+  }));
 
   if (isLoading) {
     return <LoadingTable />;
@@ -70,11 +74,8 @@ export function OrgtilknytningOverlapp() {
           </Table.ColumnHeader>
         </Table.Header>
         <Table.Body>
-          {data.map((overlappendeOTer) => (
-            <Table.Row
-              key={overlappendeOTer.fid1 + overlappendeOTer.fid2}
-              shadeOnHover={false}
-            >
+          {dataWithKey.map((overlappendeOTer) => (
+            <Table.Row key={overlappendeOTer.key} shadeOnHover={false}>
               <Table.DataCell>{overlappendeOTer.navident1}</Table.DataCell>
               <Table.DataCell>{overlappendeOTer.orgEnhetId1}</Table.DataCell>
               <Table.DataCell>{overlappendeOTer.fid1}</Table.DataCell>

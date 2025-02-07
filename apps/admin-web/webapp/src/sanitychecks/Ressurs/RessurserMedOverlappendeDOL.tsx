@@ -18,6 +18,10 @@ export function RessurserMedOverlappendeDOL() {
   });
 
   const { data, sort, handleSort } = useTableSort(dataset ?? [], "navident");
+  const dataWithKey = data.map((ressursMedDOL) => ({
+    ...ressursMedDOL,
+    key: crypto.randomUUID(),
+  }));
 
   if (isLoading) {
     return <LoadingTable />;
@@ -48,11 +52,8 @@ export function RessurserMedOverlappendeDOL() {
           </Table.ColumnHeader>
         </Table.Header>
         <Table.Body>
-          {data.map((dol) => (
-            <Table.Row
-              key={dol.navident + dol.orgEnhetId + dol.gyldigFom + dol}
-              shadeOnHover={false}
-            >
+          {dataWithKey.map((dol) => (
+            <Table.Row key={dol.key} shadeOnHover={false}>
               <Table.DataCell>{dol.navident}</Table.DataCell>
               <Table.DataCell>{dol.orgEnhetId}</Table.DataCell>
               <Table.DataCell>{dol.orgEnhetNavn}</Table.DataCell>
