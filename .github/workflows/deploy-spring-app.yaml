@@ -90,7 +90,7 @@ jobs:
         uses: nais/docker-build-push@v0
         id: docker-push
         with:
-          team: nom
+          team: org
           image_suffix: ${{ inputs.image-suffix }}
           dockerfile: ${{ inputs.dockerfile }}
           docker_context: .
@@ -99,9 +99,31 @@ jobs:
           build_secrets: |
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          salsa: false
     outputs:
       image: ${{ steps.docker-push.outputs.image }}
       telemetry: ${{ steps.docker-push.outputs.telemetry }}
+      digest: ${{ steps.docker-push.outputs.digest }}
+
+  salsa:
+    name: Generate SBOM, attest and sign image
+    needs: [ build-app-docker ]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: "write"
+    steps:
+      - name: NAIS login
+        uses: nais/login@v0
+        id: login
+        with:
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          team: org
+      - name: Generate SBOM, attest and sign image
+        id: attest-sign
+        uses: nais/attest-sign@v1
+        with:
+          image_ref: ${{needs.build-app-docker.outputs.image}}@${{ needs.build-app-docker.outputs.digest }}
 
   deploy-dev:
     name: Deploy to NAIS ${{ inputs.dev-cluster }}
