@@ -19,6 +19,9 @@ export default defineConfig({
       "~": fileURLToPath(new URL("src", import.meta.url)),
     },
   },
+  build: {
+    assetsInlineLimit: 0,
+  },
   server: {
     origin: "http://localhost:5173",
     proxy: {
@@ -39,6 +42,13 @@ export default defineConfig({
       // necessary to make hot reloading work in uidev mode in prod and dev environments
       // otherwise secure web sockets protocol (wss) will be inferred from https prefix
       protocol: "ws",
+    },
+    cors: {
+      origin: [
+        "https://nom.nav.no",
+        "https://nom.ekstern.dev.nav.no",
+        /^http:\/\/localhost:\d{4}$/,
+      ],
     },
   },
 });
