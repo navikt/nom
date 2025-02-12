@@ -68,7 +68,8 @@ spec:
       runtime: java
   gcp:
     sqlInstances:
-      - type: POSTGRES_14
+      - name: nav-ident-v2
+        type: POSTGRES_16
         tier: db-custom-1-3840
         databases:
           - name: nav-ident-db
