@@ -5,6 +5,18 @@ import {
   dolValidering,
   findPeriodGaps,
   findPeriodOverlaps,
+  nomDateIsAfter,
+  nomDateIsAfterToday,
+  nomDateIsBefore,
+  nomDateIsBeforeToday,
+  nomDateIsSame,
+  nomDateIsSameOrAfter,
+  nomDateIsSameOrBefore,
+  nomDateIsToday,
+  nomDateIsTodayOrAfter,
+  nomDateIsTodayOrBefore,
+  nomEarliestDate,
+  nomLatestDate,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { OrgtilknytningEtterValidering } from "~/pages/ResourcePage/RessursComponents/EditOrgtilknytninger";
 import {
@@ -966,5 +978,654 @@ describe("dolValidation", () => {
         },
       ],
     });
+  });
+});
+
+describe("nomDateIsSame(Date | string | null, Date | string | null)", () => {
+  test("To datoer", () => {
+    const testDate1 = new Date("2024-01-01");
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomDateIsSame(testDate1, testDate2);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Null og undefined", () => {
+    const testDate1 = undefined;
+    const testDate2 = null;
+
+    const input = nomDateIsSame(testDate1, testDate2);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Null og dato", () => {
+    const testDate1 = null;
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomDateIsSame(testDate1, testDate2);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Dato og null", () => {
+    const testDate1 = new Date("2024-01-01");
+    const testDate2 = null;
+
+    const input = nomDateIsSame(testDate1, testDate2);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Undefined og dato", () => {
+    const testDate1 = undefined;
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomDateIsSame(testDate1, testDate2);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+});
+
+describe("nomDateIsSameOrBefore(Date | string | null | undefined, Date | string | null | undefined)", () => {
+  test("To datoer", () => {
+    const testDate1 = new Date("2024-01-01");
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomDateIsSameOrBefore(testDate1, testDate2);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Null og undefined", () => {
+    const testDate1 = undefined;
+    const testDate2 = null;
+
+    const input = nomDateIsSameOrBefore(testDate1, testDate2);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Null og dato", () => {
+    const testDate1 = null;
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomDateIsSameOrBefore(testDate1, testDate2);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Dato og null", () => {
+    const testDate1 = new Date("2024-01-01");
+    const testDate2 = null;
+
+    const input = nomDateIsSameOrBefore(testDate1, testDate2);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Undefined og dato", () => {
+    const testDate1 = undefined;
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomDateIsSameOrBefore(testDate1, testDate2);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+});
+
+describe("nomDateIsSameOrAfter(Date | string | null | undefined, Date | string | null | undefined)", () => {
+  test("To datoer", () => {
+    const testDate1 = new Date("2024-01-01");
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomDateIsSameOrAfter(testDate1, testDate2);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Null og undefined", () => {
+    const testDate1 = undefined;
+    const testDate2 = null;
+
+    const input = nomDateIsSameOrAfter(testDate1, testDate2);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Null og dato", () => {
+    const testDate1 = null;
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomDateIsSameOrAfter(testDate1, testDate2);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Dato og null", () => {
+    const testDate1 = new Date("2024-01-01");
+    const testDate2 = null;
+
+    const input = nomDateIsSameOrAfter(testDate1, testDate2);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Undefined og dato", () => {
+    const testDate1 = undefined;
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomDateIsSameOrAfter(testDate1, testDate2);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+});
+
+describe("nomDateIsBefore(Date | string | null | undefined, Date | string | null | undefined)", () => {
+  test("To datoer", () => {
+    const testDate1 = new Date("2023-12-31");
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomDateIsBefore(testDate1, testDate2);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Null og undefined", () => {
+    const testDate1 = undefined;
+    const testDate2 = null;
+
+    const input = nomDateIsBefore(testDate1, testDate2);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Null og dato", () => {
+    const testDate1 = null;
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomDateIsBefore(testDate1, testDate2);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Dato og null", () => {
+    const testDate1 = new Date("2024-01-01");
+    const testDate2 = null;
+
+    const input = nomDateIsBefore(testDate1, testDate2);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Undefined og dato", () => {
+    const testDate1 = undefined;
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomDateIsBefore(testDate1, testDate2);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+});
+
+describe("nomDateIsAfter(Date | string | null | undefined, Date | string | null | undefined)", () => {
+  test("To datoer", () => {
+    const testDate1 = new Date("2024-01-02");
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomDateIsAfter(testDate1, testDate2);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Null og undefined", () => {
+    const testDate1 = undefined;
+    const testDate2 = null;
+
+    const input = nomDateIsAfter(testDate1, testDate2);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Null og dato", () => {
+    const testDate1 = null;
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomDateIsAfter(testDate1, testDate2);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Dato og null", () => {
+    const testDate1 = new Date("2024-01-01");
+    const testDate2 = null;
+
+    const input = nomDateIsAfter(testDate1, testDate2);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Undefined og dato", () => {
+    const testDate1 = undefined;
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomDateIsAfter(testDate1, testDate2);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+});
+
+describe("nomDateIsToday(Date | string | null | undefined)", () => {
+  test("Dato er i dag", () => {
+    const testDate = todayWithoutTimezone();
+
+    const input = nomDateIsToday(testDate);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Dato er ikke i dag", () => {
+    const testDate = dateWithoutTimezone(new Date("2024-01-01"));
+
+    const input = nomDateIsToday(testDate);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Null som dato", () => {
+    const testDate = null;
+
+    const input = nomDateIsToday(testDate);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Undefined som dato", () => {
+    const testDate = undefined;
+
+    const input = nomDateIsToday(testDate);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+});
+
+describe("nomDateIsTodayOrBefore(Date | string | null | undefined)", () => {
+  test("Dato er i dag", () => {
+    const testDate = todayWithoutTimezone();
+
+    const input = nomDateIsTodayOrBefore(testDate);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Dato er før i dag", () => {
+    const testDate = dateWithoutTimezone(new Date("2024-01-01"));
+
+    const input = nomDateIsTodayOrBefore(testDate);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Dato er etter i dag", () => {
+    const testDate = dateWithoutTimezone(addMonths(todayWithoutTimezone(), 1));
+
+    const input = nomDateIsTodayOrBefore(testDate);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Null som dato", () => {
+    const testDate = null;
+
+    const input = nomDateIsTodayOrBefore(testDate);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Undefined som dato", () => {
+    const testDate = undefined;
+
+    const input = nomDateIsTodayOrBefore(testDate);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+});
+
+describe("nomDateIsTodayOrAfter(Date | string | null | undefined)", () => {
+  test("Dato er i dag", () => {
+    const testDate = todayWithoutTimezone();
+
+    const input = nomDateIsTodayOrAfter(testDate);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Dato er etter i dag", () => {
+    const testDate = dateWithoutTimezone(addMonths(todayWithoutTimezone(), 1));
+
+    const input = nomDateIsTodayOrAfter(testDate);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Dato er før i dag", () => {
+    const testDate = dateWithoutTimezone(new Date("2024-01-01"));
+
+    const input = nomDateIsTodayOrAfter(testDate);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Null som dato", () => {
+    const testDate = null;
+
+    const input = nomDateIsTodayOrAfter(testDate);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Undefined som dato", () => {
+    const testDate = undefined;
+
+    const input = nomDateIsTodayOrAfter(testDate);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+});
+
+describe("nomDateIsBeforeToday(Date | string | null | undefined)", () => {
+  test("Dato er før i dag", () => {
+    const testDate = dateWithoutTimezone(new Date("2024-01-01"));
+
+    const input = nomDateIsBeforeToday(testDate);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Dato er i dag", () => {
+    const testDate = todayWithoutTimezone();
+
+    const input = nomDateIsBeforeToday(testDate);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Dato er etter i dag", () => {
+    const testDate = dateWithoutTimezone(addMonths(todayWithoutTimezone(), 1));
+
+    const input = nomDateIsBeforeToday(testDate);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Null som dato", () => {
+    const testDate = null;
+
+    const input = nomDateIsBeforeToday(testDate);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Undefined som dato", () => {
+    const testDate = undefined;
+
+    const input = nomDateIsBeforeToday(testDate);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+});
+
+describe("nomDateIsAfterToday(Date | string | null | undefined)", () => {
+  test("Dato er etter i dag", () => {
+    const testDate = dateWithoutTimezone(addMonths(todayWithoutTimezone(), 1));
+
+    const input = nomDateIsAfterToday(testDate);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Dato er i dag", () => {
+    const testDate = todayWithoutTimezone();
+
+    const input = nomDateIsAfterToday(testDate);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Dato er før i dag", () => {
+    const testDate = dateWithoutTimezone(new Date("2024-01-01"));
+
+    const input = nomDateIsAfterToday(testDate);
+
+    const expected = false;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Null som dato", () => {
+    const testDate = null;
+
+    const input = nomDateIsAfterToday(testDate);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Undefined som dato", () => {
+    const testDate = undefined;
+
+    const input = nomDateIsAfterToday(testDate);
+
+    const expected = true;
+
+    expect(input).toEqual(expected);
+  });
+});
+
+describe("nomEarliestDate(Date | string | null | undefined, Date | string | null | undefined)", () => {
+  test("Begge datoer er null", () => {
+    const testDate1 = null;
+    const testDate2 = null;
+
+    const input = nomEarliestDate(testDate1, testDate2);
+
+    const expected = null;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Den ene datoen er null", () => {
+    const testDate1 = null;
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomEarliestDate(testDate1, testDate2);
+
+    const expected = dateWithoutTimezone(testDate2);
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Begge datoene er definert", () => {
+    const testDate1 = new Date("2024-01-01");
+    const testDate2 = new Date("2024-02-02");
+
+    const input = nomEarliestDate(testDate1, testDate2);
+
+    const expected = dateWithoutTimezone(testDate1);
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Den ene datoen er undefined", () => {
+    const testDate1 = undefined;
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomEarliestDate(testDate1, testDate2);
+
+    const expected = dateWithoutTimezone(testDate2);
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Begge datoene er undefined", () => {
+    const testDate1 = undefined;
+    const testDate2 = undefined;
+
+    const input = nomEarliestDate(testDate1, testDate2);
+
+    const expected = null;
+
+    expect(input).toEqual(expected);
+  });
+});
+
+describe("nomLatestDate(Date | string | null | undefined, Date | string | null | undefined)", () => {
+  test("Begge datoer er null", () => {
+    const testDate1 = null;
+    const testDate2 = null;
+
+    const input = nomLatestDate(testDate1, testDate2);
+
+    const expected = null;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Den ene datoen er null", () => {
+    const testDate1 = null;
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomLatestDate(testDate1, testDate2);
+
+    const expected = null;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Begge datoene er definert", () => {
+    const testDate1 = new Date("2024-01-01");
+    const testDate2 = new Date("2024-02-02");
+
+    const input = nomLatestDate(testDate1, testDate2);
+
+    const expected = dateWithoutTimezone(testDate2);
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Den ene datoen er undefined", () => {
+    const testDate1 = undefined;
+    const testDate2 = new Date("2024-01-01");
+
+    const input = nomLatestDate(testDate1, testDate2);
+
+    const expected = null;
+
+    expect(input).toEqual(expected);
+  });
+
+  test("Begge datoene er undefined", () => {
+    const testDate1 = undefined;
+    const testDate2 = undefined;
+
+    const input = nomLatestDate(testDate1, testDate2);
+
+    const expected = null;
+
+    expect(input).toEqual(expected);
   });
 });

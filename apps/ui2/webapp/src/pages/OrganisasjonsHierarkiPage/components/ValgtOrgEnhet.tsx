@@ -24,15 +24,14 @@ import {
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { UserImage } from "~/components/UserImage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
+import {
+  isPeriodActive,
+  nomDateIsTodayOrAfter,
+} from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import building from "~/resources/building.svg";
 import type { OrgEnhet, Ressurs } from "~/types/api-models";
 import { NomNivaa, OrgEnhetsType, Sektor } from "~/types/api-models";
-import {
-  formatDisplayDate,
-  formatVisningsnavn,
-  isPeriodActive,
-  isTodayOrAfter,
-} from "~/utils";
+import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
 export const ValgtOrgEnhet = ({
   orgEnhet,
@@ -54,8 +53,8 @@ export const ValgtOrgEnhet = ({
   });
 
   const hentedeRessurser =
-    hentedeRessurserQuery.data?.filter(
-      (ressurs) => !ressurs.sluttdato || isTodayOrAfter(ressurs.sluttdato),
+    hentedeRessurserQuery.data?.filter((ressurs) =>
+      nomDateIsTodayOrAfter(ressurs.sluttdato),
     ) ?? [];
 
   const isOrgEnhetArbeidsomraadeQuery = useQuery({

@@ -137,47 +137,6 @@ export function isGyldighetsPeriodeActive(
   }
 }
 
-export function isPeriodActive(
-  gyldigFom: Date | string,
-  gyldigTom: Date | string | undefined,
-) {
-  return (
-    isTodayOrBefore(gyldigFom) && (!gyldigTom || isTodayOrAfter(gyldigTom))
-  );
-}
-
-export function isPeriodPast(
-  gyldigFom: Date | string,
-  gyldigTom: Date | string | undefined,
-) {
-  return isBeforeToday(gyldigFom) && gyldigTom && isBeforeToday(gyldigFom);
-}
-
-export function isPeriodFuture(
-  gyldigFom: Date | string,
-  gyldigTom: Date | string | undefined,
-) {
-  return isAfterToday(gyldigFom) && (!gyldigTom || isAfterToday(gyldigFom));
-}
-
-export function isPeriodActiveOrPast(
-  gyldigFom: Date | string,
-  gyldigTom: Date | string | undefined,
-) {
-  return (
-    isPeriodActive(gyldigFom, gyldigTom) || isPeriodPast(gyldigFom, gyldigTom)
-  );
-}
-
-export function isPeriodActiveOrFuture(
-  gyldigFom: Date | string,
-  gyldigTom: Date | string | undefined,
-) {
-  return (
-    isPeriodActive(gyldigFom, gyldigTom) || isPeriodFuture(gyldigFom, gyldigTom)
-  );
-}
-
 export function isTodayOrBefore(date: Date | string) {
   const providedDateWithoutTimezone = dateWithoutTimezone(date);
 
@@ -276,14 +235,6 @@ export function earliestDateInList(dates: (Date | string | undefined)[]) {
   });
 
   return sortedDates[0];
-}
-
-export function earliestDate(date1: Date, date2: Date) {
-  return isSameDateOrBefore(date1, date2) ? date1 : date2;
-}
-
-export function latestDate(date1: Date, date2: Date) {
-  return isSameDateOrAfter(date1, date2) ? date1 : date2;
 }
 
 export function promiseIsFulfilled<T>(
