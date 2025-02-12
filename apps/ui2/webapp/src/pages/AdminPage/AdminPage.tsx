@@ -11,7 +11,7 @@ import { Outlet, useMatch, useNavigate } from "@tanstack/react-router";
  */
 export function AdminPage() {
   const navigate = useNavigate({ from: "/admin" });
-  const { pathname } = new URL(window.location.href);
+  const { pathname } = new URL(globalThis.location.href);
 
   useMatch({ from: "/admin" });
 

@@ -18,7 +18,7 @@ export function UserImage(properties: UserImageProperties) {
   const imageQuery = useQuery({
     queryKey: getPhotoQuery.queryKey(navident as string),
     queryFn: () => getPhotoQuery.queryFn(navident as string),
-    enabled: !!navident && window.location.href.includes("nom.nav.no"),
+    enabled: !!navident && globalThis.location.href.includes("nom.nav.no"),
     staleTime: getPhotoQuery.staleTime,
     gcTime: getPhotoQuery.cacheTime,
     retry: false,
