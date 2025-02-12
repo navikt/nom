@@ -25,21 +25,19 @@ import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrap
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
 import { PageBanner } from "~/components/PageBanner";
+import {
+  dateIsSameOrBefore,
+  dateIsTodayOrBefore,
+  formatDateWithoutTimezone,
+  todayWithoutTimezone,
+} from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { RessursCard } from "~/pages/ResourcePage/RessursComponents/RessursCard";
 import fjernRessursIcon from "~/resources/fjernRessursIcon.svg";
 import type { AvvikleRessursRequest } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
-import {
-  dateWithoutTimezone,
-  formatDateWithoutTimezone,
-  formatDisplayDate,
-  formatVisningsnavn,
-  isSameDateOrBefore,
-  isTodayOrBefore,
-  todayWithoutTimezone,
-} from "~/utils";
+import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
 export function TerminateResourcePage() {
   const { id } = useParams({ from: "/ressurs-terminate/$id" });
@@ -100,15 +98,12 @@ export function TerminateResourcePage() {
     const ressursSluttdato = ressurs.sluttdato;
 
     await (!ressursSluttdato ||
-    isSameDateOrBefore(
-      dateWithoutTimezone(new Date(nySluttdato)),
-      dateWithoutTimezone(new Date(ressursSluttdato)),
-    )
+    dateIsSameOrBefore(nySluttdato, ressursSluttdato)
       ? showModal(
           <BekreftModal
             confirmButtonLabel={"Bekreft endring"}
             content={
-              isTodayOrBefore(new Date(nySluttdato)) ? (
+              dateIsTodayOrBefore(nySluttdato) ? (
                 <ModalInnholdFortiden
                   navn={
                     formatVisningsnavn(ressurs?.visningsnavn) ?? "medarbeideren"

@@ -2,20 +2,26 @@ import { addDays, isAfter, isBefore, subDays } from "date-fns";
 import orderBy from "lodash/orderBy";
 import sortBy from "lodash/orderBy";
 
-import type { OrgtilknytningEtterValidering } from "~/pages/ResourcePage/RessursComponents/EditOrgtilknytninger";
-import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 import {
+  dateIsAfter,
+  dateIsAfterToday,
+  dateIsBefore,
+  dateIsBeforeToday,
+  dateIsSame,
+  dateIsSameOrAfter,
+  dateIsSameOrBefore,
+  dateIsToday,
+  dateIsTodayOrAfter,
+  dateIsTodayOrBefore,
   dateWithoutTimezone,
   earliestDate,
   earliestDateInList,
   formatDateWithoutTimezone,
-  isBeforeDate,
-  isSameDate,
-  isSameDateOrBefore,
-  isTodayOrAfter,
   latestDate,
   todayWithoutTimezone,
-} from "~/utils";
+} from "~/dateUtils/dateUtils";
+import type { OrgtilknytningEtterValidering } from "~/pages/ResourcePage/RessursComponents/EditOrgtilknytninger";
+import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 
 export function findPeriodGaps(
   periods: { fom: Date; tom: Date | undefined }[],
@@ -71,7 +77,7 @@ export function findPeriodOverlaps(
           ? earliestDate(period1.tom, period2.tom)
           : period1.tom || period2.tom;
 
-      if (!overlapEnd || isSameDateOrBefore(overlapStart, overlapEnd)) {
+      if (!overlapEnd || dateIsSameOrBefore(overlapStart, overlapEnd)) {
         overlaps.push({ fom: overlapStart, tom: overlapEnd });
       }
     }
@@ -89,7 +95,7 @@ export function findPeriodOverlaps(
 
     if (
       !currentPeriod.tom ||
-      isSameDateOrBefore(nextPeriod.fom, addDays(currentPeriod.tom, 1))
+      dateIsSameOrBefore(nextPeriod.fom, addDays(currentPeriod.tom, 1))
     ) {
       if (nextPeriod.tom) {
         if (!currentPeriod.tom || isAfter(nextPeriod.tom, currentPeriod.tom)) {
@@ -120,7 +126,7 @@ export function dolValidering(
       (tilknytning) =>
         tilknytning.erDagligOppfolging &&
         (!tilknytning.gyldigTom ||
-          isTodayOrAfter(new Date(tilknytning.gyldigTom))),
+          dateIsTodayOrAfter(new Date(tilknytning.gyldigTom))),
     )
     .map((tilknytning) => {
       return {
@@ -142,7 +148,7 @@ export function dolValidering(
   orgtilknytninger
     .filter((tilknytning) => {
       return tilknytning.gyldigTom
-        ? isTodayOrAfter(new Date(tilknytning.gyldigTom))
+        ? dateIsTodayOrAfter(new Date(tilknytning.gyldigTom))
         : true;
     })
     .map((tilknytning) => {
@@ -217,17 +223,7 @@ export function dolValidering(
   return { dolGaps, dolOverlaps: findPeriodOverlaps(dolPeriods) };
 }
 
-export function senesteTom(
-  orgtilknytninger: Partial<OrgtilknytningState>[],
-): string | undefined {
-  if (orgtilknytninger.some((orgtilknytning) => !orgtilknytning.gyldigTom)) {
-    return undefined;
-  }
-
-  return orderBy(orgtilknytninger, "gyldigTom", "desc")[0].gyldigTom;
-}
-
-export function setRessursStartdato(
+export function skalSetteRessursStartdato(
   ressurs: Ressurs,
   orgtilknytninger: Partial<OrgtilknytningState>[],
   tidligsteOrgDatoPre: string | undefined,
@@ -250,12 +246,12 @@ export function setRessursStartdato(
 
   if (
     tidligsteOrgDatoPre &&
-    isSameDate(tidligsteOrgDatoPre, ressursStartdato)
+    dateIsSame(tidligsteOrgDatoPre, ressursStartdato)
   ) {
     return true;
   }
 
-  return isBeforeDate(tidligsteOrgDatoPost, ressursStartdato);
+  return dateIsBefore(tidligsteOrgDatoPost, ressursStartdato);
 }
 
 export function otCustomStortByDate(
@@ -280,5 +276,220 @@ export function otCustomStortByDate(
   return (
     dateWithoutTimezone(new Date(otB.gyldigFom)).getTime() -
     dateWithoutTimezone(new Date(otA.gyldigFom)).getTime()
+  );
+}
+
+export function senesteTom(
+  orgtilknytninger: Partial<OrgtilknytningState>[],
+): string | undefined {
+  if (orgtilknytninger.some((orgtilknytning) => !orgtilknytning.gyldigTom)) {
+    return undefined;
+  }
+
+  return orderBy(orgtilknytninger, "gyldigTom", "desc")[0].gyldigTom;
+}
+
+export function nomDateIsSame(
+  checkDate: Date | string | null | undefined,
+  compareDate: Date | string | null | undefined,
+) {
+  if (!checkDate && !compareDate) {
+    return true;
+  }
+
+  if (!checkDate || !compareDate) {
+    return false;
+  }
+
+  return dateIsSame(checkDate, compareDate);
+}
+
+export function nomDateIsSameOrBefore(
+  checkDate: Date | string | null | undefined,
+  compareDate: Date | string | null | undefined,
+) {
+  if (!checkDate && !compareDate) {
+    return true;
+  }
+
+  if (!checkDate) {
+    return false;
+  }
+
+  if (!compareDate) {
+    return true;
+  }
+
+  return dateIsSameOrBefore(checkDate, compareDate);
+}
+
+export function nomDateIsSameOrAfter(
+  checkDate: Date | string | null | undefined,
+  compareDate: Date | string | null | undefined,
+) {
+  if (!checkDate && !compareDate) {
+    return true;
+  }
+
+  if (!checkDate) {
+    return true;
+  }
+
+  if (!compareDate) {
+    return false;
+  }
+
+  return dateIsSameOrAfter(checkDate, compareDate);
+}
+
+export function nomDateIsBefore(
+  checkDate: Date | string | null | undefined,
+  compareDate: Date | string | null | undefined,
+) {
+  if (!checkDate && !compareDate) {
+    return false;
+  }
+
+  if (!checkDate) {
+    return false;
+  }
+
+  if (!compareDate) {
+    return true;
+  }
+
+  return dateIsBefore(checkDate, compareDate);
+}
+
+export function nomDateIsAfter(
+  checkDate: Date | string | null | undefined,
+  compareDate: Date | string | null | undefined,
+) {
+  if (!checkDate && !compareDate) {
+    return false;
+  }
+
+  if (!checkDate) {
+    return true;
+  }
+
+  if (!compareDate) {
+    return false;
+  }
+
+  return dateIsAfter(checkDate, compareDate);
+}
+
+export function nomDateIsToday(checkDate: Date | string | null | undefined) {
+  if (!checkDate) {
+    return false;
+  }
+  return dateIsToday(checkDate);
+}
+
+export function nomDateIsTodayOrBefore(
+  checkDate: Date | string | null | undefined,
+) {
+  if (!checkDate) {
+    return false;
+  }
+  return dateIsTodayOrBefore(checkDate);
+}
+
+export function nomDateIsTodayOrAfter(
+  checkDate: Date | string | null | undefined,
+) {
+  if (!checkDate) {
+    return true;
+  }
+  return dateIsTodayOrAfter(checkDate);
+}
+
+export function nomDateIsBeforeToday(
+  checkDate: Date | string | null | undefined,
+) {
+  if (!checkDate) {
+    return false;
+  }
+  return dateIsBeforeToday(checkDate);
+}
+
+export function nomDateIsAfterToday(
+  checkDate: Date | string | null | undefined,
+) {
+  if (!checkDate) {
+    return true;
+  }
+  return dateIsAfterToday(checkDate);
+}
+
+export function nomEarliestDate(
+  date1: Date | string | null | undefined,
+  date2: Date | string | null | undefined,
+) {
+  if (!date1 && !date2) {
+    return null;
+  }
+
+  if (!date1 && !!date2) {
+    return dateWithoutTimezone(date2);
+  }
+
+  if (!date2 && !!date1) {
+    return dateWithoutTimezone(date1);
+  }
+
+  if (!!date1 && !!date2) {
+    return earliestDate(date1, date2);
+  }
+}
+
+export function nomLatestDate(
+  date1: Date | string | null | undefined,
+  date2: Date | string | null | undefined,
+) {
+  if (!date1 || !date2) {
+    return null;
+  }
+
+  return latestDate(date1, date2);
+}
+
+export function isPeriodActive(
+  gyldigFom: Date | string,
+  gyldigTom: Date | string | undefined,
+) {
+  return nomDateIsTodayOrBefore(gyldigFom) && nomDateIsTodayOrAfter(gyldigTom);
+}
+
+export function isPeriodPast(
+  gyldigFom: Date | string,
+  gyldigTom: Date | string | undefined,
+) {
+  return nomDateIsBeforeToday(gyldigFom) && nomDateIsBeforeToday(gyldigTom);
+}
+
+export function isPeriodFuture(
+  gyldigFom: Date | string,
+  gyldigTom: Date | string | undefined,
+) {
+  return nomDateIsAfterToday(gyldigFom) && nomDateIsAfterToday(gyldigTom);
+}
+
+export function isPeriodActiveOrPast(
+  gyldigFom: Date | string,
+  gyldigTom: Date | string | undefined,
+) {
+  return (
+    isPeriodActive(gyldigFom, gyldigTom) || isPeriodPast(gyldigFom, gyldigTom)
+  );
+}
+
+export function isPeriodActiveOrFuture(
+  gyldigFom: Date | string,
+  gyldigTom: Date | string | undefined,
+) {
+  return (
+    isPeriodActive(gyldigFom, gyldigTom) || isPeriodFuture(gyldigFom, gyldigTom)
   );
 }

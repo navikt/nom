@@ -61,6 +61,11 @@ import { ApiResponseError } from "~/components/ApiResponseError";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
+import {
+  dateWithoutTimezone,
+  earliestDateInList,
+  formatDateWithoutTimezone,
+} from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import {
   SektorNameMapping,
@@ -70,8 +75,12 @@ import {
 } from "~/pages/CreateResourcePage/SektorStep";
 import {
   dolValidering,
+  nomDateIsAfterToday,
+  nomDateIsBefore,
+  nomDateIsBeforeToday,
+  nomDateIsTodayOrAfter,
   otCustomStortByDate,
-  setRessursStartdato,
+  skalSetteRessursStartdato,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { EndreOtBekreftelsesmodal } from "~/pages/ResourcePage/RessursComponents/Modal/EndreOtBekreftelsesmodal";
 import { OrgtilknytningTimeline } from "~/pages/ResourcePage/RessursComponents/OrgtilknytningTimeline";
@@ -85,18 +94,11 @@ import type {
 import { OrgEnhetsType } from "~/types/api-models";
 import { Sektor, Tilknytningtype } from "~/types/api-models";
 import {
-  dateWithoutTimezone,
-  earliestDateInList,
-  formatDateWithoutTimezone,
   formatDisplayDate,
   formatVisningsnavn,
-  isAfterToday,
-  isBeforeDate,
-  isBeforeToday,
   isGyldighetsPeriodeActive,
   isSameDateOrAfter,
   isSameDateOrBefore,
-  isTodayOrAfter,
   todayWithoutTimezone,
 } from "~/utils";
 
@@ -165,7 +167,7 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
     .filter(
       (tilknytning) =>
         tilknytning.sektor === Sektor.NAV_STATLIG &&
-        (!tilknytning.gyldigTom || isTodayOrAfter(tilknytning.gyldigTom)),
+        nomDateIsTodayOrAfter(tilknytning.gyldigTom),
     )
     .map((tilknytning) => tilknytning.orgEnhetId);
 
@@ -384,7 +386,7 @@ function OrgtilknytningForm({
         oppdaterOrgtilknytningerMutation.mutate(
           lagOppdaterOrgtilknytningerRequest(
             values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
-            setRessursStartdato(
+            skalSetteRessursStartdato(
               ressurs,
               values.mappedeOrgtilknytninger,
               tidligsteOrgDatoPre,
@@ -450,18 +452,14 @@ function OrgtilknytningForm({
 
           const existingOt = !!field.fid;
 
-          const avsluttet =
-            !!gyldigTom &&
-            isBeforeToday(dateWithoutTimezone(new Date(gyldigTom)));
+          const avsluttet = nomDateIsBeforeToday(gyldigTom);
 
-          const overToMndGammel =
-            !!field.gyldigTom &&
-            isBeforeDate(
-              dateWithoutTimezone(new Date(field.gyldigTom)),
-              dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
-            );
+          const overToMndGammel = nomDateIsBefore(
+            field.gyldigTom,
+            subMonths(todayWithoutTimezone(), 2),
+          );
 
-          const fremtidig = !!gyldigFom && isAfterToday(gyldigFom);
+          const fremtidig = nomDateIsAfterToday(gyldigFom);
 
           const editOtDisabled =
             existingOt &&
@@ -1327,7 +1325,7 @@ const orgtilknytningSchema = yup.object().shape({
     test: function (value, context) {
       const otTom = context?.parent?.gyldigTom ?? undefined;
 
-      const required = otTom ? !isBeforeToday(otTom) : true;
+      const required = nomDateIsTodayOrAfter(otTom);
 
       return required ? !!value : true;
     },
@@ -1347,7 +1345,7 @@ const orgtilknytningSchema = yup.object().shape({
 
         const otTom = context?.parent?.gyldigTom ?? undefined;
 
-        const required = (otTom ? !isBeforeToday(otTom) : true) && !!otSektor;
+        const required = nomDateIsTodayOrAfter(otTom) && !!otSektor;
 
         return required ? !!value : true;
       },

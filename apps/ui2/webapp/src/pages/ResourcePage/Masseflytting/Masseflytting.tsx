@@ -34,6 +34,10 @@ import { PageBanner } from "~/components/PageBanner";
 import { OrgEnhetSelect } from "~/components/select/OrgEnhetSelect";
 import { useTableSort } from "~/hooks/useTableSort";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
+import {
+  isPeriodActive,
+  nomDateIsTodayOrAfter,
+} from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type {
   MasseFlyttingRequest,
   OrgEnhet,
@@ -41,7 +45,7 @@ import type {
   Ressurs,
 } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
-import { formatVisningsnavn, isPeriodActive, isTodayOrAfter } from "~/utils";
+import { formatVisningsnavn } from "~/utils";
 
 export function Masseflytting() {
   const { id } = useParams({ from: "/masseflytting/$id" });
@@ -95,8 +99,8 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
   });
 
   const ressurser =
-    hentedeRessurserQuery.data?.filter(
-      (ressurs) => !ressurs.sluttdato || isTodayOrAfter(ressurs.sluttdato),
+    hentedeRessurserQuery.data?.filter((ressurs) =>
+      nomDateIsTodayOrAfter(ressurs.sluttdato),
     ) ?? [];
 
   const [sektorFilter, setSektorFilter] = useState({

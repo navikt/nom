@@ -19,6 +19,7 @@ import {
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { useTableSort } from "~/hooks/useTableSort";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
+import { isPeriodActiveOrFuture } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type {
   OrgEnhet,
   Ressurs,
@@ -32,7 +33,6 @@ import {
   formatDisplayDate,
   formatTlf,
   formatVisningsnavn,
-  isPeriodActiveOrFuture,
 } from "~/utils";
 
 export const OrgRessursTabellPageInner = ({

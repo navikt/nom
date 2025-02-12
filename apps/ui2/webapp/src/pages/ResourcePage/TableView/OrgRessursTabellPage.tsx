@@ -20,9 +20,9 @@ import {
 } from "~/api/react-query-endpoints";
 import ContentWrapper from "~/components/ContentWrapper";
 import { PageBanner } from "~/components/PageBanner";
+import { isPeriodActiveOrFuture } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { OrgRessursTabellPageInner } from "~/pages/ResourcePage/TableView/OrgRessursTabellPageInner";
 import type { ExcelExportRequest, OrgEnhet } from "~/types/api-models";
-import { isPeriodActiveOrFuture } from "~/utils";
 
 export const OrgRessursTabellPage = () => {
   const { id } = useParams({ from: "/org/table/$id" });
