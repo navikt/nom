@@ -52,7 +52,7 @@ const NOM_PAARORENDE_BASE_PATH = "/frackend/paarorende";
  */
 axios.interceptors.response.use(undefined, (error) => {
   if (error.response.status === 401) {
-    window.location.assign(error.response.headers.location);
+    globalThis.location.assign(error.response.headers.location);
   }
   return Promise.reject(error);
 });
@@ -229,7 +229,7 @@ export const downloadExcelByListNavident = async (
     },
   );
 
-  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const url = globalThis.URL.createObjectURL(new Blob([response.data]));
   const link = document.createElement("a");
   link.href = url;
   link.setAttribute("download", orgenhetNavn);

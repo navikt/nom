@@ -29,7 +29,7 @@ export function BurgerMenu() {
 
   const navigate = useNavigate();
 
-  const adminLenke: string = window.location.href.includes("nom.nav.no")
+  const adminLenke: string = globalThis.location.href.includes("nom.nav.no")
     ? "https://nom-admin.ansatt.nav.no/sinks/ressurs"
     : "https://nom-admin.intern.dev.nav.no/sinks/ressurs";
 
@@ -104,7 +104,7 @@ export function BurgerMenu() {
           )}
           {hasAdminAccess && (
             <Dropdown.Menu.List.Item
-              onClick={() => window.open(adminLenke, "_blank")}
+              onClick={() => globalThis.open(adminLenke, "_blank")}
             >
               <TokenFillIcon color="black" fontSize="24px" />
               <span>Admin</span>
