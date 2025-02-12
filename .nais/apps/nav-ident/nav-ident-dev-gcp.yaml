@@ -68,11 +68,12 @@ spec:
       runtime: java
   gcp:
     sqlInstances:
-      - type: POSTGRES_14
+      - name: nav-ident-v2
+        type: POSTGRES_16
+        tier: db-custom-1-3840
         databases:
           - name: nav-ident-db
             envVarPrefix: DATABASE
-        tier: db-custom-1-3840
     buckets:
       - name: no-nav-org-dev-nav-ident-storage-bucket   #Bucket names er globally unique across all google.
         lifecycleCondition:
