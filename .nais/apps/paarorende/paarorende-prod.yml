@@ -56,7 +56,8 @@ spec:
           - NAVident
   gcp:
     sqlInstances:
-      - type: POSTGRES_15
+      - name: paarorende-v2
+        type: POSTGRES_16
         tier: db-custom-1-3840
         databases:
           - name: paarorende
