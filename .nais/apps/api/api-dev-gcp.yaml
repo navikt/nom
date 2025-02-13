@@ -274,11 +274,12 @@ spec:
         - host: dvh.adeo.no
   gcp:
     sqlInstances:
-      - type: POSTGRES_12
+      - name: nom-api-v2
+        type: POSTGRES_16
+        tier: db-custom-1-3840
         databases:
           - name: nom-api-db
             envVarPrefix: DATABASE
-        tier: db-custom-1-3840
     buckets:
       - name: no-nav-org-dev-missing-orgtilnytninger-storage-bucket
         lifecycleCondition:
