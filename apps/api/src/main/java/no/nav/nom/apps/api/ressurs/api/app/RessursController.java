@@ -147,7 +147,7 @@ public class RessursController {
         @ApiResponse(responseCode = "200"),
     })
     @PreAuthorize(
-        "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
+        "hasAuthority('NOM_UI_APP')"
     )
     public ResponseEntity<StandardResponse> updatePrimarytelefonnummer(
         @PathVariable String navident,
