@@ -81,9 +81,7 @@ spring:
     banner-mode: off
     cloud-platform: kubernetes
   datasource:
-    url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DATABASE}
-    username: ${DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD}
+    url: ${DATABASE_JDBC_URL}
     hikari:
       minimum-idle: 1
       maximum-pool-size: 5
