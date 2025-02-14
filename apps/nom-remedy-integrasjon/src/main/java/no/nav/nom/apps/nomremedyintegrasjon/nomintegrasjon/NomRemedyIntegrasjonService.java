@@ -169,7 +169,7 @@ public class NomRemedyIntegrasjonService {
                 orgtilknytningSektorEndretEventV1,
                 orgtilknytning.getGyldigFom()
             );
-        } else if (!orgtilknytning.getGyldigTom().isBefore(LocalDate.now())) {
+        } else if (isNull(orgtilknytning.getGyldigTom()) || !orgtilknytning.getGyldigTom().isBefore(LocalDate.now())) {
             updateOrgtilknytningSektor(orgtilknytningSektorEndretEventV1);
         }
     }
