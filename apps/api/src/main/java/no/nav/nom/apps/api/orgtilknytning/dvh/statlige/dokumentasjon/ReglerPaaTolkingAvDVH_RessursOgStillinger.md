@@ -85,6 +85,8 @@ LocalDate gyldigFom,
 LocalDate gyldigTom,  // Aldri null. Open ended er 2099-12-31
 IOrgenhet orgenhet,
 DagligOppfolging dagligOppfolging // JA, NEI, UKJENT
+Sektor sektor // STATLIG, KOMMUNAL, EKSTERN
+Tilknytningtype tilknytningtype // FAST, MIDLERTIDIG
 ```
 
 ### Gruppere og slå sammen perioder

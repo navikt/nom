@@ -100,8 +100,8 @@ public class Util {
                 if (forrige == null) {
                     forrige = sp;
                 } else {
-                    if (likEllerFoer(sp.gyldigFom(), dayAfter(forrige.gyldigTom()))) {  // Denne bør fjerne eventuelle overlappende perioder på samme enhet
-                        forrige = new StillingPeriode(forrige.stilling(), forrige.gyldigFom(), sp.gyldigTom(), forrige.orgenhet(), forrige.dagligOppfolging());
+                    if (likEllerFoer(sp.gyldigFom(), dayAfter(forrige.gyldigTom())) && sektorOgTilknytningtypeIsEqual(sp, forrige)) {  // Denne bør fjerne eventuelle overlappende perioder på samme enhet
+                        forrige = new StillingPeriode(forrige.stilling(), forrige.gyldigFom(), sp.gyldigTom(), forrige.orgenhet(), forrige.dagligOppfolging(), forrige.sektor(), forrige.tilknytningtype());
                     } else {
                         sammenslaatt.add(forrige);
                         forrige = sp;
@@ -119,6 +119,18 @@ public class Util {
                 .thenComparing(sp -> sp.orgenhet().getId()));
 
         return sammenslaatt;
+    }
+
+    public static boolean sektorOgTilknytningtypeIsEqual(StillingPeriode sp, StillingPeriode forrige) {
+        if (sp.sektor() == null && forrige.sektor() == null) {
+            return true;
+        }
+
+        if (sp.sektor() == null || forrige.sektor() == null) {
+            return false;
+        }
+
+        return sp.sektor().equals(forrige.sektor()) && sp.tilknytningtype().equals(forrige.tilknytningtype());
     }
 
     private static List<StillingPeriode> advarOgFjernNegativePerioder(List<StillingPeriode> stillingPerioder, StrukturerteStillingPerioderForNavident sspForNavident) {

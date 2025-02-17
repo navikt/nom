@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.apps.api.u4diff.U4DiffPaaMastrede;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -47,11 +48,15 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
 
     private Random rnd = new Random();
 
-    OrgtilknytningState orgtilknytning(String fid, String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom) {
-        return orgtilknytning(fid, navident, orgEnhetId, gyldigFom, gyldigTom, true);
+    OrgtilknytningState orgtilknytning(String fid, String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom, Sektor sektor, Tilknytningtype tilknytningtype) {
+        return orgtilknytning(fid, navident, orgEnhetId, gyldigFom, gyldigTom, true, sektor, tilknytningtype);
     }
 
     OrgtilknytningState orgtilknytning(String fid, String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom, boolean erDagligOppfolging) {
+        return orgtilknytning(fid, navident, orgEnhetId, gyldigFom, gyldigTom, erDagligOppfolging, null, null);
+    }
+
+    OrgtilknytningState orgtilknytning(String fid, String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom, boolean erDagligOppfolging, Sektor sektor, Tilknytningtype tilknytningtype) {
         return OrgtilknytningState.builder()
             .fid(fid)
             .navident(navident)
@@ -59,6 +64,8 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
             .gyldigFom(gyldigFom)
             .gyldigTom(Optional.ofNullable(gyldigTom))
             .erDagligOppfolging(erDagligOppfolging)
+            .sektor(sektor)
+            .orgtilknytningType(Optional.ofNullable(tilknytningtype))
             .build();
     }
 
@@ -67,7 +74,7 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
     }
 
     OrgtilknytningState orgtilknytning(String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom, boolean erDagligOppfolging) {
-        return orgtilknytning("FID_" + rnd.nextInt(1000), navident, orgEnhetId, gyldigFom, gyldigTom, erDagligOppfolging);
+        return orgtilknytning("FID_" + rnd.nextInt(1000), navident, orgEnhetId, gyldigFom, gyldigTom, erDagligOppfolging, null, null);
     }
 
     IOrgenhet orgenhet(String id, String navn, String agressoId) {
@@ -104,11 +111,19 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
     }
 
     DvhRessursStilling dvhRessursStilling(String navid, String stillingAgressoId, String stillingOrgenhetNavn, LocalDate from, LocalDate to) {
-        return dvhRessursStilling(navid, stillingAgressoId, stillingOrgenhetNavn, stillingAgressoId, "ORGENHET", from, to);
+        return dvhRessursStilling(navid, stillingAgressoId, stillingOrgenhetNavn, stillingAgressoId, "ORGENHET", from, to, Optional.empty());
+    }
+
+    DvhRessursStilling dvhRessursStilling(String navid, String stillingAgressoId, String stillingOrgenhetNavn, LocalDate from, LocalDate to, Optional<String> ansettelseBeskType) {
+        return dvhRessursStilling(navid, stillingAgressoId, stillingOrgenhetNavn, stillingAgressoId, "ORGENHET", from, to, ansettelseBeskType);
     }
 
     DvhRessursStilling dvhRessursStilling(String navid, String stillingAgressoId, String stillingOrgenhetNavn, String orgenhetPaaReessurs, LocalDate from, LocalDate to) {
-        return dvhRessursStilling(navid, stillingAgressoId, stillingOrgenhetNavn, orgenhetPaaReessurs, "ORGENHET", from, to);
+        return dvhRessursStilling(navid, stillingAgressoId, stillingOrgenhetNavn, orgenhetPaaReessurs, "ORGENHET", from, to, Optional.empty());
+    }
+
+    DvhRessursStilling dvhRessursStilling(String navid, String stillingAgressoId, String stillingOrgenhetNavn, String orgenhetPaaReessurs, LocalDate from, LocalDate to, Optional<String> ansettelseBeskType) {
+        return dvhRessursStilling(navid, stillingAgressoId, stillingOrgenhetNavn, orgenhetPaaReessurs, "ORGENHET", from, to, ansettelseBeskType);
     }
 
     DvhRessursStilling dvhRessursStilling(
@@ -118,7 +133,8 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
         String ressursAgressoId,
         String ressursOrgenhetNiv,
         LocalDate from,
-        LocalDate to
+        LocalDate to,
+        Optional<String> ansettelseBeskType
     ) {
         return DvhRessursStilling.builder()
             .navident(Optional.of(navid))
@@ -128,6 +144,7 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
             .ressursOrgenhetNiv(Optional.ofNullable(ressursOrgenhetNiv))
             .stillingDatoFom(from)
             .stillingDatoTom(to)
+            .stillingAnsettelsesTypeBesk(ansettelseBeskType)
             .build();
     }
 
@@ -184,7 +201,9 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
             gyldigFom,
             gyldigTom,
             orgenhet,
-            dol
+            dol,
+            null,
+            Optional.empty()
         );
     }
 

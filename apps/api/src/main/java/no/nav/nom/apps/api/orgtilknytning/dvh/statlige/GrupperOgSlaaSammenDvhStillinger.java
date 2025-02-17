@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident;
+import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +13,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.groupingBy;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.dayAfter;
@@ -28,14 +31,18 @@ public class GrupperOgSlaaSammenDvhStillinger {
     }
 
     protected StrukturerteStillingPerioderForNavident behandle(StrukturerteStillingPerioderForNavident sspForNavident) {
-        // grupper først på Stillingens - stilling enhet/navn +enhetNavn+ressurs (A+B)
+        // grupper først på Stillingens - stilling enhet/navn +enhetNavn+ressurs (A+B), sektor og tilknytningtype
         var grupperteDvhStillinger = sspForNavident.dvhRessursStillinger().stream()
             .collect(groupingBy(rs ->
-                new StillingPeriode.StillingAgressoOrgIdOgNavn(
-                    rs.getStillingAgressoId(),
-                    rs.getStillingOrgenhetNavn(),
-                    rs.getRessursAgressoId(),
-                    rs.getRessursOrgenhetNiv()
+                new StillingPeriodeKey(
+                    new StillingPeriode.StillingAgressoOrgIdOgNavn(
+                        rs.getStillingAgressoId(),
+                        rs.getStillingOrgenhetNavn(),
+                        rs.getRessursAgressoId(),
+                        rs.getRessursOrgenhetNiv()
+                    ),
+                    rs.getSektor(),
+                    rs.getTilknytningtype()
                 )
             ));
 
@@ -46,7 +53,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
         LocalDate ressursSluttdato = ressurs.sluttdato().orElse(null);
 
         // Sorter og slå sammen sammenhengende perioder
-        grupperteDvhStillinger.forEach((stillingAgressoOrgIdOgNavn, grupperteRessursStillinger) -> {
+        grupperteDvhStillinger.forEach((stillingPeriodeKey, grupperteRessursStillinger) -> {
             var sorted = grupperteRessursStillinger.stream().sorted(Comparator.comparing(DvhRessursStilling::getStillingDatoFom)).toList();
 
             LocalDate periodStart = null;
@@ -95,15 +102,20 @@ public class GrupperOgSlaaSammenDvhStillinger {
                     previousEnd = end;
                 } else if (start.isAfter(previousEnd)) {
                     // Her er det brudd i stilling - Lag en StillingPeriode på forrige periode, og fortsett
-                    perioderGruppert.add(
-                        new StillingPeriode(stillingAgressoOrgIdOgNavn, periodStart, previousEnd, null)
-                    );
+                    perioderGruppert.add(new StillingPeriode(
+                        stillingPeriodeKey.stillingAgressoOrgIdOgNavn,
+                        periodStart,
+                        previousEnd,
+                        null,
+                        stillingPeriodeKey.sektor,
+                        stillingPeriodeKey.tilknytningtype
+                    ));
                     periodStart = start;
                     previousEnd = end;
                 } else {
                     // Her er det overlapp i datoer på samme stillingAgressoId, stillingOrgenhetNavn og stillingRessursAgressoId
                     // Logg Error - og klipp bort overlappingen
-                    lagErrorOverlappIPeriode(sspForNavident, rs, ressurs.navident(), stillingAgressoOrgIdOgNavn, periodStart, previousEnd, start, end);
+                    lagErrorOverlappIPeriode(sspForNavident, rs, ressurs.navident(), stillingPeriodeKey.stillingAgressoOrgIdOgNavn, periodStart, previousEnd, start, end);
 
                     previousEnd = end;
                 }
@@ -111,14 +123,19 @@ public class GrupperOgSlaaSammenDvhStillinger {
 
             // Siste RessursStilling er slått sammen - Lag StillingsPeriode, hvis vi har en periode
             if (periodStart != null) {
-                perioderGruppert.add(
-                    new StillingPeriode(stillingAgressoOrgIdOgNavn, periodStart, previousEnd, null)
-                );
+                perioderGruppert.add(new StillingPeriode(
+                    stillingPeriodeKey.stillingAgressoOrgIdOgNavn,
+                    periodStart,
+                    previousEnd,
+                    null,
+                    stillingPeriodeKey.sektor,
+                    stillingPeriodeKey.tilknytningtype
+                ));
             }
         });
+
         return new StrukturerteStillingPerioderForNavident(sspForNavident, perioderGruppert.stream().sorted(Comparator.comparing(StillingPeriode::gyldigFom)).toList());
     }
-
 
     private void lagErrorStartEtterRessursSluttdato(
         StrukturerteStillingPerioderForNavident sspForNavident,
@@ -203,4 +220,10 @@ public class GrupperOgSlaaSammenDvhStillinger {
             dvhRessursStilling
         );
     }
+
+    record StillingPeriodeKey(
+        StillingPeriode.StillingAgressoOrgIdOgNavn stillingAgressoOrgIdOgNavn,
+        Sektor sektor,
+        Optional<Tilknytningtype> tilknytningtype
+    ) {}
 }

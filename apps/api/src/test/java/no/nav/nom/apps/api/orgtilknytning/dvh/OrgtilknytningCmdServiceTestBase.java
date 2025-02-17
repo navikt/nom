@@ -4,22 +4,25 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningSektorCommand;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
+import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.verification.VerificationMode;
-import org.springframework.kafka.core.KafkaTemplate;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,8 +33,6 @@ public class OrgtilknytningCmdServiceTestBase {
 
     @Mock
     public OrgtilknytningCommandService orgtilknytningCommandService;
-    @Mock
-    public KafkaTemplate<String, StrukturerteStillingPerioderForNavident> gmlDvhLastResultProducerTemplate;
 
     @Captor
     ArgumentCaptor<OpprettOrgtilknytning> opprettOrgtilknytningArgumentCaptor;
@@ -43,6 +44,10 @@ public class OrgtilknytningCmdServiceTestBase {
     ArgumentCaptor<FjernOrgtilknytning> fjernOrgtilknytningArgumentCaptor;
     @Captor
     ArgumentCaptor<EndreDagligOppfolgingOrgtilknytning> endreDagligOppfolgingOrgtilknytningArgumentCaptor;
+    @Captor
+    ArgumentCaptor<EndreOrgtilknytningSektorCommand> endreOrgtilknytningSektorCommandArgumentCaptor;
+    @Captor
+    ArgumentCaptor<EndreTilknytningtypeCommand> endreTilknytningtypeCommandArgumentCaptor;
 
     @Captor
     ArgumentCaptor<String> endretDatoFidArgumentCaptor = ArgumentCaptor.forClass(String.class);
@@ -55,6 +60,8 @@ public class OrgtilknytningCmdServiceTestBase {
     int avvikleTimes;
     int fjernetTimes;
     int endretDagligOppfolgingTimes;
+    int endretSektorTimes;
+    int endretTilknytningtypeTimes;
 
     @BeforeEach
     void setup() {
@@ -63,6 +70,8 @@ public class OrgtilknytningCmdServiceTestBase {
         avvikleTimes = 0;
         fjernetTimes = 0;
         endretDagligOppfolgingTimes = 0;
+        endretSektorTimes = 0;
+        endretTilknytningtypeTimes = 0;
     }
 
     protected enum CMD {
@@ -70,7 +79,9 @@ public class OrgtilknytningCmdServiceTestBase {
         ENDRET_DATO,
         AVVIKLET,
         FJERNET,
-        ENDRE_DAGLIG_OPPFOLGING
+        ENDRE_DAGLIG_OPPFOLGING,
+        ENDRE_SEKTOR,
+        ENDRE_TILKNYTNINGTYPE
     }
 
     protected OrgtilknytningAssert assertOrgtilknytning(CMD cmd) {
@@ -85,6 +96,8 @@ public class OrgtilknytningCmdServiceTestBase {
                 case ENDRET_DATO -> verificationMode = atLeast(++endretDatoTimes);
                 case AVVIKLET -> verificationMode = atLeast(++avvikleTimes);
                 case ENDRE_DAGLIG_OPPFOLGING -> verificationMode = atLeast(++endretDagligOppfolgingTimes);
+                case ENDRE_SEKTOR -> verificationMode = atLeast(++endretSektorTimes);
+                case ENDRE_TILKNYTNINGTYPE -> verificationMode = atLeast(++endretTilknytningtypeTimes);
             }
         }
 
@@ -135,6 +148,31 @@ public class OrgtilknytningCmdServiceTestBase {
                     return new EndreDagligOppfolgingOrgtilknytningAssert(
                         endretDagligOppfolgingFidArgumentCaptor.getAllValues().get(endretDagligOppfolgingTimes -1),
                         endreDagligOppfolgingOrgtilknytningArgumentCaptor.getAllValues().get(endretDagligOppfolgingTimes - 1)
+                    );
+                } else {
+                    return null;
+                }
+            }
+            case ENDRE_SEKTOR -> {
+                mock.endreOrgtilknytningSektor(endreOrgtilknytningSektorCommandArgumentCaptor.capture());
+                log.debug("ENDRE_SEKTOR ({})- FID argument: {}", endretSektorTimes, endreOrgtilknytningSektorCommandArgumentCaptor.getAllValues());
+                if (verificationMode != NEVER_INVOKED) {
+                    return new EndreOrgtilknytningSektorAssert(
+                        endreOrgtilknytningSektorCommandArgumentCaptor.getAllValues().get(endretSektorTimes - 1).fid(),
+                        endreOrgtilknytningSektorCommandArgumentCaptor.getAllValues().get(endretSektorTimes - 1)
+                    );
+                } else {
+                    return null;
+                }
+            }
+
+            case ENDRE_TILKNYTNINGTYPE -> {
+                mock.endreTilknytningtype(endreTilknytningtypeCommandArgumentCaptor.capture());
+                log.debug("ENDRET_TILKNYTNINGTYPE ({})- FID argument: {}", endretTilknytningtypeTimes, endreTilknytningtypeCommandArgumentCaptor.getAllValues());
+                if (verificationMode != NEVER_INVOKED) {
+                    return new EndreTilknytningtypeAssert(
+                        endreTilknytningtypeCommandArgumentCaptor.getAllValues().get(endretTilknytningtypeTimes - 1).fid(),
+                        endreTilknytningtypeCommandArgumentCaptor.getAllValues().get(endretTilknytningtypeTimes - 1)
                     );
                 } else {
                     return null;
@@ -191,9 +229,16 @@ public class OrgtilknytningCmdServiceTestBase {
             return this;
         }
 
-    }
+        public OrgtilknytningAssert tilSektor(Sektor sektor) {
+            fail("Orgtilknytning CMD objektet har ikke sektor, kan ikke teste på det");
+            return this;
+        }
 
-    ;
+        public OrgtilknytningAssert tilTilknytningtype(Optional<Tilknytningtype> tilknytningtype) {
+            fail("Orgtilknytning CMD objektet har ikke tilknytningtype, kan ikke teste på det");
+            return this;
+        }
+    }
 
     class OpprettOrgtilknytningAssert extends OrgtilknytningAssert {
         private final OpprettOrgtilknytning opprettOrgtilknytning;
@@ -218,6 +263,12 @@ public class OrgtilknytningCmdServiceTestBase {
         @Override
         public OrgtilknytningAssert gyldigFom(LocalDate gyldigFom) {
             assertEquals(gyldigFom, opprettOrgtilknytning.gyldigFom(), "GyldigFOM dato er ikke korrekt for OpprettOrgtilknytning");
+            return this;
+        }
+
+        @Override
+        public OrgtilknytningAssert tilSektor(Sektor sektor) {
+            assertEquals(sektor, opprettOrgtilknytning.sektor(), "Sektor er ikke korrekt for OpprettOrgtilknytning");
             return this;
         }
     }
@@ -373,6 +424,59 @@ public class OrgtilknytningCmdServiceTestBase {
 
         public OrgtilknytningAssert erDagligOppfolging(boolean erDagligOppfolging) {
             assertEquals(erDagligOppfolging, endreDagligOppfolgingOrgtilknytning.dagligOppfolging(), "ErDagligOppfolging er ikke korrekt for EndreDagligOppfolgingOrgtilknytning");
+            return this;
+        }
+    }
+
+    class EndreOrgtilknytningSektorAssert extends OrgtilknytningAssert {
+        private final EndreOrgtilknytningSektorCommand endreOrgtilknytningSektorCommand;
+
+        EndreOrgtilknytningSektorAssert(String fid, EndreOrgtilknytningSektorCommand endreOrgtilknytningSektorCommand) {
+            super(fid);
+            this.endreOrgtilknytningSektorCommand = endreOrgtilknytningSektorCommand;
+        }
+
+        @Override
+        public OrgtilknytningAssert forFid(String fid) {
+            assertEquals(fid, this.fid, "FID er ikke korrekt for EndreOrgtilknytningSektorCommand");
+            return this;
+        }
+
+        @Override
+        public OrgtilknytningAssert forNavident(String navident) {
+            assertEquals(navident, endreOrgtilknytningSektorCommand.navident(), "Navident er ikke korrekt for EndreOrgtilknytningSektorCommand");
+            return this;
+        }
+
+        @Override
+        public OrgtilknytningAssert tilEnhet(String orgEnhetId) {
+            assertEquals(orgEnhetId, endreOrgtilknytningSektorCommand.orgenhetId(), "OrgenhetId er ikke korrekt for EndreOrgtilknytningSektorCommand");
+            return this;
+        }
+
+        @Override
+        public OrgtilknytningAssert tilSektor(Sektor sektor) {
+            assertEquals(sektor, endreOrgtilknytningSektorCommand.sektor(), "Sektor er ikke korrekt for EndreOrgtilknytningSektorCommand");
+            return this;
+        }
+    }
+
+    class EndreTilknytningtypeAssert extends OrgtilknytningAssert {
+        private final EndreTilknytningtypeCommand endreTilknytningtypeCommand;
+
+        EndreTilknytningtypeAssert(String fid, EndreTilknytningtypeCommand endreTilknytningtypeCommand) {
+            super(fid);
+            this.endreTilknytningtypeCommand = endreTilknytningtypeCommand;
+        }
+
+        @Override
+        public OrgtilknytningAssert forFid(String fid) {
+            assertEquals(fid, this.fid, "FID er ikke korrekt for EndreTilknytningtypeCommand");
+            return this;
+        }
+
+        public OrgtilknytningAssert tilTilknytningtype(Optional<Tilknytningtype> tilknytningtype) {
+            assertEquals(tilknytningtype, endreTilknytningtypeCommand.tilknytningtype(), "Tilknytningtype er ikke korrekt for EndreTilknytningtypeCommand");
             return this;
         }
     }

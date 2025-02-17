@@ -1,6 +1,8 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 
 import java.time.LocalDate;
@@ -12,22 +14,32 @@ public record StillingPeriode(
     LocalDate gyldigFom,
     LocalDate gyldigTom,  // Aldri null. Open ended er 2099-12-31
     IOrgenhet orgenhet,
-    DagligOppfolging dagligOppfolging
+    DagligOppfolging dagligOppfolging,
+    Sektor sektor,
+    Optional<Tilknytningtype> tilknytningtype
 ) {
     public StillingPeriode(StillingPeriode copy, IOrgenhet orgenhet) {
-        this(copy.stilling, copy.gyldigFom, copy.gyldigTom, orgenhet, copy.dagligOppfolging);
+        this(copy.stilling, copy.gyldigFom, copy.gyldigTom, orgenhet, copy.dagligOppfolging, copy.sektor, copy.tilknytningtype);
     }
 
     public StillingPeriode(StillingPeriode copy, DagligOppfolging erDagligOppfolging) {
-        this(copy.stilling, copy.gyldigFom, copy.gyldigTom, copy.orgenhet, erDagligOppfolging);
+        this(copy.stilling, copy.gyldigFom, copy.gyldigTom, copy.orgenhet, erDagligOppfolging, copy.sektor, copy.tilknytningtype);
     }
 
     public StillingPeriode(StillingPeriode copy, LocalDate gyldigFom, LocalDate gyldigTom) {
-        this(copy.stilling, gyldigFom, gyldigTom, copy.orgenhet, copy.dagligOppfolging);
+        this(copy.stilling, gyldigFom, gyldigTom, copy.orgenhet, copy.dagligOppfolging, copy.sektor, copy.tilknytningtype);
     }
 
     public StillingPeriode(StillingAgressoOrgIdOgNavn stillingAgressoOrgIdOgNavn, LocalDate gyldigFom, LocalDate gyldigTom, IOrgenhet orgenhet) {
-        this(stillingAgressoOrgIdOgNavn, gyldigFom, gyldigTom, orgenhet, DagligOppfolging.UKJENT);
+        this(stillingAgressoOrgIdOgNavn, gyldigFom, gyldigTom, orgenhet, DagligOppfolging.UKJENT, null, Optional.empty());
+    }
+
+    public StillingPeriode(StillingAgressoOrgIdOgNavn stillingAgressoOrgIdOgNavn, LocalDate gyldigFom, LocalDate gyldigTom, IOrgenhet orgenhet, Sektor sektor, Optional<Tilknytningtype> tilknytningtype) {
+        this(stillingAgressoOrgIdOgNavn, gyldigFom, gyldigTom, orgenhet, DagligOppfolging.UKJENT, sektor, tilknytningtype);
+    }
+
+    public StillingPeriode(StillingAgressoOrgIdOgNavn stillingAgressoOrgIdOgNavn, LocalDate gyldigFom, LocalDate gyldigTom, IOrgenhet orgenhet, DagligOppfolging dagligOppfolging) {
+        this(stillingAgressoOrgIdOgNavn, gyldigFom, gyldigTom, orgenhet, dagligOppfolging, null, Optional.empty());
     }
 
     @Override
@@ -76,11 +88,11 @@ public record StillingPeriode(
     }
 
     public boolean manglerAgressoId() {
-        return !stilling.agressoId.isPresent() || stilling.agressoId.get().isBlank() || stilling.agressoId.get().startsWith("-");
+        return stilling.agressoId.isEmpty() || stilling.agressoId.get().isBlank() || stilling.agressoId.get().startsWith("-");
     }
 
     public boolean manglerRessursAgressoId() {
-        return !stilling.ressursAgressoId.isPresent() || stilling.ressursAgressoId.get().isBlank() || stilling.ressursAgressoId.get().startsWith("-");
+        return stilling.ressursAgressoId.isEmpty() || stilling.ressursAgressoId.get().isBlank() || stilling.ressursAgressoId.get().startsWith("-");
     }
 
     public boolean erRessursAgressoOrgNivORGENHETnode() {

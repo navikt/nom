@@ -118,3 +118,70 @@ Ressurs 2: B000002  null - null     NAV_STATLIG
    
     fjernet      R1/B
    ```   
+6. Tre DvhStillinger, to med samme sektor, en uten, men de to med sektor har forskjellige tilknytningtyper
+   ```
+    ORGENHET PÅ RESSURS: 0AA0001
+    TRE DVH STILLINGER MED 3 FORSKJELLIGE AnsattTypeBesk
+   
+    DATO:        DD_3Y                DD_1Y                DD_6M
+                   |                    |                    |
+    DVH R1/A:      <------ R1/A ------>                                             INGEN ANSATTTYPEBESK
+    DVH R1/A:                           <------ R1/A ------>                        ANSATTTYPEBESK Midlertidig karakter § 9a
+    DVH R1/A:                                                 <------ R1/A ------   ANSATTTYPEBESK Fast
+   
+    SP R1/A:       <---- R1/A DOL ---->                                             
+    SP R1/A:                           <---- R1/A DOL ---->                         
+    SP R1/A:                                                 <---- R1/A DOL -----   
+   ```
+    Gir orgtilknytning events:
+    ```
+    opprettet          R1/A, DD_3Y
+    endreDol           R1/A, JA
+    endreDato          R1/A, DD_3Y, DD_1Y_1D
+   
+    opprettet          R1/A, DD_1Y
+    endreDol           R1/A, JA
+    endreDatot         R1/A, DD_1Y, DD_6M_1D
+   
+    opprettet          R1/A, DD_6M
+    endreDol           R1/A, JA
+    endreTilknytning   R1/A, FAST
+    endreSektor        R1/A, NAV_STATLIG
+    ```
+
+7. To DvhStillinger, en matcher med agressoId mot to Enheter, en matcher ikke Orgenhet På Ressurs, ulike OTer, like sektor/tilknytning
+   ```
+    ORGENHET PÅ RESSURS: 0DD0001
+   
+    DATO:        DD_3Y               DD_2Y                 DD_1Y             DD_6M
+                   |                   |                     |                 |
+    DVH R1/A:       <----------------- R1/A ----------------->                         ANSATTTYPEBESK Fast
+    DVH R1/A:                                                 <----- R1/A ----->       ANSATTTYPEBESK Fast
+    DVH R1/D1:                          <-------- R1/D1 - 0DD0001 ------------------   ANSATTTYPEBESK Fast
+
+    SP R1/A:        <---- R1/A DOL ---->
+    SP R1/A:                            <------------------ R1/A -------------->
+    SP R1/D1:                           <---- R1/D1 DOL ---->
+    SP R1/D2:                                                <---- R1/D2 DOL --------
+   
+    OT R1/A:        <----------- R1/A DOL ------------------>                          Sektor: NAV_STATLIG, Tilknytning: FAST
+    OT R1/B:                                                 <---- R1/B DOL ---------  Sektor: NAV_STATLIG, Tilknytning: MIDLERTIDIG
+   ```
+   Gir orgtilknytning events:
+   ```
+    endretDato         R1/A, DD_3Y, DD_2Y_1D
+
+    opprettet          R1/D1, DD_2Y
+    endretDato         R1/D1, DD_2Y, DD_1Y_1D
+    endretDOL          R1/D1, JA
+
+    opprettet          R1/A, DD_2Y
+    endretDato         R1/A, DD_2Y, DD_6M_1D
+
+    opprettet          R1/D2, DD_1Y
+    endretDOL          R1/D2, JA
+    endreTilknytning   R1/D2, FAST
+    endreSektor        R1/D2, NAV_STATLIG
+   
+    fjernet            R1/B
+   ```   

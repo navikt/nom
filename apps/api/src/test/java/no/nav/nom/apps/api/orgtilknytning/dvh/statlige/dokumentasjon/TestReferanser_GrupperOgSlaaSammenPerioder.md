@@ -109,3 +109,14 @@
 4. Slå sammen perioder med overlapp
     1. Hvor perioder henger sammen men det er overlapp - sjekk varsling
     2. Hvor perioder henger sammen men det er overlapp på flere - sjekk varsling
+
+5. Splitt på ulike sektor og tilknytninger, men sammenhengende datoer
+    1. Hvor første to stillinger har samme ansattTypeBesk
+    2. Hvor siste har annen ansattTypeBesk
+    3. Hvor perioder henger sammen, men har ulike ansattTypeBesk
+
+6. Slå sammen sammenhengende perioder med like sektor og tilknytninger
+    1. Hvor perioder henger sammen, og har samme ansattTypeBesk
+
+7. Ikke slå sammen sammenhegende perioder med ulike sektor og tilknytninger alternativ
+    1. Hvor perioder henger sammen, men har ulike ansattTypeBesk som ikke skal slås sammen

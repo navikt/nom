@@ -2,6 +2,8 @@ package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident;
+import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +44,7 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals("Enhet_1",  forsteStillingPeriode.stilling().enhetNavn());
         assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
-        assertEquals(MAX_DATE,                 forsteStillingPeriode.gyldigTom());
+        assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
 
     @Test
@@ -86,8 +88,8 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
     public void test_SplittPaaUlikeEnheter() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
-            dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", "AGRID_x", "ORGENHET", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
-            dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", "AGRID_x", "ORGENHET", LocalDate.of(2022, 1, 1), MAX_DATE)
+            dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", "AGRID_x", "ORGENHET", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", "AGRID_x", "ORGENHET", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
@@ -115,8 +117,8 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
     public void test_SplittPaaUlikeOrgenhetPaaRessurs() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
-            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AGRID_x", "ORGENHET", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
-            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AGRID_x", "ORGENHET", LocalDate.of(2022, 1, 1), MAX_DATE)
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AGRID_x", "ORGENHET", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AGRID_x", "ORGENHET", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
@@ -145,9 +147,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
     @DisplayName("AgressoId presis, men orgenhet på ressurs er upresis")
     void test_PresisAgressoID_UpresisOrgenhetPaaRessurs_IderErMatch() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
-            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AGRID", "ORGNIV3", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
-            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AGRID", "ORGNIV3", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
-            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AGRID", "ORGNIV3", LocalDate.of(2022, 1, 1), MAX_DATE)
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AGRID", "ORGNIV3", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AGRID", "ORGNIV3", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AGRID", "ORGNIV3", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
@@ -170,9 +172,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
     @DisplayName("AgressoId er upresis, men orgenhet på ressurs er presis")
     void test_UpresisAgressoID_PresisOrgenhetPaaRessurs_IderErMatch() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
-            dvhRessursStilling(A000001, "AGRID", "Enhet_1", "AGRID_1", "ORGENHET", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
-            dvhRessursStilling(A000001, "AGRID", "Enhet_1", "AGRID_1", "ORGENHET", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
-            dvhRessursStilling(A000001, "AGRID", "Enhet_1", "AGRID_1", "ORGENHET", LocalDate.of(2022, 1, 1), MAX_DATE)
+            dvhRessursStilling(A000001, "AGRID", "Enhet_1", "AGRID_1", "ORGENHET", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "AGRID", "Enhet_1", "AGRID_1", "ORGENHET", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "AGRID", "Enhet_1", "AGRID_1", "ORGENHET", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
@@ -195,9 +197,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
     @DisplayName("AgressoId presis, men orgenhet på ressurs er upresis - Id'ene matcher ikke")
     void test_PresisAgressoID_UpresisOrgenhetPaaRessurs_IderMatcherIkke() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
-            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AID_2", "ORGENHET", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
-            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AID_2", "ORGENHET", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
-            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AID_2", "ORGENHET", LocalDate.of(2022, 1, 1), MAX_DATE)
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AID_2", "ORGENHET", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AID_2", "ORGENHET", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AID_2", "ORGENHET", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
@@ -220,9 +222,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
     @DisplayName("Både AgressoId og orgenhet på ressurs er upresis - Id'ene matcher")
     void test_UpresisAgressoID_PresisOrgenhetPaaRessurs_IderMatcher() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
-            dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_1", "ORGNIV3", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
-            dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_1", "ORGNIV3", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
-            dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_1", "ORGNIV3", LocalDate.of(2022, 1, 1), MAX_DATE)
+            dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_1", "ORGNIV3", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_1", "ORGNIV3", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_1", "ORGNIV3", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
@@ -245,9 +247,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
     @DisplayName("Både AgressoId og orgenhet på ressurs er upresis - Id'ene matcher ikke")
     void test_UpresisAgressoID_UpresisOrgenhetPaaRessurs_IderMatcherIkke() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
-            dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_2", "ORGNIV3", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
-            dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_2", "ORGNIV3", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
-            dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_2", "ORGNIV3", LocalDate.of(2022, 1, 1), MAX_DATE)
+            dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_2", "ORGNIV3", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_2", "ORGNIV3", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_2", "ORGNIV3", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
@@ -270,9 +272,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
     @DisplayName("AgressoId mangler, men orgenhet på ressurs er presis")
     void test_ManglerAgressoID_PresisOrgenhetPaaRessurs() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
-            dvhRessursStilling(A000001, "-4", "Mangler", "AGRID_1", "ORGENHET", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
-            dvhRessursStilling(A000001, "-4", "Mangler", "AGRID_1", "ORGENHET", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
-            dvhRessursStilling(A000001, "-4", "Mangler", "AGRID_1", "ORGENHET", LocalDate.of(2022, 1, 1), MAX_DATE)
+            dvhRessursStilling(A000001, "-4", "Mangler", "AGRID_1", "ORGENHET", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "-4", "Mangler", "AGRID_1", "ORGENHET", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "-4", "Mangler", "AGRID_1", "ORGENHET", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
@@ -295,9 +297,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
     @DisplayName("AgressoId mangler, og orgenhet på ressurs er upresis")
     void test_ManglerAgressoID_UpresisOrgenhetPaaRessurs() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
-            dvhRessursStilling(A000001, "-4", "Mangler", "AID_1", "ORGNIV3", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
-            dvhRessursStilling(A000001, "-4", "Mangler", "AID_1", "ORGNIV3", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
-            dvhRessursStilling(A000001, "-4", "Mangler", "AID_1", "ORGNIV3", LocalDate.of(2022, 1, 1), MAX_DATE)
+            dvhRessursStilling(A000001, "-4", "Mangler", "AID_1", "ORGNIV3", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "-4", "Mangler", "AID_1", "ORGNIV3", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "-4", "Mangler", "AID_1", "ORGNIV3", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
@@ -320,9 +322,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
     @DisplayName("Mangler både AgressoId og orgenhet på ressurs")
     void test_ManglerAgressoID_ManglerOrgenhetPaaRessurs() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
-            dvhRessursStilling(A000001, "-4", "Mangler", "-3", null, LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
-            dvhRessursStilling(A000001, "-4", "Mangler", "-3", null, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
-            dvhRessursStilling(A000001, "-4", "Mangler", "-3", null, LocalDate.of(2022, 1, 1), MAX_DATE)
+            dvhRessursStilling(A000001, "-4", "Mangler", "-3", null, LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "-4", "Mangler", "-3", null, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31), Optional.empty()),
+            dvhRessursStilling(A000001, "-4", "Mangler", "-3", null, LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
@@ -571,5 +573,107 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(2, result.errors().size());
         assertEquals(DVH_RESSURSSTILLINGER_HAR_OVERLAPPENDE_PERIODER, result.errors().getFirst().errorType());
         assertEquals(DVH_RESSURSSTILLINGER_HAR_OVERLAPPENDE_PERIODER, result.errors().getFirst().errorType());
+    }
+
+    @Test
+    // Test referanser 5
+    @DisplayName("Splitt på ulike sektor og tilknytninger, men sammenhengende datoer")
+    void test_splittPaaUlikeSektorMedSammenhengendeDatoer() {
+        List<DvhRessursStilling> dvhRessursStillinger = List.of(
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), Optional.of("Midlertidig karakter § 9a")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2021, 1, 1), LocalDate.of(2021, 6, 15), Optional.of("Midlertidig karakter § 9a")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2021, 6, 16), MAX_DATE, Optional.of("Fast"))
+        );
+
+        when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
+        var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
+
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(2, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        assertEquals("AGRID_1",  forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("Enhet_1",  forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
+        assertEquals(LocalDate.of(2021, 6, 15), forsteStillingPeriode.gyldigTom());
+        assertEquals(Sektor.NAV_STATLIG, forsteStillingPeriode.sektor());
+        assertEquals(Tilknytningtype.MIDLERTIDIG, forsteStillingPeriode.tilknytningtype().orElse(null));
+        var andreStillingPeriode = result.stillingPerioder().getLast();
+        assertEquals("AGRID_1",  andreStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("Enhet_1",  andreStillingPeriode.stilling().enhetNavn());
+        assertEquals("ORGENHET", andreStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals(LocalDate.of(2021, 6, 16), andreStillingPeriode.gyldigFom());
+        assertEquals(MAX_DATE, andreStillingPeriode.gyldigTom());
+        assertEquals(Sektor.NAV_STATLIG, andreStillingPeriode.sektor());
+        assertEquals(Tilknytningtype.FAST, andreStillingPeriode.tilknytningtype().orElse(null));
+    }
+
+    @Test
+    // Test referanser 6
+    @DisplayName("Slå sammen sammenhengende perioder med like sektor og tilknytninger")
+    void test_SlaaSammenSammenhengendePerioderMedLikeSektorOgTilknytninger() {
+        List<DvhRessursStilling> dvhRessursStillinger = List.of(
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2021, 1, 1), LocalDate.of(2021, 6, 15), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2021, 6, 16), MAX_DATE, Optional.of("Fast"))
+        );
+
+        when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
+        var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
+
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(1, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        assertEquals("AGRID_1",  forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("Enhet_1",  forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
+        assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
+        assertEquals(Sektor.NAV_STATLIG, forsteStillingPeriode.sektor());
+        assertEquals(Tilknytningtype.FAST, forsteStillingPeriode.tilknytningtype().orElse(null));
+    }
+
+    @Test
+    @DisplayName("Ikke slå sammen sammenhegende perioder med ulike sektor og tilknytninger")
+    void test_IkkeSlaaSammenSammenhengendePerioderMedUlikeSektorOgTilknytninger() {
+        List<DvhRessursStilling> dvhRessursStillinger = List.of(
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), Optional.of("Midlertidig karakter § 9a")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2021, 1, 1), LocalDate.of(2021, 6, 15), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2021, 6, 16), MAX_DATE, Optional.of("Midlertidig karakter § 9a"))
+        );
+
+        when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
+        var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
+
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(3, result.stillingPerioder().size());
+        var forsteStillingPeriode = result.stillingPerioder().getFirst();
+        var andreStillingPeriode = result.stillingPerioder().get(1);
+        var tredjeStillingPeriode = result.stillingPerioder().getLast();
+
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
+        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
+        assertEquals(LocalDate.of(2020, 12, 31), forsteStillingPeriode.gyldigTom());
+        assertEquals(Sektor.NAV_STATLIG, forsteStillingPeriode.sektor());
+        assertEquals(Tilknytningtype.MIDLERTIDIG, forsteStillingPeriode.tilknytningtype().orElse(null));
+        assertEquals("AGRID_1", andreStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("Enhet_1", andreStillingPeriode.stilling().enhetNavn());
+        assertEquals("ORGENHET", andreStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals(LocalDate.of(2021, 1, 1), andreStillingPeriode.gyldigFom());
+        assertEquals(LocalDate.of(2021, 6, 15), andreStillingPeriode.gyldigTom());
+        assertEquals(Sektor.NAV_STATLIG, andreStillingPeriode.sektor());
+        assertEquals(Tilknytningtype.FAST, andreStillingPeriode.tilknytningtype().orElse(null));
+        assertEquals("AGRID_1", tredjeStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("Enhet_1", tredjeStillingPeriode.stilling().enhetNavn());
+        assertEquals("ORGENHET", tredjeStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals(LocalDate.of(2021, 6, 16), tredjeStillingPeriode.gyldigFom());
+        assertEquals(MAX_DATE, tredjeStillingPeriode.gyldigTom());
+        assertEquals(Sektor.NAV_STATLIG, tredjeStillingPeriode.sektor());
+        assertEquals(Tilknytningtype.MIDLERTIDIG, tredjeStillingPeriode.tilknytningtype().orElse(null));
     }
 }

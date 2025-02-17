@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.isNull;
+
 @Slf4j
 @Service
 public class RessursStillingLoader {
@@ -51,7 +53,11 @@ public class RessursStillingLoader {
     public List<DvhRessursStilling> load() {
         LocalDateTime start = LocalDateTime.now();
 
-        var ressursStillinger = dvhOrdsService.getStatligeTilknytninger();
+        var ressursStillinger = dvhOrdsService.getStatligeTilknytninger().stream()
+            .filter(rs -> isNull(rs.getStillingAnsettelsesTypeBesk())
+                || rs.getStillingAnsettelsesTypeBesk().isEmpty()
+                || !rs.getStillingAnsettelsesTypeBesk().get().equalsIgnoreCase("Innlån/utlån"))
+            .toList();
 
         log.info("Lastet {} ressursStillinger. Tok {}", ressursStillinger.size(), durationAsH24(start));
         return ressursStillinger;

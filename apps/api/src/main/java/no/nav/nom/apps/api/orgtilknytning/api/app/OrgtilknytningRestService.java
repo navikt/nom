@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgtilknytning.api.app;
 
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
@@ -72,8 +71,6 @@ public class OrgtilknytningRestService {
     private final AuthorizedNavident authorizedNavident;
     private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
 
-    private final Unleash unleash;
-
     public OrgtilknytningRestService(
         OrgtilknytningStateRepository orgtilknytningStateRepository,
         OrgtilknytningCommandService orgtilknytningCommandService,
@@ -81,8 +78,7 @@ public class OrgtilknytningRestService {
         RessursStateRepository ressursStateRepository,
         NomMastered nomMastered,
         AuthorizedNavident authorizedNavident,
-        OrgtilknytningEndretEmailService orgtilknytningEndretEmailService,
-        Unleash unleash
+        OrgtilknytningEndretEmailService orgtilknytningEndretEmailService
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
@@ -91,7 +87,6 @@ public class OrgtilknytningRestService {
         this.nomMastered = nomMastered;
         this.authorizedNavident = authorizedNavident;
         this.orgtilknytningEndretEmailService = orgtilknytningEndretEmailService;
-        this.unleash = unleash;
     }
 
     public List<OrgtilknytningState> getOrgtilknytninger(Optional<String> navident) {
@@ -256,10 +251,7 @@ public class OrgtilknytningRestService {
 
         validateOrgtilknytningHasSektor(oppdaterOrgtilknytningerForRessursRequest);
         validateOrgtilknytningHasTilknytningtype(oppdaterOrgtilknytningerForRessursRequest);
-        if (unleash.isEnabled("nom.validering_av_duplikate_orgenhet")) {
-            validateOrgtilknytningerHasNoActiveAndSektorAndTilknytningDuplicates(oppdaterOrgtilknytningerForRessursRequest);
-        }
-
+        validateOrgtilknytningerHasNoActiveAndSektorAndTilknytningDuplicates(oppdaterOrgtilknytningerForRessursRequest);
     }
 
     private void validateOrgtilknytningHasSektor(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
