@@ -34,8 +34,8 @@ public class UtilTest extends TestBase {
         var result = Util.slaaSammenBackToBackPerioderOgSorterAsc(stillingPerioder, DUMMY_sspForNavident);
 
         assertEquals(2, result.size());
-        assertEquals(LocalDate.of(2019, 1, 1), result.get(0).gyldigFom());
-        assertEquals(LocalDate.of(2019, 12, 31), result.get(0).gyldigTom());
+        assertEquals(LocalDate.of(2019, 1, 1), result.getFirst().gyldigFom());
+        assertEquals(LocalDate.of(2019, 12, 31), result.getFirst().gyldigTom());
         assertEquals(orgenhet.getId(), result.get(0).orgenhet().getId());
         assertEquals(JA, result.get(0).dagligOppfolging());
 
@@ -57,8 +57,8 @@ public class UtilTest extends TestBase {
         var result = Util.slaaSammenBackToBackPerioderOgSorterAsc(stillingPerioder, DUMMY_sspForNavident);
 
         assertEquals(2, result.size());
-        assertEquals(LocalDate.of(2019, 1, 1), result.get(0).gyldigFom());
-        assertEquals(LocalDate.of(2019, 12, 30), result.get(0).gyldigTom());
+        assertEquals(LocalDate.of(2019, 1, 1), result.getFirst().gyldigFom());
+        assertEquals(LocalDate.of(2019, 12, 30), result.getFirst().gyldigTom());
         assertEquals(orgenhet.getId(), result.get(0).orgenhet().getId());
         assertEquals(JA, result.get(0).dagligOppfolging());
 
@@ -80,10 +80,10 @@ public class UtilTest extends TestBase {
         var result = Util.slaaSammenBackToBackPerioderOgSorterAsc(stillingPerioder, DUMMY_sspForNavident);
 
         assertEquals(1, result.size());
-        assertEquals(LocalDate.of(2019, 1, 1), result.get(0).gyldigFom());
-        assertEquals(LocalDate.of(2021, 10, 31), result.get(0).gyldigTom());
-        assertEquals(orgenhet.getId(), result.get(0).orgenhet().getId());
-        assertEquals(JA, result.get(0).dagligOppfolging());
+        assertEquals(LocalDate.of(2019, 1, 1), result.getFirst().gyldigFom());
+        assertEquals(LocalDate.of(2021, 10, 31), result.getFirst().gyldigTom());
+        assertEquals(orgenhet.getId(), result.getFirst().orgenhet().getId());
+        assertEquals(JA, result.getFirst().dagligOppfolging());
     }
 
     @Test
@@ -98,10 +98,10 @@ public class UtilTest extends TestBase {
         var result = Util.slaaSammenBackToBackPerioderOgSorterAsc(stillingPerioder, DUMMY_sspForNavident);
 
         assertEquals(1, result.size());
-        assertEquals(LocalDate.of(2019, 1, 1), result.get(0).gyldigFom());
-        assertEquals(LocalDate.of(2021, 10, 31), result.get(0).gyldigTom());
-        assertEquals(orgenhet.getId(), result.get(0).orgenhet().getId());
-        assertEquals(JA, result.get(0).dagligOppfolging());
+        assertEquals(LocalDate.of(2019, 1, 1), result.getFirst().gyldigFom());
+        assertEquals(LocalDate.of(2021, 10, 31), result.getFirst().gyldigTom());
+        assertEquals(orgenhet.getId(), result.getFirst().orgenhet().getId());
+        assertEquals(JA, result.getFirst().dagligOppfolging());
     }
 
     @Test
@@ -116,10 +116,10 @@ public class UtilTest extends TestBase {
         var result = Util.slaaSammenBackToBackPerioderOgSorterAsc(stillingPerioder, DUMMY_sspForNavident);
 
         assertEquals(1, result.size());
-        assertEquals(LocalDate.of(2019, 1, 1), result.get(0).gyldigFom());
-        assertEquals(LocalDate.of(2021, 10, 31), result.get(0).gyldigTom());
-        assertEquals(orgenhet.getId(), result.get(0).orgenhet().getId());
-        assertEquals(JA, result.get(0).dagligOppfolging());
+        assertEquals(LocalDate.of(2019, 1, 1), result.getFirst().gyldigFom());
+        assertEquals(LocalDate.of(2021, 10, 31), result.getFirst().gyldigTom());
+        assertEquals(orgenhet.getId(), result.getFirst().orgenhet().getId());
+        assertEquals(JA, result.getFirst().dagligOppfolging());
     }
 
     @Test
@@ -134,8 +134,8 @@ public class UtilTest extends TestBase {
         var result = Util.slaaSammenBackToBackPerioderOgSorterAsc(stillingPerioder, DUMMY_sspForNavident);
 
         assertEquals(2, result.size());
-        assertEquals(LocalDate.of(2019, 1, 1), result.get(0).gyldigFom());
-        assertEquals(LocalDate.of(2019, 12, 31), result.get(0).gyldigTom());
+        assertEquals(LocalDate.of(2019, 1, 1), result.getFirst().gyldigFom());
+        assertEquals(LocalDate.of(2019, 12, 31), result.getFirst().gyldigTom());
         assertEquals(orgenhet.getId(), result.get(0).orgenhet().getId());
         assertEquals(JA, result.get(0).dagligOppfolging());
 
@@ -157,8 +157,8 @@ public class UtilTest extends TestBase {
         var result = Util.slaaSammenBackToBackPerioderOgSorterAsc(stillingPerioder, DUMMY_sspForNavident);
 
         assertEquals(2, result.size());
-        assertEquals(LocalDate.of(2019, 1, 1), result.get(0).gyldigFom());
-        assertEquals(LocalDate.of(2019, 12, 31), result.get(0).gyldigTom());
+        assertEquals(LocalDate.of(2019, 1, 1), result.getFirst().gyldigFom());
+        assertEquals(LocalDate.of(2019, 12, 31), result.getFirst().gyldigTom());
         assertEquals(orgenhet.getId(), result.get(0).orgenhet().getId());
         assertEquals(JA, result.get(0).dagligOppfolging());
 
@@ -181,8 +181,8 @@ public class UtilTest extends TestBase {
         var result = Util.slaaSammenBackToBackPerioderOgSorterAsc(stillingPerioder, DUMMY_sspForNavident);
 
         assertEquals(2, result.size());
-        assertEquals(LocalDate.of(2019, 1, 1), result.get(0).gyldigFom());
-        assertEquals(LocalDate.of(2019, 12, 31), result.get(0).gyldigTom());
+        assertEquals(LocalDate.of(2019, 1, 1), result.getFirst().gyldigFom());
+        assertEquals(LocalDate.of(2019, 12, 31), result.getFirst().gyldigTom());
         assertEquals(orgenhet.getId(), result.get(0).orgenhet().getId());
         assertEquals(JA, result.get(0).dagligOppfolging());
 
@@ -222,8 +222,8 @@ public class UtilTest extends TestBase {
 
         assertEquals(6, result.size());
 
-        assertEquals(LocalDate.of(2019,  1,  1), result.get(0).gyldigFom());
-        assertEquals(LocalDate.of(2022, 10, 31), result.get(0).gyldigTom());
+        assertEquals(LocalDate.of(2019,  1,  1), result.getFirst().gyldigFom());
+        assertEquals(LocalDate.of(2022, 10, 31), result.getFirst().gyldigTom());
         assertEquals(orgenhet1.getId(),          result.get(0).orgenhet().getId());
         assertEquals(JA,                         result.get(0).dagligOppfolging());
 

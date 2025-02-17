@@ -126,7 +126,7 @@ class RessursStillingLoaderTest extends TestBase {
     public void testLoad() {
         var result = ressursStillingLoader.load();
 
-        assertEquals(5, result.size());
+        assertEquals(6, result.size());
         assertEquals(4, result.stream().filter(rs -> rs.getNavident().equals(Optional.of("A100036"))).count());
         assertEquals(
             LocalDate.of(2021, 7, 1),
@@ -146,7 +146,7 @@ class RessursStillingLoaderTest extends TestBase {
                 .get()
                 .getStillingDatoFom()
         );
-        assertEquals(1, result.stream().filter(rs -> rs.getNavident().equals(Optional.of("A100180"))).count());
+        assertEquals(2, result.stream().filter(rs -> rs.getNavident().equals(Optional.of("A100180"))).count());
         assertEquals(
             LocalDate.of(2024, 6, 1),
             result.stream()

@@ -1,9 +1,10 @@
 package no.nav.nom.apps.api.dvh.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
+import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -14,12 +15,13 @@ import java.util.Optional;
 @Builder
 public class DvhRessursStilling {
     Optional<String> navident;
-    LocalDate stillingDatoFom;                  // DVH sin HRRES_STILLINGER.FRA_DATO            Fra dato for brekkpunktet for dette datapunktet
-    LocalDate stillingDatoTom;                  // DVH sin HRRES_STILLINGER.TIL_DATO            Fra dato for brekkpunktet for dette datapunktet
-    Optional<String> stillingAgressoId;         // DVH sin HRRES_STILLINGER.ORGENHET            Agresso id som unit4-stillingen er knyttet til i perioden for FRA/TIL_DATO.
+    LocalDate stillingDatoFom;                          // DVH sin HRRES_STILLINGER.FRA_DATO            Fra dato for brekkpunktet for dette datapunktet
+    LocalDate stillingDatoTom;                          // DVH sin HRRES_STILLINGER.TIL_DATO            Fra dato for brekkpunktet for dette datapunktet
+    Optional<String> stillingAgressoId;                 // DVH sin HRRES_STILLINGER.ORGENHET            Agresso id som unit4-stillingen er knyttet til i perioden for FRA/TIL_DATO.
+    Optional<String> stillingAnsettelsesTypeBesk;       // DVH sin HRRES_STILLINGER.ANSETELSESTYPE_BESK  Beskrivelse av ansettelsestype
                                                 //                                              Kan være NULL/TOM/MANGLENDE
     String stillingOrgenhetNavn;
-    Optional<String> ressursAgressoId;          // DVH sin HRRES_RESSURS.ORGENHET_PAA_RESSURS   Agresso id som unit4-ressursen er knyttet til NÅ
+    Optional<String> ressursAgressoId;                  // DVH sin HRRES_RESSURS.ORGENHET_PAA_RESSURS   Agresso id som unit4-ressursen er knyttet til NÅ
                                                 //                                              Kan være NULL/TOM/MANGLENDE
     Optional<String> ressursOrgenhetNiv;
     Optional<String> ressursRemedyEnhetId;
@@ -46,6 +48,23 @@ public class DvhRessursStilling {
             Optional.of(node.asText());
     }
 
+    public Sektor getSektor() {
+        var ansettelsesBeskTypeValue = this.getStillingAnsettelsesTypeBesk().orElse("");
+        return switch (ansettelsesBeskTypeValue) {
+            case "Fast", "Midlertidig karakter § 9a" -> Sektor.NAV_STATLIG;
+            default -> null;
+        };
+    }
+
+    public Optional<Tilknytningtype> getTilknytningtype() {
+        var ansettelsesBeskTypeValue = this.getStillingAnsettelsesTypeBesk().orElse("");
+        return switch (ansettelsesBeskTypeValue) {
+            case "Fast" -> Optional.of(Tilknytningtype.FAST);
+            case "Midlertidig karakter § 9a" -> Optional.of(Tilknytningtype.MIDLERTIDIG);
+            default -> Optional.empty();
+        };
+    }
+
     public static DvhRessursStilling fromOrdsRessursStilling(JsonNode json) {
         var navident = getNullableOrErrorStringNode(json, "nav_id");
 
@@ -53,7 +72,7 @@ public class DvhRessursStilling {
             .payload(json.toPrettyString())
             .navident(navident);
 
-        if (!navident.isEmpty()) {
+        if (navident.isPresent()) {
             dvhRessursStillingBuilder
                 .stillingDatoFom(localDateOf(json.get("fra_dato").asText()))
                 .stillingDatoTom(localDateOf(json.get("til_dato").asText()))
@@ -63,6 +82,7 @@ public class DvhRessursStilling {
                 .ressursOrgenhetNiv(getNullableOrErrorStringNode(json, "orgenhet_paa_ressurs_niva"))
                 .ressursRemedyEnhetId(getNullableOrErrorStringNode(json, "remedy_enhet_id"))
                 .stillingRessursAgressoId(getNullableOrErrorStringNode(json, "stilling_orgenhet_paa_ressurs"))
+                .stillingAnsettelsesTypeBesk(getNullableOrErrorStringNode(json, "ansettelsestype_besk"))
                 .ressursAgressoDatoFom(localDateOf(json.get("agresso_date_from").asText()))
                 .ressursAgressoDatoTom(localDateOf(json.get("agresso_date_to").asText()))
                 .ressursDvhDatoFom(localDateOf(json.get("date_from").asText()))

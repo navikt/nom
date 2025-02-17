@@ -29,8 +29,6 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.getEarliestDa
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.getLatestDate;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.overlapperEllerErDirekteEtterfoelgende;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.slaaSammenBackToBackPerioderOgSorterAsc;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.sorterMedNyesteEnhetFoerst;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.sorterOrgenhetFomDatoerNyesteDatoFoerst;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.sorterOrgenhetFomDatoerNyesteDatoFoerstPrefererLiktNavn;
 
 @Component
@@ -220,7 +218,9 @@ public class MatchStrukturerteStillingPerioderTilNOM {
                             stillingPeriode.stilling(),
                             nyGyldigFom,
                             nyGyldigTom,
-                            aktuellOrgEnhet
+                            aktuellOrgEnhet,
+                            stillingPeriode.sektor(),
+                            stillingPeriode.tilknytningtype()
                         );
 
                         lagErrorForDelAvStillingPeriodeSomGaarUtoverEnhetPeriodeUtenMatchendeEksisterendeOT(
@@ -239,7 +239,9 @@ public class MatchStrukturerteStillingPerioderTilNOM {
                         stillingPeriode.stilling(),
                         nyGyldigFom,
                         aktuellGyldigTom,
-                        aktuellOrgEnhet
+                        aktuellOrgEnhet,
+                        stillingPeriode.sektor(),
+                        stillingPeriode.tilknytningtype()
                     );
                     splittetPerioder.add(nyStillingsPeriode);
                 }

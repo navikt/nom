@@ -8,11 +8,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @EnableConfigurationProperties(value = AppProperties.class)
 @AutoConfigureWireMock(port = 0)
 class DvhOrdsServiceTest {
-    @MockBean
+    @MockitoBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
     @Autowired
@@ -202,7 +202,7 @@ class DvhOrdsServiceTest {
 
         var ressursStillinger = dvhOrdsService.getStatligeTilknytninger();
         assertNotNull(ressursStillinger);
-        assertEquals(5, ressursStillinger.size());
+        assertEquals(7, ressursStillinger.size());
 
         assertEquals("A100036", ressursStillinger.getFirst().getNavident().get());
         assertEquals("0499000", ressursStillinger.getFirst().getStillingAgressoId().get());
@@ -219,5 +219,13 @@ class DvhOrdsServiceTest {
         assertEquals(LocalDate.of(2024,6,30), ressursStillinger.get(4).getStillingDatoTom());
         assertEquals(LocalDate.of(1980,5,19), ressursStillinger.get(4).getRessursDvhDatoFom());
         assertEquals(LocalDate.of(2099,12,31), ressursStillinger.get(4).getRessursDvhDatoTom());
+
+        assertEquals("A100180", ressursStillinger.get(5).getNavident().get());
+        assertEquals("0521000", ressursStillinger.get(5).getStillingAgressoId().get());
+        assertEquals("Innlån/utlån", ressursStillinger.get(5).getStillingAnsettelsesTypeBesk().get());
+
+        assertEquals("A100180", ressursStillinger.get(6).getNavident().get());
+        assertEquals("0521000", ressursStillinger.get(6).getStillingAgressoId().get());
+        assertEquals(Optional.of(""), ressursStillinger.get(6).getStillingAnsettelsesTypeBesk());
     }
 }

@@ -8,6 +8,8 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningC
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningSektorCommand;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OrgtilknytningCommand;
@@ -31,6 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.AbstractMap.SimpleEntry;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.NO_END_DATE;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isCurrentOrFuture;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.lik;
 
 @Component
@@ -118,9 +121,97 @@ public class NyeRessursStillingProcessor {
             if (ot.erDagligOppfolging() != sp.erDagligOppfolging()) {
                 endringer.add(lagEndreDOLCmd(ot, sp, sspForNavident));
             }
+
+            if (sp.erDagligOppfolging() && isCurrentOrFuture(sp.gyldigTom())) {
+                if (sp.sektor() != null) {
+                    endringer.add(lagSektorEndringCmd(ot, sp, sspForNavident));
+                }
+                if (sp.tilknytningtype().isPresent()) {
+                    endringer.add(lagEndreTilknytningtypeCmd(ot, sp));
+                }
+            }
         });
 
         return endringer;
+    }
+
+    private SimpleEntry<String, OrgtilknytningCommand> lagEndreTilknytningtypeCmd(
+        OrgtilknytningState ot,
+        StillingPeriode sp
+    ) {
+        var navident = ot.navident();
+        var orgenhetId = ot.orgEnhetId();
+
+        InputMetadata inputMetadata = getMetadata(navident, orgenhetId);
+
+        var cmd = new EndreTilknytningtypeCommand(
+            ot.fid(),
+            sp.tilknytningtype(),
+            inputMetadata
+        );
+
+        return new SimpleEntry<>(ot.fid(), cmd);
+    }
+
+    private SimpleEntry<String, OrgtilknytningCommand> lagEndreTilknytningtypeCmd(
+        String fiktivFID,
+        StillingPeriode sp,
+        StrukturerteStillingPerioderForNavident sspForNavident
+    ) {
+        var navident = sspForNavident.navident();
+        var orgenhetId = sp.orgenhet().getId();
+
+        InputMetadata inputMetadata = getMetadata(navident, orgenhetId);
+
+        var cmd = new EndreTilknytningtypeCommand(
+            fiktivFID,
+            sp.tilknytningtype(),
+            inputMetadata
+        );
+
+        return new SimpleEntry<>(fiktivFID, cmd);
+    }
+
+    private SimpleEntry<String, OrgtilknytningCommand> lagSektorEndringCmd(String fiktivFID, StillingPeriode sp, StrukturerteStillingPerioderForNavident sspForNavident) {
+        var navident = sspForNavident.navident();
+        var orgenhetId = sp.orgenhet().getId();
+
+        InputMetadata inputMetadata = getMetadata(navident, orgenhetId);
+
+        var cmd = new EndreOrgtilknytningSektorCommand(
+            fiktivFID,
+            navident,
+            orgenhetId,
+            sp.sektor(),
+            inputMetadata,
+            new OrgtilknytningEvent.AdditionalAgressoData(
+                sp.stilling().toString(),
+                StillingPeriode.toString(sspForNavident.stillingPerioder())
+            )
+        );
+
+        return new SimpleEntry<>(fiktivFID, cmd);
+    }
+
+    private SimpleEntry<String, OrgtilknytningCommand> lagSektorEndringCmd(OrgtilknytningState ot, StillingPeriode sp, StrukturerteStillingPerioderForNavident sspForNavident) {
+        var navident = ot.navident();
+        var orgenhetId = ot.orgEnhetId();
+
+        InputMetadata inputMetadata = getMetadata(navident, orgenhetId);
+
+        var cmd = new EndreOrgtilknytningSektorCommand(
+            ot.fid(),
+            navident,
+            orgenhetId,
+            sp.sektor(),
+            inputMetadata,
+            new OrgtilknytningEvent.AdditionalAgressoData(
+                sp.stilling().toString(),
+                StillingPeriode.toString(sspForNavident.stillingPerioder())
+            )
+        );
+
+        return new SimpleEntry<>(ot.fid(), cmd);
     }
 
     private List<SimpleEntry<String, OrgtilknytningCommand>> fjerngamle(List<OrgtilknytningState> eksisterendeAaFjerne) {
@@ -151,6 +242,10 @@ public class NyeRessursStillingProcessor {
                             orgtilknytningCommandService.avvikleOrgtilknytning(endringFID, cmd);
                     case FjernOrgtilknytning cmd ->
                             orgtilknytningCommandService.fjernOrgtilknytning(endringFID, cmd);
+                    case EndreTilknytningtypeCommand cmd ->
+                            orgtilknytningCommandService.endreTilknytningtype(cmd.toBuilder().fid(endringFID).build());
+                    case EndreOrgtilknytningSektorCommand cmd ->
+                            orgtilknytningCommandService.endreOrgtilknytningSektor(cmd.toBuilder().fid(endringFID).build());
                     default ->
                             throw new IllegalStateException("Unexpected OrgtilknytningCommand object: " + entry.getValue().getClass().getName());
                 }
@@ -179,6 +274,10 @@ public class NyeRessursStillingProcessor {
             nye.add(lagOpprettEventCmd(fiktivFID, sp, sspForNavident));
             if (sp.erDagligOppfolging()) {
                 nye.add(lagEndreDOLCmd(fiktivFID, sp, sspForNavident));
+                if (sp.sektor() != null && sp.tilknytningtype().isPresent() && isCurrentOrFuture(sp.gyldigTom())) {
+                    nye.add(lagSektorEndringCmd(fiktivFID, sp, sspForNavident));
+                    nye.add(lagEndreTilknytningtypeCmd(fiktivFID, sp, sspForNavident));
+                }
             }
             if (sp.gyldigTom().isBefore(NO_END_DATE)) {
                 nye.add(lagEndreGyldigTomCmd(fiktivFID, sp, sspForNavident));
