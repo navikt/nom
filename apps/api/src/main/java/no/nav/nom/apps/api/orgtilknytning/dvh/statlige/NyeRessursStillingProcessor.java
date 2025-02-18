@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.AbstractMap.SimpleEntry;
+import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.NO_END_DATE;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isCurrentOrFuture;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.lik;
@@ -124,10 +125,14 @@ public class NyeRessursStillingProcessor {
 
             if (sp.erDagligOppfolging() && isCurrentOrFuture(sp.gyldigTom())) {
                 if (sp.sektor() != null) {
-                    endringer.add(lagSektorEndringCmd(ot, sp, sspForNavident));
+                    if (isNull(ot.sektor()) || ot.sektor() != sp.sektor()) {
+                        endringer.add(lagSektorEndringCmd(ot, sp, sspForNavident));
+                    }
                 }
                 if (sp.tilknytningtype().isPresent()) {
-                    endringer.add(lagEndreTilknytningtypeCmd(ot, sp));
+                    if (ot.orgtilknytningType().isEmpty() || ot.orgtilknytningType().get() != sp.tilknytningtype().get()) {
+                        endringer.add(lagEndreTilknytningtypeCmd(ot, sp));
+                    }
                 }
             }
         });
