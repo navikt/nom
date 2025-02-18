@@ -17,6 +17,7 @@ import partition from "lodash/partition";
 import React from "react";
 
 import {
+  downloadExcelKontaktPersonserForOrgenhetByOrgenhetId,
   getRessurserByListNavident,
   isOrgEnhetArbeidsomraade,
   isOrgEnhetDriftsenhet,
@@ -29,7 +30,11 @@ import {
   nomDateIsTodayOrAfter,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import building from "~/resources/building.svg";
-import type { OrgEnhet, Ressurs } from "~/types/api-models";
+import type {
+  OrgEnhet,
+  OrgenhetKontaktPersonserExcelExportRequest,
+  Ressurs,
+} from "~/types/api-models";
 import { NomNivaa, OrgEnhetsType, Sektor } from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
@@ -334,6 +339,20 @@ function DropdownMeny({
 }) {
   const hasAdminAccess = useHasAdminAccess();
 
+  const handleDownloadKontaktpersonerExcel = async () => {
+    const excelExportRequest = {
+      orgEnhetId: orgEnhet.id,
+    };
+    await downloadExcelKontaktPersonserForOrgenhetByOrgenhetId(
+      excelExportRequest as OrgenhetKontaktPersonserExcelExportRequest,
+      excelFilNavn(),
+    );
+  };
+
+  const excelFilNavn = () => {
+    return "kontaktpersoner for orgenhet - " + orgEnhet?.navn + ".xls";
+  };
+
   return (
     <Dropdown>
       <Button
@@ -386,6 +405,11 @@ function DropdownMeny({
               )}
             </>
           )}
+
+          <Dropdown.Menu.Divider />
+          <Dropdown.Menu.GroupedList.Item onClick={handleDownloadKontaktpersonerExcel}>
+            Export kontaktpersoner til Excel
+          </Dropdown.Menu.GroupedList.Item>
         </Dropdown.Menu.GroupedList>
       </Dropdown.Menu>
     </Dropdown>
