@@ -12,8 +12,18 @@ export default defineConfig({
       "~": fileURLToPath(new URL("src", import.meta.url)),
     },
   },
+  build: {
+    assetsInlineLimit: 0,
+  },
   server: {
-    origin: "http://localhost:5173",
+    cors: {
+      origin: [
+        "https://nom-admin.ansatt.dev.nav.no",
+        "https://nom-admin.intern.dev.nav.no",
+        "https://nom-admin.ansatt.nav.no",
+        /^http:\/\/localhost:\d{4}$/,
+      ],
+    },
     proxy: {
       "/api": {
         target: "http://localhost:8080/",
