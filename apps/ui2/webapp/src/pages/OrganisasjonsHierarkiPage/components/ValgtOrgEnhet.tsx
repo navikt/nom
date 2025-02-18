@@ -407,7 +407,9 @@ function DropdownMeny({
           )}
 
           <Dropdown.Menu.Divider />
-          <Dropdown.Menu.GroupedList.Item onClick={handleDownloadKontaktpersonerExcel}>
+          <Dropdown.Menu.GroupedList.Item
+            onClick={handleDownloadKontaktpersonerExcel}
+          >
             Export kontaktpersoner til Excel
           </Dropdown.Menu.GroupedList.Item>
         </Dropdown.Menu.GroupedList>
