@@ -3,6 +3,8 @@ package no.nav.nom.apps.api.orgenhet.api.app;
 import jakarta.servlet.http.HttpServletResponse;
 
 import no.nav.nom.apps.api.authorize.AuthResolver;
+import no.nav.nom.apps.api.clients.kontaktinfo.Kontaktinfo;
+import no.nav.nom.apps.api.clients.kontaktinfo.KontaktinfoClient;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import org.apache.poi.ss.usermodel.CellType;
@@ -23,11 +25,15 @@ public class KontaktpersonerExcelGenerator {
         "EKSTERN", "Ekstern"
     );
     private final AuthResolver authResolver;
+    private final KontaktinfoClient kontaktinfoClient;
+
 
     public KontaktpersonerExcelGenerator(
-        AuthResolver authResolver
+        AuthResolver authResolver,
+        KontaktinfoClient kontaktinfoClient
     ) {
         this.authResolver = authResolver;
+        this.kontaktinfoClient = kontaktinfoClient;
     }
 
     public void generate(HttpServletResponse response, OrgEnhet orgEnhet, List<Ressurs> ressurser) {
@@ -37,16 +43,17 @@ public class KontaktpersonerExcelGenerator {
             var sheet = workbook.createSheet("Kontaktpersoner - " + orgEnhet.navn());
             var rowcount = 0;
 
-            addRow(sheet.createRow(rowcount++), null);
+            addRow(sheet.createRow(rowcount++), null, null);
 
            if(!hasAdminRightsForEnhet) {
                throw new RuntimeException("User does not have access to view ressurser for this orgenhet");
            }
 
            for (Ressurs ressurs : ressurser) {
+               var kontaktinfo = kontaktinfoClient.getKontaktinfo(ressurs.state().navident());
                addRow(
                    sheet.createRow(rowcount++),
-                   ressurs
+                   ressurs, kontaktinfo.isEmpty()? null : kontaktinfo.get(0)
                );
            }
 
@@ -65,7 +72,7 @@ public class KontaktpersonerExcelGenerator {
 
     }
 
-    private static void addRow(Row row, Ressurs ressurs) {
+    private static void addRow(Row row, Ressurs ressurs, Kontaktinfo kontaktinfo) {
         var medarbeiderNavident = row.createCell(0, CellType.STRING);
         var medarbeiderFornavn = row.createCell(1, CellType.STRING);
         var medarbeiderEtternavn = row.createCell(2, CellType.STRING);
@@ -86,6 +93,12 @@ public class KontaktpersonerExcelGenerator {
             medarbeiderNavident.setCellValue(ressurs.state().navident());
             medarbeiderFornavn.setCellValue(ressurs.state().visningsnavn().fornavn());
             medarbeiderEtternavn.setCellValue(ressurs.state().visningsnavn().etternavn());
+            if (kontaktinfo != null) {
+                kontaktpersonNavn.setCellValue(kontaktinfo.fornavn() + " " + kontaktinfo.etternavn());
+                kontaktpersonRelasjon.setCellValue(kontaktinfo.relasjon());
+                kontaktpersonTelefonnr.setCellValue(kontaktinfo.telefon());
+                kontaktpersonProritet.setCellValue(kontaktinfo.prioritet());
+            }
         }
     }
 }
