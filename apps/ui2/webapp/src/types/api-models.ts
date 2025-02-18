@@ -39,6 +39,10 @@ export interface ExcelExportRequest {
   topOrgEnhetId?: string;
 }
 
+export interface OrgenhetKontaktPersonserExcelExportRequest {
+  orgEnhetId?: string;
+}
+
 export interface FolkeregisterPerson {
   navn: RessursNavn;
 }

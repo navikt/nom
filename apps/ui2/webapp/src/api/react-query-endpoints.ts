@@ -23,6 +23,7 @@ import type {
   OpprettRessursRequest,
   OpprettRessursResponse,
   OrgEnhet,
+  OrgenhetKontaktPersonserExcelExportRequest,
   OrgEnhetMedLedernavn,
   OrgtilknytningState,
   Person,
@@ -233,6 +234,26 @@ export const downloadExcelByListNavident = async (
   const link = document.createElement("a");
   link.href = url;
   link.setAttribute("download", orgenhetNavn);
+  document.body.append(link);
+  link.click();
+  link.remove();
+};
+
+export const downloadExcelKontaktPersonserForOrgenhetByOrgenhetId = async (
+  request: OrgenhetKontaktPersonserExcelExportRequest,
+  excelDocumentNavn: string,
+) => {
+  const response = await axios.get(
+    `${NOM_API_BASE_PATH}/app/orgenheter/exportKontaktpersonerFor/${request.orgEnhetId}`,
+    {
+      responseType: "blob",
+    },
+  );
+
+  const url = globalThis.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", excelDocumentNavn);
   document.body.append(link);
   link.click();
   link.remove();
