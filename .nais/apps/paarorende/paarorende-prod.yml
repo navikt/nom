@@ -71,6 +71,9 @@ spec:
         - application: nom-ui2
           namespace: org
           cluster: prod-gcp
+        - application: nom-api
+          namespace: org
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nom-api

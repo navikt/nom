@@ -228,6 +228,9 @@ spec:
         - application: nav-ident
           namespace: org
           cluster: prod-gcp
+        - application: nom-paarorende
+          namespace: org
+          cluster: prod-gcp
       external:
         - host: teamorg-unleash-api.nav.cloud.nais.io
         - host: nom-proxy.prod-fss-pub.nais.io
