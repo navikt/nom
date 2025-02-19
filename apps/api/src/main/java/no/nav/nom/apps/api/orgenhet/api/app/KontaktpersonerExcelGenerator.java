@@ -49,11 +49,15 @@ public class KontaktpersonerExcelGenerator {
                throw new RuntimeException("User does not have access to view ressurser for this orgenhet");
            }
 
-           for (Ressurs ressurs : ressurser) {
+           var sortedRessurser = ressurser.stream()
+               .sorted((r1, r2) -> r1.state().visningsnavn().etternavn().compareTo(r2.state().visningsnavn().etternavn()))
+               .toList();
+
+           for (Ressurs ressurs : sortedRessurser) {
                var kontaktinfo = kontaktinfoClient.getKontaktinfo(ressurs.state().navident());
                addRow(
                    sheet.createRow(rowcount++),
-                   ressurs, kontaktinfo.isEmpty()? null : kontaktinfo.get(0)
+                   ressurs, getPrioritertKontaktinfo(kontaktinfo)
                );
            }
 
@@ -70,6 +74,10 @@ public class KontaktpersonerExcelGenerator {
             throw new RuntimeException();
         }
 
+    }
+    private Kontaktinfo getPrioritertKontaktinfo(List<Kontaktinfo> kontaktinfo) {
+        return kontaktinfo.stream().min((k1, k2) -> k1.prioritet().compareTo(k2.prioritet()))
+            .orElse(null);
     }
 
     private static void addRow(Row row, Ressurs ressurs, Kontaktinfo kontaktinfo) {
