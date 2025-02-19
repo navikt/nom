@@ -81,7 +81,8 @@ public class KontaktpersonerExcelGenerator {
 
             workbook.write(response.getOutputStream());
         } catch (Exception e) {
-            throw new RuntimeException();
+            log.error("Failed to generate excel file", e);
+            throw new RuntimeException(e.getMessage());
         }
 
     }
