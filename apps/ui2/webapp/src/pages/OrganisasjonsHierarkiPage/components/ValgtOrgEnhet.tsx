@@ -22,7 +22,10 @@ import {
   isOrgEnhetArbeidsomraade,
   isOrgEnhetDriftsenhet,
 } from "~/api/react-query-endpoints";
-import { useHasAdminAccess } from "~/api/useGetSession";
+import {
+  useHasAdminAccess,
+  useHasAdminOrWriteAccess,
+} from "~/api/useGetSession";
 import { UserImage } from "~/components/UserImage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import {
@@ -338,7 +341,7 @@ function DropdownMeny({
   visRessursAdministeringKnapper: boolean;
 }) {
   const hasAdminAccess = useHasAdminAccess();
-
+  const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
   const handleDownloadKontaktpersonerExcel = async () => {
     const excelExportRequest = {
       orgEnhetId: orgEnhet.id,
@@ -406,12 +409,16 @@ function DropdownMeny({
             </>
           )}
 
-          <Dropdown.Menu.Divider />
-          <Dropdown.Menu.GroupedList.Item
-            onClick={handleDownloadKontaktpersonerExcel}
-          >
-            Export kontaktpersoner til Excel
-          </Dropdown.Menu.GroupedList.Item>
+          {hasAdminOrWriteAccess && (
+            <>
+              <Dropdown.Menu.Divider />
+              <Dropdown.Menu.GroupedList.Item
+                onClick={handleDownloadKontaktpersonerExcel}
+              >
+                Export kontaktpersoner til Excel
+              </Dropdown.Menu.GroupedList.Item>
+            </>
+          )}
         </Dropdown.Menu.GroupedList>
       </Dropdown.Menu>
     </Dropdown>
