@@ -24,7 +24,7 @@ import {
 } from "~/api/react-query-endpoints";
 import {
   useHasAdminAccess,
-  useHasAdminOrWriteAccess,
+  useHasAdminOrWriteAccess, useHasWriteAccess,
 } from "~/api/useGetSession";
 import { UserImage } from "~/components/UserImage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
@@ -341,7 +341,7 @@ function DropdownMeny({
   visRessursAdministeringKnapper: boolean;
 }) {
   const hasAdminAccess = useHasAdminAccess();
-  const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
+  const hasWriteAccess = useHasWriteAccess();
   const handleDownloadKontaktpersonerExcel = async () => {
     const excelExportRequest = {
       orgEnhetId: orgEnhet.id,
@@ -409,7 +409,7 @@ function DropdownMeny({
             </>
           )}
 
-          {hasAdminOrWriteAccess && (
+          {hasWriteAccess && (
             <>
               <Dropdown.Menu.Divider />
               <Dropdown.Menu.GroupedList.Item
