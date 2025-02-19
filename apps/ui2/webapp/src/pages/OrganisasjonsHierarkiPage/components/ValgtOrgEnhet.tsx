@@ -22,8 +22,7 @@ import {
   isOrgEnhetArbeidsomraade,
   isOrgEnhetDriftsenhet,
 } from "~/api/react-query-endpoints";
-import {
-  useHasAdminAccess, useHasWriteAccess} from "~/api/useGetSession";
+import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
 import { UserImage } from "~/components/UserImage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import {
