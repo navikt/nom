@@ -94,7 +94,7 @@ public class OrgEnhetController {
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=kontaktpersoner.xlsx");
             kontaktpersonerExcelGenerator.generate(response, orgEnhet.get(), ressurser);
         } catch (Exception e) {
-            log.error("Failed to generate export file");
+            log.error("Failed to generate export file " + e.getMessage());
             response.sendError(500);
         }
     }
