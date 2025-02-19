@@ -49,15 +49,17 @@ public class KontaktpersonerExcelGenerator {
                throw new RuntimeException("User does not have access to view ressurser for this orgenhet");
            }
 
+           /*
            var sortedRessurser = ressurser.stream()
                .sorted((r1, r2) -> r1.state().visningsnavn().etternavn().compareTo(r2.state().visningsnavn().etternavn()))
                .toList();
+           */
 
-           for (Ressurs ressurs : sortedRessurser) {
+           for (Ressurs ressurs : ressurser) {
                var kontaktinfo = kontaktinfoClient.getKontaktinfo(ressurs.state().navident());
                addRow(
                    sheet.createRow(rowcount++),
-                   ressurs, getPrioritertKontaktinfo(kontaktinfo)
+                   ressurs, kontaktinfo.isEmpty()? null : kontaktinfo.get(0)
                );
            }
 
