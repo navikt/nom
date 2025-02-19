@@ -65,6 +65,7 @@ public class KontaktpersonerExcelGenerator {
            for (Ressurs ressurs : ressurser) {
                log.info("Generating excel for ressurs {}", ressurs.state());
                var kontaktinfo = kontaktinfoClient.getKontaktinfo(ressurs.state().navident());
+               log.info("Kontaktinfo for ressurs {}: {}", ressurs.state().navident(), kontaktinfo);
                addRow(
                    sheet.createRow(rowcount++),
                    ressurs, kontaktinfo.isEmpty()? null : kontaktinfo.get(0)
