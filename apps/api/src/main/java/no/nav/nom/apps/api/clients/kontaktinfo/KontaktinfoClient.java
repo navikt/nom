@@ -22,14 +22,14 @@ public class KontaktinfoClient {
     public static final Logger logger = LogManager.getLogger(KontaktinfoClient.class);
     private final WebClient webClient;
 
-    @Value("${client.paarorende.max-attempts}")
+    @Value("${clients.paarorende.max-attempts}")
     private Integer maxAttempts;
 
-    @Value("${client.paarorende.backoff-duration-millis}")
+    @Value("${clients.paarorende.backoff-duration-millis}")
     private Integer backoffDurationMillis;
 
 
-    public KontaktinfoClient(@Value("${client.paarorende.base-url}") String baseUrl, OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager) throws IOException {
+    public KontaktinfoClient(@Value("${clients.paarorende.base-url}") String baseUrl, OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager) throws IOException {
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("paarorende");
 
