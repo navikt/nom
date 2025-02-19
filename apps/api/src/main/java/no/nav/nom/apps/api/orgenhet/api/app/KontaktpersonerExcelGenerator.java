@@ -11,6 +11,8 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.Map;
 
 @Component
 public class KontaktpersonerExcelGenerator {
+    private final static Logger log = LoggerFactory.getLogger(KontaktpersonerExcelGenerator.class);
 
     private static final Map<String, String> sektorMap = Map.of(
         "NAV_STATLIG", "Statlig",
@@ -46,7 +49,9 @@ public class KontaktpersonerExcelGenerator {
             addRow(sheet.createRow(rowcount++), null, null);
 
            if(!hasAdminRightsForEnhet) {
-               throw new RuntimeException("User does not have access to view ressurser for this orgenhet");
+               var errorMessage = "User does not have access to view ressurser for this orgenhet";
+               log.error(errorMessage);
+               throw new RuntimeException(errorMessage);
            }
 
            /*
@@ -55,7 +60,10 @@ public class KontaktpersonerExcelGenerator {
                .toList();
            */
 
+            log.info("Generating excel for orgenhet {} with {} ressurser", orgEnhet.id(), ressurser.size());
+
            for (Ressurs ressurs : ressurser) {
+               log.info("Generating excel for ressurs {}", ressurs.state());
                var kontaktinfo = kontaktinfoClient.getKontaktinfo(ressurs.state().navident());
                addRow(
                    sheet.createRow(rowcount++),
