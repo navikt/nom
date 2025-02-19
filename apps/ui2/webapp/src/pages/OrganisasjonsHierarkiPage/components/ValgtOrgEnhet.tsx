@@ -24,7 +24,7 @@ import {
 } from "~/api/react-query-endpoints";
 import {
   useHasAdminAccess,
-  useHasAdminOrWriteAccess, useHasWriteAccess,
+  useHasWriteAccess,
 } from "~/api/useGetSession";
 import { UserImage } from "~/components/UserImage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
@@ -413,6 +413,7 @@ function DropdownMeny({
             <>
               <Dropdown.Menu.Divider />
               <Dropdown.Menu.GroupedList.Item
+                as={Link}
                 onClick={handleDownloadKontaktpersonerExcel}
               >
                 Export kontaktpersoner til Excel
