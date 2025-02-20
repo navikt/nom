@@ -5,7 +5,7 @@ app:
     orgEnhet:
       stateTopic: org.nom.intern-orgenhet-state
   clients:
-    paarorende:
+    nom-paarorende:
       base-url: http://localhost:${wiremock.server.port}
       max-attempts: 3
       backoff-duration-millis: 2000
