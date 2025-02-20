@@ -19,7 +19,7 @@ public record AppProperties(
         MicrosoftGraph microsoftGraph,
         NomRemedyIntegrasjon nomRemedyIntegrasjon,
         DvhOrds dvhOrds,
-        Paarorende paarorende
+        NomPaarorende nomPaarorende
     ) {}
 
     public record NomProxy(
@@ -64,7 +64,7 @@ public record AppProperties(
         String orgHierarkiPath,
         String nomRessurserPath
     ) {}
-    public record Paarorende(
+    public record NomPaarorende(
         String baseUrl,
         String aadScope
     ) {}

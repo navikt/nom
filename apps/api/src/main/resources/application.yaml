@@ -14,7 +14,7 @@ app:
     organisering:
       eventsourceTopic: org.nom.organisering-eventsource
   clients:
-    paarorende:
+    nom-paarorende:
       base-url: ${PAARORENDE_BASEURL}
       max-attempts: 3
       backoff-duration-millis: 2000
@@ -98,7 +98,7 @@ spring:
           audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
       client:
         registration:
-          paarorende:
+          nom-paarorende:
             provider: azure
             client-id: ${AZURE_APP_CLIENT_ID}
             client-secret: ${AZURE_APP_CLIENT_SECRET}

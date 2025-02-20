@@ -27,26 +27,25 @@ public class KontaktinfoClient {
     private final OnBehalfOfTokenRepository onBehalfOfTokenRepository;
     private final WebClient.Builder webClientBuilder;
 
-    @Value("${app.clients.paarorende.max-attempts}")
+    @Value("${app.clients.nom-paarorende.max-attempts}")
     private Integer maxAttempts;
 
-    @Value("${app.clients.paarorende.backoff-duration-millis}")
+    @Value("${app.clients.nom-paarorende.backoff-duration-millis}")
     private Integer backoffDurationMillis;
 
     public KontaktinfoClient(
-            @Value("${app.clients.paarorende.base-url}") String baseUrl,
             OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager,
             OnBehalfOfTokenRepository onBehalfOfTokenRepository,
             AppProperties appProperties
     ) throws IOException {
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
-        oAuth2Filter.setDefaultClientRegistrationId("paarorende");
+        oAuth2Filter.setDefaultClientRegistrationId("nom-paarorende");
 
         this.onBehalfOfTokenRepository = onBehalfOfTokenRepository;
-        this.paarorendeScope = appProperties.clients().paarorende().aadScope();
+        this.paarorendeScope = appProperties.clients().nomPaarorende().aadScope();
 
         WebClient.Builder baseWebClientBuilder = WebClient.builder()
-                .baseUrl(appProperties.clients().paarorende().baseUrl())
+                .baseUrl(appProperties.clients().nomPaarorende().baseUrl())
                 .defaultHeaders(headers -> {
                     headers.add("Nav-Consumer-Id", appProperties.name());
                     headers.add("Nav-Call-Id", appProperties.name());
