@@ -375,7 +375,7 @@ NOM_WRITE_GROUPID: "c5752f26-105a-460f-a538-1859273f5057" # nom-write
 NOM_ADMIN_GROUPID: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # nom-admin
 NOM_PILOT_GROUPID: "087625aa-d658-4b00-9d71-8538b1a8fd15" # NOM-PILOT
 
-PAARORENDE_BASEURL: "https://paarorende.intern.dev.nav.no"
+PAARORENDE_BASEURL: "http://nom-paarorende.org.svc.cluster.local"
 PAARORENDE_API_SCOPE: api://dev-gcp.org.nom-paarorende/.default
 
 --- # This is the same as having an application-prod.yaml file
@@ -447,6 +447,6 @@ NOM_PILOT_GROUPID: "e219ba08-0685-40b5-95e6-5fd82ec7414a" # NOM-PILOT
 NOM_REMEDY_INTEGRASJON_BASEURL: "https://nom-remedy-integrasjon.prod-fss-pub.nais.io"
 NOM_REMEDY_INTEGRASJON_API_SCOPE: api://prod-fss.org.nom-remedy-integrasjon/.default
 
-PAARORENDE_BASEURL: "https://paarorende.intern.nav.no"
+PAARORENDE_BASEURL: "http://nom-paarorende.org.svc.cluster.local"
 PAARORENDE_API_SCOPE: api://prod-gcp.org.nom-paarorende/.default
 
