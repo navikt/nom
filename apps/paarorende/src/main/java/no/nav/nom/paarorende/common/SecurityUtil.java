@@ -1,6 +1,8 @@
 package no.nav.nom.paarorende.common;
 
 import no.nav.nom.paarorende.consumer.NomApiClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
@@ -13,6 +15,8 @@ import java.util.Arrays;
 
 @Service
 public class SecurityUtil {
+
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private final Environment environment;
     private final NomApiClient nomApiClient;
@@ -41,6 +45,11 @@ public class SecurityUtil {
     }
 
     public void assertAuthorizedAccessTo(String navident) throws AccessDeniedException {
+        // debuging purpose
+        log.info("isAuthenticated: " + isAuthenticated());
+        log.info("getNavIdent(): " + getNavIdent());
+        log.info("hasAccess({},{}) {}: ",getNavIdent(), navident, hasAccess(getNavIdent(), navident));
+
         if (!isAuthenticated() || getNavIdent() == null || !hasAccess(getNavIdent(), navident)) {
             throw new AccessDeniedException("Unauthorized");
         }
