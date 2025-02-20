@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -82,6 +83,7 @@ public class U4DiffPaaMastrede {
         try {
             var statligeNotInU4 = ressursStateRepository.getAll().stream()
                 .filter(r -> r.sektor() == Sektor.NAV_STATLIG)
+                .filter(r -> r.identType() != IdentType.ROBOT)
                 .map(RessursState::navident)
                 .distinct()
                 .filter(navident -> !u4StatligeNavidenter.contains(navident))

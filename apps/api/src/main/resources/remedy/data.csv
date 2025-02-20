@@ -295,6 +295,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 203000;2030;ORGNIV3;Sør-Varanger;Beholdt;;;JA;203000;ORGNIV3;leggInn;
 2096100;2096;AGRESSOORGENHET;Troms og Finnmark Arbeidsrådgivning;Beholdt;;;JA;2096100;ORGENHET;leggInn;
 210300;2103;ORGNIV3;;Vikafossen;;;Avventer;210300;;fe178t;24.04.2024 - lagt inn mapping til riktig nomId
+EV00001;2103;ORGENHET;;VikaFossen;;;Avventer;EV00001;;ru664y;24.04.2024 - lagt inn mapping til underenhet nomId
 230000;2300;ORGNIV3;HELFO Hovedkontor;Beholdt;;;JA;230000;ORGNIV3;hu192a;24.04.2024 - lagt inn mapping til nomId
 231000;2310;ORGNIV3;HELFO Oslo;Beholdt;;;JA;231000;ORGNIV3;leggInn;norgEnhet er under avvikling. MEN det er 23 aktive nav-identer på 2310 i HRRES_RESSURS
 239000;2390;ORGNIV3;;FEIL, se kommentar;;;Avventer;239000;;leggInn;Representerer HELSEDIR. orgEnhet her er antagelig lagt inn av Rune og Co og ikke reell. Antagelig må vi håndtere disse siden. Disse skal antagelig bare opprettes i NOM, og ikke inn i U4.
