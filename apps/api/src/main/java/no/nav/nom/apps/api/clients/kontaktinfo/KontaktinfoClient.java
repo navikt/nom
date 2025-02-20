@@ -19,7 +19,7 @@ import static no.nav.nom.apps.api.clients.WebClientUtils.defaultRetry;
 @Service
 public class KontaktinfoClient {
 
-    public static final Logger logger = LogManager.getLogger(KontaktinfoClient.class);
+    public static final Logger log = LogManager.getLogger(KontaktinfoClient.class);
     private final WebClient webClient;
 
     @Value("${app.clients.paarorende.max-attempts}")
@@ -39,14 +39,15 @@ public class KontaktinfoClient {
             .build();
     }
 
-    public List<Kontaktinfo> getKontaktinfo(String navIdent) {
+    public List<Kontaktinfo> getKontaktinfo(String navident) {
         return webClient.get()
-            .uri("/api/kontaktinfo/{navident}")
+            .uri(String.format("/api/kontaktinfo/%s", navident))
             .retrieve()
             .toEntityList(Kontaktinfo.class)
             .retryWhen(defaultRetry(maxAttempts, backoffDurationMillis))
             .doOnError(WebClientResponseException.class, (webClientResponseException) -> {
                 if (webClientResponseException.getStatusCode().value() == 404) {
+                    log.error("Kontaktinfo not found", webClientResponseException);
                     throw new KontaktinfoException("Kontaktinfo not found", ErrorCode.NOT_FOUND);
                 }
 
@@ -56,6 +57,7 @@ public class KontaktinfoClient {
                     webClientResponseException.getStatusCode().value(),
                     webClientResponseException.getResponseBodyAsString()
                 );
+                log.error(errorMsg, webClientResponseException);
                 throw new KontaktinfoException(errorMsg, ErrorCode.SERVER_ERROR);
             })
             .block().getBody();
