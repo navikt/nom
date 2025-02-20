@@ -1,5 +1,7 @@
 package no.nav.nom.apps.api.clients.kontaktinfo;
 
+import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.apps.api.common.security.OnBehalfOfTokenRepository;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,6 +23,8 @@ public class KontaktinfoClient {
 
     public static final Logger log = LogManager.getLogger(KontaktinfoClient.class);
     private final WebClient webClient;
+    private final OnBehalfOfTokenRepository onBehalfOfTokenRepository;
+    private final String paarorendeScope;
 
     @Value("${app.clients.paarorende.max-attempts}")
     private Integer maxAttempts;
@@ -28,11 +32,17 @@ public class KontaktinfoClient {
     @Value("${app.clients.paarorende.backoff-duration-millis}")
     private Integer backoffDurationMillis;
 
-
-    public KontaktinfoClient(@Value("${app.clients.paarorende.base-url}") String baseUrl, OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager) throws IOException {
+    public KontaktinfoClient(
+            @Value("${app.clients.paarorende.base-url}") String baseUrl,
+            OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager,
+            OnBehalfOfTokenRepository onBehalfOfTokenRepository,
+            AppProperties appProperties
+    ) throws IOException {
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("paarorende");
 
+        this.onBehalfOfTokenRepository = onBehalfOfTokenRepository;
+        this.paarorendeScope = appProperties.clients().paarorende().aadScope();
         this.webClient = WebClient.builder()
             .filter(oAuth2Filter)
             .baseUrl(baseUrl)
@@ -40,8 +50,10 @@ public class KontaktinfoClient {
     }
 
     public List<Kontaktinfo> getKontaktinfo(String navident) {
+        String onBehalfOfToken = onBehalfOfTokenRepository.getOnbehalfofTokenFor(paarorendeScope);
         return webClient.get()
             .uri(String.format("/api/kontaktinfo/%s", navident))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
             .retrieve()
             .toEntityList(Kontaktinfo.class)
             .retryWhen(defaultRetry(maxAttempts, backoffDurationMillis))

@@ -18,6 +18,7 @@ app:
       base-url: ${PAARORENDE_BASEURL}
       max-attempts: 3
       backoff-duration-millis: 2000
+      aad-scope: ${PAARORENDE_API_SCOPE}
     nom-proxy:
       base-url: ${NOM_PROXY_BASEURL}
     nik:
