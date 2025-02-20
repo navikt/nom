@@ -73,7 +73,7 @@ spec:
           namespace: org
           cluster: dev-gcp
         - application: nom-api
-          namespace: org
+          namespace: nom
           cluster: dev-gcp
     outbound:
       rules:
