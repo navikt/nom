@@ -22,9 +22,10 @@ import static no.nav.nom.apps.api.clients.WebClientUtils.defaultRetry;
 public class KontaktinfoClient {
 
     public static final Logger log = LogManager.getLogger(KontaktinfoClient.class);
-    private final WebClient webClient;
-    private final OnBehalfOfTokenRepository onBehalfOfTokenRepository;
+    private final WebClient clientCredentialsAuthorizedWebClient;
     private final String paarorendeScope;
+    private final OnBehalfOfTokenRepository onBehalfOfTokenRepository;
+    private final WebClient.Builder webClientBuilder;
 
     @Value("${app.clients.paarorende.max-attempts}")
     private Integer maxAttempts;
@@ -43,17 +44,27 @@ public class KontaktinfoClient {
 
         this.onBehalfOfTokenRepository = onBehalfOfTokenRepository;
         this.paarorendeScope = appProperties.clients().paarorende().aadScope();
-        this.webClient = WebClient.builder()
-            .filter(oAuth2Filter)
-            .baseUrl(baseUrl)
-            .build();
+
+        WebClient.Builder baseWebClientBuilder = WebClient.builder()
+                .baseUrl(appProperties.clients().paarorende().baseUrl())
+                .defaultHeaders(headers -> {
+                    headers.add("Nav-Consumer-Id", appProperties.name());
+                    headers.add("Nav-Call-Id", appProperties.name());
+                });
+        this.clientCredentialsAuthorizedWebClient = baseWebClientBuilder
+                .filter(oAuth2Filter)
+                .build();
+        this.webClientBuilder = baseWebClientBuilder;
     }
 
     public List<Kontaktinfo> getKontaktinfo(String navident) {
         String onBehalfOfToken = onBehalfOfTokenRepository.getOnbehalfofTokenFor(paarorendeScope);
-        return webClient.get()
+        var onBehalfOfAuthorizedWebClient = webClientBuilder
+                .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
+                .build();
+
+        return onBehalfOfAuthorizedWebClient.get()
             .uri(String.format("/api/kontaktinfo/%s", navident))
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
             .retrieve()
             .toEntityList(Kontaktinfo.class)
             .retryWhen(defaultRetry(maxAttempts, backoffDurationMillis))
