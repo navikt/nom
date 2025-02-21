@@ -8,9 +8,12 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
 
 
 @Service
@@ -45,10 +48,11 @@ public class SecurityUtil {
     }
 
     public void assertAuthorizedAccessTo(String navident) throws AccessDeniedException {
-        // debuging purpose
-        log.info("isAuthenticated: " + isAuthenticated());
-        log.info("getNavIdent(): " + getNavIdent());
-        log.info("hasAccess({},{}) {}: ",getNavIdent(), navident, hasAccess(getNavIdent(), navident));
+        // debugging purpose
+        log.info("getUserNavident(): {}", getUserNavident());
+        log.info("isAuthenticated(): {}", isAuthenticated());
+        log.info("getNavIdent(): {}", getNavIdent());
+        log.info("hasAccess(getNavIdent(), navident): {}", getNavIdent() + " " + navident + " " + hasAccess(getNavIdent(), navident));
 
         if (!isAuthenticated() || getNavIdent() == null || !hasAccess(getNavIdent(), navident)) {
             throw new AccessDeniedException("Unauthorized");
@@ -89,5 +93,14 @@ public class SecurityUtil {
 
     private boolean hasAccess(String bruker, String ressurs) {
         return nomApiClient.hasAccess(bruker, ressurs) || isAdmin() || bruker.equals(ressurs);
+    }
+
+    private Optional<String> getUserNavident() {
+        final var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth instanceof JwtAuthenticationToken token) {
+            var azp_name = token.getTokenAttributes().get("NAVident");
+            return Optional.ofNullable(azp_name).map(Objects::toString);
+        }
+        return Optional.empty();
     }
 }
