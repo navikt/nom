@@ -98,9 +98,13 @@ public class SecurityUtil {
         return nomApiClient.hasAccess(bruker, ressurs) || isAdmin() || bruker.equals(ressurs);
     }
 
+    // test method to get NAVident from token
     private Optional<String> getUserNavident() {
         final var auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth instanceof JwtAuthenticationToken token) {
+            log.info("token.getTokenAttributes(): {}", token.getTokenAttributes());
+            token.getTokenAttributes().forEach((k, v) -> log.info(" token.getTokenAttributes key: {}, token.getTokenAttributes value: {}", k, v));
+
             var azp_name = token.getTokenAttributes().get("NAVident");
             return Optional.ofNullable(azp_name).map(Objects::toString);
         }
