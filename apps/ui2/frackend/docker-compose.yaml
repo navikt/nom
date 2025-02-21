@@ -40,4 +40,7 @@ services:
       TEAM_CATALOG_API_URL: "https://teamkatalog-api.intern.dev.nav.no"
       NOM_REMEDY_INTEGRASJON_API_SCOPE: "api://dev-fss.org.nom-remedy-integrasjon/.default"
       NOM_REMEDY_INTEGRASJON_API_URL: "https://nom-remedy-integrasjon.dev-fss-pub.nais.io"
-
+      UNLEASH_SERVER_API_URL: "${UNLEASH_SERVER_API_URL}"
+      UNLEASH_SERVER_API_TOKEN: "${UNLEASH_SERVER_API_TOKEN}"
+      PAARORENDE_API_URL: "${PAARORENDE_API_URL}"
+      PAARORENDE_API_SCOPE: "${PAARORENDE_API_SCOPE}"

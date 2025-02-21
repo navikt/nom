@@ -31,10 +31,15 @@ const proxy = {
   paarorendeApiUrl: requireEnvironment("PAARORENDE_API_URL"),
 };
 
+const unleash = {
+  url: requireEnvironment("UNLEASH_SERVER_API_URL"),
+  token: requireEnvironment("UNLEASH_SERVER_API_TOKEN"),
+};
+
 const app = {
   nodeEnv: requireEnvironment("NODE_ENV"),
   host: requireEnvironment("EXPRESS_HOST"),
   port: Number(requireEnvironment("EXPRESS_PORT")),
 };
 
-export default { azureAd, proxy, app };
+export default { azureAd, proxy, app, unleash };
