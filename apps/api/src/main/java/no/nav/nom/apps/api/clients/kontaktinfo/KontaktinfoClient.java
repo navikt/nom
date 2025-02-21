@@ -58,13 +58,13 @@ public class KontaktinfoClient {
 
     public List<Kontaktinfo> getKontaktinfo(String navident) {
         String onBehalfOfToken = onBehalfOfTokenRepository.getOnbehalfofTokenFor(paarorendeScope);
+        log.info("Getting kontaktinfo for navident {} on behalf of token {}", navident, onBehalfOfToken);
         var onBehalfOfAuthorizedWebClient = webClientBuilder
                 .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
                 .build();
 
-        return clientCredentialsAuthorizedWebClient.get()
+        return onBehalfOfAuthorizedWebClient.get()
             .uri(String.format("/api/kontaktinfo/%s", navident))
-            .headers(headers -> headers.setBearerAuth(onBehalfOfToken))
             .retrieve()
             .toEntityList(Kontaktinfo.class)
             .retryWhen(defaultRetry(maxAttempts, backoffDurationMillis))
