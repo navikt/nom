@@ -73,13 +73,4 @@ public class SecurityConfig {
         return authorizedClientManager;
     }
 
-    @Bean
-    public JwtAuthenticationConverter customJwtAuthenticationConverter() {
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        //converter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
-        converter.setPrincipalClaimName("NAVident");
-        return converter;
-    }
-
-
 }
