@@ -52,9 +52,10 @@ public class SecurityUtil {
         log.info("getUserNavident(): {}", getUserNavident());
         log.info("isAuthenticated(): {}", isAuthenticated());
         log.info("getNavIdent(): {}", getNavIdent());
-        log.info("hasAccess(getNavIdent(), navident): {}", getNavIdent() + " " + navident + " " + hasAccess(getNavIdent(), navident));
+        log.info("hasAccess(): {}", hasAccess(getNavIdent(), navident));
 
         if (!isAuthenticated() || getNavIdent() == null || !hasAccess(getNavIdent(), navident)) {
+            log.error("Unauthorized access to {}", navident);
             throw new AccessDeniedException("Unauthorized");
         }
     }
