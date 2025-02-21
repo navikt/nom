@@ -13,6 +13,14 @@ on:
       - 'pom.xml'
       - 'Dockerfile_distroless'
 
+  workflow_dispatch:
+    inputs:
+      skip-tests:
+        type: boolean
+        required: false
+        default: false
+        description: Skip tests.
+
 jobs:
   deploy-spring-app:
     permissions:
