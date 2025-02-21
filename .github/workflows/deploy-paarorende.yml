@@ -12,13 +12,6 @@ on:
       - 'apps/pom.xml'
       - 'pom.xml'
       - 'Dockerfile_distroless'
-  workflow_dispatch:
-    inputs:
-      skip-tests:
-        type: boolean
-        required: false
-        default: false
-        description: Skip tests.
 
   workflow_dispatch:
     inputs:
