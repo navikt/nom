@@ -116,6 +116,14 @@ def setup_node_backend_secrets(app_info: AppInfo):
         }
     )
 
+    if app_info.uses_unleash:
+            env_object.update(
+                {
+                    "UNLEASH_SERVER_API_URL": base64_decode(secrets["UNLEASH_SERVER_API_URL"]),
+                    "UNLEASH_SERVER_API_TOKEN": base64_decode(secrets["UNLEASH_SERVER_API_TOKEN"]),
+                }
+            )
+
     with open(env_file_path, "w+") as env_file:
         env_file.writelines([f"{key}={value}\n" for key, value in env_object.items()])
         print(f"Successfully written new secrets to {env_file_path}")
@@ -136,7 +144,7 @@ def setup_secrets(apps_filter: list, env: str, fss_included: bool):
     ]
 
     node_apps = [
-        AppInfo("ui2/frackend", "nom-ui2", "org"),
+        AppInfo("ui2/frackend", "nom-ui2", "org", uses_unleash=True),
         AppInfo("admin-web/frackend", "nom-admin-web", "org")
     ]
 

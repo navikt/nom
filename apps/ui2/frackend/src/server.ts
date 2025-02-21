@@ -11,6 +11,7 @@ import { errorHandling } from "./errorHandler.js";
 import { setupStaticRoutes } from "./frontendRoute.js";
 import { setupGqlPlaygroundProxy } from "./gqlplaygroundproxy.js";
 import { verifyToken } from "./tokenValidation.js";
+import { setupUnleashProxy } from "./unleash.js";
 
 const app = express();
 
@@ -28,6 +29,7 @@ setupNomApiProxy(app);
 setupTeamcatApiProxy(app);
 setupNomRemedyIntegrasjonProxy(app);
 setupPaarorendeProxy(app);
+setupUnleashProxy(app);
 
 // Catch all route, må være sist
 setupStaticRoutes(app);
