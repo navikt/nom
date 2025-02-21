@@ -62,8 +62,9 @@ public class KontaktinfoClient {
                 .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
                 .build();
 
-        return onBehalfOfAuthorizedWebClient.get()
+        return clientCredentialsAuthorizedWebClient.get()
             .uri(String.format("/api/kontaktinfo/%s", navident))
+            .headers(headers -> headers.setBearerAuth(onBehalfOfToken))
             .retrieve()
             .toEntityList(Kontaktinfo.class)
             .retryWhen(defaultRetry(maxAttempts, backoffDurationMillis))
