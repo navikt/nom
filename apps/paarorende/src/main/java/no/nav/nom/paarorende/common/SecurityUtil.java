@@ -48,18 +48,9 @@ public class SecurityUtil {
     }
 
     public void assertAuthorizedAccessTo(String navident) throws AccessDeniedException {
-        // debugging purpose
-        log.info("getUserNavident(): {}", getUserNavident());
-        log.info("isAuthenticated(): {}", isAuthenticated());
-        log.info("getNavIdent(): {}", getNavIdent());
-        log.info("hasAccess(): {}", hasAccess(getNavIdent(), navident));
-
         if (!isAuthenticated() || getNavIdent() == null || !hasAccess(getNavIdent(), navident)) {
-            log.error("Unauthorized access to {}", navident);
             throw new AccessDeniedException("Unauthorized");
         }
-
-        log.info("assertAuthorizedAccessTo OK");
     }
 
     public String getNavIdent() {
@@ -102,9 +93,6 @@ public class SecurityUtil {
     private Optional<String> getUserNavident() {
         final var auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth instanceof JwtAuthenticationToken token) {
-            log.info("token.getTokenAttributes(): {}", token.getTokenAttributes());
-            token.getTokenAttributes().forEach((k, v) -> log.info(" token.getTokenAttributes key: {}, token.getTokenAttributes value: {}", k, v));
-
             var azp_name = token.getTokenAttributes().get("NAVident");
             return Optional.ofNullable(azp_name).map(Objects::toString);
         }
