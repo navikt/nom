@@ -58,6 +58,8 @@ public class SecurityUtil {
             log.error("Unauthorized access to {}", navident);
             throw new AccessDeniedException("Unauthorized");
         }
+
+        log.info("assertAuthorizedAccessTo OK");
     }
 
     public String getNavIdent() {
