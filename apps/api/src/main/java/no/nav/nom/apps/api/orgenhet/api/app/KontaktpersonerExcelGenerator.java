@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.clients.kontaktinfo.Kontaktinfo;
 import no.nav.nom.apps.api.clients.kontaktinfo.KontaktinfoClient;
+import no.nav.nom.apps.api.clients.kontaktinfo.RessursKontaktinfo;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import org.apache.poi.ss.usermodel.CellType;
@@ -62,6 +63,17 @@ public class KontaktpersonerExcelGenerator {
 
             log.info("Generating excel for orgenhet {} with {} ressurser", orgEnhet.id(), ressurser.size());
 
+            List<RessursKontaktinfo> ressursKontaktinfo = kontaktinfoClient.getRessursKontaktinfo(ressurser.stream().map(r -> r.state().navident()).toList());
+            for (RessursKontaktinfo info : ressursKontaktinfo) {
+                log.info("RessursKontaktinfo for ressurs {}: {}", info.ressursNavident(), info.kontaktinfo());
+                Ressurs ressurs = getRessursForGittNavident(ressurser, info.ressursNavident());
+                addRow(
+                        sheet.createRow(rowcount++),
+                        ressurs, info.kontaktinfo().isEmpty()? null : info.kontaktinfo().getFirst()
+                );
+            }
+
+           /*
            for (Ressurs ressurs : ressurser) {
                log.info("Generating excel for ressurs {}", ressurs.state());
                var kontaktinfo = kontaktinfoClient.getKontaktinfo(ressurs.state().navident());
@@ -71,6 +83,7 @@ public class KontaktpersonerExcelGenerator {
                    ressurs, kontaktinfo.isEmpty()? null : kontaktinfo.get(0)
                );
            }
+           */
 
             var headerRow = sheet.getRow(0);
             var font = workbook.createFont();
@@ -87,6 +100,11 @@ public class KontaktpersonerExcelGenerator {
         }
 
     }
+
+    private Ressurs getRessursForGittNavident(List<Ressurs> ressurser, String navident) {
+        return ressurser.stream().filter(r -> r.state().navident().equals(navident)).findFirst().orElse(null);
+    }
+
     private Kontaktinfo getPrioritertKontaktinfo(List<Kontaktinfo> kontaktinfo) {
         return kontaktinfo.stream().min((k1, k2) -> k1.prioritet().compareTo(k2.prioritet()))
             .orElse(null);
