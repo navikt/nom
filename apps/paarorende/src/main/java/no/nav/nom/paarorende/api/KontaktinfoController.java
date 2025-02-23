@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Tag(name = "Kontaktinfo")
@@ -179,5 +180,33 @@ public class KontaktinfoController {
         kontaktinfo.setDatoSlettet(LocalDate.now());
 
         kontaktInfoRepository.save(kontaktinfo);
+    }
+
+    @PostMapping("/ressurser")
+    @Operation(
+        description = "Henter kontaktinfo til pårørende for gitt ressurser - brukes av admin og ledere",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "201", description = "Hentet kontaktinfo"),
+            @ApiResponse(responseCode = "401", description = "Uautentisert"),
+            @ApiResponse(responseCode = "403", description = "Uatorisert")
+        }
+    )
+    public ResponseEntity<List<RessursKontaktinfoDTO>> getContantinfoForRessurser(@RequestBody List<String> ressursNavidents) {
+        // todo get logg inn bruker navident and check if it has access to ressurs contact info
+        //securityUtil.assertAuthorizedAccessTo(navident);
+
+        List<RessursKontaktinfoDTO> result = new ArrayList<>();
+        ressursNavidents.forEach(ressursNavident -> {
+            var kontaktInfo = KontaktinfoDTO.fromEntityList(kontaktInfoRepository.findAllByNavidentAndDatoSlettetIsNull(ressursNavident));
+            RessursKontaktinfoDTO ressursKontaktinfoDTO = RessursKontaktinfoDTO.builder()
+                .ressursNavident(ressursNavident)
+                .kontaktinfo(kontaktInfo)
+                .build();
+            result.add(ressursKontaktinfoDTO);
+        });
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 }
