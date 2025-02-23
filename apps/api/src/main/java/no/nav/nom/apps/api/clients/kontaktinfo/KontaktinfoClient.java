@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.client.web.reactive.function.client.S
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.List;
@@ -84,6 +85,32 @@ public class KontaktinfoClient {
                 throw new KontaktinfoException(errorMsg, ErrorCode.SERVER_ERROR);
             })
             .block().getBody();
+    }
+
+    public List<RessursKontaktinfo> getRessursKontaktinfo(List<String> navidents) {
+
+        return clientCredentialsAuthorizedWebClient.post()
+                .uri("/api/kontaktinfo/ressurser")
+                .body(Mono.just(navidents), List.class)
+                .retrieve()
+                .toEntityList(RessursKontaktinfo.class)
+                .retryWhen(defaultRetry(maxAttempts, backoffDurationMillis))
+                .doOnError(WebClientResponseException.class, (webClientResponseException) -> {
+                    if (webClientResponseException.getStatusCode().value() == 404) {
+                        log.error("RessursKontaktinfo not found", webClientResponseException);
+                        throw new KontaktinfoException("RessursKontaktinfo not found", ErrorCode.NOT_FOUND);
+                    }
+
+                    String errorMsg = String.format(
+                            "GET RessursKontaktinfo %s resulted in status %s with body %s",
+                            Objects.requireNonNull(webClientResponseException.getRequest()).getURI(),
+                            webClientResponseException.getStatusCode().value(),
+                            webClientResponseException.getResponseBodyAsString()
+                    );
+                    log.error(errorMsg, webClientResponseException);
+                    throw new KontaktinfoException(errorMsg, ErrorCode.SERVER_ERROR);
+                })
+                .block().getBody();
     }
 
 }
