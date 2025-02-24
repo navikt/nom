@@ -361,12 +361,7 @@ export interface RessursOrgtilknytningUlikSluttdato {
 
 export interface RessursMedFlereDOL {
   navident: string;
-  orgEnhetId: string;
-  orgEnhetNavn: string;
-  /** @format date */
-  gyldigFom: string;
-  /** @format date */
-  gyldigTom: string;
+  otErMedOverlapp: string;
 }
 
 export interface RessursMedEnhet {

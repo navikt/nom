@@ -475,7 +475,9 @@ export async function getRessursOrgtilknytningUlikSluttdato(): Promise<
     .json<RessursOrgtilknytningUlikSluttdato[]>();
 }
 
-export async function getRessursMedFlereDOL(): Promise<RessursMedFlereDOL[]> {
+export async function getRessursMedFlerEnnEnDOL(): Promise<
+  RessursMedFlereDOL[]
+> {
   return await ky
     .get(`${API_BASE_URL}/SanityCheck/ressurs/ressursMedFlereEnnEnDOL`, {
       timeout: 120_000, // 120 seconds
