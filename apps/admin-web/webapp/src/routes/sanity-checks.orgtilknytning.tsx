@@ -82,10 +82,11 @@ function OrgtilknytningSanityChecks() {
           List alle orgtilknytninger med tilknytningtype, men uten sektor
         </option>
         <option value="OrgtilknytningDuplikat">
-          List duplikate orgtilknytninger
+          List duplikate orgtilknytninger på samme orgenhet og navident
         </option>
         <option value="OrgtilknytningOverlapp">
-          List overlappende orgtilknytninger
+          List orgtilknytninger med overlappende DOL i aktiv eller fremtidig
+          periode
         </option>
       </Select>
       <ListSelector selected={selected} />
