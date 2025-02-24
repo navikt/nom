@@ -2,6 +2,7 @@ import { Table } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 
 import { getOverlappendeOrgtilknytninger } from "~/api/queries.ts";
+import { NomLink } from "~/components/NomLink.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
 import { EmptyTable } from "~/sanitychecks/components/EmptyTable.tsx";
 import { LoadingTable } from "~/sanitychecks/components/LoadingTable.tsx";
@@ -76,16 +77,32 @@ export function OrgtilknytningOverlapp() {
         <Table.Body>
           {dataWithKey.map((overlappendeOTer) => (
             <Table.Row key={overlappendeOTer.key} shadeOnHover={false}>
-              <Table.DataCell>{overlappendeOTer.navident1}</Table.DataCell>
-              <Table.DataCell>{overlappendeOTer.orgEnhetId1}</Table.DataCell>
+              <Table.DataCell>
+                <NomLink path={`ressurs/${overlappendeOTer.navident1}`}>
+                  {overlappendeOTer.navident1}
+                </NomLink>
+              </Table.DataCell>
+              <Table.DataCell>
+                <NomLink path={`org/${overlappendeOTer.orgEnhetId1}`}>
+                  {overlappendeOTer.orgEnhetId1}
+                </NomLink>
+              </Table.DataCell>
               <Table.DataCell>{overlappendeOTer.fid1}</Table.DataCell>
               <Table.DataCell>{overlappendeOTer.gyldigFom1}</Table.DataCell>
               <Table.DataCell>{overlappendeOTer.gyldigTom1}</Table.DataCell>
               <Table.DataCell>
                 {overlappendeOTer.erDagligOppfolging1}
               </Table.DataCell>
-              <Table.DataCell>{overlappendeOTer.navident2}</Table.DataCell>
-              <Table.DataCell>{overlappendeOTer.orgEnhetId2}</Table.DataCell>
+              <Table.DataCell>
+                <NomLink path={`ressurs/${overlappendeOTer.navident2}`}>
+                  {overlappendeOTer.navident2}
+                </NomLink>
+              </Table.DataCell>
+              <Table.DataCell>
+                <NomLink path={`org/${overlappendeOTer.orgEnhetId2}`}>
+                  {overlappendeOTer.orgEnhetId2}
+                </NomLink>
+              </Table.DataCell>
               <Table.DataCell>{overlappendeOTer.fid2}</Table.DataCell>
               <Table.DataCell>{overlappendeOTer.gyldigFom2}</Table.DataCell>
               <Table.DataCell>{overlappendeOTer.gyldigTom2}</Table.DataCell>
