@@ -3,7 +3,6 @@ package no.nav.nom.apps.admin.sanitycheck.service;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
-import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
@@ -27,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static no.nav.nom.apps.admin.PeriodeUtil.today;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +35,8 @@ class RessursSanityCheckServiceTest {
 
     private static final String ID_ORGENHET_1 = "ab123c";
     private static final String ID_ORGENHET_2 = "de456f";
+    private static final String FID_ORGTILKNYTNING_1 = "orgtilknytning-1";
+    private static final String FID_ORGTILKNYTNING_2 = "orgtilknytning-2";
 
     @Mock
     private RessursStateRepository ressursStateRepositoryMock;
@@ -65,7 +67,7 @@ class RessursSanityCheckServiceTest {
     @DisplayName("Sjekk for ulik sluttdato ressurs og siste OT")
     @ParameterizedTest(name = "Ressurs sluttdato: {0}, OT gyldigTOM: {1} - forventet antall avvik: {2}")
     @MethodSource("ulikSluttdatoTestCases")
-    void should_include_cases_whedsdsdsdsre_sluttdato_is_different(LocalDate sluttDato, LocalDate gyldigTom, int expected) {
+    void should_include_cases_where_sluttdato_is_different(LocalDate sluttDato, LocalDate gyldigTom, int expected) {
         RessursState ressurs = getMockRessursEkstern().toBuilder()
                 .sluttdato(Optional.ofNullable(sluttDato))
                 .build();
@@ -111,41 +113,84 @@ class RessursSanityCheckServiceTest {
         when(orgtilknytningStateRepositoryMock.findByNavident(ressurs.navident())).thenReturn(List.of(gammelOT, sisteOT));
 
 
-        var res = service.ressurserMedUlikOrgTilknytningSluttDato();
+        var ulikeDatoer = service.ressurserMedUlikOrgTilknytningSluttDato();
 
-        assertThat(res.size()).isEqualTo(1);
+        assertThat(ulikeDatoer.size()).isEqualTo(1);
     }
 
     @Test
-    @DisplayName("Alle DOL rapporteres for bruker med overlappende DOL")
+    @DisplayName("Kun overlappende DOL rapporteres")
     void should_find_overlapping_dol() {
         RessursState ressurs = getMockRessursEkstern();
         when(ressursStateRepositoryMock.findAllActiveRessurser()).thenReturn(getRessursStateMap(ressurs));
 
-        when(orgEnhetStateRepositoryMock.findById(ID_ORGENHET_1)).thenReturn(Optional.of(getMockOrgenhet()));
-        OrgEnhetState orgEnhet2 = getMockOrgenhet().toBuilder().id(ID_ORGENHET_2).navn("IT-Utvikling 2").build();
-        when(orgEnhetStateRepositoryMock.findById(ID_ORGENHET_2)).thenReturn(Optional.of(orgEnhet2));
+        LocalDate fomDato = today().minusMonths(6);
+        LocalDate tomDato = today().minusMonths(3);
+        LocalDate tomDatoDOLto = tomDato.plusDays(7);
 
         var forsteDOL = getMockOrgtilknytningEkstern().toBuilder()
-                .gyldigFom(LocalDate.of(2024, 1, 1))
-                .gyldigTom(Optional.of(LocalDate.of(2024, 6, 30)))
+                .gyldigFom(fomDato)
+                .gyldigTom(Optional.of(tomDato))
                 .orgEnhetId(ID_ORGENHET_1)
                 .build();
         var andreDOL = getMockOrgtilknytningEkstern().toBuilder()
-                .gyldigFom(LocalDate.of(2024, 6, 30))
-                .gyldigTom(Optional.of(LocalDate.of(2024, 12, 31)))
+                .fid(FID_ORGTILKNYTNING_2)
+                .gyldigFom(fomDato)
+                .gyldigTom(Optional.of(tomDatoDOLto))
                 .orgEnhetId(ID_ORGENHET_1)
                 .build();
         var tredjeDOL = getMockOrgtilknytningEkstern().toBuilder()
-                .gyldigFom(LocalDate.of(2025, 1, 1))
-                .gyldigTom(Optional.of(LocalDate.of(2025, 12, 31)))
+                .fid("orgtilnytning-3")
+                .gyldigFom(today().minusMonths(1))
+                .gyldigTom(Optional.of(today().plusYears(1)))
                 .orgEnhetId(ID_ORGENHET_2)
                 .build();
         when(orgtilknytningStateRepositoryMock.findByNavident(ressurs.navident())).thenReturn(List.of(forsteDOL, andreDOL, tredjeDOL));
 
         var ressurserMedFlereDOL = service.ressursMedFlereEnnEnDOL();
 
-        assertThat(ressurserMedFlereDOL.size()).isEqualTo(3);
+        assertThat(ressurserMedFlereDOL.size()).isEqualTo(1);
+        assertThat(ressurserMedFlereDOL.getFirst().navident()).isEqualTo(getMockRessursEkstern().navident());
+        assertThat(ressurserMedFlereDOL.getFirst().otErMedOverlapp()).contains(ID_ORGENHET_1, fomDato.toString(), tomDato.toString(), tomDatoDOLto.toString());
+        assertThat(ressurserMedFlereDOL.getFirst().otErMedOverlapp()).contains(FID_ORGTILKNYTNING_1, FID_ORGTILKNYTNING_2);
+        assertThat(ressurserMedFlereDOL.getFirst().otErMedOverlapp()).doesNotContain(ID_ORGENHET_2);
+    }
+
+    @DisplayName("Alle ulike kombinasjoner skal håndteres ved sjekk for DOL overlapp")
+    @ParameterizedTest(name = "DOL 1: [{0} - {1}] DOL 2: [{2} - {3}]  - Forventet antall avvik: {4}")
+    @MethodSource("overlappendeDOLTestCases")
+    void should_handle_all_possible_cases_of_DOL_overlap(LocalDate startDato1, LocalDate sluttDato1, LocalDate startDato2, LocalDate sluttDato2, int forventetAntallOverlapp) {
+        RessursState ressurs = getMockRessursEkstern();
+        when(ressursStateRepositoryMock.findAllActiveRessurser()).thenReturn(getRessursStateMap(ressurs));
+        
+        var forsteDOL = getMockOrgtilknytningEkstern().toBuilder()
+                .gyldigFom(startDato1)
+                .gyldigTom(Optional.of(sluttDato1))
+                .orgEnhetId(ID_ORGENHET_1)
+                .build();
+        var andreDOL = getMockOrgtilknytningEkstern().toBuilder()
+                .fid(FID_ORGTILKNYTNING_2)
+                .gyldigFom(startDato2)
+                .gyldigTom(Optional.of(sluttDato2))
+                .orgEnhetId(ID_ORGENHET_1)
+                .build();
+
+        when(orgtilknytningStateRepositoryMock.findByNavident(ressurs.navident())).thenReturn(List.of(forsteDOL, andreDOL));
+
+        var ressurserMedFlereDOL = service.ressursMedFlereEnnEnDOL();
+
+        assertThat(ressurserMedFlereDOL.size()).isEqualTo(forventetAntallOverlapp);
+    }
+
+    private static Stream<Arguments> overlappendeDOLTestCases() {
+        LocalDate today = LocalDate.now();
+        return Stream.of(
+                Arguments.of(today.minusYears(1), today.minusMonths(6), today.minusMonths(6).plusDays(1), today.plusYears(1), 0),
+                Arguments.of(today.minusYears(1), today, today, today.plusYears(1), 1),
+                Arguments.of(today.minusYears(1), today, today.minusMonths(1), today.plusYears(2), 1),
+                Arguments.of(today.minusYears(1), today, today.minusYears(1).plusMonths(1), today.minusMonths(1), 1),
+                Arguments.of(today.minusYears(1), today, today.plusDays(1), today.plusYears(1), 0)
+        );
     }
 
     @Test
@@ -155,13 +200,13 @@ class RessursSanityCheckServiceTest {
         when(ressursStateRepositoryMock.findAllActiveRessurser()).thenReturn(getRessursStateMap(ressurs));
 
         var forsteDOL = getMockOrgtilknytningEkstern().toBuilder()
-                .gyldigFom(LocalDate.of(2024, 1, 1))
-                .gyldigTom(Optional.of(LocalDate.of(2024, 6, 30)))
+                .gyldigFom(today().minusMonths(6).plusDays(1))
+                .gyldigTom(Optional.of(today().minusMonths(3)))
                 .orgEnhetId(ID_ORGENHET_1)
                 .build();
         var andreDOL = getMockOrgtilknytningEkstern().toBuilder()
-                .gyldigFom(LocalDate.of(2024, 7, 1))
-                .gyldigTom(Optional.of(LocalDate.of(2024, 12, 31)))
+                .gyldigFom(today().minusMonths(3).plusDays(1))
+                .gyldigTom(Optional.of(today().plusYears(1)))
                 .orgEnhetId(ID_ORGENHET_1)
                 .build();
         when(orgtilknytningStateRepositoryMock.findByNavident(ressurs.navident())).thenReturn(List.of(forsteDOL, andreDOL));
@@ -178,18 +223,56 @@ class RessursSanityCheckServiceTest {
         when(ressursStateRepositoryMock.findAllActiveRessurser()).thenReturn(getRessursStateMap(ressurs));
 
         var forsteDOL = getMockOrgtilknytningEkstern().toBuilder()
-                .gyldigFom(LocalDate.of(2024, 1, 1))
-                .gyldigTom(Optional.of(LocalDate.of(2024, 12, 31)))
+                .gyldigFom(today().minusMonths(3))
+                .gyldigTom(Optional.of(today().plusYears(1)))
                 .erDagligOppfolging(true)
                 .orgEnhetId(ID_ORGENHET_1)
                 .build();
         var andreDOL = getMockOrgtilknytningEkstern().toBuilder()
-                .gyldigFom(LocalDate.of(2024, 7, 1))
-                .gyldigTom(Optional.of(LocalDate.of(2024, 12, 31)))
-                .erDagligOppfolging(false)
+                .gyldigFom(today().minusMonths(2))
+                .gyldigTom(Optional.of(today().plusYears(1).minusMonths(3)))
+                .erDagligOppfolging(true)
                 .orgEnhetId(ID_ORGENHET_1)
                 .build();
-        when(orgtilknytningStateRepositoryMock.findByNavident(ressurs.navident())).thenReturn(List.of(forsteDOL, andreDOL));
+        var annenOT = getMockOrgtilknytningEkstern().toBuilder()
+                .gyldigFom(today().minusMonths(3))
+                .gyldigTom(Optional.of(today().plusYears(1)))
+                .erDagligOppfolging(false)
+                .orgEnhetId(ID_ORGENHET_2)
+                .build();
+        when(orgtilknytningStateRepositoryMock.findByNavident(ressurs.navident())).thenReturn(List.of(forsteDOL, andreDOL, annenOT));
+
+        var ressurserMedFlereDOL = service.ressursMedFlereEnnEnDOL();
+
+        assertThat(ressurserMedFlereDOL.size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("OTer med gyldigTom eldre enn 6 måneder tas ikke med")
+    void should_not_include_OTs_which_expired_more_than_6_months_ago() {
+        RessursState ressurs = getMockRessursEkstern();
+        when(ressursStateRepositoryMock.findAllActiveRessurser()).thenReturn(getRessursStateMap(ressurs));
+
+        // DOL 1 og 2 overlapper, men er eldre enn 6 mnd.
+        var utloptDOL1 = getMockOrgtilknytningEkstern().toBuilder()
+                .gyldigFom(LocalDate.now().minusYears(1))
+                .gyldigTom(Optional.of(LocalDate.now().minusYears(1).plusMonths(3)))
+                .erDagligOppfolging(true)
+                .orgEnhetId(ID_ORGENHET_1)
+                .build();
+        var utloptDOL2 = getMockOrgtilknytningEkstern().toBuilder()
+                .gyldigFom(LocalDate.now().minusYears(1).plusDays(7))
+                .gyldigTom(Optional.of(LocalDate.now().minusYears(1).plusMonths(3)))
+                .erDagligOppfolging(true)
+                .orgEnhetId(ID_ORGENHET_1)
+                .build();
+        var gyldigDOL = getMockOrgtilknytningEkstern().toBuilder()
+                .gyldigFom(LocalDate.now().minusYears(1).plusMonths(4))
+                .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+                .erDagligOppfolging(true)
+                .orgEnhetId(ID_ORGENHET_1)
+                .build();
+        when(orgtilknytningStateRepositoryMock.findByNavident(ressurs.navident())).thenReturn(List.of(utloptDOL1, utloptDOL2, gyldigDOL));
 
         var ressurserMedFlereDOL = service.ressursMedFlereEnnEnDOL();
 
@@ -219,7 +302,7 @@ class RessursSanityCheckServiceTest {
 
     private OrgtilknytningState getMockOrgtilknytningEkstern() {
         return OrgtilknytningState.builder()
-                .fid("O-FID")
+                .fid(FID_ORGTILKNYTNING_1)
                 .navident("X123456")
                 .orgEnhetId("TestId")
                 .erDagligOppfolging(true)
@@ -229,12 +312,4 @@ class RessursSanityCheckServiceTest {
                 .build();
     }
 
-    private OrgEnhetState getMockOrgenhet() {
-        return OrgEnhetState.builder()
-                .fid("OH-FID")
-                .id(ID_ORGENHET_1)
-                .navn("IT-Utvikling 1")
-                .gyldigFom(LocalDate.of(2020, 1, 1))
-                .build();
-    }
 }
