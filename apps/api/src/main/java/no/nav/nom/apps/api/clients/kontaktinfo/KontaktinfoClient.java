@@ -88,8 +88,12 @@ public class KontaktinfoClient {
     }
 
     public List<RessursKontaktinfo> getRessursKontaktinfo(List<String> navidents) {
+        String onBehalfOfToken = onBehalfOfTokenRepository.getOnbehalfofTokenFor(paarorendeScope);
+        var onBehalfOfAuthorizedWebClient = webClientBuilder
+            .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
+            .build();
 
-        return clientCredentialsAuthorizedWebClient.post()
+        return onBehalfOfAuthorizedWebClient.post()
                 .uri("/api/kontaktinfo/ressurser")
                 .body(Mono.just(navidents), List.class)
                 .retrieve()
