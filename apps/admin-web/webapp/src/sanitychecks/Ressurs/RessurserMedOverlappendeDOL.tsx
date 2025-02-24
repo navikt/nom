@@ -2,6 +2,7 @@ import { Table } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 
 import { getRessursMedFlereDOL } from "~/api/queries.ts";
+import { NomLink } from "~/components/NomLink.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
 import { EmptyTable } from "~/sanitychecks/components/EmptyTable.tsx";
 import { LoadingTable } from "~/sanitychecks/components/LoadingTable.tsx";
@@ -54,8 +55,16 @@ export function RessurserMedOverlappendeDOL() {
         <Table.Body>
           {dataWithKey.map((dol) => (
             <Table.Row key={dol.key} shadeOnHover={false}>
-              <Table.DataCell>{dol.navident}</Table.DataCell>
-              <Table.DataCell>{dol.orgEnhetId}</Table.DataCell>
+              <Table.DataCell>
+                <NomLink path={`ressurs/${dol.navident}`}>
+                  {dol.navident}
+                </NomLink>
+              </Table.DataCell>
+              <Table.DataCell>
+                <NomLink path={`org/${dol.orgEnhetId}`}>
+                  {dol.orgEnhetId}
+                </NomLink>
+              </Table.DataCell>
               <Table.DataCell>{dol.orgEnhetNavn}</Table.DataCell>
               <Table.DataCell>{dol.gyldigFom}</Table.DataCell>
               <Table.DataCell>{dol.gyldigTom}</Table.DataCell>

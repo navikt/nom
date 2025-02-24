@@ -2,6 +2,7 @@ import { Table } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 
 import { getDuplikateOrgtilknytninger } from "~/api/queries.ts";
+import { NomLink } from "~/components/NomLink.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
 import { EmptyTable } from "~/sanitychecks/components/EmptyTable.tsx";
 import { LoadingTable } from "~/sanitychecks/components/LoadingTable.tsx";
@@ -65,8 +66,16 @@ export function OrgtilknytningDuplikat() {
             >
               <Table.DataCell>{duplikateOTer.fid1}</Table.DataCell>
               <Table.DataCell>{duplikateOTer.fid2}</Table.DataCell>
-              <Table.DataCell>{duplikateOTer.navident}</Table.DataCell>
-              <Table.DataCell>{duplikateOTer.orgEnhetId}</Table.DataCell>
+              <Table.DataCell>
+                <NomLink path={`ressurs/${duplikateOTer.navident}`}>
+                  {duplikateOTer.navident}
+                </NomLink>
+              </Table.DataCell>
+              <Table.DataCell>
+                <NomLink path={`org/${duplikateOTer.orgEnhetId}`}>
+                  {duplikateOTer.orgEnhetId}
+                </NomLink>
+              </Table.DataCell>
               <Table.DataCell>{duplikateOTer.gyldigFom}</Table.DataCell>
               <Table.DataCell>{duplikateOTer.sektor}</Table.DataCell>
               <Table.DataCell>

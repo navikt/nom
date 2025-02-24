@@ -165,6 +165,27 @@ class OrgtilknytningSanityCheckServiceTest {
         );
     }
 
+    @DisplayName("Kun sjekke orgtilknytninger med gyldigTom nyere enn 6 mnd. for duplikater")
+    @ParameterizedTest(name = "Dato {0}, antall duplikater returnert {1}")
+    @MethodSource("lessThanSixMonthsTestCases")
+    void orgtilknytninger_avsluttet_mer_enn_6_mnd_siden_skal_ikke_tas_med(LocalDate gyldigTom, int forventetAntall) {
+        var orgTilknytning2 = orgTilknytning().toBuilder()
+                .gyldigTom(Optional.of(gyldigTom))
+                .build();
+        when(orgtilknytningStateRepository.getAll()).thenReturn(List.of(orgTilknytning(), orgTilknytning2));
+
+        var duplikateOTer = service.duplikateOrgtilknytninger();
+
+        assertThat(duplikateOTer.size()).isEqualTo(forventetAntall);
+    }
+
+    private static Stream<Arguments> lessThanSixMonthsTestCases() {
+        return Stream.of(
+                Arguments.of(now.minusMonths(6).minusDays(1), 0),
+                Arguments.of(now.minusMonths(5), 1)
+        );
+    }
+
     private OrgtilknytningState orgTilknytning() {
         return OrgtilknytningState.builder()
                 .fid("orgtilknytning-acb123")
