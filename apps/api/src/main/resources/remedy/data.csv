@@ -396,6 +396,7 @@ RIKSREVISJON;9504;ORGNIV0;;TODO, se kommentar;;;Avventer;RIKSREVISJON;;va981f;24
 ;4294;;Klageinstans Vest;Manglet i uttrekket;721140;tu974w;JA;721140;ORGNIV3;tu974w;
 ;4293;;Klageinstans Øst;Manglet i uttrekket;721070;pe947d;JA;721070;ORGNIV3;pe947d;
 ;0293;;NAV Dokumentsenter Øst-Viken;Hentet fra Norg-uttrekk;029300;re831r;JA;029300;ORGNIV4;re831r;Bør nok inn i mappingen. Det finnes folk på 0293 i DVH. Skal antagelig mappes til 029300, men må også ryddes litt under da 0293010 også burde ligge under 029300, men har fått feil parent. Sendt til ØT for opprydding, avventer.
+;0293;;NAV Dokumentsenter Øst-Viken;;0293010;he276e;JA;0293010;;he276e;24.02.2025 Oppdaterte så det nå er 2 enheter som mapper til 0293. Antagelig burde denne vært flyttet inn under re831r. Må tas med ØT.
 ;0692;;NAV Rådgivende overleger Vest-Viken;Hentet fra Norg-uttrekk;0692500;my567d;JA;0692500;ORGENHET;my567d;Har aktive navIdenter i HRRES_RESSURS. Skal nok mappes til 0692500 (my567d) utfra at alle ansatte i DVH tilhørte denne enheten, og navnet samsvarer.
 ;1034;;NAV Hægebostad;Hentet fra Norg-uttrekk;;;Avventer;0;;leggInn;Har aktive navIdenter i HRRES_RESSURS. Disse to personene har orgEnhet 103700 som er NAV Lister, som har sin egen remedyEnhet 1037. Mulig 1034 da kan avvikles? Sjekk med RemedyOversikt. Antagelig kan 1034 fjernes siden orgEnheten for Hægebosstad er nedlagt i Unit4, og fysiske arbeidsstedet er 1037.
 ;1084;;NAV Intro Kristiansand;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy

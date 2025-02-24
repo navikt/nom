@@ -1,7 +1,8 @@
 import { Table } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 
-import { getRessursMedFlereDOL } from "~/api/queries.ts";
+import { getRessursMedFlerEnnEnDOL } from "~/api/queries.ts";
+import { NomLink } from "~/components/NomLink.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
 import { EmptyTable } from "~/sanitychecks/components/EmptyTable.tsx";
 import { LoadingTable } from "~/sanitychecks/components/LoadingTable.tsx";
@@ -14,7 +15,8 @@ export function RessurserMedOverlappendeDOL() {
     isError,
   } = useQuery<RessursMedFlereDOL[], Error>({
     queryKey: ["API", "RESSURSMEDFLEREDOL"],
-    queryFn: async (): Promise<RessursMedFlereDOL[]> => getRessursMedFlereDOL(),
+    queryFn: async (): Promise<RessursMedFlereDOL[]> =>
+      getRessursMedFlerEnnEnDOL(),
   });
 
   const { data, sort, handleSort } = useTableSort(dataset ?? [], "navident");
@@ -38,27 +40,19 @@ export function RessurserMedOverlappendeDOL() {
           <Table.ColumnHeader scope="col" sortKey="navident" sortable>
             Nav ident
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="orgEnhet" sortable>
-            Orgenhet
-          </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="orgEnhetNavn" sortable>
-            Orgenhet
-          </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="gyldigFom" sortable>
-            Gyldig FOM
-          </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="gyldigTom" sortable>
-            Gyldig TOM
+          <Table.ColumnHeader scope="col" sortKey="orgtilknytninger" sortable>
+            Overlappende DOL orgtilknytninger
           </Table.ColumnHeader>
         </Table.Header>
         <Table.Body>
           {dataWithKey.map((dol) => (
             <Table.Row key={dol.key} shadeOnHover={false}>
-              <Table.DataCell>{dol.navident}</Table.DataCell>
-              <Table.DataCell>{dol.orgEnhetId}</Table.DataCell>
-              <Table.DataCell>{dol.orgEnhetNavn}</Table.DataCell>
-              <Table.DataCell>{dol.gyldigFom}</Table.DataCell>
-              <Table.DataCell>{dol.gyldigTom}</Table.DataCell>
+              <Table.DataCell>
+                <NomLink path={`ressurs/${dol.navident}`}>
+                  {dol.navident}
+                </NomLink>
+              </Table.DataCell>
+              <Table.DataCell>{dol.otErMedOverlapp}</Table.DataCell>
             </Table.Row>
           ))}
         </Table.Body>

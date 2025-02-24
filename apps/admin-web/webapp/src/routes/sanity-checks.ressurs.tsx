@@ -10,7 +10,7 @@ import { RessurserMedOverlappendeDOL } from "~/sanitychecks/Ressurs/RessurserMed
 import { RessursMedBlankMellomnavn } from "~/sanitychecks/Ressurs/RessursMedBlankMellomnavn.tsx";
 import { RessursMedOTUtenAktivEnhet } from "~/sanitychecks/Ressurs/RessursMedOTUtenAktivEnhet.tsx";
 import { RessursSluttetMedAktivOT } from "~/sanitychecks/Ressurs/RessursSluttetMedAktivOT.tsx";
-import { UlikSluttdatoRessursOrgtilknytning } from "~/sanitychecks/Ressurs/UlikSluttdatoRessursOrgtilknytning.tsx";
+import { RessursUlikSluttdatoOrgtilknytning } from "~/sanitychecks/Ressurs/RessursUlikSluttdatoOrgtilknytning.tsx";
 
 export const Route = createFileRoute("/sanity-checks/ressurs")({
   component: () => {
@@ -65,7 +65,7 @@ function ListSelector(props: { selected: string }) {
       return <RessursDuplikat />;
     }
     case "UlikSluttdatoRessursOrgtilknytning": {
-      return <UlikSluttdatoRessursOrgtilknytning />;
+      return <RessursUlikSluttdatoOrgtilknytning />;
     }
     case "RessurserMedOverlappendeDOL": {
       return <RessurserMedOverlappendeDOL />;
@@ -103,7 +103,7 @@ function RessursSanityChecks() {
           Ulik sluttdato på ressurs og orgtilknytning
         </option>
         <option value="RessurserMedOverlappendeDOL">
-          Ressurser med flere enn en DOL
+          Ressurser med overlappende DOL
         </option>
       </Select>
       <ListSelector selected={selected} />
