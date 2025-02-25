@@ -12,6 +12,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -32,6 +35,11 @@ public class CustomHeaderFilter implements Filter {
         throws IOException, ServletException {
 
         log.info("CustomHeaderFilter:doFilter Authorization header" + request.getAttribute("Authorization"));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        JwtAuthenticationToken oauthToken = (JwtAuthenticationToken) authentication;
+
+        log.info("CustomHeaderFilter:doFilter JwtAuthenticationToken: {}",oauthToken.getTokenAttributes());
 
         chain.doFilter(request, response);
     }
