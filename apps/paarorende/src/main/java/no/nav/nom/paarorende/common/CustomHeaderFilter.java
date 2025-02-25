@@ -6,20 +6,18 @@ import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
-
-import jakarta.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.io.IOException;
 
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class CustomHeaderFilter implements Filter {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
@@ -36,12 +34,13 @@ public class CustomHeaderFilter implements Filter {
 
         /*
         log.info("CustomHeaderFilter:doFilter Authorization header" + request.getAttribute("Authorization"));
+         */
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         JwtAuthenticationToken oauthToken = (JwtAuthenticationToken) authentication;
-
-        log.info("CustomHeaderFilter:doFilter JwtAuthenticationToken: {}",oauthToken.getTokenAttributes());
-        */
+        if(oauthToken != null) {
+            log.info("CustomHeaderFilter:doFilter JwtAuthenticationToken: {}",oauthToken.getTokenAttributes());
+        }
 
         chain.doFilter(request, response);
     }
