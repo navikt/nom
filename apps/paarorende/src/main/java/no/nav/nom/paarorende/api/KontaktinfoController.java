@@ -11,10 +11,15 @@ import no.nav.nom.paarorende.common.SwaggerConfig;
 import no.nav.nom.paarorende.jpa.Adresse;
 import no.nav.nom.paarorende.jpa.KontaktinfoRepository;
 import no.nav.nom.paarorende.jpa.Relasjon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,6 +40,7 @@ import java.util.List;
     produces = MediaType.APPLICATION_JSON_VALUE
 )
 public class KontaktinfoController {
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public final static String BASE_URL = "/api/kontaktinfo";
 
@@ -197,6 +203,9 @@ public class KontaktinfoController {
     public ResponseEntity<List<RessursKontaktinfoDTO>> getContantinfoForRessurser(@RequestBody List<String> ressursNavidents) {
         // todo get logg inn bruker navident and check if it has access to ressurs contact info
         //securityUtil.assertAuthorizedAccessTo(navident);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        JwtAuthenticationToken oauthToken = (JwtAuthenticationToken) authentication;
+        log.info("CustomHeaderFilter:doFilter JwtAuthenticationToken: {}",oauthToken.getTokenAttributes());
 
         List<RessursKontaktinfoDTO> result = new ArrayList<>();
         ressursNavidents.forEach(ressursNavident -> {
