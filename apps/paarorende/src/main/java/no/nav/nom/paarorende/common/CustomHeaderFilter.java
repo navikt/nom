@@ -34,12 +34,14 @@ public class CustomHeaderFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
         throws IOException, ServletException {
 
+        /*
         log.info("CustomHeaderFilter:doFilter Authorization header" + request.getAttribute("Authorization"));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         JwtAuthenticationToken oauthToken = (JwtAuthenticationToken) authentication;
 
         log.info("CustomHeaderFilter:doFilter JwtAuthenticationToken: {}",oauthToken.getTokenAttributes());
+        */
 
         chain.doFilter(request, response);
     }
