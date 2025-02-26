@@ -205,7 +205,8 @@ public class KontaktinfoController {
         //securityUtil.assertAuthorizedAccessTo(navident);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         JwtAuthenticationToken oauthToken = (JwtAuthenticationToken) authentication;
-        log.info("CustomHeaderFilter:doFilter JwtAuthenticationToken: {}",oauthToken.getTokenAttributes());
+        log.info("getContantinfoForRessurser JwtAuthenticationToken: {}",oauthToken.getTokenAttributes());
+        log.info("SecurityUtil getUserNavident: {}",oauthToken.getTokenAttributes().get("NAVident"));
 
         List<RessursKontaktinfoDTO> result = new ArrayList<>();
         ressursNavidents.forEach(ressursNavident -> {
