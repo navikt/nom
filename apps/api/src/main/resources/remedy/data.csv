@@ -277,7 +277,8 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 194100;1941;ORGNIV3;Skjervøy;Beholdt;;;JA;194100;ORGNIV3;leggInn;
 194200;1942;ORGNIV3;Nordreisa;Beholdt;;;JA;194200;ORGNIV3;leggInn;
 1987000;1987;AGRESSOORGENHET;Troms og Finnmark Tiltak;Beholdt;;;JA;1987000;ORGENHET;leggInn;
-1999000;1991;AGRESSOORGENHET;Troms og Finnmark Arbeidslivssenter, avd Troms;TODO, se kommentar;TODO;To enheter;Avventer;TODO;ORGENHET;To enheter;Må mappe til to enheter: både arblivssenter avd finnmark (ta977f) og arblivssenter avd. troms (ra553p) da begge har ansatte på 1991. Kan ikke flytte til nivået over fordi det er noen der som skal til 1900.
+1999000;1991;AGRESSOORGENHET;Troms og Finnmark Arbeidslivssenter, avd Troms;TODO, se kommentar;TODO;To enheter;Avventer;1999000;ORGENHET;ra553p;26.02.2025: Oppdatert så både ra553p og ta977f mapper til 1991.
+1999001;1991;AGRESSOORGENHET;Troms og Finnmark Arbeidslivssenter, avd Finnmark;TODO, se kommentar;TODO;To enheter;Avventer;1999001;ORGENHET;ta977f;26.02.2025: Oppdatert så både ra553p og ta977f mapper til 1991.
 200200;2002;ORGNIV3;Vardø;Beholdt;;;JA;200200;ORGNIV3;leggInn;
 200300;2003;ORGNIV3;Vadsø;Beholdt;;;JA;200300;ORGNIV3;leggInn;
 200400;2004;ORGNIV3;Hammerfest-Måsøy;Beholdt;;;JA;200400;ORGNIV3;leggInn;
