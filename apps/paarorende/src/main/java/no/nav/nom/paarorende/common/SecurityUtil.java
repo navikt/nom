@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class SecurityUtil {
@@ -50,9 +51,9 @@ public class SecurityUtil {
         }
     }
 
-    public void assertAuthorizedAccessToRessurs(String userNavident, String ressursNavident ) throws AccessDeniedException {
-        if (!isAuthenticated() || !hasAccess(userNavident, ressursNavident)) {
-            throw new AccessDeniedException(userNavident +" is not unauthorized access to ressurs: " + ressursNavident);
+    public void assertAuthorizedAccessToRessurser(String bruker, List<String> ressurser ) throws AccessDeniedException {
+        if (!isAuthenticated() || !hasAccess(bruker, ressurser)) {
+            throw new AccessDeniedException(bruker +" is not unauthorized access to ressurser: " + ressurser);
         }
     }
 
@@ -90,6 +91,10 @@ public class SecurityUtil {
 
     private boolean hasAccess(String bruker, String ressurs) {
         return nomApiClient.hasAccess(bruker, ressurs) || isAdmin() || bruker.equals(ressurs);
+    }
+
+    private boolean hasAccess(String bruker, List<String> ressurser) {
+        return nomApiClient.hasAccess(bruker, ressurser) || isAdmin();
     }
 
     public static String getBehalfOfUserNavident() {

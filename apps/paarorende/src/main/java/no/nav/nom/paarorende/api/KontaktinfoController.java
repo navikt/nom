@@ -201,19 +201,18 @@ public class KontaktinfoController {
             @ApiResponse(responseCode = "403", description = "Uatorisert")
         }
     )
-    public ResponseEntity<List<RessursKontaktinfoDTO>> getContaktinfoForRessurser(@RequestBody List<String> ressursNavidents) {
+    public ResponseEntity<List<RessursKontaktinfoDTO>> getContaktinfoForRessurser(@RequestBody List<String> ressurser) {
         String onBehalfOfUserNavident =  SecurityUtil.getBehalfOfUserNavident();
-        log.info("Get Contaktinfo For Ressurser on behalf of: {}", onBehalfOfUserNavident);
         if (onBehalfOfUserNavident == null) {
             throw new AccessDeniedException("Unauthorized access to ressurser kontaktinfo");
         }
 
+        // do authorization check
+        securityUtil.assertAuthorizedAccessToRessurser(onBehalfOfUserNavident, ressurser);
+
         // get contact info for ressurser
         List<RessursKontaktinfoDTO> result = new ArrayList<>();
-        ressursNavidents.forEach(ressursNavident -> {
-            // do authorization check
-            securityUtil.assertAuthorizedAccessToRessurs(onBehalfOfUserNavident, ressursNavident);
-
+        ressurser.forEach(ressursNavident -> {
             var kontaktInfo = KontaktinfoDTO.fromEntityList(kontaktInfoRepository.findAllByNavidentAndDatoSlettetIsNull(ressursNavident));
             RessursKontaktinfoDTO ressursKontaktinfoDTO = RessursKontaktinfoDTO.builder()
                 .ressursNavident(ressursNavident)
