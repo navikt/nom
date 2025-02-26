@@ -9,6 +9,8 @@ metadata:
   labels:
     team: nom
 spec:
+  tokenx:
+    enabled: true
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
