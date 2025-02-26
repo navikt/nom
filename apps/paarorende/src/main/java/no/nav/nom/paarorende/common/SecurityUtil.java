@@ -8,13 +8,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
-
 import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
-
 
 @Service
 public class SecurityUtil {
@@ -48,11 +43,6 @@ public class SecurityUtil {
     }
 
     public void assertAuthorizedAccessTo(String navident) throws AccessDeniedException {
-        log.info("getUserNavident(): " + getUserNavident());
-        log.info("getNavIdent(): " + getNavIdent());
-        log.info("isAuthenticated(): " + isAuthenticated());
-        log.info("hasAccess(): " + hasAccess(getNavIdent(), navident));
-
         if (!isAuthenticated() || getNavIdent() == null || !hasAccess(getNavIdent(), navident)) {
             throw new AccessDeniedException("Unauthorized");
         }
@@ -94,13 +84,4 @@ public class SecurityUtil {
         return nomApiClient.hasAccess(bruker, ressurs) || isAdmin() || bruker.equals(ressurs);
     }
 
-    // test method to get NAVident from token
-    private Optional<String> getUserNavident() {
-        final var auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth instanceof JwtAuthenticationToken token) {
-            var azp_name = token.getTokenAttributes().get("NAVident");
-            return Optional.ofNullable(azp_name).map(Objects::toString);
-        }
-        return Optional.empty();
-    }
 }
