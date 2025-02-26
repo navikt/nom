@@ -30,7 +30,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 023800;0238;ORGNIV3;Nannestad;Beholdt;;;JA;023800;ORGNIV3;leggInn;
 0287000;0287;AGRESSOORGENHET;Øst-Viken Tiltak;Opp til ORGNIV4;028700;;JA;028700;ORGNIV4;leggInn;Ser det er flere enheter på orgEnhetsnivå under 028700 som ikke har egne remedyEnheter. Stikkprøve på en ansatt i en annen enhet under 028700 viser at de også har brukt 0287 som remedyEnhet. Derfor flyttet agressoId et hakk opp.
 0299000;0291;AGRESSOORGENHET;Øst-Viken Arbeidslivssenter;Opp til ORGNIV4;029900;;JA;029900;ORGNIV4;leggInn;Tilsvarende som rad 31. Også sjekket en ansatt på parallell enhet
-029610;0296;ORGNIV3;Øst-Viken Arbeid og helse;Beholdt;;;JA;029610;ORGNIV4;ky791b;12.07.2023: Mappet til ky791b (ORGNIV4), men mulig den skal til ba443d (ORGNIV3). Tester med dette, og ser hvilke avvik vi da får.
+029610;0296;ORGNIV3;Øst-Viken Arbeid og helse;Beholdt;;;JA;029610;ORGNIV4;ky791b;12.07.2023: Mappet til ky791b (ORGNIV4), men mulig den skal til ba443d (ORGNIV3). Tester med dette, og ser hvilke avvik vi da får. 26.02.2026: korrekt at det er mappet til ky791b
 039000;0300;ORGNIV3;Oslo;Opp til ORGNIV2;03;;JA;03;ORGNIV2;leggInn;Testet på leder av NAV Oslo, som er på orgNiv2, men de har også en orgEnhet på orgNiv3, som er denne. Og lederen for den, og leder for en underliggende har alle XXX0300 som trygdeident, så riktig
 031200;0312;ORGNIV3;Frogner;Beholdt;;;JA;031200;ORGNIV3;leggInn;
 031300;0313;ORGNIV3;St. Hanshaugen;Beholdt;;;JA;031300;ORGNIV3;leggInn;
@@ -102,7 +102,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 070100;0701;ORGNIV3;Horten;Beholdt;;;JA;070100;ORGNIV3;leggInn;
 070400;0704;ORGNIV3;Tønsberg;Beholdt;;;JA;070400;ORGNIV3;leggInn;
 071000;0710;ORGNIV3;Sandefjord;Beholdt;;;JA;071000;ORGNIV3;leggInn;
-088010;0800;ORGNIV3;Vestfold og Telemark Region;Beholdt;;;JA;088010;ORGNIV3;leggInn;Merk: her har orgNiv3 og orgNiv4 samme agressoId. Det er orgNiv3 vi velger her
+088010;0800;ORGNIV3;Vestfold og Telemark;Beholdt;;;JA;R08;ORGNIV2;leggInn;26.02.2025 - endret til å mappe til fylkesenheten R08
 080500;0805;ORGNIV3;Porsgrunn;Beholdt;;;JA;080500;ORGNIV3;leggInn;
 080600;0806;ORGNIV3;Skien;Beholdt;;;JA;080600;ORGNIV3;leggInn;
 080700;0807;ORGNIV3;Notodden;Beholdt;;;JA;080700;ORGNIV3;leggInn;
