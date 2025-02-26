@@ -14,21 +14,13 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-
+import org.springframework.security.config.Customizer;
 
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
-
-    private final JwtAuthenticationConverter jwtAuthenticationConverter;
-
-    public SecurityConfig(JwtAuthenticationConverter jwtAuthenticationConverter) {
-        this.jwtAuthenticationConverter = jwtAuthenticationConverter;
-    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -44,11 +36,13 @@ public class SecurityConfig {
                 ).permitAll()
                 .anyRequest().fullyAuthenticated()
             )
+            /*
             .oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt
                     .jwtAuthenticationConverter(jwtAuthenticationConverter)
                 ))
-            //.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+             */
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
             .build();
     }
 
