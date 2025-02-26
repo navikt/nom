@@ -49,8 +49,6 @@ public class KontaktpersonerExcelGenerator {
             return n1.fornavn().compareTo(n2.fornavn()) == 0 ? n1.etternavn().compareTo(n2.etternavn()) : n1.fornavn().compareTo(n2.fornavn());
         }).toList();
 
-        log.info("unsorted and sorted ressurser: {}, {}", unsortedRessurser, sortedRessurser);
-
         try (Workbook workbook = new XSSFWorkbook()) {
             var sheet = workbook.createSheet("Kontaktpersoner - " + orgEnhet.navn());
             var rowcount = 0;
@@ -66,7 +64,6 @@ public class KontaktpersonerExcelGenerator {
             log.info("Generating excel for orgenhet {} with {} ressurser", orgEnhet.id(), sortedRessurser.size());
             List<RessursKontaktinfo> ressursKontaktinfo = kontaktinfoClient.getRessursKontaktinfo(sortedRessurser.stream().map(r -> r.state().navident()).toList());
             for (RessursKontaktinfo info : ressursKontaktinfo) {
-                log.info("RessursKontaktinfo for ressurs {}: {}", info.ressursNavident(), info.kontaktinfo());
                 Ressurs ressurs = getRessursForGittNavident(sortedRessurser, info.ressursNavident());
                 addRow(
                         sheet.createRow(rowcount++),

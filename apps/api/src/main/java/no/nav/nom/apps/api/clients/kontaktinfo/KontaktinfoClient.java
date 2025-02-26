@@ -23,10 +23,8 @@ import static no.nav.nom.apps.api.clients.WebClientUtils.defaultRetry;
 public class KontaktinfoClient {
 
     public static final Logger log = LogManager.getLogger(KontaktinfoClient.class);
-    private final WebClient clientCredentialsAuthorizedWebClient;
     private final String paarorendeScope;
     private final OnBehalfOfTokenRepository onBehalfOfTokenRepository;
-    private final WebClient.Builder webClientBuilder;
     private final String kontaktinfoBaseUrl;
 
     @Value("${app.clients.nom-paarorende.max-attempts}")
@@ -42,20 +40,8 @@ public class KontaktinfoClient {
     ) throws IOException {
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("nom-paarorende");
-
         this.onBehalfOfTokenRepository = onBehalfOfTokenRepository;
         this.paarorendeScope = appProperties.clients().nomPaarorende().aadScope();
-
-        WebClient.Builder baseWebClientBuilder = WebClient.builder()
-                .baseUrl(appProperties.clients().nomPaarorende().baseUrl())
-                .defaultHeaders(headers -> {
-                    headers.add("Nav-Consumer-Id", appProperties.name());
-                    headers.add("Nav-Call-Id", appProperties.name());
-                });
-        this.clientCredentialsAuthorizedWebClient = baseWebClientBuilder
-                .filter(oAuth2Filter)
-                .build();
-        this.webClientBuilder = baseWebClientBuilder;
         kontaktinfoBaseUrl = appProperties.clients().nomPaarorende().baseUrl();
     }
 
