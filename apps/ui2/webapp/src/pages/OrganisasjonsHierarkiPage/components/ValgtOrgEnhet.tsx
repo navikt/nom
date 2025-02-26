@@ -350,7 +350,7 @@ function DropdownMeny({
   };
 
   const excelFilNavn = () => {
-    return "kontaktpersoner for orgenhet - " + orgEnhet?.navn + ".xls";
+    return "kontaktpersoner for orgenhet - " + orgEnhet?.navn + ".xlsx";
   };
 
   return (
