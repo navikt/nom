@@ -27,6 +27,7 @@ public class KontaktinfoClient {
     private final String paarorendeScope;
     private final OnBehalfOfTokenRepository onBehalfOfTokenRepository;
     private final WebClient.Builder webClientBuilder;
+    private final String kontaktinfoBaseUrl;
 
     @Value("${app.clients.nom-paarorende.max-attempts}")
     private Integer maxAttempts;
@@ -55,41 +56,20 @@ public class KontaktinfoClient {
                 .filter(oAuth2Filter)
                 .build();
         this.webClientBuilder = baseWebClientBuilder;
-    }
-
-    public List<Kontaktinfo> getKontaktinfo(String navident) {
-        String onBehalfOfToken = onBehalfOfTokenRepository.getOnbehalfofTokenFor(paarorendeScope);
-        log.info("Getting kontaktinfo for navident {} on behalf of token {}", navident, onBehalfOfToken);
-        var onBehalfOfAuthorizedWebClient = webClientBuilder
-                .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
-                .build();
-
-        return onBehalfOfAuthorizedWebClient.get()
-            .uri(String.format("/api/kontaktinfo/%s", navident))
-            .retrieve()
-            .toEntityList(Kontaktinfo.class)
-            .retryWhen(defaultRetry(maxAttempts, backoffDurationMillis))
-            .doOnError(WebClientResponseException.class, (webClientResponseException) -> {
-                if (webClientResponseException.getStatusCode().value() == 404) {
-                    log.error("Kontaktinfo not found", webClientResponseException);
-                    throw new KontaktinfoException("Kontaktinfo not found", ErrorCode.NOT_FOUND);
-                }
-
-                String errorMsg = String.format(
-                    "GET kontaktinfo %s resulted in status %s with body %s",
-                    Objects.requireNonNull(webClientResponseException.getRequest()).getURI(),
-                    webClientResponseException.getStatusCode().value(),
-                    webClientResponseException.getResponseBodyAsString()
-                );
-                log.error(errorMsg, webClientResponseException);
-                throw new KontaktinfoException(errorMsg, ErrorCode.SERVER_ERROR);
-            })
-            .block().getBody();
+        kontaktinfoBaseUrl = appProperties.clients().nomPaarorende().baseUrl();
     }
 
     public List<RessursKontaktinfo> getRessursKontaktinfo(List<String> navidents) {
         String onBehalfOfToken = onBehalfOfTokenRepository.getOnbehalfofTokenFor(paarorendeScope);
+
+        /*
         var onBehalfOfAuthorizedWebClient = webClientBuilder
+            .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
+            .build();
+        */
+
+        var onBehalfOfAuthorizedWebClient = WebClient.builder()
+            .baseUrl(kontaktinfoBaseUrl)
             .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
             .build();
 
