@@ -1,6 +1,8 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.apps.api.ressurs.model.FysiskBrukersted;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.stereotype.Component;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class NomRemedyIntegrasjonClient {
 
@@ -34,13 +37,35 @@ public class NomRemedyIntegrasjonClient {
                 .build()
             )
             .retrieve()
-            .toEntityList(FysiskBrukersted.class).block()
-            .getBody().stream().map(FysiskBrukersted::brukerstedNr).collect(Collectors.toSet());
-
+            .toEntityList(NomRemedyIntegrasjonFysiskBrukersted.class).block()
+            .getBody().stream().map(NomRemedyIntegrasjonFysiskBrukersted::brukerstedNr).collect(Collectors.toSet());
     }
 
-    public record FysiskBrukersted (
-        String brukerstedNr
-    ){}
+    public List<FysiskBrukersted> getFysiskeBrukersteder() {
+        log.info("Henter fysiske brukersteder fra NomRemedyIntegrasjon");
+        var nNomRemedyIntegrasjonFysiskBrukersteder = webClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/api/fysiskebrukersteder")
+                .build()
+            )
+            .retrieve()
+            .toEntityList(NomRemedyIntegrasjonFysiskBrukersted.class)
+            .block()
+            .getBody();
 
+        if (nNomRemedyIntegrasjonFysiskBrukersteder == null) {
+            log.error("Fikk ingen fysiske brukersteder fra NomRemedyIntegrasjon");
+            return List.of();
+        }
+
+        return nNomRemedyIntegrasjonFysiskBrukersteder
+            .stream()
+            .map(fysiskBrukersted -> new FysiskBrukersted(fysiskBrukersted.brukerstedNr(), fysiskBrukersted.brukerstedNavn()))
+            .toList();
+    }
+
+    public record NomRemedyIntegrasjonFysiskBrukersted (
+        String brukerstedNr,
+        String brukerstedNavn
+    ){}
 }

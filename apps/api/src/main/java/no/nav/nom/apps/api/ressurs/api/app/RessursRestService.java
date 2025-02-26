@@ -15,6 +15,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreT
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.pdl.PdlClient;
+import no.nav.nom.apps.api.ressurs.FysiskBrukerstedService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
@@ -31,6 +32,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSekto
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
+import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import no.nav.nom.contract.nom.Sektor;
@@ -89,6 +91,7 @@ public class RessursRestService {
     private final KafkaTopicReader kafkaTopicReader;
     private final NomMastered nomMastered;
     private final AuthResolver authResolver;
+    private final FysiskBrukerstedService fysiskBrukerstedService;
 
     public RessursRestService(
         RessursStateRepository ressursStateRepository,
@@ -104,7 +107,7 @@ public class RessursRestService {
         RessursLedereResolver ressursLedereResolver,
         KafkaTopicReader kafkaTopicReader,
         NomMastered nomMastered,
-        AuthResolver authResolver
+        AuthResolver authResolver, FysiskBrukerstedService fysiskBrukerstedService
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -121,6 +124,7 @@ public class RessursRestService {
         this.ressursLedereResolver = ressursLedereResolver;
         this.nomMastered = nomMastered;
         this.authResolver = authResolver;
+        this.fysiskBrukerstedService = fysiskBrukerstedService;
     }
 
     public List<RessursState> findRessurser(RessursFilter ressursFilter) {
@@ -704,5 +708,78 @@ public class RessursRestService {
         var ressursState = findRessursStateByNavident(navident);
         ressursState.primaryTelefonnummer().ifPresent(s -> telefoner.add(new Ressurs.Telefon(s, TelefonType.PRIVAT_TELEFON)));
         return telefoner.isEmpty() ? Collections.emptyList() : telefoner;
+    }
+
+    public List<RessursState> getRessurserMedFysiskBrukersted(String fysiskBrukerstedNr) {
+        var ressursStates = fysiskBrukerstedService.getAlleRessurserMedFysiskBrukersted(fysiskBrukerstedNr);
+
+        return ressursStates.stream()
+            .map(ressursState -> ressursState.toBuilder()
+                .personident(ressursState.personident().replaceFirst(".{5}$", "*****"))
+                .build()
+            )
+            .toList();
+    }
+
+    public List<RessursState> getRessurserPaaEnhetMedFysiskBrukersted(String orgenhetId, String fysiskBrukerstedNr) {
+        var ressursStates = fysiskBrukerstedService.getAlleRessurserPaaEnhetMedFysiskBrukersted(orgenhetId, fysiskBrukerstedNr);
+
+        return ressursStates.stream()
+            .map(ressursState -> ressursState.toBuilder()
+                .personident(ressursState.personident().replaceFirst(".{5}$", "*****"))
+                .build()
+            )
+            .toList();
+    }
+
+    public void updateFysiskBrukerstedForRessurserByFysiskbrukersted(String fraFysiskBrukerstedNr, String tilFysiskBrukerstedNr) {
+        var metadata = new InputMetadata(
+            "REST",
+            "updateFysiskBrukerstedForRessurserByFysiskbrukersted",
+            Map.of("fraFysiskBrukersted", fraFysiskBrukerstedNr, "tilFysiskBrukersted", tilFysiskBrukerstedNr),
+            new Origination(
+                getAuthenticatedNavIdent(),
+                SecurityUtil.getAuthenticatedAzpName()
+            )
+        );
+
+        fysiskBrukerstedService.flyttAlleRessurserFraFysiskBrukerstedTilFysiskBrukersted(
+            fraFysiskBrukerstedNr,
+            tilFysiskBrukerstedNr,
+            metadata
+        );
+    }
+
+    public void updateFysiskBrukerstedForRessurserByEnhetAndFysiskbrukersted(String orgenhetId, String fraFysiskBrukerstedNr, String tilFysiskBrukerstedNr) {
+        var metadata = new InputMetadata(
+            "REST",
+            "updateFysiskBrukerstedForRessurserByEnhetAndFysiskbrukersted",
+            Map.of("orgenhet", orgenhetId, "fraFysiskBrukersted", fraFysiskBrukerstedNr, "tilFysiskBrukersted", tilFysiskBrukerstedNr),
+            new Origination(
+                getAuthenticatedNavIdent(),
+                SecurityUtil.getAuthenticatedAzpName()
+            )
+        );
+
+        fysiskBrukerstedService.flyttAlleRessurserPaaEnhetFraFysiskBrukerstedTilFysiskBrukersted(
+            orgenhetId,
+            fraFysiskBrukerstedNr,
+            tilFysiskBrukerstedNr,
+            metadata
+        );
+    }
+
+    public void updateFysiskBrukerstedForRessurserByNavidentList(List<String> navidenter, String tilFysiskBrukerstedNr) {
+        var metadata = new InputMetadata(
+            "REST",
+            "updateFysiskBrukerstedForRessurserByNavidentList",
+            Map.of("navidenter", navidenter, "tilFysiskBrukersted", tilFysiskBrukerstedNr),
+            new Origination(
+                getAuthenticatedNavIdent(),
+                SecurityUtil.getAuthenticatedAzpName()
+            )
+        );
+
+        fysiskBrukerstedService.flyttRessurserTilFysiskBrukersted(navidenter, tilFysiskBrukerstedNr, metadata);
     }
 }

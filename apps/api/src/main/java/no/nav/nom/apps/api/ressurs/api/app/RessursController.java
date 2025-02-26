@@ -306,6 +306,118 @@ public class RessursController {
         );
     }
 
+    @GetMapping("/byFysiskbrukersted/{fysiskBrukerstedNr}")
+    @Operation(
+        description = "Hent alle ressurser som har angitt fysisk brukersted som primære fysisk brukersted",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200"),
+        @ApiResponse(responseCode = "403"),
+    })
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<RessursState>> getRessurserByFysiskbrukersted(
+        @PathVariable String fysiskBrukerstedNr
+    ) {
+        return ResponseEntity.ok(ressursRestService.getRessurserMedFysiskBrukersted(fysiskBrukerstedNr));
+    }
+
+    @GetMapping("/byEnhetAndFysiskbrukersted/{orgenhetId}/{fysiskBrukerstedNr}")
+    @Operation(
+        description = "Hent alle ressurser som har aktiv DOl på angitt enhet og angitt fysisk brukersted som primære fysisk brukersted",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200"),
+        @ApiResponse(responseCode = "403"),
+    })
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<RessursState>> getRessurserByEnhetAndFysiskbrukersted(
+        @PathVariable String orgenhetId,
+        @PathVariable String fysiskBrukerstedNr
+    ) {
+        return ResponseEntity.ok(ressursRestService.getRessurserPaaEnhetMedFysiskBrukersted(orgenhetId, fysiskBrukerstedNr));
+    }
+
+    @PostMapping("/updateFysiskBrukerstedForRessurserByFysiskbrukersted/{fraFysiskBrukerstedNr}")
+    @Operation(
+        description = "Flytt alle ressursers primære fysiske brukersted som har angitt fysisk brukersted som primære fysisk brukersted",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200"),
+        @ApiResponse(responseCode = "403"),
+    })
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<StandardResponse> updateFysiskBrukerstedForRessurserByFysiskbrukersted(
+        @PathVariable String fraFysiskBrukerstedNr,
+        @RequestBody UpdatePrimaryFysiskBrukerstedRequest updatePrimaryFysiskBrukerstedRequest
+    ) {
+        ressursRestService.updateFysiskBrukerstedForRessurserByFysiskbrukersted(
+            fraFysiskBrukerstedNr,
+            updatePrimaryFysiskBrukerstedRequest.newPrimaryFysiskBrukersted()
+        );
+
+        return ResponseEntity.ok(
+            StandardResponse.builder()
+                .message(("Successfully changed fysisk brukersted for ressurser"))
+                .build()
+        );
+    }
+
+    @PostMapping("/updateFysiskBrukerstedForRessurserByEnhetAndFysiskbrukersted/{orgenhetId}/{fraFysiskBrukerstedNr}")
+    @Operation(
+        description = "Flytt alle ressursers primære fysiske brukersted som har aktiv DOl på angitt enhet og angitt fysisk brukersted som primære fysisk brukersted",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200"),
+        @ApiResponse(responseCode = "403"),
+    })
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<StandardResponse> updateFysiskBrukerstedForRessurserByEnhetAndFysiskbrukersted(
+        @PathVariable String orgenhetId,
+        @PathVariable String fraFysiskBrukerstedNr,
+        @RequestBody UpdatePrimaryFysiskBrukerstedRequest updatePrimaryFysiskBrukerstedRequest
+    ) {
+        ressursRestService.updateFysiskBrukerstedForRessurserByEnhetAndFysiskbrukersted(
+            orgenhetId,
+            fraFysiskBrukerstedNr,
+            updatePrimaryFysiskBrukerstedRequest.newPrimaryFysiskBrukersted()
+        );
+
+        return ResponseEntity.ok(
+            StandardResponse.builder()
+                .message(("Successfully changed fysisk brukersted for ressurser"))
+                .build()
+        );
+    }
+
+    @PostMapping("/updateFysiskBrukerstedForRessurserByNavidentList")
+    @Operation(
+        description = "Flytt angitte ressursers primære fysiske brukersted",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200"),
+        @ApiResponse(responseCode = "403"),
+    })
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<StandardResponse> updateFysiskBrukerstedForRessurserByNavidentList(
+        @RequestBody UpdatePrimaryFysiskBrukerstedForRessurserRequest request
+    ) {
+        ressursRestService.updateFysiskBrukerstedForRessurserByNavidentList(
+            request.navidenter(),
+            request.newPrimaryFysiskBrukersted()
+        );
+
+        return ResponseEntity.ok(
+            StandardResponse.builder()
+                .message(("Successfully changed fysisk brukersted for ressurser"))
+                .build()
+        );
+    }
+
     @ExceptionHandler({
         IllegalArgumentException.class,
         NoSuchElementException.class,

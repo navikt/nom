@@ -119,6 +119,7 @@ class DvhRessursStillingTestResponse {
                 .ressursOrgenhetNiv(Optional.of("Mangler"))
                 .ressursRemedyEnhetId(Optional.empty())
                 .stillingRessursAgressoId(Optional.of("0499000"))
+                .stillingAnsettelsesTypeBesk(Optional.of("Fast"))
                 .ressursAgressoDatoFom(LocalDate.of(2006,4,18))
                 .ressursAgressoDatoTom(LocalDate.of(2099,12,31))
                 .ressursDvhDatoFom(LocalDate.of(2006,4,4))
