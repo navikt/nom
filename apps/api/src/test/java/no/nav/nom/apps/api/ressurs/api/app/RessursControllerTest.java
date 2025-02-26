@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningC
 import no.nav.nom.apps.api.pdl.Kjonn;
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.pdl.Person;
+import no.nav.nom.apps.api.ressurs.FysiskBrukerstedService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.exceptions.NomMasteredException;
@@ -26,6 +27,7 @@ import no.nav.nom.contract.nom.AnsettelsesType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.Tilknytningtype;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
@@ -43,11 +45,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.Assert;
+import org.springframework.web.reactive.function.BodyInserters;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -97,6 +101,9 @@ public class RessursControllerTest extends RestTestBase {
 
     @MockitoBean
     RessursContactDetailsResolver ressursContactDetailsResolver;
+
+    @MockitoBean
+    FysiskBrukerstedService fysiskBrukerstedService;
 
     @Autowired
     TestTokensGenerator testToken;
@@ -1252,5 +1259,177 @@ public class RessursControllerTest extends RestTestBase {
             .expectStatus().isOk()
             .expectBodyList(Ressurs.Telefon.class)
             .isEqualTo(telefoner);
+    }
+
+    @Test
+    @DisplayName("Get ressurser for specified fysisk brukersted")
+    void test_getRessurserByFysiskbrukersted() {
+        var fysiskbrukerstedNr = "1234";
+
+        when(fysiskBrukerstedService.getAlleRessurserMedFysiskBrukersted(fysiskbrukerstedNr)).thenReturn(List.of(
+            ressursState().toBuilder()
+                .primaryFysiskBrukersted(Optional.of(fysiskbrukerstedNr))
+                .fysiskeBrukersteder(List.of(fysiskbrukerstedNr))
+                .build(),
+            ressursState().toBuilder()
+                .primaryFysiskBrukersted(Optional.of(fysiskbrukerstedNr))
+                .fysiskeBrukersteder(List.of(fysiskbrukerstedNr))
+                .build()
+        ));
+
+        var ressurser = webTestClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/ressurser/byFysiskbrukersted/{fysiskbrukerstedNr}")
+                .build(fysiskbrukerstedNr)
+            )
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBodyList(RessursState.class)
+            .returnResult().getResponseBody();
+
+        assertThat(ressurser)
+            .hasSize(2)
+            .allMatch(ressursState -> Objects.equals(ressursState.primaryFysiskBrukersted().orElse(null), fysiskbrukerstedNr));
+    }
+
+    @Test
+    @DisplayName("Get ressurser for specified fysisk brukersted - 403 for ikke ADMIN")
+    void test_getRessurserByFysiskbrukersted_ForIkkeAdmin() {
+        var error = webTestClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/ressurser/byFysiskbrukersted/{fysiskbrukerstedNr}")
+                .build("1234")
+            )
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
+            .exchange()
+            .expectStatus().isForbidden()
+            .expectBody(String.class)
+            .returnResult().getResponseBody();
+
+        assertThat(error.contains("Access Denied"));
+    }
+
+    @Test
+    @DisplayName("Get ressurser for specified Enhet and fysisk brukersted")
+    void test_getRessurserByEnhetAndFysiskbrukersted() {
+        var orgenhetId = "ab123c";
+        var fysiskbrukerstedNr = "1234";
+
+        when(fysiskBrukerstedService.getAlleRessurserPaaEnhetMedFysiskBrukersted(orgenhetId, fysiskbrukerstedNr)).thenReturn(List.of(
+            ressursState().toBuilder()
+                .primaryFysiskBrukersted(Optional.of(fysiskbrukerstedNr))
+                .fysiskeBrukersteder(List.of(fysiskbrukerstedNr))
+                .build(),
+            ressursState().toBuilder()
+                .primaryFysiskBrukersted(Optional.of(fysiskbrukerstedNr))
+                .fysiskeBrukersteder(List.of(fysiskbrukerstedNr))
+                .build()
+        ));
+
+        var ressurser = webTestClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/ressurser/byEnhetAndFysiskbrukersted/{orgenhetId}/{fysiskbrukerstedNr}")
+                .build(orgenhetId, fysiskbrukerstedNr)
+            )
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBodyList(RessursState.class)
+            .returnResult().getResponseBody();
+
+        assertThat(ressurser)
+            .hasSize(2)
+            .allMatch(ressursState -> Objects.equals(ressursState.primaryFysiskBrukersted().orElse(null), fysiskbrukerstedNr));
+    }
+
+    @Test
+    @DisplayName("Oppdater ressurser primary fysisk brukersted for specified fysisk brukersted")
+    void test_updateFysiskBrukerstedForRessurserByFysiskbrukersted() {
+        var fraFysiskbrukerstedNr = "1234";
+        var tilFysiskbrukerstedNr = "4321";
+
+        var request = UpdatePrimaryFysiskBrukerstedRequest.builder()
+                .newPrimaryFysiskBrukersted(tilFysiskbrukerstedNr)
+                .build();
+
+        webTestClient.post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/ressurser/updateFysiskBrukerstedForRessurserByFysiskbrukersted/{fysiskbrukerstedNr}")
+                .build(fraFysiskbrukerstedNr)
+            )
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(BodyInserters.fromValue(request))
+            .exchange()
+            .expectStatus().isOk();
+
+        verify(fysiskBrukerstedService, times(1))
+            .flyttAlleRessurserFraFysiskBrukerstedTilFysiskBrukersted(
+                eq(fraFysiskbrukerstedNr),
+                eq(tilFysiskbrukerstedNr),
+                any(InputMetadata.class)
+            );
+    }
+
+    @Test
+    @DisplayName("Oppdater ressurser primary fysisk brukersted for specified Enhet and fysisk brukersted")
+    void test_updateFysiskBrukerstedForRessurserByEnhetAndFysiskbrukersted() {
+        var orgenhetId = "ab123c";
+        var fraFysiskbrukerstedNr = "1234";
+        var tilFysiskbrukerstedNr = "4321";
+
+        var request = UpdatePrimaryFysiskBrukerstedRequest.builder()
+            .newPrimaryFysiskBrukersted(tilFysiskbrukerstedNr)
+            .build();
+
+        webTestClient.post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/ressurser/updateFysiskBrukerstedForRessurserByEnhetAndFysiskbrukersted/{orgenhetId}/{fysiskbrukerstedNr}")
+                .build(orgenhetId, fraFysiskbrukerstedNr)
+            )
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(BodyInserters.fromValue(request))
+            .exchange()
+            .expectStatus().isOk();
+
+        verify(fysiskBrukerstedService, times(1))
+            .flyttAlleRessurserPaaEnhetFraFysiskBrukerstedTilFysiskBrukersted(
+                eq(orgenhetId),
+                eq(fraFysiskbrukerstedNr),
+                eq(tilFysiskbrukerstedNr),
+                any(InputMetadata.class)
+            );
+    }
+
+    @Test
+    @DisplayName("Oppdater ressurser primary fysisk brukersted for specified navidents")
+    void test_updateFysiskBrukerstedForRessurserByNavidentList() {
+        var navidenter = List.of("A000001", "B000002");
+        var tilFysiskbrukerstedNr = "4321";
+
+        var request = UpdatePrimaryFysiskBrukerstedForRessurserRequest.builder()
+            .navidenter(navidenter)
+            .newPrimaryFysiskBrukersted(tilFysiskbrukerstedNr)
+            .build();
+
+        webTestClient.post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/ressurser/updateFysiskBrukerstedForRessurserByNavidentList")
+                .build()
+            )
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(BodyInserters.fromValue(request))
+            .exchange()
+            .expectStatus().isOk();
+
+        verify(fysiskBrukerstedService, times(1))
+            .flyttRessurserTilFysiskBrukersted(
+                eq(navidenter),
+                eq(tilFysiskbrukerstedNr),
+                any(InputMetadata.class)
+            );
     }
 }
