@@ -9,6 +9,8 @@ metadata:
   labels:
     team: org
 spec:
+  tokenx:
+    enabled: true
   image: "{{image}}"
   port: 8080
   ingresses:
