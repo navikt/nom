@@ -61,13 +61,6 @@ public class KontaktinfoClient {
 
     public List<RessursKontaktinfo> getRessursKontaktinfo(List<String> navidents) {
         String onBehalfOfToken = onBehalfOfTokenRepository.getOnbehalfofTokenFor(paarorendeScope);
-
-        /*
-        var onBehalfOfAuthorizedWebClient = webClientBuilder
-            .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
-            .build();
-        */
-
         var onBehalfOfAuthorizedWebClient = WebClient.builder()
             .baseUrl(kontaktinfoBaseUrl)
             .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
