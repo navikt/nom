@@ -200,14 +200,19 @@ public class KontaktinfoController {
             @ApiResponse(responseCode = "403", description = "Uatorisert")
         }
     )
-    public ResponseEntity<List<RessursKontaktinfoDTO>> getContantinfoForRessurser(@RequestBody List<String> ressursNavidents) {
-        // todo get logg inn bruker navident and check if it has access to ressurs contact info
-        //securityUtil.assertAuthorizedAccessTo(navident);
+    public ResponseEntity<List<RessursKontaktinfoDTO>> getContaktinfoForRessurser(@RequestBody List<String> ressursNavidents) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         JwtAuthenticationToken oauthToken = (JwtAuthenticationToken) authentication;
-        log.info("getContantinfoForRessurser JwtAuthenticationToken: {}",oauthToken.getTokenAttributes());
-        log.info("SecurityUtil getUserNavident: {}",oauthToken.getTokenAttributes().get("NAVident"));
+        String navident = String.valueOf(oauthToken.getTokenAttributes().get("NAVident"));
+        log.info("Get Contaktinfo For Ressurser on behalf of: {}", navident);
+        if (navident == null) {
+            throw new AccessDeniedException("Unauthorized");
+        }
 
+        // do authorization check
+        securityUtil.assertAuthorizedAccessTo(navident);
+
+        // get contact info for ressurser
         List<RessursKontaktinfoDTO> result = new ArrayList<>();
         ressursNavidents.forEach(ressursNavident -> {
             var kontaktInfo = KontaktinfoDTO.fromEntityList(kontaktInfoRepository.findAllByNavidentAndDatoSlettetIsNull(ressursNavident));
