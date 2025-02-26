@@ -40,8 +40,16 @@ public class KontaktpersonerExcelGenerator {
         this.kontaktinfoClient = kontaktinfoClient;
     }
 
-    public void generate(HttpServletResponse response, OrgEnhet orgEnhet, List<Ressurs> ressurser) {
+    public void generate(HttpServletResponse response, OrgEnhet orgEnhet, List<Ressurs> unsortedRessurser) {
         var hasAdminRightsForEnhet = authResolver.kanOppretteRessurs(orgEnhet.id());
+
+        List<Ressurs> sortedRessurser = unsortedRessurser.stream().sorted((r1, r2) -> {
+            var n1 = r1.state().visningsnavn();
+            var n2 = r2.state().visningsnavn();
+            return n1.fornavn().compareTo(n2.fornavn()) == 0 ? n1.etternavn().compareTo(n2.etternavn()) : n1.fornavn().compareTo(n2.fornavn());
+        }).toList();
+
+        log.info("unsorted and sorted ressurser: {}, {}", unsortedRessurser, sortedRessurser);
 
         try (Workbook workbook = new XSSFWorkbook()) {
             var sheet = workbook.createSheet("Kontaktpersoner - " + orgEnhet.navn());
@@ -55,35 +63,16 @@ public class KontaktpersonerExcelGenerator {
                throw new RuntimeException(errorMessage);
            }
 
-           /*
-           var sortedRessurser = ressurser.stream()
-               .sorted((r1, r2) -> r1.state().visningsnavn().etternavn().compareTo(r2.state().visningsnavn().etternavn()))
-               .toList();
-           */
-
-            log.info("Generating excel for orgenhet {} with {} ressurser", orgEnhet.id(), ressurser.size());
-
-            List<RessursKontaktinfo> ressursKontaktinfo = kontaktinfoClient.getRessursKontaktinfo(ressurser.stream().map(r -> r.state().navident()).toList());
+            log.info("Generating excel for orgenhet {} with {} ressurser", orgEnhet.id(), sortedRessurser.size());
+            List<RessursKontaktinfo> ressursKontaktinfo = kontaktinfoClient.getRessursKontaktinfo(sortedRessurser.stream().map(r -> r.state().navident()).toList());
             for (RessursKontaktinfo info : ressursKontaktinfo) {
                 log.info("RessursKontaktinfo for ressurs {}: {}", info.ressursNavident(), info.kontaktinfo());
-                Ressurs ressurs = getRessursForGittNavident(ressurser, info.ressursNavident());
+                Ressurs ressurs = getRessursForGittNavident(sortedRessurser, info.ressursNavident());
                 addRow(
                         sheet.createRow(rowcount++),
                         ressurs, info.kontaktinfo().isEmpty()? null : info.kontaktinfo().getFirst()
                 );
             }
-
-           /*
-           for (Ressurs ressurs : ressurser) {
-               log.info("Generating excel for ressurs {}", ressurs.state());
-               var kontaktinfo = kontaktinfoClient.getKontaktinfo(ressurs.state().navident());
-               log.info("Kontaktinfo for ressurs {}: {}", ressurs.state().navident(), kontaktinfo);
-               addRow(
-                   sheet.createRow(rowcount++),
-                   ressurs, kontaktinfo.isEmpty()? null : kontaktinfo.get(0)
-               );
-           }
-           */
 
             var headerRow = sheet.getRow(0);
             var font = workbook.createFont();
