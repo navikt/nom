@@ -17,8 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -200,15 +202,9 @@ public class KontaktinfoController {
         }
     )
     public ResponseEntity<List<RessursKontaktinfoDTO>> getContaktinfoForRessurser(@RequestBody List<String> ressursNavidents) {
-        /*
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        JwtAuthenticationToken oauthToken = (JwtAuthenticationToken) authentication;
-        String onBehalfOfNavident = String.valueOf(oauthToken.getTokenAttributes().get("NAVident"));
-        */
-
-        String onBehalfOfNavident = ((Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getClaimAsString("NAVIDENT");
-        log.info("Get Contaktinfo For Ressurser on behalf of: {}", onBehalfOfNavident);
-        if (onBehalfOfNavident == null) {
+        String onBehalfOfUserNavident =  SecurityUtil.getBehalfOfUserNavident();
+        log.info("Get Contaktinfo For Ressurser on behalf of: {}", onBehalfOfUserNavident);
+        if (onBehalfOfUserNavident == null) {
             throw new AccessDeniedException("Unauthorized access to ressurser kontaktinfo");
         }
 
@@ -216,7 +212,7 @@ public class KontaktinfoController {
         List<RessursKontaktinfoDTO> result = new ArrayList<>();
         ressursNavidents.forEach(ressursNavident -> {
             // do authorization check
-            securityUtil.assertAuthorizedAccessTo(ressursNavident);
+            securityUtil.assertAuthorizedAccessToRessurs(onBehalfOfUserNavident, ressursNavident);
 
             var kontaktInfo = KontaktinfoDTO.fromEntityList(kontaktInfoRepository.findAllByNavidentAndDatoSlettetIsNull(ressursNavident));
             RessursKontaktinfoDTO ressursKontaktinfoDTO = RessursKontaktinfoDTO.builder()

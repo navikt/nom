@@ -6,8 +6,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import java.util.Arrays;
 
@@ -48,6 +50,12 @@ public class SecurityUtil {
         }
     }
 
+    public void assertAuthorizedAccessToRessurs(String userNavident, String ressursNavident ) throws AccessDeniedException {
+        if (!isAuthenticated() || !hasAccess(userNavident, ressursNavident)) {
+            throw new AccessDeniedException(userNavident +" is not unauthorized access to ressurs: " + ressursNavident);
+        }
+    }
+
     public String getNavIdent() {
         if (Arrays.asList(environment.getActiveProfiles()).contains("local")) {
             return "testuser";
@@ -84,4 +92,10 @@ public class SecurityUtil {
         return nomApiClient.hasAccess(bruker, ressurs) || isAdmin() || bruker.equals(ressurs);
     }
 
+    public static String getBehalfOfUserNavident() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        JwtAuthenticationToken oauthToken = (JwtAuthenticationToken) authentication;
+        String onBehalfOfUserNavident = String.valueOf(oauthToken.getTokenAttributes().get("NAVident"));
+        return onBehalfOfUserNavident;
+    }
 }
