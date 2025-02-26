@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrgtilknytningStateRepository {
+    enum DOLIs {
+        TRUE,
+        FALSE,
+        ANY
+    }
 
     Optional<OrgtilknytningState> findByFid(String fid);
 
@@ -17,6 +22,18 @@ public interface OrgtilknytningStateRepository {
     List<OrgtilknytningState> findByNavidentIn(List<String> navidents);
 
     Collection<OrgtilknytningState> getAll();
+
+    List<String> getAktiveNavidenterPaaEnhet(String orgenhet);
+
+    List<String> getAktiveNavidenterPaaEnhet(String orgenhet, DOLIs dolIs);
+
+    List<String> getAktiveEllerFremtidigeNavidenterPaaEnhet(String orgenhet);
+
+    List<String> getAktiveEllerFremtidigeNavidenterPaaEnhet(String orgenhet, DOLIs dolIs);
+
+    List<OrgtilknytningState> getOrgtilknytningerPaaEnhet(String orgenhet);
+
+    List<OrgtilknytningState> getOrgtilknytningerPaaEnhet(String orgenhet, DOLIs dolIs);
 
     int count();
 
