@@ -62,8 +62,8 @@ public class KontaktpersonerExcelGenerator {
            }
 
             log.info("Generating excel for orgenhet {} with {} ressurser", orgEnhet.id(), sortedRessurser.size());
-            List<RessursKontaktinfo> ressursKontaktinfo = kontaktinfoClient.getRessursKontaktinfo(sortedRessurser.stream().map(r -> r.state().navident()).toList());
-            for (RessursKontaktinfo info : ressursKontaktinfo) {
+            List<RessursKontaktinfo> kontaktinfoForRessurser = kontaktinfoClient.getKontaktinfoForRessurser(sortedRessurser.stream().map(r -> r.state().navident()).toList());
+            for (RessursKontaktinfo info : kontaktinfoForRessurser) {
                 Ressurs ressurs = getRessursForGittNavident(sortedRessurser, info.ressursNavident());
                 addRow(
                         sheet.createRow(rowcount++),
