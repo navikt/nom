@@ -45,7 +45,7 @@ public class KontaktinfoClient {
         kontaktinfoBaseUrl = appProperties.clients().nomPaarorende().baseUrl();
     }
 
-    public List<RessursKontaktinfo> getRessursKontaktinfo(List<String> navidents) {
+    public List<RessursKontaktinfo> getKontaktinfoForRessurser(List<String> navidents) {
         String onBehalfOfToken = onBehalfOfTokenRepository.getOnbehalfofTokenFor(paarorendeScope);
         var onBehalfOfAuthorizedWebClient = WebClient.builder()
             .baseUrl(kontaktinfoBaseUrl)
