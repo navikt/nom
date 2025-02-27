@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgenhet.api.app.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -10,6 +11,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import java.time.LocalDate;
 import java.util.List;
 
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record OrgEnhet(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String id,

@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+
+import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
@@ -42,17 +44,20 @@ public class OrgEnhetController {
     private final OrgEnhetMapper orgEnhetMapper;
     private final KontaktpersonerExcelGenerator kontaktpersonerExcelGenerator;
     private final RessursRestService ressursRestService;
+    private final AuthResolver authResolver;
 
     public OrgEnhetController(
             OrgenhetService orgenhetService,
             OrgEnhetMapper orgEnhetMapper,
             KontaktpersonerExcelGenerator kontaktpersonerExcelGenerator,
-            RessursRestService ressursRestService
+            RessursRestService ressursRestService,
+            AuthResolver authResolver
     ) {
         this.orgenhetService = orgenhetService;
         this.orgEnhetMapper = orgEnhetMapper;
         this.kontaktpersonerExcelGenerator = kontaktpersonerExcelGenerator;
         this.ressursRestService = ressursRestService;
+        this.authResolver = authResolver;
     }
 
     @GetMapping("/{orgenhetId}")
@@ -84,6 +89,13 @@ public class OrgEnhetController {
             if(orgEnhet.isEmpty() || orgEnhet.get().ressursKoblinger().isEmpty()) {
                 log.error("Orgenhet not found or has no ressurser!");
                 return;
+            }
+
+            var hasAdminRightsForEnhet = authResolver.kanRedigereRessurs(orgenhetId);
+            if(!hasAdminRightsForEnhet) {
+                var errorMessage = "User does not have access to view ressurser for this orgenhet";
+                log.error(errorMessage);
+                throw new RuntimeException(errorMessage);
             }
 
             var ressursKoblinger = orgEnhet.get().ressursKoblinger();
