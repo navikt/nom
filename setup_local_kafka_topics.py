@@ -93,6 +93,10 @@ def create_topics_for_nom_entities(nom_entity_filter: list, recreate: bool):
         "navident": EntityTopics(
             state_topic="org.nav-ident"
         ),
+        "hendelser": EntityTopics(
+            state_topic="org.nom.api-ressurs-hendelse-v1",
+            streams_application_id="api-ressurs-hendelser"
+        ),
     }
 
     for entity, entity_topics in entity_topics_map.items():

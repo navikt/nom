@@ -1,0 +1,43 @@
+app:
+  kafka:
+    ressurs-evtsrc-topic: org.nom.ressurs-eventsource
+    orgtilknytning-evtsrc-topic: org.nom.orgtilknytning-eventsource
+    ressurs-hendelse-topic: org.nom.api-ressurs-hendelse-v1
+
+spring:
+  main:
+    banner-mode: off
+  application:
+    name: api-ressurs-hendelser
+  kafka:
+    security:
+      protocol: SSL
+    ssl:
+      key-store-type: PKCS12
+      key-store-location: file:${KAFKA_KEYSTORE_PATH}
+      key-store-password: ${KAFKA_CREDSTORE_PASSWORD}
+      trust-store-type: JKS
+      trust-store-location: file:${KAFKA_TRUSTSTORE_PATH}
+      trust-store-password: ${KAFKA_CREDSTORE_PASSWORD}
+    streams:
+      application-id: ${KAFKA_STREAMS_APPLICATION_ID}
+      properties:
+        commit.interval.ms: 0
+        default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        default.value.serde: org.springframework.kafka.support.serializer.JsonSerde
+    bootstrap-servers: ${KAFKA_BROKERS}
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, info, health, metrics
+      base-path: /internal
