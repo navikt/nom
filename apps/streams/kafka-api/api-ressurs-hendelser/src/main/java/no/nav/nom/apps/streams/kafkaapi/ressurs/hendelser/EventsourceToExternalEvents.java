@@ -64,10 +64,6 @@ public class EventsourceToExternalEvents {
                 })
                 .groupByKey(Grouped.with(stringSerde, ressursEventSerde))
                 .reduce((previousValue, newValue) -> newValue);
-
-        ressursPerNavident.toStream()
-                .print(Printed.<String, RessursEvent>toSysOut().withLabel("ressursPerNavident"));
-        
         
         // Aggregerer orgtilknytninger
         KTable<String, ObjectNode> orgtilknytningAggregateKTable = streamsBuilder
@@ -85,11 +81,6 @@ public class EventsourceToExternalEvents {
                         },
                         Materialized.with(stringSerde, jsonSerde)
                 );
-
-        orgtilknytningAggregateKTable
-                .toStream()
-                .print(Printed.<String, ObjectNode>toSysOut().withLabel("orgtilknytningAggregateKTable"));
-
         
         // Snu til å være per navident og kun returnere OTer som er DOL
         KTable<String, Map<String, Orgtilknytning>> orgtilknytningMappedToNavident = orgtilknytningAggregateKTable.toStream()
@@ -104,11 +95,6 @@ public class EventsourceToExternalEvents {
                         },
                         Materialized.with(stringSerde, objectSerde.copyWithType(orgtilknytningMapType))
                 );
-
-        orgtilknytningMappedToNavident
-                .toStream()
-                .print(Printed.<String, Map<String, Orgtilknytning>>toSysOut().withLabel("orgtilknytningMappedToNavident"));
-
 
         // Joiner på navident
         ressursPerNavident.join(

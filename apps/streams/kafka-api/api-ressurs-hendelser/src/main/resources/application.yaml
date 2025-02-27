@@ -25,6 +25,7 @@ spring:
         commit.interval.ms: 0
         default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
         default.value.serde: org.springframework.kafka.support.serializer.JsonSerde
+        auto.offset.reset: latest
     bootstrap-servers: ${KAFKA_BROKERS}
   jackson:
     serialization:
