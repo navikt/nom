@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.orgenhet.api.app;
 
 import jakarta.servlet.http.HttpServletResponse;
 
-import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.clients.kontaktinfo.Kontaktinfo;
 import no.nav.nom.apps.api.clients.kontaktinfo.KontaktinfoClient;
 import no.nav.nom.apps.api.clients.kontaktinfo.RessursKontaktinfo;
@@ -14,12 +13,12 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 
-@Component
+@Service
 public class KontaktpersonerExcelGenerator {
     private final static Logger log = LoggerFactory.getLogger(KontaktpersonerExcelGenerator.class);
 
@@ -28,21 +27,17 @@ public class KontaktpersonerExcelGenerator {
         "NAV_KOMMUNAL", "Kommunal",
         "EKSTERN", "Ekstern"
     );
-    private final AuthResolver authResolver;
     private final KontaktinfoClient kontaktinfoClient;
 
 
     public KontaktpersonerExcelGenerator(
-        AuthResolver authResolver,
         KontaktinfoClient kontaktinfoClient
     ) {
-        this.authResolver = authResolver;
         this.kontaktinfoClient = kontaktinfoClient;
     }
 
     public void generate(HttpServletResponse response, OrgEnhet orgEnhet, List<Ressurs> unsortedRessurser) {
-        var hasAdminRightsForEnhet = authResolver.kanOppretteRessurs(orgEnhet.id());
-
+        // sort ressurser by fornavn and etternavn
         List<Ressurs> sortedRessurser = unsortedRessurser.stream().sorted((r1, r2) -> {
             var n1 = r1.state().visningsnavn();
             var n2 = r2.state().visningsnavn();
@@ -54,12 +49,6 @@ public class KontaktpersonerExcelGenerator {
             var rowcount = 0;
 
             addRow(sheet.createRow(rowcount++), null, null);
-
-           if(!hasAdminRightsForEnhet) {
-               var errorMessage = "User does not have access to view ressurser for this orgenhet";
-               log.error(errorMessage);
-               throw new RuntimeException(errorMessage);
-           }
 
             log.info("Generating excel for orgenhet {} with {} ressurser", orgEnhet.id(), sortedRessurser.size());
             List<RessursKontaktinfo> kontaktinfoForRessurser = kontaktinfoClient.getKontaktinfoForRessurser(sortedRessurser.stream().map(r -> r.state().navident()).toList());
