@@ -21,6 +21,7 @@ import no.nav.nom.generated.model.Ressurs;
 import no.nav.nom.generated.model.RessursState;
 import no.nav.nom.generated.model.Telefon;
 import no.nav.nom.generated.model.TelefonType;
+import no.nav.nom.generated.model.Tilknytningtype;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -897,6 +898,43 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
 
         when(nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid()))
             .thenReturn(new OrgtilknytningState().erDagligOppfolging(false));
+
+        nomRemedyIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDatoEndretEventV2);
+
+        assertThat(remedyIntegrasjonRepositoryService.findAll()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Should skip updating values for OrgtilknytningDatoEndretEventV2 if orgtilknytning is dagligOppfolgning but is not active")
+    void testSkipUpdateForOrgtilknytningDatoEndretEventV2IfRessursIsDagligOppfolgningButNotActive() {
+        var ressurs = ressurs();
+
+        var orgtilknytningDatoEndretEventV2EventData = orgtilknytningDatoEndretEventV2()
+            .getOrgtilknytningDatoEndretEventData()
+            .toBuilder()
+            .gyldigFom(LocalDate.now().minusYears(2))
+            .gyldigTom(Optional.of(LocalDate.now().minusYears(1)))
+            .build();
+
+        var orgtilknytningDatoEndretEventV2 = orgtilknytningDatoEndretEventV2(orgtilknytningDatoEndretEventV2EventData);
+
+        var orgtilknytningState = new OrgtilknytningState()
+            .fid(orgtilknytningDatoEndretEventV2.getFid())
+            .orgEnhetId("org-enhet-id")
+            .erDagligOppfolging(true)
+            .sektor(no.nav.nom.generated.model.Sektor.NAV_KOMMUNAL)
+            .gyldigFom(LocalDate.now().minusYears(2))
+            .gyldigTom(LocalDate.now().minusYears(1))
+            .orgtilknytningType(Tilknytningtype.INGEN);
+
+        when(nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid()))
+            .thenReturn(orgtilknytningState);
+
+        when(nomApiClient.getRessursByNavident(orgtilknytningState.getNavident()))
+            .thenReturn(ressurs);
+
+        when(nomApiClient.getOrgEnhet(orgtilknytningState.getOrgEnhetId()))
+            .thenReturn(orgenhet());
 
         nomRemedyIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDatoEndretEventV2);
 

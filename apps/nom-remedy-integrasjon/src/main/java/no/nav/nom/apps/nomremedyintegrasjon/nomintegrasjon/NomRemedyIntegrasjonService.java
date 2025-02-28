@@ -124,7 +124,7 @@ public class NomRemedyIntegrasjonService {
             && orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().dagligOppfolging()) {
             handleOrgtilknytningDagligOppfolgingEndretEvent(orgtilknytningDagligOppfolgingEndretEventV1);
         } else if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2
-            && isOrgtilknytningDOL(orgtilknytningDatoEndretEventV2.getFid())) {
+            && isOrgtilknytningDOL(orgtilknytningDatoEndretEventV2.getFid()) && !isOrgtilknytningHistorical(orgtilknytningDatoEndretEventV2)) {
             handleOrgtilknytningDatoEndretEvent(orgtilknytningDatoEndretEventV2);
         } else if (orgtilknytningEvent instanceof OrgtilknytningSektorEndretEventV1 orgtilknytningSektorEndretEventV1
             && isOrgtilknytningDOL(orgtilknytningSektorEndretEventV1.getFid())) {
