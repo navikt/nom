@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetMedLedernavn;
@@ -87,13 +88,14 @@ public class OrgEnhetController {
                 .map(orgEnhetMapper::mapToOrgEnhet);
 
             if(orgEnhet.isEmpty() || orgEnhet.get().ressursKoblinger().isEmpty()) {
-                log.error("Orgenhet not found or has no ressurser!");
+                log.error("Orgenhet not found or has no ressurser!" + orgenhetId);
                 return;
             }
 
             var hasAdminRightsForEnhet = authResolver.kanRedigereRessurs(orgenhetId);
             if(!hasAdminRightsForEnhet) {
-                var errorMessage = "User does not have access to view ressurser for this orgenhet";
+                var loggedInUser = SecurityUtil.getAuthenticatedNavIdent();
+                var errorMessage = "User does not have access to view ressurser for this orgenhet: " + loggedInUser + "-" + orgenhetId;
                 log.error(errorMessage);
                 throw new RuntimeException(errorMessage);
             }
