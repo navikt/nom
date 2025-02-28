@@ -184,7 +184,7 @@ public class ManuelleAutorizedEvtsrcMeldinger {
     @PostMapping(value = "/fornyAuthorization")
     public ResponseEntity<String> fornyAuthorization(
         @Parameter(description = "FID for opprinnelig delegeringen") @RequestParam String fid,
-        @Parameter(description = "Ny gyldig til og med dato for delegeringen") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate nyGyldigTom,
+        @Parameter(description = "Ny gyldig til og med dato for delegeringen") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate nyGyldigTom,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
         @NonNull JwtAuthenticationToken token
     ) {
