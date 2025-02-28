@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
+import static java.util.Objects.isNull;
+
 @Tag(name = "Person")
 @RestController
 @RequestMapping(value = {"/app/person"})
@@ -45,18 +47,29 @@ public class PersonController {
         }
     )
     public ResponseEntity<Person> findPerson(@RequestBody GetPersonRequest getPersonRequest) {
+        Person person = null;
         var personident = getPersonRequest.getPersonident();
-        var folkeregisterPerson = getPerson(personident);
-        if (folkeregisterPerson.isEmpty()) {
-            return ResponseEntity.notFound().build();
+        if (isNull(getPersonRequest.getIdentType()) || getPersonRequest.getIdentType().isStandard()) {
+            var folkeregisterPerson = getPerson(personident);
+            if (folkeregisterPerson.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            var ressursState = ressursStateRepository.findByPersonident(personident);
+            person = ressursState
+                .map(rs -> new Person(rs.personident(), rs.navident(), folkeregisterPerson.get()))
+                .orElse(new Person(personident, null, folkeregisterPerson.get()));
+        } else {
+            var ressursState = ressursStateRepository.findByPersonident(personident);
+            if (ressursState.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            person = ressursState
+                .map(rs -> new Person(rs.personident(), rs.navident(), null))
+                .orElse(new Person(personident, null, null));
         }
-
-        var ressursState = ressursStateRepository.findByPersonident(personident);
-        var person = ressursState
-            .map(rs -> new Person(rs.personident(), rs.navident(), folkeregisterPerson.get()))
-            .orElse(new Person(personident, null, folkeregisterPerson.get()));
-
         return ResponseEntity.ok(person);
+
     }
 
     private Optional<FolkeregisterPerson> getPerson(String personident) {

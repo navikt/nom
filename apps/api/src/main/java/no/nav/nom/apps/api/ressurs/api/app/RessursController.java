@@ -80,10 +80,11 @@ public class RessursController {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Returns existing"),
         @ApiResponse(responseCode = "201", description = "Created"),
+        @ApiResponse(responseCode = "403", description = "Feil scope")
     })
-    @PreAuthorize(
+    /*@PreAuthorize(
         "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
-    )
+    )*/
     public ResponseEntity<OpprettRessursResponse> opprettRessurs(
         @RequestBody OpprettRessursRequest request) {
         if (!authResolver.kanOppretteRessurs(request.orgEnhetId())) {

@@ -141,7 +141,8 @@ public class RessursHendelseForEventsourceService {
             null,
             null,
             null,
-            ressurs.getFysiskBrukersted()
+            ressurs.getFysiskBrukersted(),
+            null
         )));
     }
 

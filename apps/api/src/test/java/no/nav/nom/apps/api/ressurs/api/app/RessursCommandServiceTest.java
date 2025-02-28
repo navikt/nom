@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursEventProducer;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.rest.dto.NavnDTO;
 import no.nav.nom.contract.nom.AnsettelsesType;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
@@ -103,7 +104,8 @@ public class RessursCommandServiceTest {
             LocalDate.now().minusDays(1),
             "OrgEnhetId-1",
             AnsettelsesType.FAST,
-            "2700"
+            "2700",
+            IdentType.STANDARD
         );
     }
 

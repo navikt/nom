@@ -1,5 +1,6 @@
 package no.nav.nom.apps.streams.kafkaapi.hendelser;
 
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetAvvikletEventV1;
@@ -138,7 +139,8 @@ public class HendelserTestUtils {
             ),
             Optional.empty(),
             List.of("fysiskBrukersted1", "fysiskBrukersted2"),
-            "fysiskBrukersted1"
+            "fysiskBrukersted1",
+            IdentType.STANDARD
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
