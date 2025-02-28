@@ -23,7 +23,9 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessurs
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
+import no.nav.nom.apps.api.rest.dto.NavnDTO;
 import no.nav.nom.contract.nom.AnsettelsesType;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.Tilknytningtype;
@@ -184,6 +186,7 @@ public class RessursControllerTest extends RestTestBase {
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
             .orgEnhetId("")
+            .identType(IdentType.STANDARD)
             .build();
 
         when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
@@ -273,6 +276,7 @@ public class RessursControllerTest extends RestTestBase {
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
             .orgEnhetId("")
+            .identType(IdentType.STANDARD)
             .build();
 
         when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
@@ -331,6 +335,7 @@ public class RessursControllerTest extends RestTestBase {
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
             .orgEnhetId("")
+            .identType(IdentType.STANDARD)
             .build();
 
         RessursState existingRessurs = RessursState.builder()
@@ -349,6 +354,7 @@ public class RessursControllerTest extends RestTestBase {
             .startdato(Optional.of(LocalDate.MIN.plusYears(1)))
             .primaryFysiskBrukersted(Optional.of("2700"))
             .fysiskeBrukersteder(List.of())
+            .identType(IdentType.STANDARD)
             .build();
 
         when(ressursStateRepository.findByNavident(navident)).thenReturn(Optional.of(existingRessurs));
@@ -431,6 +437,7 @@ public class RessursControllerTest extends RestTestBase {
             .ansettelsesType(null)
             .orgEnhetId("orgEnhet123")
             .fysiskBrukerstedNr("")
+            .identType(IdentType.STANDARD)
             .build();
 
         var orgEnhet = orgEnhetState().toBuilder()
@@ -1188,6 +1195,7 @@ public class RessursControllerTest extends RestTestBase {
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
             .orgEnhetId("")
+            .identType(IdentType.STANDARD)
             .build();
 
         RessursState existingRessurs = RessursState.builder()
@@ -1206,6 +1214,7 @@ public class RessursControllerTest extends RestTestBase {
             .startdato(Optional.of(LocalDate.MIN.plusYears(1)))
             .primaryFysiskBrukersted(Optional.of("2700"))
             .fysiskeBrukersteder(List.of())
+            .identType(IdentType.STANDARD)
             .build();
 
         when(ressursStateRepository.findByNavident(navident)).thenReturn(Optional.of(existingRessurs));
@@ -1431,5 +1440,64 @@ public class RessursControllerTest extends RestTestBase {
                 eq(tilFysiskbrukerstedNr),
                 any(InputMetadata.class)
             );
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Should craete robot ressurs given correct identType")
+    void should_create_robot_ressurs() {
+        String personident = "2960RPAROB2";
+        String navident = "R123456";
+        val navn = NavnDTO.builder()
+            .fornavn("Lønn")
+            .etternavn("Robot")
+            .build();
+
+        when(nikClient.opprettNavidentOnBehalfOfUser(
+            eq(OpprettNavidentRequest.builder()
+                .personid(personident)
+                .identPrefix(navn.getEtternavn().substring(0, 1))
+                .identType("ROBOT")
+                .build())
+        )).thenReturn(ResponseEntity.ok(
+            OpprettNavidentResponse.builder()
+                .navident(navident)
+                .build()));
+
+        when(pdlClient.hentPerson(eq(personident))).thenReturn(Optional.empty());
+
+        var request = opprettRessursRequest().toBuilder()
+            .personident(personident)
+            .visningsfornavn(navn.getFornavn())
+            .visningsmellomnavn(navn.getMellomnavn())
+            .visningsetternavn(navn.getEtternavn())
+            .primaryTelefonnummer(null)
+            .sektor(Sektor.NAV_STATLIG)
+            .startDato(LocalDate.now())
+            .sluttDato(Optional.empty())
+            .tilknytningtype(Tilknytningtype.FAST)
+            .ansettelsesType(null)
+            .fysiskBrukerstedNr("")
+            .orgEnhetId("")
+            .identType(IdentType.ROBOT)
+            .build();
+
+        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+            .thenReturn(Set.of(request.fysiskBrukerstedNr()));
+
+        when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
+            .thenReturn(ressursState());
+
+        postOpprettRessursRequest(
+            testToken.nomWriteGroupAndNomUiAzp(),
+            request
+        )
+            .expectStatus().is2xxSuccessful()
+            .expectBody(OpprettRessursResponse.class);
+
+        verify(ressursCommandService, times(1)).createRessursSync(any());
+
+        verify(orgtilknytningCommandService, times(1)).opprettOrgtilknytning(any());
+        verify(orgtilknytningCommandService, times(1)).endreDagligOppfolgingOrgtilknytning(any(), any());
     }
 }

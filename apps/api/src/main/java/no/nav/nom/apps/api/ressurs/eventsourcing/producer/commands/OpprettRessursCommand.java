@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands;
 
 import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.contract.nom.AnsettelsesType;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -20,5 +21,6 @@ public record OpprettRessursCommand(
     LocalDate startdato,
     String orgEnhetId,
     AnsettelsesType ansettelsesType,
-    String fysiskbrukerStedNr
+    String fysiskbrukerStedNr,
+    IdentType identType
 ) implements RessursCommand {}

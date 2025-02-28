@@ -32,9 +32,9 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSekto
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
-import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
@@ -402,7 +402,8 @@ public class RessursRestService {
                 .flatMap(OrgEnhetState::agressoId)
                 .orElse(null), // TODO: Validate not null in RessursCommandService
             request.ansettelsesType(),
-            request.fysiskBrukerstedNr()
+            request.fysiskBrukerstedNr(),
+            request.identType()
         );
 
 
@@ -604,7 +605,7 @@ public class RessursRestService {
             OpprettNavidentRequest.builder()
                 .personid(request.personident())
                 .identPrefix(request.visningsetternavn().substring(0, 1))
-                .identType("STANDARD")
+                .identType(isNull(request.identType()) ? IdentType.STANDARD.name() : request.identType().name())
                 .build()
         );
 

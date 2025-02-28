@@ -3,6 +3,7 @@ package no.nav.nom.apps.streams.kafkaapi.ressurs.state;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v2.Orgtilknytning;
 import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v2.RessursState;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningAvsluttetEventV1;
@@ -307,7 +308,8 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
             ),
             Optional.empty(),
             List.of("2021"),
-            "2021"
+            "2021",
+            IdentType.STANDARD
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(

@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.ressurs.api.app;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import no.nav.nom.contract.nom.AnsettelsesType;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 
@@ -22,5 +23,6 @@ public record OpprettRessursRequest(
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> sluttDato,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) AnsettelsesType ansettelsesType,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String fysiskBrukerstedNr,
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Tilknytningtype tilknytningtype
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Tilknytningtype tilknytningtype,
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) IdentType identType
 ) { }

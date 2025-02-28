@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import no.nav.nom.contract.nom.AnsettelsesType;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 
 import java.time.LocalDate;
@@ -38,7 +39,8 @@ public class RessursOpprettetEventV1 extends RessursEvent {
         Visningsnavn visningsnavn,
         Optional<String> primaryTelefonnummer,
         List<String> fysiskeBrukersteder,
-        String primaryFysiskBrukersted
+        String primaryFysiskBrukersted,
+        IdentType identType
     ) implements Data {}
 
     @Builder(toBuilder = true)

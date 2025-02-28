@@ -165,7 +165,8 @@ public class EventsrcToStateTest {
                 ),
                 Optional.empty(),
                 Collections.emptyList(),
-                null
+                null,
+                IdentType.STANDARD
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
@@ -290,7 +291,8 @@ public class EventsrcToStateTest {
             ),
             Optional.empty(),
             List.of("2011"),
-            "2011"
+            "2011",
+            IdentType.STANDARD
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData ressursOpprettetAdditionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(

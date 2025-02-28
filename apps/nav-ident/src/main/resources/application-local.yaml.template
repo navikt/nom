@@ -20,6 +20,7 @@ DATABASE_PORT: 5434
 DATABASE_DATABASE: postgres-navident
 DATABASE_USERNAME: postgres
 DATABASE_PASSWORD: password
+DATABASE_JDBC_URL: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DATABASE}
 
 #Embedded redis
 REDIS_HOST: "localhost"
@@ -28,3 +29,8 @@ server.port: 8088
 
 app:
   gs-bucket-name: no-nav-org-dev-nav-ident-storage-bucket
+
+spring:
+  datasource:
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
