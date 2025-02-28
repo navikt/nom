@@ -298,6 +298,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 210300;2103;ORGNIV3;;Vikafossen;;;Avventer;210300;;fe178t;24.04.2024 - lagt inn mapping til riktig nomId
 EV00001;2103;ORGENHET;;VikaFossen;;;Avventer;EV00001;;ru664y;24.04.2024 - lagt inn mapping til underenhet nomId
 230000;2300;ORGNIV3;HELFO Hovedkontor;Beholdt;;;JA;230000;ORGNIV3;hu192a;24.04.2024 - lagt inn mapping til nomId
+EH00001;2300;ORGNIV3;HELFO;Beholdt;;;JA;EH00001;ORGENHET;je305h;28.02.2025 - lagt inn mapping til underenhet også ala Vikafossen pga. mistanke om at oppover-resolvingen ikke fungerer på disse.
 231000;2310;ORGNIV3;HELFO Oslo;Beholdt;;;JA;231000;ORGNIV3;leggInn;norgEnhet er under avvikling. MEN det er 23 aktive nav-identer på 2310 i HRRES_RESSURS
 239000;2390;ORGNIV3;;FEIL, se kommentar;;;Avventer;239000;;leggInn;Representerer HELSEDIR. orgEnhet her er antagelig lagt inn av Rune og Co og ikke reell. Antagelig må vi håndtere disse siden. Disse skal antagelig bare opprettes i NOM, og ikke inn i U4.
 8101111;2810;AGRESSOORGENHET;Sekretariatet;Opp til ORGNIV2;8101;ga846n;JA;8101;ORGNIV2;ga846n;Kun 1 enhet nedover
@@ -339,7 +340,7 @@ EV00001;2103;ORGENHET;;VikaFossen;;;Avventer;EV00001;;ru664y;24.04.2024 - lagt i
 4431500;4415;AGRESSOORGENHET;Arbeid og Ytelser Molde, stab;Opp til ORGNIV3;443150;my788g;JA;443150;ORGNIV3;my788g;
 4431600;4416;AGRESSOORGENHET;Arbeid og ytelser Trondheim;Opp til ORGNIV3;443160;ge651c;JA;443160;ORGNIV3;ge651c;
 4431800;4418;AGRESSOORGENHET;Arbeid og ytelser Fauske;Opp til ORGNIV3;443180;se689m;JA;443180;ORGNIV3;se689m;
-4430307;4425;AGRESSOORGENHET;Arbeid og ytelser Kristiania Lønnsgranti;Beholdt;;;JA;4430307;ORGENHET;su769c;13.07.23: Oppdatert til å mappe til su769c, lå ingen eksplisitt mapping før.
+4430307;4425;AGRESSOORGENHET;Arbeid og ytelser Kristiania Lønnsgranti;Beholdt;;;JA;4430307;ORGENHET;su769c;28.02.2025 - enheten i NORG og U4 er utgått. Ingen mennesker på 4425. Raden kan slettes
 443030;4480;ORGNIV3;Arbeid og Ytelser Kristiania;Ned til ORGENHET;4430305;fe768k;JA;4430305;ORGENHET;fe768k;Ser at 4480 er brukt på enheten 4430305, NAY Kristiania Rådgivende overelegetjeneste
 450000;4500;ORGNIV3;Styringsenhet Kontroll;Opp til ORGNIV2;45;va593c;JA;45;ORGNIV2;va593c;
 451030;4503;ORGNIV3;Kontroll Øst;Beholdt;;;JA;451030;ORGNIV3;leggInn;
@@ -347,7 +348,7 @@ EV00001;2103;ORGENHET;;VikaFossen;;;Avventer;EV00001;;ru664y;24.04.2024 - lagt i
 451190;4519;ORGNIV3;Kontroll Nord;Beholdt;;;JA;451190;ORGNIV3;leggInn;
 4550000;4530;AGRESSOORGENHET;Kontroll Medlemskap og avgift, Stab;Opp til ORGNIV3;455000;ny692k;JA;455000;ORGNIV3;ny692k;
 453400;4534;ORGNIV3;Registerforvaltning;Beholdt;;;JA;453400;ORGNIV3;leggInn;
-4520300;4550;AGRESSOORGENHET;Kontroll Analyse;Opp til ORGNIV3;452030;vy687j;JA;452030;ORGNIV3;vy687j;Merk at her finnes det to identiske (med samme nomID) orgEnheter på niv ORGENHET
+4520300;4550;AGRESSOORGENHET;Kontroll Analyse;Opp til ORGNIV3;452030;vy687j;JA;452030;ORGNIV3;vy687j;
 240000;4700;ORGNIV3;Styringsenhet Hjelpemidler og tilrettelegging;Opp til ORGNIV2;24;ve474w;JA;24;ORGNIV2;ve474w;
 240100;4701;ORGNIV3;HMS Østfold;Beholdt;;;JA;240100;ORGNIV3;leggInn;
 240300;4703;ORGNIV3;;FEIL, se kommentar;243201;ge927t;JA;243201;ORGNIV3;ge927t;orgEnheten finnes ikke. Har lagt inn riktig enhet basert på at NORG sa det var HMS Oslo
@@ -355,7 +356,7 @@ EV00001;2103;ORGENHET;;VikaFossen;;;Avventer;EV00001;;ru664y;24.04.2024 - lagt i
 240500;4705;ORGNIV3;HMS Oppland;Beholdt;;;JA;240500;ORGNIV3;leggInn;
 240600;4706;ORGNIV3;HMS Buskerud;Beholdt;;;JA;240600;ORGNIV3;leggInn;
 240700;4707;ORGNIV3;HMS Vestfold og Telemark;Beholdt;;;JA;240700;ORGNIV3;leggInn;
-240900;4709;ORGNIV3;HMS Aust-Agder;TODO;;;NEI;240900;;leggInn;Vurder om denne skal legges ned. NORG står som under avvikling. Ingen aktive navIdenter med 4709 som remedyEnhet i HRRES_RESSURS
+240900;4709;ORGNIV3;HMS Aust-Agder;TODO;;;NEI;240900;;leggInn;28.02.2025: nedlagt i NOM og U4. Ingen folk i IR. Kan slettes.
 241000;4710;ORGNIV3;HMS Agder;Beholdt;;;JA;241000;ORGNIV3;leggInn;
 241100;4711;ORGNIV3;;FEIL, se kommentar;241101;ha941h;JA;241101;ORGNIV3;ha941h;orgEnheten finnes ikke. Har lagt inn riktig enhet basert på NORG, og stikkprøve på trygdeIdent
 241200;4712;ORGNIV3;HMS Hordaland;Beholdt;;;JA;241200;ORGNIV3;leggInn;
@@ -363,9 +364,9 @@ EV00001;2103;ORGENHET;;VikaFossen;;;Avventer;EV00001;;ru664y;24.04.2024 - lagt i
 241500;4715;ORGNIV3;HMS Møre og Romsdal;Beholdt;;;JA;241500;ORGNIV3;leggInn;
 241600;4716;ORGNIV3;HMS Trøndelag;Beholdt;;;JA;241600;ORGNIV3;leggInn;
 241800;4718;ORGNIV3;;FEIL, se kommentar;241801;sa567s;JA;241801;ORGNIV3;sa567s;orgEnheten finnes ikke. Har lagt inn riktig enhet basert på NORG, og stikkprøve på trygdeIdent
-241900;4719;ORGNIV3;;FEIL, se kommentar;241901;je572g;JA;241901;ORGNIV3;je572g;orgEnheten finnes ikke. Har lagt inn riktig enhet basert på NORG, og stikkprøve på trygdeIdent
-242000;4720;ORGNIV3;HMS Finnmark;TODO;;;NEI;242000;;leggInn;Vurder om denne skal legges ned. NORG står som under avvikling. Ingen aktive navIdenter med 4720 som remedyEnhet i HRRES_RESSURS
-2430000;4750;AGRESSOORGENHET;Fagsenteret for NAV Hjelpemidler og tilrettelegging;Tas bort;;;NEI;2430000;;leggInn;orgEnheten er avviklet. remedyEnheten står under avvikling i NORG.
+241900;4719;ORGNIV3;;FEIL, se kommentar;241901;je572g;JA;241901;ORGNIV3;ba931k;28.02.2025: Satt inn ba931k som ny nomID da HMS Troms er nedlagt til fordel for HMS Troms og Finnmark
+242000;4720;ORGNIV3;HMS Finnmark;TODO;;;NEI;242000;;leggInn;28.02.2025: Nedlagt i NOM, Under avvikling i NORG. Ingen folk i IR. Kan slette raden.
+2430000;4750;AGRESSOORGENHET;Fagsenteret for NAV Hjelpemidler og tilrettelegging;Tas bort;;;NEI;2430000;;leggInn;28.02.2025: Nedlagt i NOM, NORG. Ingen folk i IR. Kan slette raden.
 480000;4800;ORGNIV3;Familie og pensjonsytelser Styringsenhet;Opp til ORGNIV2;48;tu808x;JA;48;ORGNIV2;tu808x;
 480300;4803;ORGNIV3;Familie- og pensjonsytelser Oslo 2;Beholdt;;;JA;480300;ORGNIV3;leggInn;
 480600;4806;ORGNIV3;Familie- og pensjonsytelser Drammen;Beholdt;;;JA;480600;ORGNIV3;leggInn;
