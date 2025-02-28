@@ -50,8 +50,10 @@ public class KontaktpersonerExcelGenerator {
 
             addRow(sheet.createRow(rowcount++), null, null);
 
-            log.info("Generating excel for orgenhet {} with {} ressurser", orgEnhet.id(), sortedRessurser.size());
+            log.info("Getting content inf for ressurser");
             List<RessursKontaktinfo> kontaktinfoForRessurser = kontaktinfoClient.getKontaktinfoForRessurser(sortedRessurser.stream().map(r -> r.state().navident()).toList());
+
+            log.info("Generating excel for orgenhet {} with ressurser {}, and contantinfo {}", orgEnhet.id(), sortedRessurser, kontaktinfoForRessurser);
             for (RessursKontaktinfo info : kontaktinfoForRessurser) {
                 Ressurs ressurs = getRessursForGittNavident(sortedRessurser, info.ressursNavident());
                 addRow(
@@ -69,6 +71,7 @@ public class KontaktpersonerExcelGenerator {
             sheet.createFreezePane(0, 1);
 
             workbook.write(response.getOutputStream());
+            log.info("Generated contakt info excel for orgenhet {}", orgEnhet.id());
         } catch (Exception e) {
             log.error("Failed to generate excel file", e);
             throw new RuntimeException(e.getMessage());

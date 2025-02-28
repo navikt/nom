@@ -199,12 +199,15 @@ public class KontaktinfoController {
     )
     public ResponseEntity<List<RessursKontaktinfoDTO>> getContaktinfoForRessurser(@RequestBody List<String> ressurser) {
         String onBehalfOfUserNavident =  SecurityUtil.getBehalfOfUserNavident();
+        log.info("ON BEHALF OF USER: {}", onBehalfOfUserNavident);
+
         if (onBehalfOfUserNavident == null) {
             throw new AccessDeniedException("Unauthorized access to ressurser kontaktinfo");
         }
 
         // do authorization check
         securityUtil.assertAuthorizedAccessToRessurser(onBehalfOfUserNavident, ressurser);
+        log.info("User {} is authorized to access ressurser: {}", onBehalfOfUserNavident, ressurser);
 
         // get contact info for ressurser
         List<RessursKontaktinfoDTO> result = new ArrayList<>();
@@ -216,6 +219,8 @@ public class KontaktinfoController {
                 .build();
             result.add(ressursKontaktinfoDTO);
         });
+
+        log.info("Returning contact info for user {} and kontaktinfo: {}", onBehalfOfUserNavident, result);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 }
