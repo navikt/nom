@@ -6,15 +6,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
-
 import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
-
+import java.util.List;
 
 @Service
 public class SecurityUtil {
@@ -50,6 +48,12 @@ public class SecurityUtil {
     public void assertAuthorizedAccessTo(String navident) throws AccessDeniedException {
         if (!isAuthenticated() || getNavIdent() == null || !hasAccess(getNavIdent(), navident)) {
             throw new AccessDeniedException("Unauthorized");
+        }
+    }
+
+    public void assertAuthorizedAccessToRessurser(String bruker, List<String> ressurser ) throws AccessDeniedException {
+        if (!isAuthenticated() || !hasAccess(bruker, ressurser)) {
+            throw new AccessDeniedException(bruker +" is not unauthorized access to ressurser: " + ressurser);
         }
     }
 
@@ -89,13 +93,14 @@ public class SecurityUtil {
         return nomApiClient.hasAccess(bruker, ressurs) || isAdmin() || bruker.equals(ressurs);
     }
 
-    // test method to get NAVident from token
-    private Optional<String> getUserNavident() {
-        final var auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth instanceof JwtAuthenticationToken token) {
-            var azp_name = token.getTokenAttributes().get("NAVident");
-            return Optional.ofNullable(azp_name).map(Objects::toString);
-        }
-        return Optional.empty();
+    private boolean hasAccess(String bruker, List<String> ressurser) {
+        return nomApiClient.hasAccess(bruker, ressurser) || isAdmin();
+    }
+
+    public static String getBehalfOfUserNavident() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        JwtAuthenticationToken oauthToken = (JwtAuthenticationToken) authentication;
+        String onBehalfOfUserNavident = String.valueOf(oauthToken.getTokenAttributes().get("NAVident"));
+        return onBehalfOfUserNavident;
     }
 }

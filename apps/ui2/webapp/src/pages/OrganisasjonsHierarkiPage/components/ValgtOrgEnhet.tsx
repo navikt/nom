@@ -17,11 +17,12 @@ import partition from "lodash/partition";
 import React from "react";
 
 import {
+  downloadExcelKontaktPersonserForOrgenhetByOrgenhetId,
   getRessurserByListNavident,
   isOrgEnhetArbeidsomraade,
   isOrgEnhetDriftsenhet,
 } from "~/api/react-query-endpoints";
-import { useHasAdminAccess } from "~/api/useGetSession";
+import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
 import { UserImage } from "~/components/UserImage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import {
@@ -29,7 +30,11 @@ import {
   nomDateIsTodayOrAfter,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import building from "~/resources/building.svg";
-import type { OrgEnhet, Ressurs } from "~/types/api-models";
+import type {
+  OrgEnhet,
+  OrgenhetKontaktPersonserExcelExportRequest,
+  Ressurs,
+} from "~/types/api-models";
 import { NomNivaa, OrgEnhetsType, Sektor } from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
@@ -333,6 +338,20 @@ function DropdownMeny({
   visRessursAdministeringKnapper: boolean;
 }) {
   const hasAdminAccess = useHasAdminAccess();
+  const hasWriteAccess = useHasWriteAccess();
+  const handleDownloadKontaktpersonerExcel = async () => {
+    const excelExportRequest = {
+      orgEnhetId: orgEnhet.id,
+    };
+    await downloadExcelKontaktPersonserForOrgenhetByOrgenhetId(
+      excelExportRequest as OrgenhetKontaktPersonserExcelExportRequest,
+      excelFilNavn(),
+    );
+  };
+
+  const excelFilNavn = () => {
+    return "kontaktpersoner for orgenhet - " + orgEnhet?.navn + ".xlsx";
+  };
 
   return (
     <Dropdown>
@@ -384,6 +403,18 @@ function DropdownMeny({
                   </Dropdown.Menu.GroupedList.Item>
                 </>
               )}
+            </>
+          )}
+
+          {hasWriteAccess && (
+            <>
+              <Dropdown.Menu.Divider />
+              <Dropdown.Menu.GroupedList.Item
+                as={Link}
+                onClick={handleDownloadKontaktpersonerExcel}
+              >
+                Export kontaktpersoner til Excel
+              </Dropdown.Menu.GroupedList.Item>
             </>
           )}
         </Dropdown.Menu.GroupedList>

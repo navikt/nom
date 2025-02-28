@@ -9,6 +9,8 @@ metadata:
   labels:
     team: nom
 spec:
+  tokenx:
+    enabled: true
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
@@ -226,6 +228,9 @@ spec:
     outbound:
       rules:
         - application: nav-ident
+          namespace: org
+          cluster: prod-gcp
+        - application: nom-paarorende
           namespace: org
           cluster: prod-gcp
       external:

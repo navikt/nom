@@ -5,6 +5,10 @@ app:
     orgEnhet:
       stateTopic: org.nom.intern-orgenhet-state
   clients:
+    nom-paarorende:
+      base-url: http://localhost:${wiremock.server.port}
+      max-attempts: 3
+      backoff-duration-millis: 2000
     nom-proxy:
       base-url: http://localhost:${wiremock.server.port}
     nik:

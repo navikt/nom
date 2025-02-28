@@ -18,7 +18,8 @@ public record AppProperties(
         Pdl pdl,
         MicrosoftGraph microsoftGraph,
         NomRemedyIntegrasjon nomRemedyIntegrasjon,
-        DvhOrds dvhOrds
+        DvhOrds dvhOrds,
+        NomPaarorende nomPaarorende
     ) {}
 
     public record NomProxy(
@@ -62,5 +63,9 @@ public record AppProperties(
         String tlfPath,
         String orgHierarkiPath,
         String nomRessurserPath
+    ) {}
+    public record NomPaarorende(
+        String baseUrl,
+        String aadScope
     ) {}
 }

@@ -11,6 +11,8 @@ import no.nav.nom.paarorende.common.SwaggerConfig;
 import no.nav.nom.paarorende.jpa.Adresse;
 import no.nav.nom.paarorende.jpa.KontaktinfoRepository;
 import no.nav.nom.paarorende.jpa.Relasjon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Tag(name = "Kontaktinfo")
@@ -34,6 +37,7 @@ import java.util.List;
     produces = MediaType.APPLICATION_JSON_VALUE
 )
 public class KontaktinfoController {
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public final static String BASE_URL = "/api/kontaktinfo";
 
@@ -179,5 +183,39 @@ public class KontaktinfoController {
         kontaktinfo.setDatoSlettet(LocalDate.now());
 
         kontaktInfoRepository.save(kontaktinfo);
+    }
+
+    @PostMapping("/ressurser")
+    @Operation(
+        description = "Henter kontaktinfo til pårørende for gitt ressurser - brukes av admin og ledere",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "201", description = "Hentet kontaktinfo"),
+            @ApiResponse(responseCode = "401", description = "Uautentisert"),
+            @ApiResponse(responseCode = "403", description = "Uatorisert")
+        }
+    )
+    public ResponseEntity<List<RessursKontaktinfoDTO>> getContaktinfoForRessurser(@RequestBody List<String> ressurser) {
+        String onBehalfOfUserNavident =  SecurityUtil.getBehalfOfUserNavident();
+        if (onBehalfOfUserNavident == null) {
+            throw new AccessDeniedException("Unauthorized access to ressurser kontaktinfo");
+        }
+
+        // do authorization check
+        securityUtil.assertAuthorizedAccessToRessurser(onBehalfOfUserNavident, ressurser);
+
+        // get contact info for ressurser
+        List<RessursKontaktinfoDTO> result = new ArrayList<>();
+        ressurser.forEach(ressursNavident -> {
+            var kontaktInfo = KontaktinfoDTO.fromEntityList(kontaktInfoRepository.findAllByNavidentAndDatoSlettetIsNull(ressursNavident));
+            RessursKontaktinfoDTO ressursKontaktinfoDTO = RessursKontaktinfoDTO.builder()
+                .ressursNavident(ressursNavident)
+                .kontaktinfo(kontaktInfo)
+                .build();
+            result.add(ressursKontaktinfoDTO);
+        });
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 }

@@ -12,6 +12,7 @@ on:
       - 'apps/pom.xml'
       - 'pom.xml'
       - 'Dockerfile_distroless'
+
   workflow_dispatch:
     inputs:
       skip-tests:
