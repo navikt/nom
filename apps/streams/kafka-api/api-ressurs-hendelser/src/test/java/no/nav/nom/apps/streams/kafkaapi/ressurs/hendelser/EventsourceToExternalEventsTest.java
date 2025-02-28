@@ -2,6 +2,7 @@ package no.nav.nom.apps.streams.kafkaapi.ressurs.hendelser;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.streams.kafkaapi.ressurs.hendelser.v1.RessursOpprettetEvent;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.*;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningAvsluttetEventV1.OrgtilknytningAvsluttetEventData;
@@ -99,7 +100,8 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
                 ),
                 Optional.empty(),
                 List.of("2021"),
-                "2021"
+                "2021",
+            IdentType.STANDARD
         );
 
         final RessursOpprettetAdditionalData additionalData = new RessursOpprettetAdditionalData(
