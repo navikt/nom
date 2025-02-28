@@ -33,6 +33,8 @@ import org.springframework.web.util.HtmlUtils;
 import java.time.LocalDate;
 import java.util.Map;
 
+import static java.util.Objects.isNull;
+
 @Slf4j
 @Tag(name = "Admin for å lage manuelle Evtsrc meldinger")
 @RestController
@@ -205,7 +207,7 @@ public class ManuelleAutorizedEvtsrcMeldinger {
             "/api/admin/manuelleEvtsrcMeldinger",
             "fornyAuthorization",
             Map.of("leder", delegering.av(), "Delegert til", delegering.til(), "Orgenhet", delegering.orgenhetId(),
-                "Opprinnelig Gyldig fra", delegering.gyldigFom(), "Opprinnelig Gyldig til", delegering.gyldigTom(), "Ny Gyldig til", nyGyldigTom),
+                "Opprinnelig Gyldig fra", delegering.gyldigFom(), "Opprinnelig Gyldig til", isNull(delegering.gyldigTom()) ? "null" : delegering.gyldigTom(), "Ny Gyldig til", nyGyldigTom),
             new Origination(
                 SecurityUtil.getAuthenticatedNavIdent(),
                 "Admin swagger/rest"
