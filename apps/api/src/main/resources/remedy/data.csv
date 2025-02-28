@@ -128,7 +128,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 101400;1014;ORGNIV3;Midt-Agder;Beholdt;;;JA;101400;ORGNIV3;leggInn;
 103700;1037;ORGNIV3;Lister;Beholdt;;;JA;103700;ORGNIV3;leggInn;
 1087000;1087;AGRESSOORGENHET;Agder Tiltak;Beholdt;;dy786g;JA;1087000;ORGENHET;dy786g;
-1099000;1091;AGRESSOORGENHET;Agder Arbeidslivssenter;Beholdt;;bu966s;JA;109900;ORGNIV3;fy255z;13.07.2023: Flyttet mapping fra bu966s til overliggende fy255z.
+1099000;1091;AGRESSOORGENHET;Agder Arbeidslivssenter;Beholdt;;;JA;109900;ORGNIV3;;28.02.2025 fjernet nomId-mappingen. Mapper riktig via agressoID
 1096100;1096;AGRESSOORGENHET;Agder Spesialtjenester;Beholdt;;;JA;1096100;ORGENHET;leggInn;
 119100;1100;ORGNIV3;Rogaland Fylkeskontor;Opp til ORGNIV2;11;hy244v;JA;11;ORGNIV2;hy244v;
 110100;1101;ORGNIV3;Dalane;Beholdt;;;JA;110100;ORGNIV3;leggInn;
@@ -263,7 +263,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 187000;1870;ORGNIV3;Sortland;Beholdt;;;JA;187000;ORGNIV3;leggInn;
 187100;1871;ORGNIV3;Andøy;Beholdt;;;JA;187100;ORGNIV3;leggInn;
 189100;1891;ORGNIV3;Nordland Fylkesleddet;TODO, se kommentar;;;JA;189900;ORGNIV3;sy663b;12.07.2023: Endret til å mappe til Nordland Arbeidslivssenter (sy663b)
-189610;1893;ORGNIV3;Nordland Arbeidsrådgivning;Beholdt;;;JA;1896100;ORGENHET;fa392x;12.07.2023: Mapping endret til fa392x, tidligere gikk det til utgått enhet. 
+189610;1893;ORGNIV3;Nordland Arbeidsrådgivning;Beholdt;;;JA;189610;ORGNIV3;py942v;28.02.2025 - Endret mapping til å gå opp til py942v
 1980100;1900;AGRESSOORGENHET;Troms og Finnmark Regionkontor;Opp til ORGNIV2;R19;vy324v;JA;R19;ORGNIV2;vy324v;
 190200;1902;ORGNIV3;Tromsø;Beholdt;;;JA;190200;ORGNIV3;leggInn;
 190300;1903;ORGNIV3;NAV Sør-Troms;Beholdt;;;JA;190300;ORGNIV3;leggInn;
