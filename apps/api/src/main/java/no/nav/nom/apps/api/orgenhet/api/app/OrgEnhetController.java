@@ -92,14 +92,15 @@ public class OrgEnhetController {
                 return;
             }
 
-            var hasAdminRightsForEnhet = authResolver.kanRedigereRessurs(orgenhetId);
+            var loggedInUser = SecurityUtil.getAuthenticatedNavIdent();
+            var hasAdminRightsForEnhet = authResolver.kanOppretteRessurs(orgenhetId);
             if(!hasAdminRightsForEnhet) {
-                var loggedInUser = SecurityUtil.getAuthenticatedNavIdent();
                 var errorMessage = "User does not have access to view ressurser for this orgenhet: " + loggedInUser + "-" + orgenhetId;
                 log.error(errorMessage);
                 throw new RuntimeException(errorMessage);
             }
 
+            log.info("User have access to view ressurser for this orgenhet: {}-{}", loggedInUser, orgenhetId);
             var ressursKoblinger = orgEnhet.get().ressursKoblinger();
             var ressurser = ressursKoblinger.stream()
                 .map(orgtilknytningState ->  ressursRestService.findRessursByNavident(orgtilknytningState.navident()))
