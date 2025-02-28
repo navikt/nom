@@ -52,7 +52,12 @@ public class SecurityUtil {
     }
 
     public void assertAuthorizedAccessToRessurser(String bruker, List<String> ressurser ) throws AccessDeniedException {
-        if (!isAuthenticated() || !hasAccess(bruker, ressurser)) {
+        log.info("assertAuthorizedAccessToRessurser: {} {}", bruker, ressurser);
+        var authenticated = isAuthenticated();
+        var hasAccess = hasAccess(bruker, ressurser);
+        log.info("assertAuthorizedAccessToRessurser isAuthenticated: {}", authenticated);
+        log.info("assertAuthorizedAccessToRessurser hasAccess: {}", hasAccess);
+        if (!authenticated || !hasAccess) {
             throw new AccessDeniedException(bruker +" is not unauthorized access to ressurser: " + ressurser);
         }
     }

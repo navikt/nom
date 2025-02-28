@@ -75,11 +75,14 @@ public class AuthorizedNavidentController {
     )
     @PostMapping("/isAuthorizedForNavidents")
     public boolean isAuthorizedForNavidents(@RequestBody BrukerSkrivetilgangRessurserRequest request) {
+        log.info("isAuthorizedForNavidents: {}", request);
         for (String ressurs : request.ressurser()) {
             if (!authorizedNavident.kanBrukerRedigereRessurs(request.bruker(), ressurs)) {
+                log.info("isAuthorizedForNavidents false");
                 return false;
             }
         }
+        log.info("isAuthorizedForNavidents true");
         return true;
     }
 
