@@ -311,13 +311,15 @@ app:
       - navident: G850411         # Varm.Gullstol@trygdeetaten.no - Har NOM-WRITE-DELEGERT tilgang - Har A862414 som leder
         orgtilknytning: mu972n    # 1924000-Målselv-Bardu-ORGENHET
         sektor: NAV_KOMMUNAL
-      - navident: T168579         # Støtte for PRIM/ Christian Prestvik
-        orgtilknytning: ke793y    # ref: https://nav-it.slack.com/archives/G01F99D2AHX/p1717488133154109
-        sektor: NAV_STATLIG
 
       # Z - ident brukere
       - navident: Z993219         # Z -ident til Roy Grini
         orgtilknytning: ga691g    # 8540000-IT-ledelse-ORGENHET
+        sektor: NAV_STATLIG
+
+      # PRIM/Christian Prestvik
+      - navident: Z993818         # F_Z993818.E_Z993818@trygdeetaten.no
+        orgtilknytning: ke793y    # 4430503-Arbeid og Ytelser Innlandet AAP 1   - Leder
         sektor: NAV_STATLIG
 
       # Team ISA / Øystein Brox -  https://nav-it.slack.com/archives/C0362LA7ZLN/p1723203417454239?thread_ts=1718097159.822789&cid=C0362LA7ZLN
@@ -353,10 +355,8 @@ app:
         orgenhet: na664h
       - navident: A862414
         orgenhet: na494k
-      - navident: J129293       # Støtte for PRIM/ Christian Prestvik
-        orgenhet: ke793y        # ref: https://nav-it.slack.com/archives/G01F99D2AHX/p1717488133154109
-      - navident: N852930       # Støtte for PRIM/ Christian Prestvik
-        orgenhet: ta755b
+      - navident: Z993818     # PRIM/Christian Prestvik
+        orgenhet: ke793y
 
 NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
 NIK_API_SCOPE: api://dev-gcp.org.nav-ident/.default
