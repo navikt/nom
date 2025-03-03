@@ -527,7 +527,7 @@ function OrgtilknytningForm({
                   label="Til og med"
                   labelHelpText={
                     ressurs.sektor === Sektor.EKSTERN
-                      ? "Bruk datoen for normal avvikling av avtalen. Opsjoner skal ikke beregnes med her. Datoen må være under ett år frem i tid fra dagens dato."
+                      ? "Siste arbeidsdag iht. avtalen. Opsjoner skal ikke beregnes med her, før de utløses. Datoen må være under et år frem i tid fra dagens dato."
                       : undefined
                   }
                   name={`mappedeOrgtilknytninger.${index}.gyldigTom`}
