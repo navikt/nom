@@ -6,13 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.apps.streams.kafkaapi.ressurs.hendelser.v1.Orgtilknytning;
 import no.nav.nom.apps.streams.kafkaapi.ressurs.hendelser.v1.RessursOpprettetEvent;
-import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
-import no.nav.nom.contract.nom.eventsource.RessursEvent;
-import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
-import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOpprettetAdditionalData;
-import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOpprettetEventData;
+import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.eventsource.*;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.*;
 import org.slf4j.Logger;
@@ -51,20 +47,43 @@ public class EventsourceToExternalEvents {
         final JavaType orgtilknytningMapType = objectMapper.getTypeFactory().constructParametricType(Map.class, String.class, Orgtilknytning.class);
 
 
-        KTable<String, RessursEvent> ressursPerNavident = streamsBuilder
+        // Aggregerer ressurser siden det kan være RessursOpprettet-events som ikke har alle nødvendige felt
+        KTable<String, ObjectNode> ressursAggregateKTable = streamsBuilder
                 .stream(appProperties.ressursEvtsrcTopic(), Consumed.with(stringSerde, ressursEventSerde))
-                .filter((k, event) -> event instanceof RessursOpprettetEventV1)
                 .filter((k, event) -> !event.getFid().startsWith("FID_MANUELL")) // Ikke behandle manuelle test ressurser/orgtilknytninger
-                .filter((k, event) -> hasNavident(event)) // Ikke behandle eventer hvor navident mangler
-                .map((fid, ressursEvent) -> {
-                    RessursOpprettetAdditionalData ressursOpprettetAdditionalData = (RessursOpprettetAdditionalData) ressursEvent.getAdditionalData();
+                .groupBy((k, event) -> event.getFid(), Grouped.with(stringSerde, ressursEventSerde))
+                .aggregate(
+                        objectMapper::createObjectNode,
+                        (String key, RessursEvent ressursEvent, ObjectNode ressursAggregate) -> {
+                            ressursAggregate.put("fid", ressursEvent.getFid());
 
-                    //noinspection OptionalGetWithoutIsPresent
-                    return KeyValue.pair(ressursOpprettetAdditionalData.navident().get(), ressursEvent);
-                })
-                .groupByKey(Grouped.with(stringSerde, ressursEventSerde))
+                            if (ressursEvent.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData) {
+                                if (additionalData.navident().isPresent()) {
+                                    ressursAggregate.put("navident", additionalData.navident().get());
+                                }
+                                if (additionalData.startdato().isPresent()) {
+                                    ressursAggregate.put("startdato", String.valueOf(additionalData.startdato().get()));
+                                }
+                            }
+
+                            ressursAggregate.setAll(objectMapper.convertValue(ressursEvent.getData(), ObjectNode.class));
+
+                            if (hasRequiredFields(ressursAggregate)) {
+                                ressursAggregate.put("requiredFieldsPresent", "true");
+                            }
+
+                            return ressursAggregate;
+                        },
+                        Materialized.with(stringSerde, jsonSerde)
+                );
+
+        // Snur til å være pr. navident og kun ha med ressurser hvor nødvendige felter har fått verdi
+        KTable<String, ObjectNode> ressursPerNavident = ressursAggregateKTable.toStream()
+                .filter((k, event) -> hasRequiredFieldsForRessurs(event))
+                .selectKey((key, otJson) -> otJson.get("navident").asText())
+                .groupByKey(Grouped.with(stringSerde, jsonSerde))
                 .reduce((previousValue, newValue) -> newValue);
-        
+
         // Aggregerer orgtilknytninger
         KTable<String, ObjectNode> orgtilknytningAggregateKTable = streamsBuilder
                 .stream(appProperties.orgtilknytningEvtsrcTopic(), Consumed.with(stringSerde, orgtilknytningEventSerde))
@@ -74,17 +93,29 @@ public class EventsourceToExternalEvents {
                         objectMapper::createObjectNode,
                         (String key, OrgtilknytningEvent newEvent, ObjectNode orgtilknytningAggregate) -> {
                             log.debug("OrgtilknytningAggregate key: {} before: {}", key, orgtilknytningAggregate);
+
+                            // Hvis DagligOppfolgingEndretEvent mottas og setter DOL så skal join med ressurs trigges
+                            // For andre eventer hvor DOL er satt skal join ikke trigges
+                            if (newEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 &&
+                                    ((OrgtilknytningDagligOppfolgingEndretEventV1) newEvent).getOrgtilknytningDagligOppfolgingEndretEventData().dagligOppfolging()) {
+                                orgtilknytningAggregate.put("newDOLReceived", "true");
+                            } else if (orgtilknytningAggregate.get("newDOLReceived") != null &&
+                                    orgtilknytningAggregate.get("newDOLReceived").asText().equals("true")) {
+                                orgtilknytningAggregate.put("newDOLReceived", "false");
+                            }
+
                             orgtilknytningAggregate.setAll(objectMapper.convertValue(newEvent.getData(), ObjectNode.class));
                             orgtilknytningAggregate.put("fid", newEvent.getFid());
+
                             log.debug("OrgtilknytningAggregate key: {} after: {}", key, orgtilknytningAggregate);
                             return orgtilknytningAggregate;
                         },
                         Materialized.with(stringSerde, jsonSerde)
                 );
-        
+
         // Snu til å være per navident og kun returnere OTer som er DOL
         KTable<String, Map<String, Orgtilknytning>> orgtilknytningMappedToNavident = orgtilknytningAggregateKTable.toStream()
-                .filter((key, value) -> isDagligOppfolging(value))
+                .filter((key, value) -> isNewDagligOppfolging(value))
                 .selectKey((key, otJson) -> otJson.get("navident").asText())
                 .groupByKey(Grouped.with(stringSerde, jsonSerde))
                 .aggregate(
@@ -106,43 +137,50 @@ public class EventsourceToExternalEvents {
 
     }
 
-    private static boolean hasNavident(RessursEvent ressursEvent) {
-        RessursOpprettetAdditionalData ressursOpprettetAdditionalData =
-                (RessursOpprettetAdditionalData) ressursEvent.getAdditionalData();
-
-        if (ressursOpprettetAdditionalData.navident().isPresent()) {
-            return true;
-        } else {
-            log.warn("RessursEvent mangler navident: {}", ressursEvent);
-            return false;
-        }
+    private boolean hasRequiredFields(ObjectNode ressursAggregate) {
+        return ressursAggregate.get("navident") != null
+                && !ressursAggregate.get("navident").textValue().isEmpty()
+                && ressursAggregate.get("startdato") != null
+                && !ressursAggregate.get("startdato").textValue().isEmpty();
     }
 
-    private static boolean isDagligOppfolging(ObjectNode value) {
-        JsonNode dolNode = value.get("dagligOppfolging");
-        if (dolNode != null) {
-            return dolNode.asBoolean();
-        } else {
-            return false;
-        }
+    private static boolean isNewDagligOppfolging(ObjectNode value) {
+        JsonNode dolNode = value.get("newDOLReceived");
+        return dolNode != null && dolNode.asText().equals("true");
     }
 
-    private RessursOpprettetEvent toRessursOpprettetEvent(RessursEvent ressursEvent, Map<String, Orgtilknytning> orgtilknytningMap) {
-        RessursOpprettetEventData eventData = (RessursOpprettetEventData) ressursEvent.getData();
-        var additionalData = (RessursOpprettetAdditionalData) ressursEvent.getAdditionalData();
+    private static boolean hasRequiredFieldsForRessurs(ObjectNode value) {
+        JsonNode dolNode = value.get("requiredFieldsPresent");
+        return dolNode != null && dolNode.asText().equals("true");
+    }
 
-        log.debug("Kombinerer RessursEvent:\n {} \nmed Orgtilknytninger:\n {}", ressursEvent, orgtilknytningMap);
+    private RessursOpprettetEvent toRessursOpprettetEvent(
+            JsonNode eventAggregate,
+            Map<String, Orgtilknytning> orgtilknytningMap
+    ) {
+        log.debug("Kombinerer RessursEvent med Orgtilknytning:\n {}\n {}", eventAggregate, orgtilknytningMap);
 
-        final Orgtilknytning orgtilknytning = orgtilknytningMap.values().stream().findFirst().orElse(null);
+        try {
+            final JsonNode visningsnavn = eventAggregate.get("visningsnavn");
+            final Orgtilknytning orgtilknytning = orgtilknytningMap.values().stream().findFirst().orElse(null);
 
-        return RessursOpprettetEvent.builder()
-                .fid(ressursEvent.getFid())
-                .navident(additionalData.navident().isPresent() ? additionalData.navident().get() : null)
-                .visningsnavn(eventData.visningsnavn())
-                .startdato(additionalData.startdato().isPresent() ? additionalData.startdato().get() : null)
-                .sektor(eventData.sektor())
-                .orgtilknytning(orgtilknytning)
-                .build();
+            return RessursOpprettetEvent.builder()
+                    .fid(eventAggregate.get("fid").asText())
+                    .navident(eventAggregate.get("navident").asText())
+                    .visningsnavn(new Visningsnavn(
+                            visningsnavn.get("fornavn").asText(),
+                            Optional.ofNullable(visningsnavn.hasNonNull("mellomnavn") ? visningsnavn.get("mellomnavn").asText() : null),
+                            visningsnavn.get("etternavn").asText()
+                    ))
+                    .startdato(eventAggregate.hasNonNull("startdato") ? LocalDate.parse(eventAggregate.get("startdato").asText()) : null)
+                    .sluttdato(Optional.ofNullable(eventAggregate.hasNonNull("sluttdato") ? LocalDate.parse(eventAggregate.get("sluttdato").asText()) : null))
+                    .sektor(eventAggregate.hasNonNull("sektor") ? Sektor.valueOf(eventAggregate.get("sektor").asText()) : null)
+                    .orgtilknytning(orgtilknytning)
+                    .build();
+        } catch (Exception e) {
+            log.error("Error mapping '{}' to RessursOpprettetEvent", eventAggregate, e);
+            throw e;
+        }
     }
 
     private Orgtilknytning toOrgtilknytning(JsonNode otJson) {
