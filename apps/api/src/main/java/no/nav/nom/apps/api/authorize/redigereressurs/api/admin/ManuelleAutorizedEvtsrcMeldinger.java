@@ -15,6 +15,7 @@ import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
@@ -24,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,9 +33,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.Objects.isNull;
 
 @Slf4j
 @Tag(name = "Admin for å lage manuelle Evtsrc meldinger")
@@ -130,7 +131,7 @@ public class ManuelleAutorizedEvtsrcMeldinger {
         @Parameter(description = "Navident på Leder delegeringen er for") @RequestParam String lederNavident,
         @Parameter(description = "Navident som skal få tildelt delegeringen") @RequestParam String delegertNavident,
         @Parameter(description = "OrgenhetId som delegeringen skal gjelde") @RequestParam String orgenhetId,
-        @Parameter(description = "Gyldig til og med dato for delegeringen") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate gyldigTom,
+        @Parameter(description = "Gyldig til og med dato for delegeringen") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate gyldigTom,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
         @NonNull JwtAuthenticationToken token
     ) {
@@ -147,10 +148,16 @@ public class ManuelleAutorizedEvtsrcMeldinger {
                 .body("Authorization/Delegering kan gis - parameterene er korrekte.. Men vil ikke endres da handling ikke er bekreftet");
         }
 
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put("leder", lederNavident);
+        arguments.put("Delegert til", delegertNavident);
+        arguments.put("Orgenhet", orgenhetId);
+        arguments.put("Gyldig til", gyldigTom);
+
         var inputMetadata = new InputMetadata(
             "/api/admin/manuelleEvtsrcMeldinger",
             "opprettAuthorization",
-            Map.of("leder", lederNavident, "Delegert til", delegertNavident, "Orgenhet", orgenhetId, "Gyldig til", gyldigTom),
+            arguments,
             new Origination(
                 SecurityUtil.getAuthenticatedNavIdent(),
                 "Admin swagger/rest"
@@ -203,11 +210,18 @@ public class ManuelleAutorizedEvtsrcMeldinger {
                 .body("Authorization/Delegering kan endres - parameterene er korrekte.. Men vil ikke endres da handling ikke er bekreftet");
         }
 
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put("leder", delegering.av());
+        arguments.put("Delegert til", delegering.til());
+        arguments.put("Orgenhet", delegering.orgenhetId());
+        arguments.put("gyldigFom", delegering.gyldigFom());
+        arguments.put("gyldigTom", delegering.gyldigTom());
+        arguments.put("Ny Gyldig til", nyGyldigTom);
+
         var inputMetadata = new InputMetadata(
             "/api/admin/manuelleEvtsrcMeldinger",
             "fornyAuthorization",
-            Map.of("leder", delegering.av(), "Delegert til", delegering.til(), "Orgenhet", delegering.orgenhetId(),
-                "Opprinnelig Gyldig fra", delegering.gyldigFom(), "Opprinnelig Gyldig til", isNull(delegering.gyldigTom()) ? "null" : delegering.gyldigTom(), "Ny Gyldig til", nyGyldigTom),
+            arguments,
             new Origination(
                 SecurityUtil.getAuthenticatedNavIdent(),
                 "Admin swagger/rest"
@@ -231,6 +245,24 @@ public class ManuelleAutorizedEvtsrcMeldinger {
 
     private boolean validFid(String fid) {
         return fid.matches("[a-zA-Z0-9\\-]+");
+    }
+
+    @ExceptionHandler(NullPointerException.class)
+    private ResponseEntity<StandardResponse> handleServerError(NullPointerException exception) {
+        log.error("NullPointerException", exception);
+
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(StandardResponse.builder().message("Server error").build());
+    }
+
+    @ExceptionHandler(Exception.class)
+    private ResponseEntity<StandardResponse> handleServerError(Exception exception) {
+        log.error("Intern feil for sending av manuell melding", exception);
+
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(StandardResponse.builder().message("Server error").build());
     }
 }
 

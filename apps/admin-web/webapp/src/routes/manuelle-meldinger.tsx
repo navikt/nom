@@ -5,6 +5,7 @@ import { AvvikleOrgenhet } from "~/manuelle-meldinger/AvvikleOrgenhet.tsx";
 import { AvvikleRessurs } from "~/manuelle-meldinger/AvvikleRessurs.tsx";
 import { EndreDagligOppfolging } from "~/manuelle-meldinger/EndreDagligOppfolging.tsx";
 import { FjernOrgtilknytning } from "~/manuelle-meldinger/FjernOrgtilknytning.tsx";
+import { FornyDelegering } from "~/manuelle-meldinger/FornyDelegering.tsx";
 import { OppdatereRessursSektor } from "~/manuelle-meldinger/OppdatereRessursSektor.tsx";
 import { OppdatereSluttDatoRessurs } from "~/manuelle-meldinger/OppdatereSluttDatoRessurs.tsx";
 import { OppdatereStartdato } from "~/manuelle-meldinger/OppdatereStartdato.tsx";
@@ -52,6 +53,12 @@ function ManuelleMeldingerPage() {
       </Heading>
       <div className="flex gap-2 flex-wrap mb-4">
         <SjekkRessursStateRemedy />
+      </div>
+      <Heading level="2" size="medium" spacing>
+        Delegering
+      </Heading>
+      <div className="flex gap-2 flex-wrap mb-4">
+        <FornyDelegering />
       </div>
     </div>
   );
