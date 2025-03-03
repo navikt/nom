@@ -479,8 +479,9 @@ function Orgtilknytningsvarighet({
                     >
                       Sluttdato
                       <HelpText strategy="fixed">
-                        Bruk datoen for normal avvikling av avtalen. Opsjoner
-                        skal ikke beregnes med her.
+                        Siste arbeidsdag iht. avtalen. Opsjoner skal ikke
+                        beregnes med her, før de utløses. Datoen må være under
+                        et år frem i tid fra dagens dato.
                       </HelpText>
                     </span>
                   );
