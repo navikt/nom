@@ -65,6 +65,11 @@ function TilgangHistoryPage() {
         </Table.Header>
         <Table.Body>
           {tilgangEvents.map((tilgangEvent, index) => {
+            const opprettEvent =
+              tilgangEvent.metadata.inputMetadata.inputInterfaceMethodName.includes(
+                "add",
+              );
+
             return (
               <Table.Row key={index}>
                 <Table.DataCell>
@@ -92,7 +97,11 @@ function TilgangHistoryPage() {
                   </Link>
                 </Table.DataCell>
                 <Table.DataCell>{tilgangEvent.data.gyldigFom}</Table.DataCell>
-                <Table.DataCell>{tilgangEvent.data?.gyldigTom}</Table.DataCell>
+                <Table.DataCell>
+                  {opprettEvent
+                    ? tilgangEvent.data?.gyldigTom
+                    : tilgangEvent.data?.nyGyldigTom}
+                </Table.DataCell>
                 <Table.DataCell>
                   <JsonModal data={tilgangEvent} text={tilgangEvent.type} />
                 </Table.DataCell>
