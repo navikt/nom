@@ -152,8 +152,8 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 116500;1165;ORGNIV3;Madla;Beholdt;;;JA;116500;ORGNIV3;leggInn;
 116900;1169;ORGNIV3;Rennesøy og Finnøy;Beholdt;;;JA;116900;ORGNIV3;leggInn;
 118700;1187;ORGNIV3;Rogaland Tiltak;Beholdt;;ku572e;JA;118700;ORGNIV3;ku572e;
-1199000;1191;AGRESSOORGENHET;Rogaland Arbeidslivssenter;Opp til ORGNIV4;119900;ba853h;JA;119900;ORGNIV4;ba853h;
-1196100;1196;AGRESSOORGENHET;Rogaland Arbeidsrådgivning;Beholdt;;ma120m;JA;1196100;ORGENHET;ma120m;
+119900;1191;AGRESSOORGENHET;Rogaland Arbeidslivssenter;Opp til ORGNIV4;119900;ja848p;JA;119900;ORGNIV3;ja848p;
+119610;1196;AGRESSOORGENHET;Rogaland Arbeidsrådgivning;Beholdt;;ry469t;JA;119610;ORGNIV3;ry469t;
 128010;1200;ORGNIV3;Vestland Region;Opp til ORGNIV2;R12;se226g;JA;R12;ORGNIV2;se226g;
 120200;1202;ORGNIV3;Bergen sør;Beholdt;;;JA;120200;ORGNIV3;leggInn;
 120300;1203;ORGNIV3;Bergen nord;Beholdt;;;JA;120300;ORGNIV3;leggInn;
