@@ -22,7 +22,9 @@ import {
   updateTelefonnummer,
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
+import { BekreftModal } from "~/components/BekreftModal";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
+import { useModal } from "~/components/modalProvider/ModalProvider";
 import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBrukerstedSelect";
 import { UserImage } from "~/components/UserImage";
 import { showToast } from "~/hooks/showToast";
@@ -152,6 +154,8 @@ export function EditPersonOpplysninger({
     ressurs.primaryFysiskBrukersted,
   );
 
+  const { showModal } = useModal();
+
   const onValid = async (values: {
     primaryTelefonnummer?: string | undefined;
     mellomnavn?: string | undefined;
@@ -159,7 +163,37 @@ export function EditPersonOpplysninger({
     fornavn: string;
     primaryFysiskBrukersted: string;
   }) => {
-    mutate(values);
+    const endretNavn =
+      values.fornavn !== ressurs.visningsnavn.fornavn ||
+      (values.mellomnavn ?? "") !== (ressurs.visningsnavn.mellomnavn ?? "") ||
+      values.etternavn !== ressurs.visningsnavn.etternavn;
+
+    if (endretNavn) {
+      await showModal(
+        <BekreftModal
+          content={
+            <>
+              Du har endret medarbeiderens navn til{" "}
+              <b>
+                {formatVisningsnavn({
+                  fornavn: values.fornavn,
+                  mellomnavn: values.mellomnavn,
+                  etternavn: values.etternavn,
+                })}
+              </b>
+              . Det nye visningsnavnet vil brukes i de fleste av Navs
+              applikasjoner. Det vil også genereres en ny e-postadresse som
+              gjenspeiler det nye navnet. Vennligst bekreft endringen.
+            </>
+          }
+          heading="Bekreft navneendring"
+        />,
+      ).then(() => {
+        mutate(values);
+      });
+    } else {
+      mutate(values);
+    }
   };
 
   return (
