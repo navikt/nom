@@ -180,7 +180,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 125300;1253;ORGNIV3;Osterøy;Beholdt;;;JA;125300;ORGNIV3;leggInn;
 126300;1263;ORGNIV3;Alver (regionkontor Nordhordaland);Beholdt;;;JA;126300;ORGNIV3;leggInn;
 126600;1266;ORGNIV3;Masfjorden;Beholdt;;;JA;126600;ORGNIV3;leggInn;
-1299000;1291;AGRESSOORGENHET;Vestland Arbeidslivssenter;Opp til ORGNIV25;1299;me595c;JA;1299;ORGNIV25;me595c;
+129900;1291;AGRESSOORGENHET;Vestland Arbeidslivssenter;;129900;ku380j;JA;129900;ORGNIV3;ku380j;
 1296100;1296;AGRESSOORGENHET;Vestland Arbeidsrådgivning;Opp til ORGNIV25;1296;my580h;JA;1296;ORGNIV25;my580h;
 140100;1401;ORGNIV3;Kinn;Beholdt;;;JA;140100;ORGNIV3;leggInn;
 141200;1412;ORGNIV3;Solund;Beholdt;;;JA;141200;ORGNIV3;leggInn;
