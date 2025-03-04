@@ -6,7 +6,6 @@ import lombok.Data;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
-import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 
@@ -23,7 +22,7 @@ public class OrgtilknytningerUtenforHierarkiResponse {
     private Sektor ressursSektor;
 
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    private String orgtilknytingGydligFid;
+    private String orgtilknytningFid;
 
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String faktiskOrgenhetId;
@@ -33,14 +32,14 @@ public class OrgtilknytningerUtenforHierarkiResponse {
     private String faktiskOrgenhetRemedyEnhet;
 
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    private LocalDate orgtilknytingGydligFom;
+    private LocalDate orgtilknytningGyldigFom;
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private LocalDate orgtilknytingGydligTom;
+    private LocalDate orgtilknytningGyldigTom;
 
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private Sektor orgtilknytingSektor;
+    private Sektor orgtilknytningSektor;
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private Tilknytningtype orgtilknytingsType;
+    private Tilknytningtype orgtilknytningType;
 
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String alternativOrgenhetId;
@@ -57,14 +56,14 @@ public class OrgtilknytningerUtenforHierarkiResponse {
                 .navident(ressurs.navident())
                 .visningsnavn(ressurs.visningsnavn().getFormattedVisningsnavn())
                 .ressursSektor(ressurs.sektor())
-                .orgtilknytingGydligFid(orgtilknytning.fid())
+                .orgtilknytningFid(orgtilknytning.fid())
                 .faktiskOrgenhetId(otOrgEnhet.getId())
                 .faktiskOrgenhetNavn(otOrgEnhet.getNavn())
                 .faktiskOrgenhetRemedyEnhet(otRemedyEnhet)
-                .orgtilknytingGydligFom(orgtilknytning.gyldigFom())
-                .orgtilknytingGydligTom(orgtilknytning.gyldigTom().orElse(null))
-                .orgtilknytingSektor(orgtilknytning.sektor())
-                .orgtilknytingsType(orgtilknytning.orgtilknytningType().orElse(null))
+                .orgtilknytningGyldigFom(orgtilknytning.gyldigFom())
+                .orgtilknytningGyldigTom(orgtilknytning.gyldigTom().orElse(null))
+                .orgtilknytningSektor(orgtilknytning.sektor())
+                .orgtilknytningType(orgtilknytning.orgtilknytningType().orElse(null))
                 .alternativOrgenhetId(alternativOrgEnhet.getId())
                 .alternativOrgenhetNavn(alternativOrgEnhet.getNavn())
                 .alternativOrgenhetRemedyEnhet(alternativRemedyEnhet)
