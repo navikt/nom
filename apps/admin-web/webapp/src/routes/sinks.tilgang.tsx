@@ -10,6 +10,7 @@ import { EventDateRange } from "~/components/EventDateRange.tsx";
 import { EventOrigination } from "~/components/EventOrigination.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
 import { JsonModal } from "~/components/JsonModal.tsx";
+import { EmbeddedJsonView } from "~/components/KafkaEventTable.tsx";
 import { NavidentNameLookup } from "~/components/NavidentNameLookup.tsx";
 import { OrgEnhetLookup } from "~/components/OrgEnhetLookup.tsx";
 import { formatDisplayDatetime } from "~/utils.ts";
@@ -53,6 +54,7 @@ function TilgangHistoryPage() {
       <Table size="small">
         <Table.Header>
           <Table.Row>
+            <Table.HeaderCell />
             <Table.ColumnHeader scope="col">Fra</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Til</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Orgenhet</Table.ColumnHeader>
@@ -71,7 +73,10 @@ function TilgangHistoryPage() {
               );
 
             return (
-              <Table.Row key={index}>
+              <Table.ExpandableRow
+                content={<EmbeddedJsonView jsonData={tilgangEvent} />}
+                key={index}
+              >
                 <Table.DataCell>
                   <Link
                     search={{ filterText: tilgangEvent.data.av }}
@@ -113,7 +118,7 @@ function TilgangHistoryPage() {
                 <Table.DataCell>
                   <EventOrigination metadata={tilgangEvent.metadata} />
                 </Table.DataCell>
-              </Table.Row>
+              </Table.ExpandableRow>
             );
           })}
         </Table.Body>

@@ -1,3 +1,4 @@
+import { FilesIcon } from "@navikt/aksel-icons";
 import { Alert, Button, Heading, Table, TextField } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -12,6 +13,8 @@ import {
 } from "~/api/queries.ts";
 import { getNomMasteredStateOptions } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
+import { EmbeddedJsonView } from "~/components/KafkaEventTable.tsx";
+import { copyToClipboard } from "~/components/quickdialog.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
 import type { MasteredRessursDTO } from "~/types/nom-admin/nom-admin-models.ts";
 import type {
@@ -128,6 +131,26 @@ function NomMasteredPage() {
       <Heading className="mt-6 mb-6" level="2" size="large">
         {nomMasteredObjekter.length} medarbeidere er mastret i NOM!
       </Heading>
+      <Button
+        icon={<FilesIcon />}
+        onClick={() => {
+          const rows = data.map((ressursMastered) => ({
+            ...ressursMastered,
+            ressurs: ressurser.find(
+              (value) => value.navident === ressursMastered.navident,
+            ),
+            orgtilknytninger: getOrgtilknytning(
+              ressursMastered,
+              orgtilknytninger,
+            ),
+          }));
+          return copyToClipboard(rows);
+        }}
+        size={"xsmall"}
+        variant={"secondary"}
+      >
+        Kopier JSON[]
+      </Button>
       <Table
         onSortChange={(sortKey) => handleSort(sortKey)}
         size="small"
@@ -136,6 +159,7 @@ function NomMasteredPage() {
       >
         <Table.Header>
           <Table.Row>
+            <Table.HeaderCell />
             <Table.ColumnHeader scope="col">NAV-ident</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Visningsnavn</Table.ColumnHeader>
             <Table.ColumnHeader scope="col" sortKey="opprettet" sortable>
@@ -178,17 +202,16 @@ export function RessursTableRow({
   ressursMastered: MasteredRessursDTO;
   ressurs: Ressurs;
 }) {
-  const dolOrgtilknytning =
-    orgtilknytninger?.find(
-      (orgtilknytning) =>
-        orgtilknytning.erDagligOppfolging &&
-        isTodayOrBefore(new Date(orgtilknytning.gyldigFom)) &&
-        (!orgtilknytning.gyldigTom ||
-          isTodayOrAfter(new Date(orgtilknytning.gyldigTom))),
-    ) ?? null;
+  const dolOrgtilknytning = determineDolOrgtilknytning(orgtilknytninger);
 
   return (
-    <Table.Row>
+    <Table.ExpandableRow
+      content={
+        <EmbeddedJsonView
+          jsonData={{ ressurs, ressursMastered, dolOrgtilknytning }}
+        />
+      }
+    >
       <Table.HeaderCell scope="row">
         <Link
           search={{ filterText: ressursMastered.navident }}
@@ -207,6 +230,18 @@ export function RessursTableRow({
       <Table.DataCell scope="row">
         {dolOrgtilknytning ? dolOrgtilknytning.orgEnhetId : ""}
       </Table.DataCell>
-    </Table.Row>
+    </Table.ExpandableRow>
+  );
+}
+
+function determineDolOrgtilknytning(orgtilknytninger: OrgtilknytningState[]) {
+  return (
+    orgtilknytninger?.find(
+      (orgtilknytning) =>
+        orgtilknytning.erDagligOppfolging &&
+        isTodayOrBefore(new Date(orgtilknytning.gyldigFom)) &&
+        (!orgtilknytning.gyldigTom ||
+          isTodayOrAfter(new Date(orgtilknytning.gyldigTom))),
+    ) ?? null
   );
 }
