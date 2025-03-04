@@ -391,7 +391,7 @@ EH00001;2300;ORGNIV3;HELFO;Beholdt;;;JA;EH00001;ORGENHET;je305h;28.02.2025 - lag
 SKATT;9401;ORGNIV0;;Beholdt, MEN;;;JA;SKATT;ORGNIV0;leggInn;
 945100;9451;ORGNIV3;;TODO, se kommentar;;;NEI;945100;;leggInn;"9451 er ""Sentralt frikjøpte tillitsvalgte"". orgEnhet finnes ikke"
 RIKSREVISJON;9504;ORGNIV0;;TODO, se kommentar;;;Avventer;RIKSREVISJON;;va981f;24.04.2024 lagt inn mapping til riktig nomId
-999900;9999;ORGNIV3;;TODO, se kommentar;;;NEI;999900;;leggInn;"Finnes ikke i NOM, finnes i NORG under navnet ""Andre eksterne"""
+ER00001;9504;ORGENHET;;TODO, se kommentar;;;;ER00001;ORGENHET;ke602d;04.03.2025: lagt inn mapping til undernoden også da resolving nedover ikke fungerer riktig utenfor nav-hierarkiet
 ;4292;;Klageinstans Midt-Norge;Manglet i uttrekket;721050;se331z;JA;721050;ORGNIV3;se331z;
 ;4295;;Klageinstans Nord;Manglet i uttrekket;721190;me103b;JA;721190;ORGNIV3;me103b;
 ;4291;;Klageinstans Oslo/Akershus;Manglet i uttrekket;721030;sa137m;JA;721030;ORGNIV3;sa137m;
@@ -401,9 +401,8 @@ RIKSREVISJON;9504;ORGNIV0;;TODO, se kommentar;;;Avventer;RIKSREVISJON;;va981f;24
 ;0293;;NAV Dokumentsenter Øst-Viken;;0293010;he276e;JA;0293010;;he276e;24.02.2025 Oppdaterte så det nå er 2 enheter som mapper til 0293. Antagelig burde denne vært flyttet inn under re831r. Må tas med ØT.
 ;0692;;NAV Rådgivende overleger Vest-Viken;Hentet fra Norg-uttrekk;0692500;my567d;JA;0692500;ORGENHET;my567d;Har aktive navIdenter i HRRES_RESSURS. Skal nok mappes til 0692500 (my567d) utfra at alle ansatte i DVH tilhørte denne enheten, og navnet samsvarer.
 ;1034;;NAV Hægebostad;Hentet fra Norg-uttrekk;;;Avventer;0;;leggInn;Har aktive navIdenter i HRRES_RESSURS. Disse to personene har orgEnhet 103700 som er NAV Lister, som har sin egen remedyEnhet 1037. Mulig 1034 da kan avvikles? Sjekk med RemedyOversikt. Antagelig kan 1034 fjernes siden orgEnheten for Hægebosstad er nedlagt i Unit4, og fysiske arbeidsstedet er 1037.
-;1084;;NAV Intro Kristiansand;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
-;1193;;NAV Marked Nord-Rogaland;Hentet fra Norg-uttrekk;1194310;ge984x;JA;1194310;ORGENHET;ge984x;Har aktive navIdenter i HRRES_RESSURS. Alle ansatte her hører til 1194310 (ge984x). Bør inn i mapping.
-;1194;;NAV Marked Sør-Rogaland;Hentet fra Norg-uttrekk;1194330;bu781r;JA;1194330;ORGENHET;bu781r;Har aktive navIdenter i HRRES_RESSURS. Alle ansatte her hører til 1194330 (bu781r). Bør inn i mapping.
+;1193;;NAV Marked Nord-Rogaland;Hentet fra Norg-uttrekk;1194310;;JA;119431;ORGNIV3;my329y;04.03.2025 - flyttet mapping opp et hakk til my329y.
+;1194;;NAV Marked Sør-Rogaland;Hentet fra Norg-uttrekk;119433;ga491t;JA;119433;ORGNIV3;ga491t;04.03.2025 - flyttet mapping opp et hakk til ga491t.
 ;1195;;NAV IPS Rogaland;Hentet fra Norg-uttrekk;119510;ny183y;JA;119510;ORGNIV3;ny183y;Har aktive navIdenter i HRRES_RESSURS. Alle ansatte her er på 1195100, og siden den ikke har søsken, så plasseres mapping på parent 119510 (ny183y)
 ;1287;;NAV Tiltak Vestland;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
 ;2827;;Juridisk avdeling;Hentet fra Norg-uttrekk;8204;fu472x;JA;8204;ORGNIV2;fu472x;Har aktive navIdenter i HRRES_RESSURS. Mapper til flere orgEnheter i DVH, men alle er under Juridisk avd, så plasserer høyere opp, på ORGNIV2 for Juridisk avd, agressoID=8204 (fu472x)
