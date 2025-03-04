@@ -404,34 +404,8 @@ ER00001;9504;ORGENHET;;TODO, se kommentar;;;;ER00001;ORGENHET;ke602d;04.03.2025:
 ;1193;;NAV Marked Nord-Rogaland;Hentet fra Norg-uttrekk;1194310;;JA;119431;ORGNIV3;my329y;04.03.2025 - flyttet mapping opp et hakk til my329y.
 ;1194;;NAV Marked Sør-Rogaland;Hentet fra Norg-uttrekk;119433;ga491t;JA;119433;ORGNIV3;ga491t;04.03.2025 - flyttet mapping opp et hakk til ga491t.
 ;1195;;NAV IPS Rogaland;Hentet fra Norg-uttrekk;119510;ny183y;JA;119510;ORGNIV3;ny183y;Har aktive navIdenter i HRRES_RESSURS. Alle ansatte her er på 1195100, og siden den ikke har søsken, så plasseres mapping på parent 119510 (ny183y)
-;1287;;NAV Tiltak Vestland;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
 ;2827;;Juridisk avdeling;Hentet fra Norg-uttrekk;8204;fu472x;JA;8204;ORGNIV2;fu472x;Har aktive navIdenter i HRRES_RESSURS. Mapper til flere orgEnheter i DVH, men alle er under Juridisk avd, så plasserer høyere opp, på ORGNIV2 for Juridisk avd, agressoID=8204 (fu472x)
-;2831;;Robotadministrasjon ytelseslinjen;Hentet fra Norg-uttrekk;;;Avventer;0;;leggInn;Har aktive roboter i HRRES_RESSURS. Ingen orgEnhet-knytning i DVH
 ;2841;;Robotadministrasjon arbeids- og tjenestelinjen;Hentet fra Norg-uttrekk;;;Avventer;0;;leggInn;Har aktive roboter i HRRES_RESSURS. Ingen orgEnhet-knytning i DVH
-;2950;;NAV Drift og Utvikling - Administrative tjenester;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
-;4000;;Innsatsteam EU-EØS;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
-;4303;;NAV Id og fordeling;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
-;4540;;NAV Sentralt yrkessykdomskontor;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
-;4702;;NAV Hjelpemiddelsentral Akershus;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
-;4860;;NAV Familie- og pensjonsytelser Farskap;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
-;4862;;NAV Familie- og pensjonsytelser utland Ålesund;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
-;2800;;DIREKTORATET;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
-;2971;;RTV IT-TESTSENTER (KTL);Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
-;2972;;RTV IT-TESTSENTER (SENTRALT TESTSTED);Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
-;2973;;RTV IT-TESTSENTER (LITE TK);Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
-;2974;;RTV IT-TESTSENTER (STORT TK);Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
-;2975;;RTV IT-TESTSENTER (OPPLÆRING);Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
-;3100;;AETAT DIREKTORATET;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
-;3401;;NAV SERVICEKONTOR SPANIA;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
-;4141;;NAV PASIENTFORMIDLING;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
-;7338;;IT-TESTSENTER;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
-;9101;;IBM HAMAR;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
-;9450;;AVYO;Hentet fra Remedy-uttrekk;;;Avventer;0;;leggInn;Finnes ikke i NORG - 3 ansatte i HRRES_RESSURS
-;9500;;SJØFARTSDIREKTORATET;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
-;9501;;TOLL OG AVGIFTSDIREKTORATET;Hentet fra Remedy-uttrekk;;;Avventer;0;;leggInn;Finnes ikke i NORG - 2 ansatte i HRRES_RESSURS
-;9503;;ENHETSREGISTERET I BRØNNØYSUND;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
-;9505;;PENSJONSTRYGDEN FOR SJØMENN;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
-;9506;;NAV EKSTERNE UTEN FØDSELSNUMMER;Hentet fra Remedy-uttrekk;;;Avventer;0;;leggInn;Finnes ikke i NORG - 7 ansatte i HRRES_RESSURS
-;9507;;FYLKESMENNENE;Hentet fra Remedy-uttrekk;;;Avventer;0;;leggInn;Finnes ikke i NORG - 39 ansatte i HRRES_RESSURS
+;9450;;AVYO;Hentet fra Remedy-uttrekk;;;Avventer;0;;leggInn;04.03.2025 Finnes ikke i NORG, 2 tillitsvalgte i ulike orgenheter som er på 9450
+;9507;;FYLKESMENNENE;Hentet fra Remedy-uttrekk;;;Avventer;0;;leggInn;04.03.2025 Finnes ikke i NORG - 3 ansatte med denne firesifferenheten. ingen mapping i nom
 ;9508;;IKKE-ANSATTE MED IDENT I LØNNSSYSTEMET;Hentet fra Remedy-uttrekk;;;Avventer;0;;leggInn;Finnes ikke i NORG - 1555 ansatte i HRRES_RESSURS.
-;9998;;ARBEIDSDEPARTEMENTET;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
