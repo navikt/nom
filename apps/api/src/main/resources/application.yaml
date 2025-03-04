@@ -350,6 +350,8 @@ app:
         orgenhet: na664h
       - navident: A862414
         orgenhet: na494k
+      - navident: Z993219
+        orgenhet: ke793y
 
 NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
 NIK_API_SCOPE: api://dev-gcp.org.nav-ident/.default
