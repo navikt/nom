@@ -1,4 +1,5 @@
-import { Alert, Table } from "@navikt/ds-react";
+import { FilesIcon } from "@navikt/aksel-icons";
+import { Alert, Button, HStack, Table } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense } from "react";
@@ -7,6 +8,8 @@ import { ErrorBoundary } from "react-error-boundary";
 import { getApiHendelserEventsOptions, searchSchema } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
+import { EmbeddedJsonView } from "~/components/KafkaEventTable.tsx";
+import { copyToClipboard } from "~/components/quickdialog.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
 import { formatDisplayDatetime } from "~/utils.ts";
 
@@ -39,44 +42,60 @@ function ApiHendelserPage() {
   const { data, sort, handleSort } = useTableSort(apiHendelser, "timestamp");
 
   return (
-    <Table
-      onSortChange={(sortKey) => handleSort(sortKey)}
-      size="small"
-      sort={sort}
-      zebraStripes
-    >
-      <Table.Header>
-        <Table.Row>
-          <Table.ColumnHeader scope="col" sortKey="id" sortable>
-            ID
-          </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="timestamp" sortable>
-            Timestamp
-          </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="entity" sortable>
-            Type
-          </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="hendelse" sortable>
-            Hendelse
-          </Table.ColumnHeader>
-        </Table.Row>
-      </Table.Header>
-      <Table.Body>
-        {data.map((apiHendelse, index) => (
-          <Table.Row key={index}>
-            <Table.HeaderCell scope="row">
-              <Link search={{ filterText: apiHendelse.id }}>
-                {apiHendelse.id}
-              </Link>
-            </Table.HeaderCell>
-            <Table.DataCell>
-              {formatDisplayDatetime(apiHendelse.timestamp)}
-            </Table.DataCell>
-            <Table.DataCell>{apiHendelse.entityType}</Table.DataCell>
-            <Table.DataCell>{apiHendelse.hendelseType}</Table.DataCell>
+    <>
+      <HStack justify={"end"}>
+        <Button
+          icon={<FilesIcon />}
+          onClick={() => copyToClipboard(data)}
+          size={"xsmall"}
+          variant={"secondary"}
+        >
+          JSON[]
+        </Button>
+      </HStack>
+      <Table
+        onSortChange={(sortKey) => handleSort(sortKey)}
+        size="small"
+        sort={sort}
+        zebraStripes
+      >
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell />
+            <Table.ColumnHeader scope="col" sortKey="id" sortable>
+              ID
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="timestamp" sortable>
+              Timestamp
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="entity" sortable>
+              Type
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="hendelse" sortable>
+              Hendelse
+            </Table.ColumnHeader>
           </Table.Row>
-        ))}
-      </Table.Body>
-    </Table>
+        </Table.Header>
+        <Table.Body>
+          {data.map((apiHendelse, index) => (
+            <Table.ExpandableRow
+              content={<EmbeddedJsonView jsonData={apiHendelse} />}
+              key={index}
+            >
+              <Table.HeaderCell scope="row">
+                <Link search={{ filterText: apiHendelse.id }}>
+                  {apiHendelse.id}
+                </Link>
+              </Table.HeaderCell>
+              <Table.DataCell>
+                {formatDisplayDatetime(apiHendelse.timestamp)}
+              </Table.DataCell>
+              <Table.DataCell>{apiHendelse.entityType}</Table.DataCell>
+              <Table.DataCell>{apiHendelse.hendelseType}</Table.DataCell>
+            </Table.ExpandableRow>
+          ))}
+        </Table.Body>
+      </Table>
+    </>
   );
 }

@@ -1,4 +1,5 @@
-import { Alert, Table } from "@navikt/ds-react";
+import { FilesIcon } from "@navikt/aksel-icons";
+import { Alert, Button, HStack, Table } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense } from "react";
@@ -8,7 +9,9 @@ import { getApiOrgenhetEventsOptions, searchSchema } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
 import { JsonModal } from "~/components/JsonModal.tsx";
+import { EmbeddedJsonView } from "~/components/KafkaEventTable.tsx";
 import { NomLink } from "~/components/NomLink.tsx";
+import { copyToClipboard } from "~/components/quickdialog.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
 import { formatDisplayDatetime } from "~/utils.ts";
 
@@ -41,68 +44,86 @@ function ApiOrgenhetPage() {
   const { data, sort, handleSort } = useTableSort(apiOrgenheter, "timestamp");
 
   return (
-    <Table
-      onSortChange={(sortKey) => handleSort(sortKey)}
-      size="small"
-      sort={sort}
-      zebraStripes
-    >
-      <Table.Header>
-        <Table.Row>
-          <Table.ColumnHeader scope="col" sortKey="fid" sortable>
-            Fid
-          </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="timestamp" sortable>
-            Timestamp
-          </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="id" sortable>
-            Orgenhet NOM ID
-          </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="navn" sortable>
-            Navn
-          </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="gyldigFom" sortable>
-            Gyldig FOM
-          </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="gyldigTom" sortable>
-            Gyldig TOM
-          </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="nomNivaa" sortable>
-            NOM Nivå
-          </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="orgenhetType" sortable>
-            Orgenhet Type
-          </Table.ColumnHeader>
-        </Table.Row>
-      </Table.Header>
-      <Table.Body>
-        {data.map((apiOrgenhet, index) => (
-          <Table.Row key={index}>
-            <Table.HeaderCell scope="row">
-              <Link search={{ filterText: apiOrgenhet.key }}>
-                {apiOrgenhet.key}
-              </Link>
-            </Table.HeaderCell>
-            <Table.DataCell>
-              {formatDisplayDatetime(apiOrgenhet.timestamp)}
-            </Table.DataCell>
-            <Table.DataCell>
-              <NomLink path={`org/${apiOrgenhet.id}`}>{apiOrgenhet.id}</NomLink>
-            </Table.DataCell>
-            <Table.DataCell>
-              <JsonModal data={apiOrgenhet} text={apiOrgenhet.navn} />
-            </Table.DataCell>
-            <Table.DataCell>
-              {formatDisplayDatetime(apiOrgenhet.gyldigFom)}
-            </Table.DataCell>
-            <Table.DataCell>
-              {formatDisplayDatetime(apiOrgenhet.gyldigTom)}
-            </Table.DataCell>
-            <Table.DataCell>{apiOrgenhet.nomNivaa}</Table.DataCell>
-            <Table.DataCell>{apiOrgenhet.orgEnhetsType}</Table.DataCell>
+    <>
+      <HStack justify={"end"}>
+        <Button
+          icon={<FilesIcon />}
+          onClick={() => copyToClipboard(data)}
+          size={"xsmall"}
+          variant={"secondary"}
+        >
+          JSON[]
+        </Button>
+      </HStack>
+      <Table
+        onSortChange={(sortKey) => handleSort(sortKey)}
+        size="small"
+        sort={sort}
+        zebraStripes
+      >
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell />
+            <Table.ColumnHeader scope="col" sortKey="fid" sortable>
+              Fid
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="timestamp" sortable>
+              Timestamp
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="id" sortable>
+              Orgenhet NOM ID
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="navn" sortable>
+              Navn
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="gyldigFom" sortable>
+              Gyldig FOM
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="gyldigTom" sortable>
+              Gyldig TOM
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="nomNivaa" sortable>
+              NOM Nivå
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="orgenhetType" sortable>
+              Orgenhet Type
+            </Table.ColumnHeader>
           </Table.Row>
-        ))}
-      </Table.Body>
-    </Table>
+        </Table.Header>
+        <Table.Body>
+          {data.map((apiOrgenhet, index) => (
+            <Table.ExpandableRow
+              content={<EmbeddedJsonView jsonData={apiOrgenhet} />}
+              key={index}
+            >
+              <Table.HeaderCell scope="row">
+                <Link search={{ filterText: apiOrgenhet.key }}>
+                  {apiOrgenhet.key}
+                </Link>
+              </Table.HeaderCell>
+              <Table.DataCell>
+                {formatDisplayDatetime(apiOrgenhet.timestamp)}
+              </Table.DataCell>
+              <Table.DataCell>
+                <NomLink path={`org/${apiOrgenhet.id}`}>
+                  {apiOrgenhet.id}
+                </NomLink>
+              </Table.DataCell>
+              <Table.DataCell>
+                <JsonModal data={apiOrgenhet} text={apiOrgenhet.navn} />
+              </Table.DataCell>
+              <Table.DataCell>
+                {formatDisplayDatetime(apiOrgenhet.gyldigFom)}
+              </Table.DataCell>
+              <Table.DataCell>
+                {formatDisplayDatetime(apiOrgenhet.gyldigTom)}
+              </Table.DataCell>
+              <Table.DataCell>{apiOrgenhet.nomNivaa}</Table.DataCell>
+              <Table.DataCell>{apiOrgenhet.orgEnhetsType}</Table.DataCell>
+            </Table.ExpandableRow>
+          ))}
+        </Table.Body>
+      </Table>
+    </>
   );
 }
