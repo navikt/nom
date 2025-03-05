@@ -27,6 +27,6 @@ jobs:
       nais-config-file-path-prod: .nais/streams/kafka-api-ressurs-hendelser.yaml
       additional-nais-vars-dev: ',kafka-pool=nav-dev'
       additional-nais-vars-prod: ',kafka-pool=nav-prod'
-      dockerfile: Dockerfile_distroless_debug
+      dockerfile: Dockerfile_distroless
     secrets:
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
