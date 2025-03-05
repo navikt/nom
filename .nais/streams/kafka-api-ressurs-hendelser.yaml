@@ -28,6 +28,11 @@ spec:
     periodSeconds: 5
     timeout: 4
     failureThreshold: 5
+  startup:
+    path: /internal/health/liveness
+    initialDelay: 30
+    periodSeconds: 5
+    failureThreshold: 10
   resources:
     requests:
       cpu: 100m
