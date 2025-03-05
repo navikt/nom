@@ -12,6 +12,7 @@ import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOppret
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOpprettetEventData;
 import no.nav.nom.contract.nom.eventsource.RessursStartDatoOppdatertV1.StartDatoOppdatertEventData;
 import org.apache.kafka.streams.KeyValue;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,8 +33,10 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
     private static final String ORGENHET_ID = "ab123c";
     private static final String ORGTILKNYTNING_FID_1 = "OT_FID_1";
     private static final String ORGTILKNYTNING_FID_2 = "OT_FID_2";
+    private static final String ORGTILKNYTNING_FID_3 = "OT_FID_3";
 
     @Test
+    @DisplayName("En output-melding produseres fra ressurs og OT event")
     void produsere_ekstern_event_fra_event_source_event() {
 
         RessursOpprettetEventV1 ressursOpprettetEventV1 = ressursOpprettetEvent(RESSURS_FID, NAVIDENT);
@@ -45,42 +48,63 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
         orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), orgtilknytningOpprettetEvent(ORGTILKNYTNING_FID_2, "B456789"));
 
 
+        assertThat(outputTopic.isEmpty()).as("Det er produsert en event").isFalse();
         KeyValue<String, RessursOpprettetEvent> ressursOpprettetEvent = outputTopic.readKeyValue();
-        log.info("Output event: {}", ressursOpprettetEvent);
 
         assertThat(ressursOpprettetEvent.value.navident()).isEqualTo(NAVIDENT);
         assertThat(ressursOpprettetEvent.value.orgtilknytning().fid()).isEqualTo(ORGTILKNYTNING_FID_1);
     }
 
     @Test
+    @DisplayName("Aggregere ressurs-eventer til all nødvendig info har kommet inn")
     void aggregere_ressurs_eventer_inntil_all_nodvendig_info_har_kommet_inn() {
         // RessursOpprettet-event uten startdato 
         ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursOpprettetEvent(RESSURS_FID, NAVIDENT, null));
 
-        // Får så startdato i egen event
+        ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursSektorOppdatertEvent(RESSURS_FID, Sektor.NAV_KOMMUNAL));
+
+        // Mottar så startdato i egen event
         RessursStartDatoOppdatertV1 ressursStartDatoOppdatert = ressursStartDatoOppdatertV1(RESSURS_FID, LocalDate.now());
         ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursStartDatoOppdatert);
 
         orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), orgtilknytningOpprettetEvent(ORGTILKNYTNING_FID_1, NAVIDENT));
         orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), orgtilknytningDagligOppfolgingEndretEvent(ORGTILKNYTNING_FID_1, NAVIDENT, true));
 
-        if (!outputTopic.isEmpty()) {
-            KeyValue<String, RessursOpprettetEvent> ressursOpprettetEvent = outputTopic.readKeyValue();
-            log.info("Output event: {}", ressursOpprettetEvent);
 
-            var startDatoOppdatertEventData = (StartDatoOppdatertEventData) ressursStartDatoOppdatert.getData();
-            assertThat(ressursOpprettetEvent.value.startdato()).isEqualTo(startDatoOppdatertEventData.startdato());
-        }
+        assertThat(outputTopic.isEmpty()).as("Det er produsert en event").isFalse();
+
+        var startDatoOppdatertEventData = (StartDatoOppdatertEventData) ressursStartDatoOppdatert.getData();
+        KeyValue<String, RessursOpprettetEvent> ressursOpprettetEvent = outputTopic.readKeyValue();
+        assertThat(ressursOpprettetEvent.value.startdato()).isEqualTo(startDatoOppdatertEventData.startdato());
     }
 
     @Test
+    @DisplayName("Bare produsere events for ressurs opprettet")
     void bare_produsere_eksterne_events_for_ressurs_opprettet_events() {
-        ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursSektorOppdatertEvent());
+        ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursSektorOppdatertEvent(RESSURS_FID, Sektor.NAV_STATLIG));
 
         assertThat(outputTopic.isEmpty()).as("Ingen output-meldinger er produsert").isTrue();
     }
 
     @Test
+    @DisplayName("Ikke produsere nye events ved endringer på ressurs etter output-melding er sendt")
+    void ikke_produsere_nye_meldinger_ved_endringer_pa_ressurs_etter_output_melding_er_sendt() {
+        ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursOpprettetEvent(RESSURS_FID, NAVIDENT, null));
+        ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursStartDatoOppdatertV1(RESSURS_FID, LocalDate.now()));
+
+        orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), orgtilknytningOpprettetEvent(ORGTILKNYTNING_FID_1, NAVIDENT));
+        orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), orgtilknytningDagligOppfolgingEndretEvent(ORGTILKNYTNING_FID_1, NAVIDENT, true));
+
+        // Flere endringer for ressursen - skal ikke trigge nye output-meldinger
+        ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursSektorOppdatertEvent(RESSURS_FID, Sektor.NAV_STATLIG));
+        ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursStartDatoOppdatertV1(RESSURS_FID, LocalDate.now().plusWeeks(1)));
+        ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursSektorOppdatertEvent(RESSURS_FID, Sektor.NAV_KOMMUNAL));
+
+        assertThat(outputTopic.getQueueSize()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Ikke produsere event for orgtilknytning som ikke har DOL")
     void ikke_produsere_output_event_for_orgtilknytning_som_ikke_har_daglig_oppfolging() {
         ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursOpprettetEvent(RESSURS_FID, NAVIDENT));
 
@@ -90,6 +114,25 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
     }
 
     @Test
+    @DisplayName("Ikke produsere flere events for orgtilknytning etter første event er sendt")
+    void ikke_produsere_flere_output_events_for_dol_orgtilknytning_etter_output_event_er_sendt() {
+        ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursOpprettetEvent(RESSURS_FID, NAVIDENT));
+
+        orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), orgtilknytningOpprettetEvent(ORGTILKNYTNING_FID_1, NAVIDENT));
+        orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), orgtilknytningDagligOppfolgingEndretEvent(ORGTILKNYTNING_FID_1, NAVIDENT, true));
+
+        // Etter DOL er mottatt kommer flere endringer for OTen, inklusive nye DOL-meldinger
+        orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), orgtilknytningTilknytningtypeEndretEvent());
+        orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), orgtilknytningDagligOppfolgingEndretEvent(ORGTILKNYTNING_FID_2, NAVIDENT, true));
+        orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), orgtilknytningDagligOppfolgingEndretEvent(ORGTILKNYTNING_FID_3, NAVIDENT, true));
+
+        assertThat(outputTopic.getQueueSize())
+                .as("Kun en RessursOpprettet-melding produsert")
+                .isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Aggregere orgtilknytning events frem til DOL-event mottas")
     void aggregere_andre_orgtilknytning_events() {
         ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursOpprettetEvent(RESSURS_FID, NAVIDENT));
 
@@ -101,17 +144,17 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
 
         orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), orgtilknytningDagligOppfolgingEndretEvent(ORGTILKNYTNING_FID_1, NAVIDENT, true));
 
-        if (!outputTopic.isEmpty()) {
-            KeyValue<String, RessursOpprettetEvent> ressursOpprettetEvent = outputTopic.readKeyValue();
-            log.info("Output event: {}", ressursOpprettetEvent);
 
-            var avsluttetEventData = (OrgtilknytningAvsluttetEventData) orgtilknytningAvsluttetEvent.getData();
-            //noinspection OptionalGetWithoutIsPresent
-            assertThat(ressursOpprettetEvent.value.orgtilknytning().gyldigTom().get()).isEqualTo(avsluttetEventData.gyldigTom());
-        }
+        assertThat(outputTopic.isEmpty()).as("Det er produsert en event").isFalse();
+
+        var avsluttetEventData = (OrgtilknytningAvsluttetEventData) orgtilknytningAvsluttetEvent.getData();
+        KeyValue<String, RessursOpprettetEvent> ressursOpprettetEvent = outputTopic.readKeyValue();
+        //noinspection OptionalGetWithoutIsPresent
+        assertThat(ressursOpprettetEvent.value.orgtilknytning().gyldigTom().get()).isEqualTo(avsluttetEventData.gyldigTom());
     }
 
     @Test
+    @DisplayName("Endringer for orgtilknytning etter DOL-event er mottatt gir ikke nye events")
     void endringer_for_orgtilknytning_etter_dol_mottatt_gir_ikke_nye_hendelser() {
         ressursInputTopic.pipeInput(UUID.randomUUID().toString(), ressursOpprettetEvent(RESSURS_FID, NAVIDENT));
 
@@ -127,15 +170,13 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
 
         orgtilknytningInputTopic.pipeInput(UUID.randomUUID().toString(), orgtilknytningDagligOppfolgingEndretEvent(ORGTILKNYTNING_FID_1, NAVIDENT, false));
 
-        if (!outputTopic.isEmpty()) {
-            assertThat(outputTopic.getQueueSize()).isEqualTo(1);
-        }
+        assertThat(outputTopic.getQueueSize()).isEqualTo(1);
     }
 
     RessursOpprettetEventV1 ressursOpprettetEvent(String fid, String navident) {
         return ressursOpprettetEvent(fid, navident, LocalDate.now());
     }
-    
+
     RessursOpprettetEventV1 ressursOpprettetEvent(String fid, String navident, LocalDate startDato) {
         final RessursOpprettetEventData eventData =
                 RessursOpprettetEventData.builder()
@@ -219,13 +260,13 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
         );
     }
 
-    RessursSektorOppdatertV1 ressursSektorOppdatertEvent() {
+    RessursSektorOppdatertV1 ressursSektorOppdatertEvent(String fid, Sektor sektor) {
         final var eventData = new RessursSektorOppdatertV1.SektorOppdatertEventData(
-                Sektor.NAV_STATLIG
+                sektor
         );
 
         return new RessursSektorOppdatertV1(
-                UUID.randomUUID().toString(),
+                fid,
                 eventData,
                 (Event.Metadata) null
         );

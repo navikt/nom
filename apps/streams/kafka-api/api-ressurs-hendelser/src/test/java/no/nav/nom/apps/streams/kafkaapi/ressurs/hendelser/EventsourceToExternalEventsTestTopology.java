@@ -62,7 +62,7 @@ public class EventsourceToExternalEventsTestTopology {
         Topology topology = streamsBuilder.build();
         TopologyTestDriver topologyTestDriver = new TopologyTestDriver(topology, new Properties());
 
-        log.info(topology.describe().toString());
+//        log.info(topology.describe().toString());
 
         ressursInputTopic = topologyTestDriver.createInputTopic(RESSURS_INPUT_TOPIC, new StringSerializer(), objectSerde.copyWithType(RessursEvent.class).serializer());
         orgtilknytningInputTopic = topologyTestDriver.createInputTopic(ORGTILKNYTNING_INPUT_TOPIC, new StringSerializer(), objectSerde.copyWithType(OrgtilknytningEvent.class).serializer());
