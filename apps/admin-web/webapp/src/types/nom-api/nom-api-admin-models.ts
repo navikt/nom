@@ -23,46 +23,6 @@ export interface EnhtetMedRessursSomHarSluttetOgErLederSanityCheckResponse {
   visningsnavn?: string;
 }
 
-export interface IOrgenhet {
-  agressoId?: string;
-  agressoOrgenhetType?: string;
-  fid?: string;
-  /** @format date */
-  gyldigFom?: string;
-  /** @format date */
-  gyldigTom?: string;
-  id?: string;
-  navn?: string;
-  nomNivaa?: NomNivaa;
-  orgEnhetsType?: OrgEnhetsType;
-  orgNiv?: string;
-  overordnetOrgEnhetFid?: string;
-  uniqueAgressoId?: string;
-}
-
-export enum NomNivaa {
-  LINJEENHET = "LINJEENHET",
-  DRIFTSENHET = "DRIFTSENHET",
-  ARBEIDSOMRAADE = "ARBEIDSOMRAADE",
-}
-
-export enum OrgEnhetsType {
-  ARBEIDSLIVSSENTER = "ARBEIDSLIVSSENTER",
-  NAV_ARBEID_OG_YTELSER = "NAV_ARBEID_OG_YTELSER",
-  ARBEIDSRAADGIVNING = "ARBEIDSRAADGIVNING",
-  DIREKTORAT = "DIREKTORAT",
-  DIR = "DIR",
-  FYLKE = "FYLKE",
-  NAV_FAMILIE_OG_PENSJONSYTELSER = "NAV_FAMILIE_OG_PENSJONSYTELSER",
-  HJELPEMIDLER_OG_TILRETTELEGGING = "HJELPEMIDLER_OG_TILRETTELEGGING",
-  KLAGEINSTANS = "KLAGEINSTANS",
-  NAV_KONTAKTSENTER = "NAV_KONTAKTSENTER",
-  KONTROLL_KONTROLLENHET = "KONTROLL_KONTROLLENHET",
-  NAV_KONTOR = "NAV_KONTOR",
-  TILTAK = "TILTAK",
-  NAV_OKONOMITJENESTE = "NAV_OKONOMITJENESTE",
-}
-
 export interface OrgtilknytningState {
   erDagligOppfolging: boolean;
   fid: string;
@@ -75,6 +35,25 @@ export interface OrgtilknytningState {
   orgEnhetId: string;
   orgtilknytningType?: Tilknytningtype;
   sektor?: Sektor;
+}
+
+export interface OrgtilknytningerUtenforHierarkiResponse {
+  alternativOrgenhetId?: string;
+  alternativOrgenhetNavn?: string;
+  alternativOrgenhetRemedyEnhet?: string;
+  faktiskOrgenhetId: string;
+  faktiskOrgenhetNavn: string;
+  faktiskOrgenhetRemedyEnhet: string;
+  navident: string;
+  orgtilknytningFid: string;
+  /** @format date */
+  orgtilknytningGyldigFom: string;
+  /** @format date */
+  orgtilknytningGyldigTom?: string;
+  orgtilknytningSektor?: Sektor;
+  orgtilknytningType?: Tilknytningtype;
+  ressursSektor: Sektor;
+  visningsnavn: string;
 }
 
 export interface RobotOrgtilknytningSanityCheckResponse {

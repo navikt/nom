@@ -64,8 +64,8 @@ public class OrgtilknytningerUtenforHierarkiResponse {
                 .orgtilknytningGyldigTom(orgtilknytning.gyldigTom().orElse(null))
                 .orgtilknytningSektor(orgtilknytning.sektor())
                 .orgtilknytningType(orgtilknytning.orgtilknytningType().orElse(null))
-                .alternativOrgenhetId(alternativOrgEnhet.getId())
-                .alternativOrgenhetNavn(alternativOrgEnhet.getNavn())
+                .alternativOrgenhetId(alternativOrgEnhet == null ? null : alternativOrgEnhet.getId())
+                .alternativOrgenhetNavn(alternativOrgEnhet == null ? null : alternativOrgEnhet.getNavn())
                 .alternativOrgenhetRemedyEnhet(alternativRemedyEnhet)
                 .build();
     }

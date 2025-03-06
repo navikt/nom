@@ -2,7 +2,10 @@ import { queryOptions } from "@tanstack/react-query";
 import ky from "ky";
 
 import type { OrgEnhetsType } from "~/types/nom-admin/nom-admin-models";
-import type { U4Diff } from "~/types/nom-api/nom-api-admin-models.ts";
+import type {
+  OrgtilknytningerUtenforHierarkiResponse,
+  U4Diff,
+} from "~/types/nom-api/nom-api-admin-models.ts";
 import type { OrgEnhet, Ressurs } from "~/types/nom-api/nom-api-models.ts";
 
 export const API_BASE_URL = "/frackend/api";
@@ -253,4 +256,24 @@ export async function alleDifferanserExcelExportOptions() {
   a.click();
   a.remove();
   window.URL.revokeObjectURL(url);
+}
+
+export async function orgtilknytningerUtenforHierarki(): Promise<
+  OrgtilknytningerUtenforHierarkiResponse[]
+> {
+  return await ky
+    .get(`${API_BASE_URL}/api/admin/OrgtilknytningerUtenforHierarki`, {
+      timeout: 60_000,
+    })
+    .json<OrgtilknytningerUtenforHierarkiResponse[]>();
+}
+
+export async function masseflyttOrgtilknytninger(data: {
+  orgtilknytningerFid: string[];
+  nyOrgenhetId: string;
+  beholdTilganger: boolean;
+}) {
+  return ky.post(`${API_BASE_URL}/app/orgtilknytninger/masseflytting`, {
+    json: data,
+  });
 }

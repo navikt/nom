@@ -29,6 +29,13 @@ public class OTUtenforHierarki {
         this.leaderElection = leaderElection;
     }
 
+    public void findOTUtenforHierarkiFromDataLast() {
+        findOTUtenforHierarki();
+        if (leaderElection.isLeader() && !otUtenforHierarkieMedAlternativOrgenhet.isEmpty()) {
+            log.error("Orgtilknytninger utenfor aktiv hierarki:\n{}", toLogg(otUtenforHierarkieMedAlternativOrgenhet));
+        }
+    }
+
     public void findOTUtenforHierarki() {
         otUtenforHierarkieMedAlternativOrgenhet.clear();
 
@@ -43,9 +50,7 @@ public class OTUtenforHierarki {
             var alternativOrgenhet = finnAlternativOrgenhet(ot, aktiveOrgenheter);
             otUtenforHierarkieMedAlternativOrgenhet.put(ot, alternativOrgenhet);
         });
-        if (leaderElection.isLeader() && !otUtenforHierarkieMedAlternativOrgenhet.isEmpty()) {
-            log.error("Orgtilknytninger utenfor aktiv hierarki:\n{}", toLogg(otUtenforHierarkieMedAlternativOrgenhet));
-        }
+        log.info("Fant {} OTer utenfor aktiv hierarki", otUtenforHierarkieMedAlternativOrgenhet.size());
     }
 
     private IOrgenhet finnAlternativOrgenhet(OrgtilknytningState ot, Collection<IOrgenhet> aktiveOrgenheter) {
