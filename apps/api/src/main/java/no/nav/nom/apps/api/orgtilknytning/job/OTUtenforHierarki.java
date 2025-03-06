@@ -67,8 +67,10 @@ public class OTUtenforHierarki {
 
     private String toLogg(HashMap<OrgtilknytningState, IOrgenhet> oterUtenforHierarki) {
         var logg = new StringBuilder();
+        log.info("For logging {}", oterUtenforHierarki.size());
         try{
             oterUtenforHierarki.forEach((ot, orgenhet) -> {
+                log.info("For logging {}", ot);
                 logg.append("   Orgtilknytning: ").append(ot).append("\n");
                 if (orgenhet == null) {
                     logg.append("      Fant ikke alternativ orgenhet\n");
