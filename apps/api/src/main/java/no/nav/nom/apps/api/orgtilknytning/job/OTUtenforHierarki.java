@@ -32,6 +32,7 @@ public class OTUtenforHierarki {
     public void findOTUtenforHierarkiFromDataLast() {
         findOTUtenforHierarki();
         if (!otUtenforHierarkieMedAlternativOrgenhet.isEmpty()) {
+            log.error("Orgtilknytninger utenfor aktiv hierarki");
             log.error("Orgtilknytninger utenfor aktiv hierarki:\n{}", toLogg(otUtenforHierarkieMedAlternativOrgenhet));
         }
     }
