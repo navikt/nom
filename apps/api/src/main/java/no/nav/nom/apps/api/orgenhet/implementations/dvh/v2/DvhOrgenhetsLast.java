@@ -199,7 +199,7 @@ public class DvhOrgenhetsLast {
             log.info("Ferdig med orgenhet last");
 
             // Finn OTer utenfor hierarki
-            otUtenforHierarki.findOTUtenforHierarki();
+            otUtenforHierarki.findOTUtenforHierarkiFromDataLast();
         } catch (Exception e) {
             log.error("Failure loading data from DVH", e);
         }

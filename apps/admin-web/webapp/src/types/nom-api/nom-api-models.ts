@@ -19,6 +19,16 @@ export interface AvvikleRessursRequest {
   sluttDato: string;
 }
 
+export interface BrukerSkrivetilgangRessursRequest {
+  bruker: string;
+  ressurs: string;
+}
+
+export interface BrukerSkrivetilgangRessurserRequest {
+  bruker: string;
+  ressurser: string[];
+}
+
 export interface EndreOrgtilknytningRequest {
   erDagligOppfolging: boolean;
   fid: string;
@@ -44,6 +54,7 @@ export interface FolkeregisterPerson {
 }
 
 export interface GetPersonRequest {
+  identType?: IdentType;
   personident: string;
 }
 
@@ -86,7 +97,6 @@ export interface IOrgenhet {
   uniqueAgressoId?: string;
 }
 
-/** @default "STANDARD" */
 export enum IdentType {
   ROBOT = "ROBOT",
   STANDARD = "STANDARD",
@@ -154,6 +164,7 @@ export interface OppdaterOrgtilknytningerForRessursRequest {
 export interface OpprettRessursRequest {
   ansettelsesType: AnsettelsesType;
   fysiskBrukerstedNr: string;
+  identType?: IdentType;
   orgEnhetId: string;
   personident: string;
   primaryTelefonnummer?: string;
@@ -391,6 +402,15 @@ export interface UpdateFysiskeBrukerstederRequest {
   /** @uniqueItems true */
   fysiskeBrukersteder: string[];
   primaryFysiskBrukersted: string;
+}
+
+export interface UpdatePrimaryFysiskBrukerstedForRessurserRequest {
+  navidenter: string[];
+  newPrimaryFysiskBrukersted: string;
+}
+
+export interface UpdatePrimaryFysiskBrukerstedRequest {
+  newPrimaryFysiskBrukersted: string;
 }
 
 export interface UpdatePrimarytelefonnummer {

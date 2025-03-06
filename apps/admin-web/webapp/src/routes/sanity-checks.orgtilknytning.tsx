@@ -5,6 +5,7 @@ import { ErrorBoundary } from "react-error-boundary";
 
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { OrgtilknytningDuplikat } from "~/sanitychecks/Orgtilknytning/OrgtilknytningDuplikat.tsx";
+import { OrgtilknytningerUtenforHierarki } from "~/sanitychecks/Orgtilknytning/OrgtilknytningerUtenforHierarki.tsx";
 import { OrgtilknytningMedFlereDOLSammePeriode } from "~/sanitychecks/Orgtilknytning/OrgtilknytningMedFlereDOLSammePeriode.tsx";
 import { OrgtilknytningMedTilknytningtypeUtenSektor } from "~/sanitychecks/Orgtilknytning/OrgtilknytningMedTilknytningtypeUtenSektor.tsx";
 import { OrgtilknytningMedUgyldigSektorTilknytningtypeKombinasjon } from "~/sanitychecks/Orgtilknytning/OrgtilknytningMedUgyldigSektorTilknytningtypeKombinasjon.tsx";
@@ -49,6 +50,9 @@ function ListSelector(props: { selected: string }) {
     case "OrgtilknytningOverlapp": {
       return <OrgtilknytningOverlapp />;
     }
+    case "OrgtilknytningerUtenforHierarki": {
+      return <OrgtilknytningerUtenforHierarki />;
+    }
     default: {
       return <></>;
     }
@@ -87,6 +91,9 @@ function OrgtilknytningSanityChecks() {
         <option value="OrgtilknytningOverlapp">
           List orgtilknytninger med overlappende DOL i aktiv eller fremtidig
           periode
+        </option>
+        <option value="OrgtilknytningerUtenforHierarki">
+          List orgtilknytninger som henger på enhet utenfor hierarki
         </option>
       </Select>
       <ListSelector selected={selected} />
