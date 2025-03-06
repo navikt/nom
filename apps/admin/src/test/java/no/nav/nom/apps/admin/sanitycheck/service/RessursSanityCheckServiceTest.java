@@ -119,6 +119,27 @@ class RessursSanityCheckServiceTest {
     }
 
     @Test
+    @DisplayName("Filtere bort orgtilknytning.tomDato > 01.01.2099 i sjekk for ulik sluttdato")
+    void should_remove_ot_far_in_the_future_when_comparing_to_ressurs() {
+        RessursState ressurs = getMockRessursEkstern();
+
+        Map<String, RessursState> ressursStateMap = new HashMap<>();
+        ressursStateMap.put(ressurs.navident(), ressurs);
+        when(ressursStateRepositoryMock.findAllActiveRessurser()).thenReturn(ressursStateMap);
+
+        var otLangtFremITid = getMockOrgtilknytningEkstern().toBuilder()
+                .gyldigFom(LocalDate.of(2024, 1, 1))
+                .gyldigTom(Optional.of(LocalDate.of(2099, 1, 1)))
+                .build();
+        when(orgtilknytningStateRepositoryMock.findByNavident(ressurs.navident())).thenReturn(List.of(otLangtFremITid));
+
+
+        var ulikeDatoer = service.ressurserMedUlikOrgTilknytningSluttDato();
+
+        assertThat(ulikeDatoer.size()).isEqualTo(0);
+    }
+
+    @Test
     @DisplayName("Kun overlappende DOL rapporteres")
     void should_find_overlapping_dol() {
         RessursState ressurs = getMockRessursEkstern();
