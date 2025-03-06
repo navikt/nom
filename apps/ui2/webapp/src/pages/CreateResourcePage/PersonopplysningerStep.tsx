@@ -16,6 +16,7 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import { getOrgTilknytninger, getPerson } from "~/api/react-query-endpoints";
+import { useHasAdminAccess } from "~/api/useGetSession";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { FolkeregisterPersonInfo } from "~/pages/CreateResourcePage/components/FolkeregisterPersonInfo";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
@@ -127,7 +128,10 @@ function VisningsnavnForm({
 }: {
   folkeregisterPerson: FolkeregisterPerson;
 }) {
+  const hasAdminAccess = useHasAdminAccess();
+
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
+
   const {
     visningsfornavn,
     visningsmellomnavn,
@@ -203,11 +207,10 @@ function VisningsnavnForm({
       >
         <b>Visningnavn</b>
         <BodyShort spacing>
-          Visningsnavnet vil bli brukt i alle Navs applikasjoner, og fornavn og
-          etternavn er obligatorisk. Navnet skal som hovedregel være samme som
-          folkeregistrert navn, men man kan om ønskelig fjerne mellomnavn.
           Visningsnavnet blir benyttet til å generere medarbeiderens
-          e-postadresse.
+          e-postadresse, og det vil også bli brukt i alle Navs applikasjoner.
+          Undersøk derfor hvordan medarbeider har skrevet sitt navn i
+          rekrutteringsprosessen, og vurder å fjerne eventuelle mellomnavn.
         </BodyShort>
         <div css={fullwidthRow}>
           <TextField
@@ -217,6 +220,7 @@ function VisningsnavnForm({
             label="Fornavn"
             type="text"
             {...register("visningsfornavn")}
+            readOnly={!hasAdminAccess}
           />
           <TextField
             autoComplete="off"
@@ -233,6 +237,7 @@ function VisningsnavnForm({
             label="Etternavn"
             type="text"
             {...register("visningsetternavn")}
+            readOnly={!hasAdminAccess}
           />
         </div>
         <TextField
