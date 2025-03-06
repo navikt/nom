@@ -32,7 +32,8 @@ public class OTUtenforHierarki {
     public void findOTUtenforHierarkiFromDataLast() {
         findOTUtenforHierarki();
         if (!otUtenforHierarkieMedAlternativOrgenhet.isEmpty()) {
-            log.error("Orgtilknytninger utenfor aktiv hierarki:\n{}", toLogg(otUtenforHierarkieMedAlternativOrgenhet));
+            log.error("Orgtilknytninger utenfor aktiv hierarki");
+            log.error("Detaljer{}", toLogg(otUtenforHierarkieMedAlternativOrgenhet));
         }
     }
 
@@ -67,20 +68,14 @@ public class OTUtenforHierarki {
 
     private String toLogg(HashMap<OrgtilknytningState, IOrgenhet> oterUtenforHierarki) {
         var logg = new StringBuilder();
-        log.info("For logging {}", oterUtenforHierarki.size());
-        try{
-            oterUtenforHierarki.forEach((ot, orgenhet) -> {
-                log.info("For logging {}", ot);
-                logg.append("   Orgtilknytning: ").append(ot).append("\n");
-                if (orgenhet == null) {
-                    logg.append("      Fant ikke alternativ orgenhet\n");
-                } else {
-                    logg.append("      Alternativ orgenhet: ").append(orgenhet.getId()).append(" ").append(orgenhet.getNavn()).append("\n");
-                }
-            });
-        } catch (Exception e) {
-            log.error("Feil ved logging av OT utenfor hierarki", e);
-        }
+        oterUtenforHierarki.forEach((ot, orgenhet) -> {
+            logg.append("   Orgtilknytning: ").append(ot).append("\n");
+            if (orgenhet == null) {
+                logg.append("      Fant ikke alternativ orgenhet\n");
+            } else {
+                logg.append("      Alternativ orgenhet: ").append(orgenhet.getId()).append(" ").append(orgenhet.getNavn()).append("\n");
+            }
+        });
         return logg.toString();
     }
 
