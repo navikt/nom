@@ -233,10 +233,12 @@ function OrgTilknytningSection({
             Organisasjonstilknytninger
           </Heading>
 
-          <EditOrgtilknytningerButton
-            harSluttet={harSluttet}
-            lederKanRedigere={lederKanRedigere}
-          />
+          {useHasAdminAccess() && (
+            <EditOrgtilknytningerButton
+              harSluttet={harSluttet}
+              lederKanRedigere={lederKanRedigere}
+            />
+          )}
         </div>
 
         {orgtilknytninger.length === 0 && (

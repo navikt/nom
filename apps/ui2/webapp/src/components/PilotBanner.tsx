@@ -47,34 +47,47 @@ const PilotBanner = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div css={outerDivStyles}>
-      <div css={bannerStyles} onClick={() => setIsOpen(!isOpen)}>
-        <InformationSquareFillIcon css={iconStyles} />
-        <Heading size="small">Nytt i NOM</Heading>
-        <div css={buttonDivStyles}>
-          {isOpen && <ChevronUpIcon fontSize="32px" />}
-          {!isOpen && <ChevronDownIcon fontSize="32px" />}
+    <>
+      <div css={outerDivStyles}>
+        <div css={bannerStyles} onClick={() => setIsOpen(!isOpen)}>
+          <InformationSquareFillIcon css={iconStyles} />
+          <Heading size="small">Nytt i NOM</Heading>
+          <div css={buttonDivStyles}>
+            {isOpen && <ChevronUpIcon fontSize="32px" />}
+            {!isOpen && <ChevronDownIcon fontSize="32px" />}
+          </div>
+        </div>
+
+        {isOpen && (
+          <List as="ul" css={textDivStyles} title="Desember 2024">
+            <List.Item>
+              Pilotenheter administrerer statlige medarbeidere i NOM.
+            </List.Item>
+            <List.Item>Støtte for sektorbytte.</List.Item>
+            <List.Item>
+              Støtte for å masseflytte medarbeidere fra én orgenhet til en
+              annen.
+            </List.Item>
+            <List.Item>
+              Mulighet for å endre kontaktinfo for kontaktpersoner (pårørende).
+            </List.Item>
+            <List.Item>
+              Administrering av alle statlige medarbeidere i NOM kommer i
+              januar.
+            </List.Item>
+          </List>
+        )}
+      </div>
+      <div css={outerDivStyles}>
+        <div css={bannerStyles}>
+          <p>
+            Endring av medarbeiders tilknytning til organisasjonsenhet er
+            midlertidig utilgjengelig. Vi arbeider med å rette feilen, og
+            beklager eventuelle ulemper dette medfører.
+          </p>
         </div>
       </div>
-
-      {isOpen && (
-        <List as="ul" css={textDivStyles} title="Desember 2024">
-          <List.Item>
-            Pilotenheter administrerer statlige medarbeidere i NOM.
-          </List.Item>
-          <List.Item>Støtte for sektorbytte.</List.Item>
-          <List.Item>
-            Støtte for å masseflytte medarbeidere fra én orgenhet til en annen.
-          </List.Item>
-          <List.Item>
-            Mulighet for å endre kontaktinfo for kontaktpersoner (pårørende).
-          </List.Item>
-          <List.Item>
-            Administrering av alle statlige medarbeidere i NOM kommer i januar.
-          </List.Item>
-        </List>
-      )}
-    </div>
+    </>
   );
 };
 export default PilotBanner;
