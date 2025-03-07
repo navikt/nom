@@ -18,25 +18,27 @@ on:
       - 'apps/admin/**'
       - 'apps/api/**'
       - 'apps/nav-ident/**'
+      - 'apps/nom-rdbms-data/**'
       - 'apps/nom-remedy-integrasjon/**'
       - 'apps/nom-ressurser/**'
+      - 'apps/paarorende/**'
       - 'apps/proxy/**'
       - 'apps/streams/**'
       - 'apps/unit4/**'
       - '.github/workflows/codeql-scan_java-kotlin.yaml'
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ "main" ]
-    paths:
-      - 'apps/admin/**'
-      - 'apps/api/**'
-      - 'apps/nav-ident/**'
-      - 'apps/nom-remedy-integrasjon/**'
-      - 'apps/nom-ressurser/**'
-      - 'apps/proxy/**'
-      - 'apps/streams/**'
-      - 'apps/unit4/**'
-      - '.github/workflows/codeql-scan_java-kotlin.yaml'
+#  pull_request:
+#    # The branches below must be a subset of the branches above
+#    branches: [ "main" ]
+#    paths:
+#      - 'apps/admin/**'
+#      - 'apps/api/**'
+#      - 'apps/nav-ident/**'
+#      - 'apps/nom-remedy-integrasjon/**'
+#      - 'apps/nom-ressurser/**'
+#      - 'apps/proxy/**'
+#      - 'apps/streams/**'
+#      - 'apps/unit4/**'
+#      - '.github/workflows/codeql-scan_java-kotlin.yaml'
   schedule:
     - cron: '25 3 * * *'
 
