@@ -10,6 +10,9 @@ on:
 
 jobs:
   verify:
+    permissions:
+      contents: read
+      pull-requests: write
     name: Verify there are no lint or typescript errors
     runs-on: ubuntu-latest
     steps:
