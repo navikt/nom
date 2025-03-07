@@ -159,13 +159,16 @@ public class EventsourceToExternalEvents {
         return orgtilknytningAggregate.get("dagligOppfolging") != null &&
                 orgtilknytningAggregate.get("dagligOppfolging").asText().equals("true");
     }
-
+    
     private boolean ressursHasRequiredFields(ObjectNode ressursAggregate) {
-        return ressursAggregate.get("navident") != null
-                && !ressursAggregate.get("navident").textValue().isEmpty()
-                && ressursAggregate.get("startdato") != null
-                && !ressursAggregate.get("startdato").textValue().isEmpty();
+        JsonNode navidentNode = ressursAggregate.get("navident");
+        JsonNode startdatoNode = ressursAggregate.get("startdato");
+
+        return navidentNode != null && navidentNode.textValue() != null && !navidentNode.textValue().isEmpty()
+                && startdatoNode != null && startdatoNode.textValue() != null && !startdatoNode.textValue().isEmpty();
     }
+    
+    
 
     private static boolean isFieldSetAndTrue(ObjectNode value, String fieldName) {
         JsonNode dolNode = value.get(fieldName);
