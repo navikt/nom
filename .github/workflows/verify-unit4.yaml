@@ -28,6 +28,9 @@ name: 'verify: nom-unit4'
 #
 #jobs:
 #  verify:
+#  permissions:
+#    contents: read
+#    pull-requests: write
 #    uses: ./.github/workflows/verify-spring-app.yml
 #    with:
 #      maven-project: unit4
