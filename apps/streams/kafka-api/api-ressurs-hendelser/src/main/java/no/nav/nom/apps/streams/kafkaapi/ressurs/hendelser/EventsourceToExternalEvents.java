@@ -86,6 +86,10 @@ public class EventsourceToExternalEvents {
                 .selectKey((key, otJson) -> otJson.get("navident").asText())
                 .groupByKey(Grouped.with(stringSerde, jsonSerde))
                 .reduce((previousValue, newValue) -> newValue);
+
+        ressursPerNavident
+                .toStream()
+                .print(Printed.<String, ObjectNode>toSysOut().withLabel("ressursPerNavident"));
         
 
         // Aggregerer orgtilknytninger
@@ -97,9 +101,7 @@ public class EventsourceToExternalEvents {
                         objectMapper::createObjectNode,
                         (String key, OrgtilknytningEvent newEvent, ObjectNode orgtilknytningAggregate) -> {
                             orgtilknytningAggregate.put("fid", newEvent.getFid());
-
-                            // Hvis DagligOppfolgingEndretEvent mottas og setter DOL så skal join med ressurs trigges
-                            // For andre eventer hvor DOL er satt skal join ikke trigges
+                            
                             orgtilknytningAggregate.setAll(objectMapper.convertValue(newEvent.getData(), ObjectNode.class));
 
                             // Hvis DagligOppfolgingEndretEvent mottas og setter DOL så kan OTen gå videre til neste steg
@@ -117,6 +119,11 @@ public class EventsourceToExternalEvents {
                         },
                         Materialized.with(stringSerde, jsonSerde)
                 );
+
+        orgtilknytningAggregateKTable
+                .toStream()
+                .print(Printed.<String, ObjectNode>toSysOut().withLabel("orgtilknytningAggregateKTable"));
+        
 
         // Ta med OTer som er DOL, snu til å være per navident og merke første OT for denne navidenten for sending 
         KTable<String, ObjectNode> orgtilknytningMappedToNavident = orgtilknytningAggregateKTable.toStream()
@@ -140,10 +147,20 @@ public class EventsourceToExternalEvents {
                         Materialized.with(stringSerde, jsonSerde)
                 );
 
+        orgtilknytningMappedToNavident
+                .toStream()
+                .print(Printed.<String, ObjectNode>toSysOut().withLabel("orgtilknytningMappedToNavident"));
+        
+
         // Kun ta med orgtilkyntinger som skal joines 
         KTable<String, ObjectNode> forsteDOLOrgtilknytningPrNavident = orgtilknytningMappedToNavident.toStream()
                 .filter((key, otJson) -> isFieldSetAndTrue(otJson, "sendMessage"))
                 .toTable();
+        
+        forsteDOLOrgtilknytningPrNavident
+                .toStream()
+                .print(Printed.<String, ObjectNode>toSysOut().withLabel("forsteDOLOrgtilknytningPrNavident"));
+        
 
 
         // Joiner på navident
