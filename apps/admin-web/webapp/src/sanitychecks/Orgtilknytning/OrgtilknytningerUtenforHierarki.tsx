@@ -339,7 +339,7 @@ export function OrgtilknytningerUtenforHierarki() {
             checked={beholdTilganger}
             onChange={(e) => setBeholdTilganger(e.target.checked)}
           >
-            Behold tilganger
+            Sett masseflyttingsflagg mot Identrutina
           </Checkbox>
           <HStack gap="2" justify="end">
             <Button
