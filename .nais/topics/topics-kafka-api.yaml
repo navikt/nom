@@ -123,3 +123,6 @@ spec:
     - team: org
       application: org-kafka-manager
       access: readwrite
+    - team: org
+      application: nom-admin
+      access: read
