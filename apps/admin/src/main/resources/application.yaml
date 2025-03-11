@@ -20,6 +20,9 @@ app:
     hendelser:
       apiEventTopic: org.nom.api-hendelser-v1
       apiEventTopic-listener-id: nom-admin_apiHendelserListener_${HOSTNAME}
+    ressurs-hendelser:
+      apiEventTopic: org.nom.api-ressurs-hendelse-v1
+      apiEventTopic-listener-id: nom-admin_apiRessursHendelserListener_${HOSTNAME}
 
 nom.libs.state.ressurs.enabled: true
 nom.libs.state.orgenhet.enabled: true
