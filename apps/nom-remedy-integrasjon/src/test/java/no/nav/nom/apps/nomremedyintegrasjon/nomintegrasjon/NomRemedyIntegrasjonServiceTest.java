@@ -685,7 +685,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
     @DisplayName("Should update for delayed OrgtilknytningDatoEndretEventV2")
     void testShouldUpdateForDelayedOrgtilknytningDatoEndretEventV2(no.nav.nom.generated.model.Sektor sektor, List<Telefon> telefoner) {
         var existingRessurs = ressurs().sektor(sektor);
-        var orgtilknytning = orgtilknytningState();
+        var orgtilknytning = orgtilknytningState().gyldigFom(LocalDate.now().plusMonths(1)).gyldigTom(LocalDate.now().plusMonths(3));
         var orgtilknytningEvent = orgtilknytningDatoEndretEventV2(
                 orgtilknytningDatoEndretEventData().toBuilder()
                         .gyldigFom(LocalDate.now().plusMonths(1))
@@ -693,13 +693,19 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
                         .build()
         );
 
+        delayedEventRepository.save(
+            DelayedEvent.builder()
+                .delayedUntil(LocalDate.now())
+                .event(orgtilknytningEvent)
+                .build());
+
         when(nomApiClient.getOrgtilknytning(orgtilknytningEvent.getFid())).thenReturn(orgtilknytning);
         when(nomApiClient.getRessursByNavident(existingRessurs.getNavident())).thenReturn(existingRessurs);
         when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(orgtilknytning));
         when(nomApiClient.getOrgEnhet(orgtilknytning.getOrgEnhetId())).thenReturn(orgenhet());
         when(nomApiClient.getTelefonnummer(existingRessurs.getNavident())).thenReturn(telefoner);
 
-        nomRemedyIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningEvent);
+        nomRemedyIntegrasjonService.triggerDelayedEvents();
 
         assertThat(remedyIntegrasjonRepositoryService.findAll()).hasSize(1);
     }
@@ -802,93 +808,6 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
                 existingRessurs
             )
         );
-    }
-
-    @ParameterizedTest
-    @MethodSource("testAllSektorsAndTelefonVariants")
-    @DisplayName("Should write new entity with correctly updated values for OrgtilknytningDatoEndretEventV2")
-    void testShouldUpdateForOrgtilknytningDatoEndretEventV2(no.nav.nom.generated.model.Sektor sektor, List<Telefon> telefoner) {
-
-        var existingRessurs = ressurs().sektor(sektor);
-        var dagligOppfolgingOrgtilknytning = orgtilknytningState()
-                .navident(existingRessurs.getNavident())
-                .gyldigTom(LocalDate.now().plusDays(1))
-                .erDagligOppfolging(true);
-        var dagligOppfolgingOrgenhet = orgenhet();
-
-        var orgtilknytningDatoEndretEventV2 = orgtilknytningDatoEndretEventV2(
-                orgtilknytningDatoEndretEventData().toBuilder()
-                        .gyldigFom(LocalDate.now().plusMonths(1))
-                        .gyldigTom(Optional.of(dagligOppfolgingOrgtilknytning.getGyldigTom().plusMonths(2).plusDays(1)))
-                        .build()
-        );
-
-        when(nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid()))
-                .thenReturn(dagligOppfolgingOrgtilknytning);
-        when(nomApiClient.getOrgtilknytningerForNavident(dagligOppfolgingOrgtilknytning.getNavident()))
-                .thenReturn(List.of(dagligOppfolgingOrgtilknytning));
-
-        when(nomApiClient.getRessursByNavident(dagligOppfolgingOrgtilknytning.getNavident()))
-                .thenReturn(existingRessurs);
-
-        when(nomApiClient.getOrgEnhet(dagligOppfolgingOrgtilknytning.getOrgEnhetId()))
-                .thenReturn(dagligOppfolgingOrgenhet);
-
-        when(nomApiClient.getTelefonnummer(existingRessurs.getNavident())).thenReturn(telefoner);
-
-
-        var mobil = telefoner.isEmpty() ? null : telefoner.getFirst().getNummer();
-        var direkteTelefon = telefoner.size() > 1 ? telefoner.get(1).getNummer() : null;
-
-        remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntity(NomIntegrasjonEntity.builder()
-                .entryId(fifteenCharLengthZeroPaddedNumber(0L))
-                .entryBestiller(orgtilknytningDatoEndretEventV2.getMetadata().inputMetadata().origination().initiatedBy())
-                .entryOperasjon("Ny")
-                .entryStatus("Fullført")
-                .enhetsId(dagligOppfolgingOrgenhet.getRemedyEnhetId())
-                .etternavn(capitalizeNavn(existingRessurs.getVisningsnavn().getEtternavn()))
-                .fodselsnummer(existingRessurs.getPersonident())
-                .fornavn(capitalizeNavn(formatFornavnWithMellomnavn(existingRessurs.getVisningsnavn())))
-                .fysiskBrukerstedId(existingRessurs.getPrimaryFysiskBrukersted())
-                .navId(existingRessurs.getNavident())
-                .sektor(nomSektorToRemedyCode(existingRessurs.getSektor()))
-                .tiltredelsesdato(epochSecondsNorwegianTimeNoon(
-                        dagligOppfolgingOrgtilknytning.getGyldigFom())
-                )
-                .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()) : null)
-                .direkteTelefon(direkteTelefon)
-                .mobil(mobil)
-                .build(), orgtilknytningDatoEndretEventV2.getMetadata().inputMetadata().origination().initiatedBy());
-
-        nomRemedyIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDatoEndretEventV2);
-
-        var newNomIntegrasjonEntityForNavident = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(
-                dagligOppfolgingOrgtilknytning.getNavident()
-        );
-
-        assertThat(newNomIntegrasjonEntityForNavident)
-                .usingRecursiveComparison()
-                .isEqualTo(Optional.of(
-                        NomIntegrasjonEntity.builder()
-                                .entryId(fifteenCharLengthZeroPaddedNumber(1L))
-                                .entryBestiller(orgtilknytningDatoEndretEventV2.getMetadata().inputMetadata().origination().initiatedBy())
-                                .entryOperasjon("Ny")
-                                .entryStatus("Ubehandlet")
-                                .enhetsId(dagligOppfolgingOrgenhet.getRemedyEnhetId())
-                                .etternavn(capitalizeNavn(existingRessurs.getVisningsnavn().getEtternavn()))
-                                .fodselsnummer(existingRessurs.getPersonident())
-                                .fornavn(capitalizeNavn(formatFornavnWithMellomnavn(existingRessurs.getVisningsnavn())))
-                                .fysiskBrukerstedId(existingRessurs.getPrimaryFysiskBrukersted())
-                                .navId(existingRessurs.getNavident())
-                                .sektor(nomSektorToRemedyCode(existingRessurs.getSektor()))
-                                .tiltredelsesdato(epochSecondsNorwegianTimeNoon(
-                                        orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom())
-                                )
-                                .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()) : null)
-                                .direkteTelefon(direkteTelefon)
-                                .mobil(mobil)
-                                .build()
-                ));
     }
 
     @Test
@@ -1066,7 +985,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
         var orgtilknytning = orgtilknytningState();
         var orgtilknytningDatoEndretEventV2 = orgtilknytningDatoEndretEventV2(
             orgtilknytningDatoEndretEventData().toBuilder()
-                .gyldigFom(orgtilknytning.getGyldigFom().plusDays(2))
+                .gyldigFom(LocalDate.now())
                 .gyldigTom(Optional.of(orgtilknytning.getGyldigTom().plusMonths(1)))
                 .build()
         );
