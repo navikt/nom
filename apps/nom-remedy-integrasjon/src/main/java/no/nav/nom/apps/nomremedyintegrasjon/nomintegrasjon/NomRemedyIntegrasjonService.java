@@ -157,7 +157,16 @@ public class NomRemedyIntegrasjonService {
     }
 
     private void handleOrgtilknytningDatoEndretEvent(OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
-        updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
+        if (orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom().isAfter(LocalDate.now())) {
+            logger.info("Delaying remedy update for OrgtilknytningDatoEndretEventV2 with fid {}", orgtilknytningDatoEndretEventV2.getFid());
+
+            delayEventUpdate(
+                orgtilknytningDatoEndretEventV2,
+                orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom()
+            );
+        } else {
+            updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
+        }
     }
 
     private void handleOrgtilknytningSektorEndretEvent(OrgtilknytningSektorEndretEventV1 orgtilknytningSektorEndretEventV1) {
@@ -218,6 +227,22 @@ public class NomRemedyIntegrasjonService {
             }
         } catch (OrgtilknytningNotFoundException e) {
             logger.info("Delayed update of OrgtilknytningDagligOppfolgingEndretEventV1 cancelled. {}", e.getMessage());
+        }
+    }
+
+    private void handleDelayedOrgtiknytning(OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
+        logger.info("Handling delayed update of OrgtilknytningDatoEndretEventV2 with fid {}", orgtilknytningDatoEndretEventV2.getFid());
+
+        try {
+            var orgtilknytningState = nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid());
+
+            if (orgtilknytningState.getErDagligOppfolging()
+                && orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom().equals(orgtilknytningState.getGyldigFom())
+                && orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigTom().equals(Optional.ofNullable(orgtilknytningState.getGyldigTom()))) {
+                updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
+            }
+        } catch (OrgtilknytningNotFoundException e) {
+            logger.info("Delayed update of OrgtilknytningDatoEndretEventV2 cancelled. {}", e.getMessage());
         }
     }
 
@@ -468,6 +493,8 @@ public class NomRemedyIntegrasjonService {
                 handleDelayedRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
             } else if (nomEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
                 handleDelayedOrgtiknytning(orgtilknytningDagligOppfolgingEndretEventV1);
+            } else if (nomEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
+                handleDelayedOrgtiknytning(orgtilknytningDatoEndretEventV2);
             } else if (nomEvent instanceof OrgtilknytningSektorEndretEventV1 orgtilknytningSektorEndretEventV1) {
                 handleDelayedOrgtiknytningSektor(orgtilknytningSektorEndretEventV1);
             }
