@@ -98,9 +98,9 @@ public class KontaktpersonerExcelGenerator {
             medarbeiderEtternavn.setCellValue(ressurs.state().visningsnavn().etternavn());
             if (kontaktinfo != null) {
                 kontaktpersonNavn.setCellValue(kontaktinfo.fornavn() + " " + kontaktinfo.etternavn());
-                kontaktpersonRelasjon.setCellValue(kontaktinfo.relasjon());
-                kontaktpersonTelefonnr.setCellValue(kontaktinfo.telefon());
-                kontaktpersonProritet.setCellValue(kontaktinfo.prioritet());
+                kontaktpersonRelasjon.setCellValue(kontaktinfo.relasjon() != null ? kontaktinfo.relasjon() : "");
+                kontaktpersonTelefonnr.setCellValue(kontaktinfo.telefon() != null ? kontaktinfo.telefon() : "");
+                kontaktpersonProritet.setCellValue(kontaktinfo.prioritet() != null ? kontaktinfo.prioritet().toString() : "");
             }
         }
     }
