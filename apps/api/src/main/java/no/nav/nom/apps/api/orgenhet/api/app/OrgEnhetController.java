@@ -11,6 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 import no.nav.nom.apps.api.authorize.AuthResolver;
+import no.nav.nom.apps.api.clients.kontaktinfo.KontaktinfoClient;
+import no.nav.nom.apps.api.clients.kontaktinfo.RessursKontaktinfo;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
@@ -50,19 +52,22 @@ public class OrgEnhetController {
     private final KontaktpersonerExcelGenerator kontaktpersonerExcelGenerator;
     private final RessursRestService ressursRestService;
     private final AuthResolver authResolver;
+    private final KontaktinfoClient kontaktinfoClient;
 
     public OrgEnhetController(
             OrgenhetService orgenhetService,
             OrgEnhetMapper orgEnhetMapper,
             KontaktpersonerExcelGenerator kontaktpersonerExcelGenerator,
             RessursRestService ressursRestService,
-            AuthResolver authResolver
+            AuthResolver authResolver,
+            KontaktinfoClient kontaktinfoClient
     ) {
         this.orgenhetService = orgenhetService;
         this.orgEnhetMapper = orgEnhetMapper;
         this.kontaktpersonerExcelGenerator = kontaktpersonerExcelGenerator;
         this.ressursRestService = ressursRestService;
         this.authResolver = authResolver;
+        this.kontaktinfoClient = kontaktinfoClient;
     }
 
     @GetMapping("/{orgenhetId}")
@@ -86,7 +91,7 @@ public class OrgEnhetController {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Exported file"),
     })
-    public List<Ressurs>  findAllUnderlyingressurserUnderOrgenhet(HttpServletResponse response, @PathVariable String orgenhetId) throws IOException {
+    public List<RessursKontaktinfo>  findAllUnderlyingressurserUnderOrgenhet(HttpServletResponse response, @PathVariable String orgenhetId) throws IOException {
         List<OrgtilknytningState> combinedRessursKoblinger  = new ArrayList<>();
 
         // get all ressurser under orgenhet
@@ -106,7 +111,17 @@ public class OrgEnhetController {
             .map(orgtilknytningState ->  ressursRestService.findRessursByNavident(orgtilknytningState.navident()))
             .toList();
 
-        return ressurser;
+        // sort ressurser by fornavn and etternavn
+        List<Ressurs> sortedRessurser = ressurser.stream().sorted((r1, r2) -> {
+            var n1 = r1.state().visningsnavn();
+            var n2 = r2.state().visningsnavn();
+            return n1.fornavn().compareTo(n2.fornavn()) == 0 ? n1.etternavn().compareTo(n2.etternavn()) : n1.fornavn().compareTo(n2.fornavn());
+        }).toList();
+
+        // get kontakt info for ressurser
+        List<RessursKontaktinfo> kontaktinfoForRessurser = kontaktinfoClient.getKontaktinfoForRessurser(sortedRessurser.stream().map(r -> r.state().navident()).toList());
+
+        return kontaktinfoForRessurser;
     }
 
     @GetMapping("/exportKontaktpersonerFor/{orgenhetId}")
