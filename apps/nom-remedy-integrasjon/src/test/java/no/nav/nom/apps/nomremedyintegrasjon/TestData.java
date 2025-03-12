@@ -3,6 +3,7 @@ package no.nav.nom.apps.nomremedyintegrasjon;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
@@ -21,6 +22,7 @@ import no.nav.nom.generated.model.OrgtilknytningState;
 import no.nav.nom.generated.model.Ressurs;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -271,13 +273,30 @@ public class TestData {
         );
     }
 
+    public static RessursState ressursState() {
+        return new RessursState(
+            UUID.randomUUID().toString(),
+            "12345688888",
+            "S123456",
+            Sektor.NAV_STATLIG,
+            new Visningsnavn("Nav", Optional.empty(), "Navnesen"),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(LocalDate.now()),
+            Optional.of("2700"),
+            new ArrayList<>(),
+            IdentType.STANDARD
+        );
+    }
+
     public static OrgtilknytningState orgtilknytningState() {
         return new OrgtilknytningState()
             .navident("X123456")
             .orgEnhetId("orgenhetId")
             .gyldigFom(LocalDate.now())
             .gyldigTom(LocalDate.now().plusMonths(10))
-            .erDagligOppfolging(true);
+            .erDagligOppfolging(true)
+            .sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
     }
 
     public static no.nav.nom.contract.nom.state.OrgtilknytningState orgtilknytningState(OrgtilknytningDagligOppfolgingEndretEventV1 v1) {
@@ -290,6 +309,20 @@ public class TestData {
             v1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom(),
             v1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom(),
             Optional.empty(),
+            Optional.empty()
+        );
+    }
+
+    public static no.nav.nom.contract.nom.state.OrgtilknytningState orgtilknytningStateContract() {
+        return new no.nav.nom.contract.nom.state.OrgtilknytningState(
+            UUID.randomUUID().toString(),
+            "S123456",
+            "ab123c",
+            Sektor.NAV_STATLIG,
+            true,
+            LocalDate.now(),
+            Optional.of(LocalDate.now().plusMonths(10)),
+            Optional.of(Tilknytningtype.FAST),
             Optional.empty()
         );
     }
