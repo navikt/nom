@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 @Service
-public class NomRemedyIntegrasjonKafkaListener {
+public class NomRemedyIntegrasjonKafkaListenerOld {
 
     private final NomRemedyIntegrasjonService nomRemedyIntegrasjonService;
     private final MasteredRessursStateRepository masteredRessursStateRepository;
@@ -32,9 +32,9 @@ public class NomRemedyIntegrasjonKafkaListener {
     private final NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
     private final NomStateOrgEnhetListener nomStateOrgEnhetListener;
 
-    private final Logger logger = LoggerFactory.getLogger(NomRemedyIntegrasjonKafkaListener.class);
+    private final Logger logger = LoggerFactory.getLogger(NomRemedyIntegrasjonKafkaListenerOld.class);
 
-    public NomRemedyIntegrasjonKafkaListener(
+    public NomRemedyIntegrasjonKafkaListenerOld(
         NomRemedyIntegrasjonService nomRemedyIntegrasjonService,
         MasteredRessursStateRepository masteredRessursStateRepository,
         RessursStateRepository ressursStateRepository,

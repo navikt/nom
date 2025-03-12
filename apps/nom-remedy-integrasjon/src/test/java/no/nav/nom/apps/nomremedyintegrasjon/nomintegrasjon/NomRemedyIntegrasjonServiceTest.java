@@ -296,7 +296,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
     void testShouldUpdateForRessursPersonaliaOppdatertV1(no.nav.nom.generated.model.Sektor sektor, List<Telefon> telefoner) {
 
         var existingRessurs = ressurs().sektor(sektor);
-        var dagligOppfolgingOrgtilknytning = orgtilknytningState().erDagligOppfolging(true);
+        var dagligOppfolgingOrgtilknytning = orgtilknytningState().erDagligOppfolging(true).sektor(sektor);
         var dagligOppfolgingOrgenhet = orgenhet();
 
         var ressursPersonaliaOppdatertV1 = ressursPersonaliaOppdatertV1(
@@ -346,7 +346,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
     void testShouldUpdateForWithNoActiveDOLRessursPersonaliaOppdatertV1(no.nav.nom.generated.model.Sektor sektor, List<Telefon> telefoner) {
 
         var existingRessurs = ressurs().sektor(sektor);
-        var dagligOppfolgingOrgtilknytning = orgtilknytningState().gyldigFom(LocalDate.now().plusDays(2)).erDagligOppfolging(true);
+        var dagligOppfolgingOrgtilknytning = orgtilknytningState().gyldigFom(LocalDate.now().plusDays(2)).erDagligOppfolging(true).sektor(sektor);
         var dagligOppfolgingOrgenhet = orgenhet();
 
         var ressursPersonaliaOppdatertV1 = ressursPersonaliaOppdatertV1(
@@ -395,7 +395,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
     @DisplayName("Should write new entity with correctly updated values for RessursPrimaryTelefonnummerOppdatertV1")
     void testShouldUpdateForRessursPrimaryTelefonnummerOppdatertV1(no.nav.nom.generated.model.Sektor sektor, List<Telefon> telefoner) {
         var existingRessurs = ressurs().sektor(sektor);
-        var dagligOppfolgingOrgtilknytning = orgtilknytningState().erDagligOppfolging(true);
+        var dagligOppfolgingOrgtilknytning = orgtilknytningState().erDagligOppfolging(true).sektor(sektor);
         var dagligOppfolgingOrgenhet = orgenhet();
 
         var ressursPrimaryTelefonnummerOppdatertV1 = ressursPrimaryTelefonnummerOppdatertV1(
@@ -442,7 +442,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
     void testShouldUpdateForRessursFysiskeBrukerstederOppdatertEventV1(no.nav.nom.generated.model.Sektor sektor, List<Telefon> telefoner) {
 
         var existingRessurs = ressurs().sektor(sektor);
-        var dagligOppfolgingOrgtilknytning = orgtilknytningState().erDagligOppfolging(true);
+        var dagligOppfolgingOrgtilknytning = orgtilknytningState().erDagligOppfolging(true).sektor(sektor);
         var dagligOppfolgingOrgenhet = orgenhet();
 
         var ressursFysiskeBrukerstederOppdatertEventV1 = ressursFysiskeBrukerstederOppdatertEventV1(
@@ -491,7 +491,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
     void testShouldUpdateForOrgtilknytningDagligOppfolgingEndretEventV1(no.nav.nom.generated.model.Sektor sektor, List<Telefon> telefoner) {
 
         var existingRessurs = ressurs().sektor(sektor);
-        var previousDagligOppfolgingOrgtilknytning = orgtilknytningState().erDagligOppfolging(true);
+        var previousDagligOppfolgingOrgtilknytning = orgtilknytningState().erDagligOppfolging(true).sektor(sektor);
         var previousDagligOppfolgingOrgenhet = orgenhet();
 
         var newDagligOppfolgningRemedyEnhetId = "new-remedy-enhet-id";
@@ -685,7 +685,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
     @DisplayName("Should update for delayed OrgtilknytningDatoEndretEventV2")
     void testShouldUpdateForDelayedOrgtilknytningDatoEndretEventV2(no.nav.nom.generated.model.Sektor sektor, List<Telefon> telefoner) {
         var existingRessurs = ressurs().sektor(sektor);
-        var orgtilknytning = orgtilknytningState().gyldigFom(LocalDate.now().plusMonths(1)).gyldigTom(LocalDate.now().plusMonths(3));
+        var orgtilknytning = orgtilknytningState().sektor(sektor).gyldigFom(LocalDate.now().plusMonths(1)).gyldigTom(LocalDate.now().plusMonths(3));
         var orgtilknytningEvent = orgtilknytningDatoEndretEventV2(
                 orgtilknytningDatoEndretEventData().toBuilder()
                         .gyldigFom(LocalDate.now().plusMonths(1))

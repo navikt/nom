@@ -2,12 +2,13 @@ app:
   name: ${NAIS_APP_NAME:nom-remedy-integrasjon}
   kafka:
     ressurs:
-      stateTopic: org.nom.intern-ressurs-state
-      nomMasteredRessursTopic: org.nom.nom-mastered-ressurs
+      state-topic: org.nom.intern-ressurs-state
+      auto-startup: true
     orgEnhet:
-      stateTopic: org.nom.intern-orgenhet-state
-    orgTilknytning:
-      stateTopic: org.nom.intern-orgtilknytning-state
+      state-topic: org.nom.intern-orgenhet-state
+    orgtilknytning:
+      state-topic: org.nom.intern-orgtilknytning-state
+      auto-startup: true
   kafka-topics:
     ressurs-eventsource:
       topic-name: org.nom.ressurs-eventsource
