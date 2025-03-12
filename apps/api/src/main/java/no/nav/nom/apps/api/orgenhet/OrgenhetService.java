@@ -2,10 +2,8 @@ package no.nav.nom.apps.api.orgenhet;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import jakarta.servlet.http.HttpServletResponse;
 
 import no.nav.nom.apps.api.clients.kontaktinfo.KontaktinfoClient;
-import no.nav.nom.apps.api.clients.kontaktinfo.RessursKontaktinfo;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
@@ -13,7 +11,6 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandServic
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.ressurs.api.app.RessursRestService;
-import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
@@ -23,7 +20,6 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
-import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.slf4j.Logger;
@@ -31,9 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -61,10 +55,6 @@ public class OrgenhetService {
     private final KafkaTopicReader kafkaTopicReader;
     private final OrganiseringStateRepository organiseringStateRepository;
     private List<IOrgenhet> organiserteEnheter = emptyList();
-    private final KontaktinfoClient kontaktinfoClient;
-    private final OrgEnhetMapper orgEnhetMapper;
-    private final RessursRestService ressursRestService;
-
 
     public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository, 
                            OrgEnhetCommandService orgEnhetCommandService, 
@@ -80,9 +70,6 @@ public class OrgenhetService {
         this.dvhRepository = dvhRepository;
         this.kafkaTopicReader = kafkaTopicReader;
         this.organiseringStateRepository = organiseringStateRepository;
-        this.kontaktinfoClient = kontaktinfoClient;
-        this.orgEnhetMapper = orgEnhetMapper;
-        this.ressursRestService = ressursRestService;
     }
 
 
@@ -324,6 +311,7 @@ public class OrgenhetService {
         return kafkaTopicReader.getOrgEnhetEvents(readTopicRequest.maxRecords(), readTopicRequest.fromOffset(), readTopicRequest.partition());
     }
 
+    /*
     public List<RessursKontaktinfo>  findAllUnderlyingressurserUnderOrgenhet(String orgenhetId) throws IOException {
         // get all ressurser under orgenhet and all underliggende enheter
         List<Ressurs> sortedRessurser = getSortedRessurserInAndUnderliggendeOrgenheter(orgenhetId);
@@ -364,4 +352,6 @@ public class OrgenhetService {
         }).toList();
         return sortedRessurser;
     }
+
+     */
 }
