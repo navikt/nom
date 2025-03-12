@@ -1,11 +1,19 @@
 package no.nav.nom.apps.api.orgenhet;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import jakarta.servlet.http.HttpServletResponse;
+
+import no.nav.nom.apps.api.clients.kontaktinfo.KontaktinfoClient;
+import no.nav.nom.apps.api.clients.kontaktinfo.RessursKontaktinfo;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
+import no.nav.nom.apps.api.ressurs.api.app.RessursRestService;
+import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
@@ -15,6 +23,7 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.slf4j.Logger;
@@ -22,7 +31,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -35,6 +46,8 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
+import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
+import static no.nav.nom.apps.api.common.DateUtils.isPeriodFuture;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedAzpName;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
@@ -48,19 +61,28 @@ public class OrgenhetService {
     private final KafkaTopicReader kafkaTopicReader;
     private final OrganiseringStateRepository organiseringStateRepository;
     private List<IOrgenhet> organiserteEnheter = emptyList();
+    private final KontaktinfoClient kontaktinfoClient;
+    private final OrgEnhetMapper orgEnhetMapper;
+    private final RessursRestService ressursRestService;
 
 
     public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository, 
                            OrgEnhetCommandService orgEnhetCommandService, 
                            DvhRepository dvhRepository, 
                            KafkaTopicReader kafkaTopicReader, 
-                           OrganiseringStateRepository organiseringStateRepository
+                           OrganiseringStateRepository organiseringStateRepository,
+                           KontaktinfoClient kontaktinfoClient,
+                           OrgEnhetMapper orgEnhetMapper,
+                           RessursRestService ressursRestService
     ) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgEnhetCommandService = orgEnhetCommandService;
         this.dvhRepository = dvhRepository;
         this.kafkaTopicReader = kafkaTopicReader;
         this.organiseringStateRepository = organiseringStateRepository;
+        this.kontaktinfoClient = kontaktinfoClient;
+        this.orgEnhetMapper = orgEnhetMapper;
+        this.ressursRestService = ressursRestService;
     }
 
 
@@ -300,5 +322,46 @@ public class OrgenhetService {
 
     public List<JsonNode> getOrgEnhetEvents(ReadTopicRequest readTopicRequest) {
         return kafkaTopicReader.getOrgEnhetEvents(readTopicRequest.maxRecords(), readTopicRequest.fromOffset(), readTopicRequest.partition());
+    }
+
+    public List<RessursKontaktinfo>  findAllUnderlyingressurserUnderOrgenhet(String orgenhetId) throws IOException {
+        // get all ressurser under orgenhet and all underliggende enheter
+        List<Ressurs> sortedRessurser = getSortedRessurserInAndUnderliggendeOrgenheter(orgenhetId);
+        logger.info("User have access to these ressurser for this orgenhet: {}-{}", sortedRessurser, orgenhetId);
+
+        // get kontakt info for ressurser
+        List<RessursKontaktinfo> kontaktinfoForRessurser = kontaktinfoClient.getKontaktinfoForRessurser(sortedRessurser.stream().map(r -> r.state().navident()).toList());
+        return kontaktinfoForRessurser;
+    }
+
+    public List<Ressurs> getSortedRessurserInAndUnderliggendeOrgenheter(String orgenhetId) {
+        List<OrgtilknytningState> combinedRessursKoblinger  = new ArrayList<>();
+
+        // get all ressurser under orgenhet
+        Optional<no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet> orgEnhet = getById(orgenhetId)
+            .map(orgEnhetMapper::mapToOrgEnhet);
+        orgEnhet.ifPresent(orgEnhet1 -> combinedRessursKoblinger.addAll(orgEnhet1.ressursKoblinger()));
+
+        // first get all underlyinh enheter
+        List<no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet> underEnheter = new ArrayList<>(getAllUnderliggendeOrgEnhetById(orgenhetId)
+            .stream()
+            .map(orgEnhetMapper::mapToOrgEnhet)
+            .toList());
+        underEnheter.forEach(underEnhet -> combinedRessursKoblinger.addAll(underEnhet.ressursKoblinger()));
+
+        // then get active ressurser under each underliggende enhet
+        List<Ressurs> ressurser = combinedRessursKoblinger.stream()
+            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()) ||
+                isPeriodFuture(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
+            .map(orgtilknytningState ->  ressursRestService.findRessursByNavident(orgtilknytningState.navident()))
+            .toList();
+
+        // sort ressurser by fornavn and etternavn
+        List<Ressurs> sortedRessurser = ressurser.stream().sorted((r1, r2) -> {
+            var n1 = r1.state().visningsnavn();
+            var n2 = r2.state().visningsnavn();
+            return n1.fornavn().compareTo(n2.fornavn()) == 0 ? n1.etternavn().compareTo(n2.etternavn()) : n1.fornavn().compareTo(n2.fornavn());
+        }).toList();
+        return sortedRessurser;
     }
 }

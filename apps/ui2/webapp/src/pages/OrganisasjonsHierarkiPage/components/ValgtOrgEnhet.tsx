@@ -413,7 +413,7 @@ function DropdownMeny({
                 as={Link}
                 onClick={handleDownloadKontaktpersonerExcel}
               >
-                Export kontaktpersoner til Excel
+                Eksporter kontaktpersoner til Excel
               </Dropdown.Menu.GroupedList.Item>
             </>
           )}

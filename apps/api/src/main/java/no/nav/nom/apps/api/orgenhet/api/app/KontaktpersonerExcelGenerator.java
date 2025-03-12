@@ -22,13 +22,7 @@ import java.util.Map;
 public class KontaktpersonerExcelGenerator {
     private final static Logger log = LoggerFactory.getLogger(KontaktpersonerExcelGenerator.class);
 
-    private static final Map<String, String> sektorMap = Map.of(
-        "NAV_STATLIG", "Statlig",
-        "NAV_KOMMUNAL", "Kommunal",
-        "EKSTERN", "Ekstern"
-    );
     private final KontaktinfoClient kontaktinfoClient;
-
 
     public KontaktpersonerExcelGenerator(
         KontaktinfoClient kontaktinfoClient
@@ -36,6 +30,40 @@ public class KontaktpersonerExcelGenerator {
         this.kontaktinfoClient = kontaktinfoClient;
     }
 
+    public void generate(HttpServletResponse response, OrgEnhet orgEnhet, List<RessursKontaktinfo> kontaktinfoForRessurser, List<Ressurs> sortedRessurser) {
+        try (Workbook workbook = new XSSFWorkbook()) {
+            var sheet = workbook.createSheet("Kontaktpersoner - " + orgEnhet.navn());
+            var rowcount = 0;
+
+            addRow(sheet.createRow(rowcount++), null, null);
+
+            log.info("Generating excel for orgenhet {}, and contantinfo {}", orgEnhet.id(), kontaktinfoForRessurser);
+            for (RessursKontaktinfo info : kontaktinfoForRessurser) {
+                Ressurs ressurs = getRessursForGittNavident(sortedRessurser, info.ressursNavident());
+                addRow(
+                    sheet.createRow(rowcount++),
+                    ressurs, info.kontaktinfo().isEmpty()? null : info.kontaktinfo().getFirst()
+                );
+            }
+
+            var headerRow = sheet.getRow(0);
+            var font = workbook.createFont();
+            var style = workbook.createCellStyle();
+            font.setBold(true);
+            style.setFont(font);
+            headerRow.cellIterator().forEachRemaining(cell -> cell.setCellStyle(style));
+            sheet.createFreezePane(0, 1);
+
+            workbook.write(response.getOutputStream());
+            log.info("Generated contakt info excel for orgenhet {}", orgEnhet.id());
+
+        } catch (Exception e) {
+            log.error("Failed to generate excel file", e);
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    /*
     public void generate(HttpServletResponse response, OrgEnhet orgEnhet, List<Ressurs> unsortedRessurser) {
         // sort ressurser by fornavn and etternavn
         List<Ressurs> sortedRessurser = unsortedRessurser.stream().sorted((r1, r2) -> {
@@ -78,6 +106,7 @@ public class KontaktpersonerExcelGenerator {
         }
 
     }
+    */
 
     private Ressurs getRessursForGittNavident(List<Ressurs> ressurser, String navident) {
         return ressurser.stream().filter(r -> r.state().navident().equals(navident)).findFirst().orElse(null);

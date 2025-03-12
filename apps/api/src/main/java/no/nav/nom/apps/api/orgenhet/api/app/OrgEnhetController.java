@@ -22,7 +22,6 @@ import no.nav.nom.apps.api.ressurs.api.app.RessursRestService;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
-import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -36,13 +35,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
-import static no.nav.nom.apps.api.common.DateUtils.isPeriodFuture;
 
 @Tag(name = "OrgEnheter")
 @RestController
@@ -53,7 +47,6 @@ public class OrgEnhetController {
     private final OrgenhetService orgenhetService;
     private final OrgEnhetMapper orgEnhetMapper;
     private final KontaktpersonerExcelGenerator kontaktpersonerExcelGenerator;
-    private final RessursRestService ressursRestService;
     private final AuthResolver authResolver;
     private final KontaktinfoClient kontaktinfoClient;
 
@@ -68,7 +61,6 @@ public class OrgEnhetController {
         this.orgenhetService = orgenhetService;
         this.orgEnhetMapper = orgEnhetMapper;
         this.kontaktpersonerExcelGenerator = kontaktpersonerExcelGenerator;
-        this.ressursRestService = ressursRestService;
         this.authResolver = authResolver;
         this.kontaktinfoClient = kontaktinfoClient;
     }
@@ -95,38 +87,7 @@ public class OrgEnhetController {
         @ApiResponse(responseCode = "200", description = "Exported file"),
     })
     public List<RessursKontaktinfo>  findAllUnderlyingressurserUnderOrgenhet(HttpServletResponse response, @PathVariable String orgenhetId) throws IOException {
-        List<OrgtilknytningState> combinedRessursKoblinger  = new ArrayList<>();
-
-        // get all ressurser under orgenhet
-        Optional<OrgEnhet> orgEnhet = orgenhetService.getById(orgenhetId)
-            .map(orgEnhetMapper::mapToOrgEnhet);
-        orgEnhet.ifPresent(orgEnhet1 -> combinedRessursKoblinger.addAll(orgEnhet1.ressursKoblinger()));
-
-        // first get all underlyinh enheter
-        List<OrgEnhet> underEnheter = new ArrayList<>(orgenhetService.getAllUnderliggendeOrgEnhetById(orgenhetId)
-            .stream()
-            .map(orgEnhetMapper::mapToOrgEnhet)
-            .toList());
-        underEnheter.forEach(underEnhet -> combinedRessursKoblinger.addAll(underEnhet.ressursKoblinger()));
-
-        // then get active ressurser under each underliggende enhet
-        List<Ressurs> ressurser = combinedRessursKoblinger.stream()
-            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()) ||
-                isPeriodFuture(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
-            .map(orgtilknytningState ->  ressursRestService.findRessursByNavident(orgtilknytningState.navident()))
-            .toList();
-
-        // sort ressurser by fornavn and etternavn
-        List<Ressurs> sortedRessurser = ressurser.stream().sorted((r1, r2) -> {
-            var n1 = r1.state().visningsnavn();
-            var n2 = r2.state().visningsnavn();
-            return n1.fornavn().compareTo(n2.fornavn()) == 0 ? n1.etternavn().compareTo(n2.etternavn()) : n1.fornavn().compareTo(n2.fornavn());
-        }).toList();
-
-        // get kontakt info for ressurser
-        List<RessursKontaktinfo> kontaktinfoForRessurser = kontaktinfoClient.getKontaktinfoForRessurser(sortedRessurser.stream().map(r -> r.state().navident()).toList());
-
-        return kontaktinfoForRessurser;
+        return orgenhetService.findAllUnderlyingressurserUnderOrgenhet(orgenhetId);
     }
 
     @GetMapping("/exportKontaktpersonerFor/{orgenhetId}")
@@ -154,15 +115,17 @@ public class OrgEnhetController {
                 log.error(errorMessage);
                 throw new RuntimeException(errorMessage);
             }
+            log.info("User have access to view ressurser for this orgenhet and getting ressurer: {}-{}", loggedInUser, orgenhetId);
 
-            log.info("User have access to view ressurser for this orgenhet: {}-{}", loggedInUser, orgenhetId);
-            var ressursKoblinger = orgEnhet.get().ressursKoblinger();
-            var ressurser = ressursKoblinger.stream()
-                .map(orgtilknytningState ->  ressursRestService.findRessursByNavident(orgtilknytningState.navident()))
-                .toList();
+            List<Ressurs> sortedRessurser = orgenhetService.getSortedRessurserInAndUnderliggendeOrgenheter(orgenhetId);
+            log.info("User have access to these ressurser for this orgenhet: {}-{}", sortedRessurser, orgenhetId);
+
+            // get kontakt info for ressurser
+            List<RessursKontaktinfo> kontaktinfoForRessurser = kontaktinfoClient.getKontaktinfoForRessurser(sortedRessurser.stream().map(r -> r.state().navident()).toList());
+            log.info("Kontaktinfo for this orgenhet: {}-{}", orgenhetId, kontaktinfoForRessurser);
 
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=kontaktpersoner.xlsx");
-            kontaktpersonerExcelGenerator.generate(response, orgEnhet.get(), ressurser);
+            kontaktpersonerExcelGenerator.generate(response, orgEnhet.get(), kontaktinfoForRessurser, sortedRessurser);
         } catch (Exception e) {
             log.error("Failed to generate export file " + e.getMessage());
             response.sendError(500);
