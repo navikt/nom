@@ -89,7 +89,7 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
         OrgEnhet orgEnhet = OrgEnhet.builder().id("1").fid("F123").navn("Test Enhet").build();
 
         // act
-        kontaktpersonerExcelGenerator.generate(response, orgEnhet, ressurser);
+        kontaktpersonerExcelGenerator.generate(response, orgEnhet, kontaktinfoForRessurser, ressurser);
 
         // Verify the content of the generated Excel file
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(outputStream.toByteArray()))) {
