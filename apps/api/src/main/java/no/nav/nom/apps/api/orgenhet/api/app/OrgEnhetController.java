@@ -41,6 +41,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
+import static no.nav.nom.apps.api.common.DateUtils.isPeriodFuture;
+
 @Tag(name = "OrgEnheter")
 @RestController
 @RequestMapping(value = {"/app/orgenheter"})
@@ -106,8 +109,10 @@ public class OrgEnhetController {
             .toList());
         underEnheter.forEach(underEnhet -> combinedRessursKoblinger.addAll(underEnhet.ressursKoblinger()));
 
-        // then get ressurser under each underliggende enhet
+        // then get active ressurser under each underliggende enhet
         List<Ressurs> ressurser = combinedRessursKoblinger.stream()
+            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()) ||
+                isPeriodFuture(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
             .map(orgtilknytningState ->  ressursRestService.findRessursByNavident(orgtilknytningState.navident()))
             .toList();
 
