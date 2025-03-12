@@ -17,8 +17,10 @@ import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetMedLedernavn;
 import no.nav.nom.apps.api.ressurs.api.app.RessursRestService;
+import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -32,7 +34,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Tag(name = "OrgEnheter")
@@ -72,6 +76,37 @@ public class OrgEnhetController {
             .map(orgEnhetMapper::mapToOrgEnhet)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/findAllUnderlyingressurserUnderOrgenhet/{orgenhetId}")
+    @Operation(
+        description = "Hente alle alle-underliggende ressurser for en orgenhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Exported file"),
+    })
+    public List<Ressurs>  findAllUnderlyingressurserUnderOrgenhet(HttpServletResponse response, @PathVariable String orgenhetId) throws IOException {
+        List<OrgtilknytningState> combinedRessursKoblinger  = new ArrayList<>();
+
+        // get all ressurser under orgenhet
+        Optional<OrgEnhet> orgEnhet = orgenhetService.getById(orgenhetId)
+            .map(orgEnhetMapper::mapToOrgEnhet);
+        orgEnhet.ifPresent(orgEnhet1 -> combinedRessursKoblinger.addAll(orgEnhet1.ressursKoblinger()));
+
+        // first get all underlyinh enheter
+        List<OrgEnhet> underEnheter = new ArrayList<>(orgenhetService.getAllUnderliggendeOrgEnhetById(orgenhetId)
+            .stream()
+            .map(orgEnhetMapper::mapToOrgEnhet)
+            .toList());
+        underEnheter.forEach(underEnhet -> combinedRessursKoblinger.addAll(underEnhet.ressursKoblinger()));
+
+        // then get ressurser under each underliggende enhet
+        List<Ressurs> ressurser = combinedRessursKoblinger.stream()
+            .map(orgtilknytningState ->  ressursRestService.findRessursByNavident(orgtilknytningState.navident()))
+            .toList();
+
+        return ressurser;
     }
 
     @GetMapping("/exportKontaktpersonerFor/{orgenhetId}")
