@@ -29,22 +29,16 @@ public class KontaktpersonerExcelGenerator {
         this.kontaktinfoClient = kontaktinfoClient;
     }
 
-    public void generate(HttpServletResponse response, OrgEnhet orgEnhet, List<Ressurs> unsortedRessurser) {
-        // sort ressurser by fornavn and etternavn
-        List<Ressurs> sortedRessurser = unsortedRessurser.stream().sorted((r1, r2) -> {
-            var n1 = r1.state().visningsnavn();
-            var n2 = r2.state().visningsnavn();
-            return n1.fornavn().compareTo(n2.fornavn()) == 0 ? n1.etternavn().compareTo(n2.etternavn()) : n1.fornavn().compareTo(n2.fornavn());
-        }).toList();
+    public void generate(HttpServletResponse response, OrgEnhet orgEnhet, List<Ressurs> sortedRessurser) {
+        log.info("Getting content inf for ressurser");
+        List<RessursKontaktinfo> kontaktinfoForRessurser = kontaktinfoClient.getKontaktinfoForRessurser(sortedRessurser.stream().map(r -> r.state().navident()).toList());
+        log.info("Received kontaktinfo for this orgenhet: {}-{}", orgEnhet.id(), kontaktinfoForRessurser);
 
         try (Workbook workbook = new XSSFWorkbook()) {
             var sheet = workbook.createSheet("Kontaktpersoner - " + orgEnhet.navn());
             var rowcount = 0;
 
             addRow(sheet.createRow(rowcount++), null, null);
-
-            log.info("Getting content inf for ressurser");
-            List<RessursKontaktinfo> kontaktinfoForRessurser = kontaktinfoClient.getKontaktinfoForRessurser(sortedRessurser.stream().map(r -> r.state().navident()).toList());
 
             log.info("Generating excel for orgenhet {} with ressurser {}, and contantinfo {}", orgEnhet.id(), sortedRessurser, kontaktinfoForRessurser);
             for (RessursKontaktinfo info : kontaktinfoForRessurser) {

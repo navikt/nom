@@ -108,13 +108,10 @@ public class OrgEnhetController {
             }
 
             log.info("User have access to view ressurser for this orgenhet: {}-{}", loggedInUser, orgenhetId);
-            var ressursKoblinger = orgEnhet.get().ressursKoblinger();
-            var ressurser = ressursKoblinger.stream()
-                .map(orgtilknytningState ->  ressursRestService.findRessursByNavident(orgtilknytningState.navident()))
-                .toList();
+            var sortedRessurser = getSortedRessurserInAndUnderliggendeOrgenheter(orgenhetId);
 
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=kontaktpersoner.xlsx");
-            kontaktpersonerExcelGenerator.generate(response, orgEnhet.get(), ressurser);
+            kontaktpersonerExcelGenerator.generate(response, orgEnhet.get(), sortedRessurser);
         } catch (Exception e) {
             log.error("Failed to generate export file " + e.getMessage());
             response.sendError(500);
