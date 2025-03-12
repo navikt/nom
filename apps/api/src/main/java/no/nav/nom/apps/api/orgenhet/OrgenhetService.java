@@ -2,15 +2,11 @@ package no.nav.nom.apps.api.orgenhet;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-
-import no.nav.nom.apps.api.clients.kontaktinfo.KontaktinfoClient;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
-import no.nav.nom.apps.api.ressurs.api.app.RessursRestService;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
@@ -40,8 +36,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
-import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
-import static no.nav.nom.apps.api.common.DateUtils.isPeriodFuture;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedAzpName;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
@@ -60,10 +54,7 @@ public class OrgenhetService {
                            OrgEnhetCommandService orgEnhetCommandService, 
                            DvhRepository dvhRepository, 
                            KafkaTopicReader kafkaTopicReader, 
-                           OrganiseringStateRepository organiseringStateRepository,
-                           KontaktinfoClient kontaktinfoClient,
-                           OrgEnhetMapper orgEnhetMapper,
-                           RessursRestService ressursRestService
+                           OrganiseringStateRepository organiseringStateRepository
     ) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgEnhetCommandService = orgEnhetCommandService;
