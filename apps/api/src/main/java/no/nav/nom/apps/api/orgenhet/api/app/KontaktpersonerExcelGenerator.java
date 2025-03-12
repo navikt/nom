@@ -16,19 +16,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class KontaktpersonerExcelGenerator {
     private final static Logger log = LoggerFactory.getLogger(KontaktpersonerExcelGenerator.class);
 
-    private static final Map<String, String> sektorMap = Map.of(
-        "NAV_STATLIG", "Statlig",
-        "NAV_KOMMUNAL", "Kommunal",
-        "EKSTERN", "Ekstern"
-    );
     private final KontaktinfoClient kontaktinfoClient;
-
 
     public KontaktpersonerExcelGenerator(
         KontaktinfoClient kontaktinfoClient
