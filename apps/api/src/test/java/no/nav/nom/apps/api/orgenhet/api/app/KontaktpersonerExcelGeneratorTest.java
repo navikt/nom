@@ -26,6 +26,7 @@ import java.util.Optional;
 import static no.nav.nom.apps.api.common.TestData.ressursState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -84,7 +85,9 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
 
         // note: resources will be sorted based on the fornavn+etternavn, before retrieving the contact info
         List<RessursKontaktinfo> kontaktinfoForRessurser = List.of(kontaktinfo1, kontaktinfo3, kontaktinfo2);
-        when(kontaktinfoClient.getKontaktinfoForRessurser(List.of(ressursNavident1, ressursNavident3, ressursNavident2))).thenReturn(kontaktinfoForRessurser);
+        //when(kontaktinfoClient.getKontaktinfoForRessurser(List.of(ressursNavident1, ressursNavident3, ressursNavident2))).thenReturn(kontaktinfoForRessurser);
+        when(kontaktinfoClient.getKontaktinfoForRessurser(anyList())).thenReturn(kontaktinfoForRessurser);
+
 
         OrgEnhet orgEnhet = OrgEnhet.builder().id("1").fid("F123").navn("Test Enhet").build();
 
