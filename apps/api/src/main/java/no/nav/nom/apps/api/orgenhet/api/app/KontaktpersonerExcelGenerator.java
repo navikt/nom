@@ -30,7 +30,7 @@ public class KontaktpersonerExcelGenerator {
     }
 
     public void generate(HttpServletResponse response, OrgEnhet orgEnhet, List<Ressurs> sortedRessurser) {
-        log.info("Getting content inf for ressurser");
+        log.info("Getting content inf for ressurser: {}", sortedRessurser);
         List<RessursKontaktinfo> kontaktinfoForRessurser = kontaktinfoClient.getKontaktinfoForRessurser(sortedRessurser.stream().map(r -> r.state().navident()).toList());
         log.info("Received kontaktinfo for this orgenhet: {}-{}", orgEnhet.id(), kontaktinfoForRessurser);
 
