@@ -17,8 +17,10 @@ import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetMedLedernavn;
 import no.nav.nom.apps.api.ressurs.api.app.RessursRestService;
+import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -32,8 +34,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
+import static no.nav.nom.apps.api.common.DateUtils.isPeriodFuture;
 
 @Tag(name = "OrgEnheter")
 @RestController
@@ -101,13 +108,10 @@ public class OrgEnhetController {
             }
 
             log.info("User have access to view ressurser for this orgenhet: {}-{}", loggedInUser, orgenhetId);
-            var ressursKoblinger = orgEnhet.get().ressursKoblinger();
-            var ressurser = ressursKoblinger.stream()
-                .map(orgtilknytningState ->  ressursRestService.findRessursByNavident(orgtilknytningState.navident()))
-                .toList();
+            var sortedRessurser = getSortedRessurserInAndUnderliggendeOrgenheter(orgenhetId);
 
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=kontaktpersoner.xlsx");
-            kontaktpersonerExcelGenerator.generate(response, orgEnhet.get(), ressurser);
+            kontaktpersonerExcelGenerator.generate(response, orgEnhet.get(), sortedRessurser);
         } catch (Exception e) {
             log.error("Failed to generate export file " + e.getMessage());
             response.sendError(500);
@@ -197,5 +201,36 @@ public class OrgEnhetController {
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<StandardResponse> setOrgEnhetsType(@RequestBody SetOrgEnhetsTypeRequest setOrgEnhetsTypeRequest){
         return orgenhetService.setOrgEnhetsType(setOrgEnhetsTypeRequest);
+    }
+
+    private List<Ressurs> getSortedRessurserInAndUnderliggendeOrgenheter(String orgenhetId) {
+        List<OrgtilknytningState> combinedRessursKoblinger  = new ArrayList<>();
+
+        // get all ressurser under orgenhet
+        Optional<OrgEnhet> orgEnhet = orgenhetService.getById(orgenhetId)
+            .map(orgEnhetMapper::mapToOrgEnhet);
+        orgEnhet.ifPresent(orgEnhet1 -> combinedRessursKoblinger.addAll(orgEnhet1.ressursKoblinger()));
+
+        // first get all underlyinh enheter
+        List<no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet> underEnheter = new ArrayList<>(orgenhetService.getAllUnderliggendeOrgEnhetById(orgenhetId)
+            .stream()
+            .map(orgEnhetMapper::mapToOrgEnhet)
+            .toList());
+        underEnheter.forEach(underEnhet -> combinedRessursKoblinger.addAll(underEnhet.ressursKoblinger()));
+
+        // then get active ressurser under each underliggende enhet
+        List<Ressurs> ressurser = combinedRessursKoblinger.stream()
+            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()) ||
+                isPeriodFuture(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
+            .map(orgtilknytningState ->  ressursRestService.findRessursByNavident(orgtilknytningState.navident()))
+            .toList();
+
+        // sort ressurser by fornavn and etternavn
+        List<Ressurs> sortedRessurser = ressurser.stream().sorted((r1, r2) -> {
+            var n1 = r1.state().visningsnavn();
+            var n2 = r2.state().visningsnavn();
+            return n1.fornavn().compareTo(n2.fornavn()) == 0 ? n1.etternavn().compareTo(n2.etternavn()) : n1.fornavn().compareTo(n2.fornavn());
+        }).toList();
+        return sortedRessurser;
     }
 }

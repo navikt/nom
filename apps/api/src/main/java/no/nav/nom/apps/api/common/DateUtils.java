@@ -40,6 +40,11 @@ public class DateUtils {
         return isPeriodStartBeforeOrEqualToToday && isPeriodEndAfterOrEqualToToday;
     }
 
+    public static boolean isPeriodFuture(LocalDate periodStart, Optional<LocalDate> periodEnd) {
+        var today = LocalDate.now();
+        return periodStart.isAfter(today) && (periodEnd.isEmpty() || periodEnd.get().isAfter(today));
+    }
+
     public static void validateChronologicalDates(LocalDate startDato, LocalDate sluttDato) {
         if (sluttDato != null) {
             if (sluttDato.isBefore(startDato)) {
