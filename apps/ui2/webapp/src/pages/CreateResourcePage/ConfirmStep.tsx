@@ -18,6 +18,7 @@ import type {
   OpprettRessursRequest,
   OpprettRessursResponse,
 } from "~/types/api-models";
+import { IdentType } from "~/types/api-models";
 import { Tilknytningtype } from "~/types/api-models";
 import { DATE_FORMATS, formatVisningsnavn } from "~/utils";
 
@@ -82,6 +83,7 @@ export function ConfirmStep() {
         primaryTelefonnummer,
         fysiskBrukerstedNr,
         tilknytningtype,
+        identType: IdentType.STANDARD,
       };
 
       // TODO: better type safety here.
@@ -101,7 +103,7 @@ export function ConfirmStep() {
         }),
         params: { step: "4" },
         replace: true,
-      });
+      }).then();
     },
   });
 

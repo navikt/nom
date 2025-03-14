@@ -45,6 +45,14 @@ export function BurgerMenu() {
   const lederEllerDelegert =
     ledetAvMeg?.length > 0 || delegertTilMeg?.length > 0;
 
+  const showOpprettLink =
+    hasAdminAccess || (hasWriteAccess && lederEllerDelegert);
+
+  const showOpprettSpecialLink = hasAdminAccess;
+
+  const showTilgangerLink =
+    hasAdminAccess || (hasWriteAccess && lederEllerDelegert);
+
   return (
     <Dropdown>
       <Button
@@ -60,6 +68,7 @@ export function BurgerMenu() {
         css={css`
           padding: 0;
           color: var(--a-text-default);
+          width: fit-content;
 
           button {
             padding: var(--a-spacing-4);
@@ -82,33 +91,61 @@ export function BurgerMenu() {
             <PersonFillIcon color="black" fontSize="24px" />
             <span>Min profil</span>
           </Dropdown.Menu.List.Item>
-          {(hasAdminAccess || (hasWriteAccess && lederEllerDelegert)) && (
-            <Dropdown.Menu.List.Item
-              data-cy="opprettRessurs-button"
-              onClick={() =>
-                navigate({ to: "/ressurs/create/$step", params: { step: "1" } })
-              }
-            >
-              <PersonPlusFillIcon color="black" fontSize="24px" />
-              <span>Opprett medarbeider</span>
-            </Dropdown.Menu.List.Item>
+          {showOpprettLink && (
+            <>
+              <Dropdown.Menu.Divider />
+              <Dropdown.Menu.List.Item
+                data-cy="opprettRessurs-button"
+                onClick={() =>
+                  navigate({
+                    to: "/ressurs/create/$step",
+                    params: { step: "1" },
+                  })
+                }
+              >
+                <PersonPlusFillIcon color="black" fontSize="24px" />
+                <span>Opprett medarbeider</span>
+              </Dropdown.Menu.List.Item>
+            </>
           )}
-          {(hasAdminAccess || (hasWriteAccess && lederEllerDelegert)) && (
-            <Dropdown.Menu.List.Item
-              data-cy="tilganger-button"
-              onClick={() => navigate({ to: "/tilganger" })}
-            >
-              <KeyVerticalFillIcon color="black" fontSize="24px" />
-              <span>Tilganger</span>
-            </Dropdown.Menu.List.Item>
+          {showOpprettSpecialLink && (
+            <>
+              {!showOpprettLink && <Dropdown.Menu.Divider />}
+
+              <Dropdown.Menu.List.Item
+                onClick={() =>
+                  navigate({
+                    to: "/ressurs/createspecial",
+                  })
+                }
+              >
+                <PersonPlusFillIcon color="black" fontSize="24px" />
+                <span>Opprett annen medarbeider</span>
+              </Dropdown.Menu.List.Item>
+            </>
+          )}
+          {showTilgangerLink && (
+            <>
+              <Dropdown.Menu.Divider />
+              <Dropdown.Menu.List.Item
+                data-cy="tilganger-button"
+                onClick={() => navigate({ to: "/tilganger" })}
+              >
+                <KeyVerticalFillIcon color="black" fontSize="24px" />
+                <span>Tilganger</span>
+              </Dropdown.Menu.List.Item>
+            </>
           )}
           {hasAdminAccess && (
-            <Dropdown.Menu.List.Item
-              onClick={() => globalThis.open(adminLenke, "_blank")}
-            >
-              <TokenFillIcon color="black" fontSize="24px" />
-              <span>Admin</span>
-            </Dropdown.Menu.List.Item>
+            <>
+              {!showTilgangerLink && <Dropdown.Menu.Divider />}
+              <Dropdown.Menu.List.Item
+                onClick={() => globalThis.open(adminLenke, "_blank")}
+              >
+                <TokenFillIcon color="black" fontSize="24px" />
+                <span>Admin</span>
+              </Dropdown.Menu.List.Item>
+            </>
           )}
         </Dropdown.Menu.List>
       </Dropdown.Menu>

@@ -50,6 +50,7 @@ import {
   ModalProvider,
   useModal,
 } from "~/components/modalProvider/ModalProvider";
+import { PageBanner } from "~/components/PageBanner";
 import { Pluralize } from "~/components/Pluralize";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
@@ -159,35 +160,39 @@ function StaticContentWrapper({
   ressurs: Ressurs | undefined;
 }) {
   return (
-    <ContentWrapper>
-      {ressurs && (
-        <ReactRouterLink
-          css={css`
-            display: flex;
-            align-items: center;
-            color: #000;
-            font-size: 1.2rem;
-            margin-bottom: var(--a-spacing-4);
-          `}
-          params={{ id: ressurs?.navident }}
-          to="/ressurs/$id"
-        >
-          <ChevronLeftIcon fontSize="1.8rem" />
+    <>
+      <PageBanner text="Kontaktpersoner" />
 
-          <b>Tilbake til {formatVisningsnavn(ressurs.visningsnavn)}</b>
-        </ReactRouterLink>
-      )}
+      <ContentWrapper>
+        {ressurs && (
+          <ReactRouterLink
+            css={css`
+              display: flex;
+              align-items: center;
+              color: #000;
+              font-size: 1.2rem;
+              margin-bottom: var(--a-spacing-4);
+            `}
+            params={{ id: ressurs?.navident }}
+            to="/ressurs/$id"
+          >
+            <ChevronLeftIcon fontSize="1.8rem" />
 
-      <BodyLong>
-        Denne informasjonen kan leses av din nærmeste leder og leders leder.
-        Informasjonen kan bli brukt dersom noe skulle tilstøte deg i
-        arbeidstiden eller i en beredskapssituasjon, slik at en kontaktperson
-        bør varsles. I dette tilfellet vil én eller flere av dine kontakter
-        kunne bli kontaktet. Du kan ha opptil tre kontaktpersoner.
-      </BodyLong>
+            <b>Tilbake til {formatVisningsnavn(ressurs.visningsnavn)}</b>
+          </ReactRouterLink>
+        )}
 
-      {children}
-    </ContentWrapper>
+        <BodyLong>
+          Denne informasjonen kan leses av din nærmeste leder og leders leder.
+          Informasjonen kan bli brukt dersom noe skulle tilstøte deg i
+          arbeidstiden eller i en beredskapssituasjon, slik at en kontaktperson
+          bør varsles. I dette tilfellet vil én eller flere av dine kontakter
+          kunne bli kontaktet. Du kan ha opptil tre kontaktpersoner.
+        </BodyLong>
+
+        {children}
+      </ContentWrapper>
+    </>
   );
 }
 

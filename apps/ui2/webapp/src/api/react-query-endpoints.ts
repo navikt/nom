@@ -352,12 +352,12 @@ export const getOrgTilknytninger = {
 };
 
 export const getPerson = {
-  queryKey: (personident: string) => personKeys.id(personident),
-  queryFn: async (personident: string) =>
+  queryKey: (request: GetPersonRequest) => personKeys.id(request.personident),
+  queryFn: async (request: GetPersonRequest) =>
     (
       await axios.post<GetPersonRequest, AxiosResponse<Person>>(
         `${NOM_API_BASE_PATH}/app/person`,
-        { personident },
+        request,
       )
     ).data,
 };
