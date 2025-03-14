@@ -110,6 +110,8 @@ public class OrgEnhetController {
             log.info("User have access to view ressurser for this orgenhet: {}-{}", loggedInUser, orgenhetId);
             var sortedRessurser = getSortedRessurserInAndUnderliggendeOrgenheter(orgenhetId);
 
+            log.info("Ressurser are retrivedfor this orgenhet: {}-{}", sortedRessurser, orgenhetId);
+
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=kontaktpersoner.xlsx");
             kontaktpersonerExcelGenerator.generate(response, orgEnhet.get(), sortedRessurser);
         } catch (Exception e) {
