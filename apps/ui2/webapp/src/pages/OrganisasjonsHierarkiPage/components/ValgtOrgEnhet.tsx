@@ -472,7 +472,7 @@ export const OrgEnhetsTypeNameMapping = {
   [OrgEnhetsType.KLAGEINSTANS]: "Klageinstans",
   [OrgEnhetsType.NAV_KONTAKTSENTER]: "Kontaktsenter",
   [OrgEnhetsType.KONTROLL_KONTROLLENHET]: "Kontroll",
-  [OrgEnhetsType.NAV_KONTOR]: "NAV-kontor",
+  [OrgEnhetsType.NAV_KONTOR]: "Nav-kontor",
   [OrgEnhetsType.TILTAK]: "Tiltak",
   [OrgEnhetsType.NAV_OKONOMITJENESTE]: "Økonomi",
 };

@@ -21,10 +21,16 @@ import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/componen
 import { FolkeregisterPersonInfo } from "~/pages/CreateResourcePage/components/FolkeregisterPersonInfo";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
 import { SearchForPerson } from "~/pages/CreateResourcePage/components/SearchForPerson";
+import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { fullwidthRow } from "~/resources/NomStyles";
 import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
-import type { FolkeregisterPerson, Person } from "~/types/api-models";
-import { capitalizeName, isTodayOrAfter } from "~/utils";
+import type {
+  FolkeregisterPerson,
+  GetPersonRequest,
+  Person,
+} from "~/types/api-models";
+import { IdentType } from "~/types/api-models";
+import { capitalizeName } from "~/utils";
 
 export function PersonopplysningerStep() {
   const { personident } = useSearch({
@@ -43,9 +49,14 @@ export function PersonopplysningerStep() {
 }
 
 function CreateResourceForm({ personident }: { personident: string }) {
+  const personRequest: GetPersonRequest = {
+    identType: IdentType.STANDARD,
+    personident: personident,
+  };
+
   const hentPersonQuery = useQuery<Person, AxiosError<Error>>({
-    queryKey: getPerson.queryKey(personident),
-    queryFn: () => getPerson.queryFn(personident),
+    queryKey: getPerson.queryKey(personRequest),
+    queryFn: () => getPerson.queryFn(personRequest),
     retry: false,
   });
 
@@ -62,10 +73,8 @@ function CreateResourceForm({ personident }: { personident: string }) {
   const erAktiv =
     person &&
     orgtilknytninger &&
-    orgtilknytninger.some(
-      (orgtilknytning) =>
-        !orgtilknytning.gyldigTom ||
-        isTodayOrAfter(new Date(orgtilknytning.gyldigTom)),
+    orgtilknytninger.some((orgtilknytning) =>
+      nomDateIsTodayOrAfter(orgtilknytning.gyldigTom),
     );
 
   if (hentPersonQuery.isLoading || hentOrgtilknytningerQuery.isLoading) {
@@ -74,7 +83,7 @@ function CreateResourceForm({ personident }: { personident: string }) {
         css={css`
           align-self: center;
         `}
-        size="2xlarge"
+        size="3xlarge"
         title={`Søker etter ${personident}`}
       />
     );
@@ -202,7 +211,7 @@ function VisningsnavnForm({
               ...values,
               primaryTelefonnummer: nummerUtenSpaces,
             }),
-          });
+          }).then();
         })}
       >
         <b>Visningnavn</b>

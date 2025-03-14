@@ -91,6 +91,7 @@ import type {
   OrgtilknytningState,
   Ressurs,
 } from "~/types/api-models";
+import { IdentType } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
 import { Sektor, Tilknytningtype } from "~/types/api-models";
 import {
@@ -422,29 +423,30 @@ function OrgtilknytningForm({
       />
 
       <form autoComplete="false" onSubmit={handleSubmit(onValid)}>
-        {hasAdminOrWriteAccess && (
-          <div
-            css={css`
-              margin-top: var(--a-spacing-9);
-              display: flex;
-              justify-content: end;
-            `}
-          >
-            <Button
-              icon={<PlusCircleIcon />}
-              onClick={() => {
-                prepend(defaultNyOrgtilknytning(ressurs.sektor), {
-                  focusIndex: 0,
-                });
-              }}
-              size="small"
-              type="button"
-              variant="secondary"
+        {hasAdminOrWriteAccess &&
+          (ressurs.identType !== IdentType.VIKAFOSSEN || hasAdminAccess) && (
+            <div
+              css={css`
+                margin-top: var(--a-spacing-9);
+                display: flex;
+                justify-content: end;
+              `}
             >
-              Legg til ny
-            </Button>
-          </div>
-        )}
+              <Button
+                icon={<PlusCircleIcon />}
+                onClick={() => {
+                  prepend(defaultNyOrgtilknytning(ressurs.sektor), {
+                    focusIndex: 0,
+                  });
+                }}
+                size="small"
+                type="button"
+                variant="secondary"
+              >
+                Legg til ny
+              </Button>
+            </div>
+          )}
 
         {fields.map((field, index) => {
           const gyldigTom = watch(`mappedeOrgtilknytninger.${index}.gyldigTom`);

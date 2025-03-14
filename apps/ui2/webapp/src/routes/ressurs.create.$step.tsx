@@ -13,6 +13,8 @@ export const Route = createFileRoute("/ressurs/create/$step")({
     if (hasAdminOrWriteAccess) {
       return <CreateRessursPage />;
     }
+
+    return;
   },
   validateSearch: validateCreateRessursSearch,
 });

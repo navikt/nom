@@ -13,15 +13,21 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 
 import { getRessurs } from "~/api/react-query-endpoints";
+import ContentWrapper from "~/components/ContentWrapper";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
 import type { Ressurs } from "~/types/api-models";
+import { IdentType } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
-import { formatVisningsnavn, isInDevelopment } from "~/utils";
+import { formatVisningsnavn } from "~/utils";
 
 export function SummaryStep() {
   const { navident } = useSearch({ from: "/ressurs/create/$step" });
 
+  return <ReceiptWrapper navident={navident} />;
+}
+
+export function ReceiptWrapper({ navident }: { navident: string | undefined }) {
   const ressursQuery = useQuery({
     queryKey: getRessurs.queryKey(navident as string),
     queryFn: () => getRessurs.queryFn(navident as string),
@@ -53,11 +59,44 @@ export function SummaryStep() {
   return <></>;
 }
 
-function Receipt({ ressurs }: { ressurs: Ressurs }) {
-  const teamcatBaseUrl = isInDevelopment()
-    ? "https://teamkatalog.ekstern.dev.nav.no"
-    : "https://teamkatalog.nav.no";
+export function Receipt({ ressurs }: { ressurs: Ressurs }) {
+  return (
+    <ContentWrapper>
+      <ContainerWithHighlightedTop
+        icon={opprettRessursIconRoundedBackground}
+        title={
+          <HStack gap="4">
+            <CheckmarkCircleFillIcon
+              css={css`
+                color: var(--a-surface-success-hover);
+                font-size: var(--a-font-size-heading-xlarge);
+              `}
+            />
+            Medarbeideren er nå registrert i NOM
+          </HStack>
+        }
+      >
+        {(ressurs.identType === IdentType.STANDARD || !ressurs.identType) && (
+          <IdentTypeStandardReceipt ressurs={ressurs} />
+        )}
 
+        {ressurs.identType === IdentType.ROBOT && (
+          <IdentTypeRobotReceipt ressurs={ressurs} />
+        )}
+
+        {ressurs.identType === IdentType.UTENLANDSK_KONSULENT && (
+          <IdentTypeUtenlandskKonsulentReceipt ressurs={ressurs} />
+        )}
+
+        {ressurs.identType === IdentType.VIKAFOSSEN && (
+          <IdentTypeVikafossenReceipt ressurs={ressurs} />
+        )}
+      </ContainerWithHighlightedTop>
+    </ContentWrapper>
+  );
+}
+
+function IdentTypeStandardReceipt({ ressurs }: { ressurs: Ressurs }) {
   const sharepointLenke: string =
     "https://navno.sharepoint.com/sites/intranett-organisasjon/SitePages/Organisasjonsmaster-(NOM).aspx";
 
@@ -67,24 +106,8 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
   const lonnsskjemaLenke =
     "https://agresso.adeo.no/agresso/ContentContainer.aspx?type=topgen&menu_id=002820&activityStepId=1-1&attribute_id=S108&client=HR";
 
-  // Inntil vi vet bedre hvem som trenger å se denne teksten (f.eks antagelser fra hierarkiet) så skrur vi den av for nå. For majoriteten vil den heller være forvirrende
-  const showTeamcatInstructions = false;
-
   return (
-    <ContainerWithHighlightedTop
-      icon={opprettRessursIconRoundedBackground}
-      title={
-        <HStack gap="4">
-          <CheckmarkCircleFillIcon
-            css={css`
-              color: var(--a-surface-success-hover);
-              font-size: var(--a-font-size-heading-xlarge);
-            `}
-          />
-          Medarbeideren er nå registrert i NOM
-        </HStack>
-      }
-    >
+    <>
       <div
         css={css`
           margin: auto;
@@ -116,17 +139,6 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
             </Link>
             .
           </BodyShort>
-          {showTeamcatInstructions && (
-            <BodyShort>
-              Du kan også legge inn teamtilhørighet i{" "}
-              <Link href={teamcatBaseUrl} target="_blank">
-                Teamkatalogen
-              </Link>
-              , men det kan ta opp til to virkedager før personen vil bli
-              tilgjengelig der. Personen selv eller andre kontaktpersoner kan
-              også legge inn informasjon i Teamkatalogen.
-            </BodyShort>
-          )}
 
           {ressurs.sektor === Sektor.NAV_KOMMUNAL && (
             <Alert
@@ -190,8 +202,158 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
         href={`/ressurs/${ressurs.navident}`}
         label="Vis medarbeiderens profil"
       />
+
       <PanelLink href="/" label="Gå tilbake til forsiden" />
-    </ContainerWithHighlightedTop>
+    </>
+  );
+}
+
+function IdentTypeRobotReceipt({ ressurs }: { ressurs: Ressurs }) {
+  return (
+    <>
+      <div
+        css={css`
+          margin: auto;
+        `}
+      >
+        <HStack
+          css={css`
+            display: grid;
+          `}
+          gap="2"
+        >
+          <BodyShort>
+            Medarbeideren er nå registrert i NOM og Nav-ident{" "}
+            <b>{ressurs.navident}</b> er opprettet for{" "}
+            <b>{formatVisningsnavn(ressurs.visningsnavn)}</b>.
+          </BodyShort>
+          <BodyShort>
+            For å fullføre opprettelsen må leder eller identadministrator også
+            gi tilganger i Identrutinen i Remedy.
+          </BodyShort>
+          <BodyShort>
+            E-postadresse opprettes automatisk og blir synlig på medarbeiderens
+            profilside når den er klar.
+          </BodyShort>
+        </HStack>
+      </div>
+
+      <PanelLink
+        href="https://it-hjelpa.adeo.no/arsys/home"
+        label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
+      />
+
+      <PanelLink
+        href={`/ressurs/${ressurs.navident}`}
+        label="Vis medarbeiderens profil"
+      />
+
+      <PanelLink href="/" label="Gå tilbake til forsiden" />
+    </>
+  );
+}
+
+function IdentTypeUtenlandskKonsulentReceipt({
+  ressurs,
+}: {
+  ressurs: Ressurs;
+}) {
+  return (
+    <>
+      <div
+        css={css`
+          margin: auto;
+        `}
+      >
+        <HStack
+          css={css`
+            display: grid;
+          `}
+          gap="2"
+        >
+          <BodyShort>
+            Medarbeideren er nå registrert i NOM og Nav-ident{" "}
+            <b>{ressurs.navident}</b> er opprettet for{" "}
+            <b>{formatVisningsnavn(ressurs.visningsnavn)}</b>.
+          </BodyShort>
+          <BodyShort>
+            For å fullføre opprettelsen må leder eller identadministrator også
+            gi tilganger i Identrutinen i Remedy.
+          </BodyShort>
+          <BodyShort>
+            E-postadresse opprettes automatisk og blir synlig på medarbeiderens
+            profilside når den er klar.
+          </BodyShort>
+        </HStack>
+      </div>
+
+      <PanelLink
+        href="https://it-hjelpa.adeo.no/arsys/home"
+        label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
+      />
+
+      <PanelLink
+        href={`/ressurs/${ressurs.navident}`}
+        label="Vis medarbeiderens profil"
+      />
+
+      <PanelLink href="/" label="Gå tilbake til forsiden" />
+    </>
+  );
+}
+
+function IdentTypeVikafossenReceipt({ ressurs }: { ressurs: Ressurs }) {
+  const identskjemaLenke: string =
+    "https://navno.sharepoint.com/:b:/r/sites/intranett-hr/Delte%20dokumenter/HR-skjemaer/Identbekreftelses%20skjema.pdf?csf=1&web=1&e=E4RvBs";
+
+  return (
+    <>
+      <div
+        css={css`
+          margin: auto;
+        `}
+      >
+        <HStack
+          css={css`
+            display: grid;
+          `}
+          gap="2"
+        >
+          <BodyShort>
+            Medarbeideren er nå registrert i NOM og Nav-ident{" "}
+            <b>{ressurs.navident}</b> er opprettet for{" "}
+            <b>{formatVisningsnavn(ressurs.visningsnavn)}</b>.
+          </BodyShort>
+          <BodyShort>
+            For å fullføre opprettelsen må leder eller identadministrator også
+            gi tilganger i Identrutinen i Remedy.
+          </BodyShort>
+          <BodyShort>
+            E-postadresse opprettes automatisk og blir synlig på medarbeiderens
+            profilside når den er klar.
+          </BodyShort>
+          <BodyShort>
+            Alle nye medarbeidere må signere identskjema.{" "}
+            <Link href={identskjemaLenke} target="_blank">
+              Gå til skjemaet for å laste det ned
+            </Link>
+            .
+          </BodyShort>
+        </HStack>
+      </div>
+
+      <PanelLink
+        href="https://it-hjelpa.adeo.no/arsys/home"
+        label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
+      />
+
+      <PanelLink
+        href={`/ressurs/${ressurs.navident}`}
+        label="Vis medarbeiderens profil"
+      />
+
+      <PanelLink href="/" label="Gå tilbake til forsiden" />
+    </>
   );
 }
 

@@ -14,6 +14,8 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as TilgangerImport } from './routes/tilganger'
 import { Route as AdminImport } from './routes/admin'
 import { Route as IndexImport } from './routes/index'
+import { Route as RessursSpecialreceiptImport } from './routes/ressurs.specialreceipt'
+import { Route as RessursCreatespecialImport } from './routes/ressurs.createspecial'
 import { Route as RessursIdImport } from './routes/ressurs.$id'
 import { Route as RessursTerminateIdImport } from './routes/ressurs-terminate.$id'
 import { Route as OrgIdImport } from './routes/org.$id'
@@ -40,6 +42,16 @@ const AdminRoute = AdminImport.update({
 
 const IndexRoute = IndexImport.update({
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const RessursSpecialreceiptRoute = RessursSpecialreceiptImport.update({
+  path: '/ressurs/specialreceipt',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const RessursCreatespecialRoute = RessursCreatespecialImport.update({
+  path: '/ressurs/createspecial',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -186,6 +198,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RessursIdImport
       parentRoute: typeof rootRoute
     }
+    '/ressurs/createspecial': {
+      id: '/ressurs/createspecial'
+      path: '/ressurs/createspecial'
+      fullPath: '/ressurs/createspecial'
+      preLoaderRoute: typeof RessursCreatespecialImport
+      parentRoute: typeof rootRoute
+    }
+    '/ressurs/specialreceipt': {
+      id: '/ressurs/specialreceipt'
+      path: '/ressurs/specialreceipt'
+      fullPath: '/ressurs/specialreceipt'
+      preLoaderRoute: typeof RessursSpecialreceiptImport
+      parentRoute: typeof rootRoute
+    }
     '/org/table/$id': {
       id: '/org/table/$id'
       path: '/org/table/$id'
@@ -219,6 +245,8 @@ export const routeTree = rootRoute.addChildren({
   OrgIdRoute,
   RessursTerminateIdRoute,
   RessursIdRoute,
+  RessursCreatespecialRoute,
+  RessursSpecialreceiptRoute,
   OrgTableIdRoute,
   RessursCreateStepRoute,
 })
@@ -239,6 +267,8 @@ export const routeTree = rootRoute.addChildren({
         "/org/$id",
         "/ressurs-terminate/$id",
         "/ressurs/$id",
+        "/ressurs/createspecial",
+        "/ressurs/specialreceipt",
         "/org/table/$id",
         "/ressurs/create/$step"
       ]
@@ -288,6 +318,12 @@ export const routeTree = rootRoute.addChildren({
     },
     "/ressurs/$id": {
       "filePath": "ressurs.$id.tsx"
+    },
+    "/ressurs/createspecial": {
+      "filePath": "ressurs.createspecial.tsx"
+    },
+    "/ressurs/specialreceipt": {
+      "filePath": "ressurs.specialreceipt.tsx"
     },
     "/org/table/$id": {
       "filePath": "org.table.$id.tsx"

@@ -16,7 +16,9 @@ import type { OrgEnhet, Visningsnavn } from "~/types/api-models";
  * Very primitive function for checking if we are in a dev or production environment by checking if the hostname includes "localhost" or ".dev."
  */
 export function isInDevelopment() {
-  return globalThis.location.hostname.match(/localhost|\.dev\./);
+  const match = globalThis.location.hostname.match(/localhost|\.dev\./);
+
+  return !!match;
 }
 
 /**
