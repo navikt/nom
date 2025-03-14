@@ -94,8 +94,8 @@ public class OrgEnhetController {
             var orgEnhet = orgenhetService.getById(orgenhetId)
                 .map(orgEnhetMapper::mapToOrgEnhet);
 
-            if(orgEnhet.isEmpty() || orgEnhet.get().ressursKoblinger().isEmpty()) {
-                log.error("Orgenhet not found or has no ressurser!" + orgenhetId);
+            if(orgEnhet.isEmpty()) {
+                log.error("Orgenhet not found! " + orgenhetId);
                 return;
             }
 
