@@ -51,6 +51,7 @@ public class SecurityUtil {
         }
     }
 
+    /*
     public void assertAuthorizedAccessToRessurser(String bruker, List<String> ressurser ) throws AccessDeniedException {
         log.info("assertAuthorizedAccessToRessurser: {} {}", bruker, ressurser);
         var authenticated = isAuthenticated();
@@ -81,13 +82,14 @@ public class SecurityUtil {
             throw new AccessDeniedException(bruker +" is not unauthorized access to ressurser for : " + orgenhetId);
         }
     }
+    */
 
     public boolean canAccessContactInfoForResourcesUnderOrgenhet(String navident, String orgenhetId, List<String> ressurser) {
         var authenticated = isAuthenticated();
         var isAdmin = isAdmin();
         var isLederForOrgenhet = isNavIdentLederForOrgenhet(navident, orgenhetId, ressurser);
-        log.info("canAccessContactInfo navident, orgenhetId, authenticated, isAdmin, isLederForOrgenhet, matchingResources : {}, {}, {}, {}, {}, {}", navident, orgenhetId, authenticated, isAdmin, isLederForOrgenhet, matchingResources);
-        return isAuthenticated() && (isAdmin() || isNavIdentLederForOrgenhet(navident, orgenhetId));
+        log.info("canAccessContactInfo navident, orgenhetId, authenticated, isAdmin, isLederForOrgenhet : {}, {}, {}, {}, {}", navident, orgenhetId, authenticated, isAdmin, isLederForOrgenhet);
+        return isAuthenticated() && (isAdmin() || isNavIdentLederForOrgenhet(navident, orgenhetId, ressurser));
     }
 
     public String getNavIdent() {
