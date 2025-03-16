@@ -95,9 +95,19 @@ public class OrgEnhetController {
             .map(orgEnhetMapper::mapToOrgEnhet)
             .orElse(null);
 
-        log.info("isNavIdent LederForOrgenhet: {}-{}-{}", navident, orgEnhet, ressurser);
+        log.info("isNavIdentLederForOrgenhet: {}-{}-{}", navident, orgEnhet, ressurser);
         if(orgEnhet != null) {
-            return ResponseEntity.ok(orgEnhet.ledere().stream().anyMatch(ressursState -> ressursState.navident().equals(navident)));
+            boolean navIdentIsLeder = orgEnhet.ledere().stream().anyMatch(ressursState -> ressursState.navident().equals(navident))
+            log.info("isNavIdentLederForOrgenhet navIdentIsLeder: {}-{}-{}", navident, orgEnhet, navIdentIsLeder);
+
+            var orgenhetRessurser = getSortedRessurserInAndUnderliggendeOrgenheter(orgEnhetId);
+            List<String> differences = ressurser.stream()
+                .filter(element -> !orgenhetRessurser.contains(element))
+                .toList();
+            boolean matchingRessurser = differences.isEmpty();
+            log.info("isNavIdentLederForOrgenhet matchingRessurser: {}-{}-{}", navident, orgEnhet, matchingRessurser);
+
+            return ResponseEntity.ok(matchingRessurser && navIdentIsLeder);
         }
 
         return ResponseEntity.ok(false);
