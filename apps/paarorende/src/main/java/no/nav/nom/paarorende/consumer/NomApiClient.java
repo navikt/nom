@@ -54,25 +54,16 @@ public class NomApiClient {
             .block());
     }
 
-    public boolean isNavidentLederForOrgenhet(String navident, String orgEnhetId) {
+    public boolean isNavidentLederForOrgenhet(String navident, String orgEnhetId, List<String> ressurser) {
         log.info("isNavidentLederForOrgenhet: {}, {}", navident, orgEnhetId);
-        return Boolean.TRUE.equals(nomApi.get()
+        return Boolean.TRUE.equals(nomApi.post()
             .uri(uriBuilder -> uriBuilder
                 .path(ORGENHETER_PATH + "/isNavIdent/{navident}/LederForOrgenhet/{orgEnhetId}")
                 .build(navident, orgEnhetId))
+            .bodyValue(ressurser)
             .retrieve()
             .bodyToMono(Boolean.class)
             .block());
-    }
-
-    public List<String> getRessurserInAndUnderliggendeOrgenheter(String orgEnhetId) {
-        return nomApi.get()
-            .uri(uriBuilder -> uriBuilder
-                .path(ORGENHETER_PATH + "/getRessurserInAndUnderliggendeOrgenheter/{orgEnhetId}")
-                .build(orgEnhetId))
-            .retrieve()
-            .toEntityList(String.class)
-            .block().getBody();
     }
 
     record IsAuthorizedRessursWriteRequest(
