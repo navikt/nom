@@ -212,8 +212,13 @@ public class KontaktinfoController {
         }
 
         // do authorization check
-        securityUtil.assertNavidentHasAccessToResourcesForOrgenhet(onBehalfOfUserNavident, orgenhetId);
-        log.info("User {} is authorized to access ressurser: {}", onBehalfOfUserNavident, ressurser);
+        var hasAccess = securityUtil.canAccessContactInfo(onBehalfOfUserNavident, orgenhetId);
+        if (!hasAccess) {
+            throw new AccessDeniedException(String.format("Unauthorized access to ressurser kontaktinfo: %s, %s", onBehalfOfUserNavident, orgenhetId));
+        }
+
+        //securityUtil.assertNavidentHasAccessToResourcesForOrgenhet(onBehalfOfUserNavident, orgenhetId);
+        log.info("User is authorized to access ressurser: {} - {}", onBehalfOfUserNavident, ressurser);
 
         // get contact info for ressurser
         List<RessursKontaktinfoDTO> result = new ArrayList<>();
