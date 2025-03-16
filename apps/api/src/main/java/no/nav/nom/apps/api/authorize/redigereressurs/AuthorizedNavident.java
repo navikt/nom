@@ -15,6 +15,8 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.ressurs.api.dto.MinimalRessurs;
 import no.nav.nom.contract.nom.NomNivaa;
@@ -60,6 +62,7 @@ public class AuthorizedNavident {
     private final OrganiseringStateRepository organiseringStateRepository;
     private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
+    private final OrgEnhetMapper orgEnhetMapper;
     private final DvhRepository dvhRepository;
     private final TilgangDelegertEmailService tilgangDelegertEmailService;
     private final MicrosoftGraphClient microsoftGraphClient;
@@ -75,6 +78,7 @@ public class AuthorizedNavident {
             OrganiseringStateRepository organiseringStateRepository,
             RessursStateRepository ressursStateRepository,
             OrgenhetService orgenhetService,
+            OrgEnhetMapper orgEnhetMapper,
             DvhRepository dvhRepository,
             TilgangDelegertEmailService tilgangDelegertEmailService,
             MicrosoftGraphClient microsoftGraphClient,
@@ -87,6 +91,7 @@ public class AuthorizedNavident {
         this.organiseringStateRepository = organiseringStateRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
+        this.orgEnhetMapper = orgEnhetMapper;
         this.dvhRepository = dvhRepository;
         this.tilgangDelegertEmailService = tilgangDelegertEmailService;
         this.microsoftGraphClient = microsoftGraphClient;
@@ -383,6 +388,13 @@ public class AuthorizedNavident {
                     return Collections.emptyList();
                 });
     }
+
+    public OrgEnhet getOrgenhet(String orgenhetId) {
+        return orgenhetService.getById(orgenhetId)
+            .map(orgEnhetMapper::mapToOrgEnhet)
+            .orElse(null);
+    }
+
 
     private int orgenheterMedAuthedLederCount() {
         return lederForOrgenhetSomKanRedigere.values().stream().mapToInt(Collection::size).sum();

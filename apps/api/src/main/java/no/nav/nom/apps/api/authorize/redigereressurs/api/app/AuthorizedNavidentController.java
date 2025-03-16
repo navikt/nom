@@ -50,17 +50,11 @@ public class AuthorizedNavidentController {
     private final static Logger log = LoggerFactory.getLogger(AuthorizedNavidentController.class);
     private final AuthorizedNavident authorizedNavident;
     private final AuthResolver authResolver;
-    private final OrgenhetService orgenhetService;
-    private final OrgEnhetMapper orgEnhetMapper;
 
     public AuthorizedNavidentController(AuthorizedNavident authorizedNavident,
-                                        AuthResolver authResolver,
-                                        OrgenhetService orgenhetService,
-                                        OrgEnhetMapper orgEnhetMapper) {
+                                        AuthResolver authResolver) {
         this.authorizedNavident = authorizedNavident;
         this.authResolver = authResolver;
-        this.orgenhetService = orgenhetService;
-        this.orgEnhetMapper = orgEnhetMapper;
     }
 
     @Operation(
@@ -118,11 +112,7 @@ public class AuthorizedNavidentController {
         boolean canEditResourcesInOrgenhet = editableOrgenheter.stream().anyMatch(orgenhet -> orgenhet.getId().equals(orgenhetId));
         log.info("hasNavidentAccessToResourcesForOrgenhet, isAdmin: {}, canEditResourcesInOrgenhet: {}", isAdmin, canEditResourcesInOrgenhet);
 
-
-        OrgEnhet orgenhet = orgenhetService.getById(orgenhetId)
-            .map(orgEnhetMapper::mapToOrgEnhet)
-            .orElse(null);
-
+        OrgEnhet orgenhet = authorizedNavident.getOrgenhet(orgenhetId);
         if(orgenhet == null) {
             log.info("hasNavidentAccessToResourcesForOrgenhet, orgenhet is null");
             return false;
