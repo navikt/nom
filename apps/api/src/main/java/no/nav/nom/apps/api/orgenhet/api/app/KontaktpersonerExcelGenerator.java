@@ -31,7 +31,9 @@ public class KontaktpersonerExcelGenerator {
 
     public void generate(HttpServletResponse response, OrgEnhet orgEnhet, List<Ressurs> sortedRessurser) {
         log.info("Getting content inf for ressurser: {}", sortedRessurser);
-        List<RessursKontaktinfo> kontaktinfoForRessurser = kontaktinfoClient.getKontaktinfoForRessurser(sortedRessurser.stream().map(r -> r.state().navident()).toList());
+        List<RessursKontaktinfo> kontaktinfoForRessurser = kontaktinfoClient
+            .getKontaktinfoForRessurser(sortedRessurser.stream().map(r -> r.state().navident()).toList(),
+                orgEnhet.id());
         log.info("Received kontaktinfo for this orgenhet: {}-{}", orgEnhet.id(), kontaktinfoForRessurser);
 
         try (Workbook workbook = new XSSFWorkbook()) {
@@ -60,7 +62,7 @@ public class KontaktpersonerExcelGenerator {
             workbook.write(response.getOutputStream());
             log.info("Generated contakt info excel for orgenhet {}", orgEnhet.id());
         } catch (Exception e) {
-            log.error("Failed to generate excel file", e);
+            log.error("Failed to generate excel file in generate. ", e);
             throw new RuntimeException(e.getMessage());
         }
 

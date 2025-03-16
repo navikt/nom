@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -81,6 +82,16 @@ public class OrgEnhetController {
             .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/checkIfBrukerKanExportKontaktpersonerForOrgenhet/{orgEnhetId}")
+    @Operation(
+        description = "Sjekk om bruker kan export kontakt personer for gitt orgenhet.",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    public ResponseEntity<Boolean> checkIfBrukerKanExportKontaktpersonerForOrgenhet(@PathVariable("orgEnhetId") String orgEnhetId) {
+        return ResponseEntity.ok(authResolver.kanOppretteRessurs(orgEnhetId));
+    }
+
+
     @GetMapping("/exportKontaktpersonerFor/{orgenhetId}")
     @Operation(
         description = "Genererer regneark med oversikt over kontakt personer for en orgenhet",
@@ -95,16 +106,18 @@ public class OrgEnhetController {
                 .map(orgEnhetMapper::mapToOrgEnhet);
 
             if(orgEnhet.isEmpty()) {
-                log.error("Orgenhet not found! " + orgenhetId);
+                String notFoundError = "Orgenhet not found! " + orgenhetId;
+                log.error(notFoundError);
+                response.sendError(404, notFoundError);
                 return;
             }
 
             var loggedInUser = SecurityUtil.getAuthenticatedNavIdent();
             var hasAdminRightsForEnhet = authResolver.kanOppretteRessurs(orgenhetId);
             if(!hasAdminRightsForEnhet) {
-                var errorMessage = "User does not have access to view ressurser for this orgenhet: " + loggedInUser + "-" + orgenhetId;
-                log.error(errorMessage);
-                throw new RuntimeException(errorMessage);
+                var accessDeniedError = "User does not have access to view ressurser for this orgenhet: " + loggedInUser + "-" + orgenhetId;
+                log.error(accessDeniedError);
+                throw new AccessDeniedException(accessDeniedError);
             }
 
             log.info("User have access to view ressurser for this orgenhet: {}-{}", loggedInUser, orgenhetId);
@@ -115,7 +128,7 @@ public class OrgEnhetController {
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=kontaktpersoner.xlsx");
             kontaktpersonerExcelGenerator.generate(response, orgEnhet.get(), sortedRessurser);
         } catch (Exception e) {
-            log.error("Failed to generate export file " + e.getMessage());
+            log.error("Failed to generate export file in exportKontaktpersonerForOrgenhetId. " + e.getMessage());
             response.sendError(500);
         }
     }
