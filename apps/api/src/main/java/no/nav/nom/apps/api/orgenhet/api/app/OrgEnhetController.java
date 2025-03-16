@@ -97,7 +97,7 @@ public class OrgEnhetController {
 
         log.info("isNavIdentLederForOrgenhet: {}-{}-{}", navident, orgEnhet, ressurser);
         if(orgEnhet != null) {
-            boolean navIdentIsLeder = orgEnhet.ledere().stream().anyMatch(ressursState -> ressursState.navident().equals(navident))
+            boolean navIdentIsLeder = orgEnhet.ledere().stream().anyMatch(ressursState -> ressursState.navident().equals(navident));
             log.info("isNavIdentLederForOrgenhet navIdentIsLeder: {}-{}-{}", navident, orgEnhet, navIdentIsLeder);
 
             var orgenhetRessurser = getSortedRessurserInAndUnderliggendeOrgenheter(orgEnhetId);
