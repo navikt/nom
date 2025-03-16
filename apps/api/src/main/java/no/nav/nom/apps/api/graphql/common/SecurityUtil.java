@@ -157,6 +157,7 @@ public class SecurityUtil {
         logger.info("getBehalfOfUserNavident Token: {}", oauthToken.getToken());
         logger.info("getBehalfOfUserNavident Token.getClaimAsStringList: {}", oauthToken.getToken().getClaimAsStringList("groups"));
         logger.info("getBehalfOfUserNavident Token.getPrincipal: {}", oauthToken.getPrincipal());
+        logger.info("getBehalfOfUserNavident Token.getAuthorities: {}", oauthToken.getAuthorities());
         logger.info("getBehalfOfUserNavident TokengetPrincipal.getClaimAsStringList: {}", ((Jwt)oauthToken.getPrincipal()).getClaimAsStringList("groups"));
     }
 }

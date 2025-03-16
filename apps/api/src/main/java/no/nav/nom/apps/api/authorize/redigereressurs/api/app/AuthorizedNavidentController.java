@@ -103,6 +103,11 @@ public class AuthorizedNavidentController {
         boolean isAdmin = SecurityUtil.loggedInUserHasAccessScope(NomApiAccessScope.ADMIN);
         boolean canCreateResourcesInOrgenhet =  authorizedNavident.kanBrukerOppretteRessurs(navIdent, orgenhetId);
         log.info("hasNavidentAccessToResourcesForOrgenhet, isAdmin: {}, canCreateResourcesInOrgenhet: {}", isAdmin, canCreateResourcesInOrgenhet);
+
+        List<IOrgenhet> editableOrgenheter = authorizedNavident.orgenheterLederKanRedigere(navIdent);
+        boolean canEditResourcesInOrgenhet = editableOrgenheter.stream().anyMatch(orgenhet -> orgenhet.getId().equals(orgenhetId));
+        log.info("hasNavidentAccessToResourcesForOrgenhet, isAdmin: {}, canEditResourcesInOrgenhet: {}", isAdmin, canEditResourcesInOrgenhet);
+
         return isAdmin || canCreateResourcesInOrgenhet;
     }
 
