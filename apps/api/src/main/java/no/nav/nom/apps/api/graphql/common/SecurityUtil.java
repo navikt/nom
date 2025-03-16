@@ -148,4 +148,15 @@ public class SecurityUtil {
         return getAzpName(authentication).orElseThrow(
             () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Couldn't find %s in Claims", AZP_NAME)));
     }
+
+    // to be deleted
+    public static void printTestToken() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        JwtAuthenticationToken oauthToken = (JwtAuthenticationToken) authentication;
+        logger.info("getBehalfOfUserNavident Token.getTokenAttributes: {}", oauthToken.getTokenAttributes());
+        logger.info("getBehalfOfUserNavident Token: {}", oauthToken.getToken());
+        logger.info("getBehalfOfUserNavident Token.getClaimAsStringList: {}", oauthToken.getToken().getClaimAsStringList("groups"));
+        logger.info("getBehalfOfUserNavident Token.getPrincipal: {}", oauthToken.getPrincipal());
+        logger.info("getBehalfOfUserNavident TokengetPrincipal.getClaimAsStringList: {}", ((Jwt)oauthToken.getPrincipal()).getClaimAsStringList("groups"));
+    }
 }
