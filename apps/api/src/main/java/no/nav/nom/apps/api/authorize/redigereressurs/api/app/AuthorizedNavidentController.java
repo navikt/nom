@@ -12,6 +12,9 @@ import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.authorize.redigereressurs.NotAuthorizedToDelegateLeder;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
 import no.nav.nom.apps.api.ressurs.api.dto.MinimalRessurs;
 import no.nav.nom.contract.nom.state.LederTilgangState;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
@@ -47,10 +50,17 @@ public class AuthorizedNavidentController {
     private final static Logger log = LoggerFactory.getLogger(AuthorizedNavidentController.class);
     private final AuthorizedNavident authorizedNavident;
     private final AuthResolver authResolver;
+    private final OrgenhetService orgenhetService;
+    private final OrgEnhetMapper orgEnhetMapper;
 
-    public AuthorizedNavidentController(AuthorizedNavident authorizedNavident, AuthResolver authResolver) {
+    public AuthorizedNavidentController(AuthorizedNavident authorizedNavident,
+                                        AuthResolver authResolver,
+                                        OrgenhetService orgenhetService,
+                                        OrgEnhetMapper orgEnhetMapper) {
         this.authorizedNavident = authorizedNavident;
         this.authResolver = authResolver;
+        this.orgenhetService = orgenhetService;
+        this.orgEnhetMapper = orgEnhetMapper;
     }
 
     @Operation(
@@ -108,7 +118,22 @@ public class AuthorizedNavidentController {
         boolean canEditResourcesInOrgenhet = editableOrgenheter.stream().anyMatch(orgenhet -> orgenhet.getId().equals(orgenhetId));
         log.info("hasNavidentAccessToResourcesForOrgenhet, isAdmin: {}, canEditResourcesInOrgenhet: {}", isAdmin, canEditResourcesInOrgenhet);
 
-        return isAdmin || canCreateResourcesInOrgenhet;
+
+        OrgEnhet orgenhet = orgenhetService.getById(orgenhetId)
+            .map(orgEnhetMapper::mapToOrgEnhet)
+            .orElse(null);
+
+        if(orgenhet == null) {
+            log.info("hasNavidentAccessToResourcesForOrgenhet, orgenhet is null");
+            return false;
+        }
+
+        log.info("hasNavidentAccessToResourcesForOrgenhet, orgenhet: {}", orgenhet);
+
+        boolean isLeaderToGivenOrgenhet = orgenhet.ledere().stream().anyMatch(ressursState -> ressursState.navident().equals(navIdent));
+        log.info("hasNavidentAccessToResourcesForOrgenhet, isLeaderToGivenOrgenhet: {}", isLeaderToGivenOrgenhet);
+
+        return isAdmin || canCreateResourcesInOrgenhet || isLeaderToGivenOrgenhet;
     }
 
     @Operation(
