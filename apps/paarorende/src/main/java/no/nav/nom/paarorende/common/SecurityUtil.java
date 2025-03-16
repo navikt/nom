@@ -135,5 +135,6 @@ public class SecurityUtil {
         log.info("getBehalfOfUserNavident Token.getClaimAsStringList: {}", oauthToken.getToken().getClaimAsStringList(GROUPS));
         log.info("getBehalfOfUserNavident Token.getPrincipal: {}", oauthToken.getPrincipal());
         log.info("getBehalfOfUserNavident TokengetPrincipal.getClaimAsStringList: {}", ((Jwt)oauthToken.getPrincipal()).getClaimAsStringList(GROUPS));
+        log.info("getBehalfOfUserNavident isAdmin: {}", isAdmin());
     }
 }
