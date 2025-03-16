@@ -101,6 +101,9 @@ public class OrgEnhetController {
         @ApiResponse(responseCode = "200", description = "Exported file"),
     })
     public void exportKontaktpersonerForOrgenhetId(HttpServletResponse response, @PathVariable String orgenhetId) throws IOException {
+
+        SecurityUtil.printTestToken("OrgEnhetController_");
+
         try {
             var orgEnhet = orgenhetService.getById(orgenhetId)
                 .map(orgEnhetMapper::mapToOrgEnhet);
