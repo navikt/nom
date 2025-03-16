@@ -82,11 +82,16 @@ public class SecurityUtil {
         }
     }
 
-    public boolean canAccessContactInfo(String navident, String orgenhetId) {
+    public boolean canAccessContactInfoForResourcesUnderOrgenhet(String navident, String orgenhetId, List<String> ressurser) {
         var authenticated = isAuthenticated();
         var isAdmin = isAdmin();
         var isLederForOrgenhet = isNavIdentLederForOrgenhet(navident, orgenhetId);
-        log.info("canAccessContactInfo authenticated, isAdmin, isLederForOrgenhet : {}, {}, {}, {}, {}", navident, orgenhetId, authenticated, isAdmin, isLederForOrgenhet);
+        var resourcesUnderOrgenhet = getRessurserInAndUnderliggendeOrgenheter(orgenhetId);
+        List<String> differences = ressurser.stream()
+            .filter(element -> !resourcesUnderOrgenhet.contains(element))
+            .toList();
+        boolean matchingResources = differences.isEmpty();
+        log.info("canAccessContactInfo navident, orgenhetId, authenticated, isAdmin, isLederForOrgenhet, matchingResources : {}, {}, {}, {}, {}, {}", navident, orgenhetId, authenticated, isAdmin, isLederForOrgenhet, matchingResources);
         return isAuthenticated() && (isAdmin() || isNavIdentLederForOrgenhet(navident, orgenhetId));
     }
 
@@ -138,6 +143,10 @@ public class SecurityUtil {
 
     private boolean isNavIdentLederForOrgenhet(String navident, String orgenhetId) {
         return nomApiClient.isNavidentLederForOrgenhet(navident, orgenhetId);
+    }
+
+    private List<String> getRessurserInAndUnderliggendeOrgenheter(String orgenhetId) {
+        return nomApiClient.getRessurserInAndUnderliggendeOrgenheter(orgenhetId);
     }
 
     public static String getBehalfOfUserNavident() {
