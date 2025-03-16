@@ -98,17 +98,8 @@ public class OrgEnhetController {
         if(orgEnhet != null) {
             boolean navIdentIsLeder = orgEnhet.ledere().stream().anyMatch(ressursState -> ressursState.navident().equals(navident));
             log.info("isNavIdentLederForOrgenhet navIdentIsLeder: {}-{}-{}", navident, orgEnhet.id(), navIdentIsLeder);
-
-            var orgenhetRessurser = getSortedRessurserInAndUnderliggendeOrgenheter(orgEnhetId);
-            log.info("isNavIdentLederForOrgenhet orgenhetRessurser: {}-{}-{}", navident, orgEnhet.id(), orgenhetRessurser);
-
-            List<String> differences = ressurser.stream()
-                .filter(element -> !orgenhetRessurser.contains(element))
-                .toList();
-            boolean matchingRessurser = differences.isEmpty();
-            log.info("isNavIdentLederForOrgenhet matchingRessurser: {}-{}-{}", navident, orgEnhet.id(), matchingRessurser);
-
-            return ResponseEntity.ok(matchingRessurser && navIdentIsLeder);
+            // todo check it ressurser also match
+            return ResponseEntity.ok(navIdentIsLeder);
         }
 
         return ResponseEntity.ok(false);
@@ -124,9 +115,6 @@ public class OrgEnhetController {
         @ApiResponse(responseCode = "200", description = "Exported file"),
     })
     public void exportKontaktpersonerForOrgenhetId(HttpServletResponse response, @PathVariable String orgenhetId) throws IOException {
-
-        SecurityUtil.printTestToken("OrgEnhetController_");
-
         try {
             var orgEnhet = orgenhetService.getById(orgenhetId)
                 .map(orgEnhetMapper::mapToOrgEnhet);
@@ -154,8 +142,11 @@ public class OrgEnhetController {
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=kontaktpersoner.xlsx");
             kontaktpersonerExcelGenerator.generate(response, orgEnhet.get(), sortedRessurser);
         } catch (Exception e) {
-            log.error("Failed to generate export file in exportKontaktpersonerForOrgenhetId. " + e.getMessage());
-            response.sendError(500);
+            if (e instanceof AccessDeniedException) throw e;
+            else {
+                log.error("Something wrong happened while getting contact info or generating excel file. " + e.getMessage());
+                response.sendError(500, "Noe galt skjedde under henting av kontaktinformasjon eller generering av excel-fil.");
+            }
         }
     }
 

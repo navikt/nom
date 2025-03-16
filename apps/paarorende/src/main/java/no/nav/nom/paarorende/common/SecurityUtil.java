@@ -51,39 +51,6 @@ public class SecurityUtil {
         }
     }
 
-    /*
-    public void assertAuthorizedAccessToRessurser(String bruker, List<String> ressurser ) throws AccessDeniedException {
-        log.info("assertAuthorizedAccessToRessurser: {} {}", bruker, ressurser);
-        var authenticated = isAuthenticated();
-        var hasAccess = hasAccess(bruker, ressurser);
-        log.info("assertAuthorizedAccessToRessurser isAuthenticated: {}", authenticated);
-        log.info("assertAuthorizedAccessToRessurser hasAccess: {}", hasAccess);
-        if (!authenticated || !hasAccess) {
-            throw new AccessDeniedException(bruker +" is not unauthorized access to ressurser: " + ressurser);
-        }
-    }
-
-    public void assertNavidentHasAccessToResourcesForOrgenhet(String bruker, String orgenhetId ) throws AccessDeniedException {
-        log.info("assertNavidentHasAccessToResourcesForOrgenhet navident: {} orgenhetId: {}", bruker, orgenhetId);
-        var authenticated = isAuthenticated();
-
-        //NOT returning correct value due to missing info in token
-        var hasAccess = hasNavidentAccessToResourcesForOrgenhet(bruker, orgenhetId);
-        log.info("assertNavidentHasAccessToResourcesForOrgenhet authenticated: {} hasAccess: {}", authenticated, hasAccess);
-
-        // this should return correct value
-        var isLederForOrgenhet = isNavIdentLederForOrgenhet(bruker, orgenhetId);
-        log.info("assertNavidentHasAccessToResourcesForOrgenhet isLederForOrgenhet: {}", isLederForOrgenhet);
-
-        var isAdmin = isAdmin();
-        log.info("assertNavidentHasAccessToResourcesForOrgenhet isAdmin: {}", isAdmin);
-
-        if (!authenticated || !hasAccess || !isLederForOrgenhet || !isAdmin) {
-            throw new AccessDeniedException(bruker +" is not unauthorized access to ressurser for : " + orgenhetId);
-        }
-    }
-    */
-
     public boolean canAccessContactInfoForResourcesUnderOrgenhet(String navident, String orgenhetId, List<String> ressurser) {
         var authenticated = isAuthenticated();
         var isAdmin = isAdmin();
@@ -128,16 +95,6 @@ public class SecurityUtil {
         return nomApiClient.hasAccess(bruker, ressurs) || isAdmin() || bruker.equals(ressurs);
     }
 
-    private boolean hasAccess(String bruker, List<String> ressurser) {
-        return nomApiClient.hasAccess(bruker, ressurser) || isAdmin();
-    }
-
-    private boolean hasNavidentAccessToResourcesForOrgenhet(String navident, String orgenhetId) {
-        boolean  hasRedigeringsTilgang = nomApiClient.hasNavidentAccessToResourcesForOrgenhet(navident, orgenhetId);
-        log.info("hasNavidentAccessToResourcesForOrgenhet navident: {}, orgenhetId: {}, hasRedigeringsTilgang: {}", navident, orgenhetId, hasRedigeringsTilgang);
-        return hasRedigeringsTilgang;
-    }
-
     private boolean isNavIdentLederForOrgenhet(String navident, String orgenhetId, List<String> ressurser) {
         return nomApiClient.isNavidentLederForOrgenhet(navident, orgenhetId, ressurser);
     }
@@ -147,17 +104,5 @@ public class SecurityUtil {
         JwtAuthenticationToken oauthToken = (JwtAuthenticationToken) authentication;
         String onBehalfOfUserNavident = String.valueOf(oauthToken.getTokenAttributes().get("NAVident"));
         return onBehalfOfUserNavident;
-    }
-
-    // tobe deleted
-    public void printTestToken() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        JwtAuthenticationToken oauthToken = (JwtAuthenticationToken) authentication;
-        log.info("getBehalfOfUserNavident Token.getTokenAttributes: {}", oauthToken.getTokenAttributes());
-        log.info("getBehalfOfUserNavident Token: {}", oauthToken.getToken());
-        log.info("getBehalfOfUserNavident Token.getClaimAsStringList: {}", oauthToken.getToken().getClaimAsStringList(GROUPS));
-        log.info("getBehalfOfUserNavident Token.getPrincipal: {}", oauthToken.getPrincipal());
-        log.info("getBehalfOfUserNavident TokengetPrincipal.getClaimAsStringList: {}", ((Jwt)oauthToken.getPrincipal()).getClaimAsStringList(GROUPS));
-        log.info("getBehalfOfUserNavident isAdmin: {}", isAdmin());
     }
 }

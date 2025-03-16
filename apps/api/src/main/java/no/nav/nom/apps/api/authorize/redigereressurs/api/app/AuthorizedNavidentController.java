@@ -97,9 +97,6 @@ public class AuthorizedNavidentController {
     )
     @GetMapping("/hasNavidentAccessToResourcesForOrgenhet/{navIdent}/{orgenhetId}")
     boolean hasNavidentAccessToResourcesForOrgenhet(@PathVariable String navIdent, @PathVariable String orgenhetId) {
-        //testing
-        SecurityUtil.printTestToken("AuthorizedNavidentController_");
-
         log.info("hasNavidentAccessToResourcesForOrgenhet, navIdent: {}, orgenhetId: {}", navIdent, orgenhetId);
         boolean isAdmin = SecurityUtil.loggedInUserHasAccessScope(NomApiAccessScope.ADMIN);
         boolean canCreateResourcesInOrgenhet =  authorizedNavident.kanBrukerOppretteRessurs(navIdent, orgenhetId);

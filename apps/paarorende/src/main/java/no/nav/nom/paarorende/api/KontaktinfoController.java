@@ -201,12 +201,7 @@ public class KontaktinfoController {
         @PathVariable String orgenhetId,
         @RequestBody List<String> ressurser) {
 
-        // to be deleted
-        securityUtil.printTestToken();
-
         String onBehalfOfUserNavident =  SecurityUtil.getBehalfOfUserNavident();
-        log.info("ON BEHALF OF USER: {}", onBehalfOfUserNavident);
-
         if (onBehalfOfUserNavident == null) {
             throw new AccessDeniedException("Unauthorized access to ressurser kontaktinfo");
         }
