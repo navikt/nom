@@ -86,7 +86,7 @@ public class SecurityUtil {
         var authenticated = isAuthenticated();
         var isAdmin = isAdmin();
         var isLederForOrgenhet = isNavIdentLederForOrgenhet(navident, orgenhetId);
-        log.info("canAccessContactInfo authenticated, isAdmin, isLederForOrgenhet : {}, {}, {}", authenticated, isAdmin, isLederForOrgenhet);
+        log.info("canAccessContactInfo authenticated, isAdmin, isLederForOrgenhet : {}, {}, {}, {}, {}", navident, orgenhetId, authenticated, isAdmin, isLederForOrgenhet);
         return isAuthenticated() && (isAdmin() || isNavIdentLederForOrgenhet(navident, orgenhetId));
     }
 
