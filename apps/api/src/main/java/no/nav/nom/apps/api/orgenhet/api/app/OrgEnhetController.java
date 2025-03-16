@@ -82,26 +82,20 @@ public class OrgEnhetController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/getRessurserInAndUnderliggendeOrgenheter/{orgEnhetId}")
-    @Operation(
-        description = "Hent ressurser under alle underligene enheter for angitt orgenhet.",
-        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-    )
-    public List<String> getRessurserInAndUnderliggendeOrgenheter(@PathVariable("orgEnhetId") String orgEnhetId) {
-        return getSortedRessurserInAndUnderliggendeOrgenheter(orgEnhetId).stream().map(r -> r.state().navident()).toList();
-    }
-
-    @GetMapping("/isNavIdent/{navident}/LederForOrgenhet/{orgEnhetId}")
+    @PostMapping("/isNavIdent/{navident}/LederForOrgenhet/{orgEnhetId}")
     @Operation(
         description = "Sjekk om angitt navident er leder for angitt orgenhet.",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    public ResponseEntity<Boolean> isNavIdentLederForOrgenhet(@PathVariable("navident") String navident, @PathVariable("orgEnhetId") String orgEnhetId) {
+    public ResponseEntity<Boolean> isNavIdentLederForOrgenhet(
+        @PathVariable("navident") String navident,
+        @PathVariable("orgEnhetId") String orgEnhetId,
+        @RequestBody List<String> ressurser) {
         OrgEnhet orgEnhet = orgenhetService.getById(orgEnhetId)
             .map(orgEnhetMapper::mapToOrgEnhet)
             .orElse(null);
 
-        log.info("isNavIdent LederForOrgenhet: {}-{}", navident, orgEnhet);
+        log.info("isNavIdent LederForOrgenhet: {}-{}-{}", navident, orgEnhet, ressurser);
         if(orgEnhet != null) {
             return ResponseEntity.ok(orgEnhet.ledere().stream().anyMatch(ressursState -> ressursState.navident().equals(navident)));
         }
