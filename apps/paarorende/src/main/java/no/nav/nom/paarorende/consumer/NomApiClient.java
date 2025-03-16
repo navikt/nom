@@ -65,14 +65,14 @@ public class NomApiClient {
             .block());
     }
 
-    public List getRessurserInAndUnderliggendeOrgenheter(String orgEnhetId) {
+    public List<String> getRessurserInAndUnderliggendeOrgenheter(String orgEnhetId) {
         return nomApi.get()
             .uri(uriBuilder -> uriBuilder
                 .path(ORGENHETER_PATH + "/getRessurserInAndUnderliggendeOrgenheter/{orgEnhetId}")
                 .build(orgEnhetId))
             .retrieve()
-            .bodyToMono(List.class)
-            .block();
+            .toEntityList(String.class)
+            .block().getBody();
     }
 
     record IsAuthorizedRessursWriteRequest(
