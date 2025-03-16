@@ -65,15 +65,29 @@ public class SecurityUtil {
     public void assertNavidentHasAccessToResourcesForOrgenhet(String bruker, String orgenhetId ) throws AccessDeniedException {
         log.info("assertNavidentHasAccessToResourcesForOrgenhet navident: {} orgenhetId: {}", bruker, orgenhetId);
         var authenticated = isAuthenticated();
+
+        //NOT returning correct value due to missing info in token
         var hasAccess = hasNavidentAccessToResourcesForOrgenhet(bruker, orgenhetId);
         log.info("assertNavidentHasAccessToResourcesForOrgenhet authenticated: {} hasAccess: {}", authenticated, hasAccess);
 
+        // this should return correct value
         var isLederForOrgenhet = isNavIdentLederForOrgenhet(bruker, orgenhetId);
         log.info("assertNavidentHasAccessToResourcesForOrgenhet isLederForOrgenhet: {}", isLederForOrgenhet);
 
-        if (!authenticated || !hasAccess || !isLederForOrgenhet) {
+        var isAdmin = isAdmin();
+        log.info("assertNavidentHasAccessToResourcesForOrgenhet isAdmin: {}", isAdmin);
+
+        if (!authenticated || !hasAccess || !isLederForOrgenhet || !isAdmin) {
             throw new AccessDeniedException(bruker +" is not unauthorized access to ressurser for : " + orgenhetId);
         }
+    }
+
+    public boolean canAccessContactInfo(String navident, String orgenhetId) {
+        var authenticated = isAuthenticated();
+        var isAdmin = isAdmin();
+        var isLederForOrgenhet = isNavIdentLederForOrgenhet(navident, orgenhetId);
+        log.info("canAccessContactInfo authenticated, isAdmin, isLederForOrgenhet : {}, {}, {}", authenticated, isAdmin, isLederForOrgenhet);
+        return isAuthenticated() && (isAdmin() || isNavIdentLederForOrgenhet(navident, orgenhetId));
     }
 
     public String getNavIdent() {
@@ -88,7 +102,7 @@ public class SecurityUtil {
         }
     }
 
-    private boolean isAdmin() {
+    public boolean isAdmin() {
         if (Arrays.asList(environment.getActiveProfiles()).contains("local")) {
             return true;
         }
