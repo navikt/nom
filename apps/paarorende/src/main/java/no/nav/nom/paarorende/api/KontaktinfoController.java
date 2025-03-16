@@ -212,7 +212,7 @@ public class KontaktinfoController {
         }
 
         // do authorization check
-        var hasAccess = securityUtil.canAccessContactInfo(onBehalfOfUserNavident, orgenhetId);
+        var hasAccess = securityUtil.canAccessContactInfoForResourcesUnderOrgenhet(onBehalfOfUserNavident, orgenhetId, ressurser);
         if (!hasAccess) {
             throw new AccessDeniedException(String.format("Unauthorized access to ressurser kontaktinfo: %s, %s", onBehalfOfUserNavident, orgenhetId));
         }

@@ -82,6 +82,15 @@ public class OrgEnhetController {
             .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/getRessurserInAndUnderliggendeOrgenheter/{orgEnhetId}")
+    @Operation(
+        description = "Hent ressurser under alle underligene enheter for angitt orgenhet.",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    public List<String> getRessurserInAndUnderliggendeOrgenheter(@PathVariable("orgEnhetId") String orgEnhetId) {
+        return getSortedRessurserInAndUnderliggendeOrgenheter(orgEnhetId).stream().map(r -> r.state().navident()).toList();
+    }
+
     @GetMapping("/isNavIdent/{navident}/LederForOrgenhet/{orgEnhetId}")
     @Operation(
         description = "Sjekk om angitt navident er leder for angitt orgenhet.",
@@ -135,7 +144,7 @@ public class OrgEnhetController {
             log.info("User have access to view ressurser for this orgenhet: {}-{}", loggedInUser, orgenhetId);
             var sortedRessurser = getSortedRessurserInAndUnderliggendeOrgenheter(orgenhetId);
 
-            log.info("Ressurser are retrivedfor this orgenhet: {}-{}", sortedRessurser, orgenhetId);
+            log.info("Ressurser are retrived for this orgenhet: {}-{}", sortedRessurser, orgenhetId);
 
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=kontaktpersoner.xlsx");
             kontaktpersonerExcelGenerator.generate(response, orgEnhet.get(), sortedRessurser);
