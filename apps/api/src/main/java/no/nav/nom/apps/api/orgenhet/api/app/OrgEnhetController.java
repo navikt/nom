@@ -82,13 +82,22 @@ public class OrgEnhetController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/checkIfBrukerKanExportKontaktpersonerForOrgenhet/{orgEnhetId}")
+    @GetMapping("/isNavIdent/{navident}/LederForOrgenhet/{orgEnhetId}")
     @Operation(
-        description = "Sjekk om bruker kan export kontakt personer for gitt orgenhet.",
+        description = "Sjekk om angitt navident er leder for angitt orgenhet.",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    public ResponseEntity<Boolean> checkIfBrukerKanExportKontaktpersonerForOrgenhet(@PathVariable("orgEnhetId") String orgEnhetId) {
-        return ResponseEntity.ok(authResolver.kanOppretteRessurs(orgEnhetId));
+    public ResponseEntity<Boolean> isNavIdentLederForOrgenhet(@PathVariable("navident") String navident, @PathVariable("orgEnhetId") String orgEnhetId) {
+        OrgEnhet orgEnhet = orgenhetService.getById(orgEnhetId)
+            .map(orgEnhetMapper::mapToOrgEnhet)
+            .orElse(null);
+
+        log.info("isNavIdent LederForOrgenhet: {}-{}", navident, orgEnhet);
+        if(orgEnhet != null) {
+            return ResponseEntity.ok(orgEnhet.ledere().stream().anyMatch(ressursState -> ressursState.navident().equals(navident)));
+        }
+
+        return ResponseEntity.ok(false);
     }
 
 

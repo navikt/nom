@@ -68,7 +68,10 @@ public class SecurityUtil {
         var hasAccess = hasNavidentAccessToResourcesForOrgenhet(bruker, orgenhetId);
         log.info("assertNavidentHasAccessToResourcesForOrgenhet authenticated: {} hasAccess: {}", authenticated, hasAccess);
 
-        if (!authenticated || !hasAccess) {
+        var isLederForOrgenhet = isNavIdentLederForOrgenhet(bruker, orgenhetId);
+        log.info("assertNavidentHasAccessToResourcesForOrgenhet isLederForOrgenhet: {}", isLederForOrgenhet);
+
+        if (!authenticated || !hasAccess || !isLederForOrgenhet) {
             throw new AccessDeniedException(bruker +" is not unauthorized access to ressurser for : " + orgenhetId);
         }
     }
@@ -117,6 +120,10 @@ public class SecurityUtil {
         boolean  hasRedigeringsTilgang = nomApiClient.hasNavidentAccessToResourcesForOrgenhet(navident, orgenhetId);
         log.info("hasNavidentAccessToResourcesForOrgenhet navident: {}, orgenhetId: {}, hasRedigeringsTilgang: {}", navident, orgenhetId, hasRedigeringsTilgang);
         return hasRedigeringsTilgang;
+    }
+
+    private boolean isNavIdentLederForOrgenhet(String navident, String orgenhetId) {
+        return nomApiClient.isNavidentLederForOrgenhet(navident, orgenhetId);
     }
 
     public static String getBehalfOfUserNavident() {

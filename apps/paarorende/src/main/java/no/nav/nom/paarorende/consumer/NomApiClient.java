@@ -13,6 +13,8 @@ public class NomApiClient {
     private static final String IS_AUTHORIZED_RESSURS_SKRIV_PATH = "app/authorizedRessursRedigering/isAuthorized";
     private static final String IS_AUTHORIZED_RESSURSER_SKRIV_PATH = "app/authorizedRessursRedigering/isAuthorizedForNavidents";
     private static final String HAS_NAVIDENT_ACCESS_TO_RESOURCES_FOR_ORGENHET_PATH = "app/authorizedRessursRedigering/hasNavidentAccessToResourcesForOrgenhet";
+    private static final String ORGENHETER_PATH = "app/orgenheter";
+
 
 
     private final WebClient nomApi;
@@ -46,6 +48,17 @@ public class NomApiClient {
         return Boolean.TRUE.equals(nomApi.get()
             .uri(uriBuilder -> uriBuilder
                 .path(HAS_NAVIDENT_ACCESS_TO_RESOURCES_FOR_ORGENHET_PATH + "/{navident}/{orgenhetId}")
+                .build(navident, orgenhetId))
+            .retrieve()
+            .bodyToMono(Boolean.class)
+            .block());
+    }
+
+    public boolean isNavidentLederForOrgenhet(String navident, String orgenhetId) {
+        log.info("isNavidentLederForOrgenhet: {}, {}", navident, orgenhetId);
+        return Boolean.TRUE.equals(nomApi.get()
+            .uri(uriBuilder -> uriBuilder
+                .path(ORGENHETER_PATH + "/isNavIdent/{navident}/LederForOrgenhet/{orgenhetId}")
                 .build(navident, orgenhetId))
             .retrieve()
             .bodyToMono(Boolean.class)
