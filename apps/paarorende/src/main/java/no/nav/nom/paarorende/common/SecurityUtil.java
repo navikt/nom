@@ -62,6 +62,17 @@ public class SecurityUtil {
         }
     }
 
+    public void assertNavidentHasAccessToResourcesForOrgenhet(String bruker, String orgenhetId ) throws AccessDeniedException {
+        log.info("assertNavidentHasAccessToResourcesForOrgenhet navident: {} orgenhetId: {}", bruker, orgenhetId);
+        var authenticated = isAuthenticated();
+        var hasAccess = hasNavidentAccessToResourcesForOrgenhet(bruker, orgenhetId);
+        log.info("assertNavidentHasAccessToResourcesForOrgenhet authenticated: {} hasAccess: {}", authenticated, hasAccess);
+
+        if (!authenticated || !hasAccess) {
+            throw new AccessDeniedException(bruker +" is not unauthorized access to ressurser for : " + orgenhetId);
+        }
+    }
+
     public String getNavIdent() {
         if (Arrays.asList(environment.getActiveProfiles()).contains("local")) {
             return "testuser";
@@ -102,10 +113,27 @@ public class SecurityUtil {
         return nomApiClient.hasAccess(bruker, ressurser) || isAdmin();
     }
 
+    private boolean hasNavidentAccessToResourcesForOrgenhet(String navident, String orgenhetId) {
+        boolean  hasRedigeringsTilgang = nomApiClient.hasNavidentAccessToResourcesForOrgenhet(navident, orgenhetId);
+        log.info("hasNavidentAccessToResourcesForOrgenhet navident: {}, orgenhetId: {}, hasRedigeringsTilgang: {}", navident, orgenhetId, hasRedigeringsTilgang);
+        return hasRedigeringsTilgang;
+    }
+
     public static String getBehalfOfUserNavident() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         JwtAuthenticationToken oauthToken = (JwtAuthenticationToken) authentication;
         String onBehalfOfUserNavident = String.valueOf(oauthToken.getTokenAttributes().get("NAVident"));
         return onBehalfOfUserNavident;
+    }
+
+    // tobe deleted
+    public void printTestToken() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        JwtAuthenticationToken oauthToken = (JwtAuthenticationToken) authentication;
+        log.info("getBehalfOfUserNavident Token.getTokenAttributes: {}", oauthToken.getTokenAttributes());
+        log.info("getBehalfOfUserNavident Token: {}", oauthToken.getToken());
+        log.info("getBehalfOfUserNavident Token.getClaimAsStringList: {}", oauthToken.getToken().getClaimAsStringList(GROUPS));
+        log.info("getBehalfOfUserNavident Token.getPrincipal: {}", oauthToken.getPrincipal());
+        log.info("getBehalfOfUserNavident TokengetPrincipal.getClaimAsStringList: {}", ((Jwt)oauthToken.getPrincipal()).getClaimAsStringList(GROUPS));
     }
 }

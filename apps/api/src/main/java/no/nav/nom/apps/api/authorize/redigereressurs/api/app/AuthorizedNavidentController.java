@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.authorize.redigereressurs.NotAuthorizedToDelegateLeder;
+import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.ressurs.api.dto.MinimalRessurs;
 import no.nav.nom.contract.nom.state.LederTilgangState;
@@ -17,6 +18,8 @@ import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -41,6 +44,7 @@ import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNa
 @Slf4j
 @RequestMapping("/app/authorizedRessursRedigering")
 public class AuthorizedNavidentController {
+    private final static Logger log = LoggerFactory.getLogger(AuthorizedNavidentController.class);
     private final AuthorizedNavident authorizedNavident;
     private final AuthResolver authResolver;
 
@@ -84,6 +88,19 @@ public class AuthorizedNavidentController {
         }
         log.info("isAuthorizedForNavidents true");
         return true;
+    }
+
+    @Operation(
+        description = "om angitt bruker har tilgang til å opprette ressurser i angitt orgenhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping("/hasNavidentAccessToResourcesForOrgenhet/{navIdent}/{orgenhetId}")
+    boolean hasNavidentAccessToResourcesForOrgenhet(@PathVariable String navIdent, @PathVariable String orgenhetId) {
+        log.info("hasNavidentAccessToResourcesForOrgenhet, navIdent: {}, orgenhetId: {}", navIdent, orgenhetId);
+        boolean isAdmin = SecurityUtil.loggedInUserHasAccessScope(NomApiAccessScope.ADMIN);
+        boolean canCreateResourcesInOrgenhet =  authorizedNavident.kanBrukerOppretteRessurs(navIdent, orgenhetId);
+        log.info("hasNavidentAccessToResourcesForOrgenhet, isAdmin: {}, canCreateResourcesInOrgenhet: {}", isAdmin, canCreateResourcesInOrgenhet);
+        return isAdmin || canCreateResourcesInOrgenhet;
     }
 
     @Operation(

@@ -185,7 +185,7 @@ public class KontaktinfoController {
         kontaktInfoRepository.save(kontaktinfo);
     }
 
-    @PostMapping("/ressurser")
+    @PostMapping("/ressurser/{orgenhetId}")
     @Operation(
         description = "Henter kontaktinfo til pårørende for gitt ressurser - brukes av admin og ledere",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -197,7 +197,13 @@ public class KontaktinfoController {
             @ApiResponse(responseCode = "403", description = "Uatorisert")
         }
     )
-    public ResponseEntity<List<RessursKontaktinfoDTO>> getContaktinfoForRessurser(@RequestBody List<String> ressurser) {
+    public ResponseEntity<List<RessursKontaktinfoDTO>> getContaktinfoForRessurserForAngittOrgenhet(
+        @PathVariable String orgenhetId,
+        @RequestBody List<String> ressurser) {
+
+        // to be deleted
+        securityUtil.printTestToken();
+
         String onBehalfOfUserNavident =  SecurityUtil.getBehalfOfUserNavident();
         log.info("ON BEHALF OF USER: {}", onBehalfOfUserNavident);
 
@@ -206,7 +212,7 @@ public class KontaktinfoController {
         }
 
         // do authorization check
-        securityUtil.assertAuthorizedAccessToRessurser(onBehalfOfUserNavident, ressurser);
+        securityUtil.assertNavidentHasAccessToResourcesForOrgenhet(onBehalfOfUserNavident, orgenhetId);
         log.info("User {} is authorized to access ressurser: {}", onBehalfOfUserNavident, ressurser);
 
         // get contact info for ressurser
