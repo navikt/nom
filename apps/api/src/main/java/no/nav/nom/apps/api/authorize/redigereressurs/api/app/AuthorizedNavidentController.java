@@ -82,11 +82,11 @@ public class AuthorizedNavidentController {
         log.info("isAuthorizedForNavidents: {}", request);
         for (String ressurs : request.ressurser()) {
             if (!authorizedNavident.kanBrukerRedigereRessurs(request.bruker(), ressurs)) {
-                log.info("isAuthorizedForNavidents false");
+                log.info("isAuthorizedForNavidents false: {}, {}", request.bruker(), ressurs);
                 return false;
             }
         }
-        log.info("isAuthorizedForNavidents true");
+        log.info("isAuthorizedForNavidents true: {}, {}", request.bruker(), request.ressurser());
         return true;
     }
 
@@ -96,6 +96,9 @@ public class AuthorizedNavidentController {
     )
     @GetMapping("/hasNavidentAccessToResourcesForOrgenhet/{navIdent}/{orgenhetId}")
     boolean hasNavidentAccessToResourcesForOrgenhet(@PathVariable String navIdent, @PathVariable String orgenhetId) {
+        //testing
+        SecurityUtil.printTestToken();
+
         log.info("hasNavidentAccessToResourcesForOrgenhet, navIdent: {}, orgenhetId: {}", navIdent, orgenhetId);
         boolean isAdmin = SecurityUtil.loggedInUserHasAccessScope(NomApiAccessScope.ADMIN);
         boolean canCreateResourcesInOrgenhet =  authorizedNavident.kanBrukerOppretteRessurs(navIdent, orgenhetId);
