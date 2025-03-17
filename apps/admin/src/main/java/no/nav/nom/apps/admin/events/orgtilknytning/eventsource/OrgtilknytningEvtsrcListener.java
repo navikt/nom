@@ -32,14 +32,14 @@ public class OrgtilknytningEvtsrcListener {
     private final ObjectMapper objectMapper = configureObjectMapper();
     private final String listenerId;
 
-    public OrgtilknytningEvtsrcListener(OrgtilknytningEvtsrcRepository orgtilknytningEvtsrcRepository,@Value("${app.kafka.orgtilknytning.eventsource-listener-id}") String listenerId) {
+    public OrgtilknytningEvtsrcListener(OrgtilknytningEvtsrcRepository orgtilknytningEvtsrcRepository, String evtsrcOrgtilknytningUniqueListenerId) {
         this.orgtilknytningEvtsrcRepository = orgtilknytningEvtsrcRepository;
-        this.listenerId = listenerId;
+        this.listenerId = evtsrcOrgtilknytningUniqueListenerId;
     }
 
     @KafkaListener(
         containerFactory = "orgtilknytningEvtsrcKafkaListenerContainerFactory",
-        id = "${app.kafka.orgtilknytning.eventsource-listener-id}",
+        id = "#{evtsrcOrgtilknytningUniqueListenerId}",
         topicPartitions = @TopicPartition(
             topic = "${app.kafka.orgtilknytning.eventsourceTopic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
         )

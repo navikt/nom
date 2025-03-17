@@ -78,7 +78,7 @@ public class MasteredRessursStateAutoconfiguration extends DefaultStateAutoconfi
 
     @Bean
     @ConditionalOnProperty(value = "nom.libs.state.mastered-ressurs.enabled")
-    public String masteredRessursStateListenerId(@Value("${nom.libs.state.mastered-ressurs.listener-id}") String listenerId) {return getListenerIdString(listenerId); }
+    public String masteredRessursStateListenerId(@Value("${nom.libs.state.mastered-ressurs.listener-id}") String listenerId) {return getUniqueListenerIdString(listenerId); }
 
     static class MasteredRessursStateEnabledCondition extends AllNestedConditions {
         MasteredRessursStateEnabledCondition() {

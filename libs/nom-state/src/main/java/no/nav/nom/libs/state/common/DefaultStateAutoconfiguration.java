@@ -8,8 +8,7 @@ import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.util.backoff.FixedBackOff;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Random;
 
 @Slf4j
@@ -40,15 +39,14 @@ public class DefaultStateAutoconfiguration<T> {
         return factory;
     }
 
-    protected String getListenerIdString(String listenerId) {
-        if (isLocal()) {
-            return listenerId + "-" + Math.abs(new Random().nextInt());
-        }
-        return listenerId;
-    }
+    final HashMap<String, String> listenerIdMap = new HashMap<>();
 
-    protected boolean isLocal() {
-        List<String> profiles = Arrays.asList(environment.getActiveProfiles());
-        return profiles.contains("local") || profiles.contains("test");
+    protected String getUniqueListenerIdString(String listenerId) {
+        if (!listenerIdMap.containsKey(listenerId)) {
+            int rnd = Math.abs(new Random().nextInt());
+            while (rnd < 0) {  rnd = Math.abs(new Random().nextInt()); }
+            listenerIdMap.put(listenerId, listenerId + "-" + rnd);
+        }
+        return listenerIdMap.get(listenerId);
     }
 }

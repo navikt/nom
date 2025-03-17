@@ -25,14 +25,14 @@ public class RessursApiStateListener {
     private final RessursApiStateRepository ressursApiStateRepository;
     private final String listenerId;
 
-    public RessursApiStateListener(RessursApiStateRepository ressursApiStateRepository, @Value("${app.kafka.ressurs.apiEventTopic-listener-id}") String listenerId) {
+    public RessursApiStateListener(RessursApiStateRepository ressursApiStateRepository, String apiStateRessursUniqueListenerId) {
         this.ressursApiStateRepository = ressursApiStateRepository;
-        this.listenerId = listenerId;
+        this.listenerId = apiStateRessursUniqueListenerId;
     }
 
     @KafkaListener(
         containerFactory = "genericApiEventKafkaListenerContainerFactory",
-        id = "${app.kafka.ressurs.apiEventTopic-listener-id}",
+        id = "#{apiStateRessursUniqueListenerId}",
         topicPartitions = @TopicPartition(
             topic = "${app.kafka.ressurs.apiEventTopic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
         )

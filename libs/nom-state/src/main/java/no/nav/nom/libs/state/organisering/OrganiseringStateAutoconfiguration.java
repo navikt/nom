@@ -77,7 +77,7 @@ public class OrganiseringStateAutoconfiguration extends DefaultStateAutoconfigur
 
     @Bean
     @ConditionalOnProperty(value = "nom.libs.state.organisering.enabled")
-    public String organiseringStateListenerId(@Value("${nom.libs.state.organisering.listener-id}") String listenerId) {return getListenerIdString(listenerId); }
+    public String organiseringStateListenerId(@Value("${nom.libs.state.organisering.listener-id}") String listenerId) {return getUniqueListenerIdString(listenerId); }
 
     static class OrganiseringStateEnabledCondition extends AllNestedConditions {
         OrganiseringStateEnabledCondition() {
