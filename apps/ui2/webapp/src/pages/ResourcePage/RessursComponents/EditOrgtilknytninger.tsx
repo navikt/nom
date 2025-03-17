@@ -45,6 +45,7 @@ import {
 import * as yup from "yup";
 
 import {
+  getLedereForRessurs,
   getOrgEnhet,
   getOrgEnheterSomKanHaRessurser,
   getOrgTilknytninger,
@@ -540,7 +541,7 @@ function OrgtilknytningForm({
                 />
               </HStack>
 
-              <LederLabel index={index} />
+              <LederLabel index={index} ressurs={ressurs} />
 
               <Checkbox
                 css={css`
@@ -1073,7 +1074,7 @@ function FormTilknytningstypeSelectWrapper({
   );
 }
 
-function LederLabel({ index }: { index: number }) {
+function LederLabel({ index, ressurs }: { index: number; ressurs: Ressurs }) {
   const { watch } = useFormContext();
   const field = watch(`mappedeOrgtilknytninger.${index}`);
 
@@ -1083,7 +1084,19 @@ function LederLabel({ index }: { index: number }) {
     enabled: !!field.orgEnhetId,
   });
 
-  const lederNavn = orgEnhetQuery.data?.ledere[0]?.visningsnavn;
+  const ressursDolLeder = useQuery({
+    queryKey: getLedereForRessurs.queryKey(ressurs.navident),
+    queryFn: () => getLedereForRessurs.queryFn(ressurs.navident),
+    select: (ledere) => ledere.find((leder) => leder.erDagligOppfolging)?.leder,
+  }).data;
+
+  const orgEnhetLeder = orgEnhetQuery.data?.ledere[0];
+
+  // Vis lederen til personen, i stedet for lederen på enheten, hvis ressursen man redigerer selv er lederen
+  const lederNavn =
+    ressurs.navident === orgEnhetLeder?.navident
+      ? ressursDolLeder?.visningsnavn
+      : orgEnhetLeder?.visningsnavn;
 
   return (
     <BodyLong
