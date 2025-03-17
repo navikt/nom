@@ -16,16 +16,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@RequiredArgsConstructor
 @Slf4j
 public class EventSourceService {
 
-    @Value("${app.kafka.eventSourceListenerName}") public final String listenerId;
+    final String listenerId;
     private final Map<String, Navident> navidenter;
     private boolean hasReadToEndOnStartup = false;
 
+    public EventSourceService(String eventsourceUniqueListenerId, Map<String, Navident> navidenter) {
+        this.listenerId = eventsourceUniqueListenerId;
+        this.navidenter = navidenter;
+    }
+
     @KafkaListener(
-            id = "${app.kafka.eventSourceListenerName}",
+            id = "#{eventsourceUniqueListenerId}",
             topics = "${app.kafka.topic.eventsource.name}"
     )
     public void listen(SourceEvent event, @Header(KafkaHeaders.OFFSET) long currentOffset) {

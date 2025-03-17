@@ -77,7 +77,7 @@ public class OrgEnhetStateAutoconfiguration extends DefaultStateAutoconfiguratio
 
     @Bean
     @ConditionalOnProperty(value = "nom.libs.state.orgenhet.enabled")
-    public String orgEnhetStateListenerId(@Value("${nom.libs.state.orgenhet.listener-id}") String listenerId) {return getListenerIdString(listenerId); }
+    public String orgEnhetStateListenerId(@Value("${nom.libs.state.orgenhet.listener-id}") String listenerId) {return getUniqueListenerIdString(listenerId); }
 
     static class OrgEnhetStateEnabledCondition extends AllNestedConditions {
         OrgEnhetStateEnabledCondition() {

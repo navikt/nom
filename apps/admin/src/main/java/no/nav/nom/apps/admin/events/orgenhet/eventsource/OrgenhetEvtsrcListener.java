@@ -22,14 +22,14 @@ public class OrgenhetEvtsrcListener {
     private final OrgenhetEvtsrcRepository orgenhetEvtsrcRepository;
     private final String listenerId;
 
-    public OrgenhetEvtsrcListener(OrgenhetEvtsrcRepository orgenhetEvtsrcRepository, @Value("${app.kafka.orgenhet.eventsource-listener-id}") String listenerId) {
+    public OrgenhetEvtsrcListener(OrgenhetEvtsrcRepository orgenhetEvtsrcRepository, String evtsrcOrgenhetUniqueListenerId) {
         this.orgenhetEvtsrcRepository = orgenhetEvtsrcRepository;
-        this.listenerId = listenerId;
+        this.listenerId = evtsrcOrgenhetUniqueListenerId;
     }
 
     @KafkaListener(
         containerFactory = "orgenhetEvtsrcKafkaListenerContainerFactory",
-        id = "${app.kafka.orgenhet.eventsource-listener-id}",
+        id = "#{evtsrcOrgenhetUniqueListenerId}",
         topicPartitions = @TopicPartition(
             topic = "${app.kafka.orgenhet.eventsourceTopic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
         )

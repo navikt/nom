@@ -22,14 +22,14 @@ public class HendelserApiStateListener {
     private final HendelserApiStateRepository hendelserApiStateRepository;
     private final String listenerId;
 
-    public HendelserApiStateListener(HendelserApiStateRepository hendelserApiStateRepository, @Value("${app.kafka.hendelser.apiEventTopic-listener-id}") String listenerId) {
+    public HendelserApiStateListener(HendelserApiStateRepository hendelserApiStateRepository, String apiStateHendelserUniqueListenerId) {
         this.hendelserApiStateRepository = hendelserApiStateRepository;
-        this.listenerId = listenerId;
+        this.listenerId = apiStateHendelserUniqueListenerId;
     }
 
     @KafkaListener(
         containerFactory = "genericApiEventKafkaListenerContainerFactory",
-        id = "${app.kafka.hendelser.apiEventTopic-listener-id}",
+        id = "#{apiStateHendelserUniqueListenerId}",
         topicPartitions = @TopicPartition(
             topic = "${app.kafka.hendelser.apiEventTopic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
         )

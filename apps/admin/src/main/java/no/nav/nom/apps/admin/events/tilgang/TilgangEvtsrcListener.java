@@ -22,14 +22,14 @@ public class TilgangEvtsrcListener {
     private final TilgangEvtsrcRepository tilgangEvtsrcRepository;
     private final String listenerId;
 
-    public TilgangEvtsrcListener(TilgangEvtsrcRepository tilgangEvtsrcRepository, @Value("${app.kafka.authorize.eventsource-listener-id}") String listenerId) {
+    public TilgangEvtsrcListener(TilgangEvtsrcRepository tilgangEvtsrcRepository, String evtsrcTilgangUniqueListenerId) {
         this.tilgangEvtsrcRepository = tilgangEvtsrcRepository;
-        this.listenerId = listenerId;
+        this.listenerId = evtsrcTilgangUniqueListenerId;
     }
 
     @KafkaListener(
         containerFactory = "nomStateDelegertLederKafkaListenerContainerFactory",
-        id = "${app.kafka.authorize.eventsource-listener-id}",
+        id = "#{evtsrcTilgangUniqueListenerId}",
         topicPartitions = @TopicPartition(
             topic = "${app.kafka.authorize.eventsourceTopic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
         )

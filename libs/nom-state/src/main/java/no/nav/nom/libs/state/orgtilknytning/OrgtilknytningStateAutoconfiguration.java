@@ -78,7 +78,7 @@ public class OrgtilknytningStateAutoconfiguration extends DefaultStateAutoconfig
 
     @Bean
     @ConditionalOnProperty(value = "nom.libs.state.orgtilknytning.enabled")
-    public String orgtilknytningStateListenerId(@Value("${nom.libs.state.orgtilknytning.listener-id}") String listenerId) { return getListenerIdString(listenerId); }
+    public String orgtilknytningStateListenerId(@Value("${nom.libs.state.orgtilknytning.listener-id}") String listenerId) { return getUniqueListenerIdString(listenerId); }
 
     static class OrgtilknytningStateEnabledCondition extends AllNestedConditions {
         OrgtilknytningStateEnabledCondition() {

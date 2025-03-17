@@ -25,14 +25,14 @@ public class OrgEnhetStateApiListener {
     private final OrgEnhetStateApiRepository orgEnhetStateApiRepository;
     private final String listenerId;
 
-    public OrgEnhetStateApiListener(OrgEnhetStateApiRepository orgEnhetStateApiRepository, @Value("${app.kafka.orgenhet.apiEventTopic-listener-id}") String listenerId) {
+    public OrgEnhetStateApiListener(OrgEnhetStateApiRepository orgEnhetStateApiRepository, String apiStateOrgenhetUniqueListenerId) {
         this.orgEnhetStateApiRepository = orgEnhetStateApiRepository;
-        this.listenerId = listenerId;
+        this.listenerId = apiStateOrgenhetUniqueListenerId;
     }
 
     @KafkaListener(
         containerFactory = "genericApiEventKafkaListenerContainerFactory",
-        id = "${app.kafka.orgenhet.apiEventTopic-listener-id}",
+        id = "#{apiStateOrgenhetUniqueListenerId}",
         topicPartitions = @TopicPartition(
             topic = "${app.kafka.orgenhet.apiEventTopic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
         )

@@ -77,7 +77,7 @@ public class RessursStateAutoconfiguration extends DefaultStateAutoconfiguration
 
     @Bean
     @ConditionalOnProperty(value = "nom.libs.state.ressurs.enabled")
-    public String ressursStateListenerId(@Value("${nom.libs.state.ressurs.listener-id}") String listenerId) { return getListenerIdString(listenerId); }
+    public String ressursStateListenerId(@Value("${nom.libs.state.ressurs.listener-id}") String listenerId) { return getUniqueListenerIdString(listenerId); }
 
     static class RessursStateEnabledCondition extends AllNestedConditions {
         RessursStateEnabledCondition() {

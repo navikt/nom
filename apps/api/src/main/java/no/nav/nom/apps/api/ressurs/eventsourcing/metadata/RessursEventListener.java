@@ -38,8 +38,8 @@ public class RessursEventListener {
     }
 
     @KafkaListener(
+        id = "#{ressursEventUniqueListenerId}",
         containerFactory = "ressursEventListenerContainerFactory",
-        clientIdPrefix = "ressursEventListener",
         topicPartitions = @TopicPartition(
             topic = "${app.kafka.ressurs.eventsourceTopic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
         )

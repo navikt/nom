@@ -3,7 +3,6 @@ package no.nav.nom.libs.state.authorize;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.eventsource.AuthorizationEvent;
-import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.libs.state.common.DefaultStateAutoconfiguration;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -78,7 +77,7 @@ public class DelegertLederStateAutoconfiguration extends DefaultStateAutoconfigu
 
     @Bean
     @ConditionalOnProperty(value = "nom.libs.state.delegert-leder.enabled")
-    public String delegertLederStateListenerId(@Value("${nom.libs.state.delegert-leder.listener-id}") String listenerId) {return getListenerIdString(listenerId); }
+    public String delegertLederStateListenerId(@Value("${nom.libs.state.delegert-leder.listener-id}") String listenerId) {return getUniqueListenerIdString(listenerId); }
 
     static class DelegertLederStateEnabledCondition extends AllNestedConditions {
         DelegertLederStateEnabledCondition() {

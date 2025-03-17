@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.ressurs.eventsourcing.metadata;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,8 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Random;
 
 @Configuration
 public class RessursEventListenerConfig {
@@ -37,4 +40,17 @@ public class RessursEventListenerConfig {
         return factory;
     }
 
+    @Bean
+    public String ressursEventUniqueListenerId() { return getUniqueListenerIdString(); }
+
+    /*
+     * POD Hostname er ikke unikt nok alene.
+     * POD oppstart kan ha startet å kunsumere meldinger.
+     * Hvis POD'en restarter (pga f.eks. oppstartsfeil) så vil den ikke få ny hostname, og tidligere konsumertemeldinger vil ikke leses på nytt i ny instans.
+     */
+    protected String getUniqueListenerIdString() {
+        int rnd = Math.abs(new Random().nextInt());
+        while (rnd < 0) {  rnd = Math.abs(new Random().nextInt()); }
+        return "ressursEvtSrcListener-" + rnd;
+    }
 }

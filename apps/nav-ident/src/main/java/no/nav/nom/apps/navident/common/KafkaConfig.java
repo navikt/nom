@@ -12,6 +12,9 @@ import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 
+import java.util.HashMap;
+import java.util.Random;
+
 @EnableKafka
 @Configuration
 public class KafkaConfig {
@@ -70,6 +73,28 @@ public class KafkaConfig {
     public KafkaTemplate<String, Need> needKafkaTemplate(ProducerFactory<String, Need> producerFactory) {
         KafkaTemplate<String, Need> kafkaTemplate = new KafkaTemplate<>(producerFactory);
         return kafkaTemplate;
+    }
+
+    @Bean
+    public String eventsourceUniqueListenerId(@Value("${app.kafka.eventSourceListenerName}") String listenerId) { return getUniqueListenerIdString(listenerId); }
+
+    @Bean
+    public String rnrUniqueListenerId(@Value("${app.kafka.identServiceListenerName}") String listenerId) { return getUniqueListenerIdString(listenerId); }
+
+    final HashMap<String, String> listenerIdMap = new HashMap<>();
+
+    /*
+     * POD Hostname er ikke unikt nok alene.
+     * POD oppstart kan ha startet å kunsumere meldinger.
+     * Hvis POD'en restarter (pga f.eks. oppstartsfeil) så vil den ikke få ny hostname, og tidligere konsumertemeldinger vil ikke leses på nytt i ny instans.
+     */
+    protected String getUniqueListenerIdString(String listenerId) {
+        if (!listenerIdMap.containsKey(listenerId)) {
+            int rnd = Math.abs(new Random().nextInt());
+            while (rnd < 0) {  rnd = Math.abs(new Random().nextInt()); }
+            listenerIdMap.put(listenerId, listenerId + "-" + rnd);
+        }
+        return listenerIdMap.get(listenerId);
     }
 }
 

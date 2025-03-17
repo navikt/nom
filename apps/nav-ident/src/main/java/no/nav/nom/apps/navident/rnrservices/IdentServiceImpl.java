@@ -32,11 +32,13 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
     private final RnRMdcCache rnRMdcCache;
     private final NeedProducer needProducer;
     private final RedisSynchronizationCache redisSynchronizationCache;
+    private final String listenerName;
 
-    public IdentServiceImpl(RnRMdcCache rnRMdcCache, NeedProducer needProducer, RedisSynchronizationCache redisSynchronizationCache) {
+    public IdentServiceImpl(RnRMdcCache rnRMdcCache, NeedProducer needProducer, RedisSynchronizationCache redisSynchronizationCache, String rnrUniqueListenerId) {
         this.rnRMdcCache = rnRMdcCache;
         this.needProducer = needProducer;
         this.redisSynchronizationCache = redisSynchronizationCache;
+        this.listenerName = rnrUniqueListenerId;
     }
 
     public Respons bestillIdent(String personid, IdentType type, char idPrefix)  {
@@ -115,7 +117,7 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
 
 
     @KafkaListener(
-            id = "${app.kafka.identServiceListenerName}",
+            id = "#{rnrUniqueListenerId}",
             topics = "${app.kafka.topic.rnr.name}")
     public void listen(Need need) {
         if (!need.isResponsProdusentVisited()) return;
@@ -139,8 +141,6 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
 
         MDC.clear();
     }
-
-    @Value("${app.kafka.identServiceListenerName}") private String listenerName;
 
     @Override
     public void onPartitionsAssigned(Map<TopicPartition, Long> assignments, ConsumerSeekCallback callback) {
