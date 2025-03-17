@@ -211,8 +211,6 @@ public class KontaktinfoController {
         if (!hasAccess) {
             throw new AccessDeniedException(String.format("Unauthorized access to ressurser kontaktinfo: %s, %s", onBehalfOfUserNavident, orgenhetId));
         }
-
-        //securityUtil.assertNavidentHasAccessToResourcesForOrgenhet(onBehalfOfUserNavident, orgenhetId);
         log.info("User is authorized to access ressurser: {} - {}", onBehalfOfUserNavident, ressurser);
 
         // get contact info for ressurser
