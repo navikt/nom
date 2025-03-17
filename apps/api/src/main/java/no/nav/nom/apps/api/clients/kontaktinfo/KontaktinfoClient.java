@@ -45,15 +45,18 @@ public class KontaktinfoClient {
         kontaktinfoBaseUrl = appProperties.clients().nomPaarorende().baseUrl();
     }
 
-    public List<RessursKontaktinfo> getKontaktinfoForRessurser(List<String> navidents) {
+    public List<RessursKontaktinfo> getKontaktinfoForRessurser(List<String> navidents, String orgenhetId) {
         String onBehalfOfToken = onBehalfOfTokenRepository.getOnbehalfofTokenFor(paarorendeScope);
+
         var onBehalfOfAuthorizedWebClient = WebClient.builder()
             .baseUrl(kontaktinfoBaseUrl)
             .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
             .build();
 
         return onBehalfOfAuthorizedWebClient.post()
-                .uri("/api/kontaktinfo/ressurser")
+                .uri(uriBuilder -> uriBuilder
+                    .path("/api/kontaktinfo/ressurser/" + "{orgenhetId}")
+                    .build(orgenhetId))
                 .body(Mono.just(navidents), List.class)
                 .retrieve()
                 .toEntityList(RessursKontaktinfo.class)

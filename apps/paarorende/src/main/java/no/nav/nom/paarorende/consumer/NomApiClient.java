@@ -12,6 +12,9 @@ public class NomApiClient {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private static final String IS_AUTHORIZED_RESSURS_SKRIV_PATH = "app/authorizedRessursRedigering/isAuthorized";
     private static final String IS_AUTHORIZED_RESSURSER_SKRIV_PATH = "app/authorizedRessursRedigering/isAuthorizedForNavidents";
+    private static final String HAS_NAVIDENT_ACCESS_TO_RESOURCES_FOR_ORGENHET_PATH = "app/authorizedRessursRedigering/hasNavidentAccessToResourcesForOrgenhet";
+    private static final String ORGENHETER_PATH = "app/orgenheter";
+
 
 
     private final WebClient nomApi;
@@ -35,6 +38,29 @@ public class NomApiClient {
         return Boolean.TRUE.equals(nomApi.post()
             .uri(IS_AUTHORIZED_RESSURSER_SKRIV_PATH)
             .bodyValue(new IsAuthorizedRessurserWriteRequest(bruker, ressurser))
+            .retrieve()
+            .bodyToMono(Boolean.class)
+            .block());
+    }
+
+    public boolean hasNavidentAccessToResourcesForOrgenhet(String navident, String orgenhetId) {
+        log.info("sending hasNavidentAccessToResourcesForOrgenhet call to NOM for user and orgenhet: {}, {}", navident, orgenhetId);
+        return Boolean.TRUE.equals(nomApi.get()
+            .uri(uriBuilder -> uriBuilder
+                .path(HAS_NAVIDENT_ACCESS_TO_RESOURCES_FOR_ORGENHET_PATH + "/{navident}/{orgenhetId}")
+                .build(navident, orgenhetId))
+            .retrieve()
+            .bodyToMono(Boolean.class)
+            .block());
+    }
+
+    public boolean isNavidentLederForOrgenhet(String navident, String orgEnhetId, List<String> ressurser) {
+        log.info("isNavidentLederForOrgenhet: {}, {}", navident, orgEnhetId);
+        return Boolean.TRUE.equals(nomApi.post()
+            .uri(uriBuilder -> uriBuilder
+                .path(ORGENHETER_PATH + "/isNavIdent/{navident}/LederForOrgenhet/{orgEnhetId}")
+                .build(navident, orgEnhetId))
+            .bodyValue(ressurser)
             .retrieve()
             .bodyToMono(Boolean.class)
             .block());

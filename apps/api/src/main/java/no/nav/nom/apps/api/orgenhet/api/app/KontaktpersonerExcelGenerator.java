@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,9 +32,23 @@ public class KontaktpersonerExcelGenerator {
 
     public void generate(HttpServletResponse response, OrgEnhet orgEnhet, List<Ressurs> sortedRessurser) {
         log.info("Getting content inf for ressurser: {}", sortedRessurser);
-        List<RessursKontaktinfo> kontaktinfoForRessurser = kontaktinfoClient.getKontaktinfoForRessurser(sortedRessurser.stream().map(r -> r.state().navident()).toList());
-        log.info("Received kontaktinfo for this orgenhet: {}-{}", orgEnhet.id(), kontaktinfoForRessurser);
+        List<RessursKontaktinfo> kontaktinfoForRessurser =  List.of();
 
+        // try to get the contact info for the ressurser
+        try {
+            kontaktinfoForRessurser = kontaktinfoClient
+                .getKontaktinfoForRessurser(sortedRessurser.stream().map(r -> r.state().navident()).toList(),
+                    orgEnhet.id());
+            log.info("Received kontaktinfo for this orgenhet: {}-{}", orgEnhet.id(), kontaktinfoForRessurser);
+        } catch (Exception e) {
+            if (e instanceof AccessDeniedException) throw e;
+            else {
+                log.error("Failed to get kontaktinfo for orgenhet {}", orgEnhet.id(), e);
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+
+        // generate excel
         try (Workbook workbook = new XSSFWorkbook()) {
             var sheet = workbook.createSheet("Kontaktpersoner - " + orgEnhet.navn());
             var rowcount = 0;
@@ -58,9 +73,9 @@ public class KontaktpersonerExcelGenerator {
             sheet.createFreezePane(0, 1);
 
             workbook.write(response.getOutputStream());
-            log.info("Generated contakt info excel for orgenhet {}", orgEnhet.id());
+            log.info("Generated contact info excel for orgenhet {}", orgEnhet.id());
         } catch (Exception e) {
-            log.error("Failed to generate excel file", e);
+            log.error("Error generating excel file. ", e);
             throw new RuntimeException(e.getMessage());
         }
 

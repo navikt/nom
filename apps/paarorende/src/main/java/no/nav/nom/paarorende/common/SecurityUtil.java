@@ -51,15 +51,12 @@ public class SecurityUtil {
         }
     }
 
-    public void assertAuthorizedAccessToRessurser(String bruker, List<String> ressurser ) throws AccessDeniedException {
-        log.info("assertAuthorizedAccessToRessurser: {} {}", bruker, ressurser);
+    public boolean canAccessContactInfoForResourcesUnderOrgenhet(String navident, String orgenhetId, List<String> ressurser) {
         var authenticated = isAuthenticated();
-        var hasAccess = hasAccess(bruker, ressurser);
-        log.info("assertAuthorizedAccessToRessurser isAuthenticated: {}", authenticated);
-        log.info("assertAuthorizedAccessToRessurser hasAccess: {}", hasAccess);
-        if (!authenticated || !hasAccess) {
-            throw new AccessDeniedException(bruker +" is not unauthorized access to ressurser: " + ressurser);
-        }
+        var isAdmin = isAdmin();
+        var isLederForOrgenhet = isNavIdentLederForOrgenhet(navident, orgenhetId, ressurser);
+        log.info("canAccessContactInfo navident, orgenhetId, authenticated, isAdmin, isLederForOrgenhet : {}, {}, {}, {}, {}", navident, orgenhetId, authenticated, isAdmin, isLederForOrgenhet);
+        return isAuthenticated() && (isAdmin() || isNavIdentLederForOrgenhet(navident, orgenhetId, ressurser));
     }
 
     public String getNavIdent() {
@@ -74,7 +71,7 @@ public class SecurityUtil {
         }
     }
 
-    private boolean isAdmin() {
+    public boolean isAdmin() {
         if (Arrays.asList(environment.getActiveProfiles()).contains("local")) {
             return true;
         }
@@ -98,8 +95,8 @@ public class SecurityUtil {
         return nomApiClient.hasAccess(bruker, ressurs) || isAdmin() || bruker.equals(ressurs);
     }
 
-    private boolean hasAccess(String bruker, List<String> ressurser) {
-        return nomApiClient.hasAccess(bruker, ressurser) || isAdmin();
+    private boolean isNavIdentLederForOrgenhet(String navident, String orgenhetId, List<String> ressurser) {
+        return nomApiClient.isNavidentLederForOrgenhet(navident, orgenhetId, ressurser);
     }
 
     public static String getBehalfOfUserNavident() {

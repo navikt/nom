@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -81,6 +82,30 @@ public class OrgEnhetController {
             .orElse(ResponseEntity.notFound().build());
     }
 
+    @PostMapping("/isNavIdent/{navident}/LederForOrgenhet/{orgEnhetId}")
+    @Operation(
+        description = "Sjekk om angitt navident er leder for angitt orgenhet.",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    public ResponseEntity<Boolean> isNavIdentLederForOrgenhet(
+        @PathVariable("navident") String navident,
+        @PathVariable("orgEnhetId") String orgEnhetId,
+        @RequestBody List<String> ressurser) {
+        OrgEnhet orgEnhet = orgenhetService.getById(orgEnhetId)
+            .map(orgEnhetMapper::mapToOrgEnhet)
+            .orElse(null);
+
+        if(orgEnhet != null) {
+            boolean navIdentIsLeder = orgEnhet.ledere().stream().anyMatch(ressursState -> ressursState.navident().equals(navident));
+            log.info("isNavIdentLederForOrgenhet navIdentIsLeder: {}-{}-{}", navident, orgEnhet.id(), navIdentIsLeder);
+            // todo check it ressurser also match
+            return ResponseEntity.ok(navIdentIsLeder);
+        }
+
+        return ResponseEntity.ok(false);
+    }
+
+
     @GetMapping("/exportKontaktpersonerFor/{orgenhetId}")
     @Operation(
         description = "Genererer regneark med oversikt over kontakt personer for en orgenhet",
@@ -95,28 +120,33 @@ public class OrgEnhetController {
                 .map(orgEnhetMapper::mapToOrgEnhet);
 
             if(orgEnhet.isEmpty()) {
-                log.error("Orgenhet not found! " + orgenhetId);
+                String notFoundError = "Orgenhet not found! " + orgenhetId;
+                log.error(notFoundError);
+                response.sendError(404, notFoundError);
                 return;
             }
 
             var loggedInUser = SecurityUtil.getAuthenticatedNavIdent();
             var hasAdminRightsForEnhet = authResolver.kanOppretteRessurs(orgenhetId);
             if(!hasAdminRightsForEnhet) {
-                var errorMessage = "User does not have access to view ressurser for this orgenhet: " + loggedInUser + "-" + orgenhetId;
-                log.error(errorMessage);
-                throw new RuntimeException(errorMessage);
+                var accessDeniedError = "User does not have access to view ressurser for this orgenhet: " + loggedInUser + "-" + orgenhetId;
+                log.error(accessDeniedError);
+                throw new AccessDeniedException(accessDeniedError);
             }
 
             log.info("User have access to view ressurser for this orgenhet: {}-{}", loggedInUser, orgenhetId);
             var sortedRessurser = getSortedRessurserInAndUnderliggendeOrgenheter(orgenhetId);
 
-            log.info("Ressurser are retrivedfor this orgenhet: {}-{}", sortedRessurser, orgenhetId);
+            log.info("Ressurser are retrived for this orgenhet: {}-{}", sortedRessurser, orgenhetId);
 
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=kontaktpersoner.xlsx");
             kontaktpersonerExcelGenerator.generate(response, orgEnhet.get(), sortedRessurser);
         } catch (Exception e) {
-            log.error("Failed to generate export file " + e.getMessage());
-            response.sendError(500);
+            if (e instanceof AccessDeniedException) throw e;
+            else {
+                log.error("Something wrong happened while getting contact info or generating excel file. " + e.getMessage());
+                response.sendError(500, "Noe galt skjedde under henting av kontaktinformasjon eller generering av excel-fil.");
+            }
         }
     }
 
