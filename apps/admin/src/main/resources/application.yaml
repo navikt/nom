@@ -38,6 +38,7 @@ authentication:
     jwk: ${AZURE_APP_JWK}
   groups:
     nomAdmin: ${NOM_ADMIN_GROUPID:nomAdminGroup}
+    supportReadOnly: ${SUPPORT_READONLY_GROUPID:readOnlyGroup}
 
 management:
   endpoint:
@@ -98,6 +99,7 @@ app:
         scopes: ["ADMIN"]
 
 NOM_ADMIN_GROUPID: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # nom-admin
+SUPPORT_READONLY_GROUPID: "21301ba9-b972-411f-8090-689bc5f5ca27" # 0000-CA-NOM-Nom-Admin-Brukerstotte
 
 --- # This is the same as having an application-prod.yaml file
 spring:
@@ -113,3 +115,4 @@ app:
         scopes: ["ADMIN"]
 
 NOM_ADMIN_GROUPID: "2d91b26c-d412-440b-9122-0fafc594db89"
+SUPPORT_READONLY_GROUPID: "9aa86116-5e76-4c10-a124-5bdfcd38377e" # 0000-CA-NOM-Nom-Admin-Brukerstotte
