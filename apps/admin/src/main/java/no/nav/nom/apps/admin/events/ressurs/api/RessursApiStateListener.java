@@ -12,6 +12,7 @@ import org.springframework.kafka.event.ListenerContainerIdleEvent;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -67,6 +68,14 @@ public class RessursApiStateListener {
                 "All Ressurs StateTopic events has now been read on startup. Number of RessursStateTopic messages consumed: {}", ressursApiStateRepository.count()
             );
             hasReadToEndOnStartup.set(true);
+
+            // Logg info
+            var numWithoutSluttdato =
+                ressursApiStateRepository.getLatestRessursStatePerNavident().values()
+                    .stream()
+                    .filter(ressurs -> ressurs.sluttdato().isEmpty() || ressurs.sluttdato().get().isBefore(LocalDate.now()))
+                    .count();
+            log.info("Ressurs API topic - Total num of Ressurser: {} - Number of Ressurser without sluttdato: {}", ressursApiStateRepository.countDistinctNavident(), numWithoutSluttdato);
         }
     }
 }
