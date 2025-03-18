@@ -73,14 +73,14 @@ public class RessursApiStateListener {
             var numWithoutSluttdato =
                 ressursApiStateRepository.getLatestRessursStatePerNavident().values()
                     .stream()
-                    .filter(ressurs -> ressurs.sluttdato().isEmpty() || ressurs.sluttdato().get().isBefore(LocalDate.now()))
+                    .filter(ressurs -> ressurs.sluttdato().isEmpty() || ressurs.sluttdato().get().isAfter(LocalDate.now()))
                     .count();
 
             var numWithOTWithoutSluttdato =
                 ressursApiStateRepository.getLatestRessursStatePerNavident().values()
                     .stream()
                     .filter(ressurs -> !ressurs.orgtilknytninger().isEmpty())
-                    .filter(ressurs -> ressurs.sluttdato().isEmpty() || ressurs.sluttdato().get().isBefore(LocalDate.now()))
+                    .filter(ressurs -> ressurs.sluttdato().isEmpty() || ressurs.sluttdato().get().isAfter(LocalDate.now()))
                     .count();
 
             log.info("Ressurs API topic - Total num of Ressurser: {} - Number of Ressurser without sluttdato: {} - With OT and without sluttdato {}", ressursApiStateRepository.countDistinctNavident(), numWithoutSluttdato, numWithOTWithoutSluttdato);
