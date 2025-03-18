@@ -75,7 +75,15 @@ public class RessursApiStateListener {
                     .stream()
                     .filter(ressurs -> ressurs.sluttdato().isEmpty() || ressurs.sluttdato().get().isBefore(LocalDate.now()))
                     .count();
-            log.info("Ressurs API topic - Total num of Ressurser: {} - Number of Ressurser without sluttdato: {}", ressursApiStateRepository.countDistinctNavident(), numWithoutSluttdato);
+
+            var numWithOTWithoutSluttdato =
+                ressursApiStateRepository.getLatestRessursStatePerNavident().values()
+                    .stream()
+                    .filter(ressurs -> !ressurs.orgtilknytninger().isEmpty())
+                    .filter(ressurs -> ressurs.sluttdato().isEmpty() || ressurs.sluttdato().get().isBefore(LocalDate.now()))
+                    .count();
+
+            log.info("Ressurs API topic - Total num of Ressurser: {} - Number of Ressurser without sluttdato: {} - With OT and without sluttdato {}", ressursApiStateRepository.countDistinctNavident(), numWithoutSluttdato, numWithOTWithoutSluttdato);
         }
     }
 }
