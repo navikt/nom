@@ -59,7 +59,7 @@ public class ImportRemedyDataFile {
     }
 
 
-    public List<ImportedRemedyUser> readRemedyData(BufferedReader reader) throws IOException {
+    public List<ImportedRemedyUser> readRemedyData(BufferedReader reader) {
         List<ImportedRemedyUser> remedyUsers = new ArrayList<>();
 
         String line = "";
@@ -120,7 +120,7 @@ public class ImportRemedyDataFile {
     }
 
     private boolean isHeaderLine(String line) {
-        return line.startsWith("NAV_ID");
+        return line.contains("NAV_ID;FORNAVN;ETTERNAVN;");
     }
 }
 
