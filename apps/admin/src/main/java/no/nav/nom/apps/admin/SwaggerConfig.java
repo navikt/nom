@@ -16,7 +16,7 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
             .group("internal")
             .displayName("NOM ADMIN API v1")
-            .pathsToMatch("/sinks/**", "/states/**", "/SanityCheck/**", "/sessioninfo")
+            .pathsToMatch("/sinks/**", "/states/**", "/SanityCheck/**" ,"/RemedyCompare/**", "/sessioninfo")
             .build();
     }
 

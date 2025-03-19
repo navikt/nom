@@ -76,6 +76,11 @@ spec:
         extra:
           - azp_name
           - NAVident
+  gcp:
+    buckets:
+      - name: no-nav-org-dev-nom-admin-storage-bucket
+        lifecycleCondition:
+          age: 14
   accessPolicy:
     inbound:
       rules:
