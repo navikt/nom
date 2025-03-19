@@ -23,6 +23,9 @@ app:
     ressurs-hendelser:
       apiEventTopic: org.nom.api-ressurs-hendelse-v1
       apiEventTopic-listener-id: nom-admin_apiRessursHendelserListener_${HOSTNAME}
+  google-storage-bucket:
+    name: no-nav-org-dev-nom-admin-storage-bucket
+    remedy-data: IR_export.csv
 
 nom.libs.state.ressurs.enabled: true
 nom.libs.state.orgenhet.enabled: true
