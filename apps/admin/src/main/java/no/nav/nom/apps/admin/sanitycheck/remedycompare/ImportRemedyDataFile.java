@@ -62,13 +62,18 @@ public class ImportRemedyDataFile {
     public List<ImportedRemedyUser> readRemedyData(BufferedReader reader) throws IOException {
         List<ImportedRemedyUser> remedyUsers = new ArrayList<>();
 
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (!isHeaderLine(line)) {
-                parseAndValidateLine(line).ifPresent(remedyUsers::add);
+        String line = "";
+        try {
+            while ((line = reader.readLine()) != null) {
+                if (!isHeaderLine(line)) {
+                    parseAndValidateLine(line).ifPresent(remedyUsers::add);
+                }
             }
+            log.info("Leste {} Remedy fra bucket {}", remedyUsers.size(), bucketName);
+        } catch (Exception e) {
+            log.error("Klarer ikke å lese fra bucket for line\n\t{}", line);
+            throw new RuntimeException("Klarer ikke å lese fra bucket", e);
         }
-        log.info("Leste {} Remedy fra bucket {}", remedyUsers.size(), bucketName);
 
         return remedyUsers;
     }
