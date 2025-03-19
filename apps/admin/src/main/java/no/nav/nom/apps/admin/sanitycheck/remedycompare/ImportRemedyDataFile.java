@@ -65,7 +65,8 @@ public class ImportRemedyDataFile {
         String line = "";
         try {
             while ((line = reader.readLine()) != null) {
-                if (!isHeaderLine(line)) {
+                line = line.strip();
+                if (!isHeaderLine(line) && !line.isBlank()) {
                     parseAndValidateLine(line).ifPresent(remedyUsers::add);
                 }
             }
