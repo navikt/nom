@@ -4,7 +4,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public enum NomApiAccessScope {
-    ADMIN("ADMIN");
+    ADMIN("ADMIN"),
+    SUPPORT_READONLY("SUPPORT_READONLY");
 
     private final String scope;
 
