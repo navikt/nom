@@ -297,9 +297,6 @@ spec:
     - team: org
       application: nom-admin
       access: read
-    - team: team-nof
-      application: orgenhet-kostnadssted-mapping-api
-      access: read
 
 ---
 
@@ -333,6 +330,9 @@ spec:
       access: read
     - team: org
       application: nom-rdbms-data
+      access: read
+    - team: team-nof
+      application: orgenhet-kostnadssted-mapping-api
       access: read
 
 ---
