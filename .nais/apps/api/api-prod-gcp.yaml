@@ -225,6 +225,12 @@ spec:
         - application: nom-paarorende
           namespace: org
           cluster: prod-gcp
+        - application: tilgang
+          namespace: aap
+          cluster: prod-gcp
+        - application: brev
+          namespace: aap
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
