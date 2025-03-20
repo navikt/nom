@@ -78,9 +78,7 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
 
         RessursKontaktinfo kontaktinfo2 = RessursKontaktinfo.builder()
             .ressursNavident(ressurs2.state().navident())
-            .kontaktinfo(List.of(
-                Kontaktinfo.builder().kontaktId("id2").fornavn("K_Fornavn2").etternavn("Etternavn2").telefon("4567").prioritet(1).build())
-            ).build();
+            .kontaktinfo(List.of()).build();
         RessursKontaktinfo kontaktinfo3 = RessursKontaktinfo.builder()
             .ressursNavident(ressurs3.state().navident())
             .kontaktinfo(List.of(
