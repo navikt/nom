@@ -99,7 +99,7 @@ app:
         scopes: ["ADMIN"]
       support-readonly:
         group-id: "${SUPPORT_READONLY_GROUPID}"
-        scopes: [ "SUPPORT_READONLY" ]        
+        scopes: ["SUPPORT_READONLY"]        
   google-storage-bucket:
     name: no-nav-org-dev-nom-admin-storage-bucket
     remedy-data: IR_export.csv
@@ -125,7 +125,7 @@ app:
         scopes: ["ADMIN"]
       support-readonly:
         group-id: "${SUPPORT_READONLY_GROUPID}"
-        scopes: [ "SUPPORT_READONLY" ]
+        scopes: ["SUPPORT_READONLY"]
   google-storage-bucket:
     name: no-nav-org-prod-nom-admin-storage-bucket
     remedy-data: IR_export.csv

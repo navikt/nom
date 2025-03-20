@@ -26,6 +26,7 @@ import type {
   RessursOrgtilknytningKoblingInfo,
   RessursOrgtilknytningUlikSluttdato,
   RessursStateKafkaDTO,
+  SessionInfoResponse,
 } from "~/types/nom-admin/nom-admin-models.ts";
 import type {
   OrgtilknytningState,
@@ -566,4 +567,12 @@ export async function getRemedyCompareDiffPaaAktiv(): Promise<
       timeout: 120_000, // 120 seconds
     })
     .json<RemedyCompareResult[]>();
+}
+
+export function getSessionInfo() {
+  return queryOptions({
+    queryKey: ["SESSIONINFO"],
+    queryFn: async () =>
+      (await ky.get(`${API_BASE_URL}/sessioninfo`)).json<SessionInfoResponse>(),
+  });
 }

@@ -12,6 +12,7 @@ import { z } from "zod";
 
 import { oppdaterOrgEnhetType } from "~/api/apiQueries.ts";
 import { getOrgenhetStatesOptions, searchSchema } from "~/api/queries.ts";
+import { useHasAdminAccess } from "~/api/useGetSession.tsx";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
 import { NomLink } from "~/components/NomLink.tsx";
@@ -41,6 +42,7 @@ export const Route = createFileRoute("/state/orgenhet")({
 });
 
 function OrgenhetPage() {
+  const hasAdminAccess = useHasAdminAccess();
   const search = Route.useSearch();
 
   const orgenheter = useSuspenseQuery({
@@ -110,11 +112,15 @@ function OrgenhetPage() {
               <Table.HeaderCell scope="row">
                 <NomLink path={`org/${orgEnhet.id}`}>{orgEnhet.id}</NomLink>
               </Table.HeaderCell>
-              <OrgEnhetsTypeDataCell
-                allowEdit={allowEdit}
-                orgEnhet={orgEnhet}
-                style={{ maxWidth: "160px" }}
-              />
+              {hasAdminAccess ? (
+                <OrgEnhetsTypeDataCell
+                  allowEdit={allowEdit}
+                  orgEnhet={orgEnhet}
+                  style={{ maxWidth: "160px" }}
+                />
+              ) : (
+                <Table.DataCell>{orgEnhet.orgEnhetsType}</Table.DataCell>
+              )}
               <Table.DataCell>{orgEnhet.navn}</Table.DataCell>
               <Table.DataCell>{orgEnhet.gyldigFom}</Table.DataCell>
               <Table.DataCell>{orgEnhet.gyldigTom}</Table.DataCell>
