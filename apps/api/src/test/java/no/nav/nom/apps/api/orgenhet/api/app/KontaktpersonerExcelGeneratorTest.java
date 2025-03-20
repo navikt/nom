@@ -110,9 +110,12 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
             assertEquals(kontaktinfo1_1.kontaktinfo().getFirst().fornavn() + " " + kontaktinfo1_1.kontaktinfo().getFirst().etternavn(),
                 dataRow1.getCell(3).getStringCellValue());
 
+            var dataRow2 = sheet.getRow(2);
+            assertEquals("", dataRow2.getCell(0).getStringCellValue());
+
             // test total ressurs count and is sorted
-            var dataRow3 = sheet.getRow(3);
-            assertEquals(ressursNavident3, dataRow3.getCell(0).getStringCellValue());
+            var dataRow4 = sheet.getRow(3);
+            assertEquals(ressursNavident3, dataRow4.getCell(0).getStringCellValue());
             assertNull(sheet.getRow(5));
         }
     }
