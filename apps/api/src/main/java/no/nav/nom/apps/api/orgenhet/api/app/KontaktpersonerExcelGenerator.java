@@ -53,15 +53,25 @@ public class KontaktpersonerExcelGenerator {
             var sheet = workbook.createSheet("Kontaktpersoner - " + orgEnhet.navn());
             var rowcount = 0;
 
-            addRow(sheet.createRow(rowcount++), null, null);
+            // index -1 is for the header row
+            addRow(sheet.createRow(rowcount++), null, null, -1);
 
             log.info("Generating excel for orgenhet {} with ressurser {}, and contantinfo {}", orgEnhet.id(), sortedRessurser, kontaktinfoForRessurser);
             for (RessursKontaktinfo info : kontaktinfoForRessurser) {
                 Ressurs ressurs = getRessursForGittNavident(sortedRessurser, info.ressursNavident());
-                addRow(
+
+                // index determines the row number for ressurs.
+                // If there are multiple contact info for a ressurs, we will have multiple rows for that ressurs.
+                // However, medarbeider info will be displayed only once for that ressurs.
+                int index = 0;
+                for (Kontaktinfo k : info.kontaktinfo()) {
+                    addRow(
                         sheet.createRow(rowcount++),
-                        ressurs, info.kontaktinfo().isEmpty()? null : info.kontaktinfo().getFirst()
-                );
+                        ressurs, info.kontaktinfo().isEmpty()? null : info.kontaktinfo().getFirst(),
+                        index
+                    );
+                    index++;
+                }
             }
 
             var headerRow = sheet.getRow(0);
@@ -90,7 +100,7 @@ public class KontaktpersonerExcelGenerator {
             .orElse(null);
     }
 
-    private static void addRow(Row row, Ressurs ressurs, Kontaktinfo kontaktinfo) {
+    private static void addRow(Row row, Ressurs ressurs, Kontaktinfo kontaktinfo, int index) {
         var medarbeiderNavident = row.createCell(0, CellType.STRING);
         var medarbeiderFornavn = row.createCell(1, CellType.STRING);
         var medarbeiderEtternavn = row.createCell(2, CellType.STRING);
@@ -99,7 +109,7 @@ public class KontaktpersonerExcelGenerator {
         var kontaktpersonTelefonnr = row.createCell(5, CellType.STRING);
         var kontaktpersonProritet = row.createCell(6, CellType.STRING);
 
-        if (ressurs == null) {
+        if (ressurs == null || index == -1) {
             medarbeiderNavident.setCellValue("Medarbeider-navident");
             medarbeiderFornavn.setCellValue("Medarbeider-fornavn");
             medarbeiderEtternavn.setCellValue("Medarbeider-etternavn");
@@ -108,10 +118,15 @@ public class KontaktpersonerExcelGenerator {
             kontaktpersonTelefonnr.setCellValue("Kontaktperson-telefonnr");
             kontaktpersonProritet.setCellValue("Kontaktperson-prioritet");
         } else {
-            medarbeiderNavident.setCellValue(ressurs.state().navident());
-            medarbeiderFornavn.setCellValue(ressurs.state().visningsnavn().fornavn());
-            medarbeiderEtternavn.setCellValue(ressurs.state().visningsnavn().etternavn());
-            if (kontaktinfo != null) {
+            // if index is 0, then we will display the medarbeider info in the first row for that ressurs.
+            if (index == 0) {
+                medarbeiderNavident.setCellValue(ressurs.state().navident());
+                medarbeiderFornavn.setCellValue(ressurs.state().visningsnavn().fornavn());
+                medarbeiderEtternavn.setCellValue(ressurs.state().visningsnavn().etternavn());
+            }
+
+            // if index is >=0, then we will display the kontaktinfo for that ressurs.
+            if (index >= 0 && kontaktinfo != null) {
                 kontaktpersonNavn.setCellValue(kontaktinfo.fornavn() + " " + kontaktinfo.etternavn());
                 kontaktpersonRelasjon.setCellValue(kontaktinfo.relasjon() != null ? kontaktinfo.relasjon() : "");
                 kontaktpersonTelefonnr.setCellValue(kontaktinfo.telefon() != null ? kontaktinfo.telefon() : "");
