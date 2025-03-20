@@ -3,6 +3,7 @@ package no.nav.nom.apps.admin.sanitycheck.remedycompare;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ public class RemedyDataFileRepository {
             remedyUsers.addAll(imported);
             imported.stream()
                 .filter(remedyUser -> remedyUser.navident() != null)
+                .sorted(Comparator.comparing(ImportedRemedyUser::regDato))
                 .forEach(remedyUser -> remedyUsersByNavident.put(remedyUser.navident(), remedyUser));
         }
     }
