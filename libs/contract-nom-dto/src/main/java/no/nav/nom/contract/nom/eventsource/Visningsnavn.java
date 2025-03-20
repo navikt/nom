@@ -16,12 +16,12 @@ public record Visningsnavn(
 
     @JsonIgnore
     public String getFormattedVisningsnavn() {
-        return fornavn + mellomnavn.map(it -> " " + it).orElse("") + (" " + etternavn);
+        return fornavn + mellomnavn.map(it -> it.isBlank() ? "" : " " + it).orElse("") + (" " + etternavn);
     }
 
     @JsonIgnore
     public String getFornavnMellomnavn() {
-        return fornavn + mellomnavn.map(it -> " " + it).orElse("");
+        return fornavn + mellomnavn.map(it -> it.isBlank() ? "" : " " + it).orElse("");
     }
 
 }
