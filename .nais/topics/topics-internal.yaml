@@ -39,7 +39,7 @@ spec:
       application: nom-kafka-api-ressurs-hendelser
       access: read
     - team: org
-      application: torgeir-tmp-org-3d1c5ea9
+      application: torgeir-tmp
       access: read
 
 ---
@@ -79,7 +79,7 @@ spec:
       application: nom-rdbms-data
       access: read
     - team: org
-      application: torgeir-tmp-org-3d1c5ea9
+      application: torgeir-tmp
       access: read      
 
 ---
@@ -116,7 +116,7 @@ spec:
       application: nom-rdbms-data
       access: read
     - team: org
-      application: torgeir-tmp-org-3d1c5ea9
+      application: torgeir-tmp
       access: read
       
 ---
@@ -156,7 +156,7 @@ spec:
       application: nom-admin
       access: read
     - team: org
-      application: torgeir-tmp-org-3d1c5ea9
+      application: torgeir-tmp
       access: read      
 
 ---
@@ -196,7 +196,7 @@ spec:
       application: nom-rdbms-data
       access: read
     - team: org
-      application: torgeir-tmp-org-3d1c5ea9
+      application: torgeir-tmp
       access: read      
 
 ---
@@ -242,7 +242,7 @@ spec:
       application: nom-kafka-api-ressurs-hendelser
       access: read
     - team: org
-      application: torgeir-tmp-org-3d1c5ea9
+      application: torgeir-tmp
       access: read      
 
 ---
@@ -282,7 +282,7 @@ spec:
       application: nom-rdbms-data
       access: read
     - team: org
-      application: torgeir-tmp-org-3d1c5ea9
+      application: torgeir-tmp
       access: read
 
 ---
@@ -319,7 +319,7 @@ spec:
       application: nom-admin
       access: read
     - team: org
-      application: torgeir-tmp-org-3d1c5ea9
+      application: torgeir-tmp
       access: read      
 
 ---
@@ -359,7 +359,7 @@ spec:
       application: orgenhet-kostnadssted-mapping-api
       access: read
     - team: org
-      application: torgeir-tmp-org-3d1c5ea9
+      application: torgeir-tmp
       access: read      
 
 ---
@@ -393,7 +393,7 @@ spec:
       application: nom-rdbms-data
       access: read
     - team: org
-      application: torgeir-tmp-org-3d1c5ea9
+      application: torgeir-tmp
       access: read      
 
 ---
@@ -424,7 +424,7 @@ spec:
       application: nom-admin
       access: read
     - team: org
-      application: torgeir-tmp-org-3d1c5ea9
+      application: torgeir-tmp
       access: read
 
 ---
@@ -457,5 +457,5 @@ spec:
       application: nom-admin
       access: read
     - team: org
-      application: torgeir-tmp-org-3d1c5ea9
+      application: torgeir-tmp
       access: read      
