@@ -97,6 +97,7 @@ public class ImportRemedyDataFile {
         var aktiv = "0".equals(kolonner[5]);
         var permisjon = "0".equals(kolonner[6]);
         var sluttDato = "<null>".equals(kolonner[7]) ? null : Instant.ofEpochMilli(Long.parseLong(kolonner[7])*1000).atZone(ZoneId.systemDefault()).toLocalDate();
+        var regDato = "<null>".equals(kolonner[5]) ? null : Instant.ofEpochMilli(Long.parseLong(kolonner[8])*1000).atZone(ZoneId.systemDefault()).toLocalDate();
         var sektor = switch (kolonner[10]) {
             case "0" -> Sektor.NAV_STATLIG;
             case "1" -> Sektor.NAV_KOMMUNAL;
@@ -115,7 +116,8 @@ public class ImportRemedyDataFile {
                 aktiv,
                 permisjon,
                 sluttDato,
-                utlopsDato
+                utlopsDato,
+                regDato
         ));
     }
 
