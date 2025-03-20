@@ -258,51 +258,6 @@ function IdentTypeUtenlandskKonsulentReceipt({
 }: {
   ressurs: Ressurs;
 }) {
-  return (
-    <>
-      <div
-        css={css`
-          margin: auto;
-        `}
-      >
-        <HStack
-          css={css`
-            display: grid;
-          `}
-          gap="2"
-        >
-          <BodyShort>
-            Medarbeideren er nå registrert i NOM og Nav-ident{" "}
-            <b>{ressurs.navident}</b> er opprettet for{" "}
-            <b>{formatVisningsnavn(ressurs.visningsnavn)}</b>.
-          </BodyShort>
-          <BodyShort>
-            For å fullføre opprettelsen må leder eller identadministrator også
-            gi tilganger i Identrutinen i Remedy.
-          </BodyShort>
-          <BodyShort>
-            E-postadresse opprettes automatisk og blir synlig på medarbeiderens
-            profilside når den er klar.
-          </BodyShort>
-        </HStack>
-      </div>
-
-      <PanelLink
-        href="https://it-hjelpa.adeo.no/arsys/home"
-        label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
-      />
-
-      <PanelLink
-        href={`/ressurs/${ressurs.navident}`}
-        label="Vis medarbeiderens profil"
-      />
-
-      <PanelLink href="/" label="Gå tilbake til forsiden" />
-    </>
-  );
-}
-
-function IdentTypeVikafossenReceipt({ ressurs }: { ressurs: Ressurs }) {
   const identskjemaLenke: string =
     "https://navno.sharepoint.com/:b:/r/sites/intranett-hr/Delte%20dokumenter/HR-skjemaer/Identbekreftelses%20skjema.pdf?csf=1&web=1&e=E4RvBs";
 
@@ -338,6 +293,51 @@ function IdentTypeVikafossenReceipt({ ressurs }: { ressurs: Ressurs }) {
               Gå til skjemaet for å laste det ned
             </Link>
             .
+          </BodyShort>
+        </HStack>
+      </div>
+
+      <PanelLink
+        href="https://it-hjelpa.adeo.no/arsys/home"
+        label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
+      />
+
+      <PanelLink
+        href={`/ressurs/${ressurs.navident}`}
+        label="Vis medarbeiderens profil"
+      />
+
+      <PanelLink href="/" label="Gå tilbake til forsiden" />
+    </>
+  );
+}
+
+function IdentTypeVikafossenReceipt({ ressurs }: { ressurs: Ressurs }) {
+  return (
+    <>
+      <div
+        css={css`
+          margin: auto;
+        `}
+      >
+        <HStack
+          css={css`
+            display: grid;
+          `}
+          gap="2"
+        >
+          <BodyShort>
+            Medarbeideren er nå registrert i NOM og Nav-ident{" "}
+            <b>{ressurs.navident}</b> er opprettet for{" "}
+            <b>{formatVisningsnavn(ressurs.visningsnavn)}</b>.
+          </BodyShort>
+          <BodyShort>
+            For å fullføre opprettelsen må leder eller identadministrator også
+            gi tilganger i Identrutinen i Remedy.
+          </BodyShort>
+          <BodyShort>
+            E-postadresse opprettes automatisk og blir synlig på medarbeiderens
+            profilside når den er klar.
           </BodyShort>
         </HStack>
       </div>
