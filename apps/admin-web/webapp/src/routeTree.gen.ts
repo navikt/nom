@@ -33,6 +33,7 @@ import { Route as SinksApiOrgenhetImport } from './routes/sinks.api-orgenhet'
 import { Route as SinksApiHendelserImport } from './routes/sinks.api-hendelser'
 import { Route as SanityChecksU4diffImport } from './routes/sanity-checks.u4diff'
 import { Route as SanityChecksRessursImport } from './routes/sanity-checks.ressurs'
+import { Route as SanityChecksRemedyImport } from './routes/sanity-checks.remedy'
 import { Route as SanityChecksOrgtilknytningImport } from './routes/sanity-checks.orgtilknytning'
 import { Route as SanityChecksOrgenhetImport } from './routes/sanity-checks.orgenhet'
 
@@ -148,6 +149,11 @@ const SanityChecksRessursRoute = SanityChecksRessursImport.update({
   getParentRoute: () => SanityChecksRoute,
 } as any)
 
+const SanityChecksRemedyRoute = SanityChecksRemedyImport.update({
+  path: '/remedy',
+  getParentRoute: () => SanityChecksRoute,
+} as any)
+
 const SanityChecksOrgtilknytningRoute = SanityChecksOrgtilknytningImport.update(
   {
     path: '/orgtilknytning',
@@ -218,6 +224,13 @@ declare module '@tanstack/react-router' {
       path: '/orgtilknytning'
       fullPath: '/sanity-checks/orgtilknytning'
       preLoaderRoute: typeof SanityChecksOrgtilknytningImport
+      parentRoute: typeof SanityChecksImport
+    }
+    '/sanity-checks/remedy': {
+      id: '/sanity-checks/remedy'
+      path: '/remedy'
+      fullPath: '/sanity-checks/remedy'
+      preLoaderRoute: typeof SanityChecksRemedyImport
       parentRoute: typeof SanityChecksImport
     }
     '/sanity-checks/ressurs': {
@@ -344,6 +357,7 @@ export const routeTree = rootRoute.addChildren({
   SanityChecksRoute: SanityChecksRoute.addChildren({
     SanityChecksOrgenhetRoute,
     SanityChecksOrgtilknytningRoute,
+    SanityChecksRemedyRoute,
     SanityChecksRessursRoute,
     SanityChecksU4diffRoute,
   }),
@@ -397,6 +411,7 @@ export const routeTree = rootRoute.addChildren({
       "children": [
         "/sanity-checks/orgenhet",
         "/sanity-checks/orgtilknytning",
+        "/sanity-checks/remedy",
         "/sanity-checks/ressurs",
         "/sanity-checks/u4diff"
       ]
@@ -431,6 +446,10 @@ export const routeTree = rootRoute.addChildren({
     },
     "/sanity-checks/orgtilknytning": {
       "filePath": "sanity-checks.orgtilknytning.tsx",
+      "parent": "/sanity-checks"
+    },
+    "/sanity-checks/remedy": {
+      "filePath": "sanity-checks.remedy.tsx",
       "parent": "/sanity-checks"
     },
     "/sanity-checks/ressurs": {
