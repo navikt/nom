@@ -70,10 +70,15 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
         var ressurser = List.of(ressurs1, ressurs2, ressurs3);
 
 
-        RessursKontaktinfo kontaktinfo1 = RessursKontaktinfo.builder()
+        RessursKontaktinfo kontaktinfo1_1 = RessursKontaktinfo.builder()
             .ressursNavident(ressurs1.state().navident())
             .kontaktinfo(List.of(
-                Kontaktinfo.builder().kontaktId("id1").fornavn("K_Fornavn1").etternavn("Etternavn1").telefon("1234").prioritet(1).build())).build();
+                Kontaktinfo.builder().kontaktId("id1_1").fornavn("K_Fornavn1_1").etternavn("Etternavn1_1").telefon("1234").prioritet(1).build())).build();
+        RessursKontaktinfo kontaktinfo1_2 = RessursKontaktinfo.builder()
+            .ressursNavident(ressurs1.state().navident())
+            .kontaktinfo(List.of(
+                Kontaktinfo.builder().kontaktId("id1_2").fornavn("K_Fornavn1_2").etternavn("Etternavn1_2").telefon("123456").prioritet(2).build())).build();
+
         RessursKontaktinfo kontaktinfo2 = RessursKontaktinfo.builder()
             .ressursNavident(ressurs2.state().navident())
             .kontaktinfo(List.of(
@@ -85,7 +90,7 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
 
 
         // note: resources will be sorted based on the fornavn+etternavn, before retrieving the contact info
-        List<RessursKontaktinfo> kontaktinfoForRessurser = List.of(kontaktinfo1, kontaktinfo3, kontaktinfo2);
+        List<RessursKontaktinfo> kontaktinfoForRessurser = List.of(kontaktinfo1_1, kontaktinfo1_2, kontaktinfo3, kontaktinfo2);
         when(kontaktinfoClient.getKontaktinfoForRessurser(anyList(), any())).thenReturn(kontaktinfoForRessurser);
 
         OrgEnhet orgEnhet = OrgEnhet.builder().id("1").fid("F123").navn("Test Enhet").build();
@@ -102,13 +107,13 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
 
             var dataRow1 = sheet.getRow(1);
             assertEquals(ressursNavident1, dataRow1.getCell(0).getStringCellValue());
-            assertEquals(kontaktinfo1.kontaktinfo().getFirst().fornavn() + " " + kontaktinfo1.kontaktinfo().getFirst().etternavn(),
+            assertEquals(kontaktinfo1_1.kontaktinfo().getFirst().fornavn() + " " + kontaktinfo1_1.kontaktinfo().getFirst().etternavn(),
                 dataRow1.getCell(3).getStringCellValue());
 
             // test total ressurs count and is sorted
             var dataRow3 = sheet.getRow(3);
             assertEquals(ressursNavident2, dataRow3.getCell(0).getStringCellValue());
-            assertNull(sheet.getRow(4));
+            assertNull(sheet.getRow(5));
         }
     }
 }
