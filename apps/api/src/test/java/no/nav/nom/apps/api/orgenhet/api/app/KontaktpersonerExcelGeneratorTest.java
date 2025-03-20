@@ -112,7 +112,7 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
 
             // test total ressurs count and is sorted
             var dataRow3 = sheet.getRow(3);
-            assertEquals(ressursNavident2, dataRow3.getCell(0).getStringCellValue());
+            assertEquals(ressursNavident3, dataRow3.getCell(0).getStringCellValue());
             assertNull(sheet.getRow(5));
         }
     }
