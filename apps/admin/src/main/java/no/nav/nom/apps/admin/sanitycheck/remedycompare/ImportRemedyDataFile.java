@@ -70,7 +70,7 @@ public class ImportRemedyDataFile {
                     parseAndValidateLine(line).ifPresent(remedyUsers::add);
                 }
             }
-            log.info("Leste {} Remedy fra bucket {}", remedyUsers.size(), bucketName);
+            log.info("Leste {} Remedy brukere fra bucket {}", remedyUsers.size(), bucketName);
         } catch (Exception e) {
             log.error("Klarer ikke å lese fra bucket for line\n\t{}", line);
             throw new RuntimeException("Klarer ikke å lese fra bucket", e);

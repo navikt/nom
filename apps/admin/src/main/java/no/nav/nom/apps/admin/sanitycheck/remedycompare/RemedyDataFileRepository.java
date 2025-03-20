@@ -23,6 +23,11 @@ public class RemedyDataFileRepository {
         return remedyUsersByNavident.get(navident);
     }
 
+    public Map<String, ImportedRemedyUser> getRemedyUsers() {
+        loadIfEmpty();
+        return remedyUsersByNavident;
+    }
+
     private void loadIfEmpty() {
         if (remedyUsers.isEmpty()) {
             var imported = importRemedyDataFile.importfromBucket();
@@ -31,5 +36,11 @@ public class RemedyDataFileRepository {
                 .filter(remedyUser -> remedyUser.navident() != null)
                 .forEach(remedyUser -> remedyUsersByNavident.put(remedyUser.navident(), remedyUser));
         }
+    }
+
+    public void reload() {
+        remedyUsers.clear();
+        remedyUsersByNavident.clear();
+        loadIfEmpty();
     }
 }

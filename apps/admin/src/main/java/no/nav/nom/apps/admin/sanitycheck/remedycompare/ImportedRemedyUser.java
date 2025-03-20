@@ -15,4 +15,6 @@ public record ImportedRemedyUser(
     boolean permisjon,
     LocalDate sluttDato,
     LocalDate utlopsDato
-) {}
+) {
+    public String getVisningsnavn() { return fornavn + " " + etternavn; }
+}
