@@ -34,7 +34,6 @@ import {
   createRessurs,
   getOrgEnhet,
   getOrgEnheterSomKanHaRessurser,
-  getOrgTilknytninger,
   getPerson,
 } from "~/api/react-query-endpoints";
 import { ApiResponseError } from "~/components/ApiResponseError";
@@ -55,10 +54,7 @@ import {
   SektorNameMapping,
   TilknytningtypeNameMapping,
 } from "~/pages/CreateResourcePage/SektorStep";
-import {
-  nomDateIsSameOrAfter,
-  nomDateIsTodayOrAfter,
-} from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import { nomDateIsSameOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { fullwidthRow } from "~/resources/NomStyles";
 import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
 import type {
@@ -80,12 +76,14 @@ import {
 export function CreateSpecialResourcePage() {
   return (
     <>
-      <PageBanner text="Opprett alternativ" />
+      <PageBanner text="Opprett annen medarbeider" />
 
       <ContentWrapper>
         <ContainerWithHighlightedTop icon={opprettRessursIconRoundedBackground}>
           <ModalProvider>
             <CreateSpecialResourceForm />
+
+            <ModalComponent />
           </ModalProvider>
         </ContainerWithHighlightedTop>
       </ContentWrapper>
@@ -157,7 +155,6 @@ function CreateSpecialResourceForm() {
           align-self: center;
         `}
         size="3xlarge"
-        title={`Søker etter ${identifikasjonsnummer}`}
       />
     );
   }
@@ -198,8 +195,8 @@ function CreateSpecialResourceForm() {
                 align-self: center;
               `}
             >
-              Velg medarbeidertype og skriv inn ønsket identifikator. NOM vil
-              verifisere at nummeret ikke er i bruk.
+              Velg identtype og skriv inn ønsket identifikator. NOM vil
+              verifisere at identifikatoren ikke er i bruk.
             </BodyLong>
           </div>
 
@@ -210,8 +207,6 @@ function CreateSpecialResourceForm() {
 
           <ApiResponseError error={opprettRessursMutation.error} />
         </VStack>
-
-        <ModalComponent />
       </form>
     </FormProvider>
   );
@@ -224,12 +219,12 @@ function CreateSpecialResourceFormInner({
   identType: IdentType;
   identifikasjonsnummer: string;
 }) {
+  const navigate = useNavigate();
+
   const personRequest: GetPersonRequest = {
     identType: identType,
     personident: identifikasjonsnummer,
   };
-
-  const navigate = useNavigate();
 
   const personQuery = useQuery<Person, AxiosError<Error>>({
     queryKey: getPerson.queryKey(personRequest),
@@ -238,61 +233,135 @@ function CreateSpecialResourceFormInner({
     retry: false,
   });
 
-  const person = personQuery.data;
+  const ressurs = personQuery.data;
 
-  const hentOrgtilknytningerQuery = useQuery({
-    queryKey: getOrgTilknytninger.queryKey(person?.navident ?? ""),
-    queryFn: () => getOrgTilknytninger.queryFn(person?.navident ?? ""),
-    enabled: !!person?.navident,
-  });
-
-  const orgtilknytninger = hentOrgtilknytningerQuery.data;
-
-  const erAktiv =
-    person &&
-    orgtilknytninger &&
-    orgtilknytninger.some((orgtilknytning) =>
-      nomDateIsTodayOrAfter(orgtilknytning.gyldigTom),
-    );
+  const erBrukt = !!ressurs;
 
   if (!identifikasjonsnummer) {
-    return;
+    return (
+      <div
+        css={css`
+          margin-top: var(--a-spacing-4);
+          display: flex;
+          justify-content: end;
+        `}
+      >
+        <Button
+          css={css`
+            width: 130px;
+          `}
+          onClick={() => navigate({ to: "/" })}
+          size="small"
+          type="button"
+          variant="secondary"
+        >
+          Avbryt
+        </Button>
+      </div>
+    );
   }
 
-  if (personQuery.isLoading || hentOrgtilknytningerQuery.isLoading) {
+  if (personQuery.isLoading) {
     return (
-      <Loader
-        css={css`
-          align-self: center;
-        `}
-        size="3xlarge"
-        title={`Søker etter ${identifikasjonsnummer}`}
-      />
+      <>
+        <Loader
+          css={css`
+            align-self: center;
+          `}
+          size="3xlarge"
+          title={`Søker etter ${identifikasjonsnummer}`}
+        />
+
+        <div
+          css={css`
+            margin-top: var(--a-spacing-4);
+            display: flex;
+            justify-content: end;
+          `}
+        >
+          <Button
+            css={css`
+              width: 130px;
+            `}
+            onClick={() => navigate({ to: "/" })}
+            size="small"
+            type="button"
+            variant="secondary"
+          >
+            Avbryt
+          </Button>
+        </div>
+      </>
     );
   }
 
   if (personQuery.error && personQuery.error.status !== 404) {
-    return <Alert variant="error">En teknisk feil forhindret søket</Alert>;
+    return (
+      <>
+        <Alert variant="error">En teknisk feil forhindret søket</Alert>
+
+        <div
+          css={css`
+            margin-top: var(--a-spacing-4);
+            display: flex;
+            justify-content: end;
+          `}
+        >
+          <Button
+            css={css`
+              width: 130px;
+            `}
+            onClick={() => navigate({ to: "/" })}
+            size="small"
+            type="button"
+            variant="secondary"
+          >
+            Avbryt
+          </Button>
+        </div>
+      </>
+    );
   }
 
-  if (erAktiv) {
+  if (erBrukt) {
     return (
-      <Alert variant="error">
-        Dette nummeret er allerede i bruk for ressurs med Nav-ident{" "}
-        <b>{person?.navident}</b>. For å gjøre endringer, gå til{" "}
-        <Link to={`/ressurs/${person?.navident}`}>ressursens profilside</Link>.
-      </Alert>
+      <>
+        <Alert variant="error">
+          Denne identifikatoren er allerede i bruk for ressurs med Nav-ident{" "}
+          <b>{ressurs?.navident}</b>. Rediger identifikatoren hvis du skal
+          opprette en ny ident. Du kan se mer informasjon på{" "}
+          <Link to={`/ressurs/${ressurs?.navident}`}>
+            ressursens profilside
+          </Link>
+          .
+        </Alert>
+
+        <div
+          css={css`
+            margin-top: var(--a-spacing-4);
+            display: flex;
+            justify-content: end;
+          `}
+        >
+          <Button
+            css={css`
+              width: 130px;
+            `}
+            onClick={() => navigate({ to: "/" })}
+            size="small"
+            type="button"
+            variant="secondary"
+          >
+            Avbryt
+          </Button>
+        </div>
+      </>
     );
   }
 
   return (
     <>
-      {person?.navident && (
-        <Alert variant="info">
-          Medarbeideren har jobbet i Nav tidligere og vil beholde sin tidligere
-          Nav-ident <b>{person?.navident}</b>.
-        </Alert>
-      )}
+      <Alert variant="success">Identifikatoren er ikke i bruk</Alert>
 
       {identType === IdentType.ROBOT && <RobotFormSection />}
 
@@ -304,8 +373,9 @@ function CreateSpecialResourceFormInner({
 
       <div
         css={css`
-          width: fit-content;
-          margin: var(--a-spacing-4) auto auto;
+          margin-top: var(--a-spacing-4);
+          display: flex;
+          justify-content: end;
         `}
       >
         <Button
@@ -322,10 +392,9 @@ function CreateSpecialResourceFormInner({
 
         <Button
           css={css`
-            margin-left: var(--a-spacing-8);
+            margin-left: var(--a-spacing-6);
             width: 130px;
           `}
-          id="nesteButton"
           size="small"
           type="submit"
         >
@@ -493,7 +562,7 @@ function IdentTypeFormPart({ name }: { name: string }) {
   return (
     <Select
       error={fieldState.error?.message}
-      label="Velg medarbeidertype"
+      label="Identtype"
       onChange={(event) => {
         field.onChange(event.target.value);
         clearErrors();
@@ -634,9 +703,7 @@ function VisningsnavnFormSection({ identType }: { identType: IdentType }) {
       <b>Visningnavn</b>
       <BodyShort spacing>
         Visningsnavnet vil bli brukt i alle Navs applikasjoner, og fornavn og
-        etternavn er obligatorisk. Navnet skal som hovedregel være samme som
-        folkeregistrert navn, men man kan om ønskelig fjerne mellomnavn.
-        Visningsnavnet blir benyttet til å generere medarbeiderens
+        etternavn er obligatorisk. Visningsnavnet blir benyttet til å generere
         e-postadresse.
       </BodyShort>
       <div css={fullwidthRow}>
@@ -672,7 +739,7 @@ function VisningsnavnFormSection({ identType }: { identType: IdentType }) {
                 margin-left: var(--a-spacing-2);
               `}
             >
-              RPA
+              RPARobot
             </BodyShort>
           </div>
         )}
@@ -788,7 +855,7 @@ function lagRessursRequest(values: {
 }): OpprettRessursRequest {
   const getVisningsEtternavn = (identType: IdentType, etternavn?: string) => {
     if (identType === IdentType.VIKAFOSSEN) return "Anonym";
-    if (identType === IdentType.ROBOT) return "RPA";
+    if (identType === IdentType.ROBOT) return "RPARobot";
     return etternavn ?? "";
   };
 
