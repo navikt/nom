@@ -72,7 +72,8 @@ spec:
       tenant: trygdeetaten.no
       claims:
         groups:
-          - id: "9e0e2958-df7a-4376-83f3-9bcbec1f2650"
+          - id: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # nom-admin
+          - id: "21301ba9-b972-411f-8090-689bc5f5ca27" # 0000-CA-NOM-Nom-Admin-Brukerstotte
         extra:
           - azp_name
           - NAVident
