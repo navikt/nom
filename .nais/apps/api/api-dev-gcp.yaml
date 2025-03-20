@@ -259,6 +259,9 @@ spec:
         - application: tilgang
           namespace: aap
           cluster: dev-gcp
+        - application: brev
+          namespace: aap
+          cluster: dev-gcp
         - application: nom-paarorende
           namespace: org
           cluster: dev-gcp
