@@ -1,6 +1,7 @@
 package no.nav.nom.apps.admin.sanitycheck.remedycompare;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.admin.nomapiclient.NomApiClient;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateRepository;
@@ -19,6 +20,7 @@ public class Comparer {
     private final RemedyDataFileRepository remedyDataFileRepository;
     private final RessursStateRepository ressursStateRepository;
     private final MasteredRessursStateRepository masteredRessursStateRepository;
+    private final NomApiClient nomApiClient;
 
     private final HashMap<String, RemedyCompareResult> nomRessurserNotInRemedy = new HashMap<>();
     private final HashMap<String, RemedyCompareResult> diffPaaNavn = new HashMap<>();
@@ -31,10 +33,13 @@ public class Comparer {
 
     private final HashMap<String, String> nomRemedyEnhet = new HashMap<>();
 
-    public Comparer(RemedyDataFileRepository remedyDataFileRepository, RessursStateRepository ressursStateRepository, MasteredRessursStateRepository masteredRessursStateRepository) {
+    public Comparer(RemedyDataFileRepository remedyDataFileRepository, RessursStateRepository ressursStateRepository, MasteredRessursStateRepository masteredRessursStateRepository,
+                    NomApiClient nomApiClient
+    ) {
         this.remedyDataFileRepository = remedyDataFileRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.masteredRessursStateRepository = masteredRessursStateRepository;
+        this.nomApiClient = nomApiClient;
     }
 
     public void compareNomWithRemedy() {
@@ -84,6 +89,10 @@ public class Comparer {
     }
 
     private String remedyEnhet(RessursState ressursState) {
+        var navident = ressursState.navident();
+        if (!nomRemedyEnhet.containsKey(navident)) {
+            nomRemedyEnhet.put(navident, nomApiClient.getRessursRemedyEnhet(ressursState.navident()));
+        }
         return nomRemedyEnhet.get(ressursState.navident());
     }
 
@@ -153,9 +162,11 @@ public class Comparer {
         diffPaaSluttdato.clear();
         diffPaaUtlopsdato.clear();
         diffPaaAktiv.clear();
+        diffPaaRemedyEnhet.clear();
         remedyUsersNotInNom.clear();
-        hasCompared = false;
+        nomRemedyEnhet.clear();
 
+        hasCompared = false;
         compareNomWithRemedy();
     }
 
