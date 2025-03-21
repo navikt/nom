@@ -114,7 +114,7 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
             var dataRow4 = sheet.getRow(3);
             assertEquals(ressursNavident3, dataRow4.getCell(0).getStringCellValue());
 
-            // make sure that resurs are added evenif contact info is not available
+            // make sure that resurs are added even if contact info is not available
             var dataRow5 = sheet.getRow(4);
             assertEquals(ressursNavident2, dataRow5.getCell(0).getStringCellValue());
 
