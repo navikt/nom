@@ -1,5 +1,8 @@
-import { Table } from "@navikt/ds-react";
+import { Button, HStack, Table, UNSAFE_Combobox } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import type { SubmitHandler } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 import { getRemedyCompareDiffPaaSluttdato } from "~/api/queries.ts";
 import { NomLink } from "~/components/NomLink.tsx";
@@ -7,6 +10,9 @@ import { useTableSort } from "~/hooks/useTableSort.ts";
 import { EmptyTable } from "~/sanitychecks/components/EmptyTable.tsx";
 import { LoadingTable } from "~/sanitychecks/components/LoadingTable.tsx";
 import type { RemedyCompareResult } from "~/types/nom-admin/nom-admin-models.ts";
+import { Sektor } from "~/types/nom-api/nom-api-models.ts";
+
+type Inputs = { sektorFilters: string[] };
 
 export function RemedyCompareDiffPaaSluttdato() {
   const {
@@ -25,6 +31,21 @@ export function RemedyCompareDiffPaaSluttdato() {
     key: crypto.randomUUID(),
   }));
 
+  const [filteredData, setFilteredData] = useState(dataWithKey);
+
+  const onValidSubmit: SubmitHandler<Inputs> = (data) => {
+    setFilteredData(
+      dataWithKey.filter(({ compareResponse }) =>
+        compareResponse.ressursState?.sektor
+          ? !data.sektorFilters.includes(compareResponse.ressursState.sektor)
+          : true,
+      ),
+    );
+  };
+  const { handleSubmit, control } = useForm<Inputs>({
+    defaultValues: { sektorFilters: [] },
+  });
+
   if (isLoading) {
     return <LoadingTable />;
   }
@@ -35,7 +56,35 @@ export function RemedyCompareDiffPaaSluttdato() {
 
   return (
     <div>
-      <div style={{ paddingBottom: "20px" }}>Antall: {data.length}</div>
+      <div style={{ paddingBottom: "20px" }}>
+        Antall: {filteredData.length}/{data.length}
+      </div>
+      <HStack as="form" gap="8" onSubmit={handleSubmit(onValidSubmit)}>
+        <Controller
+          control={control}
+          name="sektorFilters"
+          render={({ field }) => (
+            <UNSAFE_Combobox
+              id="nom-sektor-filter"
+              isMultiSelect
+              label="Ekskluder NOM sektor"
+              onToggleSelected={(option, isSelected) => {
+                if (isSelected) {
+                  field.onChange([...field.value, option]);
+                } else {
+                  field.onChange(field.value.filter((v) => v !== option));
+                }
+              }}
+              options={Object.values(Sektor)}
+              style={{ width: "150px" }}
+            />
+          )}
+        />
+        <div>
+          <Button type="submit">Oppdater</Button>
+        </div>
+      </HStack>
+      <button>Oppdater</button>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.ColumnHeader scope="col" sortKey="navident" sortable>
@@ -61,7 +110,7 @@ export function RemedyCompareDiffPaaSluttdato() {
           </Table.ColumnHeader>
         </Table.Header>
         <Table.Body>
-          {dataWithKey.map((withKey) => {
+          {filteredData.map((withKey) => {
             const { mastretINom, ressursState, importedRemedyUser } =
               withKey.compareResponse;
             return (
