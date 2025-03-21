@@ -25,6 +25,36 @@ export function RemedyCompareDiffPaaUtlopsdato() {
     key: crypto.randomUUID(),
   }));
 
+  const csv = () => {
+    const headers = [
+      "Nav ident",
+      "NOM sluttdato",
+      "Remedy utløpsdato",
+      "NOM sektor",
+      "Remedy aktiv",
+      "Remedy sektor",
+      "Mastret i NOM",
+    ];
+    const rows = dataWithKey.map(({ compareResponse }) => {
+      const { ressursState, importedRemedyUser, mastretINom } = compareResponse;
+      return [
+        ressursState?.navident,
+        ressursState?.sluttdato,
+        importedRemedyUser?.utlopsDato,
+        ressursState?.sektor,
+        importedRemedyUser?.aktiv ? "X" : "",
+        importedRemedyUser?.sektor,
+        mastretINom ? "X" : "",
+      ];
+    });
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+
+    return encodeURI(csvContent);
+  };
+
   if (isLoading) {
     return <LoadingTable />;
   }
@@ -36,6 +66,9 @@ export function RemedyCompareDiffPaaUtlopsdato() {
   return (
     <div>
       <div style={{ paddingBottom: "20px" }}>Antall: {data.length}</div>
+      <a download="remedy_compare_diff_paa_utlopsdato.csv" href={csv()}>
+        Last ned CSV
+      </a>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.ColumnHeader scope="col" sortKey="navident" sortable>

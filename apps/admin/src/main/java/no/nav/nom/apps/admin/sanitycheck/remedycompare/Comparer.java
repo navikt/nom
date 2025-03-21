@@ -82,13 +82,14 @@ public class Comparer {
     }
 
     private static boolean nameDiffers(RessursState ressursState, ImportedRemedyUser remedyUser) {
-        var nomName = capitalizeNavn(ressursState.visningsnavn().getFormattedVisningsnavn());
-        return !nomName.equals(remedyUser.getVisningsnavn());
+        var nomName = ressursState.visningsnavn().getFormattedVisningsnavn();
+        var nomNameRemedyCapitalized = capitalizeNavn(ressursState.visningsnavn().getFormattedVisningsnavn());
+        return !nomName.equals(remedyUser.getVisningsnavn()) && !nomNameRemedyCapitalized.equals(remedyUser.getVisningsnavn());
     }
 
 
     private boolean isNomHistorical(RessursState ressursState) {
-        return !ressursState.sluttdato().orElse(LocalDate.MAX).isBefore(LocalDate.of(2024,1,1));
+        return ressursState.sluttdato().orElse(LocalDate.MAX).isBefore(LocalDate.of(2024,1,1));
     }
 
     public HashMap<String, RemedyCompareResult> getRessursNotInRemedy() {

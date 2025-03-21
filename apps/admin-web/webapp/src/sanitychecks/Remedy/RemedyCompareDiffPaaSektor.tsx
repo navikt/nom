@@ -25,6 +25,36 @@ export function RemedyCompareDiffPaaSektor() {
     key: crypto.randomUUID(),
   }));
 
+  const csv = () => {
+    const headers = [
+      "Nav ident",
+      "NOM sektor",
+      "Remedy sektor",
+      "NOM startdato",
+      "NOM sluttdato",
+      "Remedy aktiv",
+      "Mastret i NOM",
+    ];
+    const rows = dataWithKey.map(({ compareResponse }) => {
+      const { ressursState, importedRemedyUser, mastretINom } = compareResponse;
+      return [
+        ressursState?.navident,
+        ressursState?.sektor,
+        importedRemedyUser?.sektor,
+        ressursState?.startdato,
+        ressursState?.sluttdato,
+        importedRemedyUser?.aktiv ? "X" : "",
+        mastretINom ? "X" : "",
+      ];
+    });
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+
+    return encodeURI(csvContent);
+  };
+
   if (isLoading) {
     return <LoadingTable />;
   }
@@ -36,6 +66,9 @@ export function RemedyCompareDiffPaaSektor() {
   return (
     <div>
       <div style={{ paddingBottom: "20px" }}>Antall: {data.length}</div>
+      <a download="compare_diff_pa_sektor.csv" href={csv()}>
+        Last ned CSV
+      </a>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.ColumnHeader scope="col" sortKey="navident" sortable>
