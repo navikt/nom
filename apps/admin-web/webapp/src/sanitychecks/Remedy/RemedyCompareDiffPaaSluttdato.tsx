@@ -54,12 +54,42 @@ export function RemedyCompareDiffPaaSluttdato() {
     return <EmptyTable />;
   }
 
+  const csv = () => {
+    const headers = [
+      "Nav ident",
+      "NOM sluttdato",
+      "Remedy sluttdato",
+      "NOM sektor",
+      "Remedy aktiv",
+      "Remedy sektor",
+      "Mastret i NOM",
+    ];
+    const rows = filteredData.map(({ compareResponse }) => {
+      const { ressursState, importedRemedyUser, mastretINom } = compareResponse;
+      return [
+        ressursState?.navident,
+        ressursState?.sluttdato,
+        importedRemedyUser?.sluttDato,
+        ressursState?.sektor,
+        importedRemedyUser?.aktiv ? "X" : "",
+        importedRemedyUser?.sektor,
+        mastretINom ? "X" : "",
+      ];
+    });
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+
+    return encodeURI(csvContent);
+  };
+
   return (
     <div>
-      <div style={{ paddingBottom: "20px" }}>
-        Antall: {filteredData.length}/{data.length}
-      </div>
       <HStack as="form" gap="8" onSubmit={handleSubmit(onValidSubmit)}>
+        <div style={{ paddingBottom: "20px" }}>
+          Antall: {filteredData.length}/{data.length}
+        </div>
         <Controller
           control={control}
           name="sektorFilters"
@@ -84,7 +114,9 @@ export function RemedyCompareDiffPaaSluttdato() {
           <Button type="submit">Oppdater</Button>
         </div>
       </HStack>
-      <button>Oppdater</button>
+      <a download="remedy_compare_diff_paa_sluttdato.csv" href={csv()}>
+        Last ned CSV
+      </a>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.ColumnHeader scope="col" sortKey="navident" sortable>

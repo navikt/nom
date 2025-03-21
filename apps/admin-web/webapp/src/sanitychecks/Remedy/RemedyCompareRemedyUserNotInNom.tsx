@@ -25,6 +25,34 @@ export function RemedyCompareRemedyUserNotInNom() {
     key: crypto.randomUUID(),
   }));
 
+  const csv = () => {
+    const headers = [
+      "Nav ident",
+      "Remedy navn",
+      "Remedy registrert",
+      "Remedy sluttdato",
+      "Remedy aktiv",
+      "Remedy sektor",
+    ];
+    const rows = dataWithKey.map(({ compareResponse }) => {
+      const { importedRemedyUser } = compareResponse;
+      return [
+        importedRemedyUser?.navident,
+        importedRemedyUser?.visningsnavn,
+        importedRemedyUser?.regDato,
+        importedRemedyUser?.sluttDato,
+        importedRemedyUser?.aktiv ? "X" : "",
+        importedRemedyUser?.sektor,
+      ];
+    });
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+
+    return encodeURI(csvContent);
+  };
+
   if (isLoading) {
     return <LoadingTable />;
   }
@@ -36,6 +64,9 @@ export function RemedyCompareRemedyUserNotInNom() {
   return (
     <div>
       <div style={{ paddingBottom: "20px" }}>Antall: {data.length}</div>
+      <a download="remedy_users_not_in_nom.csv" href={csv()}>
+        Last ned CSV
+      </a>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.ColumnHeader scope="col" sortKey="navident" sortable>
