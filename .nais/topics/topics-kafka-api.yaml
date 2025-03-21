@@ -39,10 +39,7 @@ spec:
       access: read
     - team: tilgangsmaskin
       application: populasjonstilgangskontroll
-      access: read
-    - team: org
-      application: torgeir-tmp
-      access: read      
+      access: read    
 
 ---
 
@@ -75,10 +72,7 @@ spec:
       access: read
     - team: org
       application: nom-admin
-      access: read
-    - team: org
-      application: torgeir-tmp
-      access: read      
+      access: read     
 
 ---
 
@@ -106,10 +100,7 @@ spec:
       access: read
     - team: org
       application: nom-admin
-      access: read
-    - team: org
-      application: torgeir-tmp
-      access: read      
+      access: read  
 
 ---
 
@@ -137,7 +128,4 @@ spec:
       access: readwrite
     - team: org
       application: nom-admin
-      access: read
-    - team: org
-      application: torgeir-tmp
       access: read
