@@ -136,6 +136,11 @@ public class Comparer {
         return diffPaaAktiv;
     }
 
+    public HashMap<String, RemedyCompareResult> getDiffPaaRemedyEnhet() {
+        if (!hasCompared) { compareNomWithRemedy(); }
+        return diffPaaRemedyEnhet;
+    }
+
     public HashMap<String, RemedyCompareResult> getRemedyUsersNotInNom() {
         if (!hasCompared) { compareNomWithRemedy(); }
         return remedyUsersNotInNom;
