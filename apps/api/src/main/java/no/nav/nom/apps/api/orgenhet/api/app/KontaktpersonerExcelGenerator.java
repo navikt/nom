@@ -64,13 +64,21 @@ public class KontaktpersonerExcelGenerator {
                 // If there are multiple contact info for a ressurs, we will have multiple rows for that ressurs.
                 // However, medarbeider info will be displayed only once for that ressurs.
                 int index = 0;
-                for (Kontaktinfo k : info.kontaktinfo()) {
+                if(info.kontaktinfo().isEmpty()){
                     addRow(
                         sheet.createRow(rowcount++),
-                        ressurs, info.kontaktinfo().isEmpty()? null : info.kontaktinfo().getFirst(),
+                        ressurs, null,
                         index
                     );
-                    index++;
+                } else {
+                    for (Kontaktinfo k : info.kontaktinfo()) {
+                        addRow(
+                            sheet.createRow(rowcount++),
+                            ressurs, k,
+                            index
+                        );
+                        index++;
+                    }
                 }
             }
 
