@@ -40,14 +40,14 @@ public class Comparer {
             if (remedyUser == null) {
                 nomRessurserNotInRemedy.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, null));
             } else {
-                if (!ressursState.visningsnavn().getFormattedVisningsnavn().equals(remedyUser.getVisningsnavn())) {
+                if (nameDiffers(ressursState, remedyUser) && !isNomHistorical(ressursState)) {
                     diffPaaNavn.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyUser));
                 }
-                if (ressursState.sektor() != remedyUser.sektor()) {
+                if (ressursState.sektor() != remedyUser.sektor() && !isNomHistorical(ressursState)) {
                     diffPaaSektor.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyUser));
                 }
                 if (!ressursState.isEkstern() || sluttdatoErPassert(ressursState)) {
-                    if (!Objects.equals(ressursState.sluttdato().orElse(null), remedyUser.sluttDato())) {
+                    if (sluttdatoDiffers(ressursState, remedyUser) && !sluttdatoInFuture(ressursState)  && !isNomHistorical(ressursState)) {
                         if (!sluttdatoErFremITidOgRemedyErNull(ressursState, remedyUser)) {
                             diffPaaSluttdato.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyUser));
                         }
@@ -57,19 +57,38 @@ public class Comparer {
                         diffPaaUtlopsdato.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyUser));
                     }
                 }
-                if (erRessursAktiv(ressursState) != remedyUser.aktiv()) {
+                if (erRessursAktiv(ressursState) != remedyUser.aktiv() && !isNomHistorical(ressursState)) {
                     diffPaaAktiv.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyUser));
                 }
             }
         });
-        remedyDataFileRepository.getRemedyUsers().entrySet().forEach( entry -> {
-            if (!nomRessurserNotInRemedy.containsKey(entry.getKey())) {
-                remedyUsersNotInNom.put(entry.getKey(), new RemedyCompareResult(false, null, entry.getValue()));
+        remedyDataFileRepository.getRemedyUsers().forEach((key, value) -> {
+            if (ressursStateRepository.findByNavident(key).isEmpty()) {
+                remedyUsersNotInNom.put(key, new RemedyCompareResult(false, null, value));
             }
         });
+
         hasCompared = true;
         log.info("Comparison done. Differ på navn: {} Sektor: {} Sluttdato: {} Utlopsdato: {} Aktiv: {} nomRessurserNotInRemedy: {} RemedyUsersNotInNom: {}",
             diffPaaNavn.size(), diffPaaSektor.size(), diffPaaSluttdato.size(), diffPaaUtlopsdato.size(), diffPaaAktiv.size(), nomRessurserNotInRemedy.size(), remedyUsersNotInNom.size());
+    }
+
+    private boolean sluttdatoInFuture(RessursState ressursState) {
+        return ressursState.sluttdato().orElse(LocalDate.MIN).isAfter(LocalDate.now());
+    }
+
+    private static boolean sluttdatoDiffers(RessursState ressursState, ImportedRemedyUser remedyUser) {
+        return !Objects.equals(ressursState.sluttdato().orElse(null), remedyUser.sluttDato());
+    }
+
+    private static boolean nameDiffers(RessursState ressursState, ImportedRemedyUser remedyUser) {
+        var nomName = capitalizeNavn(ressursState.visningsnavn().getFormattedVisningsnavn());
+        return !nomName.equals(remedyUser.getVisningsnavn());
+    }
+
+
+    private boolean isNomHistorical(RessursState ressursState) {
+        return !ressursState.sluttdato().orElse(LocalDate.MAX).isBefore(LocalDate.of(2024,1,1));
     }
 
     public HashMap<String, RemedyCompareResult> getRessursNotInRemedy() {
@@ -136,5 +155,18 @@ public class Comparer {
 
     private boolean isMastred(RessursState ressursState) {
         return masteredRessursStateRepository.isMastered(ressursState.navident());
+    }
+
+    public static String capitalizeNavn(String navn){
+        StringBuilder stringBuilder = new StringBuilder(navn.substring(0, 1).toUpperCase() + navn.substring(1).toLowerCase());
+        for(int i = 0; i < navn.length(); i++) {
+            char characterAtIndex = navn.charAt(i);
+            if(characterAtIndex == '-' || Character.isWhitespace(characterAtIndex)) {
+                if(i + 1 < navn.length()) {
+                    stringBuilder.replace(i + 1, i + 2, String.valueOf(Character.toUpperCase(navn.charAt(i + 1))));
+                }
+            }
+        }
+        return stringBuilder.toString();
     }
 }
