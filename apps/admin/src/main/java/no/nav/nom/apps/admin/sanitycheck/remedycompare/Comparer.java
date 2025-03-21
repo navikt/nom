@@ -27,6 +27,9 @@ public class Comparer {
     private final HashMap<String, RemedyCompareResult> diffPaaUtlopsdato = new HashMap<>();
     private final HashMap<String, RemedyCompareResult> diffPaaAktiv = new HashMap<>();
     private final HashMap<String, RemedyCompareResult> remedyUsersNotInNom = new HashMap<>();
+    private final HashMap<String, RemedyCompareResult> diffPaaRemedyEnhet = new HashMap<>();
+
+    private final HashMap<String, String> nomRemedyEnhet = new HashMap<>();
 
     public Comparer(RemedyDataFileRepository remedyDataFileRepository, RessursStateRepository ressursStateRepository, MasteredRessursStateRepository masteredRessursStateRepository) {
         this.remedyDataFileRepository = remedyDataFileRepository;
@@ -38,39 +41,50 @@ public class Comparer {
         ressursStateRepository.getAll().forEach(ressursState -> {
             var remedyUser = remedyDataFileRepository.getRemedyUser(ressursState.navident());
             if (remedyUser == null) {
-                nomRessurserNotInRemedy.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, null));
+                nomRessurserNotInRemedy.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), null));
             } else {
                 if (nameDiffers(ressursState, remedyUser) && !isNomHistorical(ressursState)) {
-                    diffPaaNavn.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyUser));
+                    diffPaaNavn.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), remedyUser));
                 }
                 if (ressursState.sektor() != remedyUser.sektor() && !isNomHistorical(ressursState)) {
-                    diffPaaSektor.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyUser));
+                    diffPaaSektor.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), remedyUser));
                 }
                 if (!ressursState.isEkstern() || sluttdatoErPassert(ressursState)) {
                     if (sluttdatoDiffers(ressursState, remedyUser) && !sluttdatoInFuture(ressursState)  && !isNomHistorical(ressursState)) {
                         if (!sluttdatoErFremITidOgRemedyErNull(ressursState, remedyUser)) {
-                            diffPaaSluttdato.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyUser));
+                            diffPaaSluttdato.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), remedyUser));
                         }
                     }
                 } else { // Ekstern hvor sluttdato ikke er passert
                     if (!Objects.equals(ressursState.sluttdato().orElse(null), remedyUser.utlopsDato())) {
-                        diffPaaUtlopsdato.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyUser));
+                        diffPaaUtlopsdato.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), remedyUser));
                     }
                 }
                 if (erRessursAktiv(ressursState) != remedyUser.aktiv() && !isNomHistorical(ressursState)) {
-                    diffPaaAktiv.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyUser));
+                    diffPaaAktiv.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), remedyUser));
+                }
+                if (erRessursAktiv(ressursState) && remedyEnhetDiffers(ressursState, remedyUser)) {
+                    diffPaaRemedyEnhet.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), remedyUser));
                 }
             }
         });
         remedyDataFileRepository.getRemedyUsers().forEach((key, value) -> {
             if (ressursStateRepository.findByNavident(key).isEmpty()) {
-                remedyUsersNotInNom.put(key, new RemedyCompareResult(false, null, value));
+                remedyUsersNotInNom.put(key, new RemedyCompareResult(false, null, null, value));
             }
         });
 
         hasCompared = true;
-        log.info("Comparison done. Differ på navn: {} Sektor: {} Sluttdato: {} Utlopsdato: {} Aktiv: {} nomRessurserNotInRemedy: {} RemedyUsersNotInNom: {}",
-            diffPaaNavn.size(), diffPaaSektor.size(), diffPaaSluttdato.size(), diffPaaUtlopsdato.size(), diffPaaAktiv.size(), nomRessurserNotInRemedy.size(), remedyUsersNotInNom.size());
+        log.info("Comparison done. Differ på navn: {} Sektor: {} Sluttdato: {} Utlopsdato: {} Aktiv: {}  RemedyEnhet {} nomRessurserNotInRemedy: {} RemedyUsersNotInNom: {}",
+            diffPaaNavn.size(), diffPaaSektor.size(), diffPaaSluttdato.size(), diffPaaUtlopsdato.size(), diffPaaAktiv.size(), diffPaaRemedyEnhet.size(), nomRessurserNotInRemedy.size(), remedyUsersNotInNom.size());
+    }
+
+    private boolean remedyEnhetDiffers(RessursState ressursState, ImportedRemedyUser remedyUser) {
+        return !Objects.equals(remedyEnhet(ressursState), remedyUser.enhetsId());
+    }
+
+    private String remedyEnhet(RessursState ressursState) {
+        return nomRemedyEnhet.get(ressursState.navident());
     }
 
     private boolean sluttdatoInFuture(RessursState ressursState) {

@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning;
 
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import org.springframework.stereotype.Service;
@@ -45,5 +46,13 @@ public class OrgtilknytningService {
 
     public Optional<OrgtilknytningState> findByFid(String fid) {
         return orgtilknytningStateRepository.findByFid(fid);
+    }
+
+    public OrgtilknytningState getAktivDolOTForRessurs(String navident) {
+        return orgtilknytningStateRepository.findByNavident(navident).stream()
+            .filter(OrgtilknytningState::erDagligOppfolging)
+            .filter(PeriodeUtil::isCurrentPeriod)
+            .findFirst()
+            .orElse(null);
     }
 }

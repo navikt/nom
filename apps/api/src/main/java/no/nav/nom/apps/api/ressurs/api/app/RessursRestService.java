@@ -7,6 +7,7 @@ import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
@@ -15,6 +16,8 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreT
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.pdl.PdlClient;
+import no.nav.nom.apps.api.remedy.RemedyEnhet;
+import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.FysiskBrukerstedService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
@@ -92,6 +95,8 @@ public class RessursRestService {
     private final NomMastered nomMastered;
     private final AuthResolver authResolver;
     private final FysiskBrukerstedService fysiskBrukerstedService;
+    private final RemedyEnhetMapperService remedyEnhetMapperService;
+    private final OrgtilknytningService orgtilknytningService;
 
     public RessursRestService(
         RessursStateRepository ressursStateRepository,
@@ -107,7 +112,8 @@ public class RessursRestService {
         RessursLedereResolver ressursLedereResolver,
         KafkaTopicReader kafkaTopicReader,
         NomMastered nomMastered,
-        AuthResolver authResolver, FysiskBrukerstedService fysiskBrukerstedService
+        AuthResolver authResolver, FysiskBrukerstedService fysiskBrukerstedService, RemedyEnhetMapperService remedyEnhetMapperService,
+        OrgtilknytningService orgtilknytningService
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -125,6 +131,8 @@ public class RessursRestService {
         this.nomMastered = nomMastered;
         this.authResolver = authResolver;
         this.fysiskBrukerstedService = fysiskBrukerstedService;
+        this.remedyEnhetMapperService = remedyEnhetMapperService;
+        this.orgtilknytningService = orgtilknytningService;
     }
 
     public List<RessursState> findRessurser(RessursFilter ressursFilter) {
@@ -782,5 +790,11 @@ public class RessursRestService {
         );
 
         fysiskBrukerstedService.flyttRessurserTilFysiskBrukersted(navidenter, tilFysiskBrukerstedNr, metadata);
+    }
+
+    public String getRemedyEnhet(String navident) {
+        var aktivDolOT = orgtilknytningService.getAktivDolOTForRessurs(navident);
+        Optional<RemedyEnhet> remedyEnhet = aktivDolOT == null ? Optional.empty() : remedyEnhetMapperService.findByNomId(aktivDolOT.orgEnhetId());
+        return remedyEnhet.map(RemedyEnhet::remedyEnhetId).orElse(null);
     }
 }

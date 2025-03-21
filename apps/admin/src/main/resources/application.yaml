@@ -23,6 +23,9 @@ app:
     ressurs-hendelser:
       apiEventTopic: org.nom.api-ressurs-hendelse-v1
       apiEventTopic-listener-id: nom-admin_apiRessursHendelserListener_${HOSTNAME}
+  clients:
+    nom-api:
+      url: ${NOM_API_URL}
 
 nom.libs.state.ressurs.enabled: true
 nom.libs.state.orgenhet.enabled: true
@@ -79,6 +82,18 @@ spring:
         jwt:
           issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
           audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
+      client:
+        registration:
+          nom-api:
+            provider: azure
+            client-id: ${AZURE_APP_CLIENT_ID}
+            client-secret: ${AZURE_APP_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope:
+              - ${NOM_API_SCOPE}
+        provider:
+         azure:
+           issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
 
 unleash:
   endpoint:
