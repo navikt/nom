@@ -419,6 +419,24 @@ public class RessursController {
         );
     }
 
+    @GetMapping("/{navident}/remedyEnhet")
+    @Operation(
+        description = "Henter en ressursens remedyEnhet basert på DOL",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "remedyEnhet"),
+    })
+    public ResponseEntity<String> getRemedyEnhet(
+        @PathVariable String navident
+    ) {
+        String remedyEnhet = ressursRestService.getRemedyEnhet(navident);
+        if (remedyEnhet == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(remedyEnhet);
+    }
+
     @ExceptionHandler({
         IllegalArgumentException.class,
         NoSuchElementException.class,

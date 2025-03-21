@@ -261,6 +261,9 @@ app:
       teamcat:
         client-id: "16bf0ab5-d09b-4c38-ad6d-71f8d93ff7e4"
         scopes: ["TEAMCAT"]
+      nom-admin:
+        client-id: "66c5096f-89dc-446f-bc15-a39d5b4274e7"
+        scopes: ["QUERY_PERSON"]
       #     For testing av endepunkter under /api/v1/teamcat
       org-token-tool:
         client-id: "18c1d86b-4635-461c-8718-62c130087211"
@@ -400,6 +403,9 @@ app:
       teamcat:
         client-id: "f1931989-7a09-496c-8e2d-111b56faa242"
         scopes: ["TEAMCAT"]
+      nom-admin:
+        client-id: "00c7dcfe-c3ad-44eb-aaac-4f88c5d4f1d2"
+        scopes: ["QUERY_PERSON"]
       # For scope fra lokal kjøring, mot nom-api dvh ORDS datalast endepunkter
       local-nom-api:
         client-id: "3e962532-1cd2-4bb4-8222-515c83df854a"
