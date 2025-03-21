@@ -38,11 +38,6 @@ public class RemedyCompareController {
         comparer.clearAndCompare();
     }
 
-    @GetMapping(value = "/ressursNotInRemedy")
-    public Collection<RemedyCompareResult> ressursNotInRemedy() {
-        return comparer.getRessursNotInRemedy().values();
-    }
-
     @GetMapping(value = "/diffPaaNavn")
     public Collection<RemedyCompareResult> diffPaaNavn() {
         return comparer.getDiffPaaNavn().values();
@@ -66,6 +61,16 @@ public class RemedyCompareController {
     @GetMapping(value = "/diffPaaAktiv")
     public Collection<RemedyCompareResult> diffPaaAktiv() {
         return comparer.getDiffPaaAktiv().values();
+    }
+
+    @GetMapping(value = "/diffPaaRemedyEnhet")
+    public Collection<RemedyCompareResult> diffPaaRemedyEnhet() {
+        return comparer.getDiffPaaRemedyEnhet().values();
+    }
+
+    @GetMapping(value = "/ressursNotInRemedy")
+    public Collection<RemedyCompareResult> ressursNotInRemedy() {
+        return comparer.getRessursNotInRemedy().values();
     }
 
     @GetMapping(value = "/remedyUsersNotInNom")
