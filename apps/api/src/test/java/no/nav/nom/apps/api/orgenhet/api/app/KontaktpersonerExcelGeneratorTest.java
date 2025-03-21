@@ -69,19 +69,21 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
             List.of(new Ressurs.Telefon("7890", TelefonType.PRIVAT_TELEFON)), "epost3@epost.com", false);
         var ressurser = List.of(ressurs1, ressurs2, ressurs3);
 
-
         RessursKontaktinfo kontaktinfo1 = RessursKontaktinfo.builder()
             .ressursNavident(ressurs1.state().navident())
             .kontaktinfo(List.of(
-                Kontaktinfo.builder().kontaktId("id1").fornavn("K_Fornavn1").etternavn("Etternavn1").telefon("1234").prioritet(1).build())).build();
+                    Kontaktinfo.builder().kontaktId("id1_1").fornavn("K_Fornavn1_1").etternavn("Etternavn1_1").telefon("1234").prioritet(1).build(),
+                    Kontaktinfo.builder().kontaktId("id1_2").fornavn("K_Fornavn1_2").etternavn("Etternavn1_2").telefon("123456").prioritet(2).build())
+            ).build();
+
         RessursKontaktinfo kontaktinfo2 = RessursKontaktinfo.builder()
             .ressursNavident(ressurs2.state().navident())
-            .kontaktinfo(List.of(
-                Kontaktinfo.builder().kontaktId("id2").fornavn("K_Fornavn2").etternavn("Etternavn2").telefon("4567").prioritet(1).build())).build();
+            .kontaktinfo(List.of()).build();
         RessursKontaktinfo kontaktinfo3 = RessursKontaktinfo.builder()
             .ressursNavident(ressurs3.state().navident())
             .kontaktinfo(List.of(
-                Kontaktinfo.builder().kontaktId("id3").fornavn("K_Fornavn3").etternavn("Etternavn3").telefon("8901").prioritet(1).build())).build();
+                Kontaktinfo.builder().kontaktId("id3").fornavn("K_Fornavn3").etternavn("Etternavn3").telefon("8901").prioritet(1).build())
+            ).build();
 
 
         // note: resources will be sorted based on the fornavn+etternavn, before retrieving the contact info
@@ -100,15 +102,24 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
             assertEquals("Medarbeider-navident", headerRow.getCell(0).getStringCellValue());
             assertEquals("Kontaktperson-navn", headerRow.getCell(3).getStringCellValue());
 
-            var dataRow1 = sheet.getRow(1);
-            assertEquals(ressursNavident1, dataRow1.getCell(0).getStringCellValue());
+            var dataRow2 = sheet.getRow(1);
+            assertEquals(ressursNavident1, dataRow2.getCell(0).getStringCellValue());
             assertEquals(kontaktinfo1.kontaktinfo().getFirst().fornavn() + " " + kontaktinfo1.kontaktinfo().getFirst().etternavn(),
-                dataRow1.getCell(3).getStringCellValue());
+                dataRow2.getCell(3).getStringCellValue());
+
+            var dataRow3 = sheet.getRow(2);
+            assertEquals("", dataRow3.getCell(0).getStringCellValue());
 
             // test total ressurs count and is sorted
-            var dataRow3 = sheet.getRow(3);
-            assertEquals(ressursNavident2, dataRow3.getCell(0).getStringCellValue());
-            assertNull(sheet.getRow(4));
+            var dataRow4 = sheet.getRow(3);
+            assertEquals(ressursNavident3, dataRow4.getCell(0).getStringCellValue());
+
+            // make sure that resurs are added even if contact info is not available
+            var dataRow5 = sheet.getRow(4);
+            assertEquals(ressursNavident2, dataRow5.getCell(0).getStringCellValue());
+
+            // assert that there total 5 rows in the excel
+            assertNull(sheet.getRow(5));
         }
     }
 }
