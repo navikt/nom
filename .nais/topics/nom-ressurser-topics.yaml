@@ -31,7 +31,4 @@ spec:
       access: read
     - team: org
       application: nom-admin
-      access: read
-    - team: org
-      application: torgeir-tmp
-      access: read      
+      access: read    

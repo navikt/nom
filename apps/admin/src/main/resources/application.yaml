@@ -107,10 +107,6 @@ app:
 NOM_ADMIN_GROUPID: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # nom-admin
 SUPPORT_READONLY_GROUPID: "21301ba9-b972-411f-8090-689bc5f5ca27" # 0000-CA-NOM-Nom-Admin-Brukerstotte
 
-logging:
-  level:
-    no.nav.nom.apps.admin: TRACE
-
 --- # This is the same as having an application-prod.yaml file
 spring:
   config:
