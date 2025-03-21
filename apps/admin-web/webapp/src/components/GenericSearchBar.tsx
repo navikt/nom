@@ -7,6 +7,7 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 
 import type { searchType } from "~/api/queries.ts";
+import { useHasAdminAccess } from "~/api/useGetSession.tsx";
 
 export function GenericSearchBar({
   search,
@@ -17,6 +18,7 @@ export function GenericSearchBar({
 }) {
   const methods = useForm({ defaultValues: search });
   const navigate = useNavigate();
+  const hasAdminAccess = useHasAdminAccess();
 
   const submitHandler = methods.handleSubmit((values) => {
     navigate({
@@ -62,7 +64,9 @@ export function GenericSearchBar({
   return (
     <>
       <form className="flex gap-4 p-6" onSubmit={submitHandler}>
-        <ToggleEditMode editButton={editButton} search={search} />
+        {hasAdminAccess && (
+          <ToggleEditMode editButton={editButton} search={search} />
+        )}
         <TextField
           label="Vilkårlig tekst"
           {...methods.register("filterText")}

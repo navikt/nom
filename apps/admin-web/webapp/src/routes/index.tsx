@@ -8,8 +8,12 @@ import {
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
+import { useHasAdminAccess } from "~/api/useGetSession.tsx";
+
 export const Route = createFileRoute("/")({
   component: () => {
+    const hasAdminAccess = useHasAdminAccess();
+
     return (
       <div className="flex items-center gap-2 justify-center flex-wrap">
         <Link to="/sinks">
@@ -24,24 +28,28 @@ export const Route = createFileRoute("/")({
             <b>State</b>
           </CardWrapper>
         </Link>
-        <Link to="/manuell-last">
-          <CardWrapper>
-            <CogRotationIcon fontSize={80} />
-            <b>Manuell last</b>
-          </CardWrapper>
-        </Link>
-        <Link to="/manuelle-meldinger">
-          <CardWrapper>
-            <TerminalIcon fontSize={80} />
-            <b>Send event</b>
-          </CardWrapper>
-        </Link>
-        <Link to="/sanity-checks/orgenhet">
-          <CardWrapper>
-            <HeadHeartIcon fontSize={80} />
-            <b>Sanity checks</b>
-          </CardWrapper>
-        </Link>
+        {hasAdminAccess && (
+          <>
+            <Link to="/manuell-last">
+              <CardWrapper>
+                <CogRotationIcon fontSize={80} />
+                <b>Manuell last</b>
+              </CardWrapper>
+            </Link>
+            <Link to="/manuelle-meldinger">
+              <CardWrapper>
+                <TerminalIcon fontSize={80} />
+                <b>Send event</b>
+              </CardWrapper>
+            </Link>
+            <Link to="/sanity-checks/orgenhet">
+              <CardWrapper>
+                <HeadHeartIcon fontSize={80} />
+                <b>Sanity checks</b>
+              </CardWrapper>
+            </Link>
+          </>
+        )}
       </div>
     );
   },

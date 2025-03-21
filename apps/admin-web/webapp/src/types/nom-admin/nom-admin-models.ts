@@ -276,6 +276,31 @@ export type OrgEnhetTypeEndretEventV1 = OrgEnhetEvent & {
   data?: OrgEnhetTypeEndretEventData;
 };
 
+export interface RessursHendelseKafkaDTO {
+  key: string;
+  /** @format date-time */
+  timestamp: string;
+  fid: string;
+  navident: string;
+  visningsnavn: Visningsnavn;
+  /** @format date */
+  startdato: string;
+  /** @format date */
+  sluttdato?: string;
+  sektor: Sektor;
+  orgtilknytning: RessursHendelseOrgtilknytningKafkaDTO;
+}
+
+export interface RessursHendelseOrgtilknytningKafkaDTO {
+  fid: string;
+  orgEnhetId: string;
+  /** @format date */
+  gyldigFom: string;
+  /** @format date */
+  gyldigTom?: string;
+  dagligOppfolging: boolean;
+}
+
 export interface OrgtilknytningKafkaDTO {
   fid: string;
   orgenhetId: string;
@@ -333,6 +358,17 @@ export enum HendelseType {
   NY = "NY",
   ENDRET = "ENDRET",
   FJERNET = "FJERNET",
+}
+
+export interface SessionInfoResponse {
+  navident: string;
+  name: string;
+  roles: UserRoles[];
+}
+
+export enum UserRoles {
+  ROLE_WRITE = "ROLE_WRITE",
+  ROLE_READONLY = "ROLE_READONLY",
 }
 
 export interface RessursOrgtilknytningKoblingInfo {
@@ -460,4 +496,28 @@ export interface EnheterOgOrganisering {
   aktiveEnheterMedUnderEnheterUtenOverEnheter?: number;
   /** @format int32 */
   aktiveEnheterUtenNoenOrganisering?: number;
+}
+
+export interface ImportedRemedyUser {
+  navident?: string;
+  fornavn?: string;
+  etternavn?: string;
+  enhetsId?: string;
+  enhetsNavn?: string;
+  sektor?: Sektor;
+  aktiv?: boolean;
+  permisjon?: boolean;
+  /** @format date */
+  sluttDato?: string;
+  /** @format date */
+  utlopsDato?: string;
+  /** @format date */
+  regDato?: string;
+  visningsnavn?: string;
+}
+
+export interface RemedyCompareResult {
+  mastretINom?: boolean;
+  ressursState?: RessursState;
+  importedRemedyUser?: ImportedRemedyUser;
 }

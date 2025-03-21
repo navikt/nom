@@ -12,6 +12,7 @@ import type {
   DuplikatOrgtilknytning,
   EnheterOgOrganisering,
   HendelseDTO,
+  ImportedRemedyUser,
   MasteredRessursDTO,
   OrgEnhetOrganisering,
   OrgEnhetStartOgSluttdato,
@@ -19,17 +20,20 @@ import type {
   OrgEnhetStateDTO,
   OrgtilknytningMedOrgEnhet,
   OverlappendeOrgtilknytning,
+  RemedyCompareResult,
   RessursMedEnhet,
   RessursMedFlereDOL,
   RessursOrgtilknytningKoblingInfo,
   RessursOrgtilknytningUlikSluttdato,
   RessursStateKafkaDTO,
+  SessionInfoResponse,
 } from "~/types/nom-admin/nom-admin-models.ts";
 import type {
   OrgtilknytningState,
   Ressurs,
   RessursState,
 } from "~/types/nom-api/nom-api-models.ts";
+
 const API_BASE_URL = "/frackend/admin-api";
 const NOM_API_BASE_URL = "/frackend/api";
 export const NOM_REMEDY_INTEGRASJON_BASE_URL = "/frackend/remedy";
@@ -483,4 +487,92 @@ export async function getRessursMedFlerEnnEnDOL(): Promise<
       timeout: 120_000, // 120 seconds
     })
     .json<RessursMedFlereDOL[]>();
+}
+
+export function getImportedRemedyUser(navident: string) {
+  return queryOptions({
+    queryKey: ["API", "REMEDYUSER", navident],
+    queryFn: async () =>
+      (
+        await ky.get(`${API_BASE_URL}/RemedyCompare/remedyUser`, {
+          searchParams: {
+            navident: navident,
+          },
+        })
+      ).json<ImportedRemedyUser>(),
+  });
+}
+
+export async function getRessursNotInRemedy(): Promise<RemedyCompareResult[]> {
+  return await ky
+    .get(`${API_BASE_URL}/RemedyCompare/ressursNotInRemedy`, {
+      timeout: 120_000, // 120 seconds
+    })
+    .json<RemedyCompareResult[]>();
+}
+
+export async function getRemedyUsersNotInNom(): Promise<RemedyCompareResult[]> {
+  return await ky
+    .get(`${API_BASE_URL}/RemedyCompare/remedyUsersNotInNom`, {
+      timeout: 120_000, // 120 seconds
+    })
+    .json<RemedyCompareResult[]>();
+}
+
+export async function getRemedyCompareDiffPaaNavn(): Promise<
+  RemedyCompareResult[]
+> {
+  return await ky
+    .get(`${API_BASE_URL}/RemedyCompare/diffPaaNavn`, {
+      timeout: 120_000, // 120 seconds
+    })
+    .json<RemedyCompareResult[]>();
+}
+
+export async function getRemedyCompareDiffPaaSektor(): Promise<
+  RemedyCompareResult[]
+> {
+  return await ky
+    .get(`${API_BASE_URL}/RemedyCompare/diffPaaSektor`, {
+      timeout: 120_000, // 120 seconds
+    })
+    .json<RemedyCompareResult[]>();
+}
+
+export async function getRemedyCompareDiffPaaSluttdato(): Promise<
+  RemedyCompareResult[]
+> {
+  return await ky
+    .get(`${API_BASE_URL}/RemedyCompare/diffPaaSluttdato`, {
+      timeout: 120_000, // 120 seconds
+    })
+    .json<RemedyCompareResult[]>();
+}
+
+export async function getRemedyCompareDiffPaaUtlopsdato(): Promise<
+  RemedyCompareResult[]
+> {
+  return await ky
+    .get(`${API_BASE_URL}/RemedyCompare/diffPaaUtlopsdato`, {
+      timeout: 120_000, // 120 seconds
+    })
+    .json<RemedyCompareResult[]>();
+}
+
+export async function getRemedyCompareDiffPaaAktiv(): Promise<
+  RemedyCompareResult[]
+> {
+  return await ky
+    .get(`${API_BASE_URL}/RemedyCompare/diffPaaAktiv`, {
+      timeout: 120_000, // 120 seconds
+    })
+    .json<RemedyCompareResult[]>();
+}
+
+export function getSessionInfo() {
+  return queryOptions({
+    queryKey: ["SESSIONINFO"],
+    queryFn: async () =>
+      (await ky.get(`${API_BASE_URL}/sessioninfo`)).json<SessionInfoResponse>(),
+  });
 }
