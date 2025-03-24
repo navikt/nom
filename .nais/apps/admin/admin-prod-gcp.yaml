@@ -92,5 +92,8 @@ spec:
           namespace: org
           cluster: prod-gcp
     outbound:
+      rules:
+        - application: nom-api
+          namespace: nom
       external:
         - host: teamorg-unleash-api.nav.cloud.nais.io
