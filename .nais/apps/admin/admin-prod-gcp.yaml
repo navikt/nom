@@ -13,7 +13,7 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
     - name: NOM_API_URL
-      value: http://nom-api.nom.svc.cluster.local
+      value: http://nom-api.nom
     - name: NOM_API_SCOPE
       value: api://prod-gcp.nom.nom-api/.default
     - name: LOGGING_CONFIG
