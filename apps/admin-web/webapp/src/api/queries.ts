@@ -576,3 +576,13 @@ export function getSessionInfo() {
       (await ky.get(`${API_BASE_URL}/sessioninfo`)).json<SessionInfoResponse>(),
   });
 }
+
+export async function getRemedyCompareDiffPaaRemedyEnhet(): Promise<
+  RemedyCompareResult[]
+> {
+  return await ky
+    .get(`${API_BASE_URL}/RemedyCompare/diffPaaRemedyEnhet`, {
+      timeout: 120_000, // 120 seconds
+    })
+    .json<RemedyCompareResult[]>();
+}

@@ -86,6 +86,15 @@ function RemedySanityChecks() {
           </option>
         </Select>
       </div>
+      Alle Remedy dataene er fra{" "}
+      <a href="https://nav-it.slack.com/archives/C040RV7KCH5/p1741705426131959?thread_ts=1741699518.939969&cid=C040RV7KCH5">
+        SQL dump
+      </a>{" "}
+      statisk fil lastet til{" "}
+      <a href="https://console.cloud.google.com/storage/browser/no-nav-org-prod-nom-admin-storage-bucket;tab=objects?forceOnBucketsSortingFiltering=true&authuser=1&inv=1&invt=Abs4dg&project=org-prod-1016&prefix=&forceOnObjectsSortingFiltering=false">
+        GCP bucket
+      </a>
+      .
       <ListSelector selected={selected} />
     </div>
   );
