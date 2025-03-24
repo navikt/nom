@@ -71,12 +71,9 @@ public class Comparer {
                 if (erRessursAktiv(ressursState) != remedyUser.aktiv() && !isNomHistorical(ressursState)) {
                     diffPaaAktiv.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), remedyUser));
                 }
-//                if (erRessursAktiv(ressursState)) {
-//                    aktiveNavidenter.add(ressursState.navident());
-//                }
-//                if (erRessursAktiv(ressursState) && remedyEnhetDiffers(ressursState, remedyUser)) {
-//                    diffPaaRemedyEnhet.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), remedyUser));
-//                }
+                if (erRessursAktiv(ressursState) && remedyEnhetDiffers(ressursState, remedyUser)) {
+                    diffPaaRemedyEnhet.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), remedyUser));
+                }
             }
         });
         remedyDataFileRepository.getRemedyUsers().forEach((key, value) -> {
