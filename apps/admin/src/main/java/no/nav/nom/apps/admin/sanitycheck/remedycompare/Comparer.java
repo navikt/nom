@@ -43,6 +43,7 @@ public class Comparer {
     }
 
     public void compareNomWithRemedy() {
+        log.info("Starting comparison between NOM and Remedy");
         ressursStateRepository.getAll().forEach(ressursState -> {
             var remedyUser = remedyDataFileRepository.getRemedyUser(ressursState.navident());
             if (remedyUser == null) {
@@ -68,9 +69,9 @@ public class Comparer {
                 if (erRessursAktiv(ressursState) != remedyUser.aktiv() && !isNomHistorical(ressursState)) {
                     diffPaaAktiv.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), remedyUser));
                 }
-                if (erRessursAktiv(ressursState) && remedyEnhetDiffers(ressursState, remedyUser)) {
-                    diffPaaRemedyEnhet.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), remedyUser));
-                }
+//                if (erRessursAktiv(ressursState) && remedyEnhetDiffers(ressursState, remedyUser)) {
+//                    diffPaaRemedyEnhet.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), remedyUser));
+//                }
             }
         });
         remedyDataFileRepository.getRemedyUsers().forEach((key, value) -> {
@@ -91,9 +92,9 @@ public class Comparer {
     private String remedyEnhet(RessursState ressursState) {
         var navident = ressursState.navident();
         if (!nomRemedyEnhet.containsKey(navident)) {
-            nomRemedyEnhet.put(navident, nomApiClient.getRessursRemedyEnhet(ressursState.navident()));
+            nomRemedyEnhet.put(navident, nomApiClient.getRessursRemedyEnhet(navident));
         }
-        return nomRemedyEnhet.get(ressursState.navident());
+        return nomRemedyEnhet.get(navident);
     }
 
     private boolean sluttdatoInFuture(RessursState ressursState) {

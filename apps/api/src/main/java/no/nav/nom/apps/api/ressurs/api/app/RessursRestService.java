@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
@@ -74,6 +75,7 @@ import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAcc
 import static no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService.validateOrgtilknytningTypeSektorCombination;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
+@Slf4j
 @Service
 public class RessursRestService {
 
@@ -793,6 +795,7 @@ public class RessursRestService {
     }
 
     public String getRemedyEnhet(String navident) {
+        log.info("Fetching RemedyEnhet for navident: {}", navident);
         var aktivDolOT = orgtilknytningService.getAktivDolOTForRessurs(navident);
         Optional<RemedyEnhet> remedyEnhet = aktivDolOT == null ? Optional.empty() : remedyEnhetMapperService.findByNomId(aktivDolOT.orgEnhetId());
         return remedyEnhet.map(RemedyEnhet::remedyEnhetId).orElse(null);
