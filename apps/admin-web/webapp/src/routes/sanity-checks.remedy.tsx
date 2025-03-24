@@ -6,6 +6,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { RemedyCompareDiffPaaAktiv } from "~/sanitychecks/Remedy/RemedyCompareDiffPaaAktiv.tsx";
 import { RemedyCompareDiffPaaNavn } from "~/sanitychecks/Remedy/RemedyCompareDiffPaaNavn.tsx";
+import { RemedyCompareDiffPaaRemedyEnhet } from "~/sanitychecks/Remedy/RemedyCompareDiffPaaRemedyEnhet.tsx";
 import { RemedyCompareDiffPaaSektor } from "~/sanitychecks/Remedy/RemedyCompareDiffPaaSektor.tsx";
 import { RemedyCompareDiffPaaSluttdato } from "~/sanitychecks/Remedy/RemedyCompareDiffPaaSluttdato.tsx";
 import { RemedyCompareDiffPaaUtlopsdato } from "~/sanitychecks/Remedy/RemedyCompareDiffPaaUtlopsdato.tsx";
@@ -43,6 +44,9 @@ function ListSelector(props: { selected: string }) {
     case "diffPaaAktiv": {
       return <RemedyCompareDiffPaaAktiv />;
     }
+    case "diffPaaRemedyEnhet": {
+      return <RemedyCompareDiffPaaRemedyEnhet />;
+    }
     case "ressurserNotInRemedy": {
       return <RemedyCompareRessurserNotInRemedy />;
     }
@@ -78,6 +82,7 @@ function RemedySanityChecks() {
           <option value="diffPaaSluttdato">Forskjeller i sluttdato</option>
           <option value="diffPaaUtlopsdato">Forskjeller i utløpsdato</option>
           <option value="diffPaaAktiv">Forskjeller i aktiv</option>
+          <option value="diffPaaRemedyEnhet">Forskjeller i remedy enhet</option>
           <option value="ressurserNotInRemedy">
             NOM ressurser som ikke finnes i Remedy
           </option>
