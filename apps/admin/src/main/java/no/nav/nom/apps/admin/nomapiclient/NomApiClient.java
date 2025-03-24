@@ -19,9 +19,13 @@ public class NomApiClient {
     public String getRessursRemedyEnhet(String navident) {
         log.info("Henter remedyEnhet for ressurs {}", navident);
         return nomApiAuthorizedWebClient.get()
-            .uri(uriBuilder -> uriBuilder
-                .path("/app/ressurser/{navident}/remedyEnhet")
-                .build(navident)
+            .uri(uriBuilder -> {
+                    var newUri = uriBuilder
+                        .path("/app/ressurser/{navident}/remedyEnhet")
+                        .build(navident);
+                    log.info("URI for getRessursRemedyEnhet: {}", newUri);
+                    return newUri;
+                }
             )
             .retrieve()
             .bodyToMono(String.class)
