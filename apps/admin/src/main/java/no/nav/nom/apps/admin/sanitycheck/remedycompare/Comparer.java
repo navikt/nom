@@ -8,8 +8,10 @@ import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -69,6 +71,9 @@ public class Comparer {
                 if (erRessursAktiv(ressursState) != remedyUser.aktiv() && !isNomHistorical(ressursState)) {
                     diffPaaAktiv.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), remedyUser));
                 }
+//                if (erRessursAktiv(ressursState)) {
+//                    aktiveNavidenter.add(ressursState.navident());
+//                }
 //                if (erRessursAktiv(ressursState) && remedyEnhetDiffers(ressursState, remedyUser)) {
 //                    diffPaaRemedyEnhet.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), remedyUser));
 //                }
