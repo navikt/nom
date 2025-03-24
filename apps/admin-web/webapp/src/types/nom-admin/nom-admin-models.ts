@@ -519,5 +519,6 @@ export interface ImportedRemedyUser {
 export interface RemedyCompareResult {
   mastretINom?: boolean;
   ressursState?: RessursState;
+  nomRemedyEnhet?: string;
   importedRemedyUser?: ImportedRemedyUser;
 }

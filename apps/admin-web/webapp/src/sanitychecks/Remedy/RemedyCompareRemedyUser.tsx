@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { getImportedRemedyUser } from "~/api/queries.ts";
 
-export function RemedyCompare() {
+export function RemedyCompareRemedyUser() {
   const [navident, setNavident] = useState("");
 
   const remedyUserQuery = useQuery({
