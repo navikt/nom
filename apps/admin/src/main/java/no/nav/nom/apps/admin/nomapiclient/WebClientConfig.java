@@ -1,8 +1,11 @@
 package no.nav.nom.apps.admin.nomapiclient;
 
+import io.netty.handler.logging.LogLevel;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
@@ -11,8 +14,10 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.transport.logging.AdvancedByteBufFormat;
 
-
+@Slf4j
 @Configuration
 public class WebClientConfig {
 
@@ -41,10 +46,15 @@ public class WebClientConfig {
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("nom-api");
 
+        var httpClient = HttpClient
+            .create()
+            .wiretap("reactor.netty.http.client.HttpClient",
+                LogLevel.DEBUG, AdvancedByteBufFormat.TEXTUAL);
+
         return WebClient.builder()
+            .clientConnector(new ReactorClientHttpConnector(httpClient))
             .baseUrl(baseUrl)
             .filter(oAuth2Filter)
             .build();
     }
-
 }

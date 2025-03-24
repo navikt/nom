@@ -100,6 +100,13 @@ unleash:
     url: ${UNLEASH_SERVER_API_URL}/api
   api-key: ${UNLEASH_SERVER_API_TOKEN}
 
+logging:
+  level:
+    reactor:
+      netty:
+        http:
+          client=DEBUG:
+
 --- # This is the same as having an application-dev.yaml file
 spring:
   config:
