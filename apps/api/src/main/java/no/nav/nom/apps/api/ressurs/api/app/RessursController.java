@@ -430,10 +430,10 @@ public class RessursController {
     public ResponseEntity<String> getRemedyEnhet(
         @PathVariable String navident
     ) {
-        String remedyEnhet = ressursRestService.getRemedyEnhet(navident);
-        if (remedyEnhet == null) {
+        if (!ressursRestService.ressursExists(navident)) {
             return ResponseEntity.notFound().build();
         }
+        String remedyEnhet = ressursRestService.getRemedyEnhet(navident);
         return ResponseEntity.ok(remedyEnhet);
     }
 

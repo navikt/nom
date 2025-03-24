@@ -24,7 +24,6 @@ public class NomApiClient {
                         .build(navident)
             )
             .retrieve()
-            .onStatus(status -> status.value() == 404, (response) -> null)
             .bodyToMono(String.class)
             .retryWhen(defaultRetry)
             .block();

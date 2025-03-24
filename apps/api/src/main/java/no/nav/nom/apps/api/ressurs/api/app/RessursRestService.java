@@ -800,4 +800,8 @@ public class RessursRestService {
         Optional<RemedyEnhet> remedyEnhet = aktivDolOT == null ? Optional.empty() : remedyEnhetMapperService.findByNomId(aktivDolOT.orgEnhetId());
         return remedyEnhet.map(RemedyEnhet::remedyEnhetId).orElse(null);
     }
+
+    public boolean ressursExists(String navident) {
+        return ressursStateRepository.findByNavident(navident).isPresent();
+    }
 }
