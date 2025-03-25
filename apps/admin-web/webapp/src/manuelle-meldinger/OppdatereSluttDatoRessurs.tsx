@@ -22,7 +22,7 @@ import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
 
 const schema = z.object({
   navident: navidentValidator(),
-  sluttDato: z.date().optional().nullable(),
+  sluttDato: z.string().optionable().nullable(),
   confirm: confirmTextValidator(),
 });
 
@@ -41,7 +41,8 @@ export function OppdatereSluttDatoRessurs() {
 
   const mutation = useMutation<string, HTTPError, SchemaType>({
     mutationFn: async (v) => {
-      const formattedDate = v.sluttDato && format(v.sluttDato, "yyyy-MM-dd");
+      const formattedDate =  v.sluttDato && format(v.sluttDato, "yyyy-MM-dd");
+      console.log("formattedDate" + v.formattedDate);
 
       return (
         await ky.post(
