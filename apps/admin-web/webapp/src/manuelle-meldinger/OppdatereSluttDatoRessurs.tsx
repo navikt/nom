@@ -22,7 +22,7 @@ import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
 
 const schema = z.object({
   navident: navidentValidator(),
-  sluttDato: z.string(),
+  sluttDato: z.date().optional(),
   confirm: confirmTextValidator(),
 });
 
@@ -34,7 +34,6 @@ export function OppdatereSluttDatoRessurs() {
   const methods = useForm<SchemaType>({
     defaultValues: {
       confirm: "",
-      sluttDato: "",
     },
     resolver: zodResolver(schema),
   });
