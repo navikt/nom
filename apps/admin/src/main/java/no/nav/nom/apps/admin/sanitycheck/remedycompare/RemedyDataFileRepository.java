@@ -36,7 +36,7 @@ public class RemedyDataFileRepository {
             imported.stream()
                 .filter(remedyUser -> remedyUser.navident() != null)
                 .sorted(Comparator.comparing(ImportedRemedyUser::navident)
-                        .thenComparing(ImportedRemedyUser::aktiv).reversed()
+                        .thenComparing(ImportedRemedyUser::aktiv)
                         .thenComparing(ImportedRemedyUser::regDato)
                     )
                 .forEach(remedyUser -> remedyUsersByNavident.put(remedyUser.navident(), remedyUser));
