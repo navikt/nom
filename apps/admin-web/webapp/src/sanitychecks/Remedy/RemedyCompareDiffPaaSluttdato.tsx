@@ -91,6 +91,7 @@ export function RemedyCompareDiffPaaSluttdato() {
           <b>
             Antall: {filteredData.length}/{data.length}{" "}
           </b>
+          <br />
           (Ekskluderer NOM Eksterne hvor sluttdato i NOM ikke er passert, og
           ekskluderer også fremtidige sluttdatoer og alle sluttdatoer før 2024)
         </div>

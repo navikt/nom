@@ -67,6 +67,7 @@ export function RemedyCompareDiffPaaUtlopsdato() {
     <div>
       <div style={{ paddingBottom: "20px" }}>
         <b>Antall: {data.length}</b>
+        <br />
         (Inkluderer kun NOM Eksterne hvor sluttdato ikke er passert)
       </div>
       <a download="remedy_compare_diff_paa_utlopsdato.csv" href={csv()}>
