@@ -34,7 +34,6 @@ export function OppdatereSluttDatoRessurs() {
   const methods = useForm<SchemaType>({
     defaultValues: {
       confirm: "",
-      sluttDato: null,
     },
     resolver: zodResolver(schema),
   });
