@@ -520,5 +520,6 @@ export interface RemedyCompareResult {
   mastretINom?: boolean;
   ressursState?: RessursState;
   nomRemedyEnhet?: string;
+  epost?: string;
   importedRemedyUser?: ImportedRemedyUser;
 }

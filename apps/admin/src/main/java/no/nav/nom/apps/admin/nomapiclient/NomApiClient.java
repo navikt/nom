@@ -31,7 +31,7 @@ public class NomApiClient {
     public String getEpost(String navident) {
         return nomApiAuthorizedWebClient.get()
             .uri(uriBuilder -> uriBuilder
-                        .path("/app/ressurser/byNavident/{navident}")
+                        .path("/app/ressurser/{navident}/epost")
                         .build(navident)
             )
             .retrieve()
