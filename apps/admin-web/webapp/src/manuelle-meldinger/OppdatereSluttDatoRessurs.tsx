@@ -70,6 +70,7 @@ export function OppdatereSluttDatoRessurs() {
               methods.reset();
               methods.clearErrors();
               mutation.reset();
+              ref.current?.reset();
               ref.current?.close();
             }}
             ref={ref}
