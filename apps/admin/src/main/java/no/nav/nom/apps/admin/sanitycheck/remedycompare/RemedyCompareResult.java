@@ -6,5 +6,6 @@ public record RemedyCompareResult(
     boolean mastretINom,
     RessursState ressursState,
     String nomRemedyEnhet,
+    String epost,
     ImportedRemedyUser importedRemedyUser
 ) {}

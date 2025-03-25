@@ -70,7 +70,10 @@ export function RemedyCompareDiffPaaRemedyEnhet() {
 
   return (
     <div>
-      <div style={{ paddingBottom: "20px" }}>Antall: {data.length}</div>
+      <div style={{ paddingBottom: "20px" }}>
+        <b>Antall: {data.length}</b>
+        (Inkluderer alle fra NOM)
+      </div>
       <a download="compare_diff_pa_sektor.csv" href={csv()}>
         Last ned CSV
       </a>

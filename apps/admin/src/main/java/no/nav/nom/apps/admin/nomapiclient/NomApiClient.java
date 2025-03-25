@@ -27,4 +27,16 @@ public class NomApiClient {
             .retryWhen(defaultRetry)
             .block();
     }
+
+    public String getEpost(String navident) {
+        return nomApiAuthorizedWebClient.get()
+            .uri(uriBuilder -> uriBuilder
+                        .path("/app/ressurser/byNavident/{navident}")
+                        .build(navident)
+            )
+            .retrieve()
+            .bodyToMono(String.class)
+            .retryWhen(defaultRetry)
+            .block();
+    }
 }
