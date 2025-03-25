@@ -76,6 +76,7 @@ export function RemedyCompareDiffPaaNavn() {
     <div>
       <div style={{ paddingBottom: "20px" }}>
         <b>Antall: {data.length}</b>
+        <br />
         (Ekskludert alle hvor NOM sluttdato er før 2024)
       </div>
       <a download="remedy_compare_diff_paa_navn.csv" href={csv()}>
