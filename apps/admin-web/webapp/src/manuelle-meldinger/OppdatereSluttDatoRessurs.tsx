@@ -11,7 +11,8 @@ import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { API_BASE_URL } from "~/api/apiQueries.ts";
-import { DatePickerWrapped } from "~/components/DatepickerWrapped.tsx";
+//import { DatePickerWrapped } from "~/components/DatepickerWrapped.tsx";
+;
 import {
   ConfirmTextField,
   confirmTextValidator,
@@ -19,6 +20,7 @@ import {
 import { Footer } from "~/manuelle-meldinger/felles/Footer.tsx";
 import { navidentValidator } from "~/manuelle-meldinger/felles/NavidentTextField.tsx";
 import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
+import {DatePickerWrappedSluttdate} from "~/components/DatepickerWrappedSluttdate.tsx";
 
 const schema = z.object({
   navident: navidentValidator(),
@@ -81,7 +83,7 @@ export function OppdatereSluttDatoRessurs() {
                 label="Navident"
                 {...methods.register("navident")}
               />
-              <DatePickerWrapped
+              <DatePickerWrappedSluttdate
                 label="Sluttdato på Ressurs"
                 name="sluttDato"
               />
