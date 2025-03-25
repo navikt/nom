@@ -22,7 +22,7 @@ import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
 
 const schema = z.object({
   navident: navidentValidator(),
-  sluttDato: z.date().optional().nullable(),
+  sluttDato: z.date().nullable(),
   confirm: confirmTextValidator(),
 });
 
