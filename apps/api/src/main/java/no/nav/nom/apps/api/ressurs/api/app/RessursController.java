@@ -433,8 +433,24 @@ public class RessursController {
         if (!ressursRestService.ressursExists(navident)) {
             return ResponseEntity.notFound().build();
         }
-        String remedyEnhet = ressursRestService.getRemedyEnhet(navident);
-        return ResponseEntity.ok(remedyEnhet);
+        return ResponseEntity.ok(ressursRestService.getRemedyEnhet(navident));
+    }
+
+    @GetMapping("/{navident}/epost")
+    @Operation(
+        description = "Henter en ressursens epost",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "epost"),
+    })
+    public ResponseEntity<String> getEpost(
+        @PathVariable String navident
+    ) {
+        if (!ressursRestService.ressursExists(navident)) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(ressursRestService.getEpost(navident));
     }
 
     @ExceptionHandler({

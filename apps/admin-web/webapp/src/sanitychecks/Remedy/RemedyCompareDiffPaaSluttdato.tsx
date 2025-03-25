@@ -88,7 +88,11 @@ export function RemedyCompareDiffPaaSluttdato() {
     <div>
       <HStack as="form" gap="8" onSubmit={handleSubmit(onValidSubmit)}>
         <div style={{ paddingBottom: "20px" }}>
-          Antall: {filteredData.length}/{data.length}
+          <b>
+            Antall: {filteredData.length}/{data.length}{" "}
+          </b>
+          (Ekskluderer NOM Eksterne hvor sluttdato i NOM ikke er passert, og
+          ekskluderer også fremtidige sluttdatoer og alle sluttdatoer før 2024)
         </div>
         <Controller
           control={control}

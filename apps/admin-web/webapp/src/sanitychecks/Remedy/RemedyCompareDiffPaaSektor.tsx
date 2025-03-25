@@ -65,7 +65,10 @@ export function RemedyCompareDiffPaaSektor() {
 
   return (
     <div>
-      <div style={{ paddingBottom: "20px" }}>Antall: {data.length}</div>
+      <div style={{ paddingBottom: "20px" }}>
+        <b>Antall: {data.length}</b>
+        (Ekskludert alle hvor NOM sluttdato er før 2024)
+      </div>
       <a download="compare_diff_pa_sektor.csv" href={csv()}>
         Last ned CSV
       </a>

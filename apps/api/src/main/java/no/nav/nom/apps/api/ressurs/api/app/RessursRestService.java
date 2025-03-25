@@ -804,4 +804,9 @@ public class RessursRestService {
     public boolean ressursExists(String navident) {
         return ressursStateRepository.findByNavident(navident).isPresent();
     }
+
+    public String getEpost(String navident) {
+        log.info("Fetching Epost for navident: {}", navident);
+        return ressursContactDetailsResolver.fetchEmail(navident).orElse(null);
+    }
 }
