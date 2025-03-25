@@ -30,6 +30,7 @@ export function RemedyCompareDiffPaaNavn() {
       "Nav ident",
       "NOM navn",
       "Remedy navn",
+      "Epost",
       "NOM startdato",
       "NOM sluttdato",
       "NOM sektor",
@@ -38,13 +39,15 @@ export function RemedyCompareDiffPaaNavn() {
       "Mastret i NOM",
     ];
     const rows = dataWithKey.map(({ compareResponse }) => {
-      const { ressursState, importedRemedyUser, mastretINom } = compareResponse;
+      const { ressursState, importedRemedyUser, mastretINom, epost } =
+        compareResponse;
       return [
         ressursState?.navident,
         ressursState?.visningsnavn.mellomnavn
           ? `${ressursState?.visningsnavn.fornavn} ${ressursState?.visningsnavn.mellomnavn} ${ressursState?.visningsnavn.etternavn}`
           : `${ressursState?.visningsnavn.fornavn} ${ressursState?.visningsnavn.etternavn}`,
         importedRemedyUser?.visningsnavn,
+        epost,
         ressursState?.startdato,
         ressursState?.sluttdato,
         ressursState?.sektor,
@@ -89,6 +92,9 @@ export function RemedyCompareDiffPaaNavn() {
           <Table.ColumnHeader scope="col" sortKey="remedyNavn" sortable>
             Remedy navn
           </Table.ColumnHeader>
+          <Table.ColumnHeader scope="col" sortKey="epost" sortable>
+            Epost
+          </Table.ColumnHeader>
           <Table.ColumnHeader scope="col" sortKey="nomStart" sortable>
             NOM startdato
           </Table.ColumnHeader>
@@ -110,7 +116,7 @@ export function RemedyCompareDiffPaaNavn() {
         </Table.Header>
         <Table.Body>
           {dataWithKey.map((withKey) => {
-            const { mastretINom, ressursState, importedRemedyUser } =
+            const { mastretINom, ressursState, epost, importedRemedyUser } =
               withKey.compareResponse;
             const nomNavn = ressursState?.visningsnavn.mellomnavn
               ? `${ressursState?.visningsnavn.fornavn} ${ressursState?.visningsnavn.mellomnavn} ${ressursState?.visningsnavn.etternavn}`
@@ -126,6 +132,7 @@ export function RemedyCompareDiffPaaNavn() {
                 <Table.DataCell>
                   {importedRemedyUser?.visningsnavn}
                 </Table.DataCell>
+                <Table.DataCell>{epost}</Table.DataCell>
                 <Table.DataCell>{ressursState?.startdato}</Table.DataCell>
                 <Table.DataCell>{ressursState?.sluttdato}</Table.DataCell>
                 <Table.DataCell>{ressursState?.sektor}</Table.DataCell>
