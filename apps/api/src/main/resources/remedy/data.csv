@@ -341,7 +341,6 @@ EH00001;2300;ORGNIV3;HELFO;Beholdt;;;JA;EH00001;ORGENHET;je305h;28.02.2025 - lag
 4431500;4415;AGRESSOORGENHET;Arbeid og Ytelser Molde, stab;Opp til ORGNIV3;443150;my788g;JA;443150;ORGNIV3;my788g;
 4431600;4416;AGRESSOORGENHET;Arbeid og ytelser Trondheim;Opp til ORGNIV3;443160;ge651c;JA;443160;ORGNIV3;ge651c;
 4431800;4418;AGRESSOORGENHET;Arbeid og ytelser Fauske;Opp til ORGNIV3;443180;se689m;JA;443180;ORGNIV3;se689m;
-4430307;4425;AGRESSOORGENHET;Arbeid og ytelser Kristiania Lønnsgranti;Beholdt;;;JA;4430307;ORGENHET;su769c;28.02.2025 - enheten i NORG og U4 er utgått. Ingen mennesker på 4425. Raden kan slettes
 443030;4480;ORGNIV3;Arbeid og Ytelser Kristiania;Ned til ORGENHET;4430305;fe768k;JA;4430305;ORGENHET;fe768k;Ser at 4480 er brukt på enheten 4430305, NAY Kristiania Rådgivende overelegetjeneste
 450000;4500;ORGNIV3;Styringsenhet Kontroll;Opp til ORGNIV2;45;va593c;JA;45;ORGNIV2;va593c;
 451030;4503;ORGNIV3;Kontroll Øst;Beholdt;;;JA;451030;ORGNIV3;leggInn;
