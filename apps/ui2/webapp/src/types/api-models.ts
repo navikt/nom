@@ -24,6 +24,11 @@ export interface BrukerSkrivetilgangRessursRequest {
   ressurs: string;
 }
 
+export interface BrukerSkrivetilgangRessurserRequest {
+  bruker: string;
+  ressurser: string[];
+}
+
 export interface EndreOrgtilknytningRequest {
   erDagligOppfolging: boolean;
   fid: string;
@@ -42,10 +47,6 @@ export interface EndreTilknytningtypeRequest {
 export interface ExcelExportRequest {
   navidenter?: string[];
   topOrgEnhetId?: string;
-}
-
-export interface OrgenhetKontaktPersonserExcelExportRequest {
-  orgEnhetId?: string;
 }
 
 export interface FolkeregisterPerson {
@@ -401,6 +402,15 @@ export interface UpdateFysiskeBrukerstederRequest {
   /** @uniqueItems true */
   fysiskeBrukersteder: string[];
   primaryFysiskBrukersted: string;
+}
+
+export interface UpdatePrimaryFysiskBrukerstedForRessurserRequest {
+  navidenter: string[];
+  newPrimaryFysiskBrukersted: string;
+}
+
+export interface UpdatePrimaryFysiskBrukerstedRequest {
+  newPrimaryFysiskBrukersted: string;
 }
 
 export interface UpdatePrimarytelefonnummer {

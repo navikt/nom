@@ -17,7 +17,6 @@ import partition from "lodash/partition";
 import React from "react";
 
 import {
-  downloadExcelKontaktPersonserForOrgenhetByOrgenhetId,
   getRessurserByListNavident,
   isOrgEnhetArbeidsomraade,
   isOrgEnhetDriftsenhet,
@@ -30,11 +29,7 @@ import {
   nomDateIsTodayOrAfter,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import building from "~/resources/building.svg";
-import type {
-  OrgEnhet,
-  OrgenhetKontaktPersonserExcelExportRequest,
-  Ressurs,
-} from "~/types/api-models";
+import type { OrgEnhet, Ressurs } from "~/types/api-models";
 import { NomNivaa, OrgEnhetsType, Sektor } from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
@@ -338,20 +333,20 @@ function DropdownMeny({
   visRessursAdministeringKnapper: boolean;
 }) {
   const hasAdminAccess = useHasAdminAccess();
-  //const hasWriteAccess = useHasWriteAccess();
-  const handleDownloadKontaktpersonerExcel = async () => {
-    const excelExportRequest = {
-      orgEnhetId: orgEnhet.id,
-    };
-    await downloadExcelKontaktPersonserForOrgenhetByOrgenhetId(
-      excelExportRequest as OrgenhetKontaktPersonserExcelExportRequest,
-      excelFilNavn(),
-    );
-  };
 
-  const excelFilNavn = () => {
-    return "kontaktpersoner for orgenhet - " + orgEnhet?.navn + ".xlsx";
-  };
+  // const handleDownloadKontaktpersonerExcel = async () => {
+  //   const excelExportRequest = {
+  //     orgEnhetId: orgEnhet.id,
+  //   };
+  //   await downloadExcelKontaktPersonserForOrgenhetByOrgenhetId(
+  //     excelExportRequest as OrgenhetKontaktPersonserExcelExportRequest,
+  //     excelFilNavn(),
+  //   );
+  // };
+
+  // const excelFilNavn = () => {
+  //   return "kontaktpersoner for orgenhet - " + orgEnhet?.navn + ".xlsx";
+  // };
 
   return (
     <Dropdown>
@@ -406,7 +401,7 @@ function DropdownMeny({
             </>
           )}
 
-          <>
+          {/*          <>
             <Dropdown.Menu.Divider />
             <Dropdown.Menu.GroupedList.Item
               as={Link}
@@ -414,7 +409,7 @@ function DropdownMeny({
             >
               Eksporter kontaktpersoner til Excel
             </Dropdown.Menu.GroupedList.Item>
-          </>
+          </>*/}
         </Dropdown.Menu.GroupedList>
       </Dropdown.Menu>
     </Dropdown>
