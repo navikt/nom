@@ -23,7 +23,6 @@ import type {
   OpprettRessursRequest,
   OpprettRessursResponse,
   OrgEnhet,
-  OrgenhetKontaktPersonserExcelExportRequest,
   OrgEnhetMedLedernavn,
   OrgtilknytningState,
   Person,
@@ -31,6 +30,7 @@ import type {
   RessursLeder,
   SessionInfoResponse,
   UpdateFysiskeBrukerstederRequest,
+  UpdatePrimaryFysiskBrukerstedForRessurserRequest,
   UpdatePrimarytelefonnummer,
 } from "~/types/api-models";
 
@@ -207,6 +207,19 @@ export const getRessurserForOrgenhet = {
     ),
 };
 
+export const getRessurserForFysiskBrukersted = {
+  queryKey: (fysiskBrukerstedNr: string) => [
+    "RESSURSER_BY_FYSISK_BRUKERSTED",
+    ...fysiskBrukerstedNr,
+  ],
+  queryFn: async (fysiskBrukerstedNr: string) =>
+    (
+      await axios.get<Ressurs[]>(
+        `${NOM_API_BASE_PATH}/app/ressurser/byFysiskbrukersted/${fysiskBrukerstedNr}`,
+      )
+    ).data,
+};
+
 export const getRessurserByListNavident = {
   queryKey: (navidenter: string[]) => ["RESSURSER_BY_LIST", ...navidenter],
   queryFn: async (navidenter: string[]) =>
@@ -215,6 +228,20 @@ export const getRessurserByListNavident = {
         `${NOM_API_BASE_PATH}/app/ressurser/byListNavident`,
         navidenter,
       )
+    ).data,
+};
+
+export const getOrgtilknytningerByNavidentList = {
+  queryKey: (navidenter: string[]) => [
+    "ORGTILKNYTNINGER_BY_LIST",
+    ...navidenter,
+  ],
+  queryFn: async (navidenter: string[]) =>
+    (
+      await axios.post<
+        string[],
+        AxiosResponse<Record<string, OrgtilknytningState[]>>
+      >(`${NOM_API_BASE_PATH}/app/orgtilknytninger`, navidenter)
     ).data,
 };
 
@@ -239,25 +266,25 @@ export const downloadExcelByListNavident = async (
   link.remove();
 };
 
-export const downloadExcelKontaktPersonserForOrgenhetByOrgenhetId = async (
-  request: OrgenhetKontaktPersonserExcelExportRequest,
-  excelDocumentNavn: string,
-) => {
-  const response = await axios.get(
-    `${NOM_API_BASE_PATH}/app/orgenheter/exportKontaktpersonerFor/${request.orgEnhetId}`,
-    {
-      responseType: "blob",
-    },
-  );
-
-  const url = globalThis.URL.createObjectURL(new Blob([response.data]));
-  const link = document.createElement("a");
-  link.href = url;
-  link.setAttribute("download", excelDocumentNavn);
-  document.body.append(link);
-  link.click();
-  link.remove();
-};
+// export const downloadExcelKontaktPersonserForOrgenhetByOrgenhetId = async (
+//   request: OrgenhetKontaktPersonserExcelExportRequest,
+//   excelDocumentNavn: string,
+// ) => {
+//   const response = await axios.get(
+//     `${NOM_API_BASE_PATH}/app/orgenheter/exportKontaktpersonerFor/${request.orgEnhetId}`,
+//     {
+//       responseType: "blob",
+//     },
+//   );
+//
+//   const url = globalThis.URL.createObjectURL(new Blob([response.data]));
+//   const link = document.createElement("a");
+//   link.href = url;
+//   link.setAttribute("download", excelDocumentNavn);
+//   document.body.append(link);
+//   link.click();
+//   link.remove();
+// };
 
 export const getLedereForRessurs = {
   queryKey: (navident: string) => ressurserKeys.ledereTil(navident),
@@ -295,6 +322,14 @@ export const getOrgEnhet = {
         `${NOM_API_BASE_PATH}/app/orgenheter/${orgEnhetId}`,
       )
     ).data,
+};
+
+export const getOrgEnhetList = {
+  queryKey: (orgEnhetIder: string[]) => ["ORGENHETER_LIST", ...orgEnhetIder],
+  queryFn: async (orgEnhetIder: string[]) =>
+    await Promise.all(
+      orgEnhetIder.map((orgEnhetId) => getOrgEnhet.queryFn(orgEnhetId)),
+    ),
 };
 
 export const isOrgEnhetArbeidsomraade = {
@@ -592,6 +627,16 @@ export const updateFysiskeBrukersteder = async (
   await axios.post<unknown, AxiosResponse<unknown>>(
     `${NOM_API_BASE_PATH}/app/ressurser/${fid}/fysiskebrukersteder`,
     updateFysiskeBrukerstederRequest,
+  );
+  await hopeForKafkaStateToUpdate();
+};
+
+export const updateFysiskBrukerstedForRessurser = async (
+  request: UpdatePrimaryFysiskBrukerstedForRessurserRequest,
+) => {
+  await axios.post<unknown, AxiosResponse<unknown>>(
+    `${NOM_API_BASE_PATH}/app/ressurser/updateFysiskBrukerstedForRessurserByNavidentList`,
+    request,
   );
   await hopeForKafkaStateToUpdate();
 };

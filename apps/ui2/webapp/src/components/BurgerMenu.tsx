@@ -19,6 +19,7 @@ import {
   useHasAdminAccess,
   useHasWriteAccess,
 } from "~/api/useGetSession";
+import flyttFysiskBrukersted from "~/resources/flyttFysiskBrukersted.svg";
 import hierarchyFilled from "~/resources/hierarchyFilled.svg";
 
 export function BurgerMenu() {
@@ -80,6 +81,7 @@ export function BurgerMenu() {
             <img alt="hierarki" src={hierarchyFilled} />
             <span>Organisasjonshierarki</span>
           </Dropdown.Menu.List.Item>
+
           <Dropdown.Menu.List.Item
             onClick={() =>
               navigate({
@@ -91,9 +93,11 @@ export function BurgerMenu() {
             <PersonFillIcon color="black" fontSize="24px" />
             <span>Min profil</span>
           </Dropdown.Menu.List.Item>
+
           {showOpprettLink && (
             <>
               <Dropdown.Menu.Divider />
+
               <Dropdown.Menu.List.Item
                 data-cy="opprettRessurs-button"
                 onClick={() =>
@@ -108,6 +112,7 @@ export function BurgerMenu() {
               </Dropdown.Menu.List.Item>
             </>
           )}
+
           {showOpprettSpecialLink && (
             <>
               {!showOpprettLink && <Dropdown.Menu.Divider />}
@@ -124,9 +129,36 @@ export function BurgerMenu() {
               </Dropdown.Menu.List.Item>
             </>
           )}
+
+          {hasAdminAccess && (
+            <>
+              {" "}
+              {!showOpprettLink && !showOpprettSpecialLink && (
+                <Dropdown.Menu.Divider />
+              )}
+              <Dropdown.Menu.List.Item
+                onClick={() =>
+                  navigate({ to: "/masseflytting-fysisk-brukersted" })
+                }
+              >
+                <img
+                  alt=""
+                  css={css`
+                    height: 24px;
+                    width: 24px;
+                    align-self: center;
+                  `}
+                  src={flyttFysiskBrukersted}
+                />
+                <span>Masseflytting fysisk brukersted</span>
+              </Dropdown.Menu.List.Item>
+            </>
+          )}
+
           {showTilgangerLink && (
             <>
               <Dropdown.Menu.Divider />
+
               <Dropdown.Menu.List.Item
                 data-cy="tilganger-button"
                 onClick={() => navigate({ to: "/tilganger" })}
@@ -136,9 +168,11 @@ export function BurgerMenu() {
               </Dropdown.Menu.List.Item>
             </>
           )}
+
           {hasAdminAccess && (
             <>
               {!showTilgangerLink && <Dropdown.Menu.Divider />}
+
               <Dropdown.Menu.List.Item
                 onClick={() => globalThis.open(adminLenke, "_blank")}
               >

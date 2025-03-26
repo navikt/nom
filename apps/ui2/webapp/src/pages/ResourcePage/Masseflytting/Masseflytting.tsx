@@ -77,6 +77,8 @@ export function Masseflytting() {
 
         <ModalProvider>
           <MasseflyttingTable orgEnhet={orgEnhet} />
+
+          <ModalComponent />
         </ModalProvider>
       </ContentWrapper>
     </>
@@ -264,7 +266,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
         `}
         gap="4"
       >
-        <Heading css={css``} level="1" size="medium">
+        <Heading level="1" size="medium">
           Flytting av medarbeidere{" "}
           {orgEnhet?.navn ? `i ${orgEnhet.navn} (${orgEnhet.id})` : ""}
         </Heading>
@@ -280,7 +282,6 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
 
         <Checkbox
           checked={beholdTilganger}
-          css={css``}
           onChange={(event) => setBeholdTilganger(event.target.checked)}
         >
           Gamle tilganger skal bli med videre
@@ -303,9 +304,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
               margin-left: var(--a-spacing-4);
             `}
             disabled={valgteRessurser.length === 0 || !masseflyttingTilOrgEnhet}
-            onClick={() => {
-              handleClick().then();
-            }}
+            onClick={handleClick}
             size="small"
           >
             Flytt medarbeidere
@@ -457,8 +456,6 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
         </Table.Body>
       </Table>
 
-      <ModalComponent />
-
       {sortedRessurser.length === 0 && (
         <div
           css={css`
@@ -501,23 +498,21 @@ function lagMasseFlyttingRequest(
   };
 }
 
-interface MasseflyttingBekreftModalProperties {
-  onCancel?: () => void;
-  onConfirm?: () => void;
-  valgteRessurser: string[];
-  ressurser: Ressurs[];
-  tilOrgEnhet: string;
-  beholdTilganger: boolean;
-}
-
-export function MasseflyttingBekreftModal({
+function MasseflyttingBekreftModal({
   onCancel,
   onConfirm,
   valgteRessurser,
   ressurser,
   tilOrgEnhet,
   beholdTilganger,
-}: MasseflyttingBekreftModalProperties) {
+}: {
+  onCancel?: () => void;
+  onConfirm?: () => void;
+  valgteRessurser: string[];
+  ressurser: Ressurs[];
+  tilOrgEnhet: string;
+  beholdTilganger: boolean;
+}) {
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(tilOrgEnhet as string),
     queryFn: () => getOrgEnhet.queryFn(tilOrgEnhet as string),

@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as TilgangerImport } from './routes/tilganger'
+import { Route as MasseflyttingFysiskBrukerstedImport } from './routes/masseflytting-fysisk-brukersted'
 import { Route as AdminImport } from './routes/admin'
 import { Route as IndexImport } from './routes/index'
 import { Route as RessursSpecialreceiptImport } from './routes/ressurs.specialreceipt'
@@ -34,6 +35,12 @@ const TilgangerRoute = TilgangerImport.update({
   path: '/tilganger',
   getParentRoute: () => rootRoute,
 } as any)
+
+const MasseflyttingFysiskBrukerstedRoute =
+  MasseflyttingFysiskBrukerstedImport.update({
+    path: '/masseflytting-fysisk-brukersted',
+    getParentRoute: () => rootRoute,
+  } as any)
 
 const AdminRoute = AdminImport.update({
   path: '/admin',
@@ -126,6 +133,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminImport
+      parentRoute: typeof rootRoute
+    }
+    '/masseflytting-fysisk-brukersted': {
+      id: '/masseflytting-fysisk-brukersted'
+      path: '/masseflytting-fysisk-brukersted'
+      fullPath: '/masseflytting-fysisk-brukersted'
+      preLoaderRoute: typeof MasseflyttingFysiskBrukerstedImport
       parentRoute: typeof rootRoute
     }
     '/tilganger': {
@@ -239,6 +253,7 @@ export const routeTree = rootRoute.addChildren({
     AdminOrgenheterRoute,
     AdminRessurserRoute,
   }),
+  MasseflyttingFysiskBrukerstedRoute,
   TilgangerRoute,
   KontaktpersonerIdRoute,
   MasseflyttingIdRoute,
@@ -261,6 +276,7 @@ export const routeTree = rootRoute.addChildren({
       "children": [
         "/",
         "/admin",
+        "/masseflytting-fysisk-brukersted",
         "/tilganger",
         "/kontaktpersoner/$id",
         "/masseflytting/$id",
@@ -284,6 +300,9 @@ export const routeTree = rootRoute.addChildren({
         "/admin/orgenheter",
         "/admin/ressurser"
       ]
+    },
+    "/masseflytting-fysisk-brukersted": {
+      "filePath": "masseflytting-fysisk-brukersted.tsx"
     },
     "/tilganger": {
       "filePath": "tilganger.tsx"

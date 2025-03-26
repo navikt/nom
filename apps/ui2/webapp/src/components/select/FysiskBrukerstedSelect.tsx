@@ -8,6 +8,7 @@ import {
   BasicSelect,
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
+import { capitalizeName } from "~/utils";
 
 export function FysiskBrukerstedSelectFormPart({
   name = "fysiskBrukerstedNr",
@@ -30,6 +31,8 @@ export function FysiskBrukerstedSelectFormPart({
           description={description}
           error={fieldState.error}
           fysiskeBrukersteder={fysiskeBrukersteder}
+          helpText="Med fysisk brukersted menes hvor (kontor/plassering) medarbeideren skal
+          arbeide."
           onChange={field.onChange}
           value={field.value}
         />
@@ -38,18 +41,20 @@ export function FysiskBrukerstedSelectFormPart({
   );
 }
 
-function FysiskBrukerstedSelect({
+export function FysiskBrukerstedSelect({
   fysiskeBrukersteder,
   description,
   onChange,
   error,
   value,
+  helpText,
 }: {
   fysiskeBrukersteder: FysiskBrukersted[];
   onChange: (s: string | null) => void;
   error?: FieldError;
   description?: string;
   value?: string;
+  helpText?: string;
 }) {
   const options = fysiskeBrukersteder.map((fysiskBrukersted) =>
     fysiskBrukerstedOption(fysiskBrukersted),
@@ -60,8 +65,7 @@ function FysiskBrukerstedSelect({
     <SelectLayoutWrapper
       description={description}
       error={error}
-      helpText="Med fysisk brukersted menes hvor (kontor/plassering) medarbeideren skal
-          arbeide."
+      helpText={helpText}
       htmlFor="Fysisk brukersted"
       label="Fysisk brukersted"
     >
@@ -77,7 +81,7 @@ function FysiskBrukerstedSelect({
 
 function fysiskBrukerstedOption(fysiskBrukersted: FysiskBrukersted) {
   return {
-    label: `${fysiskBrukersted.brukerstedNr}: ${fysiskBrukersted.brukerstedNavn}`,
+    label: `${fysiskBrukersted.brukerstedNr}: ${capitalizeName(fysiskBrukersted.brukerstedNavn)}`,
     value: fysiskBrukersted.brukerstedNr,
   };
 }

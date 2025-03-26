@@ -24,7 +24,7 @@ export function useTableSort<T>(tableData: T[], defaultOrderBy: string) {
   return { data: sortTableData({ tableData, sort }), handleSort, sort };
 }
 
-export function sortTableData<T>({
+function sortTableData<T>({
   tableData,
   sort,
 }: {
