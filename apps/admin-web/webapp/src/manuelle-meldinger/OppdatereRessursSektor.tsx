@@ -63,7 +63,7 @@ export function OppdatereRessursSektor() {
         >
           <Modal
             className="w-fit"
-            header={{ heading: "Oppdatter sektor" }}
+            header={{ heading: "Oppdater sektor" }}
             onClose={() => {
               methods.reset();
               methods.clearErrors();
