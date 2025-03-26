@@ -19,8 +19,7 @@ export function DatePickerWrapped({
 
   const datePickerProperties = useDatepicker({
     onDateChange: (date) =>
-      field.onChange(date ? formatDateWithoutTimezone(date) : undefined),
-    defaultSelected: field.value ? new Date(field.value) : undefined,
+      field.onChange(date ? formatDateWithoutTimezone(date) : null),
   });
 
   return (

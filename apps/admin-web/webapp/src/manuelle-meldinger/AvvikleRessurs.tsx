@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, Detail, Modal, TextField } from "@navikt/ds-react";
 import { useMutation } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { format } from "date-fns";
 import type { HTTPError } from "ky";
 import ky from "ky";
 import queryString from "query-string";
@@ -40,10 +39,15 @@ export function AvvikleRessurs() {
 
   const mutation = useMutation<string, HTTPError, SchemaType>({
     mutationFn: async (v) => {
-      const formattedDate = v.sluttdato && format(v.sluttdato, "yyyy-MM-dd");
+      const requestObject = {
+        navident: v.navident,
+        localDate: v.sluttdato,
+        confirm: v.confirm,
+      };
+
       return (
         await ky.post(
-          `${API_BASE_URL}/api/admin/manuelleEvtsrcMeldinger/avvikleRessurs?${queryString.stringify({ ...v, gyldigTom: formattedDate })}`,
+          `${API_BASE_URL}/api/admin/manuelleEvtsrcMeldinger/avvikleRessurs?${queryString.stringify(requestObject)}`,
         )
       ).text();
     },
