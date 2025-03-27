@@ -17,7 +17,7 @@ export function UserImage(properties: UserImageProperties) {
 
   const imageQuery = useQuery({
     queryKey: getPhotoQuery.queryKey(navident as string),
-    queryFn: () => getPhotoQuery.queryFn(navident as string),
+    queryFn: ({ signal }) => getPhotoQuery.queryFn(navident as string, signal),
     enabled: !!navident && globalThis.location.href.includes("nom.nav.no"),
     staleTime: getPhotoQuery.staleTime,
     gcTime: getPhotoQuery.cacheTime,
@@ -63,9 +63,10 @@ export const getPhotoQuery = {
   cacheTime: Number.POSITIVE_INFINITY,
 };
 
-async function fetchPhoto(navident: string) {
+async function fetchPhoto(navident: string, signal: AbortSignal) {
   const response = await fetch(
     new Request(`/frackend/teamcat/resource/${navident}/photo`),
+    { signal: signal },
   );
   if (response.status !== 200) {
     throw new Error("Failed to load image");
