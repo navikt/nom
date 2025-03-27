@@ -197,6 +197,12 @@ public class RessursSanityCheckService {
 
         for (OrgtilknytningState orgtilknytning : sisteOrgtilknytninger.values().stream().flatMap(Collection::stream).toList()) {
             var ressurs = alleRessurserSomErAktive.get(orgtilknytning.navident());
+
+            // for testing
+            if(ressurs.navident().equals("A100036 ")){
+                log.info("Ulik A100036, siste OT gyldigTom {} -ressurs sluttdato{}" + orgtilknytning.gyldigTom(), ressurs.sluttdato());
+            }
+
             if (!orgtilknytning.gyldigTom().equals(ressurs.sluttdato())) {
                 ulikeSluttdatoer.add(getRessursOrgtilknytningUlikSluttdato(ressurs, orgtilknytning));
             }
