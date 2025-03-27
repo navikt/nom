@@ -197,16 +197,24 @@ public class RessursSanityCheckService {
 
         alleRessurserSomErAktive.forEach((navident, ressurs) -> {
             if (navident.equals("A100036")) {
-                log.info("Ulik A100036xx, ressurs sluttdato: {} - {}", ressurs.sluttdato(), ressurs);
+                log.info("Ulik A100036x1, ressurs sluttdato: {} - {}", ressurs.sluttdato(), ressurs);
             }
         });
+
+        if (alleRessurserSomErAktive.containsKey("A100036")) {
+            log.info("Ulik A100036x2, ressurs sluttdato: {} - {}", alleRessurserSomErAktive.get("A100036").sluttdato(), alleRessurserSomErAktive.get("A100036"));
+        }
 
         for (OrgtilknytningState orgtilknytning : sisteOrgtilknytninger.values().stream().flatMap(Collection::stream).toList()) {
             var ressurs = alleRessurserSomErAktive.get(orgtilknytning.navident());
 
             // for testing
             if(orgtilknytning.navident().equals("A100036")){
-                log.info("Ulik A100036, siste OT gyldigTom {} -ressurs sluttdato{}" + orgtilknytning.gyldigTom(), ressurs.sluttdato());
+                log.info("Ulik A100036, siste OT gyldigTom {} -ressurs sluttdato{} - {} - {}",
+                    orgtilknytning.gyldigTom(),
+                    ressurs.sluttdato(),
+                    getResursSluttDatoForGittNavident(alleRessurserSomErAktive, orgtilknytning.navident()),
+                    getResursSluttDatoForGittNavidentX(alleRessurserSomErAktive, orgtilknytning.navident()));
             }
 
             if (!orgtilknytning.gyldigTom().equals(ressurs.sluttdato())) {
@@ -214,6 +222,22 @@ public class RessursSanityCheckService {
             }
         }
         return ulikeSluttdatoer;
+    }
+
+    private Optional<LocalDate> getResursSluttDatoForGittNavident(Map<String, RessursState> alleRessurserSomErAktive, String gittNavident) {
+        if (alleRessurserSomErAktive.containsKey(gittNavident)) {
+            return alleRessurserSomErAktive.get(gittNavident).sluttdato();
+        }
+        return Optional.empty();
+    }
+
+    private Optional<LocalDate> getResursSluttDatoForGittNavidentX(Map<String, RessursState> alleRessurserSomErAktive, String gittNavident) {
+        for (Map.Entry<String, RessursState> entry : alleRessurserSomErAktive.entrySet()) {
+            if (entry.getKey().equals(gittNavident)) {
+                return entry.getValue().sluttdato();
+            }
+        }
+        return Optional.empty();
     }
 
     private Map<String, Collection<OrgtilknytningState>> getSisteOrgtilknytninger(Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger) {
