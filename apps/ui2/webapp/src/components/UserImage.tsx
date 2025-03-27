@@ -16,9 +16,9 @@ type UserImageProperties = {
 
 export function UserImage(properties: UserImageProperties) {
   const { navident, size, navn, includeInstructionsWhenNotFound } = properties;
-  const [shouldLoadImg, setShouldLoadImg] = React.useState(
-    !(properties.loadOnlyWhenVisible ?? true),
-  );
+  const loadOnlyWhenVisible = properties.loadOnlyWhenVisible ?? true;
+  const [shouldLoadImg, setShouldLoadImg] =
+    React.useState(!loadOnlyWhenVisible);
   const reference = React.useRef<HTMLAnchorElement | HTMLImageElement | null>(
     null,
   );
@@ -46,12 +46,14 @@ export function UserImage(properties: UserImageProperties) {
   React.useLayoutEffect(() => {
     const observer = new IntersectionObserver(
       (intersectionEntry) => {
-        setShouldLoadImg(intersectionEntry[0]?.isIntersecting || shouldLoadImg);
+        if (intersectionEntry[0]?.isIntersecting && !shouldLoadImg) {
+          setShouldLoadImg(true);
+        }
       },
       {
         root: undefined,
         rootMargin: "0%",
-        threshold: 0.1,
+        threshold: 0.5,
       },
     );
     if (reference.current) {
