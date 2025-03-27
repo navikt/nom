@@ -195,6 +195,12 @@ public class RessursSanityCheckService {
 
         List<RessursOrgtilknytningUlikSluttdato> ulikeSluttdatoer = new ArrayList<>();
 
+        alleRessurserSomErAktive.forEach((navident, ressurs) -> {
+            if (navident.equals("A100036")) {
+                log.info("Ulik A100036xx, ressurs sluttdato: {} - {}", ressurs.sluttdato(), ressurs);
+            }
+        });
+
         for (OrgtilknytningState orgtilknytning : sisteOrgtilknytninger.values().stream().flatMap(Collection::stream).toList()) {
             var ressurs = alleRessurserSomErAktive.get(orgtilknytning.navident());
 
