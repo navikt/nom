@@ -369,6 +369,8 @@ public class AuthorizedNavident {
 
                         return new MinimalRessurs(entraIdUser.navIdent(), visningsnavn);
                     })
+                    .distinct()
+                    .sorted(Comparator.comparing(MinimalRessurs::visningsnavn))
                     .toList();
         } catch (InterruptedException | ExecutionException ex) {
             log.error("Feil ved henting av Future med delegerbare ansatte: {}", ex.getMessage(), ex);
