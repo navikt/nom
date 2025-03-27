@@ -189,19 +189,16 @@ public class RessursSanityCheckService {
 
     public List<RessursOrgtilknytningUlikSluttdato> ressurserMedUlikOrgTilknytningSluttDato() {
         Map<String, RessursState> alleRessurserSomErAktive = ressursStateRepository.findAllActiveRessurser();
+
         Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger =
-                getOrgtilknytningerForNavidenter(alleRessurserSomErAktive.keySet(), gyldigTomBefore2099);
+            getOrgtilknytningerForNavidenter(alleRessurserSomErAktive.keySet(), gyldigTomEmptyOrBefore2099);
+
         Map<String, Collection<OrgtilknytningState>> sisteOrgtilknytninger = getSisteOrgtilknytninger(alleOrgTilknytninger);
 
         List<RessursOrgtilknytningUlikSluttdato> ulikeSluttdatoer = new ArrayList<>();
 
         for (OrgtilknytningState orgtilknytning : sisteOrgtilknytninger.values().stream().flatMap(Collection::stream).toList()) {
             var ressurs = alleRessurserSomErAktive.get(orgtilknytning.navident());
-
-            // for testing
-            if(orgtilknytning.navident().equals("A100036")){
-                log.info("Ulik A100036, siste OT gyldigTom {} -ressurs sluttdato{}" + orgtilknytning.gyldigTom(), ressurs.sluttdato());
-            }
 
             if (!orgtilknytning.gyldigTom().equals(ressurs.sluttdato())) {
                 ulikeSluttdatoer.add(getRessursOrgtilknytningUlikSluttdato(ressurs, orgtilknytning));
@@ -210,7 +207,7 @@ public class RessursSanityCheckService {
         return ulikeSluttdatoer;
     }
 
-    private Map<String, Collection<OrgtilknytningState>> getSisteOrgtilknytninger(Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger) {
+    public Map<String, Collection<OrgtilknytningState>> getSisteOrgtilknytninger(Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger) {
         Map<String, Collection<OrgtilknytningState>> result = new HashMap<>();
         for (Map.Entry<String, Collection<OrgtilknytningState>> entry : alleOrgTilknytninger.entrySet()) {
             String key = entry.getKey();
@@ -413,6 +410,10 @@ public class RessursSanityCheckService {
     private final Predicate<OrgtilknytningState> gyldigTomBefore2099 = orgtilknytningState -> 
                     orgtilknytningState.gyldigTom().isPresent() && 
                     orgtilknytningState.gyldigTom().get().isBefore(LocalDate.of(2099, 1, 1));
+
+    private final Predicate<OrgtilknytningState> gyldigTomEmptyOrBefore2099 = orgtilknytningState ->
+        orgtilknytningState.gyldigTom().isEmpty() ||
+            orgtilknytningState.gyldigTom().get().isBefore(LocalDate.of(2099, 1, 1));
 
     public List<RessursState> ressurserMedBlankMellomnavn() {
         return ressursStateRepository.getAll().stream()
