@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, Detail, Modal, TextField } from "@navikt/ds-react";
 import { useMutation } from "@tanstack/react-query";
-import { format } from "date-fns";
 import type { HTTPError } from "ky";
 import ky from "ky";
 import queryString from "query-string";
@@ -21,7 +20,7 @@ import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
 
 const schema = z.object({
   navident: navidentValidator(),
-  startdato: z.date().optional(),
+  startdato: z.string().optional(),
   confirm: confirmTextValidator(),
 });
 
@@ -39,11 +38,15 @@ export function OppdatereStartdato() {
 
   const mutation = useMutation<string, HTTPError, SchemaType>({
     mutationFn: async (v) => {
-      const formattedDate = v.startdato && format(v.startdato, "yyyy-MM-dd");
+      const requestObject = {
+        navident: v.navident,
+        startdato: v.startdato,
+        confirm: v.confirm,
+      };
 
       return (
         await ky.post(
-          `${API_BASE_URL}/api/admin/manuelleEvtsrcMeldinger/oppdaterStartDatoRessurs?${queryString.stringify({ ...v, startdato: formattedDate })}`,
+          `${API_BASE_URL}/api/admin/manuelleEvtsrcMeldinger/oppdaterStartDatoRessurs?${queryString.stringify(requestObject)}`,
         )
       ).text();
     },

@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, Detail, Modal, TextField } from "@navikt/ds-react";
 import { useMutation } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { format } from "date-fns";
 import type { HTTPError } from "ky";
 import ky from "ky";
 import queryString from "query-string";
@@ -12,7 +11,6 @@ import { z } from "zod";
 
 import { API_BASE_URL } from "~/api/apiQueries.ts";
 import { DatePickerWrapped } from "~/components/DatepickerWrapped.tsx";
-;
 import {
   ConfirmTextField,
   confirmTextValidator,
@@ -23,7 +21,7 @@ import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
 
 const schema = z.object({
   navident: navidentValidator(),
-  sluttDato: z.date().optional(),
+  sluttDato: z.string().optional(),
   confirm: confirmTextValidator(),
 });
 
@@ -41,12 +39,15 @@ export function OppdatereSluttDatoRessurs() {
 
   const mutation = useMutation<string, HTTPError, SchemaType>({
     mutationFn: async (v) => {
-      const formattedDate =  v.sluttDato && format(v.sluttDato, "yyyy-MM-dd");
-      console.log("formattedDate" + formattedDate);
+      const requestObject = {
+        navident: v.navident,
+        sluttDato: v.sluttDato,
+        confirm: v.confirm,
+      };
 
       return (
         await ky.post(
-          `${API_BASE_URL}/api/admin/manuelleEvtsrcMeldinger/oppdatereSluttDatoRessurs?${queryString.stringify({ ...v, sluttDato: formattedDate })}`,
+          `${API_BASE_URL}/api/admin/manuelleEvtsrcMeldinger/oppdatereSluttDatoRessurs?${queryString.stringify(requestObject)}`,
         )
       ).text();
     },
@@ -65,7 +66,7 @@ export function OppdatereSluttDatoRessurs() {
         >
           <Modal
             className="w-fit"
-            header={{ heading: "Oppdatter sluttdato" }}
+            header={{ heading: "Oppdater sluttdato" }}
             onClose={() => {
               methods.reset();
               methods.clearErrors();
