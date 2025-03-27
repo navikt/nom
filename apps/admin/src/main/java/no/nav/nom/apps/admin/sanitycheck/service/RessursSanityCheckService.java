@@ -197,6 +197,7 @@ public class RessursSanityCheckService {
 
         // testing
         log.info("Siste  getSisteOTerForGittNavident for {} - {}", "A100036", getSisteOTerForGittNavident(sisteOrgtilknytninger, "A100036"));
+        log.info("Siste  getAlleOTerForGittNavident for {} - {}", "A100036", getAlleOTerForGittNavident(alleOrgTilknytninger, "A100036"));
         log.info("Siste  getResursForGittNavident for {} - {}", "A100036", getResursForGittNavident(alleRessurserSomErAktive, "A100036"));
 
         for (OrgtilknytningState orgtilknytning : sisteOrgtilknytninger.values().stream().flatMap(Collection::stream).toList()) {
@@ -219,6 +220,13 @@ public class RessursSanityCheckService {
     private Collection<OrgtilknytningState> getSisteOTerForGittNavident(Map<String, Collection<OrgtilknytningState>> sisteOrgtilknytninger, String gittNavident) {
         if (sisteOrgtilknytninger.containsKey(gittNavident)) {
             return sisteOrgtilknytninger.get(gittNavident);
+        }
+        return null;
+    }
+
+    private Collection<OrgtilknytningState> getAlleOTerForGittNavident(Map<String, Collection<OrgtilknytningState>> alleOrgtilknytninger, String gittNavident) {
+        if (alleOrgtilknytninger.containsKey(gittNavident)) {
+            return alleOrgtilknytninger.get(gittNavident);
         }
         return null;
     }
