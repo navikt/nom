@@ -337,12 +337,12 @@ class RessursSanityCheckServiceTest {
         assertThat(sisteOrgtilknytninger
             .get(ressurs1.navident())
             .stream()
-            .findFirst().get().gyldigFom()).isEqualTo(LocalDate.MAX);
+            .findFirst().get().gyldigTom()).isEqualTo(LocalDate.MAX);
 
         assertThat(sisteOrgtilknytninger
             .get(ressurs2.navident())
             .stream()
-            .findFirst().get().gyldigFom()).isEqualTo(LocalDate.MAX);
+            .findFirst().get().gyldigTom()).isEmpty();
     }
 
     private Map<String, RessursState> getRessursStateMap(RessursState ressurs) {
