@@ -1,4 +1,4 @@
-import { addDays, isAfter, isBefore, subDays } from "date-fns";
+import { addDays, subDays } from "date-fns";
 import orderBy from "lodash/orderBy";
 import sortBy from "lodash/orderBy";
 
@@ -41,7 +41,7 @@ export function findPeriodGaps(
 
     if (!latestEndDate) break;
 
-    if (isAfter(periodStart, addDays(latestEndDate, 1))) {
+    if (dateIsAfter(periodStart, addDays(latestEndDate, 1))) {
       gaps.push({
         fom: addDays(latestEndDate, 1),
         tom: subDays(periodStart, 1),
@@ -50,7 +50,7 @@ export function findPeriodGaps(
 
     latestEndDate =
       periodEnd &&
-      (isAfter(periodEnd, latestEndDate) ? periodEnd : latestEndDate);
+      (dateIsAfter(periodEnd, latestEndDate) ? periodEnd : latestEndDate);
   }
 
   return gaps;
@@ -85,7 +85,7 @@ export function findPeriodOverlaps(
 
   if (overlaps.length <= 1) return overlaps;
 
-  overlaps.sort((a, b) => (isBefore(a.fom, b.fom) ? -1 : 1));
+  overlaps.sort((a, b) => (dateIsBefore(a.fom, b.fom) ? -1 : 1));
 
   const mergedPeriods: { fom: Date; tom: Date | undefined }[] = [];
   let currentPeriod = { ...overlaps[0] };
@@ -98,7 +98,7 @@ export function findPeriodOverlaps(
       dateIsSameOrBefore(nextPeriod.fom, addDays(currentPeriod.tom, 1))
     ) {
       if (nextPeriod.tom) {
-        if (!currentPeriod.tom || isAfter(nextPeriod.tom, currentPeriod.tom)) {
+        if (nomDateIsAfter(nextPeriod.tom, currentPeriod.tom)) {
           currentPeriod.tom = nextPeriod.tom;
         }
       } else {
@@ -125,12 +125,11 @@ export function dolValidering(
     .filter(
       (tilknytning) =>
         tilknytning.erDagligOppfolging &&
-        (!tilknytning.gyldigTom ||
-          dateIsTodayOrAfter(new Date(tilknytning.gyldigTom))),
+        nomDateIsTodayOrAfter(tilknytning.gyldigTom),
     )
     .map((tilknytning) => {
       return {
-        fom: isBefore(new Date(tilknytning.gyldigFom), today)
+        fom: dateIsBefore(tilknytning.gyldigFom, today)
           ? today
           : new Date(tilknytning.gyldigFom),
         tom: tilknytning.gyldigTom
@@ -152,18 +151,19 @@ export function dolValidering(
         : true;
     })
     .map((tilknytning) => {
-      const cappedFom = isBefore(new Date(tilknytning.gyldigFom), today)
+      const cappedFom = dateIsBefore(tilknytning.gyldigFom, today)
         ? today
         : new Date(tilknytning.gyldigFom);
 
       earliestTilknytningDate =
-        !earliestTilknytningDate || isBefore(cappedFom, earliestTilknytningDate)
+        !earliestTilknytningDate ||
+        dateIsBefore(cappedFom, earliestTilknytningDate)
           ? cappedFom
           : earliestTilknytningDate;
 
       if (tilknytning.gyldigTom && latestTilknytningDate) {
-        latestTilknytningDate = isAfter(
-          new Date(tilknytning.gyldigTom),
+        latestTilknytningDate = dateIsAfter(
+          tilknytning.gyldigTom,
           latestTilknytningDate,
         )
           ? new Date(tilknytning.gyldigTom)
@@ -179,12 +179,12 @@ export function dolValidering(
   if (dolPeriods.length > 0) {
     dolPeriods.map((tilknytning) => {
       earliestDolDate =
-        !earliestDolDate || isBefore(tilknytning.fom, earliestDolDate)
+        !earliestDolDate || dateIsBefore(tilknytning.fom, earliestDolDate)
           ? tilknytning.fom
           : earliestDolDate;
 
       if (tilknytning.tom && latestDolDate) {
-        latestDolDate = isAfter(new Date(tilknytning.tom), latestDolDate)
+        latestDolDate = dateIsAfter(tilknytning.tom, latestDolDate)
           ? new Date(tilknytning.tom)
           : latestDolDate;
       } else {
@@ -195,7 +195,7 @@ export function dolValidering(
     if (
       earliestTilknytningDate &&
       earliestDolDate &&
-      isBefore(earliestTilknytningDate, earliestDolDate)
+      dateIsBefore(earliestTilknytningDate, earliestDolDate)
     ) {
       dolGaps.unshift({
         fom: earliestTilknytningDate,
@@ -205,7 +205,7 @@ export function dolValidering(
 
     if (!latestTilknytningDate && latestDolDate) {
       dolGaps.push({ fom: addDays(latestDolDate, 1), tom: undefined });
-    } else if (isAfter(latestTilknytningDate, latestDolDate)) {
+    } else if (nomDateIsAfter(latestTilknytningDate, latestDolDate)) {
       dolGaps.push({
         fom: addDays(latestDolDate, 1),
         tom: latestTilknytningDate,
