@@ -189,8 +189,15 @@ public class RessursSanityCheckService {
 
     public List<RessursOrgtilknytningUlikSluttdato> ressurserMedUlikOrgTilknytningSluttDato() {
         Map<String, RessursState> alleRessurserSomErAktive = ressursStateRepository.findAllActiveRessurser();
+
+        /*
         Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger =
                 getOrgtilknytningerForNavidenter(alleRessurserSomErAktive.keySet(), gyldigTomBefore2099);
+         */
+
+        Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger =
+            getOrgtilknytningerForNavidenter(alleRessurserSomErAktive.keySet(), gyldigTomEmptyOrBefore2099);
+
         Map<String, Collection<OrgtilknytningState>> sisteOrgtilknytninger = getSisteOrgtilknytninger(alleOrgTilknytninger);
 
         List<RessursOrgtilknytningUlikSluttdato> ulikeSluttdatoer = new ArrayList<>();
@@ -434,6 +441,10 @@ public class RessursSanityCheckService {
     private final Predicate<OrgtilknytningState> gyldigTomBefore2099 = orgtilknytningState -> 
                     orgtilknytningState.gyldigTom().isPresent() && 
                     orgtilknytningState.gyldigTom().get().isBefore(LocalDate.of(2099, 1, 1));
+
+    private final Predicate<OrgtilknytningState> gyldigTomEmptyOrBefore2099 = orgtilknytningState ->
+        orgtilknytningState.gyldigTom().isEmpty() ||
+            orgtilknytningState.gyldigTom().get().isBefore(LocalDate.of(2099, 1, 1));
 
     public List<RessursState> ressurserMedBlankMellomnavn() {
         return ressursStateRepository.getAll().stream()
