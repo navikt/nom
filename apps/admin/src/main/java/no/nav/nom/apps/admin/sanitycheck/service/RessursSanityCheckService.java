@@ -190,13 +190,8 @@ public class RessursSanityCheckService {
     public List<RessursOrgtilknytningUlikSluttdato> ressurserMedUlikOrgTilknytningSluttDato() {
         Map<String, RessursState> alleRessurserSomErAktive = ressursStateRepository.findAllActiveRessurser();
 
-        /*
         Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger =
-                getOrgtilknytningerForNavidenter(alleRessurserSomErAktive.keySet(), gyldigTomBefore2099);
-         */
-
-        Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger =
-            getOrgtilknytningerForNavidenter(alleRessurserSomErAktive.keySet(), gyldigTomEmptyOrBefore2099);
+            getOrgtilknytningerForNavidenter(alleRessurserSomErAktive.keySet());
 
         Map<String, Collection<OrgtilknytningState>> sisteOrgtilknytninger = getSisteOrgtilknytninger(alleOrgTilknytninger);
 
@@ -353,6 +348,13 @@ public class RessursSanityCheckService {
         }));
     }
 
+    private Map<String, Collection<OrgtilknytningState>> getOrgtilknytningerForNavidenter(Set<String> navidenter) {
+        return navidenter.stream().collect(Collectors.toMap(navident -> navident, navident -> {
+            Collection<OrgtilknytningState> value = orgtilknytningStateRepository.findByNavident(navident);
+            return value == null ? Collections.emptyList() : value.stream().toList();
+        }));
+    }
+
     private List<String> uniqueIdForOverEnhet(List<OrganiseringState> organiseringer) {
         return organiseringer.stream().map(OrganiseringState::idOver).distinct().toList();
     }
@@ -442,9 +444,6 @@ public class RessursSanityCheckService {
                     orgtilknytningState.gyldigTom().isPresent() && 
                     orgtilknytningState.gyldigTom().get().isBefore(LocalDate.of(2099, 1, 1));
 
-    private final Predicate<OrgtilknytningState> gyldigTomEmptyOrBefore2099 = orgtilknytningState ->
-        orgtilknytningState.gyldigTom().isEmpty() ||
-            orgtilknytningState.gyldigTom().get().isBefore(LocalDate.of(2099, 1, 1));
 
     public List<RessursState> ressurserMedBlankMellomnavn() {
         return ressursStateRepository.getAll().stream()
