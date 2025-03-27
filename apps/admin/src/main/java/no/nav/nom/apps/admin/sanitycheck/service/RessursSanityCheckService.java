@@ -199,7 +199,7 @@ public class RessursSanityCheckService {
             var ressurs = alleRessurserSomErAktive.get(orgtilknytning.navident());
 
             // for testing
-            if(ressurs.navident().equals("A100036 ")){
+            if(orgtilknytning.navident().equals("A100036 ")){
                 log.info("Ulik A100036, siste OT gyldigTom {} -ressurs sluttdato{}" + orgtilknytning.gyldigTom(), ressurs.sluttdato());
             }
 
