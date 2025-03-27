@@ -319,6 +319,9 @@ class RessursSanityCheckServiceTest {
                     .build(),
                 getMockOrgtilknytningEkstern().toBuilder()
                     .gyldigTom(Optional.of(LocalDate.MAX))
+                    .build(),
+                getMockOrgtilknytningEkstern().toBuilder()
+                    .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
                     .build()
             ));
         alleOrgTilknytninger.put(ressurs2.navident(),
