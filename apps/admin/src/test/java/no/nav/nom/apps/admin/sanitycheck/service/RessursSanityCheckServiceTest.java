@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -298,6 +299,50 @@ class RessursSanityCheckServiceTest {
         var ressurserMedFlereDOL = service.ressursMedFlereEnnEnDOL();
 
         assertThat(ressurserMedFlereDOL).isEmpty();
+    }
+
+
+    @Test
+    @DisplayName("getSisteOrgtilknytninger skal returnere siste OT for hver ressurs")
+    void should_return_latest_orgtilknytning_for_each_ressurs() {
+        RessursState ressurs1 = getMockRessursEkstern();
+        RessursState ressurs2 = getMockRessursEkstern().toBuilder().navident("X654321").build();
+
+        Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger = new HashMap<>();
+        alleOrgTilknytninger.put(ressurs1.navident(),
+            List.of(
+                getMockOrgtilknytningEkstern().toBuilder()
+                    .gyldigTom(Optional.of(LocalDate.now().minusMonths(2)))
+                    .build(),
+                getMockOrgtilknytningEkstern().toBuilder()
+                    .gyldigTom(Optional.of(LocalDate.now().minusMonths(1)))
+                    .build(),
+                getMockOrgtilknytningEkstern().toBuilder()
+                    .gyldigTom(Optional.of(LocalDate.MAX))
+                    .build()
+            ));
+        alleOrgTilknytninger.put(ressurs2.navident(),
+            List.of(
+                getMockOrgtilknytningEkstern().toBuilder()
+                    .gyldigTom(Optional.empty())
+                    .build()
+            ));
+
+        var sisteOrgtilknytninger = service.getSisteOrgtilknytninger(alleOrgTilknytninger);
+
+        assertThat(sisteOrgtilknytninger.size()).isEqualTo(2);
+        assertThat(sisteOrgtilknytninger.get(ressurs1.navident()).size()).isEqualTo(1);
+        assertThat(sisteOrgtilknytninger.get(ressurs2.navident()).size()).isEqualTo(1);
+
+        assertThat(sisteOrgtilknytninger
+            .get(ressurs1.navident())
+            .stream()
+            .findFirst().get().gyldigFom()).isEqualTo(LocalDate.MAX);
+
+        assertThat(sisteOrgtilknytninger
+            .get(ressurs2.navident())
+            .stream()
+            .findFirst().get().gyldigFom()).isEqualTo(LocalDate.MAX);
     }
 
     private Map<String, RessursState> getRessursStateMap(RessursState ressurs) {

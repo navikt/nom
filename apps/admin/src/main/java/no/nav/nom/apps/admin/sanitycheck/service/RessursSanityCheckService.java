@@ -223,7 +223,7 @@ public class RessursSanityCheckService {
         return null;
     }
 
-    private Map<String, Collection<OrgtilknytningState>> getSisteOrgtilknytninger(Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger) {
+    public Map<String, Collection<OrgtilknytningState>> getSisteOrgtilknytninger(Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger) {
         Map<String, Collection<OrgtilknytningState>> result = new HashMap<>();
         for (Map.Entry<String, Collection<OrgtilknytningState>> entry : alleOrgTilknytninger.entrySet()) {
             String key = entry.getKey();
