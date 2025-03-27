@@ -337,7 +337,7 @@ class RessursSanityCheckServiceTest {
         assertThat(sisteOrgtilknytninger
             .get(ressurs1.navident())
             .stream()
-            .findFirst().get().gyldigTom()).isEqualTo(LocalDate.MAX);
+            .findFirst().get().gyldigTom()).isEqualTo(Optional.of(LocalDate.MAX));
 
         assertThat(sisteOrgtilknytninger
             .get(ressurs2.navident())
