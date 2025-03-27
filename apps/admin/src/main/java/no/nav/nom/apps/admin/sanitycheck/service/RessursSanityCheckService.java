@@ -190,22 +190,12 @@ public class RessursSanityCheckService {
     public List<RessursOrgtilknytningUlikSluttdato> ressurserMedUlikOrgTilknytningSluttDato() {
         Map<String, RessursState> alleRessurserSomErAktive = ressursStateRepository.findAllActiveRessurser();
 
-        /*
-        Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger =
-                getOrgtilknytningerForNavidenter(alleRessurserSomErAktive.keySet(), gyldigTomBefore2099);
-         */
-
         Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger =
             getOrgtilknytningerForNavidenter(alleRessurserSomErAktive.keySet(), gyldigTomEmptyOrBefore2099);
 
         Map<String, Collection<OrgtilknytningState>> sisteOrgtilknytninger = getSisteOrgtilknytninger(alleOrgTilknytninger);
 
         List<RessursOrgtilknytningUlikSluttdato> ulikeSluttdatoer = new ArrayList<>();
-
-        // testing
-        log.info("Siste  getSisteOTerForGittNavident for {} - {}", "A100036", getSisteOTerForGittNavident(sisteOrgtilknytninger, "A100036"));
-        log.info("Siste  getAlleOTerForGittNavident for {} - {}", "A100036", getAlleOTerForGittNavident(alleOrgTilknytninger, "A100036"));
-        log.info("Siste  getResursForGittNavident for {} - {}", "A100036", getResursForGittNavident(alleRessurserSomErAktive, "A100036"));
 
         for (OrgtilknytningState orgtilknytning : sisteOrgtilknytninger.values().stream().flatMap(Collection::stream).toList()) {
             var ressurs = alleRessurserSomErAktive.get(orgtilknytning.navident());
@@ -215,27 +205,6 @@ public class RessursSanityCheckService {
             }
         }
         return ulikeSluttdatoer;
-    }
-
-    private RessursState getResursForGittNavident(Map<String, RessursState> alleRessurserSomErAktive, String gittNavident) {
-        if (alleRessurserSomErAktive.containsKey(gittNavident)) {
-            return alleRessurserSomErAktive.get(gittNavident);
-        }
-        return null;
-    }
-
-    private Collection<OrgtilknytningState> getSisteOTerForGittNavident(Map<String, Collection<OrgtilknytningState>> sisteOrgtilknytninger, String gittNavident) {
-        if (sisteOrgtilknytninger.containsKey(gittNavident)) {
-            return sisteOrgtilknytninger.get(gittNavident);
-        }
-        return null;
-    }
-
-    private Collection<OrgtilknytningState> getAlleOTerForGittNavident(Map<String, Collection<OrgtilknytningState>> alleOrgtilknytninger, String gittNavident) {
-        if (alleOrgtilknytninger.containsKey(gittNavident)) {
-            return alleOrgtilknytninger.get(gittNavident);
-        }
-        return null;
     }
 
     public Map<String, Collection<OrgtilknytningState>> getSisteOrgtilknytninger(Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger) {
