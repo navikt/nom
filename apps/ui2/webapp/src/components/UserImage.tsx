@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import { Link, Tooltip } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
+import type { MutableRefObject } from "react";
 import React from "react";
 
 import person from "~/resources/person.svg";
@@ -10,15 +11,27 @@ type UserImageProperties = {
   navn?: string;
   size?: string;
   includeInstructionsWhenNotFound?: boolean;
+  loadOnlyWhenVisible?: boolean; // default true => (wait until viewport includes img before fetching data), false => fetch img data on load
 };
 
 export function UserImage(properties: UserImageProperties) {
   const { navident, size, navn, includeInstructionsWhenNotFound } = properties;
+  const [shouldLoadImg, setShouldLoadImg] = React.useState(
+    !(properties.loadOnlyWhenVisible ?? true),
+  );
+  const reference = React.useRef<HTMLAnchorElement | HTMLImageElement | null>(
+    null,
+  );
+
+  const enableQry =
+    !!navident &&
+    shouldLoadImg &&
+    globalThis.location.href.includes("nom.nav.no");
 
   const imageQuery = useQuery({
     queryKey: getPhotoQuery.queryKey(navident as string),
-    queryFn: ({ signal }) => getPhotoQuery.queryFn(navident as string, signal),
-    enabled: !!navident && globalThis.location.href.includes("nom.nav.no"),
+    queryFn: () => getPhotoQuery.queryFn(navident as string),
+    enabled: enableQry,
     staleTime: getPhotoQuery.staleTime,
     gcTime: getPhotoQuery.cacheTime,
     retry: false,
@@ -30,11 +43,34 @@ export function UserImage(properties: UserImageProperties) {
     border-radius: 100%;
   `;
 
+  React.useLayoutEffect(() => {
+    const observer = new IntersectionObserver(
+      (intersectionEntry) => {
+        setShouldLoadImg(intersectionEntry[0]?.isIntersecting || shouldLoadImg);
+      },
+      {
+        root: undefined,
+        rootMargin: "0%",
+        threshold: 0.1,
+      },
+    );
+    if (reference.current) {
+      observer.observe(reference.current);
+    }
+    return () => {
+      if (reference.current) {
+        observer.unobserve(reference.current);
+        observer.disconnect();
+      }
+    };
+  }, []);
+
   if (imageQuery.isSuccess) {
     return (
       <img
         alt={"Fotografi av " + (navn || navident)}
         css={STYLE}
+        ref={reference as MutableRefObject<HTMLImageElement>}
         src={imageQuery.data}
       />
     );
@@ -44,6 +80,7 @@ export function UserImage(properties: UserImageProperties) {
     return (
       <Link
         href="https://navno.sharepoint.com/sites/intranett-it/SitePages/oppdatere%20profilen%20din%20i%20medarbeiders%C3%B8ket.aspx"
+        ref={reference as MutableRefObject<HTMLAnchorElement>}
         target="_blank"
       >
         <Tooltip content="Åpne instruks for å endre bilde">
@@ -53,7 +90,14 @@ export function UserImage(properties: UserImageProperties) {
     );
   }
 
-  return <img alt="" css={STYLE} src={person} />;
+  return (
+    <img
+      alt=""
+      css={STYLE}
+      ref={reference as MutableRefObject<HTMLImageElement>}
+      src={person}
+    />
+  );
 }
 
 export const getPhotoQuery = {
@@ -63,10 +107,9 @@ export const getPhotoQuery = {
   cacheTime: Number.POSITIVE_INFINITY,
 };
 
-async function fetchPhoto(navident: string, signal: AbortSignal) {
+async function fetchPhoto(navident: string) {
   const response = await fetch(
     new Request(`/frackend/teamcat/resource/${navident}/photo`),
-    { signal: signal },
   );
   if (response.status !== 200) {
     throw new Error("Failed to load image");
