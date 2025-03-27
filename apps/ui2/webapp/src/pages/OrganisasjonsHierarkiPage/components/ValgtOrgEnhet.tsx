@@ -17,10 +17,10 @@ import partition from "lodash/partition";
 import React from "react";
 
 import {
+  downloadExcelKontaktPersonserForOrgenhetByOrgenhetId,
   getRessurserByListNavident,
   isOrgEnhetArbeidsomraade,
   isOrgEnhetDriftsenhet,
-  downloadExcelKontaktPersonserForOrgenhetByOrgenhetId,
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess /*useHasWriteAccess*/ } from "~/api/useGetSession";
 import { UserImage } from "~/components/UserImage";
@@ -399,15 +399,17 @@ function DropdownMeny({
             </>
           )}
 
-          {          <>
-            <Dropdown.Menu.Divider />
-            <Dropdown.Menu.GroupedList.Item
-              as={Link}
-              onClick={handleDownloadKontaktpersonerExcel}
-            >
-              Eksporter kontaktpersoner til Excel
-            </Dropdown.Menu.GroupedList.Item>
-          </>}
+          {
+            <>
+              <Dropdown.Menu.Divider />
+              <Dropdown.Menu.GroupedList.Item
+                as={Link}
+                onClick={handleDownloadKontaktpersonerExcel}
+              >
+                Eksporter kontaktpersoner til Excel
+              </Dropdown.Menu.GroupedList.Item>
+            </>
+          }
         </Dropdown.Menu.GroupedList>
       </Dropdown.Menu>
     </Dropdown>
