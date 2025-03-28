@@ -29,7 +29,7 @@ export function OrgEnhetSelectFormPart({
           helpText="Med organisasjonsenhet menes hvilken enhet medarbeideren skal
               tilhøre og dermed hvilken leder som er ansvarlig for vedkommende."
           label="Organisasjonsenhet"
-          onChange={field.onChange}
+          onChange={(oe) => field.onChange(oe?.id)}
           orgEnheter={orgEnheter}
           ref={field.ref}
           value={field.value}
