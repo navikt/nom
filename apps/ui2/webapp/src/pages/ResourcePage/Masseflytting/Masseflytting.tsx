@@ -50,12 +50,6 @@ import type {
 import { Sektor } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
 
-const blockStyle = css`
-  background-color: #deecef;
-  padding: var(--a-spacing-4) var(--a-spacing-6);
-  border-radius: var(--a-border-radius-large);
-`;
-
 export function Masseflytting() {
   const { id } = useParams({ from: "/masseflytting/$id" });
 
@@ -281,7 +275,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
           {orgEnhet?.navn ? `i ${orgEnhet.navn} (${orgEnhet.id})` : ""}
         </Heading>
         <>
-          <VStack css={blockStyle} gap="2">
+          <VStack css={fraTilBoksStyle} gap="2">
             <Label
               css={css`
                 font-size: var(--a-font-size-xlarge);
@@ -307,7 +301,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
               )}
             />
           </VStack>
-          <VStack css={blockStyle} gap={"2"}>
+          <VStack css={fraTilBoksStyle} gap={"2"}>
             <Box marginBlock={"0 2"}>
               <OrgEnhetSelect
                 helpText="Med organisasjonsenhet menes hvilken enhet medarbeideren skal
@@ -699,3 +693,9 @@ function MasseflyttingBekreftModal({
     </Modal>
   );
 }
+
+const fraTilBoksStyle = css`
+  background-color: #deecef;
+  padding: var(--a-spacing-4) var(--a-spacing-6);
+  border-radius: var(--a-border-radius-large);
+`;
