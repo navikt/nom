@@ -17,6 +17,7 @@ import partition from "lodash/partition";
 import React from "react";
 
 import {
+  downloadExcelKontaktPersonserForOrgenhetByOrgenhetId,
   getRessurserByListNavident,
   isOrgEnhetArbeidsomraade,
   isOrgEnhetDriftsenhet,
@@ -334,19 +335,16 @@ function DropdownMeny({
 }) {
   const hasAdminAccess = useHasAdminAccess();
 
-  // const handleDownloadKontaktpersonerExcel = async () => {
-  //   const excelExportRequest = {
-  //     orgEnhetId: orgEnhet.id,
-  //   };
-  //   await downloadExcelKontaktPersonserForOrgenhetByOrgenhetId(
-  //     excelExportRequest as OrgenhetKontaktPersonserExcelExportRequest,
-  //     excelFilNavn(),
-  //   );
-  // };
+  const handleDownloadKontaktpersonerExcel = async () => {
+    await downloadExcelKontaktPersonserForOrgenhetByOrgenhetId(
+      orgEnhet.id,
+      excelFilNavn(),
+    );
+  };
 
-  // const excelFilNavn = () => {
-  //   return "kontaktpersoner for orgenhet - " + orgEnhet?.navn + ".xlsx";
-  // };
+  const excelFilNavn = () => {
+    return "kontaktpersoner for orgenhet - " + orgEnhet?.navn + ".xlsx";
+  };
 
   return (
     <Dropdown>
@@ -401,15 +399,17 @@ function DropdownMeny({
             </>
           )}
 
-          {/*          <>
-            <Dropdown.Menu.Divider />
-            <Dropdown.Menu.GroupedList.Item
-              as={Link}
-              onClick={handleDownloadKontaktpersonerExcel}
-            >
-              Eksporter kontaktpersoner til Excel
-            </Dropdown.Menu.GroupedList.Item>
-          </>*/}
+          {
+            <>
+              <Dropdown.Menu.Divider />
+              <Dropdown.Menu.GroupedList.Item
+                as={Link}
+                onClick={handleDownloadKontaktpersonerExcel}
+              >
+                Eksporter kontaktpersoner til Excel
+              </Dropdown.Menu.GroupedList.Item>
+            </>
+          }
         </Dropdown.Menu.GroupedList>
       </Dropdown.Menu>
     </Dropdown>
