@@ -34,11 +34,12 @@ async function spaCdnBundleByBranchName(
     const url = `https://cdn.nav.no/org/nom-ui2/webapp-bundle/${validatedBranchName}/dist.zip`;
     const zipBundle = bundleCache.get<CachedZipBundle>(validatedBranchName);
     if (zipBundle !== undefined) {
-      const urlOptions = await fetch(url, { method: "OPTIONS" });
-      const etag =
-        (urlOptions.status === 200 && urlOptions.headers.get("etag")) ||
+      const urlHeadResponse = await fetch(url, { method: "HEAD" });
+      const currentEtag =
+        (urlHeadResponse.status === 200 &&
+          urlHeadResponse.headers.get("etag")) ||
         "no-etag";
-      if (zipBundle.etag === etag) {
+      if (zipBundle.etag === currentEtag) {
         return zipBundle.bundle;
       }
     }
