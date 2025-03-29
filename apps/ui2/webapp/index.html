@@ -20,6 +20,31 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+        const maybeBranchMatch = window.document.cookie.match(/display-branch=((\S|-)+(;|$))/);
+        if(maybeBranchMatch !== null){
+            const branchName = maybeBranchMatch[1];
+            const div = window.document.createElement("div");
+            div.style.position = "fixed";
+            div.style.padding = "4px";
+            div.style.right = "10px";
+            div.style.bottom = "50px";
+            div.style.border = "1px solid black";
+            div.style.backgroundColor = "red";
+            div.style.cursor = "pointer";
+            div.style.color = "white";
+            div.style.zIndex = "100";
+
+            const link = window.document.createElement("a");
+            link.href = "/display-branch/main";
+            link.text = `forlat branch '${branchName}'`;
+            link.style.color = "white";
+
+            div.appendChild(link);
+            window.document.body.appendChild(div);
+        }
+
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
