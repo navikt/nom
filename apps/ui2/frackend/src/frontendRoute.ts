@@ -151,7 +151,7 @@ function setupStaticRoutesWithBranchSwap(app: Express) {
       maybeHandler(request, response, next);
       return;
     }
-    const txt = `<a href=/display-branch/${okFormattedBranchname}>Vis main-branch webapp (Ingen opplastet webapp på CDN for branch ${okFormattedBranchname})</a>`;
+    const txt = `<a href=/display-branch/main}>Vis main-branch webapp (Ingen opplastet webapp på CDN for branch ${okFormattedBranchname})</a>`;
     response.setHeader("Content-Type", "text/html");
     response.send(txt);
     return;
