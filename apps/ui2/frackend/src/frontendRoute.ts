@@ -50,7 +50,7 @@ async function spaCdnBundleByBranchName(
       if (zipBundle) {
         bundleCache.set<CachedZipBundle>(validatedBranchName, {
           bundle: zipBundle,
-          etag: resp.headers.get("etag") || "no-etag",
+          etag: resp.headers.get("etag") || Math.random().toString(),
         });
         return zipBundle;
       }
@@ -111,11 +111,13 @@ function setupStaticRoutesWithBranchSwap(app: Express) {
   const defaultStaticHandler = express.static("./public", { index: false });
 
   app.get("/display-branch/:name", (request, response) => {
-    if (request.params.name === "main") {
+    const branchName = request.params.name;
+    if (branchName === "main") {
       response.clearCookie("display-branch").redirect("/");
     } else {
+      bundleCache.del(branchName);
       response
-        .cookie("display-branch", request.params.name, {
+        .cookie("display-branch", branchName, {
           httpOnly: false,
           secure: false,
           sameSite: "lax",
