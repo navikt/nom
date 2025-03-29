@@ -1,4 +1,4 @@
-name: 'deploy: nom-ui2'
+name: 'bundle-to-cdn-ui2'
 
 on:
   workflow_dispatch:
