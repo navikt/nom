@@ -41,5 +41,6 @@ jobs:
           source: ./apps/ui2/webapp/dist.zip
           destination: /nom-ui2/webapp-bundle/${{ github.ref_name }}
           cache_invalidation: 'true'
+          no_cache_paths: '/nom-ui2/webapp-bundle/${{ github.ref_name }}/dist.zip'
 
       - run: echo uploaded file ${{ steps.upload.outputs.uploaded }}
