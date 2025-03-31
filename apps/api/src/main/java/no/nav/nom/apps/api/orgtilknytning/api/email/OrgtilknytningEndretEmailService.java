@@ -5,14 +5,17 @@ import freemarker.template.TemplateException;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
-import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
+import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.common.cache.CacheQueueService;
 import no.nav.nom.apps.api.common.cache.CacheType;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
+import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.api.app.MasseFlyttingRequest;
+import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.contract.ad.AdRessurs;
@@ -34,6 +37,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,10 +45,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService.BRUK_NY_MASSEFLYTT;
+
 @Component
 public class OrgtilknytningEndretEmailService {
     private static final String OT_ENDRINGER_VARSEL_TEMPLATE = "ot-endringer-varsel.ftlh";
-    private static final String UNLEASH_USE_SEND_OT_ENDRINGER_EMAIL = "nom.orgtilknytning.send_ot_endringer_email";
+    public static final String MASSEFLYTTING_VARSEL_FTLH = "masseflytting-varsel.ftlh";
     public final String epost_body_item_template = "{0}({1}), fra og med {2}, til og med {3}. Endring utført av {4}, på {5}.";
     public final String epost_body_item_template_ot_notfound = "Endring({0}) utført av {1}, på {2}.";
     private final Logger log = LoggerFactory.getLogger(OrgtilknytningEndretEmailService.class);
@@ -60,6 +66,9 @@ public class OrgtilknytningEndretEmailService {
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
     private final LeaderElection leaderElection;
     private final NomMastered nomMastered;
+    private final RemedyEnhetMapperService remedyEnhetMapperService;
+    private final OrgenhetService orgenhetService;
+
 
     public OrgtilknytningEndretEmailService(
         MicrosoftGraphClient microsoftGraphClient,
@@ -73,7 +82,8 @@ public class OrgtilknytningEndretEmailService {
         CacheQueueService cacheQueueService,
         DvhStartupLoadMonitor dvhStartupLoadMonitor,
         LeaderElection leaderElection,
-        NomMastered nomMastered
+        NomMastered nomMastered, RemedyEnhetMapperService remedyEnhetMapperService,
+        OrgenhetService orgenhetService
     ) {
         this.microsoftGraphClient = microsoftGraphClient;
         this.unleash = unleash;
@@ -87,6 +97,8 @@ public class OrgtilknytningEndretEmailService {
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
         this.leaderElection = leaderElection;
         this.nomMastered = nomMastered;
+        this.remedyEnhetMapperService = remedyEnhetMapperService;
+        this.orgenhetService = orgenhetService;
     }
 
     public void addToOrgtilknytningEndringerQueue(String fid, OTEndretData otEndretData) {
@@ -105,7 +117,7 @@ public class OrgtilknytningEndretEmailService {
     }
 
     @Scheduled(cron = "0 0 18 * * ?") // every day at 18:00
-    public void sendEmail() {
+    public void sendMasseflyttOTEmail() {
         // await until initial load is complete
         dvhStartupLoadMonitor.awaitInitialLoadComplete();
 
@@ -140,7 +152,7 @@ public class OrgtilknytningEndretEmailService {
             } else {
                 // check if the navident is mastered in nom
                 if(nomMastered.isMastered(navident)) {
-                    sendEmail(endretRessurs.get(), endringer);
+                    sendMasseflyttOTEmail(endretRessurs.get(), endringer);
                 } else {
                     log.info("Navident {} is not mastered in nom. OT changes email will not be sent!", navident);
                 }
@@ -155,7 +167,7 @@ public class OrgtilknytningEndretEmailService {
         });
     }
 
-    private void sendEmail(RessursState endretRessurs, List<OTEndretData> otEndringerData) {
+    private void sendMasseflyttOTEmail(RessursState endretRessurs, List<OTEndretData> otEndringerData) {
         try {
             Set<String> recipientNavidents = getReceiptionNavidents(otEndringerData);
             log.info("Sender OT endringer epost til navidents: {}", recipientNavidents);
@@ -181,16 +193,8 @@ public class OrgtilknytningEndretEmailService {
             }
 
             log.info("Sender OT endringer epost subject: {}, recipients: {}, message: {}", subject, recipientList, body);
-            if (unleash.isEnabled(UNLEASH_USE_SEND_OT_ENDRINGER_EMAIL)) {
-                /*
-                    // add Line for testing purposes. This will be deleted later when tests are confirmed
-                    List<String> toLineOnly = new ArrayList<>();;
-                    toLineOnly.add("Line.Eeg-Larsen@nav.no");
-                    EmailMessage message = new EmailMessage(subject + " skulle vært sendt til " + recipientList, body, toLineOnly);
-                    */
-                EmailMessage message = new EmailMessage(subject, body, recipientList);
-                microsoftGraphClient.sendEmail(message).subscribe();
-            }
+            EmailMessage message = new EmailMessage(subject, body, recipientList);
+            microsoftGraphClient.sendEmail(message).subscribe();
         } catch (ADResponseException e) {
             throw new RessursOpprettetEmailException("Fant ikke leder epost adresse for leder");
         } catch (IOException | TemplateException e) {
@@ -198,13 +202,16 @@ public class OrgtilknytningEndretEmailService {
         }
     }
 
-    public void sendEmail(
+    // TODO: Remove me
+    public void sendMasseflyttOTEmail(
         MasseFlyttingRequest masseFlyttingRequest,
         List<OrgtilknytningState> failedAvvikleOrgtilknytninger,
         String innsenderNavident,
         int antallFlyttet
     ) {
         try {
+            var x = BRUK_NY_MASSEFLYTT; // TODO: Fjern denne gamle metoden når ny masseflytting er i bruk
+
             var innsenderVisningsnavn = ressursStateRepository.findByNavident(innsenderNavident)
                 .map(RessursState::visningsnavn)
                 .map(Visningsnavn::getFormattedVisningsnavn)
@@ -213,9 +220,6 @@ public class OrgtilknytningEndretEmailService {
                 .map(AdRessurs::getEmail)
                 .collect(Collectors.toList());
 
-            if (unleash.isEnabled("nom.masseflytting.send_email_to_additional_recipients")) {
-                recipientList.addAll(getAdditionalRecipientsEmails());
-            }
             recipientList.addAll(getAdditionalRecipientsEmails());
             var gammelOrgEnhet = orgEnhetStateRepository.findByFid(masseFlyttingRequest.orgtilknytningerFid().getFirst())
                 .map(OrgEnhetState::navn)
@@ -240,9 +244,11 @@ public class OrgtilknytningEndretEmailService {
         String gammelOrgEnhet,
         String innsenderVisningsnavn
     ) throws IOException, TemplateException {
+        var x = BRUK_NY_MASSEFLYTT; // TODO: Fjern denne gamle metoden når ny masseflytting er i bruk
+
         var stringWriter = new StringWriter();
         var model = Map.of(
-            "nyOrgEnhetId", masseFlyttingRequest.nyOrgenhetId(),
+            "nyOrgEnhet", masseFlyttingRequest.nyOrgenhetId(),
             "antallFlyttet", antallFlyttet,
             "feiletAntall", failedAvvikleOrgtilkninger.size(),
             "total", masseFlyttingRequest.orgtilknytningerFid().size(),
@@ -250,8 +256,82 @@ public class OrgtilknytningEndretEmailService {
             "feiletNavidenter", failedAvvikleOrgtilkninger.stream().map(OrgtilknytningState::navident).collect(Collectors.joining(",\n")),
             "innsenderVisningsnavn", innsenderVisningsnavn
         );
-        log.info("Masseflytting epost body: {}", model);
-        freemarkerConfig.getTemplate("masseflytting-varsel.ftlh").process(model, stringWriter);
+        log.info("Masseflytting epost model: {}", model);
+        freemarkerConfig.getTemplate(MASSEFLYTTING_VARSEL_FTLH).process(model, stringWriter);
+        return stringWriter.getBuffer().toString();
+    }
+
+    public void sendMasseflyttOTEmail(
+        String nyOrgenhetId,
+        Collection<OrgtilknytningState> orgtilknytningerFlyttet,
+        Collection<OrgtilknytningState> orgtilknytningerIkkeFlyttet
+    ) {
+        try {
+            String innsenderNavident = SecurityUtil.getAuthenticatedNavIdent();
+            var innsenderVisningsnavn = ressursStateRepository.findByNavident(innsenderNavident)
+                .map(RessursState::visningsnavn)
+                .map(Visningsnavn::getFormattedVisningsnavn)
+                .orElse("UKJENT");
+
+            var recipientList = adClient.getAdRessurser(Set.of(innsenderNavident)).getRessurser().stream()
+                .map(AdRessurs::getEmail)
+                .collect(Collectors.toList());
+            recipientList.addAll(getAdditionalRecipientsEmails());
+
+            var gammelOrgEnhetNavn = orgtilknytningerFlyttet.stream().map(ot -> getOrgEnhetNavn(ot.orgEnhetId())).collect(Collectors.joining(", "));
+            var nyOrgEnhetNavn = getOrgEnhetNavn(nyOrgenhetId);
+
+            String subject = String.format("Masseflytting av ressurser fra %s til %s", gammelOrgEnhetNavn, nyOrgEnhetNavn);
+            String body = getFormattedEmailBody(
+                nyOrgEnhetNavn,
+                gammelOrgEnhetNavn,
+                orgtilknytningerFlyttet.size(),
+                orgtilknytningerIkkeFlyttet.size(),
+                orgtilknytningerIkkeFlyttet.stream().map(OrgtilknytningState::navident).toList(),
+                innsenderVisningsnavn
+            );
+            log.info("Masseflytting epost. Mottakere: {}\nBody:\n{}", recipientList, body);
+            EmailMessage message = new EmailMessage(subject, body, recipientList);
+            microsoftGraphClient.sendEmail(message).subscribe();
+
+        } catch (ADResponseException e) {
+            log.error("Fant ikke innsender sin epost adresse for masseflytting", e);
+        } catch (IOException | TemplateException e) {
+            log.error("Feil ved generering av epost innhold", e);
+        }
+    }
+
+    private String getOrgEnhetNavn(String orgenhetId) {
+        var orgenhet = orgenhetService.getById(orgenhetId);
+
+        if (orgenhet.isPresent()) {
+            var oe = orgenhet.get();
+            var remedyEnhet = remedyEnhetMapperService.findByNomId(oe.getId());
+            return oe.getNavn() + " (" + oe.getId() + remedyEnhet.map(enhet -> "/" + enhet.remedyEnhetId()).orElse("") + ")";
+        } else {
+            return "Ukjent";
+        }
+    }
+
+    private String getFormattedEmailBody(
+        String nyOrgenhet,
+        String gammelOrgEnheter,
+        int antallFlyttet,
+        int feiletAntall,
+        List<String> feiledeNavidenter,
+        String innsenderVisningsnavn
+    ) throws IOException, TemplateException {
+        var stringWriter = new StringWriter();
+        var model = Map.of(
+            "nyOrgEnhet", nyOrgenhet,
+            "antallFlyttet", antallFlyttet,
+            "feiletAntall", feiletAntall,
+            "total", antallFlyttet + feiletAntall,
+            "gammelOrgEnhet", gammelOrgEnheter,
+            "feiletNavidenter", feiledeNavidenter.stream().collect(Collectors.joining(",\n")),
+            "innsenderVisningsnavn", innsenderVisningsnavn
+        );
+        freemarkerConfig.getTemplate(MASSEFLYTTING_VARSEL_FTLH).process(model, stringWriter);
         return stringWriter.getBuffer().toString();
     }
 
