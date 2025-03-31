@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.ressurs.api.app;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -55,7 +56,7 @@ public class RessursExcelGenerator {
         var underliggendeEnheter = orgenhetService.findAllUnderliggendeOrgenheter(topOrgEnhetId);
         var otMap = orgtilknytningStateRepository.findByNavidentIn(navidenter).stream()
             .filter(ot -> ot.orgEnhetId().equals(topOrgEnhetId) || underliggendeEnheter.contains(ot.orgEnhetId()))
-            .filter(ot -> ot.gyldigTom().isEmpty() || ot.gyldigTom().get().isAfter(LocalDate.now()))
+            .filter(PeriodeUtil::isCurrentPeriod)
             .collect(Collectors.groupingBy(
                 OrgtilknytningState::navident
             ));
@@ -74,11 +75,12 @@ public class RessursExcelGenerator {
             addRow(sheet.createRow(rowcount++), null, null, null, kanSeSluttdato);
 
             for (Ressurs ressurs : ressurser) {
-                var gyldigFromCandidates = otMap.get(ressurs.state().navident()).stream().map(OrgtilknytningState::gyldigFom).filter(Objects::nonNull).toList();
-                if(gyldigFromCandidates.isEmpty()) {
-                    log.error("Ressurs {} har ingen OTer", ressurs.state().navident());
+                var entry = otMap.get(ressurs.state().navident());
+                if(entry == null || entry.isEmpty()){
+                    log.error("Ressurs {} har ingen OTer.", ressurs.state().navident());
                     continue;
                 }
+                var gyldigFromCandidates = otMap.get(ressurs.state().navident()).stream().map(OrgtilknytningState::gyldigFom).filter(Objects::nonNull).toList();
                 var gyldigFom = Collections.min(gyldigFromCandidates);
                 var orgEnhet = otMap.get(ressurs.state().navident()).stream()
                     .map(ot -> String.format("%s (%s)", orgenhetNavnMap.get(ot.orgEnhetId()), ot.orgEnhetId()))
