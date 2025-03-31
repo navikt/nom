@@ -41,6 +41,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+
 @Tag(name = "Ressurs")
 @RestController
 @RequestMapping(value={"/app/ressurser"})
@@ -235,6 +237,7 @@ public class RessursController {
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=skjerminger.xlsx");
             ressursExcelGenerator.generate(response, ressurser, navidenter, excelExportRequest.topOrgEnhetId());
         } catch (Exception e) {
+            log.error(SECURE_LOGS, e.getMessage());
             log.error("Failed to generate export file");
             response.sendError(500);
         }
