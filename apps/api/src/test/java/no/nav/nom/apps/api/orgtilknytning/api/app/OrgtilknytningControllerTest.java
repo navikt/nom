@@ -4,18 +4,23 @@ import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytningCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDatoCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningSektorCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
+import no.nav.nom.apps.api.remedy.RemedyEnhet;
+import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
@@ -44,11 +49,15 @@ import java.util.stream.Stream;
 import static no.nav.nom.apps.api.common.TestData.orgEnhet;
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static no.nav.nom.apps.api.common.TestData.ressursState;
+import static no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService.BRUK_NY_MASSEFLYTT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.clearInvocations;
 
 public class OrgtilknytningControllerTest extends RestTestBase {
 
@@ -72,6 +81,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     @MockitoBean
     RessursStateRepository ressursStateRepository;
+
+    @MockitoBean
+    RemedyEnhetMapperService remedyEnhetMapperService;
 
     @Autowired
     TestTokensGenerator testToken;
@@ -1855,6 +1867,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     @Test
     void test_masseflytting_should_return_200_OK() {
+        assertNotNull(BRUK_NY_MASSEFLYTT); // Slett denne testen når feature forsvinner
+
         var masseflyttingRequest = new MasseFlyttingRequest(
             List.of("fid1", "fid2"),
             "newOrgEnhetId",
@@ -1865,6 +1879,26 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var orgtilknytningState2 = new OrgtilknytningState("fid2", "navident2", "orgEnhetId2", Sektor.NAV_STATLIG, true, LocalDate.now(), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty());
         saveOrgtilknytninger(List.of(orgtilknytningState1, orgtilknytningState2));
 
+        // Ny enhet
+        when(orgenhetService.getById("newOrgEnhetId")).thenReturn(Optional.of(new OrgEnhet(
+            OrgEnhetState.builder()
+                .fid("FID_3")
+                .id("newOrgEnhetId")
+                .navn("Ny enhet")
+                .gyldigFom(LocalDate.now().minusYears(1))
+                .gyldigTom(Optional.empty())
+                .build())
+        ));
+
+        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(ressursStateRepository.findByNavident("A321321")).thenReturn(Optional.of(ressursState().toBuilder().visningsnavn(new Visningsnavn("John", Optional.empty(), "Doe")).build()));
+
+        when(remedyEnhetMapperService.findByNomId("orgEnhetId1")).thenReturn(Optional.of(new RemedyEnhet("remedyEnhetId1", null, null, null)));
+        when(remedyEnhetMapperService.findByNomId("orgEnhetId2")).thenReturn(Optional.of(new RemedyEnhet("remedyEnhetId1", null, null, null)));
+        when(remedyEnhetMapperService.findByNomId("newOrgEnhetId")).thenReturn(Optional.of(new RemedyEnhet("newRemedyEnhetId", null, null, null)));
+
+        when(unleash.isEnabled(BRUK_NY_MASSEFLYTT)).thenReturn(false);
+
         postMasseflyttingRequest(
             testToken.nomAdminUser(),
             masseflyttingRequest
@@ -1872,6 +1906,53 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         verify(orgtilknytningCommandService, times(2)).avvikleOrgtilknytning(any(), any());
         verify(orgtilknytningCommandService, times(1)).endreDagligOppfolgingOrgtilknytning(any());
+        verify(orgtilknytningCommandService, times(2)).opprettOrgtilknytning(any());
+    }
+
+    @Test
+    void test_ny_masseflytting_should_return_200_OK() {
+        var masseflyttingRequest = new MasseFlyttingRequest(
+            List.of("fid1", "fid2"),
+            "newOrgEnhetId",
+            true
+        );
+
+        LocalDate flytteDato = LocalDate.now();
+
+        var orgtilknytningState1 = new OrgtilknytningState("fid1", "navident1", "orgEnhetId1", Sektor.NAV_STATLIG, false, flytteDato.minusMonths(1), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty());
+        var orgtilknytningState2 = new OrgtilknytningState("fid2", "navident2", "orgEnhetId2", Sektor.NAV_STATLIG, true, flytteDato.plusMonths(1), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty());
+        saveOrgtilknytninger(List.of(orgtilknytningState1, orgtilknytningState2));
+
+        when(orgenhetService.getById("orgEnhetId1")).thenReturn(Optional.of(new OrgEnhet(OrgEnhetState.builder().fid("FID_1").id("orgEnhetId1").navn("Enhet 1").build())));
+        when(orgenhetService.getById("orgEnhetId2")).thenReturn(Optional.of(new OrgEnhet(OrgEnhetState.builder().fid("FID_2").id("orgEnhetId2").navn("Enhet 2").build())));
+
+        // Ny enhet
+        when(orgenhetService.getById("newOrgEnhetId")).thenReturn(Optional.of(new OrgEnhet(
+            OrgEnhetState.builder()
+                .fid("FID_3")
+                .id("newOrgEnhetId")
+                .navn("Ny enhet")
+                .gyldigFom(LocalDate.now().minusYears(1))
+                .gyldigTom(Optional.empty())
+                .build())
+        ));
+
+
+        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(ressursStateRepository.findByNavident("A321321")).thenReturn(Optional.of(ressursState().toBuilder().visningsnavn(new Visningsnavn("John", Optional.empty(), "Doe")).build()));
+
+        when(remedyEnhetMapperService.findByNomId("orgEnhetId1")).thenReturn(Optional.of(new RemedyEnhet("remedyEnhetId1", null, null, null)));
+        when(remedyEnhetMapperService.findByNomId("orgEnhetId2")).thenReturn(Optional.of(new RemedyEnhet("remedyEnhetId1", null, null, null)));
+        when(remedyEnhetMapperService.findByNomId("newOrgEnhetId")).thenReturn(Optional.of(new RemedyEnhet("newRemedyEnhetId", null, null, null)));
+
+        postMasseflyttingRequest(
+            testToken.nomAdminUser(),
+            masseflyttingRequest
+        ).expectStatus().isOk();
+
+        verify(orgtilknytningCommandService, times(1)).fjernOrgtilknytning(any(), any());
+        verify(orgtilknytningCommandService, times(1)).avvikleOrgtilknytning(any(), any());
+        verify(orgtilknytningCommandService, times(2)).endreDagligOppfolgingOrgtilknytning(any());
         verify(orgtilknytningCommandService, times(2)).opprettOrgtilknytning(any());
     }
 

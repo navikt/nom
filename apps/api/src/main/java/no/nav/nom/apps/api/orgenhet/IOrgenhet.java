@@ -56,4 +56,9 @@ public interface IOrgenhet {
         return likEllerFoer(getGyldigFom(), TOMDato)
             && likEllerEtter(getGyldigTom().orElse(NO_END_DATE), FOMDato);
     }
+
+    default boolean erAktivForDato(LocalDate dato) {
+        return likEllerFoer(getGyldigFom(), dato)
+            && likEllerEtter(getGyldigTom().orElse(NO_END_DATE), dato);
+    }
 }

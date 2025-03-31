@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningSektorException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException;
@@ -47,13 +48,15 @@ public class OrgtilknytningController {
     private final static Logger logger = LoggerFactory.getLogger(OrgtilknytningController.class);
 
     private final OrgtilknytningRestService orgtilknytningRestService;
+    private final MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
     private final AuthResolver authResolver;
 
     public OrgtilknytningController(
-        OrgtilknytningRestService orgtilknytningRestService,
+        OrgtilknytningRestService orgtilknytningRestService, MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService,
         AuthResolver authResolver
     ) {
         this.orgtilknytningRestService = orgtilknytningRestService;
+        this.masseflyttOrgtilknytningerService = masseflyttOrgtilknytningerService;
         this.authResolver = authResolver;
     }
 
@@ -169,13 +172,18 @@ public class OrgtilknytningController {
         @ApiResponse(responseCode = "400", description = "Feil i input"),
     })
     @PreAuthorize(
-        /*"hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP') &&*/ "hasAuthority('ADMIN')"
+        "hasAuthority('ADMIN')"
     )
-    public ResponseEntity<MasseFlyttingRequest> masseflytting(
+    public ResponseEntity<MasseFlyttingResponse> masseflytting(
         @Valid @RequestBody MasseFlyttingRequest masseFlyttingRequest
     ) {
-        orgtilknytningRestService.masseflyttingAvRessurser(masseFlyttingRequest);
-        return ResponseEntity.ok(masseFlyttingRequest);
+        if (masseFlyttingRequest.gyldigFomFlyttedato() == null) {
+            var res = orgtilknytningRestService.masseflyttingAvRessurser(masseFlyttingRequest);
+
+            return ResponseEntity.ok(res);
+        }
+        var response = orgtilknytningRestService.nyMasseflyttingAvRessurser(masseFlyttingRequest);
+        return ResponseEntity.ok(response);
     }
 
 

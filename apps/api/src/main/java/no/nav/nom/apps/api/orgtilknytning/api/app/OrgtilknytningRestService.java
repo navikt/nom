@@ -1,10 +1,12 @@
 package no.nav.nom.apps.api.orgtilknytning.api.app;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.apps.api.orgtilknytning.api.email.OrgtilknytningEndretEmailService;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningSektorException;
@@ -63,6 +65,8 @@ import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAcc
 public class OrgtilknytningRestService {
     private final static Logger log = LoggerFactory.getLogger(OrgtilknytningRestService.class);
 
+    public static final String BRUK_NY_MASSEFLYTT = "nom.masseflytting.bruk_ny_masseflytt";
+
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final RessursStateRepository ressursStateRepository;
     private final NomMastered nomMastered;
@@ -70,6 +74,8 @@ public class OrgtilknytningRestService {
     private final RessursCommandService ressursCommandService;
     private final AuthorizedNavident authorizedNavident;
     private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
+    private final MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
+    private final Unleash unleash;
 
     public OrgtilknytningRestService(
         OrgtilknytningStateRepository orgtilknytningStateRepository,
@@ -78,7 +84,7 @@ public class OrgtilknytningRestService {
         RessursStateRepository ressursStateRepository,
         NomMastered nomMastered,
         AuthorizedNavident authorizedNavident,
-        OrgtilknytningEndretEmailService orgtilknytningEndretEmailService
+        OrgtilknytningEndretEmailService orgtilknytningEndretEmailService, MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService, Unleash unleash
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
@@ -87,6 +93,8 @@ public class OrgtilknytningRestService {
         this.nomMastered = nomMastered;
         this.authorizedNavident = authorizedNavident;
         this.orgtilknytningEndretEmailService = orgtilknytningEndretEmailService;
+        this.masseflyttOrgtilknytningerService = masseflyttOrgtilknytningerService;
+        this.unleash = unleash;
     }
 
     public List<OrgtilknytningState> getOrgtilknytninger(Optional<String> navident) {
@@ -727,7 +735,29 @@ public class OrgtilknytningRestService {
         nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
     }
 
-    public void masseflyttingAvRessurser(MasseFlyttingRequest masseFlyttingRequest) {
+    public MasseFlyttingResponse nyMasseflyttingAvRessurser(MasseFlyttingRequest request) {
+        var origination = new Origination(SecurityUtil.getAuthenticatedNavIdent(), SecurityUtil.getAuthenticatedAzpName());
+
+        var inputMetadata = new InputMetadata(
+            "REST",
+            "masseflytting",
+            request,
+            origination
+        );
+
+        var res = masseflyttOrgtilknytningerService.flyttOrgtilknytninger(request.orgtilknytningerFid(), request.nyOrgenhetId(), request.beholdTilganger(), request.gyldigFomFlyttedato(), inputMetadata);
+
+        return new MasseFlyttingResponse(
+            res.entrySet().stream().map(e -> new MasseFlyttingResponse.FeiletFlytting(e.getKey().fid(), e.getValue())).toList(),
+            request.orgtilknytningerFid().size() - res.size()
+        );
+    }
+
+    public MasseFlyttingResponse masseflyttingAvRessurser(MasseFlyttingRequest masseFlyttingRequest) {
+        if (unleash.isEnabled(BRUK_NY_MASSEFLYTT)) { // TODO: Fjern denne gamle metoden når ny masseflytting er i bruk
+            return nyMasseflyttingAvRessurser(masseFlyttingRequest);
+        }
+
         var innsenderNavident = SecurityUtil.getAuthenticatedNavIdent();
         int antallRessurserFlyttet = masseFlyttingRequest.orgtilknytningerFid().size();
         var origination = new Origination(innsenderNavident, SecurityUtil.getAuthenticatedAzpName());
@@ -821,8 +851,12 @@ public class OrgtilknytningRestService {
                 .equals(LocalDate.now().minusDays(1)))
             .toList());
 
-        orgtilknytningEndretEmailService.sendEmail(masseFlyttingRequest, ikkeAvsluttedeOrgtilknytninger, innsenderNavident, antallRessurserFlyttet);
+        orgtilknytningEndretEmailService.sendMasseflyttOTEmail(masseFlyttingRequest, ikkeAvsluttedeOrgtilknytninger, innsenderNavident, antallRessurserFlyttet);
 
+        return new MasseFlyttingResponse(
+            ikkeAvsluttedeOrgtilknytninger.stream().map(ot -> new MasseFlyttingResponse.FeiletFlytting(ot.fid(), "Ukjent årsak")).toList(),
+            antallRessurserFlyttet - ikkeAvsluttedeOrgtilknytninger.size()
+        );
     }
 
     public static void validateOrgtilknytningTypeSektorCombination(Tilknytningtype tilknytningtype, Sektor sektor) {
