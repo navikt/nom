@@ -78,9 +78,15 @@ public class RessursExcelGenerator {
                 var entry = otMap.get(ressurs.state().navident());
                 if(entry == null || entry.isEmpty()){
                     log.error("Ressurs {} har ingen OTer.", ressurs.state().navident());
-                    continue;
+                    addRow(
+                        sheet.createRow(rowcount++),
+                        ressurs,
+                        "UKJENT",
+                        null,
+                        kanSeSluttdato
+                    );
                 }
-                var gyldigFromCandidates = otMap.get(ressurs.state().navident()).stream().map(OrgtilknytningState::gyldigFom).filter(Objects::nonNull).toList();
+                var gyldigFromCandidates = entry.stream().map(OrgtilknytningState::gyldigFom).filter(Objects::nonNull).toList();
                 var gyldigFom = Collections.min(gyldigFromCandidates);
                 var orgEnhet = otMap.get(ressurs.state().navident()).stream()
                     .map(ot -> String.format("%s (%s)", orgenhetNavnMap.get(ot.orgEnhetId()), ot.orgEnhetId()))
@@ -138,7 +144,7 @@ public class RessursExcelGenerator {
             sektor.setCellValue(sektorMap.get(ressurs.state().sektor().name()));
             orgEnhet.setCellValue(orgEnhetNavn);
             epost.setCellValue(ressurs.epost());
-            fom.setCellValue(gyldigFom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+            fom.setCellValue(gyldigFom == null ? "UKJENT" : gyldigFom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
             if (kanSeSluttdato) {
                 ressurs.state().sluttdato().ifPresentOrElse(
                     gyldigTom -> sluttdato.setCellValue(gyldigTom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))),
