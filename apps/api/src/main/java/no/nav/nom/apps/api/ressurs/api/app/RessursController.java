@@ -237,7 +237,7 @@ public class RessursController {
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=skjerminger.xlsx");
             ressursExcelGenerator.generate(response, ressurser, navidenter, excelExportRequest.topOrgEnhetId());
         } catch (Exception e) {
-            log.error(SECURE_LOGS, e.getMessage());
+            log.error(SECURE_LOGS, "Feil ved excel export", e);
             log.error("Failed to generate export file");
             response.sendError(500);
         }
