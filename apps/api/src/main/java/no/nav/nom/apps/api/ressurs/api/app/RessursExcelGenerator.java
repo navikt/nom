@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
@@ -20,8 +21,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class RessursExcelGenerator {
 
@@ -52,14 +55,9 @@ public class RessursExcelGenerator {
         var underliggendeEnheter = orgenhetService.findAllUnderliggendeOrgenheter(topOrgEnhetId);
         var otMap = orgtilknytningStateRepository.findByNavidentIn(navidenter).stream()
             .filter(ot -> ot.orgEnhetId().equals(topOrgEnhetId) || underliggendeEnheter.contains(ot.orgEnhetId()))
+            .filter(ot -> ot.gyldigTom().isEmpty() || ot.gyldigTom().get().isAfter(LocalDate.now()))
             .collect(Collectors.groupingBy(
-                OrgtilknytningState::navident,
-                Collectors.collectingAndThen(
-                    Collectors.toList(),
-                    ot -> ot.stream()
-                        .filter(o -> o.gyldigTom().isEmpty() || o.gyldigTom().get().isAfter(LocalDate.now()))
-                        .toList()
-                )
+                OrgtilknytningState::navident
             ));
 
         var orgenhetNavnMap = orgEnhetStateRepository.findByIdIn(
@@ -76,7 +74,12 @@ public class RessursExcelGenerator {
             addRow(sheet.createRow(rowcount++), null, null, null, kanSeSluttdato);
 
             for (Ressurs ressurs : ressurser) {
-                var gyldigFom = Collections.min(otMap.get(ressurs.state().navident()).stream().map(OrgtilknytningState::gyldigFom).toList());
+                var gyldigFromCandidates = otMap.get(ressurs.state().navident()).stream().map(OrgtilknytningState::gyldigFom).filter(Objects::nonNull).toList();
+                if(gyldigFromCandidates.isEmpty()) {
+                    log.error("Ressurs {} har ingen OTer", ressurs.state().navident());
+                    continue;
+                }
+                var gyldigFom = Collections.min(gyldigFromCandidates);
                 var orgEnhet = otMap.get(ressurs.state().navident()).stream()
                     .map(ot -> String.format("%s (%s)", orgenhetNavnMap.get(ot.orgEnhetId()), ot.orgEnhetId()))
                     .collect(Collectors.joining(", "));
@@ -100,7 +103,7 @@ public class RessursExcelGenerator {
 
             workbook.write(response.getOutputStream());
         }catch (IOException ioException) {
-            throw new RuntimeException("IO-Exception");
+            throw new RuntimeException("IO-Exception", ioException);
         }
         catch (Exception e) {
             throw e;
