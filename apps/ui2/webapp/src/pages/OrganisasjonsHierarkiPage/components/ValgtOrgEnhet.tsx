@@ -22,7 +22,10 @@ import {
   isOrgEnhetArbeidsomraade,
   isOrgEnhetDriftsenhet,
 } from "~/api/react-query-endpoints";
-import { useHasAdminAccess /*useHasWriteAccess*/ } from "~/api/useGetSession";
+import {
+  useHasAdminAccess,
+  useHasAdminOrWriteAccess,
+} from "~/api/useGetSession";
 import { UserImage } from "~/components/UserImage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import {
@@ -399,7 +402,7 @@ function DropdownMeny({
             </>
           )}
 
-          {
+          {useHasAdminOrWriteAccess && (
             <>
               <Dropdown.Menu.Divider />
               <Dropdown.Menu.GroupedList.Item
@@ -409,7 +412,7 @@ function DropdownMeny({
                 Eksporter kontaktpersoner til Excel
               </Dropdown.Menu.GroupedList.Item>
             </>
-          }
+          )}
         </Dropdown.Menu.GroupedList>
       </Dropdown.Menu>
     </Dropdown>
