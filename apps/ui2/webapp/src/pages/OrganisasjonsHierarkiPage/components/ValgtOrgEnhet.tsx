@@ -18,6 +18,7 @@ import React from "react";
 
 import {
   downloadExcelKontaktPersonserForOrgenhetByOrgenhetId,
+  getOrgEnheterSomKanHaRessurser,
   getRessurserByListNavident,
   isOrgEnhetArbeidsomraade,
   isOrgEnhetDriftsenhet,
@@ -73,13 +74,21 @@ export const ValgtOrgEnhet = ({
     enabled: !!orgEnhet.id,
   });
 
+  const enheterSomKanHaRessurser = useQuery(getOrgEnheterSomKanHaRessurser);
+
+  const valgtOrgenhetKanHaRessurser = (
+    enheterSomKanHaRessurser.data || []
+  ).some((it) => it.id === orgEnhet.id);
+
   const visTabellKnapp = isOrgEnhetDriftsenhetQuery.data ?? false;
 
   const visRessursAdministeringKnapper =
     isOrgEnhetArbeidsomraadeQuery.data ?? false;
 
   const loading =
-    hentedeRessurserQuery.isLoading || isOrgEnhetDriftsenhetQuery.isLoading;
+    hentedeRessurserQuery.isLoading ||
+    isOrgEnhetDriftsenhetQuery.isLoading ||
+    enheterSomKanHaRessurser.isLoading;
 
   return (
     <div
@@ -191,6 +200,7 @@ export const ValgtOrgEnhet = ({
           <MedarbeidereList
             orgEnhet={orgEnhet}
             ressurser={hideRessurser ? [] : hentedeRessurser}
+            valgtOrgenhetKanHaRessurser={valgtOrgenhetKanHaRessurser}
             visRessursAdministeringKnapper={visRessursAdministeringKnapper}
             visTabellKnapp={visTabellKnapp ?? false}
           />
@@ -205,11 +215,13 @@ function MedarbeidereList({
   ressurser,
   visRessursAdministeringKnapper,
   visTabellKnapp,
+  valgtOrgenhetKanHaRessurser,
 }: {
   orgEnhet: OrgEnhet;
   ressurser: Ressurs[];
   visRessursAdministeringKnapper: boolean;
   visTabellKnapp: boolean;
+  valgtOrgenhetKanHaRessurser: boolean;
 }) {
   if (ressurser.length === 0) {
     return visTabellKnapp ? (
@@ -223,6 +235,7 @@ function MedarbeidereList({
       >
         <DropdownMeny
           orgEnhet={orgEnhet}
+          valgtEnhetKanHaRessurser={valgtOrgenhetKanHaRessurser}
           visRessursAdministeringKnapper={visRessursAdministeringKnapper}
         />
       </div>
@@ -260,6 +273,7 @@ function MedarbeidereList({
           <>
             <DropdownMeny
               orgEnhet={orgEnhet}
+              valgtEnhetKanHaRessurser={valgtOrgenhetKanHaRessurser}
               visRessursAdministeringKnapper={visRessursAdministeringKnapper}
             />
           </>
@@ -340,9 +354,11 @@ function MedarbeidereList({
 function DropdownMeny({
   orgEnhet,
   visRessursAdministeringKnapper,
+  valgtEnhetKanHaRessurser,
 }: {
   orgEnhet: OrgEnhet;
   visRessursAdministeringKnapper: boolean;
+  valgtEnhetKanHaRessurser: boolean;
 }) {
   const hasAdminAccess = useHasAdminAccess();
   const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
@@ -400,12 +416,22 @@ function DropdownMeny({
                 <>
                   <Dropdown.Menu.Divider />
 
-                  <Dropdown.Menu.GroupedList.Item
-                    as={Link}
-                    href={`/masseflytting/${orgEnhet.id}`}
-                  >
-                    Flytt én eller flere medarbeidere
-                  </Dropdown.Menu.GroupedList.Item>
+                  {valgtEnhetKanHaRessurser && (
+                    <Dropdown.Menu.GroupedList.Item
+                      as={Link}
+                      href={`/masseflytting/${orgEnhet.id}`}
+                    >
+                      Flytt én eller flere medarbeidere
+                    </Dropdown.Menu.GroupedList.Item>
+                  )}
+                  {!valgtEnhetKanHaRessurser && (
+                    <Dropdown.Menu.GroupedList.Item>
+                      <div onClick={(event_) => event_.preventDefault()}>
+                        Flytting av medarbeidere er ikke tilgjengelig for denne
+                        enheten. (Se heller lengre ned i hierarkiet)
+                      </div>
+                    </Dropdown.Menu.GroupedList.Item>
+                  )}
                 </>
               )}
             </>
