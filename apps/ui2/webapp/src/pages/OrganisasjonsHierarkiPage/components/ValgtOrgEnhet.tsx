@@ -337,6 +337,7 @@ function DropdownMeny({
   visRessursAdministeringKnapper: boolean;
 }) {
   const hasAdminAccess = useHasAdminAccess();
+  const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
 
   const handleDownloadKontaktpersonerExcel = async () => {
     await downloadExcelKontaktPersonserForOrgenhetByOrgenhetId(
@@ -402,7 +403,7 @@ function DropdownMeny({
             </>
           )}
 
-          {useHasAdminOrWriteAccess && (
+          {hasAdminOrWriteAccess && (
             <>
               <Dropdown.Menu.Divider />
               <Dropdown.Menu.GroupedList.Item
