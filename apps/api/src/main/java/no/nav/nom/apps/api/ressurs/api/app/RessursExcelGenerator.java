@@ -14,6 +14,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -98,8 +99,11 @@ public class RessursExcelGenerator {
             sheet.createFreezePane(0, 1);
 
             workbook.write(response.getOutputStream());
-        } catch (Exception e) {
-            throw new RuntimeException();
+        }catch (IOException ioException) {
+            throw new RuntimeException("IO-Exception");
+        }
+        catch (Exception e) {
+            throw e;
         }
     }
 
