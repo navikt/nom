@@ -85,20 +85,21 @@ public class RessursExcelGenerator {
                         null,
                         kanSeSluttdato
                     );
-                }
-                var gyldigFromCandidates = entry.stream().map(OrgtilknytningState::gyldigFom).filter(Objects::nonNull).toList();
-                var gyldigFom = Collections.min(gyldigFromCandidates);
-                var orgEnhet = otMap.get(ressurs.state().navident()).stream()
-                    .map(ot -> String.format("%s (%s)", orgenhetNavnMap.get(ot.orgEnhetId()), ot.orgEnhetId()))
-                    .collect(Collectors.joining(", "));
+                }else {
+                    var gyldigFromCandidates = entry.stream().map(OrgtilknytningState::gyldigFom).filter(Objects::nonNull).toList();
+                    var gyldigFom = Collections.min(gyldigFromCandidates);
+                    var orgEnhet = otMap.get(ressurs.state().navident()).stream()
+                        .map(ot -> String.format("%s (%s)", orgenhetNavnMap.get(ot.orgEnhetId()), ot.orgEnhetId()))
+                        .collect(Collectors.joining(", "));
 
-                addRow(
-                    sheet.createRow(rowcount++),
-                    ressurs,
-                    orgEnhet,
-                    gyldigFom,
-                    kanSeSluttdato
-                );
+                    addRow(
+                        sheet.createRow(rowcount++),
+                        ressurs,
+                        orgEnhet,
+                        gyldigFom,
+                        kanSeSluttdato
+                    );
+                }
             }
 
             var headerRow = sheet.getRow(0);
