@@ -20,7 +20,11 @@ import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
 
 const schema = z.object({
   navident: navidentValidator(),
-  startdato: z.string().optional(),
+  startdato: z
+    .string({
+      invalid_type_error: "Obligatorisk",
+    })
+    .min(1, "Obligatorisk"),
   confirm: confirmTextValidator(),
 });
 
