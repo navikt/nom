@@ -703,7 +703,9 @@ public class NomRemedyIntegrasjonService {
             inputMetadata.inputInterfaceMethodArguments(),
             new TypeReference<>() {}
         );
-        return (boolean) inputInterfaceMethodArguments.get("beholdTilgang");
+
+        return inputInterfaceMethodArguments.containsKey("beholdTilganger") ?
+            (boolean) inputInterfaceMethodArguments.get("beholdTilganger") : (boolean) inputInterfaceMethodArguments.get("beholdTilgang");
     }
 
     protected Integer nomSektorToRemedyCode(no.nav.nom.generated.model.Sektor sektor) {
