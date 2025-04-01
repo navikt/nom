@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.orgenhet.api.app;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -17,11 +18,13 @@ import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetMedLedernavn;
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.ressurs.api.app.RessursRestService;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -55,19 +58,25 @@ public class OrgEnhetController {
     private final KontaktpersonerExcelGenerator kontaktpersonerExcelGenerator;
     private final RessursRestService ressursRestService;
     private final AuthResolver authResolver;
+    private final OrgtilknytningStateRepository orgtilknytningStateRepository;
+    private final Unleash unleash;
+
+    public static final String UNLEASH_NY_KONTAKTINFO_EXPORT = "nom.ny_kontaktinfo_eksport";
 
     public OrgEnhetController(
-            OrgenhetService orgenhetService,
-            OrgEnhetMapper orgEnhetMapper,
-            KontaktpersonerExcelGenerator kontaktpersonerExcelGenerator,
-            RessursRestService ressursRestService,
-            AuthResolver authResolver
+        OrgenhetService orgenhetService,
+        OrgEnhetMapper orgEnhetMapper,
+        KontaktpersonerExcelGenerator kontaktpersonerExcelGenerator,
+        RessursRestService ressursRestService,
+        AuthResolver authResolver, OrgtilknytningStateRepository orgtilknytningStateRepository, Unleash unleash
     ) {
         this.orgenhetService = orgenhetService;
         this.orgEnhetMapper = orgEnhetMapper;
         this.kontaktpersonerExcelGenerator = kontaktpersonerExcelGenerator;
         this.ressursRestService = ressursRestService;
         this.authResolver = authResolver;
+        this.orgtilknytningStateRepository = orgtilknytningStateRepository;
+        this.unleash = unleash;
     }
 
     @GetMapping("/{orgenhetId}")
@@ -240,31 +249,52 @@ public class OrgEnhetController {
     private List<Ressurs> getSortedRessurserInAndUnderliggendeOrgenheter(String orgenhetId) {
         List<OrgtilknytningState> combinedRessursKoblinger  = new ArrayList<>();
 
-        // get all ressurser under orgenhet
-        Optional<OrgEnhet> orgEnhet = orgenhetService.getById(orgenhetId)
-            .map(orgEnhetMapper::mapToOrgEnhet);
-        orgEnhet.ifPresent(orgEnhet1 -> combinedRessursKoblinger.addAll(orgEnhet1.ressursKoblinger()));
+        if (unleash.isEnabled(UNLEASH_NY_KONTAKTINFO_EXPORT)) {
+            log.info("Finn navidenter i og under enhet {}", orgenhetId);
+            var underliggendeEnheter = orgenhetService.findAllUnderliggendeOrgenheter(orgenhetId);
+            var aktiveEllerFremtidigeNavidenter = orgtilknytningStateRepository.getAll().stream()
+                .filter(ot -> ot.orgEnhetId().equals(orgenhetId) || underliggendeEnheter.contains(ot.orgEnhetId()))
+                .filter(PeriodeUtil::isCurrentOrFuturePeriod)
+                .map(OrgtilknytningState::navident)
+                .toList();
 
-        // first get all underlyinh enheter
-        List<no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet> underEnheter = new ArrayList<>(orgenhetService.getAllUnderliggendeOrgEnhetById(orgenhetId)
-            .stream()
-            .map(orgEnhetMapper::mapToOrgEnhet)
-            .toList());
-        underEnheter.forEach(underEnhet -> combinedRessursKoblinger.addAll(underEnhet.ressursKoblinger()));
+            log.info("Hent {} ressurser for navidenter og sorter", aktiveEllerFremtidigeNavidenter.size());
+            var ressurser = ressursRestService.findRessurserByNavident(aktiveEllerFremtidigeNavidenter);
 
-        // then get active ressurser under each underliggende enhet
-        List<Ressurs> ressurser = combinedRessursKoblinger.stream()
-            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()) ||
-                isPeriodFuture(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
-            .map(orgtilknytningState ->  ressursRestService.findRessursByNavident(orgtilknytningState.navident()))
-            .toList();
+            // sort ressurser by fornavn and etternavn
+            List<Ressurs> sortedRessurser = ressurser.stream().sorted((r1, r2) -> {
+                var n1 = r1.state().visningsnavn();
+                var n2 = r2.state().visningsnavn();
+                return n1.fornavn().compareTo(n2.fornavn()) == 0 ? n1.etternavn().compareTo(n2.etternavn()) : n1.fornavn().compareTo(n2.fornavn());
+            }).toList();
+            return sortedRessurser;
+        } else {
+            // get all ressurser under orgenhet
+            Optional<OrgEnhet> orgEnhet = orgenhetService.getById(orgenhetId)
+                .map(orgEnhetMapper::mapToOrgEnhet);
+            orgEnhet.ifPresent(orgEnhet1 -> combinedRessursKoblinger.addAll(orgEnhet1.ressursKoblinger()));
 
-        // sort ressurser by fornavn and etternavn
-        List<Ressurs> sortedRessurser = ressurser.stream().sorted((r1, r2) -> {
-            var n1 = r1.state().visningsnavn();
-            var n2 = r2.state().visningsnavn();
-            return n1.fornavn().compareTo(n2.fornavn()) == 0 ? n1.etternavn().compareTo(n2.etternavn()) : n1.fornavn().compareTo(n2.fornavn());
-        }).toList();
-        return sortedRessurser;
+            // first get all underlying enheter
+            List<no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet> underEnheter = new ArrayList<>(orgenhetService.getAllUnderliggendeOrgEnhetById(orgenhetId)
+                .stream()
+                .map(orgEnhetMapper::mapToOrgEnhet)
+                .toList());
+            underEnheter.forEach(underEnhet -> combinedRessursKoblinger.addAll(underEnhet.ressursKoblinger()));
+
+            // then get active ressurser under each underliggende enhet
+            List<Ressurs> ressurser = combinedRessursKoblinger.stream()
+                .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()) ||
+                    isPeriodFuture(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
+                .map(orgtilknytningState -> ressursRestService.findRessursByNavident(orgtilknytningState.navident()))
+                .toList();
+
+            // sort ressurser by fornavn and etternavn
+            List<Ressurs> sortedRessurser = ressurser.stream().sorted((r1, r2) -> {
+                var n1 = r1.state().visningsnavn();
+                var n2 = r2.state().visningsnavn();
+                return n1.fornavn().compareTo(n2.fornavn()) == 0 ? n1.etternavn().compareTo(n2.etternavn()) : n1.fornavn().compareTo(n2.fornavn());
+            }).toList();
+            return sortedRessurser;
+        }
     }
 }
