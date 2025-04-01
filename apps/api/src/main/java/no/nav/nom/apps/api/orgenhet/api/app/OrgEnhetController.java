@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
@@ -43,12 +44,11 @@ import java.util.stream.Collectors;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodFuture;
 
+@Slf4j
 @Tag(name = "OrgEnheter")
 @RestController
 @RequestMapping(value = {"/app/orgenheter"})
 public class OrgEnhetController {
-
-    private final static Logger log = LoggerFactory.getLogger(OrgEnhetController.class);
     private final OrgenhetService orgenhetService;
     private final OrgEnhetMapper orgEnhetMapper;
     private final KontaktpersonerExcelGenerator kontaktpersonerExcelGenerator;
@@ -137,7 +137,7 @@ public class OrgEnhetController {
             log.info("User have access to view ressurser for this orgenhet: {}-{}", loggedInUser, orgenhetId);
             var sortedRessurser = getSortedRessurserInAndUnderliggendeOrgenheter(orgenhetId);
 
-            log.info("Ressurser are retrived for this orgenhet: {}-{}", sortedRessurser, orgenhetId);
+            log.info("Ressurser are retrieved for this orgenhet: {}-{}", sortedRessurser, orgenhetId);
 
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=kontaktpersoner.xlsx");
             kontaktpersonerExcelGenerator.generate(response, orgEnhet.get(), sortedRessurser);

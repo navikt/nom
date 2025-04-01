@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgenhet.api.app;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.clients.kontaktinfo.Kontaktinfo;
 import no.nav.nom.apps.api.clients.kontaktinfo.KontaktinfoClient;
 import no.nav.nom.apps.api.clients.kontaktinfo.RessursKontaktinfo;
@@ -18,10 +19,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class KontaktpersonerExcelGenerator {
-    private final static Logger log = LoggerFactory.getLogger(KontaktpersonerExcelGenerator.class);
-
     private final KontaktinfoClient kontaktinfoClient;
 
     public KontaktpersonerExcelGenerator(
@@ -31,8 +31,8 @@ public class KontaktpersonerExcelGenerator {
     }
 
     public void generate(HttpServletResponse response, OrgEnhet orgEnhet, List<Ressurs> sortedRessurser) {
-        log.info("Getting content inf for ressurser: {}", sortedRessurser);
-        List<RessursKontaktinfo> kontaktinfoForRessurser =  List.of();
+        log.info("Getting content info for ressurser: {}", sortedRessurser);
+        List<RessursKontaktinfo> kontaktinfoForRessurser;
 
         // try to get the contact info for the ressurser
         try {
