@@ -20,6 +20,8 @@ spec:
       value: api://dev-gcp.nom.nom-api/.default
     - name: NOM_ADMIN_GROUP
       value: 9e0e2958-df7a-4376-83f3-9bcbec1f2650
+    - name: LOGGING_CONFIG
+      value: 'classpath:logback-nais.xml'
   replicas:
     min: 2
     max: 2
