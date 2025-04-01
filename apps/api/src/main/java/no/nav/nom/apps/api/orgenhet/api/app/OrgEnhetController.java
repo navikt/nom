@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodFuture;
 
@@ -137,7 +138,8 @@ public class OrgEnhetController {
             log.info("User have access to view ressurser for this orgenhet: {}-{}", loggedInUser, orgenhetId);
             var sortedRessurser = getSortedRessurserInAndUnderliggendeOrgenheter(orgenhetId);
 
-            log.info("Ressurser are retrieved for this orgenhet: {}-{}", sortedRessurser, orgenhetId);
+            log.info(SECURE_LOGS, "Ressurser are retrieved for this orgenhet: {}-{}", sortedRessurser, orgenhetId);
+            log.info("{} ressurser are retrieved for this orgenhet: {}", sortedRessurser.size(), orgenhetId);
 
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=kontaktpersoner.xlsx");
             kontaktpersonerExcelGenerator.generate(response, orgEnhet.get(), sortedRessurser);
