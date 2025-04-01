@@ -130,7 +130,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 103700;1037;ORGNIV3;Lister;Beholdt;;;JA;103700;ORGNIV3;leggInn;
 1087000;1087;AGRESSOORGENHET;Agder Tiltak;Beholdt;;dy786g;JA;1087000;ORGENHET;dy786g;
 1099000;1091;AGRESSOORGENHET;Agder Arbeidslivssenter;Beholdt;;;JA;109900;ORGNIV3;;28.02.2025 fjernet nomId-mappingen. Mapper riktig via agressoID
-1096100;1096;AGRESSOORGENHET;Agder Spesialtjenester;Beholdt;;;JA;1096100;ORGENHET;leggInn;
+109610;1096;AGRESSOORGENHET;Agder Spesialtjenester;Beholdt;;;JA;109610;ORGNIV3;leggInn;
 119100;1100;ORGNIV3;Rogaland Fylkeskontor;Opp til ORGNIV2;11;hy244v;JA;11;ORGNIV2;hy244v;
 110100;1101;ORGNIV3;Dalane;Beholdt;;;JA;110100;ORGNIV3;leggInn;
 110200;1102;ORGNIV3;Sandnes-Forsand;Beholdt;;;JA;110200;ORGNIV3;leggInn;
