@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+
 @Slf4j
 @Service
 public class KontaktpersonerExcelGenerator {
@@ -31,7 +33,8 @@ public class KontaktpersonerExcelGenerator {
     }
 
     public void generate(HttpServletResponse response, OrgEnhet orgEnhet, List<Ressurs> sortedRessurser) {
-        log.info("Getting content info for ressurser: {}", sortedRessurser);
+        log.info(SECURE_LOGS, "Getting content info for ressurser: {}", sortedRessurser);
+        log.info("Getting content info for {} ressurser", sortedRessurser.size());
         List<RessursKontaktinfo> kontaktinfoForRessurser;
 
         // try to get the contact info for the ressurser
@@ -39,7 +42,7 @@ public class KontaktpersonerExcelGenerator {
             kontaktinfoForRessurser = kontaktinfoClient
                 .getKontaktinfoForRessurser(sortedRessurser.stream().map(r -> r.state().navident()).toList(),
                     orgEnhet.id());
-            log.info("Received kontaktinfo for this orgenhet: {}-{}", orgEnhet.id(), kontaktinfoForRessurser);
+            log.info(SECURE_LOGS, "Received kontaktinfo for this orgenhet: {}-{}", orgEnhet.id(), kontaktinfoForRessurser);
         } catch (Exception e) {
             if (e instanceof AccessDeniedException) throw e;
             else {
@@ -56,7 +59,7 @@ public class KontaktpersonerExcelGenerator {
             // index -1 is for the header row
             addRow(sheet.createRow(rowcount++), null, null, -1);
 
-            log.info("Generating excel for orgenhet {} with ressurser {}, and contantinfo {}", orgEnhet.id(), sortedRessurser, kontaktinfoForRessurser);
+            log.info(SECURE_LOGS, "Generating excel for orgenhet {} with ressurser {}, and contantinfo {}", orgEnhet.id(), sortedRessurser, kontaktinfoForRessurser);
             for (RessursKontaktinfo info : kontaktinfoForRessurser) {
                 Ressurs ressurs = getRessursForGittNavident(sortedRessurser, info.ressursNavident());
 
