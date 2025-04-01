@@ -21,7 +21,7 @@ import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
 
 const schema = z.object({
   navident: navidentValidator(),
-  sluttDato: z.string().optional(),
+  sluttDato: z.string().nullable(),
   confirm: confirmTextValidator(),
 });
 

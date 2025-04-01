@@ -21,7 +21,11 @@ import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
 
 const schema = z.object({
   orgenhetId: z.string().min(1, "Må oppgis"),
-  gyldigTom: z.date({ message: "Må oppgis" }),
+  gyldigTom: z
+    .string({
+      invalid_type_error: "Obligatorisk",
+    })
+    .min(1, "Obligatorisk"),
   confirm: confirmTextValidator(),
 });
 
@@ -63,6 +67,12 @@ export function AvvikleOrgenhet() {
           <Modal
             className="w-fit"
             header={{ heading: "Avvikle orgenhet" }}
+            onClose={() => {
+              methods.reset();
+              methods.clearErrors();
+              mutation.reset();
+              ref.current?.close();
+            }}
             ref={ref}
           >
             <Modal.Body className="flex gap-4 flex-col">

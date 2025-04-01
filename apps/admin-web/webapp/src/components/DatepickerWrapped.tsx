@@ -1,5 +1,6 @@
 import type { DateInputProps } from "@navikt/ds-react";
 import { DatePicker, useDatepicker } from "@navikt/ds-react";
+import { useEffect } from "react";
 import { useController } from "react-hook-form";
 
 import { formatDateWithoutTimezone } from "~/utils.ts";
@@ -16,6 +17,12 @@ export function DatePickerWrapped({
     name,
     rules,
   });
+
+  useEffect(() => {
+    if (!field.value) {
+      datePickerProperties.reset();
+    }
+  }, [field.value]);
 
   const datePickerProperties = useDatepicker({
     onDateChange: (date) =>

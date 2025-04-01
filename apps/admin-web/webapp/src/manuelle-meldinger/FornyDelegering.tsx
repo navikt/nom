@@ -21,7 +21,7 @@ import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
 
 const schema = z.object({
   fid: fidValidator(),
-  nyGyldigTom: z.date().optional(),
+  nyGyldigTom: z.string().nullable(),
   confirm: confirmTextValidator(),
 });
 
@@ -87,7 +87,7 @@ export function FornyDelegering() {
                 {...methods.register("fid")}
               />
               <DatePickerWrapped
-                label="Gyldig Til og med på delegering"
+                label="Gyldig til og med-dato på delegering"
                 name="nyGyldigTom"
               />
               <ConfirmTextField />
