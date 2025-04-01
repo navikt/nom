@@ -109,6 +109,7 @@ export const ValgtOrgEnhet = ({
             <Heading level="2" size="large" spacing>
               {orgEnhet.navn}
             </Heading>
+
             <HGrid
               columns={2}
               css={css`
@@ -149,9 +150,16 @@ export const ValgtOrgEnhet = ({
               )}
               {orgEnhet.agressoId && (
                 <BodyShort size="small">
-                  Agresso-ID: <b>{orgEnhet.agressoId}</b>
+                  Unit4-ID: <b>{orgEnhet.agressoId}</b>
                 </BodyShort>
               )}
+              {orgEnhet.orgNiv &&
+                orgEnhet.orgNiv !== "ORGNIV0" &&
+                orgEnhet.orgNiv !== "ORGENHET" && (
+                  <BodyShort size="small">
+                    Unit4-nivå: <b>{orgEnhet.orgNiv}</b>
+                  </BodyShort>
+                )}
             </HGrid>
           </div>
 
