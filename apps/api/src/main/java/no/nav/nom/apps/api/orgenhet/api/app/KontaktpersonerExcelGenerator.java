@@ -1,5 +1,7 @@
 package no.nav.nom.apps.api.orgenhet.api.app;
 
+import io.getunleash.Unleash;
+
 import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
@@ -18,18 +20,22 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+import static no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetController.UNLEASH_NY_KONTAKTINFO_EXPORT;
 
 @Slf4j
 @Service
 public class KontaktpersonerExcelGenerator {
     private final KontaktinfoClient kontaktinfoClient;
+    private final Unleash unleash;
 
     public KontaktpersonerExcelGenerator(
-        KontaktinfoClient kontaktinfoClient
+        KontaktinfoClient kontaktinfoClient, Unleash unleash
     ) {
         this.kontaktinfoClient = kontaktinfoClient;
+        this.unleash = unleash;
     }
 
     public void generate(HttpServletResponse response, OrgEnhet orgEnhet, List<Ressurs> sortedRessurser) {
@@ -43,6 +49,7 @@ public class KontaktpersonerExcelGenerator {
                 .getKontaktinfoForRessurser(sortedRessurser.stream().map(r -> r.state().navident()).toList(),
                     orgEnhet.id());
             log.info(SECURE_LOGS, "Received kontaktinfo for this orgenhet: {}-{}", orgEnhet.id(), kontaktinfoForRessurser);
+            log.info("Received {} kontaktinfo for this orgenhet: {}", kontaktinfoForRessurser.size(), orgEnhet.id());
         } catch (Exception e) {
             if (e instanceof AccessDeniedException) throw e;
             else {
@@ -50,6 +57,9 @@ public class KontaktpersonerExcelGenerator {
                 throw new RuntimeException(e.getMessage());
             }
         }
+
+        var ressursPerNavident = sortedRessurser.stream()
+            .collect(Collectors.toMap(r -> r.state().navident(), r -> r));
 
         // generate excel
         try (Workbook workbook = new XSSFWorkbook()) {
@@ -61,7 +71,13 @@ public class KontaktpersonerExcelGenerator {
 
             log.info(SECURE_LOGS, "Generating excel for orgenhet {} with ressurser {}, and contantinfo {}", orgEnhet.id(), sortedRessurser, kontaktinfoForRessurser);
             for (RessursKontaktinfo info : kontaktinfoForRessurser) {
-                Ressurs ressurs = getRessursForGittNavident(sortedRessurser, info.ressursNavident());
+
+                Ressurs ressurs;
+                if (unleash.isEnabled(UNLEASH_NY_KONTAKTINFO_EXPORT)) {
+                    ressurs = ressursPerNavident.get(info.ressursNavident());
+                } else {
+                    ressurs = getRessursForGittNavident(sortedRessurser, info.ressursNavident());
+                }
 
                 // index determines the row number for ressurs.
                 // If there are multiple contact info for a ressurs, we will have multiple rows for that ressurs.
@@ -99,7 +115,6 @@ public class KontaktpersonerExcelGenerator {
             log.error("Error generating excel file. ", e);
             throw new RuntimeException(e.getMessage());
         }
-
     }
 
     private Ressurs getRessursForGittNavident(List<Ressurs> ressurser, String navident) {
