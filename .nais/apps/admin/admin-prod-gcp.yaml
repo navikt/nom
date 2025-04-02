@@ -72,7 +72,7 @@ spec:
   azure:
     application:
       enabled: true
-      allowAllUsers: true
+      allowAllUsers: false
       claims:
         groups:
           - id: "2d91b26c-d412-440b-9122-0fafc594db89" # nom-admin
