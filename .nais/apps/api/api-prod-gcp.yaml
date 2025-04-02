@@ -80,6 +80,9 @@ spec:
           - id: "b32023b5-4644-4b52-b6fc-bbb7723b8fbf" # 0000-GA-NOM-WRITE-DELEGERT
           - id: "f267e0a5-1ef6-4ef1-9303-4543b34f3b05" # 0000-GA-NOM-WRITE-LEDER
           - id: "e219ba08-0685-40b5-95e6-5fd82ec7414a" # NOM-PILOT
+          - id: "9b3bcb75-12ae-4af7-aecf-fcd8f5b27dc5" # 0000-CA-NOM-Write-Utl-Konsulent
+          - id: "220b7326-c379-4611-b1ad-57c29dd60914" # 0000-CA-NOM-Write-Vikafossen
+          - id: "ea2cd5fb-b0c0-4ffa-98ea-c5439dfcc3a9" # 0000-CA-NOM-Write-Robot            
         extra:
           - azp_name
           - NAVident
