@@ -76,6 +76,9 @@ authentication:
     nomWrite: ${NOM_WRITE_GROUPID:nomWriteGroup}      # Gamle nom-write gruppen
     nomAdmin: ${NOM_ADMIN_GROUPID:nomAdminGroup}      #gamle nom-admin gruppen
     nomPilot: ${NOM_PILOT_GROUPID:nomPilotGroup}      #gamle nom-admin gruppen
+    nomWriteUtlKonsulent: ${NOM_WRITE_UTL_KONSULENT_GROUPID:nomWriteUtlKonsulentGroup}  # 0000-CA-NOM-Write-Utl-Konsulent
+    nomWriteVikafossen: ${NOM_WRITE_VIKAFOSSEN_GROUPID:nomWriteVikafossenGroup}         # 0000-CA-NOM-Write-Vikafossen
+    nomWriteRobot: ${NOM_WRITE_ROBOT_GROUPID:nomWriteRobotGroup}                        # 0000-CA-NOM-Write-Robot
 server:
   shutdown: graceful
 
@@ -288,6 +291,15 @@ app:
       nom-pilot:
         group-id: "${NOM_PILOT_GROUPID}"
         scopes: ["NOM_PILOT"]
+      nom-write-utl-konsulent:
+        group-id: "${NOM_WRITE_UTL_KONSULENT_GROUPID}"
+        scopes: ["NOM_WRITE_UTL_KONSULENT"]
+      nom-write-vikafossen:
+        group-id: "${NOM_WRITE_VIKAFOSSEN_GROUPID}"
+        scopes: ["NOM_WRITE_VIKAFOSSEN"]
+      nom-write-robot:
+        group-id: "${NOM_WRITE_ROBOT_GROUPID}"
+        scopes: ["NOM_WRITE_ROBOT"]
   orgenhet:
     linjeenhetene: me177r,su645c,hu797w,tu734a
   google-storage-bucket-name:
@@ -373,6 +385,9 @@ NOM_LEDER_GROUPID: "e9cd9267-9baf-4078-abb8-7251c4313d32" # 0000-GA-NOM-WRITE-LE
 NOM_WRITE_GROUPID: "c5752f26-105a-460f-a538-1859273f5057" # nom-write
 NOM_ADMIN_GROUPID: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # nom-admin
 NOM_PILOT_GROUPID: "087625aa-d658-4b00-9d71-8538b1a8fd15" # NOM-PILOT
+NOM_WRITE_UTL_KONSULENT_GROUPID:  "fb625494-4aa6-4061-9f87-02c820210ed9" # 0000-CA-NOM-Write-Utl-Konsulent
+NOM_WRITE_VIKAFOSSEN_GROUPID:     "2632148d-54a6-4b17-9e53-9d415d73653f" # 0000-CA-NOM-Write-Vikafossen
+NOM_WRITE_ROBOT_GROUPID:          "a735d831-420f-4a63-949b-a02ef0f17673" # 0000-CA-NOM-Write-Robot
 
 PAARORENDE_BASEURL: "http://nom-paarorende.org.svc.cluster.local"
 PAARORENDE_API_SCOPE: api://dev-gcp.org.nom-paarorende/.default
@@ -426,6 +441,15 @@ app:
       nom-pilot:
         group-id: "${NOM_PILOT_GROUPID}"
         scopes: ["NOM_PILOT"]
+      nom-write-utl-konsulent:
+        group-id: "${NOM_WRITE_UTL_KONSULENT_GROUPID}"
+        scopes: ["NOM_WRITE_UTL_KONSULENT"]
+      nom-write-vikafossen:
+        group-id: "${NOM_WRITE_VIKAFOSSEN_GROUPID}"
+        scopes: ["NOM_WRITE_VIKAFOSSEN"]
+      nom-write-robot:
+        group-id: "${NOM_WRITE_ROBOT_GROUPID}"
+        scopes: ["NOM_WRITE_ROBOT"]        
   orgenhet:
     linjeenhetene: ry630r,ky110z,se232x,ne994m
   google-storage-bucket-name:
@@ -445,6 +469,9 @@ NOM_LEDER_GROUPID: "f267e0a5-1ef6-4ef1-9303-4543b34f3b05" # 0000-GA-NOM-WRITE-LE
 NOM_WRITE_GROUPID: "1334a91a-c4e0-409e-a497-3c4453869874"
 NOM_ADMIN_GROUPID: "2d91b26c-d412-440b-9122-0fafc594db89"
 NOM_PILOT_GROUPID: "e219ba08-0685-40b5-95e6-5fd82ec7414a" # NOM-PILOT
+NOM_WRITE_UTL_KONSULENT_GROUPID:  "9b3bcb75-12ae-4af7-aecf-fcd8f5b27dc5" # 0000-CA-NOM-Write-Utl-Konsulent
+NOM_WRITE_VIKAFOSSEN_GROUPID:     "220b7326-c379-4611-b1ad-57c29dd60914" # 0000-CA-NOM-Write-Vikafossen
+NOM_WRITE_ROBOT_GROUPID:          "ea2cd5fb-b0c0-4ffa-98ea-c5439dfcc3a9" # 0000-CA-NOM-Write-Robot
 
 NOM_REMEDY_INTEGRASJON_BASEURL: "https://nom-remedy-integrasjon.prod-fss-pub.nais.io"
 NOM_REMEDY_INTEGRASJON_API_SCOPE: api://prod-fss.org.nom-remedy-integrasjon/.default
