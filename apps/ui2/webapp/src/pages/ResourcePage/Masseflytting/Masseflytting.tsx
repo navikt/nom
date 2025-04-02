@@ -3,9 +3,11 @@ import { ChevronLeftIcon, FloppydiskIcon } from "@navikt/aksel-icons";
 import {
   Alert,
   BodyShort,
+  Box,
   Button,
   Checkbox,
   Heading,
+  HStack,
   Label,
   Link,
   Loader,
@@ -16,7 +18,7 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import React, { useState } from "react";
+import { useState } from "react";
 
 import {
   getOrgEnhet,
@@ -41,6 +43,7 @@ import {
 import type {
   MasseFlyttingRequest,
   OrgEnhet,
+  OrgEnhetMedLedernavn,
   OrgtilknytningState,
   Ressurs,
 } from "~/types/api-models";
@@ -137,8 +140,9 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
   const sortedRessurser = data;
 
   const [valgteRessurser, setValgteRessurser] = useState<string[]>([]);
-  const [masseflyttingTilOrgEnhet, setMasseflyttingTilOrgEnhet] =
-    useState<string>();
+  const [masseflyttingTilOrgEnhet, setMasseflyttingTilOrgEnhet] = useState<
+    OrgEnhetMedLedernavn | undefined
+  >();
   const [beholdTilganger, setBeholdTilganger] = useState<boolean>(true);
 
   function toggleValgtRessurs(value: string, state: boolean) {
@@ -213,7 +217,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
         <MasseflyttingBekreftModal
           beholdTilganger={beholdTilganger}
           ressurser={sortedRessurser}
-          tilOrgEnhet={masseflyttingTilOrgEnhet}
+          tilOrgEnhet={masseflyttingTilOrgEnhet.id}
           valgteRessurser={valgteRessurser}
         />,
       )
@@ -222,7 +226,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
             lagMasseFlyttingRequest(
               aktiveOrgtilknytninger ?? [],
               valgteRessurser,
-              masseflyttingTilOrgEnhet,
+              masseflyttingTilOrgEnhet.id,
               beholdTilganger,
             ),
           ),
@@ -270,48 +274,84 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
           Flytting av medarbeidere{" "}
           {orgEnhet?.navn ? `i ${orgEnhet.navn} (${orgEnhet.id})` : ""}
         </Heading>
+        <>
+          <VStack css={fraTilBoksStyle} gap="2">
+            <Label
+              css={css`
+                font-size: var(--a-font-size-xlarge);
+                font-weight: var(--a-font-weight-bold);
+              `}
+            >
+              Fra
+            </Label>
 
-        <OrgEnhetSelect
-          helpText="Med organisasjonsenhet menes hvilken enhet medarbeideren skal
+            <BodyShort
+              css={css`
+                font-size: var(--a-font-size-xlarge);
+                padding: 0.5rem;
+                border-radius: 0.5rem;
+              `}
+            >
+              {orgEnhet.navn}
+            </BodyShort>
+
+            <EnhetKontekstInfo
+              orgEnhet={orgEnheterSomKanHaRessurser.find(
+                (it) => it.id === orgEnhet.id,
+              )}
+            />
+          </VStack>
+          <VStack css={fraTilBoksStyle} gap={"2"}>
+            <Box marginBlock={"0 2"}>
+              <OrgEnhetSelect
+                helpText="Med organisasjonsenhet menes hvilken enhet medarbeideren skal
               tilhøre og dermed hvilken leder som er ansvarlig for vedkommende."
-          label="Organisasjonsenhet"
-          onChange={(value) => setMasseflyttingTilOrgEnhet(value)}
-          orgEnheter={orgEnheterSomKanHaRessurser}
-          value={masseflyttingTilOrgEnhet}
-        />
+                label="Til (velg orgenhet)"
+                onChange={(value) => setMasseflyttingTilOrgEnhet(value)}
+                orgEnheter={orgEnheterSomKanHaRessurser}
+                value={masseflyttingTilOrgEnhet?.id}
+              />
+            </Box>
 
-        <Checkbox
-          checked={beholdTilganger}
-          onChange={(event) => setBeholdTilganger(event.target.checked)}
-        >
-          Gamle tilganger skal bli med videre
-        </Checkbox>
+            <EnhetKontekstInfo orgEnhet={masseflyttingTilOrgEnhet} />
 
-        <div
-          css={css`
-            justify-self: end;
-            width: fit-content;
-            display: flex;
-            align-items: center;
-          `}
-        >
-          <BodyShort>
-            <b>{valgteRessurser.length}</b> medarbeidere valgt
-          </BodyShort>
+            <Checkbox
+              checked={beholdTilganger}
+              onChange={(event) => setBeholdTilganger(event.target.checked)}
+            >
+              Gamle tilganger skal bli med videre
+            </Checkbox>
 
-          <Button
-            css={css`
-              margin-left: var(--a-spacing-4);
-            `}
-            disabled={valgteRessurser.length === 0 || !masseflyttingTilOrgEnhet}
-            onClick={handleClick}
-            size="small"
-          >
-            Flytt medarbeidere
-          </Button>
-        </div>
+            <div
+              css={css`
+                align-self: end;
+                width: fit-content;
+                display: flex;
+                align-items: center;
+              `}
+            >
+              <BodyShort>
+                <b>{valgteRessurser.length}</b> medarbeidere valgt
+              </BodyShort>
+
+              <Button
+                css={css`
+                  margin-left: var(--a-spacing-4);
+                `}
+                disabled={
+                  valgteRessurser.length === 0 || !masseflyttingTilOrgEnhet
+                }
+                onClick={() => {
+                  handleClick();
+                }}
+                size="small"
+              >
+                Flytt medarbeidere
+              </Button>
+            </div>
+          </VStack>
+        </>
       </VStack>
-
       <div
         css={css`
           margin-left: var(--a-spacing-2);
@@ -355,7 +395,6 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
           </Checkbox>
         </div>
       </div>
-
       <Table
         css={css`
           background-color: #fff;
@@ -455,7 +494,6 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
           ))}
         </Table.Body>
       </Table>
-
       {sortedRessurser.length === 0 && (
         <div
           css={css`
@@ -476,6 +514,54 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
       )}
     </>
   );
+}
+
+function EnhetKontekstInfo({
+  orgEnhet,
+  fallbackMessage,
+}: {
+  orgEnhet: OrgEnhetMedLedernavn | undefined;
+  fallbackMessage?: string;
+}) {
+  const extraAgressoInfo = useExtraAgressoInfo(orgEnhet?.id);
+  if (!orgEnhet) {
+    return <>{fallbackMessage}</>;
+  }
+
+  return (
+    <HStack gap={"4"} marginBlock={"0 0"}>
+      <span>
+        NOM-ID: <b>{orgEnhet?.id}</b>
+      </span>
+      <span>
+        Leder: <b>{orgEnhet?.ledere[0]}</b>
+      </span>
+      <span>
+        Enhet i Remedy: <b>{orgEnhet?.remedyEnhetId}</b>
+      </span>
+      {extraAgressoInfo && (
+        <span>
+          Agresso-ID: <b>{extraAgressoInfo.agressoId}</b>
+        </span>
+      )}
+    </HStack>
+  );
+}
+
+function useExtraAgressoInfo(orgEnhetId: string | undefined) {
+  const qry = useQuery({
+    queryKey: getOrgEnhet.queryKey(orgEnhetId || "nothing"),
+    queryFn: () => getOrgEnhet.queryFn(orgEnhetId || "nothing"),
+    enabled: orgEnhetId !== undefined,
+  });
+
+  if (!qry.data) {
+    return null;
+  }
+  return {
+    agressoId: qry.data.agressoId,
+    agressoOrgenhetType: qry.data.agressoOrgenhetType,
+  };
 }
 
 function lagMasseFlyttingRequest(
@@ -607,3 +693,9 @@ function MasseflyttingBekreftModal({
     </Modal>
   );
 }
+
+const fraTilBoksStyle = css`
+  background-color: #deecef;
+  padding: var(--a-spacing-4) var(--a-spacing-6);
+  border-radius: var(--a-border-radius-large);
+`;

@@ -29,7 +29,7 @@ export function OrgEnhetSelectFormPart({
           helpText="Med organisasjonsenhet menes hvilken enhet medarbeideren skal
               tilhøre og dermed hvilken leder som er ansvarlig for vedkommende."
           label="Organisasjonsenhet"
-          onChange={field.onChange}
+          onChange={(oe) => field.onChange(oe?.id)}
           orgEnheter={orgEnheter}
           ref={field.ref}
           value={field.value}
@@ -51,7 +51,7 @@ export const OrgEnhetSelect = forwardRef(
       helpText,
     }: {
       orgEnheter: OrgEnhetMedLedernavn[];
-      onChange: (s: string | undefined) => void;
+      onChange: (orgEnhet: OrgEnhetMedLedernavn | undefined) => void;
       value?: string;
       description?: string;
       label: string;
@@ -98,7 +98,9 @@ export const OrgEnhetSelect = forwardRef(
               ? "Skriv minst 1 tegn for å søke"
               : `Fant ingen resultater for "${inputValue}"`
           }
-          onChange={(option) => onChange(option?.value)}
+          onChange={(option) =>
+            onChange(orgEnheter.find((it) => it.id === option?.value))
+          }
           placeholder="Søk etter navn på organisasjonsenhet"
           ref={reference}
           value={currentValue ?? null}
