@@ -65,7 +65,7 @@ public class SinkController {
 
 
     @GetMapping(value = "/ressursEvents")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT_READONLY')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
     public List<RessursEvent> getRessursEvents(@Valid EventSearchParams eventSearchParams) {
         int fromOffset = eventSearchParams.getFromOffset();
         List<RessursEvent> events = ressursEvtsrcRepository.getRessursEvtsrc().stream().filter(eventFilter(eventSearchParams)).toList();
@@ -74,7 +74,7 @@ public class SinkController {
     }
 
     @GetMapping(value = "/orgenhetEvents")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT_READONLY')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
     public List<OrgEnhetEvent> getOrgEnhetEvents(@Valid EventSearchParams eventSearchParams) {
         int fromOffset = eventSearchParams.getFromOffset();
         List<OrgEnhetEvent> events = orgenhetEvtsrcRepository.getOrgenhetEvtsrc().stream().filter(eventFilter(eventSearchParams)).toList();
@@ -83,7 +83,7 @@ public class SinkController {
     }
 
     @GetMapping(value = "/orgtilknytningEvents")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT_READONLY')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
     public List<OrgtilknytningEvent> getOrgtilknytningEvents(@Valid EventSearchParams eventSearchParams) {
         int fromOffset = eventSearchParams.getFromOffset();
         List<OrgtilknytningEvent> events = orgtilknytningEvtsrcRepository.getOrgtilknytningEvtsrc().stream().filter(eventFilter(eventSearchParams)).toList();
@@ -92,7 +92,7 @@ public class SinkController {
     }
 
     @GetMapping(value = "/tilgangEvents")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT_READONLY')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
     public List<AuthorizationEvent> getTilgangEvents(@Valid EventSearchParams eventSearchParams) {
         int fromOffset = eventSearchParams.getFromOffset();
         List<AuthorizationEvent> events = tilgangEvtsrcRepository.getTilgangEvtsrc().stream().filter(eventFilter(eventSearchParams)).toList();
@@ -101,7 +101,7 @@ public class SinkController {
     }
 
     @GetMapping(value = "/apiRessursEvents")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT_READONLY')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
     public List<RessursStateKafkaDTO> getEksternRessursEvents(@Valid EventSearchParams eventSearchParams) {
         int fromOffset = eventSearchParams.getFromOffset();
         List<RessursStateKafkaDTO> events = ressursApiStateRepository.getRessursStateTopic().stream().filter(eventFilter(eventSearchParams)).toList();
@@ -110,7 +110,7 @@ public class SinkController {
     }
 
     @GetMapping(value = "/apiOrgenhetEvents")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT_READONLY')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
     public List<OrgEnhetStateDTO> getApiOrgenhetEvents(@Valid EventSearchParams eventSearchParams) {
         int fromOffset = eventSearchParams.getFromOffset();
         List<OrgEnhetStateDTO> events = orgEnhetStateApiRepository.getOrgtilknytningApiState().stream().filter(eventFilter(eventSearchParams)).toList();

@@ -56,7 +56,7 @@ public class StateController {
     }
 
     @GetMapping(value = "/ressurs")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT_READONLY')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
     public List<RessursState> getRessurser(@Valid RessursSearchParams ressursSearchParams) {
         int fromOffset = ressursSearchParams.getFromOffset();
         var events = ressursStateRepository.getAll().stream().filter(ressursSearchFilter(ressursSearchParams)).toList();
@@ -65,7 +65,7 @@ public class StateController {
     }
 
     @GetMapping(value = "/orgenhet")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT_READONLY')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
     public List<OrgEnhetState> getOrgenheter(@Valid OrgenhetStateSearchParams orgenhetStateSearchParams) {
         int fromOffset = orgenhetStateSearchParams.getFromOffset();
         var events = orgEnhetStateRepository.getAll().stream().filter(orgenhetSearchFilter(orgenhetStateSearchParams)).toList();
@@ -74,7 +74,7 @@ public class StateController {
     }
 
     @GetMapping(value = "/orgtilknytning")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT_READONLY')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
     public List<OrgtilknytningState> getOrgilknytning(@Valid OrgtilknytningStateSearchParams orgtilknytningStateSearchParams) {
         int fromOffset = orgtilknytningStateSearchParams.getFromOffset();
         var events = orgtilknytningStateRepository
@@ -86,7 +86,7 @@ public class StateController {
     }
 
     @GetMapping(value = "/organisering")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT_READONLY')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
     public List<OrganiseringState> getOrganisering(@Valid OrganiseringStateSearchParams organiseringStateSearchParams) {
         int fromOffset = organiseringStateSearchParams.getFromOffset();
         var events = organiseringStateRepository

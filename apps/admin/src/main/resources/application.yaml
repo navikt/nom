@@ -114,13 +114,25 @@ app:
         scopes: ["ADMIN"]
       support-readonly:
         group-id: "${SUPPORT_READONLY_GROUPID}"
-        scopes: ["SUPPORT_READONLY"]        
+        scopes: ["SUPPORT_READONLY"]
+      readonly:
+        group-id: "${READONLY_GROUPID}"
+        scopes:
+          - READONLY
+      extended-readonly:
+        group-id: "${EXTENDED_READONLY_GROUPID}"
+        scopes:
+          - READONLY
+          - EXTENDED_READONLY
+
   google-storage-bucket:
     name: no-nav-org-dev-nom-admin-storage-bucket
     remedy-data: IR_export.csv
 
-NOM_ADMIN_GROUPID: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # nom-admin
-SUPPORT_READONLY_GROUPID: "21301ba9-b972-411f-8090-689bc5f5ca27" # 0000-CA-NOM-Nom-Admin-Brukerstotte
+NOM_ADMIN_GROUPID:          "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # nom-admin
+SUPPORT_READONLY_GROUPID:   "21301ba9-b972-411f-8090-689bc5f5ca27" # 0000-CA-NOM-Nom-Admin-Brukerstotte
+READONLY_GROUPID:           "76611d10-876b-4df1-8425-dfe61e6990d1" # 0000-CA-NOM-ADMIN-Lesetilgang
+EXTENDED_READONLY_GROUPID:  "a0c8eddc-2435-4fea-a642-58b2b16dd8e0" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
 
 --- # This is the same as having an application-prod.yaml file
 spring:
@@ -137,9 +149,21 @@ app:
       support-readonly:
         group-id: "${SUPPORT_READONLY_GROUPID}"
         scopes: ["SUPPORT_READONLY"]
+      readonly:
+        group-id: "${READONLY_GROUPID}"
+        scopes:
+          - READONLY
+      extended-readonly:
+        group-id: "${EXTENDED_READONLY_GROUPID}"
+        scopes:
+          - READONLY
+          - EXTENDED_READONLY
+        
   google-storage-bucket:
     name: no-nav-org-prod-nom-admin-storage-bucket
     remedy-data: IR_export.csv
 
-NOM_ADMIN_GROUPID: "2d91b26c-d412-440b-9122-0fafc594db89"
-SUPPORT_READONLY_GROUPID: "9aa86116-5e76-4c10-a124-5bdfcd38377e" # 0000-CA-NOM-Nom-Admin-Brukerstotte
+NOM_ADMIN_GROUPID:          "2d91b26c-d412-440b-9122-0fafc594db89"
+SUPPORT_READONLY_GROUPID:   "9aa86116-5e76-4c10-a124-5bdfcd38377e" # 0000-CA-NOM-Nom-Admin-Brukerstotte
+READONLY_GROUPID:           "9a608366-69eb-42a9-a787-3469359ce322" # 0000-CA-NOM-ADMIN-Lesetilgang
+EXTENDED_READONLY_GROUPID:  "cea028e1-811f-4cd6-aa67-d0130207fd7a" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
