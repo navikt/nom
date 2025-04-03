@@ -15,7 +15,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -284,6 +283,10 @@ class E2eFraDvhTilEventsTest extends TestBase {
             .gyldigFom(DD_1Y)
             .gyldigTom(DD_6M_1D);
 
+        assertOrgtilknytning(CMD.ENDRE_TILKNYTNINGTYPE)
+            .forFid(fid_a2)
+            .tilTilknytningtype(Optional.of(Tilknytningtype.MIDLERTIDIG));
+
         String fid_a3 = assertOrgtilknytning(CMD.OPPRETTET)
             .forNavident(RESSURS_1.navident())
             .tilEnhet(ENHET_A.getId())
@@ -307,7 +310,7 @@ class E2eFraDvhTilEventsTest extends TestBase {
             .tilTilknytningtype(Optional.of(Tilknytningtype.FAST));
 
         assertEquals(1, result.size());
-        assertEquals(10, result.get(RESSURS_1.navident()).endringer().size());
+        assertEquals(11, result.get(RESSURS_1.navident()).endringer().size());
         assertEquals(0, result.get(RESSURS_1.navident()).errors().size());
     }
 
@@ -507,7 +510,7 @@ class E2eFraDvhTilEventsTest extends TestBase {
         var result = prosserer.process(sspForNavidentResult);
 
         assertEquals(1, result.size());
-        assertEquals(7, result.get(RESSURS_1.navident()).endringer().size());
+        assertEquals(8, result.get(RESSURS_1.navident()).endringer().size());
         assertEquals(1, result.get(RESSURS_1.navident()).errors().size());
 
         assertOrgtilknytning(CMD.ENDRET_DATO)
@@ -532,6 +535,10 @@ class E2eFraDvhTilEventsTest extends TestBase {
             .forFid(fid_a1)
             .gyldigFom(DD_3Y)
             .gyldigTom(DD_2Y_1D);
+
+        assertOrgtilknytning(CMD.ENDRE_TILKNYTNINGTYPE)
+            .forFid(fid_a1)
+            .tilTilknytningtype(Optional.of(Tilknytningtype.MIDLERTIDIG));
 
         String fid_a2 = assertOrgtilknytning(CMD.OPPRETTET)
             .forNavident(RESSURS_1.navident())
@@ -671,7 +678,7 @@ class E2eFraDvhTilEventsTest extends TestBase {
 
         assertEquals(1, result.size());
         assertEquals(3, result.get(RESSURS_1.navident()).stillingPerioder().size());
-        assertEquals(7, result.get(RESSURS_1.navident()).endringer().size());
+        assertEquals(8, result.get(RESSURS_1.navident()).endringer().size());
         assertEquals(0, result.get(RESSURS_1.navident()).errors().size());
 
         assertOrgtilknytning(CMD.ENDRET_DATO)
@@ -695,6 +702,10 @@ class E2eFraDvhTilEventsTest extends TestBase {
             .forFid(fid_1)
             .gyldigFom(DD_2Y)
             .gyldigTom(DD_1Y_1D);
+
+        assertOrgtilknytning(CMD.ENDRE_TILKNYTNINGTYPE)
+            .forFid(fid_1)
+            .tilTilknytningtype(Optional.of(Tilknytningtype.FAST));
 
         String fid_2 = assertOrgtilknytning(CMD.OPPRETTET)
             .forNavident(A000001)
@@ -736,7 +747,7 @@ class E2eFraDvhTilEventsTest extends TestBase {
 
         assertEquals(1, result.size());
         assertEquals(5, result.get(RESSURS_1.navident()).stillingPerioder().size());
-        assertEquals(12, result.get(RESSURS_1.navident()).endringer().size());
+        assertEquals(14, result.get(RESSURS_1.navident()).endringer().size());
         assertEquals(0, result.get(RESSURS_1.navident()).errors().size());
 
         assertOrgtilknytning(CMD.ENDRET_DATO)
@@ -760,6 +771,10 @@ class E2eFraDvhTilEventsTest extends TestBase {
             .forFid(fid_1)
             .gyldigFom(DD_4Y_2M)
             .gyldigTom(DD_3Y_6M);
+
+        assertOrgtilknytning(CMD.ENDRE_TILKNYTNINGTYPE)
+            .forFid(fid_1)
+            .tilTilknytningtype(Optional.of(Tilknytningtype.FAST));
 
         String fid_2 = assertOrgtilknytning(CMD.OPPRETTET)
             .forNavident(A000001)
@@ -796,6 +811,10 @@ class E2eFraDvhTilEventsTest extends TestBase {
             .forFid(fid_3)
             .gyldigFom(DD_2Y_8M)
             .gyldigTom(DD_1Y_6M);
+
+        assertOrgtilknytning(CMD.ENDRE_TILKNYTNINGTYPE)
+            .forFid(fid_3)
+            .tilTilknytningtype(Optional.of(Tilknytningtype.FAST));
 
         String fid_4 = assertOrgtilknytning(CMD.OPPRETTET)
             .forNavident(A000001)
