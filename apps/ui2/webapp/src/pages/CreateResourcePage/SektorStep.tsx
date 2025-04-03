@@ -28,6 +28,10 @@ export const TilknytningtypeNameMapping = {
   [Tilknytningtype.ARBEIDSTRENING]: "Arbeidstrening",
   [Tilknytningtype.STUDENT]: "Student",
   [Tilknytningtype.JOBBSPESIALIST]: "Jobbspesialist",
+  [Tilknytningtype.PRAKSISARBEID]: "Praksisarbeid",
+  [Tilknytningtype.UFORUTSETT_BEHOV]: "Uforutsett behov",
+  [Tilknytningtype.VIKAR]: "Vikar",
+  [Tilknytningtype.UTDANNINGSSTILLINGER]: "Utdanningsstillinger",
   [Tilknytningtype.ANNET]: "Annet",
   [Tilknytningtype.INGEN]: "Ingen",
 };
@@ -37,6 +41,10 @@ export const tilknytningstyperStatlige = [
   Tilknytningtype.MIDLERTIDIG,
   Tilknytningtype.LAERLING,
   Tilknytningtype.PENSJONIST,
+  Tilknytningtype.PRAKSISARBEID,
+  Tilknytningtype.UFORUTSETT_BEHOV,
+  Tilknytningtype.UTDANNINGSSTILLINGER,
+  Tilknytningtype.VIKAR,
 ];
 
 export const tilknytningstyperEksterne = [

@@ -433,6 +433,13 @@ function OrganisationHierarchyTree({
     orgtilknytningType,
   } = orgTilknytning;
 
+  const nyeTilknytningtyper = [
+    Tilknytningtype.VIKAR,
+    Tilknytningtype.UFORUTSETT_BEHOV,
+    Tilknytningtype.PRAKSISARBEID,
+    Tilknytningtype.UTDANNINGSSTILLINGER,
+  ];
+
   const startsInTheFuture = gyldigFom && isAfterToday(new Date(gyldigFom));
 
   const kanAlltidSeTilknytningstype =
@@ -541,7 +548,10 @@ function OrganisationHierarchyTree({
             )}
             <br />
             {orgtilknytningType &&
-              sektor &&
+              (sektor ||
+                nyeTilknytningtyper.find(
+                  (value) => value === orgtilknytningType,
+                )) &&
               orgtilknytningType !== Tilknytningtype.INGEN &&
               (orgtilknytningType !== Tilknytningtype.ARBEIDSTRENING ||
                 kanAlltidSeTilknytningstype) && (
