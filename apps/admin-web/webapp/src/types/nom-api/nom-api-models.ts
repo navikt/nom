@@ -49,6 +49,11 @@ export interface ExcelExportRequest {
   topOrgEnhetId?: string;
 }
 
+export interface FeiletFlytting {
+  feilmelding: string;
+  orgtilknytningFid: string;
+}
+
 export interface FolkeregisterPerson {
   navn: RessursNavn;
 }
@@ -139,8 +144,16 @@ export interface LeggTilOrgtilknytningRequest {
 
 export interface MasseFlyttingRequest {
   beholdTilganger: boolean;
+  /** @format date */
+  gyldigFomFlyttedato?: string;
   nyOrgenhetId: string;
   orgtilknytningerFid: string[];
+}
+
+export interface MasseFlyttingResponse {
+  /** @format int32 */
+  antallFlyttet: number;
+  feiledeFlyttinger: FeiletFlytting[];
 }
 
 export interface MinimalRessurs {
@@ -385,8 +398,8 @@ export enum TelefonType {
 }
 
 export enum Tilknytningtype {
-  ARBEIDSTRENING = "ARBEIDSTRENING",
   ANNET = "ANNET",
+  ARBEIDSTRENING = "ARBEIDSTRENING",
   EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER",
   FAST = "FAST",
   INGEN = "INGEN",
@@ -395,7 +408,11 @@ export enum Tilknytningtype {
   LAERLING = "LAERLING",
   MIDLERTIDIG = "MIDLERTIDIG",
   PENSJONIST = "PENSJONIST",
+  PRAKSISARBEID = "PRAKSISARBEID",
   STUDENT = "STUDENT",
+  UFORUTSETT_BEHOV = "UFORUTSETT_BEHOV",
+  UTDANNINGSSTILLINGER = "UTDANNINGSSTILLINGER",
+  VIKAR = "VIKAR",
 }
 
 export interface UpdateFysiskeBrukerstederRequest {
@@ -427,6 +444,9 @@ export enum UserRoles {
   ROLE_WRITE = "ROLE_WRITE",
   ROLE_ADMIN = "ROLE_ADMIN",
   ROLE_PILOT = "ROLE_PILOT",
+  ROLE_WRITE_UTL_KONSULENT = "ROLE_WRITE_UTL_KONSULENT",
+  ROLE_WRITE_VIKAFOSSEN = "ROLE_WRITE_VIKAFOSSEN",
+  ROLE_WRITE_ROBOT = "ROLE_WRITE_ROBOT",
 }
 
 export interface Visningsnavn {
