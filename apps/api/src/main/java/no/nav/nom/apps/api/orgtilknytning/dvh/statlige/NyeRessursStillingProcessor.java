@@ -151,12 +151,13 @@ public class NyeRessursStillingProcessor {
                             endringer.add(lagSektorEndringCmd(ot, sp, sspForNavident));
                         }
                     }
-                    if (sp.tilknytningtype().isPresent()) {
-                        if (ot.orgtilknytningType().isEmpty() || ot.orgtilknytningType().get() != sp.tilknytningtype().get()) {
-                            endringer.add(lagEndreTilknytningtypeCmd(ot, sp));
-                        }
+                }
+                if (sp.tilknytningtype().isPresent()) {
+                    if (ot.orgtilknytningType().isEmpty() || ot.orgtilknytningType().get() != sp.tilknytningtype().get()) {
+                        endringer.add(lagEndreTilknytningtypeCmd(ot, sp));
                     }
                 }
+
             } else {
                 if (sp.erDagligOppfolging() && isCurrentOrFuture(sp.gyldigTom())) {
                     if (sp.sektor() != null) {
@@ -328,9 +329,9 @@ public class NyeRessursStillingProcessor {
                     if (sp.sektor() != null) {
                         nye.add(lagSektorEndringCmd(fiktivFID, sp, sspForNavident));
                     }
-                    if (sp.tilknytningtype().isPresent()) {
-                        nye.add(lagEndreTilknytningtypeCmd(fiktivFID, sp, sspForNavident));
-                    }
+                }
+                if (sp.tilknytningtype().isPresent()) {
+                    nye.add(lagEndreTilknytningtypeCmd(fiktivFID, sp, sspForNavident));
                 }
             }
 
