@@ -1,10 +1,13 @@
 import {
+  Box,
   Button,
   Checkbox,
+  DatePicker,
   HStack,
   Modal,
   Table,
   TextField,
+  useDatepicker,
 } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
@@ -17,6 +20,7 @@ import { NomLink } from "~/components/NomLink.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
 import { LoadingTable } from "~/sanitychecks/components/LoadingTable.tsx";
 import type { OrgtilknytningerUtenforHierarkiResponse } from "~/types/nom-api/nom-api-admin-models.ts";
+import { formatDateWithoutTimezone } from "~/utils.ts";
 
 export function OrgtilknytningerUtenforHierarki() {
   const {
@@ -54,14 +58,17 @@ export function OrgtilknytningerUtenforHierarki() {
     mutationFn: ({
       nyOrgenhetId,
       beholdTilganger,
+      gyldigFomFlyttedato,
     }: {
       nyOrgenhetId: string;
       beholdTilganger: boolean;
+      gyldigFomFlyttedato: string;
     }) =>
       masseflyttOrgtilknytninger({
         orgtilknytningerFid: [...selectedRows],
         nyOrgenhetId,
         beholdTilganger,
+        gyldigFomFlyttedato,
       }),
     onSuccess: () => {
       setMutationStatus("Orgtilknytninger flyttet");
@@ -69,6 +76,11 @@ export function OrgtilknytningerUtenforHierarki() {
     onError: () => {
       setMutationStatus("Noe feilet under flytting av orgtilknytninger");
     },
+  });
+
+  const { datepickerProps, inputProps, selectedDay } = useDatepicker({
+    fromDate: new Date("Aug 23 2019"),
+    // onDateChange: console.info,
   });
 
   if (isLoading) {
@@ -341,12 +353,27 @@ export function OrgtilknytningerUtenforHierarki() {
           >
             Sett masseflyttingsflagg mot Identrutina
           </Checkbox>
+          <div className="min-h-96">
+            <DatePicker {...datepickerProps}>
+              <DatePicker.Input
+                {...inputProps}
+                label="Flyttedato (Fra og med)"
+              />
+            </DatePicker>
+          </div>
           <HStack gap="2" justify="end">
             <Button
               disabled={nyOrgenhetId === ""}
-              onClick={() =>
-                masseflyttMutation.mutate({ nyOrgenhetId, beholdTilganger })
-              }
+              onClick={() => {
+                const gyldigFomFlyttedato = selectedDay
+                  ? formatDateWithoutTimezone(selectedDay)
+                  : null;
+                masseflyttMutation.mutate({
+                  nyOrgenhetId,
+                  beholdTilganger,
+                  gyldigFomFlyttedato,
+                });
+              }}
               style={{ marginTop: "16px" }}
             >
               Bekreft
