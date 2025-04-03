@@ -17,6 +17,8 @@ spec:
         groups:
           - id: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # AD gruppe NOM-ADMIN
           - id: "21301ba9-b972-411f-8090-689bc5f5ca27" # 0000-CA-NOM-Nom-Admin-Brukerstotte
+          - id: "76611d10-876b-4df1-8425-dfe61e6990d1" # 0000-CA-NOM-ADMIN-Lesetilgang
+          - id: "a0c8eddc-2435-4fea-a642-58b2b16dd8e0" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
         extra:
           - NAVident
           - azp_name
