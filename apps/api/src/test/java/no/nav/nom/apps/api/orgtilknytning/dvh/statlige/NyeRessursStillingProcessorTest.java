@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -27,6 +29,8 @@ import static org.mockito.Mockito.when;
 @DisplayName("Tester prosessering av strukturerte StillingPerioder fra DVH")
 class NyeRessursStillingProcessorTest extends TestBase {
     NyeRessursStillingProcessor CUT;
+    @Autowired
+    Unleash unleash;
 
     @BeforeEach
     void setUp() {
@@ -36,7 +40,8 @@ class NyeRessursStillingProcessorTest extends TestBase {
             orgtilknytningCommandService,
             ressursStateRepository,
             nomMastered,
-            u4DiffPaaMastrede
+            u4DiffPaaMastrede,
+            unleash
         );
 
         when(orgtilknytningCommandService.opprettOrgtilknytning(any())).thenReturn("FID_1", "FID_2", "FID_3", "FID_4", "FID_5");

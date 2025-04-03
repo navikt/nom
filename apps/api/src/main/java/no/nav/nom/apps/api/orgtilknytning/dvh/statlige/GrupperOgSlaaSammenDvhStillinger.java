@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
@@ -12,11 +13,23 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.groupingBy;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.dayAfter;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.etter;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.foer;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isBetween;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerEtter;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerFoer;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likPeriode;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.overlapsInterval;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.erEtterRessursensSluttDato;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.erFoerRessursensStartDato;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.erLikEllerEtterRessursensSluttDato;
@@ -25,9 +38,11 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.erLikEllerEtt
 @Slf4j
 public class GrupperOgSlaaSammenDvhStillinger {
     private final RessursStateRepository ressursStateRepository;
+    private final Unleash unleash;
 
-    public GrupperOgSlaaSammenDvhStillinger(RessursStateRepository ressursStateRepository) {
+    public GrupperOgSlaaSammenDvhStillinger(RessursStateRepository ressursStateRepository, Unleash unleash) {
         this.ressursStateRepository = ressursStateRepository;
+        this.unleash = unleash;
     }
 
     protected StrukturerteStillingPerioderForNavident behandle(StrukturerteStillingPerioderForNavident sspForNavident) {
@@ -134,7 +149,150 @@ public class GrupperOgSlaaSammenDvhStillinger {
             }
         });
 
-        return new StrukturerteStillingPerioderForNavident(sspForNavident, perioderGruppert.stream().sorted(Comparator.comparing(StillingPeriode::gyldigFom)).toList());
+        if (unleash.isEnabled("nom.ny-tilknytning-mapping")) {
+            filtrerUtPerioderSomOverlapperPaaSammeEnhet(perioderGruppert);
+        }
+
+        return new StrukturerteStillingPerioderForNavident(sspForNavident, perioderGruppert.stream()
+            .sorted(
+                Comparator.comparing(StillingPeriode::gyldigFom)
+                .thenComparing(
+                    sp -> sp.tilknytningtype().orElse(null),
+                    Comparator.nullsLast(Comparator.naturalOrder())
+                ))
+            .toList());
+    }
+
+    private void filtrerUtPerioderSomOverlapperPaaSammeEnhet(List<StillingPeriode> perioderGruppert) {
+        if (isNull(perioderGruppert) || perioderGruppert.isEmpty() || isDatoerSammenhengende(perioderGruppert)) return;
+
+        var spMedTilknytningtype = perioderGruppert.stream()
+            .filter(sp -> sp.tilknytningtype().isPresent())
+            .sorted(Comparator.comparing(StillingPeriode::gyldigFom))
+            .toList();
+
+        var spUtenTilknytningtype = perioderGruppert.stream()
+            .filter(sp -> sp.tilknytningtype().isEmpty())
+            .sorted(Comparator.comparing(StillingPeriode::gyldigFom))
+            .collect(Collectors.toList());
+
+        Set<StillingPeriode> perioderSomSkalBeholdes = new HashSet<>();
+        LocalDate brekkpunktFom = null;
+        LocalDate brekkpunktTom = null;
+        StillingPeriode stillingPeriodeBeforeBreak = null;
+
+        for (StillingPeriode stillingPeriodeMedTilknytning : spMedTilknytningtype) {
+            LocalDate stillingMedTilknytningFom = stillingPeriodeMedTilknytning.gyldigFom();
+            LocalDate stillingMedTilknytningTom = stillingPeriodeMedTilknytning.gyldigTom();
+
+            if (stillingPeriodeBeforeBreak != null) {
+                spUtenTilknytningtype.remove(stillingPeriodeBeforeBreak);
+                stillingPeriodeBeforeBreak = null;
+            }
+
+            for (StillingPeriode sp : spUtenTilknytningtype) {
+                boolean stillingIsEquals = stillingPeriodeMedTilknytning.stilling().equals(sp.stilling());
+                if (brekkpunktFom != null && stillingIsEquals && isBetween(stillingMedTilknytningFom, stillingMedTilknytningTom, sp.gyldigTom())) {
+                    brekkpunktTom = stillingMedTilknytningFom.minusDays(1);
+                    perioderSomSkalBeholdes.add(new StillingPeriode(
+                        sp.stilling(),
+                        brekkpunktFom,
+                        brekkpunktTom,
+                        sp.orgenhet(),
+                        sp.sektor(),
+                        sp.tilknytningtype()
+                    ));
+                    stillingPeriodeBeforeBreak = sp;
+                    brekkpunktFom = null;
+                    brekkpunktTom = null;
+                    continue;
+                }
+
+                if (foer(sp.gyldigFom(), stillingMedTilknytningFom) && etter(sp.gyldigTom(), stillingMedTilknytningTom) && stillingIsEquals) {
+                    perioderSomSkalBeholdes.add(new StillingPeriode(
+                        sp.stilling(),
+                        sp.gyldigFom(),
+                        stillingMedTilknytningFom.minusDays(1),
+                        sp.orgenhet(),
+                        sp.sektor(),
+                        sp.tilknytningtype()
+                    ));
+                    perioderSomSkalBeholdes.add(new StillingPeriode(
+                        sp.stilling(),
+                        stillingMedTilknytningTom.plusDays(1),
+                        sp.gyldigTom(),
+                        sp.orgenhet(),
+                        sp.sektor(),
+                        sp.tilknytningtype()
+                    ));
+                    stillingPeriodeBeforeBreak = sp;
+                    continue;
+                }
+
+                if (foer(sp.gyldigFom(), stillingMedTilknytningFom) && stillingIsEquals) {
+                    perioderSomSkalBeholdes.add(new StillingPeriode(
+                        sp.stilling(),
+                        sp.gyldigFom(),
+                        stillingMedTilknytningFom.minusDays(1),
+                        sp.orgenhet(),
+                        sp.sektor(),
+                        sp.tilknytningtype()
+                    ));
+                    stillingPeriodeBeforeBreak = sp;
+                } else if (isBetween(stillingMedTilknytningFom, stillingMedTilknytningTom, sp.gyldigFom()) && sp.gyldigTom().isAfter(stillingMedTilknytningTom) && stillingIsEquals) {
+                    brekkpunktFom = stillingMedTilknytningTom.plusDays(1);
+                    brekkpunktTom = sp.gyldigTom();
+                    break;
+                } else if (etter(sp.gyldigTom(), stillingMedTilknytningTom) && stillingIsEquals) {
+                    perioderSomSkalBeholdes.add(new StillingPeriode(
+                        sp.stilling(),
+                        stillingMedTilknytningTom.plusDays(1),
+                        sp.gyldigTom(),
+                        sp.orgenhet(),
+                        sp.sektor(),
+                        sp.tilknytningtype()
+                    ));
+                }
+            }
+        }
+        if (brekkpunktTom != null) {
+            var stillingPeriode = spUtenTilknytningtype.getLast();
+            perioderSomSkalBeholdes.add(new StillingPeriode(
+                stillingPeriode.stilling(),
+                brekkpunktFom,
+                brekkpunktTom,
+                stillingPeriode.orgenhet(),
+                stillingPeriode.sektor(),
+                stillingPeriode.tilknytningtype()
+            ));
+        }
+        perioderGruppert.clear();
+        perioderSomSkalBeholdes.addAll(spMedTilknytningtype);
+        perioderGruppert.addAll(perioderSomSkalBeholdes);
+    }
+
+    private boolean isDatoerSammenhengende(List<StillingPeriode> perioderGruppert) {
+        perioderGruppert.sort(Comparator.comparing(StillingPeriode::stilling, Comparator.nullsLast(Comparator.comparing(Objects::toString))).thenComparing(StillingPeriode::gyldigFom));
+        StillingPeriode previousPeriode = perioderGruppert.getFirst();
+        for (StillingPeriode currentPeriode : perioderGruppert) {
+            boolean periodeStillingEnhetIsEqual = previousPeriode.stilling().equals(currentPeriode.stilling());
+            if (previousPeriode.equals(currentPeriode) && periodeStillingEnhetIsEqual) {
+                continue;
+            }
+            if (likPeriode(previousPeriode, currentPeriode) && periodeStillingEnhetIsEqual) {
+                return false;
+            }
+            if (likEllerFoer(previousPeriode.gyldigFom(), currentPeriode.gyldigFom()) && likEllerEtter(previousPeriode.gyldigTom(), currentPeriode.gyldigTom()) && periodeStillingEnhetIsEqual) {
+                return false;
+            }
+
+            if (overlapsInterval(previousPeriode.gyldigFom(), previousPeriode.gyldigTom(), currentPeriode) && periodeStillingEnhetIsEqual) {
+                return false;
+            }
+
+            previousPeriode = currentPeriode;
+        }
+        return true;
     }
 
     private void lagErrorStartEtterRessursSluttdato(

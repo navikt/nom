@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
@@ -18,12 +19,15 @@ import static java.util.Objects.isNull;
 public class RessursStillingLoader {
     private final AsyncNyeStrukturerOgProsesser asyncNyeStrukturerOgProsesser;
     private final DvhOrdsService dvhOrdsService;
+    private final Unleash unleash;
 
     public RessursStillingLoader(
-        AsyncNyeStrukturerOgProsesser asyncNyeStrukturerOgProsesser, DvhOrdsService dvhOrdsService
+        AsyncNyeStrukturerOgProsesser asyncNyeStrukturerOgProsesser, DvhOrdsService dvhOrdsService,
+        Unleash unleash
     ) {
         this.asyncNyeStrukturerOgProsesser = asyncNyeStrukturerOgProsesser;
         this.dvhOrdsService = dvhOrdsService;
+        this.unleash = unleash;
     }
 
     public void loadAndProcess() {
@@ -53,7 +57,8 @@ public class RessursStillingLoader {
     public List<DvhRessursStilling> load() {
         LocalDateTime start = LocalDateTime.now();
 
-        var ressursStillinger = dvhOrdsService.getStatligeTilknytninger().stream()
+        var ressursStillinger = unleash.isEnabled("nom.ny-tilknytning-mapping") ? dvhOrdsService.getStatligeTilknytninger() :
+            dvhOrdsService.getStatligeTilknytninger().stream()
             .filter(rs -> isNull(rs.getStillingAnsettelsesTypeBesk())
                 || rs.getStillingAnsettelsesTypeBesk().isEmpty()
                 || !rs.getStillingAnsettelsesTypeBesk().get().equalsIgnoreCase("Innlån/utlån"))

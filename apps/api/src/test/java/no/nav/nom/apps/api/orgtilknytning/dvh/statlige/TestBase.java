@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
@@ -45,6 +46,8 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
     NomMastered nomMastered;
     @MockitoBean
     U4DiffPaaMastrede u4DiffPaaMastrede;
+    @MockitoBean
+    Unleash unleash;
 
     private Random rnd = new Random();
 
