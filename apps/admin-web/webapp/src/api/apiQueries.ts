@@ -272,7 +272,7 @@ export async function masseflyttOrgtilknytninger(data: {
   orgtilknytningerFid: string[];
   nyOrgenhetId: string;
   beholdTilganger: boolean;
-  gyldigFomFlyttedato: string;
+  gyldigFomFlyttedato: string | null;
 }) {
   return ky.post(`${API_BASE_URL}/app/orgtilknytninger/masseflytting`, {
     json: data,

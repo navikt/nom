@@ -61,7 +61,7 @@ export function OrgtilknytningerUtenforHierarki() {
     }: {
       nyOrgenhetId: string;
       beholdTilganger: boolean;
-      gyldigFomFlyttedato: string;
+      gyldigFomFlyttedato: string | null;
     }) =>
       masseflyttOrgtilknytninger({
         orgtilknytningerFid: [...selectedRows],
