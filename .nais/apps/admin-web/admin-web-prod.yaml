@@ -16,6 +16,7 @@ spec:
       claims:
         groups:
           - id: "2d91b26c-d412-440b-9122-0fafc594db89" # AD gruppe NOM-ADMIN
+          - id: "9aa86116-5e76-4c10-a124-5bdfcd38377e" # 0000-CA-NOM-Nom-Admin-Brukerstotte    
         extra:
           - NAVident
           - azp_name
