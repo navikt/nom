@@ -8,5 +8,10 @@ NAIS_APP_NAME: nom-admin-local
 KAFKA_BROKERS: localhost:39092
 spring.kafka.properties.security.protocol: PLAINTEXT
 
+app:
+  google-storage-bucket:
+    name: no-nav-org-dev-nom-admin-storage-bucket
+    remedy-data: IR_export.csv
+
 logging:
   config: classpath:logback-local.xml
