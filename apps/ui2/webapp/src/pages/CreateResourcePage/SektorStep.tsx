@@ -41,10 +41,6 @@ export const tilknytningstyperStatlige = [
   Tilknytningtype.MIDLERTIDIG,
   Tilknytningtype.LAERLING,
   Tilknytningtype.PENSJONIST,
-  Tilknytningtype.PRAKSISARBEID,
-  Tilknytningtype.UFORUTSETT_BEHOV,
-  Tilknytningtype.UTDANNINGSSTILLINGER,
-  Tilknytningtype.VIKAR,
 ];
 
 export const tilknytningstyperEksterne = [
