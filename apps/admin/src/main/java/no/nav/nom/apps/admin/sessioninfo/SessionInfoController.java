@@ -26,7 +26,9 @@ public class SessionInfoController {
     public SessionInfoController(Environment env) {
         this.claimToRoleMapping = Map.of(
              env.getRequiredProperty("authentication.groups.nomAdmin"), UserRoles.ROLE_WRITE,
-             env.getRequiredProperty("authentication.groups.supportReadOnly"), UserRoles.ROLE_READONLY
+             env.getRequiredProperty("authentication.groups.supportReadOnly"), UserRoles.ROLE_READONLY,
+             env.getRequiredProperty("authentication.groups.readOnly"), UserRoles.ROLE_READONLY,
+             env.getRequiredProperty("authentication.groups.extendedReadOnly"), UserRoles.ROLE_EXTENDED_READONLY
         );
         logger.info("Roles mapping: {}", claimToRoleMapping);
     }
@@ -54,7 +56,8 @@ public class SessionInfoController {
     @Schema(enumAsRef = true)
     public enum UserRoles {
         ROLE_WRITE,
-        ROLE_READONLY
+        ROLE_READONLY,
+        ROLE_EXTENDED_READONLY
     }
 
     public record SessionInfoResponse(
