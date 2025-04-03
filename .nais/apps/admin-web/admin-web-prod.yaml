@@ -16,7 +16,6 @@ spec:
       claims:
         groups:
           - id: "2d91b26c-d412-440b-9122-0fafc594db89" # AD gruppe NOM-ADMIN
-          - id: "9aa86116-5e76-4c10-a124-5bdfcd38377e" # 0000-CA-NOM-Nom-Admin-Brukerstotte
           - id: "9a608366-69eb-42a9-a787-3469359ce322" # 0000-CA-NOM-ADMIN-Lesetilgang
           - id: "cea028e1-811f-4cd6-aa67-d0130207fd7a" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
         extra:
