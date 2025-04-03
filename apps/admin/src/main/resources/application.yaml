@@ -42,6 +42,8 @@ authentication:
   groups:
     nomAdmin: ${NOM_ADMIN_GROUPID:nomAdminGroup}
     supportReadOnly: ${SUPPORT_READONLY_GROUPID:readOnlyGroup}
+    readOnly: ${READONLY_GROUPID:readOnlyGroup}
+    extendedReadOnly: ${EXTENDED_READONLY_GROUPID:readOnlyGroup}
 
 management:
   endpoint:
