@@ -95,6 +95,10 @@ public class PeriodeUtil {
         return lik(dato.orElse(null), sjekkMotDato);
     }
 
+    public static boolean likPeriode(StillingPeriode sp1, StillingPeriode sp2) {
+        return lik(sp1.gyldigFom(), sp2.gyldigFom()) && lik(sp1.gyldigTom(), sp2.gyldigTom());
+    }
+
     public static boolean lik(LocalDate dato, LocalDate sjekkMotDato) {
         dato = dato == null ? NO_END_DATE : dato;
         return dato.equals(sjekkMotDato == null ? NO_END_DATE : sjekkMotDato);
@@ -118,6 +122,10 @@ public class PeriodeUtil {
     public static boolean likEllerEtter(LocalDate dato, LocalDate sjekkMotDato) {
         dato = dato == null ? NO_END_DATE : dato;
         return dato.isAfter(dayBefore(sjekkMotDato == null ? NO_END_DATE : sjekkMotDato));
+    }
+
+    public static boolean isBetween(LocalDate gyldigFom, LocalDate gyldigTom, LocalDate datoInBetween) {
+        return gyldigFom.isBefore(datoInBetween) && gyldigTom.isAfter(datoInBetween);
     }
 
     public static LocalDate tidligst(LocalDate  a, LocalDate b) {

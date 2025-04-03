@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
@@ -31,6 +32,9 @@ import static org.mockito.Mockito.when;
 class RessursStillingLoaderTest extends TestBase {
     @Autowired
     private RessursStillingLoader ressursStillingLoader;
+
+    @Autowired
+    private Unleash unleash;
 
     @MockitoBean
     OrgenhetService orgenhetService;
@@ -124,6 +128,42 @@ class RessursStillingLoaderTest extends TestBase {
     @Test
     @DisplayName("Test last av Resssurs stillinger fra Dvh json")
     public void testLoad() {
+        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
+        var result = ressursStillingLoader.load();
+
+        assertEquals(7, result.size());
+        assertEquals(4, result.stream().filter(rs -> rs.getNavident().equals(Optional.of("A100036"))).count());
+        assertEquals(
+            LocalDate.of(2021, 7, 1),
+            result.stream()
+                .filter(rs -> rs.getNavident().equals(Optional.of("A100036")))
+                .min(Comparator.comparing(DvhRessursStilling::getStillingDatoFom))
+                .get()
+                .getStillingDatoFom()
+        );
+        assertEquals(
+            LocalDate.of(2022, 1, 1),
+            result.stream()
+                .filter(rs -> rs.getNavident().equals(Optional.of("A100036")))
+                .max(Comparator.comparing(DvhRessursStilling::getStillingDatoFom))
+                .get()
+                .getStillingDatoFom()
+        );
+        assertEquals(3, result.stream().filter(rs -> rs.getNavident().equals(Optional.of("A100180"))).count());
+        assertEquals(
+            LocalDate.of(2024, 6, 1),
+            result.stream()
+                .filter(rs -> rs.getNavident().equals(Optional.of("A100180")))
+                .min(Comparator.comparing(DvhRessursStilling::getStillingDatoFom))
+                .get()
+                .getStillingDatoFom()
+        );
+    }
+
+    @Test
+    @DisplayName("Test last av Resssurs stillinger fra Dvh json")
+    public void testLoadToggleFalse() {
+        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(false);
         var result = ressursStillingLoader.load();
 
         assertEquals(6, result.size());
@@ -132,8 +172,7 @@ class RessursStillingLoaderTest extends TestBase {
             LocalDate.of(2021, 7, 1),
             result.stream()
                 .filter(rs -> rs.getNavident().equals(Optional.of("A100036")))
-                .sorted(Comparator.comparing(DvhRessursStilling::getStillingDatoFom))
-                .findFirst()
+                .min(Comparator.comparing(DvhRessursStilling::getStillingDatoFom))
                 .get()
                 .getStillingDatoFom()
         );
@@ -141,8 +180,7 @@ class RessursStillingLoaderTest extends TestBase {
             LocalDate.of(2022, 1, 1),
             result.stream()
                 .filter(rs -> rs.getNavident().equals(Optional.of("A100036")))
-                .sorted(Comparator.comparing(DvhRessursStilling::getStillingDatoFom).reversed())
-                .findFirst()
+                .max(Comparator.comparing(DvhRessursStilling::getStillingDatoFom))
                 .get()
                 .getStillingDatoFom()
         );
@@ -151,8 +189,7 @@ class RessursStillingLoaderTest extends TestBase {
             LocalDate.of(2024, 6, 1),
             result.stream()
                 .filter(rs -> rs.getNavident().equals(Optional.of("A100180")))
-                .sorted(Comparator.comparing(DvhRessursStilling::getStillingDatoFom))
-                .findFirst()
+                .min(Comparator.comparing(DvhRessursStilling::getStillingDatoFom))
                 .get()
                 .getStillingDatoFom()
         );

@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
@@ -22,6 +24,7 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerEtter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerFoer;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.tidligst;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.slaaSammenBackToBackPerioderOgSorterAsc;
+import static no.nav.nom.contract.nom.Tilknytningtype.compare;
 
 @Component
 @Slf4j
@@ -37,25 +40,30 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         // TODO: Vi trenger ikke brekk-datoer på OT'er for current og fremtidig?
         var splittedeSPer = splittStillingPerioder(sspForNavident.stillingPerioder(), fomDatoer);
 
-
         var historicFomDates = historicFomDates(fomDatoer, splittedeSPer);
         var currentFomDate = currentFomDate(fomDatoer);
         var futureFomDates = futureFomDates(fomDatoer, splittedeSPer);
 
-        List<StillingPeriode> historicStillingPerioder =  handleHistoricPerioder(sspForNavident, splittedeSPer.stream()
+        List<StillingPeriode> historicStillingPerioder = handleHistoricPerioder(
+            sspForNavident, splittedeSPer.stream()
                 .filter(sp -> historicFomDates.contains(sp.gyldigFom()))
+                .sorted((o1, o2) -> compare(o1.tilknytningtype(), o2.tilknytningtype()))
                 .toList(),
             historicFomDates
         );
 
-        List<StillingPeriode> currentStillingPerioder =  handleCurrentPerioder(sspForNavident, splittedeSPer.stream()
-            .filter(sp -> sp.gyldigFom().equals(currentFomDate))
-            .toList()
+        List<StillingPeriode> currentStillingPerioder = handleCurrentPerioder(
+            sspForNavident, splittedeSPer.stream()
+                .filter(sp -> sp.gyldigFom().equals(currentFomDate))
+                .sorted((o1, o2) -> compare(o1.tilknytningtype(), o2.tilknytningtype()))
+                .toList()
         );
 
-        List<StillingPeriode> futureStillingPerioder =  handleFuturePerioder(sspForNavident, splittedeSPer.stream()
-            .filter(sp -> futureFomDates.contains(sp.gyldigFom()))
-            .toList(),
+        List<StillingPeriode> futureStillingPerioder = handleFuturePerioder(
+            sspForNavident, splittedeSPer.stream()
+                .filter(sp -> futureFomDates.contains(sp.gyldigFom()))
+                .sorted((o1, o2) -> compare(o1.tilknytningtype(), o2.tilknytningtype()))
+                .toList(),
             futureFomDates
         );
 
@@ -172,7 +180,8 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
             for (StillingPeriode stillingPeriode : stillingPerioder) {
                 var nySP = matchDOLMotOrgenhetPaaRessurs(stillingPeriode);
                 if (hasDOLBeenSet) {
-                    nyeHistoriskeStillingPerioder.add(stillingPeriode);
+                    var nyStillingPeriode = new StillingPeriode(stillingPeriode, StillingPeriode.DagligOppfolging.NEI);
+                    nyeHistoriskeStillingPerioder.add(nyStillingPeriode);
                     if (nySP.erDagligOppfolging()) {
                         lagErrorPeriodeMedOPRMatchMotFlere(sspForNavident, stillingPerioder, stillingPeriode.stilling().ressursAgressoId().orElse("NULL"));
                     }
@@ -224,7 +233,8 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         for (StillingPeriode stillingPeriode : stillingPerioder) {
             var nySP = matchDOLMotOrgenhetPaaRessurs(stillingPeriode);
             if (hasDOLBeenSet) {
-                behandledeStillingPerioder.add(stillingPeriode);
+                var nyStillingPeriode = new StillingPeriode(stillingPeriode, StillingPeriode.DagligOppfolging.NEI);
+                behandledeStillingPerioder.add(nyStillingPeriode);
                 if (nySP.erDagligOppfolging()) {
                     lagErrorPeriodeMedOPRMatchMotFlere(sspForNavident, stillingPerioder, stillingPeriode.stilling().ressursAgressoId().orElse("NULL"));
                 }
@@ -282,6 +292,7 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         for (StillingPeriode stillingPeriode : stillingPerioder) {
             var nySP = matchDOLMotOrgenhetPaaRessurs(stillingPeriode);
             if (hasDOLBeenSet) {
+                var nyStillingPeriode = new StillingPeriode(stillingPeriode, StillingPeriode.DagligOppfolging.NEI);
                 nyeFremtidigStillingPerioder.add(stillingPeriode);
                 if (nySP.erDagligOppfolging()) {
                     lagErrorPeriodeMedOPRMatchMotFlere(sspForNavident, stillingPerioder, stillingPeriode.stilling().ressursAgressoId().orElse("NULL"));

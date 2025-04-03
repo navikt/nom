@@ -61,6 +61,10 @@ public class DvhRessursStilling {
         return switch (ansettelsesBeskTypeValue) {
             case "Fast" -> Optional.of(Tilknytningtype.FAST);
             case "Midlertidig karakter § 9a" -> Optional.of(Tilknytningtype.MIDLERTIDIG);
+            case "Uforutsett behov § 9e" -> Optional.of(Tilknytningtype.UFORUTSETT_BEHOV);
+            case "Vikar § 9b" -> Optional.of(Tilknytningtype.VIKAR);
+            case "Utdanningsstillinger § 9d" -> Optional.of(Tilknytningtype.UTDANNINGSSTILLINGER);
+            case "Praksisarbeid § 9c" -> Optional.of(Tilknytningtype.PRAKSISARBEID);
             default -> Optional.empty();
         };
     }
