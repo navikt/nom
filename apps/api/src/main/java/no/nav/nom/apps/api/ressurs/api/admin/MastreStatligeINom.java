@@ -181,7 +181,7 @@ public class MastreStatligeINom {
 
     private static List<Ressurs> eksludertDeMedMaxOTFoerApril2025(List<Ressurs> ikkeMastretUtenEkskluderteNavidenter) {
         return ikkeMastretUtenEkskluderteNavidenter.stream()
-            .filter(ressurs -> ressurs.maxOtSluttDato() == null || ressurs.maxOtSluttDato().isBefore(LocalDate.of(2025, 4, 1)))
+            .filter(ressurs -> ressurs.maxOtSluttDato() != null && ressurs.maxOtSluttDato().isAfter(LocalDate.of(2025, 3, 31)))
             .toList();
     }
 
