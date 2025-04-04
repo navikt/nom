@@ -65,7 +65,7 @@ public class MastreStatligeINom {
     }
 
     @Operation(
-        description = "List alle statlige ressurser som ikke er mastret i NOM, men som ekskluderes pgs max OT før april 2025",
+        description = "List alle statlige ressurser som ikke er mastret i NOM, men som ekskluderes pga max OT før april 2025",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -181,7 +181,7 @@ public class MastreStatligeINom {
 
     private static List<Ressurs> eksludertDeMedMaxOTFoerApril2025(List<Ressurs> ikkeMastretUtenEkskluderteNavidenter) {
         return ikkeMastretUtenEkskluderteNavidenter.stream()
-            .filter(ressurs -> ressurs.maxOtSluttDato() != null && ressurs.maxOtSluttDato().isAfter(LocalDate.of(2025, 3, 31)))
+            .filter(ressurs -> ressurs.maxOtSluttDato() == null || ressurs.maxOtSluttDato().isAfter(LocalDate.of(2025, 3, 31)))
             .toList();
     }
 
