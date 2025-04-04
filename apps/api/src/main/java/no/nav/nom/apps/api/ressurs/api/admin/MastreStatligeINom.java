@@ -24,9 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Consumer;
 
 @Slf4j
-@Tag(name = "Admin for å migrering til NOM som master av eksterne og kommunale ressurser")
+@Tag(name = "Admin for å migrering til NOM som master av statlige ressurser")
 @RestController
 @RequestMapping("/api/admin/mastrestatlige")
 @PreAuthorize("hasAuthority('ADMIN')")
@@ -54,18 +55,49 @@ public class MastreStatligeINom {
         }
     )
     @GetMapping(value = "/listStatligeSomIkkeErMastret")
-    public ResponseEntity<String> statligeSomIkkeErMastret() {
+    public ResponseEntity<String> listStatligeSomIkkeErMastret() {
         StringBuffer sb = new StringBuffer();
         sb.append("navident, sektor, startdato, sluttdato, maxOtSluttDato\n");
-        getAlleStatligeSomIkkeErMastret().forEach( ressurs -> {
-                sb.append(ressurs.navident()).append(", ");
-                sb.append(ressurs.sektor()).append(", ");
-                sb.append(ressurs.startDato()).append(", ");
-                sb.append(ressurs.sluttDato()).append(", ");
-                sb.append(ressurs.maxOtSluttDato()).append("\n");
-            }
-        );
+
+        getAlleStatligeSomIkkeErMastret().forEach(getRessursRow(sb));
+
         return ResponseEntity.ok(sb.toString());
+    }
+
+    @Operation(
+        description = "List alle statlige ressurser som ikke er mastret i NOM, men som ekskluderes pgs max OT før april 2025",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden")
+        }
+    )
+    @GetMapping(value = "/listStatligeSomIkkeErMastretOgSomEkskluderesPaaMaksOTDato")
+    public ResponseEntity<String> listStatligeSomIkkeErMastretOgSomEkskluderesPaaMaksOTDato() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("navident, sektor, startdato, sluttdato, maxOtSluttDato\n");
+
+        var ikkeMastret = getAlleStatligeSomIkkeErMastret();
+        var statligeUtenDeEkskluderteNavidenter = eksludertDeMedMaxOTFoerApril2025(ikkeMastret).stream().map(Ressurs::navident).toList();
+
+        ikkeMastret.stream()
+            .filter(ressurs -> !statligeUtenDeEkskluderteNavidenter.contains(ressurs.navident()))
+            .forEach(getRessursRow(sb));
+
+        return ResponseEntity.ok(sb.toString());
+    }
+
+    static Consumer<Ressurs> getRessursRow(StringBuffer sb) {
+        return ressurs -> {
+            sb.append(ressurs.navident()).append(", ");
+            sb.append(ressurs.sektor()).append(", ");
+            sb.append(ressurs.startDato()).append(", ");
+            sb.append(ressurs.sluttDato()).append(", ");
+            sb.append(ressurs.maxOtSluttDato()).append("\n");
+        };
     }
 
     @Operation(
@@ -106,9 +138,11 @@ public class MastreStatligeINom {
             .toList();
     }
 
+    static final LocalDate MAX_DATE = LocalDate.of(2099, 12, 31);
+
     LocalDate getMaxOTDate(String navident) {
         return orgtilknytningService.getByNavIdent(navident).stream()
-            .map(orgtilknytning -> orgtilknytning.gyldigTom().orElse(LocalDate.MAX))
+            .map(orgtilknytning -> orgtilknytning.gyldigTom().orElse(MAX_DATE))
             .max(LocalDate::compareTo).orElse(null);
     }
 
@@ -128,9 +162,7 @@ public class MastreStatligeINom {
         sb.append("Antall ikke mastret: ").append(ikkeMastretStatlige.size()).append("\n");
         sb.append("Antall ikke mastret uten ekskluderte navidenter: ").append(ikkeMastretUtenEkskluderteNavidenter.size()).append("\n");
 
-        var ekskludertOTFoerApril2025 = ikkeMastretUtenEkskluderteNavidenter.stream()
-            .filter(ressurs -> ressurs.maxOtSluttDato() == null || ressurs.maxOtSluttDato().isBefore(LocalDate.of(2025, 4, 1)))
-            .toList();
+        var ekskludertOTFoerApril2025 = eksludertDeMedMaxOTFoerApril2025(ikkeMastretUtenEkskluderteNavidenter);
 
         if (steg == 1) {
             sb.append("Steg 1 antall ekskluderert på OT dato:").append(ikkeMastretUtenEkskluderteNavidenter.size() - ekskludertOTFoerApril2025.size()).append("\n");
@@ -145,6 +177,12 @@ public class MastreStatligeINom {
             }
         }
         return sb.toString();
+    }
+
+    private static List<Ressurs> eksludertDeMedMaxOTFoerApril2025(List<Ressurs> ikkeMastretUtenEkskluderteNavidenter) {
+        return ikkeMastretUtenEkskluderteNavidenter.stream()
+            .filter(ressurs -> ressurs.maxOtSluttDato() == null || ressurs.maxOtSluttDato().isBefore(LocalDate.of(2025, 4, 1)))
+            .toList();
     }
 
     void mastreNavidenter(List<Ressurs> ressurserTilMastres) {
