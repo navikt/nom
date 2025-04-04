@@ -155,7 +155,7 @@ public class NomRemedyIntegrasjonKafkaListenerOld {
         var orgtilknytningState = orgtilknytningStateRepository.findByFid(orgtilknytningEvent.getFid());
 
         int count = 0;
-        while (orgtilknytningState.isEmpty() && count < 5) {
+        while (orgtilknytningState.isEmpty() && count < 2) {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
@@ -178,7 +178,7 @@ public class NomRemedyIntegrasjonKafkaListenerOld {
         var ressursState = ressursStateRepository.findByFid(ressursEvent.getFid());
 
         int count = 0;
-        while (ressursState.isEmpty() && count < 5) {
+        while (ressursState.isEmpty() && count < 2) {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
