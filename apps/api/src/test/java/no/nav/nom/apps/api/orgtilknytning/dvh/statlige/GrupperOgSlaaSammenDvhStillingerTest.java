@@ -945,47 +945,47 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
     @DisplayName("Test case fra DEV Miljø hvor ressursen ender opp med to like OTer, men forskjellige perioder")
     void test_ToLikeOTerMedDelvisOverlappendePerioder() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
-            /*2*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 4, 1), LocalDate.of(2022, 4, 30), Optional.of("Fast")),
-            /*3*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 5, 1), LocalDate.of(2022, 5, 31), Optional.of("Fast")),
-            /*4*/dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", LocalDate.of(2022, 6, 1), LocalDate.of(2022, 6, 1), Optional.of("Fast")),
-            /*5*/dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", LocalDate.of(2022, 6, 2), LocalDate.of(2022, 7, 31), Optional.of("Fast")),
-            /*6*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 8, 1), LocalDate.of(2022, 8, 8), Optional.of("Fast")),
-            /*7*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 8, 9), LocalDate.of(2022, 9, 30), Optional.of("Fast")),
-            /*8*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 10, 1), LocalDate.of(2022, 12, 31), Optional.of("Fast")),
-            /*9*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2023, 1, 1), LocalDate.of(2023, 4, 30), Optional.of("Fast")),
-            /*10*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2023, 5, 1), LocalDate.of(2023, 12, 31), Optional.of("Fast")),
-            /*11*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31), Optional.of("Fast")),
-            /*12*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 2, 1), LocalDate.of(2024, 12, 31), Optional.of("Fast")),
-            /*13*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 4, 1), LocalDate.of(2024, 12, 31), Optional.of("Fast")),
-            /*14*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 5, 1), LocalDate.of(2024, 12, 31), Optional.of("Fast")),
-            /*15*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 6, 1), LocalDate.of(2024, 12, 31), Optional.of("Fast")),
-            /*16*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 9, 1), LocalDate.of(2024, 12, 31), Optional.of("Fast")),
-            /*17*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 11, 1), LocalDate.of(2024, 12, 31), Optional.of("Fast")),
-            /*18*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31), Optional.of("Fast")),
-            /*19*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 2, 1), LocalDate.of(2025, 12, 31), Optional.of("Fast")),
-            /*20*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 3, 1), LocalDate.of(2025, 12, 31), Optional.of("Fast")),
-            /*21*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 5, 1), LocalDate.of(2025, 12, 31), Optional.of("Fast")),
-            /*22*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2026, 1, 1), LocalDate.of(2099, 12, 31), Optional.of("Fast")),
-            /*23*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 4, 1), LocalDate.of(2022, 4, 30), Optional.of("Innlån/utlån")),
-            /*24*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 5, 1), LocalDate.of(2022, 5, 31), Optional.of("Innlån/utlån")),
-            /*25*/dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", LocalDate.of(2022, 6, 1), LocalDate.of(2022, 6, 1), Optional.of("Innlån/utlån")),
-            /*26*/dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", LocalDate.of(2022, 6, 2), LocalDate.of(2022, 7, 31), Optional.of("Innlån/utlån")),
-            /*27*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 8, 1), LocalDate.of(2022, 8, 8), Optional.of("Innlån/utlån")),
-            /*28*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 8, 9), LocalDate.of(2022, 9, 30), Optional.of("Innlån/utlån")),
-            /*29*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 10, 1), LocalDate.of(2022, 12, 31), Optional.of("Innlån/utlån")),
-            /*30*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2023, 1, 1), LocalDate.of(2023, 4, 30), Optional.of("Innlån/utlån")),
-            /*31*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2023, 5, 1), LocalDate.of(2023, 12, 31), Optional.of("Innlån/utlån")),
-            /*32*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31), Optional.of("Innlån/utlån")),
-            /*33*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 31), Optional.of("Innlån/utlån")),
-            /*34*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 30), Optional.of("Innlån/utlån")),
-            /*35*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 5, 1), LocalDate.of(2024, 5, 31), Optional.of("Innlån/utlån")),
-            /*36*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 6, 1), LocalDate.of(2024, 8, 31), Optional.of("Innlån/utlån")),
-            /*37*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 9, 1), LocalDate.of(2024, 10, 31), Optional.of("Innlån/utlån")),
-            /*38*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 11, 1), LocalDate.of(2024, 12, 31), Optional.of("Innlån/utlån")),
-            /*39*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 31), Optional.of("Innlån/utlån")),
-            /*40*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 2, 1), LocalDate.of(2025, 2, 28), Optional.of("Innlån/utlån")),
-            /*41*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 3, 1), LocalDate.of(2025, 4, 30), Optional.of("Innlån/utlån")),
-            /*42*/dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 5, 1), LocalDate.of(2025, 12, 31), Optional.of("Innlån/utlån"))
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 4, 1), LocalDate.of(2022, 4, 30), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 5, 1), LocalDate.of(2022, 5, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", LocalDate.of(2022, 6, 1), LocalDate.of(2022, 6, 1), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", LocalDate.of(2022, 6, 2), LocalDate.of(2022, 7, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 8, 1), LocalDate.of(2022, 8, 8), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 8, 9), LocalDate.of(2022, 9, 30), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 10, 1), LocalDate.of(2022, 12, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2023, 1, 1), LocalDate.of(2023, 4, 30), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2023, 5, 1), LocalDate.of(2023, 12, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 2, 1), LocalDate.of(2024, 12, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 4, 1), LocalDate.of(2024, 12, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 5, 1), LocalDate.of(2024, 12, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 6, 1), LocalDate.of(2024, 12, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 9, 1), LocalDate.of(2024, 12, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 11, 1), LocalDate.of(2024, 12, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 2, 1), LocalDate.of(2025, 12, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 3, 1), LocalDate.of(2025, 12, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 5, 1), LocalDate.of(2025, 12, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2026, 1, 1), LocalDate.of(2099, 12, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 4, 1), LocalDate.of(2022, 4, 30), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 5, 1), LocalDate.of(2022, 5, 31), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", LocalDate.of(2022, 6, 1), LocalDate.of(2022, 6, 1), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", LocalDate.of(2022, 6, 2), LocalDate.of(2022, 7, 31), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 8, 1), LocalDate.of(2022, 8, 8), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 8, 9), LocalDate.of(2022, 9, 30), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 10, 1), LocalDate.of(2022, 12, 31), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2023, 1, 1), LocalDate.of(2023, 4, 30), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2023, 5, 1), LocalDate.of(2023, 12, 31), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 31), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 30), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 5, 1), LocalDate.of(2024, 5, 31), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 6, 1), LocalDate.of(2024, 8, 31), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 9, 1), LocalDate.of(2024, 10, 31), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 11, 1), LocalDate.of(2024, 12, 31), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 31), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 2, 1), LocalDate.of(2025, 2, 28), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 3, 1), LocalDate.of(2025, 4, 30), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 5, 1), LocalDate.of(2025, 12, 31), Optional.of("Innlån/utlån"))
         );
 
         when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
@@ -995,5 +995,86 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         var result = CUT.behandle(strukturerteStillingPerioder);
 
         assertEquals(3, result.stillingPerioder().size());
+        var stillingPeriode1 = result.stillingPerioder().getFirst();
+        var stillingPeriode2 = result.stillingPerioder().get(1);
+        var stillingPeriode3 = result.stillingPerioder().getLast();
+
+        assertAll(
+            () -> assertEquals(stillingPeriode1.gyldigFom(), LocalDate.of(2022, 4, 1)),
+            () -> assertEquals(stillingPeriode1.gyldigTom(), LocalDate.of(2022, 5, 31)),
+            () -> assertEquals(stillingPeriode1.tilknytningtype(), Optional.of(Tilknytningtype.FAST)),
+            () -> assertEquals(stillingPeriode2.gyldigFom(), LocalDate.of(2022, 6, 1)),
+            () -> assertEquals(stillingPeriode2.gyldigTom(), LocalDate.of(2022, 7, 31)),
+            () -> assertEquals(stillingPeriode2.tilknytningtype(), Optional.of(Tilknytningtype.FAST)),
+            () -> assertEquals(stillingPeriode3.gyldigFom(), LocalDate.of(2022, 8, 1)),
+            () -> assertEquals(stillingPeriode3.gyldigTom(), LocalDate.of(2099, 12, 31)),
+            () -> assertEquals(stillingPeriode3.tilknytningtype(), Optional.of(Tilknytningtype.FAST))
+        );
+    }
+
+    @Test
+    @DisplayName("Test case with provided data")
+    void test_ProvidedData() {
+        List<DvhRessursStilling> dvhRessursStillinger = List.of(
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 4, 1), LocalDate.of(2022, 4, 30), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 4, 1), LocalDate.of(2022, 4, 30), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 5, 1), LocalDate.of(2022, 12, 31), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 5, 1), LocalDate.of(2022, 12, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2023, 1, 1), LocalDate.of(2023, 4, 30), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2023, 1, 1), LocalDate.of(2023, 4, 30), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2023, 5, 1), LocalDate.of(2023, 11, 30), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2023, 5, 1), LocalDate.of(2023, 11, 30), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2023, 12, 1), LocalDate.of(2023, 12, 31), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2023, 12, 1), LocalDate.of(2023, 12, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 29), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 29), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 31), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 30), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 30), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 5, 1), LocalDate.of(2024, 7, 31), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 5, 1), LocalDate.of(2024, 7, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 8, 1), LocalDate.of(2024, 8, 14), Optional.of("Innlån/utlån")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 8, 1), LocalDate.of(2024, 8, 14), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 8, 15), LocalDate.of(2024, 8, 31), Optional.of("Fungering")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 8, 15), LocalDate.of(2024, 8, 31), Optional.of("Fungering")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 9, 1), LocalDate.of(2024, 9, 30), Optional.of("Fungering")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 9, 1), LocalDate.of(2024, 9, 30), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 10, 1), LocalDate.of(2024, 10, 31), Optional.of("Fungering")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 10, 1), LocalDate.of(2024, 10, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 11, 1), LocalDate.of(2024, 11, 30), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 11, 1), LocalDate.of(2024, 11, 30), Optional.of("Fungering")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 12, 1), LocalDate.of(2025, 1, 31), Optional.of("Fungering")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2024, 12, 1), LocalDate.of(2025, 1, 31), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 2, 1), LocalDate.of(2025, 4, 30), Optional.of("Fungering")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 2, 1), LocalDate.of(2025, 4, 30), Optional.of("Fast")),
+            dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 5, 1), LocalDate.of(2099, 12, 31), Optional.of("Fast"))
+        );
+
+        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
+        when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
+        var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
+
+        var result = CUT.behandle(strukturerteStillingPerioder);
+
+        assertEquals(3, result.stillingPerioder().size());
+
+        var stillingPeriode1 = result.stillingPerioder().getFirst();
+        var stillingPeriode2 = result.stillingPerioder().get(1);
+        var stillingPeriode3 = result.stillingPerioder().getLast();
+
+        assertAll(
+            () -> assertEquals(stillingPeriode1.gyldigFom(), LocalDate.of(2022, 4, 1)),
+            () -> assertEquals(stillingPeriode1.gyldigTom(), LocalDate.of(2024, 8, 14)),
+            () -> assertEquals(stillingPeriode1.tilknytningtype(), Optional.of(Tilknytningtype.FAST)),
+            () -> assertEquals(stillingPeriode2.gyldigFom(), LocalDate.of(2024, 8, 15)),
+            () -> assertEquals(stillingPeriode2.gyldigTom(), LocalDate.of(2024, 8, 31)),
+            () -> assertEquals(stillingPeriode2.tilknytningtype(), Optional.empty()),
+            () -> assertEquals(stillingPeriode3.gyldigFom(), LocalDate.of(2024, 9, 1)),
+            () -> assertEquals(stillingPeriode3.gyldigTom(), LocalDate.of(2099, 12, 31)),
+            () -> assertEquals(stillingPeriode3.tilknytningtype(), Optional.of(Tilknytningtype.FAST))
+        );
     }
 }
