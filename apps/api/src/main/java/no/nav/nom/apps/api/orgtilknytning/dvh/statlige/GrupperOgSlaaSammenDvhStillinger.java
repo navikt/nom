@@ -248,14 +248,9 @@ public class GrupperOgSlaaSammenDvhStillinger {
                     brekkpunktTom = sp.gyldigTom();
                     break;
                 } else if (etter(sp.gyldigTom(), stillingMedTilknytningTom) && !foer(stillingMedTilknytningTom, sp.gyldigFom()) && stillingIsEquals) {
-                    perioderSomSkalBeholdes.add(new StillingPeriode(
-                        sp.stilling(),
-                        stillingMedTilknytningTom.plusDays(1),
-                        sp.gyldigTom(),
-                        sp.orgenhet(),
-                        sp.sektor(),
-                        sp.tilknytningtype()
-                    ));
+                    brekkpunktFom = stillingMedTilknytningTom.plusDays(1);
+                    brekkpunktTom = sp.gyldigTom();
+                    break;
                 }
             }
         }
