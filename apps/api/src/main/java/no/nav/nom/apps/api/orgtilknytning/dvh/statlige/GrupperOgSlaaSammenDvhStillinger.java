@@ -26,6 +26,7 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.dayAfter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.etter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.foer;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isBetween;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.lik;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerEtter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerFoer;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likPeriode;
@@ -192,6 +193,9 @@ public class GrupperOgSlaaSammenDvhStillinger {
 
             for (StillingPeriode sp : spUtenTilknytningtype) {
                 boolean stillingIsEquals = stillingPeriodeMedTilknytning.stilling().equals(sp.stilling());
+                if (lik(sp.gyldigFom(), stillingMedTilknytningFom) && lik(sp.gyldigTom(), stillingMedTilknytningTom) && stillingIsEquals) {
+                    continue;
+                }
                 if (brekkpunktFom != null && stillingIsEquals && isBetween(stillingMedTilknytningFom, stillingMedTilknytningTom, sp.gyldigTom())) {
                     brekkpunktTom = stillingMedTilknytningFom.minusDays(1);
                     perioderSomSkalBeholdes.add(new StillingPeriode(
@@ -229,7 +233,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                     continue;
                 }
 
-                if (foer(sp.gyldigFom(), stillingMedTilknytningFom) && stillingIsEquals) {
+                if (foer(sp.gyldigFom(), stillingMedTilknytningFom) && !likEllerFoer(sp.gyldigTom(), stillingMedTilknytningFom) && stillingIsEquals) {
                     perioderSomSkalBeholdes.add(new StillingPeriode(
                         sp.stilling(),
                         sp.gyldigFom(),
@@ -243,7 +247,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                     brekkpunktFom = stillingMedTilknytningTom.plusDays(1);
                     brekkpunktTom = sp.gyldigTom();
                     break;
-                } else if (etter(sp.gyldigTom(), stillingMedTilknytningTom) && stillingIsEquals) {
+                } else if (etter(sp.gyldigTom(), stillingMedTilknytningTom) && !foer(stillingMedTilknytningTom, sp.gyldigFom()) && stillingIsEquals) {
                     perioderSomSkalBeholdes.add(new StillingPeriode(
                         sp.stilling(),
                         stillingMedTilknytningTom.plusDays(1),
