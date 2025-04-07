@@ -1,5 +1,9 @@
 package no.nav.nom.apps.api.ressurs;
 
+import freemarker.template.Configuration;
+import io.getunleash.Unleash;
+import no.nav.nom.apps.api.clients.ad.AdClient;
+import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.model.FysiskBrukersted;
 import no.nav.nom.contract.nom.IdentType;
@@ -42,6 +46,14 @@ class FysiskBrukerstedServiceTest {
     RessursCommandService ressursCommandServiceMock;
     @MockitoBean
     FysiskBrukerstedCache fysiskBrukerstedCacheMock;
+    @MockitoBean
+    AdClient adClient;
+    @MockitoBean
+    Configuration freemarkerConfig;
+    @MockitoBean
+    MicrosoftGraphClient microsoftGraphClient;
+    @MockitoBean
+    Unleash unleash;
 
 
     @Test
@@ -164,16 +176,57 @@ class FysiskBrukerstedServiceTest {
         );
         when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
             List.of(
-                new FysiskBrukersted("1234", "Der"),
-                new FysiskBrukersted("9876", "Her")
+                new FysiskBrukersted(fysiskBrukerstedToMatch, "Der"),
+                new FysiskBrukersted(fysiskBrukerstedNotToMatch, "Der")
             )
         );
         when(ressursStateRepositoryMock.findByNavident(navident1)).thenReturn(Optional.of(ressurs1));
         when(ressursStateRepositoryMock.findByNavident(navident2)).thenReturn(Optional.of(ressurs2));
 
-        assertThrows(IllegalArgumentException.class, () ->
-            fysiskBrukerstedService.flyttAlleRessurserFraFysiskBrukerstedTilFysiskBrukersted(fysiskBrukerstedToMatch, "5555", null)
+        var failed = fysiskBrukerstedService.flyttAlleRessurserFraFysiskBrukerstedTilFysiskBrukersted(fysiskBrukerstedToMatch, "5555", null);
+
+        assertEquals(1, failed.size());
+
+        verify(ressursCommandServiceMock, times(0)).oppdaterFysiskeBrukerstederCommand(any(), any());
+    }
+
+    @Test
+    void flyttAlleRessurserFraFysiskBrukerstedTilFysiskBrukersted_illegalFysiskBrukersted_2() {
+        var fysiskBrukerstedToMatch = "1234";
+        var fysiskBrukerstedNotToMatch = "9876";
+        var navident1 = "A000001";
+        var navident2 = "A000002";
+
+        var ressurs1 = ressursState().toBuilder()
+            .navident(navident1)
+            .primaryFysiskBrukersted(Optional.of(fysiskBrukerstedToMatch))
+            .build();
+        var ressurs2 = ressursState().toBuilder()
+            .navident(navident2)
+            .primaryFysiskBrukersted(Optional.of(fysiskBrukerstedToMatch))
+            .build();
+
+        when(ressursStateRepositoryMock.getAll()).thenReturn(
+            List.of(
+                ressursState(),
+                ressurs1,
+                ressursState(),
+                ressurs2
+            )
         );
+        when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
+            List.of(
+                new FysiskBrukersted(fysiskBrukerstedToMatch, "Der"),
+                new FysiskBrukersted(fysiskBrukerstedNotToMatch, "Der")
+            )
+        );
+        when(ressursStateRepositoryMock.findByNavident(navident1)).thenReturn(Optional.of(ressurs1));
+        when(ressursStateRepositoryMock.findByNavident(navident2)).thenReturn(Optional.of(ressurs2));
+
+        var failed = fysiskBrukerstedService.flyttAlleRessurserFraFysiskBrukerstedTilFysiskBrukersted(fysiskBrukerstedToMatch, "5555", null);
+
+        assertEquals(2, failed.size());
+
         verify(ressursCommandServiceMock, times(0)).oppdaterFysiskeBrukerstederCommand(any(), any());
     }
 
@@ -223,46 +276,81 @@ class FysiskBrukerstedServiceTest {
         );
         when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
             List.of(
-                new FysiskBrukersted("1234", "Der"),
-                new FysiskBrukersted("9876", "Her")
+                new FysiskBrukersted(fysiskBrukerstedToMatch, "Der"),
+                new FysiskBrukersted(fysiskBrukerstedNotToMatch, "Der")
             )
         );
         when(ressursStateRepositoryMock.findByNavident(navident1)).thenReturn(Optional.of(ressurs1));
         when(ressursStateRepositoryMock.findByNavident(navident2)).thenReturn(Optional.of(ressurs2));
 
-        fysiskBrukerstedService.flyttAlleRessurserFraFysiskBrukerstedTilFysiskBrukersted(fysiskBrukerstedToMatch, "9876", null);
+        var failed = fysiskBrukerstedService.flyttAlleRessurserFraFysiskBrukerstedTilFysiskBrukersted(fysiskBrukerstedToMatch, "9876", null);
+        assertEquals(0, failed.size());
 
         verify(ressursCommandServiceMock, times(1)).oppdaterFysiskeBrukerstederCommand(any(), any());
     }
 
     @Test
-    void flyttRessurserTilFysiskBrukersted() {
-        var fysiskBrukersted = "1234";
-
-        var ressurs1 = ressursState();
-        var ressurs2 = ressursState();
+    void flyttRessurserTilFysiskBrukersted_ok() {
+        var fysiskBrukerstedToMatch = "1234";
+        var fysiskBrukerstedNotToMatch = "9876";
+        var ressurs1 = ressursState().toBuilder().navident("A000001").build();
+        var ressurs2 = ressursState().toBuilder().navident("A000002").build();
 
         when(ressursStateRepositoryMock.findByNavident(ressurs1.navident())).thenReturn(Optional.of(ressurs1));
         when(ressursStateRepositoryMock.findByNavident(ressurs2.navident())).thenReturn(Optional.of(ressurs2));
         when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
             List.of(
-                new FysiskBrukersted("1234", "Der"),
-                new FysiskBrukersted("9876", "Her")
+                new FysiskBrukersted(fysiskBrukerstedToMatch, "Der"),
+                new FysiskBrukersted(fysiskBrukerstedNotToMatch, "Der")
             )
         );
 
-        fysiskBrukerstedService.flyttRessurserTilFysiskBrukersted(List.of(ressurs1.navident(), ressurs2.navident()), fysiskBrukersted, null);
+        fysiskBrukerstedService.flyttRessurserTilFysiskBrukersted(List.of(ressurs1.navident(), ressurs2.navident()), fysiskBrukerstedToMatch, null);
 
         verify(ressursCommandServiceMock, times(2)).oppdaterFysiskeBrukerstederCommand(any(), any());
+    }
 
-        assertThrows(IllegalArgumentException.class, () ->
-            fysiskBrukerstedService.flyttRessurserTilFysiskBrukersted(List.of(ressurs1.navident(), ressurs2.navident()), "FINNES IKKE", null)
+    @Test
+    void flyttRessurserTilFysiskBrukersted_fails() {
+        var fysiskBrukerstedToMatch = "1234";
+        var fysiskBrukerstedNotToMatch = "9876";
+        var ressurs1 = ressursState().toBuilder().navident("A000001").build();
+        var ressurs2 = ressursState().toBuilder().navident("A000002").build();
+
+        when(ressursStateRepositoryMock.findByNavident(ressurs1.navident())).thenReturn(Optional.of(ressurs1));
+        when(ressursStateRepositoryMock.findByNavident(ressurs2.navident())).thenReturn(Optional.of(ressurs2));
+        when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
+            List.of(
+                new FysiskBrukersted(fysiskBrukerstedToMatch, "Der"),
+                new FysiskBrukersted(fysiskBrukerstedNotToMatch, "Der")
+            )
         );
 
-        assertThrows(IllegalArgumentException.class, () ->
-            fysiskBrukerstedService.flyttRessurserTilFysiskBrukersted(List.of("FINNES IKKE", ressurs2.navident()), fysiskBrukersted, null)
+        var failed = fysiskBrukerstedService.flyttRessurserTilFysiskBrukersted(List.of(ressurs1.navident(), ressurs2.navident()), "FINNES IKKE", null);
+        assertEquals(2, failed.size());
+
+        verify(ressursCommandServiceMock, times(0)).oppdaterFysiskeBrukerstederCommand(any(), any());
+    }
+
+    @Test
+    void flyttRessurserTilFysiskBrukersted_fails_2() {
+        var fysiskBrukerstedToMatch = "1234";
+        var fysiskBrukerstedNotToMatch = "9876";
+        var ressurs1 = ressursState().toBuilder().navident("A000001").build();
+        var ressurs2 = ressursState().toBuilder().navident("A000002").build();
+
+        when(ressursStateRepositoryMock.findByNavident(ressurs1.navident())).thenReturn(Optional.of(ressurs1));
+        when(ressursStateRepositoryMock.findByNavident(ressurs2.navident())).thenReturn(Optional.of(ressurs2));
+        when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
+            List.of(
+                new FysiskBrukersted(fysiskBrukerstedToMatch, "Der"),
+                new FysiskBrukersted(fysiskBrukerstedNotToMatch, "Der")
+            )
         );
-        verifyNoMoreInteractions(ressursCommandServiceMock);
+        var failed = fysiskBrukerstedService.flyttRessurserTilFysiskBrukersted(List.of("FINNES IKKE", ressurs2.navident()), fysiskBrukerstedToMatch, null);
+        assertEquals(1, failed.size());
+
+        verify(ressursCommandServiceMock, times(1)).oppdaterFysiskeBrukerstederCommand(any(), any());
     }
 
     @Test

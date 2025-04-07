@@ -1,43 +1,64 @@
 package no.nav.nom.apps.api.ressurs;
 
+import freemarker.template.Configuration;
+import freemarker.template.TemplateException;
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.ressurs.api.app.NomRemedyIntegrasjonClient;
+import no.nav.nom.apps.api.clients.ad.ADResponseException;
+import no.nav.nom.apps.api.clients.ad.AdClient;
+import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
+import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
+import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
-import no.nav.nom.apps.api.ressurs.model.FysiskBrukersted;
+import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
-import static no.nav.nom.apps.api.common.SpringCacheConfig.FYSISK_BRUKERSTED_CACHE_NAME;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class FysiskBrukerstedService {
     static final String CACHE_TTL = "PT1H";
+    public static final String MASSEFLYTTING_FYSISK_BRUKERSTED_VARSEL_FTLH = "masseflytting-fysiskbrukersted-varsel.ftlh";
+    public static final String UNLEASH_MASSEFLYTTING_FYSISK_BRUKERSTED_SEND_EPOST = "nom.masseflytting.fysiskbrukersted.send_epost";
 
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final RessursCommandService ressursCommandService;
     private final FysiskBrukerstedCache fysiskBrukerstedCache;
+    private final AdClient adClient;
+    private final Configuration freemarkerConfig;
+    private final MicrosoftGraphClient microsoftGraphClient;
+    private final Unleash unleash;
 
     public FysiskBrukerstedService(
-            RessursStateRepository ressursStateRepository, OrgtilknytningStateRepository orgtilknytningStateRepository,
-            RessursCommandService ressursCommandService, FysiskBrukerstedCache fysiskBrukerstedCache
+        AdClient adClient, RessursStateRepository ressursStateRepository, OrgtilknytningStateRepository orgtilknytningStateRepository,
+        RessursCommandService ressursCommandService, FysiskBrukerstedCache fysiskBrukerstedCache, Configuration freemarkerConfig,
+        MicrosoftGraphClient microsoftGraphClient, Unleash unleash
     ) {
+        this.adClient = adClient;
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.ressursCommandService = ressursCommandService;
         this.fysiskBrukerstedCache = fysiskBrukerstedCache;
+        this.freemarkerConfig = freemarkerConfig;
+        this.microsoftGraphClient = microsoftGraphClient;
+        this.unleash = unleash;
     }
 
     public List<RessursState> getAlleRessurserMedFysiskBrukersted(String fysiskBrukerstedNr) {
@@ -54,18 +75,28 @@ public class FysiskBrukerstedService {
             .toList();
     }
 
-    public void flyttAlleRessurserFraFysiskBrukerstedTilFysiskBrukersted(String fraFysiskBrukerstedNr, String tilFysiskBrukerstedNr, InputMetadata inputMetaData) {
+    public HashMap<String, String> flyttAlleRessurserFraFysiskBrukerstedTilFysiskBrukersted(String fraFysiskBrukerstedNr, String tilFysiskBrukerstedNr, InputMetadata inputMetaData) {
         var navidenter = getAlleRessurserMedFysiskBrukersted(fraFysiskBrukerstedNr).stream().map(RessursState::navident).toList();
-        flyttRessurserTilFysiskBrukersted(navidenter, tilFysiskBrukerstedNr, inputMetaData);
+        return flyttRessurserTilFysiskBrukersted(navidenter, tilFysiskBrukerstedNr, inputMetaData);
     }
 
-    public void flyttAlleRessurserPaaEnhetFraFysiskBrukerstedTilFysiskBrukersted(String orgenhet, String fraFysiskBrukerstedNr, String tilFysiskBrukerstedNr, InputMetadata inputMetaData ) {
+    public HashMap<String, String> flyttAlleRessurserPaaEnhetFraFysiskBrukerstedTilFysiskBrukersted(String orgenhet, String fraFysiskBrukerstedNr, String tilFysiskBrukerstedNr, InputMetadata inputMetaData ) {
         var navidenter = getAlleRessurserPaaEnhetMedFysiskBrukersted(orgenhet, fraFysiskBrukerstedNr).stream().map(RessursState::navident).toList();
-        flyttRessurserTilFysiskBrukersted(navidenter, tilFysiskBrukerstedNr, inputMetaData);
+        return flyttRessurserTilFysiskBrukersted(navidenter, tilFysiskBrukerstedNr, inputMetaData);
     }
 
-    public void flyttRessurserTilFysiskBrukersted(List<String> navidenter, String tilFysiskBrukerstedNr, InputMetadata inputMetaData) {
-        navidenter.forEach(navident -> oppdaterRessursFysiskBrukersted(navident, tilFysiskBrukerstedNr, inputMetaData));
+    public HashMap<String, String> flyttRessurserTilFysiskBrukersted(List<String> navidenter, String tilFysiskBrukerstedNr, InputMetadata inputMetaData) {
+        HashMap<String, String> feiledeNavidenter = new HashMap<>();
+        navidenter.forEach(navident -> {
+            try {
+                oppdaterRessursFysiskBrukersted(navident, tilFysiskBrukerstedNr, inputMetaData);
+            } catch (IllegalArgumentException e) {
+                feiledeNavidenter.put(navident, e.getMessage());
+                log.error("Feil ved oppdatering av ressurs {} til fysisk brukersted {}", navident, tilFysiskBrukerstedNr, e);
+            }
+        });
+        sendMasseflyttFysiskBrukerstedEmail(tilFysiskBrukerstedNr, navidenter, feiledeNavidenter);
+        return feiledeNavidenter;
     }
 
     private void oppdaterRessursFysiskBrukersted(String navident, String fysiskBrukerstedNr, InputMetadata inputMetaData) {
@@ -88,6 +119,66 @@ public class FysiskBrukerstedService {
     public boolean fysiskBrukerstedExists(String fysiskBrukerstedNr) {
         return fysiskBrukerstedCache.getAll().stream()
             .anyMatch(fysiskBrukersted -> fysiskBrukersted.nr().equals(fysiskBrukerstedNr));
+    }
+
+    public void sendMasseflyttFysiskBrukerstedEmail(
+        String tilFysiskbrukersted,
+        List<String> navidenter,
+        HashMap<String, String> feiledeNavidenter
+    ) {
+        try {
+            if (!unleash.isEnabled(UNLEASH_MASSEFLYTTING_FYSISK_BRUKERSTED_SEND_EPOST)) {
+                log.info("Epost varsling er skrudd av for masseflytting av fysisk brukersted");
+                return;
+            }
+
+            String innsenderNavident = SecurityUtil.getAuthenticatedNavIdent();
+            var innsenderVisningsnavn = ressursStateRepository.findByNavident(innsenderNavident)
+                .map(RessursState::visningsnavn)
+                .map(Visningsnavn::getFormattedVisningsnavn)
+                .orElse("UKJENT");
+
+            var recipientList = adClient.getAdRessurser(Set.of(innsenderNavident)).getRessurser().stream()
+                .map(AdRessurs::getEmail)
+                .collect(Collectors.toList());
+
+            String subject = String.format("Masseflytting av ressurser til fysiskbrukersted %s", tilFysiskbrukersted);
+            String body = getFormattedMasseflyttEmailBody(
+                tilFysiskbrukersted,
+                navidenter.size() - feiledeNavidenter.size(),
+                feiledeNavidenter.size(),
+                feiledeNavidenter.keySet(),
+                innsenderVisningsnavn
+            );
+            log.info("Masseflytting epost. Mottakere: {}\nBody:\n{}", recipientList, body);
+            EmailMessage message = new EmailMessage(subject, body, recipientList);
+            microsoftGraphClient.sendEmail(message).subscribe();
+
+        } catch (ADResponseException e) {
+            log.error("Fant ikke innsender sin epost adresse for masseflytting", e);
+        } catch (IOException | TemplateException e) {
+            log.error("Feil ved generering av epost innhold", e);
+        }
+    }
+
+    private String getFormattedMasseflyttEmailBody(
+        String tilFysiskbrukersted,
+        int antallFlyttet,
+        int feiletAntall,
+        Set<String> feiledeNavidenter,
+        String innsenderVisningsnavn
+    ) throws IOException, TemplateException {
+        var stringWriter = new StringWriter();
+        var model = Map.of(
+            "nyFysiskbrukersted", tilFysiskbrukersted,
+            "antallFlyttet", antallFlyttet,
+            "feiletAntall", feiletAntall,
+            "total", antallFlyttet + feiletAntall,
+            "feiletNavidenter", feiledeNavidenter.stream().collect(Collectors.joining(",\n")),
+            "innsenderVisningsnavn", innsenderVisningsnavn
+        );
+        freemarkerConfig.getTemplate(MASSEFLYTTING_FYSISK_BRUKERSTED_VARSEL_FTLH).process(model, stringWriter);
+        return stringWriter.getBuffer().toString();
     }
 }
 
