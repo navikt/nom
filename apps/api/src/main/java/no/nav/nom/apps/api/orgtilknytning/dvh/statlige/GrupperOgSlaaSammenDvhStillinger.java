@@ -154,14 +154,13 @@ public class GrupperOgSlaaSammenDvhStillinger {
             filtrerUtPerioderSomOverlapperPaaSammeEnhet(perioderGruppert);
         }
 
-        return new StrukturerteStillingPerioderForNavident(sspForNavident, perioderGruppert.stream()
+        return new StrukturerteStillingPerioderForNavident(
+            sspForNavident, perioderGruppert.stream()
             .sorted(
                 Comparator.comparing(StillingPeriode::gyldigFom)
-                .thenComparing(
-                    sp -> sp.tilknytningtype().orElse(null),
-                    Comparator.nullsLast(Comparator.naturalOrder())
-                ))
-            .toList());
+            )
+            .toList()
+        );
     }
 
     private void filtrerUtPerioderSomOverlapperPaaSammeEnhet(List<StillingPeriode> perioderGruppert) {
@@ -181,6 +180,8 @@ public class GrupperOgSlaaSammenDvhStillinger {
         LocalDate brekkpunktFom = null;
         LocalDate brekkpunktTom = null;
         StillingPeriode stillingPeriodeBeforeBreak = null;
+
+        if (spUtenTilknytningtype.isEmpty()) return;
 
         for (StillingPeriode stillingPeriodeMedTilknytning : spMedTilknytningtype) {
             LocalDate stillingMedTilknytningFom = stillingPeriodeMedTilknytning.gyldigFom();
