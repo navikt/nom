@@ -55,7 +55,6 @@ public class OrgtilknytningEndretEmailService {
     public final String epost_body_item_template_ot_notfound = "Endring({0}) utført av {1}, på {2}.";
     private final Logger log = LoggerFactory.getLogger(OrgtilknytningEndretEmailService.class);
     private final MicrosoftGraphClient microsoftGraphClient;
-    private final Unleash unleash;
     private final Configuration freemarkerConfig;
     private final AdClient adClient;
     private final RessursStateRepository ressursStateRepository;
@@ -72,7 +71,6 @@ public class OrgtilknytningEndretEmailService {
 
     public OrgtilknytningEndretEmailService(
         MicrosoftGraphClient microsoftGraphClient,
-        Unleash unleash,
         Configuration freemarkerConfig,
         AdClient adClient,
         RessursStateRepository ressursStateRepository,
@@ -86,7 +84,6 @@ public class OrgtilknytningEndretEmailService {
         OrgenhetService orgenhetService
     ) {
         this.microsoftGraphClient = microsoftGraphClient;
-        this.unleash = unleash;
         this.freemarkerConfig = freemarkerConfig;
         this.adClient = adClient;
         this.ressursStateRepository = ressursStateRepository;
