@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
@@ -472,6 +473,12 @@ public class NyeRessursStillingProcessor {
             metadata,
             additionalData
         );
+
+        // Todo: to be removed
+        if(cmd.gyldigTom().equals(NO_END_DATE)) {
+            log.info("-2099-: setting gyldigTom = NO_END_DATE i OT: {}", originalOrgtilknytning.fid());
+        }
+
         return new SimpleEntry<>(originalOrgtilknytning.fid(), cmd);
     }
 
