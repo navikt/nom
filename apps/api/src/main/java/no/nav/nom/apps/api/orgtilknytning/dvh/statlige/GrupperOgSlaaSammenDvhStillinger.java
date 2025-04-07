@@ -158,7 +158,10 @@ public class GrupperOgSlaaSammenDvhStillinger {
             sspForNavident, perioderGruppert.stream()
             .sorted(
                 Comparator.comparing(StillingPeriode::gyldigFom)
-            )
+                    .thenComparing(
+                        sp -> sp.tilknytningtype().orElse(null),
+                        Comparator.nullsLast(Comparator.naturalOrder())
+                    ))
             .toList()
         );
     }
