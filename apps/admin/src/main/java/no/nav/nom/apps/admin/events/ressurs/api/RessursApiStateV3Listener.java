@@ -32,9 +32,9 @@ public class RessursApiStateV3Listener {
 
     @KafkaListener(
         containerFactory = "genericApiEventKafkaListenerContainerFactory",
-        id = "#{apiStateRessursUniqueListenerId}",
+        id = "#{apiStateRessursUniqueListenerId}-V3",
         topicPartitions = @TopicPartition(
-            topic = "${app.kafka.ressurs.apiEventTopic-v3}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
+            topic = "${app.kafka.ressurs.apiEventTopicV3}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
         )
     )
     public void onMessage(ConsumerRecords<String, RessursStateKafkaDTO> records) {
