@@ -58,6 +58,9 @@ public class GenericApiKafkaConfig {
     public String apiStateRessursUniqueListenerId(@Value("${app.kafka.ressurs.apiEventTopic-listener-id}") String listenerId) { return getUniqueListenerIdString(listenerId); }
 
     @Bean
+    public String apiStateRessursV3UniqueListenerId(@Value("${app.kafka.ressurs.apiEventTopicV3-listener-id}") String listenerId) { return getUniqueListenerIdString(listenerId); }
+
+    @Bean
     public String apiHendelseRessursUniqueListenerId(@Value("${app.kafka.ressurs-hendelser.apiEventTopic-listener-id}") String listenerId) { return getUniqueListenerIdString(listenerId); }
 
     @Bean

@@ -7,6 +7,7 @@ app:
       apiEventTopicV3: org.nom.api-ressurs-state-v3
       eventsource-listener-id: nom-admin_ressursEvtsrcListener_${HOSTNAME}
       apiEventTopic-listener-id: nom-admin_apiRessursListener_${HOSTNAME}
+      apiEventTopicV3-listener-id: nom-admin_apiRessursListener_v3_${HOSTNAME}
     orgenhet:
       eventsourceTopic: org.nom.orgenhet-eventsource
       apiEventTopic: org.nom.api-orgenhet-state-v3

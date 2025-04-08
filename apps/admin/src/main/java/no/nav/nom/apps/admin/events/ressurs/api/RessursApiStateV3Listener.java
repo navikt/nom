@@ -25,14 +25,14 @@ public class RessursApiStateV3Listener {
     private final RessursApiStateV3Repository ressursApiStateRepository;
     private final String listenerId;
 
-    public RessursApiStateV3Listener(RessursApiStateV3Repository ressursApiStateRepository, String apiStateRessursUniqueListenerId) {
+    public RessursApiStateV3Listener(RessursApiStateV3Repository ressursApiStateRepository, String apiStateRessursV3UniqueListenerId) {
         this.ressursApiStateRepository = ressursApiStateRepository;
-        this.listenerId = apiStateRessursUniqueListenerId;
+        this.listenerId = apiStateRessursV3UniqueListenerId;
     }
 
     @KafkaListener(
         containerFactory = "genericApiEventKafkaListenerContainerFactory",
-        id = "#{apiStateRessursUniqueListenerId}-V3",
+        id = "#{apiStateRessursV3UniqueListenerId}",
         topicPartitions = @TopicPartition(
             topic = "${app.kafka.ressurs.apiEventTopicV3}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
         )
@@ -64,7 +64,7 @@ public class RessursApiStateV3Listener {
         log.debug("Idle event received for listener {}. Waiting for listener {}", event.getListenerId(), listenerId);
         if (event.getListenerId().startsWith(listenerId)) {
             log.info(
-                "All Ressurs StateTopic events has now been read on startup. Number of RessursStateTopic messages consumed: {}", ressursApiStateRepository.count()
+                "All Ressurs StateTopic V# events has now been read on startup by {}. Number of RessursStateTopic messages consumed: {}", listenerId, ressursApiStateRepository.count()
             );
             hasReadToEndOnStartup.set(true);
 
