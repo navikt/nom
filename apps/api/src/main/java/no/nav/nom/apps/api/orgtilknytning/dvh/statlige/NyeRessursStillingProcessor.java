@@ -476,7 +476,7 @@ public class NyeRessursStillingProcessor {
 
         // Todo: to be removed
         if(cmd.gyldigTom().equals(NO_END_DATE)) {
-            log.info("-2099-: setting gyldigTom = NO_END_DATE i OT: {}", originalOrgtilknytning.fid());
+            log.info("2x99: setting gyldigTom = NO_END_DATE i OT: {}", originalOrgtilknytning.fid());
         }
 
         return new SimpleEntry<>(originalOrgtilknytning.fid(), cmd);

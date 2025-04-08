@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytningCommand;
@@ -59,6 +60,10 @@ public class OrgtilknytningCommandService {
         String fid,
         EndreDagligOppfolgingOrgtilknytning endreDagligOppfolgingOrgtilknytning
     ) {
+
+        if(endreDagligOppfolgingOrgtilknytning.gyldigTom().equals(PeriodeUtil.NO_END_DATE)) {
+            log.info("2x99: Endrer daglig oppfølging med TOM:2099 for orgtilknytning med fid {}", fid);
+        }
 
         return endreDagligOppfolgingOrgtilknytning(
             EndreDagligOppfolgingOrgtilknytningCommand.builder()
