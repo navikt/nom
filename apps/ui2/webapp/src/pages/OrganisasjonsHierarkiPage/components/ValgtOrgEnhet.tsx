@@ -14,19 +14,17 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 import partition from "lodash/partition";
-import React from "react";
+import React, { useState } from "react";
 
 import {
   downloadExcelKontaktPersonserForOrgenhetByOrgenhetId,
   getOrgEnheterSomKanHaRessurser,
   getRessurserByListNavident,
+  harLederTilgangForOrgenhetOptions,
   isOrgEnhetArbeidsomraade,
   isOrgEnhetDriftsenhet,
 } from "~/api/react-query-endpoints";
-import {
-  useHasAdminAccess,
-  useHasAdminOrWriteAccess,
-} from "~/api/useGetSession";
+import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
 import { UserImage } from "~/components/UserImage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import {
@@ -223,22 +221,42 @@ function MedarbeidereList({
   visTabellKnapp: boolean;
   valgtOrgenhetKanHaRessurser: boolean;
 }) {
+  const [isDownloading, setIsDownloading] = useState(false);
+
   if (ressurser.length === 0) {
     return visTabellKnapp ? (
-      <div
-        css={css`
-          display: flex;
-          justify-content: end;
-          align-items: center;
-          margin-top: var(--a-spacing-6);
-        `}
-      >
-        <DropdownMeny
-          orgEnhet={orgEnhet}
-          valgtEnhetKanHaRessurser={valgtOrgenhetKanHaRessurser}
-          visRessursAdministeringKnapper={visRessursAdministeringKnapper}
-        />
-      </div>
+      <>
+        <div
+          css={css`
+            display: flex;
+            justify-content: end;
+            align-items: center;
+            margin-top: var(--a-spacing-6);
+          `}
+        >
+          <DropdownMeny
+            orgEnhet={orgEnhet}
+            setIsDownloading={setIsDownloading}
+            valgtEnhetKanHaRessurser={valgtOrgenhetKanHaRessurser}
+            visRessursAdministeringKnapper={visRessursAdministeringKnapper}
+          />
+        </div>
+
+        {isDownloading && (
+          <div
+            css={css`
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              margin: auto;
+              gap: var(--a-spacing-2);
+            `}
+          >
+            <Loader size="3xlarge" />
+            <BodyShort size="large">Eksporterer kontaktpersoner...</BodyShort>
+          </div>
+        )}
+      </>
     ) : (
       <></>
     );
@@ -266,19 +284,40 @@ function MedarbeidereList({
           margin-top: var(--a-spacing-6);
         `}
       >
-        <Heading level="3" size="medium">
+        <Heading
+          css={css`
+            align-self: start;
+          `}
+          level="3"
+          size="medium"
+        >
           Medarbeidere i {orgEnhet.navn}
         </Heading>
         {visTabellKnapp && (
-          <>
-            <DropdownMeny
-              orgEnhet={orgEnhet}
-              valgtEnhetKanHaRessurser={valgtOrgenhetKanHaRessurser}
-              visRessursAdministeringKnapper={visRessursAdministeringKnapper}
-            />
-          </>
+          <DropdownMeny
+            orgEnhet={orgEnhet}
+            setIsDownloading={setIsDownloading}
+            valgtEnhetKanHaRessurser={valgtOrgenhetKanHaRessurser}
+            visRessursAdministeringKnapper={visRessursAdministeringKnapper}
+          />
         )}
       </div>
+
+      {isDownloading && (
+        <div
+          css={css`
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: auto;
+            gap: var(--a-spacing-2);
+          `}
+        >
+          <Loader size="3xlarge" />
+          <BodyShort size="large">Eksporterer kontaktpersoner...</BodyShort>
+        </div>
+      )}
+
       <VStack gap="4">
         {interneRessurser.length > 0 && (
           <div>
@@ -354,103 +393,130 @@ function MedarbeidereList({
 function DropdownMeny({
   orgEnhet,
   visRessursAdministeringKnapper,
+  setIsDownloading,
   valgtEnhetKanHaRessurser,
 }: {
   orgEnhet: OrgEnhet;
   visRessursAdministeringKnapper: boolean;
+  setIsDownloading: (value: boolean) => void;
   valgtEnhetKanHaRessurser: boolean;
 }) {
   const hasAdminAccess = useHasAdminAccess();
-  const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
+  const hasWriteAccess = useHasWriteAccess();
 
-  const handleDownloadKontaktpersonerExcel = async () => {
-    await downloadExcelKontaktPersonserForOrgenhetByOrgenhetId(
-      orgEnhet.id,
-      excelFilNavn(),
-    );
-  };
+  const hasWriteAccessForOrgenhet =
+    useQuery(harLederTilgangForOrgenhetOptions(orgEnhet.id)).data ?? false;
 
   const excelFilNavn = () => {
     return "kontaktpersoner for orgenhet - " + orgEnhet?.navn + ".xlsx";
   };
 
+  const handleDownloadKontaktpersonerExcel = async () => {
+    try {
+      setIsDownloading(true);
+      await downloadExcelKontaktPersonserForOrgenhetByOrgenhetId(
+        orgEnhet.id,
+        excelFilNavn(),
+      );
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
-    <Dropdown>
-      <Button
-        as={Dropdown.Toggle}
-        css={css`
-          color: black;
-        `}
-        icon={<MenuElipsisHorizontalCircleIcon title="Rediger" />}
-        variant="tertiary"
-      />
+    <div
+      css={css`
+        display: grid;
+      `}
+    >
+      <Dropdown>
+        <Button
+          as={Dropdown.Toggle}
+          css={css`
+            color: black;
+            justify-self: end;
+          `}
+          icon={<MenuElipsisHorizontalCircleIcon title="Rediger" />}
+          variant="tertiary"
+        />
 
-      <Dropdown.Menu
-        css={css`
-          width: 460px;
-        `}
-      >
-        <Dropdown.Menu.GroupedList>
-          <Dropdown.Menu.GroupedList.Heading>
-            Administrering av medarbeidere
-          </Dropdown.Menu.GroupedList.Heading>
+        <Dropdown.Menu
+          css={css`
+            width: 460px;
+          `}
+        >
+          <Dropdown.Menu.GroupedList>
+            <Dropdown.Menu.GroupedList.Heading>
+              Administrering av medarbeidere
+            </Dropdown.Menu.GroupedList.Heading>
 
-          <Dropdown.Menu.GroupedList.Item
-            as={Link}
-            href={`/org/table/${orgEnhet.id}`}
-          >
-            Tabellvisning av ansatte i denne enheten og underliggende enheter
-          </Dropdown.Menu.GroupedList.Item>
-          {visRessursAdministeringKnapper && (
-            <>
-              <Dropdown.Menu.Divider />
+            <Dropdown.Menu.GroupedList.Item
+              as={Link}
+              href={`/org/table/${orgEnhet.id}`}
+            >
+              Tabellvisning av ansatte i denne enheten og underliggende enheter
+            </Dropdown.Menu.GroupedList.Item>
+            {visRessursAdministeringKnapper && (
+              <>
+                <Dropdown.Menu.Divider />
 
-              <Dropdown.Menu.GroupedList.Item
-                as={Link}
-                href="/ressurs/create/1"
-              >
-                Opprett medarbeider
-              </Dropdown.Menu.GroupedList.Item>
+                <Dropdown.Menu.GroupedList.Item
+                  as={Link}
+                  href="/ressurs/create/1"
+                >
+                  Opprett medarbeider
+                </Dropdown.Menu.GroupedList.Item>
 
-              {hasAdminAccess && (
-                <>
-                  <Dropdown.Menu.Divider />
+                {hasAdminAccess && (
+                  <>
+                    <Dropdown.Menu.Divider />
 
-                  {valgtEnhetKanHaRessurser && (
-                    <Dropdown.Menu.GroupedList.Item
-                      as={Link}
-                      href={`/masseflytting/${orgEnhet.id}`}
-                    >
-                      Flytt én eller flere medarbeidere
-                    </Dropdown.Menu.GroupedList.Item>
-                  )}
-                  {!valgtEnhetKanHaRessurser && (
-                    <Dropdown.Menu.GroupedList.Item>
-                      <div onClick={(event_) => event_.preventDefault()}>
+                    {valgtEnhetKanHaRessurser && (
+                      <Dropdown.Menu.GroupedList.Item
+                        as={Link}
+                        href={`/masseflytting/${orgEnhet.id}`}
+                      >
+                        Flytt én eller flere medarbeidere
+                      </Dropdown.Menu.GroupedList.Item>
+                    )}
+
+                    {!valgtEnhetKanHaRessurser && !hasAdminAccess && (
+                      <Dropdown.Menu.GroupedList.Item
+                        as={BodyShort}
+                        css={css`
+                          :hover {
+                            color: unset;
+                            background-color: unset;
+                            cursor: default;
+                          }
+                        `}
+                        onClick={(event_) => event_.preventDefault()}
+                      >
                         Flytting av medarbeidere er ikke tilgjengelig for denne
-                        enheten. (Se heller lengre ned i hierarkiet)
-                      </div>
-                    </Dropdown.Menu.GroupedList.Item>
-                  )}
-                </>
-              )}
-            </>
-          )}
+                        enheten. Se lenger ned i hierarkiet.
+                      </Dropdown.Menu.GroupedList.Item>
+                    )}
+                  </>
+                )}
+              </>
+            )}
 
-          {hasAdminOrWriteAccess && (
-            <>
-              <Dropdown.Menu.Divider />
-              <Dropdown.Menu.GroupedList.Item
-                as={Link}
-                onClick={handleDownloadKontaktpersonerExcel}
-              >
-                Eksporter kontaktpersoner til Excel
-              </Dropdown.Menu.GroupedList.Item>
-            </>
-          )}
-        </Dropdown.Menu.GroupedList>
-      </Dropdown.Menu>
-    </Dropdown>
+            {((hasWriteAccess && hasWriteAccessForOrgenhet) ||
+              hasAdminAccess) && (
+              <>
+                <Dropdown.Menu.Divider />
+                <Dropdown.Menu.GroupedList.Item
+                  as={Link}
+                  onClick={handleDownloadKontaktpersonerExcel}
+                >
+                  Eksporter kontaktpersoner til Excel
+                </Dropdown.Menu.GroupedList.Item>
+              </>
+            )}
+          </Dropdown.Menu.GroupedList>
+        </Dropdown.Menu>
+      </Dropdown>
+    </div>
   );
 }
 

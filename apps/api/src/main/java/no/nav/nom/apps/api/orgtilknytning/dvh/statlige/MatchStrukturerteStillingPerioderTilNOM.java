@@ -255,7 +255,7 @@ public class MatchStrukturerteStillingPerioderTilNOM {
                     sspForNavident, stillingPeriode, sspForNavident.navident(), aktuellOrgEnhet
                 );
             }
-            aktuellGyldigTom = dayBefore(splittetPerioder.getLast().gyldigFom());
+            aktuellGyldigTom = splittetPerioder.isEmpty() ? aktuellGyldigTom : dayBefore(splittetPerioder.getLast().gyldigFom());
         }
 
         if (stillingPeriode.gyldigFom().isBefore(aktuellGyldigTom)) {

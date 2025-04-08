@@ -581,9 +581,9 @@ public class NyeRessursStillingProcessor {
             if (overlappendeOTerPaaSP.size() > 1) {
                 if (!sp.erDagligOppfolging()) {
                     match = overlappendeOTerPaaSP.stream()
-                        .filter(ot -> ot.gyldigFom().equals(sp.gyldigFom())
-                            && ot.gyldigTom().orElse(NO_END_DATE).equals(sp.gyldigTom()))
-                        .findFirst();
+                            .filter(ot -> ot.gyldigFom().equals(sp.gyldigFom())
+                                    && ot.gyldigTom().orElse(NO_END_DATE).equals(sp.gyldigTom()))
+                            .findFirst();
                 } else {
                     match = Optional.ofNullable(overlappendeOTerPaaSP.getFirst());
                 }
@@ -633,6 +633,7 @@ public class NyeRessursStillingProcessor {
         return eksisterendeOTer.stream()
             .filter(ot -> ot.orgEnhetId().equals(sp.orgenhet().getId()))
             .filter(ot -> overlapsInterval(sp.gyldigFom(), sp.gyldigTom(), ot))
+            .filter(ot -> ot.orgtilknytningType().equals(sp.tilknytningtype()))
             .sorted(Comparator.comparing(OrgtilknytningState::gyldigFom))
             .toList();
     }

@@ -8,6 +8,7 @@ import React, { useEffect, useRef } from "react";
 
 import { getOrgEnhet } from "~/api/react-query-endpoints";
 import { UserImage } from "~/components/UserImage";
+import { dateIsAfterToday } from "~/dateUtils/dateUtils";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import building from "~/resources/building.svg";
 import type { Ressurs } from "~/types/api-models";
@@ -25,6 +26,8 @@ export function OrgEnhetView({
     queryFn: () => getOrgEnhet.queryFn(orgEnhetId),
   });
 
+  const orgEnhet = orgEnhetQuery.data;
+
   const reference = useRef<HTMLAnchorElement>(null);
   useEffect(() => {
     // Give autofocus on initial load.
@@ -33,6 +36,9 @@ export function OrgEnhetView({
       reference.current?.focus();
     }
   }, []);
+
+  const fremtidig =
+    !!orgEnhet?.gyldigFom && dateIsAfterToday(orgEnhet?.gyldigFom);
 
   return (
     <ReactRouterLink
@@ -44,7 +50,7 @@ export function OrgEnhetView({
       ref={reference}
       to="/org/$id"
     >
-      <UnitContainerLink>
+      <UnitContainerLink fremtidig={fremtidig}>
         <VerticalEdge size="large">
           <img alt={"orgenhet"} src={building} />
         </VerticalEdge>
@@ -54,13 +60,11 @@ export function OrgEnhetView({
           `}
         >
           <Heading level="2" size="small">
-            {orgEnhetQuery.data?.navn}
+            {orgEnhet?.navn}
           </Heading>
           <BodyShort size="small">
             Leder:{" "}
-            <b>
-              {formatVisningsnavn(orgEnhetQuery.data?.ledere[0]?.visningsnavn)}
-            </b>
+            <b>{formatVisningsnavn(orgEnhet?.ledere[0]?.visningsnavn)}</b>
           </BodyShort>
         </div>
       </UnitContainerLink>
@@ -106,7 +110,13 @@ export function ResourceLink({ ressurs }: { ressurs: Ressurs }) {
   );
 }
 
-function UnitContainerLink({ children }: { children: ReactNode }) {
+function UnitContainerLink({
+  children,
+  fremtidig = false,
+}: {
+  children: ReactNode;
+  fremtidig?: boolean;
+}) {
   return (
     <div
       css={css`
@@ -114,7 +124,9 @@ function UnitContainerLink({ children }: { children: ReactNode }) {
         height: 100%;
         border-radius: 5px;
         border: 1px solid var(--a-gray-400);
-        background-color: var(--a-white);
+        background-color: ${fremtidig
+          ? "var(--a-green-100)"
+          : "var(--a-white)"};
         display: grid;
         grid-template-columns: min-content 1fr 40px;
         align-items: center;

@@ -154,14 +154,16 @@ public class GrupperOgSlaaSammenDvhStillinger {
             filtrerUtPerioderSomOverlapperPaaSammeEnhet(perioderGruppert);
         }
 
-        return new StrukturerteStillingPerioderForNavident(sspForNavident, perioderGruppert.stream()
+        return new StrukturerteStillingPerioderForNavident(
+            sspForNavident, perioderGruppert.stream()
             .sorted(
                 Comparator.comparing(StillingPeriode::gyldigFom)
-                .thenComparing(
-                    sp -> sp.tilknytningtype().orElse(null),
-                    Comparator.nullsLast(Comparator.naturalOrder())
-                ))
-            .toList());
+                    .thenComparing(
+                        sp -> sp.tilknytningtype().orElse(null),
+                        Comparator.nullsLast(Comparator.naturalOrder())
+                    ))
+            .toList()
+        );
     }
 
     private void filtrerUtPerioderSomOverlapperPaaSammeEnhet(List<StillingPeriode> perioderGruppert) {
@@ -181,6 +183,8 @@ public class GrupperOgSlaaSammenDvhStillinger {
         LocalDate brekkpunktFom = null;
         LocalDate brekkpunktTom = null;
         StillingPeriode stillingPeriodeBeforeBreak = null;
+
+        if (spUtenTilknytningtype.isEmpty()) return;
 
         for (StillingPeriode stillingPeriodeMedTilknytning : spMedTilknytningtype) {
             LocalDate stillingMedTilknytningFom = stillingPeriodeMedTilknytning.gyldigFom();
@@ -221,15 +225,18 @@ public class GrupperOgSlaaSammenDvhStillinger {
                         sp.sektor(),
                         sp.tilknytningtype()
                     ));
-                    perioderSomSkalBeholdes.add(new StillingPeriode(
-                        sp.stilling(),
-                        stillingMedTilknytningTom.plusDays(1),
-                        sp.gyldigTom(),
-                        sp.orgenhet(),
-                        sp.sektor(),
-                        sp.tilknytningtype()
-                    ));
-                    stillingPeriodeBeforeBreak = sp;
+                    brekkpunktFom = stillingMedTilknytningTom.plusDays(1);
+                    if (spMedTilknytningtype.size() == 1) {
+                        perioderSomSkalBeholdes.add(new StillingPeriode(
+                            sp.stilling(),
+                            stillingMedTilknytningTom.plusDays(1),
+                            sp.gyldigTom(),
+                            sp.orgenhet(),
+                            sp.sektor(),
+                            sp.tilknytningtype()
+                        ));
+                        stillingPeriodeBeforeBreak = sp;
+                    }
                     continue;
                 }
 

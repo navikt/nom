@@ -1,0 +1,10 @@
+KAFKA_BROKERS: ${spring.embedded.kafka.brokers}
+KAFKA_STREAMS_APPLICATION_ID: api-ressurs-state-v3
+spring:
+  kafka:
+    security:
+      protocol: PLAINTEXT
+    streams:
+      cleanup:
+        on-shutdown: true
+        on-startup: true

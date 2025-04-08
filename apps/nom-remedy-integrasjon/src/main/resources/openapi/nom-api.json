@@ -86,10 +86,148 @@
         ]
       }
     },
+    "/app/authorizedRessursRedigering/getOrgEnheterLederCanEdit": {
+      "get": {
+        "description": "Returner en liste med orgenheter innlogget bruker har tilgang til å redigere ressurser i.",
+        "operationId": "getOrgEnheterLederCanEdit",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IOrgenhet"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Controller metode for å verifisere redigere ressurs tilgang og administrere delegerering av tilganger"
+        ]
+      }
+    },
+    "/app/authorizedRessursRedigering/getRessurserWhichCanBeDelegatedTo": {
+      "get": {
+        "description": "Returner en liste med navn og navIdent for ressurser som har AD-gruppe NOM-WRITE-DELEGERT og/eller NOM-WRITE-LEDER og dermed kan delegeres til.",
+        "operationId": "getRessurserWhichCanBeDelegatedTo",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MinimalRessurs"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Controller metode for å verifisere redigere ressurs tilgang og administrere delegerering av tilganger"
+        ]
+      }
+    },
+    "/app/authorizedRessursRedigering/hasNavidentAccessToResourcesForOrgenhet/{navIdent}/{orgenhetId}": {
+      "get": {
+        "description": "om angitt bruker har tilgang til å opprette ressurser i angitt orgenhet",
+        "operationId": "hasNavidentAccessToResourcesForOrgenhet",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "navIdent",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "orgenhetId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Controller metode for å verifisere redigere ressurs tilgang og administrere delegerering av tilganger"
+        ]
+      }
+    },
+    "/app/authorizedRessursRedigering/isAuthorized": {
+      "post": {
+        "description": "Om oppgitt bruker har tilgang til å redigere oppgitt ressurs",
+        "operationId": "isAuthorizedForNavident",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrukerSkrivetilgangRessursRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Controller metode for å verifisere redigere ressurs tilgang og administrere delegerering av tilganger"
+        ]
+      }
+    },
     "/app/authorizedRessursRedigering/isAuthorizedForNavident/{navident}": {
       "get": {
         "description": "om current bruker har tilgang til å redigere ressurs",
-        "operationId": "isAuthorizedForNavident",
+        "operationId": "isAuthorizedForNavident_1",
         "parameters": [
           {
             "in": "path",
@@ -100,6 +238,42 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Controller metode for å verifisere redigere ressurs tilgang og administrere delegerering av tilganger"
+        ]
+      }
+    },
+    "/app/authorizedRessursRedigering/isAuthorizedForNavidents": {
+      "post": {
+        "description": "Om oppgitt bruker har tilgang til å redigere oppgitt ressurser",
+        "operationId": "isAuthorizedForNavidents",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrukerSkrivetilgangRessurserRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
@@ -331,7 +505,36 @@
         ]
       }
     },
-    "/app/orgenheter/finn-arbeidsomraade/{orgEnhetId}": {
+    "/app/orgenheter/exportKontaktpersonerFor/{orgenhetId}": {
+      "get": {
+        "description": "Genererer regneark med oversikt over kontakt personer for en orgenhet",
+        "operationId": "exportKontaktpersonerForOrgenhetId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgenhetId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exported file"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "OrgEnheter"
+        ]
+      }
+    },
+    "/app/orgenheter/isArbeidsomraade/{orgEnhetId}": {
       "get": {
         "description": "Sjekk om Organisasjonen tilhøerer et arbeidsområde.",
         "operationId": "checkIfOrgEnhetIsArbeidsomraade",
@@ -345,6 +548,99 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "OrgEnheter"
+        ]
+      }
+    },
+    "/app/orgenheter/isDriftsenhet/{orgEnhetId}": {
+      "get": {
+        "description": "Sjekk om Organisasjonen tilhøerer et arbeidsområde.",
+        "operationId": "checkIfOrgEnhetIsDriftsenhet",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgEnhetId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "OrgEnheter"
+        ]
+      }
+    },
+    "/app/orgenheter/isNavIdent/{navident}/LederForOrgenhet/{orgEnhetId}": {
+      "post": {
+        "description": "Sjekk om angitt navident er leder for angitt orgenhet.",
+        "operationId": "isNavIdentLederForOrgenhet",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "navident",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "orgEnhetId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
@@ -622,6 +918,49 @@
         "tags": [
           "Orgtilknytning"
         ]
+      },
+      "post": {
+        "description": "Henter orgtilknytninger til liste av Navidenter",
+        "operationId": "getOrgtilknytningerForNavidenter",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/OrgtilknytningState"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Orgtilknytning"
+        ]
       }
     },
     "/app/orgtilknytninger/forRessurs/{navident}": {
@@ -689,7 +1028,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/MasseFlyttingRequest"
+                  "$ref": "#/components/schemas/MasseFlyttingResponse"
                 }
               }
             },
@@ -699,7 +1038,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/MasseFlyttingRequest"
+                  "$ref": "#/components/schemas/MasseFlyttingResponse"
                 }
               }
             },
@@ -905,6 +1244,76 @@
               }
             },
             "description": "Created"
+          },
+          "403": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpprettRessursResponse"
+                }
+              }
+            },
+            "description": "Feil scope"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      }
+    },
+    "/app/ressurser/byEnhetAndFysiskbrukersted/{orgenhetId}/{fysiskBrukerstedNr}": {
+      "get": {
+        "description": "Hent alle ressurser som har aktiv DOl på angitt enhet og angitt fysisk brukersted som primære fysisk brukersted",
+        "operationId": "getRessurserByEnhetAndFysiskbrukersted",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgenhetId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "fysiskBrukerstedNr",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RessursState"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "403": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RessursState"
+                  }
+                }
+              }
+            },
+            "description": "Forbidden"
           }
         },
         "security": [
@@ -941,6 +1350,58 @@
               }
             },
             "description": "Ressurs"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      }
+    },
+    "/app/ressurser/byFysiskbrukersted/{fysiskBrukerstedNr}": {
+      "get": {
+        "description": "Hent alle ressurser som har angitt fysisk brukersted som primære fysisk brukersted",
+        "operationId": "getRessurserByFysiskbrukersted",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fysiskBrukerstedNr",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RessursState"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "403": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RessursState"
+                  }
+                }
+              }
+            },
+            "description": "Forbidden"
           }
         },
         "security": [
@@ -1138,6 +1599,172 @@
         ]
       }
     },
+    "/app/ressurser/updateFysiskBrukerstedForRessurserByEnhetAndFysiskbrukersted/{orgenhetId}/{fraFysiskBrukerstedNr}": {
+      "post": {
+        "description": "Flytt alle ressursers primære fysiske brukersted som har aktiv DOl på angitt enhet og angitt fysisk brukersted som primære fysisk brukersted",
+        "operationId": "updateFysiskBrukerstedForRessurserByEnhetAndFysiskbrukersted",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgenhetId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "fraFysiskBrukerstedNr",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePrimaryFysiskBrukerstedRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "403": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      }
+    },
+    "/app/ressurser/updateFysiskBrukerstedForRessurserByFysiskbrukersted/{fraFysiskBrukerstedNr}": {
+      "post": {
+        "description": "Flytt alle ressursers primære fysiske brukersted som har angitt fysisk brukersted som primære fysisk brukersted",
+        "operationId": "updateFysiskBrukerstedForRessurserByFysiskbrukersted",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fraFysiskBrukerstedNr",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePrimaryFysiskBrukerstedRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "403": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      }
+    },
+    "/app/ressurser/updateFysiskBrukerstedForRessurserByNavidentList": {
+      "post": {
+        "description": "Flytt angitte ressursers primære fysiske brukersted",
+        "operationId": "updateFysiskBrukerstedForRessurserByNavidentList",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePrimaryFysiskBrukerstedForRessurserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "403": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      }
+    },
     "/app/ressurser/{fid}/avvikle": {
       "post": {
         "description": "Avvikler en ressurs ved å sette sluttdato",
@@ -1230,6 +1857,42 @@
         ]
       }
     },
+    "/app/ressurser/{navident}/epost": {
+      "get": {
+        "description": "Henter en ressursens epost",
+        "operationId": "getEpost",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "navident",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "epost"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      }
+    },
     "/app/ressurser/{navident}/navn": {
       "post": {
         "description": "Endrer navn for en ressurs",
@@ -1276,10 +1939,10 @@
         ]
       }
     },
-    "/app/ressurser/{navident}/telefonnummer": {
+    "/app/ressurser/{navident}/remedyEnhet": {
       "get": {
-        "description": "Henter telefonnummer for en ressurs",
-        "operationId": "getTelefonnummer",
+        "description": "Henter en ressursens remedyEnhet basert på DOL",
+        "operationId": "getRemedyEnhet",
         "parameters": [
           {
             "in": "path",
@@ -1296,6 +1959,45 @@
               "*/*": {
                 "schema": {
                   "type": "string"
+                }
+              }
+            },
+            "description": "remedyEnhet"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      }
+    },
+    "/app/ressurser/{navident}/telefonnummer": {
+      "get": {
+        "description": "Henter en liste over alle telefonnummere til ressursen",
+        "operationId": "getTelefonnummer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "navident",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Telefon"
+                  }
                 }
               }
             },
@@ -1380,6 +2082,88 @@
           "sessioninfo-controller"
         ]
       }
+    },
+    "/app/statistikk": {
+      "get": {
+        "description": "Hent global statistikk",
+        "operationId": "hentGlobalStatistikk",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalStatistikkResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalStatistikkResponse"
+                }
+              }
+            },
+            "description": "Feil ved henting av statistikk"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Statistikk"
+        ]
+      }
+    },
+    "/app/statistikk/{orgenhetId}": {
+      "get": {
+        "description": "Hent statistikk for orgenhet",
+        "operationId": "hentOrgEnhetStatistikk",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgenhetId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgEnhetStatistikkResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgEnhetStatistikkResponse"
+                }
+              }
+            },
+            "description": "Feil ved henting av statistikk"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Statistikk"
+        ]
+      }
     }
   },
   "components": {
@@ -1400,6 +2184,39 @@
           "sluttDato": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "BrukerSkrivetilgangRessursRequest": {
+        "required": [
+          "bruker",
+          "ressurs"
+        ],
+        "type": "object",
+        "properties": {
+          "bruker": {
+            "type": "string"
+          },
+          "ressurs": {
+            "type": "string"
+          }
+        }
+      },
+      "BrukerSkrivetilgangRessurserRequest": {
+        "required": [
+          "bruker",
+          "ressurser"
+        ],
+        "type": "object",
+        "properties": {
+          "bruker": {
+            "type": "string"
+          },
+          "ressurser": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -1455,6 +2272,21 @@
           }
         }
       },
+      "FeiletFlytting": {
+        "required": [
+          "feilmelding",
+          "orgtilknytningFid"
+        ],
+        "type": "object",
+        "properties": {
+          "feilmelding": {
+            "type": "string"
+          },
+          "orgtilknytningFid": {
+            "type": "string"
+          }
+        }
+      },
       "FolkeregisterPerson": {
         "required": [
           "navn"
@@ -1472,8 +2304,55 @@
         ],
         "type": "object",
         "properties": {
+          "identType": {
+            "$ref": "#/components/schemas/IdentType"
+          },
           "personident": {
             "type": "string"
+          }
+        }
+      },
+      "GlobalStatistikkResponse": {
+        "type": "object",
+        "properties": {
+          "antallFylkekontor": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallHjelpemidlerOgTilrettelegging": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallKlageinstanser": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallKontrollKonrollenheter": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallLovNoder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallNavArbeidOgYtelser": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallNavFamilieOgPensjonsytelser": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallNavKontaktsenter": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallNavKontorer": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ressursStatistikk": {
+            "$ref": "#/components/schemas/RessursStatistikk"
           }
         }
       },
@@ -1522,7 +2401,6 @@
       },
       "IdentType": {
         "type": "string",
-        "default": "STANDARD",
         "enum": [
           "ROBOT",
           "STANDARD",
@@ -1537,7 +2415,6 @@
       "LederTilgangForOrgenhetRequest": {
         "required": [
           "delegertTilNavident",
-          "gyldigTom",
           "orgenhetId"
         ],
         "type": "object",
@@ -1559,7 +2436,6 @@
           "av",
           "fid",
           "gyldigFom",
-          "gyldigTom",
           "orgenhetId",
           "til"
         ],
@@ -1632,6 +2508,10 @@
           "beholdTilganger": {
             "type": "boolean"
           },
+          "gyldigFomFlyttedato": {
+            "type": "string",
+            "format": "date"
+          },
           "nyOrgenhetId": {
             "type": "string"
           },
@@ -1640,6 +2520,40 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "MasseFlyttingResponse": {
+        "required": [
+          "antallFlyttet",
+          "feiledeFlyttinger"
+        ],
+        "type": "object",
+        "properties": {
+          "antallFlyttet": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "feiledeFlyttinger": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeiletFlytting"
+            }
+          }
+        }
+      },
+      "MinimalRessurs": {
+        "required": [
+          "navident",
+          "visningsnavn"
+        ],
+        "type": "object",
+        "properties": {
+          "navident": {
+            "type": "string"
+          },
+          "visningsnavn": {
+            "type": "string"
           }
         }
       },
@@ -1699,6 +2613,9 @@
           },
           "fysiskBrukerstedNr": {
             "type": "string"
+          },
+          "identType": {
+            "$ref": "#/components/schemas/IdentType"
           },
           "orgEnhetId": {
             "type": "string"
@@ -1856,6 +2773,62 @@
           },
           "remedyEnhetId": {
             "type": "string"
+          }
+        }
+      },
+      "OrgEnhetStatistikkResponse": {
+        "type": "object",
+        "properties": {
+          "antallArbeidslivssenter": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallArbeidsraadgivning": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallFylkekontor": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallHjelpemidlerOgTilrettelegging": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallKlageinstanser": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallKontrollKonrollenheter": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallLovNoder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallNavArbeidOgYtelser": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallNavFamilieOgPensjonsytelser": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallNavKontaktsenter": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallNavKontorer": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "antallTiltak": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ressursStatistikk": {
+            "$ref": "#/components/schemas/RessursStatistikk"
           }
         }
       },
@@ -2125,6 +3098,27 @@
           }
         }
       },
+      "RessursStatistikk": {
+        "type": "object",
+        "properties": {
+          "antallAktiveRessurser": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "antallEksterneRessurser": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "antallKommunaleRessurser": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "antallStatligeRessurser": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "Sektor": {
         "type": "string",
         "enum": [
@@ -2206,8 +3200,8 @@
       "Tilknytningtype": {
         "type": "string",
         "enum": [
-          "ARBEIDSTRENING",
           "ANNET",
+          "ARBEIDSTRENING",
           "EKSTERN_SAMARBEIDSPARTNER",
           "FAST",
           "INGEN",
@@ -2216,7 +3210,11 @@
           "LAERLING",
           "MIDLERTIDIG",
           "PENSJONIST",
-          "STUDENT"
+          "PRAKSISARBEID",
+          "STUDENT",
+          "UFORUTSETT_BEHOV",
+          "UTDANNINGSSTILLINGER",
+          "VIKAR"
         ]
       },
       "UpdateFysiskeBrukerstederRequest": {
@@ -2234,6 +3232,35 @@
             }
           },
           "primaryFysiskBrukersted": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdatePrimaryFysiskBrukerstedForRessurserRequest": {
+        "required": [
+          "navidenter",
+          "newPrimaryFysiskBrukersted"
+        ],
+        "type": "object",
+        "properties": {
+          "navidenter": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "newPrimaryFysiskBrukersted": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdatePrimaryFysiskBrukerstedRequest": {
+        "required": [
+          "newPrimaryFysiskBrukersted"
+        ],
+        "type": "object",
+        "properties": {
+          "newPrimaryFysiskBrukersted": {
             "type": "string"
           }
         }
@@ -2268,7 +3295,10 @@
         "enum": [
           "ROLE_WRITE",
           "ROLE_ADMIN",
-          "ROLE_PILOT"
+          "ROLE_PILOT",
+          "ROLE_WRITE_UTL_KONSULENT",
+          "ROLE_WRITE_VIKAFOSSEN",
+          "ROLE_WRITE_ROBOT"
         ]
       },
       "Visningsnavn": {

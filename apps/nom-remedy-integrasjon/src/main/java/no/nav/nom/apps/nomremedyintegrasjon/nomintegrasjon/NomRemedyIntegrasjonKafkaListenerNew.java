@@ -1,5 +1,7 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
@@ -56,6 +58,19 @@ public class NomRemedyIntegrasjonKafkaListenerNew {
         log.info("Logget orgtilknytningStateFid: {}", key);
         if (isNomMastered(orgtilknytningState.navident())) {
             log.info("Logget mastered orgtilknytningStateFid: {}", key);
+        }
+    }
+
+    @KafkaListener(
+        id = "NomRemedyIntegrasjonOrgtilknytningEventListenerNew",
+        topics = "${app.kafka-topics.orgtilknytning-eventsource.topic-name}",
+        autoStartup = "${app.kafka-topics.orgtilknytning-eventsource.auto-startup}",
+        containerFactory = "orgtilknytningEventKafkaListenerContainerFactory"
+    )
+    public void orgtilknytningEventListener(OrgtilknytningEvent orgtilknytningEvent, @Header(KafkaHeaders.RECEIVED_KEY) String key) {
+        log.info("Logget orgtilknytningEventFid: {}", key);
+        if (orgtilknytningEvent instanceof OrgtilknytningOpprettetEventV1 opprettetEvent) {
+            log.info("Logget opprettet orgtilknytningEventFid: {}", opprettetEvent.getFid());
         }
     }
 
