@@ -225,15 +225,18 @@ public class GrupperOgSlaaSammenDvhStillinger {
                         sp.sektor(),
                         sp.tilknytningtype()
                     ));
-                    perioderSomSkalBeholdes.add(new StillingPeriode(
-                        sp.stilling(),
-                        stillingMedTilknytningTom.plusDays(1),
-                        sp.gyldigTom(),
-                        sp.orgenhet(),
-                        sp.sektor(),
-                        sp.tilknytningtype()
-                    ));
-                    stillingPeriodeBeforeBreak = sp;
+                    brekkpunktFom = stillingMedTilknytningTom.plusDays(1);
+                    if (spMedTilknytningtype.size() == 1) {
+                        perioderSomSkalBeholdes.add(new StillingPeriode(
+                            sp.stilling(),
+                            stillingMedTilknytningTom.plusDays(1),
+                            sp.gyldigTom(),
+                            sp.orgenhet(),
+                            sp.sektor(),
+                            sp.tilknytningtype()
+                        ));
+                        stillingPeriodeBeforeBreak = sp;
+                    }
                     continue;
                 }
 
