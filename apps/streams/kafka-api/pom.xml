@@ -15,6 +15,7 @@
 
     <modules>
         <module>api-ressurs-state</module>
+        <module>api-ressurs-state-v3</module>
         <module>api-orgenhet-state</module>
         <module>api-hendelser</module>
         <module>api-ressurs-hendelser</module>
