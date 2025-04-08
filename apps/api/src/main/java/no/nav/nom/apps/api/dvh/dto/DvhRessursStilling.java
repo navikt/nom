@@ -51,7 +51,7 @@ public class DvhRessursStilling {
     public Sektor getSektor() {
         var ansettelsesBeskTypeValue = this.getStillingAnsettelsesTypeBesk().orElse("");
         return switch (ansettelsesBeskTypeValue) {
-            case "Fast", "Midlertidig karakter § 9a" -> Sektor.NAV_STATLIG;
+            case "Fast", "Midlertidig karakter § 9a", "Uforutsett behov § 9e", "Vikar § 9b" -> Sektor.NAV_STATLIG;
             default -> null;
         };
     }
