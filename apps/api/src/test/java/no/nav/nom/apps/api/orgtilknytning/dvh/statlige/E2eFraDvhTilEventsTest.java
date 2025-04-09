@@ -528,8 +528,13 @@ class E2eFraDvhTilEventsTest extends TestBase {
         var result = prosserer.process(sspForNavidentResult);
 
         assertEquals(1, result.size());
-        assertEquals(8, result.get(RESSURS_1.navident()).endringer().size());
+        assertEquals(9, result.get(RESSURS_1.navident()).endringer().size());
         assertEquals(1, result.get(RESSURS_1.navident()).errors().size());
+
+        assertOrgtilknytning(CMD.ENDRET_DATO)
+            .forFid("FID_A")
+            .gyldigFom(DD_3Y)
+            .gyldigTom(null);
 
         assertOrgtilknytning(CMD.ENDRET_DATO)
             .forFid("FID_A")
