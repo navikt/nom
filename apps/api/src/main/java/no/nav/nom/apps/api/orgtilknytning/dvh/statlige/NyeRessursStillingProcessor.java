@@ -620,6 +620,12 @@ public class NyeRessursStillingProcessor {
                 ot -> {
                     if (matchedeOTer.values().stream().noneMatch(matchedOT -> matchedOT.fid().equals(ot.fid()))) {
                         matchedeOTer.put(sp, ot);
+
+                        // logging for testing in dev
+                        if(ot.fid().equals("orgtilknytning-01JQXYCV5QWPX72TVXH7NC1087")){
+                            log.info("2x99: Matchet OT {} med StillingPeriode {}", ot, sp);
+                        }
+
                     } else {
                         stillingPerioderAaOpprette.add(sp);
                     }
