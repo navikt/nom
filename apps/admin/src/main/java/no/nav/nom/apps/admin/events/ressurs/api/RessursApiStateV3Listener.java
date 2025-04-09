@@ -33,9 +33,7 @@ public class RessursApiStateV3Listener {
     @KafkaListener(
         containerFactory = "genericApiEventKafkaListenerContainerFactory",
         id = "#{apiStateRessursV3UniqueListenerId}",
-        topicPartitions = @TopicPartition(
-            topic = "${app.kafka.ressurs.apiEventTopicV3}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
-        )
+        topics = "${app.kafka.ressurs.apiEventTopicV3}"
     )
     public void onMessage(ConsumerRecords<String, RessursStateKafkaDTO> records) {
         List<RessursStateKafkaDTO> ressursStateTopic = new ArrayList<>();
@@ -64,7 +62,7 @@ public class RessursApiStateV3Listener {
         log.debug("Idle event received for listener {}. Waiting for listener {}", event.getListenerId(), listenerId);
         if (event.getListenerId().startsWith(listenerId)) {
             log.info(
-                "All Ressurs StateTopic V# events has now been read on startup by {}. Number of RessursStateTopic messages consumed: {}", listenerId, ressursApiStateRepository.count()
+                "All Ressurs StateTopic V3 events has now been read on startup by {}. Number of RessursStateTopic messages consumed: {}", listenerId, ressursApiStateRepository.count()
             );
             hasReadToEndOnStartup.set(true);
 
