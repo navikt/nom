@@ -221,6 +221,8 @@ export interface OrgEnhet {
 }
 
 export interface OrgEnhetMedLedernavn {
+  /** @format date */
+  gyldigFom: string;
   id: string;
   ledere: string[];
   navn: string;
