@@ -10,6 +10,7 @@ export const CACHE_FOR = {
 
 import { queryOptions } from "@tanstack/react-query";
 
+import type { MasseflyttingData } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
 import type {
   AvvikleRessursRequest,
   ExcelExportRequest,
@@ -649,7 +650,7 @@ export const createRessurs = async (request: OpprettRessursRequest) => {
 };
 
 export const masseflytting = async (request: MasseFlyttingRequest) => {
-  await axios.post<unknown, AxiosResponse<unknown>>(
+  return await axios.post<unknown, AxiosResponse<MasseflyttingData>>(
     `${NOM_API_BASE_PATH}/app/orgtilknytninger/masseflytting`,
     request,
   );
