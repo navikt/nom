@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.orgtilknytning.job;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
@@ -8,6 +9,7 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -23,7 +25,8 @@ public class OTUtenforHierarki {
 
     private final HashMap<OrgtilknytningState, IOrgenhet> otUtenforHierarkieMedAlternativOrgenhet = new HashMap<>();
 
-    public OTUtenforHierarki(OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService, LeaderElection leaderElection) {
+    public OTUtenforHierarki(OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService,
+                             LeaderElection leaderElection) {
         this.orgenhetService = orgenhetService;
         this.orgtilknytningService = orgtilknytningService;
         this.leaderElection = leaderElection;
@@ -31,10 +34,11 @@ public class OTUtenforHierarki {
 
     public void findOTUtenforHierarkiFromDataLast() {
         findOTUtenforHierarki();
-        if (!otUtenforHierarkieMedAlternativOrgenhet.isEmpty()) {
-            log.error("Orgtilknytninger utenfor aktiv hierarki");
-            log.error("Detaljer{}", toLogg(otUtenforHierarkieMedAlternativOrgenhet));
-        }
+
+        autoflyttOTUtenforHierarki();
+
+        findOTUtenforHierarki();
+        alertForOTUtenforHierarki();
     }
 
     public void findOTUtenforHierarki() {
@@ -54,6 +58,19 @@ public class OTUtenforHierarki {
         log.info("Fant {} OTer utenfor aktiv hierarki", otUtenforHierarkieMedAlternativOrgenhet.size());
     }
 
+    private void autoflyttOTUtenforHierarki() {
+        // grupper på til enhet
+        // finn til enhets 'organisering' gyldigFom
+
+    }
+
+    // Dette fordi vi ønsker å bruke datoen OTen havnet utenfor hierarkiet.
+    // Ved rekjøringer vil dette være stabilt
+    // Og ny orgenhet gyldigFom kan være før dette
+    private LocalDate getEnhetsOrganiseringGyldigFom(String orgenhetId) {
+        throw new UnsupportedOperationException("Ikke implementert");
+    }
+
     private IOrgenhet finnAlternativOrgenhet(OrgtilknytningState ot, Collection<IOrgenhet> aktiveOrgenheter) {
         var faktiskOrgenhet = orgenhetService.getById(ot.orgEnhetId()).orElse(null);
         if (faktiskOrgenhet == null) {
@@ -64,6 +81,15 @@ public class OTUtenforHierarki {
             .filter(oe -> oe.getAgressoId().equals(faktiskOrgenhet.getAgressoId()))
             .filter(oe -> oe.getOrgNiv().equals(faktiskOrgenhet.getOrgNiv()))
             .findFirst().orElse(null);
+    }
+
+
+    private void alertForOTUtenforHierarki() {
+        boolean sendAlert = otUtenforHierarkieMedAlternativOrgenhet.keySet().stream().anyMatch(ot -> ot.gyldigFom().isBefore(LocalDate.now().plusWeeks(1)));
+        if (sendAlert && leaderElection.isLeader()) {
+            log.error("Orgtilknytninger utenfor aktiv hierarki");
+            log.error("Detaljer{}", toLogg(otUtenforHierarkieMedAlternativOrgenhet));
+        }
     }
 
     private String toLogg(HashMap<OrgtilknytningState, IOrgenhet> oterUtenforHierarki) {
