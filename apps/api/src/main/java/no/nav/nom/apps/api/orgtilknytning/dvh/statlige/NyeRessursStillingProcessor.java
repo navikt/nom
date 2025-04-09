@@ -133,7 +133,13 @@ public class NyeRessursStillingProcessor {
                 } else {
                     endringer.add(lagEndreGyldigTomCmd(ot, sp, sspForNavident));
                 }
+            } else if (ot.gyldigTom().isPresent() && sp.gyldigTom() != null) {
+                // 2x99 hvis lik men begge tom dato er 2099, set null og legg til endringer lista
+                if (sp.gyldigTom().isEqual(PeriodeUtil.NO_END_DATE) && ot.gyldigTom().get().isEqual(PeriodeUtil.NO_END_DATE)) {
+                    endringer.add(lagEndreGyldigTomCmd(ot, sp, sspForNavident));
+                }
             }
+
             if (ot.erDagligOppfolging() != sp.erDagligOppfolging()) {
                 endringer.add(lagEndreDOLCmd(ot, sp, sspForNavident));
             }
@@ -468,14 +474,14 @@ public class NyeRessursStillingProcessor {
             originalOrgtilknytning.navident(),
             originalOrgtilknytning.orgEnhetId(),
             stillingPeriode.gyldigFom(),
-            Optional.ofNullable(stillingPeriode.gyldigTom()),
+            stillingPeriode.gyldigTom().equals(NO_END_DATE) ? Optional.empty() : Optional.of(stillingPeriode.gyldigTom()),
             stillingPeriode.erDagligOppfolging(),
             metadata,
             additionalData
         );
 
         // Todo: to be removed
-        if(cmd.gyldigTom().equals(NO_END_DATE)) {
+        if(stillingPeriode.gyldigTom().equals(NO_END_DATE)) {
             log.info("2x99: setting gyldigTom = NO_END_DATE i OT: {}", originalOrgtilknytning.fid());
         }
 
