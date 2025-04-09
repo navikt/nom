@@ -622,7 +622,11 @@ public class NyeRessursStillingProcessor {
                         matchedeOTer.put(sp, ot);
 
                         // logging for testing in dev
-                        if(ot.fid().equals("orgtilknytning-01JQXYCV5QWPX72TVXH7NC1087")){
+                        if(ot.fid().equals("orgtilknytning-01JQXYCV5QWPX72TVXH7NC1087") ||
+                            ot.fid().equals("orgtilknytning-01JQXDZWEER5GZ4YR543BW8CC9") ||
+                            ot.fid().equals("orgtilknytning-01JQXSWJ01F39HCT7HRH46N31Y") ||
+                            ot.fid().equals("orgtilknytning-01JR0JNRT5WEDBKSRWWZ1QC34Z")
+                        ){
                             log.info("2x99: Matchet OT {} med StillingPeriode {}", ot, sp);
                         }
 
@@ -632,6 +636,8 @@ public class NyeRessursStillingProcessor {
                 },
                 () -> stillingPerioderAaOpprette.add(sp)
             );
+
+
         });
     }
 
