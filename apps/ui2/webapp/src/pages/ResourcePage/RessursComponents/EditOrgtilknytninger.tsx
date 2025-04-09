@@ -45,7 +45,6 @@ import {
 import * as yup from "yup";
 
 import {
-  getLedereForRessurs,
   getOrgEnhet,
   getOrgEnheterSomKanHaRessurser,
   getOrgTilknytninger,
@@ -541,7 +540,7 @@ function OrgtilknytningForm({
                 />
               </HStack>
 
-              <LederLabel index={index} ressurs={ressurs} />
+              <LederLabel index={index} />
 
               <Checkbox
                 css={css`
@@ -1074,7 +1073,7 @@ function FormTilknytningstypeSelectWrapper({
   );
 }
 
-function LederLabel({ index, ressurs }: { index: number; ressurs: Ressurs }) {
+function LederLabel({ index }: { index: number }) {
   const { watch } = useFormContext();
   const field = watch(`mappedeOrgtilknytninger.${index}`);
 
@@ -1084,19 +1083,22 @@ function LederLabel({ index, ressurs }: { index: number; ressurs: Ressurs }) {
     enabled: !!field.orgEnhetId,
   });
 
-  const ressursDolLeder = useQuery({
-    queryKey: getLedereForRessurs.queryKey(ressurs.navident),
-    queryFn: () => getLedereForRessurs.queryFn(ressurs.navident),
-    select: (ledere) => ledere.find((leder) => leder.erDagligOppfolging)?.leder,
-  }).data;
+  // Lar dette stå her til eventuell bruk senere
+  // const ressursDolLeder = useQuery({
+  //   queryKey: getLedereForRessurs.queryKey(ressurs.navident),
+  //   queryFn: () => getLedereForRessurs.queryFn(ressurs.navident),
+  //   select: (ledere) => ledere.find((leder) => leder.erDagligOppfolging)?.leder,
+  // }).data;
 
   const orgEnhetLeder = orgEnhetQuery.data?.ledere[0];
 
-  // Vis lederen til personen, i stedet for lederen på enheten, hvis ressursen man redigerer selv er lederen
-  const lederNavn =
-    ressurs.navident === orgEnhetLeder?.navident
-      ? ressursDolLeder?.visningsnavn
-      : orgEnhetLeder?.visningsnavn;
+  // // Vis lederen til personen, i stedet for lederen på enheten, hvis ressursen man redigerer selv er lederen
+  // const lederNavn =
+  //   ressurs.navident === orgEnhetLeder?.navident
+  //     ? ressursDolLeder?.visningsnavn
+  //     : orgEnhetLeder?.visningsnavn;
+
+  const lederNavn = orgEnhetLeder?.visningsnavn;
 
   return (
     <BodyLong
