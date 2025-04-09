@@ -62,7 +62,7 @@ public class RessursApiStateV3Listener {
         log.debug("Idle event received for listener {}. Waiting for listener {}", event.getListenerId(), listenerId);
         if (event.getListenerId().startsWith(listenerId)) {
             log.info(
-                "All Ressurs StateTopic V# events has now been read on startup by {}. Number of RessursStateTopic messages consumed: {}", listenerId, ressursApiStateRepository.count()
+                "All Ressurs StateTopic V3 events has now been read on startup by {}. Number of RessursStateTopic messages consumed: {}", listenerId, ressursApiStateRepository.count()
             );
             hasReadToEndOnStartup.set(true);
 

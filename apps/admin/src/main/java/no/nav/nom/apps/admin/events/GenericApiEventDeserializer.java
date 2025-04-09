@@ -22,6 +22,7 @@ public class GenericApiEventDeserializer implements Deserializer<Object> {
     public GenericApiEventDeserializer() {
         this.serdeMappings = new HashMap<>();
         serdeMappings.put("no.nav.nom.apps.streams.kafkaapi.ressurs.state.v2.RessursState", new JsonSerde<>(RessursStateKafkaDTO.class));
+        serdeMappings.put("no.nav.nom.apps.streams.kafkaapi.ressurs.state.v3.RessursState", new JsonSerde<>(RessursStateKafkaDTO.class));
         serdeMappings.put("no.nav.nom.apps.streams.kafkaapi.orgenhet.state.v3.OrgEnhetState", new JsonSerde<>(OrgEnhetStateDTO.class));
         serdeMappings.put("no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelse", new JsonSerde<>(HendelseDTO.class));
         serdeMappings.put("no.nav.nom.apps.streams.kafkaapi.ressurs.hendelser.v1.RessursOpprettetEvent", new JsonSerde<>(RessursHendelseKafkaDTO.class));
