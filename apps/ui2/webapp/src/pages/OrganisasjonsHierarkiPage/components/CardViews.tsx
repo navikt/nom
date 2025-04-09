@@ -125,7 +125,7 @@ function UnitContainerLink({
         border-radius: 5px;
         border: 1px solid var(--a-gray-400);
         background-color: ${fremtidig
-          ? "var(--a-green-100)"
+          ? "var(--a-purple-100)"
           : "var(--a-white)"};
         display: grid;
         grid-template-columns: min-content 1fr 40px;
