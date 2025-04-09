@@ -773,6 +773,7 @@ function EditOrgilkntyningFormPart({
 function FormOrgEnhetSelectWrapper({ name }: { name: string }) {
   const orgEnheterSomKanHaRessurser =
     useQuery(getOrgEnheterSomKanHaRessurser).data || [];
+
   return (
     <OrgEnhetSelectFormPart
       name={name}

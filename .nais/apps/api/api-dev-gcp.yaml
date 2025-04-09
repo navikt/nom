@@ -107,7 +107,7 @@ spec:
         - application: org-ekstern-proxy
           namespace: org
         - application: azure-token-generator  # For test tokens i dev-gcp laget via https://doc.nais.io/security/auth/azure-ad/usage/#token-generator
-          namespace: aura
+          namespace: nais
           cluster: dev-gcp
         - application: team-catalog-backend
           cluster: dev-gcp

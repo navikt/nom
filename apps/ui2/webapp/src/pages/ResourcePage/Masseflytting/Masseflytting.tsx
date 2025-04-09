@@ -3,9 +3,9 @@ import { ChevronLeftIcon, FloppydiskIcon } from "@navikt/aksel-icons";
 import {
   Alert,
   BodyShort,
-  Box,
   Button,
   Checkbox,
+  DatePicker,
   Heading,
   HStack,
   Label,
@@ -13,12 +13,13 @@ import {
   Loader,
   Modal,
   Table,
+  useDatepicker,
   VStack,
 } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "@tanstack/react-router";
-import type { AxiosError } from "axios";
-import { useState } from "react";
+import { useParams } from "@tanstack/react-router";
+import type { AxiosError, AxiosResponse } from "axios";
+import React, { useState } from "react";
 
 import {
   getOrgEnhet,
@@ -33,7 +34,13 @@ import {
   useModal,
 } from "~/components/modalProvider/ModalProvider";
 import { PageBanner } from "~/components/PageBanner";
+import { Pluralize } from "~/components/Pluralize";
 import { OrgEnhetSelect } from "~/components/select/OrgEnhetSelect";
+import {
+  dateWithoutTimezone,
+  formatDateWithoutTimezone,
+  todayWithoutTimezone,
+} from "~/dateUtils/dateUtils";
 import { useTableSort } from "~/hooks/useTableSort";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import {
@@ -48,7 +55,7 @@ import type {
   Ressurs,
 } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
-import { formatVisningsnavn } from "~/utils";
+import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
 export function Masseflytting() {
   const { id } = useParams({ from: "/masseflytting/$id" });
@@ -144,6 +151,16 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
     OrgEnhetMedLedernavn | undefined
   >();
   const [beholdTilganger, setBeholdTilganger] = useState<boolean>(true);
+  const [fraDato, setFraDato] = useState<string | null>(
+    formatDateWithoutTimezone(todayWithoutTimezone()),
+  );
+
+  const datePickerProperties = useDatepicker({
+    onDateChange: async (date) => {
+      setFraDato(date ? formatDateWithoutTimezone(date) : null);
+    },
+    defaultSelected: fraDato ? dateWithoutTimezone(fraDato) : undefined,
+  });
 
   function toggleValgtRessurs(value: string, state: boolean) {
     setValgteRessurser((liste) =>
@@ -192,20 +209,27 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
   const orgEnheterSomKanHaRessurser =
     useQuery(getOrgEnheterSomKanHaRessurser).data || [];
 
-  const navigate = useNavigate();
+  const [masseflyttingResponse, setMasseflyttingResponse] =
+    useState<MasseflyttingResponseInfo>();
 
   const masseflyttingMutation = useMutation<
-    unknown,
+    AxiosResponse<MasseflyttingData>,
     AxiosError<Error>,
     MasseFlyttingRequest
   >({
     mutationFn: async (request) => {
-      return masseflytting(request);
+      return await masseflytting(request);
     },
-    onSuccess: async () => {
-      navigate({
-        to: `/org/${orgEnhet?.id}`,
-      }).then();
+    onSuccess: (response) => {
+      setMasseflyttingResponse({
+        status: response.status,
+        data: response.data,
+      });
+    },
+    onError: (error) => {
+      setMasseflyttingResponse({
+        status: error.response?.status ?? 500,
+      });
     },
   });
 
@@ -216,6 +240,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
       await showModal(
         <MasseflyttingBekreftModal
           beholdTilganger={beholdTilganger}
+          gyldigFom={fraDato}
           ressurser={sortedRessurser}
           tilOrgEnhet={masseflyttingTilOrgEnhet.id}
           valgteRessurser={valgteRessurser}
@@ -228,6 +253,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
               valgteRessurser,
               masseflyttingTilOrgEnhet.id,
               beholdTilganger,
+              fraDato,
             ),
           ),
         )
@@ -260,7 +286,39 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
   }
 
   return (
-    <>
+    <VStack gap="4">
+      <VStack
+        css={css`
+          background-color: #deecef;
+          padding: var(--a-spacing-4) var(--a-spacing-6);
+          border-radius: var(--a-border-radius-large);
+          display: grid;
+        `}
+        gap="2"
+      >
+        <Heading level="1" size="medium">
+          Flytt fra
+        </Heading>
+
+        <VStack gap="2">
+          <BodyShort
+            css={css`
+              font-size: var(--a-font-size-xlarge);
+              padding: 0.5rem;
+              border-radius: 0.5rem;
+            `}
+          >
+            {orgEnhet.navn}
+          </BodyShort>
+
+          <EnhetKontekstInfo
+            orgEnhet={orgEnheterSomKanHaRessurser.find(
+              (it) => it.id === orgEnhet.id,
+            )}
+          />
+        </VStack>
+      </VStack>
+
       <VStack
         css={css`
           background-color: #deecef;
@@ -270,131 +328,118 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
         `}
         gap="4"
       >
-        <Heading level="1" size="medium">
-          Flytting av medarbeidere{" "}
-          {orgEnhet?.navn ? `i ${orgEnhet.navn} (${orgEnhet.id})` : ""}
-        </Heading>
-        <>
-          <VStack css={fraTilBoksStyle} gap="2">
-            <Label
-              css={css`
-                font-size: var(--a-font-size-xlarge);
-                font-weight: var(--a-font-weight-bold);
-              `}
-            >
-              Fra
-            </Label>
+        <VStack gap="2">
+          <Heading level="1" size="medium">
+            Flytt til
+          </Heading>
 
-            <BodyShort
-              css={css`
-                font-size: var(--a-font-size-xlarge);
-                padding: 0.5rem;
-                border-radius: 0.5rem;
-              `}
-            >
-              {orgEnhet.navn}
-            </BodyShort>
-
-            <EnhetKontekstInfo
-              orgEnhet={orgEnheterSomKanHaRessurser.find(
-                (it) => it.id === orgEnhet.id,
-              )}
-            />
-          </VStack>
-          <VStack css={fraTilBoksStyle} gap={"2"}>
-            <Box marginBlock={"0 2"}>
-              <OrgEnhetSelect
-                helpText="Med organisasjonsenhet menes hvilken enhet medarbeideren skal
+          <OrgEnhetSelect
+            helpText="Med organisasjonsenhet menes hvilken enhet medarbeideren skal
               tilhøre og dermed hvilken leder som er ansvarlig for vedkommende."
-                label="Til (velg orgenhet)"
-                onChange={(value) => setMasseflyttingTilOrgEnhet(value)}
-                orgEnheter={orgEnheterSomKanHaRessurser}
-                value={masseflyttingTilOrgEnhet?.id}
-              />
-            </Box>
+            label="Velg organisasjonsenhet"
+            onChange={(value) => setMasseflyttingTilOrgEnhet(value)}
+            orgEnheter={orgEnheterSomKanHaRessurser}
+            value={masseflyttingTilOrgEnhet?.id}
+          />
 
-            <EnhetKontekstInfo orgEnhet={masseflyttingTilOrgEnhet} />
+          <EnhetKontekstInfo orgEnhet={masseflyttingTilOrgEnhet} />
+        </VStack>
 
-            <Checkbox
-              checked={beholdTilganger}
-              onChange={(event) => setBeholdTilganger(event.target.checked)}
-            >
-              Gamle tilganger skal bli med videre
-            </Checkbox>
+        <Checkbox
+          checked={beholdTilganger}
+          onChange={(event) => setBeholdTilganger(event.target.checked)}
+        >
+          Gamle tilganger skal bli med videre
+        </Checkbox>
 
-            <div
-              css={css`
-                align-self: end;
-                width: fit-content;
-                display: flex;
-                align-items: center;
-              `}
-            >
-              <BodyShort>
-                <b>{valgteRessurser.length}</b> medarbeidere valgt
-              </BodyShort>
+        <DatePicker {...datePickerProperties.datepickerProps}>
+          <DatePicker.Input
+            {...datePickerProperties.inputProps}
+            label="Gyldig fra og med"
+          />
+        </DatePicker>
 
-              <Button
-                css={css`
-                  margin-left: var(--a-spacing-4);
-                `}
-                disabled={
-                  valgteRessurser.length === 0 || !masseflyttingTilOrgEnhet
-                }
-                onClick={() => {
-                  handleClick();
-                }}
-                size="small"
-              >
-                Flytt medarbeidere
-              </Button>
-            </div>
-          </VStack>
-        </>
+        <div
+          css={css`
+            justify-self: end;
+            width: fit-content;
+            display: flex;
+            align-items: center;
+          `}
+        >
+          <BodyShort>
+            <b>{valgteRessurser.length}</b> medarbeidere valgt
+          </BodyShort>
+
+          <Button
+            css={css`
+              margin-left: var(--a-spacing-4);
+            `}
+            disabled={valgteRessurser.length === 0 || !masseflyttingTilOrgEnhet}
+            onClick={() => {
+              handleClick().then(() => {});
+            }}
+            size="small"
+          >
+            Flytt medarbeidere
+          </Button>
+        </div>
       </VStack>
+
+      <MasseflyttingResponseAlert
+        orgtilknytninger={aktiveOrgtilknytninger}
+        response={masseflyttingResponse}
+        ressurser={sortedRessurser}
+      />
+
       <div
         css={css`
           margin-left: var(--a-spacing-2);
-          margin-top: var(--a-spacing-4);
-          margin-bottom: var(--a-spacing-4);
           display: flex;
-          justify-content: space-between;
         `}
       >
         <div>
           <Label>Vis sektorer:</Label>
 
-          <Checkbox
-            checked={sektorFilter.statlig}
-            onChange={(event) =>
-              toggleSektorFilter(Sektor.NAV_STATLIG, event.target.checked)
-            }
-            size="small"
+          <div
+            css={css`
+              display: flex;
+              gap: var(--a-spacing-4);
+            `}
           >
-            Statlig
-          </Checkbox>
+            <Checkbox
+              checked={sektorFilter.statlig}
+              onChange={(event) =>
+                toggleSektorFilter(Sektor.NAV_STATLIG, event.target.checked)
+              }
+              size="small"
+            >
+              Statlig
+            </Checkbox>
 
-          <Checkbox
-            checked={sektorFilter.kommunal}
-            onChange={(event) =>
-              toggleSektorFilter(Sektor.NAV_KOMMUNAL, event.target.checked)
-            }
-            size="small"
-          >
-            Kommunal
-          </Checkbox>
+            <Checkbox
+              checked={sektorFilter.kommunal}
+              onChange={(event) =>
+                toggleSektorFilter(Sektor.NAV_KOMMUNAL, event.target.checked)
+              }
+              size="small"
+            >
+              Kommunal
+            </Checkbox>
 
-          <Checkbox
-            checked={sektorFilter.ekstern}
-            onChange={(event) =>
-              toggleSektorFilter(Sektor.EKSTERN, event.target.checked)
-            }
-            size="small"
-          >
-            Ekstern
-          </Checkbox>
+            <Checkbox
+              checked={sektorFilter.ekstern}
+              onChange={(event) =>
+                toggleSektorFilter(Sektor.EKSTERN, event.target.checked)
+              }
+              size="small"
+            >
+              Ekstern
+            </Checkbox>
+          </div>
         </div>
       </div>
+
       <Table
         css={css`
           background-color: #fff;
@@ -494,6 +539,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
           ))}
         </Table.Body>
       </Table>
+
       {sortedRessurser.length === 0 && (
         <div
           css={css`
@@ -512,7 +558,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
           </BodyShort>
         </div>
       )}
-    </>
+    </VStack>
   );
 }
 
@@ -529,7 +575,7 @@ function EnhetKontekstInfo({
   }
 
   return (
-    <HStack gap={"4"} marginBlock={"0 0"}>
+    <HStack gap="4">
       <span>
         NOM-ID: <b>{orgEnhet?.id}</b>
       </span>
@@ -569,6 +615,7 @@ function lagMasseFlyttingRequest(
   valgteRessurser: string[],
   tilOrgEnhet: string,
   beholdTilganger: boolean,
+  gyldigFom: string | null,
 ): MasseFlyttingRequest {
   const valgteRessurserOrgtilknytningFids = valgteRessurser.map(
     (ressurs) =>
@@ -581,6 +628,8 @@ function lagMasseFlyttingRequest(
     beholdTilganger: beholdTilganger,
     nyOrgenhetId: tilOrgEnhet,
     orgtilknytningerFid: valgteRessurserOrgtilknytningFids as string[],
+    gyldigFomFlyttedato:
+      gyldigFom ?? formatDateWithoutTimezone(todayWithoutTimezone()),
   };
 }
 
@@ -591,6 +640,7 @@ function MasseflyttingBekreftModal({
   ressurser,
   tilOrgEnhet,
   beholdTilganger,
+  gyldigFom,
 }: {
   onCancel?: () => void;
   onConfirm?: () => void;
@@ -598,6 +648,7 @@ function MasseflyttingBekreftModal({
   ressurser: Ressurs[];
   tilOrgEnhet: string;
   beholdTilganger: boolean;
+  gyldigFom: string | null;
 }) {
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(tilOrgEnhet as string),
@@ -626,15 +677,14 @@ function MasseflyttingBekreftModal({
         ) : (
           "Én medarbeider"
         )}{" "}
-        blir flyttet til organisasjonsenheten{" "}
-        <span
-          css={css`
-            flex-wrap: nowrap;
-            display: flex;
-          `}
-        >
-          <b>{orgEnhet ? `${orgEnhet.navn} (${orgEnhet.id})` : tilOrgEnhet}</b>:
-        </span>
+        blir fra{" "}
+        <b>
+          {gyldigFom
+            ? formatDisplayDate(gyldigFom)
+            : formatDisplayDate(todayWithoutTimezone())}
+        </b>{" "}
+        flyttet til organisasjonsenheten{" "}
+        <b>{orgEnhet ? `${orgEnhet.navn} (${orgEnhet.id})` : tilOrgEnhet}</b>:
         <VStack
           css={css`
             max-height: 500px;
@@ -694,8 +744,81 @@ function MasseflyttingBekreftModal({
   );
 }
 
-const fraTilBoksStyle = css`
-  background-color: #deecef;
-  padding: var(--a-spacing-4) var(--a-spacing-6);
-  border-radius: var(--a-border-radius-large);
-`;
+type FeiletFlytting = {
+  orgtilknytningFid: string;
+  feilmelding: string;
+};
+
+export type MasseflyttingData = {
+  feiledeFlyttinger: FeiletFlytting[];
+  antallFlyttet: number;
+};
+
+type MasseflyttingResponseInfo = {
+  status: number;
+  data?: MasseflyttingData;
+};
+
+function MasseflyttingResponseAlert({
+  response,
+  orgtilknytninger,
+  ressurser,
+}: {
+  response: MasseflyttingResponseInfo | undefined;
+  orgtilknytninger: OrgtilknytningState[];
+  ressurser: Ressurs[];
+}) {
+  if (!response) {
+    return;
+  }
+
+  if (response.status !== 200) {
+    return (
+      <Alert variant="error">Det oppstod en feil ved masseflyttingen</Alert>
+    );
+  }
+
+  const data = response.data;
+
+  if (data?.feiledeFlyttinger.length === 0) {
+    return <Alert variant="success">Masseflytting vellykket</Alert>;
+  }
+
+  return (
+    <Alert variant="warning">
+      <VStack gap="4">
+        <Heading size="small">
+          Flytting av {data?.feiledeFlyttinger.length}{" "}
+          <Pluralize
+            numberOfElements={data?.feiledeFlyttinger.length ?? 0}
+            pluralForm="ressurser"
+            singleForm="ressurs"
+          />{" "}
+          feilet:
+        </Heading>
+
+        {data?.feiledeFlyttinger.map((flytting) => {
+          const feiletOt = orgtilknytninger.find(
+            (orgtilknytning) =>
+              orgtilknytning.fid === flytting.orgtilknytningFid,
+          );
+
+          const feiletRessurs = ressurser.find(
+            (ressurs) => ressurs.navident === feiletOt?.navident,
+          );
+
+          return (
+            <BodyShort key={flytting.orgtilknytningFid}>
+              <b>
+                {feiletRessurs
+                  ? formatVisningsnavn(feiletRessurs.visningsnavn)
+                  : ""}
+              </b>
+              : "{flytting.feilmelding}"
+            </BodyShort>
+          );
+        })}
+      </VStack>
+    </Alert>
+  );
+}

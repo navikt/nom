@@ -88,7 +88,8 @@ public class OrgEnhetMapper {
                 orgEnhet.getId(),
                 orgEnhet.getNavn(),
                 remedyEnhetId.orElse(null),
-                getLedernavn(orgEnhet)
+                getLedernavn(orgEnhet),
+                orgEnhet.getGyldigFom()
         );
     }
 

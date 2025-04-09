@@ -425,7 +425,6 @@ function FysiskBrukerstedFlyttingTable() {
             css={css`
               margin-left: var(--a-spacing-2);
               display: flex;
-              justify-content: space-between;
             `}
           >
             <div>
