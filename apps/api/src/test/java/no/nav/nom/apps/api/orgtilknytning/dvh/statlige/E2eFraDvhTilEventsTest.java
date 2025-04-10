@@ -604,12 +604,12 @@ class E2eFraDvhTilEventsTest extends TestBase {
         assertEquals(1, result.get(RESSURS_1.navident()).errors().size());
 
         assertOrgtilknytning(CMD.ENDRET_DATO)
-            .forFid("FID_A")
+            .forFid("FID_B")
             .gyldigFom(DD_3Y)
             .gyldigTom(null);
 
         assertOrgtilknytning(CMD.ENDRET_DATO)
-            .forFid("FID_B")
+            .forFid("FID_A")
             .gyldigFom(DD_3Y)
             .gyldigTom(null);
 
