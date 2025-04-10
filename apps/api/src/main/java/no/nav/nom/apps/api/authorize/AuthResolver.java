@@ -54,4 +54,11 @@ public class AuthResolver {
         return loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
             authorizedNavident.kanBrukerOppretteRessurs(getAuthenticatedNavIdent(), orgenhetId);
     }
+
+    public boolean erRessursInNomWriteDelegertGroup(String ressursNavident) {
+        return authorizedNavident.getRessurserWhichCanBeDelegatedTo()
+            .stream()
+            .anyMatch(ressurs -> ressurs.navident().equals(ressursNavident));
+    }
+
 }
