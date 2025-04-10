@@ -80,4 +80,12 @@ spec:
         mountPath: /var/run/secrets/nais.io/srvnomad
   secureLogs:
     enabled: true
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
 
