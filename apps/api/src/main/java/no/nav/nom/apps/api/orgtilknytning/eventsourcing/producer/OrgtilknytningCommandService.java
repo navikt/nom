@@ -60,11 +60,6 @@ public class OrgtilknytningCommandService {
         String fid,
         EndreDagligOppfolgingOrgtilknytning endreDagligOppfolgingOrgtilknytning
     ) {
-
-        if(endreDagligOppfolgingOrgtilknytning.gyldigTom().equals(PeriodeUtil.NO_END_DATE)) {
-            log.info("2x99: Endrer daglig oppfølging med TOM:2099 for orgtilknytning med fid {}", fid);
-        }
-
         return endreDagligOppfolgingOrgtilknytning(
             EndreDagligOppfolgingOrgtilknytningCommand.builder()
                 .fid(fid)
