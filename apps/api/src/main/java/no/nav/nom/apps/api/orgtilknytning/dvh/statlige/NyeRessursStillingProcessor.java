@@ -125,6 +125,11 @@ public class NyeRessursStillingProcessor {
         var endringer = new ArrayList<SimpleEntry<String, OrgtilknytningCommand>>();
 
         matchedeOTer.forEach( (sp, ot) -> {
+
+            if(ot.navident().equals("H124889") || ot.navident().equals("B134576") || ot.navident().equals("F152272")) {
+                log.info("2xx99: ot: {} sp: {}", ot, sp);
+            }
+
             boolean gyldigTomErUlik = false;
             if (!lik(ot.gyldigTom().orElse(null), sp.gyldigTom())) {
                 gyldigTomErUlik = true;
