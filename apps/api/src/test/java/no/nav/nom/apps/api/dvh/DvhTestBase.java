@@ -3,6 +3,8 @@ package no.nav.nom.apps.api.dvh;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.junit.jupiter.api.AfterEach;
@@ -35,6 +37,12 @@ public class DvhTestBase {
 
     @MockitoBean
     protected Unleash unleash;
+
+    @MockitoBean
+    protected MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
+
+    @MockitoBean
+    protected OrganiseringStateRepository organiseringStateRepository;
 
     @AfterEach
     protected void clearRepository() {

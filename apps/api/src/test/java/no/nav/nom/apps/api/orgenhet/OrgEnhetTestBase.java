@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.orgenhet;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
 import no.nav.nom.apps.api.KafkaUtils;
+import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.libs.state.organisering.OrganiseringStateAutoconfiguration;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateAutoconfiguration;
@@ -39,6 +40,9 @@ public class OrgEnhetTestBase {
 
     @MockitoBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
+
+    @MockitoBean
+    MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
 
     @Autowired
     public Unleash unleash;

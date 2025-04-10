@@ -28,6 +28,7 @@ import java.util.Optional;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.etter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.foer;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerEtter;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerFoer;
 
 /*
  * REGLER:<
@@ -143,7 +144,7 @@ public class MasseflyttOrgtilknytningerService {
                 orgtilknytningerIkkeFlyttet.put(ot, "Orgtilknytning er ikke gyldig for flytting på angitt flyttedato");
                 return;
             }
-            if (!likEllerEtter(ot.gyldigTom().orElse(null), nyOrgenhet.getGyldigTom().orElse(null))) {
+            if (etter(ot.gyldigTom().orElse(null), nyOrgenhet.getGyldigTom().orElse(null))) {
                 orgtilknytningerIkkeFlyttet.put(ot, "Orgtilknytning er gyldig etter ny orgenhet sin gyldighetsperiode");
                 return;
             }
