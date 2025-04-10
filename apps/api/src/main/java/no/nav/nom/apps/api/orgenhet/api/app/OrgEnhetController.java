@@ -97,7 +97,7 @@ public class OrgEnhetController {
         description = "Sjekk om angitt navident er leder for angitt orgenhet.",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    public ResponseEntity<Boolean> isNavIdentLederForOrgenhet(
+    public ResponseEntity<Boolean> isNavIdentLederForOrgenhetOrHasNomWriteDelegert(
         @PathVariable("navident") String navident,
         @PathVariable("orgEnhetId") String orgEnhetId,
         @RequestBody List<String> ressurser) {
@@ -107,9 +107,10 @@ public class OrgEnhetController {
 
         if(orgEnhet != null) {
             boolean navIdentIsLeder = orgEnhet.ledere().stream().anyMatch(ressursState -> ressursState.navident().equals(navident));
-            log.info("isNavIdentLederForOrgenhet navIdentIsLeder: {}-{}-{}", navident, orgEnhet.id(), navIdentIsLeder);
+            boolean hasNomWriteDelegert = authResolver.erRessursInNomWriteDelegertGroup(navident);
+            log.info("isNavIdentLederForOrgenhet navIdentIsLeder hasNomWriteDelegert: {}-{}-{}-{}", navident, orgEnhet.id(), navIdentIsLeder, hasNomWriteDelegert);
             // todo check it ressurser also match
-            return ResponseEntity.ok(navIdentIsLeder);
+            return ResponseEntity.ok(navIdentIsLeder || hasNomWriteDelegert);
         }
 
         return ResponseEntity.ok(false);
@@ -137,8 +138,10 @@ public class OrgEnhetController {
             }
 
             var loggedInUser = SecurityUtil.getAuthenticatedNavIdent();
-            var hasAdminRightsForEnhet = authResolver.kanOppretteRessurs(orgenhetId);
-            if(!hasAdminRightsForEnhet) {
+            var isAdminOrLederToEnhet = authResolver.kanOppretteRessurs(orgenhetId);
+            var hasNomWriteDelegert = authResolver.erRessursInNomWriteDelegertGroup(loggedInUser);
+
+            if(!isAdminOrLederToEnhet && !hasNomWriteDelegert) {
                 var accessDeniedError = "User does not have access to view ressurser for this orgenhet: " + loggedInUser + "-" + orgenhetId;
                 log.error(accessDeniedError);
                 throw new AccessDeniedException(accessDeniedError);
