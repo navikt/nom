@@ -1,17 +1,23 @@
 package no.nav.nom.apps.api.orgtilknytning.job;
 
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
-import no.nav.nom.libs.utils.common.platform.LeaderElection;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerEtter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.today;
@@ -21,15 +27,24 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.today;
 public class OTUtenforHierarki {
     private final OrgenhetService orgenhetService;
     private final OrgtilknytningService orgtilknytningService;
-    private final LeaderElection leaderElection;
+    private final OrganiseringStateRepository organiseringStateRepository;
+    private final MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
+    private final Unleash unleash;
+
+    private final String UNLEASH_AUTO_FLYTT = "nom.otutenforhierarki.auto_flytt";
 
     private final HashMap<OrgtilknytningState, IOrgenhet> otUtenforHierarkieMedAlternativOrgenhet = new HashMap<>();
+    private final HashMap<IOrgenhet, List<OrgtilknytningState>> perAlternativOrgenhet = new HashMap<>();
 
     public OTUtenforHierarki(OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService,
-                             LeaderElection leaderElection) {
+                             OrganiseringStateRepository organiseringStateRepository, MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService,
+                            Unleash unleash
+    ) {
         this.orgenhetService = orgenhetService;
         this.orgtilknytningService = orgtilknytningService;
-        this.leaderElection = leaderElection;
+        this.organiseringStateRepository = organiseringStateRepository;
+        this.masseflyttOrgtilknytningerService = masseflyttOrgtilknytningerService;
+        this.unleash = unleash;
     }
 
     public void findOTUtenforHierarkiFromDataLast() {
@@ -54,21 +69,53 @@ public class OTUtenforHierarki {
         oterUtenforHierarki.forEach(ot -> {
             var alternativOrgenhet = finnAlternativOrgenhet(ot, aktiveOrgenheter);
             otUtenforHierarkieMedAlternativOrgenhet.put(ot, alternativOrgenhet);
+            if (alternativOrgenhet != null) {
+                perAlternativOrgenhet.computeIfAbsent(alternativOrgenhet, k -> new java.util.ArrayList<>()).add(ot);
+            }
         });
         log.info("Fant {} OTer utenfor aktiv hierarki", otUtenforHierarkieMedAlternativOrgenhet.size());
     }
 
     private void autoflyttOTUtenforHierarki() {
-        // grupper på til enhet
-        // finn til enhets 'organisering' gyldigFom
+        if (!unleash.isEnabled(UNLEASH_AUTO_FLYTT)) {
+            return;
+        }
+        if (otUtenforHierarkieMedAlternativOrgenhet.isEmpty()) {
+            return;
+        }
+        log.info("Autoflytter OTer utenfor hierarki");
 
+
+        perAlternativOrgenhet.forEach((alternativOrgenhet, oter) -> {
+            log.info("Autoflytter OTer utenfor hierarki for enhet {} - {} ", alternativOrgenhet.getId(), alternativOrgenhet.getNavn());
+            var flyttedato = getEnhetsOrganiseringGyldigFom(alternativOrgenhet.getId());
+            if ( flyttedato == null ) {
+                log.error("Fant ikke gyldigFom for alternativ orgenhet {}", alternativOrgenhet.getId());
+                return;
+            }
+            var otFids = oter.stream().map(OrgtilknytningState::fid).toList();
+
+            // Så og si alle slike case så er firesifferenheten den samme, så flagget skal være false.
+            boolean beholdTilganger = false;
+
+            var inputMetadata = new InputMetadata(
+                "nom-api OTUtenforHierarki",
+                "autoflyttOTUtenforHierarki",
+                Map.of("Orgtilknytning Fid's", otFids, "alternativ enhet", alternativOrgenhet, "flyttedato", flyttedato),
+                new Origination("nom-api", "nom-api")
+            );
+
+            masseflyttOrgtilknytningerService.flyttOrgtilknytninger(otFids, alternativOrgenhet.getId(), beholdTilganger, flyttedato, inputMetadata);
+        });
     }
 
     // Dette fordi vi ønsker å bruke datoen OTen havnet utenfor hierarkiet.
     // Ved rekjøringer vil dette være stabilt
     // Og ny orgenhet gyldigFom kan være før dette
     private LocalDate getEnhetsOrganiseringGyldigFom(String orgenhetId) {
-        throw new UnsupportedOperationException("Ikke implementert");
+        return organiseringStateRepository
+            .findById(orgenhetId)
+            .map(OrganiseringState::gyldigFom).orElse(null);
     }
 
     private IOrgenhet finnAlternativOrgenhet(OrgtilknytningState ot, Collection<IOrgenhet> aktiveOrgenheter) {
@@ -86,9 +133,9 @@ public class OTUtenforHierarki {
 
     private void alertForOTUtenforHierarki() {
         boolean sendAlert = otUtenforHierarkieMedAlternativOrgenhet.keySet().stream().anyMatch(ot -> ot.gyldigFom().isBefore(LocalDate.now().plusWeeks(1)));
-        if (sendAlert && leaderElection.isLeader()) {
+        if (sendAlert) {
             log.error("Orgtilknytninger utenfor aktiv hierarki");
-            log.error("Detaljer{}", toLogg(otUtenforHierarkieMedAlternativOrgenhet));
+            log.error("Detaljer {}", toLogg(otUtenforHierarkieMedAlternativOrgenhet));
         }
     }
 
