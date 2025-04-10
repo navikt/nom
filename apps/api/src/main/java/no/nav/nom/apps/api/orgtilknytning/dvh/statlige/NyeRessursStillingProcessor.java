@@ -125,8 +125,8 @@ public class NyeRessursStillingProcessor {
         var endringer = new ArrayList<SimpleEntry<String, OrgtilknytningCommand>>();
 
         matchedeOTer.forEach( (sp, ot) -> {
-
-            if(ot.navident().equals("H124889") || ot.navident().equals("B134576") || ot.navident().equals("F152272")) {
+            boolean b = ot.navident().equals("H124889") || ot.navident().equals("B134576") || ot.navident().equals("F152272");
+            if(b) {
                 log.info("2xx99: ot: {} sp: {}", ot, sp);
             }
 
@@ -142,6 +142,11 @@ public class NyeRessursStillingProcessor {
                 // hvis begge lik og 2099-12-31, set null og legge til endringer lista
                 // kanskje legge til lagEndreDOLCmd også?
                 if (sp.gyldigTom().isEqual(PeriodeUtil.NO_END_DATE) || ot.gyldigTom().get().isEqual(PeriodeUtil.NO_END_DATE)) {
+
+                    if(b) {
+                        log.info("2xxx99: ot: {} sp: {}", ot, sp);
+                    }
+
                     endringer.add(lagEndreGyldigTomCmd(ot, sp, sspForNavident));
                 }
             }
