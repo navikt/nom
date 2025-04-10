@@ -49,6 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.NO_END_DATE;
 
 @Slf4j
 @Tag(name = "Admin for å lage manuelle Evtsrc meldinger")
@@ -477,9 +478,10 @@ public class ManuelleRessursEvtsrcMeldinger {
             )
         );
 
+        Optional<LocalDate> sanitizedSluttdato  = sluttDato.equals(NO_END_DATE) ? Optional.empty() : Optional.of(sluttDato);
         ressursCommandService.oppdaterRessursSluttdatoEvent(
             new OppdaterSluttdatoCommand(ressursState.get().fid(),
-                   isNull(sluttDato)? Optional.empty() : Optional.of(sluttDato), metaData)
+                sanitizedSluttdato, metaData)
         );
 
         var response = OppdaterSluttdatoRessursResponse.builder()
