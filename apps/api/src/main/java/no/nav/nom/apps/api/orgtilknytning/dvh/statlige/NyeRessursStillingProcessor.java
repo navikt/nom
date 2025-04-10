@@ -134,7 +134,8 @@ public class NyeRessursStillingProcessor {
                     endringer.add(lagEndreGyldigTomCmd(ot, sp, sspForNavident));
                 }
             } else if (ot.gyldigTom().isPresent() && sp.gyldigTom() != null) {
-                // 2x99 hvis lik men begge tom dato er 2099, set null og legg til endringer lista
+                // hvis begge lik og 2099-12-31, set null og legge til endringer lista
+                // kanskje legge til lagEndreDOLCmd også?
                 if (sp.gyldigTom().isEqual(PeriodeUtil.NO_END_DATE) && ot.gyldigTom().get().isEqual(PeriodeUtil.NO_END_DATE)) {
                     endringer.add(lagEndreGyldigTomCmd(ot, sp, sspForNavident));
                 }
@@ -474,16 +475,11 @@ public class NyeRessursStillingProcessor {
             originalOrgtilknytning.navident(),
             originalOrgtilknytning.orgEnhetId(),
             stillingPeriode.gyldigFom(),
-            stillingPeriode.gyldigTom().equals(NO_END_DATE) ? Optional.empty() : Optional.of(stillingPeriode.gyldigTom()),
+            stillingPeriode.gyldigTom().equals(NO_END_DATE) ? Optional.empty() : Optional.of(stillingPeriode.gyldigTom()), //ikke sett 2099-12-31
             stillingPeriode.erDagligOppfolging(),
             metadata,
             additionalData
         );
-
-        // Todo: to be removed
-        if(stillingPeriode.gyldigTom().equals(NO_END_DATE)) {
-            log.info("2x99: setting gyldigTom = NO_END_DATE i OT: {}", originalOrgtilknytning.fid());
-        }
 
         return new SimpleEntry<>(originalOrgtilknytning.fid(), cmd);
     }
@@ -626,16 +622,6 @@ public class NyeRessursStillingProcessor {
                 ot -> {
                     if (matchedeOTer.values().stream().noneMatch(matchedOT -> matchedOT.fid().equals(ot.fid()))) {
                         matchedeOTer.put(sp, ot);
-
-                        // logging for testing in dev
-                        if(ot.fid().equals("orgtilknytning-01JQXYCV5QWPX72TVXH7NC1087") ||
-                            ot.fid().equals("orgtilknytning-01JQXDZWEER5GZ4YR543BW8CC9") ||
-                            ot.fid().equals("orgtilknytning-01JQXSWJ01F39HCT7HRH46N31Y") ||
-                            ot.fid().equals("orgtilknytning-01JR0JNRT5WEDBKSRWWZ1QC34Z")
-                        ){
-                            log.info("2x99: Matchet OT {} med StillingPeriode {}", ot, sp);
-                        }
-
                     } else {
                         stillingPerioderAaOpprette.add(sp);
                     }
