@@ -136,7 +136,7 @@ public class NyeRessursStillingProcessor {
             } else if (ot.gyldigTom().isPresent() && sp.gyldigTom() != null) {
                 // hvis begge lik og 2099-12-31, set null og legge til endringer lista
                 // kanskje legge til lagEndreDOLCmd også?
-                if (sp.gyldigTom().isEqual(PeriodeUtil.NO_END_DATE) && ot.gyldigTom().get().isEqual(PeriodeUtil.NO_END_DATE)) {
+                if (sp.gyldigTom().isEqual(PeriodeUtil.NO_END_DATE) || ot.gyldigTom().get().isEqual(PeriodeUtil.NO_END_DATE)) {
                     endringer.add(lagEndreGyldigTomCmd(ot, sp, sspForNavident));
                 }
             }
