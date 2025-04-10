@@ -47,11 +47,6 @@ spec:
     periodSeconds: 3
     timeout: 4
     failureThreshold: 2
-#  startup:
-#    path: internal/health/startupState
-#    initialDelay: 10
-#    periodSeconds: 5
-#    failureThreshold: 36 # 36*5sec = 3min
   resources:
     requests:
       cpu: 100m
@@ -65,6 +60,10 @@ spec:
     autoInstrumentation:
       enabled: true
       runtime: java
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
   kafka:
     pool: nav-prod
   secureLogs:
