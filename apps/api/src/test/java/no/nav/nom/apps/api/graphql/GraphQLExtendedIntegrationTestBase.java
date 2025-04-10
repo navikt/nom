@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.graphql.controller.GraphQLOrgEnhetController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLPersonController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLRessursController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLSearchController;
+import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.libs.state.organisering.OrganiseringStateAutoconfiguration;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
@@ -32,6 +33,7 @@ import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
@@ -117,6 +119,9 @@ public class GraphQLExtendedIntegrationTestBase {
 
     @Autowired
     RessursStateRepository ressursStateRepository;
+
+    @MockitoBean
+    MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
 
     @BeforeEach
     protected void setup() {

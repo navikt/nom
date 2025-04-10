@@ -188,6 +188,63 @@ class MasseflyttOrgtilknytningerServiceTest {
         assertEquals("Orgtilknytning er ikke gyldig for flytting på angitt flyttedato", res.get(orgtilknytninger.get(0)));
     }
 
+    @Test
+    @DisplayName("Orgtilknytninger med sluttdato")
+    void orgtilknytninger_med_sluttdato() {
+        boolean beholdTilganger = false;
+        OrgEnhet nyOrgenhet = getOrgenhet("ab123c", "Ny Enhet", LocalDate.of(2022, 4, 1), null);
+        OrgEnhet gmlOrgenhet = getOrgenhet("de456f", "Gml Enhet", LocalDate.of(2024, 10, 1), null);
+        OrgEnhet gmlOrgenhet2 = getOrgenhet("xy890z", "Gml Enhet 2", LocalDate.of(2022, 2, 1), null);
+
+        var originalOT = getOT("A000001", gmlOrgenhet.getId(), Sektor.EKSTERN, Tilknytningtype.KONSULENT, true, LocalDate.of(2025,4,7), LocalDate.of(2025,4,30));
+        var originalOT2 = getOT("A000001", gmlOrgenhet2.getId(), Sektor.EKSTERN, Tilknytningtype.KONSULENT, true, LocalDate.of(2025,1,22), LocalDate.of(2025,10,11));
+        List<OrgtilknytningState> orgtilknytninger = List.of(
+            originalOT, originalOT2
+        );
+
+        when(orgtilknytningStateRepository.findByFidIn(any())).thenReturn(orgtilknytninger);
+        when(orgenhetService.getById(any())).thenReturn(Optional.of(nyOrgenhet));
+
+        var res = cut.flyttOrgtilknytninger(orgtilknytninger.stream().map(OrgtilknytningState::fid).toList(), nyOrgenhet.getId(), beholdTilganger, LocalDate.of(2025, 4, 9), null);
+
+        verify(orgtilknytningCommandService, times(4)).avvikleOrgtilknytning(any(), any());
+        verify(orgtilknytningCommandService, times(0)).fjernOrgtilknytning(any(), any());
+        verify(orgtilknytningCommandService, times(2)).endreDagligOppfolgingOrgtilknytning(any());
+        verify(orgtilknytningCommandService, times(2)).endreTilknytningtype(any());
+        verify(orgtilknytningCommandService, times(2)).opprettOrgtilknytning(opprettOrgtilknytningArgumentCaptor.capture());
+
+        assertEquals(0, res.size());
+    }
+
+    @Test
+    @DisplayName("Orgtilknytninger med sluttdato, en utenfor orgenhet periode")
+    void orgtilknytninger_med_sluttdato_en_utenfor_orgenhet_periode() {
+        boolean beholdTilganger = false;
+        OrgEnhet nyOrgenhet = getOrgenhet("ab123c", "Ny Enhet", LocalDate.of(2022, 4, 1), LocalDate.of(2025, 10, 1));
+        OrgEnhet gmlOrgenhet = getOrgenhet("de456f", "Gml Enhet", LocalDate.of(2024, 10, 1), null);
+        OrgEnhet gmlOrgenhet2 = getOrgenhet("xy890z", "Gml Enhet 2", LocalDate.of(2022, 2, 1), null);
+
+        var originalOT = getOT("A000001", gmlOrgenhet.getId(), Sektor.EKSTERN, Tilknytningtype.KONSULENT, true, LocalDate.of(2025,4,7), LocalDate.of(2025,4,30));
+        var originalOT2 = getOT("A000001", gmlOrgenhet2.getId(), Sektor.EKSTERN, Tilknytningtype.KONSULENT, true, LocalDate.of(2025,1,22), LocalDate.of(2025,10,11));
+        List<OrgtilknytningState> orgtilknytninger = List.of(
+            originalOT, originalOT2
+        );
+
+        when(orgtilknytningStateRepository.findByFidIn(any())).thenReturn(orgtilknytninger);
+        when(orgenhetService.getById(any())).thenReturn(Optional.of(nyOrgenhet));
+
+        var res = cut.flyttOrgtilknytninger(orgtilknytninger.stream().map(OrgtilknytningState::fid).toList(), nyOrgenhet.getId(), beholdTilganger, LocalDate.of(2025, 4, 9), null);
+
+        verify(orgtilknytningCommandService, times(2)).avvikleOrgtilknytning(any(), any());
+        verify(orgtilknytningCommandService, times(0)).fjernOrgtilknytning(any(), any());
+        verify(orgtilknytningCommandService, times(1)).endreDagligOppfolgingOrgtilknytning(any());
+        verify(orgtilknytningCommandService, times(1)).endreTilknytningtype(any());
+        verify(orgtilknytningCommandService, times(1)).opprettOrgtilknytning(opprettOrgtilknytningArgumentCaptor.capture());
+
+        assertEquals(1, res.size());
+        assertEquals("Orgtilknytning er gyldig etter ny orgenhet sin gyldighetsperiode", res.get(orgtilknytninger.get(1)));
+    }
+
     private void assertArgumentEquals(OpprettOrgtilknytning actual, OrgtilknytningState originalOT, String nyOrgEnhetId, boolean beholdTilganger) {
         assertThat(actual).usingRecursiveComparison()
             .ignoringFields("inputMetadata")
@@ -209,6 +266,7 @@ class MasseflyttOrgtilknytningerServiceTest {
     private OrgtilknytningState getOT(String navident, String orgenhetsId, LocalDate gyldigFom, LocalDate gyldigTom) {
         return getOT(navident, orgenhetsId, Sektor.NAV_STATLIG, Tilknytningtype.FAST, true, gyldigFom, gyldigTom);
     }
+
     private OrgtilknytningState getOT(String navident, String orgenhetsId, Sektor sektor, Tilknytningtype tilknytningType, boolean erDagligOppfolging, LocalDate gyldigFom, LocalDate gyldigTom) {
         return new OrgtilknytningState(
             "FID_" + otFidCounter++,
