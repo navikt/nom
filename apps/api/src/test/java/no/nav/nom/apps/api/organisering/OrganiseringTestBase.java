@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.organisering;
 
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventKafkaConfig;
+import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.libs.state.organisering.OrganiseringStateAutoconfiguration;
 import no.nav.nom.libs.state.ressurs.RessursStateAutoconfiguration;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
@@ -41,5 +42,8 @@ public class OrganiseringTestBase {
 
     @MockitoBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
+
+    @MockitoBean
+    MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
 }
 
