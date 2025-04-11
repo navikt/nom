@@ -28,7 +28,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
 
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
-        <gcp.libraries-bom.version>26.52.0</gcp.libraries-bom.version>
+        <gcp.libraries-bom.version>26.59.0</gcp.libraries-bom.version>
         <springdoc.version>2.5.0</springdoc.version>
         <springdoc-openapi-security.version>1.8.0</springdoc-openapi-security.version>
         <hypersistence-utils-hibernate-63.version>3.9.0</hypersistence-utils-hibernate-63.version>
