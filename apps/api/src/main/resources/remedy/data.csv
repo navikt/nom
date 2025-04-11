@@ -366,6 +366,7 @@ EH00001;2300;ORGNIV3;HELFO;Beholdt;;;JA;EH00001;ORGENHET;je305h;28.02.2025 - lag
 241800;4718;ORGNIV3;;FEIL, se kommentar;241801;sa567s;JA;241801;ORGNIV3;sa567s;orgEnheten finnes ikke. Har lagt inn riktig enhet basert på NORG, og stikkprøve på trygdeIdent
 241900;4719;ORGNIV3;;FEIL, se kommentar;241901;je572g;JA;241901;ORGNIV3;ba931k;28.02.2025: Satt inn ba931k som ny nomID da HMS Troms er nedlagt til fordel for HMS Troms og Finnmark
 242000;4720;ORGNIV3;HMS Finnmark;TODO;;;NEI;242000;;leggInn;28.02.2025: Nedlagt i NOM, Under avvikling i NORG. Ingen folk i IR. Kan slette raden.
+245000;4781;ORGNIV3;Sentral forsyningsenhet;;;;JA;245000;ORGNIV3;sa429z;11.04.2025: Lagt inn ny mapping til 4781
 2430000;4750;AGRESSOORGENHET;Fagsenteret for NAV Hjelpemidler og tilrettelegging;Tas bort;;;NEI;2430000;;leggInn;28.02.2025: Nedlagt i NOM, NORG. Ingen folk i IR. Kan slette raden.
 480000;4800;ORGNIV3;Familie og pensjonsytelser Styringsenhet;Opp til ORGNIV2;48;tu808x;JA;48;ORGNIV2;tu808x;
 480300;4803;ORGNIV3;Familie- og pensjonsytelser Oslo 2;Beholdt;;;JA;480300;ORGNIV3;leggInn;
