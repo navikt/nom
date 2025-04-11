@@ -622,12 +622,6 @@ public class NyeRessursStillingProcessor {
                 ot -> {
                     if (matchedeOTer.values().stream().noneMatch(matchedOT -> matchedOT.fid().equals(ot.fid()))) {
                         matchedeOTer.put(sp, ot);
-
-                        boolean b = ot.navident().equals("B134576") || ot.navident().equals("F152272");
-                        if(b) {
-                            log.info("2xxxx99: ot: {} sp: {}", ot, sp);
-                        }
-
                     } else {
                         stillingPerioderAaOpprette.add(sp);
                     }
