@@ -125,11 +125,6 @@ public class NyeRessursStillingProcessor {
         var endringer = new ArrayList<SimpleEntry<String, OrgtilknytningCommand>>();
 
         matchedeOTer.forEach( (sp, ot) -> {
-            boolean b = ot.navident().equals("H124889") || ot.navident().equals("B134576") || ot.navident().equals("F152272");
-            if(b) {
-                log.info("2xx99: ot: {} sp: {}", ot, sp);
-            }
-
             boolean gyldigTomErUlik = false;
             if (!lik(ot.gyldigTom().orElse(null), sp.gyldigTom())) {
                 gyldigTomErUlik = true;
@@ -142,11 +137,6 @@ public class NyeRessursStillingProcessor {
                 // hvis begge lik og 2099-12-31, set null og legge til endringer lista
                 // kanskje legge til lagEndreDOLCmd også?
                 if (sp.gyldigTom().isEqual(PeriodeUtil.NO_END_DATE) || ot.gyldigTom().get().isEqual(PeriodeUtil.NO_END_DATE)) {
-
-                    if(b) {
-                        log.info("2xxx99: ot: {} sp: {}", ot, sp);
-                    }
-
                     endringer.add(lagEndreGyldigTomCmd(ot, sp, sspForNavident));
                 }
             }
@@ -639,6 +629,13 @@ public class NyeRessursStillingProcessor {
                 () -> stillingPerioderAaOpprette.add(sp)
             );
 
+            // logging
+            if(match.isPresent()){
+                boolean b = match.get().navident().equals("B134576") || match.get().navident().equals("F152272");
+                if(b) {
+                    log.info("2xxxx99: ot: {} sp: {}", match, sp);
+                }
+            }
 
         });
     }
