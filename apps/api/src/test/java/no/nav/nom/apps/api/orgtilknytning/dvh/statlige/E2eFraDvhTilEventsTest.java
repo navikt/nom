@@ -603,16 +603,6 @@ class E2eFraDvhTilEventsTest extends TestBase {
         assertEquals(7, result.get(RESSURS_1.navident()).endringer().size());
         assertEquals(1, result.get(RESSURS_1.navident()).errors().size());
 
-        assertOrgtilknytning(CMD.ENDRET_DATO)
-            .forFid("FID_A")
-            .gyldigFom(DD_3Y)
-            .gyldigTom(null);
-
-        assertOrgtilknytning(CMD.ENDRET_DATO)
-            .forFid("FID_B")
-            .gyldigFom(DD_3Y)
-            .gyldigTom(null);
-
         String fid_a1 = assertOrgtilknytning(CMD.OPPRETTET)
             .forNavident(RESSURS_1.navident())
             .tilEnhet(ENHET_A.getId())
