@@ -213,7 +213,7 @@ spec:
           cluster: prod-gcp
         - application: idm-kafka-omada-integration
           namespace: idm
-          cluster: prod-gcp
+          cluster: prod-fss
         - application: shout-out-sync-service
           namespace: shout-out
           cluster: prod-gcp
