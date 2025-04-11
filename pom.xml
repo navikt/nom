@@ -34,7 +34,7 @@
         <hypersistence-utils-hibernate-63.version>3.9.0</hypersistence-utils-hibernate-63.version>
         <graphql-extended-scalars.version>22.0</graphql-extended-scalars.version>
         <unleash.version>9.2.6</unleash.version>
-        <opencsv.version>5.9</opencsv.version>
+        <opencsv.version>5.10</opencsv.version>
         <apache.common.csv.version>1.12.0</apache.common.csv.version>
         <commons-fileupload.version>1.5</commons-fileupload.version>
         <ulid-creator.version>5.2.3</ulid-creator.version>
