@@ -39,6 +39,42 @@ export function capitalizeName(name: string) {
   return nameInProgress;
 }
 
+/**
+ * Best effort made to capitalize the name of a fysiskBrukersted.
+ * The same as capitalizeName() but not capitalizing words like "vei" and "gate".
+ */
+export function capitalizeNameFysiskBrukersted(name: string) {
+  const litenForbokstavOrd = [
+    "vei",
+    "gate",
+    "plass",
+    "allé",
+    "alle",
+    "sti",
+    "terrasse",
+    "bakke",
+    "bru",
+    "brygge",
+    "tun",
+    "kai",
+    "park",
+    "hage",
+    "torg",
+    "bygg",
+    "etg",
+    "etasje",
+  ];
+
+  let storeForbokstaver = capitalizeName(name);
+
+  for (const word of litenForbokstavOrd) {
+    const wordRegex = new RegExp(`\\b${capitalizeName(word)}\\b`, "g");
+    storeForbokstaver = storeForbokstaver.replace(wordRegex, word);
+  }
+
+  return storeForbokstaver;
+}
+
 export function formatVisningsnavn(visningsNavn?: Visningsnavn) {
   if (!visningsNavn) {
     return "";

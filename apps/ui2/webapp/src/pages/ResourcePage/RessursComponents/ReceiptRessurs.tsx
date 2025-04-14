@@ -2,7 +2,6 @@ import { css } from "@emotion/react";
 import { Heading, Link } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
-import capitalize from "lodash/capitalize";
 import React from "react";
 
 import { getOrgEnhet, getOrgTilknytninger } from "~/api/react-query-endpoints";
@@ -12,7 +11,7 @@ import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { blueTopBorder } from "~/resources/NomStyles";
 import type { Ressurs } from "~/types/api-models";
-import { formatVisningsnavn } from "~/utils";
+import { capitalizeNameFysiskBrukersted, formatVisningsnavn } from "~/utils";
 
 export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
   // Presently there will only be one orgTilknytning after creation.
@@ -86,7 +85,9 @@ export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
             label="Fysisk brukersted"
             value={
               fysiskBrukersted
-                ? capitalize(fysiskBrukersted.brukerstedNavn)
+                ? capitalizeNameFysiskBrukersted(
+                    fysiskBrukersted.brukerstedNavn,
+                  )
                 : "-"
             }
             wrapped
