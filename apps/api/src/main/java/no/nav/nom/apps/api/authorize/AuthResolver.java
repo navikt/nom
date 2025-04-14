@@ -3,7 +3,10 @@ package no.nav.nom.apps.api.authorize;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
@@ -55,10 +58,9 @@ public class AuthResolver {
             authorizedNavident.kanBrukerOppretteRessurs(getAuthenticatedNavIdent(), orgenhetId);
     }
 
-    public boolean erRessursInNomWriteDelegertGroup(String ressursNavident) {
-        return authorizedNavident.getRessurserWhichCanBeDelegatedTo()
-            .stream()
-            .anyMatch(ressurs -> ressurs.navident().equals(ressursNavident));
+    public boolean kanRessursRedigereOrgenhet(String ressursNavident, String orgenhetId) {
+        List<IOrgenhet> editableOrgenheter = authorizedNavident.orgenheterLederKanRedigere(ressursNavident);
+        return editableOrgenheter.stream().anyMatch(orgenhet -> orgenhet.getId().equals(orgenhetId));
     }
 
 }
