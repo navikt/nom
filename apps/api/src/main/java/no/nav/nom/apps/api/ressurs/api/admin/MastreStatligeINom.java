@@ -64,31 +64,31 @@ public class MastreStatligeINom {
         return ResponseEntity.ok(sb.toString());
     }
 
-    @Operation(
-        description = "List alle statlige ressurser som ikke er mastret i NOM, men som ekskluderes pga max OT før april 2025",
-        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-    )
-    @ApiResponses(
-        {
-            @ApiResponse(responseCode = "200", description = "Success"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden")
-        }
-    )
-    @GetMapping(value = "/listStatligeSomIkkeErMastretOgSomEkskluderesPaaMaksOTDato")
-    public ResponseEntity<String> listStatligeSomIkkeErMastretOgSomEkskluderesPaaMaksOTDato() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("navident, sektor, startdato, sluttdato, maxOtSluttDato\n");
-
-        var ikkeMastret = getAlleStatligeSomIkkeErMastret();
-        var statligeUtenDeEkskluderteNavidenter = eksludertDeMedMaxOTFoerApril2025(ikkeMastret).stream().map(Ressurs::navident).toList();
-
-        ikkeMastret.stream()
-            .filter(ressurs -> !statligeUtenDeEkskluderteNavidenter.contains(ressurs.navident()))
-            .forEach(getRessursRow(sb));
-
-        return ResponseEntity.ok(sb.toString());
-    }
+//    @Operation(
+//        description = "List alle statlige ressurser som ikke er mastret i NOM, men som ekskluderes pga max OT før april 2025",
+//        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+//    )
+//    @ApiResponses(
+//        {
+//            @ApiResponse(responseCode = "200", description = "Success"),
+//            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+//            @ApiResponse(responseCode = "403", description = "Forbidden")
+//        }
+//    )
+//    @GetMapping(value = "/listStatligeSomIkkeErMastretOgSomEkskluderesPaaMaksOTDato")
+//    public ResponseEntity<String> listStatligeSomIkkeErMastretOgSomEkskluderesPaaMaksOTDato() {
+//        StringBuffer sb = new StringBuffer();
+//        sb.append("navident, sektor, startdato, sluttdato, maxOtSluttDato\n");
+//
+//        var ikkeMastret = getAlleStatligeSomIkkeErMastret();
+//        var statligeUtenDeEkskluderteNavidenter = eksludertDeMedMaxOTFoerApril2025(ikkeMastret).stream().map(Ressurs::navident).toList();
+//
+//        ikkeMastret.stream()
+//            .filter(ressurs -> !statligeUtenDeEkskluderteNavidenter.contains(ressurs.navident()))
+//            .forEach(getRessursRow(sb));
+//
+//        return ResponseEntity.ok(sb.toString());
+//    }
 
     static Consumer<Ressurs> getRessursRow(StringBuffer sb) {
         return ressurs -> {
@@ -114,11 +114,9 @@ public class MastreStatligeINom {
     @PostMapping(value = "/markerStatligeSomMastret")
     public ResponseEntity<String> markerStatligeSomMastret(
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
-        @Parameter(description = "Steg 1 - ekskluder de de med max OT-sluttdato 31.03.2025\n"
-                                +"Steg 2 - kjør for alle") @RequestParam int steg,
         @RequestBody List<String> ekskluderNavidenter
     ) {
-        return ResponseEntity.ok(markerStatligeSomMastret("CONFIRM".equalsIgnoreCase(confirm), steg, ekskluderNavidenter));
+        return ResponseEntity.ok(markerStatligeSomMastret("CONFIRM".equalsIgnoreCase(confirm), ekskluderNavidenter));
     }
 
     List<Ressurs> getAlleStatligeSomIkkeErMastret() {
@@ -146,14 +144,17 @@ public class MastreStatligeINom {
             .max(LocalDate::compareTo).orElse(null);
     }
 
-    protected String markerStatligeSomMastret(boolean commit, int steg, List<String> ekskluderNavidenter) {
+    protected String markerStatligeSomMastret(boolean commit, List<String> ekskluderNavidenter) {
         StringBuilder sb = new StringBuilder();
         if (!commit) {
-            sb.append("DRY RUN");
+            sb.append("DRY RUN\n");
         }
-        sb.append("Antall navidenter å ekskluderer: ").append(ekskluderNavidenter.size()).append(" navidenter\n");
+        sb.append("Antall navidenter å ekskluderer: ").append(ekskluderNavidenter.size()).append("\n");
 
-        var ikkeMastretStatlige = getAlleStatligeSomIkkeErMastret();
+        var ikkeMastretStatlige = ressursStateRepository.getAll().stream()
+            .filter(RessursState::isStatlig)
+            .filter(ressurs -> !nomMastered.isMastered(ressurs.navident()))
+            .toList();
 
         var ikkeMastretUtenEkskluderteNavidenter = ikkeMastretStatlige.stream()
             .filter(ressurs -> !ekskluderNavidenter.contains(ressurs.navident()))
@@ -162,19 +163,8 @@ public class MastreStatligeINom {
         sb.append("Antall ikke mastret: ").append(ikkeMastretStatlige.size()).append("\n");
         sb.append("Antall ikke mastret uten ekskluderte navidenter: ").append(ikkeMastretUtenEkskluderteNavidenter.size()).append("\n");
 
-        var ekskludertOTFoerApril2025 = eksludertDeMedMaxOTFoerApril2025(ikkeMastretUtenEkskluderteNavidenter);
-
-        if (steg == 1) {
-            sb.append("Steg 1 antall ekskluderert på OT dato:").append(ikkeMastretUtenEkskluderteNavidenter.size() - ekskludertOTFoerApril2025.size()).append("\n");
-            sb.append("Antall å mastre i steg 1: ").append(ekskludertOTFoerApril2025.size()).append("\n");
-            if (commit) {
-                mastreNavidenter(ekskludertOTFoerApril2025);
-            }
-        } else {
-            sb.append("Antall å mastre i steg 2: ").append(ikkeMastretUtenEkskluderteNavidenter.size()).append("\n");
-            if (commit) {
-                mastreNavidenter(ikkeMastretUtenEkskluderteNavidenter);
-            }
+        if (commit) {
+            mastreNavidenter(ikkeMastretUtenEkskluderteNavidenter);
         }
         return sb.toString();
     }
@@ -185,7 +175,7 @@ public class MastreStatligeINom {
             .toList();
     }
 
-    void mastreNavidenter(List<Ressurs> ressurserTilMastres) {
+    void mastreNavidenter(List<RessursState> ressurserTilMastres) {
         ressurserTilMastres.forEach(ressurs -> nomMastered.markRessursAsMasteredInNom(ressurs.navident()));
     }
 
