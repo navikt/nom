@@ -30,16 +30,11 @@ public class OrgtilknytningEvtsrcListener {
 
     private final Environment env;
     private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
-    private final NomMastered nomMastered;
     private final ObjectMapper objectMapper = configureObjectMapper();
 
-    public OrgtilknytningEvtsrcListener(
-        OrgtilknytningEndretEmailService orgtilknytningEndretEmailService,
-        Environment env,
-        NomMastered nomMastered) {
+    public OrgtilknytningEvtsrcListener(OrgtilknytningEndretEmailService orgtilknytningEndretEmailService, Environment env) {
         this.orgtilknytningEndretEmailService = orgtilknytningEndretEmailService;
         this.env = env;
-        this.nomMastered = nomMastered;
     }
 
     @KafkaListener(
