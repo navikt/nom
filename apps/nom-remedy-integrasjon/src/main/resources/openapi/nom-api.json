@@ -606,7 +606,7 @@
         ]
       }
     },
-    "/app/orgenheter/isNavIdent/{navident}/LederForOrgenhet/{orgEnhetId}": {
+    "/app/orgenheter/isNavIdent/{navident}/canEditOrgenhet/{orgEnhetId}": {
       "post": {
         "description": "Sjekk om angitt navident er leder for angitt orgenhet.",
         "operationId": "isNavIdentLederForOrgenhet",

@@ -54,11 +54,11 @@ public class NomApiClient {
             .block());
     }
 
-    public boolean isNavidentLederForOrgenhet(String navident, String orgEnhetId, List<String> ressurser) {
+    public boolean isNavidentCanEditOrgenhet(String navident, String orgEnhetId, List<String> ressurser) {
         log.info("isNavidentLederForOrgenhet: {}, {}", navident, orgEnhetId);
         return Boolean.TRUE.equals(nomApi.post()
             .uri(uriBuilder -> uriBuilder
-                .path(ORGENHETER_PATH + "/isNavIdent/{navident}/LederForOrgenhet/{orgEnhetId}")
+                .path(ORGENHETER_PATH + "/isNavIdent/{navident}/canEditOrgenhet/{orgEnhetId}")
                 .build(navident, orgEnhetId))
             .bodyValue(ressurser)
             .retrieve()
