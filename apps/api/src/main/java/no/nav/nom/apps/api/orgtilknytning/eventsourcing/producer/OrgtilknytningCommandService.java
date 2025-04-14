@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytningCommand;
@@ -59,7 +60,6 @@ public class OrgtilknytningCommandService {
         String fid,
         EndreDagligOppfolgingOrgtilknytning endreDagligOppfolgingOrgtilknytning
     ) {
-
         return endreDagligOppfolgingOrgtilknytning(
             EndreDagligOppfolgingOrgtilknytningCommand.builder()
                 .fid(fid)

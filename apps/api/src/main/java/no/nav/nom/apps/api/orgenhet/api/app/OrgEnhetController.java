@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
@@ -25,8 +26,6 @@ import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -92,24 +91,22 @@ public class OrgEnhetController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/isNavIdent/{navident}/LederForOrgenhet/{orgEnhetId}")
+    @PostMapping("/isNavIdent/{navident}/canEditOrgenhet/{orgEnhetId}")
     @Operation(
         description = "Sjekk om angitt navident er leder for angitt orgenhet.",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    public ResponseEntity<Boolean> isNavIdentLederForOrgenhet(
+    public ResponseEntity<Boolean> kanRessursRedigereOrgenhet(
         @PathVariable("navident") String navident,
-        @PathVariable("orgEnhetId") String orgEnhetId,
-        @RequestBody List<String> ressurser) {
+        @PathVariable("orgEnhetId") String orgEnhetId) {
         OrgEnhet orgEnhet = orgenhetService.getById(orgEnhetId)
             .map(orgEnhetMapper::mapToOrgEnhet)
             .orElse(null);
 
         if(orgEnhet != null) {
-            boolean navIdentIsLeder = orgEnhet.ledere().stream().anyMatch(ressursState -> ressursState.navident().equals(navident));
-            log.info("isNavIdentLederForOrgenhet navIdentIsLeder: {}-{}-{}", navident, orgEnhet.id(), navIdentIsLeder);
-            // todo check it ressurser also match
-            return ResponseEntity.ok(navIdentIsLeder);
+            boolean kanRedigereOrgenhet = authResolver.kanRessursRedigereOrgenhet(navident, orgEnhetId);
+            log.info("kanRessursRedigereOrgenhet navident orgEnhetId result: {}-{}-{}", navident, orgEnhetId, kanRedigereOrgenhet);
+            return ResponseEntity.ok(kanRedigereOrgenhet);
         }
 
         return ResponseEntity.ok(false);
@@ -137,8 +134,9 @@ public class OrgEnhetController {
             }
 
             var loggedInUser = SecurityUtil.getAuthenticatedNavIdent();
-            var hasAdminRightsForEnhet = authResolver.kanOppretteRessurs(orgenhetId);
-            if(!hasAdminRightsForEnhet) {
+            var isAdminToEnhet = SecurityUtil.loggedInUserHasAccessScope(NomApiAccessScope.ADMIN);
+            boolean kanRedigereOrgenhet = authResolver.kanRessursRedigereOrgenhet(loggedInUser, orgenhetId);
+            if(!isAdminToEnhet && !kanRedigereOrgenhet) {
                 var accessDeniedError = "User does not have access to view ressurser for this orgenhet: " + loggedInUser + "-" + orgenhetId;
                 log.error(accessDeniedError);
                 throw new AccessDeniedException(accessDeniedError);

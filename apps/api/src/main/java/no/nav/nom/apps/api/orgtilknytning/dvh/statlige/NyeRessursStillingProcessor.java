@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
@@ -132,7 +133,14 @@ public class NyeRessursStillingProcessor {
                 } else {
                     endringer.add(lagEndreGyldigTomCmd(ot, sp, sspForNavident));
                 }
+            } else if (ot.gyldigTom().isPresent() && sp.gyldigTom() != null) {
+                // hvis begge lik og 2099-12-31, set null og legge til endringer lista
+                // kanskje legge til lagEndreDOLCmd også?
+                if (sp.gyldigTom().isEqual(PeriodeUtil.NO_END_DATE) || ot.gyldigTom().get().isEqual(PeriodeUtil.NO_END_DATE)) {
+                    endringer.add(lagEndreGyldigTomCmd(ot, sp, sspForNavident));
+                }
             }
+
             if (ot.erDagligOppfolging() != sp.erDagligOppfolging()) {
                 endringer.add(lagEndreDOLCmd(ot, sp, sspForNavident));
             }
@@ -467,11 +475,12 @@ public class NyeRessursStillingProcessor {
             originalOrgtilknytning.navident(),
             originalOrgtilknytning.orgEnhetId(),
             stillingPeriode.gyldigFom(),
-            Optional.ofNullable(stillingPeriode.gyldigTom()),
+            stillingPeriode.gyldigTom().equals(NO_END_DATE) ? Optional.empty() : Optional.of(stillingPeriode.gyldigTom()), //ikke sett 2099-12-31
             stillingPeriode.erDagligOppfolging(),
             metadata,
             additionalData
         );
+
         return new SimpleEntry<>(originalOrgtilknytning.fid(), cmd);
     }
 
@@ -619,6 +628,7 @@ public class NyeRessursStillingProcessor {
                 },
                 () -> stillingPerioderAaOpprette.add(sp)
             );
+
         });
     }
 
