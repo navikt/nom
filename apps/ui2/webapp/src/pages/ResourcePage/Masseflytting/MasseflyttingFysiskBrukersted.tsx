@@ -44,7 +44,7 @@ import type {
   Visningsnavn,
 } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
-import { capitalizeName, formatVisningsnavn } from "~/utils";
+import { capitalizeNameFysiskBrukersted, formatVisningsnavn } from "~/utils";
 
 export function MasseflyttingFysiskBrukersted() {
   return (
@@ -352,7 +352,7 @@ function FysiskBrukerstedFlyttingTable() {
               `}
             >
               {brukersted
-                ? `${brukersted.brukerstedNr}: ${capitalizeName(brukersted.brukerstedNavn)}`
+                ? `${brukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(brukersted.brukerstedNavn)}`
                 : ""}
             </BodyShort>
 
@@ -437,7 +437,7 @@ function FysiskBrukerstedFlyttingTable() {
               >
                 {`Medarbeidere i ${
                   brukersted
-                    ? `${brukersted.brukerstedNr}: ${capitalizeName(brukersted.brukerstedNavn)}:`
+                    ? `${brukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(brukersted.brukerstedNavn)}:`
                     : ""
                 }`}
               </Heading>
@@ -687,7 +687,7 @@ function MasseflyttingFysiskBrukerstedBekreftModal({
         >
           <b>
             {tilFysiskBrukersted
-              ? `${capitalizeName(tilFysiskBrukersted.brukerstedNavn)} (${tilFysiskBrukersted.brukerstedNr})`
+              ? `${capitalizeNameFysiskBrukersted(tilFysiskBrukersted.brukerstedNavn)} (${tilFysiskBrukersted.brukerstedNr})`
               : ""}
           </b>
           :

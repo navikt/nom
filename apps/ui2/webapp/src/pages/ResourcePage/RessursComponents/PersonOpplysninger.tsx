@@ -16,7 +16,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink, useNavigate } from "@tanstack/react-router";
 import { subMonths } from "date-fns";
-import capitalize from "lodash/capitalize";
 import React from "react";
 
 import {
@@ -38,6 +37,7 @@ import type { Ressurs } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
 import { TelefonType } from "~/types/api-models";
 import {
+  capitalizeNameFysiskBrukersted,
   dateWithoutTimezone,
   formatDisplayDate,
   formatTlf,
@@ -314,7 +314,9 @@ export function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {
     <LabelWithValue
       label="Fysisk brukersted"
       value={
-        fysiskBrukersted ? capitalize(fysiskBrukersted.brukerstedNavn) : "-"
+        fysiskBrukersted
+          ? capitalizeNameFysiskBrukersted(fysiskBrukersted.brukerstedNavn)
+          : "-"
       }
     />
   );

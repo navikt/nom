@@ -8,7 +8,7 @@ import {
   BasicSelect,
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
-import { capitalizeName } from "~/utils";
+import { capitalizeNameFysiskBrukersted } from "~/utils";
 
 export function FysiskBrukerstedSelectFormPart({
   name = "fysiskBrukerstedNr",
@@ -81,7 +81,7 @@ export function FysiskBrukerstedSelect({
 
 function fysiskBrukerstedOption(fysiskBrukersted: FysiskBrukersted) {
   return {
-    label: `${fysiskBrukersted.brukerstedNr}: ${capitalizeName(fysiskBrukersted.brukerstedNavn)}`,
+    label: `${fysiskBrukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(fysiskBrukersted.brukerstedNavn)}`,
     value: fysiskBrukersted.brukerstedNr,
   };
 }
