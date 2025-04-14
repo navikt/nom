@@ -534,7 +534,6 @@ public class NomRemedyIntegrasjonService {
 
         var telefoner = getTelefonerFromNom(ressursOpprettetAdditionalData.navident().orElseThrow(() -> RequiredValueMissingException.forField("navId")));
         var mobil = telefoner.isEmpty() ? null : mapAndTrimNumber(telefoner.getFirst());
-        var direkteTelefon = telefoner.size() > 1 ? mapAndTrimNumber(telefoner.get(1)) : null;
 
         NomIntegrasjonEntity newNomIntegrasjonEntity = NomIntegrasjonEntity.builder()
             .enhetsId(remedyEnhetsId)
@@ -548,7 +547,6 @@ public class NomRemedyIntegrasjonService {
                 .map(Utils::epochSecondsNorwegianTimeNoon)
                 .orElseThrow(() -> RequiredValueMissingException.forField("tiltredelsesdato")))
             .utlopsdato(ressursOpprettetEventData.sektor().erEkstern() && !isNull(sluttDato)? epochSecondsNorwegianTimeEndOfDay(sluttDato) : null)
-            .direkteTelefon(direkteTelefon)
             .mobil(mobil)
             .build();
 
@@ -615,10 +613,8 @@ public class NomRemedyIntegrasjonService {
         var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
         var telefoner = getTelefonerFromNom(ressursState.getNavident());
         var mobil = telefoner.isEmpty() ? null : mapAndTrimNumber(telefoner.getFirst());
-        var direkteTelefon = telefoner.size() > 1 ? telefoner.get(1).getNummer() : null;
         var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
             .mobil(mobil)
-            .direkteTelefon(direkteTelefon)
             .build();
 
         remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntity(
@@ -649,7 +645,6 @@ public class NomRemedyIntegrasjonService {
 
         var telefoner = getTelefonerFromNom(ressurs.getNavident());
         var mobil = telefoner.isEmpty() ? null : mapAndTrimNumber(telefoner.getFirst());
-        var direkteTelefon = telefoner.size() > 1 ? mapAndTrimNumber(telefoner.get(1)) : null;
 
         return NomIntegrasjonEntity.builder()
             .enhetsId(dagligOppfolgningOrgTilknytning.map(orgtilknytningState -> getRemedyEnhetId(orgtilknytningState.getOrgEnhetId())).orElse(null))
@@ -669,7 +664,6 @@ public class NomRemedyIntegrasjonService {
                 ? null
                 : dagligOppfolgningOrgTilknytning.map(OrgtilknytningState::getGyldigTom).map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null)
             )
-            .direkteTelefon(direkteTelefon)
             .mobil(mobil)
             .masseflytting(null)
             .build();

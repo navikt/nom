@@ -123,7 +123,6 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
 
         var nomIntegrasjonEntry = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(ressursOpprettetAdditionalData.navident().get());
         var mobil = telefoner.isEmpty() ? null : telefoner.getFirst().getNummer();
-        var direkteTelefon = telefoner.size() > 1 ? telefoner.get(1).getNummer() : null;
         assertThat(nomIntegrasjonEntry)
             .usingRecursiveComparison()
             .isEqualTo(Optional.of(
@@ -141,7 +140,6 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
                     .sektor(nomSektorToRemedyCode(ressursOpprettetEventV1.getRessursOpprettetEventData().sektor()))
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(ressursOpprettetAdditionalData.startdato().get()))
                     .utlopsdato((!ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().equals(Sektor.EKSTERN) || isNull(sluttDato)) ? null : epochSecondsNorwegianTimeEndOfDay(sluttDato))
-                    .direkteTelefon(direkteTelefon)
                     .mobil(mobil)
                     .build()
             ));
@@ -314,7 +312,6 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
 
         var newNomIntegrasjonEntityForNavident = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
         var mobil = telefoner.isEmpty() ? null : telefoner.getFirst().getNummer();
-        var direkteTelefon = telefoner.size() > 1 ? telefoner.get(1).getNummer() : null;
 
         assertThat(newNomIntegrasjonEntityForNavident)
             .usingRecursiveComparison()
@@ -333,7 +330,6 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
                     .sektor(nomSektorToRemedyCode(existingRessurs.getSektor()))
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
                     .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()): null)
-                    .direkteTelefon(direkteTelefon)
                     .mobil(mobil)
                     .build()
 
@@ -364,7 +360,6 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
 
         var newNomIntegrasjonEntityForNavident = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
         var mobil = telefoner.isEmpty() ? null : telefoner.getFirst().getNummer();
-        var direkteTelefon = telefoner.size() > 1 ? telefoner.get(1).getNummer() : null;
 
         assertThat(newNomIntegrasjonEntityForNavident)
             .usingRecursiveComparison()
@@ -383,7 +378,6 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
                     .sektor(nomSektorToRemedyCode(existingRessurs.getSektor()))
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
                     .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()): null)
-                    .direkteTelefon(direkteTelefon)
                     .mobil(mobil)
                     .build()
 
@@ -411,7 +405,6 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
 
         var newNomIntegrasjonEntityForNavident = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
         var mobil = telefoner.isEmpty() ? null : telefoner.getFirst().getNummer();
-        var direkteTelefon = telefoner.size() > 1 ? telefoner.get(1).getNummer() : null;
         assertThat(newNomIntegrasjonEntityForNavident)
             .usingRecursiveComparison()
             .isEqualTo(Optional.of(
@@ -430,7 +423,6 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
                     .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()): null)
                     .mobil(mobil)
-                    .direkteTelefon(direkteTelefon)
                     .build()
 
             ));
@@ -460,7 +452,6 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
 
         var newNomIntegrasjonEntityForNavident = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
         var mobil = telefoner.isEmpty() ? null : telefoner.getFirst().getNummer();
-        var direkteTelefon = telefoner.size() > 1 ? telefoner.get(1).getNummer() : null;
 
         assertThat(newNomIntegrasjonEntityForNavident)
             .usingRecursiveComparison()
@@ -479,7 +470,6 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
                     .sektor(nomSektorToRemedyCode(existingRessurs.getSektor()))
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
                     .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()): null)
-                    .direkteTelefon(direkteTelefon)
                     .mobil(mobil)
                     .build()
             ));
@@ -518,7 +508,6 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
 
         var newNomIntegrasjonEntityForNavident = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
         var mobil = telefoner.isEmpty() ? null : telefoner.getFirst().getNummer();
-        var direkteTelefon = telefoner.size() > 1 ? telefoner.get(1).getNummer() : null;
 
         assertThat(newNomIntegrasjonEntityForNavident)
             .usingRecursiveComparison()
@@ -539,7 +528,6 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
                         orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom())
                     )
                     .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom().get()): null)
-                    .direkteTelefon(direkteTelefon)
                     .mobil(mobil)
                     .build()
             ));
