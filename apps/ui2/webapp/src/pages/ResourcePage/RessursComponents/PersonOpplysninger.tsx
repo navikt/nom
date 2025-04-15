@@ -53,7 +53,13 @@ import {
 // Derfor greit å samle alle disse på et sted slik at man f.eks ikke risikere å vise SluttDato i ett bilde,
 // men ikke i et annet fordi man glemte ordne logikk begge steder.
 
-export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
+export function PersonOpplysninger({
+  ressurs,
+  ouBegrensningerAktiv,
+}: {
+  ressurs: Ressurs;
+  ouBegrensningerAktiv: boolean;
+}) {
   const navident = ressurs.navident;
 
   const kontaktinfoTilgangQuery = useQuery({
@@ -180,6 +186,7 @@ export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
 
         <EditPersonopplysningerButton
           harSluttet={harSluttet}
+          ouBegrensningerAktiv={ouBegrensningerAktiv}
           ressurs={ressurs}
         />
       </VStack>
@@ -190,9 +197,11 @@ export function PersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
 function EditPersonopplysningerButton({
   ressurs,
   harSluttet,
+  ouBegrensningerAktiv,
 }: {
   ressurs: Ressurs;
   harSluttet: boolean;
+  ouBegrensningerAktiv: boolean;
 }) {
   const navigate = useNavigate();
 
@@ -204,26 +213,45 @@ function EditPersonopplysningerButton({
 
   const hasSelvbetjeningAccess = useHasSelvbetjeningAccess(ressurs.navident);
 
+  const utilgjengeligOu = ouBegrensningerAktiv && !hasAdminAccess;
+
   if (
     (((hasWriteAccess && hasWriteAccessForRessurs) || hasSelvbetjeningAccess) &&
       !harSluttet) ||
     hasAdminAccess
   ) {
     return (
-      <Button
-        data-cy="endre-personopplysninger-button"
-        icon={<PencilIcon aria-hidden />}
-        onClick={() =>
-          navigate({
-            search: { editPersonopplysninger: true },
-            params: (previous) => previous,
-          })
-        }
-        size="small"
-        variant="secondary"
+      <div
+        css={css`
+          display: flex;
+          align-items: center;
+          gap: var(--a-spacing-2);
+        `}
       >
-        Endre personopplysninger
-      </Button>
+        {utilgjengeligOu && (
+          <HelpText>
+            Endring av personopplysninger er midlertidig utilgjengelig på grunn
+            av omorganisering av direktoratet. Endringer gjøres sentralt av
+            teamet i NOM. Meld sak i Porten ved behov.
+          </HelpText>
+        )}
+
+        <Button
+          data-cy="endre-personopplysninger-button"
+          disabled={utilgjengeligOu}
+          icon={<PencilIcon aria-hidden />}
+          onClick={() =>
+            navigate({
+              search: { editPersonopplysninger: true },
+              params: (previous) => previous,
+            })
+          }
+          size="small"
+          variant="secondary"
+        >
+          Endre personopplysninger
+        </Button>
+      </div>
     );
   }
 

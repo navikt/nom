@@ -29,8 +29,10 @@ import {
   getOrgEnhet,
   getOrgEnheterLederKanRedigere,
   getOrgEnheterLedetAvOptions,
+  getOrgEnhetList,
   getOrgTilknytninger,
   getTeamcatMemberships,
+  getUnleashEnabled,
   harLederTilgangForNavidentOptions,
 } from "~/api/react-query-endpoints";
 import {
@@ -46,11 +48,15 @@ import {
 } from "~/pages/CreateResourcePage/SektorStep";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { EditPersonOpplysninger } from "~/pages/ResourcePage/EditForms/EditPersonOpplysninger";
-import { otCustomStortByDate } from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import {
+  nomDateIsTodayOrAfter,
+  otCustomStortByDate,
+} from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { EditOrgtilknytninger } from "~/pages/ResourcePage/RessursComponents/EditOrgtilknytninger";
 import { PersonOpplysninger } from "~/pages/ResourcePage/RessursComponents/PersonOpplysninger";
 import { blueTopBorder } from "~/resources/NomStyles";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
+import { OrgEnhetsType } from "~/types/api-models";
 import { Tilknytningtype } from "~/types/api-models";
 import {
   dateWithoutTimezone,
@@ -78,6 +84,31 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   });
 
   const orgtilknytninger = orgtilknytningerQuery.data ?? [];
+
+  const orgEnhetIder = orgtilknytninger.map(
+    (tilknytning) => tilknytning.orgEnhetId,
+  );
+
+  const orgEnhetQuery = useQuery({
+    queryKey: getOrgEnhetList.queryKey(orgEnhetIder),
+    queryFn: () => getOrgEnhetList.queryFn(orgEnhetIder),
+    enabled: orgEnhetIder.length > 0,
+  });
+
+  const orgEnheter = orgEnhetQuery.data;
+
+  const jobberIDirektoratet =
+    orgtilknytninger
+      ?.filter((orgtilknytning) =>
+        nomDateIsTodayOrAfter(orgtilknytning.gyldigTom),
+      )
+      .some((orgtilknytning) =>
+        orgEnheter?.some(
+          (orgEnhet) =>
+            orgEnhet.id === orgtilknytning.orgEnhetId &&
+            orgEnhet.orgEnhetsType === OrgEnhetsType.DIREKTORAT,
+        ),
+      ) ?? false;
 
   const orgenheterLederKanRedigereQuery = useQuery({
     queryKey: getOrgEnheterLederKanRedigere.queryKey(),
@@ -108,6 +139,17 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   const lederKanRedigere = iderLederKanRedigere.some((id) =>
     redigerbareOrgEnhetIder.has(id),
   );
+
+  const ouBegrensningerUnleashQuery = useQuery({
+    queryKey: ["unleashToggle", "nom.sperring-endringer-ou"],
+    queryFn: () => getUnleashEnabled("nom.sperring-endringer-ou"),
+  });
+
+  const ouBegrensningerUnleashAktiv =
+    ouBegrensningerUnleashQuery.data?.isUnleashEnabled ?? false;
+
+  const ouBegrensningerAktiv =
+    jobberIDirektoratet && ouBegrensningerUnleashAktiv;
 
   return (
     <div
@@ -140,6 +182,7 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
         <>
           <SummarySection
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
+            ouBegrensningerAktiv={ouBegrensningerAktiv}
             ressurs={ressurs}
           />
 
@@ -149,6 +192,7 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
             lederKanRedigere={lederKanRedigere}
             orgtilknytninger={orgtilknytninger}
+            ouBegrensningerAktiv={ouBegrensningerAktiv}
             ressurs={ressurs}
           />
 
@@ -157,6 +201,7 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
           <BottomSection
             harSluttet={harSluttet}
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
+            ouBegrensningerAktiv={ouBegrensningerAktiv}
             ressursNavIdent={ressurs.navident}
           />
 
@@ -183,11 +228,13 @@ function OrgTilknytningSection({
   hasWriteAccessForRessurs,
   orgtilknytninger,
   lederKanRedigere,
+  ouBegrensningerAktiv,
 }: {
   ressurs: Ressurs;
   hasWriteAccessForRessurs: boolean;
   orgtilknytninger: OrgtilknytningState[];
   lederKanRedigere: boolean;
+  ouBegrensningerAktiv: boolean;
 }) {
   const activeOrgtilknytninger = orgtilknytninger.filter((orgTilknytning) =>
     isGyldighetsPeriodeActive(
@@ -236,6 +283,7 @@ function OrgTilknytningSection({
           <EditOrgtilknytningerButton
             harSluttet={harSluttet}
             lederKanRedigere={lederKanRedigere}
+            ouBegrensningerAktiv={ouBegrensningerAktiv}
           />
         </div>
 
@@ -602,6 +650,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
         <PersonSuitIcon />
         Leder for
       </Heading>
+
       <div
         css={css`
           display: flex;
@@ -627,9 +676,11 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
 function SummarySection({
   ressurs,
   hasWriteAccessForRessurs,
+  ouBegrensningerAktiv,
 }: {
   ressurs: Ressurs;
   hasWriteAccessForRessurs: boolean;
+  ouBegrensningerAktiv: boolean;
 }) {
   const { editPersonopplysninger } = useSearch({
     from: "/ressurs/$id",
@@ -657,7 +708,12 @@ function SummarySection({
     );
   }
 
-  return <PersonOpplysninger ressurs={ressurs} />;
+  return (
+    <PersonOpplysninger
+      ouBegrensningerAktiv={ouBegrensningerAktiv}
+      ressurs={ressurs}
+    />
+  );
 }
 
 function TeamCatSection({ navident }: { navident: string }) {
@@ -704,9 +760,11 @@ function TeamCatSection({ navident }: { navident: string }) {
 function EditOrgtilknytningerButton({
   lederKanRedigere,
   harSluttet,
+  ouBegrensningerAktiv,
 }: {
   lederKanRedigere: boolean;
   harSluttet: boolean;
+  ouBegrensningerAktiv: boolean;
 }) {
   const { editPersonopplysninger } = useSearch({
     from: "/ressurs/$id",
@@ -716,27 +774,45 @@ function EditOrgtilknytningerButton({
 
   const hasWriteAccess = useHasWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
-  //const hasAdminAccess = false;
+
+  const utilgjengeligOu = ouBegrensningerAktiv && !hasAdminAccess;
 
   if (
     !editPersonopplysninger &&
     ((hasWriteAccess && !harSluttet) || lederKanRedigere || hasAdminAccess)
   ) {
     return (
-      <Button
-        data-cy="endre-orgtilknytninger-button"
-        icon={<PencilIcon aria-hidden />}
-        onClick={() =>
-          navigate({
-            search: { editOrgtilknytninger: true },
-            params: (previous) => previous,
-          })
-        }
-        size="small"
-        variant="secondary"
+      <div
+        css={css`
+          display: flex;
+          align-items: center;
+          gap: var(--a-spacing-2);
+        `}
       >
-        Endre
-      </Button>
+        {utilgjengeligOu && (
+          <HelpText>
+            Flytting av medarbeidere er midlertidig utilgjengelig på grunn av
+            omorganisering av direktoratet. Flytting gjøres sentralt av teamet i
+            NOM. Meld sak i Porten ved behov.
+          </HelpText>
+        )}
+
+        <Button
+          data-cy="endre-orgtilknytninger-button"
+          disabled={utilgjengeligOu}
+          icon={<PencilIcon aria-hidden />}
+          onClick={() =>
+            navigate({
+              search: { editOrgtilknytninger: true },
+              params: (previous) => previous,
+            })
+          }
+          size="small"
+          variant="secondary"
+        >
+          Endre
+        </Button>
+      </div>
     );
   }
 
@@ -762,10 +838,12 @@ function BottomSection({
   ressursNavIdent,
   hasWriteAccessForRessurs,
   harSluttet,
+  ouBegrensningerAktiv,
 }: {
   ressursNavIdent: string;
   hasWriteAccessForRessurs: boolean;
   harSluttet: boolean;
+  ouBegrensningerAktiv: boolean;
 }) {
   const hasWriteAccess = useHasWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
@@ -778,7 +856,10 @@ function BottomSection({
       <>
         <Divider noMargins />
 
-        <TerminateButton ressursNavIdent={ressursNavIdent} />
+        <TerminateButton
+          ouBegrensningerAktiv={ouBegrensningerAktiv}
+          ressursNavIdent={ressursNavIdent}
+        />
       </>
     );
   }
@@ -786,34 +867,59 @@ function BottomSection({
   return;
 }
 
-function TerminateButton({ ressursNavIdent }: { ressursNavIdent: string }) {
+function TerminateButton({
+  ressursNavIdent,
+  ouBegrensningerAktiv,
+}: {
+  ressursNavIdent: string;
+  ouBegrensningerAktiv: boolean;
+}) {
   const { editPersonopplysninger } = useSearch({
     from: "/ressurs/$id",
   });
 
+  const hasAdminAccess = useHasAdminAccess();
+
+  const utilgjengeligOu = ouBegrensningerAktiv && !hasAdminAccess;
+
   if (!editPersonopplysninger) {
     return (
-      <ReactRouterLink
+      <div
         css={css`
-          align-self: flex-end;
+          display: flex;
+          align-items: center;
+          gap: var(--a-spacing-2);
+          align-self: end;
         `}
-        params={{ id: ressursNavIdent }}
-        search={{}}
-        to="/ressurs-terminate/$id"
       >
-        <Button
+        {utilgjengeligOu && (
+          <HelpText>
+            Avslutting av medarbeidere er midlertidig utilgjengelig på grunn av
+            omorganisering av direktoratet. Meld sak i Porten dersom personen
+            slutter før 10. mai.
+          </HelpText>
+        )}
+
+        <ReactRouterLink
           css={css`
-            float: right;
+            align-self: flex-end;
           `}
-          data-cy="avslutt-medarbeider-button"
-          icon={<PencilIcon aria-hidden />}
-          size="small"
-          type="button"
-          variant="secondary"
+          params={{ id: ressursNavIdent }}
+          search={{}}
+          to="/ressurs-terminate/$id"
         >
-          Medarbeider slutter i Nav
-        </Button>
-      </ReactRouterLink>
+          <Button
+            data-cy="avslutt-medarbeider-button"
+            disabled={utilgjengeligOu}
+            icon={<PencilIcon aria-hidden />}
+            size="small"
+            type="button"
+            variant="secondary"
+          >
+            Medarbeider slutter i Nav
+          </Button>
+        </ReactRouterLink>
+      </div>
     );
   }
 
