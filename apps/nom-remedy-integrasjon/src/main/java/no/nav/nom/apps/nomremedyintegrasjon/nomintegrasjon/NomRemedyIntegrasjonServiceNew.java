@@ -232,6 +232,7 @@ public class NomRemedyIntegrasjonServiceNew {
     }
 
     private String mapAndTrimNumber(String nummer) {
+        if (isNull(nummer)) return null;
         if (nummer.length() >= 10) {
             if (nummer.startsWith("47")) {
                 return nummer.substring(2);
