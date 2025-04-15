@@ -97,7 +97,6 @@ public class DvhRestConsumer {
         var ledereLastOk = loadLedereAndOrganiseringerFromDvh();
         loadTlfFromDvh();
 
-        updateShadowOrgtilknytningerForKommunaleFromDvh();
         manuelleRessurserOgLedereTilState.oppdater();
 
         authorizedNavident.oppdaterLedereForOrgenheter();
@@ -107,18 +106,20 @@ public class DvhRestConsumer {
             log.info("Initial oppdatering fra DVH er klar. Etter {}", durationAsH24(start));
         }
 
-        if (leaderElection.isLeader()) { // Oppdater state fra dvh - holder at en Pod gjør dette
-            dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();
-
-            orgEnhetTypeHandler.updateOrgEnhetsTypeForLeafs();
-
-            loadRessurserFromDvh();
-
-            updateOrgtilknytningerStateFromDvh();
-
-            updateOrgtilknytningerForEksterneFromDvh();
-        }
-
+        updateShadowOrgtilknytningerForKommunaleFromDvh();
+//
+//        if (leaderElection.isLeader()) { // Oppdater state fra dvh - holder at en Pod gjør dette
+//            dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();
+//
+//            orgEnhetTypeHandler.updateOrgEnhetsTypeForLeafs();
+//
+//            loadRessurserFromDvh();
+//
+//            updateOrgtilknytningerStateFromDvh();
+//
+//            updateOrgtilknytningerForEksterneFromDvh();
+//        }
+//
         log.info("Ferdig med schedulert oppdatering fra DVH. Tok {}", durationAsH24(start));
     }
 
