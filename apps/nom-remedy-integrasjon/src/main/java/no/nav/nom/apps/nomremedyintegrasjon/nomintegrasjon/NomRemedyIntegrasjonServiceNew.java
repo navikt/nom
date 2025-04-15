@@ -108,7 +108,7 @@ public class NomRemedyIntegrasjonServiceNew {
 
         var entryBestiller = orgtilknytningState.sistEndretAv() != null ? orgtilknytningState.sistEndretAv() : "nom-api";
         var erDagligOppfolging = orgtilknytningState.erDagligOppfolging();
-        var erMasseflytting = aggregateState.getMasseflytting();
+        var erMasseflytting = !isNull(aggregateState.getMasseflytting()) && aggregateState.getMasseflytting();
 
         if (erDagligOppfolging && (isActive(orgtilknytningState) || isFuture(orgtilknytningState) && erMasseflytting)) {
             saveStateToRemedy(nomIntegrasjonEntityFromNomData(ressursState, orgtilknytningState, aggregateState.getMasseflytting()), entryBestiller);
