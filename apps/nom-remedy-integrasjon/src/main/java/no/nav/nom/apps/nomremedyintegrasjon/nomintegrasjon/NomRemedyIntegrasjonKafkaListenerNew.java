@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateStateRepository;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
-import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
-import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
@@ -60,12 +58,15 @@ public class NomRemedyIntegrasjonKafkaListenerNew {
         var navident = ressursState.navident();
         if (isNomMastered(navident)) {
             log.info("Logget mastered ressursStateFid: {}", key);
-            aggregateStateRepository.save(AggregateState.builder()
-                .navident(navident)
-                .createdAt(LocalDateTime.now())
-                .stateFid(ressursState.fid())
-                .stateType(ressursState.getClass().getSimpleName())
-                .build());
+            var allRowsByStateFid = aggregateStateRepository.findByStateFid(ressursState.fid());
+            if (allRowsByStateFid.isEmpty()) {
+                aggregateStateRepository.save(AggregateState.builder()
+                    .navident(navident)
+                    .createdAt(LocalDateTime.now())
+                    .stateFid(ressursState.fid())
+                    .stateType(ressursState.getClass().getSimpleName())
+                    .build());
+            }
         }
     }
 
@@ -91,15 +92,11 @@ public class NomRemedyIntegrasjonKafkaListenerNew {
                     .masseflyttetFraFid(orgtilknytningState.masseflyttetFraFid().orElse(null))
                     .masseflytting(orgtilknytningState.masseflyttetFraFid().isPresent())
                     .build());
-            } else {
-                allRowsByNavidentAndMasseflyttetFraFid.forEach(aggregateState -> aggregateStateRepository.save(aggregateState.toBuilder()
-                    .stateFid(orgtilknytningState.fid())
-                    .stateType(orgtilknytningState.getClass().getSimpleName())
-                    .build()));
             }
         }
     }
 
+    /*
     @KafkaListener(
         id = "NomRemedyIntegrasjonOrgtilknytningEventListenerNew",
         topics = "${app.kafka-topics.orgtilknytning-eventsource.topic-name}",
@@ -127,7 +124,7 @@ public class NomRemedyIntegrasjonKafkaListenerNew {
                 }
             }
         }
-    }
+    }*/
 
     private void waitForNomStates() {
         while (!isInitialStateReady()) {
