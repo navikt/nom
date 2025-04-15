@@ -139,12 +139,14 @@ public class NomRemedyIntegrasjonServiceNew {
     private boolean ressursStateUpdate(RessursState ressursState, AggregateState aggregateState) {
         var navident = ressursState.navident();
         var currentDolOrgtilknytning = getCurrentDolByNavident(navident);
+        var erMasseflytting = !isNull(aggregateState.getMasseflytting()) && aggregateState.getMasseflytting();
+        logger.info("Masseflytting: {} for navident: {}", erMasseflytting, navident);
 
         var futureDolOrgtilknytning = getFutureDolByNavident(navident);
 
         if (currentDolOrgtilknytning.isPresent()) {
             saveStateToRemedy(
-                nomIntegrasjonEntityFromNomData(ressursState, currentDolOrgtilknytning.get(), aggregateState.getMasseflytting()),
+                nomIntegrasjonEntityFromNomData(ressursState, currentDolOrgtilknytning.get(), erMasseflytting),
                 ressursState.sistEndretAv()
             );
         } else if (futureDolOrgtilknytning.isPresent()) {
