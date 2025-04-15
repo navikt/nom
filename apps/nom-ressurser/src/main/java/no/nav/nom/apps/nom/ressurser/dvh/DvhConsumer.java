@@ -36,7 +36,7 @@ public class DvhConsumer {
         this.dvhOrdsClient = dvhOrdsClient;
     }
 
-    @Scheduled(initialDelay = 180000, fixedDelay = DELAY*30) // utvidet delay med 5 timer
+    @Scheduled(initialDelay = 180000, fixedDelay = DELAY) // utvidet delay med 5 timer
     @Transactional(value = "transactionManager")
     public void dvhScheduler(){
         if(leaderElection.isLeader()) {
