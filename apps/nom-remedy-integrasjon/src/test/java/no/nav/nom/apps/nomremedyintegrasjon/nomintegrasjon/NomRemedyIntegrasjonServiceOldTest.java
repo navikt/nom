@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.nomremedyintegrasjon.TestBase;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateStateRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEvent;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
 import no.nav.nom.contract.nom.Sektor;
@@ -69,10 +70,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-public class NomRemedyIntegrasjonServiceTest extends TestBase {
+public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
+
+    private final static String UNLEASH_TOGGLE = "nom-remedy.ny-remedy-integrasjon";
 
     @Autowired
-    private NomRemedyIntegrasjonService nomRemedyIntegrasjonService;
+    private NomRemedyIntegrasjonServiceOld nomRemedyIntegrasjonServiceOld;
 
     @Autowired
     RemedyIntegrasjonRepositoryService remedyIntegrasjonRepositoryService;
@@ -80,12 +83,16 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
     @MockitoBean
     NomApiClient nomApiClient;
 
+    @Autowired
+    private AggregateStateRepository aggregateStateRepository;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void clearRepositories() {
         remedyIntegrasjonRepositoryService.deleteAll();
         delayedEventRepository.deleteAll();
+        when(unleash.isEnabled(UNLEASH_TOGGLE)).thenReturn(false);
     }
 
     @BeforeEach
@@ -116,10 +123,10 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
 
         when(nomApiClient.getOrgEnhet(ressursOpprettetAdditionalData.orgEnhet().get()))
             .thenReturn(new OrgEnhet().remedyEnhetId(remedyEnhetId));
-        when(nomApiClient.getTelefonnummer(ressursOpprettetEventV1.getRessursOpprettetAdditionalData().navident().get()))
+        when(nomApiClient.getTelefonnummere(ressursOpprettetEventV1.getRessursOpprettetAdditionalData().navident().get()))
             .thenReturn(telefoner);
 
-        nomRemedyIntegrasjonService.handleRessursEvent(ressursOpprettetEventV1);
+        nomRemedyIntegrasjonServiceOld.handleRessursEvent(ressursOpprettetEventV1);
 
         var nomIntegrasjonEntry = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(ressursOpprettetAdditionalData.navident().get());
         var mobil = telefoner.isEmpty() ? null : telefoner.getFirst().getNummer();
@@ -219,9 +226,9 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
         when(nomApiClient.getRessursByFid(ressursEvent.getFid())).thenReturn(existingRessurs);
         when(nomApiClient.getOrgEnhet(any())).thenReturn(orgenhet());
         when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(orgtilknytningState()));
-        when(nomApiClient.getTelefonnummer(existingRessurs.getNavident())).thenReturn(getPrivatTelefon());
+        when(nomApiClient.getTelefonnummere(existingRessurs.getNavident())).thenReturn(getPrivatTelefon());
 
-        nomRemedyIntegrasjonService.handleRessursEvent(ressursEvent);
+        nomRemedyIntegrasjonServiceOld.handleRessursEvent(ressursEvent);
 
         var nomIntegrasjonEntry = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
 
@@ -257,9 +264,9 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
         when(nomApiClient.getRessursByFid(ressursEvent.getFid())).thenReturn(existingRessurs);
         when(nomApiClient.getOrgEnhet(any())).thenReturn(orgenhet());
         when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(orgtilknytningState()));
-        when(nomApiClient.getTelefonnummer(existingRessurs.getNavident())).thenReturn(List.of());
+        when(nomApiClient.getTelefonnummere(existingRessurs.getNavident())).thenReturn(List.of());
 
-        nomRemedyIntegrasjonService.handleRessursEvent(ressursEvent);
+        nomRemedyIntegrasjonServiceOld.handleRessursEvent(ressursEvent);
 
         assertThat(delayedEventRepository.findAll())
             .hasSize(1)
@@ -306,9 +313,9 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
         when(nomApiClient.getRessursByFid(ressursPersonaliaOppdatertV1.getFid())).thenReturn(existingRessurs);
         when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(dagligOppfolgingOrgtilknytning));
         when(nomApiClient.getOrgEnhet(dagligOppfolgingOrgtilknytning.getOrgEnhetId())).thenReturn(dagligOppfolgingOrgenhet);
-        when(nomApiClient.getTelefonnummer(existingRessurs.getNavident())).thenReturn(telefoner);
+        when(nomApiClient.getTelefonnummere(existingRessurs.getNavident())).thenReturn(telefoner);
 
-        nomRemedyIntegrasjonService.handleRessursEvent(ressursPersonaliaOppdatertV1);
+        nomRemedyIntegrasjonServiceOld.handleRessursEvent(ressursPersonaliaOppdatertV1);
 
         var newNomIntegrasjonEntityForNavident = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
         var mobil = telefoner.isEmpty() ? null : telefoner.getFirst().getNummer();
@@ -354,9 +361,9 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
         when(nomApiClient.getRessursByFid(ressursPersonaliaOppdatertV1.getFid())).thenReturn(existingRessurs);
         when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(dagligOppfolgingOrgtilknytning));
         when(nomApiClient.getOrgEnhet(dagligOppfolgingOrgtilknytning.getOrgEnhetId())).thenReturn(dagligOppfolgingOrgenhet);
-        when(nomApiClient.getTelefonnummer(existingRessurs.getNavident())).thenReturn(telefoner);
+        when(nomApiClient.getTelefonnummere(existingRessurs.getNavident())).thenReturn(telefoner);
 
-        nomRemedyIntegrasjonService.handleRessursEvent(ressursPersonaliaOppdatertV1);
+        nomRemedyIntegrasjonServiceOld.handleRessursEvent(ressursPersonaliaOppdatertV1);
 
         var newNomIntegrasjonEntityForNavident = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
         var mobil = telefoner.isEmpty() ? null : telefoner.getFirst().getNummer();
@@ -399,9 +406,9 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
         when(nomApiClient.getRessursByFid(ressursPrimaryTelefonnummerOppdatertV1.getFid())).thenReturn(existingRessurs);
         when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(dagligOppfolgingOrgtilknytning));
         when(nomApiClient.getOrgEnhet(dagligOppfolgingOrgtilknytning.getOrgEnhetId())).thenReturn(dagligOppfolgingOrgenhet);
-        when(nomApiClient.getTelefonnummer(existingRessurs.getNavident())).thenReturn(telefoner);
+        when(nomApiClient.getTelefonnummere(existingRessurs.getNavident())).thenReturn(telefoner);
 
-        nomRemedyIntegrasjonService.handleRessursEvent(ressursPrimaryTelefonnummerOppdatertV1);
+        nomRemedyIntegrasjonServiceOld.handleRessursEvent(ressursPrimaryTelefonnummerOppdatertV1);
 
         var newNomIntegrasjonEntityForNavident = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
         var mobil = telefoner.isEmpty() ? null : telefoner.getFirst().getNummer();
@@ -446,9 +453,9 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
         when(nomApiClient.getRessursByFid(ressursFysiskeBrukerstederOppdatertEventV1.getFid())).thenReturn(existingRessurs);
         when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(dagligOppfolgingOrgtilknytning));
         when(nomApiClient.getOrgEnhet(dagligOppfolgingOrgtilknytning.getOrgEnhetId())).thenReturn(dagligOppfolgingOrgenhet);
-        when(nomApiClient.getTelefonnummer(existingRessurs.getNavident())).thenReturn(telefoner);
+        when(nomApiClient.getTelefonnummere(existingRessurs.getNavident())).thenReturn(telefoner);
 
-        nomRemedyIntegrasjonService.handleRessursEvent(ressursFysiskeBrukerstederOppdatertEventV1);
+        nomRemedyIntegrasjonServiceOld.handleRessursEvent(ressursFysiskeBrukerstederOppdatertEventV1);
 
         var newNomIntegrasjonEntityForNavident = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
         var mobil = telefoner.isEmpty() ? null : telefoner.getFirst().getNummer();
@@ -499,12 +506,12 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
         when(nomApiClient.getRessursByNavident(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().navident())).thenReturn(existingRessurs);
         when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(previousDagligOppfolgingOrgtilknytning));
         when(nomApiClient.getOrgEnhet(previousDagligOppfolgingOrgtilknytning.getOrgEnhetId())).thenReturn(previousDagligOppfolgingOrgenhet);
-        when(nomApiClient.getTelefonnummer(existingRessurs.getNavident())).thenReturn(telefoner);
+        when(nomApiClient.getTelefonnummere(existingRessurs.getNavident())).thenReturn(telefoner);
 
         when(nomApiClient.getOrgEnhet(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().orgEnhetId()))
             .thenReturn(new OrgEnhet().remedyEnhetId(newDagligOppfolgningRemedyEnhetId));
 
-        nomRemedyIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
+        nomRemedyIntegrasjonServiceOld.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
 
         var newNomIntegrasjonEntityForNavident = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
         var mobil = telefoner.isEmpty() ? null : telefoner.getFirst().getNummer();
@@ -546,7 +553,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
                 .build()
         );
 
-        nomRemedyIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningFjernetEventV1);
+        nomRemedyIntegrasjonServiceOld.handleOrgtilknytningEvent(orgtilknytningFjernetEventV1);
         assertThat(delayedEventRepository.findAll()).isEmpty();
     }
 
@@ -580,7 +587,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
         when(nomApiClient.getOrgEnhet(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().orgEnhetId()))
             .thenReturn(new OrgEnhet().remedyEnhetId(newDagligOppfolgningRemedyEnhetId));
 
-        nomRemedyIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
+        nomRemedyIntegrasjonServiceOld.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
 
         var newNomIntegrasjonEntityForNavident = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
 
@@ -595,7 +602,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
             orgtilknytningDagligOppfolgingEndretEventData().toBuilder().dagligOppfolging(false).build()
         );
 
-        nomRemedyIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
+        nomRemedyIntegrasjonServiceOld.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
 
         assertThat(remedyIntegrasjonRepositoryService.findAll()).isEmpty();
     }
@@ -622,7 +629,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
                 .gyldigTom(LocalDate.now())
             ));
 
-        nomRemedyIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
+        nomRemedyIntegrasjonServiceOld.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
         assertThat(delayedEventRepository.findAll()).hasSize(1);
     }
 
@@ -660,9 +667,9 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
         when(nomApiClient.getRessursByNavident(existingRessurs.getNavident())).thenReturn(existingRessurs);
         when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(orgtilknytning));
         when(nomApiClient.getOrgEnhet(orgtilknytning.getOrgEnhetId())).thenReturn(orgenhet());
-        when(nomApiClient.getTelefonnummer(existingRessurs.getNavident())).thenReturn(telefoner);
+        when(nomApiClient.getTelefonnummere(existingRessurs.getNavident())).thenReturn(telefoner);
 
-        nomRemedyIntegrasjonService.triggerDelayedEvents();
+        nomRemedyIntegrasjonServiceOld.triggerDelayedEvents();
 
         assertThat(remedyIntegrasjonRepositoryService.findAll()).hasSize(1);
         assertThat(delayedEventRepository.findAll()).hasSize(0);
@@ -691,9 +698,9 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
         when(nomApiClient.getRessursByNavident(existingRessurs.getNavident())).thenReturn(existingRessurs);
         when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(orgtilknytning));
         when(nomApiClient.getOrgEnhet(orgtilknytning.getOrgEnhetId())).thenReturn(orgenhet());
-        when(nomApiClient.getTelefonnummer(existingRessurs.getNavident())).thenReturn(telefoner);
+        when(nomApiClient.getTelefonnummere(existingRessurs.getNavident())).thenReturn(telefoner);
 
-        nomRemedyIntegrasjonService.triggerDelayedEvents();
+        nomRemedyIntegrasjonServiceOld.triggerDelayedEvents();
 
         assertThat(remedyIntegrasjonRepositoryService.findAll()).hasSize(1);
     }
@@ -708,7 +715,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
 
         when(nomApiClient.getOrgtilknytning(orgtilknytningDolEvent.getFid())).thenReturn(orgtilknytning);
 
-        nomRemedyIntegrasjonService.triggerDelayedEvents();
+        nomRemedyIntegrasjonServiceOld.triggerDelayedEvents();
 
         assertThat(delayedEventRepository.findAll()).hasSize(0);
         assertThat(delayedEventRepository.findAll()).hasSize(0);
@@ -724,7 +731,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
 
         when(nomApiClient.getOrgtilknytning(orgtilknytningDolEvent.getFid())).thenReturn(orgtilknytning);
 
-        nomRemedyIntegrasjonService.triggerDelayedEvents();
+        nomRemedyIntegrasjonServiceOld.triggerDelayedEvents();
 
         assertThat(delayedEventRepository.findAll()).hasSize(0);
         assertThat(delayedEventRepository.findAll()).hasSize(0);
@@ -806,7 +813,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
         when(nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid()))
             .thenReturn(new OrgtilknytningState().erDagligOppfolging(false));
 
-        nomRemedyIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDatoEndretEventV2);
+        nomRemedyIntegrasjonServiceOld.handleOrgtilknytningEvent(orgtilknytningDatoEndretEventV2);
 
         assertThat(remedyIntegrasjonRepositoryService.findAll()).isEmpty();
     }
@@ -843,7 +850,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
         when(nomApiClient.getOrgEnhet(orgtilknytningState.getOrgEnhetId()))
             .thenReturn(orgenhet());
 
-        nomRemedyIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDatoEndretEventV2);
+        nomRemedyIntegrasjonServiceOld.handleOrgtilknytningEvent(orgtilknytningDatoEndretEventV2);
 
         assertThat(remedyIntegrasjonRepositoryService.findAll()).isEmpty();
     }
@@ -884,7 +891,7 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
                 new RessursState().navident(navidentForRessursToDelete)
             ));
 
-        nomRemedyIntegrasjonService.findRessurserWithSluttdatoAndMarkForDeletion(sluttdato, initiatedBy);
+        nomRemedyIntegrasjonServiceOld.findRessurserWithSluttdatoAndMarkForDeletion(sluttdato, initiatedBy);
 
         assertThat(remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(navidentForRessursToDelete))
             .contains(
@@ -908,11 +915,11 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
         when(nomApiClient.getRessursByFid(delayedEvent.getEvent().getFid())).thenReturn(existingRessurs);
         when(nomApiClient.getOrgEnhet(any())).thenReturn(orgenhet());
         when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(orgtilknytningState()));
-        when(nomApiClient.getTelefonnummer(existingRessurs.getNavident())).thenReturn(List.of());
+        when(nomApiClient.getTelefonnummere(existingRessurs.getNavident())).thenReturn(List.of());
 
         delayedEventRepository.saveAll(List.of(delayedEvent));
 
-        nomRemedyIntegrasjonService.triggerDelayedEvents();
+        nomRemedyIntegrasjonServiceOld.triggerDelayedEvents();
 
         assertThat(remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident()).orElse(null))
             .usingRecursiveComparison().ignoringFields("entryId")
@@ -986,10 +993,10 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
             .thenReturn(List.of(orgtilknytning));
         when(nomApiClient.getOrgEnhet(orgtilknytning.getOrgEnhetId()))
             .thenReturn(orgenhet());
-        when(nomApiClient.getTelefonnummer(existingRessurs.getNavident()))
+        when(nomApiClient.getTelefonnummere(existingRessurs.getNavident()))
             .thenReturn(List.of());
 
-        nomRemedyIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDatoEndretEventV2);
+        nomRemedyIntegrasjonServiceOld.handleOrgtilknytningEvent(orgtilknytningDatoEndretEventV2);
 
         var newNomIntegrasjonEntityForNavident = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
         assertThat(newNomIntegrasjonEntityForNavident)
@@ -1033,10 +1040,10 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
         when(nomApiClient.getOrgEnhet(any())).thenReturn(orgenhet());
         when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident()))
             .thenReturn(List.of(orgtilknytningState()));
-        when(nomApiClient.getTelefonnummer(existingRessurs.getNavident()))
+        when(nomApiClient.getTelefonnummere(existingRessurs.getNavident()))
             .thenReturn(List.of());
 
-        nomRemedyIntegrasjonService.handleRessursEvent(ressursSluttdatoOppdatertEventV1);
+        nomRemedyIntegrasjonServiceOld.handleRessursEvent(ressursSluttdatoOppdatertEventV1);
 
         var newNomIntegrasjonEntityForNavident = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
         assertThat(newNomIntegrasjonEntityForNavident)
@@ -1074,10 +1081,10 @@ public class NomRemedyIntegrasjonServiceTest extends TestBase {
         when(nomApiClient.getOrgEnhet(any())).thenReturn(orgenhet());
         when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident()))
                 .thenReturn(List.of(orgtilknytningState()));
-        when(nomApiClient.getTelefonnummer(existingRessurs.getNavident()))
+        when(nomApiClient.getTelefonnummere(existingRessurs.getNavident()))
                 .thenReturn(List.of());
 
-        nomRemedyIntegrasjonService.handleRessursEvent(ressursSluttdatoOppdatertEventV1);
+        nomRemedyIntegrasjonServiceOld.handleRessursEvent(ressursSluttdatoOppdatertEventV1);
 
         var newNomIntegrasjonEntityForNavident = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(existingRessurs.getNavident());
         assertThat(newNomIntegrasjonEntityForNavident)

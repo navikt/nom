@@ -8,6 +8,7 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
@@ -24,6 +25,7 @@ import no.nav.nom.generated.model.Ressurs;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -126,6 +128,31 @@ public class TestData {
             .build();
     }
 
+    public static OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEventV1MasseFlytting() {
+        return orgtilknytningOpprettetEventV1Masseflytting(orgtilknytningOpprettetEventData());
+    }
+
+    private static OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData orgtilknytningOpprettetEventData() {
+        return OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData.builder()
+            .navident("S123456")
+            .orgEnhetId("orgenhet")
+            .gyldigFom(LocalDate.now())
+            .sektor(Sektor.NAV_STATLIG)
+            .masseflyttetFraFid(UUID.randomUUID().toString())
+            .build();
+    }
+
+    public static OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEventV1Masseflytting(
+        OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData orgtilknytningOpprettetEventData
+    ) {
+        return new OrgtilknytningOpprettetEventV1(
+            UUID.randomUUID().toString(),
+            orgtilknytningOpprettetEventData,
+            inputMetadataMasseflytting(),
+            null
+        );
+    }
+
     public static OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1() {
         return orgtilknytningDagligOppfolgingEndretEventV1(orgtilknytningDagligOppfolgingEndretEventData());
     }
@@ -204,8 +231,16 @@ public class TestData {
         return inputMetadata(origination());
     }
 
+    public static InputMetadata inputMetadataMasseflytting(){
+        return inputMetadataMasseflytting(origination());
+    }
+
     public static InputMetadata inputMetadata(Origination origination){
         return new InputMetadata("", "", "", origination);
+    }
+
+    public static InputMetadata inputMetadataMasseflytting(Origination origination){
+        return new InputMetadata("", "masseflytting", Map.of("beholdTilganger", true), origination);
     }
 
     public static Origination origination() {

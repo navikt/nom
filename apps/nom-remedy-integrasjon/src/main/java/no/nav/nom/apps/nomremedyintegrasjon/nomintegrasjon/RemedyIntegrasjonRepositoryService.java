@@ -25,9 +25,7 @@ public class RemedyIntegrasjonRepositoryService {
     }
 
     protected void saveNewNomIntegrasjonEntity(NomIntegrasjonEntity newNomIntegrasjonEntity, String initiatedByNavident) {
-
         validateThatRequiredValuesAreSet(newNomIntegrasjonEntity);
-
         if (nomIntegrasjonEntityProvidesNewDataFromNom(newNomIntegrasjonEntity)) {
             nomIntegrasjonRepository.save(
                 newNomIntegrasjonEntity.toBuilder()
@@ -38,6 +36,26 @@ public class RemedyIntegrasjonRepositoryService {
                     .build()
             );
         }
+    }
+
+    protected NomIntegrasjonEntity saveNewNomIntegrasjonEntityNew(NomIntegrasjonEntity newNomIntegrasjonEntity, String initiatedByNavident) {
+        validateThatRequiredValuesAreSet(newNomIntegrasjonEntity);
+
+        if (nomIntegrasjonEntityProvidesNewDataFromNom(newNomIntegrasjonEntity)) {
+            NomIntegrasjonEntity nomIntegrasjonEntity = nomIntegrasjonRepository.save(
+                newNomIntegrasjonEntity.toBuilder()
+                    .entryId(nextId())
+                    .entryOperasjon("Ny")
+                    .entryStatus("Ubehandlet")
+                    .entryBestiller(initiatedByNavident)
+                    .build()
+            );
+            logger.info("Lagret ny rad for ressurs {}, til enhet {} og med entryId {}", newNomIntegrasjonEntity.getNavId(), newNomIntegrasjonEntity.getEnhetsId(), nomIntegrasjonEntity.getEntryId());
+            return nomIntegrasjonEntity;
+        } else {
+            logger.info("Lagret ny rad for ressurs {}, til enhet {}", newNomIntegrasjonEntity.getNavId(), newNomIntegrasjonEntity.getEnhetsId());
+        }
+        return null;
     }
 
     protected void markRessursForDeletion(String navident, String initiatedBy) {

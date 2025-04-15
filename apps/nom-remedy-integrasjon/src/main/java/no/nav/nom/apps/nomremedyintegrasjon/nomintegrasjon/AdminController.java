@@ -33,10 +33,10 @@ import static no.nav.nom.apps.nomremedyintegrasjon.config.SwaggerConfig.BEARER_T
 @RequestMapping(value = {"/admin"})
 public class AdminController {
 
-    private final NomRemedyIntegrasjonService nomRemedyIntegrasjonService;
+    private final NomRemedyIntegrasjonServiceOld nomRemedyIntegrasjonServiceOld;
 
-    public AdminController(NomRemedyIntegrasjonService nomRemedyIntegrasjonService) {
-        this.nomRemedyIntegrasjonService = nomRemedyIntegrasjonService;
+    public AdminController(NomRemedyIntegrasjonServiceOld nomRemedyIntegrasjonServiceOld) {
+        this.nomRemedyIntegrasjonServiceOld = nomRemedyIntegrasjonServiceOld;
     }
 
     @Operation(
@@ -61,7 +61,7 @@ public class AdminController {
             return ResponseEntity.badRequest().body("Ikke mulig å slette aktive ressurser fra remedy");
         }
 
-        nomRemedyIntegrasjonService.findRessurserWithSluttdatoAndMarkForDeletion(sluttdato, getAuthenticatedNavIdent());
+        nomRemedyIntegrasjonServiceOld.findRessurserWithSluttdatoAndMarkForDeletion(sluttdato, getAuthenticatedNavIdent());
 
         return ResponseEntity.ok("Fjernet ressurser med spesifisert sluttdato");
     }
@@ -81,7 +81,7 @@ public class AdminController {
     @GetMapping(value = "/bestillinger")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<NomIntegrasjonEntity>> getBestillinger() {
-        return ResponseEntity.ok(nomRemedyIntegrasjonService.getNomIntegrasjonEntities());
+        return ResponseEntity.ok(nomRemedyIntegrasjonServiceOld.getNomIntegrasjonEntities());
     }
 
     @Operation(
@@ -98,7 +98,7 @@ public class AdminController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping(value = "lesOgEksekverRessursState/{navident}")
     public ResponseEntity<String> lesOgEksekverRessursState(@PathVariable String navident) {
-        nomRemedyIntegrasjonService.lesOgEksekverRessursState(getAuthenticatedNavIdent(), navident);
+        nomRemedyIntegrasjonServiceOld.lesOgEksekverRessursState(getAuthenticatedNavIdent(), navident);
         return ResponseEntity.ok("RessursState er lest og eksekvert");
     }
 

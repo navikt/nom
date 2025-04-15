@@ -6,9 +6,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
-import jakarta.servlet.http.HttpServletResponse;
-
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
@@ -36,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
@@ -163,6 +161,20 @@ public class RessursController {
         return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
     }
 
+    @GetMapping("/{navident}/telefonnummere")
+    @Operation(
+        description = "Henter en liste over alle telefonnummere til ressursen",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Telefonnummer"),
+    })
+    public ResponseEntity<List<Ressurs.Telefon>> getTelefonnummere(
+        @PathVariable String navident
+    ) {
+        return ResponseEntity.ok(ressursRestService.getTelefonnummere(navident));
+    }
+
     @GetMapping("/{navident}/telefonnummer")
     @Operation(
         description = "Henter en liste over alle telefonnummere til ressursen",
@@ -171,7 +183,7 @@ public class RessursController {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Telefonnummer"),
     })
-    public ResponseEntity<List<Ressurs.Telefon>> getTelefonnummer(
+    public ResponseEntity<String> getTelefonnummer(
         @PathVariable String navident
     ) {
         return ResponseEntity.ok(ressursRestService.getTelefonnummer(navident));

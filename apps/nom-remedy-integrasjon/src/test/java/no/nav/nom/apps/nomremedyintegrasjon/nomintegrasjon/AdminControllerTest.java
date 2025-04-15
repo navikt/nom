@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.stream.Stream;
@@ -18,8 +18,8 @@ import static org.mockito.Mockito.verify;
 
 public class AdminControllerTest extends TestBase {
 
-    @MockBean
-    NomRemedyIntegrasjonService nomRemedyIntegrasjonService;
+    @MockitoBean
+    NomRemedyIntegrasjonServiceOld nomRemedyIntegrasjonServiceOld;
 
     @Test
     @DisplayName("POST /admin/slettFraRemedy should delete inactive ressurser from remedy")
@@ -39,7 +39,7 @@ public class AdminControllerTest extends TestBase {
             .exchange()
             .expectStatus().isOk();
 
-        verify(nomRemedyIntegrasjonService).findRessurserWithSluttdatoAndMarkForDeletion(
+        verify(nomRemedyIntegrasjonServiceOld).findRessurserWithSluttdatoAndMarkForDeletion(
             eq(sluttdato), eq(LOGGED_IN_USER_NAVIDENT)
         );
     }
@@ -61,7 +61,7 @@ public class AdminControllerTest extends TestBase {
             .exchange()
             .expectStatus().isBadRequest();
 
-        verify(nomRemedyIntegrasjonService, times(0)).findRessurserWithSluttdatoAndMarkForDeletion(any(), any());
+        verify(nomRemedyIntegrasjonServiceOld, times(0)).findRessurserWithSluttdatoAndMarkForDeletion(any(), any());
     }
 
     private static Stream<Arguments> testNotDeleteActiveRessurserFromRemedyInput() {

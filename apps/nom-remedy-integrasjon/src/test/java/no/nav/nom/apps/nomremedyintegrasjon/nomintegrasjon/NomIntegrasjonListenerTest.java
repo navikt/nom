@@ -28,9 +28,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningDagligOppfolgingEndretEventV1;
+import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningState;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursOpprettetEventV1;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursState;
-import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningState;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -43,7 +43,7 @@ import static org.mockito.Mockito.when;
 public class NomIntegrasjonListenerTest extends TestBase {
 
     @MockitoBean
-    NomRemedyIntegrasjonService nomRemedyIntegrasjonService;
+    NomRemedyIntegrasjonServiceOld nomRemedyIntegrasjonServiceOld;
 
     @Autowired
     private KafkaTemplate<String, RessursEvent> ressursEventKafkaTemplate;
@@ -94,7 +94,7 @@ public class NomIntegrasjonListenerTest extends TestBase {
         doAnswer(invocation -> {
             countDownLatch.countDown();
             return null;
-        }).when(nomRemedyIntegrasjonService).handleRessursEvent(ressursOpprettetEventV1);
+        }).when(nomRemedyIntegrasjonServiceOld).handleRessursEvent(ressursOpprettetEventV1);
 
         ressursEventKafkaTemplate.send(
             ressursEventSourceTopic, UUID.randomUUID().toString(), ressursOpprettetEventV1
@@ -102,7 +102,7 @@ public class NomIntegrasjonListenerTest extends TestBase {
 
         Awaitility.await().until(() -> ressursStateRepository.findByFid(ressursOpprettetEventV1.getFid()).isPresent());
         Awaitility.await().atMost(10, TimeUnit.SECONDS).untilAsserted(() ->
-        verify(nomRemedyIntegrasjonService, times(1))
+        verify(nomRemedyIntegrasjonServiceOld, times(1))
             .handleRessursEvent(any(RessursOpprettetEventV1.class))
         );
     }
@@ -121,14 +121,14 @@ public class NomIntegrasjonListenerTest extends TestBase {
         doAnswer(invocation -> {
             countDownLatch.countDown();
             return null;
-        }).when(nomRemedyIntegrasjonService).handleRessursEvent(ressursOpprettetEventV1);
+        }).when(nomRemedyIntegrasjonServiceOld).handleRessursEvent(ressursOpprettetEventV1);
 
         ressursEventKafkaTemplate.send(
             ressursEventSourceTopic, UUID.randomUUID().toString(), ressursOpprettetEventV1
         );
 
         Awaitility.await().atMost(10, TimeUnit.SECONDS).untilAsserted(() ->
-            verify(nomRemedyIntegrasjonService, times(1))
+            verify(nomRemedyIntegrasjonServiceOld, times(1))
             .handleRessursEvent(any(RessursOpprettetEventV1.class))
         );
     }
@@ -147,7 +147,7 @@ public class NomIntegrasjonListenerTest extends TestBase {
         doAnswer(invocation -> {
             countDownLatch.countDown();
             return null;
-        }).when(nomRemedyIntegrasjonService).handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
+        }).when(nomRemedyIntegrasjonServiceOld).handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
 
         orgtilknytningEventKafkaTemplate.send(
             orgtilknytningEventSourceTopic, UUID.randomUUID().toString(), orgtilknytningDagligOppfolgingEndretEventV1
@@ -155,7 +155,7 @@ public class NomIntegrasjonListenerTest extends TestBase {
 
         Awaitility.await().until(() -> orgtilknytningStateRepository.findByFid(orgtilknytningDagligOppfolgingEndretEventV1.getFid()).isPresent());
         Awaitility.await().atMost(10, TimeUnit.SECONDS).untilAsserted(() ->
-            verify(nomRemedyIntegrasjonService, times(1))
+            verify(nomRemedyIntegrasjonServiceOld, times(1))
                 .handleOrgtilknytningEvent(any(OrgtilknytningEvent.class))
         );
     }
@@ -174,14 +174,14 @@ public class NomIntegrasjonListenerTest extends TestBase {
         doAnswer(invocation -> {
             countDownLatch.countDown();
             return null;
-        }).when(nomRemedyIntegrasjonService).handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
+        }).when(nomRemedyIntegrasjonServiceOld).handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
 
         orgtilknytningEventKafkaTemplate.send(
             orgtilknytningEventSourceTopic, UUID.randomUUID().toString(), orgtilknytningDagligOppfolgingEndretEventV1
         );
 
         Awaitility.await().atMost(10, TimeUnit.SECONDS).untilAsserted(() ->
-            verify(nomRemedyIntegrasjonService, times(1))
+            verify(nomRemedyIntegrasjonServiceOld, times(1))
                 .handleOrgtilknytningEvent(any(OrgtilknytningEvent.class))
         );
     }
@@ -212,6 +212,6 @@ public class NomIntegrasjonListenerTest extends TestBase {
 
         Thread.sleep(700);
 
-        verifyNoInteractions(nomRemedyIntegrasjonService);
+        verifyNoInteractions(nomRemedyIntegrasjonServiceOld);
     }
 }

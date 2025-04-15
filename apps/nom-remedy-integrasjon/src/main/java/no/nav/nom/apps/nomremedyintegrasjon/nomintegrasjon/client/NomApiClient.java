@@ -76,6 +76,18 @@ public class NomApiClient {
             .block();
     }
 
+    public String getRemedyEnhetId(String orgenhetId) {
+        return nomApiAuthorizedWebClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgenheter/getRemedyEnhetId/{orgenhetId}")
+                .build(orgenhetId)
+            )
+            .retrieve()
+            .bodyToMono(String.class)
+            .retryWhen(defaultRetry)
+            .block();
+    }
+
     public List<OrgtilknytningState> getOrgtilknytningerForNavident(String navident) {
         return nomApiAuthorizedWebClient.get()
             .uri(uriBuilder -> uriBuilder
@@ -105,15 +117,27 @@ public class NomApiClient {
             .block();
     }
 
-    public List<Telefon> getTelefonnummer(String navident) {
+    public List<Telefon> getTelefonnummere(String navident) {
         return nomApiAuthorizedWebClient.get()
             .uri(uriBuilder -> uriBuilder
-                .path("/app/ressurser/{navident}/telefonnummer")
+                .path("/app/ressurser/{navident}/telefonnummere")
                 .build(navident)
             )
             .retrieve()
             .toEntityList(Telefon.class)
             .retryWhen(defaultRetry)
             .block().getBody();
+    }
+
+    public String getTelefonnummer(String navident) {
+        return nomApiAuthorizedWebClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/ressurser/{navident}/telefonnummer")
+                .build(navident)
+            )
+            .retrieve()
+            .bodyToMono(String.class)
+            .retryWhen(defaultRetry)
+            .block();
     }
 }
