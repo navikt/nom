@@ -56,6 +56,12 @@ public class Orgtilknytning {
     @Column(name = "orgtilknytning_type")
     private Tilknytningtype orgtilknytningType;
 
+    @Column(name = "masseflyttet_fra_fid")
+    private String masseflyttetFraFid;
+
+    @Column(name = "sist_endret_av")
+    private String sistEndretAv;
+
     public Orgtilknytning(String fid) {
         this.fid = fid;
     }
@@ -70,6 +76,8 @@ public class Orgtilknytning {
             .gyldigFom(orgtilknytningState.gyldigFom())
             .gyldigTom(orgtilknytningState.gyldigTom().orElse(null))
             .orgtilknytningType(orgtilknytningState.orgtilknytningType().orElse(null))
+            .masseflyttetFraFid(orgtilknytningState.masseflyttetFraFid().orElse(null))
+            .sistEndretAv(orgtilknytningState.sistEndretAv())
             .build();
     }
 }

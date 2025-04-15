@@ -37,7 +37,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
 
 @DisplayName("GraphQL.HentRessursEventsource")
@@ -185,7 +184,8 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
             Optional.empty(),
             null,
             Collections.emptyList(),
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            "S123456"
         );
 
         kafkaUtils.createRessursHendelseEventSource(ressursState);
@@ -216,7 +216,8 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
             Optional.of(LocalDate.now().minusDays(10)),
             null,
             Collections.emptyList(),
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            "S123456"
         );
 
         kafkaUtils.createRessursHendelseEventSource(ressursState);

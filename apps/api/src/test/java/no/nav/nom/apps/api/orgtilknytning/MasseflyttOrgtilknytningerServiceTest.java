@@ -1,13 +1,11 @@
 package no.nav.nom.apps.api.orgtilknytning;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.api.email.OrgtilknytningEndretEmailService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDatoCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.nom.Sektor;
@@ -28,7 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -60,6 +58,8 @@ class MasseflyttOrgtilknytningerServiceTest {
 
     @Captor
     ArgumentCaptor<AvvikleOrgtilknytning> avvikleOrgtilknytningCommandArgumentCaptor;
+    private int otFidCounter = 1;
+    private int orgenhetFidCounter = 1;
 
     @Test
     @DisplayName("Alle orgtilknytninger er aktive på flyttedato")
@@ -196,8 +196,24 @@ class MasseflyttOrgtilknytningerServiceTest {
         OrgEnhet gmlOrgenhet = getOrgenhet("de456f", "Gml Enhet", LocalDate.of(2024, 10, 1), null);
         OrgEnhet gmlOrgenhet2 = getOrgenhet("xy890z", "Gml Enhet 2", LocalDate.of(2022, 2, 1), null);
 
-        var originalOT = getOT("A000001", gmlOrgenhet.getId(), Sektor.EKSTERN, Tilknytningtype.KONSULENT, true, LocalDate.of(2025,4,7), LocalDate.of(2025,4,30));
-        var originalOT2 = getOT("A000001", gmlOrgenhet2.getId(), Sektor.EKSTERN, Tilknytningtype.KONSULENT, true, LocalDate.of(2025,1,22), LocalDate.of(2025,10,11));
+        var originalOT = getOT(
+            "A000001",
+            gmlOrgenhet.getId(),
+            Sektor.EKSTERN,
+            Tilknytningtype.KONSULENT,
+            true,
+            LocalDate.of(2025, 4, 7),
+            LocalDate.of(2025, 4, 30)
+        );
+        var originalOT2 = getOT(
+            "A000001",
+            gmlOrgenhet2.getId(),
+            Sektor.EKSTERN,
+            Tilknytningtype.KONSULENT,
+            true,
+            LocalDate.of(2025, 1, 22),
+            LocalDate.of(2025, 10, 11)
+        );
         List<OrgtilknytningState> orgtilknytninger = List.of(
             originalOT, originalOT2
         );
@@ -205,7 +221,13 @@ class MasseflyttOrgtilknytningerServiceTest {
         when(orgtilknytningStateRepository.findByFidIn(any())).thenReturn(orgtilknytninger);
         when(orgenhetService.getById(any())).thenReturn(Optional.of(nyOrgenhet));
 
-        var res = cut.flyttOrgtilknytninger(orgtilknytninger.stream().map(OrgtilknytningState::fid).toList(), nyOrgenhet.getId(), beholdTilganger, LocalDate.of(2025, 4, 9), null);
+        var res = cut.flyttOrgtilknytninger(
+            orgtilknytninger.stream().map(OrgtilknytningState::fid).toList(),
+            nyOrgenhet.getId(),
+            beholdTilganger,
+            LocalDate.of(2025, 4, 9),
+            null
+        );
 
         verify(orgtilknytningCommandService, times(4)).avvikleOrgtilknytning(any(), any());
         verify(orgtilknytningCommandService, times(0)).fjernOrgtilknytning(any(), any());
@@ -224,8 +246,24 @@ class MasseflyttOrgtilknytningerServiceTest {
         OrgEnhet gmlOrgenhet = getOrgenhet("de456f", "Gml Enhet", LocalDate.of(2024, 10, 1), null);
         OrgEnhet gmlOrgenhet2 = getOrgenhet("xy890z", "Gml Enhet 2", LocalDate.of(2022, 2, 1), null);
 
-        var originalOT = getOT("A000001", gmlOrgenhet.getId(), Sektor.EKSTERN, Tilknytningtype.KONSULENT, true, LocalDate.of(2025,4,7), LocalDate.of(2025,4,30));
-        var originalOT2 = getOT("A000001", gmlOrgenhet2.getId(), Sektor.EKSTERN, Tilknytningtype.KONSULENT, true, LocalDate.of(2025,1,22), LocalDate.of(2025,10,11));
+        var originalOT = getOT(
+            "A000001",
+            gmlOrgenhet.getId(),
+            Sektor.EKSTERN,
+            Tilknytningtype.KONSULENT,
+            true,
+            LocalDate.of(2025, 4, 7),
+            LocalDate.of(2025, 4, 30)
+        );
+        var originalOT2 = getOT(
+            "A000001",
+            gmlOrgenhet2.getId(),
+            Sektor.EKSTERN,
+            Tilknytningtype.KONSULENT,
+            true,
+            LocalDate.of(2025, 1, 22),
+            LocalDate.of(2025, 10, 11)
+        );
         List<OrgtilknytningState> orgtilknytninger = List.of(
             originalOT, originalOT2
         );
@@ -233,7 +271,13 @@ class MasseflyttOrgtilknytningerServiceTest {
         when(orgtilknytningStateRepository.findByFidIn(any())).thenReturn(orgtilknytninger);
         when(orgenhetService.getById(any())).thenReturn(Optional.of(nyOrgenhet));
 
-        var res = cut.flyttOrgtilknytninger(orgtilknytninger.stream().map(OrgtilknytningState::fid).toList(), nyOrgenhet.getId(), beholdTilganger, LocalDate.of(2025, 4, 9), null);
+        var res = cut.flyttOrgtilknytninger(
+            orgtilknytninger.stream().map(OrgtilknytningState::fid).toList(),
+            nyOrgenhet.getId(),
+            beholdTilganger,
+            LocalDate.of(2025, 4, 9),
+            null
+        );
 
         verify(orgtilknytningCommandService, times(2)).avvikleOrgtilknytning(any(), any());
         verify(orgtilknytningCommandService, times(0)).fjernOrgtilknytning(any(), any());
@@ -258,7 +302,6 @@ class MasseflyttOrgtilknytningerServiceTest {
             );
     }
 
-    private int otFidCounter = 1;
     private OrgtilknytningState getOT(String navident, String orgenhetsId) {
         return getOT(navident, orgenhetsId, Sektor.NAV_STATLIG, Tilknytningtype.FAST, true, today.minusMonths(6), null);
     }
@@ -267,7 +310,15 @@ class MasseflyttOrgtilknytningerServiceTest {
         return getOT(navident, orgenhetsId, Sektor.NAV_STATLIG, Tilknytningtype.FAST, true, gyldigFom, gyldigTom);
     }
 
-    private OrgtilknytningState getOT(String navident, String orgenhetsId, Sektor sektor, Tilknytningtype tilknytningType, boolean erDagligOppfolging, LocalDate gyldigFom, LocalDate gyldigTom) {
+    private OrgtilknytningState getOT(
+        String navident,
+        String orgenhetsId,
+        Sektor sektor,
+        Tilknytningtype tilknytningType,
+        boolean erDagligOppfolging,
+        LocalDate gyldigFom,
+        LocalDate gyldigTom
+    ) {
         return new OrgtilknytningState(
             "FID_" + otFidCounter++,
             navident,
@@ -277,11 +328,10 @@ class MasseflyttOrgtilknytningerServiceTest {
             gyldigFom,
             gyldigTom == null ? Optional.empty() : Optional.of(gyldigTom),
             tilknytningType == null ? Optional.empty() : Optional.of(tilknytningType),
-            Optional.empty()
+            Optional.empty(),
+            "S123456"
         );
     }
-
-    private int orgenhetFidCounter = 1;
 
     private OrgEnhet getOrgenhet(String id, String navn) {
         return getOrgenhet(id, navn, today.minusYears(1), null);

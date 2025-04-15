@@ -107,7 +107,8 @@ class RessursStillingLoaderTest extends TestBase {
                 Optional.empty(),
                 null,
                 Collections.emptyList(),
-                IdentType.STANDARD
+                IdentType.STANDARD,
+                null
             )));
         when(ressursStateRepository.findByNavident("H554433"))
             .thenReturn(Optional.of(new RessursState(
@@ -121,7 +122,8 @@ class RessursStillingLoaderTest extends TestBase {
                 Optional.empty(),
                 null,
                 Collections.emptyList(),
-                IdentType.STANDARD
+                IdentType.STANDARD,
+                null
             )));
     }
 
