@@ -1,6 +1,8 @@
 package no.nav.nom.contract.nom.eventsource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
 import no.nav.nom.contract.nom.Sektor;
 
 import java.time.LocalDate;
@@ -16,6 +18,12 @@ public class OrgtilknytningOpprettetEventV1 extends OrgtilknytningEvent {
         this(fid, data, Metadata.from(inputMetadata), additionalData);
     }
 
+    @JsonIgnore
+    public OrgtilknytningOpprettetEventData getOrgtilknytningOpprettetEventData() {
+        return (OrgtilknytningOpprettetEventData) getData();
+    }
+
+    @Builder(toBuilder = true)
     public record OrgtilknytningOpprettetEventData(
             String navident,
             String orgEnhetId,

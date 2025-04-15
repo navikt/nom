@@ -30,7 +30,8 @@ import javax.sql.DataSource;
     entityManagerFactoryRef = "nomRemedyIntegrasjonEntityManagerFactory",
     transactionManagerRef = "nomRemedyIntegrasjonTransactionManager",
     basePackages = {
-        "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent"
+        "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent",
+        "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate"
     }
 )
 public class NomRemedyIntegrasjonDataSourceConfig {
@@ -69,7 +70,8 @@ public class NomRemedyIntegrasjonDataSourceConfig {
         (EntityManagerFactoryBuilder builder, @Qualifier("nomRemedyIntegrasjonDataSource") DataSource dataSource){
 
         return builder.dataSource(dataSource)
-            .packages("no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent")
+            .packages("no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent",
+                "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate")
             .persistenceUnit("nom-remedy-integrasjon").build();
     }
 

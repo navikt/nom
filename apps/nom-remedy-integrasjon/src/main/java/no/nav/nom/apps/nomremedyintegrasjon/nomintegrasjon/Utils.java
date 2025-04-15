@@ -1,5 +1,7 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
+import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.generated.model.Visningsnavn;
 
 import java.time.LocalDate;
@@ -46,9 +48,31 @@ public class Utils {
         return visningsnavn.getFornavn() + (m != null && !m.isBlank() ? " " + m : "");
     }
 
+    public static String formatFornavnWithMellomnavn(no.nav.nom.contract.nom.eventsource.Visningsnavn visningsnavn) {
+        // Visningsnavn fra nomApi over rest kommer med mellomnavn som tom streng "", og ikke som null
+        var m = visningsnavn.mellomnavn().orElse(null);
+        return visningsnavn.fornavn() + (m != null && !m.isBlank() ? " " + m : "");
+    }
+
     public static boolean isActive(LocalDate gyldigFom, LocalDate gyldigTom) {
 
         return !gyldigFom.isAfter(LocalDate.now())
             && !Optional.ofNullable(gyldigTom).orElse(LocalDate.MAX).isBefore(LocalDate.now());
+    }
+
+    public static boolean isActive(OrgtilknytningState orgtilknytningState) {
+        return isActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom().orElse(null));
+    }
+
+    public static boolean isFuture(OrgtilknytningState orgtilknytningState) {
+        return orgtilknytningState.gyldigTom().map(gyldigTom -> gyldigTom.isAfter(LocalDate.now())).orElse(true);
+    }
+
+    public static Integer nomSektorToRemedyCode(Sektor sektor) {
+        return switch (sektor) {
+            case NAV_STATLIG -> 0;
+            case NAV_KOMMUNAL -> 1;
+            case EKSTERN -> 2;
+        };
     }
 }

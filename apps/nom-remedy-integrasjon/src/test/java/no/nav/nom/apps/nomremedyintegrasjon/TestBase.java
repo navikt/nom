@@ -3,6 +3,7 @@ package no.nav.nom.apps.nomremedyintegrasjon;
 import com.nimbusds.jose.JOSEObjectType;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.nomremedyintegrasjon.fysiskbrukersted.repository.FysiskBrukerstedReadOnlyRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateStateRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEventRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
@@ -11,12 +12,12 @@ import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.HashMap;
@@ -47,13 +48,13 @@ public abstract class TestBase {
     @Autowired
     protected WebTestClient webTestClient;
 
-    @MockBean
+    @MockitoBean
     protected OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
-    @MockBean
+    @MockitoBean
     protected Unleash unleash;
 
-    @MockBean
+    @MockitoBean
     protected LeaderElection leaderElection;
 
     @Autowired
@@ -62,8 +63,11 @@ public abstract class TestBase {
     @Autowired
     protected DelayedEventRepository delayedEventRepository;
 
-    @MockBean
+    @MockitoBean
     protected FysiskBrukerstedReadOnlyRepository fysiskBrukerstedReadOnlyRepository;
+
+    @MockitoBean
+    protected AggregateStateRepository aggregateStateRepository;
 
     protected final String ressursEventSourceTopic = "org.nom.ressurs-eventsource";
     protected final String orgtilknytningEventSourceTopic = "org.nom.orgtilknytning-eventsource";
