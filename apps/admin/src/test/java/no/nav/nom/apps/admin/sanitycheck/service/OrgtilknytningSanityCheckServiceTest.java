@@ -127,7 +127,8 @@ class OrgtilknytningSanityCheckServiceTest {
                 LocalDate.now(),
                 null,
                 null,
-                null);
+                null,
+            null);
         when(orgtilknytningStateRepository.getAll()).thenReturn(List.of(orgTilknytning(), orgTilknytning2));
 
         var duplikateOTer = service.duplikateOrgtilknytninger();

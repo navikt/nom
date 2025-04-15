@@ -28,8 +28,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -82,7 +82,8 @@ public class TeamcatControllerTest extends RestTestBase {
             Optional.empty(),
             null,
             Collections.emptyList(),
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            "S123456"
         );
         return  Optional.of(ressursState);
     }

@@ -75,6 +75,9 @@ public class Ressurs {
     @Column(name = "ident_type")
     private IdentType identType;
 
+    @Column(name = "sist_endret_av")
+    private String sistEndretAv;
+
     public Ressurs(String fid) {
         this.fid = fid;
     }
@@ -95,6 +98,7 @@ public class Ressurs {
             .primaryFysiskBrukersted(ressursState.primaryFysiskBrukersted().orElse(null))
             .fysiskeBrukersteder(ressursState.fysiskeBrukersteder().toArray(String[]::new))
             .identType(ressursState.identType())
+            .sistEndretAv(ressursState.sistEndretAv())
             .build();
     }
 }

@@ -269,7 +269,8 @@ public class TestData {
             v1.getRessursOpprettetAdditionalData().startdato(),
             Optional.of(v1.getRessursOpprettetEventData().primaryFysiskBrukersted()),
             v1.getRessursOpprettetEventData().fysiskeBrukersteder(),
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            null
         );
     }
 
@@ -285,7 +286,8 @@ public class TestData {
             Optional.of(LocalDate.now()),
             Optional.of("2700"),
             new ArrayList<>(),
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            null
         );
     }
 
@@ -309,7 +311,8 @@ public class TestData {
             v1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom(),
             v1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom(),
             Optional.empty(),
-            Optional.empty()
+            Optional.empty(),
+            null
         );
     }
 
@@ -323,7 +326,8 @@ public class TestData {
             LocalDate.now(),
             Optional.of(LocalDate.now().plusMonths(10)),
             Optional.of(Tilknytningtype.FAST),
-            Optional.empty()
+            Optional.empty(),
+            null
         );
     }
 }

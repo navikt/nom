@@ -75,6 +75,7 @@ public class KommunaleRessurserProcessor {
                 startDatoPaaTmpOT,
                 Optional.ofNullable(sluttDatoPaaTmpOT),
                 Optional.of(Tilknytningtype.INGEN),
+                null,
                 null
             );
             return Optional.of(ot);

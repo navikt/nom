@@ -20,5 +20,6 @@ public record OrgtilknytningState(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate gyldigFom,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> gyldigTom,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<Tilknytningtype> orgtilknytningType,
-    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<String> masseflyttetFraFid
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<String> masseflyttetFraFid,
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) String sistEndretAv
 ) {}

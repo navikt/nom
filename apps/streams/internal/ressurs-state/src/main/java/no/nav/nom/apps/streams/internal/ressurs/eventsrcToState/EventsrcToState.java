@@ -61,7 +61,7 @@ class EventsrcToState {
                         // NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
                     } else {
                         state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
-                        state.put("fid",event.getFid()); // store this for later retrieval
+                        state.put("fid", event.getFid()); // store this for later retrieval
                         if (event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data) {
                             if (data.navident().isPresent()) {
                                 state.put("navident", data.navident().get());
@@ -71,6 +71,12 @@ class EventsrcToState {
                             }
                         }
                         leggTilFysiskBrukerstedArrayIfMissing(event, state);
+                        if (event.getMetadata() != null && event.getMetadata().inputMetadata() != null) {
+                            var origination = event.getMetadata().inputMetadata().origination();
+                            if (origination != null && origination.initiatedBy() != null) {
+                                state.put("sistEndretAv", origination.initiatedBy());
+                            }
+                        }
                     }
                     return state;
                 },
@@ -78,41 +84,46 @@ class EventsrcToState {
             );
 
         var byNavIdentGroupedObjects = groupedObjects.toStream()
-            .filter((k,v) -> v != null)
-            .groupBy((k,v) -> v.get("navident").asText(), Grouped.with(stringSerde,jsonSerde2))
+            .filter((k, v) -> v != null)
+            .groupBy((k, v) -> v.get("navident").asText(), Grouped.with(stringSerde, jsonSerde2))
             .aggregate(
                 objectMapper::createObjectNode,
-                (k,v,x) -> v,
-                Materialized.with(stringSerde,jsonSerde2)
+                (k, v, x) -> v,
+                Materialized.with(stringSerde, jsonSerde2)
             );
 
-        var identType = streamsBuilder.stream(navidentTopic,Consumed.with(stringSerde, stringSerde))
-            .mapValues(v -> navidentTopicValueToJson(v,objectMapper))
-            .groupBy((k, v) -> v.get("payload").get("navident").asText(),
-                Grouped.with(stringSerde, jsonSerde2))
+        var identType = streamsBuilder.stream(navidentTopic, Consumed.with(stringSerde, stringSerde))
+            .mapValues(v -> navidentTopicValueToJson(v, objectMapper))
+            .groupBy(
+                (k, v) -> v.get("payload").get("navident").asText(),
+                Grouped.with(stringSerde, jsonSerde2)
+            )
             .aggregate(
                 () -> "",
                 (key, event, state) -> event.get("payload").get("identType").asText(),
-                Materialized.with(stringSerde,stringSerde)
+                Materialized.with(stringSerde, stringSerde)
             );
 
-        var withIdentTypeByNavident = byNavIdentGroupedObjects.leftJoin(identType, (a,b) -> {
-                a.put("identType",b);
+        var withIdentTypeByNavident = byNavIdentGroupedObjects.leftJoin(
+            identType, (a, b) -> {
+                a.put("identType", b);
                 return a;
-            });
+            }
+        );
 
-        var withIdentTypeByFid = withIdentTypeByNavident.toStream().groupBy((k,v) -> v.get("fid").asText(), Grouped.with(stringSerde,jsonSerde2))
+        var withIdentTypeByFid = withIdentTypeByNavident.toStream().groupBy((k, v) -> v.get("fid").asText(), Grouped.with(stringSerde, jsonSerde2))
             .aggregate(
                 objectMapper::createObjectNode,
                 (key, value, aggregate) -> value,
-                Materialized.with(stringSerde,jsonSerde2));
+                Materialized.with(stringSerde, jsonSerde2)
+            );
 
         withIdentTypeByFid.mapValues(this::toRessursState)
             .toStream().to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(RessursState.class)));
     }
 
     private static void leggTilFysiskBrukerstedArrayIfMissing(RessursEvent event, ObjectNode state) {
-        if(!state.has("fysiskeBrukersteder") || (state.get("fysiskeBrukersteder") == null) || !state.get("fysiskeBrukersteder").isArray()) {
+        if (!state.has("fysiskeBrukersteder") || (state.get("fysiskeBrukersteder") == null) || !state.get("fysiskeBrukersteder").isArray()) {
             if (event instanceof RessursFysiskeBrukerstederOppdatertEventV1) {
                 log.warn("Legger til 'fysiskeBrukersteder' felt for ressurs-state fid " + event.getFid());
             }
@@ -122,16 +133,30 @@ class EventsrcToState {
 
     private static ObjectNode navidentTopicValueToJson(String value, ObjectMapper objectMapper) {
         try {
-            var parsedObjNode =  objectMapper.readValue(value,ObjectNode.class);
+            var parsedObjNode = objectMapper.readValue(value, ObjectNode.class);
             var payload = parsedObjNode.get("payload");
             var hasExpectedFields = payload.has("identType") && payload.has("navident");
-            if(!hasExpectedFields){
+            if (!hasExpectedFields) {
                 throw new RuntimeException("JSON fra navident topic hadde ikke-forventede felter");
             }
             return parsedObjNode;
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Feil ved JSON parsing fra navident topic");
         }
+    }
+
+    private static <T> T parseNullableFromJson(JsonNode jsonNode, String key, Function<String, T> transform) {
+        return keyIsNonNullAndEksluderOptionalEmptyText(jsonNode, key) ? transform.apply(jsonNode.get(key).asText()) : null;
+    }
+
+    // Ser ut til at vi i stream prosessing state har fått startdato="Optional.empty" som string. Dette må kunne prosesseres, men bør kunne tas vekk på senere tidspunkt.
+    // Fordi dette vil 'forsvinne' når mellomstegene er behandlet, og bør ikke oppstå igjen
+    private static boolean keyIsNonNullAndEksluderOptionalEmptyText(JsonNode jsonNode, String key) {
+        return jsonNode.hasNonNull(key) && !jsonNode.get(key).asText().equals("Optional.empty");
+    }
+
+    private static String parseNullableFromJson(JsonNode jsonNode, String key) {
+        return parseNullableFromJson(jsonNode, key, Function.identity());
     }
 
     public RessursState toRessursState(String fid, JsonNode eventStateAggregate) {
@@ -146,7 +171,7 @@ class EventsrcToState {
             var fysiskBrukerstedList = new ArrayList<String>();
             eventStateAggregate.withArray("fysiskeBrukersteder").elements().forEachRemaining(e -> fysiskBrukerstedList.add(e.asText()));
 
-            var identTypeFromJson = parseNullableFromJson(eventStateAggregate,"identType");
+            var identTypeFromJson = parseNullableFromJson(eventStateAggregate, "identType");
 
             return new RessursState(
                 fid,
@@ -164,25 +189,12 @@ class EventsrcToState {
                 Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "primaryFysiskBrukersted")),
                 fysiskBrukerstedList,
 
-                identTypeFromJson != null ? IdentType.valueOf(identTypeFromJson) : null
+                identTypeFromJson != null ? IdentType.valueOf(identTypeFromJson) : null,
+                eventStateAggregate.hasNonNull("sistEndretAv") ? eventStateAggregate.get("sistEndretAv").asText() : null
             );
         } catch (Exception e) {
             log.error("Error mapping to RessursState", e);
             throw e;
         }
-    }
-
-    private static <T> T parseNullableFromJson(JsonNode jsonNode, String key, Function<String, T> transform) {
-        return keyIsNonNullAndEksluderOptionalEmptyText(jsonNode, key) ? transform.apply(jsonNode.get(key).asText()) : null;
-    }
-
-    // Ser ut til at vi i stream prosessing state har fått startdato="Optional.empty" som string. Dette må kunne prosesseres, men bør kunne tas vekk på senere tidspunkt.
-    // Fordi dette vil 'forsvinne' når mellomstegene er behandlet, og bør ikke oppstå igjen
-    private static boolean keyIsNonNullAndEksluderOptionalEmptyText(JsonNode jsonNode, String key) {
-        return jsonNode.hasNonNull(key) && !jsonNode.get(key).asText().equals("Optional.empty");
-    }
-
-    private static String parseNullableFromJson(JsonNode jsonNode, String key) {
-        return parseNullableFromJson(jsonNode, key, Function.identity());
     }
 }

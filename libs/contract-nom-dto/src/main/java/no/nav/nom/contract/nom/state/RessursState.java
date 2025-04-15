@@ -25,7 +25,8 @@ public record RessursState(
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> startdato,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<String> primaryFysiskBrukersted,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<String> fysiskeBrukersteder,
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, defaultValue = "STANDARD") IdentType identType
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, defaultValue = "STANDARD") IdentType identType,
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) String sistEndretAv
 ) {
     @JsonIgnore
     public boolean isEkstern() { return Sektor.EKSTERN.equals(this.sektor()); }
@@ -33,4 +34,21 @@ public record RessursState(
     public boolean isStatlig() { return Sektor.NAV_STATLIG.equals(this.sektor()); }
     @JsonIgnore
     public boolean isKommunal() { return Sektor.NAV_KOMMUNAL.equals(this.sektor()); }
+
+    @JsonIgnore
+    @Override
+    public String toString() {
+        return "RessursState{" +
+            "navident='" + navident + '\'' +
+            ", sektor=" + sektor +
+            ", visningsnavn=" + visningsnavn +
+            ", primaryTelefonnummer=" + primaryTelefonnummer +
+            ", sluttdato=" + sluttdato +
+            ", startdato=" + startdato +
+            ", primaryFysiskBrukersted=" + primaryFysiskBrukersted +
+            ", fysiskeBrukersteder=" + fysiskeBrukersteder +
+            ", identType=" + identType +
+            ", fid='" + fid + '\'' +
+            '}';
+    }
 }

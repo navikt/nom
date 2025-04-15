@@ -146,7 +146,8 @@ public class KafkaUtils {
             Optional.of(LocalDate.now()),
             null,
             Collections.emptyList(),
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            null
         );
 
         createRessursHendelseEventSource(ressursState);

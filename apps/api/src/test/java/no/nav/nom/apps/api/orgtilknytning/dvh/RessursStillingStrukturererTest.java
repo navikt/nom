@@ -6,11 +6,11 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode.DagligOppfolging;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,14 +22,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
 import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -71,7 +70,8 @@ class RessursStillingStrukturererTest extends TestBase {
                 Optional.empty(),
                 null,
                 Collections.emptyList(),
-                IdentType.STANDARD
+                IdentType.STANDARD,
+                null
             )));
         when(ressursStateRepository.findByNavident(navident_B002002))
             .thenReturn(Optional.of(new RessursState(
@@ -85,7 +85,8 @@ class RessursStillingStrukturererTest extends TestBase {
                 Optional.empty(),
                 null,
                 Collections.emptyList(),
-                IdentType.STANDARD
+                IdentType.STANDARD,
+                null
             )));
     }
 
@@ -324,7 +325,8 @@ class RessursStillingStrukturererTest extends TestBase {
                 Optional.empty(),
                 null,
                 Collections.emptyList(),
-                IdentType.STANDARD
+                IdentType.STANDARD,
+                null
             )));
 
         when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));

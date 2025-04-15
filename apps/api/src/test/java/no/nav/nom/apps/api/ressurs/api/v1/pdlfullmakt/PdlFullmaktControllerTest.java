@@ -3,12 +3,12 @@ package no.nav.nom.apps.api.ressurs.api.v1.pdlfullmakt;
 import lombok.SneakyThrows;
 import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -95,7 +95,8 @@ public class PdlFullmaktControllerTest extends RestTestBase {
             Optional.of(start),
             null,
             Collections.emptyList(),
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            "S123456"
         );
         return Optional.of(ressursState);
     }

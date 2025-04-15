@@ -1,19 +1,17 @@
 package no.nav.nom.apps.streams.internal.ressurs.eventsrcToState;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Event;
-import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
-import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
+import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttdatoOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
@@ -31,16 +29,29 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.kafka.support.serializer.JsonSerde;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.UUID;
 
 public class EventsrcToStateTest {
     private ObjectMapper objectMapper = configureObjectMapper();
     private TestInputTopic<String, RessursEvent> inputTopic;
     private TestInputTopic<String, String> identTopic;
     private TestOutputTopic<String, RessursState> outputTopic;
+
+    private static ObjectMapper configureObjectMapper() {
+        final var objectMapper = new ObjectMapper();
+
+        return objectMapper.findAndRegisterModules()
+            .registerModule(new ParameterNamesModule())
+            .registerModule(new Jdk8Module())
+            .registerModule(new JavaTimeModule())
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+    }
 
     @BeforeEach
     public void setup() {
@@ -55,14 +66,14 @@ public class EventsrcToStateTest {
         final RessursState expectedOpprettetRessurs = opprettRessurs();
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
-                .containsExactly(
-                        KeyValue.pair(expectedOpprettetRessurs.fid(), expectedOpprettetRessurs)
-                );
+            .containsExactly(
+                KeyValue.pair(expectedOpprettetRessurs.fid(), expectedOpprettetRessurs)
+            );
     }
 
     private String navidentToIdentTypeObject(String navident, IdentType identType) {
         var payload = objectMapper.createObjectNode().put("navident", navident).put("identType", identType.toString());
-        return objectMapper.createObjectNode().putPOJO("payload",payload).toString();
+        return objectMapper.createObjectNode().putPOJO("payload", payload).toString();
     }
 
     @Test
@@ -75,9 +86,9 @@ public class EventsrcToStateTest {
         final RessursSluttetEventV1.RessursSluttetEventData sluttetEventData = new RessursSluttetEventV1.RessursSluttetEventData(LocalDate.now());
 
         final RessursEvent sluttetEvent = new RessursSluttetEventV1(
-                opprettetRessurs.fid(),
-                sluttetEventData,
-                (Event.Metadata) null
+            opprettetRessurs.fid(),
+            sluttetEventData,
+            (Event.Metadata) null
         );
 
         final RessursState expectedSluttet = opprettetRessurs.toBuilder()
@@ -88,10 +99,10 @@ public class EventsrcToStateTest {
         inputTopic.pipeInput(UUID.randomUUID().toString(), sluttetEvent);
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
-                .containsExactly(
-                        KeyValue.pair(opprettetRessurs.fid(), opprettetRessurs),
-                        KeyValue.pair(opprettetRessurs.fid(), expectedSluttet)
-                );
+            .containsExactly(
+                KeyValue.pair(opprettetRessurs.fid(), opprettetRessurs),
+                KeyValue.pair(opprettetRessurs.fid(), expectedSluttet)
+            );
     }
 
     @Test
@@ -102,16 +113,16 @@ public class EventsrcToStateTest {
         final RessursState opprettetRessurs = opprettRessurs();
 
         final RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData personaliaOppdatertEventData = new RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData(
-                new Visningsnavn(
-                        "fornavnEndret",
-                        Optional.empty(),
-                        "etternavnEndret"
-                )
+            new Visningsnavn(
+                "fornavnEndret",
+                Optional.empty(),
+                "etternavnEndret"
+            )
         );
         final RessursEvent personopplysningerEndretEvent = new RessursPersonaliaOppdatertV1(
-                opprettetRessurs.fid(),
-                personaliaOppdatertEventData,
-                (Event.Metadata) null
+            opprettetRessurs.fid(),
+            personaliaOppdatertEventData,
+            (Event.Metadata) null
         );
 
         final RessursState expectedEndret = opprettetRessurs.toBuilder()
@@ -122,10 +133,10 @@ public class EventsrcToStateTest {
 
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
-                .containsExactly(
-                        KeyValue.pair(opprettetRessurs.fid(), opprettetRessurs),
-                        KeyValue.pair(opprettetRessurs.fid(), expectedEndret)
-                );
+            .containsExactly(
+                KeyValue.pair(opprettetRessurs.fid(), opprettetRessurs),
+                KeyValue.pair(opprettetRessurs.fid(), expectedEndret)
+            );
     }
 
     @Test
@@ -144,10 +155,10 @@ public class EventsrcToStateTest {
         inputTopic.pipeInput(UUID.randomUUID().toString(), slettEvent);
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
-                .containsExactly(
-                        KeyValue.pair(opprettetRessurs.fid(), opprettetRessurs),
-                        KeyValue.pair(opprettetRessurs.fid(), null)
-                );
+            .containsExactly(
+                KeyValue.pair(opprettetRessurs.fid(), opprettetRessurs),
+                KeyValue.pair(opprettetRessurs.fid(), null)
+            );
     }
 
     @Test
@@ -156,34 +167,34 @@ public class EventsrcToStateTest {
         String fid = UUID.randomUUID().toString();
 
         final RessursOpprettetEventV1.RessursOpprettetEventData eventData = new RessursOpprettetEventV1.RessursOpprettetEventData(
-                "personident",
-                Sektor.NAV_STATLIG,
-                new Visningsnavn(
-                        "fornavn",
-                        null,
-                        "etternavn"
-                ),
-                Optional.empty(),
-                Collections.emptyList(),
+            "personident",
+            Sektor.NAV_STATLIG,
+            new Visningsnavn(
+                "fornavn",
                 null,
-                IdentType.STANDARD
+                "etternavn"
+            ),
+            Optional.empty(),
+            Collections.emptyList(),
+            null,
+            IdentType.STANDARD
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
-                Optional.of("navident"),
-                null,
-                null,
-                null,
-                Optional.of(LocalDate.now()),
-                Optional.empty(),
-                Optional.empty()
+            Optional.of("navident"),
+            null,
+            null,
+            null,
+            Optional.of(LocalDate.now()),
+            Optional.empty(),
+            Optional.empty()
         );
 
         final RessursEvent opprettEvent = new RessursOpprettetEventV1(
-                fid,
-                eventData,
-                (Event.Metadata) null,
-                additionalData
+            fid,
+            eventData,
+            (Event.Metadata) null,
+            additionalData
         );
 
         final RessursState expectedOpprettet = new RessursState(
@@ -197,19 +208,20 @@ public class EventsrcToStateTest {
                 "etternavn"
             ),
             Optional.empty(),
-            Optional.empty(),additionalData.startdato(),
+            Optional.empty(), additionalData.startdato(),
             Optional.empty(),
             Collections.emptyList(),
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            null
         );
 
         identTopic.pipeInput(navidentToIdentTypeObject("navident", IdentType.STANDARD));
         inputTopic.pipeInput(UUID.randomUUID().toString(), opprettEvent);
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
-                .containsExactly(
-                        KeyValue.pair(fid, expectedOpprettet)
-                );
+            .containsExactly(
+                KeyValue.pair(fid, expectedOpprettet)
+            );
     }
 
     @Test
@@ -327,7 +339,8 @@ public class EventsrcToStateTest {
             ressursOpprettetAdditionalData.startdato(),
             Optional.ofNullable(ressursOpprettetEventData.primaryFysiskBrukersted()),
             ressursOpprettetEventData.fysiskeBrukersteder(),
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            null
         );
 
     }
@@ -337,7 +350,7 @@ public class EventsrcToStateTest {
         final StreamsBuilder streamsBuilder = new StreamsBuilder();
         final var objectSerde = kafkaConfig.objectSerde(objectMapper);
         final var jsonSerde = kafkaConfig.jsonSerde(objectMapper);
-//        kafkaConfig.
+        //        kafkaConfig.
 
         new EventsrcToState(
             "inputTopic",
@@ -359,15 +372,5 @@ public class EventsrcToStateTest {
         final var ressursStateSerde = objectSerde.copyWithType(RessursState.class);
         ressursStateSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());
         outputTopic = topologyTestDriver.createOutputTopic("outputTopic", new StringDeserializer(), ressursStateSerde.deserializer());
-    }
-
-    private static ObjectMapper configureObjectMapper() {
-        final var objectMapper = new ObjectMapper();
-
-        return objectMapper.findAndRegisterModules()
-                .registerModule(new ParameterNamesModule())
-                .registerModule(new Jdk8Module())
-                .registerModule(new JavaTimeModule())
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
     }
 }

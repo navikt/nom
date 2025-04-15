@@ -51,6 +51,12 @@ class KafkaStreamProcessor {
                         // NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
                     } else {
                         state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                        if (event.getMetadata() != null && event.getMetadata().inputMetadata() != null) {
+                            var origination = event.getMetadata().inputMetadata().origination();
+                            if (origination != null && origination.initiatedBy() != null) {
+                                state.put("sistEndretAv", origination.initiatedBy());
+                            }
+                        }
                     }
                     return state;
                 },
@@ -80,7 +86,8 @@ class KafkaStreamProcessor {
                 LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
                 Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null),
                 Optional.ofNullable(tilknytningType),
-                Optional.ofNullable(eventStateAggregate.hasNonNull("masseflyttetFraFid") ? eventStateAggregate.get("masseflyttetFraFid").asText() : null)
+                Optional.ofNullable(eventStateAggregate.hasNonNull("masseflyttetFraFid") ? eventStateAggregate.get("masseflyttetFraFid").asText() : null),
+                eventStateAggregate.hasNonNull("sistEndretAv") ? eventStateAggregate.get("sistEndretAv").asText() : null
             );
         } catch (Exception e) {
             log.error("Error mapping to OrgtilknytningState", e);
