@@ -156,13 +156,15 @@ public class NomRemedyIntegrasjonServiceNew {
             if (unleash.isEnabled(UNLEASH_TOGGLE)) {
                 remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(navident).ifPresentOrElse(nomIntegrasjonEntity -> {
                     if (nomIntegrasjonEntity.getEntryOperasjon().equals("Slette")) {
-                        logger.info("Ressurs {} er allerede slettet i IR", ressursState.sistEndretAv());
+                        logger.info("Ressurs {} er allerede slettet i IR", navident);
                     } else {
                         remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv());
                         logger.info("Ressurs {} er merket for sletting i IR", navident);
                     }
                 }, () -> remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv()));
-            }
+            } else {
+                logger.info("Ressurs {} er merket for sletting i IR", navident);
+            };
         } else {
             throw OrgtilknytningNotFoundException.orgtilknytningNotFoundException(navident);
         }
