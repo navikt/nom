@@ -381,6 +381,50 @@ public class NomRemedyIntegrasjonServiceNewTest {
         verify(aggregateStateRepository, times(1)).deleteAllById(List.of(aggregateState.getAggregateStateId()));
     }
 
+    @Test
+    @DisplayName("Orgtilknytning er masseflytting og fremtidig, skal lagres i remedy tabellen")
+    void test_009() {
+        String ressursFid = UUID.randomUUID().toString();
+        String orgtilknytningFid = UUID.randomUUID().toString();
+        String navident = "S123456";
+        LocalDate gyldigFom = LocalDate.now().minusYears(2).withDayOfMonth(1);
+
+        var ressursState = ressurs(ressursFid, navident, gyldigFom).toBuilder().sistEndretAv("X123456").build();
+        var orgtilknytningState = orgtilknytning(orgtilknytningFid, navident, gyldigFom)
+                .toBuilder()
+                .gyldigFom(LocalDate.now().plusMonths(1).withDayOfMonth(1))
+                .masseflyttetFraFid(Optional.of(UUID.randomUUID().toString()))
+                .sistEndretAv("X123456")
+                .build();
+        var aggregateState = aggregate(orgtilknytningFid, orgtilknytningState.getClass().getSimpleName(), navident)
+                .toBuilder()
+                .masseflyttetFraFid(orgtilknytningState.masseflyttetFraFid().get())
+                .masseflytting(true)
+                .build();
+
+        // And
+        doReturn(List.of(aggregateState))
+                .when(aggregateStateRepository)
+                .findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
+
+        doReturn(Optional.of(orgtilknytningState))
+                .when(orgtilknytningStateRepository)
+                .findByFid(orgtilknytningFid);
+
+        doReturn(Optional.of(ressursState))
+                .when(ressursStateRepository)
+                .findByNavident(navident);
+
+        // When
+        nomRemedyIntegrasjonService.executeImmediateStateUpdate();
+
+        // Then
+        verify(aggregateStateRepository, times(1)).findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
+        verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString());
+        verify(aggregateStateRepository, times(1)).deleteAllById(List.of(aggregateState.getAggregateStateId()));
+
+    }
+
 
     private Integer getSektor(RessursState ressursState, OrgtilknytningState dolOrgtilknytning) {
         return isNull(ressursState.sektor()) ? nomSektorToRemedyCode(dolOrgtilknytning.sektor()) : nomSektorToRemedyCode(ressursState.sektor());
