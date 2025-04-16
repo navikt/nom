@@ -130,6 +130,7 @@ public class MastreStatligeINom {
         var grpAUtvalg = utvalgGruppeA(maxOTDatoEtter);
         var skalOppdateres = ekskluderNavidenter(grpAUtvalg, ekskluderNavidenter);
 
+        sb.append("GruppeA - alle som har aktiv OT etter: ").append(maxOTDatoEtter).append("\n");
         sb.append("Antall navidenter å ekskludere: ").append(ekskluderNavidenter.size()).append("\n");
         sb.append("Antall i Gruppe A utvalg: ").append(grpAUtvalg.size()).append("\n");
         sb.append("Antall å oppdatere: ").append(skalOppdateres.size()).append("\n");
@@ -142,7 +143,7 @@ public class MastreStatligeINom {
         );
         oppdaterRessursSluttdato(commit, skalOppdateres, inputMetadata);
 
-        sb.append("navident, sektor, startdato, sluttdato, maxOtSluttDato\n");
+        sb.append("\nnavident, sektor, startdato, sluttdato, maxOtSluttDato\n");
         skalOppdateres.forEach(getRessursRow(sb));
 
         log.info(sb.toString());
@@ -181,6 +182,8 @@ public class MastreStatligeINom {
         var grpBUtvalg = utvalgGruppeB(maxOTDatoLikEllerFoer, maxOTDatoLikEllerEtter);
         var skalOppdateres = ekskluderNavidenter(grpBUtvalg, ekskluderNavidenter);
 
+        sb.append("GruppeB - alle som har ressurs.Sluttdato = null, og aktiv OT i perioden (FOM-TOM): ")
+            .append(maxOTDatoLikEllerEtter).append(" - ").append(maxOTDatoLikEllerFoer).append("\n");
         sb.append("Antall navidenter å ekskludere: ").append(ekskluderNavidenter.size()).append("\n");
         sb.append("Antall i Gruppe B utvalg: ").append(grpBUtvalg.size()).append("\n");
         sb.append("Antall å oppdatere: ").append(skalOppdateres.size()).append("\n");
@@ -194,7 +197,7 @@ public class MastreStatligeINom {
 
         oppdaterRessursSluttdato(commit, skalOppdateres, inputMetadata);
 
-        sb.append("navident, sektor, startdato, sluttdato, maxOtSluttDato\n");
+        sb.append("\nnavident, sektor, startdato, sluttdato, maxOtSluttDato\n");
         skalOppdateres.forEach(getRessursRow(sb));
 
         log.info(sb.toString());
@@ -233,6 +236,8 @@ public class MastreStatligeINom {
         var grpBUtvalg = utvalgGruppeC(maxOTDatoLikEllerFoer, ressursSluttDatoEtter);
         var skalOppdateres = ekskluderNavidenter(grpBUtvalg, ekskluderNavidenter);
 
+        sb.append("GruppeC - alle som har ressurs.Sluttdato etter ").append(ressursSluttDatoEtter)
+            .append(", og ikke har aktiv OT etter ").append(maxOTDatoLikEllerFoer).append("\n");
         sb.append("Antall navidenter å ekskludere: ").append(ekskluderNavidenter.size()).append("\n");
         sb.append("Antall i Gruppe C utvalg: ").append(grpBUtvalg.size()).append("\n");
         sb.append("Antall å oppdatere: ").append(skalOppdateres.size()).append("\n");
@@ -246,7 +251,7 @@ public class MastreStatligeINom {
 
         oppdaterRessursSluttdato(commit, skalOppdateres, inputMetadata);
 
-        sb.append("navident, sektor, startdato, sluttdato, maxOtSluttDato\n");
+        sb.append("\nnavident, sektor, startdato, sluttdato, maxOtSluttDato\n");
         skalOppdateres.forEach(getRessursRow(sb));
 
         log.info(sb.toString());
@@ -269,8 +274,8 @@ public class MastreStatligeINom {
             .filter(ressurs -> !ekskluderNavidenter.contains(ressurs.navident()))
             .toList();
 
-        sb.append("Antall ikke mastret: ").append(ikkeMastretStatlige.size()).append("\n");
-        sb.append("Antall ikke mastret uten ekskluderte navidenter: ").append(ikkeMastretUtenEkskluderteNavidenter.size()).append("\n");
+        sb.append("Antall å mastre: ").append(ikkeMastretStatlige.size()).append("\n");
+        sb.append("Antall å mastre uten ekskluderte navidenter: ").append(ikkeMastretUtenEkskluderteNavidenter.size()).append("\n");
 
         if (commit) {
             mastreNavidenter(ikkeMastretUtenEkskluderteNavidenter);
