@@ -31,16 +31,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Objects.isNull;
-import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitalizeNavn;
-import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeNoon;
-import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.formatFornavnWithMellomnavn;
-import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.nomSektorToRemedyCode;
+import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class NomRemedyIntegrasjonServiceNewTest {
@@ -98,12 +92,12 @@ public class NomRemedyIntegrasjonServiceNewTest {
 
         // And
         doReturn(List.of(aggregateState))
-            .when(aggregateStateRepository)
-            .findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
+                .when(aggregateStateRepository)
+                .findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
 
         doReturn(Optional.of(ressursState))
-            .when(ressursStateRepository)
-            .findByFid(ressursFid);
+                .when(ressursStateRepository)
+                .findByFid(ressursFid);
 
         doReturn(List.of(orgtilknytningState)).when(orgtilknytningStateRepository).findByNavident(navident);
 
@@ -134,16 +128,16 @@ public class NomRemedyIntegrasjonServiceNewTest {
 
         // And
         doReturn(List.of(aggregateState))
-            .when(aggregateStateRepository)
-            .findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
+                .when(aggregateStateRepository)
+                .findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
 
         doReturn(Optional.of(ressursState))
-            .when(ressursStateRepository)
-            .findByNavident(navident);
+                .when(ressursStateRepository)
+                .findByNavident(navident);
 
         doReturn(Optional.of(orgtilknytningState))
-            .when(orgtilknytningStateRepository)
-            .findByFid(orgtilknytningFid);
+                .when(orgtilknytningStateRepository)
+                .findByFid(orgtilknytningFid);
 
         doReturn(nomIntegrasjonEntity).when(remedyIntegrasjonRepositoryService).saveNewNomIntegrasjonEntityNew(nomIntegrasjonEntity, orgtilknytningState.sistEndretAv());
 
@@ -171,16 +165,16 @@ public class NomRemedyIntegrasjonServiceNewTest {
 
         // And
         doReturn(List.of(aggregateState))
-            .when(aggregateStateRepository)
-            .findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
+                .when(aggregateStateRepository)
+                .findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
 
         doReturn(Optional.of(ressursState))
-            .when(ressursStateRepository)
-            .findByNavident(navident);
+                .when(ressursStateRepository)
+                .findByNavident(navident);
 
         doReturn(Optional.of(orgtilknytningState))
-            .when(orgtilknytningStateRepository)
-            .findByFid(orgtilknytningFid);
+                .when(orgtilknytningStateRepository)
+                .findByFid(orgtilknytningFid);
 
         // When
         nomRemedyIntegrasjonService.executeImmediateStateUpdate();
@@ -204,25 +198,25 @@ public class NomRemedyIntegrasjonServiceNewTest {
         var orgtilknytningState = orgtilknytning(orgtilknytningFid, navident, gyldigFom);
         var aggregateState = aggregate(orgtilknytningFid, orgtilknytningState.getClass().getSimpleName(), navident);
         var currentOrgtilknytningState = orgtilknytning(UUID.randomUUID().toString(), navident, LocalDate.now().minusYears(2).withDayOfMonth(1)).toBuilder()
-            .orgEnhetId("orgEnhetId-321")
-            .build();
+                .orgEnhetId("orgEnhetId-321")
+                .build();
 
         // And
         doReturn(List.of(aggregateState))
-            .when(aggregateStateRepository)
-            .findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
+                .when(aggregateStateRepository)
+                .findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
 
         doReturn(Optional.of(ressursState))
-            .when(ressursStateRepository)
-            .findByNavident(navident);
+                .when(ressursStateRepository)
+                .findByNavident(navident);
 
         doReturn(Optional.of(orgtilknytningState))
-            .when(orgtilknytningStateRepository)
-            .findByFid(orgtilknytningFid);
+                .when(orgtilknytningStateRepository)
+                .findByFid(orgtilknytningFid);
 
         doReturn(List.of(currentOrgtilknytningState))
-            .when(orgtilknytningStateRepository)
-            .findByNavident(navident);
+                .when(orgtilknytningStateRepository)
+                .findByNavident(navident);
 
         // When
         nomRemedyIntegrasjonService.executeImmediateStateUpdate();
@@ -249,16 +243,16 @@ public class NomRemedyIntegrasjonServiceNewTest {
 
         // And
         doReturn(List.of(aggregateState))
-            .when(aggregateStateRepository)
-            .findByDelayedUntilAndMasseflyttingIsFalse(LocalDate.now());
+                .when(aggregateStateRepository)
+                .findByDelayedUntilAndMasseflyttingIsFalse(LocalDate.now());
 
         doReturn(Optional.of(ressursState))
-            .when(ressursStateRepository)
-            .findByNavident(navident);
+                .when(ressursStateRepository)
+                .findByNavident(navident);
 
         doReturn(Optional.of(orgtilknytningState))
-            .when(orgtilknytningStateRepository)
-            .findByFid(orgtilknytningFid);
+                .when(orgtilknytningStateRepository)
+                .findByFid(orgtilknytningFid);
 
         // When
         nomRemedyIntegrasjonService.executeDelayedStateUpdate();
@@ -287,16 +281,16 @@ public class NomRemedyIntegrasjonServiceNewTest {
 
         // And
         doReturn(List.of(aggregateState))
-            .when(aggregateStateRepository)
-            .findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
+                .when(aggregateStateRepository)
+                .findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
 
         doReturn(Optional.of(ressursState))
-            .when(ressursStateRepository)
-            .findByNavident(navident);
+                .when(ressursStateRepository)
+                .findByNavident(navident);
 
         doReturn(Optional.of(orgtilknytningState))
-            .when(orgtilknytningStateRepository)
-            .findByFid(orgtilknytningFid);
+                .when(orgtilknytningStateRepository)
+                .findByFid(orgtilknytningFid);
 
         doReturn(nomIntegrasjonEntity).when(remedyIntegrasjonRepositoryService).saveNewNomIntegrasjonEntityNew(nomIntegrasjonEntity, orgtilknytningState.sistEndretAv());
 
@@ -325,16 +319,16 @@ public class NomRemedyIntegrasjonServiceNewTest {
 
         // And
         doReturn(List.of(aggregateState))
-            .when(aggregateStateRepository)
-            .findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
+                .when(aggregateStateRepository)
+                .findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
 
         doReturn(Optional.of(ressursState))
-            .when(ressursStateRepository)
-            .findByNavident(navident);
+                .when(ressursStateRepository)
+                .findByNavident(navident);
 
         doReturn(Optional.of(orgtilknytningState))
-            .when(orgtilknytningStateRepository)
-            .findByFid(orgtilknytningFid);
+                .when(orgtilknytningStateRepository)
+                .findByFid(orgtilknytningFid);
 
         doReturn(nomIntegrasjonEntity).when(remedyIntegrasjonRepositoryService).saveNewNomIntegrasjonEntityNew(nomIntegrasjonEntity, orgtilknytningState.sistEndretAv());
 
@@ -347,49 +341,44 @@ public class NomRemedyIntegrasjonServiceNewTest {
         verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString());
     }
 
-    private static AggregateState aggregate(String fid, String stateType, String navident) {
-        return AggregateState.builder()
-            .aggregateStateId(UUID.randomUUID())
-            .stateFid(fid)
-            .stateType(stateType)
-            .masseflyttetFraFid(null)
-            .createdAt(LocalDateTime.now().minusSeconds(5))
-            .delayedUntil(null)
-            .navident(navident)
-            .masseflytting(false)
-            .build();
-    }
+    @Test
+    @DisplayName("Ressurs har sluttdato satt og er i fortiden, skal ikke lagres i Remedy og slettes i AggregateStateRepository")
+    void test_008() {
+        // When
+        String ressursFid = UUID.randomUUID().toString();
+        String orgtilknytningFid = UUID.randomUUID().toString();
+        String navident = "S123456";
+        LocalDate gyldigFom = LocalDate.now().minusYears(2).withDayOfMonth(1);
 
-    private static OrgtilknytningState orgtilknytning(String orgtilknytningFid, String navident, LocalDate gyldigFom) {
-        return OrgtilknytningState.builder()
-            .fid(orgtilknytningFid)
-            .navident(navident)
-            .orgEnhetId("orgEnhetId-123")
-            .sektor(Sektor.NAV_STATLIG)
-            .erDagligOppfolging(true)
-            .gyldigFom(gyldigFom)
-            .gyldigTom(Optional.empty())
-            .orgtilknytningType(Optional.of(Tilknytningtype.FAST))
-            .masseflyttetFraFid(Optional.empty())
-            .sistEndretAv("T123456")
-            .build();
-    }
+        var ressursState = ressurs(ressursFid, navident, gyldigFom).toBuilder().sluttdato(Optional.of(LocalDate.now().minusDays(1))).sistEndretAv("X123456").build();
+        var orgtilknytningState = orgtilknytning(orgtilknytningFid, navident, gyldigFom).toBuilder().gyldigTom(Optional.of(LocalDate.now().minusDays(2))).sistEndretAv("X123456").build();
+        var aggregateState = aggregate(ressursFid, ressursState.getClass().getSimpleName(), navident);
+        var nomIntegrasjonEntity = nomIntegrasjonEntityFromNomData(ressursState, orgtilknytningState, false).toBuilder().entryOperasjon("Ny").build();
 
-    private static RessursState ressurs(String ressursFid, String navident, LocalDate gyldigFom) {
-        return RessursState.builder()
-            .fid(ressursFid)
-            .personident("1234567812345")
-            .navident(navident)
-            .sektor(Sektor.NAV_STATLIG)
-            .visningsnavn(new Visningsnavn("Nav", Optional.empty(), "Navesen"))
-            .primaryTelefonnummer(Optional.empty())
-            .startdato(Optional.of(gyldigFom))
-            .sluttdato(Optional.empty())
-            .primaryFysiskBrukersted(Optional.of("2700"))
-            .fysiskeBrukersteder(Collections.emptyList())
-            .identType(IdentType.STANDARD)
-            .sistEndretAv("T123456")
-            .build();
+        // And
+        doReturn(List.of(aggregateState))
+                .when(aggregateStateRepository)
+                .findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
+
+        doReturn(Optional.of(nomIntegrasjonEntity))
+                .when(remedyIntegrasjonRepositoryService)
+                .findTopByNavIdEqualsOrderByEntryIdDesc(navident);
+
+        doReturn(Optional.of(ressursState))
+                .when(ressursStateRepository)
+                .findByFid(ressursFid);
+
+        doReturn(List.of())
+                .when(orgtilknytningStateRepository)
+                .findByNavident(navident);
+
+        // When
+        nomRemedyIntegrasjonService.executeImmediateStateUpdate();
+
+        // Then
+        verify(aggregateStateRepository, times(1)).findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
+        verify(remedyIntegrasjonRepositoryService, times(1)).markRessursForDeletion(navident, ressursState.sistEndretAv());
+        verify(aggregateStateRepository, times(1)).deleteAllById(List.of(aggregateState.getAggregateStateId()));
     }
 
 
@@ -397,8 +386,54 @@ public class NomRemedyIntegrasjonServiceNewTest {
         return isNull(ressursState.sektor()) ? nomSektorToRemedyCode(dolOrgtilknytning.sektor()) : nomSektorToRemedyCode(ressursState.sektor());
     }
 
-    private static Optional<LocalDate> getUtlopsdato(Integer sektor, OrgtilknytningState dolOrgtilknytning) {
-        if (sektor == 2 && dolOrgtilknytning.gyldigTom().isEmpty()) throw new RequiredValueMissingException("Utløpsdato er påkrevd for ekstern sektor");
+    private AggregateState aggregate(String fid, String stateType, String navident) {
+        return AggregateState.builder()
+                .aggregateStateId(UUID.randomUUID())
+                .stateFid(fid)
+                .stateType(stateType)
+                .masseflyttetFraFid(null)
+                .createdAt(LocalDateTime.now().minusSeconds(5))
+                .delayedUntil(null)
+                .navident(navident)
+                .masseflytting(false)
+                .build();
+    }
+
+    private OrgtilknytningState orgtilknytning(String orgtilknytningFid, String navident, LocalDate gyldigFom) {
+        return OrgtilknytningState.builder()
+                .fid(orgtilknytningFid)
+                .navident(navident)
+                .orgEnhetId("orgEnhetId-123")
+                .sektor(Sektor.NAV_STATLIG)
+                .erDagligOppfolging(true)
+                .gyldigFom(gyldigFom)
+                .gyldigTom(Optional.empty())
+                .orgtilknytningType(Optional.of(Tilknytningtype.FAST))
+                .masseflyttetFraFid(Optional.empty())
+                .sistEndretAv("T123456")
+                .build();
+    }
+
+    private RessursState ressurs(String ressursFid, String navident, LocalDate gyldigFom) {
+        return RessursState.builder()
+                .fid(ressursFid)
+                .personident("1234567812345")
+                .navident(navident)
+                .sektor(Sektor.NAV_STATLIG)
+                .visningsnavn(new Visningsnavn("Nav", Optional.empty(), "Navesen"))
+                .primaryTelefonnummer(Optional.empty())
+                .startdato(Optional.of(gyldigFom))
+                .sluttdato(Optional.empty())
+                .primaryFysiskBrukersted(Optional.of("2700"))
+                .fysiskeBrukersteder(Collections.emptyList())
+                .identType(IdentType.STANDARD)
+                .sistEndretAv("T123456")
+                .build();
+    }
+
+    private Optional<LocalDate> getUtlopsdato(Integer sektor, OrgtilknytningState dolOrgtilknytning) {
+        if (sektor == 2 && dolOrgtilknytning.gyldigTom().isEmpty())
+            throw new RequiredValueMissingException("Utløpsdato er påkrevd for ekstern sektor");
         return sektor == 2 ? dolOrgtilknytning.gyldigTom() : Optional.empty();
     }
 
@@ -407,17 +442,17 @@ public class NomRemedyIntegrasjonServiceNewTest {
         var utlopsdato = getUtlopsdato(sektor, dolOrgtilknytning);
 
         return NomIntegrasjonEntity.builder()
-            .fornavn(capitalizeNavn(formatFornavnWithMellomnavn(ressursState.visningsnavn()).trim()))
-            .etternavn(ressursState.visningsnavn().etternavn().trim())
-            .navId(ressursState.navident())
-            .fodselsnummer(ressursState.personident())
-            .sektor(sektor)
-            .enhetsId("2990")
-            .fysiskBrukerstedId(ressursState.primaryFysiskBrukersted().orElse(null))
-            .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dolOrgtilknytning.gyldigFom()))
-            .utlopsdato(utlopsdato.map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null))
-            .mobil("12345678")
-            .masseflytting(isMasseflytting ? "X" : null)
-            .build();
+                .fornavn(capitalizeNavn(formatFornavnWithMellomnavn(ressursState.visningsnavn()).trim()))
+                .etternavn(ressursState.visningsnavn().etternavn().trim())
+                .navId(ressursState.navident())
+                .fodselsnummer(ressursState.personident())
+                .sektor(sektor)
+                .enhetsId("2990")
+                .fysiskBrukerstedId(ressursState.primaryFysiskBrukersted().orElse(null))
+                .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dolOrgtilknytning.gyldigFom()))
+                .utlopsdato(utlopsdato.map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null))
+                .mobil("12345678")
+                .masseflytting(isMasseflytting ? "X" : null)
+                .build();
     }
 }

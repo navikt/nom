@@ -152,6 +152,17 @@ public class NomRemedyIntegrasjonServiceNew {
         } else if (futureDolOrgtilknytning.isPresent()) {
             var dolOrgtilknytning = futureDolOrgtilknytning.get();
             saveStateToRemedyIfNewOrReactivatedRessurs(ressursState, dolOrgtilknytning);
+        } else if (ressursState.sluttdato().isPresent() && ressursState.sluttdato().get().isBefore(LocalDate.now())) {
+            if (unleash.isEnabled(UNLEASH_TOGGLE)) {
+                remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(navident).ifPresentOrElse(nomIntegrasjonEntity -> {
+                    if (nomIntegrasjonEntity.getEntryOperasjon().equals("Slette")) {
+                        logger.info("Ressurs {} er allerede slettet i IR", ressursState.sistEndretAv());
+                    } else {
+                        remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv());
+                        logger.info("Ressurs {} er merket for sletting i IR", navident);
+                    }
+                }, () -> remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv()));
+            }
         } else {
             throw OrgtilknytningNotFoundException.orgtilknytningNotFoundException(navident);
         }

@@ -444,11 +444,12 @@ public class NomRemedyIntegrasjonServiceOld {
     private void avsluttRessursInRemedy(String ressursFid, LocalDate sluttdatoForRessurs, String initiatedBy) {
         if (sluttdatoForRessurs.isBefore(LocalDate.now())) {
             var ressursState = nomApiClient.getRessursByFid(ressursFid);
-
-            remedyIntegrasjonRepositoryService.markRessursForDeletion(
-                ressursState.getNavident(),
-                initiatedBy
-            );
+            if (!unleash.isEnabled("nom-remedy.ny-remedy-integrasjon")) {
+                remedyIntegrasjonRepositoryService.markRessursForDeletion(
+                    ressursState.getNavident(),
+                    initiatedBy
+                );
+            }
 
             logger.info("Deleted ressurs with fid {} and with sluttdato {}", ressursFid, sluttdatoForRessurs);
         }
@@ -468,9 +469,11 @@ public class NomRemedyIntegrasjonServiceOld {
                 .orElse(true)
             ).toList();
 
-        ressurserToDeleteFromRemedy.forEach(ressursSomSkalSlettes ->
-            remedyIntegrasjonRepositoryService.markRessursForDeletion(ressursSomSkalSlettes.getNavident(), initiatedBy)
-        );
+        if (!unleash.isEnabled("nom-remedy.ny-remedy-integrasjon")) {
+            ressurserToDeleteFromRemedy.forEach(ressursSomSkalSlettes ->
+                remedyIntegrasjonRepositoryService.markRessursForDeletion(ressursSomSkalSlettes.getNavident(), initiatedBy)
+            );
+        }
 
         logger.info("Deleted following resssurser from remedy: {}", ressurserToDeleteFromRemedy.stream().map(RessursState::getNavident).toList());
     }
