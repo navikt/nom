@@ -110,8 +110,8 @@ public class NomRemedyIntegrasjonServiceNew {
         var erDagligOppfolging = orgtilknytningState.erDagligOppfolging();
         var erMasseflytting = !isNull(aggregateState.getMasseflytting()) && aggregateState.getMasseflytting();
 
-        if (erDagligOppfolging && (isActive(orgtilknytningState) || isFuture(orgtilknytningState) && erMasseflytting)) {
-            saveStateToRemedy(nomIntegrasjonEntityFromNomData(ressursState, orgtilknytningState, aggregateState.getMasseflytting()), entryBestiller);
+        if (erDagligOppfolging && (isActive(orgtilknytningState) || (isFuture(orgtilknytningState) && erMasseflytting))) {
+            saveStateToRemedy(nomIntegrasjonEntityFromNomData(ressursState, orgtilknytningState, erMasseflytting), entryBestiller);
             return true;
         }
 
@@ -164,7 +164,7 @@ public class NomRemedyIntegrasjonServiceNew {
                 }, () -> remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv()));
             } else {
                 logger.info("Ressurs {} er merket for sletting i IR", navident);
-            };
+            }
         } else {
             throw OrgtilknytningNotFoundException.orgtilknytningNotFoundException(navident);
         }
