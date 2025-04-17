@@ -46,7 +46,7 @@
         <mock-oauth2-server.version>2.1.10</mock-oauth2-server.version>
         <nimbus-jose-jwt.version>9.47</nimbus-jose-jwt.version>
         <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
-        <ojdbc.version>23.6.0.24.10</ojdbc.version>
+        <ojdbc.version>23.7.0.25.01</ojdbc.version>
         <poi-ooxml.version>5.4.1</poi-ooxml.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <postgresql.version>42.7.4</postgresql.version>
