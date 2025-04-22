@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -68,7 +69,6 @@ public class NomRemedyIntegrasjonServiceNew {
         if (leaderElection.isLeader()) {
             var statesToUpdate = aggregateStateRepository.findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
             List<UUID> rowsToDelete = executeStateUpdates(statesToUpdate);
-            logger.info("{} rows updated", rowsToDelete);
             aggregateStateRepository.deleteAllById(rowsToDelete);
         }
     }
@@ -89,22 +89,27 @@ public class NomRemedyIntegrasjonServiceNew {
                 aggregateState.getStateFid()) : Optional.<RessursState>empty();
             var optionalOrgtilknytningState = aggregateState.getStateType()
                 .equals(OrgtilknytningState.class.getSimpleName()) ? orgtilknytningStateRepository.findByFid(aggregateState.getStateFid()) : Optional.<OrgtilknytningState>empty();
-            optionalRessursState.ifPresent(ressursState -> {
-                if (ressursStateUpdate(ressursState, aggregateState)) {
-                    fid.set(aggregateState.getAggregateStateId());
-                }
-            });
-            optionalOrgtilknytningState.ifPresent(orgtilknytningState -> {
-                if (orgtilknytningStateUpdate(orgtilknytningState, aggregateState)) {
-                    fid.set(aggregateState.getAggregateStateId());
-                }
-            });
+            try {
+                optionalRessursState.ifPresent(ressursState -> {
+                    if (ressursStateUpdate(ressursState, aggregateState)) {
+                        fid.set(aggregateState.getAggregateStateId());
+                    }
+                });
+                optionalOrgtilknytningState.ifPresent(orgtilknytningState -> {
+                    if (orgtilknytningStateUpdate(orgtilknytningState, aggregateState)) {
+                        fid.set(aggregateState.getAggregateStateId());
+                    }
+                });
+            } catch (Exception e) {
+                logger.error("ALERT: Failed to handle aggregate state with fid {} and type {}", aggregateState.getStateFid(), aggregateState.getStateType(), e);
+            }
             return isNull(fid.get()) ? null : fid.get();
-        }).toList();
+        }).filter(Objects::nonNull).toList();
     }
 
     private boolean orgtilknytningStateUpdate(OrgtilknytningState orgtilknytningState, AggregateState aggregateState) {
         if (orgtilknytningState.gyldigTom().isPresent() && orgtilknytningState.gyldigTom().get().isBefore(LocalDate.now())) return true;
+
         var ressursState = ressursStateRepository.findByNavident(orgtilknytningState.navident())
             .orElseThrow(() -> RessursNotFoundException.notFound(String.format("Fant ikke ressurs for orgtilknytning %s", orgtilknytningState.fid())));
 
