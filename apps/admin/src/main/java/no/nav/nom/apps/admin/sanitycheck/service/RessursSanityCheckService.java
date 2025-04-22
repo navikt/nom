@@ -1,10 +1,8 @@
 package no.nav.nom.apps.admin.sanitycheck.service;
 
 import no.nav.nom.apps.admin.PeriodeUtil;
-import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedEnhet;
-import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedFlereDOL;
-import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningKoblingInfo;
-import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningUlikSluttdato;
+import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.*;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
@@ -22,6 +20,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static no.nav.nom.apps.admin.PeriodeUtil.tomorrow;
 import static no.nav.nom.apps.admin.PeriodeUtil.yesterday;
@@ -237,6 +236,75 @@ public class RessursSanityCheckService {
                 .build();
     }
 
+    public List<RessursState> aktiveRessurserUtenOrgtilknytning() {
+        Map<String, RessursState> alleRessurserSomErAktive = ressursStateRepository.findAllActiveRessurser();
+
+        Map<String, Collection<OrgtilknytningState>> alleOrgtilknytningerKobletTilRessurs =
+                getOrgtilknytningerForNavidenter(alleRessurserSomErAktive.keySet(), gyldigTomEmptyOrBefore2099);
+
+        Stream<String> utenOrgtilknytninger = alleOrgtilknytningerKobletTilRessurs.entrySet().stream()
+                .filter(orgtilknytning -> orgtilknytning.getValue().isEmpty())
+                .map(Map.Entry::getKey);
+
+        Stream<String> medOrgtilknytningerSomIkkeErAktiv = alleOrgtilknytningerKobletTilRessurs.entrySet().stream()
+                .filter(orgtilknytning -> !orgtilknytning.getValue().isEmpty())
+                .filter(orgtilknytning -> orgtilknytning.getValue().stream()
+                        .allMatch(orgtilknytningState -> orgtilknytningState.gyldigTom().isPresent() && orgtilknytningState.gyldigTom().get().isBefore(LocalDate.now())))
+                .map(Map.Entry::getKey);
+
+        return Stream.concat(utenOrgtilknytninger, medOrgtilknytningerSomIkkeErAktiv)
+                .map(alleRessurserSomErAktive::get)
+                .toList();
+    }
+
+    public List<RobotRessursSanityCheckResponse> robotRessurser() {
+        Map<String, RessursState> alleRessurserSomErAktive = ressursStateRepository.findAllActiveRessurser();
+
+        Map<String, RessursState> alleAktiveRoboter = alleRessurserSomErAktive.entrySet().stream()
+                .filter(ressurs -> ressurs.getValue().identType() != null)
+                .filter(ressurs -> ressurs.getValue().identType().name().equals(IdentType.ROBOT.name()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        Map<String, Collection<OrgtilknytningState>> alleOrgtilknytningerKobletTilRobotRessurs =
+                getOrgtilknytningerForNavidenter(alleAktiveRoboter.keySet(), gyldigTomEmptyOrBefore2099);
+
+        ArrayList<RobotRessursSanityCheckResponse> result = new ArrayList<>();
+
+        alleAktiveRoboter.forEach((navident, ressurs) -> {
+            if (alleOrgtilknytningerKobletTilRobotRessurs.containsKey(navident)) {
+                result.add(new RobotRessursSanityCheckResponse(
+                        navident,
+                        ressurs.visningsnavn().getFormattedVisningsnavn(),
+                        ressurs.sektor(),
+                        ressurs.startdato().isPresent() ? ressurs.startdato() : null,
+                        ressurs.sluttdato().isPresent() ? ressurs.sluttdato() : null,
+                        alleOrgtilknytningerKobletTilRobotRessurs.get(navident).stream()
+                                .map(orgtilknytningState ->
+                                        new RobotRessursSanityCheckResponse.RobotOrgtilknytningSanityCheckResponse(
+                                                orgtilknytningState.orgEnhetId(),
+                                                orgEnhetStateRepository.findById(orgtilknytningState.orgEnhetId()).isPresent() ?
+                                                        orgEnhetStateRepository.findById(orgtilknytningState.orgEnhetId()).get().navn() :
+                                                        "Ukjent",
+                                                orgtilknytningState.gyldigFom(),
+                                                Optional.of(orgtilknytningState.gyldigTom()).orElse(null)
+                                        ))
+                                .toList()
+                ));
+            } else {
+                result.add(new RobotRessursSanityCheckResponse(
+                        navident,
+                        ressurs.visningsnavn().getFormattedVisningsnavn(),
+                        ressurs.sektor(),
+                        ressurs.startdato().isPresent() ? ressurs.startdato() : null,
+                        ressurs.sluttdato().isPresent() ? ressurs.sluttdato() : null,
+                        Collections.emptyList()
+                ));
+            }
+        });
+
+        return result;
+    }
+
     public List<RessursMedFlereDOL> ressursMedFlereEnnEnDOL() {
         Map<String, RessursState> alleRessurserSomErAktive = ressursStateRepository.findAllActiveRessurser();
         Map<String, Collection<OrgtilknytningState>> alleOrgtilknytningerKobletTilRessurs =
@@ -406,10 +474,6 @@ public class RessursSanityCheckService {
                     return t.gyldigTom().isEmpty() && orgEnhet.isPresent() && orgEnhet.get().gyldigTom().isPresent(); // orgEnhet avsluttet > tilknytning ikke avsluttet
                 }).toList();
     }
-    
-    private final Predicate<OrgtilknytningState> gyldigTomBefore2099 = orgtilknytningState -> 
-                    orgtilknytningState.gyldigTom().isPresent() && 
-                    orgtilknytningState.gyldigTom().get().isBefore(LocalDate.of(2099, 1, 1));
 
     private final Predicate<OrgtilknytningState> gyldigTomEmptyOrBefore2099 = orgtilknytningState ->
         orgtilknytningState.gyldigTom().isEmpty() ||

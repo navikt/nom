@@ -6,10 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.admin.SwaggerConfig;
-import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedEnhet;
-import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedFlereDOL;
-import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningKoblingInfo;
-import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningUlikSluttdato;
+import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.*;
 import no.nav.nom.apps.admin.sanitycheck.service.RessursSanityCheckService;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.http.ResponseEntity;
@@ -130,4 +127,29 @@ public class RessursSanityCheckController {
     public ResponseEntity<List<RessursMedFlereDOL>> ressursMedFlereEnnEnDOL() {
         return ok(ressursSanityCheckService.ressursMedFlereEnnEnDOL());
     }
+
+    @Operation(
+            description = "Henter aktive ressurser uten orgtilknytning eller med orgtilknytning som ikke er aktiv",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+            @ApiResponse(responseCode = "200", description = "Success")
+    )
+    @GetMapping("/ressursUtenOrgtilknytning")
+    public ResponseEntity<List<RessursState>> ressursUtenOrgtilknytning() {
+        return ok(ressursSanityCheckService.aktiveRessurserUtenOrgtilknytning());
+    }
+
+    @Operation(
+            description = "List robot ressurser",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+            @ApiResponse(responseCode = "200", description = "Success")
+    )
+    @GetMapping("/robotRessurser")
+    public ResponseEntity<List<RobotRessursSanityCheckResponse>> listRobotRessurser() {
+        return ok(ressursSanityCheckService.robotRessurser());
+    }
+    
 }
