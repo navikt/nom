@@ -38,6 +38,7 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -88,6 +89,29 @@ public class OrgEnhetController {
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
+
+    @PostMapping()
+    @Operation(
+        description = "Henter orgenheter med for liste av id'er",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200"),
+        }
+    )
+    public ResponseEntity<Map<String, OrgEnhet>> getOrgenheterForIder(
+        @RequestBody List<String> orgenhetIder
+    ) {
+        return ResponseEntity.ok(
+            orgenhetService.getByIdBulk(orgenhetIder).entrySet().stream()
+                .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    entry -> orgEnhetMapper.mapToOrgEnhet(entry.getValue())
+                ))
+        );
+    }
+
 
     @PostMapping("/isNavIdent/{navident}/canEditOrgenhet/{orgEnhetId}")
     @Operation(
