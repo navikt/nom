@@ -745,7 +745,7 @@ public class OrgtilknytningRestService {
             origination
         );
 
-        var res = masseflyttOrgtilknytningerService.flyttOrgtilknytninger(request.orgtilknytningerFid(), request.nyOrgenhetId(), request.beholdTilganger(), request.gyldigFomFlyttedato(), inputMetadata);
+        var res = masseflyttOrgtilknytningerService.flyttOrgtilknytninger(request.orgtilknytningerFid(), request.nyOrgenhetId(), request.beholdTilganger(), request.gyldigFomFlyttedato(), inputMetadata, false);
 
         return new MasseFlyttingResponse(
             res.entrySet().stream().map(e -> new MasseFlyttingResponse.FeiletFlytting(e.getKey().fid(), e.getValue())).toList(),

@@ -110,6 +110,11 @@ public abstract class AbstractNomStateListener<T> {
         visitors.add(visitor);
     }
 
+    public void unregister(Visitor<T> visitor) {
+        log.info("Unregistering visitor for listener {} with name: {}", listenerId, visitor.visitorName());
+        visitors.remove(visitor);
+    }
+
     protected String visitorsToString() {
         return visitors.stream().map(Visitor::visitorName).reduce((a, b) -> a + ", " + b).orElse("none");
     }

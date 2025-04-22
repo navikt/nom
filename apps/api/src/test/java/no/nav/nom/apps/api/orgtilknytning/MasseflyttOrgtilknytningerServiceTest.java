@@ -12,6 +12,7 @@ import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,8 @@ class MasseflyttOrgtilknytningerServiceTest {
     OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
     @MockitoBean
     OrgtilknytningService orgtilknytningService;
+    @MockitoBean
+    NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
 
     @Autowired
     MasseflyttOrgtilknytningerService cut;
@@ -277,6 +280,7 @@ class MasseflyttOrgtilknytningerServiceTest {
             beholdTilganger,
             LocalDate.of(2025, 4, 9),
             null
+//            , true // Also test visitor and wait for state
         );
 
         verify(orgtilknytningCommandService, times(2)).avvikleOrgtilknytning(any(), any());
