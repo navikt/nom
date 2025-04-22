@@ -309,10 +309,15 @@ EH00001;2300;ORGNIV3;HELFO;Beholdt;;;JA;EH00001;ORGENHET;je305h;28.02.2025 - lag
 8105000;2823;AGRESSOORGENHET;Kommunikasjonsavdelingen;Opp til ORGNIV2;815;bu613r;JA;815;ORGNIV2;bu613r;
 8106000;2826;AGRESSOORGENHET;Kunnskapsavdelingen;Opp til ORGNIV2;816;pa885p;JA;816;ORGNIV2;pa885p;
 8320000;2830;AGRESSOORGENHET;Ytelsesavdelingen;Opp til ORGNIV2;830;su430w;JA;830;ORGNIV2;su430w;
-8430000;2840;AGRESSOORGENHET;Arbeids- og tjenesteavdelingen;Opp til ORGNIV2;840;ja556h;JA;840;ORGNIV2;ja556h;
+8320000;2830;AGRESSOORGENHET;Ytelsesavdelingen;;832;gy963n;JA;832;ORGNIV2;gy963n; 22.04.2025: Lagt inn nye Ytelsesavd ifm. OU. 
+8430000;2840;AGRESSOORGENHET;Arbeids- og tjenesteavdelingen;;840;ja556h;JA;840;ORGNIV2;ja556h;
+8430000;2840;AGRESSOORGENHET;Arbeidsavdelingen;;843;dy639w;JA;843;ORGNIV2;dy639w;22.04.2025: Lagt inn nye ATA ifm. OU
+829;2844;ORGNIV2;Velferdsavdelingen;;829;ry772y;JA;829;ORGNIV2;ry772y;22.04.2025: Lagt inn ny enhet ifm. OU
+828;2846;ORGNIV2;Avdeling for brukeropplevelser;;828;pa720r;JA;828;ORGNIV2;pa720r;22.04.2025: Lagt inn ny enhet ifm. OU
 5224000;2960;AGRESSOORGENHET;Felles;Opp til ORGNIV2;53;gy118b;JA;53;ORGNIV2;gy118b;
 855110;2970;ORGNIV3;Digital arbeidsplass;TODO, ITAVD;;;Avklar, ITAVD;8551;ORGNIV25;ne808e;13.07.23: Lagt inn mapping til ne808e.
 855210;2990;ORGNIV3;IT utvikling 1;TODO, ITAVD;;;Avklar, ITAVD;854;ORGNIV2;bu878z;13.07.23: Lagt inn mapping til bu878z.
+857;2990;ORGNIV2;Teknologiavdelingen;;;;;857;ORGNIV2;te627k;22.04.2025: Lagt inn mapping til nye Teknologiavdelingen ifm. OU. 
 2530000;4100;AGRESSOORGENHET;Kontaktsenter Styringsenhet Ledelse;Opp til ORGNIV2;25;ba923j;JA;25;ORGNIV2;ba923j;
 2501000;4101;AGRESSOORGENHET;NAV Kontaktsenter Øst-Viken;Opp til ORGNIV3;250100;my611u;JA;250100;ORGNIV3;my611u;
 2505000;4105;AGRESSOORGENHET;Kontaktsenter Innlandet leder;Opp til ORGNIV3;250500;de895u;JA;250500;ORGNIV3;de895u;
