@@ -90,11 +90,13 @@ public class NomRemedyIntegrasjonServiceNew {
                 .equals(OrgtilknytningState.class.getSimpleName()) ? orgtilknytningStateRepository.findByFid(aggregateState.getStateFid()) : Optional.<OrgtilknytningState>empty();
             optionalRessursState.ifPresent(ressursState -> {
                 if (ressursStateUpdate(ressursState, aggregateState)) {
+                    logger.info("RessursState {} for state {}", ressursState, aggregateState);
                     fid.set(aggregateState.getAggregateStateId());
                 }
             });
             optionalOrgtilknytningState.ifPresent(orgtilknytningState -> {
                 if (orgtilknytningStateUpdate(orgtilknytningState, aggregateState)) {
+                    logger.info("OrgtilknytningState {} for state {}", orgtilknytningState, aggregateState);
                     fid.set(aggregateState.getAggregateStateId());
                 }
             });
