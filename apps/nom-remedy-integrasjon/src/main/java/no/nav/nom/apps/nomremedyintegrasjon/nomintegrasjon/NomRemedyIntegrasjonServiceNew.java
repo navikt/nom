@@ -104,6 +104,7 @@ public class NomRemedyIntegrasjonServiceNew {
     }
 
     private boolean orgtilknytningStateUpdate(OrgtilknytningState orgtilknytningState, AggregateState aggregateState) {
+        if (orgtilknytningState.gyldigTom().isPresent() && orgtilknytningState.gyldigTom().get().isBefore(LocalDate.now())) return true;
         var ressursState = ressursStateRepository.findByNavident(orgtilknytningState.navident())
             .orElseThrow(() -> RessursNotFoundException.notFound(String.format("Fant ikke ressurs for orgtilknytning %s", orgtilknytningState.fid())));
 
