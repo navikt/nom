@@ -275,7 +275,12 @@ spec:
         - application: nom-paarorende
           namespace: org
           cluster: dev-gcp
-
+        - application: eux-neessi-q1
+          namespace: eessibasis
+          cluster: dev-gcp
+        - application: eux-neessi-q2
+          namespace: eessibasis
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
@@ -283,12 +288,6 @@ spec:
           cluster: dev-gcp
         - application: nom-paarorende
           namespace: org
-          cluster: dev-gcp
-        - application: eux-neessi-q1
-          namespace: eessibasis
-          cluster: dev-gcp
-        - application: eux-neessi-q2
-          namespace: eessibasis
           cluster: dev-gcp
       external:
         - host: teamorg-unleash-api.nav.cloud.nais.io
