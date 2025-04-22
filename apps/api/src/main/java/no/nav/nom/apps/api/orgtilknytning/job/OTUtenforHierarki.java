@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerEtter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.today;
@@ -36,6 +37,8 @@ public class OTUtenforHierarki {
     private final HashMap<OrgtilknytningState, IOrgenhet> otUtenforHierarkieMedAlternativOrgenhet = new HashMap<>();
     private final HashMap<IOrgenhet, List<OrgtilknytningState>> perAlternativOrgenhet = new HashMap<>();
 
+    private boolean ventPaaState = true;
+
     public OTUtenforHierarki(OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService,
                              OrganiseringStateRepository organiseringStateRepository, MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService,
                             Unleash unleash
@@ -50,7 +53,7 @@ public class OTUtenforHierarki {
     public void findOTUtenforHierarkiFromDataLast() {
         findOTUtenforHierarki();
 
-        autoflyttOTUtenforHierarki();
+        autoflyttOTUtenforHierarki(perAlternativOrgenhet);
 
         findOTUtenforHierarki();
         alertForOTUtenforHierarki();
@@ -76,37 +79,73 @@ public class OTUtenforHierarki {
         log.info("Fant {} OTer utenfor aktiv hierarki", otUtenforHierarkieMedAlternativOrgenhet.size());
     }
 
-    private void autoflyttOTUtenforHierarki() {
+    int autoflyttOTUtenforHierarki(Map<IOrgenhet, List<OrgtilknytningState>> perAlternativOrgenhet) {
         if (!unleash.isEnabled(UNLEASH_AUTO_FLYTT)) {
-            return;
+            return 0;
         }
-        if (otUtenforHierarkieMedAlternativOrgenhet.isEmpty()) {
-            return;
+        if (perAlternativOrgenhet.isEmpty()) {
+            return 0;
         }
         log.info("Autoflytter OTer utenfor hierarki");
 
+        AtomicInteger behandlet = new AtomicInteger();
+        AtomicInteger feilet = new AtomicInteger();
 
         perAlternativOrgenhet.forEach((alternativOrgenhet, oter) -> {
             log.info("Autoflytter OTer utenfor hierarki for enhet {} - {} ", alternativOrgenhet.getId(), alternativOrgenhet.getNavn());
+            var otFids = oter.stream().map(OrgtilknytningState::fid).toList();
+            behandlet.addAndGet(otFids.size());
+
             var flyttedato = getEnhetsOrganiseringGyldigFom(alternativOrgenhet.getId());
             if ( flyttedato == null ) {
-                log.error("Fant ikke gyldigFom for alternativ orgenhet {}", alternativOrgenhet.getId());
+                log.error("Fant ikke organiseringens gyldigFom for alternativ orgenhet {}", alternativOrgenhet.getId());
+                loggFeilede(otFids, "Klarte ikke sette flyttedato for alternativ orgenhet %s - %s".formatted(alternativOrgenhet.getId(), alternativOrgenhet.getNavn()));
+
+                feilet.addAndGet(otFids.size());
                 return;
             }
-            var otFids = oter.stream().map(OrgtilknytningState::fid).toList();
 
             // Så og si alle slike case så er firesifferenheten den samme, så flagget skal være false.
             boolean beholdTilganger = false;
 
-            var inputMetadata = new InputMetadata(
-                "nom-api OTUtenforHierarki",
-                "autoflyttOTUtenforHierarki",
-                Map.of("Orgtilknytning Fid's", otFids, "alternativ enhet", alternativOrgenhet, "flyttedato", flyttedato),
-                new Origination("nom-api", "nom-api")
-            );
+            var inputMetadata = getInputMetadata(alternativOrgenhet, otFids, flyttedato);
 
-            masseflyttOrgtilknytningerService.flyttOrgtilknytninger(otFids, alternativOrgenhet.getId(), beholdTilganger, flyttedato, inputMetadata);
+            var feilede = masseflyttOrgtilknytningerService.flyttOrgtilknytninger(otFids, alternativOrgenhet.getId(), beholdTilganger, flyttedato, inputMetadata, ventPaaState);
+            loggFeilede(feilede);
+
+            feilet.addAndGet(feilede.size());
         });
+
+        log.info("Ferdig med Autoflytting OTer utenfor hierarki {}/{} (feilede/toalt)", feilet.get(), behandlet.get());
+        return feilet.get();
+    }
+
+    private void loggFeilede(List<String> otFids, String formatted) {
+        HashMap<OrgtilknytningState, String> feilede = new HashMap<>();
+        otFids.forEach(otFid -> {
+            orgtilknytningService.findByFid(otFid).ifPresent(ot -> feilede.put(ot, formatted));
+        });
+        loggFeilede(feilede);
+    }
+
+    private void loggFeilede(HashMap<OrgtilknytningState, String> feilede) {
+        if (feilede.isEmpty()) {
+            return;
+        }
+        var antallFeilede = feilede.size();
+        log.error("Fant {} OTer utenfor hierarki som ikke ble flyttet", antallFeilede);
+        feilede.forEach((ot, msg) -> {
+            log.error("Orgtilknytning {} {} {} [{} - {}]  - {}", ot.fid(), ot.navident(), ot.orgEnhetId(), ot.gyldigFom(), ot.gyldigTom(), msg);
+        });
+    }
+
+    private static InputMetadata getInputMetadata(IOrgenhet alternativOrgenhet, List<String> otFids, LocalDate flyttedato) {
+        return new InputMetadata(
+            "nom-api OTUtenforHierarki",
+            "autoflyttOTUtenforHierarki",
+            Map.of("Orgtilknytning Fid's", otFids, "alternativ enhet", alternativOrgenhet, "flyttedato", flyttedato),
+            new Origination("nom-api", "nom-api")
+        );
     }
 
     // Dette fordi vi ønsker å bruke datoen OTen havnet utenfor hierarkiet.
@@ -130,7 +169,6 @@ public class OTUtenforHierarki {
             .findFirst().orElse(null);
     }
 
-
     private void alertForOTUtenforHierarki() {
         boolean sendAlert = otUtenforHierarkieMedAlternativOrgenhet.keySet().stream().anyMatch(ot -> ot.gyldigFom().isBefore(LocalDate.now().plusWeeks(1)));
         if (sendAlert) {
@@ -153,4 +191,8 @@ public class OTUtenforHierarki {
     }
 
     public HashMap<OrgtilknytningState, IOrgenhet> getOtUtenforHierarkiMedAlternativOrgenhet() { return otUtenforHierarkieMedAlternativOrgenhet; }
+
+    public void setVentPaaState(boolean ventPaaState) {
+        this.ventPaaState = ventPaaState;
+    }
 }
