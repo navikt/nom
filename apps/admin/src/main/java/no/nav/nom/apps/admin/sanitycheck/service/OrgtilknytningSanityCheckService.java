@@ -213,4 +213,11 @@ public class OrgtilknytningSanityCheckService {
                 .build();
     }
 
+    public List<OrgtilknytningState> listTilkoblingerSomharTomDatoFoorstDagImaneden() {
+        var alleOrgtilknytningState = orgtilknytningStateRepository.getAll();
+        var aktiveOrgtilknytningState = aktiveOrgtilknytninger(alleOrgtilknytningState);
+        return aktiveOrgtilknytningState.stream()
+            .filter(ot -> ot.gyldigTom().isPresent() && ot.gyldigTom().get().getDayOfMonth() == 1)
+            .toList();
+    }
 }
