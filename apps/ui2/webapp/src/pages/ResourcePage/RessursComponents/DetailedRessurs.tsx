@@ -663,7 +663,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
             key={orgEnhet.id}
             params={{ id: orgEnhet.id }}
             search={{}}
-            to={"/org/$id"}
+            to="/org/$id"
           >
             <Link as="span">{orgEnhet.navn}</Link>
           </ReactRouterLink>
@@ -803,8 +803,9 @@ function EditOrgtilknytningerButton({
           icon={<PencilIcon aria-hidden />}
           onClick={() =>
             navigate({
+              to: "/ressurs/$id",
               search: { editOrgtilknytninger: true },
-              params: (previous) => previous,
+              params: (previous) => ({ id: previous.id ?? "" }),
             })
           }
           size="small"

@@ -330,7 +330,7 @@ function CreateSpecialResourceFormInner({
           Denne identifikatoren er allerede i bruk for ressurs med Nav-ident{" "}
           <b>{ressurs?.navident}</b>. Rediger identifikatoren hvis du skal
           opprette en ny ident. Du kan se mer informasjon på{" "}
-          <Link to={`/ressurs/${ressurs?.navident}`}>
+          <Link params={{ id: ressurs?.navident ?? "" }} to="/ressurs/$id">
             ressursens profilside
           </Link>
           .
@@ -869,17 +869,17 @@ function lagRessursRequest(values: {
     orgEnhetId:
       values.identType === IdentType.VIKAFOSSEN
         ? vikafossenOrgEnhetId
-        : values.orgEnhetId ?? "",
+        : (values.orgEnhetId ?? ""),
     startDato: values.startDato,
     sluttDato: values.sluttDato ?? "",
     visningsfornavn:
       values.identType === IdentType.VIKAFOSSEN
         ? "Nav"
-        : values.visningsfornavn ?? "",
+        : (values.visningsfornavn ?? ""),
     visningsmellomnavn:
       values.identType === IdentType.VIKAFOSSEN
         ? ""
-        : values.visningsmellomnavn ?? "",
+        : (values.visningsmellomnavn ?? ""),
     visningsetternavn: getVisningsEtternavn(
       values.identType,
       values.visningsetternavn,

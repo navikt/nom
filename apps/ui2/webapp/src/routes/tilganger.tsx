@@ -288,9 +288,9 @@ function OrgEnhetCard({
         });
 
       const settledPromises = await Promise.allSettled(promises);
-      // eslint-disable-next-line unicorn/no-array-callback-reference -- when using typeguard the function must be done this way
+
       const fulfilled = settledPromises.filter(promiseIsFulfilled);
-      // eslint-disable-next-line unicorn/no-array-callback-reference
+
       const rejected = settledPromises.filter(promiseIsRejected);
 
       if (rejected.length > 0) {

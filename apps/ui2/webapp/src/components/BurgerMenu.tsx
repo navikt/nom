@@ -38,9 +38,9 @@ export function BurgerMenu() {
     useQuery(getTilgangerDelegertTilMegOptions()).data ?? [];
 
   const ledetAvMeg = useGetSession().data?.navident
-    ? useQuery(
+    ? (useQuery(
         getOrgEnheterLedetAvOptions(useGetSession().data?.navident as string),
-      ).data ?? []
+      ).data ?? [])
     : [];
 
   const lederEllerDelegert =

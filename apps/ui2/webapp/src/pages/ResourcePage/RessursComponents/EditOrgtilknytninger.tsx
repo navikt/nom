@@ -350,8 +350,9 @@ function OrgtilknytningForm({
       });
 
       navigate({
-        params: { id: ressurs.navident },
         to: "/ressurs/$id",
+        params: { id: ressurs.navident },
+        search: { editOrgtilknytninger: undefined },
       }).then();
     },
   });
@@ -373,7 +374,7 @@ function OrgtilknytningForm({
   };
 
   const onValid: SubmitHandler<{
-    mappedeOrgtilknytninger: Partial<OrgtilknytningState>[];
+    mappedeOrgtilknytninger?: Partial<OrgtilknytningState>[];
   }> = async (values) => {
     const validation = dolValidering(
       values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
@@ -383,19 +384,21 @@ function OrgtilknytningForm({
       validation.dolGaps.length === 0 &&
       validation.dolOverlaps.length === 0
     ) {
-      await visBekreftelsesmodaler(values.mappedeOrgtilknytninger).then(() => {
-        oppdaterOrgtilknytningerMutation.mutate(
-          lagOppdaterOrgtilknytningerRequest(
-            values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
-            skalSetteRessursStartdato(
-              ressurs,
-              values.mappedeOrgtilknytninger,
-              tidligsteOrgDatoPre,
+      await visBekreftelsesmodaler(values.mappedeOrgtilknytninger ?? []).then(
+        () => {
+          oppdaterOrgtilknytningerMutation.mutate(
+            lagOppdaterOrgtilknytningerRequest(
+              values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+              skalSetteRessursStartdato(
+                ressurs,
+                values.mappedeOrgtilknytninger ?? [],
+                tidligsteOrgDatoPre,
+              ),
+              ressurs.sektor,
             ),
-            ressurs.sektor,
-          ),
-        );
-      });
+          );
+        },
+      );
     }
   };
 
@@ -625,8 +628,9 @@ function OrgtilknytningForm({
           <Button
             onClick={() =>
               navigate({
+                to: "/ressurs/$id",
                 search: { editOrgtilknytninger: undefined },
-                params: (previous) => previous,
+                params: (previous) => ({ id: previous.id ?? "" }),
               })
             }
             size="small"

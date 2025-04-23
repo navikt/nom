@@ -43,6 +43,7 @@ export function PersonopplysningerStep() {
       title="Personopplysninger"
     >
       <SearchForPerson />
+
       {!!personident && <CreateResourceForm personident={personident} />}
     </ContainerWithHighlightedTop>
   );
@@ -104,7 +105,7 @@ function CreateResourceForm({ personident }: { personident: string }) {
       <Alert variant="error">
         Denne personen finnes allerede som aktiv eller fremtidig medarbeider med
         Nav-ident <b>{person?.navident}</b>. For å gjøre endringer, gå til{" "}
-        <Link to={`/ressurs/${person?.navident}`}>
+        <Link params={{ id: person?.navident ?? "" }} to="/ressurs/$id">
           medarbeiderens profilside
         </Link>
         .
