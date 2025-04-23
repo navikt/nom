@@ -257,7 +257,7 @@ public class RessursSanityCheckService {
                 .toList();
     }
 
-    public List<RobotRessursSanityCheckResponse> robotRessurser() {
+    public List<RobotRessurs> robotRessurser() {
         Map<String, RessursState> alleRessurserSomErAktive = ressursStateRepository.findAllActiveRessurser();
 
         Map<String, RessursState> alleAktiveRoboter = alleRessurserSomErAktive.entrySet().stream()
@@ -268,37 +268,47 @@ public class RessursSanityCheckService {
         Map<String, Collection<OrgtilknytningState>> alleOrgtilknytningerKobletTilRobotRessurs =
                 getOrgtilknytningerForNavidenter(alleAktiveRoboter.keySet(), gyldigTomEmptyOrBefore2099);
 
-        ArrayList<RobotRessursSanityCheckResponse> result = new ArrayList<>();
+        ArrayList<RobotRessurs> result = new ArrayList<>();
 
         alleAktiveRoboter.forEach((navident, ressurs) -> {
             if (alleOrgtilknytningerKobletTilRobotRessurs.containsKey(navident)) {
-                result.add(new RobotRessursSanityCheckResponse(
-                        navident,
-                        ressurs.visningsnavn().getFormattedVisningsnavn(),
-                        ressurs.sektor(),
-                        ressurs.startdato().isPresent() ? ressurs.startdato() : null,
-                        ressurs.sluttdato().isPresent() ? ressurs.sluttdato() : null,
-                        alleOrgtilknytningerKobletTilRobotRessurs.get(navident).stream()
-                                .map(orgtilknytningState ->
-                                        new RobotRessursSanityCheckResponse.RobotOrgtilknytningSanityCheckResponse(
-                                                orgtilknytningState.orgEnhetId(),
-                                                orgEnhetStateRepository.findById(orgtilknytningState.orgEnhetId()).isPresent() ?
-                                                        orgEnhetStateRepository.findById(orgtilknytningState.orgEnhetId()).get().navn() :
-                                                        "Ukjent",
-                                                orgtilknytningState.gyldigFom(),
-                                                Optional.of(orgtilknytningState.gyldigTom()).orElse(null)
-                                        ))
-                                .toList()
-                ));
+                result.add(
+                        RobotRessurs.builder()
+                                .navident(navident)
+                                .visningsnavn(ressurs.visningsnavn().getFormattedVisningsnavn())
+                                .sektor(ressurs.sektor())
+                                .startdato(ressurs.startdato())
+                                .sluttdato(ressurs.sluttdato())
+                                .orgtilknytninger(
+                                        alleOrgtilknytningerKobletTilRobotRessurs.get(navident).stream()
+                                                .map(orgtilknytningState ->
+                                                        RobotRessurs.RobotOrgtilknytning.builder()
+                                                                .orgenhetId(orgtilknytningState.orgEnhetId())
+                                                                .orgenhetNavn(orgEnhetStateRepository.findById(orgtilknytningState.orgEnhetId())
+                                                                        .map(OrgEnhetState::navn)
+                                                                        .orElse("Ukjent")
+                                                                )
+                                                                .gyldigFom(orgtilknytningState.gyldigFom())
+                                                                .gyldigTom(orgtilknytningState.gyldigTom())
+                                                                .build()
+
+                                                )
+                                                .toList()
+                                )
+                                .build()
+                );
+
             } else {
-                result.add(new RobotRessursSanityCheckResponse(
-                        navident,
-                        ressurs.visningsnavn().getFormattedVisningsnavn(),
-                        ressurs.sektor(),
-                        ressurs.startdato().isPresent() ? ressurs.startdato() : null,
-                        ressurs.sluttdato().isPresent() ? ressurs.sluttdato() : null,
-                        Collections.emptyList()
-                ));
+                result.add(
+                        RobotRessurs.builder()
+                                .navident(navident)
+                                .visningsnavn(ressurs.visningsnavn().getFormattedVisningsnavn())
+                                .sektor(ressurs.sektor())
+                                .startdato(ressurs.startdato())
+                                .sluttdato(ressurs.sluttdato())
+                                .orgtilknytninger(Collections.emptyList())
+                                .build()
+                );
             }
         });
 
