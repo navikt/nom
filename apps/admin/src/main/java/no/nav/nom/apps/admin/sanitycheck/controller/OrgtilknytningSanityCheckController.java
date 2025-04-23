@@ -33,6 +33,21 @@ public class OrgtilknytningSanityCheckController {
 
 
     @Operation(
+        description = "List tilknytninger med har sluttdato på først dag i måneden",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/listTilkoblingerUtoverOrgEnhetGyldighetPeriode")
+    public ResponseEntity<List<OrgtilknytningState>> listTilkoblingerSomharTomDatoFoorstDagImaneden() {
+        return ResponseEntity.ok(orgtilknytningSanityCheckService.listTilkoblingerSomharTomDatoFoorstDagImaneden());
+    }
+
+
+    @Operation(
         description = "List tilknytninger med gyldighet utover enhetens gyldighetsperiode",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
