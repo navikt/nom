@@ -13,11 +13,19 @@ export function RessursStateTabell({
   return (
     <>
       <Table.Header>
-        <Table.ColumnHeader scope="col">Navident</Table.ColumnHeader>
+        <Table.ColumnHeader scope="col" sortKey="navident" sortable>
+          Navident
+        </Table.ColumnHeader>
         <Table.ColumnHeader scope="col">Visningnavn</Table.ColumnHeader>
-        <Table.ColumnHeader scope="col">Sektor</Table.ColumnHeader>
-        <Table.ColumnHeader scope="col">Start dato</Table.ColumnHeader>
-        <Table.ColumnHeader scope="col">Slutt dato</Table.ColumnHeader>
+        <Table.ColumnHeader scope="col" sortKey="sektor" sortable>
+          Sektor
+        </Table.ColumnHeader>
+        <Table.ColumnHeader scope="col" sortKey="startdato" sortable>
+          Start dato
+        </Table.ColumnHeader>
+        <Table.ColumnHeader scope="col" sortKey="sluttdato" sortable>
+          Slutt dato
+        </Table.ColumnHeader>
         <Table.ColumnHeader scope="col">Events</Table.ColumnHeader>
       </Table.Header>
       <Table.Body>
