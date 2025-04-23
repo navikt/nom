@@ -241,6 +241,9 @@ spec:
         - application: brev
           namespace: aap
           cluster: prod-gcp
+        - application: eux-neessi
+          namespace: eessibasis
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
@@ -248,9 +251,6 @@ spec:
           cluster: prod-gcp
         - application: nom-paarorende
           namespace: org
-          cluster: prod-gcp
-        - application: eux-neessi
-          namespace: eessibasis
           cluster: prod-gcp
       external:
         - host: teamorg-unleash-api.nav.cloud.nais.io

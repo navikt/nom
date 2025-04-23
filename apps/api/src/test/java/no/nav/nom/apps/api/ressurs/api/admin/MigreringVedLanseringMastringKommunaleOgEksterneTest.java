@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.ressurs.api.admin;
 
 import no.nav.nom.apps.api.ressurs.NomMastered;
-import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredService;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -34,34 +33,6 @@ class MigreringVedLanseringMastringKommunaleOgEksterneTest {
 
     MigreringVedLanseringMastringKommunaleOgEksterne CUT;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        CUT = new MigreringVedLanseringMastringKommunaleOgEksterne(ressursStateRepository, nomMastered);
-    }
-
-    @Test
-    void markerKommunaleSomMastret() {
-        when(ressursStateRepository.getAll()).thenReturn(ressurser);
-        when(nomMastered.isMastered("A000001")).thenReturn(true);
-        when(nomMastered.isMastered("A000008")).thenReturn(true);
-
-        String result = CUT.markerKommunaleSomMastret(false);
-        assertEquals("3 kommunale kan markeres som mastret", result);
-    }
-
-    @Test
-    void markerKommunaleSomMastret_2() {
-        when(ressursStateRepository.getAll()).thenReturn(ressurser);
-        when(nomMastered.isMastered("A000001")).thenReturn(true);
-        when(nomMastered.isMastered("A000008")).thenReturn(true);
-
-        String result = CUT.markerKommunaleSomMastret(true);
-
-        verify(nomMastered, times(3)).markRessursAsMasteredInNom(anyString());
-        assertEquals("3 kommunale er nå markert som mastret", result);
-    }
-
     private static List<RessursState> testRessurser() {
         return List.of(
             getRessursState("FID_1", "A000001", Sektor.NAV_STATLIG),
@@ -88,8 +59,37 @@ class MigreringVedLanseringMastringKommunaleOgEksterneTest {
             Optional.empty(),
             Optional.empty(),
             Collections.EMPTY_LIST,
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            "S123456"
         );
+    }
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        CUT = new MigreringVedLanseringMastringKommunaleOgEksterne(ressursStateRepository, nomMastered);
+    }
+
+    @Test
+    void markerKommunaleSomMastret() {
+        when(ressursStateRepository.getAll()).thenReturn(ressurser);
+        when(nomMastered.isMastered("A000001")).thenReturn(true);
+        when(nomMastered.isMastered("A000008")).thenReturn(true);
+
+        String result = CUT.markerKommunaleSomMastret(false);
+        assertEquals("3 kommunale kan markeres som mastret", result);
+    }
+
+    @Test
+    void markerKommunaleSomMastret_2() {
+        when(ressursStateRepository.getAll()).thenReturn(ressurser);
+        when(nomMastered.isMastered("A000001")).thenReturn(true);
+        when(nomMastered.isMastered("A000008")).thenReturn(true);
+
+        String result = CUT.markerKommunaleSomMastret(true);
+
+        verify(nomMastered, times(3)).markRessursAsMasteredInNom(anyString());
+        assertEquals("3 kommunale er nå markert som mastret", result);
     }
 
 

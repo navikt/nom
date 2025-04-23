@@ -10,7 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +28,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
+
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.etter;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerEtter;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerFoer;
 
 @Slf4j
 @Tag(name = "Admin for å migrering til NOM som master av statlige ressurser")
@@ -32,14 +43,18 @@ import java.util.function.Consumer;
 @RequestMapping("/api/admin/mastrestatlige")
 @PreAuthorize("hasAuthority('ADMIN')")
 public class MastreStatligeINom {
-
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningService orgtilknytningService;
+    private final RessursCommandService ressursCommandService;
     private final NomMastered nomMastered;
 
-    public MastreStatligeINom(RessursStateRepository ressursStateRepository, OrgtilknytningService orgtilknytningService, NomMastered nomMastered) {
+    static final LocalDate MAX_DATE = LocalDate.of(2099, 12, 31);
+
+    public MastreStatligeINom(RessursStateRepository ressursStateRepository, OrgtilknytningService orgtilknytningService,
+                              RessursCommandService ressursCommandService, NomMastered nomMastered) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningService = orgtilknytningService;
+        this.ressursCommandService = ressursCommandService;
         this.nomMastered = nomMastered;
     }
 
@@ -64,42 +79,6 @@ public class MastreStatligeINom {
         return ResponseEntity.ok(sb.toString());
     }
 
-//    @Operation(
-//        description = "List alle statlige ressurser som ikke er mastret i NOM, men som ekskluderes pga max OT før april 2025",
-//        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-//    )
-//    @ApiResponses(
-//        {
-//            @ApiResponse(responseCode = "200", description = "Success"),
-//            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-//            @ApiResponse(responseCode = "403", description = "Forbidden")
-//        }
-//    )
-//    @GetMapping(value = "/listStatligeSomIkkeErMastretOgSomEkskluderesPaaMaksOTDato")
-//    public ResponseEntity<String> listStatligeSomIkkeErMastretOgSomEkskluderesPaaMaksOTDato() {
-//        StringBuffer sb = new StringBuffer();
-//        sb.append("navident, sektor, startdato, sluttdato, maxOtSluttDato\n");
-//
-//        var ikkeMastret = getAlleStatligeSomIkkeErMastret();
-//        var statligeUtenDeEkskluderteNavidenter = eksludertDeMedMaxOTFoerApril2025(ikkeMastret).stream().map(Ressurs::navident).toList();
-//
-//        ikkeMastret.stream()
-//            .filter(ressurs -> !statligeUtenDeEkskluderteNavidenter.contains(ressurs.navident()))
-//            .forEach(getRessursRow(sb));
-//
-//        return ResponseEntity.ok(sb.toString());
-//    }
-
-    static Consumer<Ressurs> getRessursRow(StringBuffer sb) {
-        return ressurs -> {
-            sb.append(ressurs.navident()).append(", ");
-            sb.append(ressurs.sektor()).append(", ");
-            sb.append(ressurs.startDato()).append(", ");
-            sb.append(ressurs.sluttDato()).append(", ");
-            sb.append(ressurs.maxOtSluttDato()).append("\n");
-        };
-    }
-
     @Operation(
         description = "Marker alle statlige ressurser som mastret i NOM. Alle navidenter i body vil ekskluderes",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -119,29 +98,164 @@ public class MastreStatligeINom {
         return ResponseEntity.ok(markerStatligeSomMastret("CONFIRM".equalsIgnoreCase(confirm), ekskluderNavidenter));
     }
 
-    List<Ressurs> getAlleStatligeSomIkkeErMastret() {
-        return ressursStateRepository.getAll().stream()
-            .filter(RessursState::isStatlig)
-            .filter(ressurs -> !nomMastered.isMastered(ressurs.navident()))
-            .map(ressurs -> {
-                var maxOtSluttDato = getMaxOTDate(ressurs.navident());
-                return new Ressurs(
-                    ressurs.navident(),
-                    ressurs.sektor(),
-                    ressurs.startdato().orElse(null),
-                    ressurs.sluttdato().orElse(null),
-                    maxOtSluttDato
-                );
-            })
-            .toList();
+
+    @Operation(
+        description = "Oppdater sluttDato på Ressurs (skript pkt 3) for utvalg Gruppe A",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden")
+        }
+    )
+    @PostMapping(value = "/oppdaterRessursSluttdatoGrpA")
+    public ResponseEntity<String> oppdaterRessursSluttdatoGrpA(
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
+        @Parameter(description = "d.d. + 5 uker elns.") @RequestParam LocalDate maxOTDatoEtter,
+        @RequestBody List<String> ekskluderNavidenter
+    ) {
+        boolean commit = "CONFIRM".equalsIgnoreCase(confirm);
+
+        return oppdaterRessursSluttdatoGrpA(maxOTDatoEtter, ekskluderNavidenter, commit, getAuthenticatedNavIdent());
     }
 
-    static final LocalDate MAX_DATE = LocalDate.of(2099, 12, 31);
+    protected ResponseEntity<String> oppdaterRessursSluttdatoGrpA(LocalDate maxOTDatoEtter, List<String> ekskluderNavidenter, boolean commit, String userNavident) {
+        StringBuffer sb = new StringBuffer();
+        if (!commit) {
+            sb.append("DRY RUN\n");
+        }
 
-    LocalDate getMaxOTDate(String navident) {
-        return orgtilknytningService.getByNavIdent(navident).stream()
-            .map(orgtilknytning -> orgtilknytning.gyldigTom().orElse(MAX_DATE))
-            .max(LocalDate::compareTo).orElse(null);
+        var grpAUtvalg = utvalgGruppeA(maxOTDatoEtter);
+        var skalOppdateres = ekskluderNavidenter(grpAUtvalg, ekskluderNavidenter);
+
+        sb.append("GruppeA - alle som har aktiv OT etter: ").append(maxOTDatoEtter).append("\n");
+        sb.append("Antall navidenter å ekskludere: ").append(ekskluderNavidenter.size()).append("\n");
+        sb.append("Antall i Gruppe A utvalg: ").append(grpAUtvalg.size()).append("\n");
+        sb.append("Antall å oppdatere: ").append(skalOppdateres.size()).append("\n");
+
+        var inputMetadata = new InputMetadata(
+            "nom-api MastreStatligeINom",
+            "oppdaterRessursSluttdatoGrpA",
+            Map.of("maxOTDateEtter", maxOTDatoEtter, "ekskluderNavidenter", ekskluderNavidenter),
+            new Origination(userNavident, "nom-api")
+        );
+        oppdaterRessursSluttdato(commit, skalOppdateres, inputMetadata);
+
+        sb.append("\nnavident, sektor, startdato, sluttdato, maxOtSluttDato\n");
+        skalOppdateres.forEach(getRessursRow(sb));
+
+        log.info(sb.toString());
+        return ResponseEntity.ok(sb.toString());
+    }
+
+    @Operation(
+        description = "Oppdater sluttDato på Ressurs (skript pkt 3) for utvalg Gruppe B",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden")
+        }
+    )
+    @PostMapping(value = "/oppdaterRessursSluttdatoGrpB")
+    public ResponseEntity<String> oppdaterRessursSluttdatoGrpB(
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
+        @Parameter(description = "SAMME dato som brukt i Gruppe A utvalget") @RequestParam LocalDate maxOTDatoLikEllerFoer,
+        @Parameter(description = "Max OT dato skal være like eller større enn") @RequestParam(defaultValue="2024-12-01") LocalDate maxOTDatoLikEllerEtter,
+        @RequestBody List<String> ekskluderNavidenter
+    ) {
+        boolean commit = "CONFIRM".equalsIgnoreCase(confirm);
+
+        return oppdaterRessursSluttdatoGrpB(maxOTDatoLikEllerFoer, maxOTDatoLikEllerEtter, ekskluderNavidenter, commit, getAuthenticatedNavIdent());
+    }
+
+    protected ResponseEntity<String> oppdaterRessursSluttdatoGrpB(LocalDate maxOTDatoLikEllerFoer, LocalDate maxOTDatoLikEllerEtter, List<String> ekskluderNavidenter, boolean commit, String userNavident) {
+        StringBuffer sb = new StringBuffer();
+        if (!commit) {
+            sb.append("DRY RUN\n");
+        }
+
+        var grpBUtvalg = utvalgGruppeB(maxOTDatoLikEllerFoer, maxOTDatoLikEllerEtter);
+        var skalOppdateres = ekskluderNavidenter(grpBUtvalg, ekskluderNavidenter);
+
+        sb.append("GruppeB - alle som har ressurs.Sluttdato = null, og aktiv OT i perioden (FOM-TOM): ")
+            .append(maxOTDatoLikEllerEtter).append(" - ").append(maxOTDatoLikEllerFoer).append("\n");
+        sb.append("Antall navidenter å ekskludere: ").append(ekskluderNavidenter.size()).append("\n");
+        sb.append("Antall i Gruppe B utvalg: ").append(grpBUtvalg.size()).append("\n");
+        sb.append("Antall å oppdatere: ").append(skalOppdateres.size()).append("\n");
+
+        var inputMetadata = new InputMetadata(
+            "nom-api MastreStatligeINom",
+            "oppdaterRessursSluttdatoGrpB",
+            Map.of("maxOTDat0LikEllerFoer", maxOTDatoLikEllerFoer, "maxOTDatoLikEllerEtter", maxOTDatoLikEllerEtter, "ekskluderNavidenter", ekskluderNavidenter),
+            new Origination(userNavident, "nom-api")
+        );
+
+        oppdaterRessursSluttdato(commit, skalOppdateres, inputMetadata);
+
+        sb.append("\nnavident, sektor, startdato, sluttdato, maxOtSluttDato\n");
+        skalOppdateres.forEach(getRessursRow(sb));
+
+        log.info(sb.toString());
+        return ResponseEntity.ok(sb.toString());
+    }
+
+    @Operation(
+        description = "Oppdater sluttDato på Ressurs (skript pkt 3) for utvalg Gruppe C",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden")
+        }
+    )
+    @PostMapping(value = "/oppdaterRessursSluttdatoGrpC")
+    public ResponseEntity<String> oppdaterRessursSluttdatoGrpC(
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
+        @Parameter(description = "SAMME dato som brukt i Gruppe A utvalget") @RequestParam LocalDate maxOTDatoLikEllerFoer,
+        @Parameter(description = "Ressurs sluttdato skal være etter (2024-12-31)") @RequestParam(defaultValue="2024-12-31") LocalDate ressursSluttDatoEtter,
+        @RequestBody List<String> ekskluderNavidenter
+    ) {
+        boolean commit = "CONFIRM".equalsIgnoreCase(confirm);
+
+        return oppdaterRessursSluttdatoGrpC(maxOTDatoLikEllerFoer, ressursSluttDatoEtter, ekskluderNavidenter, commit, getAuthenticatedNavIdent());
+    }
+
+    protected ResponseEntity<String> oppdaterRessursSluttdatoGrpC(LocalDate maxOTDatoLikEllerFoer, LocalDate ressursSluttDatoEtter, List<String> ekskluderNavidenter, boolean commit, String userNavident) {
+        StringBuffer sb = new StringBuffer();
+        if (!commit) {
+            sb.append("DRY RUN\n");
+        }
+
+        var grpBUtvalg = utvalgGruppeC(maxOTDatoLikEllerFoer, ressursSluttDatoEtter);
+        var skalOppdateres = ekskluderNavidenter(grpBUtvalg, ekskluderNavidenter);
+
+        sb.append("GruppeC - alle som har ressurs.Sluttdato etter ").append(ressursSluttDatoEtter)
+            .append(", og ikke har aktiv OT etter ").append(maxOTDatoLikEllerFoer).append("\n");
+        sb.append("Antall navidenter å ekskludere: ").append(ekskluderNavidenter.size()).append("\n");
+        sb.append("Antall i Gruppe C utvalg: ").append(grpBUtvalg.size()).append("\n");
+        sb.append("Antall å oppdatere: ").append(skalOppdateres.size()).append("\n");
+
+        var inputMetadata = new InputMetadata(
+            "nom-api MastreStatligeINom",
+            "oppdaterRessursSluttdatoGrpC",
+            Map.of("maxOTDat0LikEllerFoer", maxOTDatoLikEllerFoer, "ressursSluttDatoEtter", ressursSluttDatoEtter, "ekskluderNavidenter", ekskluderNavidenter),
+            new Origination(userNavident, "nom-api")
+        );
+
+        oppdaterRessursSluttdato(commit, skalOppdateres, inputMetadata);
+
+        sb.append("\nnavident, sektor, startdato, sluttdato, maxOtSluttDato\n");
+        skalOppdateres.forEach(getRessursRow(sb));
+
+        log.info(sb.toString());
+        return ResponseEntity.ok(sb.toString());
     }
 
     protected String markerStatligeSomMastret(boolean commit, List<String> ekskluderNavidenter) {
@@ -160,8 +274,8 @@ public class MastreStatligeINom {
             .filter(ressurs -> !ekskluderNavidenter.contains(ressurs.navident()))
             .toList();
 
-        sb.append("Antall ikke mastret: ").append(ikkeMastretStatlige.size()).append("\n");
-        sb.append("Antall ikke mastret uten ekskluderte navidenter: ").append(ikkeMastretUtenEkskluderteNavidenter.size()).append("\n");
+        sb.append("Antall å mastre: ").append(ikkeMastretStatlige.size()).append("\n");
+        sb.append("Antall å mastre uten ekskluderte navidenter: ").append(ikkeMastretUtenEkskluderteNavidenter.size()).append("\n");
 
         if (commit) {
             mastreNavidenter(ikkeMastretUtenEkskluderteNavidenter);
@@ -169,9 +283,106 @@ public class MastreStatligeINom {
         return sb.toString();
     }
 
-    private static List<Ressurs> eksludertDeMedMaxOTFoerApril2025(List<Ressurs> ikkeMastretUtenEkskluderteNavidenter) {
-        return ikkeMastretUtenEkskluderteNavidenter.stream()
-            .filter(ressurs -> ressurs.maxOtSluttDato() == null || ressurs.maxOtSluttDato().isAfter(LocalDate.of(2025, 3, 31)))
+    protected String oppdaterRessursSluttdato(boolean commit, List<Ressurs> ressurser, InputMetadata inputMetadata) {
+        StringBuilder sb = new StringBuilder();
+        if (!commit) {
+            sb.append("DRY RUN\n");
+        }
+
+        sb.append("Antall navidenter å oppdatere sluttDato på samt trigge synk til IR: ").append(ressurser.size()).append("\n");
+
+        if ( commit ) {
+            ressurser.forEach(ressurs ->
+                ressursCommandService.oppdaterRessursSluttdatoEvent(
+                    new OppdaterSluttdatoCommand(
+                        ressurs.fid(),
+                        ressurs.maxOtSluttDato().equals(MAX_DATE) ? Optional.empty() : Optional.of(ressurs.maxOtSluttDato()),
+                        inputMetadata
+                    )
+                )
+            );
+        }
+        return sb.toString();
+    }
+
+    List<Ressurs> utvalgGruppeA(LocalDate maxOTDateEtter) {
+        // Statlige, mastret og
+        // seneste oT.tomDato > 'maxOTDate'  <- Ta med kun de er aktive etter denne datoen ('fremtidige')
+        return getAlleStatligeMastrede().stream()
+            .filter(ressurs -> etter(ressurs.maxOtSluttDato(), maxOTDateEtter))
+            .toList();
+    }
+
+    List<Ressurs> utvalgGruppeB(LocalDate maxOTDateTLikEllerFoer, LocalDate maxOTDateLikEllerEtter) {
+        // Statlige, mastret og
+        // ressurs.sluttDato == NULL
+        // og seneste oT.tomDato <= 'maxOTDateLikEllerEtter'    <- Ekskludere Gruppe A (Samme dato som brukt i gruppe A)
+        // og seneste oT.tomDato >= 'maxOTDateLikEllerEtter'    <- Ekskluder gamle datoer - bruk 2024.12.01
+        return getAlleStatligeMastrede().stream()
+            .filter(ressurs -> ressurs.sluttDato() == null)
+            .filter(ressurs -> likEllerFoer(ressurs.maxOtSluttDato(), maxOTDateTLikEllerFoer))
+            .filter(ressurs -> likEllerEtter(ressurs.maxOtSluttDato(), maxOTDateLikEllerEtter))
+            .toList();
+    }
+
+    List<Ressurs> utvalgGruppeC(LocalDate maxOTDateTLikEllerFoer, LocalDate ressursSluttDatoEtter) {
+        // Statlige, mastret og
+        // ressurs.sluttDato == NULL
+        // og seneste oT.tomDato <= 'maxOTDateLikEllerEtter'    <- Ekskludere Gruppe A (Samme dato som brukt i gruppe A)
+        // og ressurs.sluttDato > 'maxOTDateLikEllerEtter'    <- Ekskluder gamle datoer - bruk 2024.12.31
+        return getAlleStatligeMastrede().stream()
+            .filter(ressurs -> likEllerFoer(ressurs.maxOtSluttDato(), maxOTDateTLikEllerFoer))
+            .filter(ressurs -> ressurs.sluttDato() != null && etter(ressurs.sluttDato(), ressursSluttDatoEtter))
+            .toList();
+    }
+
+
+    List<Ressurs> getAlleStatligeSomIkkeErMastret() {
+        return ressursStateRepository.getAll().stream()
+            .filter(RessursState::isStatlig)
+            .filter(ressurs -> !nomMastered.isMastered(ressurs.navident()))
+            .map(ressurs -> {
+                var maxOtSluttDato = getMaxOTDate(ressurs.navident());
+                return new Ressurs(
+                    ressurs.fid(),
+                    ressurs.navident(),
+                    ressurs.sektor(),
+                    ressurs.startdato().orElse(null),
+                    ressurs.sluttdato().orElse(null),
+                    maxOtSluttDato
+                );
+            })
+            .toList();
+    }
+
+    List<Ressurs> getAlleStatligeMastrede() {
+        return ressursStateRepository.getAll().stream()
+            .filter(RessursState::isStatlig)
+            .filter(ressurs -> nomMastered.isMastered(ressurs.navident()))
+            .map(ressurs -> {
+                var maxOtSluttDato = getMaxOTDate(ressurs.navident());
+                return new Ressurs(
+                    ressurs.fid(),
+                    ressurs.navident(),
+                    ressurs.sektor(),
+                    ressurs.startdato().orElse(null),
+                    ressurs.sluttdato().orElse(null),
+                    maxOtSluttDato
+                );
+            })
+            .toList();
+    }
+
+    LocalDate getMaxOTDate(String navident) {
+        return orgtilknytningService.getByNavIdent(navident).stream()
+            .map(orgtilknytning -> orgtilknytning.gyldigTom().orElse(MAX_DATE))
+            .max(LocalDate::compareTo).orElse(null);
+    }
+
+
+    private static List<Ressurs> ekskluderNavidenter(List<Ressurs> ressurser, List<String> ekskluderteNavidenter) {
+        return ressurser.stream()
+            .filter(ressurs -> !ekskluderteNavidenter.contains(ressurs.navident))
             .toList();
     }
 
@@ -180,10 +391,22 @@ public class MastreStatligeINom {
     }
 
     record Ressurs(
+        String fid,
         String navident,
         Sektor sektor,
         LocalDate startDato,
         LocalDate sluttDato,
         LocalDate maxOtSluttDato    // Null, ingen OT'er. OT uten sluttdato = LocalDate.MAX
     ) {}
+
+
+    static Consumer<Ressurs> getRessursRow(StringBuffer sb) {
+        return ressurs -> {
+            sb.append(ressurs.navident()).append(", ");
+            sb.append(ressurs.sektor()).append(", ");
+            sb.append(ressurs.startDato()).append(", ");
+            sb.append(ressurs.sluttDato()).append(", ");
+            sb.append(ressurs.maxOtSluttDato()).append("\n");
+        };
+    }
 }

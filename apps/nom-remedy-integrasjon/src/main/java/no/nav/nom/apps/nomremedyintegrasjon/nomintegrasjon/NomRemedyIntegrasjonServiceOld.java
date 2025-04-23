@@ -55,9 +55,9 @@ import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.isActive
 import static org.apache.kafka.common.utils.Utils.isBlank;
 
 @Service
-public class NomRemedyIntegrasjonService {
+public class NomRemedyIntegrasjonServiceOld {
 
-    private final Logger logger = LoggerFactory.getLogger(NomRemedyIntegrasjonService.class);
+    private final Logger logger = LoggerFactory.getLogger(NomRemedyIntegrasjonServiceOld.class);
 
     private final RemedyIntegrasjonRepositoryService remedyIntegrasjonRepositoryService;
 
@@ -71,7 +71,7 @@ public class NomRemedyIntegrasjonService {
     private final Unleash unleash;
 
 
-    public NomRemedyIntegrasjonService(
+    public NomRemedyIntegrasjonServiceOld(
         RemedyIntegrasjonRepositoryService remedyIntegrasjonRepositoryService,
         NomApiClient nomApiClient,
         LeaderElection leaderElection,
@@ -199,7 +199,7 @@ public class NomRemedyIntegrasjonService {
         if (orgtilknytningEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
             return nomApiClient.getOrgtilknytningerForNavident(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData()
                     .navident()).stream()
-                .anyMatch(NomRemedyIntegrasjonService::orgtilknytningIsActiveOnCurrentDate);
+                .anyMatch(NomRemedyIntegrasjonServiceOld::orgtilknytningIsActiveOnCurrentDate);
         }
 
         if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
@@ -444,11 +444,12 @@ public class NomRemedyIntegrasjonService {
     private void avsluttRessursInRemedy(String ressursFid, LocalDate sluttdatoForRessurs, String initiatedBy) {
         if (sluttdatoForRessurs.isBefore(LocalDate.now())) {
             var ressursState = nomApiClient.getRessursByFid(ressursFid);
-
-            remedyIntegrasjonRepositoryService.markRessursForDeletion(
-                ressursState.getNavident(),
-                initiatedBy
-            );
+            if (!unleash.isEnabled("nom-remedy.ny-remedy-integrasjon")) {
+                remedyIntegrasjonRepositoryService.markRessursForDeletion(
+                    ressursState.getNavident(),
+                    initiatedBy
+                );
+            }
 
             logger.info("Deleted ressurs with fid {} and with sluttdato {}", ressursFid, sluttdatoForRessurs);
         }
@@ -468,9 +469,11 @@ public class NomRemedyIntegrasjonService {
                 .orElse(true)
             ).toList();
 
-        ressurserToDeleteFromRemedy.forEach(ressursSomSkalSlettes ->
-            remedyIntegrasjonRepositoryService.markRessursForDeletion(ressursSomSkalSlettes.getNavident(), initiatedBy)
-        );
+        if (!unleash.isEnabled("nom-remedy.ny-remedy-integrasjon")) {
+            ressurserToDeleteFromRemedy.forEach(ressursSomSkalSlettes ->
+                remedyIntegrasjonRepositoryService.markRessursForDeletion(ressursSomSkalSlettes.getNavident(), initiatedBy)
+            );
+        }
 
         logger.info("Deleted following resssurser from remedy: {}", ressurserToDeleteFromRemedy.stream().map(RessursState::getNavident).toList());
     }
@@ -762,7 +765,7 @@ public class NomRemedyIntegrasjonService {
     }
 
     private List<Telefon> getTelefonerFromNom(String navident) {
-        return nomApiClient.getTelefonnummer(navident).stream().sorted(
+        return nomApiClient.getTelefonnummere(navident).stream().sorted(
             (o1, o2) -> {
                 if (o1.getType().equals(o2.getType())) return 0;
                 if (o1.getType().equals(TelefonType.NAV_TJENESTE_TELEFON)) return -1;

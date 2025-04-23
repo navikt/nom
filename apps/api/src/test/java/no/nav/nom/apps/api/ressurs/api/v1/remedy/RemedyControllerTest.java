@@ -66,7 +66,8 @@ public class RemedyControllerTest extends RestTestBase {
             Optional.empty(),
             null,
             Collections.emptyList(),
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            "S123456"
         );
         return Optional.of(ressursState);
     }
@@ -195,7 +196,8 @@ public class RemedyControllerTest extends RestTestBase {
                 Optional.empty(), Optional.empty(),
                 null,
                 Collections.emptyList(),
-                IdentType.STANDARD
+                IdentType.STANDARD,
+                "S123456"
             ));
 
         OpprettRessursRequest request = OpprettRessursRequest.builder()
@@ -315,7 +317,8 @@ public class RemedyControllerTest extends RestTestBase {
             Optional.empty(),
             null,
             Collections.emptyList(),
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            "S123456"
         )));
 
         when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
@@ -330,7 +333,8 @@ public class RemedyControllerTest extends RestTestBase {
                 Optional.empty(),
                 null,
                 Collections.emptyList(),
-                IdentType.STANDARD
+                IdentType.STANDARD,
+                "S123456"
             ));
 
         OpprettRessursRequest request = OpprettRessursRequest.builder()

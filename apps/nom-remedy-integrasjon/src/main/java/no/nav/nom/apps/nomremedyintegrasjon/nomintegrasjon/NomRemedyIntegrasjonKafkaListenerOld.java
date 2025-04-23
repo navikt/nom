@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 @Service
 public class NomRemedyIntegrasjonKafkaListenerOld {
 
-    private final NomRemedyIntegrasjonService nomRemedyIntegrasjonService;
+    private final NomRemedyIntegrasjonServiceOld nomRemedyIntegrasjonServiceOld;
     private final MasteredRessursStateRepository masteredRessursStateRepository;
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
@@ -35,7 +35,7 @@ public class NomRemedyIntegrasjonKafkaListenerOld {
     private final Logger logger = LoggerFactory.getLogger(NomRemedyIntegrasjonKafkaListenerOld.class);
 
     public NomRemedyIntegrasjonKafkaListenerOld(
-        NomRemedyIntegrasjonService nomRemedyIntegrasjonService,
+        NomRemedyIntegrasjonServiceOld nomRemedyIntegrasjonServiceOld,
         MasteredRessursStateRepository masteredRessursStateRepository,
         RessursStateRepository ressursStateRepository,
         OrgtilknytningStateRepository orgtilknytningStateRepository,
@@ -44,7 +44,7 @@ public class NomRemedyIntegrasjonKafkaListenerOld {
         NomStateOrgtilknytningListener nomStateOrgtilknytningListener,
         NomStateOrgEnhetListener nomStateOrgEnhetListener
     ) {
-        this.nomRemedyIntegrasjonService = nomRemedyIntegrasjonService;
+        this.nomRemedyIntegrasjonServiceOld = nomRemedyIntegrasjonServiceOld;
         this.masteredRessursStateRepository = masteredRessursStateRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -67,7 +67,7 @@ public class NomRemedyIntegrasjonKafkaListenerOld {
         putMDCContext(recordId, ressursEvent.getClass().getSimpleName());
 
         if (isNomOriginationOrNomMastered(ressursEvent)) {
-            nomRemedyIntegrasjonService.handleRessursEvent(ressursEvent);
+            nomRemedyIntegrasjonServiceOld.handleRessursEvent(ressursEvent);
         } else {
             logger.info("Skipping event with fid {} since it is not originated from nom", ressursEvent.getFid());
         }
@@ -88,7 +88,7 @@ public class NomRemedyIntegrasjonKafkaListenerOld {
         putMDCContext(recordId, orgtilknytningEvent.getClass().getSimpleName());
 
         if (isNomOriginationOrNomMastered(orgtilknytningEvent)) {
-            nomRemedyIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningEvent);
+            nomRemedyIntegrasjonServiceOld.handleOrgtilknytningEvent(orgtilknytningEvent);
         } else {
             logger.info("Skipping event with fid {} since it is not originated from nom", orgtilknytningEvent.getFid());
         }
@@ -111,7 +111,7 @@ public class NomRemedyIntegrasjonKafkaListenerOld {
         } catch (InterruptedException e) {
             logger.error("Thread interrupted while waiting for NomStateMasteredRessursListener to read to end on startup", e);
         }
-        nomRemedyIntegrasjonService.handleNomMasteredRessursEvent(recordId, nomMasteredRessursEvent);
+        nomRemedyIntegrasjonServiceOld.handleNomMasteredRessursEvent(recordId, nomMasteredRessursEvent);
         MDC.clear();
     }
 

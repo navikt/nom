@@ -100,7 +100,7 @@ public class RessursStateBuilder {
     }
 
     public RessursState build() {
-        return new RessursState(fid, personident, navident, sektor, visningsnavn, primaryTelefonnummer, sluttdato, startdato, primaryFysiskBrukersted, fysiskeBrukersteder, IdentType.STANDARD);
+        return new RessursState(fid, personident, navident, sektor, visningsnavn, primaryTelefonnummer, sluttdato, startdato, primaryFysiskBrukersted, fysiskeBrukersteder, IdentType.STANDARD, null);
     }
 
 }

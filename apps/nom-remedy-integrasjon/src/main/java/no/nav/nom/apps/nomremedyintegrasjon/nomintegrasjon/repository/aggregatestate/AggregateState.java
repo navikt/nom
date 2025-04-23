@@ -1,12 +1,5 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -14,6 +7,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -33,6 +32,15 @@ public class AggregateState {
     @Column(name = "aggregate_state_id")
     private UUID aggregateStateId;
 
+    @Column(name = "state_fid")
+    private String stateFid;
+
+    @Column(name = "state_type")
+    private String stateType;
+
+    @Column(name = "masseflyttet_fra_fid")
+    private String masseflyttetFraFid;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -44,16 +52,4 @@ public class AggregateState {
 
     @Column(name = "masseflytting")
     private Boolean masseflytting;
-
-    @Column(name = "state_type")
-    private String stateType;
-
-    @Column(name = "state_fid")
-    private String stateFid;
-
-    @Column(name = "event_type")
-    private String eventType;
-
-    @Column(name = "event_fid")
-    private String eventFid;
 }

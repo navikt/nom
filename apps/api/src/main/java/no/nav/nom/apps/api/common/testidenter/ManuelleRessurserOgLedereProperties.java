@@ -36,7 +36,8 @@ public record ManuelleRessurserOgLedereProperties(
                 Optional.of(LocalDate.of(2022, 1, 1)),
                 Optional.of("2700"),
                 List.of("2700"),
-                IdentType.STANDARD
+                IdentType.STANDARD,
+                "nom-api"
             );
         }
 
@@ -50,7 +51,8 @@ public record ManuelleRessurserOgLedereProperties(
                 LocalDate.of(2022, 1, 1),
                 Optional.empty(),
                 Optional.empty(),
-                null
+                null,
+                "nom-api"
             );
         }
 

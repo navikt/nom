@@ -179,7 +179,8 @@ public class RessursLastFraDvhTest extends DvhTestBase {
             Optional.empty(),
             Optional.empty(),
             Collections.emptyList(),
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            null
         );
 
         dvhRessurser = List.of(
@@ -227,7 +228,8 @@ public class RessursLastFraDvhTest extends DvhTestBase {
             Optional.empty(),
             Optional.empty(),
             Collections.emptyList(),
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            null
         );
 
         var dvhRessurser = List.of(
@@ -271,7 +273,8 @@ public class RessursLastFraDvhTest extends DvhTestBase {
             Optional.empty(),
             Optional.empty(),
             Collections.emptyList(),
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            null
         );
 
         var dvhRessurser = List.of(
@@ -315,7 +318,8 @@ public class RessursLastFraDvhTest extends DvhTestBase {
             Optional.empty(),
             Optional.empty(),
             Collections.emptyList(),
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            null
         );
 
         var dvhRessurser = List.of(
@@ -362,7 +366,8 @@ public class RessursLastFraDvhTest extends DvhTestBase {
              Optional.empty(),
              Optional.empty(),
              Collections.emptyList(),
-             IdentType.STANDARD
+             IdentType.STANDARD,
+             null
          );
 
          var dvhRessurser = List.of(
@@ -405,7 +410,8 @@ public class RessursLastFraDvhTest extends DvhTestBase {
             Optional.empty(),
             Optional.empty(),
             Collections.emptyList(),
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            null
         );
 
         var dvhRessurser = List.of(
@@ -449,7 +455,8 @@ public class RessursLastFraDvhTest extends DvhTestBase {
             Optional.of(LocalDate.now()),
             null,
             Collections.emptyList(),
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            null
         );
         return ressursState;
     }

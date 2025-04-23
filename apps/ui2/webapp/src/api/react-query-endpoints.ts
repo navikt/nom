@@ -38,6 +38,7 @@ import type {
 const NOM_API_BASE_PATH = "/frackend/nom-api";
 const NOM_REMEDY_INTEGRATION_API_BASE_PATH = "/frackend/nom-remedy-integrasjon";
 const NOM_PAARORENDE_BASE_PATH = "/frackend/paarorende";
+const NOM_UNLEASH_BASE_PATH = "/frackend/unleash";
 
 /**
  * Intercept errors that are 401.
@@ -737,6 +738,17 @@ export const deleteParorendeForBruker = async (kontaktId: string) =>
   (
     await axios.delete<string, AxiosResponse<unknown>>(
       `${NOM_PAARORENDE_BASE_PATH}/api/kontaktinfo/${kontaktId}`,
+    )
+  ).data;
+
+type UnleashResponse = {
+  isUnleashEnabled: boolean;
+};
+
+export const getUnleashEnabled = async (unleashToggleName: string) =>
+  (
+    await axios.get<string, AxiosResponse<UnleashResponse>>(
+      `${NOM_UNLEASH_BASE_PATH}/${unleashToggleName}`,
     )
   ).data;
 

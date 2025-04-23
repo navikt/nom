@@ -11,7 +11,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import lombok.ToString;
 import org.hibernate.annotations.Immutable;
 
 @Entity
@@ -22,7 +21,6 @@ import org.hibernate.annotations.Immutable;
 @Builder(toBuilder = true)
 @EqualsAndHashCode
 @Getter
-@ToString
 public class NomIntegrasjonEntity {
 
     @Id
@@ -73,5 +71,26 @@ public class NomIntegrasjonEntity {
 
     @Column(name = "MASSEFLYTTING")
     private String masseflytting;
+
+    @Override
+    public String toString() {
+        return "NomIntegrasjonEntity{" +
+            "entryId='" + entryId + '\'' +
+            ", entryStatus='" + entryStatus + '\'' +
+            ", entryOperasjon='" + entryOperasjon + '\'' +
+            ", entryBestiller='" + entryBestiller + '\'' +
+            ", fornavn='" + fornavn + '\'' +
+            ", etternavn='" + etternavn + '\'' +
+            ", navId='" + navId + '\'' +
+            ", sektor=" + sektor +
+            ", enhetsId='" + enhetsId + '\'' +
+            ", fysiskBrukerstedId='" + fysiskBrukerstedId + '\'' +
+            ", tiltredelsesdato=" + tiltredelsesdato +
+            ", utlopsdato=" + utlopsdato +
+            ", mobil='" + mobil + '\'' +
+            ", direkteTelefon='" + direkteTelefon + '\'' +
+            ", masseflytting='" + masseflytting + '\'' +
+            '}';
+    }
 
 }

@@ -137,16 +137,16 @@ class OrgtilknytningStateRepositoryImplTest {
     }
 
     // NAVIDENT_1
-    OrgtilknytningState navident1_statlig_DOL_historisk_enhet1 = new OrgtilknytningState("FID_1", "NAVIDENT_1", "ENHET_1", Sektor.NAV_STATLIG, true, LocalDate.now().minusYears(3), Optional.of(LocalDate.now().minusYears(1).minusDays(1)), Optional.of(Tilknytningtype.FAST), Optional.empty());
-    OrgtilknytningState navident1_statlig_DOL_Aktiv_enhet1 = new OrgtilknytningState("FID_2", "NAVIDENT_1", "ENHET_1", Sektor.NAV_STATLIG, true, LocalDate.now().minusYears(1), Optional.of(LocalDate.now().plusYears(1).minusDays(1)), Optional.of(Tilknytningtype.FAST), Optional.empty());
-    OrgtilknytningState navident1_statlig_DOL_fremtidig_enhet1 = new OrgtilknytningState("FID_3", "NAVIDENT_1", "ENHET_1", Sektor.NAV_STATLIG, true, LocalDate.now().plusYears(1), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty());
+    OrgtilknytningState navident1_statlig_DOL_historisk_enhet1 = new OrgtilknytningState("FID_1", "NAVIDENT_1", "ENHET_1", Sektor.NAV_STATLIG, true, LocalDate.now().minusYears(3), Optional.of(LocalDate.now().minusYears(1).minusDays(1)), Optional.of(Tilknytningtype.FAST), Optional.empty(), "S123456");
+    OrgtilknytningState navident1_statlig_DOL_Aktiv_enhet1 = new OrgtilknytningState("FID_2", "NAVIDENT_1", "ENHET_1", Sektor.NAV_STATLIG, true, LocalDate.now().minusYears(1), Optional.of(LocalDate.now().plusYears(1).minusDays(1)), Optional.of(Tilknytningtype.FAST), Optional.empty(), "S123456");
+    OrgtilknytningState navident1_statlig_DOL_fremtidig_enhet1 = new OrgtilknytningState("FID_3", "NAVIDENT_1", "ENHET_1", Sektor.NAV_STATLIG, true, LocalDate.now().plusYears(1), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty(), "S123456");
 
-    OrgtilknytningState navident1_statlig_ikke_DOL_Aktiv_enhet2 = new OrgtilknytningState("FID_4", "NAVIDENT_1", "ENHET_2", Sektor.NAV_STATLIG, false, LocalDate.now().minusYears(1), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty());
+    OrgtilknytningState navident1_statlig_ikke_DOL_Aktiv_enhet2 = new OrgtilknytningState("FID_4", "NAVIDENT_1", "ENHET_2", Sektor.NAV_STATLIG, false, LocalDate.now().minusYears(1), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty(), "S123456");
 
     // NAVIDENT_2
-    OrgtilknytningState navident2_statlig_DOL_Aktiv_enhet2 = new OrgtilknytningState("FID_5", "NAVIDENT_2", "ENHET_2", Sektor.NAV_STATLIG, true, LocalDate.now().minusYears(1), Optional.of(LocalDate.now().plusYears(1).minusDays(1)), Optional.of(Tilknytningtype.FAST), Optional.empty());
-    OrgtilknytningState navident2_statlig_DOL_fremtidig_enhet2 = new OrgtilknytningState("FID_6", "NAVIDENT_2", "ENHET_2", Sektor.NAV_STATLIG, true, LocalDate.now().plusYears(1), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty());
+    OrgtilknytningState navident2_statlig_DOL_Aktiv_enhet2 = new OrgtilknytningState("FID_5", "NAVIDENT_2", "ENHET_2", Sektor.NAV_STATLIG, true, LocalDate.now().minusYears(1), Optional.of(LocalDate.now().plusYears(1).minusDays(1)), Optional.of(Tilknytningtype.FAST), Optional.empty(), "S123456");
+    OrgtilknytningState navident2_statlig_DOL_fremtidig_enhet2 = new OrgtilknytningState("FID_6", "NAVIDENT_2", "ENHET_2", Sektor.NAV_STATLIG, true, LocalDate.now().plusYears(1), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty(), "S123456");
 
-    OrgtilknytningState navident2_statlig_ikke_DOL_fremtidig_enhet3 = new OrgtilknytningState("FID_7", "NAVIDENT_2", "ENHET_3", Sektor.NAV_STATLIG, false, LocalDate.now().minusYears(1), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty());
+    OrgtilknytningState navident2_statlig_ikke_DOL_fremtidig_enhet3 = new OrgtilknytningState("FID_7", "NAVIDENT_2", "ENHET_3", Sektor.NAV_STATLIG, false, LocalDate.now().minusYears(1), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty(), "S123456");
 
 }

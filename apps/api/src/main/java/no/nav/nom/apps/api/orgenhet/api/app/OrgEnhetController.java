@@ -7,10 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
@@ -37,9 +33,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -90,6 +89,29 @@ public class OrgEnhetController {
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
+
+    @PostMapping()
+    @Operation(
+        description = "Henter orgenheter med for liste av id'er",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200"),
+        }
+    )
+    public ResponseEntity<Map<String, OrgEnhet>> getOrgenheterForIder(
+        @RequestBody List<String> orgenhetIder
+    ) {
+        return ResponseEntity.ok(
+            orgenhetService.getByIdBulk(orgenhetIder).entrySet().stream()
+                .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    entry -> orgEnhetMapper.mapToOrgEnhet(entry.getValue())
+                ))
+        );
+    }
+
 
     @PostMapping("/isNavIdent/{navident}/canEditOrgenhet/{orgEnhetId}")
     @Operation(
@@ -166,6 +188,15 @@ public class OrgEnhetController {
     )
     public List<OrgEnhet> hentOrgEnheter() {
         return orgenhetService.getAllEnheter().stream().map(orgEnhetMapper::mapToOrgEnhet).collect(Collectors.toList());
+    }
+
+    @GetMapping("/getRemedyEnhetId/{orgenhetId}")
+    @Operation(
+        description = "Henter remedy id til en orgenhet med gitt id",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    public ResponseEntity<String> getRemedyEnhetId(@PathVariable String orgenhetId) {
+        return ResponseEntity.ok(orgEnhetMapper.getRemedyEnhetId(orgenhetId));
     }
 
     @GetMapping("/kanHaRessurser")
@@ -260,12 +291,11 @@ public class OrgEnhetController {
             var ressurser = ressursRestService.findRessurserByNavident(aktiveEllerFremtidigeNavidenter);
 
             // sort ressurser by fornavn and etternavn
-            List<Ressurs> sortedRessurser = ressurser.stream().sorted((r1, r2) -> {
+            return ressurser.stream().sorted((r1, r2) -> {
                 var n1 = r1.state().visningsnavn();
                 var n2 = r2.state().visningsnavn();
                 return n1.fornavn().compareTo(n2.fornavn()) == 0 ? n1.etternavn().compareTo(n2.etternavn()) : n1.fornavn().compareTo(n2.fornavn());
             }).toList();
-            return sortedRessurser;
         } else {
             // get all ressurser under orgenhet
             Optional<OrgEnhet> orgEnhet = orgenhetService.getById(orgenhetId)
@@ -287,12 +317,11 @@ public class OrgEnhetController {
                 .toList();
 
             // sort ressurser by fornavn and etternavn
-            List<Ressurs> sortedRessurser = ressurser.stream().sorted((r1, r2) -> {
+            return ressurser.stream().sorted((r1, r2) -> {
                 var n1 = r1.state().visningsnavn();
                 var n2 = r2.state().visningsnavn();
                 return n1.fornavn().compareTo(n2.fornavn()) == 0 ? n1.etternavn().compareTo(n2.etternavn()) : n1.fornavn().compareTo(n2.fornavn());
             }).toList();
-            return sortedRessurser;
         }
     }
 }

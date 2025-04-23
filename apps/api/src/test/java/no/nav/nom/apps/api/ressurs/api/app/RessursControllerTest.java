@@ -1142,7 +1142,7 @@ public class RessursControllerTest extends RestTestBase {
 
         webTestClient.get()
             .uri(uriBuilder -> uriBuilder
-                .path("/app/ressurser/{navident}/telefonnummer")
+                .path("/app/ressurser/{navident}/telefonnummere")
                 .build(navident)
             )
             .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
@@ -1243,8 +1243,8 @@ public class RessursControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should return list of telefonnummer for given navident")
-    void test_getTelefonnummer_should_return_list() {
+    @DisplayName("Should return list of telefonnummere for given navident")
+    void test_getTelefonnummere_should_return_list() {
         String navident = "x123456";
         String expectedTelefonnummer1 = "12345678";
         String expectedTelefonnummer2 = "87654321";
@@ -1260,7 +1260,7 @@ public class RessursControllerTest extends RestTestBase {
 
         webTestClient.get()
             .uri(uriBuilder -> uriBuilder
-                .path("/app/ressurser/{navident}/telefonnummer")
+                .path("/app/ressurser/{navident}/telefonnummere")
                 .build(navident)
             )
             .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
@@ -1268,6 +1268,32 @@ public class RessursControllerTest extends RestTestBase {
             .expectStatus().isOk()
             .expectBodyList(Ressurs.Telefon.class)
             .isEqualTo(telefoner);
+    }
+
+    @Test
+    @DisplayName("Should return list of telefonnummer for given navident")
+    void test_getTelefonnummer_should_return_primary_phone() {
+        String navident = "x123456";
+        String expectedTelefonnummer = "12345678";
+        var telefoner = List.of(
+            new Ressurs.Telefon(expectedTelefonnummer, TelefonType.NAV_KONTOR_TELEFON)
+        );
+        when(ressursStateRepository.findByNavident(navident))
+            .thenReturn(Optional.of(ressursState().toBuilder().navident(navident).build()));
+
+        when(ressursContactDetailsResolver.fetchTelefoner(navident))
+            .thenReturn(telefoner);
+
+        webTestClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/ressurser/{navident}/telefonnummer")
+                .build(navident)
+            )
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(String.class)
+            .isEqualTo(expectedTelefonnummer);
     }
 
     @Test

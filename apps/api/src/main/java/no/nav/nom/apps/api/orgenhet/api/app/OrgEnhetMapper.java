@@ -50,6 +50,12 @@ public class OrgEnhetMapper {
         this.underordnetResolver = underordnetResolver;
     }
 
+    public String getRemedyEnhetId(String orgEnhetId) {
+        return remedyEnhetMapperService.findByNomId(orgEnhetId)
+            .map(RemedyEnhet::remedyEnhetId)
+            .orElse(null);
+    }
+
     public OrgEnhet mapToOrgEnhet(IOrgenhet orgEnhet) {
 
         var remedyEnhetId = remedyEnhetMapperService.findByNomId(orgEnhet.getId()).map(RemedyEnhet::remedyEnhetId);

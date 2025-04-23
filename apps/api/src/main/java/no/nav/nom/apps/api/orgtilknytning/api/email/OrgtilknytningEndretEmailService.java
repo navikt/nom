@@ -67,6 +67,8 @@ public class OrgtilknytningEndretEmailService {
     private final NomMastered nomMastered;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgenhetService orgenhetService;
+    private final Unleash unleash;
+    private final String UNLEASH_SKRU_AV_EPOST_ENDRING = "nom.ot_endring_epost.skru_av_utsendelse";
 
 
     public OrgtilknytningEndretEmailService(
@@ -81,7 +83,7 @@ public class OrgtilknytningEndretEmailService {
         DvhStartupLoadMonitor dvhStartupLoadMonitor,
         LeaderElection leaderElection,
         NomMastered nomMastered, RemedyEnhetMapperService remedyEnhetMapperService,
-        OrgenhetService orgenhetService
+        OrgenhetService orgenhetService, Unleash unleash
     ) {
         this.microsoftGraphClient = microsoftGraphClient;
         this.freemarkerConfig = freemarkerConfig;
@@ -96,6 +98,7 @@ public class OrgtilknytningEndretEmailService {
         this.nomMastered = nomMastered;
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.orgenhetService = orgenhetService;
+        this.unleash = unleash;
     }
 
     public void addToOrgtilknytningEndringerQueue(String fid, OTEndretData otEndretData) {
@@ -191,7 +194,11 @@ public class OrgtilknytningEndretEmailService {
 
             log.info("Sender OT endringer epost subject: {}, recipients: {}, message: {}", subject, recipientList, body);
             EmailMessage message = new EmailMessage(subject, body, recipientList);
-            microsoftGraphClient.sendEmail(message).subscribe();
+            if (!unleash.isEnabled(UNLEASH_SKRU_AV_EPOST_ENDRING)) {
+                microsoftGraphClient.sendEmail(message).subscribe();
+            } else {
+                log.info("Epost sending is disabled by Unleash");
+            }
         } catch (ADResponseException e) {
             throw new RessursOpprettetEmailException("Fant ikke leder epost adresse for leder");
         } catch (IOException | TemplateException e) {
@@ -225,8 +232,11 @@ public class OrgtilknytningEndretEmailService {
             String subject = String.format("Masseflytting av ressurser fra %s til %s", gammelOrgEnhet, masseFlyttingRequest.nyOrgenhetId());
             String body = getFormattedEmailBody(masseFlyttingRequest, failedAvvikleOrgtilknytninger, antallFlyttet, gammelOrgEnhet, innsenderVisningsnavn);
             EmailMessage message = new EmailMessage(subject, body, recipientList);
-            microsoftGraphClient.sendEmail(message).subscribe();
-
+            if (!unleash.isEnabled(UNLEASH_SKRU_AV_EPOST_ENDRING)) {
+                microsoftGraphClient.sendEmail(message).subscribe();
+            } else {
+                log.info("Epost sending is disabled by Unleash");
+            }
         } catch (ADResponseException e) {
             log.error("Fant ikke innsender sin epost adresse for masseflytting", e);
         } catch (IOException | TemplateException e) {
@@ -289,8 +299,11 @@ public class OrgtilknytningEndretEmailService {
             );
             log.info("Masseflytting epost. Mottakere: {}\nBody:\n{}", recipientList, body);
             EmailMessage message = new EmailMessage(subject, body, recipientList);
-            microsoftGraphClient.sendEmail(message).subscribe();
-
+            if (!unleash.isEnabled(UNLEASH_SKRU_AV_EPOST_ENDRING)) {
+                microsoftGraphClient.sendEmail(message).subscribe();
+            } else {
+                log.info("Epost sending is disabled by Unleash");
+            }
         } catch (ADResponseException e) {
             log.error("Fant ikke innsender sin epost adresse for masseflytting", e);
         } catch (IOException | TemplateException e) {

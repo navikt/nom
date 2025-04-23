@@ -48,8 +48,8 @@ export function capitalizeNameFysiskBrukersted(name: string) {
     "vei",
     "gate",
     "plass",
-    "allé",
     "alle",
+    "allé",
     "sti",
     "terrasse",
     "bakke",
@@ -65,11 +65,22 @@ export function capitalizeNameFysiskBrukersted(name: string) {
     "etasje",
   ];
 
-  let storeForbokstaver = capitalizeName(name);
+  let storeForbokstaver = capitalizeName(
+    name.toLowerCase().replaceAll("allè", "allé"),
+  );
 
+  // Bruker RegEx som finnner tilfeller av ordene som skal ha liten forbokstav
+  // som står alene og bytter dem ut med samme ord med liten forbokstav
   for (const word of litenForbokstavOrd) {
-    const wordRegex = new RegExp(`\\b${capitalizeName(word)}\\b`, "g");
-    storeForbokstaver = storeForbokstaver.replace(wordRegex, word);
+    const wordRegex = new RegExp(
+      `(^|[\\s-])${capitalizeName(word)}(?=\\s|$|-)`,
+      "g",
+    );
+
+    storeForbokstaver = storeForbokstaver.replace(
+      wordRegex,
+      (_, prefix) => `${prefix}${word}`,
+    );
   }
 
   return storeForbokstaver;

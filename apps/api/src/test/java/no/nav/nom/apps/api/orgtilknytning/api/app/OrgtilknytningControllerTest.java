@@ -53,11 +53,9 @@ import static no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestServi
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.clearInvocations;
 
 public class OrgtilknytningControllerTest extends RestTestBase {
 
@@ -1875,8 +1873,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             true
         );
 
-        var orgtilknytningState1 = new OrgtilknytningState("fid1", "navident1", "orgEnhetId1", Sektor.NAV_STATLIG, false, LocalDate.now(), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty());
-        var orgtilknytningState2 = new OrgtilknytningState("fid2", "navident2", "orgEnhetId2", Sektor.NAV_STATLIG, true, LocalDate.now(), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty());
+        var orgtilknytningState1 = new OrgtilknytningState("fid1", "navident1", "orgEnhetId1", Sektor.NAV_STATLIG, false, LocalDate.now(), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty(), "S123456");
+        var orgtilknytningState2 = new OrgtilknytningState("fid2", "navident2", "orgEnhetId2", Sektor.NAV_STATLIG, true, LocalDate.now(), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty(), "S123456");
         saveOrgtilknytninger(List.of(orgtilknytningState1, orgtilknytningState2));
 
         // Ny enhet
@@ -1919,8 +1917,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         LocalDate flytteDato = LocalDate.now();
 
-        var orgtilknytningState1 = new OrgtilknytningState("fid1", "navident1", "orgEnhetId1", Sektor.NAV_STATLIG, false, flytteDato.minusMonths(1), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty());
-        var orgtilknytningState2 = new OrgtilknytningState("fid2", "navident2", "orgEnhetId2", Sektor.NAV_STATLIG, true, flytteDato.plusMonths(1), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty());
+        var orgtilknytningState1 = new OrgtilknytningState("fid1", "navident1", "orgEnhetId1", Sektor.NAV_STATLIG, false, flytteDato.minusMonths(1), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty(), "S123456");
+        var orgtilknytningState2 = new OrgtilknytningState("fid2", "navident2", "orgEnhetId2", Sektor.NAV_STATLIG, true, flytteDato.plusMonths(1), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty(), "S123456");
         saveOrgtilknytninger(List.of(orgtilknytningState1, orgtilknytningState2));
 
         when(orgenhetService.getById("orgEnhetId1")).thenReturn(Optional.of(new OrgEnhet(OrgEnhetState.builder().fid("FID_1").id("orgEnhetId1").navn("Enhet 1").build())));
