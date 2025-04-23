@@ -247,7 +247,6 @@ function VisningsnavnForm({
             label="Etternavn"
             type="text"
             {...register("visningsetternavn")}
-            readOnly={!hasAdminAccess}
           />
         </div>
         <TextField
