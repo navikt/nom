@@ -41,6 +41,7 @@ export interface RessursState {
   primaryFysiskBrukersted?: string;
   fysiskeBrukersteder: string[];
   identType: IdentType;
+  sistEndretAv?: string;
 }
 
 export enum Sektor {
@@ -76,6 +77,7 @@ export interface OrgtilknytningState {
   gyldigTom?: string;
   orgtilknytningType?: Tilknytningtype;
   masseflyttetFraFid?: string;
+  sistEndretAv?: string;
 }
 
 export enum Tilknytningtype {
@@ -373,6 +375,27 @@ export interface SessionInfoResponse {
 export enum UserRoles {
   ROLE_WRITE = "ROLE_WRITE",
   ROLE_READONLY = "ROLE_READONLY",
+  ROLE_EXTENDED_READONLY = "ROLE_EXTENDED_READONLY",
+}
+
+export interface RobotOrgtilknytning {
+  orgenhetId: string;
+  orgenhetNavn: string;
+  /** @format date */
+  gyldigFom: string;
+  /** @format date */
+  gyldigTom?: string;
+}
+
+export interface RobotRessurs {
+  navident: string;
+  visningsnavn: string;
+  sektor: Sektor;
+  /** @format date */
+  startdato?: string;
+  /** @format date */
+  sluttdato?: string;
+  orgtilknytninger: RobotOrgtilknytning[];
 }
 
 export interface RessursOrgtilknytningKoblingInfo {

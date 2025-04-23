@@ -9,8 +9,10 @@ import { Ressurser } from "~/sanitychecks/Ressurs/Ressurser.tsx";
 import { RessurserMedOverlappendeDOL } from "~/sanitychecks/Ressurs/RessurserMedOverlappendeDOL.tsx";
 import { RessursMedBlankMellomnavn } from "~/sanitychecks/Ressurs/RessursMedBlankMellomnavn.tsx";
 import { RessursMedOTUtenAktivEnhet } from "~/sanitychecks/Ressurs/RessursMedOTUtenAktivEnhet.tsx";
+import { RessursRoboter } from "~/sanitychecks/Ressurs/RessursRoboter.tsx";
 import { RessursSluttetMedAktivOT } from "~/sanitychecks/Ressurs/RessursSluttetMedAktivOT.tsx";
 import { RessursUlikSluttdatoOrgtilknytning } from "~/sanitychecks/Ressurs/RessursUlikSluttdatoOrgtilknytning.tsx";
+import { RessursUtenOrgtilknytning } from "~/sanitychecks/Ressurs/RessursUtenOrgtilknytning.tsx";
 
 export const Route = createFileRoute("/sanity-checks/ressurs")({
   component: () => {
@@ -70,6 +72,12 @@ function ListSelector(props: { selected: string }) {
     case "RessurserMedOverlappendeDOL": {
       return <RessurserMedOverlappendeDOL />;
     }
+    case "RessursUtenOrgtilknytning": {
+      return <RessursUtenOrgtilknytning />;
+    }
+    case "RessursRoboter": {
+      return <RessursRoboter />;
+    }
     default: {
       return <></>;
     }
@@ -105,6 +113,10 @@ function RessursSanityChecks() {
         <option value="RessurserMedOverlappendeDOL">
           Ressurser med overlappende DOL
         </option>
+        <option value="RessursUtenOrgtilknytning">
+          Ressurser uten orgtilknytninger
+        </option>
+        <option value="RessursRoboter">Robot-ressurser</option>
       </Select>
       <ListSelector selected={selected} />
     </div>

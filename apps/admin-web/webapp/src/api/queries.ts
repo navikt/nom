@@ -26,6 +26,7 @@ import type {
   RessursOrgtilknytningKoblingInfo,
   RessursOrgtilknytningUlikSluttdato,
   RessursStateKafkaDTO,
+  RobotRessurs,
   SessionInfoResponse,
 } from "~/types/nom-admin/nom-admin-models.ts";
 import type {
@@ -585,4 +586,22 @@ export async function getRemedyCompareDiffPaaRemedyEnhet(): Promise<
       timeout: 120_000, // 120 seconds
     })
     .json<RemedyCompareResult[]>();
+}
+
+export async function getRessurserUtenOrgtilknytning(): Promise<
+  RessursState[]
+> {
+  return await ky
+    .get(`${API_BASE_URL}/SanityCheck/ressurs/ressursUtenOrgtilknytning`, {
+      timeout: 120_000, // 120 seconds
+    })
+    .json<RessursState[]>();
+}
+
+export async function getRobotRessurser(): Promise<RobotRessurs[]> {
+  return await ky
+    .get(`${API_BASE_URL}/SanityCheck/ressurs/robotRessurser`, {
+      timeout: 120_000, // 120 seconds
+    })
+    .json<RobotRessurs[]>();
 }
