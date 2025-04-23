@@ -89,7 +89,7 @@ export function SektorStep() {
   );
 
   const [selectedTilknytningtype, setSelectedTilknytningtype] = useState(
-    tilknytningtype ?? sektor === Sektor.NAV_KOMMUNAL
+    (tilknytningtype ?? sektor === Sektor.NAV_KOMMUNAL)
       ? Tilknytningtype.INGEN
       : (sektor === Sektor.NAV_STATLIG
           ? tilknytningstyperStatlige

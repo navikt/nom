@@ -1,6 +1,8 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { FloppydiskIcon } from "@navikt/aksel-icons";
 import {
+  Button,
   Heading,
   HelpText,
   HStack,
@@ -29,7 +31,6 @@ import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBruker
 import { UserImage } from "~/components/UserImage";
 import { showToast } from "~/hooks/showToast";
 import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
-import { SaveOrAbortButtons } from "~/pages/ResourcePage/EditForms/SaveOrAbortButtons";
 import {
   DagligLeder,
   Epost,
@@ -146,7 +147,13 @@ export function EditPersonOpplysninger({
           queryKey: ressurserKeys.id(ressurs.navident),
         })
         .then();
-      navigate({ search: {}, params: (previous) => previous }).then();
+      navigate({
+        to: "/ressurs/$id",
+        search: { editPersonopplysninger: undefined },
+        params: {
+          id: ressurs?.navident,
+        },
+      }).then();
     },
   });
 
@@ -329,9 +336,44 @@ export function EditPersonOpplysninger({
             />
           )}
         </VStack>
-        {editPersonopplysninger ? (
-          <SaveOrAbortButtons isLoading={isPending} />
-        ) : undefined}
+        {editPersonopplysninger && (
+          <div
+            css={css`
+              display: flex;
+              justify-content: flex-end;
+              gap: var(--a-spacing-4);
+            `}
+          >
+            <Button
+              data-cy="avbryt-button"
+              onClick={() =>
+                navigate({
+                  to: "/ressurs/$id",
+                  search: { editPersonopplysninger: undefined },
+                  params: {
+                    id: ressurs?.navident,
+                  },
+                })
+              }
+              size="small"
+              type="button"
+              variant="secondary"
+            >
+              Avbryt
+            </Button>
+
+            <Button
+              data-cy="lagre-button"
+              icon={<FloppydiskIcon aria-hidden />}
+              loading={isPending}
+              size="small"
+              type="submit"
+              variant="primary"
+            >
+              Lagre
+            </Button>
+          </div>
+        )}
 
         <ModalComponent />
       </form>

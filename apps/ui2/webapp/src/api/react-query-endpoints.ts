@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-await-expression-member*/
 import type { AxiosResponse } from "axios";
 import axios from "axios";
 

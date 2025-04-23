@@ -242,8 +242,9 @@ function EditPersonopplysningerButton({
           icon={<PencilIcon aria-hidden />}
           onClick={() =>
             navigate({
+              to: "/ressurs/$id",
+              params: (previous) => ({ id: previous.id ?? "" }),
               search: { editPersonopplysninger: true },
-              params: (previous) => previous,
             })
           }
           size="small"

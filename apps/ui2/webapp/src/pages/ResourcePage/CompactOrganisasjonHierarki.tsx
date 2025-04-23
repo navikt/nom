@@ -99,11 +99,7 @@ function CompactOrgEnhet({
           flex-direction: column;
         `}
       >
-        <ReactRouterLink
-          params={{ id: orgEnhet.id }}
-          search={{}}
-          to={"/org/$id"}
-        >
+        <ReactRouterLink params={{ id: orgEnhet.id }} search={{}} to="/org/$id">
           <Link as={Heading} level="3" size="small">
             {orgEnhet.navn}
           </Link>

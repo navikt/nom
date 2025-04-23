@@ -54,6 +54,7 @@ import { PageBanner } from "~/components/PageBanner";
 import { Pluralize } from "~/components/Pluralize";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
+import { Route } from "~/routes/kontaktpersoner.$id";
 import type { Ressurs } from "~/types/api-models";
 import { formatTlf, formatVisningsnavn } from "~/utils";
 
@@ -240,6 +241,8 @@ function ParorendeList({
             icon={<PencilIcon title="a11y-title" />}
             onClick={() =>
               navigate({
+                to: "/kontaktpersoner/$id",
+                params: { id },
                 search: { editKontaktpersoner: true },
               })
             }
@@ -348,9 +351,11 @@ function ParorendeForm({
 
   const queryClient = useQueryClient();
 
-  const methods = useForm<{
+  type FormValues = {
     kontaktinfo: Kontaktinfo[];
-  }>({
+  };
+
+  const methods = useForm<FormValues>({
     defaultValues: {
       kontaktinfo:
         eksisterendeKontaktinfo && eksisterendeKontaktinfo.length > 0
@@ -431,18 +436,20 @@ function ParorendeForm({
     }
   };
 
-  async function onValid(data: { kontaktinfo: Kontaktinfo[] }) {
-    const opprettKontakter = data.kontaktinfo.filter(
+  const { id } = Route.useParams();
+
+  async function onValid(data: { kontaktinfo?: Kontaktinfo[] }) {
+    const opprettKontakter = data.kontaktinfo?.filter(
       (kontakt) => !kontakt.kontaktId,
     );
 
-    const oppdaterKontakter = data.kontaktinfo.filter(
+    const oppdaterKontakter = data.kontaktinfo?.filter(
       (kontakt) => !!kontakt.kontaktId,
     );
 
     const slettKontakter = eksisterendeKontaktinfo.filter(
       (kontakt) =>
-        !oppdaterKontakter.some(
+        !oppdaterKontakter?.some(
           (oppdaterKontakt) => oppdaterKontakt.kontaktId === kontakt.kontaktId,
         ),
     );
@@ -461,11 +468,11 @@ function ParorendeForm({
 
         const mutationPromises: Promise<unknown>[] = [];
 
-        for (const kontakt of oppdaterKontakter) {
+        for (const kontakt of oppdaterKontakter ?? []) {
           mutationPromises.push(oppdaterParorendeMutation.mutateAsync(kontakt));
         }
 
-        for (const kontakt of opprettKontakter) {
+        for (const kontakt of opprettKontakter ?? []) {
           mutationPromises.push(opprettParorendeMutation.mutateAsync(kontakt));
         }
 
@@ -474,12 +481,16 @@ function ParorendeForm({
         showToast({ text: "Endringer lagret", variant: "success" });
 
         await navigate({
+          to: "/kontaktpersoner/$id",
+          params: { id },
           search: { editKontaktpersoner: undefined },
         });
       } catch {
         showToast({ text: "Noe gikk galt", variant: "error" });
 
         await navigate({
+          to: "/kontaktpersoner/$id",
+          params: { id },
           search: { editKontaktpersoner: undefined },
         });
       } finally {
@@ -632,6 +643,8 @@ function ParorendeForm({
                   )
                     .then(() =>
                       navigate({
+                        to: "/kontaktpersoner/$id",
+                        params: { id },
                         search: { editKontaktpersoner: undefined },
                       }),
                     )

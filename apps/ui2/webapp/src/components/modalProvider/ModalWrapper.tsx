@@ -1,8 +1,13 @@
-import type { ReactNode } from "react";
+import type { ReactElement } from "react";
 import React, { forwardRef } from "react";
 
+interface ModalChildProperties {
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
 interface ModalWrapperProperties {
-  children: ReactNode;
+  children: ReactElement<ModalChildProperties>;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -10,7 +15,7 @@ interface ModalWrapperProperties {
 const ModalWrapper = forwardRef<HTMLDivElement, ModalWrapperProperties>(
   ({ children, onConfirm, onCancel }, reference) => (
     <div ref={reference}>
-      {React.cloneElement(children as React.ReactElement, {
+      {React.cloneElement(children, {
         onConfirm,
         onCancel,
       })}
