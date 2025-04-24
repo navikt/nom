@@ -66,6 +66,7 @@ export function getRessursEventsOptions(search: searchType) {
       (
         await ky.get(
           `${API_BASE_URL}/sinks/ressursEvents?${queryString.stringify(search, { skipNull: true })}`,
+          { timeout: 50_000 }, // 50 seconds
         )
       ).json<KafkaEvent[]>(),
   });
@@ -102,6 +103,7 @@ export function getOrgtilknytningEventsOptions(search: searchType) {
       (
         await ky.get(
           `${API_BASE_URL}/sinks/orgtilknytningEvents?${queryString.stringify(search, { skipNull: true })}`,
+          { timeout: 120_000 }, // 50 seconds
         )
       ).json<KafkaEvent[]>(),
   });
