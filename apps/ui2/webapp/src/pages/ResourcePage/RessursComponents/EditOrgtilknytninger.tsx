@@ -1385,7 +1385,7 @@ const validateMaxTime = (
   const otSektor = context?.parent?.sektor;
 
   const maxDate = dateWithoutTimezone(
-    addYears(todayWithoutTimezone(), otSektor === Sektor.EKSTERN ? 1 : 5),
+    addYears(todayWithoutTimezone(), otSektor === Sektor.EKSTERN ? 1 : 6),
   );
 
   if (
@@ -1393,7 +1393,7 @@ const validateMaxTime = (
     (value && isSameDateOrAfter(dateWithoutTimezone(value), maxDate))
   ) {
     return context.createError({
-      message: `Må være under ${otSektor === Sektor.EKSTERN ? "ett" : "fem"} år frem i tid fra dagens dato${otSektor === Sektor.EKSTERN ? " for eksterne medarbeidere" : ", eller ikke satt"}`,
+      message: `Må være under ${otSektor === Sektor.EKSTERN ? "ett" : "seks"} år frem i tid fra dagens dato${otSektor === Sektor.EKSTERN ? " for eksterne medarbeidere" : ", eller ikke satt"}`,
     });
   }
 

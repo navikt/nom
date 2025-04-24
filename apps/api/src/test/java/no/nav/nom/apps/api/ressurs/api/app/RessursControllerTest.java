@@ -211,6 +211,53 @@ public class RessursControllerTest extends RestTestBase {
     }
 
     @Test
+    @SneakyThrows
+    void skal_ikke_kunne_opprette_statlig_ressurs_med_sluttdato_mer_enn_seks_aar_frem_i_tid() {
+        String personident = "12345678910";
+        String navident = "S123456";
+        val navn = pdlUtils.mockSinglePersonResponse();
+        String primaryTelefonnummer = "12345678";
+
+        when(nikClient.opprettNavidentOnBehalfOfUser(
+            eq(OpprettNavidentRequest.builder()
+                .personid(personident)
+                .identPrefix(navn.getEtternavn().substring(0, 1))
+                .identType("STANDARD")
+                .build())
+        )).thenReturn(ResponseEntity.ok(
+            OpprettNavidentResponse.builder()
+                .navident(navident)
+                .build()));
+
+        when(pdlClient.hentPerson(eq(personident))).thenReturn(Optional.empty());
+
+        var request = opprettRessursRequest().toBuilder()
+            .personident(personident)
+            .visningsfornavn(navn.getFornavn())
+            .visningsmellomnavn(navn.getMellomnavn())
+            .visningsetternavn(navn.getEtternavn())
+            .primaryTelefonnummer(primaryTelefonnummer)
+            .sektor(Sektor.NAV_STATLIG)
+            .startDato(LocalDate.now())
+            .sluttDato(Optional.of(LocalDate.now().plusYears(6)))
+            .tilknytningtype(Tilknytningtype.FAST)
+            .ansettelsesType(null)
+            .fysiskBrukerstedNr("")
+            .orgEnhetId("")
+            .identType(IdentType.STANDARD)
+            .build();
+
+        postOpprettRessursRequest(
+            testToken.nomWriteGroupAndNomUiAzp(),
+            request
+        )
+            .expectStatus().isBadRequest()
+            .expectBody(String.class).value(it ->
+                Assert.isTrue(it.contains("Sluttdato kan ikke være mer enn 6 år frem i tid"),"Uventet feilmelding")
+            );
+    }
+
+    @Test
     void skal_ikke_opprette_ressurs_med_feilformatert_etternavn() {
         postOpprettRessursRequest(
             testToken.nomWriteGroupAndNomUiAzp(),
@@ -1470,7 +1517,7 @@ public class RessursControllerTest extends RestTestBase {
 
     @Test
     @SneakyThrows
-    @DisplayName("Should craete robot ressurs given correct identType")
+    @DisplayName("Should create robot ressurs given correct identType")
     void should_create_robot_ressurs() {
         String personident = "2960RPAROB2";
         String navident = "R123456";

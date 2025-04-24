@@ -1015,12 +1015,12 @@ const validateMaxTime = (
     ressursIdentType === IdentType.VIKAFOSSEN;
 
   const maxDate = dateWithoutTimezone(
-    addYears(todayWithoutTimezone(), ressursEkstern ? 1 : 5),
+    addYears(todayWithoutTimezone(), ressursEkstern ? 1 : 6),
   );
 
   if (nomDateIsSameOrAfter(value, maxDate)) {
     return context.createError({
-      message: `Må være under ${ressursEkstern ? "ett" : "fem"} år frem i tid fra dagens dato${ressursEkstern ? " for eksterne medarbeidere" : ", eller ikke satt"}`,
+      message: `Må være under ${ressursEkstern ? "ett" : "seks"} år frem i tid fra dagens dato${ressursEkstern ? " for eksterne medarbeidere" : ", eller ikke satt"}`,
     });
   }
 
