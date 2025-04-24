@@ -37,6 +37,7 @@ import { PageBanner } from "~/components/PageBanner";
 import { Pluralize } from "~/components/Pluralize";
 import { OrgEnhetSelect } from "~/components/select/OrgEnhetSelect";
 import {
+  dateIsAfterToday,
   dateWithoutTimezone,
   formatDateWithoutTimezone,
   todayWithoutTimezone,
@@ -152,7 +153,11 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
   >();
   const [beholdTilganger, setBeholdTilganger] = useState<boolean>(true);
   const [fraDato, setFraDato] = useState<string | null>(
-    formatDateWithoutTimezone(todayWithoutTimezone()),
+    formatDateWithoutTimezone(
+      dateIsAfterToday("2025-05-01")
+        ? new Date("2025-05-01")
+        : todayWithoutTimezone(),
+    ),
   );
 
   const datePickerProperties = useDatepicker({
