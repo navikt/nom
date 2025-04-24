@@ -94,7 +94,7 @@ function CreateResourceForm({ personident }: { personident: string }) {
     return (
       <Alert variant="error">
         {hentPersonQuery.error.response?.status === 404
-          ? "Ingen resultater for søket. Det må hånteres manuelt."
+          ? "Fødselsnummeret ble ikke funnet i Folkeregisteret. Kontroller at du har lagt inn riktig fødselsnummer."
           : "En teknisk feil forhindret søket"}
       </Alert>
     );
