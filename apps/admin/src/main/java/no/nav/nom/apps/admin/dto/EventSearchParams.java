@@ -2,18 +2,16 @@ package no.nav.nom.apps.admin.dto;
 
 import jakarta.validation.constraints.Min;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import no.nav.nom.apps.admin.dto.hendelse.HendelseDTO;
-import no.nav.nom.apps.admin.dto.orgenhet.OrgEnhetStateDTO;
-import no.nav.nom.apps.admin.dto.ressurs.RessursStateKafkaDTO;
-import no.nav.nom.contract.nom.eventsource.Event;
 
 import java.util.function.Predicate;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @Setter
 public final class EventSearchParams {
     @Min(0) private int fromOffset = 0;
