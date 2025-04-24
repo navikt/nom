@@ -41,19 +41,17 @@ export const NOM_REMEDY_INTEGRASJON_BASE_URL = "/frackend/remedy";
 
 export const searchSchema = z.object({
   filterText: z.string().optional(),
-  // eslint-disable-next-line unicorn/prefer-top-level-await
+
   fromOffset: z.number().optional().catch(0),
 });
 
 export const searchSchemaWithNavident = z.object({
   navident: z.string().optional(),
-  // eslint-disable-next-line unicorn/prefer-top-level-await
+
   fromOffset: z.number().optional().catch(0),
 });
 
 export type searchType = z.infer<typeof searchSchema>;
-
-export type searchTypeWithNavident = z.infer<typeof searchSchemaWithNavident>;
 
 export const CACHE_FOR = {
   aMinute: 1000 * 60,

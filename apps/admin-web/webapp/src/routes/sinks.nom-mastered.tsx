@@ -1,12 +1,13 @@
 import { FilesIcon } from "@navikt/aksel-icons";
 import { Alert, Button, Heading, Table, TextField } from "@navikt/ds-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import type { AnyRoute } from "@tanstack/react-router";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useForm } from "react-hook-form";
 
-import type { searchTypeWithNavident } from "~/api/queries.ts";
+import { searchSchemaWithNavident } from "~/api/queries.ts";
 import {
   getOrgtilknytningerForListOfNavidents,
   getRessurser,
@@ -28,29 +29,38 @@ import {
   isTodayOrBefore,
 } from "~/utils.ts";
 
-export function NavidentOffsetSearchBar({
-  search,
-}: {
-  search: searchTypeWithNavident;
-}) {
+export function NavidentOffsetSearchBar({ route }: { route: AnyRoute }) {
+  const search = route.useSearch();
   const methods = useForm({ defaultValues: search });
   const navigate = useNavigate();
 
   const submitHandler = methods.handleSubmit((values) => {
     navigate({
-      search: (prev) => {
-        const overwriteOffset = {
-          fromOffset: Number.parseInt((values.fromOffset as never) || "0"),
-        };
-        return { ...prev, ...values, ...overwriteOffset };
+      to: route.to,
+      search: {
+        ...search,
+        filterText: values.filterText ?? undefined,
+        fromOffset: values.fromOffset
+          ? Number.parseInt(values.fromOffset)
+          : undefined,
       },
     }).then();
   });
 
   const tilbakestill = () => {
-    methods.reset({ navident: "", fromOffset: 0 });
+    methods.reset({
+      navident: "",
+      fromOffset: 0,
+    });
+
+    const newSearch = {
+      ...search,
+      navident: undefined,
+      fromOffset: undefined,
+    };
+
     navigate({
-      search: {},
+      search: newSearch,
       replace: true,
     }).then();
   };
@@ -79,11 +89,12 @@ export const Route = createFileRoute("/sinks/nom-mastered")({
   loader: ({ context }) => {
     context.queryClient.prefetchQuery(getNomMasteredStateOptions(undefined, 0));
   },
+  validateSearch: searchSchemaWithNavident.parse,
   component: () => {
-    const search = Route.useSearch();
     return (
       <>
-        <NavidentOffsetSearchBar search={search} />
+        <NavidentOffsetSearchBar route={Route} />
+
         <ErrorBoundary fallback={<Alert variant="error">Noe gikk galt</Alert>}>
           <Suspense fallback={<BigLoader />}>
             <NomMasteredPage />
@@ -102,7 +113,7 @@ function getOrgtilknytning(
 }
 
 function NomMasteredPage() {
-  const search = Route.useSearch<searchTypeWithNavident>();
+  const search = Route.useSearch();
   const { navident, fromOffset: offset } = search;
   const nomMasteredObjekter = useSuspenseQuery({
     ...getNomMasteredStateOptions(navident, offset),

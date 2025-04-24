@@ -3,42 +3,34 @@ import {
   PadlockUnlockedFillIcon,
 } from "@navikt/aksel-icons";
 import { Button, TextField } from "@navikt/ds-react";
+import type { AnyRoute } from "@tanstack/react-router";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 
-import type { searchType } from "~/api/queries.ts";
 import { useHasAdminAccess } from "~/api/useGetSession.tsx";
 
 export function GenericSearchBar({
-  search,
+  route,
   editButton,
 }: {
-  search: searchType;
+  route: AnyRoute;
   editButton?: boolean;
 }) {
+  const search = route.useSearch();
+
   const methods = useForm({ defaultValues: search });
   const navigate = useNavigate();
   const hasAdminAccess = useHasAdminAccess();
 
   const submitHandler = methods.handleSubmit((values) => {
     navigate({
-      search: (prev) => {
-        const overwriteOffset = {
-          fromOffset: values.fromOffset
-            ? Number.parseInt(values.fromOffset as never)
-            : undefined,
-        };
-
-        const overwriteFilterText = {
-          filterText: values.filterText ?? undefined,
-        };
-
-        return {
-          ...prev,
-          ...values,
-          ...overwriteFilterText,
-          ...overwriteOffset,
-        };
+      to: route.to,
+      search: {
+        ...search,
+        filterText: values.filterText ?? undefined,
+        fromOffset: values.fromOffset
+          ? Number.parseInt(values.fromOffset)
+          : undefined,
       },
     }).then();
   });
@@ -65,7 +57,7 @@ export function GenericSearchBar({
     <>
       <form className="flex gap-4 p-6" onSubmit={submitHandler}>
         {hasAdminAccess && (
-          <ToggleEditMode editButton={editButton} search={search} />
+          <ToggleEditMode editButton={editButton} route={route} />
         )}
         <TextField
           label="Vilkårlig tekst"
@@ -90,10 +82,10 @@ export function GenericSearchBar({
 
 function ToggleEditMode({
   editButton,
-  search,
+  route,
 }: {
   editButton?: boolean;
-  search: searchType;
+  route: AnyRoute;
 }) {
   if (!editButton) {
     return <></>;
@@ -103,14 +95,16 @@ function ToggleEditMode({
 
   const { allowEdit } = useSearch({ from: "/state/orgenhet" });
 
+  const search = route.useSearch();
+
   if (allowEdit) {
     return (
       <Button
         icon={<PadlockUnlockedFillIcon aria-hidden />}
         onClick={() =>
           navigate({
+            to: route.to,
             search: { ...search, allowEdit: undefined },
-            params: (previous) => previous,
           })
         }
         style={{ height: "fit-content", alignSelf: "end" }}
@@ -125,8 +119,8 @@ function ToggleEditMode({
       icon={<PadlockLockedFillIcon aria-hidden />}
       onClick={() =>
         navigate({
+          to: route.to,
           search: { ...search, allowEdit: true },
-          params: (previous) => previous,
         })
       }
       style={{ height: "fit-content", alignSelf: "end" }}

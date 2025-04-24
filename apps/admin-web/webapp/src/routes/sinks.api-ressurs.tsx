@@ -18,10 +18,9 @@ import { formatDisplayDatetime, formatVisningsnavn } from "~/utils.ts";
 export const Route = createFileRoute("/sinks/api-ressurs")({
   validateSearch: searchSchema.parse,
   component: () => {
-    const search = Route.useSearch();
     return (
       <>
-        <GenericSearchBar search={search} />
+        <GenericSearchBar route={Route} />
         <ErrorBoundary fallback={<Alert variant="error">Noe gikk galt</Alert>}>
           <Suspense fallback={<BigLoader />}>
             <ApiRessursPage />
@@ -94,7 +93,7 @@ function ApiRessursPage() {
               key={index}
             >
               <Table.HeaderCell scope="row">
-                <Link search={{ filterText: apiRessurs.key }}>
+                <Link search={{ filterText: apiRessurs.key }} to={Route.to}>
                   {apiRessurs.key}
                 </Link>
               </Table.HeaderCell>
