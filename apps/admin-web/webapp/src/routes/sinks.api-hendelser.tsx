@@ -16,10 +16,9 @@ import { formatDisplayDatetime } from "~/utils.ts";
 export const Route = createFileRoute("/sinks/api-hendelser")({
   validateSearch: searchSchema.parse,
   component: () => {
-    const search = Route.useSearch();
     return (
       <>
-        <GenericSearchBar search={search} />
+        <GenericSearchBar route={Route} />
         <ErrorBoundary fallback={<Alert variant="error">Noe gikk galt</Alert>}>
           <Suspense fallback={<BigLoader />}>
             <ApiHendelserPage />
@@ -83,7 +82,7 @@ function ApiHendelserPage() {
               key={index}
             >
               <Table.HeaderCell scope="row">
-                <Link search={{ filterText: apiHendelse.id }}>
+                <Link search={{ filterText: apiHendelse.id }} to={Route.to}>
                   {apiHendelse.id}
                 </Link>
               </Table.HeaderCell>

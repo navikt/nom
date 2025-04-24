@@ -5,7 +5,6 @@ import { useController } from "react-hook-form";
 
 import { formatDateWithoutTimezone } from "~/utils.ts";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- usikker på hvordan rules skal types, og om det er såå viktig.
 type DatePickerWrappedProps = { name: string; rules?: any } & DateInputProps;
 
 export function DatePickerWrapped({

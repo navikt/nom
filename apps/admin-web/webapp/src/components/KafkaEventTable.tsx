@@ -62,7 +62,6 @@ export function KafkaEventTable(props: {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function EmbeddedJsonView(props: { jsonData: object | any[] }) {
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [renderStuff, setRenderStuff] = React.useState(false);

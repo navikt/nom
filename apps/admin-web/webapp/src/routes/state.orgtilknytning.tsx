@@ -13,10 +13,9 @@ import { useTableSort } from "~/hooks/useTableSort.ts";
 export const Route = createFileRoute("/state/orgtilknytning")({
   validateSearch: searchSchema.parse,
   component: () => {
-    const search = Route.useSearch();
     return (
       <>
-        <GenericSearchBar search={search} />
+        <GenericSearchBar route={Route} />
         <ErrorBoundary fallback={<Alert variant="error">Noe gikk galt</Alert>}>
           <Suspense fallback={<BigLoader />}>
             <OrgtilknytningPage />

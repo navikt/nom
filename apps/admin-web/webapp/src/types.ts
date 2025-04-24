@@ -6,7 +6,6 @@ export type Visningsnavn = {
   mellomnavn?: string;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type KafkaEvent<DATA = any, ADDITIONALDATA = any> = {
   metadata: MetaData;
   type: string;

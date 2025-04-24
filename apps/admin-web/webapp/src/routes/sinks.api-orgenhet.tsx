@@ -18,10 +18,9 @@ import { formatDisplayDatetime } from "~/utils.ts";
 export const Route = createFileRoute("/sinks/api-orgenhet")({
   validateSearch: searchSchema.parse,
   component: () => {
-    const search = Route.useSearch();
     return (
       <>
-        <GenericSearchBar search={search} />
+        <GenericSearchBar route={Route} />
         <ErrorBoundary fallback={<Alert variant="error">Noe gikk galt</Alert>}>
           <Suspense fallback={<BigLoader />}>
             <ApiOrgenhetPage />
@@ -97,7 +96,7 @@ function ApiOrgenhetPage() {
               key={index}
             >
               <Table.HeaderCell scope="row">
-                <Link search={{ filterText: apiOrgenhet.key }}>
+                <Link search={{ filterText: apiOrgenhet.key }} to={Route.to}>
                   {apiOrgenhet.key}
                 </Link>
               </Table.HeaderCell>

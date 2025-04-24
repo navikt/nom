@@ -425,7 +425,7 @@ function OrgtilknytningForm({
         orgtilknytninger={watch("mappedeOrgtilknytninger")}
       />
 
-      <form autoComplete="false" onSubmit={handleSubmit(onValid)}>
+      <form autoComplete="off" onSubmit={handleSubmit(onValid)}>
         {hasAdminOrWriteAccess &&
           (ressurs.identType !== IdentType.VIKAFOSSEN || hasAdminAccess) && (
             <div
