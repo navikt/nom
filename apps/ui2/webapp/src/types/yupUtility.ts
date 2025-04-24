@@ -12,6 +12,7 @@ declare module "yup" {
   interface StringSchema {
     futureOrPresent(): StringSchema;
     max1YearInTheFuture(): StringSchema;
+    max6YearsInTheFuture(): StringSchema;
     optionalPhoneNumber(): StringSchema;
   }
 }
@@ -42,6 +43,23 @@ yup.addMethod(yup.string, "max1YearInTheFuture", function () {
       return !isSameDateOrAfter(
         dateWithoutTimezone(dateString),
         dateWithoutTimezone(addYears(todayWithoutTimezone(), 1)),
+      );
+    },
+  );
+});
+
+yup.addMethod(yup.string, "max6YearsInTheFuture", function () {
+  return this.test(
+    "ensure-max-6-years",
+    "Må være under seks år frem i tid fra dagens dato. Hvis fast stilling, la feltet stå tomt.",
+    function (dateString) {
+      if (!dateString) {
+        return true;
+      }
+
+      return !isSameDateOrAfter(
+        dateWithoutTimezone(dateString),
+        dateWithoutTimezone(addYears(todayWithoutTimezone(), 6)),
       );
     },
   );

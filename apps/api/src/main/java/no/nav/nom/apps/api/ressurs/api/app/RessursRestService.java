@@ -483,6 +483,7 @@ public class RessursRestService {
     }
 
     private RessursState reactivateRessurs(OpprettRessursRequest request, RessursState existingRessurs) {
+        validateOpprettRessursRequest(request);
 
         final var reaktivertRessurs = existingRessurs.toBuilder()
             .personident(request.personident())
@@ -693,12 +694,21 @@ public class RessursRestService {
     private void validateOpprettRessursRequest(OpprettRessursRequest request) {
         if (Objects.requireNonNull(request.sektor()) == Sektor.EKSTERN) {
             validateOpprettEksternRessursRequest(request);
+        } else if (request.sluttDato().isPresent()) {
+            validateSluttdatoErInnenSeksAar(request.sluttDato().get());
         }
 
         validateChronologicalDates(request.startDato(), request.sluttDato().orElse(null));
         validateIngenMellomromEtternavn(request.visningsetternavn());
         validateFysiskeBrukerstederExists(Set.of(request.fysiskBrukerstedNr()));
         validateOrgtilknytningTypeSektorCombination(request.tilknytningtype(), request.sektor());
+    }
+
+    private void validateSluttdatoErInnenSeksAar(LocalDate localDate) {
+        var sixYearsFromNow = LocalDate.now().plusYears(6);
+        if (localDate.equals(sixYearsFromNow) || localDate.isAfter(sixYearsFromNow)) {
+            throw new IllegalArgumentException("Sluttdato kan ikke være mer enn 6 år frem i tid");
+        }
     }
 
     private void validateOpprettEksternRessursRequest(OpprettRessursRequest request) {
