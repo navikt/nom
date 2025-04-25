@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.admin.SwaggerConfig;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.EnheterOgOrganisering;
+import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetArbeidsomraadeInfo;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetOrganisering;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetStartOgSluttdato;
 import no.nav.nom.apps.admin.sanitycheck.service.OrgEnhetSanityCheckService;
@@ -114,5 +115,10 @@ public class OrgEnhetSanityCheckController {
     @GetMapping(value = "/bunnEnheterSomIkkeHarEksakt1ArbeidsomradeIOrghierarkietStier")
     public ResponseEntity<List<OrgEnhetOrganisering>> bunnEnheterSomIkkeHarEksakt1ArbeidsomradeIOrghierarkietStier() {
         return ResponseEntity.ok(orgEnhetSanityCheckService.bunnEnheterSomIkkeHarEksakt1ArbeidsomradeIOrghierarkietStier());
+    }
+
+    @GetMapping(value = "/validerArbeidsomraade")
+    public ResponseEntity<OrgEnhetArbeidsomraadeInfo> validerArbeidsomraade() {
+        return ResponseEntity.ok(orgEnhetSanityCheckService.validerArbeidsomraade());
     }
 }
