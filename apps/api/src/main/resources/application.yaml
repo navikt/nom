@@ -79,6 +79,8 @@ authentication:
     nomWriteUtlKonsulent: ${NOM_WRITE_UTL_KONSULENT_GROUPID:nomWriteUtlKonsulentGroup}  # 0000-CA-NOM-Write-Utl-Konsulent
     nomWriteVikafossen: ${NOM_WRITE_VIKAFOSSEN_GROUPID:nomWriteVikafossenGroup}         # 0000-CA-NOM-Write-Vikafossen
     nomWriteRobot: ${NOM_WRITE_ROBOT_GROUPID:nomWriteRobotGroup}                        # 0000-CA-NOM-Write-Robot
+    readOnly: ${READONLY_GROUPID:readOnlyGroup}          # 0000-CA-NOM-ADMIN-Lesetilgang
+    extendedReadOnly: ${EXTENDED_READONLY_GROUPID:extendedReadOnlyGroup} # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
 server:
   shutdown: graceful
 
@@ -469,13 +471,11 @@ app:
         scopes: ["NOM_WRITE_ROBOT"]
       readonly:
         group-id: "${READONLY_GROUPID}"
-        scopes:
-          - READONLY
+        scopes: ["READONLY"]
       extended-readonly:
         group-id: "${EXTENDED_READONLY_GROUPID}"
-        scopes:
-          - READONLY
-          - EXTENDED_READONLY
+        scopes: ["READONLY", "EXTENDED_READONLY"]
+
   orgenhet:
     linjeenhetene: ry630r,ky110z,se232x,ne994m
   google-storage-bucket-name:
