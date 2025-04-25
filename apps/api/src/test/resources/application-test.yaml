@@ -50,6 +50,9 @@ app:
       nomAdminGroup:
         group-id: nomAdminGroup
         scopes: ["MUTATE_RESSURS", "ADMIN"]
+      readOnlyGroup:
+        group-id: readOnlyGroup
+        scopes: ["READONLY"]
   orgenhet:
     linjeenhetene: linje-enhet,en-annen-linjeenhet
   google-storage-bucket-name:

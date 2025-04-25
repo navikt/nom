@@ -32,7 +32,9 @@ public class SessioninfoController {
             env.getRequiredProperty("authentication.groups.nomPilot"), UserRoles.ROLE_PILOT,
             env.getRequiredProperty("authentication.groups.nomWriteUtlKonsulent"), UserRoles.ROLE_WRITE_UTL_KONSULENT,
             env.getRequiredProperty("authentication.groups.nomWriteVikafossen"), UserRoles.ROLE_WRITE_VIKAFOSSEN,
-            env.getRequiredProperty("authentication.groups.nomWriteRobot"), UserRoles.ROLE_WRITE_ROBOT
+            env.getRequiredProperty("authentication.groups.nomWriteRobot"), UserRoles.ROLE_WRITE_ROBOT,
+            env.getRequiredProperty("authentication.groups.readOnly"), UserRoles.ROLE_READONLY,
+            env.getRequiredProperty("authentication.groups.extendedReadOnly"), UserRoles.ROLE_EXTENDED_READONLY
         );
         log.debug("authentication.groups Environment (claimToRoleMap): {}", claimToRoleMap);
     }
@@ -63,7 +65,9 @@ public class SessioninfoController {
         ROLE_PILOT,
         ROLE_WRITE_UTL_KONSULENT,
         ROLE_WRITE_VIKAFOSSEN,
-        ROLE_WRITE_ROBOT
+        ROLE_WRITE_ROBOT,
+        ROLE_READONLY,
+        ROLE_EXTENDED_READONLY
     }
 
     public record SessionInfoResponse(

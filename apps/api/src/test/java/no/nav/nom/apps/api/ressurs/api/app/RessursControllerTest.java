@@ -865,6 +865,43 @@ public class RessursControllerTest extends RestTestBase {
     }
 
     @ParameterizedTest(name = "GET {0}")
+    @DisplayName("Skjuler ikke fysisk brukersted for readOnly tilgang")
+    @MethodSource("getRessursPathsTestInput")
+    void skalSkjuleIkkeSkjuleFysiskBrukerstedForLeseTilgang(String endpointPath) {
+
+        var personident = "01010154321";
+
+        var ressursState = ressursState().toBuilder()
+            .personident(personident)
+            .primaryTelefonnummer(Optional.of("12345678"))
+            .primaryFysiskBrukersted(Optional.of("1234"))
+            .fysiskeBrukersteder(List.of("1234"))
+            .build();
+
+        when(authResolver.kanRedigereRessurs(anyString())).thenReturn(false);
+
+        when(ressursStateRepository.findByNavident(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        when(ressursStateRepository.findByFid(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        webTestClient.get()
+            .uri(endpointPath)
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomReadOnlyGroupAndNomUiAzp()))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("personident")
+            .isEqualTo(personident.replaceFirst(".{5}$", "*****"))
+            .jsonPath("primaryFysiskBrukersted")
+            .isEqualTo("1234")
+            .jsonPath("fysiskeBrukersteder")
+            .isEqualTo(ressursState.fysiskeBrukersteder());
+
+    }
+
+    @ParameterizedTest(name = "GET {0}")
     @DisplayName("Skjuler ikke sensitiv data på seg selv")
     @MethodSource("getRessursPathsTestInput")
     void skalIkkeSkjuleSensitivDataForOppslagPaaSegSelv(String endpointPath) {
