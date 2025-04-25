@@ -187,10 +187,7 @@ public class RessursRestService {
             loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP) ||
             getAuthenticatedNavIdent().equals(ressursState.navident());
 
-        var showFysiskBrukerSted = loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
-            loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP) ||
-            authResolver.kanRedigereRessurs(ressursState.navident()) ||
-            getAuthenticatedNavIdent().equals(ressursState.navident());
+        var showFysiskBrukerSted = isShowFysiskBrukerSted(ressursState);
 
         var telefoner = ressursContactDetailsResolver.fetchTelefoner(ressursState.navident());
         var epost = ressursContactDetailsResolver.fetchEmail(ressursState.navident());
@@ -211,6 +208,14 @@ public class RessursRestService {
             epost.orElse(null),
             nomMastered.isMastered(ressursState.navident())
         );
+    }
+
+    private boolean isShowFysiskBrukerSted(RessursState ressursState) {
+        return loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
+            loggedInUserHasAccessScope(NomApiAccessScope.READONLY) ||
+            loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP) ||
+            authResolver.kanRedigereRessurs(ressursState.navident()) ||
+            getAuthenticatedNavIdent().equals(ressursState.navident());
     }
 
     private Ressurs hideSensitiveDataAndEnrichRessursStateWithDvhData(RessursState ressursState, Optional<String> epost) {
