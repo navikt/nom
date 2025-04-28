@@ -12,11 +12,13 @@ export function errorHandling(
     console.error(error.response?.data);
   }
   if (error.status && ("" + error.status).startsWith("4")) {
-    return response.status(error.status).json({
+    response.status(error.status).json({
       error: "Client error",
     });
+    return;
   }
-  return response.status(500).json({
+  response.status(500).json({
     error: "Internal server error",
   });
+  return;
 }
