@@ -40,7 +40,8 @@ export function addProxyHandler(
     async (request: Request, response: Response, next: NextFunction) => {
       const token = getToken(request);
       if (!token) {
-        return response.status(401).send();
+        response.status(401).send();
+        return;
       }
       const obo = await requestOboToken(token, scope);
       if (obo.ok) {
@@ -48,7 +49,8 @@ export function addProxyHandler(
         return next();
       } else {
         console.log("OBO-exchange failed", obo.error);
-        return response.status(403).send();
+        response.status(403).send();
+        return;
       }
     },
     createProxyMiddleware({
