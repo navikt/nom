@@ -88,6 +88,8 @@ spec:
           - id: "fb625494-4aa6-4061-9f87-02c820210ed9" # 0000-CA-NOM-Write-Utl-Konsulent
           - id: "2632148d-54a6-4b17-9e53-9d415d73653f" # 0000-CA-NOM-Write-Vikafossen
           - id: "a735d831-420f-4a63-949b-a02ef0f17673" # 0000-CA-NOM-Write-Robot
+          - id: "76611d10-876b-4df1-8425-dfe61e6990d1" # 0000-CA-NOM-ADMIN-Lesetilgang
+          - id: "a0c8eddc-2435-4fea-a642-58b2b16dd8e0" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
         extra:
           - azp_name
           - NAVident
