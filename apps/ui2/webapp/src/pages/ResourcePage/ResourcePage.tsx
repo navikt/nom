@@ -1,5 +1,8 @@
+import { css } from "@emotion/react";
+import { ChevronLeftIcon } from "@navikt/aksel-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearch } from "@tanstack/react-router";
+import { Link as ReactRouterLink } from "@tanstack/react-router";
 import { subYears } from "date-fns";
 import React from "react";
 
@@ -10,6 +13,7 @@ import { DetailedRessurs } from "~/pages/ResourcePage/RessursComponents/Detailed
 import { RessursCard } from "~/pages/ResourcePage/RessursComponents/RessursCard";
 import {
   dateWithoutTimezone,
+  formatVisningsnavn,
   isSameDateOrAfter,
   todayWithoutTimezone,
 } from "~/utils";
@@ -42,6 +46,26 @@ export const ResourcePage = () => {
       {editOrgtilknytninger && <PageBanner text="Endre medarbeider" />}
 
       <ContentWrapper>
+        {editOrgtilknytninger && !!ressurs && (
+          <ReactRouterLink
+            params={{ id: ressurs.navident }}
+            to={`/ressurs/$id`}
+          >
+            <div
+              css={css`
+                color: #000;
+                font-size: 1.2rem;
+                margin-bottom: var(--a-spacing-4);
+                display: flex;
+                align-items: center;
+              `}
+            >
+              <ChevronLeftIcon fontSize="1.8rem" />
+              <b>Tilbake til {formatVisningsnavn(ressurs.visningsnavn)}</b>
+            </div>
+          </ReactRouterLink>
+        )}
+
         {ressurs && (
           <>
             {sluttetOverEtArSiden && !hasAdminAccess ? (
