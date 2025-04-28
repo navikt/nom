@@ -24,7 +24,7 @@ public class SessioninfoController {
 
     @Autowired
     public SessioninfoController(Environment env) {
-        this.claimToRoleMap = Map.of(
+        this.claimToRoleMap = Map. of(
             env.getRequiredProperty("authentication.groups.nomDelegert"), UserRoles.ROLE_WRITE,
             env.getRequiredProperty("authentication.groups.nomLeder"), UserRoles.ROLE_WRITE,
             env.getRequiredProperty("authentication.groups.nomWrite"), UserRoles.ROLE_WRITE,
