@@ -149,7 +149,7 @@ public class OTUtenforHierarki {
         return new InputMetadata(
             "nom-api OTUtenforHierarki",
             "autoflyttOTUtenforHierarki",
-            Map.of("Orgtilknytning Fid's", otFids, "alternativ enhet", alternativOrgenhet, "flyttedato", flyttedato),
+            Map.of("Orgtilknytning Fid's", otFids, "alternativ enhet", alternativOrgenhet.getId() + " - " + alternativOrgenhet.getNavn(), "flyttedato", flyttedato),
             new Origination("nom-api", "nom-api")
         );
     }
