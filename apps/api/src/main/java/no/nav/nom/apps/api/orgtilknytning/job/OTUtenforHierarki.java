@@ -61,6 +61,7 @@ public class OTUtenforHierarki {
 
     public void findOTUtenforHierarki() {
         otUtenforHierarkieMedAlternativOrgenhet.clear();
+        perAlternativOrgenhet.clear();
 
         var aktiveOrgenheter = orgenhetService.getAllEnheterMedOrganisering();
         var aktiveOrgenhetIder = aktiveOrgenheter.stream().map(IOrgenhet::getId).toList();
