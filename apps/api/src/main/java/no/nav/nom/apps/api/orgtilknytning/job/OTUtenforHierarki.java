@@ -110,10 +110,16 @@ public class OTUtenforHierarki {
 
             var inputMetadata = getInputMetadata(alternativOrgenhet, otFids, flyttedato);
 
-            var feilede = masseflyttOrgtilknytningerService.flyttOrgtilknytninger(otFids, alternativOrgenhet.getId(), beholdTilganger, flyttedato, inputMetadata, ventPaaState);
-            loggFeilede(feilede);
-
-            feilet.addAndGet(feilede.size());
+            Map<OrgtilknytningState, String> feilede;
+            try {
+                feilede = masseflyttOrgtilknytningerService.flyttOrgtilknytninger(otFids, alternativOrgenhet.getId(), beholdTilganger, flyttedato, inputMetadata, ventPaaState);
+                loggFeilede(feilede);
+                feilet.addAndGet(feilede.size());
+            } catch (Exception e) {
+                log.error("Feil ved autoflytting av OTer utenfor hierarki for enhet {} - {} ", alternativOrgenhet.getId(), alternativOrgenhet.getNavn(), e);
+                loggFeilede(otFids, "Feil ved autoflytting av OTer utenfor hierarki for enhet %s - %s".formatted(alternativOrgenhet.getId(), alternativOrgenhet.getNavn()));
+                feilet.addAndGet(otFids.size());
+            }
         });
 
         log.info("Ferdig med Autoflytting OTer utenfor hierarki {}/{} (feilede/toalt)", feilet.get(), behandlet.get());
@@ -128,7 +134,7 @@ public class OTUtenforHierarki {
         loggFeilede(feilede);
     }
 
-    private void loggFeilede(HashMap<OrgtilknytningState, String> feilede) {
+    private void loggFeilede(Map<OrgtilknytningState, String> feilede) {
         if (feilede.isEmpty()) {
             return;
         }
