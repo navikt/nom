@@ -33,14 +33,18 @@ public class RemedyIntegrasjonRepositoryService {
         if (!unleash.isEnabled("nom-remedy.ny-remedy-integrasjon")) {
             validateThatRequiredValuesAreSet(newNomIntegrasjonEntity);
             if (nomIntegrasjonEntityProvidesNewDataFromNom(newNomIntegrasjonEntity)) {
-                nomIntegrasjonRepository.save(
-                    newNomIntegrasjonEntity.toBuilder()
-                        .entryId(nextId())
-                        .entryOperasjon("Ny")
-                        .entryStatus("Ubehandlet")
-                        .entryBestiller(initiatedByNavident)
-                        .build()
-                );
+                try {
+                    nomIntegrasjonRepository.save(
+                        newNomIntegrasjonEntity.toBuilder()
+                            .entryId(nextId())
+                            .entryOperasjon("Ny")
+                            .entryStatus("Ubehandlet")
+                            .entryBestiller(initiatedByNavident)
+                            .build()
+                    );
+                } catch (Exception e) {
+                    logger.error("Feil ved lagring av ny rad for ressurs {}, til enhet {} og med entryId {}", newNomIntegrasjonEntity.getNavId(), newNomIntegrasjonEntity.getEnhetsId(), newNomIntegrasjonEntity.getEntryId(), e);
+                }
             }
         }
     }
@@ -50,16 +54,20 @@ public class RemedyIntegrasjonRepositoryService {
             validateThatRequiredValuesAreSet(newNomIntegrasjonEntity);
 
             if (nomIntegrasjonEntityProvidesNewDataFromNom(newNomIntegrasjonEntity)) {
-                NomIntegrasjonEntity nomIntegrasjonEntity = nomIntegrasjonRepository.save(
-                    newNomIntegrasjonEntity.toBuilder()
-                        .entryId(nextId())
-                        .entryOperasjon("Ny")
-                        .entryStatus("Ubehandlet")
-                        .entryBestiller(initiatedByNavident)
-                        .build()
-                );
-                logger.info("Lagret ny rad for ressurs {}, til enhet {} og med entryId {}", newNomIntegrasjonEntity.getNavId(), newNomIntegrasjonEntity.getEnhetsId(), nomIntegrasjonEntity.getEntryId());
-                return nomIntegrasjonEntity;
+                try {
+                    NomIntegrasjonEntity nomIntegrasjonEntity = nomIntegrasjonRepository.save(
+                        newNomIntegrasjonEntity.toBuilder()
+                            .entryId(nextId())
+                            .entryOperasjon("Ny")
+                            .entryStatus("Ubehandlet")
+                            .entryBestiller(initiatedByNavident)
+                            .build()
+                    );
+                    logger.info("Lagret ny rad for ressurs {}, til enhet {} og med entryId {}", newNomIntegrasjonEntity.getNavId(), newNomIntegrasjonEntity.getEnhetsId(), nomIntegrasjonEntity.getEntryId());
+                    return nomIntegrasjonEntity;
+                } catch (Exception e) {
+                    logger.error("Feil ved lagring av ny rad for ressurs {}, til enhet {} og med entryId {}", newNomIntegrasjonEntity.getNavId(), newNomIntegrasjonEntity.getEnhetsId(), newNomIntegrasjonEntity.getEntryId(), e);
+                }
             } else {
                 logger.info("Lagret ny rad for ressurs {}, til enhet {}", newNomIntegrasjonEntity.getNavId(), newNomIntegrasjonEntity.getEnhetsId());
             }
