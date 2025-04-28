@@ -137,6 +137,10 @@ public class SecurityUtil {
         return SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(nomApiAccessScope.asGrantedAuthority());
     }
 
+    public static boolean hasAuthentication() {
+        return SecurityContextHolder.getContext().getAuthentication() != null;
+    }
+
     public static String getAuthenticatedNavIdent() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return getNavIdent(authentication).orElseThrow(
