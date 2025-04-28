@@ -509,7 +509,13 @@ function OrgtilknytningForm({
                   onRemove={() => remove(index)}
                 />
               )}
-              <HStack gap="8">
+
+              <HStack
+                css={css`
+                  margin-bottom: var(--a-spacing-6);
+                `}
+                gap="8"
+              >
                 <FormDateWrapper
                   defaultDate={field.gyldigFom ?? undefined}
                   disabled={editOtDisabled}
@@ -543,7 +549,7 @@ function OrgtilknytningForm({
                 />
               </HStack>
 
-              <LederLabel index={index} />
+              {!avsluttet && <LederLabel index={index} ressurs={ressurs} />}
 
               <Checkbox
                 css={css`
@@ -555,10 +561,7 @@ function OrgtilknytningForm({
                   `mappedeOrgtilknytninger.${index}.erDagligOppfolging`,
                 )}
               >
-                <BodyShort>
-                  Denne lederen har ansvar for den daglige oppfølgingen av
-                  medarbeideren
-                </BodyShort>
+                <BodyShort>Daglig oppfølging i denne enheten</BodyShort>
               </Checkbox>
 
               <div
@@ -1078,7 +1081,7 @@ function FormTilknytningstypeSelectWrapper({
   );
 }
 
-function LederLabel({ index }: { index: number }) {
+function LederLabel({ index, ressurs }: { index: number; ressurs: Ressurs }) {
   const { watch } = useFormContext();
   const field = watch(`mappedeOrgtilknytninger.${index}`);
 
@@ -1088,30 +1091,15 @@ function LederLabel({ index }: { index: number }) {
     enabled: !!field.orgEnhetId,
   });
 
-  // Lar dette stå her til eventuell bruk senere
-  // const ressursDolLeder = useQuery({
-  //   queryKey: getLedereForRessurs.queryKey(ressurs.navident),
-  //   queryFn: () => getLedereForRessurs.queryFn(ressurs.navident),
-  //   select: (ledere) => ledere.find((leder) => leder.erDagligOppfolging)?.leder,
-  // }).data;
-
   const orgEnhetLeder = orgEnhetQuery.data?.ledere[0];
 
-  // // Vis lederen til personen, i stedet for lederen på enheten, hvis ressursen man redigerer selv er lederen
-  // const lederNavn =
-  //   ressurs.navident === orgEnhetLeder?.navident
-  //     ? ressursDolLeder?.visningsnavn
-  //     : orgEnhetLeder?.visningsnavn;
-
-  const lederNavn = orgEnhetLeder?.visningsnavn;
+  if (ressurs.navident === orgEnhetLeder?.navident) {
+    return;
+  }
 
   return (
-    <BodyLong
-      css={css`
-        margin-top: var(--a-spacing-6);
-      `}
-    >
-      Leder: <b>{lederNavn ? formatVisningsnavn(lederNavn) : ""}</b>
+    <BodyLong>
+      Leder: <b>{formatVisningsnavn(orgEnhetLeder?.visningsnavn)}</b>
     </BodyLong>
   );
 }
