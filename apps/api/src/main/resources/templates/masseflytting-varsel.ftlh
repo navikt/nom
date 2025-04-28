@@ -1,6 +1,7 @@
 Hei ${innsenderVisningsnavn},
 
-Masseflyttingen av ressurser fra ${gammelOrgEnhet} til ${nyOrgEnhet} er nå gjennomført.
+Masseflyttingen av ressurser fra ${gammelOrgEnhet} til ${nyOrgEnhet} er nå gjennomført for navidentene:
+${flyttedeNavidenter}
 <#if feiletAntall == 0>
 
 Alle ressurser ble flyttet.
