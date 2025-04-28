@@ -274,15 +274,20 @@ public class OrgtilknytningEndretEmailService {
         Collection<OrgtilknytningState> orgtilknytningerIkkeFlyttet
     ) {
         try {
-            String innsenderNavident = SecurityUtil.getAuthenticatedNavIdent();
-            var innsenderVisningsnavn = ressursStateRepository.findByNavident(innsenderNavident)
-                .map(RessursState::visningsnavn)
-                .map(Visningsnavn::getFormattedVisningsnavn)
-                .orElse("UKJENT");
+            List<String> recipientList = new ArrayList<>();
+            var innsenderVisningsnavn = "";
+            if (SecurityUtil.hasAuthentication()) {
+                String innsenderNavident = SecurityUtil.getAuthenticatedNavIdent();
+                innsenderVisningsnavn = ressursStateRepository.findByNavident(innsenderNavident)
+                    .map(RessursState::visningsnavn)
+                    .map(Visningsnavn::getFormattedVisningsnavn)
+                    .orElse("UKJENT");
 
-            var recipientList = adClient.getAdRessurser(Set.of(innsenderNavident)).getRessurser().stream()
-                .map(AdRessurs::getEmail)
-                .collect(Collectors.toList());
+                recipientList.addAll(adClient.getAdRessurser(Set.of(innsenderNavident)).getRessurser().stream()
+                    .map(AdRessurs::getEmail)
+                    .toList()
+                );
+            }
             recipientList.addAll(getAdditionalRecipientsEmails());
 
             var gammelOrgEnhetNavn = orgtilknytningerFlyttet.stream().map(ot -> getOrgEnhetNavn(ot.orgEnhetId())).collect(Collectors.joining(", "));
@@ -436,6 +441,7 @@ public class OrgtilknytningEndretEmailService {
         List<String> additionalRecipients = new ArrayList<>();
         additionalRecipients.add("Line.Eeg-Larsen@nav.no");
         additionalRecipients.add("Mugunthan.Dharmadas@nav.no");
+        additionalRecipients.add("Roy.Grini@nav.no");
         return additionalRecipients;
     }
 
