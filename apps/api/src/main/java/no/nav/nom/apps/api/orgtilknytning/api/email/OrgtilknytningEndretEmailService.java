@@ -290,7 +290,7 @@ public class OrgtilknytningEndretEmailService {
             }
             recipientList.addAll(getAdditionalRecipientsEmails());
 
-            var gammelOrgEnhetNavn = orgtilknytningerFlyttet.stream().map(ot -> getOrgEnhetNavn(ot.orgEnhetId())).collect(Collectors.joining(", "));
+            var gammelOrgEnhetNavn = orgtilknytningerFlyttet.stream().map(ot -> getOrgEnhetNavn(ot.orgEnhetId())).distinct().collect(Collectors.joining(", "));
             var nyOrgEnhetNavn = getOrgEnhetNavn(nyOrgenhetId);
 
             String subject = String.format("Masseflytting av ressurser fra %s til %s", gammelOrgEnhetNavn, nyOrgEnhetNavn);
@@ -299,6 +299,7 @@ public class OrgtilknytningEndretEmailService {
                 gammelOrgEnhetNavn,
                 orgtilknytningerFlyttet.size(),
                 orgtilknytningerIkkeFlyttet.size(),
+                orgtilknytningerFlyttet.stream().map(OrgtilknytningState::navident).toList(),
                 orgtilknytningerIkkeFlyttet.stream().map(OrgtilknytningState::navident).toList(),
                 innsenderVisningsnavn
             );
@@ -333,6 +334,7 @@ public class OrgtilknytningEndretEmailService {
         String gammelOrgEnheter,
         int antallFlyttet,
         int feiletAntall,
+        List<String> flyttedeNavidenter,
         List<String> feiledeNavidenter,
         String innsenderVisningsnavn
     ) throws IOException, TemplateException {
@@ -343,7 +345,8 @@ public class OrgtilknytningEndretEmailService {
             "feiletAntall", feiletAntall,
             "total", antallFlyttet + feiletAntall,
             "gammelOrgEnhet", gammelOrgEnheter,
-            "feiletNavidenter", feiledeNavidenter.stream().collect(Collectors.joining(",\n")),
+            "flyttedeNavidenter", String.join(",\n", flyttedeNavidenter),
+            "feiletNavidenter", String.join(",\n", feiledeNavidenter),
             "innsenderVisningsnavn", innsenderVisningsnavn
         );
         freemarkerConfig.getTemplate(MASSEFLYTTING_VARSEL_FTLH).process(model, stringWriter);
