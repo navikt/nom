@@ -190,8 +190,13 @@ function DelegertRolleCard({ tilgang }: { tilgang: LederTilgangState }) {
         <b>
           <NavidentNameLookup navident={tilgang.av} />
         </b>
-        <span>Gyldig t.o.m</span>
-        <b>{formatDisplayDate(tilgang.gyldigTom)}</b>
+
+        <span>Gyldig t.o.m.:</span>
+        <b>
+          {tilgang.gyldigTom
+            ? formatDisplayDate(tilgang.gyldigTom)
+            : "Ingen utløpsdato"}
+        </b>
       </HStack>
       <HStack gap="2">
         <BodyShort>

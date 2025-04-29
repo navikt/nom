@@ -34,3 +34,18 @@ export function useHasSelvbetjeningAccess(navident: string) {
 export function useHasAdminOrWriteAccess() {
   return useHasAdminAccess() || useHasWriteAccess();
 }
+
+export function useHasRobotAccess() {
+  const session = useGetSession();
+  return !!session.data?.roles.includes(UserRoles.ROLE_WRITE_ROBOT);
+}
+
+export function useHasVikafossenAccess() {
+  const session = useGetSession();
+  return !!session.data?.roles.includes(UserRoles.ROLE_WRITE_VIKAFOSSEN);
+}
+
+export function useHasUtenlandskKonsulentAccess() {
+  const session = useGetSession();
+  return !!session.data?.roles.includes(UserRoles.ROLE_WRITE_UTL_KONSULENT);
+}

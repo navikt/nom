@@ -38,6 +38,9 @@ import {
 import {
   useGetSession,
   useHasAdminAccess,
+  useHasRobotAccess,
+  useHasUtenlandskKonsulentAccess,
+  useHasVikafossenAccess,
   useHasWriteAccess,
 } from "~/api/useGetSession";
 import { Divider } from "~/components/Divider";
@@ -49,6 +52,9 @@ import {
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { EditPersonOpplysninger } from "~/pages/ResourcePage/EditForms/EditPersonOpplysninger";
 import {
+  nomDateIsBefore,
+  nomDateIsBeforeToday,
+  nomDateIsSameOrAfter,
   nomDateIsTodayOrAfter,
   otCustomStortByDate,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
@@ -56,6 +62,7 @@ import { EditOrgtilknytninger } from "~/pages/ResourcePage/RessursComponents/Edi
 import { PersonOpplysninger } from "~/pages/ResourcePage/RessursComponents/PersonOpplysninger";
 import { blueTopBorder } from "~/resources/NomStyles";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
+import { IdentType } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
 import { Tilknytningtype } from "~/types/api-models";
 import {
@@ -66,17 +73,23 @@ import {
   isBeforeToday,
   isGyldighetsPeriodeActive,
   isInDevelopment,
-  isSameDateOrAfter,
   todayWithoutTimezone,
 } from "~/utils";
 
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   const { editOrgtilknytninger } = useSearch({ from: "/ressurs/$id" });
 
+  const hasWriteAccess = useHasWriteAccess();
+  const hasAdminAccess = useHasAdminAccess();
+
+  const hasRobotAccess = useHasRobotAccess();
+  const hasVikafossenAccess = useHasVikafossenAccess();
+  const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
+
   const hasWriteAccessForRessurs =
     useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
 
-  const harSluttet = !!ressurs.sluttdato && isBeforeToday(ressurs.sluttdato);
+  const harSluttet = nomDateIsBeforeToday(ressurs.sluttdato);
 
   const orgtilknytningerQuery = useQuery({
     queryKey: getOrgTilknytninger.queryKey(ressurs.navident),
@@ -124,13 +137,11 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   const redigerbareOrgEnhetIder = new Set(
     new Set(
       orgtilknytninger
-        .filter(
-          (tilknytning) =>
-            tilknytning.gyldigTom &&
-            isSameDateOrAfter(
-              tilknytning.gyldigTom,
-              dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
-            ),
+        .filter((tilknytning) =>
+          nomDateIsSameOrAfter(
+            tilknytning.gyldigTom,
+            dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
+          ),
         )
         .map((tilknytning) => tilknytning.orgEnhetId),
     ),
@@ -139,6 +150,40 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   const lederKanRedigere = iderLederKanRedigere.some((id) =>
     redigerbareOrgEnhetIder.has(id),
   );
+
+  const sluttetOverToMndSiden = nomDateIsBefore(
+    ressurs.sluttdato,
+    dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
+  );
+
+  const canEditRessursIdentType = (() => {
+    switch (ressurs.identType) {
+      case IdentType.ROBOT: {
+        return (!sluttetOverToMndSiden && hasRobotAccess) || hasAdminAccess;
+      }
+
+      case IdentType.VIKAFOSSEN: {
+        return (
+          (!sluttetOverToMndSiden && hasVikafossenAccess) || hasAdminAccess
+        );
+      }
+
+      case IdentType.UTENLANDSK_KONSULENT: {
+        return (
+          (!sluttetOverToMndSiden && hasUtenlandskKonsulentAccess) ||
+          hasAdminAccess
+        );
+      }
+
+      // Hvis identTypen til ressursen ikke er en av de spesielle, behandler vi
+      // det som STANDARD hvis den ikke er satt, er STANDARD eller er UKJENT
+      default: {
+        return (
+          (hasWriteAccess && !harSluttet) || lederKanRedigere || hasAdminAccess
+        );
+      }
+    }
+  })();
 
   const ouBegrensningerUnleashQuery = useQuery({
     queryKey: ["unleashToggle", "nom.sperring-endringer-ou"],
@@ -181,6 +226,7 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
       ) : (
         <>
           <SummarySection
+            canEditRessursIdentType={canEditRessursIdentType}
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
             ouBegrensningerAktiv={ouBegrensningerAktiv}
             ressurs={ressurs}
@@ -189,8 +235,8 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
           <LeaderForSection ressurs={ressurs} />
 
           <OrgTilknytningSection
+            canEditRessursIdentType={canEditRessursIdentType}
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
-            lederKanRedigere={lederKanRedigere}
             orgtilknytninger={orgtilknytninger}
             ouBegrensningerAktiv={ouBegrensningerAktiv}
             ressurs={ressurs}
@@ -199,10 +245,11 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
           <TeamCatSection navident={ressurs.navident} />
 
           <BottomSection
+            canEditRessursIdentType={canEditRessursIdentType}
             harSluttet={harSluttet}
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
             ouBegrensningerAktiv={ouBegrensningerAktiv}
-            ressursNavIdent={ressurs.navident}
+            ressurs={ressurs}
           />
 
           {ressurs.isNomMastered && (
@@ -227,14 +274,14 @@ function OrgTilknytningSection({
   ressurs,
   hasWriteAccessForRessurs,
   orgtilknytninger,
-  lederKanRedigere,
   ouBegrensningerAktiv,
+  canEditRessursIdentType,
 }: {
   ressurs: Ressurs;
   hasWriteAccessForRessurs: boolean;
   orgtilknytninger: OrgtilknytningState[];
-  lederKanRedigere: boolean;
   ouBegrensningerAktiv: boolean;
+  canEditRessursIdentType: boolean;
 }) {
   const activeOrgtilknytninger = orgtilknytninger.filter((orgTilknytning) =>
     isGyldighetsPeriodeActive(
@@ -281,8 +328,8 @@ function OrgTilknytningSection({
           </Heading>
 
           <EditOrgtilknytningerButton
+            canEditRessursIdentType={canEditRessursIdentType}
             harSluttet={harSluttet}
-            lederKanRedigere={lederKanRedigere}
             ouBegrensningerAktiv={ouBegrensningerAktiv}
           />
         </div>
@@ -677,10 +724,12 @@ function SummarySection({
   ressurs,
   hasWriteAccessForRessurs,
   ouBegrensningerAktiv,
+  canEditRessursIdentType,
 }: {
   ressurs: Ressurs;
   hasWriteAccessForRessurs: boolean;
   ouBegrensningerAktiv: boolean;
+  canEditRessursIdentType: boolean;
 }) {
   const { editPersonopplysninger } = useSearch({
     from: "/ressurs/$id",
@@ -692,12 +741,19 @@ function SummarySection({
   const hasSelfServiceAccess =
     useGetSession().data?.navident === ressurs.navident;
 
-  if (
-    editPersonopplysninger &&
-    ((hasWriteAccess && hasWriteAccessForRessurs) ||
-      hasSelfServiceAccess ||
-      hasAdminAccess)
-  ) {
+  const spesiellRessurs =
+    ressurs.identType === IdentType.ROBOT ||
+    ressurs.identType === IdentType.UTENLANDSK_KONSULENT ||
+    ressurs.identType === IdentType.VIKAFOSSEN;
+
+  const canEditPersonopplysninger =
+    (canEditRessursIdentType &&
+      (spesiellRessurs ||
+        (hasWriteAccess && hasWriteAccessForRessurs) ||
+        hasAdminAccess)) ||
+    (!spesiellRessurs && hasSelfServiceAccess);
+
+  if (editPersonopplysninger && canEditPersonopplysninger) {
     return (
       <ModalProvider>
         <EditPersonOpplysninger
@@ -710,6 +766,7 @@ function SummarySection({
 
   return (
     <PersonOpplysninger
+      canEditPersonopplysninger={canEditPersonopplysninger}
       ouBegrensningerAktiv={ouBegrensningerAktiv}
       ressurs={ressurs}
     />
@@ -758,13 +815,13 @@ function TeamCatSection({ navident }: { navident: string }) {
 }
 
 function EditOrgtilknytningerButton({
-  lederKanRedigere,
   harSluttet,
   ouBegrensningerAktiv,
+  canEditRessursIdentType,
 }: {
-  lederKanRedigere: boolean;
   harSluttet: boolean;
   ouBegrensningerAktiv: boolean;
+  canEditRessursIdentType: boolean;
 }) {
   const { editPersonopplysninger } = useSearch({
     from: "/ressurs/$id",
@@ -772,15 +829,11 @@ function EditOrgtilknytningerButton({
 
   const navigate = useNavigate();
 
-  const hasWriteAccess = useHasWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
 
   const utilgjengeligOu = ouBegrensningerAktiv && !hasAdminAccess;
 
-  if (
-    !editPersonopplysninger &&
-    ((hasWriteAccess && !harSluttet) || lederKanRedigere || hasAdminAccess)
-  ) {
+  if (!editPersonopplysninger && canEditRessursIdentType) {
     return (
       <div
         css={css`
@@ -836,30 +889,40 @@ function EditOrgtilknytningerButton({
 }
 
 function BottomSection({
-  ressursNavIdent,
+  ressurs,
   hasWriteAccessForRessurs,
   harSluttet,
   ouBegrensningerAktiv,
+  canEditRessursIdentType,
 }: {
-  ressursNavIdent: string;
+  ressurs: Ressurs;
   hasWriteAccessForRessurs: boolean;
   harSluttet: boolean;
   ouBegrensningerAktiv: boolean;
+  canEditRessursIdentType: boolean;
 }) {
   const hasWriteAccess = useHasWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
 
-  const canEditRessurs =
-    (hasWriteAccess && hasWriteAccessForRessurs) || hasAdminAccess;
+  const spesiellRessurs =
+    ressurs.identType === IdentType.ROBOT ||
+    ressurs.identType === IdentType.UTENLANDSK_KONSULENT ||
+    ressurs.identType === IdentType.VIKAFOSSEN;
 
-  if (canEditRessurs && !harSluttet) {
+  const canTerminateRessurs =
+    canEditRessursIdentType &&
+    (spesiellRessurs ||
+      (hasWriteAccess && hasWriteAccessForRessurs) ||
+      hasAdminAccess);
+
+  if (canTerminateRessurs && !harSluttet) {
     return (
       <>
         <Divider noMargins />
 
         <TerminateButton
           ouBegrensningerAktiv={ouBegrensningerAktiv}
-          ressursNavIdent={ressursNavIdent}
+          ressursNavIdent={ressurs.navident}
         />
       </>
     );
