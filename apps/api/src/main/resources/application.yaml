@@ -408,6 +408,8 @@ NOM_PILOT_GROUPID: "087625aa-d658-4b00-9d71-8538b1a8fd15" # NOM-PILOT
 NOM_WRITE_UTL_KONSULENT_GROUPID:  "fb625494-4aa6-4061-9f87-02c820210ed9" # 0000-CA-NOM-Write-Utl-Konsulent
 NOM_WRITE_VIKAFOSSEN_GROUPID:     "2632148d-54a6-4b17-9e53-9d415d73653f" # 0000-CA-NOM-Write-Vikafossen
 NOM_WRITE_ROBOT_GROUPID:          "a735d831-420f-4a63-949b-a02ef0f17673" # 0000-CA-NOM-Write-Robot
+READONLY_GROUPID:           "76611d10-876b-4df1-8425-dfe61e6990d1" # 0000-CA-NOM-ADMIN-Lesetilgang
+EXTENDED_READONLY_GROUPID:  "a0c8eddc-2435-4fea-a642-58b2b16dd8e0" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
 
 PAARORENDE_BASEURL: "http://nom-paarorende.org.svc.cluster.local"
 PAARORENDE_API_SCOPE: api://dev-gcp.org.nom-paarorende/.default
@@ -499,6 +501,8 @@ NOM_PILOT_GROUPID: "e219ba08-0685-40b5-95e6-5fd82ec7414a" # NOM-PILOT
 NOM_WRITE_UTL_KONSULENT_GROUPID:  "9b3bcb75-12ae-4af7-aecf-fcd8f5b27dc5" # 0000-CA-NOM-Write-Utl-Konsulent
 NOM_WRITE_VIKAFOSSEN_GROUPID:     "220b7326-c379-4611-b1ad-57c29dd60914" # 0000-CA-NOM-Write-Vikafossen
 NOM_WRITE_ROBOT_GROUPID:          "ea2cd5fb-b0c0-4ffa-98ea-c5439dfcc3a9" # 0000-CA-NOM-Write-Robot
+READONLY_GROUPID:           "9a608366-69eb-42a9-a787-3469359ce322" # 0000-CA-NOM-ADMIN-Lesetilgang
+EXTENDED_READONLY_GROUPID:  "cea028e1-811f-4cd6-aa67-d0130207fd7a" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
 
 NOM_REMEDY_INTEGRASJON_BASEURL: "https://nom-remedy-integrasjon.prod-fss-pub.nais.io"
 NOM_REMEDY_INTEGRASJON_API_SCOPE: api://prod-fss.org.nom-remedy-integrasjon/.default
