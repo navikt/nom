@@ -33,6 +33,7 @@ import { LabelWithValue } from "~/components/LabelWithValue";
 import { UserImage } from "~/components/UserImage";
 import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
+import { nomDateIsBefore } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { Ressurs } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
 import { TelefonType } from "~/types/api-models";
@@ -56,9 +57,11 @@ import {
 export function PersonOpplysninger({
   ressurs,
   ouBegrensningerAktiv,
+  canEditPersonopplysninger,
 }: {
   ressurs: Ressurs;
   ouBegrensningerAktiv: boolean;
+  canEditPersonopplysninger: boolean;
 }) {
   const navident = ressurs.navident;
 
@@ -77,12 +80,10 @@ export function PersonOpplysninger({
 
   const harSluttet = !!ressurs.sluttdato && isBeforeToday(ressurs.sluttdato);
 
-  const sluttetOverToMndSiden =
-    !!ressurs.sluttdato &&
-    !isSameDateOrAfter(
-      ressurs.sluttdato,
-      dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
-    );
+  const sluttetOverToMndSiden = nomDateIsBefore(
+    ressurs.sluttdato,
+    dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
+  );
 
   return (
     <HStack>
@@ -185,9 +186,8 @@ export function PersonOpplysninger({
         />
 
         <EditPersonopplysningerButton
-          harSluttet={harSluttet}
+          canEditPersonopplysninger={canEditPersonopplysninger}
           ouBegrensningerAktiv={ouBegrensningerAktiv}
-          ressurs={ressurs}
         />
       </VStack>
     </HStack>
@@ -195,31 +195,19 @@ export function PersonOpplysninger({
 }
 
 function EditPersonopplysningerButton({
-  ressurs,
-  harSluttet,
   ouBegrensningerAktiv,
+  canEditPersonopplysninger,
 }: {
-  ressurs: Ressurs;
-  harSluttet: boolean;
   ouBegrensningerAktiv: boolean;
+  canEditPersonopplysninger: boolean;
 }) {
   const navigate = useNavigate();
 
-  const hasWriteAccess = useHasWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
-
-  const hasWriteAccessForRessurs =
-    useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
-
-  const hasSelvbetjeningAccess = useHasSelvbetjeningAccess(ressurs.navident);
 
   const utilgjengeligOu = ouBegrensningerAktiv && !hasAdminAccess;
 
-  if (
-    (((hasWriteAccess && hasWriteAccessForRessurs) || hasSelvbetjeningAccess) &&
-      !harSluttet) ||
-    hasAdminAccess
-  ) {
+  if (canEditPersonopplysninger) {
     return (
       <div
         css={css`

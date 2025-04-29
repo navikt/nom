@@ -17,6 +17,9 @@ import {
 import {
   useGetSession,
   useHasAdminAccess,
+  useHasRobotAccess,
+  useHasUtenlandskKonsulentAccess,
+  useHasVikafossenAccess,
   useHasWriteAccess,
 } from "~/api/useGetSession";
 import flyttFysiskBrukersted from "~/resources/flyttFysiskBrukersted.svg";
@@ -25,6 +28,10 @@ import hierarchyFilled from "~/resources/hierarchyFilled.svg";
 export function BurgerMenu() {
   const hasAdminAccess = useHasAdminAccess();
   const hasWriteAccess = useHasWriteAccess();
+
+  const hasRobotAccess = useHasRobotAccess();
+  const hasVikafossenAccess = useHasVikafossenAccess();
+  const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
 
   const session = useGetSession();
 
@@ -49,10 +56,14 @@ export function BurgerMenu() {
   const showOpprettLink =
     hasAdminAccess || (hasWriteAccess && lederEllerDelegert);
 
-  const showOpprettSpecialLink = hasAdminAccess;
+  const showOpprettSpecialLink =
+    hasRobotAccess ||
+    hasVikafossenAccess ||
+    hasUtenlandskKonsulentAccess ||
+    hasAdminAccess;
 
   const showTilgangerLink =
-    hasAdminAccess || (hasWriteAccess && lederEllerDelegert);
+    (hasWriteAccess && lederEllerDelegert) || hasAdminAccess;
 
   return (
     <Dropdown>

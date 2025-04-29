@@ -36,6 +36,12 @@ import {
   getOrgEnheterSomKanHaRessurser,
   getPerson,
 } from "~/api/react-query-endpoints";
+import {
+  useHasAdminAccess,
+  useHasRobotAccess,
+  useHasUtenlandskKonsulentAccess,
+  useHasVikafossenAccess,
+} from "~/api/useGetSession";
 import { ApiResponseError } from "~/components/ApiResponseError";
 import ContentWrapper from "~/components/ContentWrapper";
 import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
@@ -94,9 +100,28 @@ export function CreateSpecialResourcePage() {
 function CreateSpecialResourceForm() {
   const navigate = useNavigate();
 
+  const hasAdminAccess = useHasAdminAccess();
+
+  const hasRobotAccess = useHasRobotAccess();
+  const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
+  const hasVikafossenAccess = useHasVikafossenAccess();
+
+  const IdentTypeAccessMap = {
+    [IdentType.ROBOT]: hasRobotAccess || hasAdminAccess,
+    [IdentType.UTENLANDSK_KONSULENT]:
+      hasUtenlandskKonsulentAccess || hasAdminAccess,
+    [IdentType.VIKAFOSSEN]: hasVikafossenAccess || hasAdminAccess,
+    [IdentType.STANDARD]: false,
+    [IdentType.UKJENT]: false,
+  };
+
+  const tillatteIdentTyper = spesielleIdentTyper.filter(
+    (type) => IdentTypeAccessMap[type],
+  );
+
   const methods = useForm({
     defaultValues: {
-      identType: IdentType.ROBOT,
+      identType: tillatteIdentTyper[0],
       identifikasjonsnummer: undefined,
       visningsfornavn: "",
       visningsmellomnavn: "",
@@ -174,7 +199,10 @@ function CreateSpecialResourceForm() {
                 width: 40%;
               `}
             >
-              <IdentTypeFormPart name="identType" />
+              <IdentTypeFormPart
+                name="identType"
+                tillatteIdentTyper={tillatteIdentTyper}
+              />
 
               <IdentifikasjonsnummerSearchFormPart
                 checkedIdentifikasjonsnummer={identifikasjonsnummer}
@@ -555,7 +583,13 @@ function CreateSpecialConfirmModal({
   );
 }
 
-function IdentTypeFormPart({ name }: { name: string }) {
+function IdentTypeFormPart({
+  name,
+  tillatteIdentTyper,
+}: {
+  name: string;
+  tillatteIdentTyper: IdentType[];
+}) {
   const { field, fieldState } = useController({ name });
   const { clearErrors } = useFormContext();
 
@@ -570,7 +604,7 @@ function IdentTypeFormPart({ name }: { name: string }) {
       ref={field.ref}
       value={field.value}
     >
-      {Object.values(tilgjengeligeIdentTyper).map((type) => (
+      {Object.values(tillatteIdentTyper).map((type) => (
         <option key={type} value={type}>
           {IdentTypeNameMapping[type]}
         </option>
@@ -1027,7 +1061,7 @@ const validateMaxTime = (
   return true;
 };
 
-const tilgjengeligeIdentTyper = [
+const spesielleIdentTyper = [
   IdentType.ROBOT,
   IdentType.UTENLANDSK_KONSULENT,
   IdentType.VIKAFOSSEN,
