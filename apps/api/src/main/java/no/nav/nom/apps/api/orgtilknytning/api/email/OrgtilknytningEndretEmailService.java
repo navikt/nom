@@ -117,7 +117,7 @@ public class OrgtilknytningEndretEmailService {
     }
 
     @Scheduled(cron = "0 0 18 * * ?") // every day at 18:00
-    public void sendMasseflyttOTEmail() {
+    public void sendOTEndretEmail() {
         // await until initial load is complete
         dvhStartupLoadMonitor.awaitInitialLoadComplete();
 
@@ -152,7 +152,7 @@ public class OrgtilknytningEndretEmailService {
             } else {
                 // check if the navident is mastered in nom
                 if(nomMastered.isMastered(navident)) {
-                    sendMasseflyttOTEmail(endretRessurs.get(), endringer);
+                    sendOTEndretEmail(endretRessurs.get(), endringer);
                 } else {
                     log.info("Navident {} is not mastered in nom. OT changes email will not be sent!", navident);
                 }
@@ -167,9 +167,9 @@ public class OrgtilknytningEndretEmailService {
         });
     }
 
-    private void sendMasseflyttOTEmail(RessursState endretRessurs, List<OTEndretData> otEndringerData) {
+    private void sendOTEndretEmail(RessursState endretRessurs, List<OTEndretData> otEndringerData) {
         try {
-            Set<String> recipientNavidents = getReceiptionNavidents(otEndringerData);
+            Set<String> recipientNavidents = getRecipientNavidents(otEndringerData);
             log.info("Sender OT endringer epost til navidents: {}", recipientNavidents);
 
             var adRessurser = adClient.getAdRessurser(recipientNavidents);
@@ -305,11 +305,7 @@ public class OrgtilknytningEndretEmailService {
             );
             log.info("Masseflytting epost. Mottakere: {}\nBody:\n{}", recipientList, body);
             EmailMessage message = new EmailMessage(subject, body, recipientList);
-            if (!unleash.isEnabled(UNLEASH_SKRU_AV_EPOST_ENDRING)) {
-                microsoftGraphClient.sendEmail(message).subscribe();
-            } else {
-                log.info("Epost sending is disabled by Unleash");
-            }
+            microsoftGraphClient.sendEmail(message).subscribe();
         } catch (ADResponseException e) {
             log.error("Fant ikke innsender sin epost adresse for masseflytting", e);
         } catch (IOException | TemplateException e) {
@@ -409,7 +405,7 @@ public class OrgtilknytningEndretEmailService {
         return otEndringer.toString();
     }
 
-    public Set<String> getReceiptionNavidents(List<OTEndretData> otEndringerData) {
+    public Set<String> getRecipientNavidents(List<OTEndretData> otEndringerData) {
         Set<String> recipientNavidents = new HashSet<>();
         for (OTEndretData event : otEndringerData) {
             // add the changedBy person

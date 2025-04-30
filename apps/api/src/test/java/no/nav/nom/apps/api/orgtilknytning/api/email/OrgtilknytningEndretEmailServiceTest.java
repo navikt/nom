@@ -137,7 +137,7 @@ public class OrgtilknytningEndretEmailServiceTest {
     }
 
     @Test
-    public void testGetReceiptionNavidents() {
+    public void testGetRecipientNavidents() {
         // setup data
         String fid = "fid123456";
         String navident = "A123456";
@@ -185,7 +185,7 @@ public class OrgtilknytningEndretEmailServiceTest {
         );
 
         // test
-        var result = orgtilknytningEndretEmailService.getReceiptionNavidents(
+        var result = orgtilknytningEndretEmailService.getRecipientNavidents(
             List.of(
                 OTEndretData.builder()
                     .fid(fid)
