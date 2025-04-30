@@ -303,6 +303,7 @@ EH00001;2300;ORGNIV3;HELFO;Beholdt;;;JA;EH00001;ORGENHET;je305h;28.02.2025 - lag
 231000;2310;ORGNIV3;HELFO Oslo;Beholdt;;;JA;231000;ORGNIV3;leggInn;norgEnhet er under avvikling. MEN det er 23 aktive nav-identer på 2310 i HRRES_RESSURS
 239000;2390;ORGNIV3;;FEIL, se kommentar;;;Avventer;239000;;leggInn;Representerer HELSEDIR. orgEnhet her er antagelig lagt inn av Rune og Co og ikke reell. Antagelig må vi håndtere disse siden. Disse skal antagelig bare opprettes i NOM, og ikke inn i U4.
 8101111;2810;AGRESSOORGENHET;Sekretariatet;Opp til ORGNIV2;8101;ga846n;JA;8101;ORGNIV2;ga846n;Kun 1 enhet nedover
+810;2810;ORGNIV2;Arbeids- og velferdsdirektør;;810;vu258m;JA;810;ORGNIV2;vu258m;30.04.2025 mappet til 2810 ifm. OU
 8102000;2811;AGRESSOORGENHET;Internrevisjon;Opp til ORGNIV2;812;vu140n;JA;812;ORGNIV2;vu140n;Flere orgEnheter i bunn, men alle deler 2811 ved oppslag på trygdeident, så flytter til øverste Internrev.node
 820300;2820;ORGNIV3;HR-avdelingen;Opp til ORGNIV2;821;ra316y;JA;821;ORGNIV2;ra316y;Burde vært mappet til ORGNIV2
 820200;2821;ORGNIV3;Økonomi- og styringsavdelingen;Opp til ORGNIV2;8202;ke338b;JA;8202;ORGNIV2;ke338b;
