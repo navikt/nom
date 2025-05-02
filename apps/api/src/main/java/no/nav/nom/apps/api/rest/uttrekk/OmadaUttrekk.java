@@ -194,8 +194,10 @@ public class OmadaUttrekk {
                     } catch (IOException e) {
                         log.error("Error writing to CSV", e);
                         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
+                    } catch (Exception e) {
+                        log.error("Error writing to CSV - FID {} - MasseflyttFraFid {}", kobling.fid(), kobling.masseflyttetFraFid(), e);
+                        throw e;
                     }
-
                 });
 
             return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
