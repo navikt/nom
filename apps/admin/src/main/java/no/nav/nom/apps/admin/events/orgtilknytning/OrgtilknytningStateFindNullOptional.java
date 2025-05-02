@@ -9,11 +9,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class OrgtilknytningStateFindNullOptional implements AbstractNomStateListener.Visitor<OrgtilknytningState> {
-    private final NomStateOrgtilknytningListener orgtilknytningListener;
 
     public OrgtilknytningStateFindNullOptional(NomStateOrgtilknytningListener orgtilknytningListener) {
-        this.orgtilknytningListener = orgtilknytningListener;
-
         orgtilknytningListener.register(this);
     }
 
@@ -24,8 +21,8 @@ public class OrgtilknytningStateFindNullOptional implements AbstractNomStateList
 
     @Override
     public void visit(String key, OrgtilknytningState stateObject) {
-        if (stateObject.masseflyttetFraFid() == null) {
-            log.error("Orgtilknytninf FID {} har null i masseFlyttetFraFid", key);
+        if (stateObject != null && stateObject.masseflyttetFraFid() == null) {
+            log.error("Orgtilknytning FID {} har null i masseFlyttetFraFid", key);
         }
     }
 }
