@@ -51,7 +51,7 @@ public record ManuelleRessurserOgLedereProperties(
                 LocalDate.of(2022, 1, 1),
                 Optional.empty(),
                 Optional.empty(),
-                null,
+                Optional.empty(),
                 "nom-api"
             );
         }
