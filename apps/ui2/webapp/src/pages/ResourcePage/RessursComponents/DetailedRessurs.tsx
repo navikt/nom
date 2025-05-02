@@ -45,6 +45,7 @@ import {
 } from "~/api/useGetSession";
 import { Divider } from "~/components/Divider";
 import { ModalProvider } from "~/components/modalProvider/ModalProvider";
+import { spesielleIdentTyper } from "~/pages/CreateResourcePage/CreateSpecialResourcePage";
 import {
   SektorNameMapping,
   TilknytningtypeNameMapping,
@@ -741,10 +742,7 @@ function SummarySection({
   const hasSelfServiceAccess =
     useGetSession().data?.navident === ressurs.navident;
 
-  const spesiellRessurs =
-    ressurs.identType === IdentType.ROBOT ||
-    ressurs.identType === IdentType.UTENLANDSK_KONSULENT ||
-    ressurs.identType === IdentType.VIKAFOSSEN;
+  const spesiellRessurs = spesielleIdentTyper.includes(ressurs.identType);
 
   const canEditPersonopplysninger =
     (canEditRessursIdentType &&
@@ -904,10 +902,7 @@ function BottomSection({
   const hasWriteAccess = useHasWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
 
-  const spesiellRessurs =
-    ressurs.identType === IdentType.ROBOT ||
-    ressurs.identType === IdentType.UTENLANDSK_KONSULENT ||
-    ressurs.identType === IdentType.VIKAFOSSEN;
+  const spesiellRessurs = spesielleIdentTyper.includes(ressurs.identType);
 
   const canTerminateRessurs =
     canEditRessursIdentType &&

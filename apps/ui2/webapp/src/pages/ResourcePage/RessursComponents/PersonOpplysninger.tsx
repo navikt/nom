@@ -35,6 +35,7 @@ import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { nomDateIsBefore } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { Ressurs } from "~/types/api-models";
+import { IdentType } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
 import { TelefonType } from "~/types/api-models";
 import {
@@ -44,7 +45,6 @@ import {
   formatTlf,
   formatVisningsnavn,
   isBeforeToday,
-  isSameDateOrAfter,
   todayWithoutTimezone,
 } from "~/utils";
 
@@ -84,6 +84,10 @@ export function PersonOpplysninger({
     ressurs.sluttdato,
     dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
   );
+
+  const identTypeUtenKontaktpersoner =
+    ressurs.identType === IdentType.ROBOT ||
+    ressurs.identType === IdentType.VIKAFOSSEN;
 
   return (
     <HStack>
@@ -138,7 +142,8 @@ export function PersonOpplysninger({
           {(hasKontaktinfoAccessForRessurs ||
             hasSelfServiceAccess ||
             hasAdminAccess) &&
-            !sluttetOverToMndSiden && (
+            !sluttetOverToMndSiden &&
+            !identTypeUtenKontaktpersoner && (
               <>
                 <span>Kontaktpersoner:</span>
 
@@ -168,8 +173,8 @@ export function PersonOpplysninger({
                   </ReactRouterLink>
 
                   <HelpText title="Hvem kan se denne informasjonen?">
-                    Kun synlig for medarbeideren selv, nærmeste leder og leders
-                    leder.
+                    Kun synlig for medarbeideren selv og ledere/lederstøtte med
+                    redigeringstilgang til medarbeideren.
                   </HelpText>
                 </div>
               </>
