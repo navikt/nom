@@ -720,6 +720,14 @@ export const getHarParorendeTilgang = {
     ).data,
 };
 
+export const getSpaHtmlWithoutNonce = {
+  queryKey: () => ["getSpaHtmlWithoutNonce"],
+  queryFn: async (): Promise<string> => {
+    const spaHtml = (await axios.get<string>(`/`)).data;
+    return spaHtml.replaceAll(/nonce=\S+"/g, "");
+  },
+};
+
 export const createParorendeForBruker = async (kontakt: Kontaktinfo) =>
   (
     await axios.post<Kontaktinfo, AxiosResponse<unknown>>(
