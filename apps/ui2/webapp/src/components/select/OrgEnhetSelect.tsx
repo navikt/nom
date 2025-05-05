@@ -6,8 +6,10 @@ import { Controller, useFormContext } from "react-hook-form";
 import type { OptionProps } from "react-select";
 import { components, createFilter } from "react-select";
 
-import { dateIsAfterToday } from "~/dateUtils/dateUtils";
+import { gamleOrgEnheter } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
+import { nomDateIsAfterToday } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { OrgEnhetMedLedernavn } from "~/types/api-models";
+import { isInDevelopment } from "~/utils";
 
 import { AsyncSearch, SelectLayoutWrapper } from "./CustomSelectComponents";
 
@@ -61,11 +63,17 @@ export const OrgEnhetSelect = forwardRef(
     },
     reference,
   ) => {
-    const options = orgEnheter.map((orgEnhet) => ({
-      value: orgEnhet.id,
-      label: `${orgEnhet.navn}${!!orgEnhet.gyldigFom && dateIsAfterToday(orgEnhet.gyldigFom) ? " (ikke aktiv)" : ""}`,
-      id: orgEnhet.id,
-    }));
+    const options = orgEnheter.map((orgEnhet) => {
+      const ikkeAktiv =
+        nomDateIsAfterToday(orgEnhet.gyldigFom) ||
+        (!isInDevelopment() && gamleOrgEnheter.includes(orgEnhet.id));
+
+      return {
+        value: orgEnhet.id,
+        label: `${orgEnhet.navn}${ikkeAktiv ? " (ikke aktiv)" : ""}`,
+        id: orgEnhet.id,
+      };
+    });
 
     const currentValue = options.find((option) => option.value === value);
 
