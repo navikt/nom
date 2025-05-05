@@ -184,7 +184,7 @@ export function OverEnheterDivider() {
 }
 
 // Hardkodet listen over gamle enheter. Ikke god praksis, men dette er veldig midlertidig
-const gamleOrgEnheter: string[] = [
+export const gamleOrgEnheter: string[] = [
   "py355m",
   "ke682s",
   "ra229y",
