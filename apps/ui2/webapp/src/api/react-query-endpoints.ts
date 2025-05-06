@@ -328,9 +328,12 @@ export const getOrgEnhet = {
 export const getOrgEnhetList = {
   queryKey: (orgEnhetIder: string[]) => ["ORGENHETER_LIST", ...orgEnhetIder],
   queryFn: async (orgEnhetIder: string[]) =>
-    await Promise.all(
-      orgEnhetIder.map((orgEnhetId) => getOrgEnhet.queryFn(orgEnhetId)),
-    ),
+    (
+      await axios.post<string[], AxiosResponse<OrgEnhet[]>>(
+        `${NOM_API_BASE_PATH}/app/orgenheter`,
+        orgEnhetIder,
+      )
+    ).data,
 };
 
 export const isOrgEnhetArbeidsomraade = {
