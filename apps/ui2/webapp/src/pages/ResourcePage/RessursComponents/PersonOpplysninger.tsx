@@ -389,7 +389,13 @@ export function TelefonNummere({
       />
 
       {!redigering && (
-        <LabelWithValue label="Telefonnummer" value={privatTelefon} />
+        <LabelWithValue
+          displayEmpty={
+            kontorTelefoner.length === 0 && tjenesteTelefoner.length === 0
+          }
+          label="Telefonnummer"
+          value={privatTelefon}
+        />
       )}
     </>
   );
