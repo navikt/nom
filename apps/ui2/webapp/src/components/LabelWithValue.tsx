@@ -4,15 +4,17 @@ import React from "react";
 export function LabelWithValue({
   label,
   value,
-  wrapped = false,
   helpText,
+  wrapped = false,
+  displayEmpty = false,
 }: {
   label: string;
   value: string | null | undefined;
-  wrapped?: boolean;
   helpText?: string;
+  wrapped?: boolean;
+  displayEmpty?: boolean;
 }) {
-  if (!value) {
+  if (!value && !displayEmpty) {
     return <></>;
   }
 
@@ -32,7 +34,13 @@ export function LabelWithValue({
   );
 }
 
-function ValueView({ value, helpText }: { value: string; helpText?: string }) {
+function ValueView({
+  value,
+  helpText,
+}: {
+  value: string | null | undefined;
+  helpText?: string;
+}) {
   if (helpText) {
     return (
       <HStack gap="2">
