@@ -38,7 +38,6 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -51,6 +50,7 @@ import static no.nav.nom.apps.api.common.DateUtils.isPeriodFuture;
 @RestController
 @RequestMapping(value = {"/app/orgenheter"})
 public class OrgEnhetController {
+    public static final String UNLEASH_NY_KONTAKTINFO_EXPORT = "nom.ny_kontaktinfo_eksport";
     private final OrgenhetService orgenhetService;
     private final OrgEnhetMapper orgEnhetMapper;
     private final KontaktpersonerExcelGenerator kontaktpersonerExcelGenerator;
@@ -58,8 +58,6 @@ public class OrgEnhetController {
     private final AuthResolver authResolver;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final Unleash unleash;
-
-    public static final String UNLEASH_NY_KONTAKTINFO_EXPORT = "nom.ny_kontaktinfo_eksport";
 
     public OrgEnhetController(
         OrgenhetService orgenhetService,
@@ -100,15 +98,12 @@ public class OrgEnhetController {
             @ApiResponse(responseCode = "200"),
         }
     )
-    public ResponseEntity<Map<String, OrgEnhet>> getOrgenheterForIder(
+    public ResponseEntity<List<OrgEnhet>> getOrgenheterForIder(
         @RequestBody List<String> orgenhetIder
     ) {
         return ResponseEntity.ok(
-            orgenhetService.getByIdBulk(orgenhetIder).entrySet().stream()
-                .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    entry -> orgEnhetMapper.mapToOrgEnhet(entry.getValue())
-                ))
+            orgenhetService.getByIdBulk(orgenhetIder).values().stream()
+                .map(orgEnhetMapper::mapToOrgEnhet).toList()
         );
     }
 
@@ -120,12 +115,13 @@ public class OrgEnhetController {
     )
     public ResponseEntity<Boolean> kanRessursRedigereOrgenhet(
         @PathVariable("navident") String navident,
-        @PathVariable("orgEnhetId") String orgEnhetId) {
+        @PathVariable("orgEnhetId") String orgEnhetId
+    ) {
         OrgEnhet orgEnhet = orgenhetService.getById(orgEnhetId)
             .map(orgEnhetMapper::mapToOrgEnhet)
             .orElse(null);
 
-        if(orgEnhet != null) {
+        if (orgEnhet != null) {
             boolean kanRedigereOrgenhet = authResolver.kanRessursRedigereOrgenhet(navident, orgEnhetId);
             log.info("kanRessursRedigereOrgenhet navident orgEnhetId result: {}-{}-{}", navident, orgEnhetId, kanRedigereOrgenhet);
             return ResponseEntity.ok(kanRedigereOrgenhet);
@@ -140,15 +136,17 @@ public class OrgEnhetController {
         description = "Genererer regneark med oversikt over kontakt personer for en orgenhet",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Exported file"),
-    })
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Exported file"),
+        }
+    )
     public void exportKontaktpersonerForOrgenhetId(HttpServletResponse response, @PathVariable String orgenhetId) throws IOException {
         try {
             var orgEnhet = orgenhetService.getById(orgenhetId)
                 .map(orgEnhetMapper::mapToOrgEnhet);
 
-            if(orgEnhet.isEmpty()) {
+            if (orgEnhet.isEmpty()) {
                 String notFoundError = "Orgenhet not found! " + orgenhetId;
                 log.error(notFoundError);
                 response.sendError(404, notFoundError);
@@ -158,7 +156,7 @@ public class OrgEnhetController {
             var loggedInUser = SecurityUtil.getAuthenticatedNavIdent();
             var isAdminToEnhet = SecurityUtil.loggedInUserHasAccessScope(NomApiAccessScope.ADMIN);
             boolean kanRedigereOrgenhet = authResolver.kanRessursRedigereOrgenhet(loggedInUser, orgenhetId);
-            if(!isAdminToEnhet && !kanRedigereOrgenhet) {
+            if (!isAdminToEnhet && !kanRedigereOrgenhet) {
                 var accessDeniedError = "User does not have access to view ressurser for this orgenhet: " + loggedInUser + "-" + orgenhetId;
                 log.error(accessDeniedError);
                 throw new AccessDeniedException(accessDeniedError);
@@ -173,8 +171,9 @@ public class OrgEnhetController {
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=kontaktpersoner.xlsx");
             kontaktpersonerExcelGenerator.generate(response, orgEnhet.get(), sortedRessurser);
         } catch (Exception e) {
-            if (e instanceof AccessDeniedException) throw e;
-            else {
+            if (e instanceof AccessDeniedException) {
+                throw e;
+            } else {
                 log.error("Something wrong happened while getting contact info or generating excel file. " + e.getMessage());
                 response.sendError(500, "Noe galt skjedde under henting av kontaktinformasjon eller generering av excel-fil.");
             }
@@ -201,13 +200,13 @@ public class OrgEnhetController {
 
     @GetMapping("/kanHaRessurser")
     @Operation(
-            description = "Henter alle aktive orgenheter (har overenhet) som er løvnoder (ikke har underenheter)",
-            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+        description = "Henter alle aktive orgenheter (har overenhet) som er løvnoder (ikke har underenheter)",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     public List<OrgEnhetMedLedernavn> hentOrgEnheterMedLeder() {
         return orgenhetService.getAllOrgEnheterThatCanHaveRessurser().stream()
-                .map(orgEnhetMapper::mapToOrgEnhetMedLedernavn)
-                .collect(Collectors.toList());
+            .map(orgEnhetMapper::mapToOrgEnhetMedLedernavn)
+            .collect(Collectors.toList());
     }
 
     @GetMapping("/ledetAv/{navident}")
@@ -234,7 +233,10 @@ public class OrgEnhetController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     public ResponseEntity<List<OrgEnhet>> getUnderliggendeOrgEnheterObjekt(@PathVariable("parentId") String parentId) {
-        return ResponseEntity.ok(orgenhetService.getAllUnderliggendeOrgEnhetById(parentId).stream().map(orgEnhetMapper::mapToOrgEnhet).collect(Collectors.toList()));
+        return ResponseEntity.ok(orgenhetService.getAllUnderliggendeOrgEnhetById(parentId)
+            .stream()
+            .map(orgEnhetMapper::mapToOrgEnhet)
+            .collect(Collectors.toList()));
     }
 
     @GetMapping("/isArbeidsomraade/{orgEnhetId}")
@@ -257,11 +259,11 @@ public class OrgEnhetController {
 
     @GetMapping("/read-topic")
     @Operation(
-            description = "Henter records fra ressurs event-source",
-            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+        description = "Henter records fra ressurs event-source",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<List<JsonNode>> readRessursTopic(@Valid ReadTopicRequest request){
+    public ResponseEntity<List<JsonNode>> readRessursTopic(@Valid ReadTopicRequest request) {
         return ResponseEntity.ok(orgenhetService.getOrgEnhetEvents(request));
     }
 
@@ -271,12 +273,12 @@ public class OrgEnhetController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<StandardResponse> setOrgEnhetsType(@RequestBody SetOrgEnhetsTypeRequest setOrgEnhetsTypeRequest){
+    public ResponseEntity<StandardResponse> setOrgEnhetsType(@RequestBody SetOrgEnhetsTypeRequest setOrgEnhetsTypeRequest) {
         return orgenhetService.setOrgEnhetsType(setOrgEnhetsTypeRequest);
     }
 
     private List<Ressurs> getSortedRessurserInAndUnderliggendeOrgenheter(String orgenhetId) {
-        List<OrgtilknytningState> combinedRessursKoblinger  = new ArrayList<>();
+        List<OrgtilknytningState> combinedRessursKoblinger = new ArrayList<>();
 
         if (unleash.isEnabled(UNLEASH_NY_KONTAKTINFO_EXPORT)) {
             log.info("Finn navidenter i og under enhet {}", orgenhetId);
