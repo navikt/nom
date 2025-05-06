@@ -131,7 +131,7 @@ function FysiskBrukerstedFlyttingTable() {
     enabled: orgEnhetIder.length > 0,
   });
 
-  const orgEnheter = orgEnhetQuery.data;
+  const orgEnheter = orgEnhetQuery?.data;
 
   const isLoading =
     getFysiskBrukerstedRessurserQuery.isLoading ||
