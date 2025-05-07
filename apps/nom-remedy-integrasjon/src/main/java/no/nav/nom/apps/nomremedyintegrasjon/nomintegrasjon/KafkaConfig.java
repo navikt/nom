@@ -148,7 +148,7 @@ public class KafkaConfig {
     ProducerFactory<String, no.nav.nom.contract.nom.state.OrgtilknytningState> nomOrgtilknytningStateDltProducerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
         final var jsonSerializer = new JsonSerializer<no.nav.nom.contract.nom.state.OrgtilknytningState>(objectMapper);
         properties.setClientId("nomOrgtilknytningStateDltProducer");
-        return new DefaultKafkaProducerFactory<>(properties.buildConsumerProperties(), new StringSerializer(), jsonSerializer);
+        return new DefaultKafkaProducerFactory<>(properties.buildProducerProperties(), new StringSerializer(), jsonSerializer);
     }
 
     @Bean
@@ -165,7 +165,7 @@ public class KafkaConfig {
     ProducerFactory<String, no.nav.nom.contract.nom.state.RessursState> nomRessursStateDltProducerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
         final var jsonSerializer = new JsonSerializer<no.nav.nom.contract.nom.state.RessursState>(objectMapper);
         properties.setClientId("nomRessursStateDltProducer");
-        return new DefaultKafkaProducerFactory<>(properties.buildConsumerProperties(), new StringSerializer(), jsonSerializer);
+        return new DefaultKafkaProducerFactory<>(properties.buildProducerProperties(), new StringSerializer(), jsonSerializer);
     }
 
     @Bean
