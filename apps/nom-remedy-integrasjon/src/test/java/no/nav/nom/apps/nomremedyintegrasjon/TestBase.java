@@ -5,6 +5,7 @@ import io.getunleash.Unleash;
 import no.nav.nom.apps.nomremedyintegrasjon.fysiskbrukersted.repository.FysiskBrukerstedReadOnlyRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateStateRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEventRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorStateRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
@@ -68,6 +69,9 @@ public abstract class TestBase {
 
     @MockitoBean
     protected AggregateStateRepository aggregateStateRepository;
+
+    @MockitoBean
+    protected ErrorStateRepository errorStateRepository;
 
     protected final String ressursEventSourceTopic = "org.nom.ressurs-eventsource";
     protected final String orgtilknytningEventSourceTopic = "org.nom.orgtilknytning-eventsource";

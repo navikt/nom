@@ -1,6 +1,5 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateStateRepository;
@@ -12,17 +11,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningOpprettetEventV1MasseFlytting;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningStateContract;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,8 +39,6 @@ public class NomRemedyIntegrasjonKafkaListenerNewTest {
     @Mock
     NomStateMasteredRessursListener nomStateMasteredRessursListener;
     @Mock
-    ObjectMapper objectMapper;
-    @Mock
     AggregateStateRepository aggregateStateRepository;
     @InjectMocks
     private NomRemedyIntegrasjonKafkaListenerNew nomRemedyIntegrasjonKafkaListenerNew;
@@ -55,7 +49,7 @@ public class NomRemedyIntegrasjonKafkaListenerNewTest {
     }
 
     @Test
-    @DisplayName("Test that ressursStateListener logs ressursState")
+    @DisplayName("Test that ressursStateListener saves ressursState")
     void test_that_ressursStateListener_saves_ressursState() {
         // Given
         var ressursState = ressursState();
@@ -130,37 +124,5 @@ public class NomRemedyIntegrasjonKafkaListenerNewTest {
         // Then
         verify(aggregateStateRepository, times(1)).save(any(AggregateState.class));
         assertEquals(orgtilknytningState.fid(), aggregateStateRepository.findByStateFid(orgtilknytningState.fid()).getFirst().getStateFid());
-    }
-
-
-    @DisplayName("Test that orgtilknytningEventListener saves masseflytting OrgtilknytningOpprettetEventV1")
-    void test_that_orgtilknytningEventListener_saves_masseflytting_OrgtilknytningOpprettetEventV1() {
-        // Given
-        var orgtilknytningOpprettetEventV1 = orgtilknytningOpprettetEventV1MasseFlytting();
-        var aggregateState = AggregateState.builder()
-            .aggregateStateId(UUID.randomUUID())
-            .navident(orgtilknytningOpprettetEventV1.getOrgtilknytningOpprettetEventData().navident())
-            .createdAt(LocalDateTime.now())
-            .stateFid(orgtilknytningOpprettetEventV1.getFid())
-            .stateType(orgtilknytningOpprettetEventV1.getClass().getSimpleName())
-            .masseflyttetFraFid(orgtilknytningOpprettetEventV1.getOrgtilknytningOpprettetEventData().masseflyttetFraFid())
-            .masseflytting(true)
-            .build();
-
-        // And
-        doReturn(aggregateState).when(aggregateStateRepository).save(any(AggregateState.class));
-
-        doReturn(Map.of("beholdTilganger", true))
-            .when(objectMapper)
-            .convertValue(any(), any(TypeReference.class));
-        // When
-        //nomRemedyIntegrasjonKafkaListenerNew.orgtilknytningEventListener(orgtilknytningOpprettetEventV1, orgtilknytningOpprettetEventV1.getFid());
-
-        // Then
-        ArgumentCaptor<AggregateState> captor = ArgumentCaptor.forClass(AggregateState.class);
-        verify(aggregateStateRepository, times(1)).save(captor.capture());
-        AggregateState savedAggregateState = captor.getValue();
-
-        assertEquals(orgtilknytningOpprettetEventV1.getOrgtilknytningOpprettetEventData().masseflyttetFraFid(), savedAggregateState.getMasseflyttetFraFid());
     }
 }

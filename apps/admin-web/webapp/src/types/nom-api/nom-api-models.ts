@@ -221,6 +221,8 @@ export interface OrgEnhet {
 }
 
 export interface OrgEnhetMedLedernavn {
+  /** @format date */
+  gyldigFom: string;
   id: string;
   ledere: string[];
   navn: string;
@@ -284,6 +286,7 @@ export interface OrgtilknytningState {
   orgEnhetId: string;
   orgtilknytningType?: Tilknytningtype;
   sektor?: Sektor;
+  sistEndretAv?: string;
 }
 
 export interface Person {
@@ -305,6 +308,7 @@ export interface Ressurs {
   epost?: string;
   fid: string;
   fysiskeBrukersteder: string[];
+  /** @default "STANDARD" */
   identType: IdentType;
   isNomMastered: boolean;
   navident: string;
@@ -312,6 +316,7 @@ export interface Ressurs {
   primaryFysiskBrukersted?: string;
   primaryTelefonnummer?: string;
   sektor: Sektor;
+  sistEndretAv?: string;
   /** @format date */
   sluttdato?: string;
   /** @format date */
@@ -341,12 +346,14 @@ export interface RessursNavn {
 export interface RessursState {
   fid: string;
   fysiskeBrukersteder: string[];
+  /** @default "STANDARD" */
   identType: IdentType;
   navident: string;
   personident: string;
   primaryFysiskBrukersted?: string;
   primaryTelefonnummer?: string;
   sektor: Sektor;
+  sistEndretAv?: string;
   /** @format date */
   sluttdato?: string;
   /** @format date */
@@ -447,6 +454,8 @@ export enum UserRoles {
   ROLE_WRITE_UTL_KONSULENT = "ROLE_WRITE_UTL_KONSULENT",
   ROLE_WRITE_VIKAFOSSEN = "ROLE_WRITE_VIKAFOSSEN",
   ROLE_WRITE_ROBOT = "ROLE_WRITE_ROBOT",
+  ROLE_READONLY = "ROLE_READONLY",
+  ROLE_EXTENDED_READONLY = "ROLE_EXTENDED_READONLY",
 }
 
 export interface Visningsnavn {

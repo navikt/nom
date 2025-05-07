@@ -5,7 +5,7 @@ public class RessursNotFoundException extends RuntimeException {
         super(message);
     }
 
-    public static RessursNotFoundException notFound(String navident) {
-        return new RessursNotFoundException(String.format("Ressurs med navident '%s' ble ikke funnet", navident));
+    public static RessursNotFoundException notFound(String navident, String orgtilknytningFid) {
+        return new RessursNotFoundException(String.format("Ressurs med navident '%s' ble ikke funnet for %s", navident, orgtilknytningFid));
     }
 }

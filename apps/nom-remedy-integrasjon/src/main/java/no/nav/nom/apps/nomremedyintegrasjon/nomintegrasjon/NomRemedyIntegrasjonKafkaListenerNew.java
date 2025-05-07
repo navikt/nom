@@ -1,10 +1,7 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateStateRepository;
-import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
@@ -19,12 +16,10 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Service
 public class NomRemedyIntegrasjonKafkaListenerNew {
     private final static Logger log = LoggerFactory.getLogger(NomRemedyIntegrasjonKafkaListenerNew.class);
-    private final ObjectMapper objectMapper;
     private final NomStateRessursListener nomStateRessursListener;
     private final NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
     private final NomStateMasteredRessursListener nomStateMasteredRessursListener;
@@ -32,14 +27,12 @@ public class NomRemedyIntegrasjonKafkaListenerNew {
     private final AggregateStateRepository aggregateStateRepository;
 
     public NomRemedyIntegrasjonKafkaListenerNew(
-        ObjectMapper objectMapper,
         NomStateRessursListener nomStateRessursListener,
         NomStateOrgtilknytningListener nomStateOrgtilknytningListener,
         NomStateMasteredRessursListener nomStateMasteredRessursListener,
         MasteredRessursStateRepository masteredRessursStateRepository,
         AggregateStateRepository aggregateStateRepository
     ) {
-        this.objectMapper = objectMapper;
         this.nomStateRessursListener = nomStateRessursListener;
         this.nomStateOrgtilknytningListener = nomStateOrgtilknytningListener;
         this.nomStateMasteredRessursListener = nomStateMasteredRessursListener;
@@ -50,7 +43,7 @@ public class NomRemedyIntegrasjonKafkaListenerNew {
     @KafkaListener(
         topics = "${app.kafka.ressurs.state-topic}",
         autoStartup = "${app.kafka.ressurs.auto-startup}",
-        containerFactory = "nomStateRessursKafkaListenerContainerFactory"
+        containerFactory = "nomRessursStateKafkaListenerContainerFactory"
     )
     public void ressursStateListener(RessursState ressursState, @Header(KafkaHeaders.RECEIVED_KEY) String key) {
         waitForNomStates();
@@ -73,7 +66,7 @@ public class NomRemedyIntegrasjonKafkaListenerNew {
     @KafkaListener(
         topics = "${app.kafka.orgtilknytning.state-topic}",
         autoStartup = "${app.kafka.orgtilknytning.auto-startup}",
-        containerFactory = "nomStateOrgtilknytningKafkaListenerContainerFactory"
+        containerFactory = "nomOrgtilknytningStateKafkaListenerContainerFactory"
     )
     public void orgtilknytningStateListener(OrgtilknytningState orgtilknytningState, @Header(KafkaHeaders.RECEIVED_KEY) String key) {
         waitForNomStates();
@@ -96,36 +89,6 @@ public class NomRemedyIntegrasjonKafkaListenerNew {
         }
     }
 
-    /*
-    @KafkaListener(
-        id = "NomRemedyIntegrasjonOrgtilknytningEventListenerNew",
-        topics = "${app.kafka-topics.orgtilknytning-eventsource.topic-name}",
-        autoStartup = "${app.kafka-topics.orgtilknytning-eventsource.auto-startup}",
-        containerFactory = "orgtilknytningEventKafkaListenerContainerFactory"
-    )
-    public void orgtilknytningEventListener(OrgtilknytningEvent orgtilknytningEvent, @Header(KafkaHeaders.RECEIVED_KEY) String key) {
-        log.info("Logget orgtilknytningEventFid: {}", key);
-        if (orgtilknytningEvent instanceof OrgtilknytningOpprettetEventV1 opprettetEvent) {
-            log.info("Logget opprettet orgtilknytningEventFid: {}", opprettetEvent.getFid());
-            if (opprettetEvent.getMetadata().inputMetadata().inputInterfaceMethodName().equals("masseflytting") && erMasseflytting(opprettetEvent.getMetadata().inputMetadata())) {
-                var navident = opprettetEvent.getOrgtilknytningOpprettetEventData().navident();
-                var masseflyttetFraFid = opprettetEvent.getOrgtilknytningOpprettetEventData().masseflyttetFraFid();
-                var allRowsByStateFid = aggregateStateRepository.findByNavidentAndMasseflyttetFraFid(navident, masseflyttetFraFid);
-                if (allRowsByStateFid.isEmpty()) {
-                    aggregateStateRepository.save(AggregateState.builder()
-                        .navident(navident)
-                        .createdAt(LocalDateTime.now())
-                        .stateType(opprettetEvent.getClass().getSimpleName())
-                        .masseflyttetFraFid(masseflyttetFraFid)
-                        .masseflytting(true)
-                        .build());
-                } else {
-                    allRowsByStateFid.forEach(row -> aggregateStateRepository.save(row.toBuilder().masseflytting(true).build()));
-                }
-            }
-        }
-    }*/
-
     private void waitForNomStates() {
         while (!isInitialStateReady()) {
             try {
@@ -141,13 +104,8 @@ public class NomRemedyIntegrasjonKafkaListenerNew {
     }
 
     private boolean isInitialStateReady() {
-        return nomStateRessursListener.hasReadToEndOnStartup() && nomStateOrgtilknytningListener.hasReadToEndOnStartup() && nomStateMasteredRessursListener.hasReadToEndOnStartup();
-    }
-
-    private boolean erMasseflytting(InputMetadata inputMetadata) {
-        Map<String, Object> inputInterfaceMethodArguments = objectMapper.convertValue(inputMetadata.inputInterfaceMethodArguments(), new TypeReference<>() {});
-
-        return inputInterfaceMethodArguments.containsKey("beholdTilganger") ? (boolean) inputInterfaceMethodArguments.get("beholdTilganger") : (boolean) inputInterfaceMethodArguments.get(
-            "beholdTilgang");
+        return nomStateRessursListener.hasReadToEndOnStartup()
+            && nomStateOrgtilknytningListener.hasReadToEndOnStartup()
+            && nomStateMasteredRessursListener.hasReadToEndOnStartup();
     }
 }

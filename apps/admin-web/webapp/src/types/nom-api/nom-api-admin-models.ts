@@ -35,6 +35,7 @@ export interface OrgtilknytningState {
   orgEnhetId: string;
   orgtilknytningType?: Tilknytningtype;
   sektor?: Sektor;
+  sistEndretAv?: string;
 }
 
 export interface OrgtilknytningerUtenforHierarkiResponse {
