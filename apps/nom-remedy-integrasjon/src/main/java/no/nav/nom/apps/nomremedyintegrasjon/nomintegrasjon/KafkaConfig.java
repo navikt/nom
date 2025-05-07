@@ -171,7 +171,7 @@ public class KafkaConfig {
     @Bean
     KafkaTemplate<String, no.nav.nom.contract.nom.state.RessursState> nomRessursStateProducerTemplate(
         ProducerFactory<String, no.nav.nom.contract.nom.state.RessursState> nomRessursStateDltProducerFactory,
-        @Value("${app.kafka.orgtilknytning.dlt-topic}") String dltTopic
+        @Value("${app.kafka.ressurs.dlt-topic}") String dltTopic
     ) {
         final var eventsourceTemplate = new KafkaTemplate<>(nomRessursStateDltProducerFactory);
         eventsourceTemplate.setDefaultTopic(dltTopic);

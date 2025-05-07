@@ -3,6 +3,7 @@ app:
   kafka:
     ressurs:
       state-topic: org.nom.intern-ressurs-state
+      dlt-topic: org.nom.intern-ressurs-state-dlt
       auto-startup: true
     orgEnhet:
       state-topic: org.nom.intern-orgenhet-state
