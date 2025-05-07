@@ -153,9 +153,9 @@ public interface IEntityIndexer<T, U extends QueryFilter<T>> {
 
         private void addPlainOrWrappedQueryToBuilder(BooleanQuery.Builder b, Query q, BooleanClause.Occur defaultOccur) {
             if (q instanceof BooleanQuery && ((BooleanQuery) q).clauses().size() == 1) {
-                var clause = ((BooleanQuery) q).clauses().get(0);
-                var occur = clause.getOccur();
-                var subqry = clause.getQuery();
+                var clause = ((BooleanQuery) q).clauses().getFirst();
+                var occur = clause.occur();
+                var subqry = clause.query();
                 b.add(subqry, occur);
             } else {
                 b.add(q, defaultOccur);
