@@ -12,10 +12,11 @@
     "lint:fix": "eslint --fix --ext .js,.jsx,.ts,.tsx .",
     "stylelint": "stylelint '**/*.{tsx,css}'",
     "stylelint:fix": "stylelint --fix '**/*.{tsx,css}'",
-    "generate-types:nom-admin": "swagger-typescript-api generate --path https://nom-admin-api.intern.dev.nav.no/v3/api-docs/internal --output ./src/types/nom-admin --no-client -r -n nom-admin-models",
-    "generate-types:nom-api": "swagger-typescript-api generate --path https://nom-api.intern.dev.nav.no/v3/api-docs/internal --output ./src/types/nom-api --no-client -r -n nom-api-models",
-    "generate-types:nom-api-admin": "swagger-typescript-api generate --path https://nom-api.intern.dev.nav.no/v3/api-docs/internal_admin --output ./src/types/nom-api --no-client -r -n nom-api-admin-models",
-    "generate-types": "npm run generate-types:nom-admin && npm run generate-types:nom-api && npm run generate-types:nom-api-admin",
+    "generate-types:nom-admin": "swagger-typescript-api --path https://nom-admin-api.intern.dev.nav.no/v3/api-docs/internal --output ./src/types/nom-admin --no-client -r -n nom-admin-models",
+    "generate-types:nom-api": "swagger-typescript-api --path https://nom-api.intern.dev.nav.no/v3/api-docs/internal --output ./src/types/nom-api --no-client -r -n nom-api-models",
+    "generate-types:nom-api-admin": "swagger-typescript-api --path https://nom-api.intern.dev.nav.no/v3/api-docs/internal_admin --output ./src/types/nom-api --no-client -r -n nom-api-admin-models",
+    "generate-types:nom-remedy-integrasjon": "swagger-typescript-api --path https://nom-remedy-integrasjon.intern.dev.nav.no/v3/api-docs --output ./src/types/nom-remedy-integrasjon --no-client -r -n nom-remedy-integrasjon-models",
+    "generate-types": "npm run generate-types:nom-admin && npm run generate-types:nom-api && npm run generate-types:nom-api-admin && npm run generate-types:nom-remedy-integrasjon",
     "all-checks": "npm run check-types && npm run lint && npm run stylelint"
   },
   "dependencies": {

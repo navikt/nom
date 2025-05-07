@@ -18,7 +18,6 @@ export interface RessursSearchParams {
   filterText?: string;
 }
 
-/** @default "STANDARD" */
 export enum IdentType {
   ROBOT = "ROBOT",
   STANDARD = "STANDARD",
@@ -40,6 +39,7 @@ export interface RessursState {
   startdato?: string;
   primaryFysiskBrukersted?: string;
   fysiskeBrukersteder: string[];
+  /** @default "STANDARD" */
   identType: IdentType;
   sistEndretAv?: string;
 }
@@ -484,6 +484,19 @@ export interface DuplikatOrgtilknytning {
   /** @format date */
   gyldigFom: string;
   orgtilknytningType?: Tilknytningtype;
+}
+
+export interface LoevnodeMedFeilAntallArbOmr {
+  orgenhetId: string;
+  orgenhetNavn: string;
+  /** @format int32 */
+  antallArbOmr: number;
+}
+
+export interface OrgEnhetArbeidsomraadeInfo {
+  /** @format int32 */
+  antallLoevnoder: number;
+  loevnoderMedFeil: LoevnodeMedFeilAntallArbOmr[];
 }
 
 export interface OrgEnhetOrganisering {

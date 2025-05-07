@@ -34,6 +34,7 @@ import type {
   Ressurs,
   RessursState,
 } from "~/types/nom-api/nom-api-models.ts";
+import type { ErrorState } from "~/types/nom-remedy-integrasjon/nom-remedy-integrasjon-models.ts";
 
 const API_BASE_URL = "/frackend/admin-api";
 const NOM_API_BASE_URL = "/frackend/api";
@@ -604,4 +605,24 @@ export async function getRobotRessurser(): Promise<RobotRessurs[]> {
       timeout: 120_000, // 120 seconds
     })
     .json<RobotRessurs[]>();
+}
+
+export async function getAllErrorStates(): Promise<ErrorState[]> {
+  return await ky
+    .get(`${NOM_REMEDY_INTEGRASJON_BASE_URL}/admin/getAllErrorState`, {
+      timeout: 60_000,
+    })
+    .json<ErrorState[]>();
+}
+
+export function deleteAllErrorStates() {
+  return ky.delete(
+    `${NOM_REMEDY_INTEGRASJON_BASE_URL}/admin/deleteAllErrorStates`,
+  );
+}
+
+export function deleteErrorStateById(fid: string) {
+  return ky.delete(
+    `${NOM_REMEDY_INTEGRASJON_BASE_URL}/admin/deleteErrorState/${fid}`,
+  );
 }
