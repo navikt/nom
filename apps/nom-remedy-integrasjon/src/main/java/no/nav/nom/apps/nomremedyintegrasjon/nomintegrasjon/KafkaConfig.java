@@ -120,9 +120,10 @@ public class KafkaConfig {
 
     @Bean
     protected DefaultErrorHandler ressursErrorHandler(
-        KafkaTemplate<String, no.nav.nom.contract.nom.state.RessursState> kafkaTemplate
+        KafkaTemplate<String, no.nav.nom.contract.nom.state.RessursState> kafkaTemplate,
+        @Value("${app.kafka.ressurs.dlt-topic}") String dltTopic
     ) {
-        DeadLetterPublishingRecoverer deadLetterPublishingRecoverer = new DeadLetterPublishingRecoverer(kafkaTemplate, (record, ex) -> new TopicPartition(record.topic() + "-DLT", record.partition()));
+        DeadLetterPublishingRecoverer deadLetterPublishingRecoverer = new DeadLetterPublishingRecoverer(kafkaTemplate, (record, ex) -> new TopicPartition(dltTopic, record.partition()));
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(deadLetterPublishingRecoverer, new FixedBackOff(0L, 0L));
         errorHandler.addNotRetryableExceptions(DeserializationException.class);
         errorHandler.addNotRetryableExceptions(ConverterNotFoundException.class);
@@ -133,9 +134,10 @@ public class KafkaConfig {
 
     @Bean
     protected DefaultErrorHandler orgtilknytningErrorHandler(
-        KafkaTemplate<String, no.nav.nom.contract.nom.state.OrgtilknytningState> kafkaTemplate
+        KafkaTemplate<String, no.nav.nom.contract.nom.state.OrgtilknytningState> kafkaTemplate,
+        @Value("${app.kafka.orgtilknytning.dlt-topic}") String dltTopic
     ) {
-        DeadLetterPublishingRecoverer deadLetterPublishingRecoverer = new DeadLetterPublishingRecoverer(kafkaTemplate, (record, ex) -> new TopicPartition(record.topic() + "-DLT", record.partition()));
+        DeadLetterPublishingRecoverer deadLetterPublishingRecoverer = new DeadLetterPublishingRecoverer(kafkaTemplate, (record, ex) -> new TopicPartition(dltTopic, record.partition()));
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(deadLetterPublishingRecoverer, new FixedBackOff(1000L, 3L));
         errorHandler.addNotRetryableExceptions(DeserializationException.class);
         errorHandler.addNotRetryableExceptions(ConverterNotFoundException.class);
