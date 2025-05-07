@@ -182,7 +182,7 @@ public class WrappedLucene {
     }
 
     private SearchResult getSearchResult(IndexReader ir, ScoreDoc d) throws IOException {
-        var doc = ir.document(d.doc);
+        var doc = ir.storedFields().document(d.doc);
         var entType = doc.getField(IEntityIndexer.FIELD_TYPE).stringValue();
         var nameFromDoc = doc.get(IEntityIndexer.FIELD_NAME_EXACT);
         for (var indexer : indexers.values()) {
