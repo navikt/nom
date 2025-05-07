@@ -8,6 +8,7 @@ app:
       state-topic: org.nom.intern-orgenhet-state
     orgtilknytning:
       state-topic: org.nom.intern-orgtilknytning-state
+      dlt-topic: org.nom.intern-orgtilknytning-state-dlt
       auto-startup: true
   kafka-topics:
     ressurs-eventsource:

@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @AutoConfigureWireMock(port = 0)
-@ContextConfiguration(initializers = {MockOAuth2ServerInitializer.class})
+@ContextConfiguration(initializers = {MockOAuth2ServerInitializer.class}, classes = {TestConfiguration.class})
 @EmbeddedKafka(partitions = 1, topics = {"org.nom.ressurs-eventsource", "org.nom.orgtilknytning-eventsource"}, controlledShutdown = true)
 public abstract class TestBase {
 
