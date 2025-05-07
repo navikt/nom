@@ -57,9 +57,9 @@ import static org.mockito.Mockito.when;
     partitions = 1,
     topics = {
         "org.nom.intern-ressurs-state",
-        "org.nom.intern-ressurs-state-DLT",
+        "org.nom.intern-ressurs-state-dlt",
         "org.nom.intern-orgtilknytning-state",
-        "org.nom.intern-orgtilknytning-state-DLT"
+        "org.nom.intern-orgtilknytning-state-dlt"
     },
     controlledShutdown = true
 )
@@ -91,8 +91,6 @@ public class NomRemedyIntegrasjonListenerEmbeddedTest {
     private KafkaTemplate<String, RessursState> ressursStateKafkaTemplate;
     @Autowired
     private KafkaTemplate<String, OrgtilknytningState> orgtilknytningStateKafkaTemplate;
-    private Consumer<String, RessursState> ressursStateConsumer;
-    private Consumer<String, OrgtilknytningState> orgtilknytningStateConsumer;
     @MockitoBean
     private Unleash unleash;
 
@@ -140,7 +138,7 @@ public class NomRemedyIntegrasjonListenerEmbeddedTest {
     @DisplayName("Verifiser at meldingen blir sendt til DLT topic ved feil")
     void test_003() {
         // Arrange
-        String dlqTopic = ressursStateTopic + "-DLT";
+        String dlqTopic = ressursStateTopic + "-dlt";
         RessursState invalidMessage = null;
 
         // Act
@@ -151,7 +149,7 @@ public class NomRemedyIntegrasjonListenerEmbeddedTest {
         Map<String, Object> props = KafkaTestUtils.consumerProps("dlt-test-group", "false", embeddedKafkaBroker);
         JsonDeserializer<RessursState> deserializer = new JsonDeserializer<>(RessursState.class);
         deserializer.addTrustedPackages("*");
-        ressursStateConsumer = new KafkaConsumer<>(props, new StringDeserializer(), deserializer);
+        Consumer<String, RessursState> ressursStateConsumer = new KafkaConsumer<>(props, new StringDeserializer(), deserializer);
         ressursStateConsumer.subscribe(Collections.singletonList(dlqTopic));
 
         ConsumerRecord<String, RessursState> dlqRecord = KafkaTestUtils.getSingleRecord(ressursStateConsumer, dlqTopic);
@@ -170,7 +168,7 @@ public class NomRemedyIntegrasjonListenerEmbeddedTest {
     @DisplayName("Verifiser at meldingen blir sendt til DLT topic ved feil")
     void test_004() {
         // Arrange
-        String dlqTopic = orgtilknytningStateTopic + "-DLT";
+        String dlqTopic = orgtilknytningStateTopic + "-dlt";
         OrgtilknytningState invalidMessage = null;
 
         // Act
@@ -181,7 +179,7 @@ public class NomRemedyIntegrasjonListenerEmbeddedTest {
         Map<String, Object> props = KafkaTestUtils.consumerProps("dlt-test-group", "false", embeddedKafkaBroker);
         JsonDeserializer<OrgtilknytningState> deserializer = new JsonDeserializer<>(OrgtilknytningState.class);
         deserializer.addTrustedPackages("*");
-        orgtilknytningStateConsumer = new KafkaConsumer<>(props, new StringDeserializer(), deserializer);
+        Consumer<String, OrgtilknytningState> orgtilknytningStateConsumer = new KafkaConsumer<>(props, new StringDeserializer(), deserializer);
         orgtilknytningStateConsumer.subscribe(Collections.singletonList(dlqTopic));
 
         ConsumerRecord<String, OrgtilknytningState> dlqRecord = KafkaTestUtils.getSingleRecord(orgtilknytningStateConsumer, dlqTopic);
