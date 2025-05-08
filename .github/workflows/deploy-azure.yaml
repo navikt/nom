@@ -31,9 +31,9 @@ jobs:
       maven-project: nom-azure
       jar-path: apps/nom-azure/target/app.jar
       image-suffix: nom-azure
-      nais-config-file-path-dev: .nais/apps/azure/nom-azure-dev-gcp.yaml
-      nais-config-file-path-prod: .nais/apps/azure/nom-azure-prod-gcp.yaml
-      unleash-vars-file-path: .nais/apps/azure/unleash-vars.yaml
+      nais-config-file-path-dev: .nais/apps/nom-azure/nom-azure-dev-gcp.yaml
+      nais-config-file-path-prod: .nais/apps/nom-azure/nom-azure-prod-gcp.yaml
+      unleash-vars-file-path: .nais/apps/nom-azure/unleash-vars.yaml
       deploy-timeout: 20m
       skip-tests: ${{ github.event.inputs.skip-tests == 'true'}}
       dockerfile: Dockerfile_distroless
