@@ -9,7 +9,7 @@ import unicorn from "eslint-plugin-unicorn";
 /** @type {import("eslint").Linter.FlatConfig[]} */
 export default [
     {
-        ignores: ["/src/vite-env.d.ts", "/dist", "/src/types/api-models.ts", "/src/routeTree.gen.ts", "**/graphql_generated.ts"],
+        ignores: ["src/vite-env.d.ts", "dist", "src/types/api-models.ts", "src/routeTree.gen.ts", "**/graphql_generated.ts"],
     },
     {
         files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
