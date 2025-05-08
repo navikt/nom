@@ -6,7 +6,7 @@ on:
       - 'main'
       - 'dev/*'
     paths:
-      - 'apps/azure/**'
+      - 'apps/nom-azure/**'
       - 'libs/**'
       - '.nais/apps/nom-azure/*.yaml'
       - '.github/*/deploy-azure.yaml'
