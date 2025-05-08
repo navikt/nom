@@ -68,6 +68,7 @@ public class OTUtenforHierarki {
         var oterUtenforHierarki = orgtilknytningService.getAll().stream()
             .filter(ot -> !aktiveOrgenhetIder.contains(ot.orgEnhetId()))
             .filter(ot -> likEllerEtter(ot.gyldigTom().orElse(null), today()))
+            .filter(ot -> !ot.fid().startsWith("FID_MANUELL"))
             .toList();
 
         oterUtenforHierarki.forEach(ot -> {
