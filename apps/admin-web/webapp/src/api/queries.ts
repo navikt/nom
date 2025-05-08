@@ -8,12 +8,12 @@ import type {
   KafkaEvent,
   OrganiseringState,
 } from "~/types.ts";
-import type {
+import {
   DuplikatOrgtilknytning,
   EnheterOgOrganisering,
   HendelseDTO,
   ImportedRemedyUser,
-  MasteredRessursDTO,
+  MasteredRessursDTO, OrgEnhetArbeidsomraadeInfo,
   OrgEnhetOrganisering,
   OrgEnhetStartOgSluttdato,
   OrgEnhetState,
@@ -27,7 +27,7 @@ import type {
   RessursOrgtilknytningUlikSluttdato,
   RessursStateKafkaDTO,
   RobotRessurs,
-  SessionInfoResponse,
+  SessionInfoResponse
 } from "~/types/nom-admin/nom-admin-models.ts";
 import type {
   OrgtilknytningState,
@@ -617,6 +617,14 @@ export async function getRobotRessurser(): Promise<RobotRessurs[]> {
       timeout: 120_000, // 120 seconds
     })
     .json<RobotRessurs[]>();
+}
+
+export async function getArbeidsomraadeInfo(): Promise<OrgEnhetArbeidsomraadeInfo> {
+  return await ky
+    .get(`${API_BASE_URL}/SanityCheck/orgenhet/validerArbeidsomraade`, {
+      timeout: 120_000, // 120 seconds
+    })
+    .json<OrgEnhetArbeidsomraadeInfo>();
 }
 
 export async function getAllErrorStates(): Promise<ErrorState[]> {
