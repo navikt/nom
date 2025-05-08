@@ -1,0 +1,42 @@
+name: 'deploy: azure'
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'dev/*'
+    paths:
+      - 'apps/azure/**'
+      - 'libs/**'
+      - '.nais/apps/azure/*.yaml'
+      - '.github/*/deploy-azure.yaml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
+      - 'Dockerfile_distroless'
+  workflow_dispatch:
+    inputs:
+      skip-tests:
+        type: boolean
+        required: false
+        default: false
+        description: Skip tests.
+
+jobs:
+  deploy-spring-app:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    uses: ./.github/workflows/deploy-spring-app.yaml
+    with:
+      maven-project: azure
+      jar-path: apps/azure/target/app.jar
+      image-suffix: nom-azure
+      nais-config-file-path-dev: .nais/apps/azure/azure-dev-gcp.yaml
+      nais-config-file-path-prod: .nais/apps/azure/azure-prod-gcp.yaml
+      unleash-vars-file-path: .nais/apps/azure/unleash-vars.yaml
+      deploy-timeout: 20m
+      skip-tests: ${{ github.event.inputs.skip-tests == 'true'}}
+      dockerfile: Dockerfile_distroless
+    secrets:
+      NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+
