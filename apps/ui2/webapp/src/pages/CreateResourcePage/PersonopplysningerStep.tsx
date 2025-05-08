@@ -16,7 +16,6 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import { getOrgTilknytninger, getPerson } from "~/api/react-query-endpoints";
-import { useHasAdminAccess } from "~/api/useGetSession";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { FolkeregisterPersonInfo } from "~/pages/CreateResourcePage/components/FolkeregisterPersonInfo";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
@@ -138,8 +137,6 @@ function VisningsnavnForm({
 }: {
   folkeregisterPerson: FolkeregisterPerson;
 }) {
-  const hasAdminAccess = useHasAdminAccess();
-
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
 
   const {
@@ -230,7 +227,6 @@ function VisningsnavnForm({
             label="Fornavn"
             type="text"
             {...register("visningsfornavn")}
-            readOnly={!hasAdminAccess}
           />
           <TextField
             autoComplete="off"
