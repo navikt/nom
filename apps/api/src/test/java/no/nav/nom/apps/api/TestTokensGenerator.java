@@ -65,6 +65,23 @@ public class TestTokensGenerator {
         return validToken(claims);
     }
 
+    public String nomWriteRobotGroupAndNomUiAzp() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("NAVident", LOGGED_IN_USER_NAVIDENT);
+        claims.put("groups", List.of("nomWriteRobotGroup"));
+        claims.put("azp_name", "nomUiClient");
+        return validToken(claims);
+    }
+
+    public String nomWriteVikafossenGroupAndNomUiAzp() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("NAVident", LOGGED_IN_USER_NAVIDENT);
+        claims.put("groups", List.of("nomWriteVikafossenGroup"));
+        claims.put("azp_name", "nomUiClient");
+        return validToken(claims);
+    }
+
+
     public String nomRemedyIntegrasjonAzp() {
         Map<String, Object> claims = new HashMap<>();
         claims.put("azp_name", "nomRemedyIntegrasjonClient");
