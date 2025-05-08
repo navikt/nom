@@ -25,5 +25,6 @@
         <module>admin</module>
         <module>nom-rdbms-data</module>
         <module>paarorende</module>
+        <module>azure</module>
     </modules>
 </project>

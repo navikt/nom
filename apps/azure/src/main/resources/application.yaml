@@ -1,0 +1,13 @@
+spring.application.name: nom-azure
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      base-path: /internal
+      exposure:
+        include: prometheus, info, health, metrics, loggers, mappings
