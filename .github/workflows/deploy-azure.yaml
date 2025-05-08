@@ -28,7 +28,7 @@ jobs:
       id-token: "write"
     uses: ./.github/workflows/deploy-spring-app.yaml
     with:
-      maven-project: azure
+      maven-project: nom-azure
       jar-path: apps/azure/target/app.jar
       image-suffix: nom-azure
       nais-config-file-path-dev: .nais/apps/azure/azure-dev-gcp.yaml
