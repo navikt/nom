@@ -48,15 +48,10 @@ public class OrgtilknytningController {
     private final static Logger logger = LoggerFactory.getLogger(OrgtilknytningController.class);
 
     private final OrgtilknytningRestService orgtilknytningRestService;
-    private final MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
     private final AuthResolver authResolver;
 
-    public OrgtilknytningController(
-        OrgtilknytningRestService orgtilknytningRestService, MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService,
-        AuthResolver authResolver
-    ) {
+    public OrgtilknytningController(OrgtilknytningRestService orgtilknytningRestService, AuthResolver authResolver) {
         this.orgtilknytningRestService = orgtilknytningRestService;
-        this.masseflyttOrgtilknytningerService = masseflyttOrgtilknytningerService;
         this.authResolver = authResolver;
     }
 
@@ -73,9 +68,7 @@ public class OrgtilknytningController {
     public ResponseEntity<List<OrgtilknytningState>> getOrgtilknytninger(
         @RequestParam Optional<String> navident
     ) {
-        return ResponseEntity.ok(
-            orgtilknytningRestService.getOrgtilknytninger(navident)
-        );
+        return ResponseEntity.ok(orgtilknytningRestService.getOrgtilknytninger(navident));
     }
 
     @PostMapping()
@@ -91,8 +84,7 @@ public class OrgtilknytningController {
     public ResponseEntity<Map<String, List<OrgtilknytningState>>> getOrgtilknytningerForNavidenter(
         @RequestBody List<String> navidenter
     ) {
-        return ResponseEntity.ok(
-            orgtilknytningRestService.getOrgtilknytninger(navidenter));
+        return ResponseEntity.ok(orgtilknytningRestService.getOrgtilknytninger(navidenter));
     }
 
     @PostMapping("/{fid}/tilknytningtype")

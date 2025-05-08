@@ -63,6 +63,9 @@ app:
     enabled: false
   google-storage-bucket-name:
     missing-ot: "DUMMY"
+  orgenhet:
+    vikafossenId: dummyVikafossenId
+    linjeenhetene: linje-enhet,en-annen-linjeenhet
 
 # DB. Bruk cloud-proxy mot miljø, eller kjør postgres lokalt
 

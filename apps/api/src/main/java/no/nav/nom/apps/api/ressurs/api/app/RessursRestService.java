@@ -52,6 +52,7 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -70,6 +71,10 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.DateUtils.validateChronologicalDates;
+import static no.nav.nom.apps.api.common.security.NomApiAccessScope.ADMIN;
+import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_ROBOT;
+import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_UTL_KONSULENT;
+import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_VIKAFOSSEN;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
 import static no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService.validateOrgtilknytningTypeSektorCombination;
@@ -99,6 +104,8 @@ public class RessursRestService {
     private final FysiskBrukerstedService fysiskBrukerstedService;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgtilknytningService orgtilknytningService;
+    @Value("${app.orgenhet.vikafossenId}")
+    private String vikafossenOrgEnhetId;
 
     public RessursRestService(
         RessursStateRepository ressursStateRepository,
@@ -139,7 +146,7 @@ public class RessursRestService {
 
     public List<RessursState> findRessurser(RessursFilter ressursFilter) {
 
-        var showFysiskBrukersted = loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
+        var showFysiskBrukersted = loggedInUserHasAccessScope(ADMIN) ||
             loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP);
 
         return ressursStateRepository.getAll().stream()
@@ -168,11 +175,11 @@ public class RessursRestService {
             .toList();
     }
 
-    private RessursState findRessursStateByNavident(String navident) {
+    RessursState findRessursStateByNavident(String navident) {
         return ressursStateRepository.findByNavident(navident).orElseThrow(() -> RessursNotFoundException.navident(navident));
     }
 
-    private RessursState findRessursStateByFid(String fid) {
+    RessursState findRessursStateByFid(String fid) {
         return ressursStateRepository.findByFid(fid).orElseThrow(() -> RessursNotFoundException.fid(fid));
     }
 
@@ -183,7 +190,7 @@ public class RessursRestService {
 
     private Ressurs hideSensitiveDataAndEnrichRessursStateWithDvhData(RessursState ressursState) {
 
-        var showPersonident = loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
+        var showPersonident = loggedInUserHasAccessScope(ADMIN) ||
             loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP) ||
             getAuthenticatedNavIdent().equals(ressursState.navident());
 
@@ -211,7 +218,7 @@ public class RessursRestService {
     }
 
     private boolean isShowFysiskBrukerSted(RessursState ressursState) {
-        return loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
+        return loggedInUserHasAccessScope(ADMIN) ||
             loggedInUserHasAccessScope(NomApiAccessScope.READONLY) ||
             loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP) ||
             authResolver.kanRedigereRessurs(ressursState.navident()) ||
@@ -220,11 +227,11 @@ public class RessursRestService {
 
     private Ressurs hideSensitiveDataAndEnrichRessursStateWithDvhData(RessursState ressursState, Optional<String> epost) {
 
-        var showPersonident = loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
+        var showPersonident = loggedInUserHasAccessScope(ADMIN) ||
             loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP) ||
             getAuthenticatedNavIdent().equals(ressursState.navident());
 
-        var showFysiskBrukerSted = loggedInUserHasAccessScope(NomApiAccessScope.ADMIN) ||
+        var showFysiskBrukerSted = loggedInUserHasAccessScope(ADMIN) ||
             loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP) ||
             authResolver.kanRedigereRessurs(ressursState.navident()) ||
             getAuthenticatedNavIdent().equals(ressursState.navident());
@@ -707,6 +714,13 @@ public class RessursRestService {
         validateIngenMellomromEtternavn(request.visningsetternavn());
         validateFysiskeBrukerstederExists(Set.of(request.fysiskBrukerstedNr()));
         validateOrgtilknytningTypeSektorCombination(request.tilknytningtype(), request.sektor());
+        validateOrgenhetForIdenttype(request.identType(), request.orgEnhetId());
+    }
+
+    private void validateOrgenhetForIdenttype(IdentType identType, String orgenhetId) {
+        if (identType == IdentType.VIKAFOSSEN && !Objects.equals(orgenhetId, vikafossenOrgEnhetId)) {
+            throw new IllegalArgumentException("Vikafossen identtype kan kun opprettes på Vikafossen orgenhet (" + vikafossenOrgEnhetId + ")");
+        }
     }
 
     private void validateSluttdatoErInnenSeksAar(LocalDate localDate) {
@@ -841,5 +855,23 @@ public class RessursRestService {
     public String getEpost(String navident) {
         log.info("Fetching Epost for navident: {}", navident);
         return ressursContactDetailsResolver.fetchEmail(navident).orElse(null);
+    }
+
+    public boolean kanOppretteAngittRessurs(IdentType identType, String orgenhet) {
+        return switch (identType) {
+            case ROBOT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_ROBOT, ADMIN);
+            case UTENLANDSK_KONSULENT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_UTL_KONSULENT, ADMIN);
+            case VIKAFOSSEN -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN, ADMIN); // NOM admin skal fratas denne rollen etterhvert
+            default -> authResolver.kanOppretteRessurs(orgenhet);
+        };
+    }
+
+    public boolean kanEndreEllerAvvikleAngittRessurs(IdentType identType, String navident) {
+        return switch (identType) {
+            case ROBOT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_ROBOT, ADMIN) || authResolver.kanRedigereRessurs(navident);
+            case UTENLANDSK_KONSULENT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_UTL_KONSULENT, ADMIN) || authResolver.kanRedigereRessurs(navident);
+            case VIKAFOSSEN -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN, ADMIN); // NOM admin skal fratas denne rollen etterhvert
+            default -> authResolver.kanRedigereRessurs(navident);
+        };
     }
 }
