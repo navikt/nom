@@ -8,7 +8,7 @@ on:
     paths:
       - 'apps/azure/**'
       - 'libs/**'
-      - '.nais/apps/azure/*.yaml'
+      - '.nais/apps/nom-azure/*.yaml'
       - '.github/*/deploy-azure.yaml'
       - 'apps/pom.xml'
       - 'pom.xml'
@@ -29,10 +29,10 @@ jobs:
     uses: ./.github/workflows/deploy-spring-app.yaml
     with:
       maven-project: nom-azure
-      jar-path: apps/azure/target/app.jar
+      jar-path: apps/nom-azure/target/app.jar
       image-suffix: nom-azure
-      nais-config-file-path-dev: .nais/apps/azure/azure-dev-gcp.yaml
-      nais-config-file-path-prod: .nais/apps/azure/azure-prod-gcp.yaml
+      nais-config-file-path-dev: .nais/apps/azure/nom-azure-dev-gcp.yaml
+      nais-config-file-path-prod: .nais/apps/azure/nom-azure-prod-gcp.yaml
       unleash-vars-file-path: .nais/apps/azure/unleash-vars.yaml
       deploy-timeout: 20m
       skip-tests: ${{ github.event.inputs.skip-tests == 'true'}}
