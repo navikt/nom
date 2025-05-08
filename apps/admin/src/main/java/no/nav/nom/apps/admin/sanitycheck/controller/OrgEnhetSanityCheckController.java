@@ -117,6 +117,15 @@ public class OrgEnhetSanityCheckController {
         return ResponseEntity.ok(orgEnhetSanityCheckService.bunnEnheterSomIkkeHarEksakt1ArbeidsomradeIOrghierarkietStier());
     }
 
+    @Operation(
+            description = "Valider angivelse av ARBEIDSOMRÅDE på enheter",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+            {
+                    @ApiResponse(responseCode = "200", description = "Success")
+            }
+    )
     @GetMapping(value = "/validerArbeidsomraade")
     public ResponseEntity<OrgEnhetArbeidsomraadeInfo> validerArbeidsomraade() {
         return ResponseEntity.ok(orgEnhetSanityCheckService.validerArbeidsomraade());
