@@ -54,6 +54,14 @@ public class DvhRessursRestService {
             .toList();
     }
 
+    public List<DvhRessursDTO> nomMasteredRessurser(String startsWith) {
+        return ressursStateRepository
+            .findByNavidentBulk(masteredRessursStateRepository.navidenter()).values().stream()
+            .filter(ressursState -> ressursState.navident().startsWith(startsWith))
+            .map(this::toDTO)
+            .toList();
+    }
+
     public List<DvhOrgenhetDTO> orgenheter() {
         logger.debug("Henter orgenheter. Bruke ny organisering");
 
