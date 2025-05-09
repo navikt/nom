@@ -44,8 +44,10 @@ public class StateController {
 
 
     public StateController(
-        RessursStateRepository ressursStateRepository, OrgEnhetStateRepository orgEnhetStateRepository,
-        OrgtilknytningStateRepository orgtilknytningStateRepository, OrganiseringStateRepository organiseringStateRepository,
+        RessursStateRepository ressursStateRepository,
+        OrgEnhetStateRepository orgEnhetStateRepository,
+        OrgtilknytningStateRepository orgtilknytningStateRepository,
+        OrganiseringStateRepository organiseringStateRepository,
         MasteredRessursStateRepository masteredRessursStateRepository
     ) {
         this.ressursStateRepository = ressursStateRepository;

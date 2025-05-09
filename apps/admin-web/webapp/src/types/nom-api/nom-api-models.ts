@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -8,6 +9,78 @@
  * ## SOURCE: https://github.com/acacode/swagger-typescript-api ##
  * ---------------------------------------------------------------
  */
+
+export enum UserRoles {
+  ROLE_WRITE = "ROLE_WRITE",
+  ROLE_ADMIN = "ROLE_ADMIN",
+  ROLE_PILOT = "ROLE_PILOT",
+  ROLE_WRITE_UTL_KONSULENT = "ROLE_WRITE_UTL_KONSULENT",
+  ROLE_WRITE_VIKAFOSSEN = "ROLE_WRITE_VIKAFOSSEN",
+  ROLE_WRITE_ROBOT = "ROLE_WRITE_ROBOT",
+  ROLE_READONLY = "ROLE_READONLY",
+  ROLE_EXTENDED_READONLY = "ROLE_EXTENDED_READONLY",
+}
+
+export enum Tilknytningtype {
+  ANNET = "ANNET",
+  ARBEIDSTRENING = "ARBEIDSTRENING",
+  EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER",
+  FAST = "FAST",
+  INGEN = "INGEN",
+  JOBBSPESIALIST = "JOBBSPESIALIST",
+  KONSULENT = "KONSULENT",
+  LAERLING = "LAERLING",
+  MIDLERTIDIG = "MIDLERTIDIG",
+  PENSJONIST = "PENSJONIST",
+  PRAKSISARBEID = "PRAKSISARBEID",
+  STUDENT = "STUDENT",
+  UFORUTSETT_BEHOV = "UFORUTSETT_BEHOV",
+  UTDANNINGSSTILLINGER = "UTDANNINGSSTILLINGER",
+  VIKAR = "VIKAR",
+}
+
+export enum TelefonType {
+  NAV_TJENESTE_TELEFON = "NAV_TJENESTE_TELEFON",
+  NAV_KONTOR_TELEFON = "NAV_KONTOR_TELEFON",
+  PRIVAT_TELEFON = "PRIVAT_TELEFON",
+}
+
+export enum Sektor {
+  NAV_STATLIG = "NAV_STATLIG",
+  NAV_KOMMUNAL = "NAV_KOMMUNAL",
+  EKSTERN = "EKSTERN",
+}
+
+export enum OrgEnhetsType {
+  ARBEIDSLIVSSENTER = "ARBEIDSLIVSSENTER",
+  NAV_ARBEID_OG_YTELSER = "NAV_ARBEID_OG_YTELSER",
+  ARBEIDSRAADGIVNING = "ARBEIDSRAADGIVNING",
+  DIREKTORAT = "DIREKTORAT",
+  DIR = "DIR",
+  FYLKE = "FYLKE",
+  NAV_FAMILIE_OG_PENSJONSYTELSER = "NAV_FAMILIE_OG_PENSJONSYTELSER",
+  HJELPEMIDLER_OG_TILRETTELEGGING = "HJELPEMIDLER_OG_TILRETTELEGGING",
+  KLAGEINSTANS = "KLAGEINSTANS",
+  NAV_KONTAKTSENTER = "NAV_KONTAKTSENTER",
+  KONTROLL_KONTROLLENHET = "KONTROLL_KONTROLLENHET",
+  NAV_KONTOR = "NAV_KONTOR",
+  TILTAK = "TILTAK",
+  NAV_OKONOMITJENESTE = "NAV_OKONOMITJENESTE",
+}
+
+export enum NomNivaa {
+  LINJEENHET = "LINJEENHET",
+  DRIFTSENHET = "DRIFTSENHET",
+  ARBEIDSOMRAADE = "ARBEIDSOMRAADE",
+}
+
+export enum IdentType {
+  ROBOT = "ROBOT",
+  STANDARD = "STANDARD",
+  VIKAFOSSEN = "VIKAFOSSEN",
+  UTENLANDSK_KONSULENT = "UTENLANDSK_KONSULENT",
+  UKJENT = "UKJENT",
+}
 
 export enum AnsettelsesType {
   FAST = "FAST",
@@ -102,15 +175,7 @@ export interface IOrgenhet {
   uniqueAgressoId?: string;
 }
 
-export enum IdentType {
-  ROBOT = "ROBOT",
-  STANDARD = "STANDARD",
-  VIKAFOSSEN = "VIKAFOSSEN",
-  UTENLANDSK_KONSULENT = "UTENLANDSK_KONSULENT",
-  UKJENT = "UKJENT",
-}
-
-export type JsonNode = object;
+export type JsonNode = any;
 
 export interface LederTilgangForOrgenhetRequest {
   delegertTilNavident: string;
@@ -159,12 +224,6 @@ export interface MasseFlyttingResponse {
 export interface MinimalRessurs {
   navident: string;
   visningsnavn: string;
-}
-
-export enum NomNivaa {
-  LINJEENHET = "LINJEENHET",
-  DRIFTSENHET = "DRIFTSENHET",
-  ARBEIDSOMRAADE = "ARBEIDSOMRAADE",
 }
 
 export interface OppdaterOrgtilknytningerForRessursRequest {
@@ -255,23 +314,6 @@ export interface OrgEnhetStatistikkResponse {
   /** @format int32 */
   antallTiltak?: number;
   ressursStatistikk?: RessursStatistikk;
-}
-
-export enum OrgEnhetsType {
-  ARBEIDSLIVSSENTER = "ARBEIDSLIVSSENTER",
-  NAV_ARBEID_OG_YTELSER = "NAV_ARBEID_OG_YTELSER",
-  ARBEIDSRAADGIVNING = "ARBEIDSRAADGIVNING",
-  DIREKTORAT = "DIREKTORAT",
-  DIR = "DIR",
-  FYLKE = "FYLKE",
-  NAV_FAMILIE_OG_PENSJONSYTELSER = "NAV_FAMILIE_OG_PENSJONSYTELSER",
-  HJELPEMIDLER_OG_TILRETTELEGGING = "HJELPEMIDLER_OG_TILRETTELEGGING",
-  KLAGEINSTANS = "KLAGEINSTANS",
-  NAV_KONTAKTSENTER = "NAV_KONTAKTSENTER",
-  KONTROLL_KONTROLLENHET = "KONTROLL_KONTROLLENHET",
-  NAV_KONTOR = "NAV_KONTOR",
-  TILTAK = "TILTAK",
-  NAV_OKONOMITJENESTE = "NAV_OKONOMITJENESTE",
 }
 
 export interface OrgtilknytningState {
@@ -372,12 +414,6 @@ export interface RessursStatistikk {
   antallStatligeRessurser?: number;
 }
 
-export enum Sektor {
-  NAV_STATLIG = "NAV_STATLIG",
-  NAV_KOMMUNAL = "NAV_KOMMUNAL",
-  EKSTERN = "EKSTERN",
-}
-
 export interface SessionInfoResponse {
   name: string;
   navident: string;
@@ -396,30 +432,6 @@ export interface StandardResponse {
 export interface Telefon {
   nummer: string;
   type: TelefonType;
-}
-
-export enum TelefonType {
-  NAV_TJENESTE_TELEFON = "NAV_TJENESTE_TELEFON",
-  NAV_KONTOR_TELEFON = "NAV_KONTOR_TELEFON",
-  PRIVAT_TELEFON = "PRIVAT_TELEFON",
-}
-
-export enum Tilknytningtype {
-  ANNET = "ANNET",
-  ARBEIDSTRENING = "ARBEIDSTRENING",
-  EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER",
-  FAST = "FAST",
-  INGEN = "INGEN",
-  JOBBSPESIALIST = "JOBBSPESIALIST",
-  KONSULENT = "KONSULENT",
-  LAERLING = "LAERLING",
-  MIDLERTIDIG = "MIDLERTIDIG",
-  PENSJONIST = "PENSJONIST",
-  PRAKSISARBEID = "PRAKSISARBEID",
-  STUDENT = "STUDENT",
-  UFORUTSETT_BEHOV = "UFORUTSETT_BEHOV",
-  UTDANNINGSSTILLINGER = "UTDANNINGSSTILLINGER",
-  VIKAR = "VIKAR",
 }
 
 export interface UpdateFysiskeBrukerstederRequest {
@@ -445,17 +457,6 @@ export interface UpdateVisningsnavnRequest {
   etternavn?: string;
   fornavn?: string;
   mellomnavn?: string;
-}
-
-export enum UserRoles {
-  ROLE_WRITE = "ROLE_WRITE",
-  ROLE_ADMIN = "ROLE_ADMIN",
-  ROLE_PILOT = "ROLE_PILOT",
-  ROLE_WRITE_UTL_KONSULENT = "ROLE_WRITE_UTL_KONSULENT",
-  ROLE_WRITE_VIKAFOSSEN = "ROLE_WRITE_VIKAFOSSEN",
-  ROLE_WRITE_ROBOT = "ROLE_WRITE_ROBOT",
-  ROLE_READONLY = "ROLE_READONLY",
-  ROLE_EXTENDED_READONLY = "ROLE_EXTENDED_READONLY",
 }
 
 export interface Visningsnavn {

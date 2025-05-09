@@ -6,6 +6,7 @@ import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +34,7 @@ public class OrgtilknytningEvtsrcKafkaConfig {
 
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, String> orgtilknytningEvtsrcKafkaListenerContainerFactory(
-        ConsumerFactory<String, String> consumerFactory
+        @Qualifier("orgtilknytningEvtsrcConsumerFactory") ConsumerFactory<String, String> consumerFactory
     ) {
         final var factory = new ConcurrentKafkaListenerContainerFactory<String, String>();
         factory.setConsumerFactory(consumerFactory);
