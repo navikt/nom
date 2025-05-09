@@ -8,6 +8,7 @@ import { getDeadLetterEventsOptions, searchSchema } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
 import { JsonModal } from "~/components/JsonModal.tsx";
+import { formatDisplayDatetime } from "~/utils.ts";
 
 export const Route = createFileRoute("/sinks/dead-letter")({
   loaderDeps: ({ search }) => search,
@@ -45,6 +46,7 @@ function DeadLetterHistoryPage() {
       <Table>
         <Table.Header>
           <Table.ColumnHeader scope="col">Fid</Table.ColumnHeader>
+          <Table.ColumnHeader scope="col">Created at</Table.ColumnHeader>
           <Table.ColumnHeader scope="col">Header</Table.ColumnHeader>
           <Table.ColumnHeader scope="col">Event</Table.ColumnHeader>
         </Table.Header>
@@ -53,6 +55,9 @@ function DeadLetterHistoryPage() {
             return (
               <Table.Row key={index}>
                 <Table.HeaderCell scope="row">{event.fid}</Table.HeaderCell>
+                <Table.DataCell>
+                  {formatDisplayDatetime(event.timestamp)}
+                </Table.DataCell>
                 <Table.DataCell>
                   <JsonModal data={event.headers || {}} text="Header" />
                 </Table.DataCell>
