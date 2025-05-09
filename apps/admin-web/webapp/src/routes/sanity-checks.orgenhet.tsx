@@ -11,10 +11,10 @@ import {
 } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { AntallOrgenheter } from "~/sanitychecks/OrgEnhet/AntallOrgenheter.tsx";
+import { Arbeidsomraade } from "~/sanitychecks/OrgEnhet/Arbeidsomraade.tsx";
 import { DuplikateEnheter } from "~/sanitychecks/OrgEnhet/DuplikateEnheter.tsx";
 import { EnheterOgOrganisering } from "~/sanitychecks/OrgEnhet/EnheterOgOrganisering.tsx";
 import { OrgEnhetOrganiseringTabell } from "~/sanitychecks/OrgEnhet/OrgEnhetOrganiseringTabell.tsx";
-import { Arbeidsomraade } from "~/sanitychecks/OrgEnhet/Arbeidsomraade.tsx";
 
 export const Route = createFileRoute("/sanity-checks/orgenhet")({
   component: () => {

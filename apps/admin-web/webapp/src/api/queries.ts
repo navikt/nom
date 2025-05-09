@@ -8,12 +8,14 @@ import type {
   KafkaEvent,
   OrganiseringState,
 } from "~/types.ts";
-import {
+import type {
+  DeadLetterDTO,
   DuplikatOrgtilknytning,
   EnheterOgOrganisering,
   HendelseDTO,
   ImportedRemedyUser,
-  MasteredRessursDTO, OrgEnhetArbeidsomraadeInfo,
+  MasteredRessursDTO,
+  OrgEnhetArbeidsomraadeInfo,
   OrgEnhetOrganisering,
   OrgEnhetStartOgSluttdato,
   OrgEnhetState,
@@ -27,7 +29,7 @@ import {
   RessursOrgtilknytningUlikSluttdato,
   RessursStateKafkaDTO,
   RobotRessurs,
-  SessionInfoResponse
+  SessionInfoResponse,
 } from "~/types/nom-admin/nom-admin-models.ts";
 import type {
   OrgtilknytningState,
@@ -118,7 +120,7 @@ export function getDeadLetterEventsOptions(search: searchType) {
         await ky.get(
           `${API_BASE_URL}/sinks/remedyDeadletter?${queryString.stringify(search, { skipNull: true })}`,
         )
-      ).json<KafkaEvent[]>(),
+      ).json<DeadLetterDTO[]>(),
   });
 }
 

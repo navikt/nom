@@ -32,9 +32,8 @@ export function Arbeidsomraade() {
   const dataWithKey = data.map((lovnode) => ({
     ...lovnode,
     key: crypto.randomUUID(),
-  }))
-  
-  
+  }));
+
   if (isLoading) {
     return <LoadingTable />;
   }
