@@ -71,6 +71,7 @@ public class NomRemedyIntegrasjonServiceNew {
         this.unleash = unleash;
     }
 
+    @Transactional
     @Scheduled(cron = "*/5 * * * * *")
     public void executeImmediateStateUpdate() {
         if (leaderElection.isLeader()) {
@@ -80,6 +81,7 @@ public class NomRemedyIntegrasjonServiceNew {
         }
     }
 
+    @Transactional
     @Scheduled(cron = "0 15 0 * * *")
     public void executeDelayedStateUpdate() {
         if (leaderElection.isLeader()) {
@@ -99,7 +101,8 @@ public class NomRemedyIntegrasjonServiceNew {
         }
     }
 
-    private List<UUID> executeStateUpdates(List<AggregateState> statesToUpdate) {
+    @Transactional
+    protected List<UUID> executeStateUpdates(List<AggregateState> statesToUpdate) {
         return statesToUpdate.stream().map(aggregateState -> {
             AtomicReference<UUID> fid = new AtomicReference<>(null);
             var optionalRessursState = aggregateState.getStateType().equals(RessursState.class.getSimpleName()) ? ressursStateRepository.findByFid(
