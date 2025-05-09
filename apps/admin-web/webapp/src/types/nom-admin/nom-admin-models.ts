@@ -252,8 +252,8 @@ export type RessursSluttetEventV1 = RessursEvent;
 
 export interface DeadLetterDTO {
   fid?: string;
-  header?: string;
-  orgtilknytningState?: string;
+  headers?: Record<string, string>;
+  event?: any;
 }
 
 export type OrgtilknytningAvsluttetEventV1 = OrgtilknytningEvent;

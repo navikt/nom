@@ -37,6 +37,10 @@ public class DeadLetterListener {
             @TopicPartition(
                 topic = "${app.kafka.dead-letter.orgtilknytning-topic}",
                 partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
+            ),
+            @TopicPartition(
+                topic = "${app.kafka.dead-letter.ressurs-topic}",
+                partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
             )
         }
     )
