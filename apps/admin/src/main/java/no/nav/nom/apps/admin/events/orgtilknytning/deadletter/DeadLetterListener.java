@@ -3,6 +3,7 @@ package no.nav.nom.apps.admin.events.orgtilknytning.deadletter;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.admin.dto.deadletter.DeadLetterDTO;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.common.header.Headers;
 import org.springframework.context.event.EventListener;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.PartitionOffset;
@@ -10,6 +11,9 @@ import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.kafka.event.ListenerContainerIdleEvent;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.StreamSupport;
 
@@ -42,10 +46,16 @@ public class DeadLetterListener {
             .map(stringStringConsumerRecord ->
                 new DeadLetterDTO(
                     stringStringConsumerRecord.key(),
-                    stringStringConsumerRecord.headers().toString(),
+                    headersToMap(stringStringConsumerRecord.headers()),
                     stringStringConsumerRecord.value()
                 ))
             .forEach(this::saveMessage);
+    }
+
+    private Map<String, String> headersToMap(Headers headers) {
+        Map<String, String> headerMap = new HashMap<>();
+        headers.forEach(header -> headerMap.put(header.key(), new String(header.value(), StandardCharsets.UTF_8)));
+        return headerMap;
     }
 
     private void saveMessage(DeadLetterDTO deadLetterDTO) {
