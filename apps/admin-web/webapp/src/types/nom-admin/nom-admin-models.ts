@@ -252,6 +252,8 @@ export type RessursSluttetEventV1 = RessursEvent;
 
 export interface DeadLetterDTO {
   fid?: string;
+  /** @format date-time */
+  timestamp?: string;
   headers?: Record<string, string>;
   event?: any;
 }
