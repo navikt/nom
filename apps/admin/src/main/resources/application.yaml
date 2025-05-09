@@ -25,6 +25,10 @@ app:
     ressurs-hendelser:
       apiEventTopic: org.nom.api-ressurs-hendelse-v1
       apiEventTopic-listener-id: nom-admin_apiRessursHendelserListener_${HOSTNAME}
+    dead-letter:
+      orgtilknytning-topic: org.nom.intern-orgtilknytning-state-dlt
+      ressurs-topic: org.nom.intern-ressurs-state-dlt
+      listener-id: nom-admin_deadLetterListener_${HOSTNAME}
   clients:
     nom-api:
       url: ${NOM_API_URL}
@@ -95,8 +99,8 @@ spring:
             scope:
               - ${NOM_API_SCOPE}
         provider:
-         azure:
-           issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
+          azure:
+            issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
 
 unleash:
   endpoint:
@@ -154,7 +158,7 @@ app:
         scopes:
           - READONLY
           - EXTENDED_READONLY
-        
+
   google-storage-bucket:
     name: no-nav-org-prod-nom-admin-storage-bucket
     remedy-data: IR_export.csv

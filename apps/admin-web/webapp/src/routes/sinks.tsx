@@ -8,6 +8,7 @@ import {
 
 import {
   getApiRessursEventsOptions,
+  getDeadLetterEventsOptions,
   getOrgenhetEventsOptions,
   getOrgtilknytningEventsOptions,
   getRessursEventsOptions,
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/sinks")({
     context.queryClient.prefetchQuery(getRessursEventsOptions(deps));
     context.queryClient.prefetchQuery(getApiRessursEventsOptions(deps));
     context.queryClient.prefetchQuery(getOrgtilknytningEventsOptions(deps));
+    context.queryClient.prefetchQuery(getDeadLetterEventsOptions(deps));
   },
   component: () => {
     const search = Route.useSearch();
@@ -71,6 +73,11 @@ export const Route = createFileRoute("/sinks")({
             label="Ekstern Topic Hendelser"
             onClick={() => navigate({ to: "/sinks/api-hendelser", search })}
             value={"/sinks/api-hendelser"}
+          />
+          <Tabs.Tab
+            label="Remedy Dead Letter"
+            onClick={() => navigate({ to: "/sinks/dead-letter", search })}
+            value={"/sinks/dead-letter"}
           />
         </Tabs.List>
         <Outlet />

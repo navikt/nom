@@ -110,6 +110,18 @@ export function getOrgtilknytningEventsOptions(search: searchType) {
   });
 }
 
+export function getDeadLetterEventsOptions(search: searchType) {
+  return queryOptions({
+    queryKey: ["EVENTS", "DEAD-LETTER", search],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/sinks/remedyDeadletter?${queryString.stringify(search, { skipNull: true })}`,
+        )
+      ).json<KafkaEvent[]>(),
+  });
+}
+
 export function getNomMasteredStateOptions(
   navident: string | undefined,
   offset: number | undefined,

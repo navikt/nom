@@ -29,7 +29,10 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/internal/**",
                     "v3/api-docs/**",
-                    "/error"
+                    "/error",
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/swagger-resources/**"
                 ).permitAll()
                 .anyRequest().fullyAuthenticated()
             )

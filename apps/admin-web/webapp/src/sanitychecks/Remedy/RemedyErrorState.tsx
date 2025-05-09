@@ -2,6 +2,7 @@ import { Table } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 
 import { getAllErrorStates } from "~/api/queries.ts";
+import { NomLink } from "~/components/NomLink.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
 import { EmptyTable } from "~/sanitychecks/components/EmptyTable.tsx";
 import { LoadingTable } from "~/sanitychecks/components/LoadingTable.tsx";
@@ -59,7 +60,11 @@ export function RemedyErrorState() {
           {data.map((errorState) => (
             <Table.Row key={errorState.errorId}>
               <Table.DataCell>{errorState.errorId}</Table.DataCell>
-              <Table.DataCell>{errorState.navident}</Table.DataCell>
+              <Table.DataCell>
+                <NomLink path={`/ressurs/${errorState.navident}`}>
+                  {errorState.navident}
+                </NomLink>
+              </Table.DataCell>
               <Table.DataCell>{errorState.errorStateFid}</Table.DataCell>
               <Table.DataCell>{errorState.errorStateType}</Table.DataCell>
               <Table.DataCell>{errorState.errorMessage}</Table.DataCell>

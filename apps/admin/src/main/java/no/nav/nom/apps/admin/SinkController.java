@@ -2,6 +2,7 @@ package no.nav.nom.apps.admin;
 
 import io.getunleash.Unleash;
 import no.nav.nom.apps.admin.dto.EventSearchParams;
+import no.nav.nom.apps.admin.dto.deadletter.DeadLetterDTO;
 import no.nav.nom.apps.admin.dto.hendelse.HendelseDTO;
 import no.nav.nom.apps.admin.dto.orgenhet.OrgEnhetStateDTO;
 import no.nav.nom.apps.admin.dto.ressurs.RessursHendelseKafkaDTO;
@@ -9,6 +10,7 @@ import no.nav.nom.apps.admin.dto.ressurs.RessursStateKafkaDTO;
 import no.nav.nom.apps.admin.events.hendelser.HendelserApiStateRepository;
 import no.nav.nom.apps.admin.events.orgenhet.api.OrgEnhetStateApiRepository;
 import no.nav.nom.apps.admin.events.orgenhet.eventsource.OrgenhetEvtsrcRepository;
+import no.nav.nom.apps.admin.events.orgtilknytning.deadletter.DeadLetterRepository;
 import no.nav.nom.apps.admin.events.orgtilknytning.eventsource.OrgtilknytningEvtsrcRepository;
 import no.nav.nom.apps.admin.events.ressurs.api.RessursHendelseApiRepository;
 import no.nav.nom.apps.admin.events.ressurs.eventsource.RessursEvtsrcRepository;
@@ -49,6 +51,7 @@ public class SinkController {
     private final OrgtilknytningEvtsrcRepository orgtilknytningEvtsrcRepository;
     private final RessursHendelseApiRepository ressursHendelseApiRepository;
     private final Unleash unleash;
+    private final DeadLetterRepository deadLetterRepository;
 
     public SinkController(
         RessursEvtsrcRepository ressursEvtsrcRepository,
@@ -59,7 +62,8 @@ public class SinkController {
         HendelserApiStateRepository hendelserApiStateRepository,
         OrgtilknytningEvtsrcRepository orgtilknytningEvtsrcRepository,
         RessursHendelseApiRepository ressursHendelseApiRepository,
-        Unleash unleash
+        Unleash unleash,
+        DeadLetterRepository deadLetterRepository
     ) {
         this.ressursEvtsrcRepository = ressursEvtsrcRepository;
         this.orgenhetEvtsrcRepository = orgenhetEvtsrcRepository;
@@ -70,6 +74,7 @@ public class SinkController {
         this.orgtilknytningEvtsrcRepository = orgtilknytningEvtsrcRepository;
         this.ressursHendelseApiRepository = ressursHendelseApiRepository;
         this.unleash = unleash;
+        this.deadLetterRepository = deadLetterRepository;
     }
 
 
@@ -145,6 +150,15 @@ public class SinkController {
     public List<RessursHendelseKafkaDTO> getApiRessursHendelseEvents(@Valid EventSearchParams eventSearchParams) {
         int fromOffset = eventSearchParams.getFromOffset();
         List<RessursHendelseKafkaDTO> events = ressursHendelseApiRepository.getRessursHendelser().stream().filter(eventFilter(eventSearchParams)).toList();
+
+        return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
+    }
+
+    @GetMapping(value = "/remedyDeadletter")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
+    public List<DeadLetterDTO> getRemedyDeadletter(@Valid EventSearchParams eventSearchParams) {
+        int fromOffset = eventSearchParams.getFromOffset();
+        List<DeadLetterDTO> events = deadLetterRepository.getDeadLetters().stream().filter(eventFilter(eventSearchParams)).toList();
 
         return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }

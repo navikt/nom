@@ -75,6 +75,9 @@ public class GenericApiKafkaConfig {
     @Bean
     public String evtsrcTilgangUniqueListenerId(@Value("${app.kafka.authorize.eventsource-listener-id}") String listenerId) { return getUniqueListenerIdString(listenerId); }
 
+    @Bean
+    public String deadLetterUniqueListenerId(@Value("${app.kafka.dead-letter.listener-id}") String listenerId) { return getUniqueListenerIdString(listenerId); }
+
     final HashMap<String, String> listenerIdMap = new HashMap<>();
 
     /*
