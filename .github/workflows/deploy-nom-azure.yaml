@@ -1,4 +1,4 @@
-name: 'deploy: azure'
+name: 'deploy: nom-azure'
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - 'apps/nom-azure/**'
       - 'libs/**'
       - '.nais/apps/nom-azure/*.yaml'
-      - '.github/*/deploy-azure.yaml'
+      - '.github/*/deploy-nom-azure.yaml'
       - 'apps/pom.xml'
       - 'pom.xml'
       - 'Dockerfile_distroless'
