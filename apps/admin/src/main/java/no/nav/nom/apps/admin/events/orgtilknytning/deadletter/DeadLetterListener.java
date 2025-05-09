@@ -12,6 +12,9 @@ import org.springframework.kafka.event.ListenerContainerIdleEvent;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -50,6 +53,7 @@ public class DeadLetterListener {
             .map(stringStringConsumerRecord ->
                 new DeadLetterDTO(
                     stringStringConsumerRecord.key(),
+                    LocalDateTime.ofInstant(Instant.ofEpochMilli(stringStringConsumerRecord.timestamp()), ZoneId.systemDefault()),
                     headersToMap(stringStringConsumerRecord.headers()),
                     stringStringConsumerRecord.value()
                 ))
