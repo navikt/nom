@@ -37,7 +37,7 @@ public class DvhRessursController {
         description = "Hent alle ressurser med orgtilknytninger som er mastret i NOM, der mod30 parameter er et modulo filter basert på talldelen av navidenten",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @GetMapping("/nom-mastered-ressurser/{mod30}")
+    @GetMapping("/nom-mastered-ressurser/mod30/{mod30}")
     public ResponseEntity<List<DvhRessursDTO>> nomMasteredRessurser(@PathVariable Integer mod30) {
         if(mod30 > 30 || mod30 < 0){
             return ResponseEntity.badRequest().build();
