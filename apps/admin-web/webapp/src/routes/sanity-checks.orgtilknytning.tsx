@@ -29,6 +29,9 @@ export const Route = createFileRoute("/sanity-checks/orgtilknytning")({
 
 function ListSelector(props: { selected: string }) {
   switch (props.selected) {
+    case "OrgtilknytningSluttdatoForstdagIManed": {
+      return <OrgtilknytningSluttdatoForstdagIManed />;
+    }
     case "OrgtilknytningOrgGyldighet": {
       return <OrgtilknytningOrgGyldighet />;
     }
@@ -69,6 +72,9 @@ function OrgtilknytningSanityChecks() {
         onChange={(e) => setSelected(e.target.value)}
         style={{ width: "650px", paddingBottom: "20px" }}
       >
+        <option value="OrgtilknytningSluttdatoForstdagIManed">
+          List tilknytninger med sluttdato på først dag i måneden
+        </option>
         <option value="OrgtilknytningOrgGyldighet">
           List tilknytninger med gyldighet utover enhetens gyldighetsperiode
         </option>
