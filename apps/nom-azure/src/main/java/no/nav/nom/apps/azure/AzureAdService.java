@@ -38,7 +38,9 @@ public class AzureAdService {
 
     private byte[] lookupProfilePictureByNavIdent(String navIdent) {
         String userId = lookupUserByNavIdent(navIdent);
-        return lookupUserProfilePicture(userId);
+        var pictureBytes = lookupUserProfilePicture(userId);
+        log.info("Fetch of profile picture for {}: {}", navIdent, pictureBytes == null ? "failed" : "success");
+        return pictureBytes;
     }
 
     public Optional<byte[]> profilePictureByNavIdent(String navIdent){
