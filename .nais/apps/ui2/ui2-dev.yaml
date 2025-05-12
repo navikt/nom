@@ -93,6 +93,10 @@ spec:
       value: http://nom-api.nom.svc.cluster.local
     - name: NOM_API_SCOPE
       value: api://dev-gcp.nom.nom-api/.default
+    - name: NOM_AZURE_URL
+      value: http://nom-azure.org.svc.cluster.local
+    - name: NOM_AZURE_SCOPE
+      value: api://dev-gcp.org.nom-azure/.default
     - name: TEAM_CATALOG_API_URL
       value: http://team-catalog-backend.org.svc.cluster.local
     - name: TEAM_CATALOG_SCOPE

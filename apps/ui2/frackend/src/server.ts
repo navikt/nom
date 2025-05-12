@@ -3,6 +3,7 @@ import express from "express";
 import { setupActuators } from "./actuators.js";
 import {
   setupNomApiProxy,
+  setupNomAzureProxy,
   setupNomRemedyIntegrasjonProxy,
   setupPaarorendeProxy,
   setupTeamcatApiProxy,
@@ -27,6 +28,7 @@ setupGqlPlaygroundProxy(app);
 app.use(verifyToken);
 setupNomApiProxy(app);
 setupTeamcatApiProxy(app);
+setupNomAzureProxy(app);
 setupNomRemedyIntegrasjonProxy(app);
 setupPaarorendeProxy(app);
 setupUnleashProxy(app);
