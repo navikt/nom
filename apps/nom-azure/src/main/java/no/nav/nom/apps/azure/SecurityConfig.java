@@ -27,22 +27,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, Environment environment) throws Exception {
 
-        var commonPre = http
+        var common = http
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .csrf(AbstractHttpConfigurer::disable)
             .logout(AbstractHttpConfigurer::disable)
             .securityMatcher("/**");
 
-
-        var isLocalEnv = Arrays.asList(environment.getActiveProfiles()).contains("local");
-
-        if (isLocalEnv) {
-            commonPre.authorizeHttpRequests((auth) -> auth
+        if (isLocalEnv(environment)) {
+            common.authorizeHttpRequests((auth) -> auth
                 .anyRequest().permitAll()
             );
             logger.info("Local environment detected. Permit all");
-        }else{
-            commonPre
+        } else {
+            common
                 .authorizeHttpRequests((auth) -> auth
                     .requestMatchers(
                         "/internal/**",
@@ -55,7 +52,7 @@ public class SecurityConfig {
 
         }
 
-        return commonPre
+        return common
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
             .exceptionHandling((exceptionHandling) ->
                 exceptionHandling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)
@@ -66,5 +63,10 @@ public class SecurityConfig {
     @Bean
     public JwtDecoder jwtDecoder(OAuth2ResourceServerProperties properties) {
         return JwtDecoders.fromIssuerLocation(properties.getJwt().getIssuerUri());
+    }
+
+    private boolean isLocalEnv(Environment environment) {
+        var lacksPlatformEnvVariable = environment.getProperty("NAIS_CLIENT_ID") == null;
+        return lacksPlatformEnvVariable && Arrays.asList(environment.getActiveProfiles()).contains("local");
     }
 }
