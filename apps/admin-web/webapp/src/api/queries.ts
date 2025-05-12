@@ -420,6 +420,18 @@ export function getOrgtilknytningMedNegativPeriode() {
   });
 }
 
+export function getOrgtilknytningSluttdatoForstdagIManed() {
+  return queryOptions({
+    queryKey: ["API", "ORGTLKNYTNINGMEDSLUTTDATOFORSTIMANED"],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/SanityCheck/orgtilknytning/listTilkoblingerSomharTomDatoForstDagImaneden`,
+        )
+      ).json<OrgtilknytningState[]>(),
+  });
+}
+
 export function getOrgtilknytningMedFlereAktivDOL() {
   return queryOptions({
     queryKey: ["API", "ORGTILKNYTNINGMEDFLEREAKTIVDOL"],
