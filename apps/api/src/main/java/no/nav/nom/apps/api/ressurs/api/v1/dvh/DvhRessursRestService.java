@@ -54,23 +54,6 @@ public class DvhRessursRestService {
             .toList();
     }
 
-    public List<DvhRessursDTO> nomMasteredRessurser(String startsWith) {
-        return ressursStateRepository
-            .findByNavidentBulk(masteredRessursStateRepository.navidenter()).values().stream()
-            .filter(ressursState -> ressursState.navident().startsWith(startsWith))
-            .map(this::toDTO)
-            .toList();
-    }
-
-    public List<DvhRessursDTO> nomMasteredRessurser(Integer mod30Filter) {
-        final Integer restrictedModulo = mod30Filter != null ? mod30Filter % 30 : null;
-        return ressursStateRepository
-            .findByNavidentBulk(masteredRessursStateRepository.navidenter()).values().stream()
-            .filter(it -> restrictedModulo == null || (Integer.parseInt(it.navident().substring(1)) + restrictedModulo) % 30 == 0)
-            .map(this::toDTO)
-            .toList();
-    }
-
     public List<DvhOrgenhetDTO> orgenheter() {
         logger.debug("Henter orgenheter. Bruke ny organisering");
 
