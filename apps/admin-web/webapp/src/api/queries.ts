@@ -420,7 +420,7 @@ export function getOrgtilknytningMedNegativPeriode() {
   });
 }
 
-export function getOrgtilknytningMedSluttdatoForstIManed() {
+export function getOrgtilknytningSluttdatoForstdagIManed() {
   return queryOptions({
     queryKey: ["API", "ORGTLKNYTNINGMEDSLUTTDATOFORSTIMANED"],
     queryFn: async () =>
