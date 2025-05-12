@@ -12,6 +12,7 @@ import { OrgtilknytningMedUgyldigSektorTilknytningtypeKombinasjon } from "~/sani
 import { OrgtilknytningNegativPeriode } from "~/sanitychecks/Orgtilknytning/OrgtilknytningNegativPeriode.tsx";
 import { OrgtilknytningOrgGyldighet } from "~/sanitychecks/Orgtilknytning/OrgtilknytningOrgGyldighet.tsx";
 import { OrgtilknytningOverlapp } from "~/sanitychecks/Orgtilknytning/OrgtilknytningOverlapp.tsx";
+import { OrgtilknytningSluttdatoForstdagIManed } from "~/sanitychecks/Orgtilknytning/OrgtilknytningSluttdatoForstdagIManed.tsx";
 
 export const Route = createFileRoute("/sanity-checks/orgtilknytning")({
   component: () => {
