@@ -29,6 +29,9 @@ const proxy = {
   ),
   paarorendeApiScope: requireEnvironment("PAARORENDE_API_SCOPE"),
   paarorendeApiUrl: requireEnvironment("PAARORENDE_API_URL"),
+
+  nomAzureApiScope: requireEnvironment("NOM_AZURE_SCOPE"),
+  nomAzureApiUrl: requireEnvironment("NOM_AZURE_URL"),
 };
 
 const unleash = {
