@@ -2,13 +2,13 @@ import { Pagination, Table } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { type SetStateAction, useState } from "react";
 
-import { getOrgtilknytningMedSluttdatoForstIManed } from "~/api/queries.ts";
+import { getOrgtilknytningSluttdatoForstdagIManed } from "~/api/queries.ts";
 import { useTableSort } from "~/hooks/useTableSort.ts";
 import { OrgtilknytningStateTabell } from "~/sanitychecks/Orgtilknytning/OrgtilknytningStateTabell.tsx";
 
-export function OrgtilknytningMedSluttdatoForstIManed() {
-  const orgtilknytningMedSluttdatoForstIManed = useQuery(
-    getOrgtilknytningMedSluttdatoForstIManed(),
+export function OrgtilknytningSluttdatoForstdagIManed() {
+  const orgtilknytningSluttdatoForstdagIManed = useQuery(
+    getOrgtilknytningSluttdatoForstdagIManed(),
   );
   const [page, setPage] = useState(1);
   const handlePageChange = (value: SetStateAction<number>) => {
@@ -18,7 +18,7 @@ export function OrgtilknytningMedSluttdatoForstIManed() {
   const rowsPerPage = 50;
 
   const { data, sort, handleSort } = useTableSort(
-    orgtilknytningMedSluttdatoForstIManed.data ?? [],
+    orgtilknytningSluttdatoForstdagIManed.data ?? [],
     "navident",
   );
 
