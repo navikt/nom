@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -8,6 +9,30 @@
  * ## SOURCE: https://github.com/acacode/swagger-typescript-api ##
  * ---------------------------------------------------------------
  */
+
+export enum Tilknytningtype {
+  ANNET = "ANNET",
+  ARBEIDSTRENING = "ARBEIDSTRENING",
+  EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER",
+  FAST = "FAST",
+  INGEN = "INGEN",
+  JOBBSPESIALIST = "JOBBSPESIALIST",
+  KONSULENT = "KONSULENT",
+  LAERLING = "LAERLING",
+  MIDLERTIDIG = "MIDLERTIDIG",
+  PENSJONIST = "PENSJONIST",
+  PRAKSISARBEID = "PRAKSISARBEID",
+  STUDENT = "STUDENT",
+  UFORUTSETT_BEHOV = "UFORUTSETT_BEHOV",
+  UTDANNINGSSTILLINGER = "UTDANNINGSSTILLINGER",
+  VIKAR = "VIKAR",
+}
+
+export enum Sektor {
+  NAV_STATLIG = "NAV_STATLIG",
+  NAV_KOMMUNAL = "NAV_KOMMUNAL",
+  EKSTERN = "EKSTERN",
+}
 
 export interface EnhetsOrganisasjonSanityCheckResponse {
   agressoId?: string;
@@ -35,6 +60,7 @@ export interface OrgtilknytningState {
   orgEnhetId: string;
   orgtilknytningType?: Tilknytningtype;
   sektor?: Sektor;
+  sistEndretAv?: string;
 }
 
 export interface OrgtilknytningerUtenforHierarkiResponse {
@@ -74,30 +100,6 @@ export interface RobotRessursSanityCheckResponse {
   /** @format date */
   startdato?: string;
   visningsnavn?: string;
-}
-
-export enum Sektor {
-  NAV_STATLIG = "NAV_STATLIG",
-  NAV_KOMMUNAL = "NAV_KOMMUNAL",
-  EKSTERN = "EKSTERN",
-}
-
-export enum Tilknytningtype {
-  ANNET = "ANNET",
-  ARBEIDSTRENING = "ARBEIDSTRENING",
-  EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER",
-  FAST = "FAST",
-  INGEN = "INGEN",
-  JOBBSPESIALIST = "JOBBSPESIALIST",
-  KONSULENT = "KONSULENT",
-  LAERLING = "LAERLING",
-  MIDLERTIDIG = "MIDLERTIDIG",
-  PENSJONIST = "PENSJONIST",
-  PRAKSISARBEID = "PRAKSISARBEID",
-  STUDENT = "STUDENT",
-  UFORUTSETT_BEHOV = "UFORUTSETT_BEHOV",
-  UTDANNINGSSTILLINGER = "UTDANNINGSSTILLINGER",
-  VIKAR = "VIKAR",
 }
 
 export interface U4Diff {

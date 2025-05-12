@@ -7,19 +7,22 @@ import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredVa
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateStateRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorState;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorStateRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,6 +36,7 @@ import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.formatFo
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.isActive;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.isFuture;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.nomSektorToRemedyCode;
+import static org.apache.commons.lang3.StringUtils.deleteWhitespace;
 
 @Service
 public class NomRemedyIntegrasjonServiceNew {
@@ -42,6 +46,7 @@ public class NomRemedyIntegrasjonServiceNew {
     private final RemedyIntegrasjonRepositoryService remedyIntegrasjonRepositoryService;
     private final NomApiClient nomApiClient;
     private final AggregateStateRepository aggregateStateRepository;
+    private final ErrorStateRepository errorStateRepository;
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final Unleash unleash;
@@ -51,6 +56,7 @@ public class NomRemedyIntegrasjonServiceNew {
         RemedyIntegrasjonRepositoryService remedyIntegrasjonRepositoryService,
         NomApiClient nomApiClient,
         AggregateStateRepository aggregateStateRepository,
+        ErrorStateRepository errorStateRepository,
         RessursStateRepository ressursStateRepository,
         OrgtilknytningStateRepository orgtilknytningStateRepository,
         Unleash unleash
@@ -59,11 +65,13 @@ public class NomRemedyIntegrasjonServiceNew {
         this.remedyIntegrasjonRepositoryService = remedyIntegrasjonRepositoryService;
         this.nomApiClient = nomApiClient;
         this.aggregateStateRepository = aggregateStateRepository;
+        this.errorStateRepository = errorStateRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.unleash = unleash;
     }
 
+    @Transactional
     @Scheduled(cron = "*/5 * * * * *")
     public void executeImmediateStateUpdate() {
         if (leaderElection.isLeader()) {
@@ -73,6 +81,7 @@ public class NomRemedyIntegrasjonServiceNew {
         }
     }
 
+    @Transactional
     @Scheduled(cron = "0 15 0 * * *")
     public void executeDelayedStateUpdate() {
         if (leaderElection.isLeader()) {
@@ -82,7 +91,18 @@ public class NomRemedyIntegrasjonServiceNew {
         }
     }
 
-    private List<UUID> executeStateUpdates(List<AggregateState> statesToUpdate) {
+    @Scheduled(cron = "0 30 8 * * MON-FRI")
+    public void logErrorState() {
+        if (leaderElection.isLeader()) {
+            var errorStates = errorStateRepository.findAll();
+            if (!errorStates.isEmpty()) {
+                logger.info("ALERT: En sjekk har blitt gjort på nom-remedy-integrasjon error states, og det er {} feil i systemet, sjekk i nom-admin", errorStates.size());
+            }
+        }
+    }
+
+    @Transactional
+    protected List<UUID> executeStateUpdates(List<AggregateState> statesToUpdate) {
         return statesToUpdate.stream().map(aggregateState -> {
             AtomicReference<UUID> fid = new AtomicReference<>(null);
             var optionalRessursState = aggregateState.getStateType().equals(RessursState.class.getSimpleName()) ? ressursStateRepository.findByFid(
@@ -93,25 +113,45 @@ public class NomRemedyIntegrasjonServiceNew {
                 optionalRessursState.ifPresent(ressursState -> {
                     if (ressursStateUpdate(ressursState, aggregateState)) {
                         fid.set(aggregateState.getAggregateStateId());
+                        errorStateRepository.deleteErrorStateByErrorStateFid(ressursState.fid());
                     }
                 });
                 optionalOrgtilknytningState.ifPresent(orgtilknytningState -> {
                     if (orgtilknytningStateUpdate(orgtilknytningState, aggregateState)) {
                         fid.set(aggregateState.getAggregateStateId());
+                        errorStateRepository.deleteErrorStateByErrorStateFid(orgtilknytningState.fid());
                     }
                 });
             } catch (Exception e) {
-                logger.error("ALERT: Failed to handle aggregate state with fid {} and type {}", aggregateState.getStateFid(), aggregateState.getStateType(), e);
+                logger.error(
+                    "ALERT: Kunne ikke prosessere state av typen {} til navident {}, med følgende feilmelding {}",
+                    aggregateState.getStateType(),
+                    aggregateState.getNavident(),
+                    e.getMessage(),
+                    e
+                );
+                fid.set(aggregateState.getAggregateStateId());
+                errorStateRepository.save(
+                    ErrorState.builder()
+                        .errorStateFid(aggregateState.getStateFid())
+                        .errorStateType(aggregateState.getStateType())
+                        .errorMessage(e.getMessage())
+                        .createdAt(LocalDateTime.now())
+                        .navident(aggregateState.getNavident())
+                        .build()
+                );
             }
             return isNull(fid.get()) ? null : fid.get();
         }).filter(Objects::nonNull).toList();
     }
 
     private boolean orgtilknytningStateUpdate(OrgtilknytningState orgtilknytningState, AggregateState aggregateState) {
-        if (orgtilknytningState.gyldigTom().isPresent() && orgtilknytningState.gyldigTom().get().isBefore(LocalDate.now())) return true;
+        if (orgtilknytningState.gyldigTom().isPresent() && orgtilknytningState.gyldigTom().get().isBefore(LocalDate.now())) {
+            return true;
+        }
 
         var ressursState = ressursStateRepository.findByNavident(orgtilknytningState.navident())
-            .orElseThrow(() -> RessursNotFoundException.notFound(String.format("Fant ikke ressurs for orgtilknytning %s", orgtilknytningState.fid())));
+            .orElseThrow(() -> RessursNotFoundException.notFound(orgtilknytningState.navident(), orgtilknytningState.fid()));
 
         var entryBestiller = orgtilknytningState.sistEndretAv() != null ? orgtilknytningState.sistEndretAv() : "nom-api";
         var erDagligOppfolging = orgtilknytningState.erDagligOppfolging();
@@ -161,14 +201,16 @@ public class NomRemedyIntegrasjonServiceNew {
             saveStateToRemedyIfNewOrReactivatedRessurs(ressursState, dolOrgtilknytning);
         } else if (ressursState.sluttdato().isPresent() && ressursState.sluttdato().get().isBefore(LocalDate.now())) {
             if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-                remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(navident).ifPresentOrElse(nomIntegrasjonEntity -> {
-                    if (nomIntegrasjonEntity.getEntryOperasjon().equals("Slette")) {
-                        logger.info("Ressurs {} er allerede slettet i IR", navident);
-                    } else {
-                        remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv());
-                        logger.info("Ressurs {} er merket for sletting i IR", navident);
-                    }
-                }, () -> remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv()));
+                remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(navident).ifPresentOrElse(
+                    nomIntegrasjonEntity -> {
+                        if (nomIntegrasjonEntity.getEntryOperasjon().equals("Slette")) {
+                            logger.info("Ressurs {} er allerede slettet i IR", navident);
+                        } else {
+                            remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv());
+                            logger.info("Ressurs {} er merket for sletting i IR", navident);
+                        }
+                    }, () -> remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv())
+                );
             } else {
                 logger.info("Ressurs {} er merket for sletting i IR", navident);
             }
@@ -252,16 +294,18 @@ public class NomRemedyIntegrasjonServiceNew {
     }
 
     private String mapAndTrimNumber(String nummer) {
-        if (isNull(nummer)) return null;
+        if (isNull(nummer)) {
+            return null;
+        }
         if (nummer.length() >= 10) {
             if (nummer.startsWith("47")) {
-                return nummer.substring(2);
+                return deleteWhitespace(nummer.substring(2));
             }
             if (nummer.startsWith("+47")) {
-                return nummer.substring(3);
+                return deleteWhitespace(nummer.substring(3));
             }
         }
-        return StringUtils.deleteWhitespace(nummer);
+        return deleteWhitespace(nummer);
     }
 
     private String getRemedyEnhetId(String orgEnhetId) {
@@ -274,5 +318,21 @@ public class NomRemedyIntegrasjonServiceNew {
             throw new RequiredValueMissingException("Utløpsdato er påkrevd for ekstern sektor");
         }
         return sektor == 2 ? dolOrgtilknytning.gyldigTom() : Optional.empty();
+    }
+
+    public List<ErrorState> getAllErrorStates() {
+        return errorStateRepository.findAll();
+    }
+
+    @Transactional
+    public void deleteAllErrorStates() {
+        errorStateRepository.deleteAll();
+        logger.info("Slettet alle error states");
+    }
+
+    @Transactional
+    public void deleteErrorState(String fid) {
+        errorStateRepository.deleteErrorStateByErrorStateFid(fid);
+        logger.info("Slettet error state med id: {}", fid);
     }
 }

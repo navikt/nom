@@ -132,15 +132,37 @@ public class SecurityUtil {
         return Optional.ofNullable(jwt.getClaimAsString(AZP_NAME));
     }
 
+    public static boolean loggedInUserHasAnyAccessScope(NomApiAccessScope... nomApiAccessScopes) {
+        for (NomApiAccessScope nomApiAccessScope : nomApiAccessScopes) {
+            if (loggedInUserHasAccessScope(nomApiAccessScope)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public static boolean loggedInUserHasAccessScope(NomApiAccessScope nomApiAccessScope) {
         return SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(nomApiAccessScope.asGrantedAuthority());
+    }
+
+    public static boolean hasAuthentication() {
+        return SecurityContextHolder.getContext().getAuthentication() != null;
     }
 
     public static String getAuthenticatedNavIdent() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return getNavIdent(authentication).orElseThrow(
             () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Couldn't find %s in Claims", NAVIDENT)));
+    }
+
+    public static List<String> getAuthenticatedRoller() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+        }
+        return List.of();
     }
 
     public static String getAuthenticatedAzpName() {

@@ -28,10 +28,10 @@ export const TilknytningtypeNameMapping = {
   [Tilknytningtype.ARBEIDSTRENING]: "Arbeidstrening",
   [Tilknytningtype.STUDENT]: "Student",
   [Tilknytningtype.JOBBSPESIALIST]: "Jobbspesialist",
-  [Tilknytningtype.PRAKSISARBEID]: "Praksisarbeid",
-  [Tilknytningtype.UFORUTSETT_BEHOV]: "Uforutsett behov",
-  [Tilknytningtype.VIKAR]: "Vikar",
-  [Tilknytningtype.UTDANNINGSSTILLINGER]: "Utdanningsstillinger",
+  [Tilknytningtype.PRAKSISARBEID]: "Praksisarbeid § 9c",
+  [Tilknytningtype.UFORUTSETT_BEHOV]: "Uforutsett behov § 9e",
+  [Tilknytningtype.VIKAR]: "Vikar § 9b",
+  [Tilknytningtype.UTDANNINGSSTILLINGER]: "Utdanningsstillinger § 9d",
   [Tilknytningtype.ANNET]: "Annet",
   [Tilknytningtype.INGEN]: "Ingen",
 };
@@ -89,7 +89,7 @@ export function SektorStep() {
   );
 
   const [selectedTilknytningtype, setSelectedTilknytningtype] = useState(
-    tilknytningtype ?? sektor === Sektor.NAV_KOMMUNAL
+    (tilknytningtype ?? sektor === Sektor.NAV_KOMMUNAL)
       ? Tilknytningtype.INGEN
       : (sektor === Sektor.NAV_STATLIG
           ? tilknytningstyperStatlige

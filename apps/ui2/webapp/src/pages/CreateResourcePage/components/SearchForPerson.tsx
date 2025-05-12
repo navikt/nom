@@ -2,6 +2,8 @@ import { Search } from "@navikt/ds-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Controller, useForm } from "react-hook-form";
 
+import { Route } from "~/routes/ressurs.create.$step";
+
 export function SearchForPerson() {
   const { personident } = useSearch({ from: "/ressurs/create/$step" });
   const { handleSubmit, control, reset } = useForm({
@@ -11,24 +13,22 @@ export function SearchForPerson() {
   });
   const navigate = useNavigate();
 
+  const { step } = Route.useParams();
+
   return (
     <form
       onSubmit={handleSubmit((values) => {
+        const trimmedPersonident =
+          values.personident?.replaceAll(" ", "") ?? "";
+
         navigate({
-          params: (previous) => previous,
-          search: (oldSearch) => {
-            return oldSearch.personident === values.personident
-              ? {
-                  ...oldSearch,
-                }
-              : {
-                  ...oldSearch,
-                  personident: values.personident?.replaceAll(" ", ""),
-                  visningsfornavn: undefined,
-                  visningsmellomnavn: undefined,
-                  visningsetternavn: undefined,
-                  primaryTelefonnummer: undefined,
-                };
+          to: `/ressurs/create/${step}`,
+          search: {
+            personident: trimmedPersonident,
+            visningsfornavn: undefined,
+            visningsmellomnavn: undefined,
+            visningsetternavn: undefined,
+            primaryTelefonnummer: undefined,
           },
         }).then();
       })}

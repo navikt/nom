@@ -9,11 +9,13 @@ import type {
   OrganiseringState,
 } from "~/types.ts";
 import type {
+  DeadLetterDTO,
   DuplikatOrgtilknytning,
   EnheterOgOrganisering,
   HendelseDTO,
   ImportedRemedyUser,
   MasteredRessursDTO,
+  OrgEnhetArbeidsomraadeInfo,
   OrgEnhetOrganisering,
   OrgEnhetStartOgSluttdato,
   OrgEnhetState,
@@ -26,6 +28,7 @@ import type {
   RessursOrgtilknytningKoblingInfo,
   RessursOrgtilknytningUlikSluttdato,
   RessursStateKafkaDTO,
+  RobotRessurs,
   SessionInfoResponse,
 } from "~/types/nom-admin/nom-admin-models.ts";
 import type {
@@ -33,6 +36,7 @@ import type {
   Ressurs,
   RessursState,
 } from "~/types/nom-api/nom-api-models.ts";
+import type { ErrorState } from "~/types/nom-remedy-integrasjon/nom-remedy-integrasjon-models.ts";
 
 const API_BASE_URL = "/frackend/admin-api";
 const NOM_API_BASE_URL = "/frackend/api";
@@ -40,19 +44,17 @@ export const NOM_REMEDY_INTEGRASJON_BASE_URL = "/frackend/remedy";
 
 export const searchSchema = z.object({
   filterText: z.string().optional(),
-  // eslint-disable-next-line unicorn/prefer-top-level-await
+
   fromOffset: z.number().optional().catch(0),
 });
 
 export const searchSchemaWithNavident = z.object({
   navident: z.string().optional(),
-  // eslint-disable-next-line unicorn/prefer-top-level-await
+
   fromOffset: z.number().optional().catch(0),
 });
 
 export type searchType = z.infer<typeof searchSchema>;
-
-export type searchTypeWithNavident = z.infer<typeof searchSchemaWithNavident>;
 
 export const CACHE_FOR = {
   aMinute: 1000 * 60,
@@ -67,6 +69,7 @@ export function getRessursEventsOptions(search: searchType) {
       (
         await ky.get(
           `${API_BASE_URL}/sinks/ressursEvents?${queryString.stringify(search, { skipNull: true })}`,
+          { timeout: 50_000 }, // 50 seconds
         )
       ).json<KafkaEvent[]>(),
   });
@@ -103,8 +106,21 @@ export function getOrgtilknytningEventsOptions(search: searchType) {
       (
         await ky.get(
           `${API_BASE_URL}/sinks/orgtilknytningEvents?${queryString.stringify(search, { skipNull: true })}`,
+          { timeout: 120_000 }, // 50 seconds
         )
       ).json<KafkaEvent[]>(),
+  });
+}
+
+export function getDeadLetterEventsOptions(search: searchType) {
+  return queryOptions({
+    queryKey: ["EVENTS", "DEAD-LETTER", search],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/sinks/remedyDeadletter?${queryString.stringify(search, { skipNull: true })}`,
+        )
+      ).json<DeadLetterDTO[]>(),
   });
 }
 
@@ -597,4 +613,50 @@ export async function getRemedyCompareDiffPaaRemedyEnhet(): Promise<
       timeout: 120_000, // 120 seconds
     })
     .json<RemedyCompareResult[]>();
+}
+
+export async function getRessurserUtenOrgtilknytning(): Promise<
+  RessursState[]
+> {
+  return await ky
+    .get(`${API_BASE_URL}/SanityCheck/ressurs/ressursUtenOrgtilknytning`, {
+      timeout: 120_000, // 120 seconds
+    })
+    .json<RessursState[]>();
+}
+
+export async function getRobotRessurser(): Promise<RobotRessurs[]> {
+  return await ky
+    .get(`${API_BASE_URL}/SanityCheck/ressurs/robotRessurser`, {
+      timeout: 120_000, // 120 seconds
+    })
+    .json<RobotRessurs[]>();
+}
+
+export async function getArbeidsomraadeInfo(): Promise<OrgEnhetArbeidsomraadeInfo> {
+  return await ky
+    .get(`${API_BASE_URL}/SanityCheck/orgenhet/validerArbeidsomraade`, {
+      timeout: 120_000, // 120 seconds
+    })
+    .json<OrgEnhetArbeidsomraadeInfo>();
+}
+
+export async function getAllErrorStates(): Promise<ErrorState[]> {
+  return await ky
+    .get(`${NOM_REMEDY_INTEGRASJON_BASE_URL}/admin/getAllErrorState`, {
+      timeout: 60_000,
+    })
+    .json<ErrorState[]>();
+}
+
+export function deleteAllErrorStates() {
+  return ky.delete(
+    `${NOM_REMEDY_INTEGRASJON_BASE_URL}/admin/deleteAllErrorStates`,
+  );
+}
+
+export function deleteErrorStateById(fid: string) {
+  return ky.delete(
+    `${NOM_REMEDY_INTEGRASJON_BASE_URL}/admin/deleteErrorState/${fid}`,
+  );
 }

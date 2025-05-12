@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-await-expression-member*/
 import type { AxiosResponse } from "axios";
 import axios from "axios";
 
@@ -329,9 +328,12 @@ export const getOrgEnhet = {
 export const getOrgEnhetList = {
   queryKey: (orgEnhetIder: string[]) => ["ORGENHETER_LIST", ...orgEnhetIder],
   queryFn: async (orgEnhetIder: string[]) =>
-    await Promise.all(
-      orgEnhetIder.map((orgEnhetId) => getOrgEnhet.queryFn(orgEnhetId)),
-    ),
+    (
+      await axios.post<string[], AxiosResponse<OrgEnhet[]>>(
+        `${NOM_API_BASE_PATH}/app/orgenheter`,
+        orgEnhetIder,
+      )
+    ).data,
 };
 
 export const isOrgEnhetArbeidsomraade = {
@@ -716,6 +718,14 @@ export const getHarParorendeTilgang = {
         `${NOM_PAARORENDE_BASE_PATH}/api/kontaktinfo/tilgang/${navident}`,
       )
     ).data,
+};
+
+export const getSpaHtmlWithoutNonce = {
+  queryKey: () => ["getSpaHtmlWithoutNonce"],
+  queryFn: async (): Promise<string> => {
+    const spaHtml = (await axios.get<string>(`/`)).data;
+    return spaHtml.replaceAll(/nonce=\S+"/g, "");
+  },
 };
 
 export const createParorendeForBruker = async (kontakt: Kontaktinfo) =>

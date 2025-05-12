@@ -1,6 +1,7 @@
 package no.nav.nom.apps.admin.sanitycheck.service;
 
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.EnheterOgOrganisering;
+import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetArbeidsomraadeInfo;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetStartOgSluttdato;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetOrganisering;
 import no.nav.nom.contract.nom.NomNivaa;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Comparator.comparing;
 
@@ -242,6 +244,42 @@ public class OrgEnhetSanityCheckService {
                     oe.gyldigFom(),
                     oe.gyldigTom().orElse(null)))
             .toList();
+    }
+    
+    public OrgEnhetArbeidsomraadeInfo validerArbeidsomraade() {
+        var alleEnheter =  orgEnhetStateRepository.getAll().stream().toList(); // Aktive enheter i organisasjonstreet
+        var alleIdOver = organiseringStateRepository.getActiveOrganisering().values().stream()
+                .map(OrganiseringState::idOver).toList();
+        var alleLeafNoder = alleEnheter.stream().filter(o -> !alleIdOver.contains(o.id())).toList();
+
+        List<OrgEnhetArbeidsomraadeInfo.LoevnodeMedFeilAntallArbOmr> loevnoderMedFeilAntallArbOmr = new ArrayList<>();
+        alleLeafNoder.forEach(orgenhet -> {
+            var count = findArbeidsomraadeCountInHierarkiAbove(orgenhet);
+            if (count != 1) {
+                loevnoderMedFeilAntallArbOmr.add(
+                        OrgEnhetArbeidsomraadeInfo.LoevnodeMedFeilAntallArbOmr.builder()
+                                .orgenhetId(orgenhet.id())
+                                .orgenhetNavn(orgenhet.navn())
+                                .antallArbOmr(count)
+                                .build()
+                );
+            }
+        });
+        
+        return OrgEnhetArbeidsomraadeInfo.builder()
+                .antallLoevnoder(alleLeafNoder.size())
+                .loevnoderMedFeil(loevnoderMedFeilAntallArbOmr)
+                .build();
+    }
+
+    private int findArbeidsomraadeCountInHierarkiAbove(OrgEnhetState orgenhet) {
+        boolean isArbOmr = NomNivaa.ARBEIDSOMRAADE.equals(orgenhet.nomNivaa().orElse(null));
+        AtomicInteger countAbove = new AtomicInteger();
+        organiseringStateRepository.findActiveById(orgenhet.id())
+                .ifPresent(org -> countAbove.set(
+                        findArbeidsomraadeCountInHierarkiAbove(orgEnhetStateRepository.findById(org.idOver()).get())
+                ));
+        return countAbove.get() + (isArbOmr ? 1 : 0);
     }
 
     private static OrgEnhetState getOrgEnhetState(String orgEnhetId, List<OrgEnhetState> aktiveEnheter) {

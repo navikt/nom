@@ -62,6 +62,8 @@ import static java.util.Collections.emptySet;
 import static no.nav.nom.apps.api.common.TestData.orgEnhetState;
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static no.nav.nom.apps.api.common.TestData.ressursState;
+import static no.nav.nom.contract.nom.IdentType.STANDARD;
+import static no.nav.nom.contract.nom.IdentType.VIKAFOSSEN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -70,6 +72,7 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 public class RessursControllerTest extends RestTestBase {
@@ -148,8 +151,6 @@ public class RessursControllerTest extends RestTestBase {
             .hasSize(1)
             .allMatch(ressursState -> ressursState.sektor().equals(sektorFilterValue))
             .allMatch(ressursState -> ressursState.sluttdato().equals(Optional.of(sluttDatoFilterValue)));
-
-
     }
 
     @Test
@@ -186,7 +187,7 @@ public class RessursControllerTest extends RestTestBase {
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
             .orgEnhetId("")
-            .identType(IdentType.STANDARD)
+            .identType(STANDARD)
             .build();
 
         when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
@@ -211,6 +212,53 @@ public class RessursControllerTest extends RestTestBase {
     }
 
     @Test
+    @SneakyThrows
+    void skal_ikke_kunne_opprette_statlig_ressurs_med_sluttdato_mer_enn_seks_aar_frem_i_tid() {
+        String personident = "12345678910";
+        String navident = "S123456";
+        val navn = pdlUtils.mockSinglePersonResponse();
+        String primaryTelefonnummer = "12345678";
+
+        when(nikClient.opprettNavidentOnBehalfOfUser(
+            eq(OpprettNavidentRequest.builder()
+                .personid(personident)
+                .identPrefix(navn.getEtternavn().substring(0, 1))
+                .identType("STANDARD")
+                .build())
+        )).thenReturn(ResponseEntity.ok(
+            OpprettNavidentResponse.builder()
+                .navident(navident)
+                .build()));
+
+        when(pdlClient.hentPerson(eq(personident))).thenReturn(Optional.empty());
+
+        var request = opprettRessursRequest().toBuilder()
+            .personident(personident)
+            .visningsfornavn(navn.getFornavn())
+            .visningsmellomnavn(navn.getMellomnavn())
+            .visningsetternavn(navn.getEtternavn())
+            .primaryTelefonnummer(primaryTelefonnummer)
+            .sektor(Sektor.NAV_STATLIG)
+            .startDato(LocalDate.now())
+            .sluttDato(Optional.of(LocalDate.now().plusYears(6)))
+            .tilknytningtype(Tilknytningtype.FAST)
+            .ansettelsesType(null)
+            .fysiskBrukerstedNr("")
+            .orgEnhetId("")
+            .identType(STANDARD)
+            .build();
+
+        postOpprettRessursRequest(
+            testToken.nomWriteGroupAndNomUiAzp(),
+            request
+        )
+            .expectStatus().isBadRequest()
+            .expectBody(String.class).value(it ->
+                Assert.isTrue(it.contains("Sluttdato kan ikke være mer enn 6 år frem i tid"),"Uventet feilmelding")
+            );
+    }
+
+    @Test
     void skal_ikke_opprette_ressurs_med_feilformatert_etternavn() {
         postOpprettRessursRequest(
             testToken.nomWriteGroupAndNomUiAzp(),
@@ -229,7 +277,7 @@ public class RessursControllerTest extends RestTestBase {
     void skal_ikke_oppdatere_ressurs_med_feilformatert_etternavn() {
 
         when(ressursStateRepository.findByNavident(any()))
-            .thenReturn(Optional.of(RessursState.builder().sektor(Sektor.EKSTERN).build()));
+            .thenReturn(Optional.of(RessursState.builder().sektor(Sektor.EKSTERN).identType(STANDARD).build()));
 
         postUpdateVisningsnavnRequest(
             "navident",
@@ -276,7 +324,7 @@ public class RessursControllerTest extends RestTestBase {
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
             .orgEnhetId("")
-            .identType(IdentType.STANDARD)
+            .identType(STANDARD)
             .build();
 
         when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
@@ -335,7 +383,7 @@ public class RessursControllerTest extends RestTestBase {
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
             .orgEnhetId("")
-            .identType(IdentType.STANDARD)
+            .identType(STANDARD)
             .build();
 
         RessursState existingRessurs = RessursState.builder()
@@ -354,7 +402,7 @@ public class RessursControllerTest extends RestTestBase {
             .startdato(Optional.of(LocalDate.MIN.plusYears(1)))
             .primaryFysiskBrukersted(Optional.of("2700"))
             .fysiskeBrukersteder(List.of())
-            .identType(IdentType.STANDARD)
+            .identType(STANDARD)
             .build();
 
         when(ressursStateRepository.findByNavident(navident)).thenReturn(Optional.of(existingRessurs));
@@ -437,7 +485,7 @@ public class RessursControllerTest extends RestTestBase {
             .ansettelsesType(null)
             .orgEnhetId("orgEnhet123")
             .fysiskBrukerstedNr("")
-            .identType(IdentType.STANDARD)
+            .identType(STANDARD)
             .build();
 
         var orgEnhet = orgEnhetState().toBuilder()
@@ -518,6 +566,8 @@ public class RessursControllerTest extends RestTestBase {
         var existingRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
             .build();
+
+        when(ressursStateRepository.findByNavident(existingRessurs.navident())).thenReturn(Optional.of(existingRessurs));
 
         var updateVisningsnavnRequest = new UpdateVisningsnavnRequest(
             "Erik", Optional.of("Ten"), "Haag"
@@ -818,6 +868,43 @@ public class RessursControllerTest extends RestTestBase {
     }
 
     @ParameterizedTest(name = "GET {0}")
+    @DisplayName("Skjuler ikke fysisk brukersted for readOnly tilgang")
+    @MethodSource("getRessursPathsTestInput")
+    void skalSkjuleIkkeSkjuleFysiskBrukerstedForLeseTilgang(String endpointPath) {
+
+        var personident = "01010154321";
+
+        var ressursState = ressursState().toBuilder()
+            .personident(personident)
+            .primaryTelefonnummer(Optional.of("12345678"))
+            .primaryFysiskBrukersted(Optional.of("1234"))
+            .fysiskeBrukersteder(List.of("1234"))
+            .build();
+
+        when(authResolver.kanRedigereRessurs(anyString())).thenReturn(false);
+
+        when(ressursStateRepository.findByNavident(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        when(ressursStateRepository.findByFid(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        webTestClient.get()
+            .uri(endpointPath)
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomReadOnlyGroupAndNomUiAzp()))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("personident")
+            .isEqualTo(personident.replaceFirst(".{5}$", "*****"))
+            .jsonPath("primaryFysiskBrukersted")
+            .isEqualTo("1234")
+            .jsonPath("fysiskeBrukersteder")
+            .isEqualTo(ressursState.fysiskeBrukersteder());
+
+    }
+
+    @ParameterizedTest(name = "GET {0}")
     @DisplayName("Skjuler ikke sensitiv data på seg selv")
     @MethodSource("getRessursPathsTestInput")
     void skalIkkeSkjuleSensitivDataForOppslagPaaSegSelv(String endpointPath) {
@@ -1065,6 +1152,7 @@ public class RessursControllerTest extends RestTestBase {
             .ansettelsesType(AnsettelsesType.FAST)
             .fysiskBrukerstedNr("whatever")
             .tilknytningtype(Tilknytningtype.KONSULENT)
+            .identType(STANDARD)
             .build();
     }
 
@@ -1195,7 +1283,7 @@ public class RessursControllerTest extends RestTestBase {
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
             .orgEnhetId("")
-            .identType(IdentType.STANDARD)
+            .identType(STANDARD)
             .build();
 
         RessursState existingRessurs = RessursState.builder()
@@ -1214,7 +1302,7 @@ public class RessursControllerTest extends RestTestBase {
             .startdato(Optional.of(LocalDate.MIN.plusYears(1)))
             .primaryFysiskBrukersted(Optional.of("2700"))
             .fysiskeBrukersteder(List.of())
-            .identType(IdentType.STANDARD)
+            .identType(STANDARD)
             .build();
 
         when(ressursStateRepository.findByNavident(navident)).thenReturn(Optional.of(existingRessurs));
@@ -1470,8 +1558,8 @@ public class RessursControllerTest extends RestTestBase {
 
     @Test
     @SneakyThrows
-    @DisplayName("Should craete robot ressurs given correct identType")
-    void should_create_robot_ressurs() {
+    @DisplayName("Should create robot ressurs given correct identType and Write_Robot_Group")
+    void should_create_robot_ressurs_for_robot_admin() {
         String personident = "2960RPAROB2";
         String navident = "R123456";
         val navn = NavnDTO.builder()
@@ -1515,7 +1603,7 @@ public class RessursControllerTest extends RestTestBase {
             .thenReturn(ressursState());
 
         postOpprettRessursRequest(
-            testToken.nomWriteGroupAndNomUiAzp(),
+            testToken.nomWriteRobotGroupAndNomUiAzp(),
             request
         )
             .expectStatus().is2xxSuccessful()
@@ -1525,5 +1613,210 @@ public class RessursControllerTest extends RestTestBase {
 
         verify(orgtilknytningCommandService, times(1)).opprettOrgtilknytning(any());
         verify(orgtilknytningCommandService, times(1)).endreDagligOppfolgingOrgtilknytning(any(), any());
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Ordinary Leder Should be rejected in creation of robot ressurs given correct identType")
+    void should_reject_create_robot_ressurs_for_leader() {
+        String personident = "2960RPAROB2";
+        val navn = NavnDTO.builder()
+            .fornavn("Lønn")
+            .etternavn("Robot")
+            .build();
+
+        var request = opprettRessursRequest().toBuilder()
+            .personident(personident)
+            .visningsfornavn(navn.getFornavn())
+            .visningsmellomnavn(navn.getMellomnavn())
+            .visningsetternavn(navn.getEtternavn())
+            .primaryTelefonnummer(null)
+            .sektor(Sektor.NAV_STATLIG)
+            .startDato(LocalDate.now())
+            .sluttDato(Optional.empty())
+            .tilknytningtype(Tilknytningtype.FAST)
+            .ansettelsesType(null)
+            .fysiskBrukerstedNr("")
+            .orgEnhetId("")
+            .identType(IdentType.ROBOT)
+            .build();
+
+        postOpprettRessursRequest(
+            testToken.nomWriteGroupAndNomUiAzp(),
+            request
+        )
+            .expectStatus().isForbidden();
+
+        verifyNoInteractions(ressursCommandService);
+        verifyNoInteractions(orgtilknytningCommandService);
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Vikafossen Leder Should be rejected in creation of robot ressurs given correct identType")
+    void should_reject_create_robot_ressurs_for_vikafossen_leader() {
+        String personident = "2960RPAROB2";
+        val navn = NavnDTO.builder()
+            .fornavn("Lønn")
+            .etternavn("Robot")
+            .build();
+
+        var request = opprettRessursRequest().toBuilder()
+            .personident(personident)
+            .visningsfornavn(navn.getFornavn())
+            .visningsmellomnavn(navn.getMellomnavn())
+            .visningsetternavn(navn.getEtternavn())
+            .primaryTelefonnummer(null)
+            .sektor(Sektor.NAV_STATLIG)
+            .startDato(LocalDate.now())
+            .sluttDato(Optional.empty())
+            .tilknytningtype(Tilknytningtype.FAST)
+            .ansettelsesType(null)
+            .fysiskBrukerstedNr("")
+            .orgEnhetId("")
+            .identType(IdentType.ROBOT)
+            .build();
+
+        postOpprettRessursRequest(
+            testToken.nomWriteVikafossenGroupAndNomUiAzp(),
+            request
+        )
+            .expectStatus().isForbidden();
+
+        verifyNoInteractions(ressursCommandService);
+        verifyNoInteractions(orgtilknytningCommandService);
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Should create Vikafossen ressurs given correct identType and Write_Vikafossen_Group")
+    void should_create_vikafossen_ressurs_for_vikafossen_admin() {
+        String personident = "HEMMELIG";
+        String navident = "R123456";
+        val navn = NavnDTO.builder()
+            .fornavn("Anonym")
+            .etternavn("Vikafossen")
+            .build();
+
+        when(nikClient.opprettNavidentOnBehalfOfUser(
+            eq(OpprettNavidentRequest.builder()
+                .personid(personident)
+                .identPrefix(navn.getEtternavn().substring(0, 1))
+                .identType(VIKAFOSSEN.name())
+                .build())
+        )).thenReturn(ResponseEntity.ok(
+            OpprettNavidentResponse.builder()
+                .navident(navident)
+                .build()));
+
+        when(pdlClient.hentPerson(eq(personident))).thenReturn(Optional.empty());
+
+        var request = opprettRessursRequest().toBuilder()
+            .personident(personident)
+            .visningsfornavn(navn.getFornavn())
+            .visningsmellomnavn(navn.getMellomnavn())
+            .visningsetternavn(navn.getEtternavn())
+            .primaryTelefonnummer(null)
+            .sektor(Sektor.NAV_STATLIG)
+            .startDato(LocalDate.now())
+            .sluttDato(Optional.empty())
+            .tilknytningtype(Tilknytningtype.FAST)
+            .ansettelsesType(null)
+            .fysiskBrukerstedNr("")
+            .orgEnhetId("dummyVikafossenId")
+            .identType(VIKAFOSSEN)
+            .build();
+
+        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+            .thenReturn(Set.of(request.fysiskBrukerstedNr()));
+
+        when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
+            .thenReturn(ressursState());
+
+        postOpprettRessursRequest(
+            testToken.nomWriteVikafossenGroupAndNomUiAzp(),
+            request
+        )
+            .expectStatus().is2xxSuccessful()
+            .expectBody(OpprettRessursResponse.class);
+
+        verify(ressursCommandService, times(1)).createRessursSync(any());
+
+        verify(orgtilknytningCommandService, times(1)).opprettOrgtilknytning(any());
+        verify(orgtilknytningCommandService, times(1)).endreDagligOppfolgingOrgtilknytning(any(), any());
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Ordinary Leder Should be rejected in creation of vikafossen ressurs given correct identType")
+    void should_reject_create_vikafossen_ressurs_for_leader() {
+        String personident = "HEMMELIG";
+        val navn = NavnDTO.builder()
+            .fornavn("Anonym")
+            .etternavn("Vikafossen")
+            .build();
+
+        var request = opprettRessursRequest().toBuilder()
+            .personident(personident)
+            .visningsfornavn(navn.getFornavn())
+            .visningsmellomnavn(navn.getMellomnavn())
+            .visningsetternavn(navn.getEtternavn())
+            .primaryTelefonnummer(null)
+            .sektor(Sektor.NAV_STATLIG)
+            .startDato(LocalDate.now())
+            .sluttDato(Optional.empty())
+            .tilknytningtype(Tilknytningtype.FAST)
+            .ansettelsesType(null)
+            .fysiskBrukerstedNr("")
+            .orgEnhetId("dummyVikafossenId")
+            .identType(VIKAFOSSEN)
+            .build();
+        postOpprettRessursRequest(
+            testToken.nomWriteGroupAndNomUiAzp(),
+            request
+        )
+            .expectStatus().isForbidden();
+
+        verifyNoInteractions(ressursCommandService);
+        verifyNoInteractions(orgtilknytningCommandService);
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Should be rejected in creation of vikafossen ressurs given correct identType but in incorrect Orgenhet")
+    void should_reject_create_vikafossen_ressurs_for_incorrect_orgenhet() {
+        String personident = "HEMMELIG";
+        val navn = NavnDTO.builder()
+            .fornavn("Anonym")
+            .etternavn("Vikafossen")
+            .build();
+
+        var request = opprettRessursRequest().toBuilder()
+            .personident(personident)
+            .visningsfornavn(navn.getFornavn())
+            .visningsmellomnavn(navn.getMellomnavn())
+            .visningsetternavn(navn.getEtternavn())
+            .primaryTelefonnummer(null)
+            .sektor(Sektor.NAV_STATLIG)
+            .startDato(LocalDate.now())
+            .sluttDato(Optional.empty())
+            .tilknytningtype(Tilknytningtype.FAST)
+            .ansettelsesType(null)
+            .fysiskBrukerstedNr("")
+            .orgEnhetId("IKKE VIKAFOSSEN ORGENHET")
+            .identType(VIKAFOSSEN)
+            .build();
+
+        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+            .thenReturn(Set.of(request.fysiskBrukerstedNr()));
+
+        postOpprettRessursRequest(
+            testToken.nomWriteVikafossenGroupAndNomUiAzp(),
+            request
+        )
+            .expectStatus().isBadRequest();
+
+        verifyNoInteractions(ressursCommandService);
+        verifyNoInteractions(orgtilknytningCommandService);
     }
 }

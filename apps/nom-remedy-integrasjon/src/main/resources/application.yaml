@@ -3,11 +3,13 @@ app:
   kafka:
     ressurs:
       state-topic: org.nom.intern-ressurs-state
+      dlt-topic: org.nom.intern-ressurs-state-dlt
       auto-startup: true
     orgEnhet:
       state-topic: org.nom.intern-orgenhet-state
     orgtilknytning:
       state-topic: org.nom.intern-orgtilknytning-state
+      dlt-topic: org.nom.intern-orgtilknytning-state-dlt
       auto-startup: true
   kafka-topics:
     ressurs-eventsource:

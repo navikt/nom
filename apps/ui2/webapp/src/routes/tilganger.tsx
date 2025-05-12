@@ -190,8 +190,13 @@ function DelegertRolleCard({ tilgang }: { tilgang: LederTilgangState }) {
         <b>
           <NavidentNameLookup navident={tilgang.av} />
         </b>
-        <span>Gyldig t.o.m</span>
-        <b>{formatDisplayDate(tilgang.gyldigTom)}</b>
+
+        <span>Gyldig t.o.m.:</span>
+        <b>
+          {tilgang.gyldigTom
+            ? formatDisplayDate(tilgang.gyldigTom)
+            : "Ingen utløpsdato"}
+        </b>
       </HStack>
       <HStack gap="2">
         <BodyShort>
@@ -288,9 +293,9 @@ function OrgEnhetCard({
         });
 
       const settledPromises = await Promise.allSettled(promises);
-      // eslint-disable-next-line unicorn/no-array-callback-reference -- when using typeguard the function must be done this way
+
       const fulfilled = settledPromises.filter(promiseIsFulfilled);
-      // eslint-disable-next-line unicorn/no-array-callback-reference
+
       const rejected = settledPromises.filter(promiseIsRejected);
 
       if (rejected.length > 0) {

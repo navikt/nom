@@ -16,10 +16,9 @@ export const Route = createFileRoute("/sinks/orgenhet")({
   },
   validateSearch: searchSchema.parse,
   component: () => {
-    const search = Route.useSearch();
     return (
       <>
-        <GenericSearchBar search={search} />
+        <GenericSearchBar route={Route} />
         <ErrorBoundary fallback={<Alert variant="error">Noe gikk galt</Alert>}>
           <Suspense fallback={<BigLoader />}>
             <OrgenhetHistoryPage />

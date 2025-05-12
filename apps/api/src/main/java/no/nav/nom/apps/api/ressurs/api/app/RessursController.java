@@ -17,6 +17,7 @@ import no.nav.nom.apps.api.ressurs.api.exceptions.NomMasteredException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,9 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
+
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedRoller;
 
 @Tag(name = "Ressurs")
 @RestController
@@ -66,7 +70,6 @@ public class RessursController {
         @ApiResponse(responseCode = "200", description = "Ressurs"),
     })
     public ResponseEntity<List<RessursState>> getRessurser(RessursFilter ressursFilter) {
-
         return ResponseEntity.ok(ressursRestService.findRessurser(ressursFilter));
     }
 
@@ -80,14 +83,13 @@ public class RessursController {
         @ApiResponse(responseCode = "201", description = "Created"),
         @ApiResponse(responseCode = "403", description = "Feil scope")
     })
-    /*@PreAuthorize(
+    @PreAuthorize(
         "hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')"
-    )*/
+    )
     public ResponseEntity<OpprettRessursResponse> opprettRessurs(
-        @RequestBody OpprettRessursRequest request) {
-        if (!authResolver.kanOppretteRessurs(request.orgEnhetId())) {
-            throw new AccessDeniedException("Ikke tilgang til å opprette ressurs for angitt orgenhet");
-        }
+        @RequestBody OpprettRessursRequest request)
+    {
+        validateKanOppretteRessurs(request.identType(), request.orgEnhetId());
         return ResponseEntity.ok(toResponse(ressursRestService.createRessursAndNotify(request)));
     }
 
@@ -104,11 +106,9 @@ public class RessursController {
     )
     public ResponseEntity<StandardResponse> avvikleRessurs(
         @PathVariable String fid,
-        @RequestBody AvvikleRessursRequest request) {
-        if (!authResolver.kanRedigereRessurs(ressursRestService.findRessursByFid(fid).state().navident())) {
-            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
-        }
-
+        @RequestBody AvvikleRessursRequest request)
+    {
+        validateKanAvvikleRessurs(fid);
         ressursRestService.avvikleRessurs(fid, request);
         return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
     }
@@ -128,12 +128,8 @@ public class RessursController {
         @PathVariable String navident,
         @RequestBody UpdateVisningsnavnRequest updateVisningsnavnRequest
     ) {
-        if (!authResolver.kanRedigereRessurs(navident)) {
-            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
-        }
-
+        validateKanEndreRessursByNavident(navident);
         ressursRestService.updateRessursNavn(navident, updateVisningsnavnRequest);
-
         return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
     }
 
@@ -152,12 +148,9 @@ public class RessursController {
         @PathVariable String navident,
         @RequestBody UpdatePrimarytelefonnummer updatePrimarytelefonnummer
     ) {
-        if (!authResolver.kanRedigereRessurs(navident) && !authResolver.kanSelvbetjene(navident)) {
-            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
-        }
+        validateKanEndreEllerSelvbetjeneRessurs(navident);
 
         ressursRestService.updateRessursPrimaryTelefonnummer(navident, updatePrimarytelefonnummer);
-
         return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
     }
 
@@ -306,17 +299,10 @@ public class RessursController {
         @PathVariable String fid,
         @RequestBody UpdateFysiskeBrukerstederRequest updateFysiskeBrukerstederRequest
     ) {
-        if (!authResolver.kanRedigereRessurs(ressursRestService.findRessursByFid(fid).state().navident())) {
-            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
-        }
-
+        validateKanEndreRessursByFid(fid);
         ressursRestService.updateFysiskeBrukersteder(fid, updateFysiskeBrukerstederRequest);
 
-        return ResponseEntity.ok(
-            StandardResponse.builder()
-                .message(("Successfully changed fysiske brukersteder"))
-                .build()
-        );
+        return ResponseEntity.ok(StandardResponse.builder().message(("Successfully changed fysiske brukersteder")).build());
     }
 
     @GetMapping("/byFysiskbrukersted/{fysiskBrukerstedNr}")
@@ -433,7 +419,7 @@ public class RessursController {
 
     @GetMapping("/{navident}/remedyEnhet")
     @Operation(
-        description = "Henter en ressursens remedyEnhet basert på DOL",
+        description = "Henter en ressurs remedyEnhet basert på DOL",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses({
@@ -463,6 +449,47 @@ public class RessursController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(ressursRestService.getEpost(navident));
+    }
+
+    private void validateKanOppretteRessurs(IdentType identType, String orgEnhetId) {
+        if (!ressursRestService.kanOppretteAngittRessurs(identType, orgEnhetId)) {
+            log.warn("{} med roller {} har ikke tilgang til å opprette ressurs for angitt orgenhet eller identtype - {} - {}, ",
+                getAuthenticatedNavIdent(), getAuthenticatedRoller(), orgEnhetId, identType);
+            throw new AccessDeniedException("Ikke tilgang til å opprette ressurs for angitt orgenhet eller identtype");
+        }
+    }
+
+    private void validateKanEndreRessursByFid(String fid) {
+        RessursState ressurs = ressursRestService.findRessursStateByFid(fid);
+        validateKanEndreRessurs(ressurs.navident(), ressurs);
+    }
+
+    private void validateKanEndreRessursByNavident(String navident) {
+        RessursState ressurs = ressursRestService.findRessursStateByNavident(navident);
+        validateKanEndreRessurs(navident, ressurs);
+    }
+
+    private void validateKanEndreRessurs(String navident, RessursState ressurs) {
+        if (!ressursRestService.kanEndreEllerAvvikleAngittRessurs(ressurs.identType(), ressurs.navident())) {
+            log.warn("{} med roller {} har ikke tilgang til å redigere ressurs - {} - {}, ",
+                getAuthenticatedNavIdent(), getAuthenticatedRoller(), navident, ressurs.identType());
+            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
+        }
+    }
+
+    private void validateKanEndreEllerSelvbetjeneRessurs(String navident) {
+        if (!authResolver.kanSelvbetjene(navident)) {
+            validateKanEndreRessursByNavident(navident);
+        }
+    }
+
+    private void validateKanAvvikleRessurs(String fid) {
+        RessursState ressurs = ressursRestService.findRessursByFid(fid).state();
+        if (!ressursRestService.kanEndreEllerAvvikleAngittRessurs(ressurs.identType(), ressurs.navident())) {
+            log.warn("{} med roller {} har ikke tilgang til å avvikle ressurs - {} - {}, ",
+                getAuthenticatedNavIdent(), getAuthenticatedRoller(), fid, ressurs.identType());
+            throw new AccessDeniedException("Ikke tilgang til å avvikle ressurs");
+        }
     }
 
     @ExceptionHandler({
@@ -504,7 +531,6 @@ public class RessursController {
             .status(HttpStatus.CONFLICT)
             .body(StandardResponse.builder().message(exception.getMessage()).build());
     }
-
 
     @ExceptionHandler(Exception.class)
     private ResponseEntity<StandardResponse> handleServerError(Exception exception) {

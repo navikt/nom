@@ -22,6 +22,7 @@ import { apolloClient } from "~/api/apolloclient";
 import { useGetSession } from "~/api/useGetSession";
 import { isInDevelopment } from "~/utils";
 
+import { ExpiryNotifier } from "./components/ExpiryNotifier";
 import { routeTree } from "./routeTree.gen";
 
 // Don't initialize faro when running the dev-server
@@ -88,6 +89,7 @@ declare module "@tanstack/react-router" {
 createRoot(document.querySelector("#root") as HTMLElement).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
+      <ExpiryNotifier />
       <ReactQueryDevtools buttonPosition="bottom-left" initialIsOpen={false} />
       <ApolloProvider client={apolloClient}>
         <LoadSession>

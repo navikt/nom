@@ -117,7 +117,7 @@ public class OrgtilknytningEndretEmailService {
     }
 
     @Scheduled(cron = "0 0 18 * * ?") // every day at 18:00
-    public void sendMasseflyttOTEmail() {
+    public void sendOTEndretEmail() {
         // await until initial load is complete
         dvhStartupLoadMonitor.awaitInitialLoadComplete();
 
@@ -152,7 +152,7 @@ public class OrgtilknytningEndretEmailService {
             } else {
                 // check if the navident is mastered in nom
                 if(nomMastered.isMastered(navident)) {
-                    sendMasseflyttOTEmail(endretRessurs.get(), endringer);
+                    sendOTEndretEmail(endretRessurs.get(), endringer);
                 } else {
                     log.info("Navident {} is not mastered in nom. OT changes email will not be sent!", navident);
                 }
@@ -167,9 +167,9 @@ public class OrgtilknytningEndretEmailService {
         });
     }
 
-    private void sendMasseflyttOTEmail(RessursState endretRessurs, List<OTEndretData> otEndringerData) {
+    private void sendOTEndretEmail(RessursState endretRessurs, List<OTEndretData> otEndringerData) {
         try {
-            Set<String> recipientNavidents = getReceiptionNavidents(otEndringerData);
+            Set<String> recipientNavidents = getRecipientNavidents(otEndringerData);
             log.info("Sender OT endringer epost til navidents: {}", recipientNavidents);
 
             var adRessurser = adClient.getAdRessurser(recipientNavidents);
@@ -274,18 +274,23 @@ public class OrgtilknytningEndretEmailService {
         Collection<OrgtilknytningState> orgtilknytningerIkkeFlyttet
     ) {
         try {
-            String innsenderNavident = SecurityUtil.getAuthenticatedNavIdent();
-            var innsenderVisningsnavn = ressursStateRepository.findByNavident(innsenderNavident)
-                .map(RessursState::visningsnavn)
-                .map(Visningsnavn::getFormattedVisningsnavn)
-                .orElse("UKJENT");
+            List<String> recipientList = new ArrayList<>();
+            var innsenderVisningsnavn = "";
+            if (SecurityUtil.hasAuthentication()) {
+                String innsenderNavident = SecurityUtil.getAuthenticatedNavIdent();
+                innsenderVisningsnavn = ressursStateRepository.findByNavident(innsenderNavident)
+                    .map(RessursState::visningsnavn)
+                    .map(Visningsnavn::getFormattedVisningsnavn)
+                    .orElse("UKJENT");
 
-            var recipientList = adClient.getAdRessurser(Set.of(innsenderNavident)).getRessurser().stream()
-                .map(AdRessurs::getEmail)
-                .collect(Collectors.toList());
+                recipientList.addAll(adClient.getAdRessurser(Set.of(innsenderNavident)).getRessurser().stream()
+                    .map(AdRessurs::getEmail)
+                    .toList()
+                );
+            }
             recipientList.addAll(getAdditionalRecipientsEmails());
 
-            var gammelOrgEnhetNavn = orgtilknytningerFlyttet.stream().map(ot -> getOrgEnhetNavn(ot.orgEnhetId())).collect(Collectors.joining(", "));
+            var gammelOrgEnhetNavn = orgtilknytningerFlyttet.stream().map(ot -> getOrgEnhetNavn(ot.orgEnhetId())).distinct().collect(Collectors.joining(", "));
             var nyOrgEnhetNavn = getOrgEnhetNavn(nyOrgenhetId);
 
             String subject = String.format("Masseflytting av ressurser fra %s til %s", gammelOrgEnhetNavn, nyOrgEnhetNavn);
@@ -294,16 +299,13 @@ public class OrgtilknytningEndretEmailService {
                 gammelOrgEnhetNavn,
                 orgtilknytningerFlyttet.size(),
                 orgtilknytningerIkkeFlyttet.size(),
+                orgtilknytningerFlyttet.stream().map(OrgtilknytningState::navident).toList(),
                 orgtilknytningerIkkeFlyttet.stream().map(OrgtilknytningState::navident).toList(),
                 innsenderVisningsnavn
             );
             log.info("Masseflytting epost. Mottakere: {}\nBody:\n{}", recipientList, body);
             EmailMessage message = new EmailMessage(subject, body, recipientList);
-            if (!unleash.isEnabled(UNLEASH_SKRU_AV_EPOST_ENDRING)) {
-                microsoftGraphClient.sendEmail(message).subscribe();
-            } else {
-                log.info("Epost sending is disabled by Unleash");
-            }
+            microsoftGraphClient.sendEmail(message).subscribe();
         } catch (ADResponseException e) {
             log.error("Fant ikke innsender sin epost adresse for masseflytting", e);
         } catch (IOException | TemplateException e) {
@@ -328,6 +330,7 @@ public class OrgtilknytningEndretEmailService {
         String gammelOrgEnheter,
         int antallFlyttet,
         int feiletAntall,
+        List<String> flyttedeNavidenter,
         List<String> feiledeNavidenter,
         String innsenderVisningsnavn
     ) throws IOException, TemplateException {
@@ -338,7 +341,8 @@ public class OrgtilknytningEndretEmailService {
             "feiletAntall", feiletAntall,
             "total", antallFlyttet + feiletAntall,
             "gammelOrgEnhet", gammelOrgEnheter,
-            "feiletNavidenter", feiledeNavidenter.stream().collect(Collectors.joining(",\n")),
+            "flyttedeNavidenter", String.join(",\n", flyttedeNavidenter),
+            "feiletNavidenter", String.join(",\n", feiledeNavidenter),
             "innsenderVisningsnavn", innsenderVisningsnavn
         );
         freemarkerConfig.getTemplate(MASSEFLYTTING_VARSEL_FTLH).process(model, stringWriter);
@@ -401,7 +405,7 @@ public class OrgtilknytningEndretEmailService {
         return otEndringer.toString();
     }
 
-    public Set<String> getReceiptionNavidents(List<OTEndretData> otEndringerData) {
+    public Set<String> getRecipientNavidents(List<OTEndretData> otEndringerData) {
         Set<String> recipientNavidents = new HashSet<>();
         for (OTEndretData event : otEndringerData) {
             // add the changedBy person
@@ -436,6 +440,7 @@ public class OrgtilknytningEndretEmailService {
         List<String> additionalRecipients = new ArrayList<>();
         additionalRecipients.add("Line.Eeg-Larsen@nav.no");
         additionalRecipients.add("Mugunthan.Dharmadas@nav.no");
+        additionalRecipients.add("Roy.Grini@nav.no");
         return additionalRecipients;
     }
 

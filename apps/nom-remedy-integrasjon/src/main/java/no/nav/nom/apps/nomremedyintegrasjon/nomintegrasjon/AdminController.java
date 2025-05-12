@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static no.nav.nom.apps.nomremedyintegrasjon.config.SecurityConfig.NAVIDENT_CLAIM_NAME;
 import static no.nav.nom.apps.nomremedyintegrasjon.config.SwaggerConfig.BEARER_TOKEN;
@@ -34,9 +37,12 @@ import static no.nav.nom.apps.nomremedyintegrasjon.config.SwaggerConfig.BEARER_T
 public class AdminController {
 
     private final NomRemedyIntegrasjonServiceOld nomRemedyIntegrasjonServiceOld;
+    private final NomRemedyIntegrasjonServiceNew nomRemedyIntegrasjonServiceNew;
 
-    public AdminController(NomRemedyIntegrasjonServiceOld nomRemedyIntegrasjonServiceOld) {
+    public AdminController(NomRemedyIntegrasjonServiceOld nomRemedyIntegrasjonServiceOld,
+                           NomRemedyIntegrasjonServiceNew nomRemedyIntegrasjonServiceNew) {
         this.nomRemedyIntegrasjonServiceOld = nomRemedyIntegrasjonServiceOld;
+        this.nomRemedyIntegrasjonServiceNew = nomRemedyIntegrasjonServiceNew;
     }
 
     @Operation(
@@ -102,7 +108,27 @@ public class AdminController {
         return ResponseEntity.ok("RessursState er lest og eksekvert");
     }
 
-    public static String getAuthenticatedNavIdent() {
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping(value = "getAllErrorState")
+    public ResponseEntity<List<ErrorState>> getAllErrorState() {
+        return ResponseEntity.ok(nomRemedyIntegrasjonServiceNew.getAllErrorStates());
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping(value = "deleteAllErrorStates")
+    public ResponseEntity<String> deleteAllErrorStates() {
+        nomRemedyIntegrasjonServiceNew.deleteAllErrorStates();
+        return ResponseEntity.ok("Slettet alle error states");
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping(value = "deleteErrorState/{fid}")
+    public ResponseEntity<String> deleteErrorState(@PathVariable String fid) {
+        nomRemedyIntegrasjonServiceNew.deleteErrorState(fid);
+        return ResponseEntity.ok("Slettet error state med id: " + fid);
+    }
+
+    private static String getAuthenticatedNavIdent() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Jwt jwt = (Jwt) authentication.getPrincipal();
         return Optional.ofNullable(jwt.getClaimAsString(NAVIDENT_CLAIM_NAME)).orElseThrow(

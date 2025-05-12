@@ -31,7 +31,8 @@ import javax.sql.DataSource;
     transactionManagerRef = "nomRemedyIntegrasjonTransactionManager",
     basePackages = {
         "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent",
-        "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate"
+        "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate",
+        "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate"
     }
 )
 public class NomRemedyIntegrasjonDataSourceConfig {
@@ -71,7 +72,8 @@ public class NomRemedyIntegrasjonDataSourceConfig {
 
         return builder.dataSource(dataSource)
             .packages("no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent",
-                "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate")
+                "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate",
+                "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate")
             .persistenceUnit("nom-remedy-integrasjon").build();
     }
 

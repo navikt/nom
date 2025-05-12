@@ -26,10 +26,9 @@ export const Route = createFileRoute("/state/orgenhet")({
     allowEdit: z.boolean().optional(),
   }).parse,
   component: () => {
-    const search = Route.useSearch();
     return (
       <>
-        <GenericSearchBar editButton={true} search={search} />
+        <GenericSearchBar editButton={true} route={Route} />
         <ErrorBoundary fallback={<Alert variant="error">Noe gikk galt</Alert>}>
           <Suspense fallback={<BigLoader />}>
             <OrgenhetPage />

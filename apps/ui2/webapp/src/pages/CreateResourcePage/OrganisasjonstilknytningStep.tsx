@@ -321,7 +321,7 @@ const statligValidationSchema = yup.object({
 */
 const kommunalPeriodeValidationSchema = yup.object().shape({
   gyldigFom: yup.string().required("Obligatorisk"),
-  gyldigTom: yup.string().optional(),
+  gyldigTom: yup.string().max6YearsInTheFuture().optional(),
 });
 
 const kommunalValidationSchema =

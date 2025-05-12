@@ -131,7 +131,7 @@ function FysiskBrukerstedFlyttingTable() {
     enabled: orgEnhetIder.length > 0,
   });
 
-  const orgEnheter = orgEnhetQuery.data;
+  const orgEnheter = orgEnhetQuery?.data;
 
   const isLoading =
     getFysiskBrukerstedRessurserQuery.isLoading ||
@@ -562,8 +562,9 @@ function FysiskBrukerstedFlyttingTable() {
                           text-decoration: none;
                         }
                       `}
+                      params={{ id: ressurs.navident }}
                       target="_blank"
-                      to={`/ressurs/${ressurs.navident}`}
+                      to="/ressurs/$id"
                     >
                       {ressurs.navident}
                     </ReactRouterLink>
@@ -575,8 +576,9 @@ function FysiskBrukerstedFlyttingTable() {
                           text-decoration: none;
                         }
                       `}
+                      params={{ id: ressurs.navident }}
                       target="_blank"
-                      to={`/ressurs/${ressurs.navident}`}
+                      to="/ressurs/$id"
                     >
                       {formatVisningsnavn(ressurs.visningsnavn)}
                     </ReactRouterLink>
@@ -592,8 +594,9 @@ function FysiskBrukerstedFlyttingTable() {
                             text-decoration: none;
                           }
                         `}
+                        params={{ id: ressurs.navident }}
                         target="_blank"
-                        to={`/org/${ressurs.orgEnhet.id}`}
+                        to="/ressurs/$id"
                       >
                         {`${ressurs.orgEnhet.name} (${ressurs.orgEnhet.id})`}
                       </ReactRouterLink>

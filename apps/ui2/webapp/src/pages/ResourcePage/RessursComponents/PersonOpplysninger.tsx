@@ -33,7 +33,9 @@ import { LabelWithValue } from "~/components/LabelWithValue";
 import { UserImage } from "~/components/UserImage";
 import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
+import { nomDateIsBefore } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { Ressurs } from "~/types/api-models";
+import { IdentType } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
 import { TelefonType } from "~/types/api-models";
 import {
@@ -43,7 +45,6 @@ import {
   formatTlf,
   formatVisningsnavn,
   isBeforeToday,
-  isSameDateOrAfter,
   todayWithoutTimezone,
 } from "~/utils";
 
@@ -56,9 +57,11 @@ import {
 export function PersonOpplysninger({
   ressurs,
   ouBegrensningerAktiv,
+  canEditPersonopplysninger,
 }: {
   ressurs: Ressurs;
   ouBegrensningerAktiv: boolean;
+  canEditPersonopplysninger: boolean;
 }) {
   const navident = ressurs.navident;
 
@@ -77,12 +80,14 @@ export function PersonOpplysninger({
 
   const harSluttet = !!ressurs.sluttdato && isBeforeToday(ressurs.sluttdato);
 
-  const sluttetOverToMndSiden =
-    !!ressurs.sluttdato &&
-    !isSameDateOrAfter(
-      ressurs.sluttdato,
-      dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
-    );
+  const sluttetOverToMndSiden = nomDateIsBefore(
+    ressurs.sluttdato,
+    dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
+  );
+
+  const identTypeUtenKontaktpersoner =
+    ressurs.identType === IdentType.ROBOT ||
+    ressurs.identType === IdentType.VIKAFOSSEN;
 
   return (
     <HStack>
@@ -137,7 +142,8 @@ export function PersonOpplysninger({
           {(hasKontaktinfoAccessForRessurs ||
             hasSelfServiceAccess ||
             hasAdminAccess) &&
-            !sluttetOverToMndSiden && (
+            !sluttetOverToMndSiden &&
+            !identTypeUtenKontaktpersoner && (
               <>
                 <span>Kontaktpersoner:</span>
 
@@ -167,8 +173,8 @@ export function PersonOpplysninger({
                   </ReactRouterLink>
 
                   <HelpText title="Hvem kan se denne informasjonen?">
-                    Kun synlig for medarbeideren selv, nærmeste leder og leders
-                    leder.
+                    Kun synlig for medarbeideren selv og ledere/lederstøtte med
+                    redigeringstilgang til medarbeideren.
                   </HelpText>
                 </div>
               </>
@@ -185,9 +191,8 @@ export function PersonOpplysninger({
         />
 
         <EditPersonopplysningerButton
-          harSluttet={harSluttet}
+          canEditPersonopplysninger={canEditPersonopplysninger}
           ouBegrensningerAktiv={ouBegrensningerAktiv}
-          ressurs={ressurs}
         />
       </VStack>
     </HStack>
@@ -195,31 +200,19 @@ export function PersonOpplysninger({
 }
 
 function EditPersonopplysningerButton({
-  ressurs,
-  harSluttet,
   ouBegrensningerAktiv,
+  canEditPersonopplysninger,
 }: {
-  ressurs: Ressurs;
-  harSluttet: boolean;
   ouBegrensningerAktiv: boolean;
+  canEditPersonopplysninger: boolean;
 }) {
   const navigate = useNavigate();
 
-  const hasWriteAccess = useHasWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
-
-  const hasWriteAccessForRessurs =
-    useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
-
-  const hasSelvbetjeningAccess = useHasSelvbetjeningAccess(ressurs.navident);
 
   const utilgjengeligOu = ouBegrensningerAktiv && !hasAdminAccess;
 
-  if (
-    (((hasWriteAccess && hasWriteAccessForRessurs) || hasSelvbetjeningAccess) &&
-      !harSluttet) ||
-    hasAdminAccess
-  ) {
+  if (canEditPersonopplysninger) {
     return (
       <div
         css={css`
@@ -242,8 +235,9 @@ function EditPersonopplysningerButton({
           icon={<PencilIcon aria-hidden />}
           onClick={() =>
             navigate({
+              to: "/ressurs/$id",
+              params: (previous) => ({ id: previous.id ?? "" }),
               search: { editPersonopplysninger: true },
-              params: (previous) => previous,
             })
           }
           size="small"
@@ -395,7 +389,13 @@ export function TelefonNummere({
       />
 
       {!redigering && (
-        <LabelWithValue label="Telefonnummer" value={privatTelefon} />
+        <LabelWithValue
+          displayEmpty={
+            kontorTelefoner.length === 0 && tjenesteTelefoner.length === 0
+          }
+          label="Telefonnummer"
+          value={privatTelefon}
+        />
       )}
     </>
   );

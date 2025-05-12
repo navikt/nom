@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -9,6 +10,78 @@
  * ---------------------------------------------------------------
  */
 
+export enum UserRoles {
+  ROLE_WRITE = "ROLE_WRITE",
+  ROLE_READONLY = "ROLE_READONLY",
+  ROLE_EXTENDED_READONLY = "ROLE_EXTENDED_READONLY",
+}
+
+export enum HendelseType {
+  NY = "NY",
+  ENDRET = "ENDRET",
+  FJERNET = "FJERNET",
+}
+
+export enum EntityType {
+  ORGENHET = "ORGENHET",
+  RESSURS = "RESSURS",
+}
+
+export enum OrgEnhetsType {
+  ARBEIDSLIVSSENTER = "ARBEIDSLIVSSENTER",
+  NAV_ARBEID_OG_YTELSER = "NAV_ARBEID_OG_YTELSER",
+  ARBEIDSRAADGIVNING = "ARBEIDSRAADGIVNING",
+  DIREKTORAT = "DIREKTORAT",
+  DIR = "DIR",
+  FYLKE = "FYLKE",
+  NAV_FAMILIE_OG_PENSJONSYTELSER = "NAV_FAMILIE_OG_PENSJONSYTELSER",
+  HJELPEMIDLER_OG_TILRETTELEGGING = "HJELPEMIDLER_OG_TILRETTELEGGING",
+  KLAGEINSTANS = "KLAGEINSTANS",
+  NAV_KONTAKTSENTER = "NAV_KONTAKTSENTER",
+  KONTROLL_KONTROLLENHET = "KONTROLL_KONTROLLENHET",
+  NAV_KONTOR = "NAV_KONTOR",
+  TILTAK = "TILTAK",
+  NAV_OKONOMITJENESTE = "NAV_OKONOMITJENESTE",
+}
+
+export enum NomNivaa {
+  LINJEENHET = "LINJEENHET",
+  DRIFTSENHET = "DRIFTSENHET",
+  ARBEIDSOMRAADE = "ARBEIDSOMRAADE",
+}
+
+export enum Tilknytningtype {
+  ANNET = "ANNET",
+  ARBEIDSTRENING = "ARBEIDSTRENING",
+  EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER",
+  FAST = "FAST",
+  INGEN = "INGEN",
+  JOBBSPESIALIST = "JOBBSPESIALIST",
+  KONSULENT = "KONSULENT",
+  LAERLING = "LAERLING",
+  MIDLERTIDIG = "MIDLERTIDIG",
+  PENSJONIST = "PENSJONIST",
+  PRAKSISARBEID = "PRAKSISARBEID",
+  STUDENT = "STUDENT",
+  UFORUTSETT_BEHOV = "UFORUTSETT_BEHOV",
+  UTDANNINGSSTILLINGER = "UTDANNINGSSTILLINGER",
+  VIKAR = "VIKAR",
+}
+
+export enum Sektor {
+  NAV_STATLIG = "NAV_STATLIG",
+  NAV_KOMMUNAL = "NAV_KOMMUNAL",
+  EKSTERN = "EKSTERN",
+}
+
+export enum IdentType {
+  ROBOT = "ROBOT",
+  STANDARD = "STANDARD",
+  VIKAFOSSEN = "VIKAFOSSEN",
+  UTENLANDSK_KONSULENT = "UTENLANDSK_KONSULENT",
+  UKJENT = "UKJENT",
+}
+
 export interface RessursSearchParams {
   /**
    * @format int32
@@ -16,15 +89,6 @@ export interface RessursSearchParams {
    */
   fromOffset?: number;
   filterText?: string;
-}
-
-/** @default "STANDARD" */
-export enum IdentType {
-  ROBOT = "ROBOT",
-  STANDARD = "STANDARD",
-  VIKAFOSSEN = "VIKAFOSSEN",
-  UTENLANDSK_KONSULENT = "UTENLANDSK_KONSULENT",
-  UKJENT = "UKJENT",
 }
 
 export interface RessursState {
@@ -40,13 +104,9 @@ export interface RessursState {
   startdato?: string;
   primaryFysiskBrukersted?: string;
   fysiskeBrukersteder: string[];
+  /** @default "STANDARD" */
   identType: IdentType;
-}
-
-export enum Sektor {
-  NAV_STATLIG = "NAV_STATLIG",
-  NAV_KOMMUNAL = "NAV_KOMMUNAL",
-  EKSTERN = "EKSTERN",
+  sistEndretAv?: string;
 }
 
 export interface Visningsnavn {
@@ -76,24 +136,7 @@ export interface OrgtilknytningState {
   gyldigTom?: string;
   orgtilknytningType?: Tilknytningtype;
   masseflyttetFraFid?: string;
-}
-
-export enum Tilknytningtype {
-  ANNET = "ANNET",
-  ARBEIDSTRENING = "ARBEIDSTRENING",
-  EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER",
-  FAST = "FAST",
-  INGEN = "INGEN",
-  JOBBSPESIALIST = "JOBBSPESIALIST",
-  KONSULENT = "KONSULENT",
-  LAERLING = "LAERLING",
-  MIDLERTIDIG = "MIDLERTIDIG",
-  PENSJONIST = "PENSJONIST",
-  PRAKSISARBEID = "PRAKSISARBEID",
-  STUDENT = "STUDENT",
-  UFORUTSETT_BEHOV = "UFORUTSETT_BEHOV",
-  UTDANNINGSSTILLINGER = "UTDANNINGSSTILLINGER",
-  VIKAR = "VIKAR",
+  sistEndretAv?: string;
 }
 
 export interface OrgenhetStateSearchParams {
@@ -103,12 +146,6 @@ export interface OrgenhetStateSearchParams {
    */
   fromOffset?: number;
   filterText?: string;
-}
-
-export enum NomNivaa {
-  LINJEENHET = "LINJEENHET",
-  DRIFTSENHET = "DRIFTSENHET",
-  ARBEIDSOMRAADE = "ARBEIDSOMRAADE",
 }
 
 export interface OrgEnhetState {
@@ -127,23 +164,6 @@ export interface OrgEnhetState {
   agressoId?: string;
   agressoOrgNivaa?: string;
   agressoOrgenhetType?: string;
-}
-
-export enum OrgEnhetsType {
-  ARBEIDSLIVSSENTER = "ARBEIDSLIVSSENTER",
-  NAV_ARBEID_OG_YTELSER = "NAV_ARBEID_OG_YTELSER",
-  ARBEIDSRAADGIVNING = "ARBEIDSRAADGIVNING",
-  DIREKTORAT = "DIREKTORAT",
-  DIR = "DIR",
-  FYLKE = "FYLKE",
-  NAV_FAMILIE_OG_PENSJONSYTELSER = "NAV_FAMILIE_OG_PENSJONSYTELSER",
-  HJELPEMIDLER_OG_TILRETTELEGGING = "HJELPEMIDLER_OG_TILRETTELEGGING",
-  KLAGEINSTANS = "KLAGEINSTANS",
-  NAV_KONTAKTSENTER = "NAV_KONTAKTSENTER",
-  KONTROLL_KONTROLLENHET = "KONTROLL_KONTROLLENHET",
-  NAV_KONTOR = "NAV_KONTOR",
-  TILTAK = "TILTAK",
-  NAV_OKONOMITJENESTE = "NAV_OKONOMITJENESTE",
 }
 
 export interface OrganiseringStateSearchParams {
@@ -203,7 +223,7 @@ export type DelegertAuthorizationOpprettetEventV1 = AuthorizationEvent;
 export interface InputMetadata {
   inputInterfaceName?: string;
   inputInterfaceMethodName?: string;
-  inputInterfaceMethodArguments?: object;
+  inputInterfaceMethodArguments?: any;
   origination?: Origination;
 }
 
@@ -229,6 +249,14 @@ export interface RessursEvent {
 export type RessursSluttdatoOppdatertEventV1 = RessursEvent;
 
 export type RessursSluttetEventV1 = RessursEvent;
+
+export interface DeadLetterDTO {
+  fid?: string;
+  /** @format date-time */
+  timestamp?: string;
+  headers?: Record<string, string>;
+  event?: any;
+}
 
 export type OrgtilknytningAvsluttetEventV1 = OrgtilknytningEvent;
 
@@ -345,11 +373,6 @@ export interface OrgEnhetStateDTO {
   orgEnhetsType?: OrgEnhetsType;
 }
 
-export enum EntityType {
-  ORGENHET = "ORGENHET",
-  RESSURS = "RESSURS",
-}
-
 export interface HendelseDTO {
   id?: string;
   /** @format date-time */
@@ -358,21 +381,30 @@ export interface HendelseDTO {
   hendelseType?: HendelseType;
 }
 
-export enum HendelseType {
-  NY = "NY",
-  ENDRET = "ENDRET",
-  FJERNET = "FJERNET",
-}
-
 export interface SessionInfoResponse {
   navident: string;
   name: string;
   roles: UserRoles[];
 }
 
-export enum UserRoles {
-  ROLE_WRITE = "ROLE_WRITE",
-  ROLE_READONLY = "ROLE_READONLY",
+export interface RobotOrgtilknytning {
+  orgenhetId: string;
+  orgenhetNavn: string;
+  /** @format date */
+  gyldigFom: string;
+  /** @format date */
+  gyldigTom?: string;
+}
+
+export interface RobotRessurs {
+  navident: string;
+  visningsnavn: string;
+  sektor: Sektor;
+  /** @format date */
+  startdato?: string;
+  /** @format date */
+  sluttdato?: string;
+  orgtilknytninger: RobotOrgtilknytning[];
 }
 
 export interface RessursOrgtilknytningKoblingInfo {
@@ -461,6 +493,19 @@ export interface DuplikatOrgtilknytning {
   /** @format date */
   gyldigFom: string;
   orgtilknytningType?: Tilknytningtype;
+}
+
+export interface LoevnodeMedFeilAntallArbOmr {
+  orgenhetId: string;
+  orgenhetNavn: string;
+  /** @format int32 */
+  antallArbOmr: number;
+}
+
+export interface OrgEnhetArbeidsomraadeInfo {
+  /** @format int32 */
+  antallLoevnoder: number;
+  loevnoderMedFeil: LoevnodeMedFeilAntallArbOmr[];
 }
 
 export interface OrgEnhetOrganisering {

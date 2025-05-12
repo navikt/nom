@@ -350,8 +350,9 @@ function OrgtilknytningForm({
       });
 
       navigate({
-        params: { id: ressurs.navident },
         to: "/ressurs/$id",
+        params: { id: ressurs.navident },
+        search: { editOrgtilknytninger: undefined },
       }).then();
     },
   });
@@ -373,7 +374,7 @@ function OrgtilknytningForm({
   };
 
   const onValid: SubmitHandler<{
-    mappedeOrgtilknytninger: Partial<OrgtilknytningState>[];
+    mappedeOrgtilknytninger?: Partial<OrgtilknytningState>[];
   }> = async (values) => {
     const validation = dolValidering(
       values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
@@ -383,19 +384,21 @@ function OrgtilknytningForm({
       validation.dolGaps.length === 0 &&
       validation.dolOverlaps.length === 0
     ) {
-      await visBekreftelsesmodaler(values.mappedeOrgtilknytninger).then(() => {
-        oppdaterOrgtilknytningerMutation.mutate(
-          lagOppdaterOrgtilknytningerRequest(
-            values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
-            skalSetteRessursStartdato(
-              ressurs,
-              values.mappedeOrgtilknytninger,
-              tidligsteOrgDatoPre,
+      await visBekreftelsesmodaler(values.mappedeOrgtilknytninger ?? []).then(
+        () => {
+          oppdaterOrgtilknytningerMutation.mutate(
+            lagOppdaterOrgtilknytningerRequest(
+              values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+              skalSetteRessursStartdato(
+                ressurs,
+                values.mappedeOrgtilknytninger ?? [],
+                tidligsteOrgDatoPre,
+              ),
+              ressurs.sektor,
             ),
-            ressurs.sektor,
-          ),
-        );
-      });
+          );
+        },
+      );
     }
   };
 
@@ -422,7 +425,7 @@ function OrgtilknytningForm({
         orgtilknytninger={watch("mappedeOrgtilknytninger")}
       />
 
-      <form autoComplete="false" onSubmit={handleSubmit(onValid)}>
+      <form autoComplete="off" onSubmit={handleSubmit(onValid)}>
         {hasAdminOrWriteAccess &&
           (ressurs.identType !== IdentType.VIKAFOSSEN || hasAdminAccess) && (
             <div
@@ -506,7 +509,13 @@ function OrgtilknytningForm({
                   onRemove={() => remove(index)}
                 />
               )}
-              <HStack gap="8">
+
+              <HStack
+                css={css`
+                  margin-bottom: var(--a-spacing-6);
+                `}
+                gap="8"
+              >
                 <FormDateWrapper
                   defaultDate={field.gyldigFom ?? undefined}
                   disabled={editOtDisabled}
@@ -540,7 +549,7 @@ function OrgtilknytningForm({
                 />
               </HStack>
 
-              <LederLabel index={index} />
+              {!avsluttet && <LederLabel index={index} ressurs={ressurs} />}
 
               <Checkbox
                 css={css`
@@ -552,10 +561,7 @@ function OrgtilknytningForm({
                   `mappedeOrgtilknytninger.${index}.erDagligOppfolging`,
                 )}
               >
-                <BodyShort>
-                  Denne lederen har ansvar for den daglige oppfølgingen av
-                  medarbeideren
-                </BodyShort>
+                <BodyShort>Daglig oppfølging i denne enheten</BodyShort>
               </Checkbox>
 
               <div
@@ -625,8 +631,9 @@ function OrgtilknytningForm({
           <Button
             onClick={() =>
               navigate({
+                to: "/ressurs/$id",
                 search: { editOrgtilknytninger: undefined },
-                params: (previous) => previous,
+                params: (previous) => ({ id: previous.id ?? "" }),
               })
             }
             size="small"
@@ -1074,7 +1081,7 @@ function FormTilknytningstypeSelectWrapper({
   );
 }
 
-function LederLabel({ index }: { index: number }) {
+function LederLabel({ index, ressurs }: { index: number; ressurs: Ressurs }) {
   const { watch } = useFormContext();
   const field = watch(`mappedeOrgtilknytninger.${index}`);
 
@@ -1084,30 +1091,15 @@ function LederLabel({ index }: { index: number }) {
     enabled: !!field.orgEnhetId,
   });
 
-  // Lar dette stå her til eventuell bruk senere
-  // const ressursDolLeder = useQuery({
-  //   queryKey: getLedereForRessurs.queryKey(ressurs.navident),
-  //   queryFn: () => getLedereForRessurs.queryFn(ressurs.navident),
-  //   select: (ledere) => ledere.find((leder) => leder.erDagligOppfolging)?.leder,
-  // }).data;
-
   const orgEnhetLeder = orgEnhetQuery.data?.ledere[0];
 
-  // // Vis lederen til personen, i stedet for lederen på enheten, hvis ressursen man redigerer selv er lederen
-  // const lederNavn =
-  //   ressurs.navident === orgEnhetLeder?.navident
-  //     ? ressursDolLeder?.visningsnavn
-  //     : orgEnhetLeder?.visningsnavn;
-
-  const lederNavn = orgEnhetLeder?.visningsnavn;
+  if (ressurs.navident === orgEnhetLeder?.navident) {
+    return;
+  }
 
   return (
-    <BodyLong
-      css={css`
-        margin-top: var(--a-spacing-6);
-      `}
-    >
-      Leder: <b>{lederNavn ? formatVisningsnavn(lederNavn) : ""}</b>
+    <BodyLong>
+      Leder: <b>{formatVisningsnavn(orgEnhetLeder?.visningsnavn)}</b>
     </BodyLong>
   );
 }
@@ -1381,7 +1373,7 @@ const validateMaxTime = (
   const otSektor = context?.parent?.sektor;
 
   const maxDate = dateWithoutTimezone(
-    addYears(todayWithoutTimezone(), otSektor === Sektor.EKSTERN ? 1 : 5),
+    addYears(todayWithoutTimezone(), otSektor === Sektor.EKSTERN ? 1 : 6),
   );
 
   if (
@@ -1389,7 +1381,7 @@ const validateMaxTime = (
     (value && isSameDateOrAfter(dateWithoutTimezone(value), maxDate))
   ) {
     return context.createError({
-      message: `Må være under ${otSektor === Sektor.EKSTERN ? "ett" : "fem"} år frem i tid fra dagens dato${otSektor === Sektor.EKSTERN ? " for eksterne medarbeidere" : ", eller ikke satt"}`,
+      message: `Må være under ${otSektor === Sektor.EKSTERN ? "ett" : "seks"} år frem i tid fra dagens dato${otSektor === Sektor.EKSTERN ? " for eksterne medarbeidere" : ", eller ikke satt"}`,
     });
   }
 

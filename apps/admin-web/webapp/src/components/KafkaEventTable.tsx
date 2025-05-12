@@ -8,6 +8,7 @@ import { EventDateRange } from "~/components/EventDateRange.tsx";
 import { EventOrigination } from "~/components/EventOrigination.tsx";
 import { JsonModal } from "~/components/JsonModal.tsx";
 import { copyToClipboard } from "~/components/quickdialog.tsx";
+import { useTableSort } from "~/hooks/useTableSort.ts";
 import type { KafkaEvent } from "~/types.ts";
 import { formatDisplayDatetime } from "~/utils.ts";
 
@@ -16,21 +17,28 @@ export function KafkaEventTable(props: {
   linkPrefix: string;
 }) {
   const kafkaEvents = props.kafkaEvents;
+  const { data, sort, handleSort } = useTableSort(kafkaEvents ?? [], "dato");
   return (
     <div>
       <EventDateRange events={kafkaEvents} />
-      <Table size="small">
+      <Table
+        onSortChange={(sortKey) => handleSort(sortKey)}
+        size="small"
+        sort={sort}
+      >
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell />
             <Table.ColumnHeader scope="col">Fid</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Endring</Table.ColumnHeader>
-            <Table.ColumnHeader scope="col">Dato</Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="dato" sortable>
+              Dato
+            </Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Opprinnelse</Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {kafkaEvents.map((kafkaEvent, index) => {
+          {data.map((kafkaEvent, index) => {
             return (
               <Table.ExpandableRow
                 content={<EmbeddedJsonView jsonData={kafkaEvent} />}
@@ -62,7 +70,6 @@ export function KafkaEventTable(props: {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function EmbeddedJsonView(props: { jsonData: object | any[] }) {
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [renderStuff, setRenderStuff] = React.useState(false);

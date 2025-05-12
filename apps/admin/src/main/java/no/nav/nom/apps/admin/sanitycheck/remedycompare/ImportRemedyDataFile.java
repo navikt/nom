@@ -12,12 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +46,8 @@ public class ImportRemedyDataFile {
 
         try (ReadChannel reader = storage.reader(BlobId.of(bucketName, fileName))) {
             BufferedReader br = new BufferedReader(Channels.newReader(reader, StandardCharsets.UTF_8));
-            
-            List<ImportedRemedyUser> remedyUsers = readRemedyData(br);
-            return remedyUsers;
+
+            return readRemedyData(br);
         } catch (Exception e) {
             log.error("Klarer ikke å lese fra bucket: ", e);
             throw new RuntimeException("Klarer ikke å lese fra bucket", e);
@@ -85,7 +81,7 @@ public class ImportRemedyDataFile {
         log.debug("Parsing line: {}", line);
         var kolonner = line.split(";(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1); // Split på semikolon, ignorer komma i "
 
-        if ("<null>".equals(kolonner[0])) {
+        if ("<null>".equals(kolonner[0]) || kolonner[0].isEmpty()) {
             return Optional.empty();
         }
 
@@ -96,28 +92,34 @@ public class ImportRemedyDataFile {
         var enhetsNavn = kolonner[4];
         var aktiv = "0".equals(kolonner[5]);
         var permisjon = "0".equals(kolonner[6]);
-        var sluttDato = "<null>".equals(kolonner[7]) ? null : Instant.ofEpochMilli(Long.parseLong(kolonner[7])*1000).atZone(ZoneId.systemDefault()).toLocalDate();
-        var regDato = "<null>".equals(kolonner[5]) ? null : Instant.ofEpochMilli(Long.parseLong(kolonner[8])*1000).atZone(ZoneId.systemDefault()).toLocalDate();
+        var sluttDato = "<null>".equals(kolonner[7]) || kolonner[7].isEmpty() ? null : Instant.ofEpochMilli(Long.parseLong(kolonner[7]) * 1000)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate();
+        var regDato = "<null>".equals(kolonner[5]) || kolonner[5].isEmpty() ? null : Instant.ofEpochMilli(Long.parseLong(kolonner[8]) * 1000)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate();
         var sektor = switch (kolonner[10]) {
             case "0" -> Sektor.NAV_STATLIG;
             case "1" -> Sektor.NAV_KOMMUNAL;
             case "2" -> Sektor.EKSTERN;
             default -> null;
         };
-        var utlopsDato = "<null>".equals(kolonner[11]) ? null : Instant.ofEpochMilli(Long.parseLong(kolonner[11])*1000).atZone(ZoneId.systemDefault()).toLocalDate();
+        var utlopsDato = "<null>".equals(kolonner[11]) || kolonner[11].isEmpty() ? null : Instant.ofEpochMilli(Long.parseLong(kolonner[11]) * 1000)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate();
 
         return Optional.of(new ImportedRemedyUser(
-                navident,
-                fornavn,
-                etternavn,
-                enhetsId,
-                enhetsNavn,
-                sektor,
-                aktiv,
-                permisjon,
-                sluttDato,
-                utlopsDato,
-                regDato
+            navident,
+            fornavn,
+            etternavn,
+            enhetsId,
+            enhetsNavn,
+            sektor,
+            aktiv,
+            permisjon,
+            sluttDato,
+            utlopsDato,
+            regDato
         ));
     }
 

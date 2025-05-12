@@ -11,6 +11,7 @@ import {
 } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { AntallOrgenheter } from "~/sanitychecks/OrgEnhet/AntallOrgenheter.tsx";
+import { Arbeidsomraade } from "~/sanitychecks/OrgEnhet/Arbeidsomraade.tsx";
 import { DuplikateEnheter } from "~/sanitychecks/OrgEnhet/DuplikateEnheter.tsx";
 import { EnheterOgOrganisering } from "~/sanitychecks/OrgEnhet/EnheterOgOrganisering.tsx";
 import { OrgEnhetOrganiseringTabell } from "~/sanitychecks/OrgEnhet/OrgEnhetOrganiseringTabell.tsx";
@@ -68,6 +69,9 @@ function ListSelector(props: { selected: string }) {
         />
       );
     }
+    case "Arbeidsomraade": {
+      return <Arbeidsomraade />;
+    }
     default: {
       return <></>;
     }
@@ -101,6 +105,9 @@ function OrgEnhetSanityChecks() {
           }
         >
           Bunn enheter som ikke har eksakt 1 arbeidsområde hierarkiet i stier
+        </option>
+        <option value={"Arbeidsomraade"}>
+          Enheter med avvikende antall arbeidsområde
         </option>
       </Select>
       <ListSelector selected={handleChange} />

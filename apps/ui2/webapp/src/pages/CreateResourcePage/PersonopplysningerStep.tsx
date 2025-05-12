@@ -16,7 +16,6 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import { getOrgTilknytninger, getPerson } from "~/api/react-query-endpoints";
-import { useHasAdminAccess } from "~/api/useGetSession";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { FolkeregisterPersonInfo } from "~/pages/CreateResourcePage/components/FolkeregisterPersonInfo";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
@@ -43,6 +42,7 @@ export function PersonopplysningerStep() {
       title="Personopplysninger"
     >
       <SearchForPerson />
+
       {!!personident && <CreateResourceForm personident={personident} />}
     </ContainerWithHighlightedTop>
   );
@@ -93,7 +93,7 @@ function CreateResourceForm({ personident }: { personident: string }) {
     return (
       <Alert variant="error">
         {hentPersonQuery.error.response?.status === 404
-          ? "Ingen resultater for søket. Det må hånteres manuelt."
+          ? "Fødselsnummeret ble ikke funnet i Folkeregisteret. Kontroller at du har lagt inn riktig fødselsnummer."
           : "En teknisk feil forhindret søket"}
       </Alert>
     );
@@ -104,7 +104,7 @@ function CreateResourceForm({ personident }: { personident: string }) {
       <Alert variant="error">
         Denne personen finnes allerede som aktiv eller fremtidig medarbeider med
         Nav-ident <b>{person?.navident}</b>. For å gjøre endringer, gå til{" "}
-        <Link to={`/ressurs/${person?.navident}`}>
+        <Link params={{ id: person?.navident ?? "" }} to="/ressurs/$id">
           medarbeiderens profilside
         </Link>
         .
@@ -137,8 +137,6 @@ function VisningsnavnForm({
 }: {
   folkeregisterPerson: FolkeregisterPerson;
 }) {
-  const hasAdminAccess = useHasAdminAccess();
-
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
 
   const {
@@ -229,7 +227,6 @@ function VisningsnavnForm({
             label="Fornavn"
             type="text"
             {...register("visningsfornavn")}
-            readOnly={!hasAdminAccess}
           />
           <TextField
             autoComplete="off"
@@ -246,7 +243,6 @@ function VisningsnavnForm({
             label="Etternavn"
             type="text"
             {...register("visningsetternavn")}
-            readOnly={!hasAdminAccess}
           />
         </div>
         <TextField

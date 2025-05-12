@@ -50,7 +50,20 @@ app:
       nomAdminGroup:
         group-id: nomAdminGroup
         scopes: ["MUTATE_RESSURS", "ADMIN"]
+      readOnlyGroup:
+        group-id: readOnlyGroup
+        scopes: ["READONLY"]
+      nom-write-utl-konsulent:
+        group-id: nomWriteUtlKonsulentGroup
+        scopes: ["NOM_WRITE_UTL_KONSULENT", "MUTATE_RESSURS"]
+      nom-write-vikafossen:
+        group-id: nomWriteVikafossenGroup
+        scopes: ["NOM_WRITE_VIKAFOSSEN", "MUTATE_RESSURS"]
+      nom-write-robot:
+        group-id: nomWriteRobotGroup
+        scopes: ["NOM_WRITE_ROBOT", "MUTATE_RESSURS"]
   orgenhet:
+    vikafossenId: dummyVikafossenId
     linjeenhetene: linje-enhet,en-annen-linjeenhet
   google-storage-bucket-name:
     missing-ot: none

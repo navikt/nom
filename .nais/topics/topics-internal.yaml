@@ -428,4 +428,60 @@ spec:
       access: read
     - team: org
       application: nom-admin
-      access: read     
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.intern-orgtilknytning-state-dlt
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+    maxCompactionLagMs: 7200000  # 1000 * 60 * 60 * 2 = 7200000 = 2 hours
+  acl:
+    - team: org
+      application: nom-remedy-integrasjon
+      access: readwrite
+    - team: org
+      application: org-kafka-manager
+      access: read
+    - team: org
+      application: nom-admin
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.intern-ressurs-state-dlt
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+    maxCompactionLagMs: 7200000  # 1000 * 60 * 60 * 2 = 7200000 = 2 hours
+  acl:
+    - team: org
+      application: nom-remedy-integrasjon
+      access: readwrite
+    - team: org
+      application: org-kafka-manager
+      access: read
+    - team: org
+      application: nom-admin
+      access: read

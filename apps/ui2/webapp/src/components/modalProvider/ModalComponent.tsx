@@ -20,9 +20,18 @@ const ModalComponent = () => {
     closeModal();
   };
 
+  if (!React.isValidElement(modal.content)) {
+    return null;
+  }
+
   return (
     <ModalWrapper onCancel={handleCancel} onConfirm={handleConfirm}>
-      {modal.content}
+      {
+        modal.content as React.ReactElement<{
+          onConfirm: () => void;
+          onCancel: () => void;
+        }>
+      }
     </ModalWrapper>
   );
 };

@@ -36,6 +36,12 @@ import {
   getOrgEnheterSomKanHaRessurser,
   getPerson,
 } from "~/api/react-query-endpoints";
+import {
+  useHasAdminAccess,
+  useHasRobotAccess,
+  useHasUtenlandskKonsulentAccess,
+  useHasVikafossenAccess,
+} from "~/api/useGetSession";
 import { ApiResponseError } from "~/components/ApiResponseError";
 import ContentWrapper from "~/components/ContentWrapper";
 import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
@@ -94,9 +100,28 @@ export function CreateSpecialResourcePage() {
 function CreateSpecialResourceForm() {
   const navigate = useNavigate();
 
+  const hasAdminAccess = useHasAdminAccess();
+
+  const hasRobotAccess = useHasRobotAccess();
+  const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
+  const hasVikafossenAccess = useHasVikafossenAccess();
+
+  const IdentTypeAccessMap = {
+    [IdentType.ROBOT]: hasRobotAccess || hasAdminAccess,
+    [IdentType.UTENLANDSK_KONSULENT]:
+      hasUtenlandskKonsulentAccess || hasAdminAccess,
+    [IdentType.VIKAFOSSEN]: hasVikafossenAccess || hasAdminAccess,
+    [IdentType.STANDARD]: false,
+    [IdentType.UKJENT]: false,
+  };
+
+  const tillatteIdentTyper = spesielleIdentTyper.filter(
+    (type) => IdentTypeAccessMap[type],
+  );
+
   const methods = useForm({
     defaultValues: {
-      identType: IdentType.ROBOT,
+      identType: tillatteIdentTyper[0],
       identifikasjonsnummer: undefined,
       visningsfornavn: "",
       visningsmellomnavn: "",
@@ -174,7 +199,10 @@ function CreateSpecialResourceForm() {
                 width: 40%;
               `}
             >
-              <IdentTypeFormPart name="identType" />
+              <IdentTypeFormPart
+                name="identType"
+                tillatteIdentTyper={tillatteIdentTyper}
+              />
 
               <IdentifikasjonsnummerSearchFormPart
                 checkedIdentifikasjonsnummer={identifikasjonsnummer}
@@ -330,7 +358,7 @@ function CreateSpecialResourceFormInner({
           Denne identifikatoren er allerede i bruk for ressurs med Nav-ident{" "}
           <b>{ressurs?.navident}</b>. Rediger identifikatoren hvis du skal
           opprette en ny ident. Du kan se mer informasjon på{" "}
-          <Link to={`/ressurs/${ressurs?.navident}`}>
+          <Link params={{ id: ressurs?.navident ?? "" }} to="/ressurs/$id">
             ressursens profilside
           </Link>
           .
@@ -555,7 +583,13 @@ function CreateSpecialConfirmModal({
   );
 }
 
-function IdentTypeFormPart({ name }: { name: string }) {
+function IdentTypeFormPart({
+  name,
+  tillatteIdentTyper,
+}: {
+  name: string;
+  tillatteIdentTyper: IdentType[];
+}) {
   const { field, fieldState } = useController({ name });
   const { clearErrors } = useFormContext();
 
@@ -570,7 +604,7 @@ function IdentTypeFormPart({ name }: { name: string }) {
       ref={field.ref}
       value={field.value}
     >
-      {Object.values(tilgjengeligeIdentTyper).map((type) => (
+      {Object.values(tillatteIdentTyper).map((type) => (
         <option key={type} value={type}>
           {IdentTypeNameMapping[type]}
         </option>
@@ -869,17 +903,17 @@ function lagRessursRequest(values: {
     orgEnhetId:
       values.identType === IdentType.VIKAFOSSEN
         ? vikafossenOrgEnhetId
-        : values.orgEnhetId ?? "",
+        : (values.orgEnhetId ?? ""),
     startDato: values.startDato,
     sluttDato: values.sluttDato ?? "",
     visningsfornavn:
       values.identType === IdentType.VIKAFOSSEN
         ? "Nav"
-        : values.visningsfornavn ?? "",
+        : (values.visningsfornavn ?? ""),
     visningsmellomnavn:
       values.identType === IdentType.VIKAFOSSEN
         ? ""
-        : values.visningsmellomnavn ?? "",
+        : (values.visningsmellomnavn ?? ""),
     visningsetternavn: getVisningsEtternavn(
       values.identType,
       values.visningsetternavn,
@@ -1015,19 +1049,19 @@ const validateMaxTime = (
     ressursIdentType === IdentType.VIKAFOSSEN;
 
   const maxDate = dateWithoutTimezone(
-    addYears(todayWithoutTimezone(), ressursEkstern ? 1 : 5),
+    addYears(todayWithoutTimezone(), ressursEkstern ? 1 : 6),
   );
 
   if (nomDateIsSameOrAfter(value, maxDate)) {
     return context.createError({
-      message: `Må være under ${ressursEkstern ? "ett" : "fem"} år frem i tid fra dagens dato${ressursEkstern ? " for eksterne medarbeidere" : ", eller ikke satt"}`,
+      message: `Må være under ${ressursEkstern ? "ett" : "seks"} år frem i tid fra dagens dato${ressursEkstern ? " for eksterne medarbeidere" : ", eller ikke satt"}`,
     });
   }
 
   return true;
 };
 
-const tilgjengeligeIdentTyper = [
+export const spesielleIdentTyper = [
   IdentType.ROBOT,
   IdentType.UTENLANDSK_KONSULENT,
   IdentType.VIKAFOSSEN,

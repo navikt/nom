@@ -148,7 +148,7 @@ public class RessursSanityCheckController {
             @ApiResponse(responseCode = "200", description = "Success")
     )
     @GetMapping("/robotRessurser")
-    public ResponseEntity<List<RobotRessursSanityCheckResponse>> listRobotRessurser() {
+    public ResponseEntity<List<RobotRessurs>> listRobotRessurser() {
         return ok(ressursSanityCheckService.robotRessurser());
     }
     
