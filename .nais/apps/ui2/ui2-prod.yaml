@@ -37,6 +37,9 @@ spec:
         - application: nom-paarorende
           namespace: org
           cluster: prod-gcp
+        - application: nom-azure
+          namespace: org
+          cluster: prod-gcp
       external:
         - host: unpkg.com
         - host: nom-remedy-integrasjon.prod-fss-pub.nais.io
