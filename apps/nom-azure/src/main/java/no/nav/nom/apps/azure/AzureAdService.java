@@ -1,21 +1,25 @@
 package no.nav.nom.apps.azure;
 
 import com.azure.identity.ClientSecretCredentialBuilder;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.microsoft.graph.serviceclient.GraphServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.Optional;
 
 @Service
 public class AzureAdService {
 
+    private final Logger log = LoggerFactory.getLogger(AzureAdService.class);
 
     private final GraphServiceClient graphServiceClient;
 
-    private final Logger log = LoggerFactory.getLogger(AzureAdService.class);
+    private final LoadingCache<String, byte[]> pictureCache;
 
     public AzureAdService(Environment environment) {
         var azProps = new AzureProperties(environment);
@@ -27,11 +31,23 @@ public class AzureAdService {
 
         this.graphServiceClient = new GraphServiceClient(clientSecretCredential);
 
+        this.pictureCache = Caffeine.newBuilder()
+                .expireAfterWrite(Duration.ofHours(12))
+                .maximumSize(10000).build(this::lookupProfilePictureByNavIdent);
     }
 
-    public Optional<byte[]> lookupProfilePictureByNavIdent(String navIdent) {
+    private byte[] lookupProfilePictureByNavIdent(String navIdent) {
         String userId = lookupUserByNavIdent(navIdent);
         return lookupUserProfilePicture(userId);
+    }
+
+    public Optional<byte[]> profilePictureByNavIdent(String navIdent){
+        var out = pictureCache.get(navIdent);
+        return Optional.ofNullable(out);
+    }
+
+    public void refreshPictureCache(String navIdent) {
+        this.pictureCache.refresh(navIdent);
     }
 
 
@@ -51,7 +67,7 @@ public class AzureAdService {
     }
 
 
-    private Optional<byte[]> lookupUserProfilePicture(String id) {
+    private byte[] lookupUserProfilePicture(String id) {
         try {
             var photoContents = this.graphServiceClient
                 .users()
@@ -61,15 +77,15 @@ public class AzureAdService {
                 .get();
 
             if(photoContents == null){
-                return Optional.empty();
+                return null;
             }
 
             var bytes = photoContents.readAllBytes();
             photoContents.close();
 
-            return Optional.of(bytes);
+            return bytes;
         } catch (Exception e) {
-            return Optional.empty();
+            return null;
         }
 
         /*
@@ -88,9 +104,13 @@ public class AzureAdService {
         public final String tenantId;
 
         AzureProperties(Environment environment) {
-            this.clientId = environment.getRequiredProperty("AZURE_APP_CLIENT_ID");
-            this.clientSecret = environment.getRequiredProperty("AZURE_APP_CLIENT_SECRET");
-            this.tenantId = environment.getRequiredProperty("AZURE_APP_TENANT_ID");
+            try {
+                this.clientId = environment.getRequiredProperty("AZURE_APP_CLIENT_ID");
+                this.clientSecret = environment.getRequiredProperty("AZURE_APP_CLIENT_SECRET");
+                this.tenantId = environment.getRequiredProperty("AZURE_APP_TENANT_ID");
+            } catch (Exception e) {
+                throw new RuntimeException("Missing one or more 'AZURE_APP_...' environment variables ");
+            }
         }
     }
 }
