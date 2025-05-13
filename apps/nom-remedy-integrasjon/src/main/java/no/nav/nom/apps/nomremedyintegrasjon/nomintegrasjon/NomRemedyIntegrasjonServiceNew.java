@@ -91,6 +91,7 @@ public class NomRemedyIntegrasjonServiceNew {
         }
     }
 
+    @Transactional
     @Scheduled(cron = "0 30 8 * * MON-FRI")
     public void logErrorState() {
         if (leaderElection.isLeader()) {
