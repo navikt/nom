@@ -56,11 +56,9 @@ import {
 
 export function PersonOpplysninger({
   ressurs,
-  ouBegrensningerAktiv,
   canEditPersonopplysninger,
 }: {
   ressurs: Ressurs;
-  ouBegrensningerAktiv: boolean;
   canEditPersonopplysninger: boolean;
 }) {
   const navident = ressurs.navident;
@@ -192,7 +190,6 @@ export function PersonOpplysninger({
 
         <EditPersonopplysningerButton
           canEditPersonopplysninger={canEditPersonopplysninger}
-          ouBegrensningerAktiv={ouBegrensningerAktiv}
         />
       </VStack>
     </HStack>
@@ -200,52 +197,29 @@ export function PersonOpplysninger({
 }
 
 function EditPersonopplysningerButton({
-  ouBegrensningerAktiv,
   canEditPersonopplysninger,
 }: {
-  ouBegrensningerAktiv: boolean;
   canEditPersonopplysninger: boolean;
 }) {
   const navigate = useNavigate();
 
-  const hasAdminAccess = useHasAdminAccess();
-
-  const utilgjengeligOu = ouBegrensningerAktiv && !hasAdminAccess;
-
   if (canEditPersonopplysninger) {
     return (
-      <div
-        css={css`
-          display: flex;
-          align-items: center;
-          gap: var(--a-spacing-2);
-        `}
+      <Button
+        data-cy="endre-personopplysninger-button"
+        icon={<PencilIcon aria-hidden />}
+        onClick={() =>
+          navigate({
+            to: "/ressurs/$id",
+            params: (previous) => ({ id: previous.id ?? "" }),
+            search: { editPersonopplysninger: true },
+          })
+        }
+        size="small"
+        variant="secondary"
       >
-        {utilgjengeligOu && (
-          <HelpText>
-            Endring av personopplysninger er midlertidig utilgjengelig på grunn
-            av omorganisering av direktoratet. Endringer gjøres sentralt av
-            teamet i NOM. Meld sak i Porten ved behov.
-          </HelpText>
-        )}
-
-        <Button
-          data-cy="endre-personopplysninger-button"
-          disabled={utilgjengeligOu}
-          icon={<PencilIcon aria-hidden />}
-          onClick={() =>
-            navigate({
-              to: "/ressurs/$id",
-              params: (previous) => ({ id: previous.id ?? "" }),
-              search: { editPersonopplysninger: true },
-            })
-          }
-          size="small"
-          variant="secondary"
-        >
-          Endre personopplysninger
-        </Button>
-      </div>
+        Endre personopplysninger
+      </Button>
     );
   }
 

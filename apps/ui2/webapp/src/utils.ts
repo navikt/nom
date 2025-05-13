@@ -69,7 +69,7 @@ export function capitalizeNameFysiskBrukersted(name: string) {
     name.toLowerCase().replaceAll("allè", "allé"),
   );
 
-  // Bruker RegEx som finnner tilfeller av ordene som skal ha liten forbokstav
+  // Bruker RegEx som finner tilfeller av ordene som skal ha liten forbokstav
   // som står alene og bytter dem ut med samme ord med liten forbokstav
   for (const word of litenForbokstavOrd) {
     const wordRegex = new RegExp(

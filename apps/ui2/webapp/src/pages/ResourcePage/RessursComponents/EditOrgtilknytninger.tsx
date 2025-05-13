@@ -79,6 +79,7 @@ import {
   nomDateIsBefore,
   nomDateIsBeforeToday,
   nomDateIsTodayOrAfter,
+  nomDateIsTodayOrBefore,
   otCustomStortByDate,
   skalSetteRessursStartdato,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
@@ -99,7 +100,6 @@ import {
   formatVisningsnavn,
   isGyldighetsPeriodeActive,
   isSameDateOrAfter,
-  isSameDateOrBefore,
   todayWithoutTimezone,
 } from "~/utils";
 
@@ -143,16 +143,8 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
 
   const dagensDolOrgtilknytning = dolOrgtilknytninger.find((tilknytning) => {
     if (
-      !!tilknytning.gyldigFom &&
-      isSameDateOrBefore(
-        new Date(tilknytning.gyldigFom),
-        todayWithoutTimezone(),
-      ) &&
-      (!tilknytning.gyldigTom ||
-        isSameDateOrAfter(
-          new Date(tilknytning.gyldigTom),
-          todayWithoutTimezone(),
-        ))
+      nomDateIsTodayOrBefore(tilknytning.gyldigFom) &&
+      nomDateIsTodayOrAfter(tilknytning.gyldigTom)
     ) {
       return true;
     }
