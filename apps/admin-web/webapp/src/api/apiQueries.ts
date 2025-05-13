@@ -278,3 +278,11 @@ export async function masseflyttOrgtilknytninger(data: {
     json: data,
   });
 }
+
+export const spaHtmlWithoutNonce = {
+  queryKey: () => ["spaHtmlWithoutNonce"],
+  queryFn: async (): Promise<string> => {
+    const spaHtml = await (await ky.get<string>(`/`)).text();
+    return spaHtml.replaceAll(/nonce=\S+"/g, "");
+  },
+};

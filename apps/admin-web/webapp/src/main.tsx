@@ -8,6 +8,7 @@ import { createRouter, RouterProvider } from "@tanstack/react-router";
 import React from "react";
 import { createRoot } from "react-dom/client";
 
+import { ExpiryNotifier } from "./components/ExpiryNotifier.tsx";
 import { routeTree } from "./routeTree.gen.ts";
 
 export const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ createRoot(document.querySelector("#root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools buttonPosition="bottom-left" initialIsOpen={false} />
+      <ExpiryNotifier />
       <RouterProvider router={router} />
     </QueryClientProvider>
   </React.StrictMode>,
