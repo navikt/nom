@@ -175,7 +175,7 @@ export interface IOrgenhet {
   uniqueAgressoId?: string;
 }
 
-export type JsonNode = object;
+export type JsonNode = any;
 
 export interface LederTilgangForOrgenhetRequest {
   delegertTilNavident: string;
