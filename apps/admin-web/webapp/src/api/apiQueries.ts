@@ -282,7 +282,11 @@ export async function masseflyttOrgtilknytninger(data: {
 export const spaHtmlWithoutNonce = {
   queryKey: () => ["spaHtmlWithoutNonce"],
   queryFn: async (): Promise<string> => {
-    const spaHtml = await (await ky.get<string>(`/`)).text();
-    return spaHtml.replaceAll(/nonce=\S+"/g, "");
+    const spaHtmlResponse = await fetch(`/`);
+    if (!spaHtmlResponse.status.toString().startsWith("2")) {
+      throw { message: "Status code not 2xx", status: spaHtmlResponse.status };
+    }
+    const spaText = await spaHtmlResponse.text();
+    return spaText.replaceAll(/nonce=\S+"/g, "");
   },
 };
