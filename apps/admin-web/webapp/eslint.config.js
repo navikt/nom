@@ -16,6 +16,7 @@ export default [
             "src/types/nom-admin/nom-admin-models.ts",
             "src/types/nom-api/nom-api-models.ts",
             "src/types/nom-api/nom-api-admin-models.ts",
+            "src/types/nom-remedy-integrasjon/nom-remedy-integrasjon-models.ts",
         ],
     },
     {
