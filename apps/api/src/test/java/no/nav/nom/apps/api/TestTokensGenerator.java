@@ -1,14 +1,27 @@
 package no.nav.nom.apps.api;
 
 import com.nimbusds.jose.JOSEObjectType;
+import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static no.nav.nom.apps.api.common.security.NomApiAccessScope.ADMIN;
+import static no.nav.nom.apps.api.common.security.NomApiAccessScope.MUTATE_RESSURS;
+import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP;
+import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_UI_APP;
+import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_ROBOT;
+import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_VIKAFOSSEN;
+import static no.nav.nom.apps.api.common.security.NomApiAccessScope.READONLY;
 
 @Component
 public class TestTokensGenerator {
@@ -38,8 +51,6 @@ public class TestTokensGenerator {
     public String validToken(Map<String, Object> claims) {
         return generateToken(OAUTH_VALID_ISSUER, claims, OAUTH_VALID_AUDIENCE);
     }
-
-
 
     public String nomAdminUser() {
         Map<String, Object> claims = new HashMap<>();
@@ -77,6 +88,14 @@ public class TestTokensGenerator {
         Map<String, Object> claims = new HashMap<>();
         claims.put("NAVident", LOGGED_IN_USER_NAVIDENT);
         claims.put("groups", List.of("nomWriteVikafossenGroup"));
+        claims.put("azp_name", "nomUiClient");
+        return validToken(claims);
+    }
+
+    public String nomWriteUtlKonsulentGroupAndNomUiAzp() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("NAVident", LOGGED_IN_USER_NAVIDENT);
+        claims.put("groups", List.of("nomWriteUtlKonsulentGroup"));
         claims.put("azp_name", "nomUiClient");
         return validToken(claims);
     }
@@ -142,6 +161,50 @@ public class TestTokensGenerator {
         return validToken(claims);
     }
 
+    public void setNomAdminUserAuth() {
+        setAuthentication(LOGGED_IN_USER_NAVIDENT, List.of(ADMIN, NOM_UI_APP), "nomUiClient");
+    }
 
+    public void setNomWriteGroupAndNomUiAzpAuth() {
+        setAuthentication(LOGGED_IN_USER_NAVIDENT, List.of(MUTATE_RESSURS, NOM_UI_APP), "nomUiClient");
+    }
+
+    public void setNomReadOnlyGroupAndNomUiAzpAuth() {
+        setAuthentication(LOGGED_IN_USER_NAVIDENT, List.of(READONLY, NOM_UI_APP), "nomUiClient");
+    }
+
+    public void setNomWriteRobotGroupAndNomUiAzpAuth() {
+        setAuthentication(LOGGED_IN_USER_NAVIDENT, List.of(NOM_WRITE_ROBOT, NOM_UI_APP), "nomUiClient");
+    }
+
+    public void setNomWriteVikafossenGroupAndNomUiAzpAuth() {
+        setAuthentication(LOGGED_IN_USER_NAVIDENT, List.of(NOM_WRITE_VIKAFOSSEN, NOM_UI_APP), "nomUiClient");
+    }
+
+    public void setNomRemedyIntegrasjonAzpAuth() {
+        setAuthentication(LOGGED_IN_USER_NAVIDENT, List.of(NOM_REMEDY_INTEGRASJON_APP), "nomRemedyIntegrasjonClient");
+    }
+
+    public void setNoScopesUserAuth() {
+        setAuthentication(LOGGED_IN_USER_NAVIDENT, List.of(), "some-app");
+    }
+
+    public void setDefaultUserNomUiClient() {
+        setAuthentication(LOGGED_IN_USER_NAVIDENT, List.of(NOM_UI_APP), "nomUiClient");
+    }
+
+    public void setAuthentication(String navidentBruker, List<NomApiAccessScope> accessScopes, String azpName) {
+        Jwt jwt = Jwt.withTokenValue("token")
+            .header("alg", "none")
+            .claim("NAVident", navidentBruker)
+            .claim("azp_name", azpName)
+            .build();
+
+        Authentication auth = new JwtAuthenticationToken(jwt, accessScopes.stream().map(NomApiAccessScope::asGrantedAuthority).toList());
+
+        var context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(auth);
+        SecurityContextHolder.setContext(context);
+    }
 
 }

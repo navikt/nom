@@ -5,9 +5,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import no.nav.nom.apps.api.authorize.AuthResolver;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningSektorException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException;
@@ -19,6 +19,8 @@ import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -40,6 +42,10 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedRoller;
+
+@Slf4j
 @Tag(name = "Orgtilknytning")
 @RestController
 @RequestMapping(value = {"/app/orgtilknytninger"})
@@ -48,11 +54,15 @@ public class OrgtilknytningController {
     private final static Logger logger = LoggerFactory.getLogger(OrgtilknytningController.class);
 
     private final OrgtilknytningRestService orgtilknytningRestService;
-    private final AuthResolver authResolver;
+    private final RessursStateRepository ressursStateRepository;
+    private final OrgtilknytningService orgtilknytningService;
 
-    public OrgtilknytningController(OrgtilknytningRestService orgtilknytningRestService, AuthResolver authResolver) {
+    public OrgtilknytningController(OrgtilknytningRestService orgtilknytningRestService, RessursStateRepository ressursStateRepository,
+                                    OrgtilknytningService orgtilknytningService
+    ) {
         this.orgtilknytningRestService = orgtilknytningRestService;
-        this.authResolver = authResolver;
+        this.ressursStateRepository = ressursStateRepository;
+        this.orgtilknytningService = orgtilknytningService;
     }
 
     @GetMapping()
@@ -104,9 +114,7 @@ public class OrgtilknytningController {
         @PathVariable String fid,
         @RequestBody EndreTilknytningtypeRequest endreTilknytningtypeRequest
     ) {
-        if (!authResolver.kanRedigereRessurs(orgtilknytningRestService.getOrgtilknytning(fid).navident())) {
-            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
-        }
+        validateKanEndreOrgtilknytningByFid(fid);
 
         orgtilknytningRestService.updateOrgtilknytningType(fid, endreTilknytningtypeRequest);
         return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
@@ -147,11 +155,10 @@ public class OrgtilknytningController {
         @PathVariable String navident,
         @Valid @RequestBody OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest
     ) {
-        var isLeder = authResolver.kanRedigereRessurs(navident);
+        validateKanEndreOrgtilknytninger(navident, oppdaterOrgtilknytningerForRessursRequest);
 
-        orgtilknytningRestService.oppdaterOrgtilknytningerForRessurs(navident, oppdaterOrgtilknytningerForRessursRequest, isLeder);
+        orgtilknytningRestService.oppdaterOrgtilknytningerForRessurs(navident, oppdaterOrgtilknytningerForRessursRequest);
         return ResponseEntity.ok(StandardResponse.builder().message("Orgtilknytninger for ressurs oppdatert").build());
-
     }
 
     @PostMapping("/masseflytting")
@@ -164,11 +171,14 @@ public class OrgtilknytningController {
         @ApiResponse(responseCode = "400", description = "Feil i input"),
     })
     @PreAuthorize(
+        // Hvis/når denne åpnes for andre, legg til tester som sjekker at
+        // vanlig leder/delegert ikke kan flytte robot/vikafossen/utlKonsulent
         "hasAuthority('ADMIN')"
     )
     public ResponseEntity<MasseFlyttingResponse> masseflytting(
         @Valid @RequestBody MasseFlyttingRequest masseFlyttingRequest
     ) {
+        validateKanMasseflytte(masseFlyttingRequest);
         if (masseFlyttingRequest.gyldigFomFlyttedato() == null) {
             var res = orgtilknytningRestService.masseflyttingAvRessurser(masseFlyttingRequest);
 
@@ -178,6 +188,43 @@ public class OrgtilknytningController {
         return ResponseEntity.ok(response);
     }
 
+    private void validateKanEndreOrgtilknytningByFid(String fid) {
+        OrgtilknytningState ot = orgtilknytningRestService.getOrgtilknytning(fid);
+        RessursState ressurs = ressursStateRepository.findByNavident(ot.navident())
+            .orElseThrow(() -> RessursNotFoundException.navident(ot.navident()));
+
+        if (!orgtilknytningRestService.kanEndreOrgtilknytning(ressurs.identType(), ressurs.navident())) {
+            log.warn("{} med roller {} har ikke tilgang til å redigere orgtilknytning {} for ressurs - {} - {}, ",
+                getAuthenticatedNavIdent(), getAuthenticatedRoller(), ot.fid(), ot.navident(), ressurs.identType());
+            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
+        }
+    }
+
+    private void validateKanEndreOrgtilknytninger(String navident, OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
+        RessursState ressurs = ressursStateRepository.findByNavident(navident)
+            .orElseThrow(() -> RessursNotFoundException.navident(navident));
+
+        if (!orgtilknytningRestService.kanEndreOrgtilknytninger(ressurs.identType(), navident, oppdaterOrgtilknytningerForRessursRequest)) {
+            log.warn("{} med roller {} har ikke tilgang til å redigere orgtilknytninger for ressurs - {} - {}, ",
+                getAuthenticatedNavIdent(), getAuthenticatedRoller(), navident, ressurs.identType());
+            throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
+        }
+    }
+
+    private void validateKanMasseflytte(MasseFlyttingRequest masseFlyttingRequest) {
+        masseFlyttingRequest.orgtilknytningerFid().forEach(otFid -> {
+            var ot = orgtilknytningService.findByFid(otFid).orElseThrow(() -> OrgtilknytningNotFoundException.fid(otFid));
+
+            var ressurs = ressursStateRepository.findByNavident(ot.navident())
+                .orElseThrow(() -> RessursNotFoundException.navident(ot.navident()));
+
+            if (!orgtilknytningRestService.kanEndreOrgtilknytning(ressurs.identType(), ot.navident())) {
+                log.warn("{} med roller {} har ikke tilgang til å redigere orgtilknytninger for ressurs - {} - {}, ",
+                    getAuthenticatedNavIdent(), getAuthenticatedRoller(), ot.navident(), ressurs.identType());
+                throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
+            }
+        });
+    }
 
     // TODO: Lage global ControllerAdvice
     @ExceptionHandler(

@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.orgtilknytning.api.app;
 
 import io.getunleash.Unleash;
+import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
@@ -27,6 +28,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
@@ -58,6 +60,10 @@ import java.util.stream.Stream;
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 import static no.nav.nom.apps.api.common.DateUtils.isPerioderOverlapping;
+import static no.nav.nom.apps.api.common.security.NomApiAccessScope.ADMIN;
+import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_ROBOT;
+import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_UTL_KONSULENT;
+import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_VIKAFOSSEN;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
 
@@ -66,6 +72,7 @@ public class OrgtilknytningRestService {
     private final static Logger log = LoggerFactory.getLogger(OrgtilknytningRestService.class);
 
     public static final String BRUK_NY_MASSEFLYTT = "nom.masseflytting.bruk_ny_masseflytt";
+    public static final String BRUK_NY_TILGANGSVALIDERING = "nom.orgtilknytning.bruk_ny_tilgangsvalidering";
 
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final RessursStateRepository ressursStateRepository;
@@ -73,6 +80,7 @@ public class OrgtilknytningRestService {
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final RessursCommandService ressursCommandService;
     private final AuthorizedNavident authorizedNavident;
+    private final AuthResolver authResolver;
     private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
     private final MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
     private final Unleash unleash;
@@ -83,7 +91,7 @@ public class OrgtilknytningRestService {
         RessursCommandService ressursCommandService,
         RessursStateRepository ressursStateRepository,
         NomMastered nomMastered,
-        AuthorizedNavident authorizedNavident,
+        AuthorizedNavident authorizedNavident, AuthResolver authResolver,
         OrgtilknytningEndretEmailService orgtilknytningEndretEmailService, MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService, Unleash unleash
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -92,6 +100,7 @@ public class OrgtilknytningRestService {
         this.ressursStateRepository = ressursStateRepository;
         this.nomMastered = nomMastered;
         this.authorizedNavident = authorizedNavident;
+        this.authResolver = authResolver;
         this.orgtilknytningEndretEmailService = orgtilknytningEndretEmailService;
         this.masseflyttOrgtilknytningerService = masseflyttOrgtilknytningerService;
         this.unleash = unleash;
@@ -123,11 +132,8 @@ public class OrgtilknytningRestService {
     // Validerer at oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger inneholder alle, og inneholder kun, eksisterende orgtilknytninger for tilknyttet ressurs.
     // Påser at det ikke sendes unødvendige endring-events (endring-events som ikke gir ny verdi til state)
     // TODO: Valider at det til en hver tid finnes en aktiv daglig oppfolging
-    public void oppdaterOrgtilknytningerForRessurs(String navident,
-                                                   OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
-                                                   boolean isLeder) {
-        var orgEnheterTilLeder = authorizedNavident.orgenheterLederKanRedigere(getAuthenticatedNavIdent());
-        validateOppdaterOrgtilknytningerForRessursRequest(oppdaterOrgtilknytningerForRessursRequest, orgEnheterTilLeder, isLeder);
+    public void oppdaterOrgtilknytningerForRessurs(String navident, OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
+        validateOppdaterOrgtilknytningerForRessursRequest(oppdaterOrgtilknytningerForRessursRequest, authResolver.kanRedigereRessurs(navident));
         var tilknyttetRessurs = ressursStateRepository.findByNavident(navident)
             .orElseThrow(() -> RessursNotFoundException.navident(navident));
 
@@ -250,9 +256,10 @@ public class OrgtilknytningRestService {
     }
 
     private void validateOppdaterOrgtilknytningerForRessursRequest(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
-                                                                   List<IOrgenhet> alleUnderliggendeEnheterTilLeder,
                                                                    boolean isLeder) {
-        validateLederKanOppdatereOrgtilknytninger(oppdaterOrgtilknytningerForRessursRequest, alleUnderliggendeEnheterTilLeder, isLeder);
+        if (!unleash.isEnabled(BRUK_NY_TILGANGSVALIDERING)) {
+            validateLederKanOppdatereOrgtilknytninger(oppdaterOrgtilknytningerForRessursRequest, isLeder);
+        }
         validateEndreOrgtilknytningUnderToMaaneder(oppdaterOrgtilknytningerForRessursRequest);
         validateChronologicalDates(oppdaterOrgtilknytningerForRessursRequest);
         validateNoOverlappingDagligeOppfolginger(oppdaterOrgtilknytningerForRessursRequest);
@@ -332,9 +339,8 @@ public class OrgtilknytningRestService {
     }
 
     private void validateLederKanOppdatereOrgtilknytninger(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
-                                                           List<IOrgenhet> alleUnderliggendeEnheterTilLeder,
                                                            boolean isLeder) {
-
+        var alleUnderliggendeEnheterTilLeder = authorizedNavident.orgenheterLederKanRedigere(getAuthenticatedNavIdent());
         Set<String> orgenhetIds = alleUnderliggendeEnheterTilLeder.stream().map(IOrgenhet::getId).collect(Collectors.toSet());
         var orgtilknytningFids = oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().stream()
             .map(EndreOrgtilknytningRequest::fid)
@@ -873,8 +879,49 @@ public class OrgtilknytningRestService {
 
     }
 
-    private boolean isActiveOrFuture(LocalDate gyldigFom, Optional<LocalDate> gyldigTom) {
-        return isActiveOrFuture(gyldigFom, gyldigTom.orElse(null));
+    public boolean kanEndreOrgtilknytning(IdentType identType, String navident) {
+        return switch (identType) {
+            case ROBOT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_ROBOT, ADMIN) || authResolver.kanRedigereRessurs(navident);
+            case UTENLANDSK_KONSULENT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_UTL_KONSULENT, ADMIN) || authResolver.kanRedigereRessurs(navident);
+            case VIKAFOSSEN -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN, ADMIN); // NOM admin skal fratas denne rollen etterhvert
+            default -> authResolver.kanRedigereRessurs(navident);
+        };
+    }
+
+    public boolean kanEndreOrgtilknytninger(IdentType identType, String navident, OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
+        if (unleash.isEnabled(BRUK_NY_TILGANGSVALIDERING)) {
+            var orgenhetIdsUnderEndring = orgEnhetIderForOterUnderEndring(oppdaterOrgtilknytningerForRessursRequest);
+            return switch (identType) {
+                case ROBOT ->
+                    SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_ROBOT,ADMIN)
+                    || authResolver.kanRedigereRessurs(navident)
+                    || authResolver.kanRessursRedigereNoenAvOrgenhetene(navident, orgenhetIdsUnderEndring);
+                case UTENLANDSK_KONSULENT ->
+                    SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_UTL_KONSULENT,ADMIN)
+                    || authResolver.kanRedigereRessurs(navident)
+                    || authResolver.kanRessursRedigereNoenAvOrgenhetene(navident, orgenhetIdsUnderEndring);
+                case VIKAFOSSEN ->
+                    SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN, ADMIN); // NOM admin skal fratas denne rollen etterhvert
+                default ->
+                    authResolver.kanRedigereRessurs(navident)
+                    || authResolver.kanRessursRedigereNoenAvOrgenhetene(navident, orgenhetIdsUnderEndring);
+            };
+        }
+        return true;
+    }
+
+    private Set<String> orgEnhetIderForOterUnderEndring(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
+        var enheterTilOTerUnderEndring = new HashSet<String>();
+        oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {
+            var otFid = endreOrgtilknytningRequest.fid();
+            var ot = orgtilknytningStateRepository.findByFid(otFid).orElseThrow(() -> new OrgtilknytningNotFoundException(otFid));
+            enheterTilOTerUnderEndring.add(ot.orgEnhetId());
+        });
+        oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(leggTilOrgtilknytningRequest ->
+            enheterTilOTerUnderEndring.add(leggTilOrgtilknytningRequest.orgEnhetId())
+        );
+
+        return enheterTilOTerUnderEndring;
     }
 
     private boolean isActiveOrFuture(LocalDate gyldigFom, LocalDate gyldigTom) {
