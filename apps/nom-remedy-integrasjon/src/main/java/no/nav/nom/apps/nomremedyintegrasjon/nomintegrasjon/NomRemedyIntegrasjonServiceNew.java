@@ -97,7 +97,10 @@ public class NomRemedyIntegrasjonServiceNew {
         if (leaderElection.isLeader()) {
             var errorStates = errorStateRepository.findAll();
             if (!errorStates.isEmpty()) {
-                logger.info("ALERT: En sjekk har blitt gjort på nom-remedy-integrasjon error states, og det er {} feil i systemet, sjekk i nom-admin", errorStates.size());
+                logger.info(
+                    "ALERT: En sjekk har blitt gjort på nom-remedy-integrasjon error states, og det er {} feil i systemet, sjekk i nom-admin",
+                    errorStates.size()
+                );
             }
         }
     }
@@ -168,7 +171,7 @@ public class NomRemedyIntegrasjonServiceNew {
             if (currentDolOrgtilknytning.isPresent()) {
                 aggregateStateRepository.save(
                     aggregateState.toBuilder()
-                        .delayedUntil(orgtilknytningState.gyldigFom())
+                        .delayedUntil(orgtilknytningState.gyldigFom().plusDays(1))
                         .build());
                 logger.info(
                     "OrgtilknytningState med fid {} ble utsatt i aggregateStateTabellen helt til {}",
@@ -200,20 +203,28 @@ public class NomRemedyIntegrasjonServiceNew {
         } else if (futureDolOrgtilknytning.isPresent()) {
             var dolOrgtilknytning = futureDolOrgtilknytning.get();
             saveStateToRemedyIfNewOrReactivatedRessurs(ressursState, dolOrgtilknytning);
-        } else if (ressursState.sluttdato().isPresent() && ressursState.sluttdato().get().isBefore(LocalDate.now())) {
-            if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-                remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(navident).ifPresentOrElse(
-                    nomIntegrasjonEntity -> {
-                        if (nomIntegrasjonEntity.getEntryOperasjon().equals("Slette")) {
-                            logger.info("Ressurs {} er allerede slettet i IR", navident);
-                        } else {
-                            remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv());
-                            logger.info("Ressurs {} er merket for sletting i IR", navident);
-                        }
-                    }, () -> remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv())
-                );
-            } else {
-                logger.info("Ressurs {} er merket for sletting i IR", navident);
+        } else if (ressursState.sluttdato().isPresent()) {
+            var sluttdato = ressursState.sluttdato().get();
+            if (sluttdato.isBefore(LocalDate.now())) {
+                if (unleash.isEnabled(UNLEASH_TOGGLE)) {
+                    remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(navident).ifPresentOrElse(
+                        nomIntegrasjonEntity -> {
+                            if (nomIntegrasjonEntity.getEntryOperasjon().equals("Slette")) {
+                                logger.info("Ressurs {} er allerede slettet i IR", navident);
+                            } else {
+                                remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv());
+                                logger.info("Ressurs {} er merket for sletting i IR", navident);
+                            }
+                        }, () -> remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv())
+                    );
+                } else {
+                    logger.info("Ressurs {} er merket for sletting i IR", navident);
+                }
+            } else if (!sluttdato.isBefore(LocalDate.now())) {
+                aggregateStateRepository.save(
+                    aggregateState.toBuilder()
+                        .delayedUntil(ressursState.sluttdato().get().plusDays(1))
+                        .build());
             }
         } else {
             throw OrgtilknytningNotFoundException.orgtilknytningNotFoundException(navident);
