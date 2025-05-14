@@ -141,6 +141,7 @@ function UserImageNew(props: UserImageProperties) {
   const [imgSrc, setImgSrc] = useState(
     enableImgFetch ? `/frackend/nom-azure/picture/${props.navident}` : person,
   );
+  const [imgError, setImgError] = useState(false);
 
   const STYLE = css`
     height: ${size || "65px"};
@@ -148,7 +149,7 @@ function UserImageNew(props: UserImageProperties) {
     border-radius: 100%;
   `;
 
-  if (includeInstructionsWhenNotFound) {
+  if (includeInstructionsWhenNotFound && imgError) {
     return (
       <Link
         href="https://navno.sharepoint.com/sites/intranett-it/SitePages/oppdatere%20profilen%20din%20i%20medarbeiders%C3%B8ket.aspx"
@@ -166,7 +167,10 @@ function UserImageNew(props: UserImageProperties) {
       alt={"Fotografi av " + (navn || navident)}
       css={STYLE}
       loading={loadOnlyWhenVisible ? "lazy" : "eager"}
-      onError={() => setImgSrc(person)}
+      onError={() => {
+        setImgSrc(person);
+        setImgError(true);
+      }}
       src={imgSrc}
     />
   );
