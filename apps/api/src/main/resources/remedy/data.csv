@@ -360,7 +360,6 @@ EH00001;2300;ORGNIV3;HELFO;Beholdt;;;JA;EH00001;ORGENHET;je305h;28.02.2025 - lag
 240300;4703;ORGNIV3;;FEIL, se kommentar;243201;ge927t;JA;243201;ORGNIV3;ge927t;orgEnheten finnes ikke. Har lagt inn riktig enhet basert på at NORG sa det var HMS Oslo
 240400;4704;ORGNIV3;;FEIL, se kommentar;240401;je378k;JA;240401;ORGNIV3;je378k;orgEnheten finnes ikke. Har lagt inn riktig enhet basert på NORG, og stikkprøve på trygdeIdent
 240500;4705;ORGNIV3;HMS Oppland;Beholdt;;;JA;240500;ORGNIV3;leggInn;
-2450001;4705;AGRESSOORGENHET;Sentral forsyningsenhet operativ;Beholdt;;;JA;2450001;ORGENHET;sa711j;08.05.2025 midlertidig lagt inn som workarount frem til uke 21 2025
 240600;4706;ORGNIV3;HMS Buskerud;Beholdt;;;JA;240600;ORGNIV3;leggInn;
 240700;4707;ORGNIV3;HMS Vestfold og Telemark;Beholdt;;;JA;240700;ORGNIV3;leggInn;
 240900;4709;ORGNIV3;HMS Aust-Agder;TODO;;;NEI;240900;;leggInn;28.02.2025: nedlagt i NOM og U4. Ingen folk i IR. Kan slettes.
