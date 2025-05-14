@@ -18,9 +18,9 @@ export function useTableSort<T>(
       setSort({
         orderBy: sortKey,
         direction:
-          sort && sortKey === sort.orderBy && sort.direction === "ascending"
-            ? "descending"
-            : "ascending",
+          sort && sortKey === sort.orderBy && sort.direction === "descending"
+            ? "ascending"
+            : "descending",
       });
     } else {
       setSort({ orderBy: defaultOrderBy, direction: "none" });
