@@ -1,9 +1,13 @@
 package no.nav.nom.apps.azure;
 
 import com.azure.identity.ClientSecretCredentialBuilder;
+import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.microsoft.graph.serviceclient.GraphServiceClient;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -21,7 +25,11 @@ public class AzureAdService {
 
     private final LoadingCache<String, byte[]> pictureCache;
 
-    public AzureAdService(Environment environment) {
+    private final Counter countPictureRequested;
+    private final Counter countPictureFetch;
+    private final Gauge cacheSizeGauge;
+
+    public AzureAdService(Environment environment, MeterRegistry meterRegistry) {
         var azProps = new AzureProperties(environment);
         var clientSecretCredential = new ClientSecretCredentialBuilder()
             .clientId(azProps.clientId)
@@ -32,11 +40,23 @@ public class AzureAdService {
         this.graphServiceClient = new GraphServiceClient(clientSecretCredential);
 
         this.pictureCache = Caffeine.newBuilder()
-                .expireAfterWrite(Duration.ofHours(12))
-                .maximumSize(10000).build(this::lookupProfilePictureByNavIdent);
+            .expireAfterWrite(Duration.ofHours(72))
+            .refreshAfterWrite(Duration.ofHours(24))
+            .maximumSize(20000).build(this::lookupProfilePictureByNavIdent);
+
+        this.pictureCache.estimatedSize();
+
+        this.countPictureRequested = meterRegistry.counter("requests.picture_requested.count");
+        this.countPictureFetch = meterRegistry.counter("requests.picture_fetched.count");
+
+        this.cacheSizeGauge = Gauge
+            .builder("picture.cache.size", this.pictureCache, Cache::estimatedSize)
+            .register(meterRegistry);
+
     }
 
     private byte[] lookupProfilePictureByNavIdent(String navIdent) {
+        countPictureFetch.increment();
         String userId = lookupUserByNavIdent(navIdent);
         var pictureBytes = userId == null ? null : lookupUserProfilePicture(userId);
         log.info("Fetch of profile picture for {}: {}", navIdent, pictureBytes == null ? "failed" : "success");
@@ -44,6 +64,8 @@ public class AzureAdService {
     }
 
     public Optional<byte[]> profilePictureByNavIdent(String navIdent){
+        countPictureRequested.increment();
+        this.cacheSizeGauge.value();
         var out = pictureCache.get(navIdent);
         return Optional.ofNullable(out);
     }

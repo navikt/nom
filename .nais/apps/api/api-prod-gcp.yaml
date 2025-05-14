@@ -28,9 +28,8 @@ spec:
   ingresses:
     - https://nom-api.intern.nav.no
   replicas:
-    min: 2
-    max: 2
-    cpuThresholdPercentage: 50
+    min: 1
+    max: 1
   strategy:
     rollingUpdate:
       maxSurge: 100%
