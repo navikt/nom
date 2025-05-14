@@ -11,16 +11,16 @@ export function useTableSort<T>(
 ) {
   const [sort, setSort] = useState<SortState>({
     orderBy: defaultOrderBy,
-    direction: direction ?? "ascending",
+    direction: direction ?? "descending",
   });
   const handleSort = (sortKey: string | undefined) => {
     if (sortKey) {
       setSort({
         orderBy: sortKey,
         direction:
-          sort && sortKey === sort.orderBy && sort.direction === "descending"
-            ? "ascending"
-            : "descending",
+          sort && sortKey === sort.orderBy && sort.direction === "ascending"
+            ? "descending"
+            : "ascending",
       });
     } else {
       setSort({ orderBy: defaultOrderBy, direction: "none" });
