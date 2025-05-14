@@ -171,7 +171,7 @@ public class NomRemedyIntegrasjonServiceNew {
             if (currentDolOrgtilknytning.isPresent()) {
                 aggregateStateRepository.save(
                     aggregateState.toBuilder()
-                        .delayedUntil(orgtilknytningState.gyldigFom().plusDays(1))
+                        .delayedUntil(orgtilknytningState.gyldigFom())
                         .build());
                 logger.info(
                     "OrgtilknytningState med fid {} ble utsatt i aggregateStateTabellen helt til {}",
