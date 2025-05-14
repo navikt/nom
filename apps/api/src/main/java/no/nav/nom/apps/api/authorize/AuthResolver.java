@@ -6,7 +6,10 @@ import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
@@ -39,7 +42,6 @@ public class AuthResolver {
      * @param navident
      * @return true hvis tilgang, false hvis ikke
      */
-
     public boolean kanSelvbetjene(String navident) {
         return getAuthenticatedNavIdent().equals(navident);
     }
@@ -63,4 +65,8 @@ public class AuthResolver {
         return editableOrgenheter.stream().anyMatch(orgenhet -> orgenhet.getId().equals(orgenhetId));
     }
 
+    public boolean kanRessursRedigereNoenAvOrgenhetene(String ressursNavident, Set<String> orgenhetIds) {
+        var editableOrgenhetIds = authorizedNavident.orgenheterLederKanRedigere(ressursNavident).stream().map(IOrgenhet::getId).collect(Collectors.toSet());
+        return !Collections.disjoint(editableOrgenhetIds, orgenhetIds);
+    }
 }

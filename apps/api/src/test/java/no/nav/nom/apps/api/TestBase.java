@@ -29,6 +29,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.util.StreamUtils;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -92,7 +93,7 @@ public abstract class TestBase {
     @Autowired
     protected RessursStateRepository ressursStateRepository;
 
-    @MockBean
+    @MockitoBean
     protected Unleash unleash;
 
     @Autowired
@@ -107,7 +108,7 @@ public abstract class TestBase {
     @Autowired
     protected MasteredRessursStateRepository masteredRessursStateRepository;
 
-    @MockBean
+    @MockitoBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
 //    @Autowired

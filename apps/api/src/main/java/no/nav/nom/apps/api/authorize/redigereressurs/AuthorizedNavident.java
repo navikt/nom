@@ -15,7 +15,6 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.ressurs.api.dto.MinimalRessurs;
 import no.nav.nom.contract.nom.NomNivaa;
@@ -33,7 +32,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -103,16 +110,17 @@ public class AuthorizedNavident {
         return delegertLederStateRepository.findDelegertAvNavident(getAuthenticatedNavIdent());
     }
 
-    public boolean kanBrukerRedigereRessurs(String navident, String ressursNavident) {
+    // Har ressurs aktiv eller fremtidig tilknytning på enhet eller enhet i hierarki under som bruker er leder for eller er delegert leder for
+    public boolean kanBrukerRedigereRessurs(String bruker, String ressursNavident) {
         Set<String> orgenhetIder = new HashSet<>();
         synchronized (this) {
-            var orgenheter = lederForOrgenhetSomKanRedigere.get(navident);
+            var orgenheter = lederForOrgenhetSomKanRedigere.get(bruker);
             if (orgenheter != null) {
-                orgenhetIder.addAll(orgenheter);
+                orgenhetIder.addAll(orgenheter); // ADD alle enheter og de under som bruker er leder for
             }
         }
 
-        orgenhetIder.addAll(delegertLederStateRepository.aktiveDelegeringerForOrgenheterTilNavident(navident));
+        orgenhetIder.addAll(delegertLederStateRepository.aktiveDelegeringerForOrgenheterTilNavident(bruker)); // ADD alle enheter bruker er delegert til
         return orgenhetIder.stream().anyMatch(orgenhetId -> erRessursInnunderOrgenhet(ressursNavident, orgenhetId));
     }
 
