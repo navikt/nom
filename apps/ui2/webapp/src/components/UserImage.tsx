@@ -2,8 +2,10 @@ import { css } from "@emotion/react";
 import { Link, Tooltip } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import type { MutableRefObject } from "react";
+import { useState } from "react";
 import React from "react";
 
+import { useUnleashToggle } from "~/hooks/useUnleashToggle";
 import person from "~/resources/person.svg";
 
 type UserImageProperties = {
@@ -15,6 +17,15 @@ type UserImageProperties = {
 };
 
 export function UserImage(properties: UserImageProperties) {
+  const nomAzurePictures = useUnleashToggle("nom.ui.bilder.bruknomazure");
+  return !nomAzurePictures ? (
+    <UserImageOld {...properties} />
+  ) : (
+    <UserImageNew {...properties} />
+  );
+}
+
+function UserImageOld(properties: UserImageProperties) {
   const { navident, size, navn, includeInstructionsWhenNotFound } = properties;
   const loadOnlyWhenVisible = properties.loadOnlyWhenVisible ?? true;
   const [shouldLoadImg, setShouldLoadImg] =
@@ -118,4 +129,45 @@ async function fetchPhoto(navident: string) {
   }
   const blob = await response.blob();
   return URL.createObjectURL(blob);
+}
+
+function UserImageNew(props: UserImageProperties) {
+  const { navident, size, navn, includeInstructionsWhenNotFound } = props;
+  const loadOnlyWhenVisible = props.loadOnlyWhenVisible ?? true;
+
+  const enableImgFetch =
+    !!navident && globalThis.location.href.includes("nom.nav.no");
+
+  const [imgSrc, setImgSrc] = useState(
+    enableImgFetch ? `/frackend/nom-azure/picture/${props.navident}` : person,
+  );
+
+  const STYLE = css`
+    height: ${size || "65px"};
+    width: ${size || "65px"};
+    border-radius: 100%;
+  `;
+
+  if (includeInstructionsWhenNotFound) {
+    return (
+      <Link
+        href="https://navno.sharepoint.com/sites/intranett-it/SitePages/oppdatere%20profilen%20din%20i%20medarbeiders%C3%B8ket.aspx"
+        target="_blank"
+      >
+        <Tooltip content="Åpne instruks for å endre bilde">
+          <img alt="" css={STYLE} src={person} />
+        </Tooltip>
+      </Link>
+    );
+  }
+
+  return (
+    <img
+      alt={"Fotografi av " + (navn || navident)}
+      css={STYLE}
+      loading={loadOnlyWhenVisible ? "lazy" : "eager"}
+      onError={() => setImgSrc(person)}
+      src={imgSrc}
+    />
+  );
 }
