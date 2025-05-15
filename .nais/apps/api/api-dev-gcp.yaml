@@ -283,6 +283,9 @@ spec:
         - application: eux-neessi-q2
           namespace: eessibasis
           cluster: dev-gcp
+        - application: behandlingsflyt
+          namespace: aap
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
