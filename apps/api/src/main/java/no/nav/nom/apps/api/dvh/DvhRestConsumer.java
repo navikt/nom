@@ -12,6 +12,7 @@ import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
+import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
@@ -67,6 +68,8 @@ public class DvhRestConsumer {
     private final NomStateDelegertLederListener nomStateDelegertLederListener;
     private final DvhOrdsService dvhOrdsService;
 
+    private final OTUtenforHierarki otUtenforHierarki;
+
     @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
     public void scheduledOppdateringFraDvh() {
         log.info("Starter schedulert oppdatering fra DVH");
@@ -110,6 +113,11 @@ public class DvhRestConsumer {
 
         if (leaderElection.isLeader()) { // Oppdater state fra dvh - holder at en Pod gjør dette
             dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();
+
+            // Sikre 'riktig orgenhet+organisering' før Sjekk på ot utenfor hierarki
+            loadLedereAndOrganiseringerFromDvh();
+            // Finn OTer utenfor hierarki - og autoflytt om mulig
+            findOTUtenforHierarki();
 
             orgEnhetTypeHandler.updateOrgEnhetsTypeForLeafs();
 
@@ -251,6 +259,16 @@ public class DvhRestConsumer {
         }
         return false;
     }
+
+    public void findOTUtenforHierarki() {
+        log.info("Finn OTer utenfor hierarki");
+        try {
+            otUtenforHierarki.findOTUtenforHierarkiFromDataLast();
+        } catch (Exception e) {
+            log.error("Feilet i 'Finn OTer utenfor hierarki'", e);
+        }
+    }
+
 
     private boolean isInitialStateReady() {
         return  nomStateRessursListener.hasReadToEndOnStartup()

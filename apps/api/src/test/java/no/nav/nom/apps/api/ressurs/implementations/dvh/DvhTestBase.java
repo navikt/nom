@@ -20,6 +20,7 @@ import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
+import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursEventKafkaConfig;
@@ -133,4 +134,6 @@ public abstract class DvhTestBase {
     RessursEventSourceRepository ressursEventSourceRepository;
     @MockitoBean
     U4DiffPaaMastrede u4DiffPaaMastrede;
+    @MockitoBean
+    OTUtenforHierarki oTUtenforHierarki;
 }
