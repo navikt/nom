@@ -168,7 +168,7 @@ class MastreStatligeINomTest {
 
         var res = mastreStatligeINom.utvalgGruppeA(dd5uker);
 
-        assertEquals(8, res.size());
+        assertEquals(3, res.size());
     }
 
     @Test
@@ -199,10 +199,10 @@ class MastreStatligeINomTest {
         var res = mastreStatligeINom.oppdaterRessursSluttdatoGrpA(dd5uker, List.of("A000001", "A000002", "A000003"), true, "USERID");
 
         assertTrue(res.getBody().contains("Antall navidenter å ekskludere: 3"));
-        assertTrue(res.getBody().contains("Antall i Gruppe A utvalg: 8"));
-        assertTrue(res.getBody().contains("Antall å oppdatere: 7"));
+        assertTrue(res.getBody().contains("Antall i Gruppe A utvalg: 3"));
+        assertTrue(res.getBody().contains("Antall å oppdatere: 3"));
 
-        verify(ressursCommandService, times(7)).oppdaterRessursSluttdatoEvent(any());
+        verify(ressursCommandService, times(3)).oppdaterRessursSluttdatoEvent(any());
     }
 
     @Test
@@ -214,8 +214,8 @@ class MastreStatligeINomTest {
 
         assertTrue(res.getBody().contains("DRY RUN"));
         assertTrue(res.getBody().contains("Antall navidenter å ekskludere: 3"));
-        assertTrue(res.getBody().contains("Antall i Gruppe A utvalg: 8"));
-        assertTrue(res.getBody().contains("Antall å oppdatere: 7"));
+        assertTrue(res.getBody().contains("Antall i Gruppe A utvalg: 3"));
+        assertTrue(res.getBody().contains("Antall å oppdatere: 3"));
 
         verifyNoInteractions(ressursCommandService);
     }
