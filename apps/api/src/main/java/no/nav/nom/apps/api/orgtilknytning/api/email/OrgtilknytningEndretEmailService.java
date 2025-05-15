@@ -276,6 +276,8 @@ public class OrgtilknytningEndretEmailService {
         try {
             List<String> recipientList = new ArrayList<>();
             var innsenderVisningsnavn = "";
+
+            recipientList.addAll(getAdditionalRecipientsEmails());
             if (SecurityUtil.hasAuthentication()) {
                 String innsenderNavident = SecurityUtil.getAuthenticatedNavIdent();
                 innsenderVisningsnavn = ressursStateRepository.findByNavident(innsenderNavident)
@@ -287,8 +289,10 @@ public class OrgtilknytningEndretEmailService {
                     .map(AdRessurs::getEmail)
                     .toList()
                 );
+            } else {
+                // Auto flytting av OTer utenfor hierarki
+                recipientList.addAll(getOmadaRecipientsEmails());
             }
-            recipientList.addAll(getAdditionalRecipientsEmails());
 
             var gammelOrgEnhetNavn = orgtilknytningerFlyttet.stream().map(ot -> getOrgEnhetNavn(ot.orgEnhetId())).distinct().collect(Collectors.joining(", "));
             var nyOrgEnhetNavn = getOrgEnhetNavn(nyOrgenhetId);
@@ -443,6 +447,14 @@ public class OrgtilknytningEndretEmailService {
         additionalRecipients.add("Roy.Grini@nav.no");
         return additionalRecipients;
     }
+
+    private List<String> getOmadaRecipientsEmails() {
+        List<String> additionalRecipients = new ArrayList<>();
+        additionalRecipients.add("Eivind.Staff@nav.no");
+        additionalRecipients.add("Lise.Charlotte.Tviberg@nav.no");
+        return additionalRecipients;
+    }
+
 
     public String getNavidentFromOrgtilknytningStateRepository(String fid) {
         var orgtilknytningState = orgtilknytningStateRepository.findByFid(fid);
