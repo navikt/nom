@@ -246,6 +246,9 @@ spec:
         - application: eux-neessi
           namespace: eessibasis
           cluster: prod-gcp
+        - application: behandlingsflyt
+          namespace: aap
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
