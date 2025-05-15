@@ -39,7 +39,7 @@
         <commons-fileupload.version>1.5</commons-fileupload.version>
         <ulid-creator.version>5.2.3</ulid-creator.version>
         <vault-jdbc.version>1.3.10</vault-jdbc.version>
-        <swagger-annotations-jakarta.version>2.2.30</swagger-annotations-jakarta.version>
+        <swagger-annotations-jakarta.version>2.2.32</swagger-annotations-jakarta.version>
         <wiremock.version>2.35.2</wiremock.version>
         <org.wiremock.version>3.13.0</org.wiremock.version>
         <spring-cloud-contract-wiremock.version>4.2.1</spring-cloud-contract-wiremock.version>
