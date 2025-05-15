@@ -309,7 +309,7 @@ public class MastreStatligeINom {
         // Statlige, mastret og
         // seneste oT.tomDato > 'maxOTDate'  <- Ta med kun de er aktive etter denne datoen ('fremtidige')
         return getAlleStatligeMastrede().stream()
-            .filter(ressurs -> ressurs.maxOtSluttDato() != null && etter(ressurs.maxOtSluttDato(), maxOTDateEtter))
+            .filter(ressurs -> ressurs.maxOtSluttDato() != null && !ressurs.maxOtSluttDato.equals(MAX_DATE) && etter(ressurs.maxOtSluttDato(), maxOTDateEtter))
             .toList();
     }
 
@@ -320,7 +320,7 @@ public class MastreStatligeINom {
         // og seneste oT.tomDato >= 'maxOTDateLikEllerEtter'    <- Ekskluder gamle datoer - bruk 2024.12.01
         return getAlleStatligeMastrede().stream()
             .filter(ressurs -> ressurs.sluttDato() == null)
-            .filter(ressurs -> ressurs.maxOtSluttDato() != null && likEllerFoer(ressurs.maxOtSluttDato(), maxOTDateTLikEllerFoer))
+            .filter(ressurs -> ressurs.maxOtSluttDato() != null && !ressurs.maxOtSluttDato.equals(MAX_DATE) && likEllerFoer(ressurs.maxOtSluttDato(), maxOTDateTLikEllerFoer))
             .filter(ressurs -> likEllerEtter(ressurs.maxOtSluttDato(), maxOTDateLikEllerEtter))
             .toList();
     }
@@ -331,7 +331,7 @@ public class MastreStatligeINom {
         // og seneste oT.tomDato <= 'maxOTDateLikEllerEtter'    <- Ekskludere Gruppe A (Samme dato som brukt i gruppe A)
         // og ressurs.sluttDato > 'maxOTDateLikEllerEtter'    <- Ekskluder gamle datoer - bruk 2024.12.31
         return getAlleStatligeMastrede().stream()
-            .filter(ressurs -> ressurs.maxOtSluttDato() != null && likEllerFoer(ressurs.maxOtSluttDato(), maxOTDateTLikEllerFoer))
+            .filter(ressurs -> ressurs.maxOtSluttDato() != null && !ressurs.maxOtSluttDato.equals(MAX_DATE) && likEllerFoer(ressurs.maxOtSluttDato(), maxOTDateTLikEllerFoer))
             .filter(ressurs -> ressurs.sluttDato() != null && etter(ressurs.sluttDato(), ressursSluttDatoEtter))
             .toList();
     }
