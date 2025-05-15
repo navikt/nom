@@ -23,7 +23,7 @@ public class AzureAdService {
 
     private final GraphServiceClient graphServiceClient;
 
-    private final LoadingCache<String, byte[]> pictureCache;
+    private final LoadingCache<String, Optional<byte[]>> pictureCache;
 
     private final Counter countPictureRequested;
     private final Counter countPictureFetch;
@@ -55,19 +55,18 @@ public class AzureAdService {
 
     }
 
-    private byte[] lookupProfilePictureByNavIdent(String navIdent) {
+    private Optional<byte[]> lookupProfilePictureByNavIdent(String navIdent) {
         countPictureFetch.increment();
         String userId = lookupUserByNavIdent(navIdent);
         var pictureBytes = userId == null ? null : lookupUserProfilePicture(userId);
         log.info("Fetch of profile picture for {}: {}", navIdent, pictureBytes == null ? "failed" : "success");
-        return pictureBytes;
+        return Optional.ofNullable(pictureBytes);
     }
 
     public Optional<byte[]> profilePictureByNavIdent(String navIdent){
         countPictureRequested.increment();
         this.cacheSizeGauge.value();
-        var out = pictureCache.get(navIdent);
-        return Optional.ofNullable(out);
+        return pictureCache.get(navIdent);
     }
 
     public void refreshPictureCache(String navIdent) {
