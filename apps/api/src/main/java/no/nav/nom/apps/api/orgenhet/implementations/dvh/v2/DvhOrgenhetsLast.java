@@ -40,8 +40,6 @@ public class DvhOrgenhetsLast {
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrgEnhetCommandService orgEnhetCommandService;
     private final OrgEnhetIdGenerator orgEnhetIdGenerator;
-
-    private final OTUtenforHierarki otUtenforHierarki;
     private final DvhOrdsService dvhOrdsService;
 
     /*
@@ -197,9 +195,6 @@ public class DvhOrgenhetsLast {
                 }
             );
             log.info("Ferdig med orgenhet last");
-
-            // Finn OTer utenfor hierarki
-            otUtenforHierarki.findOTUtenforHierarkiFromDataLast();
         } catch (Exception e) {
             log.error("Failure loading data from DVH", e);
         }

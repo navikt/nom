@@ -157,4 +157,9 @@ public class DvhLast {
     public void triggerOrgEnhetsTypeLast(){
         orgEnhetTypeHandler.updateOrgEnhetsTypeForLeafs();
     }
+
+    @Async
+    public void triggerFindOTUtenforHierarki() {
+        dvhRestConsumer.findOTUtenforHierarki();
+    }
 }
