@@ -15,6 +15,9 @@ management:
         include: prometheus, info, health, metrics, loggers, mappings
 
 spring:
+  threads:
+    virtual:
+      enabled: true
   security:
     oauth2:
       resourceserver:
