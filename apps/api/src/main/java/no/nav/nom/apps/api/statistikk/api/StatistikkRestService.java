@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -214,23 +215,38 @@ public class StatistikkRestService {
             .toList().size();
     }
 
-    private List<OrgEnhet> finnAlleNavKontorer(Collection<IOrgenhet> alleOrgenheter) {
-        log.info("Finner alle Nav kontorer");
-        var orgenheter = alleOrgenheter.stream()
-            .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().isPresent())
-            .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().get().equals(OrgEnhetsType.NAV_KONTOR))
-            .map(orgEnhetMapper::mapToOrgEnhet)
-            .toList();
-        log.info("Funnet alle Nav kontorer: {}", orgenheter.size());
-        log.info("Finner alle som er Nav kontor og har overordnet enhet som ikke er arbeidsomraade");
-        return orgenheter.stream()
-            .filter(orgEnhet -> alleOrgenheter.stream()
-                .anyMatch(iOrgenhet ->
-                    iOrgenhet.getId().equals(orgEnhet.overordnetEnhetId())
-                        && iOrgenhet.getNomNivaa().isPresent()
-                        && !iOrgenhet.getNomNivaa().get().equals(NomNivaa.ARBEIDSOMRAADE)))
-            .toList();
-    }
+private List<OrgEnhet> finnAlleNavKontorer(Collection<IOrgenhet> alleOrgenheter) {
+    log.info("Finner alle Nav kontorer");
+    long startTime = System.nanoTime();
+
+    var orgenheter = alleOrgenheter.stream()
+        .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().isPresent())
+        .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().get().equals(OrgEnhetsType.NAV_KONTOR))
+        .map(orgEnhetMapper::mapToOrgEnhet)
+        .toList();
+
+    long orgenheterTime = System.nanoTime();
+    log.info("Funnet alle Nav kontorer: {} (Tid brukt: {} ms)", orgenheter.size(), (orgenheterTime - startTime) / 1_000_000);
+
+    log.info("Finner alle som er Nav kontor og har overordnet enhet som ikke er arbeidsomraade");
+    List<OrgEnhet> navKontorer = new ArrayList<>();
+    orgenheter.forEach(orgEnhet -> {
+        var overordnetEnhet = alleOrgenheter.stream()
+            .filter(iOrgenhet -> iOrgenhet.getId().equals(orgEnhet.overordnetEnhetId()))
+            .filter(iOrgenhet -> iOrgenhet.getNomNivaa().isPresent())
+            .filter(iOrgenhet -> !iOrgenhet.getNomNivaa().get().equals(NomNivaa.ARBEIDSOMRAADE))
+            .findFirst().orElse(null);
+        if (overordnetEnhet != null) {
+            var overordnetEnhetMapped = orgEnhetMapper.mapToOrgEnhet(overordnetEnhet);
+            navKontorer.add(overordnetEnhetMapped);
+        }
+    });
+
+    long navKontorerTime = System.nanoTime();
+    log.info("Tid brukt på å finne Nav kontorer med overordnet enhet: {} ms", (navKontorerTime - orgenheterTime) / 1_000_000);
+
+    return navKontorer;
+}
 
     private List<IOrgenhet> createNewIOrgenhetList(Collection<IOrgenhet> allOrgenheter, NomNivaa nomNivaa, OrgEnhetsType orgEnhetsType) {
         return allOrgenheter.stream()
