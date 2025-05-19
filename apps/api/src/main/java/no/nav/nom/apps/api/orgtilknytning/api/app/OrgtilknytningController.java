@@ -179,11 +179,7 @@ public class OrgtilknytningController {
         @Valid @RequestBody MasseFlyttingRequest masseFlyttingRequest
     ) {
         validateKanMasseflytte(masseFlyttingRequest);
-        if (masseFlyttingRequest.gyldigFomFlyttedato() == null) {
-            var res = orgtilknytningRestService.masseflyttingAvRessurser(masseFlyttingRequest);
 
-            return ResponseEntity.ok(res);
-        }
         var response = orgtilknytningRestService.nyMasseflyttingAvRessurser(masseFlyttingRequest);
         return ResponseEntity.ok(response);
     }

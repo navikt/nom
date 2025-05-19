@@ -11,8 +11,8 @@ import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 
 public class PdlFullmaktControllerTest extends RestTestBase {
 
-    @MockBean
+    @MockitoBean
     protected RessursStateRepository ressursStateRepository;
 
     @Autowired
