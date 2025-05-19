@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +48,8 @@ public class StatistikkRestService {
 
     public GlobalStatistikkResponse hentGlobalStatistikk() {
         var alleRessurser = ressursStateRepository.findAllActiveRessurser().values().stream()
+            .distinct()
+            .filter(ressursState -> ressursState.startdato().isPresent() && !ressursState.startdato().get().isAfter(LocalDate.now()))
             .filter(this::filterGyldigeRessurs)
             .toList();
         var ressursStatistikk = new RessursStatistikk(
@@ -66,7 +69,7 @@ public class StatistikkRestService {
         var antallNavKontaktsenter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(alleOrgEnheter, OrgEnhetsType.NAV_KONTAKTSENTER);
         var antallKontrollKonrollenheter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(alleOrgEnheter, OrgEnhetsType.KONTROLL_KONTROLLENHET);
         var antallFylker = createNewIOrgenhetList(alleOrgEnheter, NomNivaa.DRIFTSENHET, OrgEnhetsType.FYLKE).size();
-        var antallNavKontorer = createNewIOrgenhetList(alleOrgEnheter, NomNivaa.ARBEIDSOMRAADE, OrgEnhetsType.NAV_KONTOR).size();
+        var antallNavKontorer = finnAlleNavKontorer(alleOrgEnheter).size();
         return new GlobalStatistikkResponse(
             ressursStatistikk,
             antallNavArbeidOgYtelser,
@@ -205,6 +208,18 @@ public class StatistikkRestService {
             .filter(navKontor -> enheterToIgnore.stream()
                 .noneMatch(fylkeEnhet -> fylkeEnhet.remedyEnhetId().equals(navKontor.remedyEnhetId())))
             .toList().size();
+    }
+
+    private List<OrgEnhet> finnAlleNavKontorer(Collection<IOrgenhet> alleOrgenheter) {
+        var orgenheter = alleOrgenheter.stream().map(orgEnhetMapper::mapToOrgEnhet).toList();
+        return orgenheter.stream()
+            .filter(orgenhet -> orgenhet.orgEnhetsType() != null)
+            .filter(orgenhet -> orgenhet.orgEnhetsType().equals(OrgEnhetsType.NAV_KONTOR))
+            .filter(orgenhet -> orgenheter.stream().anyMatch(org2 -> orgenhet.overordnetEnhetId() != null
+                && orgenhet.overordnetEnhetId().equals(org2.id())
+                && org2.orgEnhetsType() != null
+                && !org2.orgEnhetsType().equals(OrgEnhetsType.NAV_KONTOR)))
+            .toList();
     }
 
     private List<IOrgenhet> createNewIOrgenhetList(Collection<IOrgenhet> allOrgenheter, NomNivaa nomNivaa, OrgEnhetsType orgEnhetsType) {
