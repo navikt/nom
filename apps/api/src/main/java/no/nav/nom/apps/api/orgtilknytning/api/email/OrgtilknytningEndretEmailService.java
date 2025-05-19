@@ -14,7 +14,6 @@ import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.orgtilknytning.api.app.MasseFlyttingRequest;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
@@ -44,8 +43,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService.BRUK_NY_MASSEFLYTT;
 
 @Component
 public class OrgtilknytningEndretEmailService {
@@ -204,68 +201,6 @@ public class OrgtilknytningEndretEmailService {
         } catch (IOException | TemplateException e) {
             throw new RessursOpprettetEmailException("Feil ved generering av epost innhold");
         }
-    }
-
-    // TODO: Remove me
-    public void sendMasseflyttOTEmail(
-        MasseFlyttingRequest masseFlyttingRequest,
-        List<OrgtilknytningState> failedAvvikleOrgtilknytninger,
-        String innsenderNavident,
-        int antallFlyttet
-    ) {
-        try {
-            var x = BRUK_NY_MASSEFLYTT; // TODO: Fjern denne gamle metoden når ny masseflytting er i bruk
-
-            var innsenderVisningsnavn = ressursStateRepository.findByNavident(innsenderNavident)
-                .map(RessursState::visningsnavn)
-                .map(Visningsnavn::getFormattedVisningsnavn)
-                .orElse("UKJENT");
-            var recipientList = adClient.getAdRessurser(Set.of(innsenderNavident)).getRessurser().stream()
-                .map(AdRessurs::getEmail)
-                .collect(Collectors.toList());
-
-            recipientList.addAll(getAdditionalRecipientsEmails());
-            var gammelOrgEnhet = orgEnhetStateRepository.findByFid(masseFlyttingRequest.orgtilknytningerFid().getFirst())
-                .map(OrgEnhetState::navn)
-                .orElse("Ukjent");
-
-            String subject = String.format("Masseflytting av ressurser fra %s til %s", gammelOrgEnhet, masseFlyttingRequest.nyOrgenhetId());
-            String body = getFormattedEmailBody(masseFlyttingRequest, failedAvvikleOrgtilknytninger, antallFlyttet, gammelOrgEnhet, innsenderVisningsnavn);
-            EmailMessage message = new EmailMessage(subject, body, recipientList);
-            if (!unleash.isEnabled(UNLEASH_SKRU_AV_EPOST_ENDRING)) {
-                microsoftGraphClient.sendEmail(message).subscribe();
-            } else {
-                log.info("Epost sending is disabled by Unleash");
-            }
-        } catch (ADResponseException e) {
-            log.error("Fant ikke innsender sin epost adresse for masseflytting", e);
-        } catch (IOException | TemplateException e) {
-            log.error("Feil ved generering av epost innhold", e);
-        }
-    }
-
-    private String getFormattedEmailBody(
-        MasseFlyttingRequest masseFlyttingRequest,
-        List<OrgtilknytningState> failedAvvikleOrgtilkninger,
-        int antallFlyttet,
-        String gammelOrgEnhet,
-        String innsenderVisningsnavn
-    ) throws IOException, TemplateException {
-        var x = BRUK_NY_MASSEFLYTT; // TODO: Fjern denne gamle metoden når ny masseflytting er i bruk
-
-        var stringWriter = new StringWriter();
-        var model = Map.of(
-            "nyOrgEnhet", masseFlyttingRequest.nyOrgenhetId(),
-            "antallFlyttet", antallFlyttet,
-            "feiletAntall", failedAvvikleOrgtilkninger.size(),
-            "total", masseFlyttingRequest.orgtilknytningerFid().size(),
-            "gammelOrgEnhet", gammelOrgEnhet,
-            "feiletNavidenter", failedAvvikleOrgtilkninger.stream().map(OrgtilknytningState::navident).collect(Collectors.joining(",\n")),
-            "innsenderVisningsnavn", innsenderVisningsnavn
-        );
-        log.info("Masseflytting epost model: {}", model);
-        freemarkerConfig.getTemplate(MASSEFLYTTING_VARSEL_FTLH).process(model, stringWriter);
-        return stringWriter.getBuffer().toString();
     }
 
     public void sendMasseflyttOTEmail(
