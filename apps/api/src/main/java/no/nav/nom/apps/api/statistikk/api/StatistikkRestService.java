@@ -52,6 +52,7 @@ public class StatistikkRestService {
             .filter(ressursState -> ressursState.startdato().isPresent() && !ressursState.startdato().get().isAfter(LocalDate.now()))
             .filter(this::filterGyldigeRessurs)
             .toList();
+
         var ressursStatistikk = new RessursStatistikk(
             alleRessurser.size(),
             alleRessurser.stream().filter(RessursState::isStatlig).count(),
@@ -70,6 +71,7 @@ public class StatistikkRestService {
         var antallKontrollKonrollenheter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(alleOrgEnheter, OrgEnhetsType.KONTROLL_KONTROLLENHET);
         var antallFylker = createNewIOrgenhetList(alleOrgEnheter, NomNivaa.DRIFTSENHET, OrgEnhetsType.FYLKE).size();
         var antallNavKontorer = finnAlleNavKontorer(alleOrgEnheter).size();
+        log.info("Funnet alle Nav kontorer som har overordnet enhet som ikke er arbeidsomraade: {}", antallNavKontorer);
         return new GlobalStatistikkResponse(
             ressursStatistikk,
             antallNavArbeidOgYtelser,
@@ -213,12 +215,14 @@ public class StatistikkRestService {
     }
 
     private List<OrgEnhet> finnAlleNavKontorer(Collection<IOrgenhet> alleOrgenheter) {
+        log.info("Finner alle Nav kontorer");
         var orgenheter = alleOrgenheter.stream()
             .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().isPresent())
             .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().get().equals(OrgEnhetsType.NAV_KONTOR))
             .map(orgEnhetMapper::mapToOrgEnhet)
             .toList();
-
+        log.info("Funnet alle Nav kontorer: {}", orgenheter.size());
+        log.info("Finner alle som er Nav kontor og har overordnet enhet som ikke er arbeidsomraade");
         return orgenheter.stream()
             .filter(orgEnhet -> alleOrgenheter.stream()
                 .anyMatch(iOrgenhet ->
