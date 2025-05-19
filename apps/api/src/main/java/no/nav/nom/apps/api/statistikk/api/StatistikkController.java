@@ -38,7 +38,6 @@ public class StatistikkController {
             @ApiResponse(responseCode = "500", description = "Feil ved henting av statistikk")
         }
     )
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<GlobalStatistikkResponse> hentGlobalStatistikk() {
         return ResponseEntity.ok(statistikkRestService.hentGlobalStatistikk());
     }
