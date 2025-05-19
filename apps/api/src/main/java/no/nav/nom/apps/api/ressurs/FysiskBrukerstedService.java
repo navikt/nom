@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.ressurs;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
@@ -14,7 +13,6 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysis
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
-import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -22,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +32,6 @@ import java.util.stream.Collectors;
 public class FysiskBrukerstedService {
     static final String CACHE_TTL = "PT1H";
     public static final String MASSEFLYTTING_FYSISK_BRUKERSTED_VARSEL_FTLH = "masseflytting-fysiskbrukersted-varsel.ftlh";
-    public static final String UNLEASH_MASSEFLYTTING_FYSISK_BRUKERSTED_SEND_EPOST = "nom.masseflytting.fysiskbrukersted.send_epost";
 
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
@@ -44,12 +40,11 @@ public class FysiskBrukerstedService {
     private final AdClient adClient;
     private final Configuration freemarkerConfig;
     private final MicrosoftGraphClient microsoftGraphClient;
-    private final Unleash unleash;
 
     public FysiskBrukerstedService(
         AdClient adClient, RessursStateRepository ressursStateRepository, OrgtilknytningStateRepository orgtilknytningStateRepository,
         RessursCommandService ressursCommandService, FysiskBrukerstedCache fysiskBrukerstedCache, Configuration freemarkerConfig,
-        MicrosoftGraphClient microsoftGraphClient, Unleash unleash
+        MicrosoftGraphClient microsoftGraphClient
     ) {
         this.adClient = adClient;
         this.ressursStateRepository = ressursStateRepository;
@@ -58,7 +53,6 @@ public class FysiskBrukerstedService {
         this.fysiskBrukerstedCache = fysiskBrukerstedCache;
         this.freemarkerConfig = freemarkerConfig;
         this.microsoftGraphClient = microsoftGraphClient;
-        this.unleash = unleash;
     }
 
     public List<RessursState> getAlleRessurserMedFysiskBrukersted(String fysiskBrukerstedNr) {
@@ -127,11 +121,12 @@ public class FysiskBrukerstedService {
         HashMap<String, String> feiledeNavidenter
     ) {
         try {
-            if (!unleash.isEnabled(UNLEASH_MASSEFLYTTING_FYSISK_BRUKERSTED_SEND_EPOST)) {
-                log.info("Epost varsling er skrudd av for masseflytting av fysisk brukersted");
+            if (!SecurityUtil.hasAuthentication()) {
+                log.error("Ingen innlogget bruker, kan ikke sende epost");
                 return;
             }
 
+            // Henter innsender sin epost adresse
             String innsenderNavident = SecurityUtil.getAuthenticatedNavIdent();
             var innsenderVisningsnavn = ressursStateRepository.findByNavident(innsenderNavident)
                 .map(RessursState::visningsnavn)
