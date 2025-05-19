@@ -69,7 +69,7 @@ public class StatistikkRestService {
         var antallNavKontaktsenter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(alleOrgEnheter, OrgEnhetsType.NAV_KONTAKTSENTER);
         var antallKontrollKonrollenheter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(alleOrgEnheter, OrgEnhetsType.KONTROLL_KONTROLLENHET);
         var antallFylker = createNewIOrgenhetList(alleOrgEnheter, NomNivaa.DRIFTSENHET, OrgEnhetsType.FYLKE).size();
-        var antallNavKontorer = createNewIOrgenhetList(alleOrgEnheter, NomNivaa.ARBEIDSOMRAADE, OrgEnhetsType.NAV_KONTOR).size();
+        var antallNavKontorer = finnAlleNavKontorer(alleOrgEnheter).size();
         return new GlobalStatistikkResponse(
             ressursStatistikk,
             antallNavArbeidOgYtelser,
@@ -213,14 +213,18 @@ public class StatistikkRestService {
     }
 
     private List<OrgEnhet> finnAlleNavKontorer(Collection<IOrgenhet> alleOrgenheter) {
-        var orgenheter = alleOrgenheter.stream().map(orgEnhetMapper::mapToOrgEnhet).toList();
+        var orgenheter = alleOrgenheter.stream()
+            .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().isPresent())
+            .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().get().equals(OrgEnhetsType.NAV_KONTOR))
+            .map(orgEnhetMapper::mapToOrgEnhet)
+            .toList();
+
         return orgenheter.stream()
-            .filter(orgenhet -> orgenhet.orgEnhetsType() != null)
-            .filter(orgenhet -> orgenhet.orgEnhetsType().equals(OrgEnhetsType.NAV_KONTOR))
-            .filter(orgenhet -> orgenheter.stream().anyMatch(org2 -> orgenhet.overordnetEnhetId() != null
-                && orgenhet.overordnetEnhetId().equals(org2.id())
-                && org2.orgEnhetsType() != null
-                && !org2.orgEnhetsType().equals(OrgEnhetsType.NAV_KONTOR)))
+            .filter(orgEnhet -> alleOrgenheter.stream()
+                .anyMatch(iOrgenhet ->
+                    iOrgenhet.getId().equals(orgEnhet.overordnetEnhetId())
+                        && iOrgenhet.getNomNivaa().isPresent()
+                        && !iOrgenhet.getNomNivaa().get().equals(NomNivaa.ARBEIDSOMRAADE)))
             .toList();
     }
 
