@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +48,8 @@ public class StatistikkRestService {
 
     public GlobalStatistikkResponse hentGlobalStatistikk() {
         var alleRessurser = ressursStateRepository.findAllActiveRessurser().values().stream()
+            .distinct()
+            .filter(ressursState -> ressursState.startdato().isPresent() && !ressursState.startdato().get().isAfter(LocalDate.now()))
             .filter(this::filterGyldigeRessurs)
             .toList();
         var ressursStatistikk = new RessursStatistikk(
@@ -56,17 +59,17 @@ public class StatistikkRestService {
             alleRessurser.stream().filter(RessursState::isEkstern).count()
         );
 
-        var globaleOrgenheter = orgenhetService.getAllEnheterMedOrganisering().stream().toList();
+        var alleOrgEnheter = orgenhetService.getAllEnheterMedOrganisering().stream().toList();
         var antallLovNoder = orgenhetService.getAllOrgEnheterThatCanHaveRessurser().size();
 
-        var antallNavArbeidOgYtelser = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(globaleOrgenheter, OrgEnhetsType.NAV_ARBEID_OG_YTELSER);
-        var antallNavFamilieOgPensjonsytelser = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(globaleOrgenheter, OrgEnhetsType.NAV_FAMILIE_OG_PENSJONSYTELSER);
-        var antallHjelpemidlerOgTilrettelegging = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(globaleOrgenheter, OrgEnhetsType.HJELPEMIDLER_OG_TILRETTELEGGING);
-        var antallKlageinstanser = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(globaleOrgenheter, OrgEnhetsType.KLAGEINSTANS);
-        var antallNavKontaktsenter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(globaleOrgenheter, OrgEnhetsType.NAV_KONTAKTSENTER);
-        var antallKontrollKonrollenheter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(globaleOrgenheter, OrgEnhetsType.KONTROLL_KONTROLLENHET);
-        var antallFylker = createNewIOrgenhetList(globaleOrgenheter, NomNivaa.DRIFTSENHET, OrgEnhetsType.FYLKE).size();
-        var antallNavKontorer = createNewIOrgenhetList(globaleOrgenheter, NomNivaa.ARBEIDSOMRAADE, OrgEnhetsType.NAV_KONTOR).size();
+        var antallNavArbeidOgYtelser = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(alleOrgEnheter, OrgEnhetsType.NAV_ARBEID_OG_YTELSER);
+        var antallNavFamilieOgPensjonsytelser = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(alleOrgEnheter, OrgEnhetsType.NAV_FAMILIE_OG_PENSJONSYTELSER);
+        var antallHjelpemidlerOgTilrettelegging = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(alleOrgEnheter, OrgEnhetsType.HJELPEMIDLER_OG_TILRETTELEGGING);
+        var antallKlageinstanser = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(alleOrgEnheter, OrgEnhetsType.KLAGEINSTANS);
+        var antallNavKontaktsenter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(alleOrgEnheter, OrgEnhetsType.NAV_KONTAKTSENTER);
+        var antallKontrollKonrollenheter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(alleOrgEnheter, OrgEnhetsType.KONTROLL_KONTROLLENHET);
+        var antallFylker = createNewIOrgenhetList(alleOrgEnheter, NomNivaa.DRIFTSENHET, OrgEnhetsType.FYLKE).size();
+        var antallNavKontorer = finnAlleNavKontorer(alleOrgEnheter).size();
         return new GlobalStatistikkResponse(
             ressursStatistikk,
             antallNavArbeidOgYtelser,
@@ -177,19 +180,19 @@ public class StatistikkRestService {
         var antallNavKontorer = createNewIOrgenhetList(underliggendeOrgEnheter, NomNivaa.ARBEIDSOMRAADE, OrgEnhetsType.NAV_KONTOR).size();
 
         return new OrgEnhetStatistikkResponse(
-                ressursStatistikk,
-                antallLovnoder,
-                antallNavArbeidOgYtelser,
-                antallNavFamilieOgPensjonsytelser,
-                antallHjelpemidlerOgTilrettelegging,
-                antallKlageinstanser,
-                antallNavKontaktsenter,
-                antallKontrollKonrollenheter,
-                antallFylker,
-                antallNavKontorer,
-                0,
-                0,
-                0
+            ressursStatistikk,
+            antallLovnoder,
+            antallNavArbeidOgYtelser,
+            antallNavFamilieOgPensjonsytelser,
+            antallHjelpemidlerOgTilrettelegging,
+            antallKlageinstanser,
+            antallNavKontaktsenter,
+            antallKontrollKonrollenheter,
+            antallFylker,
+            antallNavKontorer,
+            0,
+            0,
+            0
         );
     }
 
@@ -205,6 +208,18 @@ public class StatistikkRestService {
             .filter(navKontor -> enheterToIgnore.stream()
                 .noneMatch(fylkeEnhet -> fylkeEnhet.remedyEnhetId().equals(navKontor.remedyEnhetId())))
             .toList().size();
+    }
+
+    private List<OrgEnhet> finnAlleNavKontorer(Collection<IOrgenhet> alleOrgenheter) {
+        var orgenheter = alleOrgenheter.stream().map(orgEnhetMapper::mapToOrgEnhet).toList();
+        return orgenheter.stream()
+            .filter(orgenhet -> orgenhet.orgEnhetsType() != null)
+            .filter(orgenhet -> orgenhet.orgEnhetsType().equals(OrgEnhetsType.NAV_KONTOR))
+            .filter(orgenhet -> orgenheter.stream().anyMatch(org2 -> orgenhet.overordnetEnhetId() != null
+                && orgenhet.overordnetEnhetId().equals(org2.id())
+                && org2.orgEnhetsType() != null
+                && !org2.orgEnhetsType().equals(OrgEnhetsType.NAV_KONTOR)))
+            .toList();
     }
 
     private List<IOrgenhet> createNewIOrgenhetList(Collection<IOrgenhet> allOrgenheter, NomNivaa nomNivaa, OrgEnhetsType orgEnhetsType) {
