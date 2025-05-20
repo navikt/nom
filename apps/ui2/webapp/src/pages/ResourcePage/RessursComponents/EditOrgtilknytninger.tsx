@@ -56,6 +56,9 @@ import {
   useGetSession,
   useHasAdminAccess,
   useHasAdminOrWriteAccess,
+  useHasRobotAccess,
+  useHasUtenlandskKonsulentAccess,
+  useHasVikafossenAccess,
 } from "~/api/useGetSession";
 import { ApiResponseError } from "~/components/ApiResponseError";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
@@ -106,7 +109,16 @@ import {
 export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
   const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
 
-  if (!hasAdminOrWriteAccess) {
+  const hasRobotAccess = useHasRobotAccess();
+  const hasVikafossenAccess = useHasVikafossenAccess();
+  const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
+
+  if (
+    !hasAdminOrWriteAccess &&
+    !hasRobotAccess &&
+    !hasVikafossenAccess &&
+    !hasUtenlandskKonsulentAccess
+  ) {
     return;
   }
 
