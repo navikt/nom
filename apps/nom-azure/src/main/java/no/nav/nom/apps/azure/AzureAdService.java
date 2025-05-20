@@ -1,9 +1,8 @@
 package no.nav.nom.apps.azure;
 
 import com.azure.identity.ClientSecretCredentialBuilder;
-import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.microsoft.graph.serviceclient.GraphServiceClient;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
@@ -15,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 @Service
 public class AzureAdService {
@@ -23,7 +24,7 @@ public class AzureAdService {
 
     private final GraphServiceClient graphServiceClient;
 
-    private final LoadingCache<String, Optional<byte[]>> pictureCache;
+    private final AsyncLoadingCache<String, Optional<byte[]>> pictureCache;
 
     private final Counter countPictureRequested;
     private final Counter countPictureFetch;
@@ -42,15 +43,15 @@ public class AzureAdService {
         this.pictureCache = Caffeine.newBuilder()
             .expireAfterWrite(Duration.ofHours(72))
             .refreshAfterWrite(Duration.ofHours(24))
-            .maximumSize(20000).build(this::lookupProfilePictureByNavIdent);
-
-        this.pictureCache.estimatedSize();
+            .maximumSize(20000)
+            .executor(Executors.newVirtualThreadPerTaskExecutor())
+            .buildAsync(this::lookupProfilePictureByNavIdent);
 
         this.countPictureRequested = meterRegistry.counter("requests.picture_requested.count");
         this.countPictureFetch = meterRegistry.counter("requests.picture_fetched.count");
 
         this.cacheSizeGauge = Gauge
-            .builder("picture.cache.size", this.pictureCache, Cache::estimatedSize)
+            .builder("picture.cache.size", this.pictureCache, (asyncLoadingCache) -> asyncLoadingCache.synchronous().estimatedSize())
             .register(meterRegistry);
 
     }
@@ -66,11 +67,16 @@ public class AzureAdService {
     public Optional<byte[]> profilePictureByNavIdent(String navIdent){
         countPictureRequested.increment();
         this.cacheSizeGauge.value();
-        return pictureCache.get(navIdent);
+        try{
+            return pictureCache.get(navIdent).join();
+        } catch (RuntimeException e) {
+            log.error(e.getMessage());
+            return Optional.empty();
+        }
     }
 
     public void refreshPictureCache(String navIdent) {
-        this.pictureCache.refresh(navIdent);
+        this.pictureCache.synchronous().refresh(navIdent);
     }
 
 
