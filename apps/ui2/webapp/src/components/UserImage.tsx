@@ -135,13 +135,29 @@ function UserImageNew(props: UserImageProperties) {
   const { navident, size, navn, includeInstructionsWhenNotFound } = props;
   const loadOnlyWhenVisible = props.loadOnlyWhenVisible ?? true;
 
-  const enableImgFetch =
-    !!navident && globalThis.location.href.includes("nom.nav.no");
-
-  const [imgSrc, setImgSrc] = useState(
-    enableImgFetch ? `/frackend/nom-azure/picture/${props.navident}` : person,
-  );
   const [imgError, setImgError] = useState(false);
+  const [imgSrc, setImgSrc] = useState(person);
+
+  React.useEffect(() => {
+    setImgSrc(person);
+    setImgError(false);
+    const enableImgFetch =
+      !!navident && globalThis.location.href.includes("nom.nav.no");
+
+    const img = new Image();
+    // img.loading = loadOnlyWhenVisible ? "lazy" : "eager";
+    img.src = enableImgFetch
+      ? `/frackend/nom-azure/picture/${props.navident}`
+      : person;
+
+    img
+      .decode()
+      .then(() => setImgSrc(img.src))
+      .catch(() => {
+        setImgError(true);
+        setImgSrc(person);
+      });
+  }, [props.navident]);
 
   const STYLE = css`
     height: ${size || "65px"};
@@ -164,13 +180,9 @@ function UserImageNew(props: UserImageProperties) {
 
   return (
     <img
-      alt={"Fotografi av " + (navn || navident)}
+      alt={"Et fotografi av " + (navn || navident)}
       css={STYLE}
       loading={loadOnlyWhenVisible ? "lazy" : "eager"}
-      onError={() => {
-        setImgSrc(person);
-        setImgError(true);
-      }}
       src={imgSrc}
     />
   );
