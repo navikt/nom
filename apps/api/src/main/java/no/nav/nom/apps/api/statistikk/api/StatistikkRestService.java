@@ -238,9 +238,13 @@ private List<IOrgenhet> finnAlleNavKontorer(Collection<IOrgenhet> alleOrgenheter
         .toList();
     log.info("Finner alle som er Nav kontor og har overordnet enhet som ikke er arbeidsomraade");
     List<IOrgenhet> navKontorer = new ArrayList<>();
-    alleOrgenheter.forEach(orgEnhet -> alleOverordnetEnheter.stream()
-        .filter(overordnetFid -> overordnetFid.equals(orgEnhet.getFid()))
-        .findFirst().ifPresent(overordnetEnhet -> navKontorer.add(orgEnhet)));
+    alleOrgenheter.forEach(orgEnhet -> {
+        if (orgEnhet.getOverordnetOrgEnhetFid().isPresent()) {
+            alleOverordnetEnheter.stream()
+                .filter(overordnetFid -> overordnetFid.equals(orgEnhet.getOverordnetOrgEnhetFid().get()))
+                .findFirst().ifPresent(overordnetEnhet -> navKontorer.add(orgEnhet));
+        }
+    });
 
     long navKontorerTime = System.nanoTime();
     log.info("Tid brukt på å finne Nav kontorer med overordnet enhet: {} ms", (navKontorerTime - orgenheterTime) / 1_000_000);
