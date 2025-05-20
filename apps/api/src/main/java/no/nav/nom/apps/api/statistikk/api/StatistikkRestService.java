@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
 
@@ -106,7 +107,8 @@ public class StatistikkRestService {
 
         var underliggendeOrgEnheter = orgenhetService.getAllUnderliggendeOrgEnhetById(optionalOrgEnhet.get().getId()).stream().toList();
 
-        var underliggendeOrgEnheterMapped = underliggendeOrgEnheter.stream()
+
+        var underliggendeOrgEnheterMapped = Stream.concat(Stream.of(optionalOrgEnhet.get()), underliggendeOrgEnheter.stream())
             .map(orgEnhetMapper::mapToOrgEnhet).toList();
 
         var alleRessursNavidenter = underliggendeOrgEnheterMapped.stream()
@@ -118,6 +120,7 @@ public class StatistikkRestService {
 
         var alleRessurser = ressursStateRepository.findByNavidentBulk(alleRessursNavidenter).values().stream()
             .distinct()
+            .filter(ressursState -> ressursState.sluttdato().isEmpty() || !ressursState.sluttdato().get().isBefore(LocalDate.now()))
             .filter(ressursState -> ressursState.startdato().isPresent() && !ressursState.startdato().get().isAfter(LocalDate.now()))
             .filter(this::filterGyldigeRessurs)
             .toList();
