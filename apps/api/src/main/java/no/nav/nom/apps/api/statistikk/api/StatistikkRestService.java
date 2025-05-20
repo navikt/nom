@@ -115,13 +115,13 @@ public class StatistikkRestService {
         var alleRessursNavidenter = underliggendeOrgEnheterMapped.stream()
             .map(OrgEnhet::ressursKoblinger)
             .flatMap(Collection::stream)
+            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
             .map(OrgtilknytningState::navident)
             .distinct()
             .toList();
 
         var alleRessurser = ressursStateRepository.findByNavidentBulk(alleRessursNavidenter).values().stream()
             .distinct()
-            .filter(ressursState -> isPeriodActive(ressursState.startdato(), ressursState.sluttdato()))
             .filter(this::filterGyldigeRessurs)
             .toList();
 
