@@ -231,22 +231,23 @@ public class StatistikkRestService {
         var alleNavKontorer = alleOrgenheter.stream()
             .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().isPresent())
             .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().get().equals(OrgEnhetsType.NAV_KONTOR))
-            .map(IOrgenhet::getId)
             .toList();
 
-        var orgenhetOverordnetId = alleNavKontorer.stream()
+        var navKontorOverordnetId = alleNavKontorer.stream()
+            .map(IOrgenhet::getId)
             .map(organiseringStateRepository::findActiveById)
             .filter(Optional::isPresent)
             .map(Optional::get)
             .map(OrganiseringState::idOver)
             .toList();
 
-        var antallNavKontorer = orgenhetOverordnetId.stream()
+        var antallNavKontorer = navKontorOverordnetId.stream()
             .filter(nomId -> alleOrgenheter.stream()
                 .anyMatch(iOrgenhet -> iOrgenhet.getId().equals(nomId)
                     && iOrgenhet.getNomNivaa().isPresent()
-                    && !iOrgenhet.getNomNivaa().get().equals(NomNivaa.ARBEIDSOMRAADE)))
+                    && (!iOrgenhet.getNomNivaa().get().equals(NomNivaa.ARBEIDSOMRAADE) && iOrgenhet.getNomNivaa().isPresent())))
             .toList();
+
         return antallNavKontorer.size();
     }
 
