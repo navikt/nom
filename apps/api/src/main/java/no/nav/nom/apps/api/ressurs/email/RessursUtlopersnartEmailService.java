@@ -2,11 +2,10 @@ package no.nav.nom.apps.api.ressurs.email;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
-import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
+import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
@@ -21,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.LocalDate;
@@ -36,13 +36,11 @@ import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
 public class RessursUtlopersnartEmailService {
 
     private static final String SLUTTDATO_UTLOPER_VARSEL_TEMPLATE = "epostvarsel-utlopsdato.ftlh";
-    private static final String UNLEASH_SLUTTDATO_UTLOPER_EPOST_VARSEL = "nom.ressurs.sluttdato_utloper_email";
     private final Logger log = LoggerFactory.getLogger(RessursUtlopersnartEmailService.class);
     private final MicrosoftGraphClient microsoftGraphClient;
     private final AdClient adClient;
     private final RessursStateRepository ressursStateRepository;
     private final Configuration freemarkerConfig;
-    private final Unleash unleash;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final LederResolver lederResolver;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
@@ -55,7 +53,6 @@ public class RessursUtlopersnartEmailService {
         AdClient adClient,
         RessursStateRepository ressursStateRepository,
         Configuration freemarkerConfig,
-        Unleash unleash,
         OrgtilknytningStateRepository orgtilknytningStateRepository,
         LederResolver lederResolver,
         OrgEnhetStateRepository orgEnhetStateRepository,
@@ -67,7 +64,6 @@ public class RessursUtlopersnartEmailService {
         this.adClient = adClient;
         this.ressursStateRepository = ressursStateRepository;
         this.freemarkerConfig = freemarkerConfig;
-        this.unleash = unleash;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.lederResolver = lederResolver;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
@@ -87,15 +83,13 @@ public class RessursUtlopersnartEmailService {
             return;
         }
 
-        if(unleash.isEnabled(UNLEASH_SLUTTDATO_UTLOPER_EPOST_VARSEL)) {
-            log.info("Sender en e-post om utløpsdato for ressurser til ledere av organisasjonsenheter");
-            var ressurserUtloperSnart = getUtlopendeRessurser();
+        log.info("Sender en e-post om utløpsdato for ressurser til ledere av organisasjonsenheter");
+        var ressurserUtloperSnart = getUtlopendeRessurser();
 
-            log.info("Ressurser utløper snart, antall: {}, ressurser: {}", ressurserUtloperSnart.size(),
-                ressurserUtloperSnart.stream().map(UtloperRessursData::ressursNavident).toList());
-            if(!ressurserUtloperSnart.isEmpty()){
-                ressurserUtloperSnart.forEach(this::sendEmail);
-            }
+        log.info("Ressurser utløper snart, antall: {}, ressurser: {}", ressurserUtloperSnart.size(),
+            ressurserUtloperSnart.stream().map(UtloperRessursData::ressursNavident).toList());
+        if(!ressurserUtloperSnart.isEmpty()){
+            ressurserUtloperSnart.forEach(this::sendEmail);
         }
     }
 
