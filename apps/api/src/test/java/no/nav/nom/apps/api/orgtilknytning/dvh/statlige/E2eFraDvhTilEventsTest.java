@@ -33,15 +33,13 @@ class E2eFraDvhTilEventsTest extends TestBase {
     @Autowired
     Unleash unleash;
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     @DisplayName("En DvhStilling, ingen eksisterende OT - Ref: 1")
-    void e2e_test_1(boolean unleashBoolean) {
+    void e2e_test_1() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling("A000001", "0AA0001", "Enhet A", DD_3Y, DD_1Y_1D)
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         var sspForNavidentResult = strukturer.strukturerStilingPerioderPerNavident(dvhRessursStillinger);
         var result = prosserer.process(sspForNavidentResult);
 
@@ -67,15 +65,13 @@ class E2eFraDvhTilEventsTest extends TestBase {
         assertEquals(0, result.get(RESSURS_1.navident()).errors().size());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     @DisplayName("To sammenhengende DvhStillinger, ingen eksisterende OT - Ref: 2")
-    void e2e_test_2(boolean unleashBoolean) {
+    void e2e_test_2() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling("A000001", "0AA0001", "Enhet A", DD_3Y, DD_1Y_1D),
             dvhRessursStilling("A000001", "0AA0001", "Enhet A", DD_1Y, NO_END_DATE)
         );
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         var sspForNavidentResult = strukturer.strukturerStilingPerioderPerNavident(dvhRessursStillinger);
         var result = prosserer.process(sspForNavidentResult);
 
@@ -96,15 +92,13 @@ class E2eFraDvhTilEventsTest extends TestBase {
         assertEquals(0, result.get(RESSURS_1.navident()).errors().size());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     @DisplayName("To sammenhengende DvhStillinger, matcher eksisterende OT - Ref: 3")
-    void e2e_test_3(boolean unleashBoolean) {
+    void e2e_test_3() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling("A000001", "0AA0001", "Enhet A", DD_3Y, DD_1Y_1D),
             dvhRessursStilling("A000001", "0AA0001", "Enhet A", DD_1Y, NO_END_DATE)
         );
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
             orgtilknytning("FID_A", A000001, ENHET_A.getId(), DD_3Y, null, true)
         ));
@@ -117,15 +111,13 @@ class E2eFraDvhTilEventsTest extends TestBase {
         assertEquals(0, result.get(RESSURS_1.navident()).errors().size());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     @DisplayName("En DvhStilling, matcher med agressoId mot to Enheter - Ref: 4")
-    void e2e_test_4(boolean unleashBoolean) {
+    void e2e_test_4() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling("A000001", "0DD0001", "Enhet D2", DD_3Y, NO_END_DATE)
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         var sspForNavidentResult = strukturer.strukturerStilingPerioderPerNavident(dvhRessursStillinger);
         var result = prosserer.process(sspForNavidentResult);
 
@@ -164,17 +156,15 @@ class E2eFraDvhTilEventsTest extends TestBase {
         assertEquals(0, result.get(RESSURS_1.navident()).errors().size());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     @DisplayName("To DvhStillinger, en matcher med agressoId mot to Enheter, en matcher ikke Orgenhet På Ressurs, ulike OTer - Ref: 5")
-    void e2e_test_5(boolean unleashBoolean) {
+    void e2e_test_5() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling("A000001", "0AA0001", "Enhet A", "0DD0001", DD_3Y, DD_1Y_1D),
             dvhRessursStilling("A000001", "0AA0001", "Enhet A", "0DD0001", DD_1Y, DD_6M_1D),
             dvhRessursStilling("A000001", "0DD0001", "Enhet D2","0DD0001", DD_2Y, NO_END_DATE)
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
             orgtilknytning("FID_A", A000001, ENHET_A.getId(), DD_3Y, DD_1Y_1D, true),
             orgtilknytning("FID_B", A000001, ENHET_B.getId(), DD_1Y, null, true)
@@ -245,7 +235,6 @@ class E2eFraDvhTilEventsTest extends TestBase {
             dvhRessursStilling("A000001", "0AA0001", "Enhet A","0AA0001", DD_6M, NO_END_DATE, Optional.of("Fast"))
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
         var sspForNavidentResult = strukturer.strukturerStilingPerioderPerNavident(dvhRessursStillinger);
         var result = prosserer.process(sspForNavidentResult);
 
@@ -383,14 +372,14 @@ class E2eFraDvhTilEventsTest extends TestBase {
             .tilEnhet(ENHET_D2.getId());
 
         assertOrgtilknytning(CMD.ENDRE_TILKNYTNINGTYPE)
-            .forFid(fid_d2)
+            .forFid(fid_d1)
             .tilTilknytningtype(Optional.of(Tilknytningtype.FAST));
 
         assertOrgtilknytning(CMD.FJERNET)
             .forFid("FID_B");
 
         assertEquals(1, result.size());
-        assertEquals(11, result.get(RESSURS_1.navident()).endringer().size());
+        assertEquals(13, result.get(RESSURS_1.navident()).endringer().size());
         assertEquals(0, result.get(RESSURS_1.navident()).errors().size());
     }
 
@@ -413,7 +402,6 @@ class E2eFraDvhTilEventsTest extends TestBase {
             orgtilknytning("FID_A2", A000001, ENHET_A.getId(), LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31), false, null, null),
             orgtilknytning("FID_B", A000001, ENHET_B.getId(), LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31), true, null, null)
         ));
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
 
         var sspForNavidentResult = strukturer.strukturerStilingPerioderPerNavident(dvhRessursStillinger);
         var result = prosserer.process(sspForNavidentResult);
@@ -496,7 +484,6 @@ class E2eFraDvhTilEventsTest extends TestBase {
             orgtilknytning("FID_A", A000001, ENHET_A.getId(), LocalDate.of(2021, 5, 1), null, true, Sektor.NAV_STATLIG, Tilknytningtype.FAST),
             orgtilknytning("FID_A2", A000001, ENHET_A.getId(), LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31), false, null, null)
         ));
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
 
         var sspForNavidentResult = strukturer.strukturerStilingPerioderPerNavident(dvhRessursStillinger);
         var result = prosserer.process(sspForNavidentResult);
@@ -519,7 +506,6 @@ class E2eFraDvhTilEventsTest extends TestBase {
             dvhRessursStilling("A000001", "0AA0001", "Enhet A", "0AA0001", DD_3Y, MAX_DATE, Optional.of("Midlertidig karakter § 9a"))
         );
 
-        when (unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
             orgtilknytning("FID_A", A000001, ENHET_A.getId(), DD_3Y, MAX_DATE, true, Sektor.NAV_STATLIG, Tilknytningtype.FAST)
         ));
@@ -590,7 +576,6 @@ class E2eFraDvhTilEventsTest extends TestBase {
             dvhRessursStilling("A000001", "0BB0001", "Enhet B", "0BB0001", DD_3Y, MAX_DATE, Optional.of("Utdanningsstillinger § 9d"))
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
             orgtilknytning("FID_A", A000001, ENHET_A.getId(), DD_3Y, MAX_DATE, false, Sektor.NAV_STATLIG, Tilknytningtype.FAST),
             orgtilknytning("FID_B", A000001, ENHET_B.getId(), DD_3Y, MAX_DATE, true, Sektor.NAV_STATLIG, Tilknytningtype.FAST)
@@ -640,7 +625,6 @@ class E2eFraDvhTilEventsTest extends TestBase {
             dvhRessursStilling("A000001", "0BB0001", "Enhet B", "0BB0001", DD_2Y, DD_1Y_1D, Optional.of("Timelønn"))
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
             orgtilknytning("FID_A", A000001, ENHET_A.getId(), DD_3Y, DD_2Y_1D, true, Sektor.NAV_STATLIG, Tilknytningtype.FAST),
             orgtilknytning("FID_B", A000001, ENHET_B.getId(), DD_2Y, DD_1Y_1D, true, Sektor.NAV_STATLIG, Tilknytningtype.FAST)
@@ -666,7 +650,6 @@ class E2eFraDvhTilEventsTest extends TestBase {
         );
 
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
             orgtilknytning("FID_A", A000001, ENHET_A.getId(), DD_3Y, DD_6M_1D, true, Sektor.NAV_STATLIG, Tilknytningtype.FAST)
         ));
@@ -694,7 +677,6 @@ class E2eFraDvhTilEventsTest extends TestBase {
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
             orgtilknytning("FID_A", A000001, ENHET_A.getId(), DD_3Y, DD_6M_1D, true, null, null)
         ));
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
 
         var sspForNavidentResult = strukturer.strukturerStilingPerioderPerNavident(dvhRessursStillinger);
         var result = prosserer.process(sspForNavidentResult);
@@ -759,7 +741,6 @@ class E2eFraDvhTilEventsTest extends TestBase {
             dvhRessursStilling("A000001", "0AA0001", "Enhet A", "0AA0001", DD_2Y_8M, DD_1Y_6M, Optional.of("Fast")),
             dvhRessursStilling("A000001", "0AA0001", "Enhet A", "0AA0001", DD_2Y, NO_END_DATE, Optional.of("Innlån/utlån"))
         );
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
 
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
             orgtilknytning("FID_A", A000001, ENHET_A.getId(), DD_5Y, NO_END_DATE, true, null, null)
@@ -905,7 +886,6 @@ class E2eFraDvhTilEventsTest extends TestBase {
             dvhRessursStilling("A000001", "0EE0001", "Enhet E", LocalDate.of(2025, 5, 1), LocalDate.of(2099, 12, 31), Optional.of("Fast"))
         );
         
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
             orgtilknytning("FID_F1_1", A000001, ENHET_F1.getId(), LocalDate.of(2022, 4, 1), LocalDate.of(2022, 8, 31), true, null, Tilknytningtype.FAST),
             orgtilknytning("FID_F1_2", A000001, ENHET_F1.getId(), LocalDate.of(2022, 9, 1), LocalDate.of(2022, 10, 31), false, null, Tilknytningtype.FAST),

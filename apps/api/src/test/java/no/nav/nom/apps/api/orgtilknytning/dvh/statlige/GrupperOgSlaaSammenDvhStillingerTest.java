@@ -31,17 +31,15 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
     @Autowired
     Unleash unleash;
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     @DisplayName("Basic sammenslåing")
-    void test_BasicSammenslaaingAvDvhRessursStillinger(boolean unleashBoolean) {
+    void test_BasicSammenslaaingAvDvhRessursStillinger() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -56,18 +54,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 1.i
     @DisplayName("Splitt på ikke sammenhengende periode")
-    public void test_SplittPaaIkkeSammenhengendePeriode(boolean unleashBoolean) {
+    public void test_SplittPaaIkkeSammenhengendePeriode() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 8, 31)),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -93,18 +89,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(MAX_DATE, andreStillingPeriode.gyldigTom());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 1.ii
     @DisplayName("Splitt på ulike enheter")
-    public void test_SplittPaaUlikeEnheter(boolean unleashBoolean) {
+    public void test_SplittPaaUlikeEnheter() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
             dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", "AGRID_x", "ORGENHET", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
             dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", "AGRID_x", "ORGENHET", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -124,18 +118,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(MAX_DATE, andreStillingPeriode.gyldigTom());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 1.iii
     @DisplayName("Splitt på ulike 'OrgenhetPåRessurs' selv om 'AgressoId' er lik")
-    public void test_SplittPaaUlikeOrgenhetPaaRessurs(boolean unleashBoolean) {
+    public void test_SplittPaaUlikeOrgenhetPaaRessurs() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AGRID_x", "ORGENHET", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AGRID_x", "ORGENHET", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -157,18 +149,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(MAX_DATE, andreStillingPeriode.gyldigTom());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 1.iv
     @DisplayName("AgressoId presis, men orgenhet på ressurs er upresis")
-    void test_PresisAgressoID_UpresisOrgenhetPaaRessurs_IderErMatch(boolean unleashBoolean) {
+    void test_PresisAgressoID_UpresisOrgenhetPaaRessurs_IderErMatch() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AGRID", "ORGNIV3", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AGRID", "ORGNIV3", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31), Optional.empty()),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AGRID", "ORGNIV3", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -184,18 +174,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 1.v
     @DisplayName("AgressoId er upresis, men orgenhet på ressurs er presis")
-    void test_UpresisAgressoID_PresisOrgenhetPaaRessurs_IderErMatch(boolean unleashBoolean) {
+    void test_UpresisAgressoID_PresisOrgenhetPaaRessurs_IderErMatch() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID", "Enhet_1", "AGRID_1", "ORGENHET", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
             dvhRessursStilling(A000001, "AGRID", "Enhet_1", "AGRID_1", "ORGENHET", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31), Optional.empty()),
             dvhRessursStilling(A000001, "AGRID", "Enhet_1", "AGRID_1", "ORGENHET", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -211,18 +199,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 1.vi
     @DisplayName("AgressoId presis, men orgenhet på ressurs er upresis - Id'ene matcher ikke")
-    void test_PresisAgressoID_UpresisOrgenhetPaaRessurs_IderMatcherIkke(boolean unleashBoolean) {
+    void test_PresisAgressoID_UpresisOrgenhetPaaRessurs_IderMatcherIkke() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AID_2", "ORGENHET", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AID_2", "ORGENHET", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31), Optional.empty()),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", "AID_2", "ORGENHET", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -238,18 +224,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 1.vii
     @DisplayName("Både AgressoId og orgenhet på ressurs er upresis - Id'ene matcher")
-    void test_UpresisAgressoID_PresisOrgenhetPaaRessurs_IderMatcher(boolean unleashBoolean) {
+    void test_UpresisAgressoID_PresisOrgenhetPaaRessurs_IderMatcher() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_1", "ORGNIV3", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
             dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_1", "ORGNIV3", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31), Optional.empty()),
             dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_1", "ORGNIV3", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -265,18 +249,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 1.viii
     @DisplayName("Både AgressoId og orgenhet på ressurs er upresis - Id'ene matcher ikke")
-    void test_UpresisAgressoID_UpresisOrgenhetPaaRessurs_IderMatcherIkke(boolean unleashBoolean) {
+    void test_UpresisAgressoID_UpresisOrgenhetPaaRessurs_IderMatcherIkke() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_2", "ORGNIV3", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
             dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_2", "ORGNIV3", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31), Optional.empty()),
             dvhRessursStilling(A000001, "AID_100", "Enhet_1", "AID_2", "ORGNIV3", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -292,18 +274,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 1.ix
     @DisplayName("AgressoId mangler, men orgenhet på ressurs er presis")
-    void test_ManglerAgressoID_PresisOrgenhetPaaRessurs(boolean unleashBoolean) {
+    void test_ManglerAgressoID_PresisOrgenhetPaaRessurs() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "-4", "Mangler", "AGRID_1", "ORGENHET", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
             dvhRessursStilling(A000001, "-4", "Mangler", "AGRID_1", "ORGENHET", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31), Optional.empty()),
             dvhRessursStilling(A000001, "-4", "Mangler", "AGRID_1", "ORGENHET", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -319,18 +299,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 1.x
     @DisplayName("AgressoId mangler, og orgenhet på ressurs er upresis")
-    void test_ManglerAgressoID_UpresisOrgenhetPaaRessurs(boolean unleashBoolean) {
+    void test_ManglerAgressoID_UpresisOrgenhetPaaRessurs() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "-4", "Mangler", "AID_1", "ORGNIV3", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
             dvhRessursStilling(A000001, "-4", "Mangler", "AID_1", "ORGNIV3", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31), Optional.empty()),
             dvhRessursStilling(A000001, "-4", "Mangler", "AID_1", "ORGNIV3", LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -346,18 +324,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 1.xi
     @DisplayName("Mangler både AgressoId og orgenhet på ressurs")
-    void test_ManglerAgressoID_ManglerOrgenhetPaaRessurs(boolean unleashBoolean) {
+    void test_ManglerAgressoID_ManglerOrgenhetPaaRessurs() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "-4", "Mangler", "-3", null, LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31), Optional.empty()),
             dvhRessursStilling(A000001, "-4", "Mangler", "-3", null, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31), Optional.empty()),
             dvhRessursStilling(A000001, "-4", "Mangler", "-3", null, LocalDate.of(2022, 1, 1), MAX_DATE, Optional.empty())
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -373,18 +349,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 2.i
     @DisplayName("Perioder henger sammen, og første periode slutter før ressursens startdato")
-    void test_FoerstePeriodeSlutterFoerRessursensStartDato(boolean unleashBoolean) {
+    void test_FoerstePeriodeSlutterFoerRessursensStartDato() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2020, 11, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -402,18 +376,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, result.errors().getFirst().errorType());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 2.ii
     @DisplayName("Ulike perioder hvor første periode starter før ressursen startdato, men slutter etter")
-    void test_FoerstePeriodeStarterFoerRessursensStartDato(boolean unleashBoolean) {
+    void test_FoerstePeriodeStarterFoerRessursensStartDato() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2020, 5, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -431,18 +403,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, result.errors().getFirst().errorType());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 2.iii
     @DisplayName("Ulike perioder henger sammen, og første periode slutter før ressursens startdato, den andre starter før ressursens startdato")
-    void test_UlikePerioder_FoersteMedPeriodeFoerOgEnSomStarterFoerRessursensStartDato(boolean unleashBoolean) {
+    void test_UlikePerioder_FoersteMedPeriodeFoerOgEnSomStarterFoerRessursensStartDato() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
             dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2021, 11, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -469,18 +439,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, result.errors().getLast().errorType());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 3.i
     @DisplayName("Perioder henger sammen, og siste periode slutter etter ressursens sluttdato")
-    void test_SistePeriodeSlutterEtterRessursensStartDato(boolean unleashBoolean) {
+    void test_SistePeriodeSlutterEtterRessursensStartDato() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2019, 1, 1), LocalDate.of(2023, 12, 31))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -498,18 +466,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, result.errors().getFirst().errorType());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 3.ii
     @DisplayName("Perioder henger sammen, og siste periode starter etter ressursens sluttdato")
-    void test_SistePeriodeStarterEtterRessursensStartDato(boolean unleashBoolean) {
+    void test_SistePeriodeStarterEtterRessursensStartDato() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2019, 1, 1), LocalDate.of(2021, 12, 31))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -527,18 +493,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, result.errors().getFirst().errorType());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 3.iii
     @DisplayName("Ulike perioder henger sammen, den ene med periode som slutter etter ressursen sluttdato, den andre med periode etter ressursen sluttdato")
-    void test_UlikePerioder_FoersteMedPeriodeSlutterEtterRessursensSluttDato_AndreStarterEtterRessursenSluttdato(boolean unleashBoolean) {
+    void test_UlikePerioder_FoersteMedPeriodeSlutterEtterRessursensSluttDato_AndreStarterEtterRessursenSluttdato() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
             dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2019, 1, 1), LocalDate.of(2021, 8, 31))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -557,17 +521,15 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, result.errors().getLast().errorType());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test    
     // Test referanser 4.i
     @DisplayName("Like enheter, men overlapp av periode")
-    void test_OverlappAvPeriode(boolean unleashBoolean) {
+    void test_OverlappAvPeriode() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 3, 1), MAX_DATE)
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -586,11 +548,10 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
     }
 
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 4.ii
     @DisplayName("Splitt på ulike enheter med overlapp av periode - Flere overlapp")
-    void test_SplittPaaUlikeEnheterMedOverlapp_FlereOverlapp(boolean unleashBoolean) {
+    void test_SplittPaaUlikeEnheterMedOverlapp_FlereOverlapp() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 3, 1), MAX_DATE), // Overlapper den over
@@ -598,7 +559,6 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
             dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31))
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -622,18 +582,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(DVH_RESSURSSTILLINGER_HAR_OVERLAPPENDE_PERIODER, result.errors().getFirst().errorType());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 5
     @DisplayName("Splitt på ulike sektor og tilknytninger, men sammenhengende datoer")
-    void test_splittPaaUlikeSektorMedSammenhengendeDatoer(boolean unleashBoolean) {
+    void test_splittPaaUlikeSektorMedSammenhengendeDatoer() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), Optional.of("Midlertidig karakter § 9a")),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2021, 1, 1), LocalDate.of(2021, 6, 15), Optional.of("Midlertidig karakter § 9a")),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2021, 6, 16), MAX_DATE, Optional.of("Fast"))
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -658,18 +616,16 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(Tilknytningtype.FAST, andreStillingPeriode.tilknytningtype().orElse(null));
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     // Test referanser 6
     @DisplayName("Slå sammen sammenhengende perioder med like sektor og tilknytninger")
-    void test_SlaaSammenSammenhengendePerioderMedLikeSektorOgTilknytninger(boolean unleashBoolean) {
+    void test_SlaaSammenSammenhengendePerioderMedLikeSektorOgTilknytninger() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), Optional.of("Fast")),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2021, 1, 1), LocalDate.of(2021, 6, 15), Optional.of("Fast")),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2021, 6, 16), MAX_DATE, Optional.of("Fast"))
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -686,17 +642,15 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(Tilknytningtype.FAST, forsteStillingPeriode.tilknytningtype().orElse(null));
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
+    @Test
     @DisplayName("Ikke slå sammen sammenhegende perioder med ulike sektor og tilknytninger")
-    void test_IkkeSlaaSammenSammenhengendePerioderMedUlikeSektorOgTilknytninger(boolean unleashBoolean) {
+    void test_IkkeSlaaSammenSammenhengendePerioderMedUlikeSektorOgTilknytninger() {
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31), Optional.of("Midlertidig karakter § 9a")),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2021, 1, 1), LocalDate.of(2021, 6, 15), Optional.of("Fast")),
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2021, 6, 16), MAX_DATE, Optional.of("Midlertidig karakter § 9a"))
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(unleashBoolean);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -740,7 +694,6 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
             dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31), Optional.of("Utdanningsstillinger § 9d"))
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -772,7 +725,6 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
             dvhRessursStilling(A000001, "AGRID_2", "Enhet_2", LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31), Optional.of("Timelønn"))
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -798,7 +750,6 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31), Optional.of("Timelønn"))
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -823,7 +774,6 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31), Optional.of("Fast"))
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -859,7 +809,6 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 7, 1), LocalDate.of(2021, 6, 30), Optional.of("Fast"))
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -894,7 +843,6 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 1, 1), LocalDate.of(2022, 10, 31))
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -932,7 +880,6 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
     void test_FaarNullIPerioderGruppert() {
         List<DvhRessursStilling> dvhRessursStillinger = Collections.emptyList();
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -988,7 +935,6 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 5, 1), LocalDate.of(2025, 12, 31), Optional.of("Innlån/utlån"))
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
 
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
@@ -1053,7 +999,6 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
             dvhRessursStilling(A000001, "AGRID_1", "Enhet_1", LocalDate.of(2025, 5, 1), LocalDate.of(2099, 12, 31), Optional.of("Fast"))
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2010, 1, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 
@@ -1156,7 +1101,6 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
             dvhRessursStilling(A000001, "AGRID_2", "Enhet 2", LocalDate.of(2026, 8, 1), LocalDate.of(2099, 12, 31), Optional.of("Fast"))
         );
 
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
         when(ressursStateRepository.findByNavident(A000001)).thenReturn(Optional.of(ressurs(A000001, LocalDate.of(2022, 4, 1))));
         var strukturerteStillingPerioder = new StrukturerteStillingPerioderForNavident(A000001, dvhRessursStillinger);
 

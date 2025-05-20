@@ -57,12 +57,7 @@ public class RessursStillingLoader {
     public List<DvhRessursStilling> load() {
         LocalDateTime start = LocalDateTime.now();
 
-        var ressursStillinger = unleash.isEnabled("nom.ny-tilknytning-mapping") ? dvhOrdsService.getStatligeTilknytninger() :
-            dvhOrdsService.getStatligeTilknytninger().stream()
-            .filter(rs -> isNull(rs.getStillingAnsettelsesTypeBesk())
-                || rs.getStillingAnsettelsesTypeBesk().isEmpty()
-                || !rs.getStillingAnsettelsesTypeBesk().get().equalsIgnoreCase("Innlån/utlån"))
-            .toList();
+        var ressursStillinger = dvhOrdsService.getStatligeTilknytninger();
 
         log.info("Lastet {} ressursStillinger. Tok {}", ressursStillinger.size(), durationAsH24(start));
         return ressursStillinger;

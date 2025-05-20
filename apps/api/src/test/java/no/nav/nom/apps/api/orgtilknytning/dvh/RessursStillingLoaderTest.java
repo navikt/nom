@@ -130,7 +130,6 @@ class RessursStillingLoaderTest extends TestBase {
     @Test
     @DisplayName("Test last av Resssurs stillinger fra Dvh json")
     public void testLoad() {
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(true);
         var result = ressursStillingLoader.load();
 
         assertEquals(7, result.size());
@@ -163,12 +162,11 @@ class RessursStillingLoaderTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test last av Resssurs stillinger fra Dvh json")
+    @DisplayName("Test last av Ressurs stillinger fra Dvh json")
     public void testLoadToggleFalse() {
-        when(unleash.isEnabled("nom.ny-tilknytning-mapping")).thenReturn(false);
         var result = ressursStillingLoader.load();
 
-        assertEquals(6, result.size());
+        assertEquals(7, result.size());
         assertEquals(4, result.stream().filter(rs -> rs.getNavident().equals(Optional.of("A100036"))).count());
         assertEquals(
             LocalDate.of(2021, 7, 1),
@@ -186,7 +184,7 @@ class RessursStillingLoaderTest extends TestBase {
                 .get()
                 .getStillingDatoFom()
         );
-        assertEquals(2, result.stream().filter(rs -> rs.getNavident().equals(Optional.of("A100180"))).count());
+        assertEquals(3, result.stream().filter(rs -> rs.getNavident().equals(Optional.of("A100180"))).count());
         assertEquals(
             LocalDate.of(2024, 6, 1),
             result.stream()

@@ -150,9 +150,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
             }
         });
 
-        if (unleash.isEnabled("nom.ny-tilknytning-mapping")) {
-            filtrerUtPerioderSomOverlapperPaaSammeEnhet(perioderGruppert);
-        }
+        filtrerUtPerioderSomOverlapperPaaSammeEnhet(perioderGruppert);
 
         return new StrukturerteStillingPerioderForNavident(
             sspForNavident, perioderGruppert.stream()

@@ -92,12 +92,7 @@ public class NyeRessursStillingProcessor {
         // Disse skal endres
         // Stillingperioder uten eksisterende OT skal opprettes
         // Eksisterende OT uten tilsvarende stillingperiode skal fjernes
-        if (unleash.isEnabled("nom.ny-tilknytning-mapping")) {
-            matchEksisterendeMotStillingPerioderNew(sspForNavident.stillingPerioder(), eksisterendeOTer, matchedeOTer, stillingPerioderAaOpprette);
-        } else {
-            matchEksisterendeMotStillingPerioderOld(sspForNavident.stillingPerioder(), eksisterendeOTer, matchedeOTer, stillingPerioderAaOpprette);
-        }
-
+        matchEksisterendeMotStillingPerioderNew(sspForNavident.stillingPerioder(), eksisterendeOTer, matchedeOTer, stillingPerioderAaOpprette);
 
         var eksisterendeAaFjerne = getOTerAaFjerne(eksisterendeOTer, matchedeOTer);
 
@@ -145,39 +140,23 @@ public class NyeRessursStillingProcessor {
                 endringer.add(lagEndreDOLCmd(ot, sp, sspForNavident));
             }
 
-            if (unleash.isEnabled("nom.ny-tilknytning-mapping")) {
-                if (!lik(ot.gyldigFom(), sp.gyldigFom())) {
-                    var cmd = lagEndreGyldigFomCmd(ot, sp, sspForNavident, gyldigTomErUlik);
-                    if (cmd != null) {
-                        endringer.add(cmd);
-                    }
+            if (!lik(ot.gyldigFom(), sp.gyldigFom())) {
+                var cmd = lagEndreGyldigFomCmd(ot, sp, sspForNavident, gyldigTomErUlik);
+                if (cmd != null) {
+                    endringer.add(cmd);
                 }
+            }
 
-                if (isCurrentOrFuture(sp.gyldigTom())) {
-                    if (sp.sektor() != null) {
-                        if (isNull(ot.sektor()) || ot.sektor() != sp.sektor()) {
-                            endringer.add(lagSektorEndringCmd(ot, sp, sspForNavident));
-                        }
+            if (isCurrentOrFuture(sp.gyldigTom())) {
+                if (sp.sektor() != null) {
+                    if (isNull(ot.sektor()) || ot.sektor() != sp.sektor()) {
+                        endringer.add(lagSektorEndringCmd(ot, sp, sspForNavident));
                     }
                 }
-                if (sp.tilknytningtype().isPresent()) {
-                    if (ot.orgtilknytningType().isEmpty() || ot.orgtilknytningType().get() != sp.tilknytningtype().get()) {
-                        endringer.add(lagEndreTilknytningtypeCmd(ot, sp));
-                    }
-                }
-
-            } else {
-                if (sp.erDagligOppfolging() && isCurrentOrFuture(sp.gyldigTom())) {
-                    if (sp.sektor() != null) {
-                        if (isNull(ot.sektor()) || ot.sektor() != sp.sektor()) {
-                            endringer.add(lagSektorEndringCmd(ot, sp, sspForNavident));
-                        }
-                    }
-                    if (sp.tilknytningtype().isPresent()) {
-                        if (ot.orgtilknytningType().isEmpty() || ot.orgtilknytningType().get() != sp.tilknytningtype().get()) {
-                            endringer.add(lagEndreTilknytningtypeCmd(ot, sp));
-                        }
-                    }
+            }
+            if (sp.tilknytningtype().isPresent()) {
+                if (ot.orgtilknytningType().isEmpty() || ot.orgtilknytningType().get() != sp.tilknytningtype().get()) {
+                    endringer.add(lagEndreTilknytningtypeCmd(ot, sp));
                 }
             }
         });
@@ -324,23 +303,15 @@ public class NyeRessursStillingProcessor {
             nye.add(lagOpprettEventCmd(fiktivFID, sp, sspForNavident));
             if (sp.erDagligOppfolging()) {
                 nye.add(lagEndreDOLCmd(fiktivFID, sp, sspForNavident));
-                if (!unleash.isEnabled("nom.ny-tilknytning-mapping")) {
-                    if (sp.sektor() != null && sp.tilknytningtype().isPresent() && isCurrentOrFuture(sp.gyldigTom())) {
-                        nye.add(lagSektorEndringCmd(fiktivFID, sp, sspForNavident));
-                        nye.add(lagEndreTilknytningtypeCmd(fiktivFID, sp, sspForNavident));
-                    }
-                }
             }
 
-            if (unleash.isEnabled("nom.ny-tilknytning-mapping")) {
-                if (isCurrentOrFuture(sp.gyldigTom())) {
-                    if (sp.sektor() != null) {
-                        nye.add(lagSektorEndringCmd(fiktivFID, sp, sspForNavident));
-                    }
+            if (isCurrentOrFuture(sp.gyldigTom())) {
+                if (sp.sektor() != null) {
+                    nye.add(lagSektorEndringCmd(fiktivFID, sp, sspForNavident));
                 }
-                if (sp.tilknytningtype().isPresent()) {
-                    nye.add(lagEndreTilknytningtypeCmd(fiktivFID, sp, sspForNavident));
-                }
+            }
+            if (sp.tilknytningtype().isPresent()) {
+                nye.add(lagEndreTilknytningtypeCmd(fiktivFID, sp, sspForNavident));
             }
 
             if (sp.gyldigTom().isBefore(NO_END_DATE)) {
