@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.statistikk.api;
 
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
@@ -11,15 +12,14 @@ import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
+import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -28,21 +28,24 @@ import java.util.Set;
 
 import static java.util.Objects.isNull;
 
+@Slf4j
 @Service
 public class StatistikkRestService {
-    private final static Logger log = LoggerFactory.getLogger(StatistikkRestService.class);
 
     private final RessursStateRepository ressursStateRepository;
+    private final OrganiseringStateRepository organiseringStateRepository;
     private final OrgenhetService orgenhetService;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgEnhetMapper orgEnhetMapper;
 
     public StatistikkRestService(RessursStateRepository ressursStateRepository,
+                                 OrganiseringStateRepository organiseringStateRepository,
                                  OrgenhetService orgenhetService,
                                  RemedyEnhetMapperService remedyEnhetMapperService,
                                  OrgEnhetMapper orgEnhetMapper
     ) {
         this.ressursStateRepository = ressursStateRepository;
+        this.organiseringStateRepository = organiseringStateRepository;
         this.orgenhetService = orgenhetService;
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.orgEnhetMapper = orgEnhetMapper;
@@ -72,8 +75,7 @@ public class StatistikkRestService {
         var antallNavKontaktsenter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(alleOrgEnheter, OrgEnhetsType.NAV_KONTAKTSENTER);
         var antallKontrollKonrollenheter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(alleOrgEnheter, OrgEnhetsType.KONTROLL_KONTROLLENHET);
         var antallFylker = createNewIOrgenhetList(alleOrgEnheter, NomNivaa.DRIFTSENHET, OrgEnhetsType.FYLKE).size();
-        var antallNavKontorer = finnAlleNavKontorer(alleOrgEnheter).size();
-        log.info("Funnet alle Nav kontorer som har overordnet enhet som ikke er arbeidsomraade: {}", antallNavKontorer);
+        var antallNavKontorer = finnAlleNavKontorer(alleOrgEnheter);
         return new GlobalStatistikkResponse(
             ressursStatistikk,
             antallNavArbeidOgYtelser,
@@ -153,7 +155,7 @@ public class StatistikkRestService {
         var antallNavKontaktsenter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.NAV_KONTAKTSENTER);
         var antallKontrollKonrollenheter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.KONTROLL_KONTROLLENHET);
         var antallFylker = createNewIOrgenhetList(underliggendeOrgEnheter, NomNivaa.DRIFTSENHET, OrgEnhetsType.FYLKE).size();
-        var antallNavKontorer = createNewIOrgenhetList(underliggendeOrgEnheter, NomNivaa.ARBEIDSOMRAADE, OrgEnhetsType.NAV_KONTOR).size();
+        var antallNavKontorer = finnAlleNavKontorer(underliggendeOrgEnheter);
         var antallArbeidslivssenter = createNewIOrgenhetList(underliggendeOrgEnheter, NomNivaa.ARBEIDSOMRAADE, OrgEnhetsType.ARBEIDSLIVSSENTER).size();
         var antallArbeidsraadgivning = createNewIOrgenhetList(underliggendeOrgEnheter, NomNivaa.ARBEIDSOMRAADE, OrgEnhetsType.ARBEIDSRAADGIVNING).size();
         var antallTiltak = createNewIOrgenhetList(underliggendeOrgEnheter, NomNivaa.ARBEIDSOMRAADE, OrgEnhetsType.TILTAK).size();
@@ -183,7 +185,7 @@ public class StatistikkRestService {
         var antallNavKontaktsenter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.NAV_KONTAKTSENTER);
         var antallKontrollKonrollenheter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.KONTROLL_KONTROLLENHET);
         var antallFylker = createNewIOrgenhetList(underliggendeOrgEnheter, NomNivaa.DRIFTSENHET, OrgEnhetsType.FYLKE).size();
-        var antallNavKontorer = createNewIOrgenhetList(underliggendeOrgEnheter, NomNivaa.ARBEIDSOMRAADE, OrgEnhetsType.NAV_KONTOR).size();
+        var antallNavKontorer = finnAlleNavKontorer(underliggendeOrgEnheter);
 
         return new OrgEnhetStatistikkResponse(
             ressursStatistikk,
@@ -216,40 +218,28 @@ public class StatistikkRestService {
             .toList().size();
     }
 
-private List<IOrgenhet> finnAlleNavKontorer(Collection<IOrgenhet> alleOrgenheter) {
-    log.info("Finner alle Nav kontorer");
-    long startTime = System.nanoTime();
+private int finnAlleNavKontorer(Collection<IOrgenhet> alleOrgenheter) {
 
-    var orgenhetOverordnetFid = alleOrgenheter.stream()
+    var alleNavKontorer = alleOrgenheter.stream()
         .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().isPresent())
         .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().get().equals(OrgEnhetsType.NAV_KONTOR))
-        .map(IOrgenhet::getOverordnetOrgEnhetFid)
+        .map(IOrgenhet::getId)
+        .toList();
+
+    var orgenhetOverordnetId = alleNavKontorer.stream()
+        .map(organiseringStateRepository::findActiveById)
         .filter(Optional::isPresent)
         .map(Optional::get)
+        .map(OrganiseringState::idOver)
         .toList();
 
-    long orgenheterTime = System.nanoTime();
-    log.info("Funnet alle Nav kontorer: {} (Tid brukt: {} ms)", orgenhetOverordnetFid.size(), (orgenheterTime - startTime) / 1_000_000);
-    var alleOverordnetEnheter = alleOrgenheter.stream().filter(orgEnhet ->
-        orgenhetOverordnetFid.contains(orgEnhet.getFid()))
-        .filter(iOrgenhet -> iOrgenhet.getNomNivaa().isPresent())
-        .filter(iOrgenhet -> !iOrgenhet.getNomNivaa().get().equals(NomNivaa.ARBEIDSOMRAADE))
-        .map(IOrgenhet::getFid)
+    var antallNavKontorer = orgenhetOverordnetId.stream()
+        .filter(nomId -> alleOrgenheter.stream()
+            .anyMatch(iOrgenhet -> iOrgenhet.getId().equals(nomId)
+                && iOrgenhet.getNomNivaa().isPresent()
+                && !iOrgenhet.getNomNivaa().get().equals(NomNivaa.ARBEIDSOMRAADE)))
         .toList();
-    log.info("Finner alle som er Nav kontor og har overordnet enhet som ikke er arbeidsomraade");
-    List<IOrgenhet> navKontorer = new ArrayList<>();
-    alleOrgenheter.forEach(orgEnhet -> {
-        if (orgEnhet.getOverordnetOrgEnhetFid().isPresent()) {
-            alleOverordnetEnheter.stream()
-                .filter(overordnetFid -> overordnetFid.equals(orgEnhet.getOverordnetOrgEnhetFid().get()))
-                .findFirst().ifPresent(overordnetEnhet -> navKontorer.add(orgEnhet));
-        }
-    });
-
-    long navKontorerTime = System.nanoTime();
-    log.info("Tid brukt på å finne Nav kontorer med overordnet enhet: {} ms", (navKontorerTime - orgenheterTime) / 1_000_000);
-
-    return navKontorer;
+    return antallNavKontorer.size();
 }
 
     private List<IOrgenhet> createNewIOrgenhetList(Collection<IOrgenhet> allOrgenheter, NomNivaa nomNivaa, OrgEnhetsType orgEnhetsType) {

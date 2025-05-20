@@ -12,7 +12,9 @@ import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,6 +45,9 @@ public class StatistikkControllerTest extends RestTestBase {
     RessursStateRepository ressursStateRepository;
 
     @MockitoBean
+    OrganiseringStateRepository organiseringStateRepository;
+
+    @MockitoBean
     OrgenhetService orgenhetService;
 
     @Autowired
@@ -59,8 +64,15 @@ public class StatistikkControllerTest extends RestTestBase {
     @Test
     @DisplayName("Test hentGlobalStatistikk")
     public void testHentGlobalStatistikk() {
+        var alleOrgEnheter = getAllOrgEnheter().stream().toList();
         when(ressursStateRepository.findAllActiveRessurser()).thenReturn(mapOfActiveRessurser());
         when(orgenhetService.getAllEnheterMedOrganisering()).thenReturn(getAllOrgEnheter());
+        when(organiseringStateRepository.findActiveById(alleOrgEnheter.getFirst().getId())).thenReturn(Optional.ofNullable(getAllOrganiseringer().getFirst()));
+        when(organiseringStateRepository.findActiveById(alleOrgEnheter.get(1).getId())).thenReturn(Optional.ofNullable(getAllOrganiseringer().get(1)));
+        when(organiseringStateRepository.findActiveById(alleOrgEnheter.get(2).getId())).thenReturn(Optional.ofNullable(getAllOrganiseringer().get(2)));
+        when(organiseringStateRepository.findActiveById(alleOrgEnheter.get(3).getId())).thenReturn(Optional.ofNullable(getAllOrganiseringer().get(3)));
+        when(organiseringStateRepository.findActiveById(alleOrgEnheter.get(4).getId())).thenReturn(Optional.ofNullable(getAllOrganiseringer().get(4)));
+        when(organiseringStateRepository.findActiveById(alleOrgEnheter.get(5).getId())).thenReturn(Optional.ofNullable(getAllOrganiseringer().get(5)));
         when(orgenhetService.getAllOrgEnheterThatCanHaveRessurser()).thenReturn(getAllOrgEnheter());
 
         var expectedGlobalStatistikkResponse = new GlobalStatistikkResponse(
@@ -116,7 +128,7 @@ public class StatistikkControllerTest extends RestTestBase {
                 .navn("Test enhet456")
                 .gyldigFom(LocalDate.now().minusMonths(1))
                 .gyldigTom(Optional.empty())
-                .overordnetOrgEnhetFid(Optional.of("fid-123"))
+                .overordnetOrgEnhetFid(Optional.empty())
                 .lederFid(Optional.empty())
                 .orgEnhetsType(Optional.of(OrgEnhetsType.FYLKE))
                 .nomNivaa(Optional.of(NomNivaa.DRIFTSENHET))
@@ -127,7 +139,7 @@ public class StatistikkControllerTest extends RestTestBase {
                 .navn("Test enhet789")
                 .gyldigFom(LocalDate.now().minusMonths(1))
                 .gyldigTom(Optional.empty())
-                .overordnetOrgEnhetFid(Optional.of("fid-456"))
+                .overordnetOrgEnhetFid(Optional.empty())
                 .lederFid(Optional.empty())
                 .orgEnhetsType(Optional.of(OrgEnhetsType.NAV_KONTOR))
                 .nomNivaa(Optional.of(NomNivaa.ARBEIDSOMRAADE))
@@ -138,7 +150,7 @@ public class StatistikkControllerTest extends RestTestBase {
                 .navn("Test enhet101112")
                 .gyldigFom(LocalDate.now().minusMonths(1))
                 .gyldigTom(Optional.empty())
-                .overordnetOrgEnhetFid(Optional.of("fid-456"))
+                .overordnetOrgEnhetFid(Optional.empty())
                 .lederFid(Optional.empty())
                 .orgEnhetsType(Optional.of(OrgEnhetsType.NAV_KONTOR))
                 .nomNivaa(Optional.of(NomNivaa.ARBEIDSOMRAADE))
@@ -149,7 +161,7 @@ public class StatistikkControllerTest extends RestTestBase {
                 .navn("Test enhet131415")
                 .gyldigFom(LocalDate.now().minusMonths(1))
                 .gyldigTom(Optional.empty())
-                .overordnetOrgEnhetFid(Optional.of("fid-456"))
+                .overordnetOrgEnhetFid(Optional.empty())
                 .lederFid(Optional.empty())
                 .orgEnhetsType(Optional.of(OrgEnhetsType.NAV_KONTOR))
                 .nomNivaa(Optional.of(NomNivaa.ARBEIDSOMRAADE))
@@ -160,7 +172,7 @@ public class StatistikkControllerTest extends RestTestBase {
                 .navn("Test enhet161718")
                 .gyldigFom(LocalDate.now().minusMonths(1))
                 .gyldigTom(Optional.empty())
-                .overordnetOrgEnhetFid(Optional.of("fid-456"))
+                .overordnetOrgEnhetFid(Optional.empty())
                 .lederFid(Optional.empty())
                 .orgEnhetsType(Optional.of(OrgEnhetsType.NAV_KONTOR))
                 .nomNivaa(Optional.of(NomNivaa.ARBEIDSOMRAADE))
@@ -172,6 +184,65 @@ public class StatistikkControllerTest extends RestTestBase {
 
     private IOrgenhet map(OrgEnhetState orgEnhetState) {
         return new OrgEnhet(orgEnhetState);
+    }
+
+    private List<OrganiseringState> getAllOrganiseringer() {
+        return List.of(
+            OrganiseringState.builder()
+                .fid("fid-123")
+                .id("orgEnhet123")
+                .navn("Test enhet123")
+                .idOver("NAV123")
+                .navnOver("Nav")
+                .gyldigFom(LocalDate.now().minusMonths(1))
+                .gyldigTom(Optional.empty())
+                .build(),
+            OrganiseringState.builder()
+                .fid("fid-456")
+                .id("orgEnhet456")
+                .navn("Test enhet456")
+                .idOver("orgEnhet123")
+                .navnOver("Test enhet123")
+                .gyldigFom(LocalDate.now().minusMonths(1))
+                .gyldigTom(Optional.empty())
+                .build(),
+            OrganiseringState.builder()
+                .fid("fid-789")
+                .id("orgEnhet789")
+                .navn("Test enhet789")
+                .idOver("orgEnhet456")
+                .navnOver("Test enhet456")
+                .gyldigFom(LocalDate.now().minusMonths(1))
+                .gyldigTom(Optional.empty())
+                .build(),
+            OrganiseringState.builder()
+                .fid("fid-101112")
+                .id("orgEnhet101112")
+                .navn("Test enhet101112")
+                .idOver("orgEnhet456")
+                .navnOver("Test enhet456")
+                .gyldigFom(LocalDate.now().minusMonths(1))
+                .gyldigTom(Optional.empty())
+                .build(),
+            OrganiseringState.builder()
+                .fid("fid-131415")
+                .id("orgEnhet131415")
+                .navn("Test enhet131415")
+                .idOver("orgEnhet456")
+                .navnOver("Test enhet456")
+                .gyldigFom(LocalDate.now().minusMonths(1))
+                .gyldigTom(Optional.empty())
+                .build(),
+            OrganiseringState.builder()
+                .fid("fid-161718")
+                .id("orgEnhet161718")
+                .navn("Test enhet161718")
+                .idOver("orgEnhet456")
+                .navnOver("Test enhet456")
+                .gyldigFom(LocalDate.now().minusMonths(1))
+                .gyldigTom(Optional.empty())
+                .build()
+        );
     }
 
     private GlobalStatistikkResponse getGlobalStatistikk(
