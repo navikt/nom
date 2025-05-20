@@ -26,6 +26,8 @@ import {
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
 import { UserImage } from "~/components/UserImage";
+import { useUnleashToggle } from "~/hooks/useUnleashToggle";
+import { OrgEnhetStatistikk } from "~/pages/FrontPage/FrontPage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import {
   isPeriodActive,
@@ -43,6 +45,8 @@ export const ValgtOrgEnhet = ({
   orgEnhet: OrgEnhet;
   hideRessurser?: boolean;
 }) => {
+  const hasAdminAccess = useHasAdminAccess();
+
   const ressurserNavidents = orgEnhet.ressursKoblinger
     .filter((orgtilknytning) =>
       isPeriodActive(orgtilknytning.gyldigFom, orgtilknytning.gyldigTom),
@@ -87,6 +91,10 @@ export const ValgtOrgEnhet = ({
     hentedeRessurserQuery.isLoading ||
     isOrgEnhetDriftsenhetQuery.isLoading ||
     enheterSomKanHaRessurser.isLoading;
+
+  const statistikkAlleOrgenheterAdmin = useUnleashToggle(
+    "nom.statistikk.alle.orgenheter",
+  );
 
   return (
     <div
@@ -186,6 +194,10 @@ export const ValgtOrgEnhet = ({
             <OrgenhetLederLink orgEnhet={orgEnhet} />
           </div>
         </div>
+
+        {hasAdminAccess && statistikkAlleOrgenheterAdmin && (
+          <OrgEnhetStatistikk orgEnhet={orgEnhet} />
+        )}
 
         {loading ? (
           <Loader

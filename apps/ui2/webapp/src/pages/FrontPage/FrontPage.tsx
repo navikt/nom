@@ -88,7 +88,7 @@ export function OrgEnhetStatistikk({
 
   const ressursStatistikk = statistikk?.ressursStatistikk;
 
-  const MedarbeidereStatistikk: MedarbeidereStatistikk = {
+  const medarbeidereStatistikk: MedarbeidereStatistikk = {
     statlige: ressursStatistikk?.antallStatligeRessurser ?? 0,
     kommunale: ressursStatistikk?.antallKommunaleRessurser ?? 0,
     eksterne: ressursStatistikk?.antallEksterneRessurser ?? 0,
@@ -111,7 +111,7 @@ export function OrgEnhetStatistikk({
           grid-template-columns: repeat(2, 1fr);
         `}
       >
-        <MedarbeidereBarChartGridWrapper statistikk={MedarbeidereStatistikk} />
+        <MedarbeidereBarChartGridWrapper statistikk={medarbeidereStatistikk} />
 
         <OrgEnheterStatistikkGridWrapper statistikk={statistikk} />
       </div>
@@ -122,11 +122,13 @@ export function OrgEnhetStatistikk({
 function GridItem({
   columns = 1,
   rows = 1,
+  standalone = false,
   children,
 }: {
   columns?: number;
   rows?: number;
-  children: ReactNode;
+  standalone?: boolean;
+  children: React.ReactNode;
 }) {
   return (
     <div
@@ -137,9 +139,10 @@ function GridItem({
         padding: var(--a-spacing-6);
         border-radius: 10px;
         border: 2px solid var(--a-icon-info);
-        grid-column: span ${columns};
-        grid-row: span ${rows};
         align-items: center;
+        ${standalone
+          ? `height: fit-content;`
+          : `grid-column: span ${columns}; grid-row: span ${rows};`}
       `}
     >
       {children}
@@ -162,7 +165,7 @@ function MedarbeidereBarChartGridWrapper({
   }
 
   return (
-    <GridItem rows={2}>
+    <GridItem standalone>
       <MedarbeidereBarChart statistikk={statistikk} />
     </GridItem>
   );
@@ -258,11 +261,20 @@ function OrgEnheterStatistikkGridWrapper({
 }) {
   const antallNavKontorer = statistikk?.antallNavKontorer ?? 0;
   const antallFylkekontor = statistikk?.antallFylkekontor ?? 0;
-  //const antallLovnoder = statistikk?.antallLovNoder ?? 0;
+  const antallLovnoder = statistikk?.antallLovNoder ?? 0;
+  const antallHjelpemidlerOgTilrettelegging =
+    statistikk?.antallHjelpemidlerOgTilrettelegging ?? 0;
+  const antallKlageinstanser = statistikk?.antallKlageinstanser ?? 0;
+  const antallKontrollKonrollenheter =
+    statistikk?.antallKontrollKonrollenheter ?? 0;
+  const antallNavKontaktsenter = statistikk?.antallNavKontaktsenter ?? 0;
+  const antallNavArbeidOgYtelser = statistikk?.antallNavArbeidOgYtelser ?? 0;
+  const antallNavFamilieOgPensjonsytelser =
+    statistikk?.antallNavFamilieOgPensjonsytelser ?? 0;
 
   const statistikkItems: OrgEnhetStatistikkItem[] = [];
 
-  if (!!antallFylkekontor && antallFylkekontor > 0) {
+  if (antallFylkekontor > 0) {
     statistikkItems.push({
       label: "Antall fylkesenheter:",
       value: antallFylkekontor,
@@ -270,7 +282,7 @@ function OrgEnheterStatistikkGridWrapper({
         "Antall Nav-regioner. Navs regioner avviker noe fra den administrative inndelingen av landet i fylker.",
     });
   }
-  if (!!antallNavKontorer && antallNavKontorer > 0) {
+  if (antallNavKontorer > 0) {
     statistikkItems.push({
       label: "Antall Nav-kontor:",
       value: antallNavKontorer,
@@ -278,15 +290,56 @@ function OrgEnheterStatistikkGridWrapper({
         "Antallet kan avvike noe blant annet fordi det er bevegelser i start/slutt-dato for Nav-kontor ifm. vertskommunesamarbeid.",
     });
   }
-  // Beholder dette siden det senere skal vises andre steder i hierarkiet
-  // if (!!antallLovnoder && antallLovnoder > 0) {
-  //   statistikkItems.push({
-  //     label: "Organisasjonsenheter:",
-  //     value: antallLovnoder,
-  //     helpText:
-  //       "Antall enheter der det er registrert medarbeidere. På et Nav-kontor telles antall avdelinger.",
-  //   });
-  // }
+  if (antallLovnoder > 0) {
+    statistikkItems.push({
+      label: "Organisasjonsenheter:",
+      value: antallLovnoder,
+      helpText:
+        "Antall enheter der det er registrert medarbeidere. På et Nav-kontor telles antall avdelinger.",
+    });
+  }
+  if (antallHjelpemidlerOgTilrettelegging > 0) {
+    statistikkItems.push({
+      label: "Hjelpemidler og tilrettelegging:",
+      value: antallHjelpemidlerOgTilrettelegging,
+      helpText: "Hjelpetekst",
+    });
+  }
+  if (antallKlageinstanser > 0) {
+    statistikkItems.push({
+      label: "Antall klageinstanser:",
+      value: antallKlageinstanser,
+      helpText: "Hjelpetekst",
+    });
+  }
+  if (antallKontrollKonrollenheter > 0) {
+    statistikkItems.push({
+      label: "Kontrollenheter:",
+      value: antallKontrollKonrollenheter,
+      helpText: "Hjelpetekst",
+    });
+  }
+  if (antallNavKontaktsenter > 0) {
+    statistikkItems.push({
+      label: "Nav Kontaktsenter:",
+      value: antallNavKontaktsenter,
+      helpText: "Hjelpetekst",
+    });
+  }
+  if (antallNavArbeidOgYtelser > 0) {
+    statistikkItems.push({
+      label: "Nav Arbeid og ytelser:",
+      value: antallNavArbeidOgYtelser,
+      helpText: "Hjelpetekst",
+    });
+  }
+  if (antallNavFamilieOgPensjonsytelser > 0) {
+    statistikkItems.push({
+      label: "Nav Familie og pensjonsytelser:",
+      value: antallNavFamilieOgPensjonsytelser,
+      helpText: "Hjelpetekst",
+    });
+  }
 
   if (statistikkItems.length === 0) {
     return;
