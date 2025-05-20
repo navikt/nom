@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgtilknytning.job;
 
-import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
@@ -30,9 +29,6 @@ public class OTUtenforHierarki {
     private final OrgtilknytningService orgtilknytningService;
     private final OrganiseringStateRepository organiseringStateRepository;
     private final MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
-    private final Unleash unleash;
-
-    private final String UNLEASH_AUTO_FLYTT = "nom.otutenforhierarki.auto_flytt";
 
     private final HashMap<OrgtilknytningState, IOrgenhet> otUtenforHierarkieMedAlternativOrgenhet = new HashMap<>();
     private final HashMap<IOrgenhet, List<OrgtilknytningState>> perAlternativOrgenhet = new HashMap<>();
@@ -40,14 +36,12 @@ public class OTUtenforHierarki {
     private boolean ventPaaState = true;
 
     public OTUtenforHierarki(OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService,
-                             OrganiseringStateRepository organiseringStateRepository, MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService,
-                            Unleash unleash
+                             OrganiseringStateRepository organiseringStateRepository, MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService
     ) {
         this.orgenhetService = orgenhetService;
         this.orgtilknytningService = orgtilknytningService;
         this.organiseringStateRepository = organiseringStateRepository;
         this.masseflyttOrgtilknytningerService = masseflyttOrgtilknytningerService;
-        this.unleash = unleash;
     }
 
     public void findOTUtenforHierarkiFromDataLast() {
@@ -82,9 +76,6 @@ public class OTUtenforHierarki {
     }
 
     int autoflyttOTUtenforHierarki(Map<IOrgenhet, List<OrgtilknytningState>> perAlternativOrgenhet) {
-        if (!unleash.isEnabled(UNLEASH_AUTO_FLYTT)) {
-            return 0;
-        }
         if (perAlternativOrgenhet.isEmpty()) {
             return 0;
         }
