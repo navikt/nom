@@ -180,7 +180,7 @@ public class OrgtilknytningController {
     ) {
         validateKanMasseflytte(masseFlyttingRequest);
 
-        var response = orgtilknytningRestService.nyMasseflyttingAvRessurser(masseFlyttingRequest);
+        var response = orgtilknytningRestService.masseflyttingAvRessurser(masseFlyttingRequest);
         return ResponseEntity.ok(response);
     }
 

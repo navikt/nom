@@ -737,7 +737,7 @@ public class OrgtilknytningRestService {
         nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
     }
 
-    public MasseFlyttingResponse nyMasseflyttingAvRessurser(MasseFlyttingRequest request) {
+    public MasseFlyttingResponse masseflyttingAvRessurser(MasseFlyttingRequest request) {
         var origination = new Origination(SecurityUtil.getAuthenticatedNavIdent(), SecurityUtil.getAuthenticatedAzpName());
 
         var inputMetadata = new InputMetadata(
