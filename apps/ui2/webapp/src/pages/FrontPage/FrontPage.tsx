@@ -18,6 +18,7 @@ import {
   getOrgEnhet,
   getStatistikkForOrgEnhet,
 } from "~/api/react-query-endpoints";
+import { useHasAdminAccess } from "~/api/useGetSession";
 import type { ChartRow } from "~/components/charts/HorizontalBarChart";
 import { HorizontalBarChart } from "~/components/charts/HorizontalBarChart";
 import ContentWrapper from "~/components/ContentWrapper";
@@ -259,6 +260,8 @@ function OrgEnheterStatistikkGridWrapper({
 }: {
   statistikk: GlobalStatistikkResponse | undefined;
 }) {
+  const hasAdminAccess = useHasAdminAccess();
+
   const antallNavKontorer = statistikk?.antallNavKontorer ?? 0;
   const antallFylkekontor = statistikk?.antallFylkekontor ?? 0;
   const antallLovnoder = statistikk?.antallLovNoder ?? 0;
@@ -290,7 +293,7 @@ function OrgEnheterStatistikkGridWrapper({
         "Antallet kan avvike noe blant annet fordi det er bevegelser i start/slutt-dato for Nav-kontor ifm. vertskommunesamarbeid.",
     });
   }
-  if (antallLovnoder > 0) {
+  if (antallLovnoder > 0 && hasAdminAccess) {
     statistikkItems.push({
       label: "Organisasjonsenheter:",
       value: antallLovnoder,
@@ -298,42 +301,42 @@ function OrgEnheterStatistikkGridWrapper({
         "Antall enheter der det er registrert medarbeidere. På et Nav-kontor telles antall avdelinger.",
     });
   }
-  if (antallHjelpemidlerOgTilrettelegging > 0) {
+  if (antallHjelpemidlerOgTilrettelegging > 0 && hasAdminAccess) {
     statistikkItems.push({
       label: "Hjelpemidler og tilrettelegging:",
       value: antallHjelpemidlerOgTilrettelegging,
       helpText: "Hjelpetekst",
     });
   }
-  if (antallKlageinstanser > 0) {
+  if (antallKlageinstanser > 0 && hasAdminAccess) {
     statistikkItems.push({
       label: "Antall klageinstanser:",
       value: antallKlageinstanser,
       helpText: "Hjelpetekst",
     });
   }
-  if (antallKontrollKonrollenheter > 0) {
+  if (antallKontrollKonrollenheter > 0 && hasAdminAccess) {
     statistikkItems.push({
       label: "Kontrollenheter:",
       value: antallKontrollKonrollenheter,
       helpText: "Hjelpetekst",
     });
   }
-  if (antallNavKontaktsenter > 0) {
+  if (antallNavKontaktsenter > 0 && hasAdminAccess) {
     statistikkItems.push({
       label: "Nav Kontaktsenter:",
       value: antallNavKontaktsenter,
       helpText: "Hjelpetekst",
     });
   }
-  if (antallNavArbeidOgYtelser > 0) {
+  if (antallNavArbeidOgYtelser > 0 && hasAdminAccess) {
     statistikkItems.push({
       label: "Nav Arbeid og ytelser:",
       value: antallNavArbeidOgYtelser,
       helpText: "Hjelpetekst",
     });
   }
-  if (antallNavFamilieOgPensjonsytelser > 0) {
+  if (antallNavFamilieOgPensjonsytelser > 0 && hasAdminAccess) {
     statistikkItems.push({
       label: "Nav Familie og pensjonsytelser:",
       value: antallNavFamilieOgPensjonsytelser,
@@ -346,7 +349,7 @@ function OrgEnheterStatistikkGridWrapper({
   }
 
   return (
-    <GridItem>
+    <GridItem standalone>
       <OrgEnheterStatistikk statistikk={statistikkItems} />
     </GridItem>
   );
