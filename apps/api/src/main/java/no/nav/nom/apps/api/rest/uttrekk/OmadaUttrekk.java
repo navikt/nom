@@ -57,7 +57,7 @@ public class OmadaUttrekk {
         ShadowOrgtilknytningerKommunaleRepository shadowOrgtilknytningerKommunaleRepository,
         RemedyEnhetIdResolver remedyEnhetIdResolver,
         DvhRepository dvhRepository,
-        OrganiseringStateRepository organiseringStateRepository,
+        OrganiseringStateRepository organiseringStateRepository
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
