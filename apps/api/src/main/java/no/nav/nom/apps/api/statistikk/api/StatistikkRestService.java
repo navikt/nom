@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
@@ -215,32 +216,31 @@ public class StatistikkRestService {
             .toList().size();
     }
 
-private List<OrgEnhet> finnAlleNavKontorer(Collection<IOrgenhet> alleOrgenheter) {
+private List<IOrgenhet> finnAlleNavKontorer(Collection<IOrgenhet> alleOrgenheter) {
     log.info("Finner alle Nav kontorer");
     long startTime = System.nanoTime();
 
-    var orgenheter = alleOrgenheter.stream()
+    var orgenhetOverordnetFid = alleOrgenheter.stream()
         .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().isPresent())
         .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().get().equals(OrgEnhetsType.NAV_KONTOR))
-        .map(orgEnhetMapper::mapToOrgEnhet)
+        .map(IOrgenhet::getOverordnetOrgEnhetFid)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
         .toList();
 
     long orgenheterTime = System.nanoTime();
-    log.info("Funnet alle Nav kontorer: {} (Tid brukt: {} ms)", orgenheter.size(), (orgenheterTime - startTime) / 1_000_000);
-
+    log.info("Funnet alle Nav kontorer: {} (Tid brukt: {} ms)", orgenhetOverordnetFid.size(), (orgenheterTime - startTime) / 1_000_000);
+    var alleOverordnetEnheter = alleOrgenheter.stream().filter(orgEnhet ->
+        orgenhetOverordnetFid.contains(orgEnhet.getFid()))
+        .filter(iOrgenhet -> iOrgenhet.getNomNivaa().isPresent())
+        .filter(iOrgenhet -> !iOrgenhet.getNomNivaa().get().equals(NomNivaa.ARBEIDSOMRAADE))
+        .map(IOrgenhet::getFid)
+        .toList();
     log.info("Finner alle som er Nav kontor og har overordnet enhet som ikke er arbeidsomraade");
-    List<OrgEnhet> navKontorer = new ArrayList<>();
-    orgenheter.forEach(orgEnhet -> {
-        var overordnetEnhet = alleOrgenheter.stream()
-            .filter(iOrgenhet -> iOrgenhet.getId().equals(orgEnhet.overordnetEnhetId()))
-            .filter(iOrgenhet -> iOrgenhet.getNomNivaa().isPresent())
-            .filter(iOrgenhet -> !iOrgenhet.getNomNivaa().get().equals(NomNivaa.ARBEIDSOMRAADE))
-            .findFirst().orElse(null);
-        if (overordnetEnhet != null) {
-            var overordnetEnhetMapped = orgEnhetMapper.mapToOrgEnhet(overordnetEnhet);
-            navKontorer.add(overordnetEnhetMapped);
-        }
-    });
+    List<IOrgenhet> navKontorer = new ArrayList<>();
+    alleOrgenheter.forEach(orgEnhet -> alleOverordnetEnheter.stream()
+        .filter(overordnetFid -> overordnetFid.equals(orgEnhet.getFid()))
+        .findFirst().ifPresent(overordnetEnhet -> navKontorer.add(orgEnhet)));
 
     long navKontorerTime = System.nanoTime();
     log.info("Tid brukt på å finne Nav kontorer med overordnet enhet: {} ms", (navKontorerTime - orgenheterTime) / 1_000_000);
