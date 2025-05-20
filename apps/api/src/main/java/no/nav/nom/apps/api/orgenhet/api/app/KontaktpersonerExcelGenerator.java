@@ -1,9 +1,6 @@
 package no.nav.nom.apps.api.orgenhet.api.app;
 
 import io.getunleash.Unleash;
-
-import jakarta.servlet.http.HttpServletResponse;
-
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.clients.kontaktinfo.Kontaktinfo;
 import no.nav.nom.apps.api.clients.kontaktinfo.KontaktinfoClient;
@@ -14,28 +11,22 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
-import static no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetController.UNLEASH_NY_KONTAKTINFO_EXPORT;
 
 @Slf4j
 @Service
 public class KontaktpersonerExcelGenerator {
     private final KontaktinfoClient kontaktinfoClient;
-    private final Unleash unleash;
 
-    public KontaktpersonerExcelGenerator(
-        KontaktinfoClient kontaktinfoClient, Unleash unleash
-    ) {
+    public KontaktpersonerExcelGenerator(KontaktinfoClient kontaktinfoClient, Unleash unleash) {
         this.kontaktinfoClient = kontaktinfoClient;
-        this.unleash = unleash;
     }
 
     public void generate(HttpServletResponse response, OrgEnhet orgEnhet, List<Ressurs> sortedRessurser) {
@@ -72,12 +63,7 @@ public class KontaktpersonerExcelGenerator {
             log.info(SECURE_LOGS, "Generating excel for orgenhet {} with ressurser {}, and contantinfo {}", orgEnhet.id(), sortedRessurser, kontaktinfoForRessurser);
             for (RessursKontaktinfo info : kontaktinfoForRessurser) {
 
-                Ressurs ressurs;
-                if (unleash.isEnabled(UNLEASH_NY_KONTAKTINFO_EXPORT)) {
-                    ressurs = ressursPerNavident.get(info.ressursNavident());
-                } else {
-                    ressurs = getRessursForGittNavident(sortedRessurser, info.ressursNavident());
-                }
+                Ressurs ressurs = ressursPerNavident.get(info.ressursNavident());
 
                 // index determines the row number for ressurs.
                 // If there are multiple contact info for a ressurs, we will have multiple rows for that ressurs.
