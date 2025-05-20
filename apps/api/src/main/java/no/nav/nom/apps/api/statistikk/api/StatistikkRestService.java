@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
+import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 
 @Slf4j
 @Service
@@ -120,8 +121,7 @@ public class StatistikkRestService {
 
         var alleRessurser = ressursStateRepository.findByNavidentBulk(alleRessursNavidenter).values().stream()
             .distinct()
-            .filter(ressursState -> ressursState.sluttdato().isEmpty() || !ressursState.sluttdato().get().isBefore(LocalDate.now()))
-            .filter(ressursState -> ressursState.startdato().isPresent() && !ressursState.startdato().get().isAfter(LocalDate.now()))
+            .filter(ressursState -> isPeriodActive(ressursState.startdato(), ressursState.sluttdato()))
             .filter(this::filterGyldigeRessurs)
             .toList();
 

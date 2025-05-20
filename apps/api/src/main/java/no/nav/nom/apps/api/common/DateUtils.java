@@ -32,6 +32,13 @@ public class DateUtils {
         return isPeriodActive(periodStart, periodEnd.orElse(null));
     }
 
+    public static boolean isPeriodActive(Optional<LocalDate> periodStart, Optional<LocalDate> periodEnd) {
+        if (periodStart.isEmpty()) {
+            return false;
+        }
+        return isPeriodActive(periodStart.orElse(null), periodEnd.orElse(null));
+    }
+
     public static boolean isPeriodActive(LocalDate periodStart, LocalDate periodEnd) {
         var today = LocalDate.now();
         var isPeriodStartBeforeOrEqualToToday = periodStart.isBefore(today.plusDays(1));
