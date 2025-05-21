@@ -435,6 +435,17 @@ function DropdownMeny({
     }
   };
 
+  const adminOrWriteForOrgenhet =
+    (hasWriteAccess && hasWriteAccessForOrgenhet) || hasAdminAccess;
+
+  const visOpprettMedarbeidere =
+    visRessursAdministeringKnapper && adminOrWriteForOrgenhet;
+
+  const visMasseflytting =
+    visRessursAdministeringKnapper &&
+    valgtEnhetKanHaRessurser &&
+    hasAdminAccess;
+
   return (
     <div
       css={css`
@@ -468,60 +479,39 @@ function DropdownMeny({
             >
               Tabellvisning av ansatte i denne enheten og underliggende enheter
             </Dropdown.Menu.GroupedList.Item>
-            {visRessursAdministeringKnapper && (
+
+            {visOpprettMedarbeidere && (
               <>
                 <Dropdown.Menu.Divider />
-
                 <Dropdown.Menu.GroupedList.Item
                   as={Link}
                   href="/ressurs/create/1"
                 >
                   Opprett medarbeider
                 </Dropdown.Menu.GroupedList.Item>
-
-                {hasAdminAccess && (
-                  <>
-                    <Dropdown.Menu.Divider />
-
-                    {valgtEnhetKanHaRessurser && (
-                      <Dropdown.Menu.GroupedList.Item
-                        as={Link}
-                        href={`/masseflytting/${orgEnhet.id}`}
-                      >
-                        Flytt én eller flere medarbeidere
-                      </Dropdown.Menu.GroupedList.Item>
-                    )}
-
-                    {!valgtEnhetKanHaRessurser && !hasAdminAccess && (
-                      <Dropdown.Menu.GroupedList.Item
-                        as={BodyShort}
-                        css={css`
-                          :hover {
-                            color: unset;
-                            background-color: unset;
-                            cursor: default;
-                          }
-                        `}
-                        onClick={(event_) => event_.preventDefault()}
-                      >
-                        Flytting av medarbeidere er ikke tilgjengelig for denne
-                        enheten. Se lenger ned i hierarkiet.
-                      </Dropdown.Menu.GroupedList.Item>
-                    )}
-                  </>
-                )}
               </>
             )}
 
-            {((hasWriteAccess && hasWriteAccessForOrgenhet) ||
-              hasAdminAccess) && (
+            {visMasseflytting && (
+              <>
+                <Dropdown.Menu.Divider />
+                <Dropdown.Menu.GroupedList.Item
+                  as={Link}
+                  href={`/masseflytting/${orgEnhet.id}`}
+                >
+                  Flytt én eller flere medarbeidere
+                </Dropdown.Menu.GroupedList.Item>
+              </>
+            )}
+
+            {adminOrWriteForOrgenhet && (
               <>
                 <Dropdown.Menu.Divider />
                 <Dropdown.Menu.GroupedList.Item
                   as={Link}
                   onClick={handleDownloadKontaktpersonerExcel}
                 >
-                  Eksporter kontaktpersoner til Excel
+                  Eksportér kontaktpersoner til Excel
                 </Dropdown.Menu.GroupedList.Item>
               </>
             )}
