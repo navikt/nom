@@ -1061,7 +1061,7 @@ const validateMaxTime = (
   return true;
 };
 
-export const spesielleIdentTyper = [
+const spesielleIdentTyper = [
   IdentType.ROBOT,
   IdentType.UTENLANDSK_KONSULENT,
   IdentType.VIKAFOSSEN,

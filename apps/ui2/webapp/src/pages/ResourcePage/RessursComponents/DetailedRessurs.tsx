@@ -29,7 +29,6 @@ import {
   getOrgEnhet,
   getOrgEnheterLederKanRedigere,
   getOrgEnheterLedetAvOptions,
-  getOrgEnhetList,
   getOrgTilknytninger,
   getTeamcatMemberships,
   harLederTilgangForNavidentOptions,
@@ -44,7 +43,6 @@ import {
 } from "~/api/useGetSession";
 import { Divider } from "~/components/Divider";
 import { ModalProvider } from "~/components/modalProvider/ModalProvider";
-import { spesielleIdentTyper } from "~/pages/CreateResourcePage/CreateSpecialResourcePage";
 import {
   SektorNameMapping,
   TilknytningtypeNameMapping,
@@ -55,7 +53,6 @@ import {
   nomDateIsBefore,
   nomDateIsBeforeToday,
   nomDateIsSameOrAfter,
-  nomDateIsTodayOrAfter,
   otCustomStortByDate,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { EditOrgtilknytninger } from "~/pages/ResourcePage/RessursComponents/EditOrgtilknytninger";
@@ -63,7 +60,6 @@ import { PersonOpplysninger } from "~/pages/ResourcePage/RessursComponents/Perso
 import { blueTopBorder } from "~/resources/NomStyles";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 import { IdentType } from "~/types/api-models";
-import { OrgEnhetsType } from "~/types/api-models";
 import { Tilknytningtype } from "~/types/api-models";
 import {
   dateWithoutTimezone,
@@ -78,13 +74,6 @@ import {
 
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   const { editOrgtilknytninger } = useSearch({ from: "/ressurs/$id" });
-
-  const hasWriteAccess = useHasWriteAccess();
-  const hasAdminAccess = useHasAdminAccess();
-
-  const hasRobotAccess = useHasRobotAccess();
-  const hasVikafossenAccess = useHasVikafossenAccess();
-  const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
 
   const hasWriteAccessForRessurs =
     useQuery(harLederTilgangForNavidentOptions(ressurs.navident)).data ?? false;
@@ -122,43 +111,9 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
     ),
   );
 
-  const lederKanRedigere = iderLederKanRedigere.some((id) =>
+  const tidligereLeder = iderLederKanRedigere.some((id) =>
     redigerbareOrgEnhetIder.has(id),
   );
-
-  const sluttetOverToMndSiden = nomDateIsBefore(
-    ressurs.sluttdato,
-    dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
-  );
-
-  const canEditRessursIdentType = (() => {
-    switch (ressurs.identType) {
-      case IdentType.ROBOT: {
-        return (!sluttetOverToMndSiden && hasRobotAccess) || hasAdminAccess;
-      }
-
-      case IdentType.VIKAFOSSEN: {
-        return (
-          (!sluttetOverToMndSiden && hasVikafossenAccess) || hasAdminAccess
-        );
-      }
-
-      case IdentType.UTENLANDSK_KONSULENT: {
-        return (
-          (!sluttetOverToMndSiden && hasUtenlandskKonsulentAccess) ||
-          hasAdminAccess
-        );
-      }
-
-      // Hvis identTypen til ressursen ikke er en av de spesielle, behandler vi
-      // det som STANDARD hvis den ikke er satt, er STANDARD eller er UKJENT
-      default: {
-        return (
-          (hasWriteAccess && !harSluttet) || lederKanRedigere || hasAdminAccess
-        );
-      }
-    }
-  })();
 
   return (
     <div
@@ -190,24 +145,23 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
       ) : (
         <>
           <SummarySection
-            canEditRessursIdentType={canEditRessursIdentType}
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
             ressurs={ressurs}
+            tidligereLeder={tidligereLeder}
           />
 
           <LeaderForSection ressurs={ressurs} />
 
           <OrgTilknytningSection
-            canEditRessursIdentType={canEditRessursIdentType}
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
             orgtilknytninger={orgtilknytninger}
             ressurs={ressurs}
+            tidligereLeder={tidligereLeder}
           />
 
           <TeamCatSection navident={ressurs.navident} />
 
           <BottomSection
-            canEditRessursIdentType={canEditRessursIdentType}
             harSluttet={harSluttet}
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
             ressurs={ressurs}
@@ -235,12 +189,12 @@ function OrgTilknytningSection({
   ressurs,
   hasWriteAccessForRessurs,
   orgtilknytninger,
-  canEditRessursIdentType,
+  tidligereLeder,
 }: {
   ressurs: Ressurs;
   hasWriteAccessForRessurs: boolean;
   orgtilknytninger: OrgtilknytningState[];
-  canEditRessursIdentType: boolean;
+  tidligereLeder: boolean;
 }) {
   const activeOrgtilknytninger = orgtilknytninger.filter((orgTilknytning) =>
     isGyldighetsPeriodeActive(
@@ -262,6 +216,52 @@ function OrgTilknytningSection({
   );
 
   const harSluttet = !!ressurs.sluttdato && isBeforeToday(ressurs.sluttdato);
+
+  const hasWriteAccess = useHasWriteAccess();
+  const hasAdminAccess = useHasAdminAccess();
+
+  const hasRobotAccess = useHasRobotAccess();
+  const hasVikafossenAccess = useHasVikafossenAccess();
+  const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
+
+  const sluttetOverToMndSiden = nomDateIsBefore(
+    ressurs.sluttdato,
+    dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
+  );
+
+  const canEditOrgtilknytninger = (() => {
+    switch (ressurs.identType) {
+      case IdentType.ROBOT: {
+        return (
+          (!sluttetOverToMndSiden && hasRobotAccess) ||
+          (hasWriteAccess && hasWriteAccessForRessurs) ||
+          tidligereLeder ||
+          hasAdminAccess
+        );
+      }
+
+      case IdentType.VIKAFOSSEN: {
+        return (
+          (!sluttetOverToMndSiden && hasVikafossenAccess) || hasAdminAccess
+        );
+      }
+
+      case IdentType.UTENLANDSK_KONSULENT: {
+        return (
+          (!sluttetOverToMndSiden && hasUtenlandskKonsulentAccess) ||
+          (hasWriteAccess && hasWriteAccessForRessurs) ||
+          tidligereLeder ||
+          hasAdminAccess
+        );
+      }
+
+      default: {
+        return (
+          (!harSluttet && hasWriteAccess) || tidligereLeder || hasAdminAccess
+        );
+      }
+    }
+  })();
 
   return (
     <>
@@ -287,8 +287,9 @@ function OrgTilknytningSection({
           </Heading>
 
           <EditOrgtilknytningerButton
-            canEditRessursIdentType={canEditRessursIdentType}
+            canEditOrgtilknytninger={canEditOrgtilknytninger}
             harSluttet={harSluttet}
+            ressurs={ressurs}
           />
         </div>
 
@@ -681,11 +682,11 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
 function SummarySection({
   ressurs,
   hasWriteAccessForRessurs,
-  canEditRessursIdentType,
+  tidligereLeder,
 }: {
   ressurs: Ressurs;
   hasWriteAccessForRessurs: boolean;
-  canEditRessursIdentType: boolean;
+  tidligereLeder: boolean;
 }) {
   const { editPersonopplysninger } = useSearch({
     from: "/ressurs/$id",
@@ -694,17 +695,52 @@ function SummarySection({
   const hasWriteAccess = useHasWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
 
+  const hasRobotAccess = useHasRobotAccess();
+  const hasVikafossenAccess = useHasVikafossenAccess();
+  const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
+
   const hasSelfServiceAccess =
     useGetSession().data?.navident === ressurs.navident;
 
-  const spesiellRessurs = spesielleIdentTyper.includes(ressurs.identType);
+  const harSluttet = !!ressurs.sluttdato && isBeforeToday(ressurs.sluttdato);
 
-  const canEditPersonopplysninger =
-    (canEditRessursIdentType &&
-      (spesiellRessurs ||
-        (hasWriteAccess && hasWriteAccessForRessurs) ||
-        hasAdminAccess)) ||
-    (!spesiellRessurs && hasSelfServiceAccess);
+  const canEditPersonopplysninger = (() => {
+    switch (ressurs.identType) {
+      case IdentType.ROBOT: {
+        return (
+          (!harSluttet &&
+            (hasRobotAccess ||
+              tidligereLeder ||
+              (hasWriteAccess && hasWriteAccessForRessurs))) ||
+          hasAdminAccess
+        );
+      }
+
+      case IdentType.VIKAFOSSEN: {
+        return (!harSluttet && hasVikafossenAccess) || hasAdminAccess;
+      }
+
+      case IdentType.UTENLANDSK_KONSULENT: {
+        return (
+          (!harSluttet &&
+            (hasUtenlandskKonsulentAccess ||
+              tidligereLeder ||
+              (hasWriteAccess && hasWriteAccessForRessurs))) ||
+          hasAdminAccess
+        );
+      }
+
+      default: {
+        return (
+          (!harSluttet &&
+            ((hasWriteAccess && hasWriteAccessForRessurs) ||
+              tidligereLeder ||
+              hasSelfServiceAccess)) ||
+          hasAdminAccess
+        );
+      }
+    }
+  })();
 
   if (editPersonopplysninger && canEditPersonopplysninger) {
     return (
@@ -768,18 +804,47 @@ function TeamCatSection({ navident }: { navident: string }) {
 
 function EditOrgtilknytningerButton({
   harSluttet,
-  canEditRessursIdentType,
+  canEditOrgtilknytninger,
+  ressurs,
 }: {
   harSluttet: boolean;
-  canEditRessursIdentType: boolean;
+  canEditOrgtilknytninger: boolean;
+  ressurs: Ressurs;
 }) {
   const { editPersonopplysninger } = useSearch({
     from: "/ressurs/$id",
   });
 
+  const hasWriteAccess = useHasWriteAccess();
+  const hasAdminAccess = useHasAdminAccess();
+
+  const hasRobotAccess = useHasRobotAccess();
+  const hasVikafossenAccess = useHasVikafossenAccess();
+  const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
+
   const navigate = useNavigate();
 
-  if (!editPersonopplysninger && canEditRessursIdentType) {
+  const kanGjenopprette = (() => {
+    switch (ressurs.identType) {
+      case IdentType.ROBOT: {
+        return hasRobotAccess || hasAdminAccess;
+      }
+
+      case IdentType.VIKAFOSSEN: {
+        return hasVikafossenAccess || hasAdminAccess;
+      }
+
+      case IdentType.UTENLANDSK_KONSULENT: {
+        return hasUtenlandskKonsulentAccess || hasAdminAccess;
+      }
+
+      default: {
+        return hasWriteAccess || hasAdminAccess;
+      }
+    }
+  })();
+
+  if (!editPersonopplysninger && canEditOrgtilknytninger) {
     return (
       <Button
         data-cy="endre-orgtilknytninger-button"
@@ -799,7 +864,7 @@ function EditOrgtilknytningerButton({
     );
   }
 
-  if (harSluttet) {
+  if (harSluttet && kanGjenopprette) {
     return (
       <Button
         icon={<PencilIcon fontSize="1.5rem" />}
@@ -821,23 +886,45 @@ function BottomSection({
   ressurs,
   hasWriteAccessForRessurs,
   harSluttet,
-  canEditRessursIdentType,
 }: {
   ressurs: Ressurs;
   hasWriteAccessForRessurs: boolean;
   harSluttet: boolean;
-  canEditRessursIdentType: boolean;
 }) {
   const hasWriteAccess = useHasWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
 
-  const spesiellRessurs = spesielleIdentTyper.includes(ressurs.identType);
+  const hasRobotAccess = useHasRobotAccess();
+  const hasVikafossenAccess = useHasVikafossenAccess();
+  const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
 
-  const canTerminateRessurs =
-    canEditRessursIdentType &&
-    (spesiellRessurs ||
-      (hasWriteAccess && hasWriteAccessForRessurs) ||
-      hasAdminAccess);
+  const canTerminateRessurs = (() => {
+    switch (ressurs.identType) {
+      case IdentType.ROBOT: {
+        return (
+          hasRobotAccess ||
+          (hasWriteAccess && hasWriteAccessForRessurs) ||
+          hasAdminAccess
+        );
+      }
+
+      case IdentType.VIKAFOSSEN: {
+        return hasVikafossenAccess || hasAdminAccess;
+      }
+
+      case IdentType.UTENLANDSK_KONSULENT: {
+        return (
+          hasUtenlandskKonsulentAccess ||
+          (hasWriteAccess && hasWriteAccessForRessurs) ||
+          hasAdminAccess
+        );
+      }
+
+      default: {
+        return (hasWriteAccess && hasWriteAccessForRessurs) || hasAdminAccess;
+      }
+    }
+  })();
 
   if (canTerminateRessurs && !harSluttet) {
     return (
