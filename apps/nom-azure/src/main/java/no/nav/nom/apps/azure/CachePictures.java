@@ -155,11 +155,14 @@ public class CachePictures {
 
         @Override
         public Optional<byte[]> get(String navident) {
-            String x = this.redisTemplate.opsForValue().get(navidentToKeyPath(navident));
-            if(x == null){
+            String maybeBase64Img = this.redisTemplate.opsForValue().get(navidentToKeyPath(navident));
+            if (maybeBase64Img == null) {
                 return fetchAndUpdate(navident);
             }
-            var bytesAsBase64 = Base64.getDecoder().decode(x);
+            if (CODE_NO_PICTURE.equals(maybeBase64Img)) {
+                return Optional.empty();
+            }
+            var bytesAsBase64 = Base64.getDecoder().decode(maybeBase64Img);
             this.countValkeyPictureGet.increment();
             return Optional.of(bytesAsBase64);
         }
