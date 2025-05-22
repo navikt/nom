@@ -29,15 +29,14 @@ spring:
           audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
   data:
     redis:
-      url: ${REDIS_URI_NOM_AZURE_CACHE:redis://127.0.0.1:6379}
+      host: ${VALKEY_HOST_NOM_AZURE_CACHE:127.0.0.1}
+      port: ${VALKEY_PORT_NOM_AZURE_CACHE:6379}
+      connect-timeout: 10s
+      timeout: 5s
       username: ${VALKEY_USERNAME_NOM_AZURE_CACHE:}
       password: ${VALKEY_PASSWORD_NOM_AZURE_CACHE:}
-      timeout: 2000
-  cache:
-    redis:
-      time-to-live: ${CACHE_TIME_TO_LIVE_MILLIS:259200000} # 3*24*60*60*1000
-      enable-statistics: true
-    cache-names: pictures
+      ssl:
+        enabled: true
 
 
 
