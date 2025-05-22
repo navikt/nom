@@ -18,6 +18,8 @@ spec:
       value: "-Xms2g -Xmx8g"
     - name: OTEL_JAVAAGENT_LOGGING  # Bli kvitt Otel loggingen https://opentelemetry.io/docs/zero-code/java/agent/configuration/#java-agent-logging-output
       value: none
+  envFrom:
+    - secret: nom-azure-unleash-api-token
   image: "{{image}}"
   port: 8080
   ingresses: [] # Kan gå via service-discovery
@@ -62,6 +64,9 @@ spec:
       enabled: true
       allowAllUsers: true
       tenant: trygdeetaten.no
+  valkey:
+    - instance: nom-azure-cache
+      access: readwrite
   accessPolicy:
     inbound:
       rules:
@@ -73,6 +78,7 @@ spec:
           cluster: dev-gcp
         - application: azure-token-generator
           namespace: nais
-          cluster: dev-gcp          
+          cluster: dev-gcp
     outbound:
-      external: [] # må sikkert ha noe for azure her
+      external:
+        - host: teamorg-unleash-api.nav.cloud.nais.io

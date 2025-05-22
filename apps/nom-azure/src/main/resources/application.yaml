@@ -1,5 +1,8 @@
 spring.application.name: nom-azure
 
+app:
+  name: ${NAIS_APP_NAME:nom-azure}
+
 management:
   endpoint:
     health:
@@ -24,3 +27,21 @@ spring:
         jwt:
           issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
           audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
+  data:
+    redis:
+      url: ${REDIS_URI_NOM_AZURE_CACHE:valkey://127.0.0.1:6379}
+      username: ${VALKEY_USERNAME_NOM_AZURE_CACHE:}
+      password: ${VALKEY_PASSWORD_NOM_AZURE_CACHE:}
+      timeout: 2000
+  cache:
+    redis:
+      time-to-live: ${CACHE_TIME_TO_LIVE_MILLIS:259200000} # 3*24*60*60*1000
+      enable-statistics: true
+    cache-names: pictures
+
+
+
+unleash:
+  endpoint:
+    url: ${UNLEASH_SERVER_API_URL}/api
+  api-key: ${UNLEASH_SERVER_API_TOKEN}

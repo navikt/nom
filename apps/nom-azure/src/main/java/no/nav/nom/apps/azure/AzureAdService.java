@@ -1,21 +1,16 @@
 package no.nav.nom.apps.azure;
 
 import com.azure.identity.ClientSecretCredentialBuilder;
-import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import com.microsoft.graph.models.odataerrors.ODataError;
 import com.microsoft.graph.serviceclient.GraphServiceClient;
 import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 
 @Service
 public class AzureAdService {
@@ -24,11 +19,7 @@ public class AzureAdService {
 
     private final GraphServiceClient graphServiceClient;
 
-    private final AsyncLoadingCache<String, Optional<byte[]>> pictureCache;
-
-    private final Counter countPictureRequested;
     private final Counter countPictureFetch;
-    private final Gauge cacheSizeGauge;
 
     public AzureAdService(Environment environment, MeterRegistry meterRegistry) {
         var azProps = new AzureProperties(environment);
@@ -40,45 +31,17 @@ public class AzureAdService {
 
         this.graphServiceClient = new GraphServiceClient(clientSecretCredential);
 
-        this.pictureCache = Caffeine.newBuilder()
-            .expireAfterWrite(Duration.ofHours(72))
-            .refreshAfterWrite(Duration.ofHours(24))
-            .maximumSize(20000)
-            .executor(Executors.newVirtualThreadPerTaskExecutor())
-            .buildAsync(this::lookupProfilePictureByNavIdent);
-
-        this.countPictureRequested = meterRegistry.counter("requests.picture_requested.count");
         this.countPictureFetch = meterRegistry.counter("requests.picture_fetched.count");
-
-        this.cacheSizeGauge = Gauge
-            .builder("picture.cache.size", this.pictureCache, (asyncLoadingCache) -> asyncLoadingCache.synchronous().estimatedSize())
-            .register(meterRegistry);
 
     }
 
-    private Optional<byte[]> lookupProfilePictureByNavIdent(String navIdent) {
+    public Optional<byte[]> fetchProfilePictureByNavIdent(String navIdent) {
         countPictureFetch.increment();
         String userId = lookupUserByNavIdent(navIdent);
         var pictureBytes = userId == null ? null : lookupUserProfilePicture(userId);
         log.info("Fetch of profile picture for {}: {}", navIdent, pictureBytes == null ? "failed" : "success");
         return Optional.ofNullable(pictureBytes);
     }
-
-    public Optional<byte[]> profilePictureByNavIdent(String navIdent){
-        countPictureRequested.increment();
-        this.cacheSizeGauge.value();
-        try{
-            return pictureCache.get(navIdent).join();
-        } catch (RuntimeException e) {
-            log.error(e.getMessage());
-            return Optional.empty();
-        }
-    }
-
-    public void refreshPictureCache(String navIdent) {
-        this.pictureCache.synchronous().refresh(navIdent);
-    }
-
 
     private String lookupUserByNavIdent(String navIdent) {
         try {
@@ -103,11 +66,11 @@ public class AzureAdService {
     }
 
 
-    private byte[] lookupUserProfilePicture(String id) {
+    private byte[] lookupUserProfilePicture(String azureUserId) {
         try {
             var photoContents = this.graphServiceClient
                 .users()
-                .byUserId(id)
+                .byUserId(azureUserId)
                 .photo()
                 .content()
                 .get();
@@ -120,17 +83,18 @@ public class AzureAdService {
             photoContents.close();
 
             return bytes;
-        } catch (Exception e) {
+        } catch (ODataError oDataError) {
+            if (oDataError.getError() != null && "ImageNotFound".equals(oDataError.getError().getCode())) {
+                log.info("Azure fetch: Image not found for user id {}", azureUserId);
+            } else {
+                log.warn("Azure fetch: OData error for user id {}", azureUserId);
+            }
             return null;
         }
-
-        /*
-            ODataError =>
-//            if (e.getError() != null && "ImageNotFound".equals(e.getError().getCode())) {
-                    ...
-                }else { ...}
-            ApiException, IOException, NullPointerException => { ... log }
-         */
+        catch (Exception e) {
+            // More granular logging of errors could be added if necessary
+            return null;
+        }
 
     }
 
