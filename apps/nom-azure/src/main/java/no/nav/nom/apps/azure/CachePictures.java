@@ -3,6 +3,7 @@ package no.nav.nom.apps.azure;
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.getunleash.Unleash;
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
@@ -82,6 +83,9 @@ public class CachePictures {
     private class CacheCaffeine implements ICachePicture {
         private final AsyncLoadingCache<String, Optional<byte[]>> pictureCache;
         private final Gauge cacheCaffeineSizeGauge;
+        private final Counter countCaffeinePictureGet;
+
+
         public CacheCaffeine(MeterRegistry meterRegistry) {
 
             this.pictureCache = Caffeine.newBuilder()
@@ -94,11 +98,14 @@ public class CachePictures {
             this.cacheCaffeineSizeGauge = Gauge
                 .builder("picture.cache.caffeine.size", this.pictureCache, (asyncLoadingCache) -> asyncLoadingCache.synchronous().estimatedSize())
                 .register(meterRegistry);
+
+            this.countCaffeinePictureGet =  meterRegistry.counter("requests.picture_requested.caffeine.count");
         }
         @Override
         public Optional<byte[]> get(String navIdent) {
             this.cacheCaffeineSizeGauge.value();
             try{
+                this.countCaffeinePictureGet.increment();
                 return pictureCache.get(navIdent).join();
             } catch (RuntimeException e) {
                 log.error(e.getMessage());
@@ -119,8 +126,9 @@ public class CachePictures {
         private static final String CODE_NO_PICTURE = "NO_PICTURE_404";
 
         private final RedisTemplate<String, String> redisTemplate;
-
         private final Gauge cacheValkeySizeGauge;
+        private final Counter countValkeyPictureGet;
+
 
         public CacheValkey(RedisTemplate<String, String> redisTemplate, MeterRegistry meterRegistry) {
             this.redisTemplate = redisTemplate;
@@ -128,6 +136,9 @@ public class CachePictures {
             this.cacheValkeySizeGauge = Gauge
                 .builder("picture.cache.valkey.size", this::valkeyCacheSize)
                 .register(meterRegistry);
+
+            this.countValkeyPictureGet =  meterRegistry.counter("requests.picture_requested.valkey.count");
+
         }
 
         private Long valkeyCacheSize(){
@@ -149,6 +160,7 @@ public class CachePictures {
                 return fetchAndUpdate(navident);
             }
             var bytesAsBase64 = Base64.getDecoder().decode(x);
+            this.countValkeyPictureGet.increment();
             return Optional.of(bytesAsBase64);
         }
 
