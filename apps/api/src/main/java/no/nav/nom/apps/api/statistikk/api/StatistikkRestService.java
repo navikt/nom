@@ -21,12 +21,12 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
@@ -106,13 +106,11 @@ public class StatistikkRestService {
             throw new OrgEnhetNotFoundException("Fant ikke orgenhet med id " + orgEnhetId);
         }
 
-        var underliggendeOrgEnheter = orgenhetService.getAllUnderliggendeOrgEnhetById(optionalOrgEnhet.get().getId()).stream().toList();
+        var orgEnheter = new ArrayList<>(orgenhetService.getAllUnderliggendeOrgEnhetById(optionalOrgEnhet.get().getId()));
+        orgEnheter.add(optionalOrgEnhet.get());
 
-
-        var underliggendeOrgEnheterMapped = Stream.concat(Stream.of(optionalOrgEnhet.get()), underliggendeOrgEnheter.stream())
-            .map(orgEnhetMapper::mapToOrgEnhet).toList();
-
-        var alleRessursNavidenter = underliggendeOrgEnheterMapped.stream()
+        var alleRessursNavidenter = orgEnheter.stream()
+            .map(orgEnhetMapper::mapToOrgEnhet)
             .map(OrgEnhet::ressursKoblinger)
             .flatMap(Collection::stream)
             .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
@@ -136,9 +134,9 @@ public class StatistikkRestService {
 
         if (optionalOrgEnhet.get().getNomNivaa().isPresent()) {
             if (optionalOrgEnhet.get().getNomNivaa().get().equals(NomNivaa.LINJEENHET)) {
-                return hentStatistikkForLinjeenhet(ressursStatistikk, antallLovnoder, underliggendeOrgEnheter);
+                return hentStatistikkForLinjeenhet(ressursStatistikk, antallLovnoder, orgEnheter);
             } else if (optionalOrgEnhet.get().getNomNivaa().get().equals(NomNivaa.DRIFTSENHET)) {
-                return hentStatistikkForDriftsenhet(ressursStatistikk, antallLovnoder, underliggendeOrgEnheter);
+                return hentStatistikkForDriftsenhet(ressursStatistikk, antallLovnoder, orgEnheter);
             }
         }
         return new OrgEnhetStatistikkResponse(
