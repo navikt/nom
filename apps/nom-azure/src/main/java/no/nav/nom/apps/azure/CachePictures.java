@@ -175,7 +175,7 @@ public class CachePictures {
                 String bytesAsBase64 = Base64.getEncoder().encodeToString(maybeFetched.get());
                 this.redisTemplate.opsForValue().set(navidentToKeyPath(navident), bytesAsBase64, Duration.ofHours(72));
             } else {
-                this.redisTemplate.opsForValue().set(navidentToKeyPath(navident), CODE_NO_PICTURE);
+                this.redisTemplate.opsForValue().set(navidentToKeyPath(navident), CODE_NO_PICTURE, Duration.ofHours(72));
             }
             cacheValkeySizeGauge.value();
             return maybeFetched;
