@@ -143,14 +143,20 @@ public class CachePictures {
 
         private Long valkeyCacheSize(){
             try {
+                log.debug("checking valkey cache size");
                 var connectionFactory = this.redisTemplate.getConnectionFactory();
                 if (connectionFactory != null) {
-                    return connectionFactory.getConnection().serverCommands().dbSize();
+                    var conn = connectionFactory.getConnection();
+                    var dbSize = conn.serverCommands().dbSize();
+                    conn.close();
+                    log.debug("got valkey cache size: " + dbSize);
+                    return dbSize;
                 }
-            } catch (Throwable e) {
-                return -1L;
+            } catch (Throwable ignored) {
             }
+            log.debug("Failed to get valkey cache size");
             return -1L;
+
         }
 
         @Override
