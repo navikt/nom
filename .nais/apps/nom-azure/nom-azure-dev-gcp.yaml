@@ -79,6 +79,9 @@ spec:
         - application: azure-token-generator
           namespace: nais
           cluster: dev-gcp
+        - application: team-catalog-frackend
+          namespace: org
+          cluster: dev-gcp
     outbound:
       external:
         - host: teamorg-unleash-api.nav.cloud.nais.io
