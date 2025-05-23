@@ -85,7 +85,6 @@ public class CachePictures {
         private final Gauge cacheCaffeineSizeGauge;
         private final Counter countCaffeinePictureGet;
 
-
         public CacheCaffeine(MeterRegistry meterRegistry) {
 
             this.pictureCache = Caffeine.newBuilder()
@@ -124,6 +123,7 @@ public class CachePictures {
     private class CacheValkey implements ICachePicture {
 
         private static final String CODE_NO_PICTURE = "NO_PICTURE_404";
+        private static final Duration DEFAULT_TTL = Duration.ofHours(72);
 
         private final RedisTemplate<String, String> redisTemplate;
         private final Gauge cacheValkeySizeGauge;
@@ -157,9 +157,15 @@ public class CachePictures {
         public Optional<byte[]> get(String navident) {
             String maybeBase64Img = this.redisTemplate.opsForValue().get(navidentToKeyPath(navident));
             if (maybeBase64Img == null) {
+                log.debug("Missing from cache, need to fetch for navident: " + navident);
                 return fetchAndUpdate(navident);
             }
+            // TODO, refetch if remaining TTL is less than some fraction of the default TTL
+            //  var tresholdForRefreshOfPresentValue = DEFAULT_TTL.dividedBy(3);
+            //  var thresholdForRefreshOfMissingValue = DEFAULT_TTL.dividedBy(3).multipliedBy(2);
+
             if (CODE_NO_PICTURE.equals(maybeBase64Img)) {
+                log.debug("Entry for missing picture found in cache for navident: " + navident);
                 return Optional.empty();
             }
             var bytesAsBase64 = Base64.getDecoder().decode(maybeBase64Img);
@@ -176,9 +182,11 @@ public class CachePictures {
             var maybeFetched = azureAdService.fetchProfilePictureByNavIdent(navident);
             if (maybeFetched.isPresent()) {
                 String bytesAsBase64 = Base64.getEncoder().encodeToString(maybeFetched.get());
-                this.redisTemplate.opsForValue().set(navidentToKeyPath(navident), bytesAsBase64, Duration.ofHours(72));
+                log.debug("Storing picture in redis cache for navident: " + navident);
+                this.redisTemplate.opsForValue().set(navidentToKeyPath(navident), bytesAsBase64, DEFAULT_TTL);
             } else {
-                this.redisTemplate.opsForValue().set(navidentToKeyPath(navident), CODE_NO_PICTURE, Duration.ofHours(72));
+                log.debug("Storing 'not found' entry in redis cache for navident: " + navident);
+                this.redisTemplate.opsForValue().set(navidentToKeyPath(navident), CODE_NO_PICTURE, DEFAULT_TTL);
             }
             cacheValkeySizeGauge.value();
             return maybeFetched;

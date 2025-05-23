@@ -3,6 +3,8 @@ spring.application.name: nom-azure
 app:
   name: ${NAIS_APP_NAME:nom-azure}
 
+logging.level.no.nav.nom.apps.azure: debug
+
 management:
   endpoint:
     health:
