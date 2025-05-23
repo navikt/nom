@@ -1,4 +1,4 @@
-spring.application.name: nom-azure
+spring.application.name: ${NAIS_APP_NAME:nom-azure}
 
 app:
   name: ${NAIS_APP_NAME:nom-azure}
