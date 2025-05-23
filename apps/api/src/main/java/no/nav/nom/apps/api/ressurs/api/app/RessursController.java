@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -16,6 +17,7 @@ import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.NomMasteredException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
+import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -47,18 +49,28 @@ import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedRo
 @RestController
 @RequestMapping(value={"/app/ressurser"})
 public class RessursController {
-
     private final static Logger log = LoggerFactory.getLogger(RessursController.class);
+
+    public static final String BRUK_NY_TELEFON_AGGREGERING = "nom.telefon.bruk_ny_telefon_aggregering";
+    
     private final RessursRestService ressursRestService;
     private final RessursExcelGenerator ressursExcelGenerator;
     private final AuthResolver authResolver;
+    private final Unleash unleash;
+    private final TelefonService telefonService;
 
     public RessursController(
-        RessursRestService ressursRestService, RessursExcelGenerator ressursExcelGenerator, AuthResolver authResolver
+            RessursRestService ressursRestService, 
+            RessursExcelGenerator ressursExcelGenerator, 
+            AuthResolver authResolver, 
+            Unleash unleash, 
+            TelefonService telefonService
     ) {
         this.ressursRestService = ressursRestService;
         this.ressursExcelGenerator = ressursExcelGenerator;
         this.authResolver = authResolver;
+        this.unleash = unleash;
+        this.telefonService = telefonService;
     }
 
     @GetMapping
@@ -156,21 +168,29 @@ public class RessursController {
 
     @GetMapping("/{navident}/telefonnummere")
     @Operation(
-        description = "Henter en liste over alle telefonnummere til ressursen",
-        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+            description = "Henter en prioritert liste over alle telefonnumre til ressursen",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Telefonnummer"),
+            @ApiResponse(responseCode = "200", description = "Telefonnummer"),
     })
-    public ResponseEntity<List<Ressurs.Telefon>> getTelefonnummere(
-        @PathVariable String navident
+    public ResponseEntity<List<Ressurs.Telefon>> getTelefonnumre(
+            @PathVariable String navident
     ) {
-        return ResponseEntity.ok(ressursRestService.getTelefonnummere(navident));
+        if (unleash.isEnabled(BRUK_NY_TELEFON_AGGREGERING)) {
+            List<Ressurs.Telefon> dtoTelefonnummer = telefonService.getAlleTelefonnummer(navident)
+                    .stream()
+                    .map(tlf -> new Ressurs.Telefon(tlf.nummer(), tlf.type()))
+                    .toList();
+            return ResponseEntity.ok(dtoTelefonnummer);
+        } else {
+            return ResponseEntity.ok(ressursRestService.getTelefonnummere(navident));
+        }
     }
 
     @GetMapping("/{navident}/telefonnummer")
     @Operation(
-        description = "Henter en liste over alle telefonnummere til ressursen",
+        description = "Henter prioritert telefonnummer for ressursen",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses({
@@ -179,7 +199,11 @@ public class RessursController {
     public ResponseEntity<String> getTelefonnummer(
         @PathVariable String navident
     ) {
-        return ResponseEntity.ok(ressursRestService.getTelefonnummer(navident));
+        if (unleash.isEnabled(BRUK_NY_TELEFON_AGGREGERING)) {
+            return ResponseEntity.ok(telefonService.getPrioritertTelefonnummer(navident));
+        } else {
+            return ResponseEntity.ok(ressursRestService.getTelefonnummer(navident));
+        }
     }
 
     @GetMapping("/byNavident/{navident}")

@@ -743,7 +743,7 @@ public class RessursRestService {
     }
 
     public List<Ressurs.Telefon> getTelefonnummere(String navident) {
-        logger.info("Fetching telefonnummer for navident: {}", navident);
+        logger.info("Fetching telefonnumre for navident: {}", navident);
         var telefoner = new ArrayList<>(ressursContactDetailsResolver.fetchTelefoner(navident));
         var ressursState = findRessursStateByNavident(navident);
         ressursState.primaryTelefonnummer().ifPresent(s -> telefoner.add(new Ressurs.Telefon(s, TelefonType.PRIVAT_TELEFON)));
