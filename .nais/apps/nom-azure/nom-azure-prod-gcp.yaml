@@ -14,8 +14,6 @@ spec:
       value: prod
     - name: LOGGING_CONFIG
       value: 'classpath:logback.xml'
-    - name: JDK_JAVA_OPTIONS
-      value: "-Xms2g -Xmx8g"
     - name: OTEL_JAVAAGENT_LOGGING  # Bli kvitt Otel loggingen https://opentelemetry.io/docs/zero-code/java/agent/configuration/#java-agent-logging-output
       value: none
   envFrom:
@@ -45,9 +43,9 @@ spec:
   resources:
     requests:
       cpu: 100m
-      memory: 3Gi
+      memory: 500Mi
     limits:
-      memory: 10Gi
+      memory: 4Gi
   prometheus:
     enabled: true
     path: /internal/prometheus
