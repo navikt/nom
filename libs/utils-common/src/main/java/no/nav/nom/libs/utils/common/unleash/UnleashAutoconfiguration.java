@@ -2,6 +2,8 @@ package no.nav.nom.libs.utils.common.unleash;
 
 import io.getunleash.DefaultUnleash;
 import io.getunleash.Unleash;
+import io.getunleash.UnleashContext;
+import io.getunleash.UnleashContextProvider;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.util.UnleashConfig;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -11,6 +13,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 
 @AutoConfiguration
@@ -28,7 +33,7 @@ public class UnleashAutoconfiguration {
     @Bean
     @ConditionalOnMissingBean
     StrategySupplier strategies() {
-        return () -> new Strategy[]{new ByClusterStrategy(), new ByUserIdStrategy(environment)};
+        return () -> new Strategy[]{};
     }
 
     @Bean
@@ -39,12 +44,19 @@ public class UnleashAutoconfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public UnleashConfig unleashConfig(UnleashProperties properties, AppNameSupplier nameSupplier) {
+    public UnleashConfig unleashConfig(UnleashProperties properties, AppNameSupplier nameSupplier, ContextSupplier contextSupplier) {
         return UnleashConfig.builder()
             .appName(nameSupplier.name())
             .unleashAPI(properties.endpoint().url())
             .apiKey(properties.apiKey())
+            .unleashContextProvider(contextSupplier.context())
             .build();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    ContextSupplier defaultContextSupplier() {
+        return UnleashContextProvider::getDefaultProvider;
     }
 
     @Bean(name = "unleash")

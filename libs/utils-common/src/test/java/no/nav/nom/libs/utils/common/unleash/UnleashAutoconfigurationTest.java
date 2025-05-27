@@ -3,8 +3,8 @@ package no.nav.nom.libs.utils.common.unleash;
 import io.getunleash.DefaultUnleash;
 import io.getunleash.FakeUnleash;
 import io.getunleash.Unleash;
+import io.getunleash.UnleashContext;
 import io.getunleash.strategy.Strategy;
-import io.getunleash.strategy.UserWithIdStrategy;
 import io.getunleash.util.UnleashConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanCreationException;
@@ -15,6 +15,9 @@ import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,8 +34,31 @@ public class UnleashAutoconfigurationTest {
     @Configuration
     static class DoubleStrategySupplierConfig {
         @Bean
-        StrategySupplier supplier() {
-            return () -> new Strategy[]{new ByClusterStrategy(), new UserWithIdStrategy()};
+        StrategySupplier supplier(Environment environment) {
+            return () -> new Strategy[]{
+                new Strategy() {
+                    @Override
+                    public String getName() {
+                        return "strategy1";
+                    }
+
+                    @Override
+                    public boolean isEnabled(Map<String, String> parameters, UnleashContext context) {
+                        return false;
+                    }
+                },
+                new Strategy() {
+                    @Override
+                    public String getName() {
+                        return "strategy2";
+                    }
+
+                    @Override
+                    public boolean isEnabled(Map<String, String> parameters, UnleashContext context) {
+                        return false;
+                    }
+                }
+            };
         }
     }
 

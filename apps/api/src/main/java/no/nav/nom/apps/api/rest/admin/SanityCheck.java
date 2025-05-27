@@ -62,21 +62,18 @@ public class SanityCheck {
     private final OrgenhetService orgenhetService;
     private final OrgtilknytningService orgtilknytningService;
     private final OrganiseringStateRepository organiseringStateRepository;
-    private final Unleash unleash;
 
     public SanityCheck(
         DvhRepository dvhRepository,
         RessursStateRepository ressursStateRepository,
         OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService,
-        OrganiseringStateRepository organiseringStateRepository,
-        Unleash unleash
+        OrganiseringStateRepository organiseringStateRepository
     ) {
         this.dvhRepository = dvhRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
         this.orgtilknytningService = orgtilknytningService;
         this.organiseringStateRepository = organiseringStateRepository;
-        this.unleash = unleash;
     }
     //TODO: (Test Testesen 4) Denne er ferdig implementert i nom-admin, kan fjernes.
     @Operation(
