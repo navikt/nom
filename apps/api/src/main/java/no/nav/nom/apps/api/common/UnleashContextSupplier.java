@@ -8,6 +8,8 @@ import no.nav.nom.libs.utils.common.unleash.ContextSupplier;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Slf4j
 @Component
 public class UnleashContextSupplier implements ContextSupplier {
@@ -15,8 +17,8 @@ public class UnleashContextSupplier implements ContextSupplier {
     @Override
     public UnleashContextProvider context() {
         return () -> {
-            var navident = SecurityUtil.getNavIdent(SecurityContextHolder.getContext().getAuthentication());
-            log.info("Getting navident for unleash context: {}", navident.orElse("Unauthenticated user"));
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            Optional<String> navident = auth == null ? Optional.empty() : SecurityUtil.getNavIdent(auth);
 
             return new UnleashContext
                 .Builder(UnleashContextProvider.getDefaultProvider().getContext())

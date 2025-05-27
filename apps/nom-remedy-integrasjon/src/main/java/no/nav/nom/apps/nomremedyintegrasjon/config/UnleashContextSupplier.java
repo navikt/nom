@@ -31,6 +31,8 @@ public class UnleashContextSupplier implements ContextSupplier {
 
     private static Optional<String> getAuthenticatedNavIdent() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) return Optional.empty();
+
         Jwt jwt = (Jwt) authentication.getPrincipal();
         return Optional.ofNullable(jwt.getClaimAsString(NAVIDENT_CLAIM_NAME));
     }
