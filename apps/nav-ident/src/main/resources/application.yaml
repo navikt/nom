@@ -36,8 +36,8 @@ spring:
   datasource:
     url: ${DATABASE_JDBC_URL}
     hikari:
-      minimum-idle: 2
-      maximum-pool-size: 2
+      minimum-idle: 1
+      maximum-pool-size: 5
 
   jpa:
     open-in-view: false

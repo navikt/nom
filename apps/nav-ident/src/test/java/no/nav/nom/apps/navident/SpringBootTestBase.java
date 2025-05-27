@@ -10,15 +10,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.slf4j.MDC;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import javax.sql.DataSource;
 import java.util.UUID;
 
 import static no.nav.nom.libs.utils.common.mdc.MdcConfig.MDC_CALL_ID_KEY;
@@ -34,13 +33,10 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(initializers = {MockOAuth2ServerInitializer.class})
 @AutoConfigureWireMock(port = 0)
 public abstract class SpringBootTestBase {
-    
-    @MockBean DataSource dataSource;
-
-    @MockBean
+    @MockitoBean
     protected OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
     
-    @MockBean
+    @MockitoBean
     Unleash unleash;
 
     @BeforeEach

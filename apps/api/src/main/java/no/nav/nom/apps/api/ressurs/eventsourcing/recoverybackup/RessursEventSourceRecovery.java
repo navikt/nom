@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -37,11 +38,11 @@ public class RessursEventSourceRecovery {
     private TransactionTemplate transactionTemplate;
     private final TaskExecutor taskExecutor;
     public RessursEventSourceRecovery(
-            KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate,
-            RessursEventSourceRepository ressursEventSourceRepository,
-            ObjectMapper objectMapper,
-            LeaderElection leaderElection,
-            PlatformTransactionManager transactionManager, TaskExecutor taskExecutor
+        KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate,
+        RessursEventSourceRepository ressursEventSourceRepository,
+        ObjectMapper objectMapper,
+        LeaderElection leaderElection,
+        PlatformTransactionManager transactionManager, @Qualifier("applicationTaskExecutor") TaskExecutor taskExecutor
     ) {
         this.ressursEventProducerTemplate = ressursEventProducerTemplate;
         this.ressursEventSourceRepository = ressursEventSourceRepository;
