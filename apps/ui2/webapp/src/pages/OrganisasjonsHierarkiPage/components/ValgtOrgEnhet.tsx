@@ -1,5 +1,8 @@
 import { css } from "@emotion/react";
-import { MenuElipsisHorizontalCircleIcon } from "@navikt/aksel-icons";
+import {
+  ExternalLinkIcon,
+  MenuElipsisHorizontalCircleIcon,
+} from "@navikt/aksel-icons";
 import {
   BodyShort,
   Button,
@@ -20,6 +23,7 @@ import {
   downloadExcelKontaktPersonserForOrgenhetByOrgenhetId,
   getOrgEnheterSomKanHaRessurser,
   getRessurserByListNavident,
+  getTeamcatSection,
   harLederTilgangForOrgenhetOptions,
   isOrgEnhetArbeidsomraade,
   isOrgEnhetDriftsenhet,
@@ -36,7 +40,11 @@ import {
 import building from "~/resources/building.svg";
 import type { OrgEnhet, Ressurs } from "~/types/api-models";
 import { NomNivaa, OrgEnhetsType, Sektor } from "~/types/api-models";
-import { formatDisplayDate, formatVisningsnavn } from "~/utils";
+import {
+  formatDisplayDate,
+  formatVisningsnavn,
+  isInDevelopment,
+} from "~/utils";
 
 export const ValgtOrgEnhet = ({
   orgEnhet,
@@ -46,6 +54,8 @@ export const ValgtOrgEnhet = ({
   hideRessurser?: boolean;
 }) => {
   const hasAdminAccess = useHasAdminAccess();
+
+  const inDevelopment = isInDevelopment();
 
   const ressurserNavidents = orgEnhet.ressursKoblinger
     .filter((orgtilknytning) =>
@@ -91,6 +101,18 @@ export const ValgtOrgEnhet = ({
     hentedeRessurserQuery.isLoading ||
     isOrgEnhetDriftsenhetQuery.isLoading ||
     enheterSomKanHaRessurser.isLoading;
+
+  const teamkatalogSeksjon = useQuery({
+    queryKey: getTeamcatSection.queryKey(orgEnhet.id),
+    queryFn: () => getTeamcatSection.queryFn(orgEnhet.id),
+    enabled:
+      orgEnhet.orgEnhetsType === OrgEnhetsType.DIR ||
+      orgEnhet.orgEnhetsType === OrgEnhetsType.DIREKTORAT,
+  }).data;
+
+  const tkatLenke = inDevelopment
+    ? `https://teamkatalog.ekstern.dev.nav.no/area/${teamkatalogSeksjon?.id}`
+    : `https://teamkatalog.nav.no/area/${teamkatalogSeksjon?.id}`;
 
   const statistikkAlleOrgenheterAdmin = useUnleashToggle(
     "nom.statistikk.alle.orgenheter",
@@ -194,6 +216,19 @@ export const ValgtOrgEnhet = ({
             <OrgenhetLederLink orgEnhet={orgEnhet} />
           </div>
         </div>
+
+        {!!teamkatalogSeksjon && (
+          <Link
+            css={css`
+              margin-top: var(--a-spacing-4);
+            `}
+            href={tkatLenke}
+            target="_blank"
+          >
+            Se seksjon i Teamkatalogen{" "}
+            <ExternalLinkIcon fontSize="1.333rem" title="a11y-title" />
+          </Link>
+        )}
 
         {hasAdminAccess && statistikkAlleOrgenheterAdmin && (
           <OrgEnhetStatistikk orgEnhet={orgEnhet} />

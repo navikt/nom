@@ -407,6 +407,12 @@ export const getTeamcatMemberships = {
     (await axios.get(`/frackend/teamcat/member/membership/${navident}`)).data,
 };
 
+export const getTeamcatSection = {
+  queryKey: (id: string) => teamcatMembershipsKeys.navident(id),
+  queryFn: async (id: string) =>
+    (await axios.get(`/frackend/teamcat/productarea/nomid/${id}`)).data,
+};
+
 export const getRessursEvents = {
   queryFn: async ({ pageParam }: { pageParam: number }) =>
     (
