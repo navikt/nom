@@ -1,4 +1,4 @@
-name: 'deploy: api'
+name: 'deploy: api-test'
 
 on:
   push:
