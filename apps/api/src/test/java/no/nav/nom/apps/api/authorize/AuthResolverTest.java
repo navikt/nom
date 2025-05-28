@@ -87,7 +87,7 @@ public class AuthResolverTest {
 
         when(authorizedNavident.orgenheterLederKanRedigere(LOGGED_IN_USER_NAVIDENT)).thenReturn(List.of(orgEnhet("ORG1"), orgEnhet("ORG2")));
 
-        assertTrue(authResolver.kanRessursRedigereNoenAvOrgenhetene(LOGGED_IN_USER_NAVIDENT, Set.of("ORG1")));
+        assertTrue(authResolver.kanRedigereNoenAvOrgenhetene(Set.of("ORG1")));
     }
 
     @Test
@@ -97,6 +97,6 @@ public class AuthResolverTest {
 
         when(authorizedNavident.orgenheterLederKanRedigere(LOGGED_IN_USER_NAVIDENT)).thenReturn(List.of(orgEnhet("ORG1"), orgEnhet("ORG2")));
 
-        assertFalse(authResolver.kanRessursRedigereNoenAvOrgenhetene(LOGGED_IN_USER_NAVIDENT, Set.of("ORG3", "ORG4", "ORG5")));
+        assertFalse(authResolver.kanRedigereNoenAvOrgenhetene(Set.of("ORG3", "ORG4", "ORG5")));
     }
 }

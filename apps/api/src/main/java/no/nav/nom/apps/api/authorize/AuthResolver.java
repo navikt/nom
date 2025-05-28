@@ -65,10 +65,10 @@ public class AuthResolver {
         return editableOrgenheter.stream().anyMatch(orgenhet -> orgenhet.getId().equals(orgenhetId));
     }
 
-    public boolean kanRessursRedigereNoenAvOrgenhetene(String ressursNavident, Set<String> orgenhetIds) {
-        var editableOrgenhetIds = authorizedNavident.orgenheterLederKanRedigere(ressursNavident).stream().map(IOrgenhet::getId).collect(Collectors.toSet());
+    public boolean kanRedigereNoenAvOrgenhetene(Set<String> orgenhetIds) {
+        var editableOrgenhetIds = authorizedNavident.orgenheterLederKanRedigere(getAuthenticatedNavIdent()).stream().map(IOrgenhet::getId).collect(Collectors.toSet());
         if (Collections.disjoint(editableOrgenhetIds, orgenhetIds)) {
-            log.warn("Ressurs {} har ikke tilgang til noen av orgenhetene {} kun {}", ressursNavident, orgenhetIds, editableOrgenhetIds);
+            log.warn("Ressurs {} har ikke tilgang til noen av orgenhetene {} kun {}", getAuthenticatedNavIdent(), orgenhetIds, editableOrgenhetIds);
             return false;
         }
         return true;

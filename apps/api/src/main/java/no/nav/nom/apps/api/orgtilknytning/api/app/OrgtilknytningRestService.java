@@ -785,16 +785,16 @@ public class OrgtilknytningRestService {
                 case ROBOT ->
                     SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_ROBOT,ADMIN)
                     || authResolver.kanRedigereRessurs(navident)
-                    || authResolver.kanRessursRedigereNoenAvOrgenhetene(navident, orgenhetIdsUnderEndring);
+                    || authResolver.kanRedigereNoenAvOrgenhetene(orgenhetIdsUnderEndring);
                 case UTENLANDSK_KONSULENT ->
                     SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_UTL_KONSULENT,ADMIN)
                     || authResolver.kanRedigereRessurs(navident)
-                    || authResolver.kanRessursRedigereNoenAvOrgenhetene(navident, orgenhetIdsUnderEndring);
+                    || authResolver.kanRedigereNoenAvOrgenhetene(orgenhetIdsUnderEndring);
                 case VIKAFOSSEN ->
                     SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN, ADMIN); // NOM admin skal fratas denne rollen etterhvert
                 default ->
                     authResolver.kanRedigereRessurs(navident)
-                    || authResolver.kanRessursRedigereNoenAvOrgenhetene(navident, orgenhetIdsUnderEndring);
+                    || authResolver.kanRedigereNoenAvOrgenhetene(orgenhetIdsUnderEndring);
             };
         }
         return true;
