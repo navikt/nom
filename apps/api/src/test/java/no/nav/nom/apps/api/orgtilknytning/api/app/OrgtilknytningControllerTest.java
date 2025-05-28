@@ -56,7 +56,6 @@ import static no.nav.nom.contract.nom.IdentType.STANDARD;
 import static no.nav.nom.contract.nom.IdentType.UTENLANDSK_KONSULENT;
 import static no.nav.nom.contract.nom.IdentType.VIKAFOSSEN;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -622,6 +621,48 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             oppdaterOrgtilknytningerForRessursRequest
         )
             .expectStatus().isForbidden();
+    }
+
+    @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan redigere orgtilknytning som er under 2 maaneder gammel for ressurs")
+    void test_rediger_orgtilknytning_som_er_under_to_mnd_gammel() {
+        when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
+
+        OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
+
+        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.NAV_STATLIG).build();
+
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.of(LocalDate.now().minusMonths(1)))
+            .build();
+
+        saveOrgtilknytninger(List.of(existingOrgtilknytning));
+        when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
+
+        var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
+            .gyldigTom(null)
+            .build();
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(endreOrgtilknytningRequest))
+            .nyeOrgtilknytninger(Collections.emptyList())
+            .setRessursStartdato(true)
+            .setRessursSluttdato(true)
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().is2xxSuccessful();
     }
 
     @Test

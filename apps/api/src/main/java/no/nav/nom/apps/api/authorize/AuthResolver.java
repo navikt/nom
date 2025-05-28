@@ -67,6 +67,10 @@ public class AuthResolver {
 
     public boolean kanRessursRedigereNoenAvOrgenhetene(String ressursNavident, Set<String> orgenhetIds) {
         var editableOrgenhetIds = authorizedNavident.orgenheterLederKanRedigere(ressursNavident).stream().map(IOrgenhet::getId).collect(Collectors.toSet());
-        return !Collections.disjoint(editableOrgenhetIds, orgenhetIds);
+        if (Collections.disjoint(editableOrgenhetIds, orgenhetIds)) {
+            log.warn("Ressurs {} har ikke tilgang til noen av orgenhetene {} kun {}", ressursNavident, orgenhetIds, editableOrgenhetIds);
+            return false;
+        }
+        return true;
     }
 }
