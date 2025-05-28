@@ -73,11 +73,13 @@ export function OrgEnhetStatistikk({
   gittStatistikk,
   header,
   expandable = false,
+  className,
 }: {
   orgEnhet: OrgEnhet | undefined;
   gittStatistikk?: GlobalStatistikkResponse | undefined;
   header?: string;
   expandable?: boolean;
+  className?: string;
 }) {
   if (!orgEnhet) {
     return;
@@ -101,6 +103,18 @@ export function OrgEnhetStatistikk({
   };
 
   const isLoading = orgEnhetStatistikkQuery.isLoading && !gittStatistikk;
+
+  const visMedarbeidereBarChart = medarbeidereStatistikk.totalt > 0;
+
+  const visOrgEnheterStatistikk = statistikk
+    ? Object.entries(statistikk).some(
+        ([_, value]) => typeof value === "number" && value > 0,
+      )
+    : false;
+
+  if (!visMedarbeidereBarChart && !visOrgEnheterStatistikk) {
+    return;
+  }
 
   const innerContent = isLoading ? (
     <div
@@ -132,6 +146,7 @@ export function OrgEnhetStatistikk({
   if (expandable) {
     return (
       <ReadMore
+        className={className}
         css={css`
           .navds-read-more__button {
             color: var(--a-text-default);
@@ -154,7 +169,7 @@ export function OrgEnhetStatistikk({
   }
 
   return (
-    <div>
+    <div className={className}>
       {!!header && (
         <Heading level="2" size="medium">
           {header}
@@ -201,12 +216,7 @@ function MedarbeidereBarChartGridWrapper({
 }: {
   statistikk: MedarbeidereStatistikk;
 }) {
-  if (
-    !statistikk ||
-    (statistikk.statlige === 0 &&
-      statistikk.kommunale === 0 &&
-      statistikk.eksterne === 0)
-  ) {
+  if (!statistikk || statistikk.totalt === 0) {
     return;
   }
 

@@ -249,18 +249,14 @@ export const ValgtOrgEnhet = ({
         )}
 
         {hasAdminAccess && statistikkAlleOrgenheterAdmin && (
-          <div
+          <OrgEnhetStatistikk
             css={css`
               margin-top: var(--a-spacing-6);
-              gap: var(--a-spacing-2);
             `}
-          >
-            <OrgEnhetStatistikk
-              expandable
-              header="Statistikk"
-              orgEnhet={orgEnhet}
-            />
-          </div>
+            expandable
+            header="Statistikk"
+            orgEnhet={orgEnhet}
+          />
         )}
       </div>
     </div>
