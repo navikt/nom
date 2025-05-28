@@ -37,6 +37,7 @@ export function HorizontalBarChart({
       css={css`
         width: 100%;
         border-radius: 10px;
+        line-height: 1.5rem;
       `}
     >
       {typeof title === "string" ? (

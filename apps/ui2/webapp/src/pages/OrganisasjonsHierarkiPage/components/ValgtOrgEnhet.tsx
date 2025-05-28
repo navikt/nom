@@ -128,6 +128,7 @@ export const ValgtOrgEnhet = ({
       `}
     >
       <TopBorder />
+
       <div
         css={css`
           display: flex;
@@ -230,10 +231,6 @@ export const ValgtOrgEnhet = ({
           </Link>
         )}
 
-        {hasAdminAccess && statistikkAlleOrgenheterAdmin && (
-          <OrgEnhetStatistikk orgEnhet={orgEnhet} />
-        )}
-
         {loading ? (
           <Loader
             css={css`
@@ -249,6 +246,21 @@ export const ValgtOrgEnhet = ({
             visRessursAdministeringKnapper={visRessursAdministeringKnapper}
             visTabellKnapp={visTabellKnapp ?? false}
           />
+        )}
+
+        {hasAdminAccess && statistikkAlleOrgenheterAdmin && (
+          <div
+            css={css`
+              margin-top: var(--a-spacing-6);
+              gap: var(--a-spacing-2);
+            `}
+          >
+            <OrgEnhetStatistikk
+              expandable
+              header="Statistikk"
+              orgEnhet={orgEnhet}
+            />
+          </div>
         )}
       </div>
     </div>
@@ -340,6 +352,7 @@ function MedarbeidereList({
         >
           Medarbeidere i {orgEnhet.navn}
         </Heading>
+
         {visTabellKnapp && (
           <DropdownMeny
             orgEnhet={orgEnhet}
@@ -493,6 +506,7 @@ function DropdownMeny({
           css={css`
             color: black;
             justify-self: end;
+            padding: var(--a-spacing-1);
           `}
           icon={<MenuElipsisHorizontalCircleIcon title="Rediger" />}
           variant="tertiary"

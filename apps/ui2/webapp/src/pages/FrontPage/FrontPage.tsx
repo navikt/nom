@@ -6,6 +6,8 @@ import {
   HelpText,
   HStack,
   Label,
+  Loader,
+  ReadMore,
   VStack,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
@@ -51,14 +53,14 @@ export const FrontPage = () => {
   return (
     <ContentWrapper>
       <VStack gap="12">
-        <OrgEnhetStatistikk
-          gittStatistikk={globalStatistikk}
-          header="Nøkkelinfo for hele Nav"
+        <Orghierarki
+          lenker={isInDevelopment() ? developmentLenker : productionLenker}
           orgEnhet={orgEnhet}
         />
 
-        <Orghierarki
-          lenker={isInDevelopment() ? developmentLenker : productionLenker}
+        <OrgEnhetStatistikk
+          gittStatistikk={globalStatistikk}
+          header="Nøkkelinfo for hele Nav"
           orgEnhet={orgEnhet}
         />
       </VStack>
@@ -70,10 +72,12 @@ export function OrgEnhetStatistikk({
   orgEnhet,
   gittStatistikk,
   header,
+  expandable = false,
 }: {
   orgEnhet: OrgEnhet | undefined;
   gittStatistikk?: GlobalStatistikkResponse | undefined;
   header?: string;
+  expandable?: boolean;
 }) {
   if (!orgEnhet) {
     return;
@@ -96,26 +100,67 @@ export function OrgEnhetStatistikk({
     totalt: ressursStatistikk?.antallAktiveRessurser ?? 0,
   };
 
+  const isLoading = orgEnhetStatistikkQuery.isLoading && !gittStatistikk;
+
+  const innerContent = isLoading ? (
+    <div
+      css={css`
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--a-spacing-2);
+      `}
+    >
+      <Loader size="3xlarge" />
+      <BodyShort size="large">Genererer statistikk...</BodyShort>
+    </div>
+  ) : (
+    <div
+      css={css`
+        margin-top: var(--a-spacing-4);
+        display: grid;
+        gap: var(--a-spacing-6);
+        grid-template-columns: repeat(2, 1fr);
+      `}
+    >
+      <MedarbeidereBarChartGridWrapper statistikk={medarbeidereStatistikk} />
+
+      <OrgEnheterStatistikkGridWrapper statistikk={statistikk} />
+    </div>
+  );
+
+  if (expandable) {
+    return (
+      <ReadMore
+        css={css`
+          .navds-read-more__button {
+            color: var(--a-text-default);
+            font-size: var(--a-font-size-heading-medium);
+            font-weight: var(--a-font-weight-bold);
+          }
+
+          .navds-read-more__content {
+            margin-left: 0;
+            padding-left: 0;
+            border-left: none;
+          }
+        `}
+        defaultOpen
+        header="Statistikk"
+      >
+        {innerContent}
+      </ReadMore>
+    );
+  }
+
   return (
     <div>
       {!!header && (
-        <Heading level="2" size="large">
+        <Heading level="2" size="medium">
           {header}
         </Heading>
       )}
-
-      <div
-        css={css`
-          margin-top: var(--a-spacing-4);
-          display: grid;
-          gap: var(--a-spacing-6);
-          grid-template-columns: repeat(2, 1fr);
-        `}
-      >
-        <MedarbeidereBarChartGridWrapper statistikk={medarbeidereStatistikk} />
-
-        <OrgEnheterStatistikkGridWrapper statistikk={statistikk} />
-      </div>
+      {innerContent}
     </div>
   );
 }
