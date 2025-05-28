@@ -178,7 +178,7 @@ public class DvhOrgenhetsLast {
                         .filter(orgEnhetState -> orgEnhetState.gyldigTom().map(gyldigTom -> gyldigTom.isBefore(LocalDate.now())).orElse(false))
                         .forEach(orgEnhetState -> {
                             LocalDate gyldigTom = orgenhetV2.getGyldigTom().orElse(LocalDate.now());
-                            if (!orgEnhetState.gyldigTom().get().equals(gyldigTom)) {
+                            if (orgEnhetState.gyldigTom().orElse(LocalDate.MAX).isAfter(gyldigTom)) { // hvis State har gyldigTom < evt. ny 'kalkulert gyldigTom' så ikke endre, for å slippe case med dobbelt parkerte enheter
                                 avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, gyldigTom);
                             }
                         });

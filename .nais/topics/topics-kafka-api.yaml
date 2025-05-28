@@ -37,9 +37,6 @@ spec:
     - team: org
       application: team-catalog-backend
       access: read
-    - team: tilgangsmaskin
-      application: populasjonstilgangskontroll
-      access: read    
 
 ---
 
