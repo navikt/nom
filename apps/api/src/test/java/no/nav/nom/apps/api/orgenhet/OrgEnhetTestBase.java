@@ -4,6 +4,7 @@ import io.getunleash.Unleash;
 import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
 import no.nav.nom.apps.api.KafkaUtils;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
+import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.libs.state.organisering.OrganiseringStateAutoconfiguration;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateAutoconfiguration;
@@ -43,6 +44,9 @@ public class OrgEnhetTestBase {
 
     @MockitoBean
     MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
+
+    @MockitoBean
+    TelefonService telefonService;
 
     @Autowired
     public Unleash unleash;

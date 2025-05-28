@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.ressurs.eventsourcing.producer;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterJobbTelefonCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPrimaryTelefonnummerCommand;
@@ -15,6 +16,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.SlettRessursC
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursJobbtelefonOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonidentOppdatertV1;
@@ -222,5 +224,18 @@ public class RessursCommandService {
                 , inputMetadata
             )
         );
+    }
+
+    public CompletableFuture<SendResult<String, RessursEvent>> oppdaterJobbtelefonEvent(
+        OppdaterJobbTelefonCommand oppdaterJobbTelefonCommand, InputMetadata inputMetadata
+    ) {
+        return eventProducer.sendMessage(new RessursJobbtelefonOppdatertEventV1(
+            oppdaterJobbTelefonCommand.fid(),
+            new RessursJobbtelefonOppdatertEventV1.JobbtelefonOppdatertEventData(
+                oppdaterJobbTelefonCommand.navident(),
+                oppdaterJobbTelefonCommand.jobbtelefon()
+            ),
+            inputMetadata
+        ));
     }
 }

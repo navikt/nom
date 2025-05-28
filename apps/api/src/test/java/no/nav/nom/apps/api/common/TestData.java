@@ -3,7 +3,9 @@ package no.nav.nom.apps.api.common;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.Tilknytningtype;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
@@ -74,6 +76,7 @@ public class TestData {
             "X123456",
             Sektor.NAV_STATLIG,
             new Visningsnavn("Nav", Optional.empty(), "Navesen"),
+            new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),

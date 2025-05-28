@@ -2,6 +2,8 @@ package no.nav.nom.apps.api.common;
 
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.TelefonType;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 
@@ -16,6 +18,7 @@ public class RessursStateBuilder {
     private String navident;
     private Sektor sektor;
     private Visningsnavn visningsnavn;
+    private Jobbtelefon jobbtelefon;
     private Optional<String> primaryTelefonnummer;
     private Optional<LocalDate> sluttdato;
 
@@ -46,6 +49,11 @@ public class RessursStateBuilder {
 
     public RessursStateBuilder visningsnavn(Visningsnavn visningsnavn) {
         this.visningsnavn = visningsnavn;
+        return this;
+    }
+
+    public RessursStateBuilder jobbtelefon(Jobbtelefon jobbtelefon) {
+        this.jobbtelefon = jobbtelefon;
         return this;
     }
 
@@ -91,6 +99,10 @@ public class RessursStateBuilder {
             null,
             "etternavn" + suffix
         );
+        this.jobbtelefon = new Jobbtelefon(
+            "12345678" + suffix,
+            TelefonType.NAV_TJENESTE_TELEFON
+        );
         this.primaryTelefonnummer = Optional.empty();
         this.sluttdato = Optional.empty();
         this.startdato = Optional.empty();
@@ -100,7 +112,7 @@ public class RessursStateBuilder {
     }
 
     public RessursState build() {
-        return new RessursState(fid, personident, navident, sektor, visningsnavn, primaryTelefonnummer, sluttdato, startdato, primaryFysiskBrukersted, fysiskeBrukersteder, IdentType.STANDARD, null);
+        return new RessursState(fid, personident, navident, sektor, visningsnavn, jobbtelefon, primaryTelefonnummer, sluttdato, startdato, primaryFysiskBrukersted, fysiskeBrukersteder, IdentType.STANDARD, null);
     }
 
 }

@@ -9,7 +9,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 )
 @JsonSubTypes({
     @JsonSubTypes.Type(value = RessursSluttdatoOppdatertEventV1.class),
-    @JsonSubTypes.Type(value = RessursSluttetEventV1.class)
+    @JsonSubTypes.Type(value = RessursSluttetEventV1.class),
+    @JsonSubTypes.Type(value = RessursJobbtelefonOppdatertEventV1.class)
 })
 public abstract class RessursEvent extends Event {
 

@@ -4,12 +4,22 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterJobbTelefonCommand;
 import no.nav.nom.contract.nom.TelefonType;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
+import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -19,11 +29,13 @@ public class TelefonService {
 
     private final RessursStateRepository ressursStateRepository;
     private final DvhRepository dvhRepository;
+    private final RessursCommandService ressursCommandService;
 
 
-    public TelefonService(RessursStateRepository ressursStateRepository, DvhRepository dvhRepository) {
+    public TelefonService(RessursStateRepository ressursStateRepository, DvhRepository dvhRepository, RessursCommandService ressursCommandService) {
         this.ressursStateRepository = ressursStateRepository;
         this.dvhRepository = dvhRepository;
+        this.ressursCommandService = ressursCommandService;
     }
 
     // Listen med telefonnummer for hver navident er sortert med høyest prioriterte nummer først 
@@ -64,6 +76,10 @@ public class TelefonService {
     public String getPrioritertTelefonnummer(String navident) {
         List<Telefon> telefoner = getAlleTelefonnummer(navident);
         return telefoner.isEmpty() ? null : telefoner.getFirst().nummer();
+    }
+
+    public Jobbtelefon getRessursStateTelefonnummer(String navident) {
+        return findRessursStateByNavident(navident).jobbtelefon();
     }
 
     public List<Telefon> getAlleTelefonnummer(String navident) {
@@ -119,5 +135,19 @@ public class TelefonService {
         return ressursStateRepository.findByNavident(navident).orElseThrow(() -> RessursNotFoundException.navident(navident));
     }
 
+    public void oppdaterRessursStateJobbtelefonBulk(List<DvhTelefon> dvhTelefonerMedEndring) {
+        Origination origination = new Origination("nom-api", "nom-api");
+        InputMetadata inputMetadata = new InputMetadata("nom-api BatchJob", "Datavarehus telefonoppdatering", null, origination);
+        dvhTelefonerMedEndring.forEach(dvhTelefon -> {
+            RessursState ressursState = findRessursStateByNavident(dvhTelefon.getNavIdent());
+            inputMetadata.toBuilder().inputInterfaceMethodArguments(dvhTelefon).build();
+            ressursCommandService.oppdaterJobbtelefonEvent(new OppdaterJobbTelefonCommand(
+                    ressursState.fid(),
+                    ressursState.navident(),
+                    new Jobbtelefon(dvhTelefon.getNummer(),
+                    mapType(dvhTelefon.getType()))
+            ), inputMetadata);
+        });
+    }
 }
 

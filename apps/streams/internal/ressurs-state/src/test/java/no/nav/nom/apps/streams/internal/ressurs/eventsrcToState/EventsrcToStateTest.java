@@ -7,9 +7,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursJobbtelefonOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttdatoOppdatertEventV1;
@@ -207,6 +210,7 @@ public class EventsrcToStateTest {
                 Optional.empty(),
                 "etternavn"
             ),
+            null,
             Optional.empty(),
             Optional.empty(), additionalData.startdato(),
             Optional.empty(),
@@ -291,6 +295,38 @@ public class EventsrcToStateTest {
             );
     }
 
+    @Test
+    @DisplayName("Håndterer RessursJobbtelefonOppdatertEventV1 event merges sammen inn i state")
+    void testRessursJobbtelefonOppdatertEventV1() {
+
+        identTopic.pipeInput(navidentToIdentTypeObject("navident", IdentType.STANDARD));
+        final RessursState opprettetRessurs = opprettRessurs();
+
+        final RessursJobbtelefonOppdatertEventV1.JobbtelefonOppdatertEventData ressursJobbtelefonOppdatertEventV1Data = new RessursJobbtelefonOppdatertEventV1.JobbtelefonOppdatertEventData(
+            opprettetRessurs.navident(),
+            new Jobbtelefon("12345678",
+            TelefonType.NAV_TJENESTE_TELEFON)
+        );
+
+        final RessursEvent ressursJobbtelefonOppdatertEventV1 = new RessursJobbtelefonOppdatertEventV1(
+            opprettetRessurs.fid(),
+            ressursJobbtelefonOppdatertEventV1Data,
+            (Event.Metadata) null
+        );
+
+        final RessursState expectedEndret = opprettetRessurs.toBuilder()
+            .jobbtelefon(new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON))
+            .build();
+
+        inputTopic.pipeInput(UUID.randomUUID().toString(), ressursJobbtelefonOppdatertEventV1);
+
+        Assertions.assertThat(outputTopic.readKeyValuesToList())
+            .containsExactly(
+                KeyValue.pair(opprettetRessurs.fid(), opprettetRessurs),
+                KeyValue.pair(opprettetRessurs.fid(), expectedEndret)
+            );
+    }
+
     private RessursState opprettRessurs() {
 
         final RessursOpprettetEventV1.RessursOpprettetEventData ressursOpprettetEventData = new RessursOpprettetEventV1.RessursOpprettetEventData(
@@ -334,6 +370,7 @@ public class EventsrcToStateTest {
             ressursOpprettetAdditionalData.navident().get(),
             ressursOpprettetEventData.sektor(),
             ressursOpprettetEventData.visningsnavn(),
+            null,
             Optional.empty(),
             Optional.empty(),
             ressursOpprettetAdditionalData.startdato(),

@@ -20,6 +20,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningSektorEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursJobbtelefonOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursPrimaryTelefonnummerOppdatertEventV1;
@@ -116,6 +117,8 @@ public class NomRemedyIntegrasjonServiceOld {
         }
         else if (ressursEvent instanceof RessursPrimaryTelefonnummerOppdatertEventV1 ressursPrimaryTelefonnummerOppdatertEventV1) {
             updateRessursTelefonnummer(ressursPrimaryTelefonnummerOppdatertEventV1);
+        } else if (ressursEvent instanceof RessursJobbtelefonOppdatertEventV1 ressursJobbtelefonOppdatertEventV1) {
+            //updateRessursTelefonnummer(ressursJobbtelefonOppdatertEventV1);
         }
     }
 
@@ -623,6 +626,25 @@ public class NomRemedyIntegrasjonServiceOld {
         remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntity(
             newNomIntegrasjonEntity,
             ressursPrimaryTelefonnummerOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy()
+        );
+    }
+
+    private void updateRessursTelefonnummer(RessursJobbtelefonOppdatertEventV1 ressursJobbtelefonOppdatertEventV1) {
+        logger.info(
+            "Updating remedy data for {} with fid {}",
+            ressursJobbtelefonOppdatertEventV1.getClass().getSimpleName(),
+            ressursJobbtelefonOppdatertEventV1.getFid()
+        );
+
+        var ressursState = nomApiClient.getRessursByFid(ressursJobbtelefonOppdatertEventV1.getFid());
+        var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
+        var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
+            .mobil(ressursJobbtelefonOppdatertEventV1.getJobbtelefonOppdatertEventData().jobbtelefon().nummer())
+            .build();
+
+        remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntity(
+            newNomIntegrasjonEntity,
+            ressursJobbtelefonOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy()
         );
     }
 

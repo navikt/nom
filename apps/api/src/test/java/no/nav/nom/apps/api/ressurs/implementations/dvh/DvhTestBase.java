@@ -26,6 +26,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursEventKafkaConfig;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursEventProducer;
 import no.nav.nom.apps.api.ressurs.eventsourcing.recoverybackup.RessursEventSourceRepository;
+import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.apps.api.u4diff.U4DiffPaaMastrede;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
@@ -58,6 +59,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
         KafkaProperties.class,
         LocalConfiguration.class,
         ObjectMapper.class,
+        TelefonService.class,
     })
 @EnableKafka
 @AutoConfigureJson

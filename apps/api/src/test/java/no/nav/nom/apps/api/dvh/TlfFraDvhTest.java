@@ -1,7 +1,10 @@
 package no.nav.nom.apps.api.dvh;
 
 import lombok.val;
+import no.nav.nom.contract.nom.TelefonType;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -11,8 +14,19 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class TlfFraDvhTest extends DvhTestBase {
+
+    @BeforeEach
+    public void setup() {
+        // Clear the repository before each test to ensure a clean state
+        when(unleash.isEnabled(any())).thenReturn(false);
+    }
 
     @Test
     @DisplayName("hent telefonnr")
@@ -46,6 +60,37 @@ public class TlfFraDvhTest extends DvhTestBase {
             assertThat(this.dvhRepository.getTelefonNrListByNavIdent(navident)).hasSize(1);
         }
 
+    }
+
+    @Test
+    @DisplayName("Hent telefoner, sjekk om det er endring i nummer eller type, burde ikke oppdatere ressursstate")
+    void test3_1() {
+        when(unleash.isEnabled(any())).thenReturn(true);
+        stubTlfFromString(tlfDvhPayload);
+
+        when(telefonService.getRessursStateTelefonnummer("A123123")).thenReturn(new Jobbtelefon("4711220033", TelefonType.NAV_KONTOR_TELEFON));
+        when(telefonService.getRessursStateTelefonnummer("A321321")).thenReturn(new Jobbtelefon("4711330022", TelefonType.NAV_KONTOR_TELEFON));
+        when(telefonService.getRessursStateTelefonnummer("A321320")).thenReturn(new Jobbtelefon("4721002102", TelefonType.NAV_TJENESTE_TELEFON));
+        when(telefonService.getRessursStateTelefonnummer("A440022")).thenReturn(new Jobbtelefon("4722330011", TelefonType.NAV_KONTOR_TELEFON));
+        when(telefonService.getRessursStateTelefonnummer("A503020")).thenReturn(new Jobbtelefon("4733002200", TelefonType.NAV_TJENESTE_TELEFON));
+        when(telefonService.getRessursStateTelefonnummer("J509999")).thenReturn(new Jobbtelefon("4733008888", TelefonType.NAV_TJENESTE_TELEFON));
+        when(telefonService.getRessursStateTelefonnummer("J501111")).thenReturn(new Jobbtelefon("4733001111", TelefonType.NAV_TJENESTE_TELEFON));
+        dvhRestConsumer.loadTlfFromDvh();
+        verify(telefonService, times(0)).oppdaterRessursStateJobbtelefonBulk(anyList());
+    }
+
+    @Test
+    @DisplayName("Hent telefoner, sjekk om det er endring i nummer eller type, burde oppdatere ressursstate")
+    void test3_2() {
+        when(unleash.isEnabled(any())).thenReturn(true);
+        stubTlfFromString(tlfDvhPayload);
+
+        when(telefonService.getRessursStateTelefonnummer("A123123")).thenReturn(new Jobbtelefon("4711220033", TelefonType.NAV_KONTOR_TELEFON));
+        when(telefonService.getRessursStateTelefonnummer("A321321")).thenReturn(new Jobbtelefon("4711330022", TelefonType.NAV_KONTOR_TELEFON));
+        when(telefonService.getRessursStateTelefonnummer("A321320")).thenReturn(new Jobbtelefon("4721002102", TelefonType.NAV_TJENESTE_TELEFON));
+        when(telefonService.getRessursStateTelefonnummer("A440022")).thenReturn(new Jobbtelefon("4722330011", TelefonType.NAV_KONTOR_TELEFON));
+        dvhRestConsumer.loadTlfFromDvh();
+        verify(telefonService, times(1)).oppdaterRessursStateJobbtelefonBulk(anyList());
     }
 
 

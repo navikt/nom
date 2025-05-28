@@ -3,7 +3,10 @@ package no.nav.nom.apps.api.telefon;
 import no.nav.nom.apps.api.common.TestData;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterJobbTelefonCommand;
 import no.nav.nom.contract.nom.TelefonType;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.Test;
@@ -21,6 +24,9 @@ import static no.nav.nom.apps.api.dvh.dto.DvhTelefon.DvhTelefonType.KONTORTELEFO
 import static no.nav.nom.apps.api.dvh.dto.DvhTelefon.DvhTelefonType.TJENESTETELEFON;
 import static no.nav.nom.contract.nom.TelefonType.NAV_TJENESTE_TELEFON;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +48,9 @@ class TelefonServiceTest {
 
     @Mock
     private RessursStateRepository ressursStateRepositoryMock;
+
+    @Mock
+    private RessursCommandService ressursCommandServiceMock;
 
     @InjectMocks
     private TelefonService telefonService;
@@ -159,5 +168,20 @@ class TelefonServiceTest {
                 .navident(navident)
                 .primaryTelefonnummer(Optional.of(primaryTelefonnummer))
                 .build();
+    }
+
+    @Test
+    void should_call_ressurs_command_service() {
+        var telefoner = List.of(
+                DvhTelefon.builder().navIdent(NAV_IDENT_A).nummer(KONTORTELEFON_A).type(KONTORTELEFON).beskrivelse("Bla, bla").build(),
+                DvhTelefon.builder().navIdent(NAV_IDENT_A).nummer(TJENESTETELEFON_A).type(TJENESTETELEFON).beskrivelse("Bla, bla").build()
+        );
+
+        var ressursState = ressursState(NAV_IDENT_A, PRIVATTELEFON_A);
+        when(ressursStateRepositoryMock.findByNavident(NAV_IDENT_A)).thenReturn(Optional.ofNullable(ressursState));
+
+        telefonService.oppdaterRessursStateJobbtelefonBulk(telefoner);
+
+        verify(ressursCommandServiceMock, times(2)).oppdaterJobbtelefonEvent(any(OppdaterJobbTelefonCommand.class), any(InputMetadata.class));
     }
 }

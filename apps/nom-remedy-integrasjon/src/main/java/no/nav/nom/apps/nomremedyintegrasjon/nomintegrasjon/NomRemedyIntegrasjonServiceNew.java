@@ -262,6 +262,7 @@ public class NomRemedyIntegrasjonServiceNew {
     }
 
     private NomIntegrasjonEntity nomIntegrasjonEntityFromNomData(RessursState ressursState, OrgtilknytningState dolOrgtilknytning, boolean isMasseflytting) {
+        var jobbtelefon = ressursState.jobbtelefon() != null ? ressursState.jobbtelefon() : null;
         var mobil = getTelefonerFromNom(ressursState.navident());
         var sektor = getSektor(ressursState, dolOrgtilknytning);
         var utlopsdato = getUtlopsdato(sektor, dolOrgtilknytning);
@@ -276,7 +277,7 @@ public class NomRemedyIntegrasjonServiceNew {
             .fysiskBrukerstedId(ressursState.primaryFysiskBrukersted().orElse(null))
             .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dolOrgtilknytning.gyldigFom()))
             .utlopsdato(utlopsdato.map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null))
-            .mobil(mapAndTrimNumber(mobil))
+            .mobil(jobbtelefon != null ? jobbtelefon.nummer() : mapAndTrimNumber(mobil))
             .masseflytting(isMasseflytting ? "X" : null)
             .build();
     }

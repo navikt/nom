@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.TelefonType;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
@@ -167,6 +169,7 @@ class EventsrcToState {
             }
 
             final var visningsnavn = eventStateAggregate.get("visningsnavn");
+            final var jobbtelefon = eventStateAggregate.get("jobbtelefon");
 
             var fysiskBrukerstedList = new ArrayList<String>();
             eventStateAggregate.withArray("fysiskeBrukersteder").elements().forEachRemaining(e -> fysiskBrukerstedList.add(e.asText()));
@@ -183,6 +186,10 @@ class EventsrcToState {
                     Optional.ofNullable(parseNullableFromJson(visningsnavn, "mellomnavn")),
                     visningsnavn.get("etternavn").asText()
                 ),
+                jobbtelefon != null ? new Jobbtelefon(
+                    jobbtelefon.hasNonNull("nummer") ? jobbtelefon.get("nummer").asText() : null,
+                    jobbtelefon.hasNonNull("type") ? TelefonType.valueOf(jobbtelefon.get("type").asText()) : null
+                ) : null,
                 Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "primaryTelefonnummer")),
                 Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "sluttdato", LocalDate::parse)),
                 Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "startdato", LocalDate::parse)),

@@ -174,6 +174,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
                 Optional.empty(),
                 "ENavn 1"
             ),
+            null,
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
@@ -223,6 +224,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
                 Optional.empty(),
                 "ENavn 1"
             ),
+            null,
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
@@ -268,6 +270,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
                 Optional.empty(),
                 "ENavn 1"
             ),
+            null,
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
@@ -313,6 +316,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
                 Optional.empty(),
                 "ENavn 1"
             ),
+            null,
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
@@ -361,6 +365,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
                  Optional.empty(),
                  "ENavn 1"
              ),
+             null,
              Optional.empty(),
              Optional.empty(),
              Optional.empty(),
@@ -405,6 +410,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
                 Optional.empty(),
                 "ENavn 1"
             ),
+            null,
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
@@ -450,6 +456,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
                 Optional.of("mellomnavn" + suffix),
                 "etternavn" + suffix
             ),
+            null,
             Optional.empty(),
             null,
             Optional.of(LocalDate.now()),

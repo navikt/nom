@@ -4,6 +4,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -31,6 +32,7 @@ public record ManuelleRessurserOgLedereProperties(
                 navident,
                 Sektor.valueOf(sektor),
                 new Visningsnavn("Test", Optional.empty(), navident),
+                new Jobbtelefon(null, null),
                 Optional.empty(),
                 Optional.empty(),
                 Optional.of(LocalDate.of(2022, 1, 1)),

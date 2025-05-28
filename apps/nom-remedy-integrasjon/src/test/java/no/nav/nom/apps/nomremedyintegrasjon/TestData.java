@@ -3,8 +3,10 @@ package no.nav.nom.apps.nomremedyintegrasjon;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
@@ -299,6 +301,7 @@ public class TestData {
             v1.getRessursOpprettetAdditionalData().navident().get(),
             v1.getRessursOpprettetEventData().sektor(),
             v1.getRessursOpprettetEventData().visningsnavn(),
+            null,
             v1.getRessursOpprettetEventData().primaryTelefonnummer(),
             Optional.empty(),
             v1.getRessursOpprettetAdditionalData().startdato(),
@@ -316,6 +319,7 @@ public class TestData {
             "S123456",
             Sektor.NAV_STATLIG,
             new Visningsnavn("Nav", Optional.empty(), "Navnesen"),
+            new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
             Optional.empty(),
             Optional.empty(),
             Optional.of(LocalDate.now()),

@@ -1,11 +1,13 @@
 package no.nav.nom.apps.api.dvh;
 
+import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
+import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
@@ -15,6 +17,8 @@ import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
+import no.nav.nom.apps.api.telefon.TelefonService;
+import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
@@ -27,6 +31,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -34,6 +39,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
 import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyRessursType.ANNEN_STATLIG;
 
@@ -69,6 +75,8 @@ public class DvhRestConsumer {
     private final DvhOrdsService dvhOrdsService;
 
     private final OTUtenforHierarki otUtenforHierarki;
+    private final TelefonService telefonService;
+    private final Unleash unleash;
 
     @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
     public void scheduledOppdateringFraDvh() {
@@ -235,7 +243,19 @@ public class DvhRestConsumer {
         log.info("Laster tlf fra dvh");
         try {
             var tlfRader = dvhOrdsService.getTelefoner();
+            if (unleash.isEnabled("nom-api.ny-dvh-telefon-persistering")) {
+                List<DvhTelefon> dvhTelefonerMedEndring = new ArrayList<>();
+                tlfRader.forEach(dvhTelefon -> {
+                    var prioritertTelefon = telefonService.getRessursStateTelefonnummer(dvhTelefon.getNavIdent());
+                    if (isNull(prioritertTelefon)
+                        || !prioritertTelefon.nummer().equals(dvhTelefon.getNummer())
+                        || !compareTelefonType(dvhTelefon.getType(), prioritertTelefon.type())) {
+                        dvhTelefonerMedEndring.add(dvhTelefon);
+                    }
+                });
 
+                if (!dvhTelefonerMedEndring.isEmpty()) telefonService.oppdaterRessursStateJobbtelefonBulk(dvhTelefonerMedEndring);
+            }
             log.info("Telefonnr lastet: Antall rader = " + tlfRader.size());
             dvhRepository.saveTlf(tlfRader);
         } catch (Exception e) {
@@ -282,5 +302,10 @@ public class DvhRestConsumer {
     private String durationAsH24(LocalDateTime start) {
         Duration duration = Duration.between(start, LocalDateTime.now());
         return "%02d:%02d:%02d".formatted(duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart());
+    }
+
+    private boolean compareTelefonType(DvhTelefon.DvhTelefonType dvhTelefonType, TelefonType telefonType) {
+        if (dvhTelefonType.equals(DvhTelefon.DvhTelefonType.TJENESTETELEFON) && telefonType.equals(TelefonType.NAV_TJENESTE_TELEFON)) return true;
+        return dvhTelefonType.equals(DvhTelefon.DvhTelefonType.KONTORTELEFON) && telefonType.equals(TelefonType.NAV_KONTOR_TELEFON);
     }
 }

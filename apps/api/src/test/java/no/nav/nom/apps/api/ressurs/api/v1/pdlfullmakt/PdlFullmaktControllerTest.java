@@ -6,6 +6,8 @@ import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.TelefonType;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -90,6 +92,7 @@ public class PdlFullmaktControllerTest extends RestTestBase {
                 Optional.of("kanskje"),
                 "etter"
             ),
+            new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
             Optional.empty(),
             Optional.of(slutt),
             Optional.of(start),

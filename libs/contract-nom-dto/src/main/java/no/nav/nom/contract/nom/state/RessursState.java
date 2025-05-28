@@ -2,10 +2,11 @@ package no.nav.nom.contract.nom.state;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Builder;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 
 import java.time.LocalDate;
@@ -20,6 +21,7 @@ public record RessursState(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String navident,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Sektor sektor,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Visningsnavn visningsnavn,
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Jobbtelefon jobbtelefon,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<String> primaryTelefonnummer,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> sluttdato,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> startdato,
@@ -42,6 +44,7 @@ public record RessursState(
             "navident='" + navident + '\'' +
             ", sektor=" + sektor +
             ", visningsnavn=" + visningsnavn +
+            ", jobbtelefon=" + jobbtelefon +
             ", primaryTelefonnummer=" + primaryTelefonnummer +
             ", sluttdato=" + sluttdato +
             ", startdato=" + startdato +

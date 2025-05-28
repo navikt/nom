@@ -16,6 +16,8 @@ import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.TelefonType;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -77,6 +79,7 @@ public class TeamcatControllerTest extends RestTestBase {
                 Optional.of("m" + navident),
                 "e" + navident
             ),
+            new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
             Optional.empty(),
             Optional.of(LocalDate.now().plusDays(10)),
             Optional.empty(),

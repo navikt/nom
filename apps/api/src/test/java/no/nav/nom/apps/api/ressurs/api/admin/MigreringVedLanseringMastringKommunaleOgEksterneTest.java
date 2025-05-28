@@ -54,6 +54,7 @@ class MigreringVedLanseringMastringKommunaleOgEksterneTest {
             navident,
             sektor,
             new Visningsnavn("Test", Optional.empty(), "Test"),
+            null,
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),

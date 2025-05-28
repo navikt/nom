@@ -11,9 +11,11 @@ import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
@@ -179,6 +181,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
                 Optional.of("mellomnavn"),
                 "etternavn"
             ),
+            new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
             Optional.empty(),
             Optional.of(LocalDate.now().plusDays(10)),
             Optional.empty(),
@@ -211,6 +214,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
                 Optional.of("mellomnavn"),
                 "etternavn"
             ),
+            new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
             Optional.empty(),
             Optional.of(LocalDate.now().plusDays(10)),
             Optional.of(LocalDate.now().minusDays(10)),

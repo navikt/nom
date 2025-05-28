@@ -372,6 +372,7 @@ class FysiskBrukerstedServiceTest {
             "X123456",
             Sektor.NAV_STATLIG,
             new Visningsnavn("Nav", Optional.empty(), "Navesen"),
+            null,
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),

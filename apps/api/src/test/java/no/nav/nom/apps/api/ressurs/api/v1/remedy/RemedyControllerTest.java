@@ -15,6 +15,8 @@ import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.apps.api.rest.dto.NavnDTO;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.TelefonType;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -61,6 +63,7 @@ public class RemedyControllerTest extends RestTestBase {
                 Optional.of(navn.getMellomnavn()),
                 navn.getEtternavn()
             ),
+            new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
             Optional.empty(),
             Optional.of(LocalDate.now().plusDays(10)),
             Optional.empty(),
@@ -192,6 +195,7 @@ public class RemedyControllerTest extends RestTestBase {
                 navident,
                 Sektor.EKSTERN,
                 new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
+                new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
                 Optional.empty(),
                 Optional.empty(), Optional.empty(),
                 null,
@@ -312,6 +316,7 @@ public class RemedyControllerTest extends RestTestBase {
             navident,
             Sektor.NAV_STATLIG,
             new Visningsnavn("Opprinnelig_fornavn", Optional.empty(), "Opprinnelig_etternavn"),
+            new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
@@ -328,6 +333,7 @@ public class RemedyControllerTest extends RestTestBase {
                 navident,
                 Sektor.NAV_STATLIG,
                 new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
+                new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),

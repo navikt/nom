@@ -13,6 +13,7 @@ import no.nav.nom.apps.api.graphql.controller.GraphQLRessursController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLSearchController;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
+import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.libs.state.organisering.OrganiseringStateAutoconfiguration;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateAutoconfiguration;
@@ -122,6 +123,9 @@ public class GraphQLExtendedIntegrationTestBase {
 
     @MockitoBean
     MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
+
+    @MockitoBean
+    TelefonService telefonService;
 
     @BeforeEach
     protected void setup() {
