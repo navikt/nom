@@ -1,0 +1,214 @@
+on:
+  workflow_call:
+    inputs:
+      maven-project:
+        required: true
+        type: string
+      jar-path:
+        required: true
+        type: string
+      image-suffix:
+        required: true
+        type: string
+      nais-config-file-path-dev:
+        required: true
+        type: string
+      nais-config-file-path-prod:
+        required: true
+        type: string
+      deploy-timeout:
+        required: false
+        type: string
+        default: 10m
+      dev-cluster:
+        type: string
+        required: false
+        default: dev-gcp
+      prod-cluster:
+        type: string
+        required: false
+        default: prod-gcp
+      unleash-vars-file-path:
+        type: string
+        required: false
+        default: skip
+      additional-nais-vars-dev:
+        type: string
+        required: false
+        description: Additional template variables besides image var. Must adhere to pattern ',var1=value,var2=value'
+        default: ''
+      additional-nais-vars-prod:
+        type: string
+        required: false
+        description: Additional template variables besides image var. Must adhere to pattern ',var1=value,var2=value'
+        default: ''
+      skip-tests:
+        type: boolean
+        required: false
+        default: false
+        description: Skip tests. This makes build faster.
+      skip-prod-deploy:
+        type: boolean
+        required: false
+        default: false
+        description: Skip deployment to production.
+      dockerfile:
+        type: string
+        required: false
+        default: Dockerfile
+        description: Dockerfile to use for building the docker image
+    secrets:
+      NAIS_WORKLOAD_IDENTITY_PROVIDER:
+        required: true
+
+jobs:
+  build-app-docker:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    name: "Build app and push docker image to GAR"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Cache local Maven build-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/build-cache
+          key: ${{ runner.os }}-maven-build-cache-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-build-cache-
+      - name: JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
+          cache: maven
+      - name: Build java app
+        env:
+          GITHUB_USERNAME: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.READER_TOKEN }}
+        run: mvn clean package --projects :${{ inputs.maven-project }} --also-make -Dmaven.test.skip=true --batch-mode
+      - name: Build and push Docker image
+        uses: nais/docker-build-push@v0
+        id: docker-push
+        with:
+          team: org
+          image_suffix: ${{ inputs.image-suffix }}
+          dockerfile: ${{ inputs.dockerfile }}
+          docker_context: .
+          build_args: |
+            JAR_PATH=${{ inputs.jar-path }}
+          build_secrets: |
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          salsa: false
+    outputs:
+      image: ${{ steps.docker-push.outputs.image }}
+      telemetry: ${{ steps.docker-push.outputs.telemetry }}
+      digest: ${{ steps.docker-push.outputs.digest }}
+
+  build-test-app:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    name: "Build app and test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Cache local Maven build-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/build-cache
+          key: ${{ runner.os }}-maven-build-cache-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-build-cache-
+      - name: JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
+          cache: maven
+      - name: Build java app
+        env:
+          GITHUB_USERNAME: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.READER_TOKEN }}
+        run: mvn clean package --projects :${{ inputs.maven-project }} --also-make -Dmaven.test.skip=${{ inputs.skip-tests }} --batch-mode
+
+  salsa:
+    name: Generate SBOM, attest and sign image
+    needs: [ build-app-docker ]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: "write"
+    steps:
+      - name: NAIS login
+        uses: nais/login@v0
+        id: login
+        with:
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          team: org
+      - name: Generate SBOM, attest and sign image
+        id: attest-sign
+        uses: nais/attest-sign@v1
+        with:
+          image_ref: ${{needs.build-app-docker.outputs.image}}@${{ needs.build-app-docker.outputs.digest }}
+
+  deploy-dev:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    name: Deploy to NAIS ${{ inputs.dev-cluster }}
+    needs:
+      - build-app-docker
+      - build-test-app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        if: ${{ inputs.unleash-vars-file-path != 'skip' }}
+        env:
+          CLUSTER: ${{ inputs.dev-cluster }}
+          RESOURCE: .nais/unleash/unleash-token.yaml
+          TIMEOUT: ${{ inputs.deploy-timeout }}
+          VAR: env=development
+          VARS: ${{ inputs.unleash-vars-file-path }}
+          TELEMETRY: ${{ needs.build-app-docker.outputs.telemetry }}
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: ${{ inputs.dev-cluster }}
+          RESOURCE: ${{ inputs.nais-config-file-path-dev }}
+          TIMEOUT: ${{ inputs.deploy-timeout }}
+          VAR: image=${{needs.build-app-docker.outputs.image}}${{ inputs.additional-nais-vars-dev }}
+          TELEMETRY: ${{ needs.build-app-docker.outputs.telemetry }}
+
+#  deploy-prod:
+#    permissions:
+#      contents: "read"
+#      id-token: "write"
+#    name: Deploy to NAIS ${{ inputs.prod-cluster }}
+#    if: ${{ github.ref == 'refs/heads/main' && !inputs.skip-tests && !inputs.skip-prod-deploy}}
+#    needs:
+#      - build-app-docker
+#      - build-test-app
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: nais/deploy/actions/deploy@v2
+#        if: ${{ inputs.unleash-vars-file-path != 'skip' }}
+#        env:
+#          CLUSTER: ${{ inputs.prod-cluster }}
+#          RESOURCE: .nais/unleash/unleash-token.yaml
+#          TIMEOUT: ${{ inputs.deploy-timeout }}
+#          VAR: env=production
+#          VARS: ${{ inputs.unleash-vars-file-path }}
+#          TELEMETRY: ${{ needs.build-app-docker.outputs.telemetry }}
+#      - uses: nais/deploy/actions/deploy@v2
+#        env:
+#          CLUSTER: ${{ inputs.prod-cluster }}
+#          RESOURCE: ${{ inputs.nais-config-file-path-prod }}
+#          TIMEOUT: ${{ inputs.deploy-timeout }}
+#          VAR: image=${{needs.build-app-docker.outputs.image}}${{ inputs.additional-nais-vars-prod }}
+#          TELEMETRY: ${{ needs.build-app-docker.outputs.telemetry }}
