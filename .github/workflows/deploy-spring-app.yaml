@@ -88,7 +88,7 @@ jobs:
         env:
           GITHUB_USERNAME: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.READER_TOKEN }}
-        run: mvn clean package --projects :${{ inputs.maven-project }} --also-make -Dmaven.test.skip=${{ inputs.skip-tests }} --batch-mode
+        run: mvn clean package --projects :${{ inputs.maven-project }} --also-make -Dmaven.test.skip=true --batch-mode
       - name: Build and push Docker image
         uses: nais/docker-build-push@v0
         id: docker-push
@@ -107,6 +107,34 @@ jobs:
       image: ${{ steps.docker-push.outputs.image }}
       telemetry: ${{ steps.docker-push.outputs.telemetry }}
       digest: ${{ steps.docker-push.outputs.digest }}
+
+  build-test-app:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    name: "Build app and test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Cache local Maven build-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/build-cache
+          key: ${{ runner.os }}-maven-build-cache-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-build-cache-
+      - name: JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
+          cache: maven
+      - name: Build java app
+        env:
+          GITHUB_USERNAME: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.READER_TOKEN }}
+        run: mvn clean package --projects :${{ inputs.maven-project }} --also-make -Dmaven.test.skip=${{ inputs.skip-tests }} --batch-mode
 
   salsa:
     name: Generate SBOM, attest and sign image
@@ -133,7 +161,9 @@ jobs:
       contents: "read"
       id-token: "write"
     name: Deploy to NAIS ${{ inputs.dev-cluster }}
-    needs: build-app-docker
+    needs:
+      - build-app-docker
+      - build-test-app
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -160,7 +190,9 @@ jobs:
       id-token: "write"
     name: Deploy to NAIS ${{ inputs.prod-cluster }}
     if: ${{ github.ref == 'refs/heads/main' && !inputs.skip-tests && !inputs.skip-prod-deploy}}
-    needs: build-app-docker
+    needs:
+      - build-app-docker
+      - build-test-app
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
