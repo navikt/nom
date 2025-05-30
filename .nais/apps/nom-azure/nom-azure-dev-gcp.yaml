@@ -80,6 +80,9 @@ spec:
         - application: team-catalog-frackend
           namespace: org
           cluster: dev-gcp
+        - application: etterlevelse-backend
+          namespace: teamdatajegerne
+          cluster: dev-gcp
     outbound:
       external:
         - host: teamorg-unleash-api.nav.cloud.nais.io
