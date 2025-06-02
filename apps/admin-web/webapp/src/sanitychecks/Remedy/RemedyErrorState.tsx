@@ -19,7 +19,7 @@ export function RemedyErrorState() {
     queryFn: async (): Promise<ErrorState[]> => getAllErrorStates(),
   });
 
-  const { data, sort, handleSort } = useTableSort(dataset, "errorId");
+  const { data, sort, handleSort } = useTableSort(dataset, "createdAt");
 
   if (isLoading) {
     return <LoadingTable />;
@@ -47,13 +47,13 @@ export function RemedyErrorState() {
             Error State Fid
           </Table.ColumnHeader>
           <Table.ColumnHeader scope="col" sortKey="errorStateType" sortable>
-            Error State Type
+            Statetype
           </Table.ColumnHeader>
           <Table.ColumnHeader scope="col" sortKey="errorMessage" sortable>
-            Error Message
+            Feilmelding
           </Table.ColumnHeader>
           <Table.ColumnHeader scope="col" sortKey="createdAt" sortable>
-            Created At
+            Dato feilmelding
           </Table.ColumnHeader>
         </Table.Header>
         <Table.Body>
