@@ -80,6 +80,9 @@ spec:
         - application: team-catalog-frackend
           namespace: org
           cluster: prod-gcp
+        - application: team-catalog-backend
+          namespace: org
+          cluster: prod-gcp
         - application: etterlevelse-backend
           namespace: teamdatajegerne
           cluster: prod-gcp
