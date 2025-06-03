@@ -38,7 +38,8 @@ class OmadaUttrekkTest {
             Arguments.of("123 45 678", "4712345678"),
             Arguments.of("+3512345678", "3512345678"),
             Arguments.of("+4712345678", "4712345678"),
-            Arguments.of("4712345678", "4712345678")
+            Arguments.of("4712345678", "4712345678"),
+            Arguments.of("47345678", "4747345678")
         );
     }
 }

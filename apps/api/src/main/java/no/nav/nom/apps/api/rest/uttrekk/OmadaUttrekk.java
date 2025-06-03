@@ -340,12 +340,14 @@ public class OmadaUttrekk {
             return telefon
                 .replaceAll("\\s", "")
                 .replaceAll("\\+", "");
-        } else {
-            if (telefon.startsWith("47")) {
+        } else if (telefon.startsWith("47")) {
+            if (telefon.length() == 10) {
                 return telefon.replaceAll("\\s", "");
             } else {
                 return "47" + telefon.replaceAll("\\s", "");
             }
+        } else {
+            return "47" + telefon.replaceAll("\\s", "");
         }
     }
 
