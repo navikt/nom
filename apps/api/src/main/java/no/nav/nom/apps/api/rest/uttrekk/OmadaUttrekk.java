@@ -63,7 +63,7 @@ public class OmadaUttrekk {
             RemedyEnhetIdResolver remedyEnhetIdResolver,
             DvhRepository dvhRepository,
             OrganiseringStateRepository organiseringStateRepository,
-            TelefonService telefonService, 
+            TelefonService telefonService,
             Unleash unleash
     ) {
         this.ressursStateRepository = ressursStateRepository;
@@ -230,7 +230,7 @@ public class OmadaUttrekk {
                             try {
                                 printer.printRecord(
                                         navident,
-                                        prioritertNummer.nummer(),
+                                        formaterTelefonnummer(prioritertNummer.nummer()),
                                         prioritertNummer.type(),
                                         ""
                                 );
@@ -332,6 +332,20 @@ public class OmadaUttrekk {
                 });
 
             return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
+        }
+    }
+
+    String formaterTelefonnummer(String telefon) {
+        if (telefon.startsWith("+")) {
+            return telefon
+                .replaceAll("\\s", "")
+                .replaceAll("\\+", "");
+        } else {
+            if (telefon.startsWith("47")) {
+                return telefon.replaceAll("\\s", "");
+            } else {
+                return "47" + telefon.replaceAll("\\s", "");
+            }
         }
     }
 

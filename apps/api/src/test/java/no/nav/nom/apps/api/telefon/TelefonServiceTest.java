@@ -65,7 +65,7 @@ class TelefonServiceTest {
         );
         when(ressursStateRepositoryMock.findAllActiveRessurser()).thenReturn(ressurser);
 
-        var ressurserMedTelefon = telefonService.fetchPrivatTelefoner();
+        var ressurserMedTelefon = telefonService.fetchPrivattelefoner();
 
         assertThat(ressurserMedTelefon.size()).isEqualTo(2);
         var telefon = ressurserMedTelefon.getFirst();

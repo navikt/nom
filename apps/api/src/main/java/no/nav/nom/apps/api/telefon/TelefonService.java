@@ -41,10 +41,10 @@ public class TelefonService {
     // Listen med telefonnummer for hver navident er sortert med høyest prioriterte nummer først 
     public Map<String, List<Telefon>> hentPrioriterteTelefonnummer() {
         var navTelefoner = fetchNavTelefoner();
-        var privatTelefoner = fetchPrivatTelefoner();
+        var privattelefoner = fetchPrivattelefoner();
 
         Map<String, List<Telefon>> sorted = new HashMap<>();
-        Stream.concat(navTelefoner.stream(), privatTelefoner.stream())
+        Stream.concat(navTelefoner.stream(), privattelefoner.stream())
                 .collect(Collectors.groupingBy(
                                 Telefon::navident,
                                 Collectors.toList()
@@ -65,7 +65,7 @@ public class TelefonService {
                 .toList();
     }
 
-    public List<Telefon> fetchPrivatTelefoner() {
+    public List<Telefon> fetchPrivattelefoner() {
         return ressursStateRepository.findAllActiveRessurser()
                 .values().stream()
                 .filter(ressurs -> ressurs.primaryTelefonnummer().isPresent())
