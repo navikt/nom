@@ -33,8 +33,8 @@ export const FrontPage = () => {
 
   const orgEnhetId = inDevelopment ? "sa312u" : "py437s";
 
-  const developmentLenker = ["fa965e", "me177r", "su645c", "hu797w", "tu734a"];
-  const productionLenker = ["bu431e", "ry630r", "ky110z", "se232x", "ne994m"];
+  const developmentLenker = ["fa965e", "me177r", "ju219d", "hu797w", "tu734a"];
+  const productionLenker = ["bu431e", "ry630r", "te464t", "se232x", "ne994m"];
 
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(orgEnhetId),
@@ -578,7 +578,7 @@ function Orghierarki({
         >
           <OrghierarkiItem
             icon={building}
-            label="Klage- og ankelinjen"
+            label="Velferdslinjen"
             to={`/org/${lenker[2]}`}
           />
         </div>
