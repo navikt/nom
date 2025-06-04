@@ -112,7 +112,11 @@ export function OrgEnhetStatistikk({
       )
     : false;
 
-  if (!visMedarbeidereBarChart && !visOrgEnheterStatistikk) {
+  if (
+    !orgEnhetStatistikkQuery.isLoading &&
+    !visMedarbeidereBarChart &&
+    !visOrgEnheterStatistikk
+  ) {
     return;
   }
 
