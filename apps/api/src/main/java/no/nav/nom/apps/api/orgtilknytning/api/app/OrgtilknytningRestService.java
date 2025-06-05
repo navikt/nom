@@ -47,6 +47,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -265,9 +266,12 @@ public class OrgtilknytningRestService {
     }
 
     private void validateOrgtilknytningTypeSektorCombination(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
-        oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(endreOrgtilknytningRequest ->
-            validateOrgtilknytningTypeSektorCombination(endreOrgtilknytningRequest.tilknytningtype(), endreOrgtilknytningRequest.sektor())
-        );
+        oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {
+            var origOT = orgtilknytningStateRepository.findByFid(endreOrgtilknytningRequest.fid()).orElseThrow(() -> OrgtilknytningNotFoundException.fid(endreOrgtilknytningRequest.fid()));
+            if (!Objects.equals(origOT.orgtilknytningType().orElse(null), endreOrgtilknytningRequest.tilknytningtype())) {
+                validateOrgtilknytningTypeSektorCombination(endreOrgtilknytningRequest.tilknytningtype(), endreOrgtilknytningRequest.sektor());
+            }
+        });
 
         oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(nyeOrgtilknytningRequest ->
             validateOrgtilknytningTypeSektorCombination(nyeOrgtilknytningRequest.tilknytningtype(), nyeOrgtilknytningRequest.sektor())

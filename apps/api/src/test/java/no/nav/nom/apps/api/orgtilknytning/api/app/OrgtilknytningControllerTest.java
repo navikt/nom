@@ -1742,7 +1742,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("1")
             .sektor(tilknyttetRessurs.sektor())
-            .orgtilknytningType(Optional.of(Tilknytningtype.MIDLERTIDIG))
+            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
             .erDagligOppfolging(false)
             .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
             .build();
@@ -1751,7 +1751,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("2")
             .sektor(tilknyttetRessurs.sektor())
-            .orgtilknytningType(Optional.of(Tilknytningtype.MIDLERTIDIG))
+            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
             .erDagligOppfolging(false)
             .gyldigFom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().orElseThrow().plusDays(1))
             .gyldigTom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(gyldigTom -> gyldigTom.plusMonths(1)))
