@@ -8,7 +8,6 @@ import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
-import no.nav.nom.apps.api.orgtilknytning.api.email.OrgtilknytningEndretEmailService;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningSektorException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTilknytningtypeException;
@@ -77,7 +76,6 @@ public class OrgtilknytningRestService {
     private final RessursCommandService ressursCommandService;
     private final AuthorizedNavident authorizedNavident;
     private final AuthResolver authResolver;
-    private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
     private final MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
     private final Unleash unleash;
 
@@ -88,7 +86,7 @@ public class OrgtilknytningRestService {
         RessursStateRepository ressursStateRepository,
         NomMastered nomMastered,
         AuthorizedNavident authorizedNavident, AuthResolver authResolver,
-        OrgtilknytningEndretEmailService orgtilknytningEndretEmailService, MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService, Unleash unleash
+        MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService, Unleash unleash
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
@@ -97,7 +95,6 @@ public class OrgtilknytningRestService {
         this.nomMastered = nomMastered;
         this.authorizedNavident = authorizedNavident;
         this.authResolver = authResolver;
-        this.orgtilknytningEndretEmailService = orgtilknytningEndretEmailService;
         this.masseflyttOrgtilknytningerService = masseflyttOrgtilknytningerService;
         this.unleash = unleash;
     }
@@ -263,6 +260,18 @@ public class OrgtilknytningRestService {
         validateOrgtilknytningHasSektor(oppdaterOrgtilknytningerForRessursRequest);
         validateOrgtilknytningHasTilknytningtype(oppdaterOrgtilknytningerForRessursRequest);
         validateOrgtilknytningerHasNoActiveAndSektorAndTilknytningDuplicates(oppdaterOrgtilknytningerForRessursRequest);
+
+        validateOrgtilknytningTypeSektorCombination(oppdaterOrgtilknytningerForRessursRequest);
+    }
+
+    private void validateOrgtilknytningTypeSektorCombination(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
+        oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(endreOrgtilknytningRequest ->
+            validateOrgtilknytningTypeSektorCombination(endreOrgtilknytningRequest.tilknytningtype(), endreOrgtilknytningRequest.sektor())
+        );
+
+        oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(nyeOrgtilknytningRequest ->
+            validateOrgtilknytningTypeSektorCombination(nyeOrgtilknytningRequest.tilknytningtype(), nyeOrgtilknytningRequest.sektor())
+        );
     }
 
     private void validateOrgtilknytningHasSektor(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
