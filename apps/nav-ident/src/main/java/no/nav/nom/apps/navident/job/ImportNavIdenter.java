@@ -94,14 +94,24 @@ public class ImportNavIdenter {
     public void importTestNavIdent(String importLine, boolean kunLes) {
         log.debug(LogConfig.SECURE_LOGS, "line: {}", importLine);
         var kolonner = importLine.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1); // Split på komma, ignorer komma i "
+
+        // initialize
+        var navIdent = "";
+        var personIdent = "";
+        var identType = IdentType.STANDARD; // by default
+
         if (kolonner.length < 3) {
             log.error(LogConfig.SECURE_LOGS, "importLine kan ikke splittes på ',': {}", importLine);
             return;
+        } else if (kolonner.length == 3) {
+            // CSV fil innholder navident, personident, ident_type
+            navIdent = kolonner[0];
+            personIdent = kolonner[1];
+            identType = IdentType.valueOf(kolonner[2]);
+        } else {
+            navIdent = kolonner[0];
+            personIdent = kolonner[4];
         }
-        var navIdent = kolonner[0];
-        var personIdent = kolonner[4];
-        var status = kolonner[7];
-        var sektor = kolonner[8];
 
         if (navIdent.length() == 0) {
             log.error(LogConfig.SECURE_LOGS, "Lest navIdent '{}' fra importlinje er tom: {}", navIdent, importLine);
@@ -145,7 +155,7 @@ public class ImportNavIdenter {
             .payload(
                 EventPayload.builder()
                     .navident(navIdent)
-                    .identType(IdentType.STANDARD)
+                    .identType(identType)
                     .personid(personIdent)
                     .build()
             ).build();
