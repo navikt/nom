@@ -313,7 +313,7 @@ app:
           - EXTENDED_READONLY
   orgenhet:
     vikafossenId: ru151s
-    linjeenhetene: me177r,su645c,hu797w,tu734a
+    linjeenhetene: me177r,su645c,ju219d,tu734a
   google-storage-bucket-name:
     missing-ot: no-nav-org-dev-missing-orgtilnytninger-storage-bucket
     missing-ekstern-sluttdato: remedy-ressurs-sluttdato
@@ -481,7 +481,7 @@ app:
         scopes: ["READONLY", "EXTENDED_READONLY"]
 
   orgenhet:
-    linjeenhetene: ry630r,ky110z,se232x,ne994m
+    linjeenhetene: ry630r,te464t,se232x,ne994m
     vikafossenId: ru664y
   google-storage-bucket-name:
     missing-ot: no-nav-org-prod-missing-orgtilnytninger-storage-bucket
