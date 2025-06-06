@@ -33,13 +33,13 @@ class OmadaUttrekkTest {
 
     private static Stream<Arguments> privattelefon_varianter_input() {
         return Stream.of(
-            Arguments.of("12345678", "4712345678"),
-            Arguments.of("12 34 56 78", "4712345678"),
-            Arguments.of("123 45 678", "4712345678"),
-            Arguments.of("+3512345678", "3512345678"),
-            Arguments.of("+4712345678", "4712345678"),
-            Arguments.of("4712345678", "4712345678"),
-            Arguments.of("47345678", "4747345678")
+            Arguments.of("12345678", "+4712345678"),
+            Arguments.of("12 34 56 78", "+4712345678"),
+            Arguments.of("123 45 678", "+4712345678"),
+            Arguments.of("+3512345678", "+3512345678"),
+            Arguments.of("+4712345678", "+4712345678"),
+            Arguments.of("4712345678", "+4712345678"),
+            Arguments.of("47345678", "+4747345678")
         );
     }
 }

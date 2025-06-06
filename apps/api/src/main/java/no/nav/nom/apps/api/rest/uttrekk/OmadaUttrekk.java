@@ -336,18 +336,16 @@ public class OmadaUttrekk {
     }
 
     String formaterTelefonnummer(String telefon) {
+        telefon = telefon.replace(" ", "");
+
         if (telefon.startsWith("+")) {
-            return telefon
-                .replaceAll("\\s", "")
-                .replaceAll("\\+", "");
-        } else if (telefon.startsWith("47")) {
-            if (telefon.length() == 10) {
-                return telefon.replaceAll("\\s", "");
-            } else {
-                return "47" + telefon.replaceAll("\\s", "");
-            }
+            return telefon;
         } else {
-            return "47" + telefon.replaceAll("\\s", "");
+            if (telefon.length() == 10) {
+                return "+" + telefon;
+            } else {
+                return "+47" + telefon;
+            }
         }
     }
 
