@@ -6,17 +6,27 @@ public record EmailMessage(
         Message message
 ) {
     public EmailMessage(String subject, String content, List<String> recipientsEmailAddresses) {
-        this(new Message(subject, recipientsEmailAddresses, new Message.Body("Text", content)));
+        this(new Message(subject, recipientsEmailAddresses, new Message.Body("Text", content), List.of()));
+    }
+
+    public EmailMessage(String subject, String content, List<String> recipientsEmailAddresses, List<String> ccRecipientsEmailAddresses) {
+        this(new Message(subject, recipientsEmailAddresses, new Message.Body("Text", content), ccRecipientsEmailAddresses));
     }
 
     public record Message(
             String subject,
             Body body,
-            List<Recipient> toRecipients
+            List<Recipient> toRecipients,
+            List<Recipient> ccRecipients
     ) {
 
-        public Message(String subject, List<String> recipientsEmailAddresses, Body body) {
-            this(subject, body, recipientsEmailAddresses.stream().map(Recipient::new).toList());
+        public Message(String subject, List<String> recipientsEmailAddresses, Body body, List<String> ccRecipientsEmailAddresses) {
+            this(
+                subject,
+                body,
+                recipientsEmailAddresses.stream().map(Recipient::new).toList(),
+                ccRecipientsEmailAddresses.stream().map(Recipient::new).toList()
+            );
         }
 
         public record Body(
