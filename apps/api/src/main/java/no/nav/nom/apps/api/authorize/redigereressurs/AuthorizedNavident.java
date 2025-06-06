@@ -74,6 +74,7 @@ public class AuthorizedNavident {
     private final String nomWriteDelegertAdGroup;
     private final String nomWriteLederAdGroup;
     // Per leder for alle orgenheter på ARBEIDSOMRÅDE nivå og nedover. For den enkelte leder er alle under-nivåer lagt til.
+    //   map <leder navident> -> Set<orgenhet-id>
     Map<String, HashSet<String>> lederForOrgenhetSomKanRedigere = new ConcurrentHashMap<>();
 
     public AuthorizedNavident(
