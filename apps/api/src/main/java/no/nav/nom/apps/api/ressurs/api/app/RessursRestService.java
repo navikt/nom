@@ -104,6 +104,7 @@ public class RessursRestService {
     private final FysiskBrukerstedService fysiskBrukerstedService;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgtilknytningService orgtilknytningService;
+
     @Value("${app.orgenhet.vikafossenId}")
     private String vikafossenOrgEnhetId;
 
@@ -720,6 +721,9 @@ public class RessursRestService {
     private void validateOrgenhetForIdenttype(IdentType identType, String orgenhetId) {
         if (identType == IdentType.VIKAFOSSEN && !Objects.equals(orgenhetId, vikafossenOrgEnhetId)) {
             throw new IllegalArgumentException("Vikafossen identtype kan kun opprettes på Vikafossen orgenhet (" + vikafossenOrgEnhetId + ")");
+        }
+        if (Objects.equals(orgenhetId, vikafossenOrgEnhetId) && identType != IdentType.VIKAFOSSEN) {
+            throw new IllegalArgumentException("Vikafossen orgenhet kan kun ha identer av Vikafossen identtype");
         }
     }
 

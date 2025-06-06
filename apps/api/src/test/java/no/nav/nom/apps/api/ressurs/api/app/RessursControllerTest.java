@@ -62,6 +62,7 @@ import static java.util.Collections.emptySet;
 import static no.nav.nom.apps.api.common.TestData.orgEnhetState;
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static no.nav.nom.apps.api.common.TestData.ressursState;
+import static no.nav.nom.contract.nom.IdentType.ROBOT;
 import static no.nav.nom.contract.nom.IdentType.STANDARD;
 import static no.nav.nom.contract.nom.IdentType.VIKAFOSSEN;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -1745,6 +1746,121 @@ public class RessursControllerTest extends RestTestBase {
         verify(orgtilknytningCommandService, times(1)).opprettOrgtilknytning(any());
         verify(orgtilknytningCommandService, times(1)).endreDagligOppfolgingOrgtilknytning(any(), any());
     }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Should reject create Standard ressurs vikafossen orgenhet")
+    void should_reject_create_standard_ressurs_in_vikafossen_orgenhet() {
+        String personident = "HEMMELIG";
+        String navident = "R123456";
+        val navn = NavnDTO.builder()
+            .fornavn("Anonym")
+            .etternavn("Standard")
+            .build();
+
+        when(nikClient.opprettNavidentOnBehalfOfUser(
+            eq(OpprettNavidentRequest.builder()
+                .personid(personident)
+                .identPrefix(navn.getEtternavn().substring(0, 1))
+                .identType(STANDARD.name())
+                .build())
+        )).thenReturn(ResponseEntity.ok(
+            OpprettNavidentResponse.builder()
+                .navident(navident)
+                .build()));
+
+        when(pdlClient.hentPerson(eq(personident))).thenReturn(Optional.empty());
+
+        var request = opprettRessursRequest().toBuilder()
+            .personident(personident)
+            .visningsfornavn(navn.getFornavn())
+            .visningsmellomnavn(navn.getMellomnavn())
+            .visningsetternavn(navn.getEtternavn())
+            .primaryTelefonnummer(null)
+            .sektor(Sektor.NAV_STATLIG)
+            .startDato(LocalDate.now())
+            .sluttDato(Optional.empty())
+            .tilknytningtype(Tilknytningtype.FAST)
+            .ansettelsesType(null)
+            .fysiskBrukerstedNr("")
+            .orgEnhetId("dummyVikafossenId")
+            .identType(STANDARD)
+            .build();
+
+        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+            .thenReturn(Set.of(request.fysiskBrukerstedNr()));
+
+        when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
+            .thenReturn(ressursState());
+
+        postOpprettRessursRequest(
+            testToken.nomWriteVikafossenGroupAndNomUiAzp(),
+            request
+        )
+            .expectStatus().isBadRequest();
+
+
+        verifyNoInteractions(ressursCommandService);
+        verifyNoInteractions(orgtilknytningCommandService);
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Should reject create Robot ressurs vikafossen orgenhet")
+    void should_reject_create_robot_ressurs_in_vikafossen_orgenhet() {
+        String personident = "HEMMELIG";
+        String navident = "R123456";
+        val navn = NavnDTO.builder()
+            .fornavn("Mr.")
+            .etternavn("Robot")
+            .build();
+
+        when(nikClient.opprettNavidentOnBehalfOfUser(
+            eq(OpprettNavidentRequest.builder()
+                .personid(personident)
+                .identPrefix(navn.getEtternavn().substring(0, 1))
+                .identType(ROBOT.name())
+                .build())
+        )).thenReturn(ResponseEntity.ok(
+            OpprettNavidentResponse.builder()
+                .navident(navident)
+                .build()));
+
+        when(pdlClient.hentPerson(eq(personident))).thenReturn(Optional.empty());
+
+        var request = opprettRessursRequest().toBuilder()
+            .personident(personident)
+            .visningsfornavn(navn.getFornavn())
+            .visningsmellomnavn(navn.getMellomnavn())
+            .visningsetternavn(navn.getEtternavn())
+            .primaryTelefonnummer(null)
+            .sektor(Sektor.NAV_STATLIG)
+            .startDato(LocalDate.now())
+            .sluttDato(Optional.empty())
+            .tilknytningtype(Tilknytningtype.FAST)
+            .ansettelsesType(null)
+            .fysiskBrukerstedNr("")
+            .orgEnhetId("dummyVikafossenId")
+            .identType(ROBOT)
+            .build();
+
+        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+            .thenReturn(Set.of(request.fysiskBrukerstedNr()));
+
+        when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
+            .thenReturn(ressursState());
+
+        postOpprettRessursRequest(
+            testToken.nomWriteRobotGroupAndNomUiAzp(),
+            request
+        )
+            .expectStatus().isBadRequest();
+
+
+        verifyNoInteractions(ressursCommandService);
+        verifyNoInteractions(orgtilknytningCommandService);
+    }
+
 
     @Test
     @SneakyThrows

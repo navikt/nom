@@ -38,6 +38,7 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -79,6 +80,9 @@ public class OrgtilknytningRestService {
     private final AuthResolver authResolver;
     private final MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
     private final Unleash unleash;
+
+    @Value("${app.orgenhet.vikafossenId}")
+    private String vikafossenOrgEnhetId;
 
     public OrgtilknytningRestService(
         OrgtilknytningStateRepository orgtilknytningStateRepository,
@@ -127,7 +131,7 @@ public class OrgtilknytningRestService {
     // Påser at det ikke sendes unødvendige endring-events (endring-events som ikke gir ny verdi til state)
     // TODO: Valider at det til en hver tid finnes en aktiv daglig oppfolging
     public void oppdaterOrgtilknytningerForRessurs(String navident, OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
-        validateOppdaterOrgtilknytningerForRessursRequest(oppdaterOrgtilknytningerForRessursRequest, authResolver.kanRedigereRessurs(navident));
+        validateOppdaterOrgtilknytningerForRessursRequest(oppdaterOrgtilknytningerForRessursRequest, authResolver.kanRedigereRessurs(navident), navident);
         var tilknyttetRessurs = ressursStateRepository.findByNavident(navident)
             .orElseThrow(() -> RessursNotFoundException.navident(navident));
 
@@ -250,9 +254,9 @@ public class OrgtilknytningRestService {
     }
 
     private void validateOppdaterOrgtilknytningerForRessursRequest(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
-                                                                   boolean isLeder) {
+                                                                   boolean isLoggedInUserLederForNavident, String navident) {
         if (!unleash.isEnabled(BRUK_NY_TILGANGSVALIDERING)) {
-            validateLederKanOppdatereOrgtilknytninger(oppdaterOrgtilknytningerForRessursRequest, isLeder);
+            validateLederKanOppdatereOrgtilknytninger(oppdaterOrgtilknytningerForRessursRequest, isLoggedInUserLederForNavident);
         }
         validateEndreOrgtilknytningUnderToMaaneder(oppdaterOrgtilknytningerForRessursRequest);
         validateChronologicalDates(oppdaterOrgtilknytningerForRessursRequest);
@@ -263,6 +267,8 @@ public class OrgtilknytningRestService {
         validateOrgtilknytningerHasNoActiveAndSektorAndTilknytningDuplicates(oppdaterOrgtilknytningerForRessursRequest);
 
         validateOrgtilknytningTypeSektorCombination(oppdaterOrgtilknytningerForRessursRequest);
+
+        validateOrgtilknytningForVikafossen(oppdaterOrgtilknytningerForRessursRequest, navident);
     }
 
     private void validateOrgtilknytningTypeSektorCombination(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
@@ -435,6 +441,21 @@ public class OrgtilknytningRestService {
                 gyldigFom,
                 gyldigTom
             );
+        }
+    }
+
+    private void validateOrgtilknytningForVikafossen(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest, String navident) {
+        var ressurs = ressursStateRepository.findByNavident(navident) .orElseThrow(() -> RessursNotFoundException.navident(navident));
+        var isVikafossen = ressurs.identType().equals(IdentType.VIKAFOSSEN);
+
+        if (isVikafossen) {
+            if (oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().stream().anyMatch( nye -> !nye.orgEnhetId().equals(vikafossenOrgEnhetId))) {
+                throw InvalidOppdaterOrgtilknytningerForRessursRequestException.vikafossenIdentPaaFeilEnhet();
+            }
+        } else {
+            if (oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().stream().anyMatch( nye -> nye.orgEnhetId().equals(vikafossenOrgEnhetId))) {
+                throw InvalidOppdaterOrgtilknytningerForRessursRequestException.ikkeVikafossenIdentPaaVikafossenEnhet(ressurs.identType().toString());
+            }
         }
     }
 

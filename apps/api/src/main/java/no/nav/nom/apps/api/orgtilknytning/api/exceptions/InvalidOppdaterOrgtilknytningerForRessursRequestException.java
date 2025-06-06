@@ -51,4 +51,17 @@ public class InvalidOppdaterOrgtilknytningerForRessursRequestException extends R
             "Duplikat orgtilknytning for orgenhet %s (%s)".formatted(orgenhetNavn, orgenhetId)
         );
     }
+
+    public static InvalidOppdaterOrgtilknytningerForRessursRequestException vikafossenIdentPaaFeilEnhet() {
+        return new InvalidOppdaterOrgtilknytningerForRessursRequestException(
+            "Ressursen er av type VIKAFOSSEN og kan da kun ha orgtilknytning til Vikafossen enheten"
+        );
+    }
+
+    public static InvalidOppdaterOrgtilknytningerForRessursRequestException ikkeVikafossenIdentPaaVikafossenEnhet(String ressurstype) {
+        return new InvalidOppdaterOrgtilknytningerForRessursRequestException(
+            "Ressursen er av type {} og kan da ikke ha orgtilknytning til Vikafossen enheten"
+        );
+    }
+
 }
