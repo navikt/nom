@@ -47,7 +47,6 @@ export const tilknytningstyperEksterne = [
   Tilknytningtype.KONSULENT,
   Tilknytningtype.STUDENT,
   Tilknytningtype.ARBEIDSTRENING,
-  Tilknytningtype.JOBBSPESIALIST,
   Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER,
   Tilknytningtype.ANNET,
 ];
