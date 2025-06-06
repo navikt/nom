@@ -68,7 +68,7 @@ public class TelefonService {
     public List<Telefon> fetchPrivattelefoner() {
         return ressursStateRepository.findAllActiveRessurser()
                 .values().stream()
-                .filter(ressurs -> ressurs.primaryTelefonnummer().isPresent())
+                .filter(ressurs -> ressurs.primaryTelefonnummer().isPresent() && !ressurs.primaryTelefonnummer().get().isBlank())
                 .map(r -> new Telefon(r.navident(), r.primaryTelefonnummer().get(), TelefonType.PRIVAT_TELEFON))
                 .toList();
     }

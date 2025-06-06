@@ -74,6 +74,19 @@ class TelefonServiceTest {
     }
 
     @Test
+    void skal_ikke_ta_med_privattelefonnr_som_er_tom_streng() {
+        var ressurser = Map.of(
+            NAV_IDENT_A, ressursState(NAV_IDENT_A, PRIVATTELEFON_A),
+            NAV_IDENT_B, ressursState(NAV_IDENT_B, "")
+        );
+        when(ressursStateRepositoryMock.findAllActiveRessurser()).thenReturn(ressurser);
+
+        var ressurserMedTelefon = telefonService.fetchPrivattelefoner();
+
+        assertThat(ressurserMedTelefon.size()).isEqualTo(1);
+    }
+
+    @Test
     void should_combine_phone_numbers_and_return_a_map_with_lists_of_sorted_numbers() {
         var telefoner = List.of(
                 DvhTelefon.builder().navIdent(NAV_IDENT_A).nummer(KONTORTELEFON_A).type(KONTORTELEFON).beskrivelse("Bla, bla").build(),
