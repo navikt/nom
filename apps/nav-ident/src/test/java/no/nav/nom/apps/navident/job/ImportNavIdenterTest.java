@@ -19,6 +19,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -207,6 +208,24 @@ A867804,HAE4403,Horisontal,Abakus,27469208996,4403,NAV ARBEID OG YTELSER KRISTIA
         InputStream inputStream = getClass().getResourceAsStream("/NIK_identType-test.txt");
         Map<String, String>  res = importNavIdenter.readIdentTypeFromResourceFile(inputStream);
         assertTrue(res.size() == 20);
+    }
+
+
+
+    @Test
+    @SneakyThrows
+    void test_importTestNavIdentFromResourceFile() {
+        InputStream inputStream = getClass().getResourceAsStream("/IdentType_DIFF-test.csv");
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+
+        importNavIdenter.importFromReader(br, false);
+
+        verify(producer, times(20)).send(any(), eventCaptor.capture());
+        verify(sourceEventRepository, times(20)).save(any());
+
+        assertEquals( "R160993", eventCaptor.getValue().getPayload().getNavident());
+        assertEquals( "2300RPARob1", eventCaptor.getValue().getPayload().getPersonid());
+        assertEquals(IdentType.ROBOT, eventCaptor.getValue().getPayload().getIdentType());
     }
 
 }
