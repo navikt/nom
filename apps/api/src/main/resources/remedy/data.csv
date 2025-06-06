@@ -51,7 +51,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 038700;0387;ORGNIV3;Oslo Tiltak;Beholdt;;;JA;038700;ORGNIV3;leggInn;
 039900;0391;ORGNIV3;Oslo Arbeidslivssenter;Beholdt;;;JA;039900;ORGNIV3;leggInn;
 039300;0393;ORGNIV3;Oslo Oppfølging Utland;Beholdt;;;JA;039300;ORGNIV3;leggInn;
-039610;0396;ORGNIV3;Arbeid og helse Oslo;Beholdt;;;JA;039610;ORGNIV3;leggInn;
+039020;0396;ORGNIV3;Oslo tjenesteutvikling;Beholdt;;;JA;039020;ORGNIV3;ne175a;06.06.2025 Oppdatert til ny enhet sammen med enheten. 
 048010;0400;ORGNIV3;Innlandet Region;Opp til ORGNIV2;R04;;JA;R04;ORGNIV2;leggInn;
 040200;0402;ORGNIV3;Kongsvinger;Beholdt;;;JA;040200;ORGNIV3;leggInn;
 040300;0403;ORGNIV3;Hamar;Beholdt;;;JA;040300;ORGNIV3;leggInn;
