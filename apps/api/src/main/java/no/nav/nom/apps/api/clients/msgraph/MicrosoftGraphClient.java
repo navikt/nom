@@ -46,8 +46,9 @@ public class MicrosoftGraphClient {
 
     public Mono<Void> sendEmail(EmailMessage emailMessage) {
         if (msGraphClientProperties.sendEmail()) {
-            logger.info("Attempting to send email: {}, url: {}",
+            logger.info("Attempting to send email: to({}), cc({}), url: {}",
                     emailMessage.message().toRecipients(),
+                    emailMessage.message().ccRecipients(),
                     msGraphClientProperties.baseUrl() + EMAIL_URI_PATH);
             return webClient.post()
                     .uri(EMAIL_URI_PATH)
