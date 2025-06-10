@@ -50,6 +50,10 @@
         <poi-ooxml.version>5.4.1</poi-ooxml.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <postgresql.version>42.7.6</postgresql.version>
+        <microsoft-graph.version>6.40.0</microsoft-graph.version>
+        <azure-identity.version>1.16.1</azure-identity.version>
+        <caffeine.version>3.2.0</caffeine.version>
+
 
         <commons-io.version>2.19.0</commons-io.version> <!-- versjonskonflikt og https://github.com/navikt/nom/security/dependabot/172 -->
     </properties>
