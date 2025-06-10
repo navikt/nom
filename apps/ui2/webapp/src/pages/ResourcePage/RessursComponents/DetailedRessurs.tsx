@@ -234,7 +234,7 @@ function OrgTilknytningSection({
       case IdentType.ROBOT: {
         return (
           (!sluttetOverToMndSiden && hasRobotAccess) ||
-          (hasWriteAccess && hasWriteAccessForRessurs) ||
+          (!harSluttet && hasWriteAccess) ||
           tidligereLeder ||
           hasAdminAccess
         );
@@ -249,7 +249,7 @@ function OrgTilknytningSection({
       case IdentType.UTENLANDSK_KONSULENT: {
         return (
           (!sluttetOverToMndSiden && hasUtenlandskKonsulentAccess) ||
-          (hasWriteAccess && hasWriteAccessForRessurs) ||
+          (!harSluttet && hasWriteAccess) ||
           tidligereLeder ||
           hasAdminAccess
         );
@@ -864,7 +864,7 @@ function EditOrgtilknytningerButton({
     );
   }
 
-  if (harSluttet && kanGjenopprette) {
+  if (!editPersonopplysninger && harSluttet && kanGjenopprette) {
     return (
       <Button
         icon={<PencilIcon fontSize="1.5rem" />}

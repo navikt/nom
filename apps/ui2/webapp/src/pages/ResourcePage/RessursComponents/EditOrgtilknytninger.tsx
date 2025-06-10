@@ -114,10 +114,12 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
   const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
 
   if (
-    !hasAdminOrWriteAccess &&
-    !hasRobotAccess &&
-    !hasVikafossenAccess &&
-    !hasUtenlandskKonsulentAccess
+    (ressurs.identType === IdentType.VIKAFOSSEN && !hasVikafossenAccess) ||
+    (ressurs.identType !== IdentType.VIKAFOSSEN &&
+      !hasAdminOrWriteAccess &&
+      !hasVikafossenAccess &&
+      !hasRobotAccess &&
+      !hasUtenlandskKonsulentAccess)
   ) {
     return;
   }

@@ -80,6 +80,21 @@ import {
 } from "~/utils";
 
 export function CreateSpecialResourcePage() {
+  const hasAdminAccess = useHasAdminAccess();
+
+  const hasRobotAccess = useHasRobotAccess();
+  const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
+  const hasVikafossenAccess = useHasVikafossenAccess();
+
+  if (
+    !hasAdminAccess &&
+    !hasRobotAccess &&
+    !hasUtenlandskKonsulentAccess &&
+    !hasVikafossenAccess
+  ) {
+    return;
+  }
+
   return (
     <>
       <PageBanner text="Opprett annen medarbeider" />
