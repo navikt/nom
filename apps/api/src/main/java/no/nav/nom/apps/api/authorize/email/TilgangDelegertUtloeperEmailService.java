@@ -69,11 +69,18 @@ public class TilgangDelegertUtloeperEmailService {
             return;
         }
 
-        log.info("Leader pod: Preparing to send email about expiring delegert leder");
-        delegertLederStateRepository.getAll()
-            .stream()
-            .filter(it -> expiresInExactlySpecifiedWeeks(it, 5) || expiresInExactlySpecifiedWeeks(it, 2))
-            .forEach(this::sendEmail);
+        var alleAktiveDelegeringer = delegertLederStateRepository.getAll().stream().filter(LederTilgangState::isActive).toList();
+        var relevanteDelegeringer = alleAktiveDelegeringer.stream()
+            .filter(delegering -> expiresInExactlySpecifiedWeeks(delegering, 5) || expiresInExactlySpecifiedWeeks(delegering, 2))
+            .toList();
+
+        log.info(
+            "Leader pod: Preparing to send email about expiring delegert leder, for {} out of {} active delegeringer that will expire in 2 or 5 weeks",
+            relevanteDelegeringer.size(),
+            alleAktiveDelegeringer.size()
+        );
+
+        relevanteDelegeringer.forEach(this::sendEmail);
     }
 
     private void sendEmail(LederTilgangState expiringDelegering) {
