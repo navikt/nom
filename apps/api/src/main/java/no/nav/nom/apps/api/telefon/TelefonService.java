@@ -107,7 +107,7 @@ public class TelefonService {
         2. NAV_KONTOR_TELEFON
         3. PRIVAT_TELEFON
      */
-    private static Comparator<Telefon> telefonComparator() {
+    public static Comparator<Telefon> telefonComparator() {
         return (o1, o2) -> {
             if (o1.type().equals(o2.type())) return 0;
             if (o1.type().equals(TelefonType.NAV_TJENESTE_TELEFON)) return -1;

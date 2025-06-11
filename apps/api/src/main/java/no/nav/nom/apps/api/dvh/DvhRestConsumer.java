@@ -34,6 +34,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -244,15 +245,7 @@ public class DvhRestConsumer {
         try {
             var tlfRader = dvhOrdsService.getTelefoner();
             if (unleash.isEnabled("nom-api.ny-dvh-telefon-persistering")) {
-                List<DvhTelefon> dvhTelefonerMedEndring = new ArrayList<>();
-                tlfRader.forEach(dvhTelefon -> {
-                    var prioritertTelefon = telefonService.getRessursStateTelefonnummer(dvhTelefon.getNavIdent());
-                    if (isNull(prioritertTelefon)
-                        || !prioritertTelefon.nummer().equals(dvhTelefon.getNummer())
-                        || !compareTelefonType(dvhTelefon.getType(), prioritertTelefon.type())) {
-                        dvhTelefonerMedEndring.add(dvhTelefon);
-                    }
-                });
+                List<DvhTelefon> dvhTelefonerMedEndring = getDvhTelefoner(tlfRader);
 
                 if (!dvhTelefonerMedEndring.isEmpty()) telefonService.oppdaterRessursStateJobbtelefonBulk(dvhTelefonerMedEndring);
             }
@@ -261,6 +254,26 @@ public class DvhRestConsumer {
         } catch (Exception e) {
             log.error("Failure loading tlf data from DVH", e);
         }
+    }
+
+    private List<DvhTelefon> getDvhTelefoner(List<DvhTelefon> tlfRader) {
+        List<DvhTelefon> dvhTelefonerMedEndring = new ArrayList<>();
+        var sortedTlfRader = tlfRader.stream().collect(Collectors.groupingBy(DvhTelefon::getNavIdent));
+        sortedTlfRader.forEach((navident, dvhTelefoner) -> {
+            if (dvhTelefoner.size() > 1) {
+                if (dvhTelefoner.stream().allMatch(dvhTelefon -> dvhTelefon.getType().equals(DvhTelefon.DvhTelefonType.TJENESTETELEFON))) dvhTelefoner.sort(Comparator.comparing(DvhTelefon::getNummer));
+                else if (dvhTelefoner.stream().allMatch(dvhTelefon -> dvhTelefon.getType().equals(DvhTelefon.DvhTelefonType.KONTORTELEFON))) dvhTelefoner.sort(Comparator.comparing(DvhTelefon::getNummer));
+                else dvhTelefoner.sort(Comparator.comparing((DvhTelefon t) -> t.getType() != DvhTelefon.DvhTelefonType.TJENESTETELEFON));
+            }
+
+            var ressursStateTelefonnummer = telefonService.getRessursStateTelefonnummer(navident);
+            if (isNull(ressursStateTelefonnummer)
+                || !ressursStateTelefonnummer.nummer().equals(dvhTelefoner.getFirst().getNummer())
+                || !compareTelefonType(dvhTelefoner.getFirst().getType(), ressursStateTelefonnummer.type())) {
+                dvhTelefonerMedEndring.add(dvhTelefoner.getFirst());
+            }
+        });
+        return dvhTelefonerMedEndring;
     }
 
     public boolean loadLedereAndOrganiseringerFromDvh() {
