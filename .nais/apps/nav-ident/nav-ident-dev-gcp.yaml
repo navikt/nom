@@ -109,6 +109,8 @@ spec:
     outbound:
       rules:
         - application: nav-ident-redis
+        - application: logging
+          namespace: nais-system
       external:
         - host: pdl-api.dev-fss-pub.nais.io
         - host: teamorg-unleash-api.nav.cloud.nais.io

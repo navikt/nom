@@ -77,7 +77,7 @@ public class NavidentController {
     )
     @PostMapping(value = "/create")
     public ResponseEntity<NavidentResponseDTO> createNavident(@RequestBody NavidentRequestDTO request) {
-        logger.info(LogConfig.SECURE_LOGS, "Navident bestilt for: {}", request);
+        logger.info(LogConfig.TEAM_LOGS, "Navident bestilt for: {}", request);
         val bestilling = identService.bestillIdent(request.getPersonid(), request.getIdentType(), prefixValidator(request.getIdentPrefix()));
         val response = NavidentResponseDTO.builder()
             .navident(bestilling.getBody().getNavident())
@@ -147,12 +147,12 @@ public class NavidentController {
             Navident eksisterende = navidenter.get(navident);
 
             if (!eksisterende.getGjeldendePersonid().equals(personid)) {
-                logger.info(LogConfig.SECURE_LOGS, "Angitt personid er ikke det som er gjeldende. Gjeldende er: {}", eksisterende.getGjeldendePersonid());
+                logger.info(LogConfig.TEAM_LOGS, "Angitt personid er ikke det som er gjeldende. Gjeldende er: {}", eksisterende.getGjeldendePersonid());
                 return ResponseEntity.badRequest().body("Kan angitt personid er ikke det som er gjeldende for navidenten.");
             }
         }
 
-        logger.info(LogConfig.SECURE_LOGS, "Sletter Navident/personid: {}/{}", navident, personid);
+        logger.info(LogConfig.TEAM_LOGS, "Sletter Navident/personid: {}/{}", navident, personid);
 
         eventSourceProducer.produceSlettEvent(navident, identType, personid);
 
