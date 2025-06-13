@@ -38,6 +38,10 @@ spec:
         - application: org-token-tool
           namespace: org
           cluster: prod-gcp
+    outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
   webproxy: true
   ingresses:
     - https://nom-proxy.intern.nav.no

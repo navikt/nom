@@ -45,6 +45,10 @@ spec:
         - application: org-token-tool
           namespace: org
           cluster: dev-gcp
+    outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
   webproxy: true
   ingresses:
     - https://nom-proxy.dev-fss-pub.nais.io
