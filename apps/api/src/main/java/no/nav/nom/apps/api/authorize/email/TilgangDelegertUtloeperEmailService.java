@@ -132,18 +132,17 @@ public class TilgangDelegertUtloeperEmailService {
         }
     }
 
-
     private boolean expiresInExactlySpecifiedWeeks(LederTilgangState state, int weeks) {
-        return state.isActive() && state.gyldigTom().minusWeeks(weeks).equals(LocalDate.now());
+        return state.isActive() && Optional.ofNullable(state.gyldigTom())
+                .map(gyldigTom -> gyldigTom.minusWeeks(weeks).equals(LocalDate.now()))
+                .orElse(false);
     }
-
 
     private String generateEmailBody(EmailTemplateVariables emailTemplateVariables) throws IOException, TemplateException {
         var stringWriter = new StringWriter();
         freemarkerConfig.getTemplate(DELEGERT_TILGANG_UTLOEPER_TEMPLATE).process(emailTemplateVariables, stringWriter);
         return stringWriter.getBuffer().toString();
     }
-
 
     private class EmailTemplateVariables extends HashMap<String, String> {
         EmailTemplateVariables(LederTilgangState lederTilgangState, String undersottName) {
