@@ -40,3 +40,10 @@ merged_df.to_csv("nom_rdbms_data_db_public_ressurs-merged.csv", index=False, hea
 print(f"Total entries in dev file: {len(dev_df)}")
 print(f"Total entries in prod file: {len(prod_df)}")
 print(f"Total entries in merged file: {len(merged_df)}")
+
+# Find and Remove duplicates
+duplicates = merged_df[merged_df.duplicated(subset=merged_df.columns[0], keep=False)]
+print(f"Duplicates entries in merged file: {duplicates}")
+merged_df = merged_df.drop_duplicates()
+print(f"Total entries in final merged file: {len(merged_df)}")
+
