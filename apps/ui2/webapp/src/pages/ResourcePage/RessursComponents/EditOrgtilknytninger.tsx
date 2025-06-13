@@ -108,13 +108,16 @@ import {
 
 export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
   const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
+  const hasAdminAccess = useHasAdminAccess();
 
   const hasRobotAccess = useHasRobotAccess();
   const hasVikafossenAccess = useHasVikafossenAccess();
   const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
 
   if (
-    (ressurs.identType === IdentType.VIKAFOSSEN && !hasVikafossenAccess) ||
+    (ressurs.identType === IdentType.VIKAFOSSEN &&
+      !hasVikafossenAccess &&
+      !hasAdminAccess) ||
     (ressurs.identType !== IdentType.VIKAFOSSEN &&
       !hasAdminOrWriteAccess &&
       !hasVikafossenAccess &&
