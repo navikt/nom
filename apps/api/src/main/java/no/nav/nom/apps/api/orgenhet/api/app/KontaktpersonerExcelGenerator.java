@@ -18,7 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 
 @Slf4j
 @Service
@@ -30,7 +30,7 @@ public class KontaktpersonerExcelGenerator {
     }
 
     public void generate(HttpServletResponse response, OrgEnhet orgEnhet, List<Ressurs> sortedRessurser) {
-        log.info(SECURE_LOGS, "Getting content info for ressurser: {}", sortedRessurser);
+        log.info(TEAM_LOGS, "Getting content info for ressurser: {}", sortedRessurser);
         log.info("Getting content info for {} ressurser", sortedRessurser.size());
         List<RessursKontaktinfo> kontaktinfoForRessurser;
 
@@ -39,7 +39,7 @@ public class KontaktpersonerExcelGenerator {
             kontaktinfoForRessurser = kontaktinfoClient
                 .getKontaktinfoForRessurser(sortedRessurser.stream().map(r -> r.state().navident()).toList(),
                     orgEnhet.id());
-            log.info(SECURE_LOGS, "Received kontaktinfo for this orgenhet: {}-{}", orgEnhet.id(), kontaktinfoForRessurser);
+            log.info(TEAM_LOGS, "Received kontaktinfo for this orgenhet: {}-{}", orgEnhet.id(), kontaktinfoForRessurser);
             log.info("Received {} kontaktinfo for this orgenhet: {}", kontaktinfoForRessurser.size(), orgEnhet.id());
         } catch (Exception e) {
             if (e instanceof AccessDeniedException) throw e;
@@ -60,7 +60,7 @@ public class KontaktpersonerExcelGenerator {
             // index -1 is for the header row
             addRow(sheet.createRow(rowcount++), null, null, -1);
 
-            log.info(SECURE_LOGS, "Generating excel for orgenhet {} with ressurser {}, and contantinfo {}", orgEnhet.id(), sortedRessurser, kontaktinfoForRessurser);
+            log.info(TEAM_LOGS, "Generating excel for orgenhet {} with ressurser {}, and contantinfo {}", orgEnhet.id(), sortedRessurser, kontaktinfoForRessurser);
             for (RessursKontaktinfo info : kontaktinfoForRessurser) {
 
                 Ressurs ressurs = ressursPerNavident.get(info.ressursNavident());

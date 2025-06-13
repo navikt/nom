@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
-import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Tag(name = "Remedy")
@@ -75,7 +75,7 @@ public class RemedyController {
     }
 
     public RessursDTO finnRessurs(String personident) {
-        log.info(SECURE_LOGS, "Finn ressurs request mottatt:\n{}", personident);
+        log.info(TEAM_LOGS, "Finn ressurs request mottatt:\n{}", personident);
 
         if (personident == null || personident.isBlank()) {
             log.error("Personident er tom");
@@ -88,7 +88,7 @@ public class RemedyController {
             .map(this::from);
 
         if (response.isPresent()) {
-            log.info(SECURE_LOGS, "Ressurs {} funnet med personident {}", response.get().getNavident(), personident);
+            log.info(TEAM_LOGS, "Ressurs {} funnet med personident {}", response.get().getNavident(), personident);
             return response.get();
         } else {
             log.debug("Forsøker å finne ressurs i PDL");
@@ -116,11 +116,11 @@ public class RemedyController {
     }
 
     public RessursDTO tryOpprettRessurs(OpprettRessursRequest request) {
-        log.info(SECURE_LOGS, "Opprett ressurs request mottatt:\n{}", request);
+        log.info(TEAM_LOGS, "Opprett ressurs request mottatt:\n{}", request);
         var funnetRessurs = ressursStateRepository.findByPersonident(request.getPersonident());
 
         if (funnetRessurs.isPresent()) {
-            log.debug(SECURE_LOGS, "Ressurs med personident {} finnes fra før", request.getPersonident());
+            log.debug(TEAM_LOGS, "Ressurs med personident {} finnes fra før", request.getPersonident());
             return funnetRessurs.map(this::from).get();
         }
 

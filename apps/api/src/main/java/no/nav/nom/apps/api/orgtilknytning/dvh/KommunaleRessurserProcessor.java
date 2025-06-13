@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 
 @Slf4j
 @Service
@@ -34,13 +34,13 @@ public class KommunaleRessurserProcessor {
     public Optional<OrgtilknytningState> process(DvhRessurs kommunalRessurs, List<StillingPeriode> stillingPerioder) {
         var eksisterendeOrgtilknytninger = orgtilknytningService.getByNavIdent(kommunalRessurs.getNavIdent());
 
-        log.debug(SECURE_LOGS, "Prosesserer kommunal ressurs {}\n{}", kommunalRessurs.getNavIdent(), detaljerToString(kommunalRessurs, stillingPerioder, eksisterendeOrgtilknytninger));
+        log.debug(TEAM_LOGS, "Prosesserer kommunal ressurs {}\n{}", kommunalRessurs.getNavIdent(), detaljerToString(kommunalRessurs, stillingPerioder, eksisterendeOrgtilknytninger));
 
         var aktiveEksisterendeOrgtilknytninger = eksisterendeOrgtilknytninger.stream().filter(PeriodeUtil::isCurrentPeriod).toList();
 
         if (aktiveEksisterendeOrgtilknytninger.size() == 0) {
             String fid = PrefixedUlidCreator.createTmpOrgtilknytningUlid();
-            log.debug(SECURE_LOGS, "Kommunal Ressurs {} har ingen eksisterende aktive orgtilknytninger. Lager en temporær som er basert på OrgenhetPaaRessurs.", kommunalRessurs.getNavIdent());
+            log.debug(TEAM_LOGS, "Kommunal Ressurs {} har ingen eksisterende aktive orgtilknytninger. Lager en temporær som er basert på OrgenhetPaaRessurs.", kommunalRessurs.getNavIdent());
 
             var orgenhetPaaRessurs = getOrgenhetPaaRessurs(kommunalRessurs);
             if (orgenhetPaaRessurs.isEmpty()) {

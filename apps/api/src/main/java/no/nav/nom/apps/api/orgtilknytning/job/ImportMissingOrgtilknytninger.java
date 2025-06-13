@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 
 @Service
 @Slf4j
@@ -121,28 +121,28 @@ public class ImportMissingOrgtilknytninger {
 
     // NAV-ident,Navn,Sektor,Enhetsnummer,Orgenhet Unit4 nr,Orgenhet Unit4 navn,NOM_orgenhet,NOM_orgnavn,gyldig_tom,Kommentar
     private Optional<MissingOrgtilknytning> parseAndValidateLine(String line) {
-        log.debug(SECURE_LOGS, "Parsing line: {}", line);
+        log.debug(TEAM_LOGS, "Parsing line: {}", line);
         var kolonner = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1); // Split på komma, ignorer komma i "
 
         MissingOrgtilknytning missingOt = new MissingOrgtilknytning(kolonner[0], kolonner[1], kolonner[6], kolonner[7]);
 
         if (missingOt.navident().isEmpty()) {
-            log.warn(SECURE_LOGS, "Navident '{}' er tom. Importlinje: {}", missingOt.navident(), line);
+            log.warn(TEAM_LOGS, "Navident '{}' er tom. Importlinje: {}", missingOt.navident(), line);
             return Optional.empty();
         }
 
         if (missingOt.navident().length() != 7 || !missingOt.navident().matches("[A-Z]\\d+")) {
-            log.warn(SECURE_LOGS, "Navident '{}' er ikke gyldig. Importlinje: {}", missingOt.navident(), line);
+            log.warn(TEAM_LOGS, "Navident '{}' er ikke gyldig. Importlinje: {}", missingOt.navident(), line);
             return Optional.empty();
         }
 
         if (missingOt.orgId().isEmpty()) {
-            log.warn(SECURE_LOGS, "Orgenhet ID '{}' er tom. Importlinje: {}", missingOt.orgId(), line);
+            log.warn(TEAM_LOGS, "Orgenhet ID '{}' er tom. Importlinje: {}", missingOt.orgId(), line);
             return Optional.empty();
         }
 
         if (missingOt.orgId().length() != 6 || !missingOt.orgId().matches("^[a-z]{2}\\d{3}[a-z]$")) {
-            log.warn(SECURE_LOGS, "Orgenhet ID '{}' er ikke gyldig. Importlinje: {}", missingOt.orgId(), line);
+            log.warn(TEAM_LOGS, "Orgenhet ID '{}' er ikke gyldig. Importlinje: {}", missingOt.orgId(), line);
             return Optional.empty();
         }
 
@@ -175,7 +175,7 @@ public class ImportMissingOrgtilknytninger {
         if (ressursOptional.isPresent()) {
             ressurs = ressursOptional.get();
         } else {
-            log.warn(SECURE_LOGS, "Ressurs med navident {} ({}) ikke funnet", missingOt.navident(), missingOt.navn());
+            log.warn(TEAM_LOGS, "Ressurs med navident {} ({}) ikke funnet", missingOt.navident(), missingOt.navn());
             return "";
         }
 
@@ -183,14 +183,14 @@ public class ImportMissingOrgtilknytninger {
         if (orgEnhetOptional.isPresent()) {
             orgEnhet = orgEnhetOptional.get();
         } else {
-            log.warn(SECURE_LOGS, "OrgEnhet med ID {} ({}) ikke funnet", missingOt.orgId(), missingOt.orgNavn());
+            log.warn(TEAM_LOGS, "OrgEnhet med ID {} ({}) ikke funnet", missingOt.orgId(), missingOt.orgNavn());
             return "";
         }
 
         LocalDate fomDato = getFomDato(orgEnhet.gyldigFom(), ressurs.startdato());
         
         if (ressurs.sluttdato().isPresent() && ressurs.sluttdato().get().isBefore(LocalDate.now())) {
-            log.info(SECURE_LOGS, "Sluttdato {} er passert for ressurs {}, så oppretter ikke orgtilknytning", ressurs.sluttdato().get(), ressurs.navident());
+            log.info(TEAM_LOGS, "Sluttdato {} er passert for ressurs {}, så oppretter ikke orgtilknytning", ressurs.sluttdato().get(), ressurs.navident());
             return "";
         }
 
@@ -200,7 +200,7 @@ public class ImportMissingOrgtilknytninger {
                 .toList();
         
         if (!notExpiredOrgtilknytninger.isEmpty()) {
-            log.warn(SECURE_LOGS, "Ressurs med navident {} har eksisterende orgtilknytninger: {}", missingOt.navident(),
+            log.warn(TEAM_LOGS, "Ressurs med navident {} har eksisterende orgtilknytninger: {}", missingOt.navident(),
                     eksisterendeOrgtilknytninger);
             return "";
         }
@@ -248,7 +248,7 @@ public class ImportMissingOrgtilknytninger {
 
         boolean masteringOk = nomMastered.markRessursAsMasteredInNom(missingOt.navident());
         if (!masteringOk) {
-            log.warn(SECURE_LOGS, "Fikk ikke merket ressurs med navident {} som mastret i NOM", missingOt.navident());
+            log.warn(TEAM_LOGS, "Fikk ikke merket ressurs med navident {} som mastret i NOM", missingOt.navident());
             return "";
         }
 

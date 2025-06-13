@@ -41,7 +41,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
-import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyRessursType.ANNEN_STATLIG;
 
 @Slf4j
@@ -184,7 +184,7 @@ public class DvhRestConsumer {
                         if (l.size() > 1) {
                             var personIdent = l.get(0).getPersonIdent();
                             var navIdenter = l.stream().map(DvhRessurs::getNavIdent).toList();
-                            log.warn(SECURE_LOGS, "Forkastet lesing av ansatt med personident " + personIdent + " har flere aktive navidenter: " + navIdenter);
+                            log.warn(TEAM_LOGS, "Forkastet lesing av ansatt med personident " + personIdent + " har flere aktive navidenter: " + navIdenter);
                             l.clear();
                         }
                     }

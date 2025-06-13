@@ -20,7 +20,7 @@ import javax.net.ssl.SSLException;
 public class AppConfig {
 
     // Marker for use with logger to ensure that sensitive logs are filtered into the correct log
-    public static final Marker SECURE_LOGS = MarkerFactory.getMarker("SECURE_LOGS");
+    public static final Marker TEAM_LOGS = MarkerFactory.getMarker("TEAM_LOGS");
 
     @Bean
     @Profile("proxy")
