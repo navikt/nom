@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.organisering;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getunleash.Unleash;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
@@ -53,6 +54,7 @@ import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+@Slf4j
 @ExtendWith(MockitoExtension.class)
 public class OrganiseringTest extends OrganiseringTestBase {
 
@@ -87,7 +89,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
 
     @BeforeEach
     public void setUp() throws JsonProcessingException {
-
+        var start = System.currentTimeMillis();
         // Always enable features for tests
         when(unleash.isEnabled(any())).thenReturn(true);
 
@@ -110,6 +112,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         container.start();
 
         ContainerTestUtils.waitForAssignment(container, embeddedKafkaBroker.getPartitionsPerTopic());
+        log.info("Setting up Kafka consumer took {} ms", System.currentTimeMillis() - start);
     }
 
     @AfterEach

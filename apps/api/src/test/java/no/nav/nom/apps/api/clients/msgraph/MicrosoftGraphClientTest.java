@@ -2,17 +2,26 @@ package no.nav.nom.apps.api.clients.msgraph;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.nom.apps.api.TestBase;
+import no.nav.nom.apps.api.newtestbase.WireMockTestBase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Collections;
 import java.util.List;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.matching;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class MicrosoftGraphClientTest extends TestBase {
+@SpringBootTest(classes = {MicrosoftGraphClient.class, ObjectMapper.class})
+class MicrosoftGraphClientTest extends WireMockTestBase {
 
     private static final String ENTRA_ID_GROUP = "e152f131-2d26-4834-b6a0-30b2415f0385";
     private static final String ENTRA_ID_PATH = "/groups/" + ENTRA_ID_GROUP + "/members?$select=mail,onPremisesSamAccountName";
@@ -23,7 +32,6 @@ class MicrosoftGraphClientTest extends TestBase {
 
     @Autowired
     private MicrosoftGraphClient microsoftGraphClient;
-
 
     @Test
     void should_follow_odata_nextLink_and_get_all_users_in_group() throws JsonProcessingException {

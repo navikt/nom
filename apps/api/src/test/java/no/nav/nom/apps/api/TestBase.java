@@ -19,7 +19,6 @@ import no.nav.security.mock.oauth2.MockOAuth2Server;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -46,7 +45,7 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("test")
 @SpringBootTest(
     classes = { TestConfig.class, MasteredRessursStateAutoconfiguration.class },
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
         "nom.libs.state.idle-event-interval-seconds: 1",
         "nom.libs.state.mastered-ressurs.enabled: true",

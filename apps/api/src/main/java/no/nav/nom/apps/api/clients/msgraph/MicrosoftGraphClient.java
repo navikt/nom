@@ -149,5 +149,4 @@ public class MicrosoftGraphClient {
                     throw new RuntimeException(throwable);
                 });
     }
-
 }
