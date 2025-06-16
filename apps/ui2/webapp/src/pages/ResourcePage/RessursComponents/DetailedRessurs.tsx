@@ -426,7 +426,7 @@ function ExpiredOrgTilknytning({
         display: flex;
         gap: var(--a-spacing-4);
         align-items: center;
-        background: var(--a-bg-subtle);
+        background: var(--a-surface-subtle);
         padding: var(--a-spacing-6);
         border: 1px solid var(--a-border-default);
         border-radius: var(--a-border-radius-large);

@@ -2,7 +2,7 @@ import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Buildings3Icon, PlusCircleIcon } from "@navikt/aksel-icons";
 import {
-  BodyShort,
+  BodyLong,
   Button,
   DatePicker,
   Detail,
@@ -13,13 +13,14 @@ import {
   List,
   Loader,
   Table,
+  Tag,
   useDatepicker,
   VStack,
 } from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { isSameDay, subDays } from "date-fns";
+import { isSameDay, subDays, subYears } from "date-fns";
 import sortBy from "lodash/sortBy";
 import React, { useState } from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
@@ -36,6 +37,7 @@ import {
   getTilgangerDelegertTilMegOptions,
   tilgangerKeys,
 } from "~/api/react-query-endpoints";
+import { useHasAdminAccess } from "~/api/useGetSession";
 import { ApiResponseError } from "~/components/ApiResponseError";
 import ContentWrapper from "~/components/ContentWrapper";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
@@ -43,6 +45,11 @@ import { NavidentNameLookup } from "~/components/NavidentNameLookup";
 import { PageBanner } from "~/components/PageBanner";
 import { Pluralize } from "~/components/Pluralize";
 import { DelegeringNavidentSelectFormPart } from "~/components/select/DelegeringNavidentSelect";
+import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
+import {
+  nomDateIsBefore,
+  nomDateIsSameOrAfter,
+} from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { blueTopBorder } from "~/resources/NomStyles";
 import type {
   LederTilgangForOrgenhetRequest,
@@ -51,11 +58,13 @@ import type {
   OrgEnhet,
 } from "~/types/api-models";
 import {
+  dateWithoutTimezone,
   formatDateWithoutTimezone,
   formatDisplayDate,
   isSameDateOrAfter,
   promiseIsFulfilled,
   promiseIsRejected,
+  todayWithoutTimezone,
 } from "~/utils";
 
 export const Route = createFileRoute("/tilganger")({
@@ -78,6 +87,8 @@ function TilgangerPageWrapper() {
 }
 
 function TilgangerPage() {
+  const hasAdminAccess = useHasAdminAccess();
+
   const { orgenheterLedetAvMegOgDelegerbart } = Route.useLoaderData();
 
   const delegerbareRessurserQuery = useQuery({
@@ -88,14 +99,31 @@ function TilgangerPage() {
   const delegerbareRessurser = delegerbareRessurserQuery?.data;
 
   const delegertTilMeg =
-    useQuery(getTilgangerDelegertTilMegOptions()).data ?? [];
+    useQuery(getTilgangerDelegertTilMegOptions()).data?.sort((a, b) =>
+      nomDateIsBefore(a.gyldigTom, b.gyldigTom) ? 1 : -1,
+    ) ?? [];
+
+  const filtrertDelegertTilMeg = hasAdminAccess
+    ? delegertTilMeg
+    : delegertTilMeg.filter((tilgang) =>
+        nomDateIsSameOrAfter(
+          tilgang.gyldigTom,
+          dateWithoutTimezone(subYears(todayWithoutTimezone(), 2)),
+        ),
+      );
 
   function HarIkkeTilgangTilInnhold() {
     return (
-      <List
-        as="ul"
-        title="Følgende ledere kan delegere redigeringstilgang i NOM:"
-      >
+      <List>
+        <Heading
+          css={css`
+            margin-bottom: var(--a-spacing-2);
+          `}
+          level="2"
+          size="small"
+        >
+          Følgende ledere kan delegere redigeringstilgang i NOM:
+        </Heading>
         <List.Item>
           Ledere på driftsenhetsnivå (f.eks. Agder fylke, NKS styringsenhet,
           Arbeid og ytelser styringsenhet osv.)
@@ -112,11 +140,14 @@ function TilgangerPage() {
   }
 
   function HarTilgangState() {
+    const brukerveiledningLenke: string =
+      "https://navno.sharepoint.com/sites/intranett-it/SitePages/Brukerveiledninger-Mine-Tilganger.aspx";
+
     return (
       <VStack gap="6">
         {orgenheterLedetAvMegOgDelegerbart.length > 0 && (
           <>
-            <Heading level="1" size="medium">
+            <Heading level="2" size="medium">
               Organisasjonsenheter du er leder for:
             </Heading>
             {orgenheterLedetAvMegOgDelegerbart.map((orgEnhet) => (
@@ -129,15 +160,27 @@ function TilgangerPage() {
             ))}
           </>
         )}
-        {delegertTilMeg.length > 0 && (
-          <>
-            <Heading level="1" size="medium">
+
+        {filtrertDelegertTilMeg.length > 0 && (
+          <ContainerWithHighlightedTop gap={6} padding={9}>
+            <Heading level="2" size="medium">
               Organisasjonsenheter du har fått redigeringstilgang til:
             </Heading>
-            {delegertTilMeg.map((tilgang) => (
+
+            <BodyLong>
+              For å få redigeringstilgang her i NOM, må du først ha fått
+              skrivetilgang til NOM i Mine Tilganger. Brukerveiledning for Mine
+              Tilganger finner du her:{" "}
+              <Link target="_blank" to={brukerveiledningLenke}>
+                Brukerveiledning Mine Tilganger
+              </Link>
+              .
+            </BodyLong>
+
+            {filtrertDelegertTilMeg.map((tilgang) => (
               <DelegertRolleCard key={tilgang.fid} tilgang={tilgang} />
             ))}
-          </>
+          </ContainerWithHighlightedTop>
         )}
       </VStack>
     );
@@ -148,7 +191,7 @@ function TilgangerPage() {
       <PageBanner text="Redigeringstilgang" />
       <ContentWrapper>
         {orgenheterLedetAvMegOgDelegerbart.length > 0 ||
-        delegertTilMeg.length > 0 ? (
+        filtrertDelegertTilMeg.length > 0 ? (
           <HarTilgangState />
         ) : (
           <HarIkkeTilgangTilInnhold />
@@ -164,55 +207,74 @@ function DelegertRolleCard({ tilgang }: { tilgang: LederTilgangState }) {
     queryFn: () => getOrgEnhet.queryFn(tilgang.orgenhetId),
   }).data;
 
-  const brukerveiledningLenke: string =
-    "https://navno.sharepoint.com/sites/intranett-it/SitePages/Brukerveiledninger-Mine-Tilganger.aspx";
-
   return (
     <VStack
-      css={[
-        blueTopBorder,
-        css`
-          padding: 2rem;
-          background: white;
-        `,
-      ]}
+      css={css`
+        padding: 2rem;
+        border-radius: 5px;
+        background: ${!tilgang.active ? "var(--a-surface-subtle)" : "#fff"};
+        border: 1px solid
+          ${!tilgang.active
+            ? "var(--a-border-subtle)"
+            : "var(--a-border-default)"};
+      `}
       gap="6"
     >
-      <Heading level="2" size="small">
-        <HGrid columns={{ md: "max-content 1fr max-content" }} gap="2">
-          <Buildings3Icon fontSize="24" />
-          <span>{`${orgEnhet?.navn} (${orgEnhet?.id})`}</span>
-          <Detail>{orgEnhet?.nomNivaa ?? orgEnhet?.orgNiv}</Detail>
-        </HGrid>
-      </Heading>
-      <HStack gap="4" key={tilgang.fid}>
-        <span>Delegert fra:</span>
-        <b>
-          <NavidentNameLookup navident={tilgang.av} />
-        </b>
+      <div
+        css={css`
+          display: flex;
+          justify-content: space-between;
+        `}
+      >
+        <VStack>
+          <HStack gap="2">
+            <Buildings3Icon fontSize="24" />
+            <Heading
+              level="3"
+              size="small"
+            >{`${orgEnhet?.navn} (${orgEnhet?.id})`}</Heading>
+          </HStack>
 
-        <span>Gyldig t.o.m.:</span>
-        <b>
-          {tilgang.gyldigTom
-            ? formatDisplayDate(tilgang.gyldigTom)
-            : "Ingen utløpsdato"}
-        </b>
+          <Detail>
+            <b>{orgEnhet?.nomNivaa ?? orgEnhet?.orgNiv}</b>
+          </Detail>
+        </VStack>
+
+        {!tilgang.active && (
+          <Tag
+            css={css`
+              height: fit-content;
+            `}
+            size="small"
+            variant="warning"
+          >
+            Utløpt
+          </Tag>
+        )}
+      </div>
+
+      <HStack gap="4" key={tilgang.fid}>
+        <span>
+          Delegert fra:{" "}
+          <b>
+            <NavidentNameLookup navident={tilgang.av} />
+          </b>
+        </span>
+
+        <span>
+          Gyldig t.o.m.:{" "}
+          <b>
+            {tilgang.gyldigTom
+              ? formatDisplayDate(tilgang.gyldigTom)
+              : "Ingen utløpsdato"}
+          </b>
+        </span>
       </HStack>
-      <HStack gap="2">
-        <BodyShort>
-          Redigeringstilgangen gjelder for alle underliggende
-          organisasjonsenheter.
-        </BodyShort>
-        <BodyShort>
-          For å få redigeringstilgang her i NOM, må du først ha fått
-          skrivetilgang til NOM i Mine Tilganger. Brukerveiledning for Mine
-          Tilganger finner du her:{" "}
-          <Link target="_blank" to={brukerveiledningLenke}>
-            Brukerveiledning Mine Tilganger
-          </Link>
-          .
-        </BodyShort>
-      </HStack>
+
+      <BodyLong>
+        Redigeringstilgangen gjelder for alle underliggende
+        organisasjonsenheter.
+      </BodyLong>
     </VStack>
   );
 }
@@ -390,12 +452,14 @@ function OrgEnhetCard({
               ) : undefined}
             </Table.Body>
           </Table>
+
           <HStack gap="2">
-            <BodyShort>
+            <BodyLong>
               Redigeringstilgangen gjelder for alle underliggende
               organisasjonsenheter.
-            </BodyShort>
-            <BodyShort>
+            </BodyLong>
+
+            <BodyLong>
               For å delegere redigeringstilgang her i NOM, må medarbeideren
               først ha fått skrivetilgang til NOM i Mine Tilganger.
               Brukerveiledning for Mine Tilganger finner du her:{" "}
@@ -403,7 +467,7 @@ function OrgEnhetCard({
                 Brukerveiledning Mine Tilganger
               </Link>
               .
-            </BodyShort>
+            </BodyLong>
           </HStack>
         </VStack>
 

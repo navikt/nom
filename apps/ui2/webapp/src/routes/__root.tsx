@@ -44,7 +44,7 @@ export const Route = createRootRouteWithContext<{
         <PilotBanner />
         <div
           css={css`
-            background-color: var(--a-gray-50);
+            background-color: var(--nom-bg);
             min-height: calc(
               100vh - ${headerHeight} - ${pilotBannerHeight} - ${footerHeight}
             );

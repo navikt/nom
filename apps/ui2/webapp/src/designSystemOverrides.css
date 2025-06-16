@@ -5,6 +5,7 @@
     --nom-primary-hover: var(--a-lightblue-900);
     --nom-primary-active: var(--a-deepblue-500);
     --nom-secondary-hover: #DEECEF;
+    --nom-bg: var(--a-gray-50);
 
     /* --a prefixes overrides general building blocks of design system tokens */
     --a-surface-action: var(--a-lightblue-800);
