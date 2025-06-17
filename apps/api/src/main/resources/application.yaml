@@ -53,7 +53,7 @@ app:
       org-hierarki-path: /dvh_nom/nom_ords_hrorg_hierarki.json
       nom-ressurser-path: /dvh_nom/nom_ords_ansatte_historikk.json
   epost-varsel-for-enhet-navnendring:
-    max-evt-alder-dager-for-varsel: 5
+    max-evt-alder-dager-for-varsel: 60
 
   manuelle-ressurser-og-ledere:
     enabled: false

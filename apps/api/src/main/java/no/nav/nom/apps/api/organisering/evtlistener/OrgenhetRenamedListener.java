@@ -62,7 +62,7 @@ public class OrgenhetRenamedListener {
     }
 
     @KafkaListener(
-        id = "nomApi_orgenhet_renamed_listener",
+        id = "nomApi_omada_orgenhet_renamed_listener",
         containerFactory = "organiseringEventSourceKafkaListenerContainerFactory",
         topics = "${app.kafka.organisering.eventsourceTopic}"
     )
