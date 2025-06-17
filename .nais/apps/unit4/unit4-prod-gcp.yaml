@@ -71,6 +71,9 @@ spec:
           namespace: org
           cluster: prod-gcp
     outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
       external:
         - host: teamorg-unleash-api.nav.cloud.nais.io
         - host: nom-proxy.prod-fss-pub.nais.io

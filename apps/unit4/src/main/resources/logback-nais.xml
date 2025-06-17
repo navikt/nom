@@ -3,7 +3,7 @@
     <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>SECURE_LOGS</marker>
+                <marker>TEAM_LOGS</marker>
             </evaluator>
             <OnMatch>DENY</OnMatch>
         </filter>
@@ -21,37 +21,19 @@
         </encoder>
     </appender>
 
-    <appender name="SECURE_LOGS" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/secure-logs/secure.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-            <fileNamePattern>/secure-logs/secure.log.%i</fileNamePattern>
-            <minIndex>1</minIndex>
-            <maxIndex>1</maxIndex>
-        </rollingPolicy>
-        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <maxFileSize>50MB</maxFileSize>
-        </triggeringPolicy>
+    <appender name="TEAM_LOGS" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>team-logs.nais-system:5170</destination>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${HOSTNAME}","nais_container_name":"${NAIS_APP_NAME}"}</customFields>
+            <includeContext>false</includeContext>
+        </encoder>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <!-- Deny log messages not having marker SECURE_LOGS -->
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>SECURE_LOGS</marker>
+                <marker>TEAM_LOGS</marker>
             </evaluator>
             <OnMatch>ACCEPT</OnMatch>
             <OnMismatch>DENY</OnMismatch>
         </filter>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <!-- Add MDC-keys always as it removes the pattern if the MDC does not contain a value for the key -->
-            <includeMdcKeyName>Nav-Consumer-Id</includeMdcKeyName>
-            <includeMdcKeyName>Nav-Call-Id</includeMdcKeyName>
-            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
-                <exclude>java\.util\.concurrent\..*</exclude>
-                <exclude>org\.apache\.catalina\..*</exclude>
-                <exclude>org\.apache\.coyote\..*</exclude>
-                <exclude>org\.apache\.tomcat\..*</exclude>
-                <exclude>org\.springframework\.aop\..*</exclude>
-                <exclude>org\.springframework\.security\.web\.ObservationFilterChainDecorator</exclude>
-            </throwableConverter>
-        </encoder>
     </appender>
 
     <!-- NOM loggers -->
@@ -59,6 +41,11 @@
 
     <root level="INFO">
         <appender-ref ref="STDOUT_JSON"/>
-        <appender-ref ref="SECURE_LOGS"/>
+        <appender-ref ref="TEAM_LOGS"/>
     </root>
+
+    <logger name="team-logs-logger" level="INFO" additivity="false">
+        <appender-ref ref="TEAM_LOGS" />
+    </logger>
+
 </configuration>

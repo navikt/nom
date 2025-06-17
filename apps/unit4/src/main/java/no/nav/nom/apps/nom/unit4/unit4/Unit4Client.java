@@ -21,7 +21,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static no.nav.nom.apps.nom.unit4.AppConfig.SECURE_LOGS;
+import static no.nav.nom.apps.nom.unit4.AppConfig.TEAM_LOGS;
 
 @Service
 @RequiredArgsConstructor
@@ -55,7 +55,7 @@ public class Unit4Client {
                     .bodyToMono(JsonNode.class)
                     .block();
 
-            log.debug(SECURE_LOGS, "Response fra find unit4 ressurs:\n{}", response != null ? response.toPrettyString() : "n/a");
+            log.debug(TEAM_LOGS, "Response fra find unit4 ressurs:\n{}", response != null ? response.toPrettyString() : "n/a");
             return response;
         } catch (WebClientResponseException wce) {
             HttpStatusCode httpStatusCode = wce.getStatusCode();
@@ -81,7 +81,7 @@ public class Unit4Client {
 
     public JsonNode createRessurs(Unit4RessursDto unit4RessursDto) throws Unit4Exception, JsonProcessingException {
         val body = objectMapper.writeValueAsString(unit4RessursDto);
-        log.debug(SECURE_LOGS, "Create unit4 ressurs:\n{}", body);
+        log.debug(TEAM_LOGS, "Create unit4 ressurs:\n{}", body);
         try {
             JsonNode response =
                 webClient.post()
@@ -98,11 +98,11 @@ public class Unit4Client {
                     .getBody();
 
 
-            log.debug(SECURE_LOGS, "Response fra create unit4 ressurs:\n{}", response != null ? response.toPrettyString() : "n/a");
+            log.debug(TEAM_LOGS, "Response fra create unit4 ressurs:\n{}", response != null ? response.toPrettyString() : "n/a");
             return response;
         } catch (WebClientResponseException wce) {
             HttpStatusCode httpStatusCode = wce.getStatusCode();
-            log.error(SECURE_LOGS, "Error posting to Unit4[{}], dumping dto({}): {} ", appProperties.proxy().baseUrl() + RESSURS_ENDPOINT, unit4RessursDto.getClass().getSimpleName(), body, wce);
+            log.error(TEAM_LOGS, "Error posting to Unit4[{}], dumping dto({}): {} ", appProperties.proxy().baseUrl() + RESSURS_ENDPOINT, unit4RessursDto.getClass().getSimpleName(), body, wce);
             log.debug("Error creating unit4 ressurs", wce);
 
             logIfErrorMessageInBody(wce.getResponseBodyAsString(StandardCharsets.UTF_8));
@@ -118,7 +118,7 @@ public class Unit4Client {
             }
         } catch (WebClientException wce) {
             log.warn("Unit4 createRessurs request error", wce);
-            log.warn(SECURE_LOGS, "Unit4 createRessurs request error for Unit4[{}], dumping dto({}): {}", appProperties.proxy().baseUrl() + RESSURS_ENDPOINT, unit4RessursDto.getClass().getSimpleName(), body, wce);
+            log.warn(TEAM_LOGS, "Unit4 createRessurs request error for Unit4[{}], dumping dto({}): {}", appProperties.proxy().baseUrl() + RESSURS_ENDPOINT, unit4RessursDto.getClass().getSimpleName(), body, wce);
             throw new Unit4UnknownException("Annen ukjent feil ved request til Unit4");
         }
     }
@@ -126,7 +126,7 @@ public class Unit4Client {
     public JsonNode patchRessurs(String personId, List<Unit4PatchRequest> unit4PatchRequest) throws Unit4Exception, JsonProcessingException{
         val body = objectMapper.writeValueAsString(unit4PatchRequest);
         val url = appProperties.proxy().baseUrl() + RESSURS_ENDPOINT + "/" + personId;
-        log.debug(SECURE_LOGS, "Patch unit4 ressurs [{}]:\n{}", url, body);
+        log.debug(TEAM_LOGS, "Patch unit4 ressurs [{}]:\n{}", url, body);
 
         try {
             JsonNode response =
@@ -143,11 +143,11 @@ public class Unit4Client {
                     .block()
                     .getBody() ;
 
-            log.debug(SECURE_LOGS, "Response fra patch unit4 ressurs:\n{}", response != null ? response.toPrettyString() : "n/a");
+            log.debug(TEAM_LOGS, "Response fra patch unit4 ressurs:\n{}", response != null ? response.toPrettyString() : "n/a");
             return response;
         } catch (WebClientResponseException wce) {
             HttpStatusCode httpStatusCode = wce.getStatusCode();
-            log.error(SECURE_LOGS, "Error patching to Unit4[{}], dumping dto({}): {} ", url, unit4PatchRequest.getClass().getSimpleName(), body, wce);
+            log.error(TEAM_LOGS, "Error patching to Unit4[{}], dumping dto({}): {} ", url, unit4PatchRequest.getClass().getSimpleName(), body, wce);
 
             logIfErrorMessageInBody(wce.getResponseBodyAsString(StandardCharsets.UTF_8));
 
@@ -162,7 +162,7 @@ public class Unit4Client {
             }
         } catch (WebClientException wce) {
             log.warn("Unit4 patchRessurs request error", wce);
-            log.warn(SECURE_LOGS, "Unit4 patchRessurs request error for Unit4[{}], dumping dto({}): {}", url, unit4PatchRequest.getClass().getSimpleName(), body, wce);
+            log.warn(TEAM_LOGS, "Unit4 patchRessurs request error for Unit4[{}], dumping dto({}): {}", url, unit4PatchRequest.getClass().getSimpleName(), body, wce);
             throw new Unit4UnknownException("Annen ukjent feil ved request til Unit4");
         }
     }
@@ -185,7 +185,7 @@ public class Unit4Client {
 
         } catch (WebClientResponseException wce) {
             HttpStatusCode httpStatusCode = wce.getStatusCode();
-            log.error(SECURE_LOGS, "Error in delete Ressurs to Unit4[{}]", wce);
+            log.error(TEAM_LOGS, "Error in delete Ressurs to Unit4[{}]", wce);
 
             logIfErrorMessageInBody(wce.getResponseBodyAsString(StandardCharsets.UTF_8));
 
@@ -200,7 +200,7 @@ public class Unit4Client {
             }
         } catch (WebClientException wce) {
             log.warn("Unit4 deleteRessurs request error", wce);
-            log.warn(SECURE_LOGS, "Unit4 deleteRessurs request error for Unit4[{}]", url, wce);
+            log.warn(TEAM_LOGS, "Unit4 deleteRessurs request error for Unit4[{}]", url, wce);
             throw new Unit4UnknownException("Annen ukjent feil ved request til Unit4");
         }
     }

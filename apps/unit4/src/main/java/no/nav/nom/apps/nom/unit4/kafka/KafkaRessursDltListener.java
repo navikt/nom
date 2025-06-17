@@ -15,7 +15,7 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
-import static no.nav.nom.apps.nom.unit4.AppConfig.SECURE_LOGS;
+import static no.nav.nom.apps.nom.unit4.AppConfig.TEAM_LOGS;
 
 @Component
 @Slf4j
@@ -43,7 +43,7 @@ public class KafkaRessursDltListener {
                     unit4RessursDto = new Unit4RessursDto(ressursOpprettetEventV1, fellesKoblingValue, !unleash.isEnabled(UNLEASH_SKRU_AV_EKSTRAAGA_TOGGLE, true));
                 } catch (Exception e) {
                     log.error("Feil ved konvertering til Unit4 objekt på meldings-key: {}", uuid);
-                    log.error(SECURE_LOGS, "Feil ved konvertering til Unit4 objekt på meldings-key: {}, event: {}", uuid, ressursOpprettetEventV1, e); // Send more detailed information to secure-logs logger.
+                    log.error(TEAM_LOGS, "Feil ved konvertering til Unit4 objekt på meldings-key: {}, event: {}", uuid, ressursOpprettetEventV1, e); // Send more detailed information to secure-logs logger.
                     return;
                 }
                 try {
