@@ -16,7 +16,7 @@ import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.DvhService;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
-import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
+import no.nav.nom.apps.api.organisering.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetEventKafkaConfig;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetEventProducer;

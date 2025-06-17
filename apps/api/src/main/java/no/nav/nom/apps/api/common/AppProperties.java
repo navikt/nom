@@ -5,7 +5,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("app")
 public record AppProperties(
         Clients clients,
-        String name
+        String name,
+        EpostVarselForEnhetNavnendring epostVarselForEnhetNavnendring
 ) {
 
     public boolean isSandbox() {
@@ -64,8 +65,13 @@ public record AppProperties(
         String orgHierarkiPath,
         String nomRessurserPath
     ) {}
+
     public record NomPaarorende(
         String baseUrl,
         String aadScope
+    ) {}
+
+    public record EpostVarselForEnhetNavnendring(
+        Integer maxEvtAlderDagerForVarsel
     ) {}
 }

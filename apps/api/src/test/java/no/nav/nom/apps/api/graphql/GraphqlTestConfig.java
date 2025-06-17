@@ -27,7 +27,7 @@ import no.nav.nom.apps.api.graphql.ressurs.RessursPropertyResolver;
 import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
 import no.nav.nom.apps.api.graphql.ressurs.TelefonResolver;
 import no.nav.nom.apps.api.graphql.search.SearchResolver;
-import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
+import no.nav.nom.apps.api.organisering.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;

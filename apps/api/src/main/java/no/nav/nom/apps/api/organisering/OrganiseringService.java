@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.organisering.eventsourcing;
+package no.nav.nom.apps.api.organisering;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

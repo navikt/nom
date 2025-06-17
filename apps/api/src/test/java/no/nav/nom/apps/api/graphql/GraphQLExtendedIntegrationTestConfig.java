@@ -19,7 +19,7 @@ import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.lucenesearch.OrgEnhetStateVisitor;
 import no.nav.nom.apps.api.lucenesearch.RessursStateVisitor;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
-import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
+import no.nav.nom.apps.api.organisering.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;

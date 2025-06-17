@@ -1,8 +1,7 @@
 package no.nav.nom.apps.api.organisering;
 
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
-import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
-import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService.OrganiseringIdTuple;
+import no.nav.nom.apps.api.organisering.OrganiseringService.OrganiseringIdTuple;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
