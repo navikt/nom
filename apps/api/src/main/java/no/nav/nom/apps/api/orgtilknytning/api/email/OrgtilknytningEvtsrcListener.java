@@ -27,6 +27,7 @@ import java.util.stream.StreamSupport;
 @Slf4j
 @Service
 public class OrgtilknytningEvtsrcListener {
+    
     private final Environment env;
     private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
     private final ObjectMapper objectMapper = configureObjectMapper();
