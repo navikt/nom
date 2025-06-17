@@ -124,6 +124,7 @@ function TilgangerPage() {
         >
           Følgende ledere kan delegere redigeringstilgang i NOM:
         </Heading>
+
         <List.Item>
           Ledere på driftsenhetsnivå (f.eks. Agder fylke, NKS styringsenhet,
           Arbeid og ytelser styringsenhet osv.)

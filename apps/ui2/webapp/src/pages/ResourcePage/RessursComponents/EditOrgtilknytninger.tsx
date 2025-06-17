@@ -204,6 +204,7 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
       >
         {formatVisningsnavn(ressurs.visningsnavn)}
       </Heading>
+
       <Label
         css={css`
           font-weight: var(--a-font-weight-regular);
