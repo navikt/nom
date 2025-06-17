@@ -10,7 +10,7 @@ import React from "react";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { Footer, footerHeight } from "~/components/Footer";
 import { headerHeight, NavHeader } from "~/components/NavHeader";
-import PilotBanner, { pilotBannerHeight } from "~/components/PilotBanner";
+import { PilotBanner, pilotBannerHeight } from "~/components/PilotBanner";
 import { PrefetchUsefulAdminQueries } from "~/components/PrefetchUsefulQueries";
 import { TestBanner } from "~/components/TestBanner";
 

@@ -118,6 +118,7 @@ function TilgangerPage() {
         <Heading
           css={css`
             margin-bottom: var(--a-spacing-2);
+            margin-left: var(--a-spacing-2);
           `}
           level="2"
           size="small"

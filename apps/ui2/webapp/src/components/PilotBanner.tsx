@@ -5,76 +5,103 @@ import {
   InformationSquareFillIcon,
 } from "@navikt/aksel-icons";
 import { Heading, List } from "@navikt/ds-react";
-import { useState } from "react";
+import React, { useState } from "react";
+
+import { todayWithoutTimezone } from "~/dateUtils/dateUtils";
+import { nomDateIsAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 
 export const pilotBannerHeight = "50px";
 
-const outerDivStyles = css`
-  width: 100%;
-  min-height: ${pilotBannerHeight};
-  background-color: var(--nom-secondary-hover);
-  border-bottom: 1px solid var(--a-lightblue-800);
-  border-top: 1px solid var(--a-lightblue-800);
-`;
-
-const bannerStyles = css`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: var(--a-spacing-2);
-`;
-
-const iconStyles = css`
-  height: 25px;
-  width: 25px;
-  margin-right: var(--a-spacing-2);
-`;
-
-const textDivStyles = css`
-  width: 30%;
-  padding-bottom: 0.7rem;
-  padding-top: 10px;
-  margin: 0 auto 10px;
-`;
-
-const buttonDivStyles = css`
-  display: flex;
-  align-items: center;
-  margin-left: var(--a-spacing-2);
-`;
-
-const PilotBanner = () => {
+export function PilotBanner() {
   const [isOpen, setIsOpen] = useState(false);
 
+  const latestDisplayDate = "2025-09-30";
+
+  if (nomDateIsAfter(todayWithoutTimezone(), latestDisplayDate)) {
+    return;
+  }
+
   return (
-    <div css={outerDivStyles}>
-      <div css={bannerStyles} onClick={() => setIsOpen(!isOpen)}>
-        <InformationSquareFillIcon css={iconStyles} />
+    <div
+      css={css`
+        width: 100%;
+        min-height: ${pilotBannerHeight};
+        background-color: var(--nom-secondary-hover);
+        border-bottom: 1px solid var(--a-lightblue-800);
+        padding: var(--a-spacing-3) 0;
+      `}
+    >
+      <div
+        css={css`
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        `}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <InformationSquareFillIcon
+          css={css`
+            margin-right: var(--a-spacing-2);
+          `}
+          fontSize="24px"
+        />
+
         <Heading size="small">Nytt i NOM</Heading>
-        <div css={buttonDivStyles}>
-          {isOpen && <ChevronUpIcon fontSize="32px" />}
-          {!isOpen && <ChevronDownIcon fontSize="32px" />}
+
+        <div
+          css={css`
+            display: flex;
+            margin-left: var(--a-spacing-2);
+          `}
+        >
+          {isOpen ? (
+            <ChevronUpIcon fontSize="32px" />
+          ) : (
+            <ChevronDownIcon fontSize="32px" />
+          )}
         </div>
       </div>
 
       {isOpen && (
-        <List as="ul" css={textDivStyles} title="Desember 2024">
+        <List
+          as="ul"
+          css={css`
+            width: 100%;
+            max-width: 600px;
+            margin: var(--a-spacing-3) auto 0;
+          `}
+        >
+          <Heading
+            css={css`
+              margin-bottom: var(--a-spacing-2);
+              margin-left: var(--a-spacing-2);
+            `}
+            level="2"
+            size="small"
+          >
+            Juni 2025
+          </Heading>
+
+          <List.Item>Administrering av alle statlige ansatte</List.Item>
           <List.Item>
-            Pilotenheter administrerer statlige medarbeidere i NOM.
+            Opprettelse og administrering av ikke-standard identer som roboter
+            og utenlandske konsulenter
           </List.Item>
-          <List.Item>Støtte for sektorbytte.</List.Item>
           <List.Item>
-            Støtte for å masseflytte medarbeidere fra én orgenhet til en annen.
+            Tabelloversikt over medarbeideres kontaktpersoner
           </List.Item>
           <List.Item>
-            Mulighet for å endre kontaktinfo for kontaktpersoner (pårørende).
+            Masseflytting av medarbeidere til ny organisasjonsenhet
           </List.Item>
           <List.Item>
-            Administrering av alle statlige medarbeidere i NOM kommer i januar.
+            Masseflytting av medarbeidere til nytt fysisk brukersted
+          </List.Item>
+          <List.Item>
+            Oppdatert organisasjonskart og innplassering etter
+            omorganiseringsprosessen i direktoratet
           </List.Item>
         </List>
       )}
     </div>
   );
-};
-export default PilotBanner;
+}

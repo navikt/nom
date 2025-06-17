@@ -15,6 +15,8 @@ const outerDiv = css`
   min-height: ${headerHeight};
   width: 100%;
   place-content: center center;
+  border-bottom: 1px solid var(--a-lightblue-800);
+  padding-top: 1px;
 `;
 
 const innerDiv = css(
