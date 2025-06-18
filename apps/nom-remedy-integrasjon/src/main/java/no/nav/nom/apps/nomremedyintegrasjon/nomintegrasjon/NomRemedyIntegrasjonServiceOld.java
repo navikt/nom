@@ -759,7 +759,7 @@ public class NomRemedyIntegrasjonServiceOld {
         }
     }
 
-    public void lesOgEksekverRessursState(String entryBestiller, String navident) {
+    public void lesStatePaaNytt(String entryBestiller, String navident) {
         var ressursState = nomApiClient.getRessursByNavident(navident);
         if (!ressursState.getIsNomMastered()) {
             logger.info("Ressurs with navident {} is not mastered, skipping", navident);

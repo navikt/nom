@@ -1,5 +1,6 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
+import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -26,7 +27,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static no.nav.nom.apps.nomremedyintegrasjon.config.SecurityConfig.NAVIDENT_CLAIM_NAME;
 import static no.nav.nom.apps.nomremedyintegrasjon.config.SwaggerConfig.BEARER_TOKEN;
@@ -38,11 +38,14 @@ public class AdminController {
 
     private final NomRemedyIntegrasjonServiceOld nomRemedyIntegrasjonServiceOld;
     private final NomRemedyIntegrasjonServiceNew nomRemedyIntegrasjonServiceNew;
+    private final Unleash unleash;
 
     public AdminController(NomRemedyIntegrasjonServiceOld nomRemedyIntegrasjonServiceOld,
-                           NomRemedyIntegrasjonServiceNew nomRemedyIntegrasjonServiceNew) {
+                           NomRemedyIntegrasjonServiceNew nomRemedyIntegrasjonServiceNew, Unleash unleash
+    ) {
         this.nomRemedyIntegrasjonServiceOld = nomRemedyIntegrasjonServiceOld;
         this.nomRemedyIntegrasjonServiceNew = nomRemedyIntegrasjonServiceNew;
+        this.unleash = unleash;
     }
 
     @Operation(
@@ -104,7 +107,11 @@ public class AdminController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping(value = "lesOgEksekverRessursState/{navident}")
     public ResponseEntity<String> lesOgEksekverRessursState(@PathVariable String navident) {
-        nomRemedyIntegrasjonServiceOld.lesOgEksekverRessursState(getAuthenticatedNavIdent(), navident);
+        if (unleash.isEnabled("nom-remedy.ny-remedy-integrasjon")) {
+            nomRemedyIntegrasjonServiceNew.lesStatePaaNytt(navident);
+        } else {
+            nomRemedyIntegrasjonServiceOld.lesStatePaaNytt(getAuthenticatedNavIdent(), navident);
+        }
         return ResponseEntity.ok("RessursState er lest og eksekvert");
     }
 

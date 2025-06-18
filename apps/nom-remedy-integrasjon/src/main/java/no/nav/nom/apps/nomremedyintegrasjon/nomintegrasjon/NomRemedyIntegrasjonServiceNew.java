@@ -348,4 +348,19 @@ public class NomRemedyIntegrasjonServiceNew {
         errorStateRepository.deleteErrorStateByErrorStateFid(fid);
         logger.info("Slettet error state med id: {}", fid);
     }
+
+    @Transactional
+    public void lesStatePaaNytt(String navident) {
+        var ressursState = ressursStateRepository.findByNavident(navident)
+            .orElseThrow(() -> RessursNotFoundException.notFound(navident));
+        executeStateUpdates(
+            List.of(
+                AggregateState.builder()
+                    .navident(navident)
+                    .createdAt(LocalDateTime.now())
+                    .stateFid(ressursState.fid())
+                    .stateType(ressursState.getClass().getSimpleName())
+                    .build()
+            ));
+    }
 }
