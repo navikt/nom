@@ -153,7 +153,17 @@ public class MicrosoftGraphClient {
     }
 
     private static Duration calculateDelay(Throwable failure) {
-        String headerValue = ((WebClientResponseException.ServiceUnavailable) failure).getHeaders().get("Retry-After").get(0);
+        if (!(failure instanceof WebClientResponseException.TooManyRequests)) {
+            logger.warn("Failure is not a TooManyRequests exception, defaulting to 0 seconds delay");
+            return Duration.ofSeconds(0); // Default delay if not a ServiceUnavailable exception
+        }
+
+        var retryAfterHeader = ((WebClientResponseException.TooManyRequests) failure).getHeaders().get("Retry-After");
+        if (retryAfterHeader == null || retryAfterHeader.isEmpty()) {
+            logger.warn("No Retry-After header found in response, defaulting to 0 seconds delay");
+            return Duration.ofSeconds(0); // Default delay if no header is present
+        }
+        String headerValue = retryAfterHeader.getFirst();
         try {
             var durationInSeconds = Integer.parseInt(headerValue);
             logger.info("Got Retry-After header value: {} seconds", durationInSeconds);
