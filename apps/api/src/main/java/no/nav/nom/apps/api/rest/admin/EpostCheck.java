@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import no.nav.nom.apps.api.clients.msgraph.EmailSendingUnforeseenException;
 import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
 import no.nav.nom.apps.api.common.SwaggerConfig;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Tag(name = "Admin for å sjekke om epost tjenesten går.")
@@ -67,6 +69,34 @@ public class EpostCheck {
     }
 
     @Operation(
+        description = "Test multi epost sending - sjekke retry resultat",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/spamEmailTest")
+    public String spamEmailTest(@RequestParam String mottaker, @RequestParam int antall) {
+        if (antall >= 20) {
+            return "Antall må være mindre enn 20";
+        }
+        List<String> errors = new ArrayList<>();
+        for (var n = 1; n <= antall; n++) {
+            EmailMessage message = new EmailMessage("Test " + n, "testBody", List.of(mottaker));
+            try {
+                microsoftGraphClient.sendEmail(message).subscribe();
+            } catch (EmailSendingUnforeseenException e) {
+                errors.add(e.getMessage());
+            }
+        }
+        return errors.isEmpty() ?
+            "%s eposter sent uten feil".formatted(antall) :
+            "Errors occurred: " + String.join(", ", errors);
+    }
+
+    @Operation(
         description = "Trigger send email about changes in orgtilknytning",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
@@ -76,7 +106,7 @@ public class EpostCheck {
         }
     )
     @GetMapping(value = "/sendEmailVedOTEndringer")
-    public String sendEmailVedOtEndringer() throws TemplateException, IOException {
+    public String sendEmailVedOtEndringer() {
         orgtilknytningEndretEmailService.sendOTEndretEmail();
         return "Emails sent!";
     }
@@ -91,7 +121,7 @@ public class EpostCheck {
         }
     )
     @GetMapping(value = "/sendEmailRessursSluttdatoUtloper")
-    public String sendEmailRessursSluttdatoUtloper() throws TemplateException, IOException {
+    public String sendEmailRessursSluttdatoUtloper() {
         ressursUtlopersnartEmailService.sendEmail();
         return "Emails sent!";
     }

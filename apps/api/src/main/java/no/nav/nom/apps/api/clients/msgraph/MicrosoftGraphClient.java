@@ -135,18 +135,32 @@ public class MicrosoftGraphClient {
 
     private Retry defaultRetry(Integer maxAttempts, Integer backoffDurationMillis) {
         return Retry.backoff(maxAttempts, Duration.ofMillis(backoffDurationMillis))
-                .jitter(0.75)
-                .filter(throwable -> {
-                    if (throwable instanceof WebClientResponseException) {
-                        return ((WebClientResponseException) throwable).getStatusCode().is5xxServerError();
-                    }
-                    return false;
-                }).onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
-                    Throwable throwable = retrySignal.failure();
-                    if (throwable instanceof WebClientResponseException) {
-                        throw (WebClientResponseException) throwable;
-                    }
-                    throw new RuntimeException(throwable);
-                });
+            .jitter(0.75)
+            .filter(throwable -> {
+                if (throwable instanceof WebClientResponseException) {
+                    return ((WebClientResponseException) throwable).getStatusCode().is5xxServerError();
+                }
+                return false;
+            })
+            .doBeforeRetryAsync(signal -> Mono.delay(calculateDelay(signal.failure())).then())
+            .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
+                Throwable throwable = retrySignal.failure();
+                if (throwable instanceof WebClientResponseException) {
+                    throw (WebClientResponseException) throwable;
+                }
+                throw new RuntimeException(throwable);
+            });
+    }
+
+    private static Duration calculateDelay(Throwable failure) {
+        String headerValue = ((WebClientResponseException.ServiceUnavailable) failure).getHeaders().get("Retry-After").get(0);
+        try {
+            var durationInSeconds = Integer.parseInt(headerValue);
+            logger.info("Got Retry-After header value: {} seconds", durationInSeconds);
+            return Duration.ofSeconds(durationInSeconds);
+        } catch (NumberFormatException e) {
+            logger.warn("Failed to parse Retry-After header value as Int: {}", headerValue, e);
+        }
+        return Duration.ofSeconds(0); // Default delay if parsing fails
     }
 }
