@@ -43,7 +43,7 @@ public class KafkaRessursDltListener {
                     unit4RessursDto = new Unit4RessursDto(ressursOpprettetEventV1, fellesKoblingValue, !unleash.isEnabled(UNLEASH_SKRU_AV_EKSTRAAGA_TOGGLE, true));
                 } catch (Exception e) {
                     log.error("Feil ved konvertering til Unit4 objekt på meldings-key: {}", uuid);
-                    log.error(TEAM_LOGS, "Feil ved konvertering til Unit4 objekt på meldings-key: {}, event: {}", uuid, ressursOpprettetEventV1, e); // Send more detailed information to secure-logs logger.
+                    log.error(TEAM_LOGS, "Feil ved konvertering til Unit4 objekt på meldings-key: {}, event: {}", uuid, ressursOpprettetEventV1, e); // Send more detailed information to team-logs logger.
                     return;
                 }
                 try {

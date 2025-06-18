@@ -24,8 +24,6 @@ spec:
       value: none
   envFrom:
     - secret: nav-ident-unleash-api-token
-  secureLogs:
-    enabled: true
   image: "{{image}}"
   port: 8080
   ingresses:

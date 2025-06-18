@@ -76,8 +76,6 @@ spec:
     paths:
       - kvPath: /serviceuser/data/prod/srvnomad
         mountPath: /var/run/secrets/nais.io/srvnomad
-  secureLogs:
-    enabled: true
   observability:
     autoInstrumentation:
       enabled: true

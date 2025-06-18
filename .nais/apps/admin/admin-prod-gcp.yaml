@@ -66,8 +66,6 @@ spec:
         - id: elastic
   kafka:
     pool: nav-prod
-  secureLogs:
-    enabled: true
   azure:
     application:
       enabled: true

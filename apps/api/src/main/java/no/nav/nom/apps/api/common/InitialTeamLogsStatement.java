@@ -11,6 +11,6 @@ import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 public class InitialTeamLogsStatement {
     @PostConstruct
     public void init() {
-        log.info(TEAM_LOGS, "Securelogs check - application started");
+        log.info(TEAM_LOGS, "Team logs check - application started");
     }
 }
