@@ -14,7 +14,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.DvhService;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
-import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
+import no.nav.nom.apps.api.organisering.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;

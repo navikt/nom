@@ -42,6 +42,7 @@
         <swagger-annotations-jakarta.version>2.2.32</swagger-annotations-jakarta.version>
         <wiremock.version>2.35.2</wiremock.version>
         <org.wiremock.version>3.13.0</org.wiremock.version>
+        <org.wiremock-spring-boot.version>3.10.0</org.wiremock-spring-boot.version>
         <spring-cloud-contract-wiremock.version>4.3.0</spring-cloud-contract-wiremock.version>
         <mock-oauth2-server.version>2.2.0</mock-oauth2-server.version>
         <nimbus-jose-jwt.version>10.3</nimbus-jose-jwt.version>
@@ -49,7 +50,7 @@
         <ojdbc.version>23.8.0.25.04</ojdbc.version>
         <poi-ooxml.version>5.4.1</poi-ooxml.version>
         <commons-compress.version>1.27.1</commons-compress.version>
-        <postgresql.version>42.7.6</postgresql.version>
+        <postgresql.version>42.7.7</postgresql.version>
         <microsoft-graph.version>6.40.0</microsoft-graph.version>
         <azure-identity.version>1.16.1</azure-identity.version>
         <caffeine.version>3.2.0</caffeine.version>
@@ -249,6 +250,12 @@
                 <groupId>org.wiremock</groupId>
                 <artifactId>wiremock-standalone</artifactId>
                 <version>${org.wiremock.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wiremock.integrations</groupId>
+                <artifactId>wiremock-spring-boot</artifactId>
+                <version>${org.wiremock-spring-boot.version}</version>
             </dependency>
 
             <dependency>

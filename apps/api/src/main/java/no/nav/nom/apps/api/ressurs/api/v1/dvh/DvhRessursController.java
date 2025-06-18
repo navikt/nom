@@ -33,7 +33,7 @@ public class DvhRessursController {
     }
 
     @Operation(
-        description = "Hent alle Orgenheter med tillegsinfo",
+        description = "Hent alle Orgenheter med tilleggsinfo",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @GetMapping("/orgenheter")

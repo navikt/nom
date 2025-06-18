@@ -138,6 +138,8 @@ public class TilgangDelegertUtloeperEmailServiceTest {
                 startDate.plusDays(i)
             ));
         }
+
+        out.add(new  LederTilgangState("fid-null","til-null","av-null","o-null", LocalDate.now(), null));
         return out;
     }
 

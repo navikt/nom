@@ -88,9 +88,6 @@ function OrgenhetPage() {
           <Table.ColumnHeader scope="col" sortKey="orgNiv" sortable>
             Orgniv
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="agressoId" sortable>
-            remedyEnhetId
-          </Table.ColumnHeader>
           <Table.ColumnHeader scope="col" sortKey="nomNivaa" sortable>
             nomNivaa
           </Table.ColumnHeader>
@@ -125,7 +122,6 @@ function OrgenhetPage() {
               <Table.DataCell>{orgEnhet.gyldigTom}</Table.DataCell>
               <Table.DataCell>{orgEnhet.agressoId}</Table.DataCell>
               <Table.DataCell>{orgEnhet.agressoOrgNivaa}</Table.DataCell>
-              <Table.DataCell>{orgEnhet.agressoId}</Table.DataCell>
               <Table.DataCell>{orgEnhet.nomNivaa}</Table.DataCell>
               <Table.DataCell>{orgEnhet.agressoOrgenhetType}</Table.DataCell>
               <Table.DataCell>

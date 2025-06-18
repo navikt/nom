@@ -108,13 +108,16 @@ import {
 
 export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
   const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
+  const hasAdminAccess = useHasAdminAccess();
 
   const hasRobotAccess = useHasRobotAccess();
   const hasVikafossenAccess = useHasVikafossenAccess();
   const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
 
   if (
-    (ressurs.identType === IdentType.VIKAFOSSEN && !hasVikafossenAccess) ||
+    (ressurs.identType === IdentType.VIKAFOSSEN &&
+      !hasVikafossenAccess &&
+      !hasAdminAccess) ||
     (ressurs.identType !== IdentType.VIKAFOSSEN &&
       !hasAdminOrWriteAccess &&
       !hasVikafossenAccess &&
@@ -201,6 +204,7 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
       >
         {formatVisningsnavn(ressurs.visningsnavn)}
       </Heading>
+
       <Label
         css={css`
           font-weight: var(--a-font-weight-regular);
@@ -494,7 +498,7 @@ function OrgtilknytningForm({
           return (
             <div
               css={css`
-                background: ${avsluttet ? "var(--a-bg-subtle)" : "#fff"};
+                background: ${avsluttet ? "var(--a-surface-subtle)" : "#fff"};
                 margin-top: var(--a-spacing-6);
                 padding: var(--a-spacing-6);
                 border-radius: 8px;

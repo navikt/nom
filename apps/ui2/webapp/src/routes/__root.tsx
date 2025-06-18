@@ -10,7 +10,7 @@ import React from "react";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { Footer, footerHeight } from "~/components/Footer";
 import { headerHeight, NavHeader } from "~/components/NavHeader";
-import PilotBanner, { pilotBannerHeight } from "~/components/PilotBanner";
+import { PilotBanner, pilotBannerHeight } from "~/components/PilotBanner";
 import { PrefetchUsefulAdminQueries } from "~/components/PrefetchUsefulQueries";
 import { TestBanner } from "~/components/TestBanner";
 
@@ -44,7 +44,7 @@ export const Route = createRootRouteWithContext<{
         <PilotBanner />
         <div
           css={css`
-            background-color: var(--a-gray-50);
+            background-color: var(--nom-bg);
             min-height: calc(
               100vh - ${headerHeight} - ${pilotBannerHeight} - ${footerHeight}
             );

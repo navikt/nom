@@ -10,7 +10,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 )
 @JsonSubTypes({
     @JsonSubTypes.Type(value = OrganiseringOpprettetEventV1.class),
-    @JsonSubTypes.Type(value = OrganiseringEndretEventV1.class)
+    @JsonSubTypes.Type(value = OrganiseringEndretEventV1.class),
+    @JsonSubTypes.Type(value = OrganiseringAvsluttetEventV1.class)
 })
 
 public abstract class OrganiseringEvent extends Event {
