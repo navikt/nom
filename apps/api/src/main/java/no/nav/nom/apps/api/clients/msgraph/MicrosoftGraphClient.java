@@ -136,12 +136,6 @@ public class MicrosoftGraphClient {
     private Retry defaultRetry(Integer maxAttempts, Integer backoffDurationMillis) {
         return Retry.backoff(maxAttempts, Duration.ofMillis(backoffDurationMillis))
             .jitter(0.75)
-            .filter(throwable -> {
-                if (throwable instanceof WebClientResponseException) {
-                    return ((WebClientResponseException) throwable).getStatusCode().is5xxServerError();
-                }
-                return false;
-            })
             .doBeforeRetryAsync(signal -> Mono.delay(calculateDelay(signal.failure())).then())
             .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
                 Throwable throwable = retrySignal.failure();
@@ -154,9 +148,11 @@ public class MicrosoftGraphClient {
 
     private static Duration calculateDelay(Throwable failure) {
         if (!(failure instanceof WebClientResponseException.TooManyRequests)) {
-            logger.warn("Failure is not a TooManyRequests exception, defaulting to 0 seconds delay");
+            logger.info("Failure is not a TooManyRequests exception, defaulting to 0 seconds delay");
             return Duration.ofSeconds(0); // Default delay if not a ServiceUnavailable exception
         }
+
+        logger.info("Calculating delay based on Retry-After header for TooManyRequests exception");
 
         var retryAfterHeader = ((WebClientResponseException.TooManyRequests) failure).getHeaders().get("Retry-After");
         if (retryAfterHeader == null || retryAfterHeader.isEmpty()) {
