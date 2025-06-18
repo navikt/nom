@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 @Profile("local")
 public class DvhOrdsClientLocalImpl implements DvhOrdsClient {
     private AppProperties.DvhOrds dvhOrdsProperties;
-    private static final int MAX_IN_MEMORY_MB = 300;
+    private static final int MAX_IN_MEMORY_MB = 400;
     private final WebClient webClient;
 
     public DvhOrdsClientLocalImpl(OAuth2AuthorizedClientManager authorizedClientManager, AppProperties appProperties) {
