@@ -68,9 +68,9 @@ public class RemedyIntegrasjonRepositoryService {
                 } catch (Exception e) {
                     logger.error("Feil ved lagring av ny rad for ressurs {}, til enhet {} og med entryId {}", newNomIntegrasjonEntity.getNavId(), newNomIntegrasjonEntity.getEnhetsId(), newNomIntegrasjonEntity.getEntryId(), e);
                 }
-            } else {
-                logger.info("Lagret ny rad for ressurs {}, til enhet {}", newNomIntegrasjonEntity.getNavId(), newNomIntegrasjonEntity.getEnhetsId());
             }
+        } else {
+            logger.info("Lagret ny rad for ressurs {}, til enhet {}", newNomIntegrasjonEntity.getNavId(), newNomIntegrasjonEntity.getEnhetsId());
         }
         return null;
     }
