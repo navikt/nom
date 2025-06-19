@@ -57,8 +57,8 @@ public class RessursStateBuilder {
         return this;
     }
 
-    public RessursStateBuilder primaryTelefonnummer(Optional<String> primaryTelefonnummer) {
-        this.primaryTelefonnummer = primaryTelefonnummer;
+    public RessursStateBuilder primaryTelefonnummer(String primaryTelefonnummer) {
+        this.primaryTelefonnummer = Optional.of(primaryTelefonnummer);
         return this;
     }
 
@@ -69,18 +69,18 @@ public class RessursStateBuilder {
         return this;
     }
 
-    public RessursStateBuilder sluttdato(Optional<LocalDate> sluttdato) {
-        this.sluttdato = sluttdato;
+    public RessursStateBuilder sluttdato(LocalDate sluttdato) {
+        this.sluttdato = Optional.of(sluttdato);
         return this;
     }
 
-    public RessursStateBuilder startdato(Optional<LocalDate> startdato) {
-        this.startdato = startdato;
+    public RessursStateBuilder startdato(LocalDate startdato) {
+        this.startdato = Optional.of(startdato);
         return this;
     }
 
-    public RessursStateBuilder primaryFysiskBrukersted(Optional<String> primaryFysiskBrukersted) {
-        this.primaryFysiskBrukersted = primaryFysiskBrukersted;
+    public RessursStateBuilder primaryFysiskBrukersted(String primaryFysiskBrukersted) {
+        this.primaryFysiskBrukersted = Optional.of(primaryFysiskBrukersted);
         return this;
     }
 

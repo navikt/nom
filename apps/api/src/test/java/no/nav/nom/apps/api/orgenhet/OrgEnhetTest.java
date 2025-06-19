@@ -18,7 +18,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -82,9 +81,9 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         // This testing should be split up
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202204", Optional.empty()));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202204", Optional.empty()));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet3, 3, "202204", Optional.empty()));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202204", null));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202204", null));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet3, 3, "202204", null));
 
         assertEquals(3, orgenhetService.getAllEnheter().size());
 
@@ -138,9 +137,9 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         // This testing should be split up
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202204", Optional.empty()));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202204", Optional.empty()));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet3, 3, "202204", Optional.empty()));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202204", null));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202204", null));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet3, 3, "202204", null));
 
         assertEquals(3, orgenhetService.getAllEnheter().size());
 
@@ -194,9 +193,9 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         // This testing should be split up
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202204", Optional.empty()));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202204", Optional.empty()));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet3, 3, "202204", Optional.empty()));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202204", null));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202204", null));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet3, 3, "202204", null));
 
         assertEquals(3, orgenhetService.getAllEnheter().size());
 
@@ -269,7 +268,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         // This testing should be split up
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202108", Optional.empty()));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202108", null));
 
         assertEquals(1, orgenhetService.getAllEnheter().size());
 
@@ -324,9 +323,9 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         // This testing should be split up
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202108", Optional.of("202112")));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 2, "202202", Optional.of("202204")));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 3, "202206", Optional.empty()));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202108", "202112"));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 2, "202202", "202204"));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 3, "202206", null));
 
         assertEquals(3, orgenhetService.getAllEnheter().size());
 
@@ -362,7 +361,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         // This testing should be split up
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202108", Optional.empty()));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202108", null));
 
         assertEquals(1, orgenhetService.getAllEnheter().size());
 
@@ -398,7 +397,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         // This testing should be split up
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202108", Optional.of("202201")));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202108", "202201"));
 
         assertEquals(1, orgenhetService.getAllEnheter().size());
 
@@ -447,8 +446,8 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         // This testing should be split up
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", Optional.of("202012")));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 2, "202106", Optional.empty()));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", "202012"));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 2, "202106", null));
 
         var allEnheter = orgenhetService.getAllEnheter();
         assertEquals(2, allEnheter.size());
@@ -484,7 +483,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         // This testing should be split up
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", Optional.of("202102")));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", "202102"));
 
         allEnheter = orgenhetService.getAllEnheter();
         assertEquals(2, allEnheter.size());
@@ -538,7 +537,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         // This testing should be split up
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", Optional.empty()));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", null));
 
         var allEnheter = orgenhetService.getAllEnheter();
         assertEquals(1, allEnheter.size());
@@ -589,8 +588,8 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         // This testing should be split up
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202101", Optional.empty()));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202008", Optional.of("202011")));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202101", null));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202008", "202011"));
 
         allEnheter = orgenhetService.getAllEnheter();
         assertEquals(2, allEnheter.size());
@@ -642,8 +641,8 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         // This testing should be split up
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", Optional.of("202011")));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 2, "202101", Optional.empty()));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", "202011"));
+        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 2, "202101", null));
 
 
         var allEnheter = orgenhetService.getAllEnheter();
@@ -701,7 +700,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
             .build();
 
         orgEnhetStateRepository.update(
-            dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", Optional.empty()));
+            dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", null));
 
 
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet1);
@@ -740,7 +739,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
             .build();
 
         orgEnhetStateRepository.update(
-            dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 1, "201806", Optional.empty()));
+            dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 1, "201806", null));
 
 
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet1, mockedEnhet2);

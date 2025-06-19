@@ -3,7 +3,7 @@ package no.nav.nom.contract.nom;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.util.Optional;
+import static java.util.Objects.isNull;
 
 @Schema(enumAsRef = true)
 public enum Tilknytningtype {
@@ -24,25 +24,25 @@ public enum Tilknytningtype {
     VIKAR;
 
     @JsonIgnore
-    public static int compare(Optional<Tilknytningtype> t1, Optional<Tilknytningtype> t2) {
+    public static int compare(Tilknytningtype t1, Tilknytningtype t2) {
+        if (isNull(t1)) {
+            return 1;
+        }
+
+        if (isNull(t2)) {
+            return -1;
+        }
+
         if (t1.equals(t2)) {
             return 0;
         }
 
-        if (t1.equals(Optional.of(Tilknytningtype.FAST))) {
+        if (t1.equals(Tilknytningtype.FAST)) {
             return -1;
         }
 
-        if (t2.equals((Optional.of(Tilknytningtype.FAST)))) {
+        if (t2.equals(Tilknytningtype.FAST)) {
             return 1;
-        }
-
-        if (t1.equals(Optional.empty())) {
-            return 1;
-        }
-
-        if (t2.equals(Optional.empty())) {
-            return -1;
         }
 
         return 0;

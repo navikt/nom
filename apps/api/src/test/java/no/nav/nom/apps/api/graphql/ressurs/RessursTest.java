@@ -138,7 +138,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
             enhet,
             1,
             String.valueOf(enhet.getORGENHET_FRA_PERIODE()),
-            Optional.of(String.valueOf(enhet.getORGENHET_TIL_PERIODE()))
+            String.valueOf(enhet.getORGENHET_TIL_PERIODE())
         ));
         orgtilknytningStateRepository.update(
             "FID_1",
@@ -353,7 +353,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
             enhet,
             1,
             String.valueOf(enhet.getORGENHET_FRA_PERIODE()),
-            Optional.of(String.valueOf(enhet.getORGENHET_TIL_PERIODE()))
+            String.valueOf(enhet.getORGENHET_TIL_PERIODE())
         ));
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
@@ -384,7 +384,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
             mockedEnhet,
             1,
             String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()),
-            Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))
+            String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE())
         ));
         orgtilknytningStateRepository.update(
             "FID_1",
@@ -422,13 +422,13 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
             ressursLederForDenneEnheten,
             1,
             String.valueOf(ressursLederForDenneEnheten.getORGENHET_FRA_PERIODE()),
-            Optional.of(String.valueOf(ressursLederForDenneEnheten.getORGENHET_TIL_PERIODE()))
+            String.valueOf(ressursLederForDenneEnheten.getORGENHET_TIL_PERIODE())
         ));   // orgEnhet 5 får ID 1
         orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(
             lederenErPaDenneEnheten,
             2,// orgEnhet 4 får ID 2
             String.valueOf(lederenErPaDenneEnheten.getORGENHET_FRA_PERIODE()),
-            Optional.of(String.valueOf(lederenErPaDenneEnheten.getORGENHET_TIL_PERIODE()))
+            String.valueOf(lederenErPaDenneEnheten.getORGENHET_TIL_PERIODE())
         ));
 
         // Lagrer orgTilknytning for testNavIdent4 til orgEnhet ID_2 (testId4)

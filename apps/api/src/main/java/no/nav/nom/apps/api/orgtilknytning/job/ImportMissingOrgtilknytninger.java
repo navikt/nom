@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
 
 @Service
@@ -153,14 +154,14 @@ public class ImportMissingOrgtilknytninger {
         return line.startsWith("NAV-ident,Navn");
     }
 
-    public LocalDate getFomDato(LocalDate orgEnhetGyldigFom, Optional<LocalDate> ressursStartDato) {
-        if (ressursStartDato.isEmpty()) {
+    public LocalDate getFomDato(LocalDate orgEnhetGyldigFom, LocalDate ressursStartDato) {
+        if (isNull(ressursStartDato)) {
             return orgEnhetGyldigFom;
         } else {
-            if (orgEnhetGyldigFom.isAfter(ressursStartDato.get())) {
+            if (orgEnhetGyldigFom.isAfter(ressursStartDato)) {
                 return orgEnhetGyldigFom;
             } else {
-                return ressursStartDato.get();
+                return ressursStartDato;
             }
         }
     }
@@ -187,7 +188,7 @@ public class ImportMissingOrgtilknytninger {
             return "";
         }
 
-        LocalDate fomDato = getFomDato(orgEnhet.gyldigFom(), ressurs.startdato());
+        LocalDate fomDato = getFomDato(orgEnhet.gyldigFom(), ressurs.startdato().orElse(null));
         
         if (ressurs.sluttdato().isPresent() && ressurs.sluttdato().get().isBefore(LocalDate.now())) {
             log.info(SECURE_LOGS, "Sluttdato {} er passert for ressurs {}, så oppretter ikke orgtilknytning", ressurs.sluttdato().get(), ressurs.navident());

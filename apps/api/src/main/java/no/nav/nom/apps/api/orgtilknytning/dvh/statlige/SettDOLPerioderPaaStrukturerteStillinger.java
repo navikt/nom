@@ -5,16 +5,17 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident;
-import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import static java.util.Comparator.comparing;
-import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
@@ -47,7 +48,7 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         List<StillingPeriode> historicStillingPerioder = handleHistoricPerioder(
             sspForNavident, splittedeSPer.stream()
                 .filter(sp -> historicFomDates.contains(sp.gyldigFom()))
-                .sorted((o1, o2) -> compare(o1.tilknytningtype(), o2.tilknytningtype()))
+                .sorted((o1, o2) -> compare(o1.tilknytningtype().orElse(null), o2.tilknytningtype().orElse(null)))
                 .toList(),
             historicFomDates
         );
@@ -55,14 +56,14 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         List<StillingPeriode> currentStillingPerioder = handleCurrentPerioder(
             sspForNavident, splittedeSPer.stream()
                 .filter(sp -> sp.gyldigFom().equals(currentFomDate))
-                .sorted((o1, o2) -> compare(o1.tilknytningtype(), o2.tilknytningtype()))
+                .sorted((o1, o2) -> compare(o1.tilknytningtype().orElse(null), o2.tilknytningtype().orElse(null)))
                 .toList()
         );
 
         List<StillingPeriode> futureStillingPerioder = handleFuturePerioder(
             sspForNavident, splittedeSPer.stream()
                 .filter(sp -> futureFomDates.contains(sp.gyldigFom()))
-                .sorted((o1, o2) -> compare(o1.tilknytningtype(), o2.tilknytningtype()))
+                .sorted((o1, o2) -> compare(o1.tilknytningtype().orElse(null), o2.tilknytningtype().orElse(null)))
                 .toList(),
             futureFomDates
         );

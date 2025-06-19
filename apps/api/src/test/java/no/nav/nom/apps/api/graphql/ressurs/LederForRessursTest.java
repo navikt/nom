@@ -19,7 +19,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils.orgEnhetStateToOrganiseringState;
@@ -252,7 +251,7 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
             dvhOrgEnhetMock,
             idSuffix,
             String.valueOf(dvhOrgEnhetMock.getORGENHET_FRA_PERIODE()),
-            Optional.of(String.valueOf(dvhOrgEnhetMock.getORGENHET_TIL_PERIODE()))
+            String.valueOf(dvhOrgEnhetMock.getORGENHET_TIL_PERIODE())
         );
         orgEnhetStateRepository.update(state);
         return state;
@@ -274,7 +273,7 @@ public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
             dvhOrgEnhetMock,
             idSuffix,
             String.valueOf(dvhOrgEnhetMock.getORGENHET_FRA_PERIODE()),
-            Optional.of(String.valueOf(dvhOrgEnhetMock.getORGENHET_TIL_PERIODE()))
+            String.valueOf(dvhOrgEnhetMock.getORGENHET_TIL_PERIODE())
         );
     }
 

@@ -7,7 +7,6 @@ import no.nav.nom.apps.api.common.OrgEnhetStateBuilder;
 import no.nav.nom.apps.api.common.RessursStateBuilder;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
-import no.nav.nom.apps.api.graphql.OldGraphQLTestBase;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -15,12 +14,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -75,8 +72,8 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
     @Test
     @DisplayName("Søk på agressoId")
     public void scenario2() {
-        var e1 = new OrgEnhetStateBuilder(1).navn("testid").uniqueAgressoId(Optional.of("unique-1")).build();
-        var e2 = new OrgEnhetStateBuilder(2).navn("testid2").uniqueAgressoId(Optional.of("unique-2")).build();
+        var e1 = new OrgEnhetStateBuilder(1).navn("testid").uniqueAgressoId("unique-1").build();
+        var e2 = new OrgEnhetStateBuilder(2).navn("testid2").uniqueAgressoId("unique-2").build();
         List.of(e1, e2).forEach(kafkaUtils::createOrgenhetHendelseEventSource);
 
         luceneService.addInvalidatedEntitiesToIndex();
@@ -96,7 +93,7 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
     public void scenario3() {
 
         var mocknavn = "testenhet";
-        var e1 = new OrgEnhetStateBuilder(1).navn(mocknavn).uniqueAgressoId(Optional.of("unique-1")).build();
+        var e1 = new OrgEnhetStateBuilder(1).navn(mocknavn).uniqueAgressoId("unique-1").build();
         kafkaUtils.createOrgenhetHendelseEventSource(e1);
         luceneService.addInvalidatedEntitiesToIndex();
 
@@ -113,7 +110,7 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
 
         var r1 = new RessursStateBuilder(1).build();
         var r2 = new RessursStateBuilder(2).visningsnavn("test1", "etternavn").build();
-        var e1 = new OrgEnhetStateBuilder(1).navn("testenhet").uniqueAgressoId(Optional.of("unique-1")).build();
+        var e1 = new OrgEnhetStateBuilder(1).navn("testenhet").uniqueAgressoId("unique-1").build();
 
         List.of(r1,r2).forEach(kafkaUtils::createRessursHendelseEventSource);
         List.of(e1).forEach(kafkaUtils::createOrgenhetHendelseEventSource);
@@ -156,8 +153,8 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
         kafkaUtils.createRessursHendelseEventSource("1");
         kafkaUtils.createRessursHendelseEventSource("2");
 
-        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(1).navn("NAV City").uniqueAgressoId(Optional.of("unique-1")).build());
-        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(2).navn("Not-to-find").uniqueAgressoId(Optional.of("unique-2")).build());
+        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(1).navn("NAV City").uniqueAgressoId("unique-1").build());
+        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(2).navn("Not-to-find").uniqueAgressoId("unique-2").build());
 
         luceneService.addInvalidatedEntitiesToIndex();
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
@@ -197,8 +194,8 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
 
         kafkaUtils.createRessursHendelseEventSource("1");
         kafkaUtils.createRessursHendelseEventSource("2");
-        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(3).navn("test 3").gyldigTom(Optional.of(passedDate)).uniqueAgressoId(Optional.of("unique-1")).build());
-        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(4).navn("test 4").uniqueAgressoId(Optional.of("unique-2")).build());
+        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(3).navn("test 3").gyldigTom(passedDate).uniqueAgressoId("unique-1").build());
+        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(4).navn("test 4").uniqueAgressoId("unique-2").build());
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
         luceneService.addInvalidatedEntitiesToIndex();
@@ -231,9 +228,9 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
     public void scenario71_orgniv() {
         var r1 = new RessursStateBuilder(1).visningsnavn("fornavn", "etternavn").build();
 
-        var e1 = new OrgEnhetStateBuilder(1).navn("fornavnene").agressoOrgNivaa(Optional.of("ORGNIV2")).uniqueAgressoId(Optional.of("unique-1")).build();
-        var e2 = new OrgEnhetStateBuilder(2).navn("fornavnet").uniqueAgressoId(Optional.of("unique-2")).build();
-        var e3 = new OrgEnhetStateBuilder(3).navn("fornavn").uniqueAgressoId(Optional.of("unique-3")).build();
+        var e1 = new OrgEnhetStateBuilder(1).navn("fornavnene").agressoOrgNivaa("ORGNIV2").uniqueAgressoId("unique-1").build();
+        var e2 = new OrgEnhetStateBuilder(2).navn("fornavnet").uniqueAgressoId("unique-2").build();
+        var e3 = new OrgEnhetStateBuilder(3).navn("fornavn").uniqueAgressoId("unique-3").build();
 
         List.of(e1, e2, e3).forEach(kafkaUtils::createOrgenhetHendelseEventSource);
         List.of(r1).forEach(kafkaUtils::createRessursHendelseEventSource);

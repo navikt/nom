@@ -12,7 +12,8 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Component
 public class GraphQLFieldConsumptionCounter {
@@ -32,7 +33,7 @@ public class GraphQLFieldConsumptionCounter {
 
     public void count(DataFetchingEnvironment env) {
         final var consumer = securityUtil.getAzpName().orElse("unknown");
-        final var operationName = Optional.ofNullable(env.getOperationDefinition().getName()); // operation name is the query alias, which may be null
+        final var operationName = env.getOperationDefinition().getName(); // operation name is the query alias, which may be null
         final var queryRoot = env.getField().getName();
 
         registerValues(queryRoot, queryRoot, consumer, operationName); // register query root
@@ -42,13 +43,13 @@ public class GraphQLFieldConsumptionCounter {
         });
     }
 
-    private void registerValues(String field, String path, String consumer, Optional<String> operationName) {
+    private void registerValues(String field, String path, String consumer, String operationName) {
         Map<String, String> tagsAndValues = new LinkedHashMap<>();
 
         tagsAndValues.put("field", field);
         tagsAndValues.put("path", path);
         tagsAndValues.put("consumer", consumer);
-        tagsAndValues.put("operationName", operationName.orElse("unknown"));
+        tagsAndValues.put("operationName", isEmpty(operationName) ? "unknown" : operationName);
 
         incrementCounter(METRICS_COUNTER_NAME, tagsAndValues);
     }

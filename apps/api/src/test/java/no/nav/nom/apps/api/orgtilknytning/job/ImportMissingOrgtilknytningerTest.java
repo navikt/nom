@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
@@ -39,6 +38,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -46,7 +46,12 @@ import java.io.StringReader;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Stream;
@@ -89,13 +94,13 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
     private MasteredRessursStateRepository masteredRessursStateRepository;
 
 
-    @MockBean
+    @MockitoBean
     private RessursStateRepository ressursStateRepositoryMock;
 
-    @MockBean
+    @MockitoBean
     private OrgEnhetStateRepository orgEnhetStateRepositoryMock;
 
-    @MockBean
+    @MockitoBean
     private OrgtilknytningStateRepository orgtilknytningStateRepositoryMock;
 
 
@@ -311,7 +316,7 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
     @DisplayName("FomDato for Orgtilknytning skal settes til seneste av orgEnhet.gyldigFom og ressurs.startDato")
     void should_use_latest_date_for_ot_fromDato(
             LocalDate orgEnhetGyldigFom,
-            @SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<LocalDate> ressursStartDato,
+            LocalDate ressursStartDato,
             LocalDate otFromDato
     ) {
         assertThat(importMissingOrgtilknytninger.getFomDato(orgEnhetGyldigFom, ressursStartDato)).isEqualTo(otFromDato);
@@ -320,9 +325,9 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
     private static Stream<Arguments> correctOrgtilknytningFomDatoInput() {
         return Stream.of(
                 // Orgenhet gyldigFom, ressurs startdato, forventet resultat
-                Arguments.of(DATE_IN_2023, Optional.of(DATE_IN_2024), DATE_IN_2024),
-                Arguments.of(DATE_IN_2024, Optional.of(DATE_IN_2019), DATE_IN_2024),
-                Arguments.of(DATE_IN_2024, Optional.empty(), DATE_IN_2024)
+                Arguments.of(DATE_IN_2023, DATE_IN_2024, DATE_IN_2024),
+                Arguments.of(DATE_IN_2024, DATE_IN_2019, DATE_IN_2024),
+                Arguments.of(DATE_IN_2024, null, DATE_IN_2024)
         );
     }
 

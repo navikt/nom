@@ -54,7 +54,7 @@ public class TriggerUtledNomNivaaPaaNytt {
 
         orgenheterToProcess
             .forEach(orgEnhetState ->
-                orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdate(orgEnhetState, orgEnhetState.orgEnhetsType())
+                orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdate(orgEnhetState, orgEnhetState.orgEnhetsType().isPresent() ? orgEnhetState.orgEnhetsType().get() : null)
             );
 
         if (orgEnhetId != null) {
