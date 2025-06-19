@@ -183,6 +183,9 @@ spring:
     listener:
       missing-topics-fatal: true
     client-id: ${HOSTNAME}
+  http:
+    codecs:
+      max-in-memory-size: 400MB
 
 management:
   metrics:
