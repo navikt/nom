@@ -232,10 +232,9 @@ public class NomRemedyIntegrasjonServiceNew {
     private boolean ressursStateUpdate(RessursState ressursState, AggregateState aggregateState) {
         var navident = ressursState.navident();
         var currentDolOrgtilknytning = getCurrentDolByNavident(navident);
+        var futureDolOrgtilknytning = getFutureDolByNavident(navident);
         var erMasseflytting = !isNull(aggregateState.getMasseflytting()) && aggregateState.getMasseflytting();
         logger.info("Masseflytting: {} for navident: {}", erMasseflytting, navident);
-
-        var futureDolOrgtilknytning = getFutureDolByNavident(navident);
 
         if (ressursState.sluttdato().isPresent()) {
             var sluttdato = ressursState.sluttdato().get();
@@ -255,10 +254,16 @@ public class NomRemedyIntegrasjonServiceNew {
                     logger.info("Ressurs {} er merket for sletting i IR", navident);
                 }
             } else if (!sluttdato.isBefore(LocalDate.now())) {
+                logger.info("Ressurs {} har en sluttdato i fremtiden, oppdaterer ressurs i aggregate_state tabellen", navident);
                 aggregateStateRepository.save(
                     aggregateState.toBuilder()
                         .delayedUntil(ressursState.sluttdato().get().plusDays(1))
                         .build());
+                logger.info(
+                    "RessursState med fid {} ble utsatt i aggregateStateTabellen helt til {}",
+                    aggregateState.getStateFid(),
+                    ressursState.sluttdato().get().plusDays(1)
+                );
             }
         } else {
             if (currentDolOrgtilknytning.isPresent()) {
