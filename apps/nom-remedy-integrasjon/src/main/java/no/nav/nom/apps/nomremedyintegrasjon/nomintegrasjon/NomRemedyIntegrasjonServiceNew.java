@@ -220,6 +220,7 @@ public class NomRemedyIntegrasjonServiceNew {
                     aggregateState.getStateFid(),
                     orgtilknytningState.gyldigFom()
                 );
+                return false;
             } else {
                 saveStateToRemedyIfNewOrReactivatedRessurs(ressursState, orgtilknytningState);
                 return true;
@@ -264,6 +265,7 @@ public class NomRemedyIntegrasjonServiceNew {
                     aggregateState.getStateFid(),
                     ressursState.sluttdato().get().plusDays(1)
                 );
+                return false;
             }
         } else {
             if (currentDolOrgtilknytning.isPresent()) {
