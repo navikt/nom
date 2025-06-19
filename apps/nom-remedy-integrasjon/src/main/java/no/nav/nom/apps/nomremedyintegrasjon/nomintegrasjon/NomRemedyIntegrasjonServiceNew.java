@@ -236,14 +236,12 @@ public class NomRemedyIntegrasjonServiceNew {
         if ((ressursState.startdato().isPresent() && dolOrgtilknytning.gyldigFom() != null)
             && (ressursState.startdato().get().isAfter(LocalDate.now()) || dolOrgtilknytning.gyldigFom().isAfter(LocalDate.now()))) {
             if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-                var entryId = remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntityNew(
-                        nomIntegrasjonEntityFromNomData(ressursState, dolOrgtilknytning, false), ressursState.sistEndretAv())
-                    .getEntryId();
+                remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntityNew(
+                        nomIntegrasjonEntityFromNomData(ressursState, dolOrgtilknytning, false), ressursState.sistEndretAv());
                 logger.info(
-                    "Opprettet ressurs i IR med navident {}, startdato {} og entryId {}",
+                    "Opprettet ressurs i IR med navident {}, startdato {}",
                     ressursState.navident(),
-                    ressursState.startdato().get(),
-                    entryId
+                    ressursState.startdato().get()
                 );
             } else {
                 logger.info("Opprettet ressurs i IR med navident {}, startdato {}", ressursState.navident(), ressursState.startdato().get());
