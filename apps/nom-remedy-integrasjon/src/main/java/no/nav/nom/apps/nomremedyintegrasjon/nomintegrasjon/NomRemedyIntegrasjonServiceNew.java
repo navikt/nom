@@ -7,6 +7,7 @@ import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredVa
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateStateRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEventRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorStateRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -50,6 +52,7 @@ public class NomRemedyIntegrasjonServiceNew {
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final Unleash unleash;
+    private final DelayedEventRepository delayedEventRepository;
 
     public NomRemedyIntegrasjonServiceNew(
         LeaderElection leaderElection,
@@ -59,7 +62,8 @@ public class NomRemedyIntegrasjonServiceNew {
         ErrorStateRepository errorStateRepository,
         RessursStateRepository ressursStateRepository,
         OrgtilknytningStateRepository orgtilknytningStateRepository,
-        Unleash unleash
+        Unleash unleash,
+        DelayedEventRepository delayedEventRepository
     ) {
         this.leaderElection = leaderElection;
         this.remedyIntegrasjonRepositoryService = remedyIntegrasjonRepositoryService;
@@ -69,6 +73,7 @@ public class NomRemedyIntegrasjonServiceNew {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.unleash = unleash;
+        this.delayedEventRepository = delayedEventRepository;
     }
 
     @Transactional
@@ -85,8 +90,45 @@ public class NomRemedyIntegrasjonServiceNew {
     @Scheduled(cron = "0 15 0 * * *")
     public void executeDelayedStateUpdate() {
         if (leaderElection.isLeader()) {
+            logger.info("Executing delayed state update");
             var delayedStates = aggregateStateRepository.findByDelayedUntilAndMasseflyttingIsFalse(LocalDate.now());
+            logger.info("Delayed state update: {}", delayedStates);
             List<UUID> rowsToDelete = executeStateUpdates(delayedStates);
+            aggregateStateRepository.deleteAllById(rowsToDelete);
+        }
+    }
+
+    @Transactional
+    @Scheduled(cron = "0 10 0 * * *")
+    public void executeOldDelayedStateUpdate() {
+        if (leaderElection.isLeader()) {
+            logger.info("Executing old delayed state update");
+            var oldDelayedStates = delayedEventRepository.findByDelayedUntilLessThanEqual(LocalDate.now());
+            if (oldDelayedStates.isEmpty()) {
+                logger.info("No old delayed states to update");
+                return;
+            }
+            List<AggregateState> oldDelayedStatesToUpdate = new ArrayList<>();
+            oldDelayedStates.forEach(state -> {
+                var fid = state.getEvent().getFid();
+                var fidType = fid.contains("ressurs") ? RessursState.class.getSimpleName() : OrgtilknytningState.class.getSimpleName();
+                var navident = fidType.equals("OrgtilknytningState") ? orgtilknytningStateRepository.findByFid(fid).map(OrgtilknytningState::navident)
+                    .orElseThrow(() -> OrgtilknytningNotFoundException.orgtilknytningNotFoundException(fid)) :
+                    ressursStateRepository.findByFid(fid).map(RessursState::navident)
+                        .orElseThrow(() -> RessursNotFoundException.notFound(fid));
+
+                oldDelayedStatesToUpdate.add(
+                    AggregateState.builder()
+                        .createdAt(LocalDateTime.now())
+                        .navident(navident)
+                        .stateFid(fid)
+                        .stateType(fidType)
+                        .delayedUntil(null)
+                        .build()
+                );
+            });
+            logger.info("Old delayed state update: {}", oldDelayedStates);
+            List<UUID> rowsToDelete = executeStateUpdates(oldDelayedStatesToUpdate);
             aggregateStateRepository.deleteAllById(rowsToDelete);
         }
     }
@@ -195,15 +237,7 @@ public class NomRemedyIntegrasjonServiceNew {
 
         var futureDolOrgtilknytning = getFutureDolByNavident(navident);
 
-        if (currentDolOrgtilknytning.isPresent()) {
-            saveStateToRemedy(
-                nomIntegrasjonEntityFromNomData(ressursState, currentDolOrgtilknytning.get(), erMasseflytting),
-                ressursState.sistEndretAv()
-            );
-        } else if (futureDolOrgtilknytning.isPresent()) {
-            var dolOrgtilknytning = futureDolOrgtilknytning.get();
-            saveStateToRemedyIfNewOrReactivatedRessurs(ressursState, dolOrgtilknytning);
-        } else if (ressursState.sluttdato().isPresent()) {
+        if (ressursState.sluttdato().isPresent()) {
             var sluttdato = ressursState.sluttdato().get();
             if (sluttdato.isBefore(LocalDate.now())) {
                 if (unleash.isEnabled(UNLEASH_TOGGLE)) {
@@ -227,7 +261,17 @@ public class NomRemedyIntegrasjonServiceNew {
                         .build());
             }
         } else {
-            throw OrgtilknytningNotFoundException.orgtilknytningNotFoundException(navident);
+            if (currentDolOrgtilknytning.isPresent()) {
+                saveStateToRemedy(
+                    nomIntegrasjonEntityFromNomData(ressursState, currentDolOrgtilknytning.get(), erMasseflytting),
+                    ressursState.sistEndretAv()
+                );
+            } else if (futureDolOrgtilknytning.isPresent()) {
+                var dolOrgtilknytning = futureDolOrgtilknytning.get();
+                saveStateToRemedyIfNewOrReactivatedRessurs(ressursState, dolOrgtilknytning);
+            } else {
+                throw OrgtilknytningNotFoundException.orgtilknytningNotFoundException(navident);
+            }
         }
         return true;
     }
