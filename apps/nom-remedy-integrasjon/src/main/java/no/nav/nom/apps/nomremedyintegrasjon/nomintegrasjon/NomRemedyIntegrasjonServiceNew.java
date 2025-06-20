@@ -87,7 +87,7 @@ public class NomRemedyIntegrasjonServiceNew {
     }
 
     @Transactional
-    @Scheduled(cron = "0 0 12 * * *")
+    @Scheduled(cron = "0 15 0 * * *")
     public void executeDelayedStateUpdate() {
         if (leaderElection.isLeader()) {
             logger.info("Executing delayed state update");
@@ -99,7 +99,7 @@ public class NomRemedyIntegrasjonServiceNew {
     }
 
     @Transactional
-    //@Scheduled(cron = "0 10 0 * * *")
+    @Scheduled(cron = "0 10 0 * * *")
     public void executeOldDelayedStateUpdate() {
         if (leaderElection.isLeader()) {
             logger.info("Executing old delayed state update");
@@ -123,7 +123,7 @@ public class NomRemedyIntegrasjonServiceNew {
                         .navident(navident)
                         .stateFid(fid)
                         .stateType(fidType)
-                        .delayedUntil(null)
+                        .delayedUntil(state.getDelayedUntil())
                         .build()
                 );
             });
