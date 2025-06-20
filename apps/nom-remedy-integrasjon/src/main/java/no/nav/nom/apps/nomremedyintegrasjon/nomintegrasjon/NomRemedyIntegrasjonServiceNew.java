@@ -87,11 +87,11 @@ public class NomRemedyIntegrasjonServiceNew {
     }
 
     @Transactional
-    @Scheduled(cron = "0 15 0 * * *")
+    @Scheduled(cron = "0 30 11 * * *")
     public void executeDelayedStateUpdate() {
         if (leaderElection.isLeader()) {
             logger.info("Executing delayed state update");
-            var delayedStates = aggregateStateRepository.findByDelayedUntilAndMasseflyttingIsFalse(LocalDate.now());
+            var delayedStates = aggregateStateRepository.findAggregateStatesByMasseflyttingIsFalseAndDelayedUntilIsLessThanEqual(LocalDate.now());
             logger.info("Delayed state update: {}", delayedStates);
             List<UUID> rowsToDelete = executeStateUpdates(delayedStates);
             aggregateStateRepository.deleteAllById(rowsToDelete);
@@ -99,7 +99,7 @@ public class NomRemedyIntegrasjonServiceNew {
     }
 
     @Transactional
-    @Scheduled(cron = "0 10 0 * * *")
+    //@Scheduled(cron = "0 10 0 * * *")
     public void executeOldDelayedStateUpdate() {
         if (leaderElection.isLeader()) {
             logger.info("Executing old delayed state update");
