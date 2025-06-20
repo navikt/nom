@@ -87,11 +87,11 @@ public class NomRemedyIntegrasjonServiceNew {
     }
 
     @Transactional
-    @Scheduled(cron = "0 30 11 * * *")
+    @Scheduled(cron = "0 0 12 * * *")
     public void executeDelayedStateUpdate() {
         if (leaderElection.isLeader()) {
             logger.info("Executing delayed state update");
-            var delayedStates = aggregateStateRepository.findAggregateStatesByMasseflyttingIsFalseAndDelayedUntilIsLessThanEqual(LocalDate.now());
+            var delayedStates = aggregateStateRepository.findAggregateStatesByMasseflyttingIsFalseOrMasseflyttingIsNullAndDelayedUntilIsLessThanEqual(LocalDate.now());
             logger.info("Delayed state update: {}", delayedStates);
             List<UUID> rowsToDelete = executeStateUpdates(delayedStates);
             aggregateStateRepository.deleteAllById(rowsToDelete);

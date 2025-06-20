@@ -254,7 +254,7 @@ public class NomRemedyIntegrasjonServiceNewTest {
         // And
         doReturn(List.of(aggregateState))
                 .when(aggregateStateRepository)
-                .findAggregateStatesByMasseflyttingIsFalseAndDelayedUntilIsLessThanEqual(LocalDate.now());
+                .findAggregateStatesByMasseflyttingIsFalseOrMasseflyttingIsNullAndDelayedUntilIsLessThanEqual(LocalDate.now());
 
         doReturn(Optional.of(ressursState))
                 .when(ressursStateRepository)
@@ -269,7 +269,7 @@ public class NomRemedyIntegrasjonServiceNewTest {
 
         // Then
         verify(aggregateStateRepository, times(0)).findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
-        verify(aggregateStateRepository, times(1)).findAggregateStatesByMasseflyttingIsFalseAndDelayedUntilIsLessThanEqual(any());
+        verify(aggregateStateRepository, times(1)).findAggregateStatesByMasseflyttingIsFalseOrMasseflyttingIsNullAndDelayedUntilIsLessThanEqual(any());
         verify(aggregateStateRepository, times(0)).save(aggregateState.toBuilder().delayedUntil(orgtilknytningState.gyldigFom()).build());
         verify(aggregateStateRepository, times(1)).deleteAllById(List.of(aggregateState.getAggregateStateId()));
         verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString());
