@@ -60,7 +60,7 @@ export function FornyDelegering() {
   return (
     <>
       <Trigger onClick={() => ref.current?.showModal()}>
-        Fornye delegering
+        Forny delegering
       </Trigger>
 
       <FormProvider {...methods}>
@@ -70,7 +70,7 @@ export function FornyDelegering() {
         >
           <Modal
             className="w-fit"
-            header={{ heading: "Fornye delegering" }}
+            header={{ heading: "Forny delegering" }}
             onClose={() => {
               methods.reset();
               methods.clearErrors();
