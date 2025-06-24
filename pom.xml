@@ -53,7 +53,7 @@
         <postgresql.version>42.7.7</postgresql.version>
         <microsoft-graph.version>6.42.1</microsoft-graph.version>
         <azure-identity.version>1.16.2</azure-identity.version>
-        <caffeine.version>3.2.0</caffeine.version>
+        <caffeine.version>3.2.1</caffeine.version>
 
 
         <commons-io.version>2.19.0</commons-io.version> <!-- versjonskonflikt og https://github.com/navikt/nom/security/dependabot/172 -->
