@@ -155,6 +155,9 @@ export const OrgRessursTabellPageInner = ({
               <Table.ColumnHeader scope="col" sortKey="telefonnumer">
                 Telefonnr.
               </Table.ColumnHeader>
+              <Table.ColumnHeader scope="col" sortKey="telefonnumer">
+                E-post
+              </Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
           <Table.Body
@@ -218,6 +221,7 @@ export const OrgRessursTabellPageInner = ({
                 >
                   <TelefonNummere ressurs={ressurs} />
                 </Table.DataCell>
+                <Table.DataCell>{ressurs.epost}</Table.DataCell>
               </Table.Row>
             ))}
           </Table.Body>
@@ -250,6 +254,7 @@ interface CustomRessurs {
   visningsnavn: Visningsnavn;
   primaryTelefonnummer?: string;
   telefoner: Telefon[];
+  epost?: string;
   sektor: Sektor;
   orgEnheter: CustomOrgEnhet[];
   tidligsteFom?: Date | string;
@@ -291,6 +296,7 @@ const createCustomRessurser = (
       primaryTelefonnummer: ressurs.primaryTelefonnummer,
       sektor: ressurs.sektor,
       telefoner: ressurs.telefoner,
+      epost: ressurs.epost,
       orgEnheter: customOrgEnheter,
       tidligsteFom: tidligsteFomDato,
       sluttdato: ressurs.sluttdato === null ? undefined : ressurs.sluttdato,
