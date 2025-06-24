@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
+import no.nav.nom.contract.nom.eventsource.Event;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -133,6 +134,12 @@ public class AdminController {
     public ResponseEntity<String> deleteErrorState(@PathVariable String fid) {
         nomRemedyIntegrasjonServiceNew.deleteErrorState(fid);
         return ResponseEntity.ok("Slettet error state med id: " + fid);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping(value = "getAllDelayStates")
+    public ResponseEntity<List<Event>> getAllDelayStates() {
+        return ResponseEntity.ok(nomRemedyIntegrasjonServiceNew.getAllDelayedEvents());
     }
 
     private static String getAuthenticatedNavIdent() {

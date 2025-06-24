@@ -7,10 +7,12 @@ import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredVa
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateStateRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEvent;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEventRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorStateRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
+import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
@@ -418,5 +420,9 @@ public class NomRemedyIntegrasjonServiceNew {
                     .stateType(ressursState.getClass().getSimpleName())
                     .build()
             ));
+    }
+
+    public List<Event> getAllDelayedEvents() {
+        return delayedEventRepository.findAll().stream().map(DelayedEvent::getEvent).toList();
     }
 }
