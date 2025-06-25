@@ -11,6 +11,7 @@ import {
 import { Link } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
+import { Link as ReactRouterLink } from "@tanstack/react-router";
 
 import { getRessurs } from "~/api/react-query-endpoints";
 import ContentWrapper from "~/components/ContentWrapper";
@@ -185,7 +186,10 @@ function IdentTypeStandardReceipt({ ressurs }: { ressurs: Ressurs }) {
                 <BodyShort>
                   Statlig ansatte registreres i Unit4 ved hjelp av lønnsskjema.
                   Det aktuelle lønnsskjemaet{" "}
-                  <Link href={lonnsskjemaLenke}>finner du her</Link>.
+                  <Link href={lonnsskjemaLenke} target="_blank">
+                    finner du her
+                  </Link>
+                  .
                 </BodyShort>
               </VStack>
             </Alert>
@@ -193,17 +197,7 @@ function IdentTypeStandardReceipt({ ressurs }: { ressurs: Ressurs }) {
         </HStack>
       </div>
 
-      <PanelLink
-        href="https://it-hjelpa.adeo.no/arsys/home"
-        label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
-      />
-      {/*TODO: disse burde ikke være hrefs, men bruker Routeren sine lenker slik at det ikke gjøres en sidenavigasjon og hele siden må lastes på nytt.*/}
-      <PanelLink
-        href={`/ressurs/${ressurs.navident}`}
-        label="Vis medarbeiderens profil"
-      />
-
-      <PanelLink href="/" label="Gå tilbake til forsiden" />
+      <RessursLenker ressursNavIdent={ressurs.navident} />
     </>
   );
 }
@@ -238,17 +232,7 @@ function IdentTypeRobotReceipt({ ressurs }: { ressurs: Ressurs }) {
         </HStack>
       </div>
 
-      <PanelLink
-        href="https://it-hjelpa.adeo.no/arsys/home"
-        label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
-      />
-
-      <PanelLink
-        href={`/ressurs/${ressurs.navident}`}
-        label="Vis medarbeiderens profil"
-      />
-
-      <PanelLink href="/" label="Gå tilbake til forsiden" />
+      <RessursLenker ressursNavIdent={ressurs.navident} />
     </>
   );
 }
@@ -297,17 +281,7 @@ function IdentTypeUtenlandskKonsulentReceipt({
         </HStack>
       </div>
 
-      <PanelLink
-        href="https://it-hjelpa.adeo.no/arsys/home"
-        label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
-      />
-
-      <PanelLink
-        href={`/ressurs/${ressurs.navident}`}
-        label="Vis medarbeiderens profil"
-      />
-
-      <PanelLink href="/" label="Gå tilbake til forsiden" />
+      <RessursLenker ressursNavIdent={ressurs.navident} />
     </>
   );
 }
@@ -342,55 +316,80 @@ function IdentTypeVikafossenReceipt({ ressurs }: { ressurs: Ressurs }) {
         </HStack>
       </div>
 
-      <PanelLink
-        href="https://it-hjelpa.adeo.no/arsys/home"
-        label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
-      />
-
-      <PanelLink
-        href={`/ressurs/${ressurs.navident}`}
-        label="Vis medarbeiderens profil"
-      />
-
-      <PanelLink href="/" label="Gå tilbake til forsiden" />
+      <RessursLenker ressursNavIdent={ressurs.navident} />
     </>
   );
 }
 
-function PanelLink({ label, href }: { label: string; href: string }) {
-  return (
-    <Link
-      css={css`
-        display: flex;
-        width: 70%;
-        margin: auto;
-        padding: var(--a-spacing-4);
-        border: 1px solid var(--a-border-default);
-        text-decoration: none;
-        font-size: var(--a-font-size-heading-medium);
-        color: var(--a-text-default);
-        justify-content: space-between;
+function RessursLenker({ ressursNavIdent }: { ressursNavIdent: string }) {
+  const identrutinenLenke = "https://it-hjelpa.adeo.no/arsys/home";
 
-        :hover,
-        :active {
-          color: var(--a-text-action-hover);
-          border: 1px solid var(--a-border-action-hover);
-          text-decoration: underline;
-          box-shadow: var(--a-shadow-small);
-          background: unset;
-        }
-      `}
-      href={href}
-    >
-      <Label
-        css={css`
-          cursor: pointer;
-          font-size: inherit;
-          line-height: inherit;
-        `}
-      >
-        {label}
-      </Label>
+  return (
+    <>
+      <PanelLink
+        href={identrutinenLenke}
+        label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
+        newTab
+      />
+
+      <PanelLink
+        href={`/ressurs/${ressursNavIdent}`}
+        internal
+        label="Vis medarbeiderens profil"
+      />
+
+      <PanelLink href="/" internal label="Gå tilbake til forsiden" />
+    </>
+  );
+}
+
+function PanelLink({
+  label,
+  href,
+  newTab = false,
+  internal = false,
+}: {
+  label: string;
+  href: string;
+  newTab?: boolean;
+  internal?: boolean;
+}) {
+  const sharedStyles = css`
+    display: flex;
+    width: 70%;
+    margin: auto;
+    padding: var(--a-spacing-4);
+    border: 1px solid var(--a-border-default);
+    text-decoration: none;
+    font-size: var(--a-font-size-heading-medium);
+    color: var(--a-text-default);
+    justify-content: space-between;
+    align-items: center;
+
+    :hover,
+    :active {
+      color: var(--a-text-action-hover);
+      border: 1px solid var(--a-border-action-hover);
+      text-decoration: underline;
+      box-shadow: var(--a-shadow-small);
+      background: unset;
+    }
+  `;
+
+  const labelStyles = css`
+    cursor: pointer;
+    font-size: inherit;
+    line-height: inherit;
+  `;
+
+  return internal ? (
+    <ReactRouterLink css={sharedStyles} to={href}>
+      <Label css={labelStyles}>{label}</Label>
+      <ChevronRightIcon />
+    </ReactRouterLink>
+  ) : (
+    <Link css={sharedStyles} href={href} target={newTab ? "_blank" : undefined}>
+      <Label css={labelStyles}>{label}</Label>
       <ChevronRightIcon />
     </Link>
   );
