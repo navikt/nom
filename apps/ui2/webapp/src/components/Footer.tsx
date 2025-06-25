@@ -4,15 +4,26 @@ import {
   InformationSquareIcon,
   QuestionmarkDiamondIcon,
 } from "@navikt/aksel-icons";
-import { Link } from "@navikt/ds-react";
 import type { Ref, SVGProps } from "react";
 import { forwardRef } from "react";
 
+import { SmartLink } from "~/components/navigation/SmartLink";
 import { defaultWidth } from "~/resources/NomStyles";
 
 export const footerHeight = "180px";
 
 export function Footer() {
+  const sharepointLenke =
+    "https://navno.sharepoint.com/sites/intranett-organisasjon/SitePages/Organisasjonsmaster-(NOM).aspx?xsdata=MDV8MDF8fDQ5NzZlZGM5MjM5NTQ1MWIyZTU2MDhkYjEzZGU3OWNmfDYyMzY2NTM0MWVjMzQ5NjI4ODY5OWI1NTM1Mjc5ZDBifDB8MHw2MzgxMjU2MTg0NTAzNDU1NTh8VW5rbm93bnxWR1ZoYlhOVFpXTjFjbWwwZVZObGNuWnBZMlY4ZXlKV0lqb2lNQzR3TGpBd01EQWlMQ0pRSWpvaVYybHVNeklpTENKQlRpSTZJazkwYUdWeUlpd2lWMVFpT2pFeGZRPT18MXxNVFkzTmprMk5UQTBORFEwTlRzeE5qYzJPVFkxTURRME5EUTFPekU1T2pGaFlUQTNaVEpoTFdRMFpESXROREV6TlMxaU16TTVMVGd6WW1abU9ERXlNR1psTmw4ME0yVTJNakZoT0MwMk5UZ3lMVFEyWTJJdFlqSXhZeTAyTVRneE1qa3hNbVV6WXpSQWRXNXhMbWRpYkM1emNHRmpaWE09fGNlMjg1M2YzOTY1ZjQ2M2YyZTU2MDhkYjEzZGU3OWNmfDc5ZDFiMWQ3Yzc0NTQ2NTZiYTQ1Y2RmMGYxNjZjMGVj&sdata=MmJ2TjdJbFc2ZDZXSytiVFFUYU41OXZzM0ltcm9ab09xZVR5OEpPeVZ2WT0%3D&ovuser=62366534-1ec3-4962-8869-9b5535279d0b%2ctest%40nav.no&OR=Teams-HL&CT=1676969474366&clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiIyNy8yMzAxMDEwMDkxMyIsIkhhc0ZlZGVyYXRlZFVzZXIiOmZhbHNlfQ%3D%3D";
+
+  const slackLenke = "https://nav-it.slack.com/archives/C0362LA7ZLN";
+
+  const tilgjengelighetserklaeringLenke =
+    "https://uustatus.no/nb/erklaringer/publisert/ed146ebd-3afa-428e-95e1-e7dc21f56119";
+
+  const portenLenke =
+    "https://jira.adeo.no/plugins/servlet/desk/portal/581/?requestGroup=1144";
+
   return (
     <div
       css={css`
@@ -45,15 +56,12 @@ export function Footer() {
           defaultWidth,
         )}
       >
-        <Link
-          href="https://navno.sharepoint.com/sites/intranett-organisasjon/SitePages/Organisasjonsmaster-(NOM).aspx?xsdata=MDV8MDF8fDQ5NzZlZGM5MjM5NTQ1MWIyZTU2MDhkYjEzZGU3OWNmfDYyMzY2NTM0MWVjMzQ5NjI4ODY5OWI1NTM1Mjc5ZDBifDB8MHw2MzgxMjU2MTg0NTAzNDU1NTh8VW5rbm93bnxWR1ZoYlhOVFpXTjFjbWwwZVZObGNuWnBZMlY4ZXlKV0lqb2lNQzR3TGpBd01EQWlMQ0pRSWpvaVYybHVNeklpTENKQlRpSTZJazkwYUdWeUlpd2lWMVFpT2pFeGZRPT18MXxNVFkzTmprMk5UQTBORFEwTlRzeE5qYzJPVFkxTURRME5EUTFPekU1T2pGaFlUQTNaVEpoTFdRMFpESXROREV6TlMxaU16TTVMVGd6WW1abU9ERXlNR1psTmw4ME0yVTJNakZoT0MwMk5UZ3lMVFEyWTJJdFlqSXhZeTAyTVRneE1qa3hNbVV6WXpSQWRXNXhMbWRpYkM1emNHRmpaWE09fGNlMjg1M2YzOTY1ZjQ2M2YyZTU2MDhkYjEzZGU3OWNmfDc5ZDFiMWQ3Yzc0NTQ2NTZiYTQ1Y2RmMGYxNjZjMGVj&sdata=MmJ2TjdJbFc2ZDZXSytiVFFUYU41OXZzM0ltcm9ab09xZVR5OEpPeVZ2WT0%3D&ovuser=62366534-1ec3-4962-8869-9b5535279d0b%2ctest%40nav.no&OR=Teams-HL&CT=1676969474366&clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiIyNy8yMzAxMDEwMDkxMyIsIkhhc0ZlZGVyYXRlZFVzZXIiOmZhbHNlfQ%3D%3D"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
+        <SmartLink href={sharepointLenke}>
           <QuestionmarkDiamondIcon />
           Brukerveiledning
-        </Link>
-        <Link
+        </SmartLink>
+
+        <SmartLink
           css={css`
             svg {
               width: 20px;
@@ -61,20 +69,18 @@ export function Footer() {
               margin-right: 2px;
             }
           `}
-          href={"https://nav-it.slack.com/archives/C0362LA7ZLN"}
+          href={slackLenke}
         >
           <SlackIcon />
           #nom
-        </Link>
-        <Link
-          href="https://uustatus.no/nb/erklaringer/publisert/ed146ebd-3afa-428e-95e1-e7dc21f56119"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
+        </SmartLink>
+
+        <SmartLink href={tilgjengelighetserklaeringLenke}>
           <InformationSquareIcon />
           Tilgjengelighetserklæring
-        </Link>
-        <Link
+        </SmartLink>
+
+        <SmartLink
           css={css`
             grid-row: span 2;
             align-self: flex-start;
@@ -83,11 +89,11 @@ export function Footer() {
               align-self: start;
             }
           `}
-          href="https://jira.adeo.no/plugins/servlet/desk/portal/581/?requestGroup=1144"
+          href={portenLenke}
         >
           <EnvelopeClosedFillIcon />
           Meld feil i Porten
-        </Link>
+        </SmartLink>
       </div>
     </div>
   );

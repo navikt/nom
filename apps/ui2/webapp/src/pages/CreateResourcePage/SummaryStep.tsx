@@ -8,13 +8,12 @@ import {
   Loader,
   VStack,
 } from "@navikt/ds-react";
-import { Link } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
-import { Link as ReactRouterLink } from "@tanstack/react-router";
 
 import { getRessurs } from "~/api/react-query-endpoints";
 import ContentWrapper from "~/components/ContentWrapper";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
 import type { Ressurs } from "~/types/api-models";
@@ -135,9 +134,9 @@ function IdentTypeStandardReceipt({ ressurs }: { ressurs: Ressurs }) {
           </BodyShort>
           <BodyShort>
             Alle nye medarbeidere må signere identskjema.{" "}
-            <Link href={identskjemaLenke} target="_blank">
+            <SmartLink externalIcon href={identskjemaLenke} inline={true}>
               Gå til skjemaet for å laste det ned
-            </Link>
+            </SmartLink>
             .
           </BodyShort>
 
@@ -160,11 +159,11 @@ function IdentTypeStandardReceipt({ ressurs }: { ressurs: Ressurs }) {
                     dekket utlegg eller skal være stedfortredere
                   </li>
                 </ul>
-                <Link href={sharepointLenke} target="_blank">
+                <SmartLink href={sharepointLenke}>
                   På denne siden på Navet kan du ser mer detaljert informasjon
                   om hvilke typer kommunalt ansatte som skal registreres både i
                   NOM og i Unit4.
-                </Link>
+                </SmartLink>
               </BodyShort>
             </Alert>
           )}
@@ -186,9 +185,9 @@ function IdentTypeStandardReceipt({ ressurs }: { ressurs: Ressurs }) {
                 <BodyShort>
                   Statlig ansatte registreres i Unit4 ved hjelp av lønnsskjema.
                   Det aktuelle lønnsskjemaet{" "}
-                  <Link href={lonnsskjemaLenke} target="_blank">
+                  <SmartLink href={lonnsskjemaLenke} inline>
                     finner du her
-                  </Link>
+                  </SmartLink>
                   .
                 </BodyShort>
               </VStack>
@@ -273,9 +272,9 @@ function IdentTypeUtenlandskKonsulentReceipt({
           </BodyShort>
           <BodyShort>
             Alle nye medarbeidere må signere identskjema.{" "}
-            <Link href={identskjemaLenke} target="_blank">
+            <SmartLink href={identskjemaLenke}>
               Gå til skjemaet for å laste det ned
-            </Link>
+            </SmartLink>
             .
           </BodyShort>
         </HStack>
@@ -329,68 +328,54 @@ function RessursLenker({ ressursNavIdent }: { ressursNavIdent: string }) {
       <PanelLink
         href={identrutinenLenke}
         label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
-        newTab
       />
 
       <PanelLink
         href={`/ressurs/${ressursNavIdent}`}
-        internal
         label="Vis medarbeiderens profil"
       />
 
-      <PanelLink href="/" internal label="Gå tilbake til forsiden" />
+      <PanelLink href="/" label="Gå tilbake til forsiden" />
     </>
   );
 }
 
-function PanelLink({
-  label,
-  href,
-  newTab = false,
-  internal = false,
-}: {
-  label: string;
-  href: string;
-  newTab?: boolean;
-  internal?: boolean;
-}) {
-  const sharedStyles = css`
-    display: flex;
-    width: 70%;
-    margin: auto;
-    padding: var(--a-spacing-4);
-    border: 1px solid var(--a-border-default);
-    text-decoration: none;
-    font-size: var(--a-font-size-heading-medium);
-    color: var(--a-text-default);
-    justify-content: space-between;
-    align-items: center;
+function PanelLink({ label, href }: { label: string; href: string }) {
+  return (
+    <SmartLink
+      css={css`
+        display: flex;
+        width: 70%;
+        margin: auto;
+        padding: var(--a-spacing-4);
+        border: 1px solid var(--a-border-default);
+        text-decoration: none;
+        font-size: var(--a-font-size-heading-medium);
+        color: var(--a-text-default);
+        justify-content: space-between;
+        align-items: center;
 
-    :hover,
-    :active {
-      color: var(--a-text-action-hover);
-      border: 1px solid var(--a-border-action-hover);
-      text-decoration: underline;
-      box-shadow: var(--a-shadow-small);
-      background: unset;
-    }
-  `;
-
-  const labelStyles = css`
-    cursor: pointer;
-    font-size: inherit;
-    line-height: inherit;
-  `;
-
-  return internal ? (
-    <ReactRouterLink css={sharedStyles} to={href}>
-      <Label css={labelStyles}>{label}</Label>
+        :hover,
+        :active {
+          color: var(--a-text-action-hover);
+          border: 1px solid var(--a-border-action-hover);
+          text-decoration: underline;
+          box-shadow: var(--a-shadow-small);
+          background: unset;
+        }
+      `}
+      href={href}
+    >
+      <Label
+        css={css`
+          cursor: pointer;
+          font-size: inherit;
+          line-height: inherit;
+        `}
+      >
+        {label}
+      </Label>
       <ChevronRightIcon />
-    </ReactRouterLink>
-  ) : (
-    <Link css={sharedStyles} href={href} target={newTab ? "_blank" : undefined}>
-      <Label css={labelStyles}>{label}</Label>
-      <ChevronRightIcon />
-    </Link>
+    </SmartLink>
   );
 }
