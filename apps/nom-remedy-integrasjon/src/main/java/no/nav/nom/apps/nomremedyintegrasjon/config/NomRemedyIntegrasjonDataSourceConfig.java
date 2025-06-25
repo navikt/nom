@@ -1,9 +1,6 @@
 package no.nav.nom.apps.nomremedyintegrasjon.config;
 
 import com.zaxxer.hikari.HikariConfig;
-
-import jakarta.persistence.EntityManagerFactory;
-
 import lombok.SneakyThrows;
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,6 +19,7 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 @Configuration
@@ -30,7 +28,7 @@ import javax.sql.DataSource;
     entityManagerFactoryRef = "nomRemedyIntegrasjonEntityManagerFactory",
     transactionManagerRef = "nomRemedyIntegrasjonTransactionManager",
     basePackages = {
-        "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent",
+        "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.jpa",
         "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate",
         "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate"
     }

@@ -7,8 +7,9 @@ import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredVa
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateStateRepository;
-import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEvent;
-import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEventRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.jpa.DelayedEventRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.r2dbc.DelayedEventR2dbc;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.r2dbc.DelayedEventReactiveRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorStateRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -55,6 +57,7 @@ public class NomRemedyIntegrasjonServiceNew {
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final Unleash unleash;
     private final DelayedEventRepository delayedEventRepository;
+    private final DelayedEventReactiveRepository delayedEventReactiveRepository;
 
     public NomRemedyIntegrasjonServiceNew(
         LeaderElection leaderElection,
@@ -65,7 +68,8 @@ public class NomRemedyIntegrasjonServiceNew {
         RessursStateRepository ressursStateRepository,
         OrgtilknytningStateRepository orgtilknytningStateRepository,
         Unleash unleash,
-        DelayedEventRepository delayedEventRepository
+        DelayedEventRepository delayedEventRepository,
+        DelayedEventReactiveRepository delayedEventReactiveRepository
     ) {
         this.leaderElection = leaderElection;
         this.remedyIntegrasjonRepositoryService = remedyIntegrasjonRepositoryService;
@@ -76,6 +80,7 @@ public class NomRemedyIntegrasjonServiceNew {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.unleash = unleash;
         this.delayedEventRepository = delayedEventRepository;
+        this.delayedEventReactiveRepository = delayedEventReactiveRepository;
     }
 
     @Transactional
@@ -422,7 +427,7 @@ public class NomRemedyIntegrasjonServiceNew {
             ));
     }
 
-    public List<Event> getAllDelayedEvents() {
-        return delayedEventRepository.findAll().stream().map(DelayedEvent::getEvent).toList();
+    public Flux<Event> getAllDelayedEvents() {
+        return delayedEventReactiveRepository.findAll().map(DelayedEventR2dbc::getEvent);
     }
 }

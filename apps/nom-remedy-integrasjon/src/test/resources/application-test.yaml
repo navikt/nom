@@ -15,6 +15,11 @@ spring:
       username: test
       password: test
 
+  r2dbc:
+    url: r2dbc:tc:postgresql:14.4:///nom-remedy-integrasjon
+    username: test
+    password: test
+
   kafka:
     bootstrap-servers: ${spring.embedded.kafka.brokers}
     properties:
@@ -25,6 +30,8 @@ spring:
     consumer:
       auto-offset-reset: earliest
       group-id: test
+  main:
+    allow-bean-definition-overriding: true
 
 UNLEASH_SERVER_API_URL: https://unleash.nais.io/api
 UNLEASH_SERVER_API_TOKEN: some-token

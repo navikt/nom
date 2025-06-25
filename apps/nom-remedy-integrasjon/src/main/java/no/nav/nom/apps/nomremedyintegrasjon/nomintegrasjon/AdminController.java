@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Flux;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -136,10 +137,9 @@ public class AdminController {
         return ResponseEntity.ok("Slettet error state med id: " + fid);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping(value = "getAllDelayStates")
-    public ResponseEntity<List<Event>> getAllDelayStates() {
-        return ResponseEntity.ok(nomRemedyIntegrasjonServiceNew.getAllDelayedEvents());
+    public Flux<Event> getAllDelayStates() {
+        return nomRemedyIntegrasjonServiceNew.getAllDelayedEvents();
     }
 
     private static String getAuthenticatedNavIdent() {
