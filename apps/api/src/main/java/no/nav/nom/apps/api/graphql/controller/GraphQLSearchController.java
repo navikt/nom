@@ -13,7 +13,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
-import java.util.Optional;
+
+import static java.util.Objects.isNull;
 
 @Controller
 @PreAuthorize("@securityUtil.checkAuth(authentication)")
@@ -28,21 +29,25 @@ public class GraphQLSearchController {
     }
 
     @QueryMapping("search")
-    public List<Object> search(@Argument("term") String term, @Argument("ressursFilter") Optional<RessursSearchFilter> ressursFilter, @Argument("orgEnhetFilter") Optional<OrgEnhetSearchFilter> orgEnhetFilter, DataFetchingEnvironment environment) {
+    public List<Object> search(@Argument("term") String term, @Argument("ressursFilter") RessursSearchFilter ressursFilter, @Argument("orgEnhetFilter") OrgEnhetSearchFilter orgEnhetFilter, DataFetchingEnvironment environment) {
         counter.count(environment);
-        return searchResolver.search(term, ressursFilter.orElse(RessursSearchFilter.alle()), orgEnhetFilter.orElse(OrgEnhetSearchFilter.alle()));
+        var ressurs = isNull(ressursFilter) ? RessursSearchFilter.alle() : ressursFilter;
+        var orgenhet = isNull(orgEnhetFilter) ? OrgEnhetSearchFilter.alle() : orgEnhetFilter;
+        return searchResolver.search(term, ressurs, orgenhet);
     }
 
     @QueryMapping("searchRessurs")
-    public List<Ressurs> searchRessurs(@Argument("term") String term, @Argument("filter") Optional<RessursSearchFilter> filter, DataFetchingEnvironment environment) {
+    public List<Ressurs> searchRessurs(@Argument("term") String term, @Argument("filter") RessursSearchFilter filter, DataFetchingEnvironment environment) {
         counter.count(environment);
-        return searchResolver.searchRessurs(term, filter.orElseGet(RessursSearchFilter::alle));
+        var searchFilter = isNull(filter) ? RessursSearchFilter.alle() : filter;
+        return searchResolver.searchRessurs(term, searchFilter);
     }
 
     @QueryMapping("searchOrgEnhet")
-    public List<OrgEnhet> searchOrgEnhet(@Argument("term") String term, @Argument("filter") Optional<OrgEnhetSearchFilter> filter, DataFetchingEnvironment environment) {
+    public List<OrgEnhet> searchOrgEnhet(@Argument("term") String term, @Argument("filter") OrgEnhetSearchFilter filter, DataFetchingEnvironment environment) {
         counter.count(environment);
-        return searchResolver.searchOrgenhet(term, filter.orElseGet(OrgEnhetSearchFilter::alle));
+        var searchFilter = isNull(filter) ? OrgEnhetSearchFilter.alle() : filter;
+        return searchResolver.searchOrgenhet(term, searchFilter);
     }
 
 }

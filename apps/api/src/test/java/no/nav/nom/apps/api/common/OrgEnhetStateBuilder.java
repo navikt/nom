@@ -42,48 +42,48 @@ public class OrgEnhetStateBuilder {
         return this;
     }
 
-    public OrgEnhetStateBuilder gyldigTom(Optional<LocalDate> gyldigTom) {
-        this.gyldigTom = gyldigTom;
+    public OrgEnhetStateBuilder gyldigTom(LocalDate gyldigTom) {
+        this.gyldigTom = Optional.ofNullable(gyldigTom);
         return this;
     }
 
-    public OrgEnhetStateBuilder overordnetOrgEnhetFid(Optional<String> overordnetOrgEnhetFid) {
-        this.overordnetOrgEnhetFid = overordnetOrgEnhetFid;
+    public OrgEnhetStateBuilder overordnetOrgEnhetFid(String overordnetOrgEnhetFid) {
+        this.overordnetOrgEnhetFid = Optional.of(overordnetOrgEnhetFid);
         return this;
     }
 
-    public OrgEnhetStateBuilder lederFid(Optional<String> lederFid) {
-        this.lederFid = lederFid;
+    public OrgEnhetStateBuilder lederFid(String lederFid) {
+        this.lederFid = Optional.of(lederFid);
         return this;
     }
 
-    public OrgEnhetStateBuilder orgEnhetsType(Optional<OrgEnhetsType> orgEnhetsType) {
-        this.orgEnhetsType = orgEnhetsType;
+    public OrgEnhetStateBuilder orgEnhetsType(OrgEnhetsType orgEnhetsType) {
+        this.orgEnhetsType = Optional.of(orgEnhetsType);
         return this;
     }
 
-    public OrgEnhetStateBuilder nomNivaa(Optional<NomNivaa> nomNivaa) {
-        this.nomNivaa = nomNivaa;
+    public OrgEnhetStateBuilder nomNivaa(NomNivaa nomNivaa) {
+        this.nomNivaa = Optional.of(nomNivaa);
         return this;
     }
 
-    public OrgEnhetStateBuilder uniqueAgressoId(Optional<String> uniqueAgressoId) {
-        this.uniqueAgressoId = uniqueAgressoId;
+    public OrgEnhetStateBuilder uniqueAgressoId(String uniqueAgressoId) {
+        this.uniqueAgressoId = Optional.of(uniqueAgressoId);
         return this;
     }
 
-    public OrgEnhetStateBuilder agressoId(Optional<String> agressoId) {
-        this.agressoId = agressoId;
+    public OrgEnhetStateBuilder agressoId(String agressoId) {
+        this.agressoId = Optional.of(agressoId);
         return this;
     }
 
-    public OrgEnhetStateBuilder agressoOrgNivaa(Optional<String> agressoOrgNivaa) {
-        this.agressoOrgNivaa = agressoOrgNivaa;
+    public OrgEnhetStateBuilder agressoOrgNivaa(String agressoOrgNivaa) {
+        this.agressoOrgNivaa = Optional.of(agressoOrgNivaa);
         return this;
     }
 
-    public OrgEnhetStateBuilder agressoOrgenhetType(Optional<String> agressoOrgenhetType) {
-        this.agressoOrgenhetType = agressoOrgenhetType;
+    public OrgEnhetStateBuilder agressoOrgenhetType(String agressoOrgenhetType) {
+        this.agressoOrgenhetType = Optional.of(agressoOrgenhetType);
         return this;
     }
 

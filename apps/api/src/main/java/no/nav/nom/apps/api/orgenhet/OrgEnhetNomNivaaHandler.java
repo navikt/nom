@@ -50,9 +50,9 @@ public class OrgEnhetNomNivaaHandler {
     }
 
     public void mapOrgEnhetTypeToNewNomNivaaAndUpdateChildren(OrgEnhetTypeEndretEventV1 orgEnhetTypeEndretEventV1) {
-
+        var orgEnhetType = orgEnhetTypeEndretEventV1.getData().orgEnhetsType().isPresent() ? orgEnhetTypeEndretEventV1.getData().orgEnhetsType().get() : null;
         orgEnhetStateRepository.findByFid(orgEnhetTypeEndretEventV1.getFid()).ifPresent(orgEnhetState -> {
-                mapOrgEnhetTypeToNewNomNivaaAndUpdate(orgEnhetState, orgEnhetTypeEndretEventV1.getData().orgEnhetsType());
+                mapOrgEnhetTypeToNewNomNivaaAndUpdate(orgEnhetState, orgEnhetType);
                 mapOrgEnhetTypeToNewNomNivaaForChildren(orgEnhetState);
             }
 
@@ -62,7 +62,7 @@ public class OrgEnhetNomNivaaHandler {
     public void mapOrgEnhetTypeToNewNomNivaaForChildren(OrgEnhetState orgEnhetState) {
         var children = orgEnhetUnderordnetResolver.findUnderordnedeOrgEnheter(orgEnhetState);
         children.forEach(childOrgEnhetState -> {
-            mapOrgEnhetTypeToNewNomNivaaAndUpdate(childOrgEnhetState, childOrgEnhetState.orgEnhetsType());
+            mapOrgEnhetTypeToNewNomNivaaAndUpdate(childOrgEnhetState, childOrgEnhetState.orgEnhetsType().isPresent() ? childOrgEnhetState.orgEnhetsType().get() : null);
             mapOrgEnhetTypeToNewNomNivaaForChildren(childOrgEnhetState);
         });
     }
@@ -100,7 +100,7 @@ public class OrgEnhetNomNivaaHandler {
                     logger.info("Adding missing ARBEIDSOMRAADE {} under DRIFTSENHET {}", secondBottomOrgenhet.id(), topOrgEnhetState.id());
 
                     updateNomNivaaIfNewValue(
-                        secondBottomOrgenhet, Optional.of(NomNivaa.ARBEIDSOMRAADE), "MISSING_ARBEIDSOMRAADE_ADDED"
+                        secondBottomOrgenhet, NomNivaa.ARBEIDSOMRAADE, "MISSING_ARBEIDSOMRAADE_ADDED"
                     );
                 }
             }
@@ -168,63 +168,63 @@ public class OrgEnhetNomNivaaHandler {
     }
 
     // https://jira.adeo.no/browse/ORG-1711
-    public void mapOrgEnhetTypeToNewNomNivaaAndUpdate(OrgEnhetState orgEnhetState, Optional<OrgEnhetsType> newOrgEnhetsType) {
+    public void mapOrgEnhetTypeToNewNomNivaaAndUpdate(OrgEnhetState orgEnhetState, OrgEnhetsType newOrgEnhetsType) {
 
 
         if (linjeenheteneOrgEnhetIds.contains(orgEnhetState.id())) {
             updateNomNivaaIfNewValue(
                 orgEnhetState,
-                Optional.of(NomNivaa.LINJEENHET),
+                Optional.of(NomNivaa.LINJEENHET).orElse(null),
                 "LINJEENHET_ID_MATCH"
             );
 
         } else if (orgEnhetIsTopmostWithinOrgEnhetType(orgEnhetState, newOrgEnhetsType)) {
             updateNomNivaaIfNewValue(
                 orgEnhetState,
-                newOrgEnhetsType.flatMap(NomNivaaMapper::mapNivaaForTopmostWithinOrgEnhetType),
+                NomNivaaMapper.mapNivaaForTopmostWithinOrgEnhetType(newOrgEnhetsType).orElse(null),
                 "TOP"
             );
 
         } else if (orgEnhetIsSecondTopmostWithinOrgEnhetType(orgEnhetState, newOrgEnhetsType)) {
             updateNomNivaaIfNewValue(
                 orgEnhetState,
-                newOrgEnhetsType.flatMap(NomNivaaMapper::mapNivaaForSecondTopmostWithinOrgEnhetType),
+                NomNivaaMapper.mapNivaaForSecondTopmostWithinOrgEnhetType(newOrgEnhetsType).orElse(null),
                 "SECOND_TOP"
             );
 
         } else if (orgEnhetIsThirdTopmostWithinOrgEnhetType(orgEnhetState, newOrgEnhetsType)) {
             updateNomNivaaIfNewValue(
                 orgEnhetState,
-                newOrgEnhetsType.flatMap(NomNivaaMapper::mapNivaaForThirdTopmostWithinOrgEnhetType),
+                NomNivaaMapper.mapNivaaForThirdTopmostWithinOrgEnhetType(newOrgEnhetsType).orElse(null),
                 "THIRD_TOP"
             );
         } else {
-            updateNomNivaaIfNewValue(orgEnhetState, Optional.empty(), "BELOW");
+            updateNomNivaaIfNewValue(orgEnhetState, null, "BELOW");
         }
 
     }
 
-    public void updateNomNivaaIfNewValue(OrgEnhetState orgEnhetState, Optional<NomNivaa> newNomNivaa, String levelWithinOrgenhetstype) {
+    public void updateNomNivaaIfNewValue(OrgEnhetState orgEnhetState, NomNivaa newNomNivaa, String levelWithinOrgenhetstype) {
 
         var orgenheterOver = findAllOrgenheterOver(orgEnhetState, new ArrayList<>());
-
+        var optionalNewNomNivaa = Optional.ofNullable(newNomNivaa);
         if (orgenheterOver.isEmpty()) {
             logger.info(
                 "Orgenhet {} got no overordnet orgenheter from dvh. Assuming incorrect data from dvh. Skipping new NomNivaaEndretEventV1",
                 orgEnhetState.id()
             );
 
-        } else if (!orgEnhetState.nomNivaa().equals(newNomNivaa)) {
+        } else if (!orgEnhetState.nomNivaa().equals(optionalNewNomNivaa)) {
             orgEnhetCommandService.endreNomNivaa(
                 orgEnhetState.fid(),
                 new EndreNomNivaa(
-                    newNomNivaa,
+                    optionalNewNomNivaa,
                     new InputMetadata(
                         "nom-api",
                         "nom-api",
                         Map.of(
                             "oldValue", orgEnhetState.nomNivaa(),
-                            "newValue", newNomNivaa,
+                            "newValue", optionalNewNomNivaa,
                             "levelWithinOrgenhetstype", levelWithinOrgenhetstype,
                             "orgEnhetId", orgEnhetState.id(),
                             "orgenheterOver", orgenheterOver
@@ -241,10 +241,10 @@ public class OrgEnhetNomNivaaHandler {
         }
     }
 
-    public boolean orgEnhetIsTopmostWithinOrgEnhetType(OrgEnhetState orgEnhetState, Optional<OrgEnhetsType> orgEnhetsType) {
+    public boolean orgEnhetIsTopmostWithinOrgEnhetType(OrgEnhetState orgEnhetState, OrgEnhetsType orgEnhetsType) {
         // Dersom ingen forelder oppover i treet har samme orgenhetstype ansees orgenheten som en toppnode i denne sammenheng
         return findAllOrgenheterOver(orgEnhetState).stream()
-            .noneMatch(overordnetOrgEnhet -> overordnetOrgEnhet.orgEnhetsType().equals(orgEnhetsType));
+            .noneMatch(overordnetOrgEnhet -> overordnetOrgEnhet.orgEnhetsType().isPresent() && overordnetOrgEnhet.orgEnhetsType().get().equals(orgEnhetsType));
     }
 
 
@@ -262,21 +262,20 @@ public class OrgEnhetNomNivaaHandler {
 
     }
 
-    public boolean orgEnhetIsSecondTopmostWithinOrgEnhetType(OrgEnhetState orgEnhetState, Optional<OrgEnhetsType> orgEnhetsType) {
+    public boolean orgEnhetIsSecondTopmostWithinOrgEnhetType(OrgEnhetState orgEnhetState, OrgEnhetsType orgEnhetsType) {
         var overordnetOrgEnhet = orgEnhetOverordnetResolver.findOverordnetOrgEnhet(orgEnhetState);
 
-        return overordnetOrgEnhet.isPresent()
-            && overordnetOrgEnhet.get().orgEnhetsType().equals(orgEnhetsType)
-            && orgEnhetIsTopmostWithinOrgEnhetType(overordnetOrgEnhet.get(), orgEnhetsType);
+        return overordnetOrgEnhet.filter(enhetState -> enhetState.orgEnhetsType().isPresent()
+            && overordnetOrgEnhet.get().orgEnhetsType().get().equals(orgEnhetsType)
+            && orgEnhetIsTopmostWithinOrgEnhetType(overordnetOrgEnhet.get(), orgEnhetsType)).isPresent();
 
     }
 
-    public boolean orgEnhetIsThirdTopmostWithinOrgEnhetType(OrgEnhetState orgEnhetState, Optional<OrgEnhetsType> orgEnhetsType) {
+    public boolean orgEnhetIsThirdTopmostWithinOrgEnhetType(OrgEnhetState orgEnhetState, OrgEnhetsType orgEnhetsType) {
         var overordnetOrgEnhet = orgEnhetOverordnetResolver.findOverordnetOrgEnhet(orgEnhetState);
-
-        return overordnetOrgEnhet.isPresent()
-            && overordnetOrgEnhet.get().orgEnhetsType().equals(orgEnhetsType)
-            && orgEnhetIsSecondTopmostWithinOrgEnhetType(overordnetOrgEnhet.get(), orgEnhetsType);
+        return overordnetOrgEnhet.filter(enhetState -> enhetState.orgEnhetsType().isPresent()
+            && enhetState.orgEnhetsType().get().equals(orgEnhetsType)
+            && orgEnhetIsSecondTopmostWithinOrgEnhetType(enhetState, orgEnhetsType)).isPresent();
     }
 
 }

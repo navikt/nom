@@ -3,7 +3,6 @@ package no.nav.nom.apps.api.organisering.evtlistener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
@@ -35,8 +34,6 @@ import java.util.stream.StreamSupport;
 public class OrgenhetRenamedListener {
     public static final String ORGENHET_NAVN_ENDRET_VARSEL_FTLH = "orgenhet-navn-endret-varsel.ftlh";
 
-    public static final String UNLEASH_ALL_EMAIL_RECIPIENTS ="nom.omada_orgenhet_navnendring.email_to_all";
-
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
     private final OrgenhetService orgenhetService;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
@@ -44,12 +41,11 @@ public class OrgenhetRenamedListener {
     private final MicrosoftGraphClient microsoftGraphClient;
     private final AppProperties.EpostVarselForEnhetNavnendring params;
     private final ObjectMapper objectMapper;
-    private final Unleash unleash;
 
     public OrgenhetRenamedListener(
         DvhStartupLoadMonitor dvhStartupLoadMonitor, OrgenhetService orgenhetService,
         RemedyEnhetMapperService remedyEnhetMapperService, Configuration freemarkerConfig, MicrosoftGraphClient microsoftGraphClient,
-        AppProperties appProperties, ObjectMapper objectMapper, Unleash unleash
+        AppProperties appProperties, ObjectMapper objectMapper
     ) {
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
         this.orgenhetService = orgenhetService;
@@ -58,7 +54,6 @@ public class OrgenhetRenamedListener {
         this.microsoftGraphClient = microsoftGraphClient;
         this.params = appProperties.epostVarselForEnhetNavnendring();
         this.objectMapper = objectMapper;
-        this.unleash = unleash;
     }
 
     @KafkaListener(
@@ -124,12 +119,8 @@ public class OrgenhetRenamedListener {
     private void sendEpostVarsling(IOrgenhet gammelEnhet, IOrgenhet nyEnhet, String gammelRemedyEnhetId, String nyRemedyEnhetId) {
         try {
             List<String> recipientList = new ArrayList<>();
-            if (unleash.isEnabled(UNLEASH_ALL_EMAIL_RECIPIENTS)) {
-                recipientList.addAll(getTeamOrgRecipientsEmails());
-                recipientList.addAll(getOmadaRecipientsEmails());
-            } else {
-                recipientList.addAll(getInitialRunEmails());
-            }
+            recipientList.addAll(getTeamOrgRecipientsEmails());
+            recipientList.addAll(getOmadaRecipientsEmails());
 
             var gammel = getSammensattNavn(gammelEnhet.getId(), gammelRemedyEnhetId, gammelEnhet.getNavn());
             var ny = getSammensattNavn(nyEnhet.getId(), nyRemedyEnhetId, nyEnhet.getNavn());
@@ -199,12 +190,6 @@ public class OrgenhetRenamedListener {
         );
         freemarkerConfig.getTemplate(ORGENHET_NAVN_ENDRET_VARSEL_FTLH).process(model, stringWriter);
         return stringWriter.getBuffer().toString();
-    }
-
-    private List<String> getInitialRunEmails() {
-        List<String> additionalRecipients = new ArrayList<>();
-        additionalRecipients.add("Roy.Grini@nav.no");
-        return additionalRecipients;
     }
 
     private List<String> getTeamOrgRecipientsEmails() {

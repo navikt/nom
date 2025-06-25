@@ -194,7 +194,7 @@ public class OrgtilknytningRestService {
             .toList();
 
         Map<String, List<OrgtilknytningState>> possibleDuplicates = Stream.concat(nyeOrgtilknytninger.stream(), eksisterendeOrgtilknytninger.stream())
-            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()) || orgtilknytningState.gyldigFom().isAfter(LocalDate.now()))
+            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom().orElse(null)) || orgtilknytningState.gyldigFom().isAfter(LocalDate.now()))
             .collect(Collectors.groupingBy(OrgtilknytningState::orgEnhetId))
             .entrySet().stream()
             .filter(entry -> entry.getValue().size() > 1)
@@ -205,8 +205,8 @@ public class OrgtilknytningRestService {
             var firstDuplicate = entry.getValue().getFirst();
             for (int i = 1; i < entry.getValue().size(); i++) {
                 var duplicate = entry.getValue().get(i);
-                if (isPeriodActive(firstDuplicate.gyldigFom(), firstDuplicate.gyldigTom())
-                    && isPeriodActive(duplicate.gyldigFom(), duplicate.gyldigTom())
+                if (isPeriodActive(firstDuplicate.gyldigFom(), firstDuplicate.gyldigTom().orElse(null))
+                    && isPeriodActive(duplicate.gyldigFom(), duplicate.gyldigTom().orElse(null))
                     && firstDuplicate.sektor().equals(duplicate.sektor())
                     && firstDuplicate.orgtilknytningType().equals(duplicate.orgtilknytningType())) {
                     throw InvalidOppdaterOrgtilknytningerForRessursRequestException.duplikatOrgtilknytning(

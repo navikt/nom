@@ -135,18 +135,38 @@ public class MicrosoftGraphClient {
 
     private Retry defaultRetry(Integer maxAttempts, Integer backoffDurationMillis) {
         return Retry.backoff(maxAttempts, Duration.ofMillis(backoffDurationMillis))
-                .jitter(0.75)
-                .filter(throwable -> {
-                    if (throwable instanceof WebClientResponseException) {
-                        return ((WebClientResponseException) throwable).getStatusCode().is5xxServerError();
-                    }
-                    return false;
-                }).onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
-                    Throwable throwable = retrySignal.failure();
-                    if (throwable instanceof WebClientResponseException) {
-                        throw (WebClientResponseException) throwable;
-                    }
-                    throw new RuntimeException(throwable);
-                });
+            .jitter(0.75)
+            .doBeforeRetryAsync(signal -> Mono.delay(calculateDelay(signal.failure())).then())
+            .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
+                Throwable throwable = retrySignal.failure();
+                if (throwable instanceof WebClientResponseException) {
+                    throw (WebClientResponseException) throwable;
+                }
+                throw new RuntimeException(throwable);
+            });
+    }
+
+    private static Duration calculateDelay(Throwable failure) {
+        if (!(failure instanceof WebClientResponseException.TooManyRequests)) {
+            logger.info("Failure is not a TooManyRequests exception, defaulting to 0 seconds delay");
+            return Duration.ofSeconds(0); // Default delay if not a ServiceUnavailable exception
+        }
+
+        logger.info("Calculating delay based on Retry-After header for TooManyRequests exception");
+
+        var retryAfterHeader = ((WebClientResponseException.TooManyRequests) failure).getHeaders().get("Retry-After");
+        if (retryAfterHeader == null || retryAfterHeader.isEmpty()) {
+            logger.warn("No Retry-After header found in response, defaulting to 0 seconds delay");
+            return Duration.ofSeconds(0); // Default delay if no header is present
+        }
+        String headerValue = retryAfterHeader.getFirst();
+        try {
+            var durationInSeconds = Integer.parseInt(headerValue);
+            logger.info("Got Retry-After header value: {} seconds", durationInSeconds);
+            return Duration.ofSeconds(durationInSeconds);
+        } catch (NumberFormatException e) {
+            logger.warn("Failed to parse Retry-After header value as Int: {}", headerValue, e);
+        }
+        return Duration.ofSeconds(0); // Default delay if parsing fails
     }
 }

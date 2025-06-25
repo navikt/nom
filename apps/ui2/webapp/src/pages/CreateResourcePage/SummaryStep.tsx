@@ -8,12 +8,12 @@ import {
   Loader,
   VStack,
 } from "@navikt/ds-react";
-import { Link } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 
 import { getRessurs } from "~/api/react-query-endpoints";
 import ContentWrapper from "~/components/ContentWrapper";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
 import type { Ressurs } from "~/types/api-models";
@@ -134,9 +134,9 @@ function IdentTypeStandardReceipt({ ressurs }: { ressurs: Ressurs }) {
           </BodyShort>
           <BodyShort>
             Alle nye medarbeidere må signere identskjema.{" "}
-            <Link href={identskjemaLenke} target="_blank">
+            <SmartLink externalIcon href={identskjemaLenke} inline={true}>
               Gå til skjemaet for å laste det ned
-            </Link>
+            </SmartLink>
             .
           </BodyShort>
 
@@ -159,11 +159,11 @@ function IdentTypeStandardReceipt({ ressurs }: { ressurs: Ressurs }) {
                     dekket utlegg eller skal være stedfortredere
                   </li>
                 </ul>
-                <Link href={sharepointLenke} target="_blank">
+                <SmartLink href={sharepointLenke}>
                   På denne siden på Navet kan du ser mer detaljert informasjon
                   om hvilke typer kommunalt ansatte som skal registreres både i
                   NOM og i Unit4.
-                </Link>
+                </SmartLink>
               </BodyShort>
             </Alert>
           )}
@@ -185,7 +185,10 @@ function IdentTypeStandardReceipt({ ressurs }: { ressurs: Ressurs }) {
                 <BodyShort>
                   Statlig ansatte registreres i Unit4 ved hjelp av lønnsskjema.
                   Det aktuelle lønnsskjemaet{" "}
-                  <Link href={lonnsskjemaLenke}>finner du her</Link>.
+                  <SmartLink href={lonnsskjemaLenke} inline>
+                    finner du her
+                  </SmartLink>
+                  .
                 </BodyShort>
               </VStack>
             </Alert>
@@ -193,17 +196,7 @@ function IdentTypeStandardReceipt({ ressurs }: { ressurs: Ressurs }) {
         </HStack>
       </div>
 
-      <PanelLink
-        href="https://it-hjelpa.adeo.no/arsys/home"
-        label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
-      />
-      {/*TODO: disse burde ikke være hrefs, men bruker Routeren sine lenker slik at det ikke gjøres en sidenavigasjon og hele siden må lastes på nytt.*/}
-      <PanelLink
-        href={`/ressurs/${ressurs.navident}`}
-        label="Vis medarbeiderens profil"
-      />
-
-      <PanelLink href="/" label="Gå tilbake til forsiden" />
+      <RessursLenker ressursNavIdent={ressurs.navident} />
     </>
   );
 }
@@ -238,17 +231,7 @@ function IdentTypeRobotReceipt({ ressurs }: { ressurs: Ressurs }) {
         </HStack>
       </div>
 
-      <PanelLink
-        href="https://it-hjelpa.adeo.no/arsys/home"
-        label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
-      />
-
-      <PanelLink
-        href={`/ressurs/${ressurs.navident}`}
-        label="Vis medarbeiderens profil"
-      />
-
-      <PanelLink href="/" label="Gå tilbake til forsiden" />
+      <RessursLenker ressursNavIdent={ressurs.navident} />
     </>
   );
 }
@@ -289,25 +272,15 @@ function IdentTypeUtenlandskKonsulentReceipt({
           </BodyShort>
           <BodyShort>
             Alle nye medarbeidere må signere identskjema.{" "}
-            <Link href={identskjemaLenke} target="_blank">
+            <SmartLink href={identskjemaLenke}>
               Gå til skjemaet for å laste det ned
-            </Link>
+            </SmartLink>
             .
           </BodyShort>
         </HStack>
       </div>
 
-      <PanelLink
-        href="https://it-hjelpa.adeo.no/arsys/home"
-        label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
-      />
-
-      <PanelLink
-        href={`/ressurs/${ressurs.navident}`}
-        label="Vis medarbeiderens profil"
-      />
-
-      <PanelLink href="/" label="Gå tilbake til forsiden" />
+      <RessursLenker ressursNavIdent={ressurs.navident} />
     </>
   );
 }
@@ -342,13 +315,23 @@ function IdentTypeVikafossenReceipt({ ressurs }: { ressurs: Ressurs }) {
         </HStack>
       </div>
 
+      <RessursLenker ressursNavIdent={ressurs.navident} />
+    </>
+  );
+}
+
+function RessursLenker({ ressursNavIdent }: { ressursNavIdent: string }) {
+  const identrutinenLenke = "https://it-hjelpa.adeo.no/arsys/home";
+
+  return (
+    <>
       <PanelLink
-        href="https://it-hjelpa.adeo.no/arsys/home"
+        href={identrutinenLenke}
         label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
       />
 
       <PanelLink
-        href={`/ressurs/${ressurs.navident}`}
+        href={`/ressurs/${ressursNavIdent}`}
         label="Vis medarbeiderens profil"
       />
 
@@ -359,7 +342,7 @@ function IdentTypeVikafossenReceipt({ ressurs }: { ressurs: Ressurs }) {
 
 function PanelLink({ label, href }: { label: string; href: string }) {
   return (
-    <Link
+    <SmartLink
       css={css`
         display: flex;
         width: 70%;
@@ -370,6 +353,7 @@ function PanelLink({ label, href }: { label: string; href: string }) {
         font-size: var(--a-font-size-heading-medium);
         color: var(--a-text-default);
         justify-content: space-between;
+        align-items: center;
 
         :hover,
         :active {
@@ -392,6 +376,6 @@ function PanelLink({ label, href }: { label: string; href: string }) {
         {label}
       </Label>
       <ChevronRightIcon />
-    </Link>
+    </SmartLink>
   );
 }

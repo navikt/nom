@@ -6,8 +6,8 @@ import io.getunleash.Unleash;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredValueMissingException;
-import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEvent;
-import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEventRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.jpa.DelayedEventJpa;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.jpa.DelayedEventRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Event;
@@ -422,7 +422,7 @@ public class NomRemedyIntegrasjonServiceOld {
 
     private void delayEventUpdate(Event event, LocalDate until) {
         delayedEventRepository.save(
-            DelayedEvent.builder()
+            DelayedEventJpa.builder()
                 .delayedUntil(until)
                 .event(event)
                 .build());
@@ -488,8 +488,8 @@ public class NomRemedyIntegrasjonServiceOld {
 
     }
 
-    private void handleDelayedEvent(DelayedEvent delayedEvent) {
-        var nomEvent = delayedEvent.getEvent();
+    private void handleDelayedEvent(DelayedEventJpa delayedEventJpa) {
+        var nomEvent = delayedEventJpa.getEvent();
 
         boolean deleteEvent = true;
         try {
@@ -505,12 +505,12 @@ public class NomRemedyIntegrasjonServiceOld {
                 handleDelayedOrgtiknytningSektor(orgtilknytningSektorEndretEventV1);
             }
         } catch (RequiredValueMissingException e) {
-            logger.error("ALERT: Failed to handle delayed event: {}", delayedEvent, e);
+            logger.error("ALERT: Failed to handle delayed event: {}", delayedEventJpa, e);
             deleteEvent = false;
         }
 
         if (deleteEvent) {
-            delayedEventRepository.deleteById(delayedEvent.getDelayedEventId());
+            delayedEventRepository.deleteById(delayedEventJpa.getDelayedEventId());
         }
     }
 
@@ -759,7 +759,7 @@ public class NomRemedyIntegrasjonServiceOld {
         }
     }
 
-    public void lesOgEksekverRessursState(String entryBestiller, String navident) {
+    public void lesStatePaaNytt(String entryBestiller, String navident) {
         var ressursState = nomApiClient.getRessursByNavident(navident);
         if (!ressursState.getIsNomMastered()) {
             logger.info("Ressurs with navident {} is not mastered, skipping", navident);

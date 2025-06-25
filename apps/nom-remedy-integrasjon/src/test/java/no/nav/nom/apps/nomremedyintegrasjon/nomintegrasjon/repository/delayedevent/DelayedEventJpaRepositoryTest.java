@@ -1,6 +1,7 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent;
 
 import no.nav.nom.apps.nomremedyintegrasjon.TestBase;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.jpa.DelayedEventJpa;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttdatoOppdatertEventV1;
@@ -23,7 +24,7 @@ import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursSluttetEventV
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class DelayedEventRepositoryTest extends TestBase {
+public class DelayedEventJpaRepositoryTest extends TestBase {
 
     @BeforeEach
     void clearRepositories() {
@@ -35,7 +36,7 @@ public class DelayedEventRepositoryTest extends TestBase {
     @DisplayName("Should save and deserialize events of type")
     void shouldDeserializeEvent(Event event, Class<Event> expectedType) {
         var savedDelayedEvent = delayedEventRepository.save(
-            DelayedEvent.builder()
+            DelayedEventJpa.builder()
                 .delayedUntil(LocalDate.now())
                 .event(event)
                 .build()
@@ -62,7 +63,7 @@ public class DelayedEventRepositoryTest extends TestBase {
 
         delayedEventRepository.saveAll(
             Stream.of(today, yesterday, tomorrow).map(delayedUntil ->
-                DelayedEvent.builder()
+                DelayedEventJpa.builder()
                     .delayedUntil(delayedUntil)
                     .event(ressursSluttdatoOppdatertEventV1(delayedUntil))
                     .build()

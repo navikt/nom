@@ -191,7 +191,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         // The organisering is now present in the state
-        OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgEnhetState, orgEnhetStateOver, LocalDate.now(), Optional.empty());
+        OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgEnhetState, orgEnhetStateOver, LocalDate.now(), null);
         organiseringStateRepository.update(organiseringState);
 
         // No longer receive organisering from DVH
@@ -239,7 +239,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         // The organisering is now present in the state
-        OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgEnhetState, orgEnhetStateOver, LocalDate.now(), Optional.empty());
+        OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgEnhetState, orgEnhetStateOver, LocalDate.now(), null);
         organiseringStateRepository.update(organiseringState);
 
         // 2. No longer receive organisering from DVH
@@ -310,7 +310,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         // Organisering is now available from OrganiseringStateRepository
-        OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgEnhetState, orgEnhetStateOver, LocalDate.now(), Optional.empty());
+        OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgEnhetState, orgEnhetStateOver, LocalDate.now(), null);
         organiseringStateRepository.update(organiseringState);
 
         // Change organisering from DVH
@@ -385,12 +385,12 @@ public class OrganiseringTest extends OrganiseringTestBase {
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         // oppdatere organiseringByFid map i OrganiseringStateRepository
-        OrganiseringState organiseringState3 = getOrganiseringState("organisering_3", orgEnhet3, overEnhetTilOrgEnhet3, LocalDate.now().minusDays(1), Optional.empty());
+        OrganiseringState organiseringState3 = getOrganiseringState("organisering_3", orgEnhet3, overEnhetTilOrgEnhet3, LocalDate.now().minusDays(1), null);
 
         organiseringStateRepository.update(organiseringState3);
 
         OrganiseringState organiseringState2 = getOrganiseringState("organisering_2", orgEnhet2.id(), organisering2.getNavnUnder(), orgEnhet3.id(),
-            organisering2.getNavnOver(), LocalDate.now().minusDays(1), Optional.empty());
+            organisering2.getNavnOver(), LocalDate.now().minusDays(1), null);
         organiseringStateRepository.update(organiseringState2);
 
         // New node 4 gets 3 as parent and node 2 is moved and gets 4 as new parent
@@ -480,7 +480,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
 
         // oppdatere state
         OrganiseringState organiseringState3 = getOrganiseringState("organisering_3", orgEnhet3.id(), organisering3.getNavnUnder(),
-            overEnhetTilOrgEnhet3.id(), organisering3.getNavnOver(), LocalDate.now().minusDays(1), Optional.empty());
+            overEnhetTilOrgEnhet3.id(), organisering3.getNavnOver(), LocalDate.now().minusDays(1), null);
         organiseringStateRepository.update(organiseringState3);
 
 
@@ -561,7 +561,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
 
         // The organisering is now present in the state
         String fid_organisering1 = "organisering_1";
-        OrganiseringState organiseringState = getOrganiseringState(fid_organisering1, orgeEnhetState, orgeEnhetStateOver, LocalDate.now(), Optional.empty());
+        OrganiseringState organiseringState = getOrganiseringState(fid_organisering1, orgeEnhetState, orgeEnhetStateOver, LocalDate.now(), null);
         organiseringStateRepository.update(organiseringState);
 
         // 2. eksisterende organisering avsluttes og ikke kommer fra DVH
@@ -624,11 +624,11 @@ public class OrganiseringTest extends OrganiseringTestBase {
         return orgEnhetState;
     }
 
-    private static OrganiseringState getOrganiseringState(String fid, OrgEnhetState orgeEnhetState, OrgEnhetState orgeEnhetStateOver, LocalDate gyldigFom, Optional<LocalDate> gyldigTom) {
+    private static OrganiseringState getOrganiseringState(String fid, OrgEnhetState orgeEnhetState, OrgEnhetState orgeEnhetStateOver, LocalDate gyldigFom, LocalDate gyldigTom) {
         return getOrganiseringState(fid, orgeEnhetState.id(), orgeEnhetState.navn(), orgeEnhetStateOver.id(), orgeEnhetStateOver.navn(), gyldigFom, gyldigTom);
     }
 
-    private static OrganiseringState getOrganiseringState(String fid, String id, String navn, String idOver, String navnOver, LocalDate gyldigFom, Optional<LocalDate> gyldigTom) {
+    private static OrganiseringState getOrganiseringState(String fid, String id, String navn, String idOver, String navnOver, LocalDate gyldigFom, LocalDate gyldigTom) {
         return OrganiseringState.builder()
             .fid(fid)
             .id(id)
@@ -636,7 +636,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
             .idOver(idOver)
             .navnOver(navnOver)
             .gyldigFom(gyldigFom)
-            .gyldigTom(gyldigTom)
+            .gyldigTom(Optional.ofNullable(gyldigTom))
             .build();
     }
 

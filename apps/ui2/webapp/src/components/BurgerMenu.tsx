@@ -22,6 +22,7 @@ import {
   useHasVikafossenAccess,
   useHasWriteAccess,
 } from "~/api/useGetSession";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import flyttFysiskBrukersted from "~/resources/flyttFysiskBrukersted.svg";
 import hierarchyFilled from "~/resources/hierarchyFilled.svg";
 
@@ -76,6 +77,7 @@ export function BurgerMenu() {
       >
         Meny
       </Button>
+
       <Dropdown.Menu
         css={css`
           padding: 0;
@@ -84,6 +86,10 @@ export function BurgerMenu() {
 
           button {
             padding: var(--a-spacing-4);
+          }
+
+          a {
+            text-decoration: none;
           }
         `}
       >
@@ -109,18 +115,12 @@ export function BurgerMenu() {
             <>
               <Dropdown.Menu.Divider />
 
-              <Dropdown.Menu.List.Item
-                data-cy="opprettRessurs-button"
-                onClick={() =>
-                  navigate({
-                    to: "/ressurs/create/$step",
-                    params: { step: "1" },
-                  })
-                }
-              >
-                <PersonPlusFillIcon color="black" fontSize="24px" />
-                <span>Opprett medarbeider</span>
-              </Dropdown.Menu.List.Item>
+              <SmartLink href="/ressurs/create/1">
+                <Dropdown.Menu.List.Item data-cy="opprettRessurs-button">
+                  <PersonPlusFillIcon color="black" fontSize="24px" />
+                  <span>Opprett medarbeider</span>
+                </Dropdown.Menu.List.Item>
+              </SmartLink>
             </>
           )}
 
@@ -143,7 +143,6 @@ export function BurgerMenu() {
 
           {hasAdminAccess && (
             <>
-              {" "}
               {!showOpprettLink && !showOpprettSpecialLink && (
                 <Dropdown.Menu.Divider />
               )}

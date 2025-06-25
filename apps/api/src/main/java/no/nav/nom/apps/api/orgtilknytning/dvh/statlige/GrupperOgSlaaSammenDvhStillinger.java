@@ -259,7 +259,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                 }
             }
         }
-        if (brekkpunktTom != null) {
+        if (brekkpunktTom != null && !spUtenTilknytningtype.isEmpty()) {
             var stillingPeriode = spUtenTilknytningtype.getLast();
             perioderSomSkalBeholdes.add(new StillingPeriode(
                 stillingPeriode.stilling(),

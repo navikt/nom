@@ -22,10 +22,10 @@ spec:
     - name: nom-ui_high_failrate
       rules:
         - alert: NOM-UI høy feilrate i logger
-          expr: (100 * sum by (app, namespace) (rate(log_messages_errors{app="nom-ui2",namespace="nom"}[3m])) / sum by (app, namespace) (rate(log_messages_total{app="nom-ui2",namespace="nom"}[3m]))) > 10
-          for: 3m
+          expr: (sum(loki:service:loglevel:count1m{service_name="nom-ui2", detected_level="error"}) / sum(loki:service:loglevel:count1m{service_name="nom-ui2"})) > 0.05
+          for: 10m
           annotations:
-            action: "Sjekk loggene til app {{ $labels.app }}, for å se hvorfor det er så mye feil"
+            action: "{{ $labels.service_name }} har {{ $value | humanizePercentage }} feilmeldinger i loggene i løpet av de siste 10 minuttene."
           labels:
             namespace: org
             severity: warning

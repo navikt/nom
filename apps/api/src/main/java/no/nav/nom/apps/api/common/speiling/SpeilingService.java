@@ -49,7 +49,7 @@ public class SpeilingService {
         var dolOrgtilknytninger = orgtilknytningStateRepository.getAll()
             .stream()
             .filter(OrgtilknytningState::erDagligOppfolging)
-            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
+            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom().orElse(null)))
             .filter(orgtilknytningState -> orgtilknytningState.sektor() != null)
             .filter(orgtilknytningState -> nomMastered.isMastered(orgtilknytningState.navident()))
             .toList();

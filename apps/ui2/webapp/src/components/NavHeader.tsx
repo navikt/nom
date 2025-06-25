@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 
+import { SmartLink } from "~/components/navigation/SmartLink";
 import nomLogoCircle from "~/resources/nomLogoCircle.svg";
 import { defaultWidth } from "~/resources/NomStyles";
 
@@ -34,9 +35,9 @@ export const NavHeader = () => {
   return (
     <div css={outerDiv}>
       <div css={innerDiv}>
-        <ReactRouterLink title="Hjem" to="/">
+        <SmartLink href="/" title="Hjem">
           <img alt="Forside NOM" src={nomLogoCircle} />
-        </ReactRouterLink>
+        </SmartLink>
         <SearchBar />
         <BurgerMenu />
       </div>

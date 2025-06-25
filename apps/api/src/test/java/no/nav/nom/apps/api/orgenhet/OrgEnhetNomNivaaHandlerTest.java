@@ -15,7 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,13 +34,13 @@ import static org.mockito.Mockito.when;
 
 public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
 
-    @MockBean
+    @MockitoBean
     private OrgEnhetCommandService orgEnhetCommandService;
 
-    @MockBean
+    @MockitoBean
     OrgEnhetOverordnetResolver orgEnhetOverordnetResolver;
 
-    @MockBean
+    @MockitoBean
     OrgEnhetUnderordnetResolver orgEnhetUnderordnetResolver;
 
     @Autowired
@@ -82,7 +82,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
 
         orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdate(
             orgEnhetState,
-            Optional.of(orgEnhetsType)
+            orgEnhetsType
         );
 
         verify(orgEnhetCommandService, times(1))
@@ -144,7 +144,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
 
         orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdate(
             orgEnhetState,
-            Optional.of(orgEnhetsType)
+            orgEnhetsType
         );
 
         verify(orgEnhetCommandService, times(1))
@@ -213,7 +213,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
 
         orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdate(
             targetOrgEnhetState,
-            Optional.of(orgEnhetsType)
+            orgEnhetsType
         );
 
         verify(orgEnhetCommandService, times(1))
@@ -256,7 +256,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
 
         orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdate(
             orgeEnhetState,
-            Optional.of(OrgEnhetsType.DIREKTORAT)
+            OrgEnhetsType.DIREKTORAT
         );
 
         verify(orgEnhetCommandService, times(0))

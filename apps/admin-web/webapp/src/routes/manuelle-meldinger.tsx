@@ -1,6 +1,7 @@
 import { Heading } from "@navikt/ds-react";
 import { createFileRoute } from "@tanstack/react-router";
 
+import { AvsluttDelegering } from "~/manuelle-meldinger/AvsluttDelegering.tsx";
 import { AvvikleOrgenhet } from "~/manuelle-meldinger/AvvikleOrgenhet.tsx";
 import { AvvikleRessurs } from "~/manuelle-meldinger/AvvikleRessurs.tsx";
 import { EndreDagligOppfolging } from "~/manuelle-meldinger/EndreDagligOppfolging.tsx";
@@ -11,6 +12,7 @@ import { OppdatereSluttDatoRessurs } from "~/manuelle-meldinger/OppdatereSluttDa
 import { OppdatereStartdato } from "~/manuelle-meldinger/OppdatereStartdato.tsx";
 import { OppdaterPersonalia } from "~/manuelle-meldinger/OppdaterPersonalia.tsx";
 import { OppdaterPersonidentRessurs } from "~/manuelle-meldinger/OppdaterPersonidentRessurs.tsx";
+import { OpprettDelegering } from "~/manuelle-meldinger/OpprettDelegering.tsx";
 import { SettNomMaster } from "~/manuelle-meldinger/SettNomMaster.tsx";
 import { SjekkRessursStateRemedy } from "~/manuelle-meldinger/SjekkRessursStateRemedy.tsx";
 import { SlettAlleErrorStates } from "~/manuelle-meldinger/SlettAlleErrorStates.tsx";
@@ -37,6 +39,7 @@ function ManuelleMeldingerPage() {
         <OppdatereSluttDatoRessurs />
         <OppdatereRessursSektor />
       </div>
+
       <Heading level="2" size="medium" spacing>
         Orgenhet
       </Heading>
@@ -44,12 +47,14 @@ function ManuelleMeldingerPage() {
         <AvvikleOrgenhet />
         <EndreDagligOppfolging />
       </div>
+
       <Heading level="2" size="medium" spacing>
         Orgtilknytning
       </Heading>
       <div className="flex gap-2 flex-wrap mb-4">
         <FjernOrgtilknytning />
       </div>
+
       <Heading level="2" size="medium" spacing>
         Remedy Admin Controller
       </Heading>
@@ -58,11 +63,14 @@ function ManuelleMeldingerPage() {
         <SlettAlleErrorStates />
         <SlettEnErrorStateRad />
       </div>
+
       <Heading level="2" size="medium" spacing>
         Delegering
       </Heading>
       <div className="flex gap-2 flex-wrap mb-4">
         <FornyDelegering />
+        <OpprettDelegering />
+        <AvsluttDelegering />
       </div>
     </div>
   );

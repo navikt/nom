@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.nomremedyintegrasjon.TestBase;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateStateRepository;
-import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEvent;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.jpa.DelayedEventJpa;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
@@ -257,7 +257,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
     @MethodSource("testShouldDelayRessursEventsInput")
     @ParameterizedTest(name = "{0}")
     @DisplayName("Should save delayed RessursEvent when future sluttdato")
-    void testShouldDelayRessursEvents(RessursEvent ressursEvent, DelayedEvent expectedDelayedEvent) {
+    void testShouldDelayRessursEvents(RessursEvent ressursEvent, DelayedEventJpa expectedDelayedEventJpa) {
 
         var existingRessurs = ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
 
@@ -272,7 +272,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
             .hasSize(1)
             .first()
             .usingRecursiveComparison().ignoringFieldsOfTypes(UUID.class)
-            .isEqualTo(expectedDelayedEvent);
+            .isEqualTo(expectedDelayedEventJpa);
     }
 
     private static Stream<Arguments> testShouldDelayRessursEventsInput() {
@@ -282,13 +282,13 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
         return Stream.of(
             Arguments.of(
                 ressursSluttetEvent,
-                DelayedEvent.builder()
+                DelayedEventJpa.builder()
                     .delayedUntil(futureDate.plusDays(1))
                     .event(ressursSluttetEvent).build()
             ),
             Arguments.of(
                 ressursSluttdatoOppdatertEventV1,
-                DelayedEvent.builder()
+                DelayedEventJpa.builder()
                     .delayedUntil(futureDate.plusDays(1))
                     .event(ressursSluttdatoOppdatertEventV1).build()
             )
@@ -547,7 +547,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
         var orgtilknytningFjernetEventV1 = orgtilknytningFjernetEventV1(orgtilknytningDagligOppfolgingEndretEventV1.getFid());
 
         delayedEventRepository.save(
-            DelayedEvent.builder()
+            DelayedEventJpa.builder()
                 .delayedUntil(LocalDate.now())
                 .event(orgtilknytningDagligOppfolgingEndretEventV1)
                 .build()
@@ -658,7 +658,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
         );
 
         delayedEventRepository.save(
-            DelayedEvent.builder()
+            DelayedEventJpa.builder()
                 .delayedUntil(LocalDate.now())
                 .event(orgtilknytningEvent)
                 .build());
@@ -689,7 +689,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
         );
 
         delayedEventRepository.save(
-            DelayedEvent.builder()
+            DelayedEventJpa.builder()
                 .delayedUntil(LocalDate.now())
                 .event(orgtilknytningEvent)
                 .build());
@@ -709,9 +709,9 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
     @MethodSource("testShouldNotUpdateOrgtilknytningDolEventInput")
     @DisplayName("Should not update remedy for delayed OrgtilknytningDagligOppfolgingEndretEventV1")
     void testShouldNotUpdateForDelayedOrgtilknytningDagligOppfolgingEndretEventV1(
-        DelayedEvent delayedEvent, OrgtilknytningState orgtilknytning) {
-        var orgtilknytningDolEvent = (OrgtilknytningDagligOppfolgingEndretEventV1)delayedEvent.getEvent();
-        delayedEventRepository.save(delayedEvent);
+        DelayedEventJpa delayedEventJpa, OrgtilknytningState orgtilknytning) {
+        var orgtilknytningDolEvent = (OrgtilknytningDagligOppfolgingEndretEventV1) delayedEventJpa.getEvent();
+        delayedEventRepository.save(delayedEventJpa);
 
         when(nomApiClient.getOrgtilknytning(orgtilknytningDolEvent.getFid())).thenReturn(orgtilknytning);
 
@@ -725,9 +725,9 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
     @MethodSource("testShouldNotUpdateOrgtilknytningEventInput")
     @DisplayName("Should not update remedy for delayed OrgtilknytningDatoEndretEventV2")
     void testShouldNotUpdateForDelayedOrgtilknytningEndretEventV1(
-        DelayedEvent delayedEvent, OrgtilknytningState orgtilknytning) {
-        var orgtilknytningDolEvent = (OrgtilknytningDatoEndretEventV2)delayedEvent.getEvent();
-        delayedEventRepository.save(delayedEvent);
+        DelayedEventJpa delayedEventJpa, OrgtilknytningState orgtilknytning) {
+        var orgtilknytningDolEvent = (OrgtilknytningDatoEndretEventV2) delayedEventJpa.getEvent();
+        delayedEventRepository.save(delayedEventJpa);
 
         when(nomApiClient.getOrgtilknytning(orgtilknytningDolEvent.getFid())).thenReturn(orgtilknytning);
 
@@ -743,7 +743,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
 
         return Stream.of(
             Arguments.of(
-                DelayedEvent.builder()
+                DelayedEventJpa.builder()
                     .delayedUntil(LocalDate.now())
                     .event(
                         orgtilknytningDagligOppfolgingEndretEventV1(
@@ -757,7 +757,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
                 existingRessurs
             ),
             Arguments.of(
-                DelayedEvent.builder()
+                DelayedEventJpa.builder()
                     .delayedUntil(LocalDate.now())
                     .event(
                         orgtilknytningDagligOppfolgingEndretEventV1(
@@ -779,7 +779,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
 
         return Stream.of(
             Arguments.of(
-                DelayedEvent.builder()
+                DelayedEventJpa.builder()
                     .delayedUntil(LocalDate.now())
                     .event(
                         orgtilknytningDatoEndretEventV2(
@@ -791,7 +791,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
                 existingRessurs
             ),
             Arguments.of(
-                DelayedEvent.builder()
+                DelayedEventJpa.builder()
                     .delayedUntil(LocalDate.now())
                     .event(
                         orgtilknytningDatoEndretEventV2(
@@ -909,15 +909,15 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
     @DisplayName("Should handle delayed RessursEvent")
     @MethodSource("testDelayedDeleteRessursInput")
     void testDelayedDeleteRessurs(
-        DelayedEvent delayedEvent, Ressurs existingRessurs, NomIntegrasjonEntity expectedNomIntegrasjonEntity
+        DelayedEventJpa delayedEventJpa, Ressurs existingRessurs, NomIntegrasjonEntity expectedNomIntegrasjonEntity
     ) {
 
-        when(nomApiClient.getRessursByFid(delayedEvent.getEvent().getFid())).thenReturn(existingRessurs);
+        when(nomApiClient.getRessursByFid(delayedEventJpa.getEvent().getFid())).thenReturn(existingRessurs);
         when(nomApiClient.getOrgEnhet(any())).thenReturn(orgenhet());
         when(nomApiClient.getOrgtilknytningerForNavident(existingRessurs.getNavident())).thenReturn(List.of(orgtilknytningState()));
         when(nomApiClient.getTelefonnummere(existingRessurs.getNavident())).thenReturn(List.of());
 
-        delayedEventRepository.saveAll(List.of(delayedEvent));
+        delayedEventRepository.saveAll(List.of(delayedEventJpa));
 
         nomRemedyIntegrasjonServiceOld.triggerDelayedEvents();
 
@@ -946,14 +946,14 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
 
         return Stream.of(
             Arguments.of(
-                DelayedEvent.builder().delayedUntil(yesterday).event(ressursSluttetEventV1).build(),
+                DelayedEventJpa.builder().delayedUntil(yesterday).event(ressursSluttetEventV1).build(),
                 existingRessursWithSluttdatoYesterday,
                 nomIntegrasjonEntityForDeletingRessurs.toBuilder()
                     .entryBestiller(ressursSluttetEventV1.getMetadata().inputMetadata().origination().initiatedBy())
                     .build()
             ),
             Arguments.of(
-                DelayedEvent.builder().delayedUntil(yesterday).event(ressursSluttdatoOppdatertEventV1).build(),
+                DelayedEventJpa.builder().delayedUntil(yesterday).event(ressursSluttdatoOppdatertEventV1).build(),
                 existingRessursWithSluttdatoYesterday,
                 nomIntegrasjonEntityForDeletingRessurs.toBuilder()
                     .entryBestiller(ressursSluttdatoOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy())
@@ -961,12 +961,12 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
             ),
             // Tester at man ikke sletter ressurs dersom ressursen har en annen sluttdato enn spesifisert i den forsinkede hendelsen
             Arguments.of(
-                DelayedEvent.builder().delayedUntil(yesterday).event(ressursSluttetEventV1).build(),
+                DelayedEventJpa.builder().delayedUntil(yesterday).event(ressursSluttetEventV1).build(),
                 existingRessursWithSluttdatoAnotherDay,
                 null
             ),
             Arguments.of(
-                DelayedEvent.builder().delayedUntil(yesterday).event(ressursSluttdatoOppdatertEventV1).build(),
+                DelayedEventJpa.builder().delayedUntil(yesterday).event(ressursSluttdatoOppdatertEventV1).build(),
                 existingRessursWithSluttdatoAnotherDay,
                 null
             )

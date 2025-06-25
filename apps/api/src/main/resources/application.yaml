@@ -183,6 +183,9 @@ spring:
     listener:
       missing-topics-fatal: true
     client-id: ${HOSTNAME}
+  http:
+    codecs:
+      max-in-memory-size: 400MB
 
 management:
   metrics:
@@ -378,6 +381,9 @@ app:
         orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
         sektor: NAV_STATLIG
       - navident: Z993192         # Team ISA / Øystein Brox
+        orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z990141         # Team ISA / Øystein Brox
         orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
         sektor: NAV_STATLIG
 

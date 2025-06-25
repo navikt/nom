@@ -113,7 +113,7 @@ public class StatistikkRestService {
             .map(orgEnhetMapper::mapToOrgEnhet)
             .map(OrgEnhet::ressursKoblinger)
             .flatMap(Collection::stream)
-            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
+            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom().orElse(null)))
             .map(OrgtilknytningState::navident)
             .distinct()
             .toList();

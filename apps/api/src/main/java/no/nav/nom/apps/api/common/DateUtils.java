@@ -6,7 +6,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 public class DateUtils {
 
@@ -17,26 +16,15 @@ public class DateUtils {
         return DateTimeFormatter.ofPattern("dd.MM.yyyy").format(localDate);
     }
 
-    public static boolean isPeriodsOverlapping(LocalDate period1Start, Optional<LocalDate> period1End, LocalDate period2Start, Optional<LocalDate> period2End) {
+    public static boolean isPeriodsOverlapping(LocalDate period1Start, LocalDate period1End, LocalDate period2Start, LocalDate period2End) {
         return isPerioderOverlapping(
-            new Periode(period1Start, period1End.orElse(LocalDate.MAX)),
-            new Periode(period2Start, period2End.orElse(LocalDate.MAX))
+            new Periode(period1Start, period1End != null ? period1End : LocalDate.MAX),
+            new Periode(period2Start, period2End != null ? period2End : LocalDate.MAX)
         );
     }
 
     public static Boolean isPerioderOverlapping(Periode periode1, Periode periode2) {
         return periode1.start().isBefore(periode2.end) && periode2.start.isBefore(periode1.end);
-    }
-
-    public static boolean isPeriodActive(LocalDate periodStart, Optional<LocalDate> periodEnd) {
-        return isPeriodActive(periodStart, periodEnd.orElse(null));
-    }
-
-    public static boolean isPeriodActive(Optional<LocalDate> periodStart, Optional<LocalDate> periodEnd) {
-        if (periodStart.isEmpty()) {
-            return false;
-        }
-        return isPeriodActive(periodStart.orElse(null), periodEnd.orElse(null));
     }
 
     public static boolean isPeriodActive(LocalDate periodStart, LocalDate periodEnd) {
@@ -45,11 +33,6 @@ public class DateUtils {
         var isPeriodEndAfterOrEqualToToday = periodEnd == null || periodEnd.isAfter(today.minusDays(1));
 
         return isPeriodStartBeforeOrEqualToToday && isPeriodEndAfterOrEqualToToday;
-    }
-
-    public static boolean isPeriodFuture(LocalDate periodStart, Optional<LocalDate> periodEnd) {
-        var today = LocalDate.now();
-        return periodStart.isAfter(today) && (periodEnd.isEmpty() || periodEnd.get().isAfter(today));
     }
 
     public static void validateChronologicalDates(LocalDate startDato, LocalDate sluttDato) {
@@ -72,10 +55,6 @@ public class DateUtils {
         }
 
         return today.plusDays(1);
-    }
-
-    public static boolean isPeriodCoveredBy(LocalDate periodFom, LocalDate periodTom, List<Periode> perioder) {
-        return perioder.stream().anyMatch(p -> isPeriodCoveredByAny(periodFom, periodTom, mergeContinuousPeriods(perioder)));
     }
 
     public static List<Periode> mergeContinuousPeriods(List<Periode> perioder) {

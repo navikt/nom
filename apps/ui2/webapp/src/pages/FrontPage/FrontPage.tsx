@@ -11,7 +11,6 @@ import {
   VStack,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import React from "react";
 
@@ -24,6 +23,7 @@ import { useHasAdminAccess } from "~/api/useGetSession";
 import type { ChartRow } from "~/components/charts/HorizontalBarChart";
 import { HorizontalBarChart } from "~/components/charts/HorizontalBarChart";
 import ContentWrapper from "~/components/ContentWrapper";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import building from "~/resources/building.svg";
 import type { GlobalStatistikkResponse, OrgEnhet } from "~/types/api-models";
 import { formatDisplayNumber, isInDevelopment } from "~/utils";
@@ -621,7 +621,7 @@ export function OrghierarkiItem({
   icon: string;
 }) {
   return to ? (
-    <Link
+    <SmartLink
       css={css`
         color: #000;
 
@@ -629,10 +629,10 @@ export function OrghierarkiItem({
           text-decoration: none;
         }
       `}
-      to={to}
+      href={to}
     >
       <OrghierarkiItemContent icon={icon} label={label} />
-    </Link>
+    </SmartLink>
   ) : (
     <OrghierarkiItemContent icon={icon} label={label} />
   );

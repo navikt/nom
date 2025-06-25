@@ -7,9 +7,13 @@ import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredVa
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateStateRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.jpa.DelayedEventRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.r2dbc.DelayedEventR2dbc;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.r2dbc.DelayedEventReactiveRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorStateRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
+import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
@@ -20,9 +24,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -50,6 +56,8 @@ public class NomRemedyIntegrasjonServiceNew {
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final Unleash unleash;
+    private final DelayedEventRepository delayedEventRepository;
+    private final DelayedEventReactiveRepository delayedEventReactiveRepository;
 
     public NomRemedyIntegrasjonServiceNew(
         LeaderElection leaderElection,
@@ -59,7 +67,9 @@ public class NomRemedyIntegrasjonServiceNew {
         ErrorStateRepository errorStateRepository,
         RessursStateRepository ressursStateRepository,
         OrgtilknytningStateRepository orgtilknytningStateRepository,
-        Unleash unleash
+        Unleash unleash,
+        DelayedEventRepository delayedEventRepository,
+        DelayedEventReactiveRepository delayedEventReactiveRepository
     ) {
         this.leaderElection = leaderElection;
         this.remedyIntegrasjonRepositoryService = remedyIntegrasjonRepositoryService;
@@ -69,6 +79,8 @@ public class NomRemedyIntegrasjonServiceNew {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.unleash = unleash;
+        this.delayedEventRepository = delayedEventRepository;
+        this.delayedEventReactiveRepository = delayedEventReactiveRepository;
     }
 
     @Transactional
@@ -85,8 +97,45 @@ public class NomRemedyIntegrasjonServiceNew {
     @Scheduled(cron = "0 15 0 * * *")
     public void executeDelayedStateUpdate() {
         if (leaderElection.isLeader()) {
-            var delayedStates = aggregateStateRepository.findByDelayedUntilAndMasseflyttingIsFalse(LocalDate.now());
+            logger.info("Executing delayed state update");
+            var delayedStates = aggregateStateRepository.findAggregateStatesByMasseflyttingIsFalseOrMasseflyttingIsNullAndDelayedUntilIsLessThanEqual(LocalDate.now());
+            logger.info("Delayed state update: {}", delayedStates);
             List<UUID> rowsToDelete = executeStateUpdates(delayedStates);
+            aggregateStateRepository.deleteAllById(rowsToDelete);
+        }
+    }
+
+    @Transactional
+    @Scheduled(cron = "0 10 0 * * *")
+    public void executeOldDelayedStateUpdate() {
+        if (leaderElection.isLeader()) {
+            logger.info("Executing old delayed state update");
+            var oldDelayedStates = delayedEventRepository.findByDelayedUntilLessThanEqual(LocalDate.now());
+            if (oldDelayedStates.isEmpty()) {
+                logger.info("No old delayed states to update");
+                return;
+            }
+            List<AggregateState> oldDelayedStatesToUpdate = new ArrayList<>();
+            oldDelayedStates.forEach(state -> {
+                var fid = state.getEvent().getFid();
+                var fidType = fid.contains("ressurs") ? RessursState.class.getSimpleName() : OrgtilknytningState.class.getSimpleName();
+                var navident = fidType.equals("OrgtilknytningState") ? orgtilknytningStateRepository.findByFid(fid).map(OrgtilknytningState::navident)
+                    .orElseThrow(() -> OrgtilknytningNotFoundException.orgtilknytningNotFoundException(fid)) :
+                    ressursStateRepository.findByFid(fid).map(RessursState::navident)
+                        .orElseThrow(() -> RessursNotFoundException.notFound(fid));
+
+                oldDelayedStatesToUpdate.add(
+                    AggregateState.builder()
+                        .createdAt(LocalDateTime.now())
+                        .navident(navident)
+                        .stateFid(fid)
+                        .stateType(fidType)
+                        .delayedUntil(state.getDelayedUntil())
+                        .build()
+                );
+            });
+            logger.info("Old delayed state update: {}", oldDelayedStates);
+            List<UUID> rowsToDelete = executeStateUpdates(oldDelayedStatesToUpdate);
             aggregateStateRepository.deleteAllById(rowsToDelete);
         }
     }
@@ -109,10 +158,13 @@ public class NomRemedyIntegrasjonServiceNew {
     protected List<UUID> executeStateUpdates(List<AggregateState> statesToUpdate) {
         return statesToUpdate.stream().map(aggregateState -> {
             AtomicReference<UUID> fid = new AtomicReference<>(null);
-            var optionalRessursState = aggregateState.getStateType().equals(RessursState.class.getSimpleName()) ? ressursStateRepository.findByFid(
-                aggregateState.getStateFid()) : Optional.<RessursState>empty();
-            var optionalOrgtilknytningState = aggregateState.getStateType()
-                .equals(OrgtilknytningState.class.getSimpleName()) ? orgtilknytningStateRepository.findByFid(aggregateState.getStateFid()) : Optional.<OrgtilknytningState>empty();
+
+            var optionalRessursState = aggregateState.getStateType().equals(RessursState.class.getSimpleName()) ?
+                ressursStateRepository.findByFid(aggregateState.getStateFid()) : Optional.<RessursState>empty();
+
+            var optionalOrgtilknytningState = aggregateState.getStateType().equals(OrgtilknytningState.class.getSimpleName()) ?
+                orgtilknytningStateRepository.findByFid(aggregateState.getStateFid()) : Optional.<OrgtilknytningState>empty();
+
             try {
                 optionalRessursState.ifPresent(ressursState -> {
                     if (ressursStateUpdate(ressursState, aggregateState)) {
@@ -135,15 +187,13 @@ public class NomRemedyIntegrasjonServiceNew {
                     e
                 );
                 fid.set(aggregateState.getAggregateStateId());
-                errorStateRepository.save(
-                    ErrorState.builder()
-                        .errorStateFid(aggregateState.getStateFid())
-                        .errorStateType(aggregateState.getStateType())
-                        .errorMessage(e.getMessage())
-                        .createdAt(LocalDateTime.now())
-                        .navident(aggregateState.getNavident())
-                        .build()
-                );
+                errorStateRepository.save(ErrorState.builder()
+                    .errorStateFid(aggregateState.getStateFid())
+                    .errorStateType(aggregateState.getStateType())
+                    .errorMessage(e.getMessage())
+                    .createdAt(LocalDateTime.now())
+                    .navident(aggregateState.getNavident())
+                    .build());
             }
             return isNull(fid.get()) ? null : fid.get();
         }).filter(Objects::nonNull).toList();
@@ -162,13 +212,17 @@ public class NomRemedyIntegrasjonServiceNew {
         var erMasseflytting = !isNull(aggregateState.getMasseflytting()) && aggregateState.getMasseflytting();
 
         if (erDagligOppfolging && (isActive(orgtilknytningState) || (isFuture(orgtilknytningState) && erMasseflytting))) {
+            logger.info("OrgtilknytningState er aktiv eller er i fremtiden og er masseflytting for navident {}, lagrer i IR", orgtilknytningState.navident());
+            logger.info("navident: {} orgtilknytningState: {}", orgtilknytningState.navident(), orgtilknytningState);
             saveStateToRemedy(nomIntegrasjonEntityFromNomData(ressursState, orgtilknytningState, erMasseflytting), entryBestiller);
             return true;
         }
 
         if (isFuture(orgtilknytningState) && erDagligOppfolging) {
+            logger.info("OrgtilknytningState er i fremtiden for navident {}, utsetter i aggregate_state tabellen", orgtilknytningState.navident());
             var currentDolOrgtilknytning = getCurrentDolByNavident(orgtilknytningState.navident());
             if (currentDolOrgtilknytning.isPresent()) {
+                logger.info("Fant eksisterende orgtilknytning for navident {}, oppdaterer aggregate_state tabellen", orgtilknytningState.navident());
                 aggregateStateRepository.save(
                     aggregateState.toBuilder()
                         .delayedUntil(orgtilknytningState.gyldigFom())
@@ -178,6 +232,7 @@ public class NomRemedyIntegrasjonServiceNew {
                     aggregateState.getStateFid(),
                     orgtilknytningState.gyldigFom()
                 );
+                return false;
             } else {
                 saveStateToRemedyIfNewOrReactivatedRessurs(ressursState, orgtilknytningState);
                 return true;
@@ -190,22 +245,15 @@ public class NomRemedyIntegrasjonServiceNew {
     private boolean ressursStateUpdate(RessursState ressursState, AggregateState aggregateState) {
         var navident = ressursState.navident();
         var currentDolOrgtilknytning = getCurrentDolByNavident(navident);
+        var futureDolOrgtilknytning = getFutureDolByNavident(navident);
         var erMasseflytting = !isNull(aggregateState.getMasseflytting()) && aggregateState.getMasseflytting();
         logger.info("Masseflytting: {} for navident: {}", erMasseflytting, navident);
 
-        var futureDolOrgtilknytning = getFutureDolByNavident(navident);
-
-        if (currentDolOrgtilknytning.isPresent()) {
-            saveStateToRemedy(
-                nomIntegrasjonEntityFromNomData(ressursState, currentDolOrgtilknytning.get(), erMasseflytting),
-                ressursState.sistEndretAv()
-            );
-        } else if (futureDolOrgtilknytning.isPresent()) {
-            var dolOrgtilknytning = futureDolOrgtilknytning.get();
-            saveStateToRemedyIfNewOrReactivatedRessurs(ressursState, dolOrgtilknytning);
-        } else if (ressursState.sluttdato().isPresent()) {
+        if (ressursState.sluttdato().isPresent()) {
+            logger.info("RessursState har en sluttdato for navident {}, sjekker om den er før dagens dato", navident);
             var sluttdato = ressursState.sluttdato().get();
             if (sluttdato.isBefore(LocalDate.now())) {
+                logger.info("RessursState med navident {} har en sluttdato før dagens dato, sletter ressurs i IR", navident);
                 if (unleash.isEnabled(UNLEASH_TOGGLE)) {
                     remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(navident).ifPresentOrElse(
                         nomIntegrasjonEntity -> {
@@ -221,13 +269,30 @@ public class NomRemedyIntegrasjonServiceNew {
                     logger.info("Ressurs {} er merket for sletting i IR", navident);
                 }
             } else if (!sluttdato.isBefore(LocalDate.now())) {
+                logger.info("Ressurs {} har en sluttdato i fremtiden, oppdaterer ressurs i aggregate_state tabellen", navident);
                 aggregateStateRepository.save(
                     aggregateState.toBuilder()
                         .delayedUntil(ressursState.sluttdato().get().plusDays(1))
                         .build());
+                logger.info(
+                    "RessursState med fid {} ble utsatt i aggregateStateTabellen helt til {}",
+                    aggregateState.getStateFid(),
+                    ressursState.sluttdato().get().plusDays(1)
+                );
+                return false;
             }
         } else {
-            throw OrgtilknytningNotFoundException.orgtilknytningNotFoundException(navident);
+            if (currentDolOrgtilknytning.isPresent()) {
+                saveStateToRemedy(
+                    nomIntegrasjonEntityFromNomData(ressursState, currentDolOrgtilknytning.get(), erMasseflytting),
+                    ressursState.sistEndretAv()
+                );
+            } else if (futureDolOrgtilknytning.isPresent()) {
+                var dolOrgtilknytning = futureDolOrgtilknytning.get();
+                saveStateToRemedyIfNewOrReactivatedRessurs(ressursState, dolOrgtilknytning);
+            } else {
+                throw OrgtilknytningNotFoundException.orgtilknytningNotFoundException(navident);
+            }
         }
         return true;
     }
@@ -236,14 +301,12 @@ public class NomRemedyIntegrasjonServiceNew {
         if ((ressursState.startdato().isPresent() && dolOrgtilknytning.gyldigFom() != null)
             && (ressursState.startdato().get().isAfter(LocalDate.now()) || dolOrgtilknytning.gyldigFom().isAfter(LocalDate.now()))) {
             if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-                var entryId = remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntityNew(
-                        nomIntegrasjonEntityFromNomData(ressursState, dolOrgtilknytning, false), ressursState.sistEndretAv())
-                    .getEntryId();
+                remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntityNew(
+                        nomIntegrasjonEntityFromNomData(ressursState, dolOrgtilknytning, false), ressursState.sistEndretAv());
                 logger.info(
-                    "Opprettet ressurs i IR med navident {}, startdato {} og entryId {}",
+                    "Opprettet ressurs i IR med navident {}, startdato {}",
                     ressursState.navident(),
-                    ressursState.startdato().get(),
-                    entryId
+                    ressursState.startdato().get()
                 );
             } else {
                 logger.info("Opprettet ressurs i IR med navident {}, startdato {}", ressursState.navident(), ressursState.startdato().get());
@@ -347,5 +410,24 @@ public class NomRemedyIntegrasjonServiceNew {
     public void deleteErrorState(String fid) {
         errorStateRepository.deleteErrorStateByErrorStateFid(fid);
         logger.info("Slettet error state med id: {}", fid);
+    }
+
+    @Transactional
+    public void lesStatePaaNytt(String navident) {
+        var ressursState = ressursStateRepository.findByNavident(navident)
+            .orElseThrow(() -> RessursNotFoundException.notFound(navident));
+        executeStateUpdates(
+            List.of(
+                AggregateState.builder()
+                    .navident(navident)
+                    .createdAt(LocalDateTime.now())
+                    .stateFid(ressursState.fid())
+                    .stateType(ressursState.getClass().getSimpleName())
+                    .build()
+            ));
+    }
+
+    public Flux<Event> getAllDelayedEvents() {
+        return delayedEventReactiveRepository.findAll().map(DelayedEventR2dbc::getEvent);
     }
 }
