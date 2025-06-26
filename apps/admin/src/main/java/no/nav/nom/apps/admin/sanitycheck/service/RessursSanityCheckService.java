@@ -2,8 +2,10 @@ package no.nav.nom.apps.admin.sanitycheck.service;
 
 import no.nav.nom.apps.admin.PeriodeUtil;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.*;
+import no.nav.nom.apps.admin.webclient.nomremedyapiclient.NomRemedyApiClient;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -32,16 +34,19 @@ public class RessursSanityCheckService {
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrganiseringStateRepository organiseringStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
+    private final NomRemedyApiClient nomRemedyApiClient;
 
     public RessursSanityCheckService(RessursStateRepository ressursStateRepository,
                                      OrgEnhetStateRepository orgEnhetStateRepository,
                                      OrganiseringStateRepository organiseringStateRepository,
-                                     OrgtilknytningStateRepository orgtilknytningStateRepository
+                                     OrgtilknytningStateRepository orgtilknytningStateRepository,
+                                     NomRemedyApiClient nomRemedyApiClient
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.organiseringStateRepository = organiseringStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
+        this.nomRemedyApiClient = nomRemedyApiClient;
     }
 
     public RessursOrgtilknytningKoblingInfo aktiveRessurser() {
@@ -494,5 +499,45 @@ public class RessursSanityCheckService {
                 .filter(r -> r.visningsnavn().mellomnavn().isPresent())
                 .filter(r -> r.visningsnavn().mellomnavn().get().isBlank())
                 .toList();
+    }
+
+    public List<RessursState> compareFutureChangedWithDelayEvents() {
+        List<RessursState> futureRessursStates = ressursStateRepository.findAllActiveRessurser().values()
+            .stream()
+            .filter(ressursState -> ressursState.sluttdato().isPresent()
+                && ressursState.sluttdato().get().isAfter(LocalDate.now()))
+            .toList();
+        List<String> delayedEvents = getAllDelayedEventsBlocking();
+        List<RessursState> ressurserMedForsinkedeHendelser = new ArrayList<>();
+
+        if (futureRessursStates.isEmpty() && delayedEvents.isEmpty()) {
+            log.info("Ingen fremtidige ressurser eller forsinkede hendelser funnet.");
+            return Collections.emptyList();
+        }
+
+        boolean hasMatch = false;
+        for (RessursState ressursState : futureRessursStates) {
+            String fid = ressursState.fid();
+            for (String delayedEvent : delayedEvents) {
+                if (fid.equals(delayedEvent)) {
+                    hasMatch = true;
+                    break; // Break inner loop if a match is found
+                }
+            }
+            if (!hasMatch) {
+                ressurserMedForsinkedeHendelser.add(ressursState);
+            }
+        }
+        return ressurserMedForsinkedeHendelser;
+    }
+
+    private List<String> getAllDelayedEventsBlocking() {
+        return nomRemedyApiClient.getAllDelayedEventsAsList().stream().map(event -> {
+            if (event instanceof RessursEvent ressursEvent) {
+                return ressursEvent.getFid();
+            } else {
+                return ""; // or handle other event types as needed
+            }
+        }).toList();
     }
 }

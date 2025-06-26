@@ -7,6 +7,7 @@ import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredVa
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateStateRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.jpa.DelayedEventJpa;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.jpa.DelayedEventRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.r2dbc.DelayedEventR2dbc;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.r2dbc.DelayedEventReactiveRepository;
@@ -429,5 +430,11 @@ public class NomRemedyIntegrasjonServiceNew {
 
     public Flux<Event> getAllDelayedEvents() {
         return delayedEventReactiveRepository.findAll().map(DelayedEventR2dbc::getEvent);
+    }
+
+    public List<Event> getAllDelayedEventsBlocking() {
+        return delayedEventRepository.findAll().stream()
+            .map(DelayedEventJpa::getEvent)
+            .toList();
     }
 }

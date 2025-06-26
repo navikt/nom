@@ -1,10 +1,10 @@
-package no.nav.nom.apps.admin.nomapiclient;
+package no.nav.nom.apps.admin.webclient.nomapiclient;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static no.nav.nom.apps.admin.nomapiclient.WebClientUtils.defaultRetry;
+import static no.nav.nom.apps.admin.webclient.WebClientUtils.defaultRetry;
 
 @Slf4j
 @Service

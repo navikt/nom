@@ -1,5 +1,6 @@
 package no.nav.nom.apps.admin.sanitycheck.service;
 
+import no.nav.nom.apps.admin.webclient.nomremedyapiclient.NomRemedyApiClient;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -51,6 +52,9 @@ class RessursSanityCheckServiceTest {
     @Mock
     private OrgtilknytningStateRepository orgtilknytningStateRepositoryMock;
 
+    @Mock
+    private NomRemedyApiClient nomRemedyApiClientMock;
+
 
     private RessursSanityCheckService service;
 
@@ -61,7 +65,8 @@ class RessursSanityCheckServiceTest {
                 ressursStateRepositoryMock,
                 orgEnhetStateRepositoryMock,
                 organiseringStateRepositoryMock,
-                orgtilknytningStateRepositoryMock
+                orgtilknytningStateRepositoryMock,
+                nomRemedyApiClientMock
         );
     }
 

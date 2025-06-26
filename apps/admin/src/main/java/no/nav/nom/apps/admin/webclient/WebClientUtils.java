@@ -1,4 +1,4 @@
-package no.nav.nom.apps.admin.nomapiclient;
+package no.nav.nom.apps.admin.webclient;
 
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.util.retry.Retry;

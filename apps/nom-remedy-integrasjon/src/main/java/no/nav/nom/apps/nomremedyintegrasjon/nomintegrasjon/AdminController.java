@@ -138,8 +138,14 @@ public class AdminController {
     }
 
     @GetMapping(value = "getAllDelayStates")
-    public Flux<Event> getAllDelayStates() {
-        return nomRemedyIntegrasjonServiceNew.getAllDelayedEvents();
+    public ResponseEntity<Flux<Event>> getAllDelayStates() {
+        return ResponseEntity.ok(nomRemedyIntegrasjonServiceNew.getAllDelayedEvents());
+    }
+
+    @GetMapping(value = "getAllDelayedEventsBlocking")
+    public ResponseEntity<List<Event>> getAllDelayedEventsBlocking() {
+        List<Event> events = nomRemedyIntegrasjonServiceNew.getAllDelayedEventsBlocking();
+        return ResponseEntity.ok(events);
     }
 
     private static String getAuthenticatedNavIdent() {

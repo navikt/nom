@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { BigLoader } from "~/components/BigLoader.tsx";
+import { RessursDelayedEventComparison } from "~/sanitychecks/Ressurs/RessursDelayedEventComparison.tsx";
 import { RessursDuplikat } from "~/sanitychecks/Ressurs/RessursDuplikat.tsx";
 import { Ressurser } from "~/sanitychecks/Ressurs/Ressurser.tsx";
 import { RessurserMedOverlappendeDOL } from "~/sanitychecks/Ressurs/RessurserMedOverlappendeDOL.tsx";
@@ -78,6 +79,9 @@ function ListSelector(props: { selected: string }) {
     case "RessursRoboter": {
       return <RessursRoboter />;
     }
+    case "RessursDelayedEventComparison": {
+      return <RessursDelayedEventComparison />;
+    }
     default: {
       return <></>;
     }
@@ -117,6 +121,9 @@ function RessursSanityChecks() {
           Ressurser uten orgtilknytninger
         </option>
         <option value="RessursRoboter">Robot-ressurser</option>
+        <option value="RessursDelayedEventComparison">
+          Ressurser med fremtidig endring som ikke er i DelayedEvent
+        </option>
       </Select>
       <ListSelector selected={selected} />
     </div>

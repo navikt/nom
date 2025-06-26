@@ -1,17 +1,14 @@
 package no.nav.nom.apps.admin.sanitycheck.remedycompare;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.admin.nomapiclient.NomApiClient;
+import no.nav.nom.apps.admin.webclient.nomapiclient.NomApiClient;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 
 @Slf4j

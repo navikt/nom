@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { BigLoader } from "~/components/BigLoader.tsx";
+import { OrgtilknytningDelayedEventComparison } from "~/sanitychecks/Orgtilknytning/OrgtilknytningDelayedEventComparison.tsx";
 import { OrgtilknytningDuplikat } from "~/sanitychecks/Orgtilknytning/OrgtilknytningDuplikat.tsx";
 import { OrgtilknytningerUtenforHierarki } from "~/sanitychecks/Orgtilknytning/OrgtilknytningerUtenforHierarki.tsx";
 import { OrgtilknytningMedFlereDOLSammePeriode } from "~/sanitychecks/Orgtilknytning/OrgtilknytningMedFlereDOLSammePeriode.tsx";
@@ -57,6 +58,9 @@ function ListSelector(props: { selected: string }) {
     case "OrgtilknytningerUtenforHierarki": {
       return <OrgtilknytningerUtenforHierarki />;
     }
+    case "OrgtilknytningDelayedEventComparison": {
+      return <OrgtilknytningDelayedEventComparison />;
+    }
     default: {
       return <></>;
     }
@@ -101,6 +105,10 @@ function OrgtilknytningSanityChecks() {
         </option>
         <option value="OrgtilknytningerUtenforHierarki">
           List orgtilknytninger som henger på enhet utenfor hierarki
+        </option>
+        <option value="OrgtilknytningDelayedEventComparison">
+          List orgtilknytninger med fremtidig endring som ikke er i delayed
+          event
         </option>
       </Select>
       <ListSelector selected={selected} />

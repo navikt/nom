@@ -4,8 +4,10 @@ import no.nav.nom.apps.admin.PeriodeUtil;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.DuplikatOrgtilknytning;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OrgtilknytningMedOrgEnhet;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OverlappendeOrgtilknytning;
+import no.nav.nom.apps.admin.webclient.nomremedyapiclient.NomRemedyApiClient;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
@@ -14,20 +16,30 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 
 @Service
 public class OrgtilknytningSanityCheckService {
+    private final static Logger logger = LoggerFactory.getLogger(OrgtilknytningSanityCheckService.class);
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
+    private final NomRemedyApiClient nomRemedyApiClient;
 
     public OrgtilknytningSanityCheckService(OrgtilknytningStateRepository orgtilknytningStateRepository,
-                                            OrgEnhetStateRepository orgEnhetStateRepository) {
+                                            OrgEnhetStateRepository orgEnhetStateRepository,
+                                            NomRemedyApiClient nomRemedyApiClient
+    ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
+        this.nomRemedyApiClient = nomRemedyApiClient;
     }
 
     public List<OrgtilknytningMedOrgEnhet> orgtilknytningerUtoverEnhetGyldighetsPeriode() {
@@ -165,6 +177,63 @@ public class OrgtilknytningSanityCheckService {
         return duplikateOTer;
     }
 
+    public List<OrgtilknytningState> compareFutureChangesWithDelayedEvents() {
+        List<OrgtilknytningState> futureOrgtilknytningStates = getAllFutureOrgtilknytningStates();
+        List<String> delayedEvents = getAllDelayedEventsBlocking();
+        List<OrgtilknytningState> futureDelayedEventsMatch = new ArrayList<>();
+
+        if (futureOrgtilknytningStates.isEmpty() && delayedEvents.isEmpty()) {
+            logger.info("No future orgtilknytning states or delayed events found.");
+            return List.of();
+        }
+
+        boolean hasMatch = false;
+        for (OrgtilknytningState orgtilknytningState : futureOrgtilknytningStates) {
+            String fid = orgtilknytningState.fid();
+            for (String delayedEventFid : delayedEvents) {
+                if (fid.equals(delayedEventFid)) {
+                    hasMatch = true;
+                    break;
+                }
+            }
+            if (!hasMatch) {
+                futureDelayedEventsMatch.add(orgtilknytningState);
+            }
+        }
+        return futureDelayedEventsMatch;
+    }
+
+    private List<OrgtilknytningState> getAllFutureOrgtilknytningStates() {
+        return orgtilknytningStateRepository.getAll().stream()
+            .filter(OrgtilknytningState::erDagligOppfolging)
+            .filter(orgtilknytningState -> orgtilknytningState.gyldigFom().isAfter(LocalDate.now())
+                && (orgtilknytningState.gyldigTom().isPresent() && !orgtilknytningState.gyldigTom().get().isBefore(LocalDate.now())))
+            .collect(Collectors.toList());
+    }
+
+    private List<String> getAllDelayedEvents() {
+        // or handle other event types as needed
+        return nomRemedyApiClient.getAllDelayedEvents().map(
+                event -> {
+                    if (event instanceof OrgtilknytningEvent orgEvent) {
+                        return orgEvent.getFid();
+                    } else {
+                        return ""; // or handle other event types as needed
+                    }
+                })
+            .collectList().block();
+    }
+
+    private List<String> getAllDelayedEventsBlocking() {
+        return nomRemedyApiClient.getAllDelayedEventsAsList().stream().map(event -> {
+            if (event instanceof OrgtilknytningEvent orgEvent) {
+                return orgEvent.getFid();
+            } else {
+                return ""; // or handle other event types as needed
+            }
+        }).toList();
+    }
+
     private List<OrgtilknytningState> aktiveOrgtilknytninger(Collection<OrgtilknytningState> orgtilknytninger) {
         return orgtilknytninger.stream().filter(ot ->
                 ot.gyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
@@ -186,7 +255,7 @@ public class OrgtilknytningSanityCheckService {
                 }).toList();
     }
 
-    public boolean validateOrgtilknytningTypeSektorCombination(OrgtilknytningState orgtilknytningState) {
+    private boolean validateOrgtilknytningTypeSektorCombination(OrgtilknytningState orgtilknytningState) {
 
         Map<Sektor, List<Tilknytningtype>> allowedOrgtilknytningTypeForSektorMap = Map.of(
                 Sektor.EKSTERN, List.of(Tilknytningtype.KONSULENT, Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER, Tilknytningtype.ARBEIDSTRENING, Tilknytningtype.ANNET, Tilknytningtype.STUDENT),

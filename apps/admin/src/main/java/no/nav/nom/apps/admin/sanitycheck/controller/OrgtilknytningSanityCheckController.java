@@ -136,4 +136,18 @@ public class OrgtilknytningSanityCheckController {
     public ResponseEntity<List<DuplikatOrgtilknytning>> duplikateOrgtilknytninger() {
         return ResponseEntity.ok(orgtilknytningSanityCheckService.duplikateOrgtilknytninger());
     }
+
+    @Operation(
+        description = "Sammenligner fremtidige endringer i orgtilknytning med forsinkede hendelser",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/delayedEventsComparison")
+    public ResponseEntity<List<OrgtilknytningState>> delayedEventsComparison() {
+        return ResponseEntity.ok(orgtilknytningSanityCheckService.compareFutureChangesWithDelayedEvents());
+    }
 }

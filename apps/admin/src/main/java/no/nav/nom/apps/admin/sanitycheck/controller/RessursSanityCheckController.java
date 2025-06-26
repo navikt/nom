@@ -151,5 +151,18 @@ public class RessursSanityCheckController {
     public ResponseEntity<List<RobotRessurs>> listRobotRessurser() {
         return ok(ressursSanityCheckService.robotRessurser());
     }
-    
+
+    @Operation(
+        description = "Sammenligner fremtidige endringer i ressurser med forsinkede hendelser",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/delayedEventsComparison")
+    public ResponseEntity<List<RessursState>> delayedEventsComparison() {
+        return ok(ressursSanityCheckService.compareFutureChangedWithDelayEvents());
+    }
 }

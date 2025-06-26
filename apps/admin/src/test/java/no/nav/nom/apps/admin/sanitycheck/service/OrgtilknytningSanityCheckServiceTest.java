@@ -1,5 +1,6 @@
 package no.nav.nom.apps.admin.sanitycheck.service;
 
+import no.nav.nom.apps.admin.webclient.nomremedyapiclient.NomRemedyApiClient;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -33,13 +34,16 @@ class OrgtilknytningSanityCheckServiceTest {
     @Mock
     private OrgEnhetStateRepository orgEnhetStateRepository;
 
+    @Mock
+    private NomRemedyApiClient nomRemedyApiClient;
+
     private OrgtilknytningSanityCheckService service;
 
     private static final LocalDate now = LocalDate.now();
 
     @BeforeEach
     void setUp() {
-        service = new OrgtilknytningSanityCheckService(orgtilknytningStateRepository, orgEnhetStateRepository);
+        service = new OrgtilknytningSanityCheckService(orgtilknytningStateRepository, orgEnhetStateRepository, nomRemedyApiClient);
     }
 
     @Test

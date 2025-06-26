@@ -32,6 +32,8 @@ app:
   clients:
     nom-api:
       url: ${NOM_API_URL}
+    nom-remedy-integrasjon:
+      url: ${NOM_REMEDY_INTEGRASJON_BASE_URL}
 
 nom.libs.state.ressurs.enabled: true
 nom.libs.state.orgenhet.enabled: true
@@ -98,6 +100,13 @@ spring:
             authorization-grant-type: client_credentials
             scope:
               - ${NOM_API_SCOPE}
+          nom-remedy-integrasjon:
+            provider: azure
+            client-id: ${AZURE_APP_CLIENT_ID}
+            client-secret: ${AZURE_APP_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope:
+              - ${NOM_REMEDY_API_SCOPE}
         provider:
           azure:
             issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0

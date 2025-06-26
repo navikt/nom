@@ -8,81 +8,189 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as TilgangerRouteImport } from './routes/tilganger'
-import { Route as MasseflyttingFysiskBrukerstedRouteImport } from './routes/masseflytting-fysisk-brukersted'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as RessursSpecialreceiptRouteImport } from './routes/ressurs.specialreceipt'
-import { Route as RessursCreatespecialRouteImport } from './routes/ressurs.createspecial'
-import { Route as RessursIdRouteImport } from './routes/ressurs.$id'
-import { Route as RessursTerminateIdRouteImport } from './routes/ressurs-terminate.$id'
-import { Route as OrgIdRouteImport } from './routes/org.$id'
-import { Route as MasseflyttingIdRouteImport } from './routes/masseflytting.$id'
-import { Route as KontaktpersonerIdRouteImport } from './routes/kontaktpersoner.$id'
-import { Route as RessursCreateStepRouteImport } from './routes/ressurs.create.$step'
-import { Route as OrgTableIdRouteImport } from './routes/org.table.$id'
+// Import Routes
 
-const TilgangerRoute = TilgangerRouteImport.update({
+import { Route as rootRoute } from './routes/__root'
+import { Route as TilgangerImport } from './routes/tilganger'
+import { Route as MasseflyttingFysiskBrukerstedImport } from './routes/masseflytting-fysisk-brukersted'
+import { Route as IndexImport } from './routes/index'
+import { Route as RessursSpecialreceiptImport } from './routes/ressurs.specialreceipt'
+import { Route as RessursCreatespecialImport } from './routes/ressurs.createspecial'
+import { Route as RessursIdImport } from './routes/ressurs.$id'
+import { Route as RessursTerminateIdImport } from './routes/ressurs-terminate.$id'
+import { Route as OrgIdImport } from './routes/org.$id'
+import { Route as MasseflyttingIdImport } from './routes/masseflytting.$id'
+import { Route as KontaktpersonerIdImport } from './routes/kontaktpersoner.$id'
+import { Route as RessursCreateStepImport } from './routes/ressurs.create.$step'
+import { Route as OrgTableIdImport } from './routes/org.table.$id'
+
+// Create/Update Routes
+
+const TilgangerRoute = TilgangerImport.update({
   id: '/tilganger',
   path: '/tilganger',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
+
 const MasseflyttingFysiskBrukerstedRoute =
-  MasseflyttingFysiskBrukerstedRouteImport.update({
+  MasseflyttingFysiskBrukerstedImport.update({
     id: '/masseflytting-fysisk-brukersted',
     path: '/masseflytting-fysisk-brukersted',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => rootRoute,
   } as any)
-const IndexRoute = IndexRouteImport.update({
+
+const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
-const RessursSpecialreceiptRoute = RessursSpecialreceiptRouteImport.update({
+
+const RessursSpecialreceiptRoute = RessursSpecialreceiptImport.update({
   id: '/ressurs/specialreceipt',
   path: '/ressurs/specialreceipt',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
-const RessursCreatespecialRoute = RessursCreatespecialRouteImport.update({
+
+const RessursCreatespecialRoute = RessursCreatespecialImport.update({
   id: '/ressurs/createspecial',
   path: '/ressurs/createspecial',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
-const RessursIdRoute = RessursIdRouteImport.update({
+
+const RessursIdRoute = RessursIdImport.update({
   id: '/ressurs/$id',
   path: '/ressurs/$id',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
-const RessursTerminateIdRoute = RessursTerminateIdRouteImport.update({
+
+const RessursTerminateIdRoute = RessursTerminateIdImport.update({
   id: '/ressurs-terminate/$id',
   path: '/ressurs-terminate/$id',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
-const OrgIdRoute = OrgIdRouteImport.update({
+
+const OrgIdRoute = OrgIdImport.update({
   id: '/org/$id',
   path: '/org/$id',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
-const MasseflyttingIdRoute = MasseflyttingIdRouteImport.update({
+
+const MasseflyttingIdRoute = MasseflyttingIdImport.update({
   id: '/masseflytting/$id',
   path: '/masseflytting/$id',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
-const KontaktpersonerIdRoute = KontaktpersonerIdRouteImport.update({
+
+const KontaktpersonerIdRoute = KontaktpersonerIdImport.update({
   id: '/kontaktpersoner/$id',
   path: '/kontaktpersoner/$id',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
-const RessursCreateStepRoute = RessursCreateStepRouteImport.update({
+
+const RessursCreateStepRoute = RessursCreateStepImport.update({
   id: '/ressurs/create/$step',
   path: '/ressurs/create/$step',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
-const OrgTableIdRoute = OrgTableIdRouteImport.update({
+
+const OrgTableIdRoute = OrgTableIdImport.update({
   id: '/org/table/$id',
   path: '/org/table/$id',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
+
+// Populate the FileRoutesByPath interface
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/masseflytting-fysisk-brukersted': {
+      id: '/masseflytting-fysisk-brukersted'
+      path: '/masseflytting-fysisk-brukersted'
+      fullPath: '/masseflytting-fysisk-brukersted'
+      preLoaderRoute: typeof MasseflyttingFysiskBrukerstedImport
+      parentRoute: typeof rootRoute
+    }
+    '/tilganger': {
+      id: '/tilganger'
+      path: '/tilganger'
+      fullPath: '/tilganger'
+      preLoaderRoute: typeof TilgangerImport
+      parentRoute: typeof rootRoute
+    }
+    '/kontaktpersoner/$id': {
+      id: '/kontaktpersoner/$id'
+      path: '/kontaktpersoner/$id'
+      fullPath: '/kontaktpersoner/$id'
+      preLoaderRoute: typeof KontaktpersonerIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/masseflytting/$id': {
+      id: '/masseflytting/$id'
+      path: '/masseflytting/$id'
+      fullPath: '/masseflytting/$id'
+      preLoaderRoute: typeof MasseflyttingIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/org/$id': {
+      id: '/org/$id'
+      path: '/org/$id'
+      fullPath: '/org/$id'
+      preLoaderRoute: typeof OrgIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/ressurs-terminate/$id': {
+      id: '/ressurs-terminate/$id'
+      path: '/ressurs-terminate/$id'
+      fullPath: '/ressurs-terminate/$id'
+      preLoaderRoute: typeof RessursTerminateIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/ressurs/$id': {
+      id: '/ressurs/$id'
+      path: '/ressurs/$id'
+      fullPath: '/ressurs/$id'
+      preLoaderRoute: typeof RessursIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/ressurs/createspecial': {
+      id: '/ressurs/createspecial'
+      path: '/ressurs/createspecial'
+      fullPath: '/ressurs/createspecial'
+      preLoaderRoute: typeof RessursCreatespecialImport
+      parentRoute: typeof rootRoute
+    }
+    '/ressurs/specialreceipt': {
+      id: '/ressurs/specialreceipt'
+      path: '/ressurs/specialreceipt'
+      fullPath: '/ressurs/specialreceipt'
+      preLoaderRoute: typeof RessursSpecialreceiptImport
+      parentRoute: typeof rootRoute
+    }
+    '/org/table/$id': {
+      id: '/org/table/$id'
+      path: '/org/table/$id'
+      fullPath: '/org/table/$id'
+      preLoaderRoute: typeof OrgTableIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/ressurs/create/$step': {
+      id: '/ressurs/create/$step'
+      path: '/ressurs/create/$step'
+      fullPath: '/ressurs/create/$step'
+      preLoaderRoute: typeof RessursCreateStepImport
+      parentRoute: typeof rootRoute
+    }
+  }
+}
+
+// Create and export the route tree
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -98,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/org/table/$id': typeof OrgTableIdRoute
   '/ressurs/create/$step': typeof RessursCreateStepRoute
 }
+
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/masseflytting-fysisk-brukersted': typeof MasseflyttingFysiskBrukerstedRoute
@@ -112,8 +221,9 @@ export interface FileRoutesByTo {
   '/org/table/$id': typeof OrgTableIdRoute
   '/ressurs/create/$step': typeof RessursCreateStepRoute
 }
+
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
+  __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/masseflytting-fysisk-brukersted': typeof MasseflyttingFysiskBrukerstedRoute
   '/tilganger': typeof TilgangerRoute
@@ -127,6 +237,7 @@ export interface FileRoutesById {
   '/org/table/$id': typeof OrgTableIdRoute
   '/ressurs/create/$step': typeof RessursCreateStepRoute
 }
+
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
@@ -172,6 +283,7 @@ export interface FileRouteTypes {
     | '/ressurs/create/$step'
   fileRoutesById: FileRoutesById
 }
+
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   MasseflyttingFysiskBrukerstedRoute: typeof MasseflyttingFysiskBrukerstedRoute
@@ -185,95 +297,6 @@ export interface RootRouteChildren {
   RessursSpecialreceiptRoute: typeof RessursSpecialreceiptRoute
   OrgTableIdRoute: typeof OrgTableIdRoute
   RessursCreateStepRoute: typeof RessursCreateStepRoute
-}
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/tilganger': {
-      id: '/tilganger'
-      path: '/tilganger'
-      fullPath: '/tilganger'
-      preLoaderRoute: typeof TilgangerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/masseflytting-fysisk-brukersted': {
-      id: '/masseflytting-fysisk-brukersted'
-      path: '/masseflytting-fysisk-brukersted'
-      fullPath: '/masseflytting-fysisk-brukersted'
-      preLoaderRoute: typeof MasseflyttingFysiskBrukerstedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ressurs/specialreceipt': {
-      id: '/ressurs/specialreceipt'
-      path: '/ressurs/specialreceipt'
-      fullPath: '/ressurs/specialreceipt'
-      preLoaderRoute: typeof RessursSpecialreceiptRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ressurs/createspecial': {
-      id: '/ressurs/createspecial'
-      path: '/ressurs/createspecial'
-      fullPath: '/ressurs/createspecial'
-      preLoaderRoute: typeof RessursCreatespecialRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ressurs/$id': {
-      id: '/ressurs/$id'
-      path: '/ressurs/$id'
-      fullPath: '/ressurs/$id'
-      preLoaderRoute: typeof RessursIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ressurs-terminate/$id': {
-      id: '/ressurs-terminate/$id'
-      path: '/ressurs-terminate/$id'
-      fullPath: '/ressurs-terminate/$id'
-      preLoaderRoute: typeof RessursTerminateIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/org/$id': {
-      id: '/org/$id'
-      path: '/org/$id'
-      fullPath: '/org/$id'
-      preLoaderRoute: typeof OrgIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/masseflytting/$id': {
-      id: '/masseflytting/$id'
-      path: '/masseflytting/$id'
-      fullPath: '/masseflytting/$id'
-      preLoaderRoute: typeof MasseflyttingIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/kontaktpersoner/$id': {
-      id: '/kontaktpersoner/$id'
-      path: '/kontaktpersoner/$id'
-      fullPath: '/kontaktpersoner/$id'
-      preLoaderRoute: typeof KontaktpersonerIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ressurs/create/$step': {
-      id: '/ressurs/create/$step'
-      path: '/ressurs/create/$step'
-      fullPath: '/ressurs/create/$step'
-      preLoaderRoute: typeof RessursCreateStepRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/org/table/$id': {
-      id: '/org/table/$id'
-      path: '/org/table/$id'
-      fullPath: '/org/table/$id'
-      preLoaderRoute: typeof OrgTableIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-  }
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -290,6 +313,67 @@ const rootRouteChildren: RootRouteChildren = {
   OrgTableIdRoute: OrgTableIdRoute,
   RessursCreateStepRoute: RessursCreateStepRoute,
 }
-export const routeTree = rootRouteImport
+
+export const routeTree = rootRoute
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+/* ROUTE_MANIFEST_START
+{
+  "routes": {
+    "__root__": {
+      "filePath": "__root.tsx",
+      "children": [
+        "/",
+        "/masseflytting-fysisk-brukersted",
+        "/tilganger",
+        "/kontaktpersoner/$id",
+        "/masseflytting/$id",
+        "/org/$id",
+        "/ressurs-terminate/$id",
+        "/ressurs/$id",
+        "/ressurs/createspecial",
+        "/ressurs/specialreceipt",
+        "/org/table/$id",
+        "/ressurs/create/$step"
+      ]
+    },
+    "/": {
+      "filePath": "index.tsx"
+    },
+    "/masseflytting-fysisk-brukersted": {
+      "filePath": "masseflytting-fysisk-brukersted.tsx"
+    },
+    "/tilganger": {
+      "filePath": "tilganger.tsx"
+    },
+    "/kontaktpersoner/$id": {
+      "filePath": "kontaktpersoner.$id.tsx"
+    },
+    "/masseflytting/$id": {
+      "filePath": "masseflytting.$id.tsx"
+    },
+    "/org/$id": {
+      "filePath": "org.$id.tsx"
+    },
+    "/ressurs-terminate/$id": {
+      "filePath": "ressurs-terminate.$id.tsx"
+    },
+    "/ressurs/$id": {
+      "filePath": "ressurs.$id.tsx"
+    },
+    "/ressurs/createspecial": {
+      "filePath": "ressurs.createspecial.tsx"
+    },
+    "/ressurs/specialreceipt": {
+      "filePath": "ressurs.specialreceipt.tsx"
+    },
+    "/org/table/$id": {
+      "filePath": "org.table.$id.tsx"
+    },
+    "/ressurs/create/$step": {
+      "filePath": "ressurs.create.$step.tsx"
+    }
+  }
+}
+ROUTE_MANIFEST_END */

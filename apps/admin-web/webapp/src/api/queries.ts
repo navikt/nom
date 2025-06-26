@@ -444,6 +444,36 @@ export function getOrgtilknytningMedFlereAktivDOL() {
   });
 }
 
+export function getOrgtilknytningerMedFremtidigEndringSomIkkeErIDelayedEvent() {
+  return queryOptions({
+    queryKey: ["API", "ORGTILKNYTNINGMEDFREMTIDIGENDRING"],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/SanityCheck/orgtilknytning/delayedEventsComparison`,
+          {
+            timeout: 240_000, // 120 seconds
+          },
+        )
+      ).json<OrgtilknytningState[]>(),
+  });
+}
+
+export function getRessurserMedFremtidigEndringSomIkkeErIDelayedEvent() {
+  return queryOptions({
+    queryKey: ["API", "RESSURSMEDFREMTIDIGENDRING"],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/SanityCheck/ressurs/delayedEventsComparison`,
+          {
+            timeout: 240_000, // 120 seconds
+          },
+        )
+      ).json<RessursState[]>(),
+  });
+}
+
 export function getOrgtilknytningMedUgyldigSektorTilknytningKombinasjon() {
   return queryOptions({
     queryKey: ["API", "UGYLDIGSEKTORTILKNYTNINGTYPE"],
