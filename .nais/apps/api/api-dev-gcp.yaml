@@ -71,8 +71,6 @@ spec:
         - id: elastic
   kafka:
     pool: nav-dev
-  secureLogs:
-    enabled: true
   azure:
     application:
       enabled: true
@@ -294,6 +292,8 @@ spec:
         - application: nom-paarorende
           namespace: org
           cluster: dev-gcp
+        - application: logging
+          namespace: nais-system
       external:
         - host: teamorg-unleash-api.nav.cloud.nais.io
         - host: nom-proxy.dev-fss-pub.nais.io

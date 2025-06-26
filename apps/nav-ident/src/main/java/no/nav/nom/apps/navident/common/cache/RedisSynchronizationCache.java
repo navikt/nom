@@ -24,13 +24,13 @@ public class RedisSynchronizationCache {
     public boolean tryLock(String personid) {
         cleanupOldLocks();
 
-        log.debug(LogConfig.SECURE_LOGS, "Locking personid %s".formatted(personid));
+        log.debug(LogConfig.TEAM_LOGS, "Locking personid %s".formatted(personid));
         log.debug("Locking personid %s".formatted(mask(personid)));
         return redisPersonidentLockRegistry.obtain(personid).tryLock();
     }
 
     public void unlock(String personid) {
-        log.debug(LogConfig.SECURE_LOGS, "Unlocking personident %s".formatted(personid));
+        log.debug(LogConfig.TEAM_LOGS, "Unlocking personident %s".formatted(personid));
         log.debug("Unlocking personident %s".formatted(mask(personid)));
         redisPersonidentLockRegistry.obtain(personid).unlock();
     }

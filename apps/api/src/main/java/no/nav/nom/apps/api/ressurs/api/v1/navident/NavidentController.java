@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 
 @Slf4j
 @Tag(name = "Navident")
@@ -61,7 +61,7 @@ public class NavidentController {
     @ApiResponses({@ApiResponse(responseCode = "200", description = "Success")})
     @PreAuthorize("hasAuthority('QUERY_PERSON')")
     public ResponseEntity<NavidentResponse> opprettNavident(@RequestBody NavidentRequest request) {
-        log.info(SECURE_LOGS, "opprettNavident kalt fra Remedy:\n{}", request);
+        log.info(TEAM_LOGS, "opprettNavident kalt fra Remedy:\n{}", request);
 
         return ResponseEntity.ok(
             toNavidentResponse(remedyController.tryOpprettRessurs(convert(request)))

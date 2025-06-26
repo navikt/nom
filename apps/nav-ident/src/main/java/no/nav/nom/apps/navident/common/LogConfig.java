@@ -5,6 +5,6 @@ import org.slf4j.MarkerFactory;
 
 public class LogConfig {
 
-    public static final Marker SECURE_LOGS = MarkerFactory.getMarker("SECURE_LOGS");
+    public static final Marker TEAM_LOGS = MarkerFactory.getMarker("TEAM_LOGS");
 
 }

@@ -32,7 +32,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 
 @Slf4j
 @Service
@@ -110,7 +110,7 @@ public class RessursHendelseForEventsourceService {
                     return;
                 }
 
-                log.info(SECURE_LOGS, "Ressurs {} har fått ny personident {}", r.fid(), ressurs.getPersonIdent());
+                log.info(TEAM_LOGS, "Ressurs {} har fått ny personident {}", r.fid(), ressurs.getPersonIdent());
                 ressursEndretPersonident(r.fid(), ressurs);
                 // og denne kan ha andre endringer så sjekk dette i tillegg
                 createEndreHendelse(r, ressurs);
@@ -120,7 +120,7 @@ public class RessursHendelseForEventsourceService {
                 return;
             }
 
-            log.debug(SECURE_LOGS, "Ny personident {} fra DVH, kjenner ikke identen så oppretter ny", ressurs.getPersonIdent());
+            log.debug(TEAM_LOGS, "Ny personident {} fra DVH, kjenner ikke identen så oppretter ny", ressurs.getPersonIdent());
             final var taskEvent = opprettRessurs(ressurs);
             opprettetRessuser.put(taskEvent.getKey(), taskEvent.getValue());
         });

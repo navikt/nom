@@ -3,7 +3,7 @@
     <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>SECURE_LOGS</marker>
+                <marker>TEAM_LOGS</marker>
             </evaluator>
             <OnMatch>DENY</OnMatch>
         </filter>
@@ -21,49 +21,7 @@
         </encoder>
     </appender>
 
-    <appender name="SECURE_LOGS" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/secure-logs/secure.log</file>
-
-        <!-- FixedWindowRollingPolicy is deprecared, ref: https://logback.qos.ch/manual/appenders.html#FixedWindowRollingPolicy -->
-        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-            <fileNamePattern>/secure-logs/secure.log.%i</fileNamePattern>
-            <minIndex>1</minIndex>
-            <maxIndex>1</maxIndex>
-        </rollingPolicy>
-        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <!-- 5 sekunder i stedet for default 60s - Jeg tror vi med dagens logging kan klare opptil 5MB per sekund med logging under DVH last -->
-            <!-- Kan tydeligvis være mer - treffer sporadisk på 128MB grensen fortsatt. -->
-            <!-- Sett ned ytterligere fra 5s til 3s. Skrur også ned filesize til under 3x -->
-            <maxFileSize>30MB</maxFileSize>
-            <checkIncrement>3000</checkIncrement>
-        </triggeringPolicy>
-
-        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <!-- Deny log messages not having marker SECURE_LOGS -->
-            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>SECURE_LOGS</marker>
-            </evaluator>
-            <OnMatch>ACCEPT</OnMatch>
-            <OnMismatch>DENY</OnMismatch>
-        </filter>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <!-- Add MDC-keys always as it removes the pattern if the MDC does not contain a value for the key -->
-            <includeMdcKeyName>trace_id</includeMdcKeyName>
-            <includeMdcKeyName>span_id</includeMdcKeyName>
-            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
-                <exclude>java\.util\.concurrent\..*</exclude>
-                <exclude>org\.apache\.catalina\..*</exclude>
-                <exclude>org\.apache\.coyote\..*</exclude>
-                <exclude>org\.apache\.tomcat\..*</exclude>
-                <exclude>org\.springframework\.aop\..*</exclude>
-                <exclude>org\.springframework\.security\.web\.ObservationFilterChainDecorator</exclude>
-            </throwableConverter>
-        </encoder>
-    </appender>
-
-
     <root level="INFO">
         <appender-ref ref="STDOUT_JSON"/>
-        <appender-ref ref="SECURE_LOGS"/>
     </root>
 </configuration>

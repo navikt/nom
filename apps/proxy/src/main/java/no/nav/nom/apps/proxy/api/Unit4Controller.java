@@ -24,7 +24,7 @@ import reactor.core.publisher.Mono;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 
-import static no.nav.nom.apps.proxy.common.CommonConfig.SECURE_LOGS;
+import static no.nav.nom.apps.proxy.common.CommonConfig.TEAM_LOGS;
 
 
 @Slf4j
@@ -53,7 +53,7 @@ public class Unit4Controller {
     @PostMapping("/ressurs")
     public ResponseEntity<String> postRessurs(@RequestBody String body) {
         log.info("Mottatt /proxy/unit4/ressurs POST request");
-        log.debug(SECURE_LOGS, "POST /proxy/unit4/ressurs payload: {}", body);
+        log.debug(TEAM_LOGS, "POST /proxy/unit4/ressurs payload: {}", body);
 
         try {
             return webClient
@@ -79,7 +79,7 @@ public class Unit4Controller {
     public ResponseEntity<String> patchRessurs(@PathVariable String personId, @RequestBody String body) {
         String url = unit4EmployeesUrl + "/" + personId;
         log.info("Mottatt /proxy/unit4/ressurs PATCH request -> {}", url);
-        log.debug(SECURE_LOGS, "PATCH /proxy/unit4/ressurs/{} payload: {}", personId, body);
+        log.debug(TEAM_LOGS, "PATCH /proxy/unit4/ressurs/{} payload: {}", personId, body);
 
         try {
             return webClient
@@ -104,7 +104,7 @@ public class Unit4Controller {
     @DeleteMapping("/ressurs/{personId}")
     public ResponseEntity<String> deleteRessurs(@PathVariable String personId) {
         log.info("Mottatt /proxy/unit4/ressurs DELETE request");
-        log.debug(SECURE_LOGS, "DELETE /proxy/unit4/ressurs/{}", personId);
+        log.debug(TEAM_LOGS, "DELETE /proxy/unit4/ressurs/{}", personId);
 
         try {
             return webClient
@@ -127,7 +127,7 @@ public class Unit4Controller {
     @GetMapping("/ressurs/{personId}")
     public ResponseEntity<String> getRessurs(@PathVariable String personId) {
         log.info("Mottatt /proxy/unit4/{personId} ressurs GET request");
-        log.debug(SECURE_LOGS, "GET /proxy/unit4/ressurs/{}", personId);
+        log.debug(TEAM_LOGS, "GET /proxy/unit4/ressurs/{}", personId);
 
         try {
             String response = webClient.get()

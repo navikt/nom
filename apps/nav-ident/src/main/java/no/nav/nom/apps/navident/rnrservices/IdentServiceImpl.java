@@ -8,7 +8,6 @@ import no.nav.nom.apps.navident.common.cache.RnRMdcCache;
 import no.nav.nom.contract.nom.IdentType;
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.listener.ConsumerSeekAware;
@@ -42,12 +41,12 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
     }
 
     public Respons bestillIdent(String personid, IdentType type, char idPrefix)  {
-        log.debug(LogConfig.SECURE_LOGS, "bestillIdent(personId = {}, type = {}, idPrefix = '{}') invokert", personid, type, idPrefix);
+        log.debug(LogConfig.TEAM_LOGS, "bestillIdent(personId = {}, type = {}, idPrefix = '{}') invokert", personid, type, idPrefix);
         log.debug("bestillIdent(personId = %s, type = %s, idPrefix = '%s') invokert".formatted(mask(personid), type, idPrefix));
 
         if (!redisSynchronizationCache.tryLock(personid)) {
             // Some other process has lock on this personIdent. Return error response
-            log.debug(LogConfig.SECURE_LOGS, "Unable to obtain lock for personident %s".formatted(personid));
+            log.debug(LogConfig.TEAM_LOGS, "Unable to obtain lock for personident %s".formatted(personid));
             log.debug("Unable to obtain lock for personident %s".formatted(mask(personid)));
             return Respons.builder()
                 .httpStatus(HttpStatus.CONFLICT)
@@ -75,11 +74,11 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
                 if (responses.containsKey(uuid)) {
                     Respons respons = responses.get(uuid);
                     responses.remove(uuid);
-                    log.debug(LogConfig.SECURE_LOGS, "Returnerer respons for personid {} : {}", personid, respons);
+                    log.debug(LogConfig.TEAM_LOGS, "Returnerer respons for personid {} : {}", personid, respons);
                     log.debug("Returnerer respons for personid %s : %s".formatted(mask(personid), respons));
                     return respons;
                 } else {
-                    log.error(LogConfig.SECURE_LOGS, "Forventet respons data for bestilling av personid {}, men ingen var tilgjengelig", personid);
+                    log.error(LogConfig.TEAM_LOGS, "Forventet respons data for bestilling av personid {}, men ingen var tilgjengelig", personid);
                     log.error("Forventet respons data for bestilling av personid %s, men ingen var tilgjengelig".formatted(mask(personid)));
                     return Respons.builder()
                             .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -91,7 +90,7 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
             } else { // TimeOut
                 redisSynchronizationCache.unlock(personid);
 
-                log.error(LogConfig.SECURE_LOGS, "Tjenesten for bestilling av personid timet ut i bestilling av {}", personid);
+                log.error(LogConfig.TEAM_LOGS, "Tjenesten for bestilling av personid timet ut i bestilling av {}", personid);
                 log.error("Tjenesten for bestilling av personid timet ut i bestilling av %s".formatted(mask(personid)));
                 return Respons.builder()
                         .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -103,7 +102,7 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
         } catch (InterruptedException e) {
             redisSynchronizationCache.unlock(personid);
 
-            log.error(LogConfig.SECURE_LOGS, "Ident bestilling for ident {} ble avbrutt", personid, e);
+            log.error(LogConfig.TEAM_LOGS, "Ident bestilling for ident {} ble avbrutt", personid, e);
             log.error("Ident bestilling for ident %s ble avbrutt".formatted(mask(personid)), e);
             return Respons.builder()
                     .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)

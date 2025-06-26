@@ -24,8 +24,6 @@ spec:
       value: none
   envFrom:
     - secret: nav-ident-unleash-api-token
-  secureLogs:
-    enabled: true
   image: "{{image}}"
   port: 8080
   ingresses:
@@ -106,6 +104,8 @@ spec:
     outbound:
       rules:
         - application: nav-ident-redis
+        - application: logging
+          namespace: nais-system
       external:
         - host: pdl-api.prod-fss-pub.nais.io
         - host: teamorg-unleash-api.nav.cloud.nais.io

@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 
 @Slf4j
 @Service
@@ -118,7 +118,7 @@ public class MissingEksternSluttdatoer {
             new Origination("nom-api", "nom-api")
         );
 
-        log.debug(SECURE_LOGS, "Lager RessursSluttetEvent event for fid {}", fid);
+        log.debug(TEAM_LOGS, "Lager RessursSluttetEvent event for fid {}", fid);
         ressursCommandService.avsluttRessursEvent(new OpphorRessursCommand(fid, ressurs.sluttDato()), metadata);
     }
 
@@ -138,7 +138,7 @@ public class MissingEksternSluttdatoer {
             null
         );
 
-        log.debug(SECURE_LOGS, "Lager AvvikleOrgtilknytning event for fid {}:\n {}", orgtilknytning.fid(), avvikleOrgtilknytning);
+        log.debug(TEAM_LOGS, "Lager AvvikleOrgtilknytning event for fid {}:\n {}", orgtilknytning.fid(), avvikleOrgtilknytning);
 
         orgtilknytningCommandService.avvikleOrgtilknytning(orgtilknytning.fid(), avvikleOrgtilknytning);
     }

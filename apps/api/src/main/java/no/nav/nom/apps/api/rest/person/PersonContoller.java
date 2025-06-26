@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 
 @Tag(name = "Person")
 @RestController
@@ -41,7 +41,7 @@ public class PersonContoller {
     })
     @PreAuthorize("hasAuthority('QUERY_PERSON')")
     public ResponseEntity<PdlPersonDTO> getPerson(@RequestBody PdlPersonRequest request) {
-        log.info(SECURE_LOGS, "getPerson kalt fra Remedy:\n{}", request);
+        log.info(TEAM_LOGS, "getPerson kalt fra Remedy:\n{}", request);
         return  ResponseEntity.ok(convert(remedyController.finnRessurs(request.getPersonident())));
 
     }

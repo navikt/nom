@@ -92,7 +92,7 @@ public class ImportNavIdenter {
 
     // NAV-ID,Person id,Bruker id,Fornavn,Etternavn,Enhets-ID,Enhet,Status,Sektor,I permisjon?,I permisjon dato,Reg. dato,Tiltredelsesdato,Status-History.Slettet.TIME
     public void importTestNavIdent(String importLine, boolean kunLes) {
-        log.debug(LogConfig.SECURE_LOGS, "line: {}", importLine);
+        log.debug(LogConfig.TEAM_LOGS, "line: {}", importLine);
         var kolonner = importLine.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1); // Split på komma, ignorer komma i "
 
         // initialize
@@ -101,7 +101,7 @@ public class ImportNavIdenter {
         var identType = IdentType.STANDARD; // by default
 
         if (kolonner.length < 3) {
-            log.error(LogConfig.SECURE_LOGS, "importLine kan ikke splittes på ',': {}", importLine);
+            log.error(LogConfig.TEAM_LOGS, "importLine kan ikke splittes på ',': {}", importLine);
             return;
         } else if (kolonner.length == 3) {
             // CSV fil innholder navident, personident, ident_type
@@ -114,13 +114,13 @@ public class ImportNavIdenter {
         }
 
         if (navIdent.length() == 0) {
-            log.error(LogConfig.SECURE_LOGS, "Lest navIdent '{}' fra importlinje er tom: {}", navIdent, importLine);
+            log.error(LogConfig.TEAM_LOGS, "Lest navIdent '{}' fra importlinje er tom: {}", navIdent, importLine);
             return;
         }
 
         // Check length 7 and starts with letter, rest is digits
         if (navIdent.length() != 7 || !navIdent.matches("[A-Z]\\d+")){
-            log.error(LogConfig.SECURE_LOGS, "Lest navIdent '{}' fra importlinje er ikke gyldig: {}", navIdent, importLine);
+            log.error(LogConfig.TEAM_LOGS, "Lest navIdent '{}' fra importlinje er ikke gyldig: {}", navIdent, importLine);
             return;
         }
 
@@ -130,20 +130,20 @@ public class ImportNavIdenter {
         }
 
         if (finnesPersonidentAllerede(personIdent)) {
-            log.error(LogConfig.SECURE_LOGS, "Lest personident '{}' fra importlinje finnes i fra før på annen Navident: {}", navIdent, importLine);
+            log.error(LogConfig.TEAM_LOGS, "Lest personident '{}' fra importlinje finnes i fra før på annen Navident: {}", navIdent, importLine);
             return;
         }
 
         if (personIdent.length() == 0) {
-            log.error(LogConfig.SECURE_LOGS, "Lest personIdent fra importlinje er tom", personIdent, importLine);
+            log.error(LogConfig.TEAM_LOGS, "Lest personIdent fra importlinje er tom", personIdent, importLine);
             return;
         }
 
         if (importerteNavIdenter.get(navIdent) != null) {
             if (importerteNavIdenter.get(navIdent).equals(personIdent)) {
-                log.info(LogConfig.SECURE_LOGS,"Navident '{}' allerede importert på samme personid", navIdent);
+                log.info(LogConfig.TEAM_LOGS,"Navident '{}' allerede importert på samme personid", navIdent);
             } else {
-                log.error(LogConfig.SECURE_LOGS, "Navident '{}' allerede importert, men på en annen personid ({}): {}", navIdent, importerteNavIdenter.get(navIdent), importLine);
+                log.error(LogConfig.TEAM_LOGS, "Navident '{}' allerede importert, men på en annen personid ({}): {}", navIdent, importerteNavIdenter.get(navIdent), importLine);
             }
             return;
         }
@@ -164,7 +164,7 @@ public class ImportNavIdenter {
             sourceEventRepository.save(sourceEvent);
             producer.send(eventSourceTopic, sourceEvent);
 
-            log.debug(LogConfig.SECURE_LOGS, "Persisted SourceEvent posted: %s".formatted(sourceEvent.maskedToString()));
+            log.debug(LogConfig.TEAM_LOGS, "Persisted SourceEvent posted: %s".formatted(sourceEvent.maskedToString()));
         }
     }
 
@@ -224,7 +224,7 @@ public class ImportNavIdenter {
                 ).build();
         sourceEventRepository.save(sourceEvent);
         producer.send(eventSourceTopic, sourceEvent);
-        log.debug(LogConfig.SECURE_LOGS, "Persisted SourceEvent posted: %s".formatted(sourceEvent.maskedToString()));
+        log.debug(LogConfig.TEAM_LOGS, "Persisted SourceEvent posted: %s".formatted(sourceEvent.maskedToString()));
     }
 
     public boolean isValidNavIdentAndHasValidSequenceNumber(String navIdent) {

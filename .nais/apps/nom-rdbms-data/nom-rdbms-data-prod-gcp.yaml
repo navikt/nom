@@ -55,8 +55,6 @@ spec:
         - id: elastic
   kafka:
     pool: nav-prod
-  secureLogs:
-    enabled: true
   gcp:
     sqlInstances:
       - type: POSTGRES_16
