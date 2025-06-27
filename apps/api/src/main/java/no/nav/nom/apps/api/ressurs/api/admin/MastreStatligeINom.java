@@ -220,32 +220,35 @@ public class MastreStatligeINom {
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
         @Parameter(description = "SAMME dato som brukt i Gruppe A utvalget") @RequestParam LocalDate maxOTDatoLikEllerFoer,
         @Parameter(description = "Ressurs sluttdato skal være etter (2024-12-31)") @RequestParam(defaultValue="2024-12-31") LocalDate ressursSluttDatoEtter,
-        @RequestBody List<String> ekskluderNavidenter
+        @Parameter(description = "Begrens utvalg til de navidenter som leveres i body fremfor å eksludere dem") @RequestParam(defaultValue="false") boolean begrensUtvalgTilNavidentListe,
+        @RequestBody List<String> navidentListe
     ) {
         boolean commit = "CONFIRM".equalsIgnoreCase(confirm);
 
-        return oppdaterRessursSluttdatoGrpC(maxOTDatoLikEllerFoer, ressursSluttDatoEtter, ekskluderNavidenter, commit, getAuthenticatedNavIdent());
+        return oppdaterRessursSluttdatoGrpC(maxOTDatoLikEllerFoer, ressursSluttDatoEtter, navidentListe, begrensUtvalgTilNavidentListe, commit, getAuthenticatedNavIdent());
     }
 
-    protected ResponseEntity<String> oppdaterRessursSluttdatoGrpC(LocalDate maxOTDatoLikEllerFoer, LocalDate ressursSluttDatoEtter, List<String> ekskluderNavidenter, boolean commit, String userNavident) {
+    protected ResponseEntity<String> oppdaterRessursSluttdatoGrpC(LocalDate maxOTDatoLikEllerFoer, LocalDate ressursSluttDatoEtter, List<String> navidentListe, boolean begrensUtvalgTilNavidentListe, boolean commit, String userNavident) {
         StringBuffer sb = new StringBuffer();
         if (!commit) {
             sb.append("DRY RUN\n");
         }
 
         var grpBUtvalg = utvalgGruppeC(maxOTDatoLikEllerFoer, ressursSluttDatoEtter);
-        var skalOppdateres = ekskluderNavidenter(grpBUtvalg, ekskluderNavidenter);
+        var skalOppdateres = begrensUtvalgTilNavidentListe ?
+                begrensUtvalgTilNavidenter(grpBUtvalg,  navidentListe) :
+                ekskluderNavidenter(grpBUtvalg, navidentListe);
 
         sb.append("GruppeC - alle som har ressurs.Sluttdato etter ").append(ressursSluttDatoEtter)
             .append(", og ikke har aktiv OT etter ").append(maxOTDatoLikEllerFoer).append("\n");
-        sb.append("Antall navidenter å ekskludere: ").append(ekskluderNavidenter.size()).append("\n");
+        sb.append(begrensUtvalgTilNavidentListe ? "Antall navidenter å begrense utvalget med: " : "Antall navidenter å ekskludere: ").append(navidentListe.size()).append("\n");
         sb.append("Antall i Gruppe C utvalg: ").append(grpBUtvalg.size()).append("\n");
         sb.append("Antall å oppdatere: ").append(skalOppdateres.size()).append("\n");
 
         var inputMetadata = new InputMetadata(
             "nom-api MastreStatligeINom",
             "oppdaterRessursSluttdatoGrpC",
-            Map.of("maxOTDat0LikEllerFoer", maxOTDatoLikEllerFoer, "ressursSluttDatoEtter", ressursSluttDatoEtter, "ekskluderNavidenter", ekskluderNavidenter),
+            Map.of("maxOTDat0LikEllerFoer", maxOTDatoLikEllerFoer, "ressursSluttDatoEtter", ressursSluttDatoEtter, "navidentListe", navidentListe, "begrensUtvalgTilNavidentListe", begrensUtvalgTilNavidentListe),
             new Origination(userNavident, "nom-api")
         );
 
@@ -379,6 +382,12 @@ public class MastreStatligeINom {
             .max(LocalDate::compareTo).orElse(null);
     }
 
+
+    private static List<Ressurs> begrensUtvalgTilNavidenter(List<Ressurs> ressurser, List<String> navidenter) {
+        return ressurser.stream()
+            .filter(ressurs -> navidenter.contains(ressurs.navident))
+            .toList();
+    }
 
     private static List<Ressurs> ekskluderNavidenter(List<Ressurs> ressurser, List<String> ekskluderteNavidenter) {
         return ressurser.stream()
