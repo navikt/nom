@@ -18,6 +18,8 @@ spec:
       value: api://prod-gcp.nom.nom-api/.default
     - name: NOM_REMEDY_INTEGRASJON_BASE_URL
       value: https://nom-remedy-integrasjon.prod-fss-pub.nais.io
+    - name: NOM_REMEDY_API_SCOPE
+      value: api://prod-fss.org.nom-remedy-integrasjon/.default
     - name: LOGGING_CONFIG
       value: 'classpath:logback.xml'
     - name: JDK_JAVA_OPTIONS
