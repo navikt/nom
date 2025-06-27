@@ -209,8 +209,7 @@ public class OrgtilknytningSanityCheckService {
     private List<OrgtilknytningState> getAllFutureOrgtilknytningStates() {
         return orgtilknytningStateRepository.getAll().stream()
             .filter(OrgtilknytningState::erDagligOppfolging)
-            .filter(orgtilknytningState -> orgtilknytningState.gyldigFom().isAfter(LocalDate.now())
-                && (orgtilknytningState.gyldigTom().isPresent() && !orgtilknytningState.gyldigTom().get().isBefore(LocalDate.now())))
+            .filter(orgtilknytningState -> orgtilknytningState.gyldigFom().isAfter(LocalDate.now()))
             .collect(Collectors.toList());
     }
 
