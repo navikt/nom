@@ -127,6 +127,7 @@ export function PersonOpplysninger({
             gap: var(--a-spacing-2) var(--a-spacing-4);
           `}
         >
+          <Type ressurs={ressurs} />
           <Navident ressurs={ressurs} />
           <SektorView ressurs={ressurs} />
           <StartDato ressurs={ressurs} />
@@ -239,6 +240,15 @@ export function KortFortalt() {
       <PersonIcon />
       <span>Kort fortalt</span>
     </Heading>
+  );
+}
+
+export function Type({ ressurs }: { ressurs: Ressurs }) {
+  return (
+    <LabelWithValue
+      label="Type"
+      value={ressurs.identType === IdentType.ROBOT ? "Robot" : undefined}
+    />
   );
 }
 

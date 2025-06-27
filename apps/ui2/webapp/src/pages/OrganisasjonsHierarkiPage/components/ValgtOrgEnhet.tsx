@@ -39,6 +39,7 @@ import {
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import building from "~/resources/building.svg";
 import type { OrgEnhet, Ressurs } from "~/types/api-models";
+import { IdentType } from "~/types/api-models";
 import { NomNivaa, OrgEnhetsType, Sektor } from "~/types/api-models";
 import {
   formatDisplayDate,
@@ -317,16 +318,18 @@ function MedarbeidereList({
     );
   }
 
-  const [eksterneRessurser, interneRessurser] = partition(
-    ressurser,
-    (ressurs) => ressurs.sektor.includes(Sektor.EKSTERN),
+  ressurser.sort((a, b) =>
+    a.visningsnavn.fornavn.localeCompare(b.visningsnavn.fornavn),
   );
 
-  interneRessurser.sort((a, b) =>
-    a.visningsnavn.fornavn.localeCompare(b.visningsnavn.fornavn),
+  const [roboter, mennesker] = partition(
+    ressurser,
+    (ressurs) => ressurs.identType === IdentType.ROBOT,
   );
-  eksterneRessurser.sort((a, b) =>
-    a.visningsnavn.fornavn.localeCompare(b.visningsnavn.fornavn),
+
+  const [eksterneRessurser, interneRessurser] = partition(
+    mennesker,
+    (ressurs) => ressurs.sektor === Sektor.EKSTERN,
   );
 
   return (
@@ -433,6 +436,42 @@ function MedarbeidereList({
                 `}
               >
                 {eksterneRessurser.map((ressurs) => {
+                  return (
+                    <ResourceLink key={ressurs.navident} ressurs={ressurs} />
+                  );
+                })}
+              </div>
+            </ReadMore>
+          </div>
+        )}
+
+        {roboter.length > 0 && (
+          <div>
+            <ReadMore
+              css={css`
+                .navds-read-more__button {
+                  color: var(--a-text-default);
+                  font-size: var(--a-font-size-heading-small);
+                  font-weight: var(--a-font-weight-bold);
+                }
+
+                .navds-read-more__content {
+                  margin-left: 0;
+                  padding-left: 0;
+                  border-left: none;
+                }
+              `}
+              header={"Roboter"}
+            >
+              <div
+                css={css`
+                  margin-top: var(--a-spacing-4);
+                  display: grid;
+                  grid-template-columns: repeat(2, 1fr);
+                  gap: var(--a-spacing-4);
+                `}
+              >
+                {roboter.map((ressurs) => {
                   return (
                     <ResourceLink key={ressurs.navident} ressurs={ressurs} />
                   );
