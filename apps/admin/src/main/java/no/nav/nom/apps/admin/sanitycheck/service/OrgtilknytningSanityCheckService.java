@@ -180,7 +180,9 @@ public class OrgtilknytningSanityCheckService {
 
     public List<OrgtilknytningState> compareFutureChangesWithDelayedEvents() {
         List<OrgtilknytningState> futureOrgtilknytningStates = getAllFutureOrgtilknytningStates();
+        logger.info("Found {} future orgtilknytning states.", futureOrgtilknytningStates.size());
         List<String> delayedEvents = getAllDelayedEventsBlocking();
+        logger.info("Found {} delayed events.", delayedEvents.size());
         List<OrgtilknytningState> futureDelayedEventsMatch = new ArrayList<>();
 
         if (futureOrgtilknytningStates.isEmpty() && delayedEvents.isEmpty()) {
