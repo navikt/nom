@@ -16,6 +16,8 @@ spec:
       value: http://nom-api.nom
     - name: NOM_API_SCOPE
       value: api://prod-gcp.nom.nom-api/.default
+    - name: NOM_REMEDY_INTEGRASJON_BASE_URL
+      value: https://nom-remedy-integrasjon.prod-fss-pub.nais.io
     - name: LOGGING_CONFIG
       value: 'classpath:logback.xml'
     - name: JDK_JAVA_OPTIONS
@@ -94,4 +96,5 @@ spec:
         - application: nom-api
           namespace: nom
       external:
+        - host: nom-remedy-integrasjon.prod-fss-pub.nais.io
         - host: teamorg-unleash-api.nav.cloud.nais.io
