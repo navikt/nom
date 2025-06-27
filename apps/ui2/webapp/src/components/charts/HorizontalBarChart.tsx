@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Heading } from "@navikt/ds-react";
+import { Heading, HelpText } from "@navikt/ds-react";
 import maxBy from "lodash/maxBy";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -15,9 +15,11 @@ export type ChartRow = {
 export function HorizontalBarChart({
   rows,
   title,
+  helpText,
 }: {
   rows: ChartRow[];
   title: string | ReactNode;
+  helpText?: string | ReactNode;
 }) {
   const data = normalizeData(rows);
   const maxValueRow = maxBy(data, "normalizedPercentage");
@@ -40,13 +42,22 @@ export function HorizontalBarChart({
         line-height: 1.5rem;
       `}
     >
-      {typeof title === "string" ? (
-        <Heading level="2" size="medium">
-          {title}
-        </Heading>
-      ) : (
-        <>{title}</>
-      )}
+      <div
+        css={css`
+          display: flex;
+          justify-content: space-between;
+        `}
+      >
+        {typeof title === "string" ? (
+          <Heading level="2" size="medium">
+            {title}
+          </Heading>
+        ) : (
+          <>{title}</>
+        )}
+
+        {!!helpText && <HelpText>{helpText}</HelpText>}
+      </div>
 
       <div
         css={css`

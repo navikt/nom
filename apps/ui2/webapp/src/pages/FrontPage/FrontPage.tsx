@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import { Buildings3FillIcon, PersonFillIcon } from "@navikt/aksel-icons";
 import {
+  BodyLong,
   BodyShort,
   Heading,
   HelpText,
@@ -59,6 +60,7 @@ export const FrontPage = () => {
         />
 
         <OrgEnhetStatistikk
+          displayOrgEnheterStatistikk
           gittStatistikk={globalStatistikk}
           header="Nøkkelinfo for hele Nav"
           orgEnhet={orgEnhet}
@@ -74,12 +76,14 @@ export function OrgEnhetStatistikk({
   header,
   expandable = false,
   className,
+  displayOrgEnheterStatistikk,
 }: {
   orgEnhet: OrgEnhet | undefined;
   gittStatistikk?: GlobalStatistikkResponse | undefined;
   header?: string;
   expandable?: boolean;
   className?: string;
+  displayOrgEnheterStatistikk: boolean;
 }) {
   if (!orgEnhet) {
     return;
@@ -143,7 +147,9 @@ export function OrgEnhetStatistikk({
     >
       <MedarbeidereBarChartGridWrapper statistikk={medarbeidereStatistikk} />
 
-      <OrgEnheterStatistikkGridWrapper statistikk={statistikk} />
+      {displayOrgEnheterStatistikk && (
+        <OrgEnheterStatistikkGridWrapper statistikk={statistikk} />
+      )}
     </div>
   );
 
@@ -253,6 +259,20 @@ function MedarbeidereBarChart({
 
   return (
     <HorizontalBarChart
+      helpText={
+        <>
+          <BodyLong>
+            Alle medarbeidere med en aktiv Nav-ident telles én gang.
+          </BodyLong>
+          <BodyLong>
+            Eksterne medarbeidere som får utbetalinger, som tolker og lese- og
+            sekretærhjelper, telles også.
+          </BodyLong>
+          <BodyLong>
+            Roboter og andre ikke-menneskelige identer telles ikke.
+          </BodyLong>
+        </>
+      }
       rows={medarbeidereData}
       title={
         <div
@@ -291,22 +311,28 @@ function MedarbeidereBarChart({
               />
             </div>
 
-            <BodyShort
+            <div
               css={css`
-                margin-left: var(--a-spacing-4);
-                font-size: inherit;
-              `}
-              size="large"
-            >
-              Antall medarbeidere:
-            </BodyShort>
-            <span
-              css={css`
-                margin-left: var(--a-spacing-4);
+                display: flex;
               `}
             >
-              <b>{formatDisplayNumber(statistikk.totalt)}</b>
-            </span>
+              <BodyShort
+                css={css`
+                  margin-left: var(--a-spacing-4);
+                  font-size: inherit;
+                `}
+                size="large"
+              >
+                Antall medarbeidere:
+              </BodyShort>
+              <span
+                css={css`
+                  margin-left: var(--a-spacing-4);
+                `}
+              >
+                <b>{formatDisplayNumber(statistikk.totalt)}</b>
+              </span>
+            </div>
           </div>
         </div>
       }

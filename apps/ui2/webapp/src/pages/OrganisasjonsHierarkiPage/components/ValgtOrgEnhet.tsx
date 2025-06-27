@@ -115,10 +115,6 @@ export const ValgtOrgEnhet = ({
     ? `https://teamkatalog.ekstern.dev.nav.no/area/${teamkatalogSeksjon?.id}`
     : `https://teamkatalog.nav.no/area/${teamkatalogSeksjon?.id}`;
 
-  const statistikkAlleOrgenheterAdmin = useUnleashToggle(
-    "nom.statistikk.alle.orgenheter",
-  );
-
   return (
     <div
       css={css`
@@ -249,16 +245,15 @@ export const ValgtOrgEnhet = ({
           />
         )}
 
-        {hasAdminAccess && statistikkAlleOrgenheterAdmin && (
-          <OrgEnhetStatistikk
-            css={css`
-              margin-top: var(--a-spacing-6);
-            `}
-            expandable
-            header="Statistikk"
-            orgEnhet={orgEnhet}
-          />
-        )}
+        <OrgEnhetStatistikk
+          css={css`
+            margin-top: var(--a-spacing-6);
+          `}
+          displayOrgEnheterStatistikk={hasAdminAccess}
+          expandable
+          header="Statistikk"
+          orgEnhet={orgEnhet}
+        />
       </div>
     </div>
   );
