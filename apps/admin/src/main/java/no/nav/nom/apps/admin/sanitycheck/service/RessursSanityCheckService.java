@@ -5,7 +5,7 @@ import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.*;
 import no.nav.nom.apps.admin.webclient.nomremedyapiclient.NomRemedyApiClient;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
-import no.nav.nom.contract.nom.eventsource.RessursEvent;
+import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -532,12 +532,6 @@ public class RessursSanityCheckService {
     }
 
     private List<String> getAllDelayedEventsBlocking() {
-        return nomRemedyApiClient.getAllDelayedEventsAsList().stream().map(event -> {
-            if (event instanceof RessursEvent ressursEvent) {
-                return ressursEvent.getFid();
-            } else {
-                return ""; // or handle other event types as needed
-            }
-        }).toList();
+        return nomRemedyApiClient.getAllDelayedEventsAsList().stream().map(Event::getFid).toList();
     }
 }

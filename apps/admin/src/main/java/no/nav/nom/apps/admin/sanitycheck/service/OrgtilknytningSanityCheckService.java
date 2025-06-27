@@ -7,6 +7,7 @@ import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OverlappendeOrgtilkn
 import no.nav.nom.apps.admin.webclient.nomremedyapiclient.NomRemedyApiClient;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
+import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
@@ -225,13 +226,7 @@ public class OrgtilknytningSanityCheckService {
     }
 
     private List<String> getAllDelayedEventsBlocking() {
-        return nomRemedyApiClient.getAllDelayedEventsAsList().stream().map(event -> {
-            if (event instanceof OrgtilknytningEvent orgEvent) {
-                return orgEvent.getFid();
-            } else {
-                return ""; // or handle other event types as needed
-            }
-        }).toList();
+        return nomRemedyApiClient.getAllDelayedEventsAsList().stream().map(Event::getFid).toList();
     }
 
     private List<OrgtilknytningState> aktiveOrgtilknytninger(Collection<OrgtilknytningState> orgtilknytninger) {
