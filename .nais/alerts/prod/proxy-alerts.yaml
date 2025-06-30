@@ -22,7 +22,7 @@ spec:
     - name: nom-proxy_high_failrate
       rules:
         - alert: NOM-PROXY høy feilrate i logger
-          expr: (sum(loki:service:loglevel:count1m{service_name="="nom-proxy", detected_level="error"}) / sum(loki:service:loglevel:count1m{service_name="="nom-proxy"})) > 0.05
+          expr: (sum(loki:service:loglevel:count1m{service_name="nom-proxy", detected_level="error"}) / sum(loki:service:loglevel:count1m{service_name="nom-proxy"})) > 0.05
           for: 3m
           annotations:
             action: "{{ $labels.service_name }} har {{ $value | humanizePercentage }} feilmeldinger i loggene i løpet av de siste 3 minuttene."
