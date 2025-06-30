@@ -25,5 +25,7 @@ public interface AggregateStateRepository extends JpaRepository<AggregateState, 
 
     List<AggregateState> findByStateFid(String stateFid);
 
-    List<AggregateState> findByNavidentAndMasseflyttetFraFid(String navident, String masseflyttetFraFid);
+    List<AggregateState> findAggregateStatesByStateFidAndMasseflyttetFraFid(String stateFid, String masseflyttetFraFid);
+
+    List<AggregateState> findAggregateStatesByNavidentAndMasseflyttetFraFidAndStateType(String navident, String masseflyttetFraFid, String stateType);
 }

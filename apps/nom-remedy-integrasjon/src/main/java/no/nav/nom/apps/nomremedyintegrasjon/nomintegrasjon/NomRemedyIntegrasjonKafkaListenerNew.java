@@ -58,6 +58,8 @@ public class NomRemedyIntegrasjonKafkaListenerNew {
                     .createdAt(LocalDateTime.now())
                     .stateFid(ressursState.fid())
                     .stateType(ressursState.getClass().getSimpleName())
+                    .masseflyttetFraFid(null)
+                    .masseflytting(false)
                     .build());
             }
         }
@@ -75,14 +77,15 @@ public class NomRemedyIntegrasjonKafkaListenerNew {
         if (isNomMastered(navident) && orgtilknytningState.erDagligOppfolging()) {
             log.info("Logget mastered orgtilknytningStateFid: {}", key);
             var masseflyttetFraFid = orgtilknytningState.masseflyttetFraFid().orElse(null);
-            var allRowsByNavidentAndMasseflyttetFraFid = aggregateStateRepository.findByNavidentAndMasseflyttetFraFid(navident, masseflyttetFraFid);
+            var stateFid = orgtilknytningState.fid();
+            var allRowsByNavidentAndMasseflyttetFraFid = aggregateStateRepository.findAggregateStatesByStateFidAndMasseflyttetFraFid(stateFid, masseflyttetFraFid);
             if (allRowsByNavidentAndMasseflyttetFraFid.isEmpty()) {
                 aggregateStateRepository.save(AggregateState.builder()
                     .navident(navident)
                     .createdAt(LocalDateTime.now())
-                    .stateFid(orgtilknytningState.fid())
+                    .stateFid(stateFid)
                     .stateType(orgtilknytningState.getClass().getSimpleName())
-                    .masseflyttetFraFid(orgtilknytningState.masseflyttetFraFid().orElse(null))
+                    .masseflyttetFraFid(masseflyttetFraFid)
                     .masseflytting(orgtilknytningState.masseflyttetFraFid().isPresent())
                     .build());
             }

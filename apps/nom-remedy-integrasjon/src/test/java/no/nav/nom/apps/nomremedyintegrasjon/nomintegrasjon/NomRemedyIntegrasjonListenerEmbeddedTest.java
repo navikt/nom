@@ -123,7 +123,7 @@ public class NomRemedyIntegrasjonListenerEmbeddedTest {
     void test_002() {
         var orgtilknytning = orgtilknytningStateContract();
         when(masteredRessursStateRepository.isMastered(orgtilknytning.navident())).thenReturn(true);
-        when(aggregateStateRepository.findByNavidentAndMasseflyttetFraFid(any(), any())).thenReturn(List.of());
+        when(aggregateStateRepository.findAggregateStatesByNavidentAndMasseflyttetFraFidAndStateType(any(), any(), any())).thenReturn(List.of());
 
 
         orgtilknytningStateKafkaTemplate.send(orgtilknytningStateTopic, orgtilknytning.fid(), orgtilknytning);
