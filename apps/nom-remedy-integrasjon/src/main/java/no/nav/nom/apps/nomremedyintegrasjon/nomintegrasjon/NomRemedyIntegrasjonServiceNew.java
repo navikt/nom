@@ -224,10 +224,14 @@ public class NomRemedyIntegrasjonServiceNew {
             var currentDolOrgtilknytning = getCurrentDolByNavident(orgtilknytningState.navident());
             if (currentDolOrgtilknytning.isPresent()) {
                 logger.info("Fant eksisterende orgtilknytning for navident {}, oppdaterer aggregate_state tabellen", orgtilknytningState.navident());
-                aggregateStateRepository.save(
-                    aggregateState.toBuilder()
-                        .delayedUntil(orgtilknytningState.gyldigFom())
-                        .build());
+                try {
+                    aggregateStateRepository.save(
+                        aggregateState.toBuilder()
+                            .delayedUntil(orgtilknytningState.gyldigFom())
+                            .build());
+                } catch (Exception e) {
+                    logger.error("Klarte ikke lagre? Feilmelding {}", e.getMessage(), e);
+                }
                 logger.info(
                     "OrgtilknytningState med fid {} ble utsatt i aggregateStateTabellen helt til {}",
                     aggregateState.getStateFid(),
