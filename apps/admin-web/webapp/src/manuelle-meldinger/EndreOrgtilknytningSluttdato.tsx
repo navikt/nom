@@ -10,6 +10,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { API_BASE_URL } from "~/api/apiQueries.ts";
+import { DatePickerWrapped } from "~/components/DatepickerWrapped.tsx";
 import {
   ConfirmTextField,
   confirmTextValidator,
@@ -20,7 +21,6 @@ import {
 } from "~/manuelle-meldinger/felles/FidTextField.tsx";
 import { Footer } from "~/manuelle-meldinger/felles/Footer.tsx";
 import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
-import {DatePickerWrapped} from "~/components/DatepickerWrapped.tsx";
 
 const schema = z.object({
   fid: fidValidator(),
