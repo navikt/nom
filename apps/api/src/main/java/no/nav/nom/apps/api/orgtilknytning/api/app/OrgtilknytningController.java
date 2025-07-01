@@ -40,7 +40,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedRoller;
@@ -76,7 +75,7 @@ public class OrgtilknytningController {
         }
     )
     public ResponseEntity<List<OrgtilknytningState>> getOrgtilknytninger(
-        @RequestParam Optional<String> navident
+        @RequestParam(required = false) String navident
     ) {
         return ResponseEntity.ok(orgtilknytningRestService.getOrgtilknytninger(navident));
     }

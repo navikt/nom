@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.api.email.OrgtilknytningEndretEmailService;
@@ -16,11 +15,9 @@ import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
-import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.common.AbstractNomStateListener;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
-import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -32,9 +29,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.etter;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.foer;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerEtter;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerFoer;
 
 /*
  * REGLER:<
@@ -179,9 +174,9 @@ public class MasseflyttOrgtilknytningerService {
                     nyOrgenhetId,
                     beholdTilganger,
                     ot.gyldigFom(),
-                    ot.gyldigTom(),
+                    ot.gyldigTom().orElse(null),
                     ot.sektor(),
-                    ot.orgtilknytningType(),
+                    ot.orgtilknytningType().orElse(null),
                     ot.erDagligOppfolging(),
                     inputMetadata,
                     ventPaaState
@@ -202,9 +197,9 @@ public class MasseflyttOrgtilknytningerService {
                     nyOrgenhetId,
                     beholdTilganger,
                     flyttedato,
-                    ot.gyldigTom(),
+                    ot.gyldigTom().orElse(null),
                     ot.sektor(),
-                    ot.orgtilknytningType(),
+                    ot.orgtilknytningType().orElse(null),
                     ot.erDagligOppfolging(),
                     inputMetadata,
                     ventPaaState
@@ -227,14 +222,14 @@ public class MasseflyttOrgtilknytningerService {
         String nyOrgenhetId,
         boolean beholdTilganger,
         LocalDate gyldigFom,
-        Optional<LocalDate> gyldigTom,
+        LocalDate gyldigTom,
         Sektor sektor,
-        Optional<Tilknytningtype> tilknytningType,
+        Tilknytningtype tilknytningType,
         boolean isDOL,
         InputMetadata inputMetadata,
         boolean ventPaaState
     ) {
-        var latch = setupStateOppdatertLytter(2 + (gyldigTom.isPresent() ? 1 : 0) + (tilknytningType.isPresent() ? 1 : 0), ventPaaState);
+        var latch = setupStateOppdatertLytter(2 + (gyldigTom != null ? 1 : 0) + (tilknytningType != null ? 1 : 0), ventPaaState);
 
         var newFid = orgtilknytningCommandService.opprettOrgtilknytning(new OpprettOrgtilknytning(
             navident,
@@ -246,34 +241,37 @@ public class MasseflyttOrgtilknytningerService {
             null
         ));
 
-        gyldigTom.ifPresent(localDate -> orgtilknytningCommandService.avvikleOrgtilknytning(
-            newFid, new AvvikleOrgtilknytning(
-                navident,
-                nyOrgenhetId,
-                localDate,
-                inputMetadata,
-                null
-            )
-        ));
+        if (gyldigTom != null) {
+            orgtilknytningCommandService.avvikleOrgtilknytning(
+                newFid,
+                new AvvikleOrgtilknytning(
+                    navident,
+                    nyOrgenhetId,
+                    gyldigTom,
+                    inputMetadata,
+                    null
+                )
+            );
+        }
 
         orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(new EndreDagligOppfolgingOrgtilknytningCommand(
             newFid,
             navident,
             nyOrgenhetId,
             gyldigFom,
-            gyldigTom,
+            Optional.ofNullable(gyldigTom),
             isDOL,
             inputMetadata,
             null
         ));
 
-        tilknytningType.ifPresent(t ->
+        if (tilknytningType != null) {
             orgtilknytningCommandService.endreTilknytningtype(new EndreTilknytningtypeCommand(
                 newFid,
-                tilknytningType,
+                Optional.of(tilknytningType),
                 inputMetadata
-            ))
-        );
+            ));
+        }
 
         ventPaaState(latch, ventPaaState);
     }

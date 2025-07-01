@@ -516,7 +516,7 @@ public class NyeRessursStillingProcessor {
                 // Sjekk om dette er gammel historisk hvor data last med 3 års historikk ikke er tilgjengelig, men NOM har akkumulert denne gamle historikken.
                 match = eksisterendeOTer.stream()
                     .filter(ot -> ot.gyldigFom().isBefore(nestenTreAarSiden)
-                        && lik(ot.gyldigTom(), sp.gyldigTom())
+                        && lik(ot.gyldigTom().orElse(null), sp.gyldigTom())
                         && ot.orgEnhetId().equals(sp.orgenhet().getId())
                     )
                     .findFirst();
@@ -576,7 +576,7 @@ public class NyeRessursStillingProcessor {
                 // Sjekk om dette er gammel historisk hvor data last med 3 års historikk ikke er tilgjengelig, men NOM har akkumulert denne gamle historikken.
                 match = eksisterendeOTer.stream()
                     .filter(ot -> ot.gyldigFom().isBefore(nestenTreAarSiden)
-                        && lik(ot.gyldigTom(), sp.gyldigTom())
+                        && lik(ot.gyldigTom().orElse(null), sp.gyldigTom())
                         && ot.orgEnhetId().equals(sp.orgenhet().getId())
                         && ot.orgtilknytningType().equals(sp.tilknytningtype())
                     )

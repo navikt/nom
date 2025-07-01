@@ -6,21 +6,17 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreD
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytningCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDatoCommand;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OrgtilknytningCommand;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 
-import java.time.LocalDate;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isCurrentOrFuture;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.today;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.yesterday;
 
 public record StrukturerteStillingPerioderForNavident(
@@ -64,17 +60,17 @@ public record StrukturerteStillingPerioderForNavident(
         public boolean erAktivEllerFremtidig(List<Endring> endringer) {
             switch (command) {
                 case AvvikleOrgtilknytning cmd                      -> { return isCurrentOrFuture(cmd.gyldigTom()); }
-                case EndreDagligOppfolgingOrgtilknytning cmd        -> { return isCurrentOrFuture(cmd.gyldigTom()); }
-                case EndreDagligOppfolgingOrgtilknytningCommand cmd -> { return isCurrentOrFuture(cmd.gyldigTom()); }
-                case EndreOrgtilknytningDato cmd                    -> { return isCurrentOrFuture(cmd.gyldigTom()); }
-                case EndreOrgtilknytningDatoCommand cmd             -> { return isCurrentOrFuture(cmd.gyldigTom()); }
-                case FjernOrgtilknytning cmd                        -> { return isCurrentOrFuture(cmd.gyldigTom()); }
+                case EndreDagligOppfolgingOrgtilknytning cmd        -> { return isCurrentOrFuture(cmd.gyldigTom().orElse(null)); }
+                case EndreDagligOppfolgingOrgtilknytningCommand cmd -> { return isCurrentOrFuture(cmd.gyldigTom().orElse(null)); }
+                case EndreOrgtilknytningDato cmd                    -> { return isCurrentOrFuture(cmd.gyldigTom().orElse(null)); }
+                case EndreOrgtilknytningDatoCommand cmd             -> { return isCurrentOrFuture(cmd.gyldigTom().orElse(null)); }
+                case FjernOrgtilknytning cmd                        -> { return isCurrentOrFuture(cmd.gyldigTom().orElse(null)); }
                 case OpprettOrgtilknytning cmd -> {
                         var endreDatoCmd = endringer.stream().filter(e -> e.command() instanceof EndreOrgtilknytningDatoCommand || e.command() instanceof EndreOrgtilknytningDato).findFirst();
                         if (endreDatoCmd.isPresent()) {
                             switch (endreDatoCmd.get().command) {
-                                case EndreOrgtilknytningDato endreCmd           -> { return isCurrentOrFuture(endreCmd.gyldigTom()); }
-                                case EndreOrgtilknytningDatoCommand endreCmd    -> { return isCurrentOrFuture(endreCmd.gyldigTom()); }
+                                case EndreOrgtilknytningDato endreCmd           -> { return isCurrentOrFuture(endreCmd.gyldigTom().orElse(null)); }
+                                case EndreOrgtilknytningDatoCommand endreCmd    -> { return isCurrentOrFuture(endreCmd.gyldigTom().orElse(null)); }
                                 default -> { return false; }
                             }
                         } else {

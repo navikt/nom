@@ -172,7 +172,7 @@ public class RessursRestService {
         var eposter = ressursContactDetailsResolver.fetchEmails(navidenter);
 
         return ressursStates.values().stream()
-            .map(ressursState -> hideSensitiveDataAndEnrichRessursStateWithDvhData(ressursState, eposter.get(ressursState.navident())))
+            .map(ressursState -> hideSensitiveDataAndEnrichRessursStateWithDvhData(ressursState, eposter.get(ressursState.navident()).orElse(null)))
             .toList();
     }
 
@@ -226,7 +226,7 @@ public class RessursRestService {
             getAuthenticatedNavIdent().equals(ressursState.navident());
     }
 
-    private Ressurs hideSensitiveDataAndEnrichRessursStateWithDvhData(RessursState ressursState, Optional<String> epost) {
+    private Ressurs hideSensitiveDataAndEnrichRessursStateWithDvhData(RessursState ressursState, String epost) {
 
         var showPersonident = loggedInUserHasAccessScope(ADMIN) ||
             loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP) ||
@@ -251,7 +251,7 @@ public class RessursRestService {
                 .fysiskeBrukersteder(showFysiskBrukerSted ? ressursState.fysiskeBrukersteder() : Collections.emptyList())
                 .build(),
             telefoner,
-            epost.orElse(null),
+            epost,
             nomMastered.isMastered(ressursState.navident())
         );
     }
@@ -671,7 +671,7 @@ public class RessursRestService {
             metadata
         );
 
-        var orgtilknytninger = orgtilknytningRestService.getOrgtilknytninger(Optional.of(ressursState.navident()));
+        var orgtilknytninger = orgtilknytningRestService.getOrgtilknytninger(ressursState.navident());
 
         orgtilknytninger.forEach(orgtilknytningState -> {
             var gyldigFomIsAfterAvvikletDato = orgtilknytningState.gyldigFom().isAfter(request.sluttDato());

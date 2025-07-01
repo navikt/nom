@@ -234,7 +234,7 @@ public class OrgtilknytningCmdServiceTestBase {
             return this;
         }
 
-        public OrgtilknytningAssert tilTilknytningtype(Optional<Tilknytningtype> tilknytningtype) {
+        public OrgtilknytningAssert tilTilknytningtype(Tilknytningtype tilknytningtype) {
             fail("Orgtilknytning CMD objektet har ikke tilknytningtype, kan ikke teste på det");
             return this;
         }
@@ -475,8 +475,9 @@ public class OrgtilknytningCmdServiceTestBase {
             return this;
         }
 
-        public OrgtilknytningAssert tilTilknytningtype(Optional<Tilknytningtype> tilknytningtype) {
-            assertEquals(tilknytningtype, endreTilknytningtypeCommand.tilknytningtype(), "Tilknytningtype er ikke korrekt for EndreTilknytningtypeCommand");
+        @Override
+        public OrgtilknytningAssert tilTilknytningtype(Tilknytningtype tilknytningtype) {
+            assertEquals(Optional.of(tilknytningtype), endreTilknytningtypeCommand.tilknytningtype(), "Tilknytningtype er ikke korrekt for EndreTilknytningtypeCommand");
             return this;
         }
     }

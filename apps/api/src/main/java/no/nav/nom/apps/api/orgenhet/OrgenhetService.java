@@ -65,34 +65,33 @@ public class OrgenhetService {
 
 
     public Optional<IOrgenhet> getById(String id) {
-        return map(orgEnhetStateRepository.findById(id));
+        return orgEnhetStateRepository.findById(id).map(this::map);
     }
 
 
     public Optional<IOrgenhet> getByFid(String fid) {
-        return map(orgEnhetStateRepository.findByFid(fid));
+        return orgEnhetStateRepository.findByFid(fid).map(this::map);
     }
 
 
     public Optional<IOrgenhet> getEnhetByAgressoIdNivaAndName(String agressoId, String orgNiv, String name) {
         if (name != null) {
-            return map(
-                orgEnhetStateRepository.findAllByUniqueAgressoId(agressoId + "-" + name + "-" + orgNiv)
+            return orgEnhetStateRepository.findAllByUniqueAgressoId(agressoId + "-" + name + "-" + orgNiv)
                     .stream()
                     .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
                     .max(comparing(OrgEnhetState::gyldigFom))
-            );
+                .map(this::map);
         }
         return getEnhetByAgressoIdAndOrgniv(agressoId, orgNiv);
     }
 
 
     public Optional<IOrgenhet> getEnhetByAgressoIdAndOrgniv(String agressoId, String orgNiv) {
-        return map(orgEnhetStateRepository.findAllByAgressoIdAndNiv(agressoId + "--" + orgNiv)
+        return orgEnhetStateRepository.findAllByAgressoIdAndNiv(agressoId + "--" + orgNiv)
             .stream()
             .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
             .max(comparing(OrgEnhetState::gyldigFom))
-        );
+            .map(this::map);
     }
 
 
@@ -167,10 +166,6 @@ public class OrgenhetService {
 
     public void setOrganiserteEnheter(List<IOrgenhet> organiserteEnheter) {
         this.organiserteEnheter = organiserteEnheter;
-    }
-
-    private Optional<IOrgenhet> map(Optional<OrgEnhetState> orgEnhetState) {
-        return Optional.ofNullable(orgEnhetState.map(OrgEnhet::new).orElse(null));
     }
 
     private IOrgenhet map(OrgEnhetState orgEnhetState) {

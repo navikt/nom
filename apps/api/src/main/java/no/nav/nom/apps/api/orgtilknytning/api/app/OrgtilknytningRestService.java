@@ -104,13 +104,11 @@ public class OrgtilknytningRestService {
         this.unleash = unleash;
     }
 
-    public List<OrgtilknytningState> getOrgtilknytninger(Optional<String> navident) {
-        return navident.map(
-                presentNavident -> orgtilknytningStateRepository.findByNavident(presentNavident).stream().toList()
-            )
-            .orElseGet(
-                () -> orgtilknytningStateRepository.getAll().stream().toList()
-            );
+    public List<OrgtilknytningState> getOrgtilknytninger(String navident) {
+        if (navident != null) {
+            return orgtilknytningStateRepository.findByNavident(navident).stream().toList();
+        }
+        return orgtilknytningStateRepository.getAll().stream().toList();
     }
 
     public Map<String, List<OrgtilknytningState>> getOrgtilknytninger(List<String> navidenter) {

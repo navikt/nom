@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident;
 import org.junit.jupiter.api.DisplayName;
@@ -30,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 // REF: no/nav/nom/apps/api/orgtilknytning/dvh/dokumentasjon/TestReferanser_MatcheTilEnheterINOM.md
+@Slf4j
 @DisplayName("Tester matching av RessursStillinger fra DVH til NOM enhet")
 class MatchStrukturerteStillingPerioderTilNOMTest extends TestBase {
 

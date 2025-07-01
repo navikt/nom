@@ -43,7 +43,8 @@ public class OrgEnhetTypeHandler {
             .toList();
 
         leafOrgEnheter.forEach(leafOrgEnhet ->
-            mapToNomOrgEnhetsType(leafOrgEnhet.agressoOrgenhetType())
+            leafOrgEnhet.agressoOrgenhetType()
+                .map(this::mapToNomOrgEnhetsType)
                 .ifPresentOrElse(
                     nomOrgenhetType -> {
                         var orgEnhetsTypeNotEqualToExistingValue = leafOrgEnhet.orgEnhetsType()
@@ -138,8 +139,8 @@ public class OrgEnhetTypeHandler {
         return orgEnhetState.gyldigTom().map(gyldigTom -> gyldigTom.isAfter(LocalDate.now())).orElse(true);
     }
 
-    private static Optional<OrgEnhetsType> mapToNomOrgEnhetsType(Optional<String> maybeAgressoOrgenhetType) {
-        return maybeAgressoOrgenhetType.map(agressoOrgenhetType -> switch (agressoOrgenhetType) {
+    private OrgEnhetsType mapToNomOrgEnhetsType(String agressoOrgenhetType) {
+        return switch (agressoOrgenhetType) {
             case "ALS" -> OrgEnhetsType.ARBEIDSLIVSSENTER;
             case "Arbeid og Ytelser" -> OrgEnhetsType.NAV_ARBEID_OG_YTELSER;
             case "ARK" -> OrgEnhetsType.ARBEIDSRAADGIVNING;
@@ -154,6 +155,6 @@ public class OrgEnhetTypeHandler {
             case "Tiltak" -> OrgEnhetsType.TILTAK;
             case "Økonomi" -> OrgEnhetsType.NAV_OKONOMITJENESTE;
             default -> null;
-        });
+        };
     }
 }

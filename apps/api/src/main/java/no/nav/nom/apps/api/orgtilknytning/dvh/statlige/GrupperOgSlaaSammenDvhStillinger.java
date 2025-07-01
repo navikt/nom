@@ -124,7 +124,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                         previousEnd,
                         null,
                         stillingPeriodeKey.sektor,
-                        stillingPeriodeKey.tilknytningtype
+                        stillingPeriodeKey.tilknytningtype.orElse(null)
                     ));
                     periodStart = start;
                     previousEnd = end;
@@ -145,7 +145,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                     previousEnd,
                     null,
                     stillingPeriodeKey.sektor,
-                    stillingPeriodeKey.tilknytningtype
+                    stillingPeriodeKey.tilknytningtype.orElse(null)
                 ));
             }
         });
@@ -206,7 +206,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                         brekkpunktTom,
                         sp.orgenhet(),
                         sp.sektor(),
-                        sp.tilknytningtype()
+                        sp.tilknytningtype().orElse(null)
                     ));
                     stillingPeriodeBeforeBreak = sp;
                     brekkpunktFom = null;
@@ -221,7 +221,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                         stillingMedTilknytningFom.minusDays(1),
                         sp.orgenhet(),
                         sp.sektor(),
-                        sp.tilknytningtype()
+                        sp.tilknytningtype().orElse(null)
                     ));
                     brekkpunktFom = stillingMedTilknytningTom.plusDays(1);
                     if (spMedTilknytningtype.size() == 1) {
@@ -231,7 +231,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                             sp.gyldigTom(),
                             sp.orgenhet(),
                             sp.sektor(),
-                            sp.tilknytningtype()
+                            sp.tilknytningtype().orElse(null)
                         ));
                         stillingPeriodeBeforeBreak = sp;
                     }
@@ -245,7 +245,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                         stillingMedTilknytningFom.minusDays(1),
                         sp.orgenhet(),
                         sp.sektor(),
-                        sp.tilknytningtype()
+                        sp.tilknytningtype().orElse(null)
                     ));
                     stillingPeriodeBeforeBreak = sp;
                 } else if (isBetween(stillingMedTilknytningFom, stillingMedTilknytningTom, sp.gyldigFom()) && sp.gyldigTom().isAfter(stillingMedTilknytningTom) && stillingIsEquals) {
@@ -267,7 +267,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                 brekkpunktTom,
                 stillingPeriode.orgenhet(),
                 stillingPeriode.sektor(),
-                stillingPeriode.tilknytningtype()
+                stillingPeriode.tilknytningtype().orElse(null)
             ));
         }
         perioderGruppert.clear();
