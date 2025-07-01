@@ -5,6 +5,7 @@ import { AvsluttDelegering } from "~/manuelle-meldinger/AvsluttDelegering.tsx";
 import { AvvikleOrgenhet } from "~/manuelle-meldinger/AvvikleOrgenhet.tsx";
 import { AvvikleRessurs } from "~/manuelle-meldinger/AvvikleRessurs.tsx";
 import { EndreDagligOppfolging } from "~/manuelle-meldinger/EndreDagligOppfolging.tsx";
+import { EndreOrgtilknytningSluttdato } from "~/manuelle-meldinger/EndreOrgtilknytningSluttdato.tsx";
 import { FjernOrgtilknytning } from "~/manuelle-meldinger/FjernOrgtilknytning.tsx";
 import { FornyDelegering } from "~/manuelle-meldinger/FornyDelegering.tsx";
 import { OppdatereRessursSektor } from "~/manuelle-meldinger/OppdatereRessursSektor.tsx";
@@ -53,6 +54,7 @@ function ManuelleMeldingerPage() {
       </Heading>
       <div className="flex gap-2 flex-wrap mb-4">
         <FjernOrgtilknytning />
+        <EndreOrgtilknytningSluttdato />
       </div>
 
       <Heading level="2" size="medium" spacing>

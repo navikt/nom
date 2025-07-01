@@ -65,7 +65,7 @@ export function Arbeidsomraade() {
           {dataWithKey.map((arbOmr) => (
             <Table.Row key={arbOmr.key} shadeOnHover={false}>
               <Table.DataCell>
-                <NomLink path={`ressurs/${arbOmr.orgenhetId}`}>
+                <NomLink path={`org/${arbOmr.orgenhetId}`}>
                   {arbOmr.orgenhetId}
                 </NomLink>
               </Table.DataCell>
