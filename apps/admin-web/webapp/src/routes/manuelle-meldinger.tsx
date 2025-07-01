@@ -18,6 +18,7 @@ import { SjekkRessursStateRemedy } from "~/manuelle-meldinger/SjekkRessursStateR
 import { SlettAlleErrorStates } from "~/manuelle-meldinger/SlettAlleErrorStates.tsx";
 import { SlettEnErrorStateRad } from "~/manuelle-meldinger/SlettEnErrorStateRad.tsx";
 import { SlettRessursMelding } from "~/manuelle-meldinger/SlettRessursMelding.tsx";
+import {EndreOrgtilknytningSluttdato} from "~/manuelle-meldinger/EndreOrgtilknytningSluttdato.tsx";
 
 export const Route = createFileRoute("/manuelle-meldinger")({
   component: ManuelleMeldingerPage,
@@ -53,6 +54,7 @@ function ManuelleMeldingerPage() {
       </Heading>
       <div className="flex gap-2 flex-wrap mb-4">
         <FjernOrgtilknytning />
+        <EndreOrgtilknytningSluttdato />
       </div>
 
       <Heading level="2" size="medium" spacing>
