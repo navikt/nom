@@ -67,7 +67,7 @@ public class MicrosoftGraphClient {
                                     ((WebClientResponseException) exception).getResponseBodyAsString()
                             );
                         }
-                        logger.warn("Sending email failed: {}", errorMsg);
+                        logger.error("Sending email failed: {}", errorMsg);
                         throw new EmailSendingUnforeseenException(errorMsg);
                     });
         } else {
