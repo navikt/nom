@@ -3,7 +3,6 @@ package no.nav.nom.apps.api.orgtilknytning.dvh;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 public class PeriodeUtil {
     public static final LocalDate NO_END_DATE = LocalDate.of(2099, 12, 31);
@@ -41,10 +40,6 @@ public class PeriodeUtil {
 
     public static boolean isCurrentOrFuture(LocalDate date) {
         return date == null || date.isAfter(yesterday());
-    }
-
-    public static boolean isCurrentOrFuture(Optional<LocalDate> date) {
-        return isCurrentOrFuture(date != null ? date.orElse(null) : null);
     }
 
     public static LocalDate today() { return LocalDate.now(); }
@@ -90,10 +85,6 @@ public class PeriodeUtil {
     public static LocalDate dayAfter(LocalDate localDate) { return localDate.plusDays(1); }
 
     public static LocalDate dayBefore(LocalDate localDate) { return localDate.minusDays(1); }
-
-    public static boolean lik(Optional<LocalDate> dato, LocalDate sjekkMotDato) {
-        return lik(dato.orElse(null), sjekkMotDato);
-    }
 
     public static boolean likPeriode(StillingPeriode sp1, StillingPeriode sp2) {
         return lik(sp1.gyldigFom(), sp2.gyldigFom()) && lik(sp1.gyldigTom(), sp2.gyldigTom());

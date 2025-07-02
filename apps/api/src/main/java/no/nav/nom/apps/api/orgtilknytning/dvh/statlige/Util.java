@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -66,17 +65,14 @@ public class Util {
 
     public static LocalDate getLatestDate(LocalDate d1, LocalDate d2) {
         d1 = d1 == null ? NO_END_DATE : d1;
+        d2 = d2 == null ? NO_END_DATE : d2;
         return d1.isBefore(d2) ? d2 : d1;
     }
 
     public static LocalDate getEarliestDate(LocalDate d1, LocalDate d2) {
         d1 = d1 == null ? NO_END_DATE : d1;
+        d2 = d2 == null ? NO_END_DATE : d2;
         return d1.isBefore(d2) ? d1 : d2;
-    }
-
-    public static LocalDate getEarliestDate(LocalDate d1, Optional<LocalDate> d2) {
-        d1 = d1 == null ? NO_END_DATE : d1;
-        return getEarliestDate(d1, d2.orElse(NO_END_DATE));
     }
 
     public static boolean erOrgenhetGyldigIHeleStillingPerioden(StillingPeriode stillingPeriode, IOrgenhet matchetOrgenhet) {

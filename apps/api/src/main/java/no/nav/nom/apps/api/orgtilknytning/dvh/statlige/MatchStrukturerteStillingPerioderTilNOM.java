@@ -143,7 +143,7 @@ public class MatchStrukturerteStillingPerioderTilNOM {
             // Ref: 'Matche til enheter i NOM'  1.i.b
             // Har ikke eksisterende OT for StillingPerioden - Må endre StillingPerioden til å være innenfor Enhetens gyldighetsperiode
             LocalDate nyGyldigFom = getLatestDate(stillingPeriode.gyldigFom(), matchetOrgenhet.getGyldigFom());
-            LocalDate nyGyldigTom = getEarliestDate(stillingPeriode.gyldigTom(), matchetOrgenhet.getGyldigTom());
+            LocalDate nyGyldigTom = getEarliestDate(stillingPeriode.gyldigTom(), matchetOrgenhet.getGyldigTom().orElse(null));
 
             lagErrorStillingPeriodeUtoverEnhetPeriodeUtenMatchendeEksisterendeOT(
                 sspForNavident, stillingPeriode, sspForNavident.navident(), matchetOrgenhet, nyGyldigFom, nyGyldigTom
@@ -212,7 +212,7 @@ public class MatchStrukturerteStillingPerioderTilNOM {
                     } else {
                         // Har ikke eksisterende OT for StillingPerioden - Må endre StillingPerioden til å være innenfor Enhetens gyldighetsperiode
                         LocalDate nyGyldigFom = getLatestDate(stillingPeriode.gyldigFom(), aktuellOrgEnhet.getGyldigFom());
-                        LocalDate nyGyldigTom = getEarliestDate(aktuellGyldigTom, aktuellOrgEnhet.getGyldigTom());
+                        LocalDate nyGyldigTom = getEarliestDate(aktuellGyldigTom, aktuellOrgEnhet.getGyldigTom().orElse(null));
 
                         var nyStillingsPeriode = new StillingPeriode(
                             stillingPeriode.stilling(),
@@ -220,7 +220,7 @@ public class MatchStrukturerteStillingPerioderTilNOM {
                             nyGyldigTom,
                             aktuellOrgEnhet,
                             stillingPeriode.sektor(),
-                            stillingPeriode.tilknytningtype()
+                            stillingPeriode.tilknytningtype().orElse(null)
                         );
 
                         lagErrorForDelAvStillingPeriodeSomGaarUtoverEnhetPeriodeUtenMatchendeEksisterendeOT(
@@ -241,7 +241,7 @@ public class MatchStrukturerteStillingPerioderTilNOM {
                         aktuellGyldigTom,
                         aktuellOrgEnhet,
                         stillingPeriode.sektor(),
-                        stillingPeriode.tilknytningtype()
+                        stillingPeriode.tilknytningtype().orElse(null)
                     );
                     splittetPerioder.add(nyStillingsPeriode);
                 }
@@ -600,7 +600,7 @@ public class MatchStrukturerteStillingPerioderTilNOM {
                     stillingPeriode.gyldigFom(), stillingPeriode.gyldigTom(),
                     orgenhet.getId(), orgenhet.getNavn(),
                     orgenhet.getGyldigFom(), orgenhet.getGyldigTom().orElse(null),
-                    dayAfter(delperiodeGyldigTom), getEarliestDate(stillingPeriode.gyldigTom(), orgenhet.getGyldigTom())
+                    dayAfter(delperiodeGyldigTom), getEarliestDate(stillingPeriode.gyldigTom(), orgenhet.getGyldigTom().orElse(null))
                 ),
             stillingPeriode
         );

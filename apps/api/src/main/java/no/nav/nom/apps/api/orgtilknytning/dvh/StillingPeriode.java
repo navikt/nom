@@ -34,8 +34,8 @@ public record StillingPeriode(
         this(stillingAgressoOrgIdOgNavn, gyldigFom, gyldigTom, orgenhet, DagligOppfolging.UKJENT, null, Optional.empty());
     }
 
-    public StillingPeriode(StillingAgressoOrgIdOgNavn stillingAgressoOrgIdOgNavn, LocalDate gyldigFom, LocalDate gyldigTom, IOrgenhet orgenhet, Sektor sektor, Optional<Tilknytningtype> tilknytningtype) {
-        this(stillingAgressoOrgIdOgNavn, gyldigFom, gyldigTom, orgenhet, DagligOppfolging.UKJENT, sektor, tilknytningtype);
+    public StillingPeriode(StillingAgressoOrgIdOgNavn stillingAgressoOrgIdOgNavn, LocalDate gyldigFom, LocalDate gyldigTom, IOrgenhet orgenhet, Sektor sektor, Tilknytningtype tilknytningtype) {
+        this(stillingAgressoOrgIdOgNavn, gyldigFom, gyldigTom, orgenhet, DagligOppfolging.UKJENT, sektor, Optional.ofNullable(tilknytningtype));
     }
 
     public StillingPeriode(StillingAgressoOrgIdOgNavn stillingAgressoOrgIdOgNavn, LocalDate gyldigFom, LocalDate gyldigTom, IOrgenhet orgenhet, DagligOppfolging dagligOppfolging) {
