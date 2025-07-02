@@ -19,12 +19,11 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 @Profile("!local")
 public class DvhOrdsClientImpl implements DvhOrdsClient {
-    private AppProperties.DvhOrds dvhOrdsProperties;
-    private static final int MAX_IN_MEMORY_MB = 300;
+    private static final int MAX_IN_MEMORY_MB = 350;
     private final WebClient webClient;
 
     public DvhOrdsClientImpl(OAuth2AuthorizedClientManager authorizedClientManager, AppProperties appProperties) {
-        dvhOrdsProperties = appProperties.clients().dvhOrds();
+        AppProperties.DvhOrds dvhOrdsProperties = appProperties.clients().dvhOrds();
 
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("dvh-ords");
