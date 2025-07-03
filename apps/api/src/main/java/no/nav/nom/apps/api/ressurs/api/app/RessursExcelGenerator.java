@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+
 @Slf4j
 @Component
 public class RessursExcelGenerator {
@@ -56,7 +58,7 @@ public class RessursExcelGenerator {
         var underliggendeEnheter = orgenhetService.findAllUnderliggendeOrgenheter(topOrgEnhetId);
         var otMap = orgtilknytningStateRepository.findByNavidentIn(navidenter).stream()
             .filter(ot -> ot.orgEnhetId().equals(topOrgEnhetId) || underliggendeEnheter.contains(ot.orgEnhetId()))
-            .filter(PeriodeUtil::isCurrentPeriod)
+            .filter(PeriodeUtil::isCurrentOrFuturePeriod)
             .collect(Collectors.groupingBy(
                 OrgtilknytningState::navident
             ));
@@ -150,8 +152,8 @@ public class RessursExcelGenerator {
             sektor.setCellValue(sektorMap.get(ressurs.state().sektor().name()));
             orgEnhet.setCellValue(orgEnhetNavn);
             fom.setCellValue(gyldigFom == null ? "UKJENT" : gyldigFom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
-            jobbtelefon.setCellValue(ressurs.state().jobbtelefon().nummer());
-            ressurs.state().primaryTelefonnummer().ifPresent(privatTelefon::setCellValue);
+            jobbtelefon.setCellValue(isNull(ressurs.state().jobbtelefon().nummer()) ? "" : ressurs.state().jobbtelefon().nummer());
+            ressurs.state().primaryTelefonnummer().ifPresentOrElse(privatTelefon::setCellValue, () -> privatTelefon.setCellValue(""));
             epost.setCellValue(ressurs.epost());
             if (kanSeSluttdato) {
                 ressurs.state().sluttdato().ifPresentOrElse(
