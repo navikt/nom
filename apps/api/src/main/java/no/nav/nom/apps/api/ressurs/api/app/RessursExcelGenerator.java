@@ -115,6 +115,7 @@ public class RessursExcelGenerator {
             throw new RuntimeException("IO-Exception", ioException);
         }
         catch (Exception e) {
+            log.error("Feil ved generering av ressurs-Excel", e);
             throw e;
         }
     }
@@ -124,9 +125,11 @@ public class RessursExcelGenerator {
         var navn = row.createCell(1, CellType.STRING);
         var sektor = row.createCell(2, CellType.STRING);
         var orgEnhet = row.createCell(3, CellType.STRING);
-        var epost = row.createCell(4, CellType.STRING);
-        var fom = row.createCell(5, CellType.STRING);
-        var sluttdato = row.createCell(6, CellType.STRING);
+        var fom = row.createCell(4, CellType.STRING);
+        var jobbtelefon = row.createCell(5, CellType.STRING);
+        var privatTelefon = row.createCell(6, CellType.STRING);
+        var epost = row.createCell(7, CellType.STRING);
+        var sluttdato = row.createCell(8, CellType.STRING);
 
 
         if (ressurs == null) {
@@ -134,8 +137,10 @@ public class RessursExcelGenerator {
             navn.setCellValue("Navn");
             sektor.setCellValue("Sektor");
             orgEnhet.setCellValue("Organisasjonsenhet");
-            epost.setCellValue("Epost");
             fom.setCellValue("Fra og med");
+            jobbtelefon.setCellValue("Jobbtelefon");
+            privatTelefon.setCellValue("Privat telefon");
+            epost.setCellValue("Epost");
             if (kanSeSluttdato) {
                 sluttdato.setCellValue("Sluttdato");
             }
@@ -144,8 +149,10 @@ public class RessursExcelGenerator {
             navn.setCellValue(ressurs.state().visningsnavn().toString());
             sektor.setCellValue(sektorMap.get(ressurs.state().sektor().name()));
             orgEnhet.setCellValue(orgEnhetNavn);
-            epost.setCellValue(ressurs.epost());
             fom.setCellValue(gyldigFom == null ? "UKJENT" : gyldigFom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+            jobbtelefon.setCellValue(ressurs.state().jobbtelefon().nummer());
+            ressurs.state().primaryTelefonnummer().ifPresent(privatTelefon::setCellValue);
+            epost.setCellValue(ressurs.epost());
             if (kanSeSluttdato) {
                 ressurs.state().sluttdato().ifPresentOrElse(
                     gyldigTom -> sluttdato.setCellValue(gyldigTom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))),
