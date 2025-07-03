@@ -110,7 +110,7 @@ public class RessursUtloperSnartEmailService {
         }
 
         if (!ressursUtloperOmToUker.isEmpty()) {
-            ressursUtloperOmToUker.forEach(this::sendEmailTilAnsatt);
+            //ressursUtloperOmToUker.forEach(this::sendEmailTilAnsatt);
         }
     }
 
@@ -136,7 +136,7 @@ public class RessursUtloperSnartEmailService {
             }
 
             log.info(TEAM_LOGS, "Sender ressurs sluttdato utløper epost subject: {}, recipients: {}, message: {}", subject, recipientList, emailBody);
-            EmailMessage message = new EmailMessage(subject, emailBody, recipientList);
+            EmailMessage message = new EmailMessage(subject, emailBody, recipientList, List.of(), bccRecipientsEmailAddresses());
             microsoftGraphClient.sendEmail(message).subscribe();
         } catch (ADResponseException e) {
             EmailSendingUnforeseenException.emailNotFound(utlopendeRessurs.orgenhetLederNavident());
