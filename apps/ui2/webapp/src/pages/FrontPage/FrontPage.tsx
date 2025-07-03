@@ -77,6 +77,7 @@ export function OrgEnhetStatistikk({
   expandable = false,
   className,
   displayOrgEnheterStatistikk,
+  teknologiavdelingen,
 }: {
   orgEnhet: OrgEnhet | undefined;
   gittStatistikk?: GlobalStatistikkResponse | undefined;
@@ -84,6 +85,7 @@ export function OrgEnhetStatistikk({
   expandable?: boolean;
   className?: string;
   displayOrgEnheterStatistikk: boolean;
+  teknologiavdelingen?: boolean;
 }) {
   if (!orgEnhet) {
     return;
@@ -145,7 +147,10 @@ export function OrgEnhetStatistikk({
         grid-template-columns: repeat(2, 1fr);
       `}
     >
-      <MedarbeidereBarChartGridWrapper statistikk={medarbeidereStatistikk} />
+      <MedarbeidereBarChartGridWrapper
+        statistikk={medarbeidereStatistikk}
+        teknologiavdelingen={teknologiavdelingen}
+      />
 
       {displayOrgEnheterStatistikk && (
         <OrgEnheterStatistikkGridWrapper statistikk={statistikk} />
@@ -223,8 +228,10 @@ function GridItem({
 
 function MedarbeidereBarChartGridWrapper({
   statistikk,
+  teknologiavdelingen,
 }: {
   statistikk: MedarbeidereStatistikk;
+  teknologiavdelingen?: boolean;
 }) {
   if (!statistikk || statistikk.totalt === 0) {
     return;
@@ -232,15 +239,20 @@ function MedarbeidereBarChartGridWrapper({
 
   return (
     <GridItem standalone>
-      <MedarbeidereBarChart statistikk={statistikk} />
+      <MedarbeidereBarChart
+        statistikk={statistikk}
+        teknologiavdelingen={teknologiavdelingen}
+      />
     </GridItem>
   );
 }
 
 function MedarbeidereBarChart({
   statistikk,
+  teknologiavdelingen = false,
 }: {
   statistikk: MedarbeidereStatistikk;
+  teknologiavdelingen?: boolean;
 }) {
   const medarbeidereData: ChartRow[] = [
     {
@@ -265,8 +277,9 @@ function MedarbeidereBarChart({
             Alle medarbeidere med en aktiv Nav-ident telles én gang.
           </BodyLong>
           <BodyLong>
-            Eksterne medarbeidere som får utbetalinger, som tolker og lese- og
-            sekretærhjelper, telles også.
+            {teknologiavdelingen
+              ? "Tallet for eksterne viser antall lånt inn via Teknologiavdelingens avtaler. Teamkatalogen viser hvor disse faktisk jobber."
+              : "Eksterne medarbeidere som får utbetalinger, som tolker og lese- og sekretærhjelper, telles også."}
           </BodyLong>
           <BodyLong>
             Roboter og andre ikke-menneskelige identer telles ikke.

@@ -28,20 +28,20 @@ export const OrgRessursTabellPage = () => {
   const { id } = useParams({ from: "/org/table/$id" });
 
   const isOrgEnhetDriftsenhetQuery = useQuery({
-    queryKey: isOrgEnhetDriftsenhet.queryKey(id as string),
-    queryFn: () => isOrgEnhetDriftsenhet.queryFn(id as string),
+    queryKey: isOrgEnhetDriftsenhet.queryKey(id),
+    queryFn: () => isOrgEnhetDriftsenhet.queryFn(id),
     enabled: !!id,
   });
 
   const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(id as string),
-    queryFn: () => getOrgEnhet.queryFn(id as string),
+    queryKey: getOrgEnhet.queryKey(id),
+    queryFn: () => getOrgEnhet.queryFn(id),
     enabled: !!id && isOrgEnhetDriftsenhetQuery.isSuccess,
   });
 
   const underliggendeOrgEnhetQuery = useQuery({
-    queryKey: getAlleUnderliggendeOrgEnheter.queryKey(id as string),
-    queryFn: () => getAlleUnderliggendeOrgEnheter.queryFn(id as string),
+    queryKey: getAlleUnderliggendeOrgEnheter.queryKey(id),
+    queryFn: () => getAlleUnderliggendeOrgEnheter.queryFn(id),
     enabled: !!id && orgEnhetQuery.isSuccess,
   });
 

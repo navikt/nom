@@ -21,9 +21,11 @@ import React, { useState } from "react";
 
 import {
   downloadExcelKontaktPersonserForOrgenhetByOrgenhetId,
+  getAlleUnderliggendeOrgEnheter,
   getOrgEnheterSomKanHaRessurser,
   getRessurserByListNavident,
   getTeamcatSection,
+  getUnderliggendeOrgenheter,
   harLederTilgangForOrgenhetOptions,
   isOrgEnhetArbeidsomraade,
   isOrgEnhetDriftsenhet,
@@ -88,6 +90,18 @@ export const ValgtOrgEnhet = ({
   });
 
   const enheterSomKanHaRessurser = useQuery(getOrgEnheterSomKanHaRessurser);
+
+  const tekAvdNavId = inDevelopment ? "je104d" : "te627k";
+
+  const enheterUnderTekAvdQuery = useQuery({
+    queryKey: getUnderliggendeOrgenheter.queryKey(tekAvdNavId),
+    queryFn: () => getUnderliggendeOrgenheter.queryFn(tekAvdNavId),
+  });
+
+  const enheterUnderTekAvd = enheterUnderTekAvdQuery.data;
+
+  const underTeknologiavdelingen =
+    orgEnhet.id === tekAvdNavId || enheterUnderTekAvd?.includes(orgEnhet.id);
 
   const valgtOrgenhetKanHaRessurser = (
     enheterSomKanHaRessurser.data || []
@@ -253,6 +267,7 @@ export const ValgtOrgEnhet = ({
           expandable
           header="Statistikk"
           orgEnhet={orgEnhet}
+          teknologiavdelingen={underTeknologiavdelingen}
         />
       </div>
     </div>
