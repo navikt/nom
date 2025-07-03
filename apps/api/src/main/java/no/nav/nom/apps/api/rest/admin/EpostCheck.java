@@ -12,7 +12,7 @@ import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.api.email.OrgtilknytningEndretEmailService;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
-import no.nav.nom.apps.api.ressurs.email.RessursUtlopersnartEmailService;
+import no.nav.nom.apps.api.ressurs.email.RessursUtloperSnartEmailService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,12 +32,12 @@ public class EpostCheck {
     private final MicrosoftGraphClient microsoftGraphClient;
     private final RessursOpprettetEmailService opprettetRessurs;
     private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
-    private final RessursUtlopersnartEmailService ressursUtlopersnartEmailService;
+    private final RessursUtloperSnartEmailService ressursUtlopersnartEmailService;
 
     public EpostCheck(MicrosoftGraphClient microsoftGraphClient,
                       RessursOpprettetEmailService opprettetRessurs,
                       OrgtilknytningEndretEmailService orgtilknytningEndretEmailService,
-                      RessursUtlopersnartEmailService ressursUtlopersnartEmailService) {
+                      RessursUtloperSnartEmailService ressursUtlopersnartEmailService) {
         this.microsoftGraphClient = microsoftGraphClient;
         this.opprettetRessurs = opprettetRessurs;
         this.orgtilknytningEndretEmailService = orgtilknytningEndretEmailService;

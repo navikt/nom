@@ -4,9 +4,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import no.nav.nom.apps.api.common.DateUtils;
-import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
-import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
-import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -19,27 +17,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.text.MessageFormat;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -47,15 +38,15 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("test")
 @ExtendWith({SpringExtension.class})
 @ContextConfiguration(classes = {Configuration.class})
-public class RessursUtlopersnartEmailServiceTest {
+public class RessursUtloperSnartEmailServiceTest {
 
-    Map<String,String> data = new HashMap<>();
+    Map<String, String> data = new HashMap<>();
 
     @Autowired
     private Configuration configuration;
 
     @InjectMocks
-    private RessursUtlopersnartEmailService ressursUtlopersnartEmailService;
+    private RessursUtloperSnartEmailService ressursUtlopersnartEmailService;
 
     @Mock
     private OrgtilknytningStateRepository orgtilknytningStateRepository;
@@ -67,7 +58,7 @@ public class RessursUtlopersnartEmailServiceTest {
     private RessursStateRepository ressursStateRepository;
 
     @Mock
-    private LederResolver lederResolver;
+    private OrgEnhetMapper orgEnhetMapper;
 
     @Test
     void testFreemarkerTemplate() throws TemplateException, IOException {
@@ -101,14 +92,12 @@ public class RessursUtlopersnartEmailServiceTest {
         String ressursEtterNavn = "ressursForNavn";
         Visningsnavn vis1 = new Visningsnavn(ressursForNavn, Optional.empty(), ressursEtterNavn);
         Optional<LocalDate> ressursSluttdato = Optional.of(LocalDate.now().plusWeeks(2));
-        Optional<LocalDate> ressursSluttdatoPlus1dag = Optional.of(LocalDate.now().plusWeeks(2).plusDays(1));
 
         String ressursNavIdent2 = "ressurNavnOgNavIdent2";
         String ressursForNavn2 = "ressursForNavn2";
         String ressursEtterNavn2 = "ressursEtterNavn2";
         Visningsnavn vis2 = new Visningsnavn(ressursForNavn2, Optional.empty(), ressursEtterNavn2);
         Optional<LocalDate> ressursSluttdato2 = Optional.of(LocalDate.now().plusWeeks(5));
-        Optional<LocalDate> ressursSluttdato2Plus1dag = Optional.of(LocalDate.now().plusWeeks(5).plusDays(1));
 
         String orgEnhet = "orgenhet123456";
         String orgEnhetNavn = "orgenhetNavn";
@@ -128,12 +117,10 @@ public class RessursUtlopersnartEmailServiceTest {
             )
         );
 
-        when(lederResolver.leder(any())).thenReturn(List.of(
-                OrgEnhetsLeder.builder()
-                    .ressurs(Ressurs.builder()
-                        .navIdent(orgenhetLederNavIdent)
-                        .build()
-                    )
+        when(orgEnhetMapper.hentOrgEnhetLedere(any(), any(), any())).thenReturn(List.of(
+                RessursState.builder()
+                    .visningsnavn(new Visningsnavn("Leder", Optional.empty(), "Ledersen"))
+                    .navident("L123456")
                     .build()
             )
         );
@@ -141,18 +128,22 @@ public class RessursUtlopersnartEmailServiceTest {
         when(orgtilknytningStateRepository.findByNavident(ressusNavIdent)).thenReturn(
             List.of(
                 OrgtilknytningState.builder()
+                    .erDagligOppfolging(true)
                     .navident(ressusNavIdent)
                     .orgEnhetId(orgEnhet)
-                    .gyldigTom(Optional.of(ressursSluttdato.get()))
+                    .gyldigFom(ressursSluttdato.get().minusYears(5))
+                    .gyldigTom(ressursSluttdato)
                     .build()
             )
         );
         when(orgtilknytningStateRepository.findByNavident(ressursNavIdent2)).thenReturn(
             List.of(
                 OrgtilknytningState.builder()
+                    .erDagligOppfolging(true)
                     .navident(ressursNavIdent2)
                     .orgEnhetId(orgEnhet)
-                    .gyldigTom(Optional.of(ressursSluttdato2.get()))
+                    .gyldigFom(ressursSluttdato2.get().minusYears(5))
+                    .gyldigTom(ressursSluttdato2)
                     .build()
             )
         );
@@ -176,20 +167,22 @@ public class RessursUtlopersnartEmailServiceTest {
         var result = ressursUtlopersnartEmailService.getUtlopendeRessurser();
 
         // verify
-        List<UtloperRessursData> expected = List.of(
-            UtloperRessursData.builder()
-                .ressurNavn(vis1.getFormattedVisningsnavn())
-                .ressursNavident(ressusNavIdent)
-                .ressursSluttdato(ressursSluttdato.get())
-                .orgenhetData(Map.of(orgEnhetNavn, orgenhetLederNavIdent))
-                .build(),
-            UtloperRessursData.builder()
-                .ressurNavn(vis2.getFormattedVisningsnavn())
-                .ressursNavident(ressursNavIdent2)
-                .ressursSluttdato(ressursSluttdato2.get())
-                .orgenhetData(Map.of(orgEnhetNavn, orgenhetLederNavIdent))
-                .build()
-        );
+        var ressursEn = RessursUtloperData.builder()
+            .ressurNavn(vis1.getFormattedVisningsnavn())
+            .ressursNavident(ressusNavIdent)
+            .ressursSluttdato(ressursSluttdato.get())
+            .orgenhetNavn(orgEnhetNavn)
+            .orgenhetLederNavident(orgenhetLederNavIdent)
+            .build();
+        var ressursTwo = RessursUtloperData.builder()
+            .ressurNavn(vis2.getFormattedVisningsnavn())
+            .ressursNavident(ressursNavIdent2)
+            .ressursSluttdato(ressursSluttdato2.get())
+            .orgenhetNavn(orgEnhetNavn)
+            .orgenhetLederNavident(orgenhetLederNavIdent)
+            .build();
+        var expected = List.of(ressursEn, ressursTwo);
+
 
         assertEquals(expected.size(), result.size());
         assertTrue(expected.containsAll(result));
@@ -204,20 +197,17 @@ public class RessursUtlopersnartEmailServiceTest {
         String ressursEtterNavn = "ressursForNavn";
         Visningsnavn vis1 = new Visningsnavn(ressursForNavn, Optional.empty(), ressursEtterNavn);
         Optional<LocalDate> ressursSluttdato = Optional.of(LocalDate.now().plusWeeks(2));
-        Optional<LocalDate> ressursSluttdatoPlus1dag = Optional.of(LocalDate.now().plusWeeks(2).plusDays(1));
 
         String ressursNavIdent2 = "ressurNavnOgNavIdent2";
         String ressursForNavn2 = "ressursForNavn2";
         String ressursEtterNavn2 = "ressursEtterNavn2";
         Visningsnavn vis2 = new Visningsnavn(ressursForNavn2, Optional.empty(), ressursEtterNavn2);
         Optional<LocalDate> ressursSluttdato2 = Optional.of(LocalDate.now().plusWeeks(5));
-        Optional<LocalDate> ressursSluttdato2Plus1dag = Optional.of(LocalDate.now().plusWeeks(5).plusDays(1));
 
         String orgEnhet = "orgenhet123456";
         String orgEnhetNavn = "orgenhetNavn";
         String agressoId = "orgEnhetAgressoId123456";
         String orgNiva = "Nivaa";
-        String orgenhetLederNavIdent = "L123456";
 
         when(orgEnhetStateRepository.findById(orgEnhet)).thenReturn(
             Optional.of(OrgEnhetState.builder()
@@ -231,12 +221,10 @@ public class RessursUtlopersnartEmailServiceTest {
             )
         );
 
-        when(lederResolver.leder(any())).thenReturn(List.of(
-                OrgEnhetsLeder.builder()
-                    .ressurs(Ressurs.builder()
-                        .navIdent(orgenhetLederNavIdent)
-                        .build()
-                    )
+        when(orgEnhetMapper.hentOrgEnhetLedere(any(), any(), any())).thenReturn(List.of(
+                RessursState.builder()
+                    .visningsnavn(new Visningsnavn("Leder", Optional.empty(), "Ledersen"))
+                    .navident("L123456")
                     .build()
             )
         );
@@ -244,8 +232,10 @@ public class RessursUtlopersnartEmailServiceTest {
         when(orgtilknytningStateRepository.findByNavident(ressusNavIdent)).thenReturn(
             List.of(
                 OrgtilknytningState.builder()
+                    .erDagligOppfolging(true)
                     .navident(ressusNavIdent)
                     .orgEnhetId(orgEnhet)
+                    .gyldigFom(ressursSluttdato.get().minusYears(5))
                     .gyldigTom(Optional.of(ressursSluttdato.get().minusDays(7)))
                     .build()
             )
@@ -253,8 +243,10 @@ public class RessursUtlopersnartEmailServiceTest {
         when(orgtilknytningStateRepository.findByNavident(ressursNavIdent2)).thenReturn(
             List.of(
                 OrgtilknytningState.builder()
+                    .erDagligOppfolging(true)
                     .navident(ressursNavIdent2)
                     .orgEnhetId(orgEnhet)
+                    .gyldigFom(ressursSluttdato2.get().minusYears(5))
                     .gyldigTom(Optional.of(ressursSluttdato2.get().plusDays(8)))
                     .build()
             )
@@ -279,28 +271,26 @@ public class RessursUtlopersnartEmailServiceTest {
         var result = ressursUtlopersnartEmailService.getUtlopendeRessurser();
 
         // verify
-        List<UtloperRessursData> expected = List.of(
-            UtloperRessursData.builder()
+        List<RessursUtloperData> expected = List.of(
+            RessursUtloperData.builder()
                 .ressurNavn(vis1.getFormattedVisningsnavn())
                 .ressursNavident(ressusNavIdent)
                 .ressursSluttdato(ressursSluttdato.get())
-                .orgenhetData(Map.of(orgEnhetNavn, orgenhetLederNavIdent))
                 .build(),
-            UtloperRessursData.builder()
+            RessursUtloperData.builder()
                 .ressurNavn(vis2.getFormattedVisningsnavn())
                 .ressursNavident(ressursNavIdent2)
                 .ressursSluttdato(ressursSluttdato2.get())
-                .orgenhetData(Map.of(orgEnhetNavn, orgenhetLederNavIdent))
                 .build()
         );
 
-        assertEquals(expected.size(), 2);
-        assertEquals(result.size(), 0);
-        assertNotEquals(expected.size(), result.size());
+        assertEquals(2, expected.size());
+        assertTrue(result.containsAll(expected));
+        assertTrue(expected.containsAll(result));
     }
 
     @Test
-    public void testUtloperDato(){
+    public void testUtloperDato() {
         String utloperDato = "2021-09-01";
         String formattedUtloperDato = DateUtils.formatDateTime(LocalDate.parse(utloperDato));
         assertEquals("01.09.2021", formattedUtloperDato);
@@ -309,6 +299,5 @@ public class RessursUtlopersnartEmailServiceTest {
         String formattedUtloperDato2 = DateUtils.formatDateTime(LocalDate.parse(utloperDato2));
         assertEquals("31.12.2024", formattedUtloperDato2);
     }
-
 }
 

@@ -82,7 +82,7 @@ public class OrgEnhetMapper {
             remedyEnhetId.orElse(null),
             overordnetId.orElse(null),
             underordnedeOrgEnhetIds,
-            hentOrgEnhetsLedere(orgEnhet),
+            hentOrgEnhetLedere(orgEnhet),
             orgtilknytningService.getByEnhet(orgEnhet.getId())
         );
     }
@@ -99,8 +99,12 @@ public class OrgEnhetMapper {
         );
     }
 
-    private List<RessursState> hentOrgEnhetsLedere(IOrgenhet orgEnhet) {
-        return dvhRepository.getLederByAgressoIdAndNivAndNavn(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn())
+    private List<RessursState> hentOrgEnhetLedere(IOrgenhet orgEnhet) {
+        return hentOrgEnhetLedere(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn());
+    }
+
+    public List<RessursState> hentOrgEnhetLedere(String agressoId, String orgNiv, String navn) {
+        return dvhRepository.getLederByAgressoIdAndNivAndNavn(agressoId, orgNiv, navn)
             .stream()
             .map(this::ressursWithObscuredPersonident)
             .filter(Objects::nonNull)

@@ -6,26 +6,32 @@ public record EmailMessage(
         Message message
 ) {
     public EmailMessage(String subject, String content, List<String> recipientsEmailAddresses) {
-        this(new Message(subject, recipientsEmailAddresses, new Message.Body("Text", content), List.of()));
+        this(new Message(subject, recipientsEmailAddresses, new Message.Body("Text", content), List.of(), List.of()));
     }
 
     public EmailMessage(String subject, String content, List<String> recipientsEmailAddresses, List<String> ccRecipientsEmailAddresses) {
-        this(new Message(subject, recipientsEmailAddresses, new Message.Body("Text", content), ccRecipientsEmailAddresses));
+        this(new Message(subject, recipientsEmailAddresses, new Message.Body("Text", content), ccRecipientsEmailAddresses, List.of()));
+    }
+
+    public EmailMessage(String subject, String content, List<String> recipientsEmailAddresses, List<String> ccRecipientsEmailAddresses, List<String> bccRecipientsEmailAddresses) {
+        this(new Message(subject, recipientsEmailAddresses, new Message.Body("Text", content), ccRecipientsEmailAddresses, bccRecipientsEmailAddresses));
     }
 
     public record Message(
             String subject,
             Body body,
             List<Recipient> toRecipients,
-            List<Recipient> ccRecipients
+            List<Recipient> ccRecipients,
+            List<Recipient> bccRecipients
     ) {
 
-        public Message(String subject, List<String> recipientsEmailAddresses, Body body, List<String> ccRecipientsEmailAddresses) {
+        public Message(String subject, List<String> recipientsEmailAddresses, Body body, List<String> ccRecipientsEmailAddresses, List<String> bccRecipientsEmailAddresses) {
             this(
                 subject,
                 body,
                 recipientsEmailAddresses.stream().map(Recipient::new).toList(),
-                ccRecipientsEmailAddresses.stream().map(Recipient::new).toList()
+                ccRecipientsEmailAddresses.stream().map(Recipient::new).toList(),
+                bccRecipientsEmailAddresses.stream().map(Recipient::new).toList()
             );
         }
 
