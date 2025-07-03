@@ -152,7 +152,7 @@ public class RessursExcelGenerator {
             sektor.setCellValue(sektorMap.get(ressurs.state().sektor().name()));
             orgEnhet.setCellValue(orgEnhetNavn);
             fom.setCellValue(gyldigFom == null ? "UKJENT" : gyldigFom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
-            jobbtelefon.setCellValue(isNull(ressurs.state().jobbtelefon().nummer()) ? "" : ressurs.state().jobbtelefon().nummer());
+            jobbtelefon.setCellValue(isNull(ressurs.state().jobbtelefon()) ? "" : ressurs.state().jobbtelefon().nummer());
             ressurs.state().primaryTelefonnummer().ifPresentOrElse(privatTelefon::setCellValue, () -> privatTelefon.setCellValue(""));
             epost.setCellValue(ressurs.epost());
             if (kanSeSluttdato) {
