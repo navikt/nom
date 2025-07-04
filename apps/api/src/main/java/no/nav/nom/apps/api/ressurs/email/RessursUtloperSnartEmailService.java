@@ -294,6 +294,6 @@ public class RessursUtloperSnartEmailService {
     }
 
     private List<String> bccRecipientsEmailAddresses() {
-        return unleash.isEnabled("nom.email.bcc-utlopersnart") ? List.of("line.eeg-larsen@nav.no") : List.of();
+        return unleash.isEnabled("nom.email.bcc-utlopersnart") ? List.of("hama.keli@nav.no") : List.of();
     }
 }
