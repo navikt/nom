@@ -285,4 +285,29 @@ public class OrgtilknytningSanityCheckService {
             .filter(ot -> ot.gyldigTom().isPresent() && ot.gyldigTom().get().getDayOfMonth() == 1)
             .toList();
     }
+
+    public List<OverlappendeOrgtilknytning> orgtilknytningerMedOverlappendeHistoriskeDol() {
+        var dolOrgtilknytningerSomErAvsluttet = orgtilknytningStateRepository.getAll().stream()
+            .filter(ot -> ot.erDagligOppfolging()
+                && ot.gyldigFom() != null
+                && ot.gyldigTom().isPresent()
+                && ot.gyldigTom().get().isBefore(LocalDate.now()))
+            .sorted(Comparator.comparing(OrgtilknytningState::gyldigFom))
+            .collect(Collectors.groupingBy(OrgtilknytningState::navident));
+
+        List<OverlappendeOrgtilknytning> overlappendeOrgtilknytninger = new ArrayList<>();
+
+        dolOrgtilknytningerSomErAvsluttet.forEach((navident, orgtilknytningStates) -> {
+            OrgtilknytningState previous = null;
+            for (OrgtilknytningState ot : orgtilknytningStates) {
+                if (previous != null) {
+                    if (PeriodeUtil.overlapsInterval(ot, previous)) {
+                        overlappendeOrgtilknytninger.add(overlappendeOrgtilknytning(ot, previous));
+                    }
+                }
+                previous = ot;
+            }
+        });
+        return overlappendeOrgtilknytninger;
+    }
 }

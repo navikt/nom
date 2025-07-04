@@ -690,3 +690,16 @@ export function deleteErrorStateById(fid: string) {
     `${NOM_REMEDY_INTEGRASJON_BASE_URL}/admin/deleteErrorState/${fid}`,
   );
 }
+
+export async function getOverlappendeHistoriskeDolOrgtilknytninger(): Promise<
+  OverlappendeOrgtilknytning[]
+> {
+  return await ky
+    .get(
+      `${API_BASE_URL}/SanityCheck/orgtilknytning/overlappendeHistoriskeDolOrgtilknytninger`,
+      {
+        timeout: 120_000, // 120 seconds
+      },
+    )
+    .json<OverlappendeOrgtilknytning[]>();
+}

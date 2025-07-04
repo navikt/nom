@@ -68,6 +68,12 @@ export enum Tilknytningtype {
   VIKAR = "VIKAR",
 }
 
+export enum TelefonType {
+  NAV_TJENESTE_TELEFON = "NAV_TJENESTE_TELEFON",
+  NAV_KONTOR_TELEFON = "NAV_KONTOR_TELEFON",
+  PRIVAT_TELEFON = "PRIVAT_TELEFON",
+}
+
 export enum Sektor {
   NAV_STATLIG = "NAV_STATLIG",
   NAV_KOMMUNAL = "NAV_KOMMUNAL",
@@ -91,12 +97,18 @@ export interface RessursSearchParams {
   filterText?: string;
 }
 
+export interface Jobbtelefon {
+  nummer?: string;
+  type?: TelefonType;
+}
+
 export interface RessursState {
   fid: string;
   personident: string;
   navident: string;
   sektor: Sektor;
   visningsnavn: Visningsnavn;
+  jobbtelefon?: Jobbtelefon;
   primaryTelefonnummer?: string;
   /** @format date */
   sluttdato?: string;
@@ -245,6 +257,8 @@ export interface RessursEvent {
   additionalData?: Data;
   type: string;
 }
+
+export type RessursJobbtelefonOppdatertEventV1 = RessursEvent;
 
 export type RessursSluttdatoOppdatertEventV1 = RessursEvent;
 

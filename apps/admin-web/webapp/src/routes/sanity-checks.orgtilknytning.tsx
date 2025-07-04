@@ -7,6 +7,7 @@ import { BigLoader } from "~/components/BigLoader.tsx";
 import { OrgtilknytningDelayedEventComparison } from "~/sanitychecks/Orgtilknytning/OrgtilknytningDelayedEventComparison.tsx";
 import { OrgtilknytningDuplikat } from "~/sanitychecks/Orgtilknytning/OrgtilknytningDuplikat.tsx";
 import { OrgtilknytningerUtenforHierarki } from "~/sanitychecks/Orgtilknytning/OrgtilknytningerUtenforHierarki.tsx";
+import { OrgtilknytningHistoriskDolOverlapp } from "~/sanitychecks/Orgtilknytning/OrgtilknytningHistoriskDolOverlapp.tsx";
 import { OrgtilknytningMedFlereDOLSammePeriode } from "~/sanitychecks/Orgtilknytning/OrgtilknytningMedFlereDOLSammePeriode.tsx";
 import { OrgtilknytningMedTilknytningtypeUtenSektor } from "~/sanitychecks/Orgtilknytning/OrgtilknytningMedTilknytningtypeUtenSektor.tsx";
 import { OrgtilknytningMedUgyldigSektorTilknytningtypeKombinasjon } from "~/sanitychecks/Orgtilknytning/OrgtilknytningMedUgyldigSektorTilknytningtypeKombinasjon.tsx";
@@ -61,6 +62,9 @@ function ListSelector(props: { selected: string }) {
     case "OrgtilknytningDelayedEventComparison": {
       return <OrgtilknytningDelayedEventComparison />;
     }
+    case "OrgtilknytningHistoriskDolOverlapp": {
+      return <OrgtilknytningHistoriskDolOverlapp />;
+    }
     default: {
       return <></>;
     }
@@ -109,6 +113,9 @@ function OrgtilknytningSanityChecks() {
         <option value="OrgtilknytningDelayedEventComparison">
           List orgtilknytninger med fremtidig endring som ikke er i delayed
           event
+        </option>
+        <option value="OrgtilknytningHistoriskDolOverlapp">
+          List historiske orgtilknytninger med overlappende DOL
         </option>
       </Select>
       <ListSelector selected={selected} />
