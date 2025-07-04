@@ -284,6 +284,9 @@ spec:
         - application: behandlingsflyt
           namespace: aap
           cluster: dev-gcp
+        - application: behandlingskatalog-backend
+          namespace: teamdatajegerne
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident

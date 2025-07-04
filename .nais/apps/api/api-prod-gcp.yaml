@@ -247,6 +247,9 @@ spec:
         - application: behandlingsflyt
           namespace: aap
           cluster: prod-gcp
+        - application: behandlingskatalog-backend
+          namespace: teamdatajegerne
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
