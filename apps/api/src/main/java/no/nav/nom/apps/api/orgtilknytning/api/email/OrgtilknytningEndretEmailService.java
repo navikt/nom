@@ -190,7 +190,7 @@ public class OrgtilknytningEndretEmailService {
             }
 
             log.info("Sender OT endringer epost subject: {}, recipients: {}, message: {}", subject, recipientList, body);
-            EmailMessage message = new EmailMessage(subject, body, recipientList);
+            EmailMessage message = new EmailMessage(subject, body, recipientList, List.of(), getAdditionalBccRecipientsEmails());
             if (!unleash.isEnabled(UNLEASH_SKRU_AV_EPOST_ENDRING)) {
                 microsoftGraphClient.sendEmail(message).subscribe();
             } else {
@@ -381,6 +381,10 @@ public class OrgtilknytningEndretEmailService {
         additionalRecipients.add("Mugunthan.Dharmadas@nav.no");
         additionalRecipients.add("Roy.Grini@nav.no");
         return additionalRecipients;
+    }
+
+    private List<String> getAdditionalBccRecipientsEmails() {
+        return unleash.isEnabled("nom.email.bcc-ot-endret") ? List.of("line.eeg-larsen@nav.no") : List.of();
     }
 
     private List<String> getOmadaRecipientsEmails() {
