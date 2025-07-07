@@ -82,8 +82,8 @@ public class GenericApiKafkaConfig {
 
     /*
     * POD Hostname er ikke unikt nok alene.
-    * POD oppstart kan ha startet å kunsumere meldinger.
-    * Hvis POD'en restarter (pga f.eks. oppstartsfeil) så vil den ikke få ny hostname, og tidligere konsumertemeldinger vil ikke leses på nytt i ny instans.
+    * POD oppstart kan ha startet å konsumere meldinger.
+    * Hvis POD'en restarter (pga. f.eks. oppstartsfeil) så vil den ikke få ny hostname, og tidligere konsumerte meldinger vil ikke leses på nytt i ny instans.
      */
     protected String getUniqueListenerIdString(String listenerId) {
         if (!listenerIdMap.containsKey(listenerId)) {
