@@ -580,6 +580,7 @@ public class SanityCheck {
         return result.toString();
     }
 
+    // TODO Lagt over til nom-admin, kan fjernes
     @Operation(
         description = "Valider angivelse av ARBEIDSOMRÅDE på enheter",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -782,6 +783,7 @@ public class SanityCheck {
         return flereDol.toString();
     }
 
+    // TODO Lagt over til nom-admin, kan fjernes
     @Operation(
         description = "Valider aktive ressurser uten orgtilknytning",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -811,6 +813,7 @@ public class SanityCheck {
         return ressurserUtenOrgtilknytning.toString();
     }
 
+    // TODO Lagt over til nom-admin, kan fjernes
     @Operation(
         description = "List robot ressurser",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
