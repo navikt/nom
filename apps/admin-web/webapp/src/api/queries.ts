@@ -22,7 +22,7 @@ import type {
   OrgEnhetStateDTO,
   OrgtilknytningMedOrgEnhet,
   OverlappendeOrgtilknytning,
-  RemedyCompareResult,
+  RemedyCompareResult, RessursHendelseKafkaDTO,
   RessursMedEnhet,
   RessursMedFlereDOL,
   RessursOrgtilknytningKoblingInfo,
@@ -222,6 +222,19 @@ export function getApiHendelserEventsOptions(search: searchType) {
       ).json<HendelseDTO[]>(),
   });
 }
+
+export function getApiRessursHendelseEventsOptions(search: searchType) {
+  return queryOptions({
+    queryKey: ["API", "RESSURS_HENDELSE", search],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/sinks/apiRessursHendelseEvents?${queryString.stringify(search, { skipNull: true })}`,
+        )
+      ).json<RessursHendelseKafkaDTO[]>(),
+  });
+}
+
 
 export function getRessurs(navident: string | undefined) {
   return queryOptions({
