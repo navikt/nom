@@ -111,6 +111,13 @@ public class OrgEnhetMapper {
             .toList();
     }
 
+    public List<String> hentOrgEnhetLedereNavident(String agressoId, String orgNiv, String navn) {
+        return dvhRepository.getLederByAgressoIdAndNivAndNavn(agressoId, orgNiv, navn)
+            .stream()
+            .map(DvhLeder::getNavIdent)
+            .toList();
+    }
+
     private RessursState ressursWithObscuredPersonident(DvhLeder leder) {
         var ressursState = ressursStateRepository.findByNavident(leder.getNavIdent()).orElse(null);
         var loggedInUserAuthorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();

@@ -30,6 +30,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
@@ -78,7 +80,7 @@ public class RessursUtloperSnartEmailService {
         this.unleash = unleash;
     }
 
-    @Scheduled(cron = "0 0 19 * * ?") // every day at 18:00
+    @Scheduled(cron = "0 0 18 * * ?") // every day at 18:00
     public void sendEmail() {
         // await until initial load is complete
         dvhStartupLoadMonitor.awaitInitialLoadComplete();
@@ -91,18 +93,23 @@ public class RessursUtloperSnartEmailService {
 
         log.info("Sender en e-post om utløpsdato for ressurser til ledere av organisasjonsenheter");
         var ressurserUtloperSnart = getUtlopendeRessurser();
-
+        log.info(
+            "Totalt antall ressurser som utløper snart: {} Ressurser: {}",
+            ressurserUtloperSnart.size(),
+            ressurserUtloperSnart.stream().map(RessursUtloperData::ressursNavident).toList());
         var ressursUtloperOmFemEllerToUker = ressurserUtloperSnart.stream()
             .filter(ressursUtloperData -> ressursUtloperData.orgenhetLederNavident() != null)
             .toList();
 
         var ressursUtloperOmToUker = ressurserUtloperSnart.stream()
+            .filter(ressursUtloperData -> ressursUtloperData.ressursSluttdato() != null)
             .filter(ressursUtloperData -> ressursUtloperData.ressursSluttdato().isEqual(LocalDate.now().plusWeeks(2)))
             .filter(ressursUtloperData -> isNull(ressursUtloperData.orgenhetLederNavident()))
             .toList();
 
         log.info(
-            "Ressurser utløper snart, antall: {}, ressurser: {}", ressurserUtloperSnart.size(),
+            "Ressurser utløper snart med leder navident, antall: {}, ressurser: {}",
+            ressurserUtloperSnart.size(),
             ressurserUtloperSnart.stream().map(RessursUtloperData::ressursNavident).toList()
         );
         if (!ressursUtloperOmFemEllerToUker.isEmpty()) {
@@ -135,7 +142,7 @@ public class RessursUtloperSnartEmailService {
                 return;
             }
 
-            log.info(TEAM_LOGS, "Sender ressurs sluttdato utløper epost subject: {}, recipients: {}, message: {}", subject, recipientList, emailBody);
+            log.info(TEAM_LOGS, "Sender ressurs sluttdato utløper epost subject: {}, recipients: {}, message: {}", subject, Stream.concat(recipientList.stream(), bccRecipientsEmailAddresses().stream()).collect(Collectors.toSet()), emailBody);
             EmailMessage message = new EmailMessage(subject, emailBody, recipientList, List.of(), bccRecipientsEmailAddresses());
             microsoftGraphClient.sendEmail(message).subscribe();
         } catch (ADResponseException e) {
@@ -232,8 +239,8 @@ public class RessursUtloperSnartEmailService {
         try {
             var dolOrgtilknytning = orgtilknytningStateRepository.findByNavident(ressurs.navident()).stream()
                 .filter(OrgtilknytningState::erDagligOppfolging)
-                .filter(ot -> ot.gyldigTom().isPresent())
-                .filter(ot -> DateUtils.isPeriodActive(ot.gyldigFom(), ot.gyldigTom().get()))
+                .filter(ot -> ot.gyldigTom() != null && ot.gyldigTom().isPresent())
+                .filter(ot -> DateUtils.isPeriodActive(ot.gyldigFom(), ot.gyldigTom().get()) || ot.gyldigFom().isAfter(LocalDate.now()))
                 .filter(ot -> isRessursSluttdatoEqualToOrgtilknytningGyldigTom(ressurs, ot))
                 .findFirst()
                 .orElse(null);
@@ -244,36 +251,36 @@ public class RessursUtloperSnartEmailService {
                 .ressursSluttdato(ressurs.sluttdato().orElse(null))
                 .build();
 
-            if (dolOrgtilknytning == null) {
+            if (isNull(dolOrgtilknytning)) {
                 log.warn("ALERT: Fant ikke gyldig orgtilknytning for ressurs: {}", ressurs.navident());
                 return utloperRessursData;
             }
 
             var orgEnhetState = orgEnhetStateRepository.findById(dolOrgtilknytning.orgEnhetId()).orElse(null);
 
-            if (orgEnhetState == null) {
+            if (isNull(orgEnhetState)) {
                 log.warn("ALERT: Fant ikke orgenhet med id: {}", dolOrgtilknytning.orgEnhetId());
                 return utloperRessursData;
             }
 
-            var ledere = orgEnhetMapper.hentOrgEnhetLedere(
+            var ledere = orgEnhetMapper.hentOrgEnhetLedereNavident(
                 orgEnhetState.agressoId().orElse(null),
                 orgEnhetState.agressoOrgNivaa().orElse(null),
                 orgEnhetState.navn()
             );
 
-            if (ledere.isEmpty()) {
+            if (isNull(ledere) || ledere.isEmpty()) {
                 log.warn("ALERT: Fant ikke leder for orgenhet: {}, ressurs: {}", orgEnhetState.navn(), ressurs.navident());
                 return utloperRessursData.toBuilder().orgenhetNavn(orgEnhetState.navn()).build();
             }
 
             return utloperRessursData.toBuilder()
                 .orgenhetNavn(orgEnhetState.navn())
-                .orgenhetLederNavident(ledere.getFirst().navident())
+                .orgenhetLederNavident(ledere.getFirst())
                 .build();
 
         } catch (Exception e) {
-            log.error("ALERT: En feil skjedde under henting av ressurs med fem eller to uker til utløpsdato: {}", ressurs.navident(), e);
+            log.error("ALERT: En feil skjedde under henting av ressurs med fem eller to uker til utløpsdato: {}\n {}", ressurs.navident(), e.getStackTrace(), e);
             return RessursUtloperData.builder()
                 .ressurNavn(ressurs.visningsnavn().getFormattedVisningsnavn())
                 .ressursNavident(ressurs.navident())

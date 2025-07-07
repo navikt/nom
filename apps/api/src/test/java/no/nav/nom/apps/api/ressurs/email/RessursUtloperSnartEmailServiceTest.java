@@ -117,13 +117,7 @@ public class RessursUtloperSnartEmailServiceTest {
             )
         );
 
-        when(orgEnhetMapper.hentOrgEnhetLedere(any(), any(), any())).thenReturn(List.of(
-                RessursState.builder()
-                    .visningsnavn(new Visningsnavn("Leder", Optional.empty(), "Ledersen"))
-                    .navident("L123456")
-                    .build()
-            )
-        );
+        when(orgEnhetMapper.hentOrgEnhetLedereNavident(any(), any(), any())).thenReturn(List.of("L123456"));
 
         when(orgtilknytningStateRepository.findByNavident(ressusNavIdent)).thenReturn(
             List.of(
