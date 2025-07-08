@@ -21,7 +21,6 @@ import React, { useState } from "react";
 
 import {
   downloadExcelKontaktPersonserForOrgenhetByOrgenhetId,
-  getAlleUnderliggendeOrgEnheter,
   getOrgEnheterSomKanHaRessurser,
   getRessurserByListNavident,
   getTeamcatSection,
@@ -32,7 +31,6 @@ import {
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
 import { UserImage } from "~/components/UserImage";
-import { useUnleashToggle } from "~/hooks/useUnleashToggle";
 import { OrgEnhetStatistikk } from "~/pages/FrontPage/FrontPage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import {
@@ -41,8 +39,7 @@ import {
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import building from "~/resources/building.svg";
 import type { OrgEnhet, Ressurs } from "~/types/api-models";
-import { IdentType } from "~/types/api-models";
-import { NomNivaa, OrgEnhetsType, Sektor } from "~/types/api-models";
+import { IdentType, NomNivaa, OrgEnhetsType, Sektor } from "~/types/api-models";
 import {
   formatDisplayDate,
   formatVisningsnavn,
@@ -259,16 +256,19 @@ export const ValgtOrgEnhet = ({
           />
         )}
 
-        <OrgEnhetStatistikk
-          css={css`
-            margin-top: var(--a-spacing-6);
-          `}
-          displayOrgEnheterStatistikk={hasAdminAccess}
-          expandable
-          header="Statistikk"
-          orgEnhet={orgEnhet}
-          teknologiavdelingen={underTeknologiavdelingen}
-        />
+        {(hasAdminAccess ||
+          orgEnhet.orgEnhetsType !== OrgEnhetsType.DIREKTORAT) && (
+          <OrgEnhetStatistikk
+            css={css`
+              margin-top: var(--a-spacing-6);
+            `}
+            displayOrgEnheterStatistikk={hasAdminAccess}
+            expandable
+            header="Statistikk"
+            orgEnhet={orgEnhet}
+            teknologiavdelingen={underTeknologiavdelingen}
+          />
+        )}
       </div>
     </div>
   );
