@@ -11,6 +11,15 @@ import java.util.UUID;
 @Repository
 public interface AggregateStateRepository extends JpaRepository<AggregateState, UUID> {
 
+    @Query(
+        nativeQuery = true, value =
+        """
+        SELECT *
+        FROM aggregate_state
+        WHERE (masseflyttet_fra_fid IS NULL or masseflytting = false)
+        AND delayed_until <= :delayedUntil
+       """
+    )
     List<AggregateState> findAggregateStatesByMasseflyttingIsFalseOrMasseflyttingIsNullAndDelayedUntilIsLessThanEqual(LocalDate delayedUntil);
 
     @Query(
