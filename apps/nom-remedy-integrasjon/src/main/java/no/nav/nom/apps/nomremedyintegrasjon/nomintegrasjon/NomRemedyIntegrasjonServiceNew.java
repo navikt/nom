@@ -345,7 +345,7 @@ public class NomRemedyIntegrasjonServiceNew {
             .fysiskBrukerstedId(ressursState.primaryFysiskBrukersted().orElse(null))
             .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dolOrgtilknytning.gyldigFom()))
             .utlopsdato(utlopsdato.map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null))
-            .mobil(jobbtelefon != null ? jobbtelefon.nummer() : mapAndTrimNumber(mobil))
+            .mobil(jobbtelefon != null ? mapAndTrimNumber(jobbtelefon.nummer()) : mapAndTrimNumber(mobil))
             .masseflytting(isMasseflytting ? "X" : null)
             .build();
     }
