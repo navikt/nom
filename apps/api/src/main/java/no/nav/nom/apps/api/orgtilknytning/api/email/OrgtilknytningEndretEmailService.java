@@ -384,7 +384,7 @@ public class OrgtilknytningEndretEmailService {
     }
 
     private List<String> getAdditionalBccRecipientsEmails() {
-        return unleash.isEnabled("nom.email.bcc-ot-endret") ? List.of("line.eeg-larsen@nav.no") : List.of();
+        return unleash.isEnabled("nom.email.bcc-ot-endret") ? List.of("hama.keli@nav.no") : List.of();
     }
 
     private List<String> getOmadaRecipientsEmails() {
