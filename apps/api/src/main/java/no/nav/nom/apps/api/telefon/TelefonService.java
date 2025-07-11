@@ -3,7 +3,6 @@ package no.nav.nom.apps.api.telefon;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
-import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterJobbTelefonCommand;
 import no.nav.nom.contract.nom.TelefonType;
@@ -59,9 +58,9 @@ public class TelefonService {
     }
 
     public List<Telefon> fetchNavTelefoner() {
-        return dvhRepository.getNavidentTelefonNrMap().stream()
+        return dvhRepository.getNavidentTelefonNrList().stream()
                 .filter(Objects::nonNull)
-                .map(this::toTelefon)
+                .map(DvhTelefon::toTelefon)
                 .toList();
     }
 
@@ -78,19 +77,14 @@ public class TelefonService {
         return telefoner.isEmpty() ? null : telefoner.getFirst().nummer();
     }
 
-    public Jobbtelefon getRessursStateTelefonnummer(String navident) {
-        return findRessursStateByNavident(navident).jobbtelefon();
-    }
-
     public List<Telefon> getAlleTelefonnummer(String navident) {
         List<Telefon> telefoner = dvhRepository.getTelefonNrListByNavIdent(navident)
                 .stream()
                 .filter(Objects::nonNull)
-                .map(tlf -> new Telefon(navident, tlf.getNummer(), mapType(tlf.getType())))
+                .map(DvhTelefon::toTelefon)
                 .toList();
 
-        Optional<Telefon> privatNummer = findRessursStateByNavident(navident)
-                .primaryTelefonnummer()
+        Optional<Telefon> privatNummer = findRessursStateByNavident(navident).flatMap(RessursState::primaryTelefonnummer)
                 .flatMap(
                         p -> Optional.of(new Telefon(navident, p, TelefonType.PRIVAT_TELEFON))
                 );
@@ -99,7 +93,6 @@ public class TelefonService {
                 .sorted(telefonComparator())
                 .toList();
     }
-
 
     /*
         Sorteringsrekkefølge:
@@ -120,34 +113,26 @@ public class TelefonService {
         };
     }
 
-    private TelefonType mapType(DvhTelefon.DvhTelefonType dvhTelefonType) {
-        return switch (dvhTelefonType) {
-            case TJENESTETELEFON -> TelefonType.NAV_TJENESTE_TELEFON;
-            case KONTORTELEFON -> TelefonType.NAV_KONTOR_TELEFON;
-        };
+    public Optional<RessursState> findRessursStateByNavident(String navident) {
+        return ressursStateRepository.findByNavident(navident);
     }
 
-    private Telefon toTelefon(DvhTelefon dvhTelefon) {
-        return new Telefon(dvhTelefon.getNavIdent(), dvhTelefon.getNummer(), mapType(dvhTelefon.getType()));
+    public Map<String, Telefon> getExistingTelefoner() {
+        return ressursStateRepository.getAll().stream()
+            .filter(ressurs -> ressurs.jobbtelefon() != null && ressurs.navident() != null)
+            .collect(Collectors.toMap(RessursState::fid, ressurs -> new Telefon(ressurs.navident(), ressurs.jobbtelefon().nummer(), ressurs.jobbtelefon().type())));
     }
 
-    private RessursState findRessursStateByNavident(String navident) {
-        return ressursStateRepository.findByNavident(navident).orElseThrow(() -> RessursNotFoundException.navident(navident));
-    }
-
-    public void oppdaterRessursStateJobbtelefonBulk(List<DvhTelefon> dvhTelefonerMedEndring) {
+    public void oppdaterRessursStateJobbtelefon(String fid, String navident, Jobbtelefon telefon) {
         Origination origination = new Origination("nom-api", "nom-api");
         InputMetadata inputMetadata = new InputMetadata("nom-api BatchJob", "Datavarehus telefonoppdatering", null, origination);
-        dvhTelefonerMedEndring.forEach(dvhTelefon -> {
-            RessursState ressursState = findRessursStateByNavident(dvhTelefon.getNavIdent());
-            inputMetadata.toBuilder().inputInterfaceMethodArguments(dvhTelefon).build();
-            ressursCommandService.oppdaterJobbtelefonEvent(new OppdaterJobbTelefonCommand(
-                    ressursState.fid(),
-                    ressursState.navident(),
-                    new Jobbtelefon(dvhTelefon.getNummer(),
-                    mapType(dvhTelefon.getType()))
-            ), inputMetadata);
-        });
+        if (telefon != null) inputMetadata.toBuilder().inputInterfaceMethodArguments(telefon).build();
+
+        ressursCommandService.oppdaterJobbtelefonEvent(new OppdaterJobbTelefonCommand(
+            fid,
+            navident,
+            telefon
+        ), inputMetadata);
     }
 }
 

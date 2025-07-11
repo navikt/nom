@@ -114,8 +114,7 @@ public class NomRemedyIntegrasjonServiceOld {
             updateRessursPersonalia(ressursPersonaliaOppdatertV1);
         } else if (ressursEvent instanceof RessursFysiskeBrukerstederOppdatertEventV1 ressursFysiskeBrukerstederOppdatertEventV1) {
             updateRessursFysiskeBrukersteder(ressursFysiskeBrukerstederOppdatertEventV1);
-        }
-        else if (ressursEvent instanceof RessursPrimaryTelefonnummerOppdatertEventV1 ressursPrimaryTelefonnummerOppdatertEventV1) {
+        } else if (ressursEvent instanceof RessursPrimaryTelefonnummerOppdatertEventV1 ressursPrimaryTelefonnummerOppdatertEventV1) {
             updateRessursTelefonnummer(ressursPrimaryTelefonnummerOppdatertEventV1);
         } else if (ressursEvent instanceof RessursJobbtelefonOppdatertEventV1 ressursJobbtelefonOppdatertEventV1) {
             //updateRessursTelefonnummer(ressursJobbtelefonOppdatertEventV1);
@@ -615,16 +614,8 @@ public class NomRemedyIntegrasjonServiceOld {
             ressursPrimaryTelefonnummerOppdatertEventV1.getFid()
         );
 
-        var ressursState = nomApiClient.getRessursByFid(ressursPrimaryTelefonnummerOppdatertEventV1.getFid());
-        var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
-        var telefoner = getTelefonerFromNom(ressursState.getNavident());
-        var mobil = telefoner.isEmpty() ? null : mapAndTrimNumber(telefoner.getFirst());
-        var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
-            .mobil(mobil)
-            .build();
-
-        remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntity(
-            newNomIntegrasjonEntity,
+        updateRessursTelefonnummer(
+            ressursPrimaryTelefonnummerOppdatertEventV1.getFid(),
             ressursPrimaryTelefonnummerOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy()
         );
     }
@@ -636,15 +627,24 @@ public class NomRemedyIntegrasjonServiceOld {
             ressursJobbtelefonOppdatertEventV1.getFid()
         );
 
-        var ressursState = nomApiClient.getRessursByFid(ressursJobbtelefonOppdatertEventV1.getFid());
+        updateRessursTelefonnummer(
+            ressursJobbtelefonOppdatertEventV1.getFid(),
+            ressursJobbtelefonOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy()
+        );
+    }
+
+    private void updateRessursTelefonnummer(String fid, String initiatedBy) {
+        var ressursState = nomApiClient.getRessursByFid(fid);
         var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
+        var telefoner = getTelefonerFromNom(ressursState.getNavident());
+        var mobil = telefoner.isEmpty() ? null : mapAndTrimNumber(telefoner.getFirst());
         var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
-            .mobil(ressursJobbtelefonOppdatertEventV1.getJobbtelefonOppdatertEventData().jobbtelefon().nummer())
+            .mobil(mobil)
             .build();
 
         remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntity(
             newNomIntegrasjonEntity,
-            ressursJobbtelefonOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy()
+            initiatedBy
         );
     }
 

@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.dvh;
 
-import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +16,10 @@ import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
+import no.nav.nom.apps.api.telefon.Telefon;
 import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.contract.nom.TelefonType;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
@@ -31,16 +32,15 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyRessursType.ANNEN_STATLIG;
 
@@ -77,7 +77,6 @@ public class DvhRestConsumer {
 
     private final OTUtenforHierarki otUtenforHierarki;
     private final TelefonService telefonService;
-    private final Unleash unleash;
 
     @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
     public void scheduledOppdateringFraDvh() {
@@ -107,7 +106,7 @@ public class DvhRestConsumer {
         log.info("State topics er lest, fortsetter schedulert oppdatering fra DVH etter {}", durationAsH24(start));
 
         var ledereLastOk = loadLedereAndOrganiseringerFromDvh();
-        loadTlfFromDvh();
+        List<DvhTelefon> dvhTelefoner = loadTlfFromDvh();
 
         manuelleRessurserOgLedereTilState.oppdater();
 
@@ -135,6 +134,7 @@ public class DvhRestConsumer {
             updateOrgtilknytningerStateFromDvh();
 
             updateOrgtilknytningerForEksterneFromDvh();
+            oppdaterTelefonerFraDvh(dvhTelefoner);
         }
 
         log.info("Ferdig med schedulert oppdatering fra DVH. Tok {}", durationAsH24(start));
@@ -240,40 +240,66 @@ public class DvhRestConsumer {
         }
     }
 
-    public void loadTlfFromDvh() {
+    public List<DvhTelefon> loadTlfFromDvh() {
         log.info("Laster tlf fra dvh");
         try {
-            var tlfRader = dvhOrdsService.getTelefoner();
-            if (unleash.isEnabled("nom-api.ny-dvh-telefon-persistering")) {
-                List<DvhTelefon> dvhTelefonerMedEndring = getDvhTelefoner(tlfRader);
-
-                if (!dvhTelefonerMedEndring.isEmpty()) telefonService.oppdaterRessursStateJobbtelefonBulk(dvhTelefonerMedEndring);
-            }
-            log.info("Telefonnr lastet: Antall rader = " + tlfRader.size());
+            List<DvhTelefon> tlfRader = dvhOrdsService.getTelefoner();
+            log.info("Telefonnr lastet: Antall rader fra DVH = " + tlfRader.size());
             dvhRepository.saveTlf(tlfRader);
+            return tlfRader;
         } catch (Exception e) {
             log.error("Failure loading tlf data from DVH", e);
         }
+        return List.of();
     }
 
-    private List<DvhTelefon> getDvhTelefoner(List<DvhTelefon> tlfRader) {
-        List<DvhTelefon> dvhTelefonerMedEndring = new ArrayList<>();
-        var sortedTlfRader = tlfRader.stream().collect(Collectors.groupingBy(DvhTelefon::getNavIdent));
-        sortedTlfRader.forEach((navident, dvhTelefoner) -> {
-            if (dvhTelefoner.size() > 1) {
-                if (dvhTelefoner.stream().allMatch(dvhTelefon -> dvhTelefon.getType().equals(DvhTelefon.DvhTelefonType.TJENESTETELEFON))) dvhTelefoner.sort(Comparator.comparing(DvhTelefon::getNummer));
-                else if (dvhTelefoner.stream().allMatch(dvhTelefon -> dvhTelefon.getType().equals(DvhTelefon.DvhTelefonType.KONTORTELEFON))) dvhTelefoner.sort(Comparator.comparing(DvhTelefon::getNummer));
-                else dvhTelefoner.sort(Comparator.comparing((DvhTelefon t) -> t.getType() != DvhTelefon.DvhTelefonType.TJENESTETELEFON));
-            }
 
-            var ressursStateTelefonnummer = telefonService.getRessursStateTelefonnummer(navident);
-            if (isNull(ressursStateTelefonnummer)
-                || !ressursStateTelefonnummer.nummer().equals(dvhTelefoner.getFirst().getNummer())
-                || !compareTelefonType(dvhTelefoner.getFirst().getType(), ressursStateTelefonnummer.type())) {
-                dvhTelefonerMedEndring.add(dvhTelefoner.getFirst());
-            }
+    public void oppdaterTelefonerFraDvh(List<DvhTelefon> tlfRader) {
+        Map<String, List<DvhTelefon>> dvhTelefonerMap = tlfRader.stream().collect(Collectors.groupingBy(DvhTelefon::getNavIdent));
+
+        Map<String, Telefon> eksisterendeTelefoner = telefonService.getExistingTelefoner();
+
+        // Oppdaterer eksisterende telefoner
+        log.info("Fant {} eksisterende telefoner og {} telefoner fra dvh", eksisterendeTelefoner.size(), dvhTelefonerMap.size());
+        eksisterendeTelefoner.forEach((String fid, Telefon telefon) -> {
+            List<DvhTelefon> dvhTelefoner = dvhTelefonerMap.remove(telefon.navident());
+            oppdaterTelefonOmEndret(fid, telefon.navident(), toJobbtelefon(telefon), dvhTelefoner);
         });
-        return dvhTelefonerMedEndring;
+
+        // Legger til ny telefoner
+        log.info("Sitter igjen med {} nye telefoner fra dvh", dvhTelefonerMap.size());
+        dvhTelefonerMap.forEach((String navident, List<DvhTelefon> dvhTelefoner) -> telefonService.findRessursStateByNavident(navident)
+            .ifPresent(ressursState -> oppdaterTelefonOmEndret(ressursState.fid(), navident, null, dvhTelefoner)));
+    }
+
+    private void oppdaterTelefonOmEndret (String fid, String navident, Jobbtelefon telefon, List<DvhTelefon> dvhTelefoner) {
+        try {
+            if (dvhTelefoner != null && !dvhTelefoner.isEmpty()) {
+                if (dvhTelefoner.size() > 1) {
+                    // Sorterer til en fast rekkefølge med tjenestetelefonnummer først for å unngå skifte mellom flere telefonnummer av samme type
+                    dvhTelefoner.sort(Comparator
+                        .comparing((DvhTelefon t) -> t.getType() != DvhTelefon.DvhTelefonType.TJENESTETELEFON)
+                        .thenComparing(DvhTelefon::getNummer));
+                }
+                DvhTelefon dvhTelefon = dvhTelefoner.getFirst();
+
+                // Ny telefon eller endret telefon i DVH
+                if (telefon == null || !dvhTelefon.getNummer().equals(telefon.nummer()) || !compareTelefonType(dvhTelefon.getType(), telefon.type())) {
+                    log.info("Telefon {}, dvhTelefon {}", telefon, dvhTelefon);
+                    telefonService.oppdaterRessursStateJobbtelefon(fid, navident, dvhTelefon.toJobbtelefon());
+                }
+            } else {
+                // Telefon er fjernet fra DVH
+                log.info("Sletter telefon {}", telefon);
+                telefonService.oppdaterRessursStateJobbtelefon(fid, navident, null);
+            }
+        } catch (Exception e) {
+            log.error("Feilet i oppdatering av telefon for fid {}: ", fid, e);
+        }
+    }
+
+    private Jobbtelefon toJobbtelefon(Telefon telefon) {
+        return new Jobbtelefon(telefon.nummer(), telefon.type());
     }
 
     public boolean loadLedereAndOrganiseringerFromDvh() {

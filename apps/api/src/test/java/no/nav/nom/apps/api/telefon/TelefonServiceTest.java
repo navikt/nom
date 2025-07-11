@@ -7,6 +7,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterJobbTelefonCommand;
 import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class TelefonServiceTest {
 
+    private static final String FID_A = "ressurs-XXXXXXXXXXXXXXXXXXXXXXXXXX";
     private static final String NAV_IDENT_A = "A123456";
     private static final String KONTORTELEFON_A = "4777777777";
     private static final String TJENESTETELEFON_A = "4788888888";
@@ -93,7 +95,7 @@ class TelefonServiceTest {
                 DvhTelefon.builder().navIdent(NAV_IDENT_A).nummer(TJENESTETELEFON_A).type(TJENESTETELEFON).beskrivelse("Bla, bla").build(),
                 DvhTelefon.builder().navIdent(NAV_IDENT_X).nummer(TJENESTETELEFON_X).type(TJENESTETELEFON).beskrivelse("Bla, bla").build()
         );
-        when(dvhRepositoryMock.getNavidentTelefonNrMap()).thenReturn(telefoner);
+        when(dvhRepositoryMock.getNavidentTelefonNrList()).thenReturn(telefoner);
 
         var ressurser = Map.of(
                 NAV_IDENT_A, ressursState(NAV_IDENT_A, PRIVATTELEFON_A),
@@ -185,15 +187,10 @@ class TelefonServiceTest {
 
     @Test
     void should_call_ressurs_command_service() {
-        var telefoner = List.of(
-                DvhTelefon.builder().navIdent(NAV_IDENT_A).nummer(KONTORTELEFON_A).type(KONTORTELEFON).beskrivelse("Bla, bla").build(),
-                DvhTelefon.builder().navIdent(NAV_IDENT_A).nummer(TJENESTETELEFON_A).type(TJENESTETELEFON).beskrivelse("Bla, bla").build()
-        );
+        Jobbtelefon telefon = new Jobbtelefon(KONTORTELEFON_A, NAV_TJENESTE_TELEFON);
 
-        var ressursState = ressursState(NAV_IDENT_A, PRIVATTELEFON_A);
-        when(ressursStateRepositoryMock.findByNavident(NAV_IDENT_A)).thenReturn(Optional.ofNullable(ressursState));
-
-        telefonService.oppdaterRessursStateJobbtelefonBulk(telefoner);
+        telefonService.oppdaterRessursStateJobbtelefon(FID_A, NAV_IDENT_A, telefon);
+        telefonService.oppdaterRessursStateJobbtelefon(FID_A, NAV_IDENT_A, null);
 
         verify(ressursCommandServiceMock, times(2)).oppdaterJobbtelefonEvent(any(OppdaterJobbTelefonCommand.class), any(InputMetadata.class));
     }

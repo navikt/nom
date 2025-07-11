@@ -229,12 +229,16 @@ public class RessursCommandService {
     public CompletableFuture<SendResult<String, RessursEvent>> oppdaterJobbtelefonEvent(
         OppdaterJobbTelefonCommand oppdaterJobbTelefonCommand, InputMetadata inputMetadata
     ) {
-        return eventProducer.sendMessage(new RessursJobbtelefonOppdatertEventV1(
-            oppdaterJobbTelefonCommand.fid(),
+
+        RessursJobbtelefonOppdatertEventV1.JobbtelefonOppdatertEventData jobbData =
             new RessursJobbtelefonOppdatertEventV1.JobbtelefonOppdatertEventData(
                 oppdaterJobbTelefonCommand.navident(),
                 oppdaterJobbTelefonCommand.jobbtelefon()
-            ),
+            );
+
+        return eventProducer.sendMessage(new RessursJobbtelefonOppdatertEventV1(
+            oppdaterJobbTelefonCommand.fid(),
+            jobbData,
             inputMetadata
         ));
     }

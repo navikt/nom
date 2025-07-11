@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.StreamSupport;
 
@@ -234,6 +235,7 @@ public class DvhOrdsService {
         return StreamSupport.stream(getTlfJson().get("items").spliterator(), false)
             .filter(this::validateTlf)
             .map(DvhTelefon::fromOrds)
+            .filter(Objects::nonNull)
             .toList();
     }
 
@@ -263,8 +265,6 @@ public class DvhOrdsService {
     public JsonNode getNomRessurserJson(String ordsFilter) {
         return dvhOrdsClient.dvhGetJsonDataOrdsFilter(dvhOrdsProperties.nomRessurserPath(), ordsFilter);
     }
-
-
 
     private boolean validateLeder(JsonNode e) {
         final var validate = e.hasNonNull("leder_navident") && e.hasNonNull("orgnode_kode") && e.hasNonNull("orgnode_niva");

@@ -248,7 +248,7 @@ public class OmadaUttrekk {
         } else {
             log.info("Eksporterer telefonnummer på gammel måte");
             try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
-                dvhRepository.getNavidentTelefonNrMap().forEach(telefon -> {
+                dvhRepository.getNavidentTelefonNrList().forEach(telefon -> {
                     try {
                         printer.printRecord(
                                 telefon.getNavIdent(),

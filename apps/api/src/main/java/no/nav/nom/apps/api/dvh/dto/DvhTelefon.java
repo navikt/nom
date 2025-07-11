@@ -1,11 +1,13 @@
 package no.nav.nom.apps.api.dvh.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import no.nav.nom.apps.api.telefon.Telefon;
+import no.nav.nom.contract.nom.TelefonType;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 
 @Data
 @Builder
@@ -35,6 +37,20 @@ public class DvhTelefon {
             .type(type)
             .beskrivelse(jsonNode.get("typename").asText())
             .build();
+    }
+
+    public Jobbtelefon toJobbtelefon() {
+        return new Jobbtelefon(nummer, switch (type) {
+            case TJENESTETELEFON -> TelefonType.NAV_TJENESTE_TELEFON;
+            case KONTORTELEFON -> TelefonType.NAV_KONTOR_TELEFON;
+        });
+    }
+
+    public Telefon toTelefon() {
+        return new Telefon(navIdent, nummer, switch (type) {
+            case TJENESTETELEFON -> TelefonType.NAV_TJENESTE_TELEFON;
+            case KONTORTELEFON -> TelefonType.NAV_KONTOR_TELEFON;
+        });
     }
 
     public enum DvhTelefonType {

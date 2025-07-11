@@ -12,6 +12,7 @@ import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
+import no.nav.nom.contract.nom.eventsource.RessursJobbtelefonOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import org.apache.kafka.common.serialization.Serdes;
@@ -28,7 +29,6 @@ import org.apache.kafka.streams.processor.api.FixedKeyProcessorSupplier;
 import org.apache.kafka.streams.processor.api.FixedKeyRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Component;
 
@@ -83,7 +83,19 @@ class EventsrcToState {
                             state.put("startdato", String.valueOf(data.startdato().get()));
                         }
                     }
-                    state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                    if (event.getData() == null && event instanceof RessursJobbtelefonOppdatertEventV1 && event.getFid().equals(state.get("fid").asText())) {
+                        RessursJobbtelefonOppdatertEventV1 jobbtelefonOppdatertEventV1 = new RessursJobbtelefonOppdatertEventV1(
+                            event.getFid(),
+                            new RessursJobbtelefonOppdatertEventV1.JobbtelefonOppdatertEventData(
+                                state.get("navident").asText(),
+                                null
+                            ),
+                            event.getMetadata().inputMetadata()
+                        );
+                        state.setAll(objectMapper.convertValue(jobbtelefonOppdatertEventV1.getData(), ObjectNode.class));
+                    } else {
+                        state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                    }
                     state.put("fid", event.getFid()); // Keep fid - Ønsker å benytte denne som key på output
                     return state;
                 },

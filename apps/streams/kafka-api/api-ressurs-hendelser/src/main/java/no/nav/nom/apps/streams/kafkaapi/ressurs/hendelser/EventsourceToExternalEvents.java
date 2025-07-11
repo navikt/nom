@@ -8,6 +8,7 @@ import no.nav.nom.apps.streams.kafkaapi.ressurs.hendelser.v1.RessursOpprettetEve
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
+import no.nav.nom.contract.nom.eventsource.RessursJobbtelefonOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import org.apache.kafka.common.serialization.Serdes;
@@ -64,7 +65,19 @@ public class EventsourceToExternalEvents {
                                 }
                             }
 
-                            ressursAggregate.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                            if (event.getData() == null && event instanceof RessursJobbtelefonOppdatertEventV1 && event.getFid().equals(ressursAggregate.get("fid").asText())) {
+                                RessursJobbtelefonOppdatertEventV1 jobbtelefonOppdatertEventV1 = new RessursJobbtelefonOppdatertEventV1(
+                                    event.getFid(),
+                                    new RessursJobbtelefonOppdatertEventV1.JobbtelefonOppdatertEventData(
+                                        ressursAggregate.get("navident").asText(),
+                                        null
+                                    ),
+                                    event.getMetadata().inputMetadata()
+                                );
+                                ressursAggregate.setAll(objectMapper.convertValue(jobbtelefonOppdatertEventV1.getData(), ObjectNode.class));
+                            } else {
+                                ressursAggregate.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                            }
 
                             if (ressursHasRequiredFields(ressursAggregate)) {
 

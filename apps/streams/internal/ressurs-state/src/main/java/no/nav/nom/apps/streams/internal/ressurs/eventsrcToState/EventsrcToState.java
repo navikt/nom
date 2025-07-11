@@ -10,6 +10,7 @@ import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursJobbtelefonOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -62,7 +63,19 @@ class EventsrcToState {
                         // (See https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Stream+Usage+Patterns#KafkaStreamUsagePatterns-Howtomanagethesizeofstatestoresusingtombstones?)
                         // NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
                     } else {
-                        state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                        if (event.getData() == null && event instanceof RessursJobbtelefonOppdatertEventV1 && event.getFid().equals(state.get("fid").asText())) {
+                            RessursJobbtelefonOppdatertEventV1 jobbtelefonOppdatertEventV1 = new RessursJobbtelefonOppdatertEventV1(
+                                event.getFid(),
+                                new RessursJobbtelefonOppdatertEventV1.JobbtelefonOppdatertEventData(
+                                    state.get("navident").asText(),
+                                    null
+                                ),
+                                event.getMetadata().inputMetadata()
+                            );
+                            state.setAll(objectMapper.convertValue(jobbtelefonOppdatertEventV1.getData(), ObjectNode.class));
+                        } else {
+                            state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                        }
                         state.put("fid", event.getFid()); // store this for later retrieval
                         if (event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data) {
                             if (data.navident().isPresent()) {
@@ -169,7 +182,7 @@ class EventsrcToState {
             }
 
             final var visningsnavn = eventStateAggregate.get("visningsnavn");
-            final var jobbtelefon = eventStateAggregate.get("jobbtelefon");
+            final var jobbtelefon = eventStateAggregate.hasNonNull("jobbtelefon") ? eventStateAggregate.get("jobbtelefon") : null;
 
             var fysiskBrukerstedList = new ArrayList<String>();
             eventStateAggregate.withArray("fysiskeBrukersteder").elements().forEachRemaining(e -> fysiskBrukerstedList.add(e.asText()));
@@ -186,7 +199,7 @@ class EventsrcToState {
                     Optional.ofNullable(parseNullableFromJson(visningsnavn, "mellomnavn")),
                     visningsnavn.get("etternavn").asText()
                 ),
-                jobbtelefon != null ? new Jobbtelefon(
+                jobbtelefon != null  ? new Jobbtelefon(
                     jobbtelefon.hasNonNull("nummer") ? jobbtelefon.get("nummer").asText() : null,
                     jobbtelefon.hasNonNull("type") ? TelefonType.valueOf(jobbtelefon.get("type").asText()) : null
                 ) : null,
