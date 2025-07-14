@@ -30,12 +30,17 @@ async function initVendorStorage() {
     for (const s of Object.keys(fetches)) {
       try {
         // eslint-disable-next-line unicorn/no-await-expression-member
+        const response = await fetches[s];
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status} ${response.statusText}`);
+        }
         bodies[s] = (await fetches[s]).text();
       } catch (error) {
         console.error(
           { err: error, graphqlsrc: s, graphqlsrcUrl: graphiqlSource[s] },
           "Error during vendoring of graphiql",
         );
+        bodies[s] = null;
       }
     }
     await Promise.allSettled(Object.values(bodies));
