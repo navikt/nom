@@ -5,14 +5,18 @@ import { fileURLToPath, URL } from "node:url";
 import { TanStackRouterVite } from "@tanstack/router-vite-plugin";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import monacoEditorPlugin from "vite-plugin-monaco-editor";
+import $monacoEditorPlugin from "vite-plugin-monaco-editor";
 
 // https://vitejs.dev/config/
+
+const monacoEditorPlugin = $monacoEditorPlugin.default ?? $monacoEditorPlugin;
+
 export default defineConfig({
   plugins: [
     react({
       jsxImportSource: "@emotion/react",
     }),
+    TanStackRouterVite(),
     monacoEditorPlugin({
       languageWorkers: ["editorWorkerService", "json"],
       customWorkers: [
@@ -22,7 +26,6 @@ export default defineConfig({
         },
       ],
     }),
-    TanStackRouterVite(),
   ],
   resolve: {
     alias: {
