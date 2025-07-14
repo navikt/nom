@@ -3,10 +3,10 @@ import { Express } from "express";
 const graphiqlSource: Record<string, string> = {
   reactdev: "https://unpkg.com/react@18/umd/react.production.min.js",
   reactdomdev: "https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
-  graphiqljs: "https://unpkg.com/graphiql/graphiql.min.js",
-  graphiqlcss: "https://unpkg.com/graphiql/graphiql.min.css",
+  graphiqljs: "https://unpkg.com/graphiql@4.1.2/dist/index.umd.js",
+  graphiqlcss: "https://unpkg.com/graphiql@4.1.2/dist/style.css",
   graphiqlpluginexplorerjs:
-    "https://unpkg.com/@graphiql/plugin-explorer/dist/index.umd.js",
+    "https://unpkg.com/@graphiql/plugin-explorer@4.0.6/dist/index.umd.js",
   graphiqlpluginexplorercss:
     "https://unpkg.com/@graphiql/plugin-explorer/dist/style.css",
 };
