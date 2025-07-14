@@ -3,8 +3,8 @@ import { Express } from "express";
 const graphiqlSource: Record<string, string> = {
   reactdev: "https://unpkg.com/react@18/umd/react.production.min.js",
   reactdomdev: "https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
-  graphiqljs: "https://unpkg.com/graphiql/dist/index.umd.js",
-  graphiqlcss: "https://unpkg.com/graphiql/dist/style.css",
+  graphiqljs: "https://unpkg.com/graphiql/graphiql.min.js",
+  graphiqlcss: "https://unpkg.com/graphiql/graphiql.min.css",
   graphiqlpluginexplorerjs:
     "https://unpkg.com/@graphiql/plugin-explorer/dist/index.umd.js",
   graphiqlpluginexplorercss:
@@ -30,17 +30,12 @@ async function initVendorStorage() {
     for (const s of Object.keys(fetches)) {
       try {
         // eslint-disable-next-line unicorn/no-await-expression-member
-        const response = await fetches[s];
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status} ${response.statusText}`);
-        }
         bodies[s] = (await fetches[s]).text();
       } catch (error) {
         console.error(
           { err: error, graphqlsrc: s, graphqlsrcUrl: graphiqlSource[s] },
           "Error during vendoring of graphiql",
         );
-        bodies[s] = null;
       }
     }
     await Promise.allSettled(Object.values(bodies));
