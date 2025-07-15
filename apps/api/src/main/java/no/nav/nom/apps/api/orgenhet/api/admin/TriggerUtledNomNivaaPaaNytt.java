@@ -7,8 +7,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetNomNivaaHandler;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.contract.nom.NomNivaa;
-import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 @Tag(name = "Admin for å utlede nom nivåer på nytt.")
@@ -25,19 +25,20 @@ import java.util.Optional;
 @RequestMapping("/api/admin/utlednomnivaaer")
 @PreAuthorize("hasAuthority('ADMIN')")
 public class TriggerUtledNomNivaaPaaNytt {
-
-    private final OrgEnhetNomNivaaHandler orgEnhetNomNivaaHandler;
-    private final OrgEnhetStateRepository orgEnhetStateRepository;
-    private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
-
     private final Logger logger = LoggerFactory.getLogger(TriggerUtledNomNivaaPaaNytt.class);
 
-    public TriggerUtledNomNivaaPaaNytt(OrgEnhetNomNivaaHandler orgEnhetNomNivaaHandler, OrgEnhetStateRepository orgEnhetStateRepository,
-                                       DvhStartupLoadMonitor dvhStartupLoadMonitor
+    private final OrgEnhetNomNivaaHandler orgEnhetNomNivaaHandler;
+    private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
+    private final OrgenhetService orgenhetService;
+
+
+    public TriggerUtledNomNivaaPaaNytt(OrgEnhetNomNivaaHandler orgEnhetNomNivaaHandler,
+                                       DvhStartupLoadMonitor dvhStartupLoadMonitor,
+                                       OrgenhetService orgenhetService
     ) {
         this.orgEnhetNomNivaaHandler = orgEnhetNomNivaaHandler;
-        this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
+        this.orgenhetService = orgenhetService;
     }
 
     @Operation(
@@ -47,10 +48,22 @@ public class TriggerUtledNomNivaaPaaNytt {
     @GetMapping()
     String utledNomNivaPaaNytt(@RequestParam(required = false) String orgEnhetId) {
 
-        var orgenheterToProcess =  orgEnhetStateRepository.getAll().stream()
-            .filter(orgEnhetState -> orgEnhetId == null || orgEnhetState.id().equals(orgEnhetId))
-            .filter(orgEnhetState -> orgEnhetState.gyldigTom().isEmpty() || !orgEnhetState.gyldigTom().get().isBefore(LocalDate.now()))
-            .toList();
+        var orgenheterToProcess = orgenhetService.getAllEnheterMedOrganisering().stream()
+            .filter(orgEnhetState -> orgEnhetId == null || orgEnhetState.getId().equals(orgEnhetId))
+            .map(iOrgenhet -> OrgEnhetState.builder()
+                .fid(iOrgenhet.getFid())
+                .id(iOrgenhet.getId())
+                .navn(iOrgenhet.getNavn())
+                .gyldigFom(iOrgenhet.getGyldigFom())
+                .gyldigTom(iOrgenhet.getGyldigTom())
+                .overordnetOrgEnhetFid(iOrgenhet.getOverordnetOrgEnhetFid())
+                .lederFid(Optional.empty())
+                .orgEnhetsType(iOrgenhet.getOrgEnhetsType())
+                .nomNivaa(iOrgenhet.getNomNivaa())
+                .uniqueAgressoId(Optional.ofNullable(iOrgenhet.getUniqueAgressoId()))
+                .agressoId(Optional.ofNullable(iOrgenhet.getAgressoId()))
+                .agressoOrgenhetType(Optional.empty())
+                .build()).toList();
 
         dvhStartupLoadMonitor.awaitInitialLoadComplete();
 
