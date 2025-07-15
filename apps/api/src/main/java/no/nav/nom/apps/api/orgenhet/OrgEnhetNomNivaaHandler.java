@@ -63,7 +63,7 @@ public class OrgEnhetNomNivaaHandler {
         var children = orgEnhetUnderordnetResolver.findUnderordnedeOrgEnheter(orgEnhetState);
         children.forEach(childOrgEnhetState -> {
             if (childOrgEnhetState.orgEnhetsType() == null || childOrgEnhetState.orgEnhetsType().isEmpty()) {
-                logger.info("OrgEnhetState {} har ingen orgEnhetsType, kan ikke utlede nomNivaa", orgEnhetState.id());
+                logger.error("OrgEnhetState {} har ingen orgEnhetsType, kan ikke utlede nomNivaa", orgEnhetState.id());
             }
             mapOrgEnhetTypeToNewNomNivaaAndUpdate(childOrgEnhetState, childOrgEnhetState.orgEnhetsType().isPresent() ? childOrgEnhetState.orgEnhetsType().get() : null);
             mapOrgEnhetTypeToNewNomNivaaForChildren(childOrgEnhetState);

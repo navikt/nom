@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Tag(name = "Admin for å utlede nom nivåer på nytt.")
@@ -48,6 +49,7 @@ public class TriggerUtledNomNivaaPaaNytt {
 
         var orgenheterToProcess =  orgEnhetStateRepository.getAll().stream()
             .filter(orgEnhetState -> orgEnhetId == null || orgEnhetState.id().equals(orgEnhetId))
+            .filter(orgEnhetState -> orgEnhetState.gyldigTom().isEmpty() || !orgEnhetState.gyldigTom().get().isBefore(LocalDate.now()))
             .toList();
 
         dvhStartupLoadMonitor.awaitInitialLoadComplete();
@@ -55,7 +57,7 @@ public class TriggerUtledNomNivaaPaaNytt {
         orgenheterToProcess
             .forEach(orgEnhetState -> {
                 if (orgEnhetState.orgEnhetsType() == null || orgEnhetState.orgEnhetsType().isEmpty()) {
-                    logger.info("OrgEnhetState {} har ingen orgEnhetsType, kan ikke utlede nomNivaa", orgEnhetState.id());
+                    logger.error("OrgEnhetState {} har ingen orgEnhetsType, kan ikke utlede nomNivaa", orgEnhetState.id());
                 }
                     orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdate(orgEnhetState, orgEnhetState.orgEnhetsType().isPresent() ? orgEnhetState.orgEnhetsType().get() : null);
                 }
