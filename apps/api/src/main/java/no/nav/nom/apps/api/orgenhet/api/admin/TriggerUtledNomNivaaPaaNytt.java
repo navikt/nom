@@ -53,8 +53,12 @@ public class TriggerUtledNomNivaaPaaNytt {
         dvhStartupLoadMonitor.awaitInitialLoadComplete();
 
         orgenheterToProcess
-            .forEach(orgEnhetState ->
-                orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdate(orgEnhetState, orgEnhetState.orgEnhetsType().isPresent() ? orgEnhetState.orgEnhetsType().get() : null)
+            .forEach(orgEnhetState -> {
+                if (orgEnhetState.orgEnhetsType() == null || orgEnhetState.orgEnhetsType().isEmpty()) {
+                    logger.info("OrgEnhetState {} har ingen orgEnhetsType, kan ikke utlede nomNivaa", orgEnhetState.id());
+                }
+                    orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdate(orgEnhetState, orgEnhetState.orgEnhetsType().isPresent() ? orgEnhetState.orgEnhetsType().get() : null);
+                }
             );
 
         if (orgEnhetId != null) {
