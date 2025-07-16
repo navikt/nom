@@ -53,8 +53,7 @@ public class TriggerUtledNomNivaaPaaNytt {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @GetMapping()
-    String utledNomNivaPaaNytt(@RequestParam(required = false) String orgEnhetId) {
-        logger.info(nav);
+    public ResponseEntity<String> utledNomNivaPaaNytt(@RequestParam(required = false) String orgEnhetId) {
         var orgenheterToProcess = orgenhetService.getAllEnheterMedOrganisering().stream()
             .filter(orgEnhetState -> orgEnhetId == null || orgEnhetState.getId().equals(orgEnhetId))
             .filter(iOrgenhet -> !iOrgenhet.getId().equals(nav))
@@ -77,7 +76,7 @@ public class TriggerUtledNomNivaaPaaNytt {
 
         orgenheterToProcess
             .forEach(orgEnhetState -> {
-                if (orgEnhetState.orgEnhetsType() == null || orgEnhetState.orgEnhetsType().isEmpty()) {
+                if (orgEnhetState.orgEnhetsType().isEmpty()) {
                     logger.error("OrgEnhetState {} har ingen orgEnhetsType, kan ikke utlede nomNivaa", orgEnhetState.id());
                 }
                     orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdate(orgEnhetState, orgEnhetState.orgEnhetsType().isPresent() ? orgEnhetState.orgEnhetsType().get() : null);
@@ -97,7 +96,7 @@ public class TriggerUtledNomNivaaPaaNytt {
 
         logger.info(message);
 
-        return String.format("Utledet nivå på nytt for %s enhet", orgenheterToProcess.size());
+        return ResponseEntity.ok(String.format("Utledet nivå på nytt for %s enhet", orgenheterToProcess.size()));
     }
 
     @ExceptionHandler({

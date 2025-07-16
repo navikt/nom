@@ -14,6 +14,7 @@ public class NomNivaaMapper {
                 HJELPEMIDLER_OG_TILRETTELEGGING, NAV_KONTAKTSENTER, FYLKE, KLAGEINSTANS -> Optional.of(NomNivaa.DRIFTSENHET);
             case NAV_KONTOR, TILTAK, ARBEIDSLIVSSENTER, ARBEIDSRAADGIVNING -> Optional.of(NomNivaa.ARBEIDSOMRAADE);
             case NAV_OKONOMITJENESTE -> Optional.empty();
+            case null -> Optional.empty();
         };
     }
 
@@ -24,6 +25,7 @@ public class NomNivaaMapper {
             case DIREKTORAT, DIR, NAV_ARBEID_OG_YTELSER, NAV_FAMILIE_OG_PENSJONSYTELSER, KONTROLL_KONTROLLENHET,
                 HJELPEMIDLER_OG_TILRETTELEGGING, NAV_KONTAKTSENTER, KLAGEINSTANS -> Optional.of(NomNivaa.ARBEIDSOMRAADE);
             case FYLKE, NAV_KONTOR, TILTAK, ARBEIDSLIVSSENTER, ARBEIDSRAADGIVNING -> Optional.empty();
+            case null -> Optional.empty();
         };
     }
 
