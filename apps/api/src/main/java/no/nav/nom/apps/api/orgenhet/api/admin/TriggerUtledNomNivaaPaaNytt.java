@@ -8,12 +8,15 @@ import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetNomNivaaHandler;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -95,5 +98,15 @@ public class TriggerUtledNomNivaaPaaNytt {
         logger.info(message);
 
         return String.format("Utledet nivå på nytt for %s enhet", orgenheterToProcess.size());
+    }
+
+    @ExceptionHandler({
+        NullPointerException.class
+    })
+    public ResponseEntity<StandardResponse> handleException(Exception e) {
+        logger.error("Exception occurred: {}", e.getMessage(), e);
+        return ResponseEntity.badRequest().body(StandardResponse.builder()
+            .message("En feil oppstod under behandling av forespørselen: " + e.getMessage())
+            .build());
     }
 }
