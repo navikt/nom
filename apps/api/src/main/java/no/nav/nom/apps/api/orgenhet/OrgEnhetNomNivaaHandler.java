@@ -39,8 +39,8 @@ public class OrgEnhetNomNivaaHandler {
         OrgEnhetStateRepository orgEnhetStateRepository,
         OrgEnhetCommandService orgEnhetCommandService,
         OrgEnhetOverordnetResolver orgEnhetOverordnetResolver,
-        OrgEnhetUnderordnetResolver orgEnhetUnderordnetResolver, @Value("#{'${app.orgenhet.linjeenhetene}'.split(',')}")
-        Set<String> linjeenheteneOrgEnhetIds
+        OrgEnhetUnderordnetResolver orgEnhetUnderordnetResolver,
+        @Value("#{'${app.orgenhet.linjeenhetene}'.split(',')}") Set<String> linjeenheteneOrgEnhetIds
     ) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgEnhetCommandService = orgEnhetCommandService;

@@ -12,6 +12,7 @@ import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,15 +31,18 @@ public class TriggerUtledNomNivaaPaaNytt {
     private final OrgEnhetNomNivaaHandler orgEnhetNomNivaaHandler;
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
     private final OrgenhetService orgenhetService;
+    private final String nav;
 
 
     public TriggerUtledNomNivaaPaaNytt(OrgEnhetNomNivaaHandler orgEnhetNomNivaaHandler,
                                        DvhStartupLoadMonitor dvhStartupLoadMonitor,
-                                       OrgenhetService orgenhetService
-    ) {
+                                       OrgenhetService orgenhetService,
+                                       @Value("app.orgenhet.nav") String nav
+                                       ) {
         this.orgEnhetNomNivaaHandler = orgEnhetNomNivaaHandler;
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
         this.orgenhetService = orgenhetService;
+        this.nav = nav;
     }
 
     @Operation(
@@ -50,6 +54,7 @@ public class TriggerUtledNomNivaaPaaNytt {
 
         var orgenheterToProcess = orgenhetService.getAllEnheterMedOrganisering().stream()
             .filter(orgEnhetState -> orgEnhetId == null || orgEnhetState.getId().equals(orgEnhetId))
+            .filter(iOrgenhet -> !iOrgenhet.getId().equals(nav))
             .map(iOrgenhet -> OrgEnhetState.builder()
                 .fid(iOrgenhet.getFid())
                 .id(iOrgenhet.getId())

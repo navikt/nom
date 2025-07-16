@@ -315,6 +315,7 @@ app:
           - READONLY
           - EXTENDED_READONLY
   orgenhet:
+    nav: sa312u
     vikafossenId: ru151s
     linjeenhetene: me177r,su645c,ju219d,tu734a
   google-storage-bucket-name:
@@ -489,6 +490,7 @@ app:
         scopes: ["READONLY", "EXTENDED_READONLY"]
 
   orgenhet:
+    nav: py437s
     linjeenhetene: ry630r,te464t,se232x,ne994m
     vikafossenId: ru664y
   google-storage-bucket-name:
