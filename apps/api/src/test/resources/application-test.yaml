@@ -65,6 +65,7 @@ app:
   orgenhet:
     vikafossenId: dummyVikafossenId
     linjeenhetene: linje-enhet,en-annen-linjeenhet
+    nav: dummyNavId
   google-storage-bucket-name:
     missing-ot: none
       
