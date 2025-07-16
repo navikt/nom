@@ -173,7 +173,7 @@ public class OrgEnhetNomNivaaHandler {
     // https://jira.adeo.no/browse/ORG-1711
     public void mapOrgEnhetTypeToNewNomNivaaAndUpdate(OrgEnhetState orgEnhetState, OrgEnhetsType newOrgEnhetsType) {
 
-
+        logger.info("Linjeenhetene IDs {}", linjeenheteneOrgEnhetIds);
         if (linjeenheteneOrgEnhetIds.contains(orgEnhetState.id())) {
             updateNomNivaaIfNewValue(
                 orgEnhetState,

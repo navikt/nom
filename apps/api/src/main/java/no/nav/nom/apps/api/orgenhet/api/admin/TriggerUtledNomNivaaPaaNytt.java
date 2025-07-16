@@ -37,7 +37,7 @@ public class TriggerUtledNomNivaaPaaNytt {
     public TriggerUtledNomNivaaPaaNytt(OrgEnhetNomNivaaHandler orgEnhetNomNivaaHandler,
                                        DvhStartupLoadMonitor dvhStartupLoadMonitor,
                                        OrgenhetService orgenhetService,
-                                       @Value("app.orgenhet.nav") String nav
+                                       @Value("${app.orgenhet.nav}") String nav
                                        ) {
         this.orgEnhetNomNivaaHandler = orgEnhetNomNivaaHandler;
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
@@ -51,7 +51,7 @@ public class TriggerUtledNomNivaaPaaNytt {
     )
     @GetMapping()
     String utledNomNivaPaaNytt(@RequestParam(required = false) String orgEnhetId) {
-
+        logger.info(nav);
         var orgenheterToProcess = orgenhetService.getAllEnheterMedOrganisering().stream()
             .filter(orgEnhetState -> orgEnhetId == null || orgEnhetState.getId().equals(orgEnhetId))
             .filter(iOrgenhet -> !iOrgenhet.getId().equals(nav))
