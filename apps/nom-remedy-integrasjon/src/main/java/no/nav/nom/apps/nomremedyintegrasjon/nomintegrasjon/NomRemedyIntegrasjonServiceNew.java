@@ -284,6 +284,10 @@ public class NomRemedyIntegrasjonServiceNew {
                     aggregateState.getStateFid(),
                     ressursState.sluttdato().get().plusDays(1)
                 );
+                var orgtilknytningState = currentDolOrgtilknytning.orElseGet(() -> futureDolOrgtilknytning.orElse(null));
+                var nomIntegrasjonEntity = nomIntegrasjonEntityFromNomData(ressursState, orgtilknytningState, erMasseflytting);
+                var entryBestiller = (ressursState.sistEndretAv() != null && !ressursState.sistEndretAv().isEmpty())  ? ressursState.sistEndretAv() : (orgtilknytningState != null && orgtilknytningState.sistEndretAv() != null && !orgtilknytningState.sistEndretAv().isEmpty()) ? orgtilknytningState.sistEndretAv() : "nom-api";
+                saveStateToRemedy(nomIntegrasjonEntity, entryBestiller);
                 return false;
             }
         } else {

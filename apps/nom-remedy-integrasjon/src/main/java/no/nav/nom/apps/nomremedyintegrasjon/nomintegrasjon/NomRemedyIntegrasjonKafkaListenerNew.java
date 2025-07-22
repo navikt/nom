@@ -61,6 +61,8 @@ public class NomRemedyIntegrasjonKafkaListenerNew {
                     .masseflyttetFraFid(null)
                     .masseflytting(false)
                     .build());
+            } else {
+                aggregateStateRepository.save(allRowsByStateFid.getFirst().toBuilder().delayedUntil(null).build());
             }
         }
     }
@@ -88,6 +90,8 @@ public class NomRemedyIntegrasjonKafkaListenerNew {
                     .masseflyttetFraFid(masseflyttetFraFid)
                     .masseflytting(orgtilknytningState.masseflyttetFraFid().isPresent())
                     .build());
+            } else {
+                aggregateStateRepository.save(allRowsByNavidentAndMasseflyttetFraFid.getFirst().toBuilder().delayedUntil(null).build());
             }
         }
     }
