@@ -19,6 +19,7 @@ import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,8 @@ public class OrgenhetService {
     private final KafkaTopicReader kafkaTopicReader;
     private final OrganiseringStateRepository organiseringStateRepository;
     private List<IOrgenhet> organiserteEnheter = emptyList();
+    @Value("${app.orgenhet.vikafossenId}")
+    private String vikafossenOrgEnhetId;
 
 
     public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository, 
@@ -111,13 +114,17 @@ public class OrgenhetService {
     // - has no children (is a leaf node in the tree)
     public Collection<IOrgenhet> getAllOrgEnheterThatCanHaveRessurser() {
         return orgEnhetStateRepository.getAll().stream()
-                .filter(orgEnhetState -> organiseringStateRepository.orgEnhetHasParent(orgEnhetState.id()))
-                .filter(orgEnhetState -> !organiseringStateRepository.orgEnhetHasChildren(orgEnhetState.id()))
-                .map(this::map).toList();
+            .filter(orgEnhetState -> organiseringStateRepository.orgEnhetHasParent(orgEnhetState.id()))
+            .filter(orgEnhetState -> !organiseringStateRepository.orgEnhetHasChildren(orgEnhetState.id()))
+            .map(this::map)
+            .filter(iOrgenhet -> !iOrgenhet.getId().equals(vikafossenOrgEnhetId))
+            .toList();
     }
 
     public Collection<IOrgenhet> getAllOrgEnheterThatCanHaveRessurser(String orgEnhetId) {
-        var underliggendeOrgEnhet = getAllUnderliggendeOrgEnhetById(orgEnhetId).stream().map(iOrgenhet -> orgEnhetStateRepository.findById(iOrgenhet.getId()).get()).toList();
+        var underliggendeOrgEnhet = getAllUnderliggendeOrgEnhetById(orgEnhetId).stream()
+            .map(iOrgenhet -> orgEnhetStateRepository.findById(iOrgenhet.getId()).get())
+            .toList();
         return underliggendeOrgEnhet.stream()
             .filter(orgEnhetState -> organiseringStateRepository.orgEnhetHasParent(orgEnhetState.id()))
             .filter(orgEnhetState -> !organiseringStateRepository.orgEnhetHasChildren(orgEnhetState.id()))
