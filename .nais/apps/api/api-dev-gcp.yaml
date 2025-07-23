@@ -287,6 +287,9 @@ spec:
         - application: behandlingskatalog-backend
           namespace: teamdatajegerne
           cluster: dev-gcp
+        - application: slack-sommeroppgave
+          namespace: isa
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
