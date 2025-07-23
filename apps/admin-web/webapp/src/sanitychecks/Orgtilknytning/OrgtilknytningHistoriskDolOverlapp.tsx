@@ -35,6 +35,7 @@ export function OrgtilknytningHistoriskDolOverlapp() {
 
   return (
     <div>
+      <h1>Antall overlappende historiske DOL: {dataWithKey.length}</h1>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.ColumnHeader scope="col" sortKey="navident1" sortable>

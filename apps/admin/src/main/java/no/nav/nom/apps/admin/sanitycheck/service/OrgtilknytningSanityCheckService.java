@@ -12,6 +12,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,14 +34,17 @@ public class OrgtilknytningSanityCheckService {
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final NomRemedyApiClient nomRemedyApiClient;
+    private final RessursStateRepository ressursStateRepository;
 
     public OrgtilknytningSanityCheckService(OrgtilknytningStateRepository orgtilknytningStateRepository,
                                             OrgEnhetStateRepository orgEnhetStateRepository,
-                                            NomRemedyApiClient nomRemedyApiClient
+                                            NomRemedyApiClient nomRemedyApiClient,
+                                            RessursStateRepository ressursStateRepository
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.nomRemedyApiClient = nomRemedyApiClient;
+        this.ressursStateRepository = ressursStateRepository;
     }
 
     public List<OrgtilknytningMedOrgEnhet> orgtilknytningerUtoverEnhetGyldighetsPeriode() {
@@ -287,7 +291,8 @@ public class OrgtilknytningSanityCheckService {
     }
 
     public List<OverlappendeOrgtilknytning> orgtilknytningerMedOverlappendeHistoriskeDol() {
-        var dolOrgtilknytningerSomErAvsluttet = orgtilknytningStateRepository.getAll().stream()
+        var ressurserSomErAktiv = ressursStateRepository.findAllActiveRessurser();
+        var dolOrgtilknytningerSomErAvsluttet = orgtilknytningStateRepository.findByNavidentIn(ressurserSomErAktiv.keySet().stream().toList()).stream()
             .filter(ot -> ot.erDagligOppfolging()
                 && ot.gyldigFom() != null
                 && ot.gyldigTom().isPresent()

@@ -6,6 +6,7 @@ import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ class OrgtilknytningSanityCheckServiceTest {
     private OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Mock
+    private RessursStateRepository ressursStateRepository;
+
+    @Mock
     private NomRemedyApiClient nomRemedyApiClient;
 
     private OrgtilknytningSanityCheckService service;
@@ -43,7 +47,7 @@ class OrgtilknytningSanityCheckServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new OrgtilknytningSanityCheckService(orgtilknytningStateRepository, orgEnhetStateRepository, nomRemedyApiClient);
+        service = new OrgtilknytningSanityCheckService(orgtilknytningStateRepository, orgEnhetStateRepository, nomRemedyApiClient, ressursStateRepository);
     }
 
     @Test
