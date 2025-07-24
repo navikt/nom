@@ -244,7 +244,7 @@ function CreateSpecialResourceForm() {
           </div>
 
           <CreateSpecialResourceFormInner
-            identType={identType}
+            identType={identType as IdentType}
             identifikasjonsnummer={identifikasjonsnummer}
           />
 

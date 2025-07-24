@@ -432,7 +432,9 @@ function OrgtilknytningForm({
       <Informasjonsboks ressursSektor={ressurs.sektor} />
 
       <OrgtilknytningTimeline
-        orgtilknytninger={watch("mappedeOrgtilknytninger")}
+        orgtilknytninger={
+          watch("mappedeOrgtilknytninger") as OrgtilknytningState[]
+        }
       />
 
       <form autoComplete="off" onSubmit={handleSubmit(onValid)}>

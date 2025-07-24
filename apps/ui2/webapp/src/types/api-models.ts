@@ -175,6 +175,11 @@ export interface IOrgenhet {
   uniqueAgressoId?: string;
 }
 
+export interface Jobbtelefon {
+  nummer?: string;
+  type?: TelefonType;
+}
+
 export type JsonNode = any;
 
 export interface LederTilgangForOrgenhetRequest {
@@ -353,6 +358,7 @@ export interface Ressurs {
   /** @default "STANDARD" */
   identType: IdentType;
   isNomMastered: boolean;
+  jobbtelefon?: Jobbtelefon;
   navident: string;
   personident: string;
   primaryFysiskBrukersted?: string;
@@ -390,6 +396,7 @@ export interface RessursState {
   fysiskeBrukersteder: string[];
   /** @default "STANDARD" */
   identType: IdentType;
+  jobbtelefon?: Jobbtelefon;
   navident: string;
   personident: string;
   primaryFysiskBrukersted?: string;
