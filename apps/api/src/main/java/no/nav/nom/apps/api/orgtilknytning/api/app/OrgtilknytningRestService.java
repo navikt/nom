@@ -790,11 +790,30 @@ public class OrgtilknytningRestService {
     }
 
     public static void validateOrgtilknytningTypeSektorCombination(Tilknytningtype tilknytningtype, Sektor sektor) {
-
         Map<Sektor, List<Tilknytningtype>> allowedOrgtilknytningTypeForSektorMap = Map.of(
-            Sektor.EKSTERN, List.of(Tilknytningtype.KONSULENT, Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER, Tilknytningtype.ARBEIDSTRENING, Tilknytningtype.ANNET, Tilknytningtype.STUDENT),
+            Sektor.EKSTERN, List.of(
+                Tilknytningtype.KONSULENT,
+                Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER,
+                Tilknytningtype.ARBEIDSTRENING,
+                Tilknytningtype.ANNET,
+                Tilknytningtype.STUDENT,
+                Tilknytningtype.HELFO,
+                Tilknytningtype.SKATTEETATEN,
+                Tilknytningtype.RIKSREVISJONEN,
+                Tilknytningtype.STATSFORVALTEREN
+            ),
             Sektor.NAV_KOMMUNAL, List.of(Tilknytningtype.INGEN),
-            Sektor.NAV_STATLIG, List.of(Tilknytningtype.FAST, Tilknytningtype.MIDLERTIDIG, Tilknytningtype.PENSJONIST, Tilknytningtype.LAERLING)
+            Sektor.NAV_STATLIG, List.of(
+                Tilknytningtype.FAST,
+                Tilknytningtype.MIDLERTIDIG,
+                Tilknytningtype.PENSJONIST,
+                Tilknytningtype.LAERLING,
+                Tilknytningtype.VIKAR,
+                Tilknytningtype.UFORUTSETT_BEHOV,
+                Tilknytningtype.UTDANNINGSSTILLINGER,
+                Tilknytningtype.PRAKSISARBEID,
+                Tilknytningtype.ARBEIDSTRENING
+            )
         );
 
         if (!allowedOrgtilknytningTypeForSektorMap.get(sektor).contains(tilknytningtype)) {
