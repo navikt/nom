@@ -32,6 +32,10 @@ export const TilknytningtypeNameMapping = {
   [Tilknytningtype.UFORUTSETT_BEHOV]: "Uforutsett behov § 9e",
   [Tilknytningtype.VIKAR]: "Vikar § 9b",
   [Tilknytningtype.UTDANNINGSSTILLINGER]: "Utdanningsstillinger § 9d",
+  [Tilknytningtype.HELFO]: "Helfo",
+  [Tilknytningtype.SKATTEETATEN]: "Skatteetaten",
+  [Tilknytningtype.RIKSREVISJONEN]: "Riksrevisjonen",
+  [Tilknytningtype.STATSFORVALTEREN]: "Statsforvalteren",
   [Tilknytningtype.ANNET]: "Annet",
   [Tilknytningtype.INGEN]: "Ingen",
 };
@@ -47,7 +51,10 @@ export const tilknytningstyperEksterne = [
   Tilknytningtype.KONSULENT,
   Tilknytningtype.STUDENT,
   Tilknytningtype.ARBEIDSTRENING,
-  Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER,
+  Tilknytningtype.STATSFORVALTEREN,
+  Tilknytningtype.HELFO,
+  Tilknytningtype.SKATTEETATEN,
+  Tilknytningtype.RIKSREVISJONEN,
   Tilknytningtype.ANNET,
 ];
 
