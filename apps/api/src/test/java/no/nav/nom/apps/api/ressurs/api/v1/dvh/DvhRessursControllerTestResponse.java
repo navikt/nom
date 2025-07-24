@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.ressurs.api.v1.dvh;
 
 import no.nav.nom.apps.api.TestTokensGenerator;
-import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -14,11 +13,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException;
@@ -29,10 +26,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ActiveProfiles("DvhRessursControllerTest-FAKES")
@@ -159,8 +156,8 @@ class RessursStateRepositoryFake implements RessursStateRepository {
             .navident("A000001")
             .sektor(Sektor.NAV_STATLIG)
             .visningsnavn(new Visningsnavn("Fornavn_1", Optional.empty(), "Etternavn_1"))
-            .startdato(Optional.of(LocalDate.of(2007, 12, 1)))
-            .sluttdato(Optional.of(LocalDate.of(2012, 11, 30)))
+            .startdato(LocalDate.of(2007, 12, 1))
+            .sluttdato(LocalDate.of(2012, 11, 30))
             .build(),
         RessursState.builder()
             .fid("FID_2")
@@ -168,8 +165,8 @@ class RessursStateRepositoryFake implements RessursStateRepository {
             .navident("A000002")
             .sektor(Sektor.NAV_KOMMUNAL)
             .visningsnavn(new Visningsnavn("Fornavn_2", Optional.empty(), "Etternavn_2"))
-            .startdato(Optional.of(LocalDate.of(2008, 12, 1)))
-            .sluttdato(Optional.empty())
+            .startdato(LocalDate.of(2008, 12, 1))
+            .sluttdato(null)
             .build(),
         RessursState.builder()
             .fid("FID_3")
@@ -177,8 +174,8 @@ class RessursStateRepositoryFake implements RessursStateRepository {
             .navident("A000003")
             .sektor(Sektor.EKSTERN)
             .visningsnavn(new Visningsnavn("Fornavn_3", Optional.of("Mellomnavn_3"), "Etternavn_3"))
-            .startdato(Optional.of(LocalDate.of(2009, 12, 1)))
-            .sluttdato(Optional.empty())
+            .startdato(LocalDate.of(2009, 12, 1))
+            .sluttdato(null)
             .build(),
         RessursState.builder()
             .fid("FID_4")
@@ -186,8 +183,8 @@ class RessursStateRepositoryFake implements RessursStateRepository {
             .navident("A000004")
             .sektor(Sektor.NAV_STATLIG)
             .visningsnavn(new Visningsnavn("Fornavn_4", Optional.empty(), "Etternavn_4"))
-            .startdato(Optional.of(LocalDate.of(2010, 12, 1)))
-            .sluttdato(Optional.empty())
+            .startdato(LocalDate.of(2010, 12, 1))
+            .sluttdato(null)
             .build()
     );
 
@@ -309,15 +306,15 @@ class RessursStateRepositoryFake implements RessursStateRepository {
     @Override
     public Map<String, RessursState> findAllWithSluttdatoBeforeToday() {
         return ressursByNavident.values().stream()
-            .filter(ressurs -> ressurs.sluttdato().isPresent())
-            .filter(ressurs -> ressurs.sluttdato().get().isBefore(LocalDate.now()))
+            .filter(ressurs -> ressurs.sluttdato() != null)
+            .filter(ressurs -> ressurs.sluttdato().isBefore(LocalDate.now()))
             .collect(Collectors.toMap(RessursState::navident, ressurs -> ressurs));
     }
 
     @Override
     public Map<String, RessursState> findAllActiveRessurser() {
         return ressursByNavident.values().stream()
-            .filter(ressurs -> ressurs.sluttdato().isEmpty() || !ressurs.sluttdato().get().isBefore(LocalDate.now()))
+            .filter(ressurs -> isNull(ressurs.sluttdato()) || !ressurs.sluttdato().isBefore(LocalDate.now()))
             .collect(Collectors.toMap(RessursState::navident, ressurs -> ressurs));
     }
 

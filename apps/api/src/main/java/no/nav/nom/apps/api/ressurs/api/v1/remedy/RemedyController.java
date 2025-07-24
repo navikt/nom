@@ -197,10 +197,10 @@ public class RemedyController {
             final var opprettRessursCommand = new OpprettRessursCommand(
                 request.getPersonident(),
                 opprettetNavident,
-                pdlPerson,
+                pdlPerson.orElse(null),
                 Sektor.valueOf(request.getSektor()),
                 new Visningsnavn(request.getFornavn(), Optional.ofNullable(request.getMellomnavn()), request.getEtternavn()),
-                Optional.empty(),
+                null,
                 metadataFromRequest,
                 null,
                 null,

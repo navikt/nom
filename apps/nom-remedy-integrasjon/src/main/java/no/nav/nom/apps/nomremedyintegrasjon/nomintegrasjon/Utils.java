@@ -1,5 +1,6 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredValueMissingException;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.generated.model.Visningsnavn;
@@ -31,6 +32,9 @@ public class Utils {
     }
 
     public static Long epochSecondsNorwegianTimeNoon(LocalDate localDate) {
+        if (localDate == null) {
+            throw new RequiredValueMissingException("tiltredelsesdato");
+        }
         var localDateTime = localDate.atTime(LocalTime.NOON);
 
         return localDateTime.toEpochSecond(norwegianTimeZone.getRules().getOffset(localDateTime));

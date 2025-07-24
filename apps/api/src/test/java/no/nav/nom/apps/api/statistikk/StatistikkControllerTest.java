@@ -32,9 +32,9 @@ import java.util.Optional;
 
 import static no.nav.nom.apps.api.common.TestData.orgEnhetState;
 import static no.nav.nom.apps.api.common.TestData.ressursState;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class StatistikkControllerTest extends RestTestBase {
 
@@ -98,12 +98,12 @@ public class StatistikkControllerTest extends RestTestBase {
 
     private Map<String, RessursState> mapOfActiveRessurser() {
         return Map.of(
-                "A123456", ressursState().toBuilder().navident("A123456").sektor(Sektor.NAV_STATLIG).startdato(Optional.of(LocalDate.now().minusYears(1))).build(),
-                "B123456", ressursState().toBuilder().navident("B123456").sektor(Sektor.NAV_STATLIG).startdato(Optional.of(LocalDate.now().minusYears(1))).build(),
-                "C123456", ressursState().toBuilder().navident("C123456").sektor(Sektor.NAV_KOMMUNAL).startdato(Optional.of(LocalDate.now().minusYears(1))).build(),
-                "D123456", ressursState().toBuilder().navident("D123456").sektor(Sektor.NAV_KOMMUNAL).startdato(Optional.of(LocalDate.now().minusYears(1))).build(),
-                "E123456", ressursState().toBuilder().navident("E123456").sektor(Sektor.EKSTERN).startdato(Optional.of(LocalDate.now().minusYears(1))).build(),
-                "F123456", ressursState().toBuilder().navident("F123456").sektor(Sektor.EKSTERN).startdato(Optional.of(LocalDate.now().minusYears(1))).build(),
+                "A123456", ressursState().toBuilder().navident("A123456").sektor(Sektor.NAV_STATLIG).startdato(LocalDate.now().minusYears(1)).build(),
+                "B123456", ressursState().toBuilder().navident("B123456").sektor(Sektor.NAV_STATLIG).startdato(LocalDate.now().minusYears(1)).build(),
+                "C123456", ressursState().toBuilder().navident("C123456").sektor(Sektor.NAV_KOMMUNAL).startdato(LocalDate.now().minusYears(1)).build(),
+                "D123456", ressursState().toBuilder().navident("D123456").sektor(Sektor.NAV_KOMMUNAL).startdato(LocalDate.now().minusYears(1)).build(),
+                "E123456", ressursState().toBuilder().navident("E123456").sektor(Sektor.EKSTERN).startdato(LocalDate.now().minusYears(1)).build(),
+                "F123456", ressursState().toBuilder().navident("F123456").sektor(Sektor.EKSTERN).startdato(LocalDate.now().minusYears(1)).build(),
                 "G123456", ressursState().toBuilder().navident("G123456").sektor(Sektor.NAV_STATLIG).identType(IdentType.ROBOT).build(),
                 "H123456", ressursState().toBuilder().navident("H123456").sektor(Sektor.EKSTERN).identType(IdentType.VIKAFOSSEN).build()
         );

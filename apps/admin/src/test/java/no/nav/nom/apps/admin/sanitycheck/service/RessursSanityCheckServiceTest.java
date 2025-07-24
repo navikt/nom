@@ -75,7 +75,7 @@ class RessursSanityCheckServiceTest {
     @MethodSource("ulikSluttdatoTestCases")
     void should_include_cases_where_sluttdato_is_different(LocalDate sluttDato, LocalDate gyldigTom, int expected) {
         RessursState ressurs = getMockRessursEkstern().toBuilder()
-                .sluttdato(Optional.ofNullable(sluttDato))
+                .sluttdato(sluttDato)
                 .build();
         Map<String, RessursState> ressursStateMap = new HashMap<>();
         ressursStateMap.put(ressurs.navident(), ressurs);
@@ -366,10 +366,10 @@ class RessursSanityCheckServiceTest {
                 .navident("X123456")
                 .sektor(Sektor.EKSTERN)
                 .visningsnavn(new Visningsnavn("Nav", Optional.empty(), "Navesen"))
-                .primaryTelefonnummer(Optional.of("12345678"))
-                .startdato(Optional.of(LocalDate.of(2024, 1, 1)))
-                .sluttdato(Optional.of(LocalDate.of(2024, 12, 31)))
-                .primaryFysiskBrukersted(Optional.of("2700"))
+                .primaryTelefonnummer("12345678")
+                .startdato(LocalDate.of(2024, 1, 1))
+                .sluttdato(LocalDate.of(2024, 12, 31))
+                .primaryFysiskBrukersted("2700")
                 .fysiskeBrukersteder(List.of("2700"))
                 .build();
     }

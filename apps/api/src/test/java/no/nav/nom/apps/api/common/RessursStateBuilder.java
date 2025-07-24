@@ -10,7 +10,6 @@ import no.nav.nom.contract.nom.state.RessursState;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 public class RessursStateBuilder {
     private String fid;
@@ -19,12 +18,12 @@ public class RessursStateBuilder {
     private Sektor sektor;
     private Visningsnavn visningsnavn;
     private Jobbtelefon jobbtelefon;
-    private Optional<String> primaryTelefonnummer;
-    private Optional<LocalDate> sluttdato;
+    private String primaryTelefonnummer;
+    private LocalDate sluttdato;
 
-    private Optional<LocalDate> startdato;
+    private LocalDate startdato;
 
-    private Optional<String> primaryFysiskBrukersted;
+    private String primaryFysiskBrukersted;
     private List<String> fysiskeBrukersteder;
 
     public RessursStateBuilder fid(String fid) {
@@ -58,7 +57,7 @@ public class RessursStateBuilder {
     }
 
     public RessursStateBuilder primaryTelefonnummer(String primaryTelefonnummer) {
-        this.primaryTelefonnummer = Optional.of(primaryTelefonnummer);
+        this.primaryTelefonnummer = primaryTelefonnummer;
         return this;
     }
 
@@ -70,17 +69,17 @@ public class RessursStateBuilder {
     }
 
     public RessursStateBuilder sluttdato(LocalDate sluttdato) {
-        this.sluttdato = Optional.of(sluttdato);
+        this.sluttdato = sluttdato;
         return this;
     }
 
     public RessursStateBuilder startdato(LocalDate startdato) {
-        this.startdato = Optional.of(startdato);
+        this.startdato = startdato;
         return this;
     }
 
     public RessursStateBuilder primaryFysiskBrukersted(String primaryFysiskBrukersted) {
-        this.primaryFysiskBrukersted = Optional.of(primaryFysiskBrukersted);
+        this.primaryFysiskBrukersted = primaryFysiskBrukersted;
         return this;
     }
 
@@ -103,10 +102,10 @@ public class RessursStateBuilder {
             "12345678" + suffix,
             TelefonType.NAV_TJENESTE_TELEFON
         );
-        this.primaryTelefonnummer = Optional.empty();
-        this.sluttdato = Optional.empty();
-        this.startdato = Optional.empty();
-        this.primaryFysiskBrukersted = Optional.empty();
+        this.primaryTelefonnummer = null;
+        this.sluttdato = null;
+        this.startdato = null;
+        this.primaryFysiskBrukersted = null;
         this.fysiskeBrukersteder = Collections.emptyList();
 
     }

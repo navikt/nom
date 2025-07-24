@@ -5,13 +5,12 @@ import lombok.Builder;
 import no.nav.nom.contract.nom.Sektor;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Builder(toBuilder = true)
 public record RessursFilter(
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    Optional<Sektor> sektor,
+    Sektor sektor,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    Optional<LocalDate> sluttdato
+    LocalDate sluttdato
 ) {
 }

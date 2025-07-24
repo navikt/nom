@@ -113,7 +113,7 @@ public class ImportNavIdenter {
             personIdent = kolonner[4];
         }
 
-        if (navIdent.length() == 0) {
+        if (navIdent.isEmpty()) {
             log.error(LogConfig.TEAM_LOGS, "Lest navIdent '{}' fra importlinje er tom: {}", navIdent, importLine);
             return;
         }
@@ -134,7 +134,7 @@ public class ImportNavIdenter {
             return;
         }
 
-        if (personIdent.length() == 0) {
+        if (personIdent.isEmpty()) {
             log.error(LogConfig.TEAM_LOGS, "Lest personIdent fra importlinje er tom", personIdent, importLine);
             return;
         }

@@ -151,11 +151,11 @@ public class RessursRestService {
             loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP);
 
         return ressursStateRepository.getAll().stream()
-            .filter(ressursState -> (ressursFilter.sektor().isEmpty() || ressursState.sektor().equals(ressursFilter.sektor().get()))
-                && (ressursFilter.sluttdato().isEmpty() || ressursState.sluttdato().equals(ressursFilter.sluttdato())))
+            .filter(ressursState -> (ressursFilter.sektor() == null || ressursState.sektor().equals(ressursFilter.sektor()))
+                && (ressursFilter.sluttdato() == null || ressursState.sluttdato().equals(ressursFilter.sluttdato())))
             .map(ressursState -> ressursState.toBuilder()
                 .personident(ressursState.personident().replaceFirst(".{5}$", "*****"))
-                .primaryFysiskBrukersted(showFysiskBrukersted ? ressursState.primaryFysiskBrukersted() : Optional.empty())
+                .primaryFysiskBrukersted(showFysiskBrukersted ? ressursState.primaryFysiskBrukersted() : null)
                 .fysiskeBrukersteder(showFysiskBrukersted ? ressursState.fysiskeBrukersteder() : Collections.emptyList())
                 .build()
             )
@@ -209,7 +209,7 @@ public class RessursRestService {
             ressursState.toBuilder()
                 .personident(personident)
                 .primaryTelefonnummer(ressursState.primaryTelefonnummer())
-                .primaryFysiskBrukersted(showFysiskBrukerSted ? ressursState.primaryFysiskBrukersted() : Optional.empty())
+                .primaryFysiskBrukersted(showFysiskBrukerSted ? ressursState.primaryFysiskBrukersted() : null)
                 .fysiskeBrukersteder(showFysiskBrukerSted ? ressursState.fysiskeBrukersteder() : Collections.emptyList())
                 .build(),
             telefoner,
@@ -247,7 +247,7 @@ public class RessursRestService {
             ressursState.toBuilder()
                 .personident(personident)
                 .primaryTelefonnummer(ressursState.primaryTelefonnummer())
-                .primaryFysiskBrukersted(showFysiskBrukerSted ? ressursState.primaryFysiskBrukersted() : Optional.empty())
+                .primaryFysiskBrukersted(showFysiskBrukerSted ? ressursState.primaryFysiskBrukersted() : null)
                 .fysiskeBrukersteder(showFysiskBrukerSted ? ressursState.fysiskeBrukersteder() : Collections.emptyList())
                 .build(),
             telefoner,
@@ -310,7 +310,7 @@ public class RessursRestService {
         var existingFysiskeBrukerstederForRessurs = Optional.ofNullable(ressursState.fysiskeBrukersteder()).orElse(Collections.emptyList());
 
         var requestContainsNewValues = !Set.copyOf(existingFysiskeBrukerstederForRessurs).equals(updateFysiskeBrukerstederRequest.fysiskeBrukersteder())
-            || !ressursState.primaryFysiskBrukersted().equals(Optional.of(updateFysiskeBrukerstederRequest.primaryFysiskBrukersted()));
+            || !ressursState.primaryFysiskBrukersted().equals(updateFysiskeBrukerstederRequest.primaryFysiskBrukersted());
 
         if (requestContainsNewValues) {
 
@@ -410,14 +410,14 @@ public class RessursRestService {
         final var opprettRessursCommand = new OpprettRessursCommand(
             request.personident(),
             navident,
-            pdlPerson,
+            pdlPerson.orElse(null),
             request.sektor(),
             new Visningsnavn(
                 request.visningsfornavn().trim(),
                 Optional.ofNullable(trimToNull(request.visningsmellomnavn())),
                 request.visningsetternavn()
             ),
-            Optional.ofNullable(trimToNull(request.primaryTelefonnummer())),
+            trimToNull(request.primaryTelefonnummer()),
             metaData,
             request.startDato(),
             Optional.ofNullable(request.orgEnhetId())
@@ -452,7 +452,7 @@ public class RessursRestService {
                     opprettetRessurs.navident(),
                     request.orgEnhetId(),
                     request.startDato(),
-                    request.sluttDato(),
+                    Optional.ofNullable(request.sluttDato()),
                     true,
                     metaData,
                     null
@@ -468,9 +468,9 @@ public class RessursRestService {
             );
 
             // If sluttdato is present we fire a separate "avsluttRessursEvent" so that other systems, such as skjerming, know the ressurs already has a sluttDato.
-            if (request.sluttDato().isPresent()) {
+            if (request.sluttDato() != null) {
                 ressursCommandService.avsluttRessursEvent(
-                    new OpphorRessursCommand(opprettetRessurs.fid(), request.sluttDato().get()),
+                    new OpphorRessursCommand(opprettetRessurs.fid(), request.sluttDato()),
                     metaData
                 );
 
@@ -480,7 +480,7 @@ public class RessursRestService {
                     new AvvikleOrgtilknytning(
                         opprettetRessurs.navident(),
                         request.orgEnhetId(),
-                        request.sluttDato().get(),
+                        request.sluttDato(),
                         metaData,
                         null
                     )
@@ -506,10 +506,10 @@ public class RessursRestService {
                     Optional.ofNullable(trimToNull(request.visningsmellomnavn())),
                     request.visningsetternavn()
                 ))
-            .primaryTelefonnummer(Optional.ofNullable(trimToNull(request.primaryTelefonnummer())))
+            .primaryTelefonnummer(trimToNull(request.primaryTelefonnummer()))
             .sektor(request.sektor())
             .sluttdato(request.sluttDato())
-            .primaryFysiskBrukersted(Optional.ofNullable(request.fysiskBrukerstedNr()))
+            .primaryFysiskBrukersted(request.fysiskBrukerstedNr())
             .build();
 
         var metadata = new InputMetadata(
@@ -542,7 +542,7 @@ public class RessursRestService {
                 existingRessurs.navident(),
                 request.orgEnhetId(),
                 request.startDato(),
-                request.sluttDato(),
+                Optional.ofNullable(request.sluttDato()),
                 true,
                 metadata,
                 null
@@ -558,9 +558,9 @@ public class RessursRestService {
         );
 
         // If sluttdato is present we fire a separate "avsluttRessursEvent" so that other systems, such as skjerming, know the ressurs already has a sluttDato.
-        if (request.sluttDato().isPresent()) {
+        if (request.sluttDato() != null) {
             ressursCommandService.avsluttRessursEvent(
-                new OpphorRessursCommand(existingRessurs.fid(), request.sluttDato().get()),
+                new OpphorRessursCommand(existingRessurs.fid(), request.sluttDato()),
                 metadata
             );
 
@@ -569,7 +569,7 @@ public class RessursRestService {
                 new AvvikleOrgtilknytning(
                     existingRessurs.navident(),
                     request.orgEnhetId(),
-                    request.sluttDato().get(),
+                    request.sluttDato(),
                     metadata,
                     null
                 )
@@ -582,9 +582,9 @@ public class RessursRestService {
                 metadata
             );
 
-        if (reaktivertRessurs.primaryTelefonnummer().isPresent() && !existingRessurs.primaryTelefonnummer().equals(reaktivertRessurs.primaryTelefonnummer()))
+        if (reaktivertRessurs.primaryTelefonnummer() != null && !existingRessurs.primaryTelefonnummer().equals(reaktivertRessurs.primaryTelefonnummer()))
             ressursCommandService.oppdatertPrimaryTelefonnummer(
-                new OppdaterPrimaryTelefonnummerCommand(existingRessurs.fid(), reaktivertRessurs.primaryTelefonnummer().get()),
+                new OppdaterPrimaryTelefonnummerCommand(existingRessurs.fid(), reaktivertRessurs.primaryTelefonnummer()),
                 metadata
             );
 
@@ -594,23 +594,25 @@ public class RessursRestService {
                 metadata
             );
 
-        if (reaktivertRessurs.primaryFysiskBrukersted().isPresent() && existingRessurs.primaryFysiskBrukersted().isPresent()) {
-            if (!reaktivertRessurs.primaryFysiskBrukersted().get().equals(existingRessurs.primaryFysiskBrukersted().get()))
+        var reaktivertPrimaryFysiskBrukersted = reaktivertRessurs.primaryFysiskBrukersted();
+        if ((reaktivertPrimaryFysiskBrukersted != null && !reaktivertPrimaryFysiskBrukersted.isEmpty())
+            && (existingRessurs.primaryFysiskBrukersted() != null && !existingRessurs.primaryFysiskBrukersted().isEmpty())) {
+            if (!reaktivertRessurs.primaryFysiskBrukersted().equals(existingRessurs.primaryFysiskBrukersted()))
                 ressursCommandService.oppdaterFysiskeBrukerstederCommand(
                     new OppdaterFysiskeBrukerstederCommand(
                         reaktivertRessurs.fid(),
                         new HashSet<>(existingRessurs.fysiskeBrukersteder()),
-                        reaktivertRessurs.primaryFysiskBrukersted().get()
+                        reaktivertRessurs.primaryFysiskBrukersted()
                     ),
                     metadata
                 );
         }
 
-        reaktivertRessurs.sluttdato().ifPresentOrElse(sluttdato -> ressursCommandService.oppdaterRessursSluttdatoEvent(
-            new OppdaterSluttdatoCommand(reaktivertRessurs.fid(), Optional.of(sluttdato), metadata)
-        ), () -> ressursCommandService.oppdaterRessursSluttdatoEvent(
-            new OppdaterSluttdatoCommand(reaktivertRessurs.fid(), Optional.empty(), metadata)
-        ));
+        if (reaktivertRessurs.sluttdato() != null) {
+            ressursCommandService.oppdaterRessursSluttdatoEvent(new OppdaterSluttdatoCommand(reaktivertRessurs.fid(), reaktivertRessurs.sluttdato(), metadata));
+        } else {
+            ressursCommandService.oppdaterRessursSluttdatoEvent(new OppdaterSluttdatoCommand(reaktivertRessurs.fid(), null, metadata));
+        }
 
         if (!reaktivertRessurs.personident().equals(existingRessurs.personident())) {
             ressursCommandService.oppdaterPersonidentCommand(
@@ -707,11 +709,11 @@ public class RessursRestService {
     private void validateOpprettRessursRequest(OpprettRessursRequest request) {
         if (Objects.requireNonNull(request.sektor()) == Sektor.EKSTERN) {
             validateOpprettEksternRessursRequest(request);
-        } else if (request.sluttDato().isPresent()) {
-            validateSluttdatoErInnenSeksAar(request.sluttDato().get());
+        } else if (request.sluttDato() != null) {
+            validateSluttdatoErInnenSeksAar(request.sluttDato());
         }
 
-        validateChronologicalDates(request.startDato(), request.sluttDato().orElse(null));
+        validateChronologicalDates(request.startDato(), request.sluttDato());
         validateIngenMellomromEtternavn(request.visningsetternavn());
         validateFysiskeBrukerstederExists(Set.of(request.fysiskBrukerstedNr()));
         validateOrgtilknytningTypeSektorCombination(request.tilknytningtype(), request.sektor());
@@ -735,7 +737,7 @@ public class RessursRestService {
     }
 
     private void validateOpprettEksternRessursRequest(OpprettRessursRequest request) {
-        if (request.sluttDato().isEmpty()) {
+        if (request.sluttDato() == null) {
             throw new IllegalArgumentException("Sluttdato må oppgis for opprettelse av ekstern ressurs");
         }
     }
@@ -750,7 +752,7 @@ public class RessursRestService {
         logger.info("Fetching telefonnumre for navident: {}", navident);
         var telefoner = new ArrayList<>(ressursContactDetailsResolver.fetchTelefoner(navident));
         var ressursState = findRessursStateByNavident(navident);
-        ressursState.primaryTelefonnummer().ifPresent(s -> telefoner.add(new Ressurs.Telefon(s, TelefonType.PRIVAT_TELEFON)));
+        if (ressursState.primaryTelefonnummer() != null) telefoner.add(new Ressurs.Telefon(ressursState.primaryTelefonnummer(), TelefonType.PRIVAT_TELEFON));
         return telefoner.isEmpty() ? Collections.emptyList() : telefoner;
     }
 
@@ -758,7 +760,7 @@ public class RessursRestService {
         logger.info("Fetching telefonnummer for navident: {}", navident);
         var telefoner = new ArrayList<>(ressursContactDetailsResolver.fetchTelefoner(navident));
         var ressursState = findRessursStateByNavident(navident);
-        ressursState.primaryTelefonnummer().ifPresent(s -> telefoner.add(new Ressurs.Telefon(s, TelefonType.PRIVAT_TELEFON)));
+        if (ressursState.primaryTelefonnummer() != null) telefoner.add(new Ressurs.Telefon(ressursState.primaryTelefonnummer(), TelefonType.PRIVAT_TELEFON));
         telefoner.sort(
             (o1, o2) -> {
                 if (o1.type().equals(o2.type())) return 0;

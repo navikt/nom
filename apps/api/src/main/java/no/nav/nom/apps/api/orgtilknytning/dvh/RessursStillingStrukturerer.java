@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode.DagligOppfolging;
+import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Component;
 
@@ -182,7 +183,7 @@ public class RessursStillingStrukturerer {
             )));
         List<StillingPeriode> perioderGruppert = new ArrayList<>();
 
-        LocalDate ressursSluttdato = ressursStateRepository.findByNavident(navident).get().sluttdato().orElse(null);
+        LocalDate ressursSluttdato = ressursStateRepository.findByNavident(navident).map(RessursState::sluttdato).orElse(null);
 
         // Sorter og slå sammen sammenhengende perioder
         grupperteStillinger.forEach((stillingAgressoOrgIdOgNavn, grupperteRessursStillinger) -> {

@@ -87,19 +87,19 @@ public class RessursCommandServiceTest {
         return new OpprettRessursCommand(
             request.personident(),
             navident,
-            Optional.of(Person.builder()
+            Person.builder()
                 .fornavn(request.visningsfornavn())
                 .mellomnavn(request.visningsmellomnavn())
                 .etternavn(request.visningsetternavn())
                 .kjonn(Kjonn.MANN)
-                .foedselsdato(LocalDate.of(1980, 1, 1)).build()),
+                .foedselsdato(LocalDate.of(1980, 1, 1)).build(),
             Sektor.EKSTERN,
             new Visningsnavn(
                 request.visningsfornavn(),
                 Optional.of(request.visningsmellomnavn()),
                 request.visningsetternavn()
             ),
-            Optional.empty(),
+            null,
             metaData,
             LocalDate.now().minusDays(1),
             "OrgEnhetId-1",
@@ -130,7 +130,7 @@ public class RessursCommandServiceTest {
             .sektor(Sektor.EKSTERN)
             .orgEnhetId("OrgEnhetId-1")
             .startDato(LocalDate.now().minusDays(1))
-            .sluttDato(Optional.of(LocalDate.now().plusYears(1)))
+            .sluttDato(LocalDate.now().plusYears(1))
             .ansettelsesType(AnsettelsesType.FAST)
             .fysiskBrukerstedNr("2700")
             .tilknytningtype(Tilknytningtype.KONSULENT)

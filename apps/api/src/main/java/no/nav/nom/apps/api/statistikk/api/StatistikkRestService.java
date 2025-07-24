@@ -60,7 +60,7 @@ public class StatistikkRestService {
     public GlobalStatistikkResponse hentGlobalStatistikk() {
         var alleRessurser = ressursStateRepository.findAllActiveRessurser().values().stream()
             .distinct()
-            .filter(ressursState -> ressursState.startdato().isPresent() && !ressursState.startdato().get().isAfter(LocalDate.now()))
+            .filter(ressursState -> ressursState.startdato() != null && !ressursState.startdato().isAfter(LocalDate.now()))
             .filter(this::filterGyldigeRessurs)
             .toList();
         var ressursStatistikk = new RessursStatistikk(

@@ -254,9 +254,9 @@ public class NomRemedyIntegrasjonServiceNew {
         var erMasseflytting = !isNull(aggregateState.getMasseflytting()) && aggregateState.getMasseflytting();
         logger.info("Masseflytting: {} for navident: {}", erMasseflytting, navident);
 
-        if (ressursState.sluttdato().isPresent()) {
+        if (ressursState.sluttdato() != null) {
             logger.info("RessursState har en sluttdato for navident {}, sjekker om den er før dagens dato", navident);
-            var sluttdato = ressursState.sluttdato().get();
+            var sluttdato = ressursState.sluttdato();
             if (sluttdato.isBefore(LocalDate.now())) {
                 logger.info("RessursState med navident {} har en sluttdato før dagens dato, sletter ressurs i IR", navident);
                 if (unleash.isEnabled(UNLEASH_TOGGLE)) {
@@ -277,12 +277,12 @@ public class NomRemedyIntegrasjonServiceNew {
                 logger.info("Ressurs {} har en sluttdato i fremtiden, oppdaterer ressurs i aggregate_state tabellen", navident);
                 aggregateStateRepository.save(
                     aggregateState.toBuilder()
-                        .delayedUntil(ressursState.sluttdato().get().plusDays(1))
+                        .delayedUntil(ressursState.sluttdato().plusDays(1))
                         .build());
                 logger.info(
                     "RessursState med fid {} ble utsatt i aggregateStateTabellen helt til {}",
                     aggregateState.getStateFid(),
-                    ressursState.sluttdato().get().plusDays(1)
+                    ressursState.sluttdato().plusDays(1)
                 );
                 var orgtilknytningState = currentDolOrgtilknytning.orElseGet(() -> futureDolOrgtilknytning.orElse(null));
                 var nomIntegrasjonEntity = nomIntegrasjonEntityFromNomData(ressursState, orgtilknytningState, erMasseflytting);
@@ -307,18 +307,18 @@ public class NomRemedyIntegrasjonServiceNew {
     }
 
     private void saveStateToRemedyIfNewOrReactivatedRessurs(RessursState ressursState, OrgtilknytningState dolOrgtilknytning) {
-        if ((ressursState.startdato().isPresent() && dolOrgtilknytning.gyldigFom() != null)
-            && (ressursState.startdato().get().isAfter(LocalDate.now()) || dolOrgtilknytning.gyldigFom().isAfter(LocalDate.now()))) {
+        if ((ressursState.startdato() != null && dolOrgtilknytning.gyldigFom() != null)
+            && (ressursState.startdato().isAfter(LocalDate.now()) || dolOrgtilknytning.gyldigFom().isAfter(LocalDate.now()))) {
             if (unleash.isEnabled(UNLEASH_TOGGLE)) {
                 remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntityNew(
                         nomIntegrasjonEntityFromNomData(ressursState, dolOrgtilknytning, false), ressursState.sistEndretAv());
                 logger.info(
                     "Opprettet ressurs i IR med navident {}, startdato {}",
                     ressursState.navident(),
-                    ressursState.startdato().get()
+                    ressursState.startdato()
                 );
             } else {
-                logger.info("Opprettet ressurs i IR med navident {}, startdato {}", ressursState.navident(), ressursState.startdato().get());
+                logger.info("Opprettet ressurs i IR med navident {}, startdato {}", ressursState.navident(), ressursState.startdato());
             }
         } else {
             throw new RequiredValueMissingException(String.format("Ressursen %s manglet tiltredato", ressursState.navident()));
@@ -346,7 +346,7 @@ public class NomRemedyIntegrasjonServiceNew {
             .fodselsnummer(ressursState.personident())
             .sektor(sektor)
             .enhetsId(getRemedyEnhetId(dolOrgtilknytning.orgEnhetId()))
-            .fysiskBrukerstedId(ressursState.primaryFysiskBrukersted().orElse(null))
+            .fysiskBrukerstedId(ressursState.primaryFysiskBrukersted())
             .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dolOrgtilknytning.gyldigFom()))
             .utlopsdato(utlopsdato.map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null))
             .mobil(jobbtelefon != null ? mapAndTrimNumber(jobbtelefon.nummer()) : mapAndTrimNumber(mobil))

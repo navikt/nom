@@ -9,15 +9,15 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.contract.nom.Sektor;
-import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
-import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -627,9 +627,9 @@ abstract public class MockBasisTestOrganisering {
             .navident("HR")
             .sektor(Sektor.NAV_STATLIG)
             .visningsnavn(null)
-            .sluttdato(Optional.empty())
-            .startdato(Optional.of(LocalDate.now().minusYears(1)))
-            .primaryFysiskBrukersted(Optional.empty())
+            .sluttdato(null)
+            .startdato(LocalDate.now().minusYears(1))
+            .primaryFysiskBrukersted(null)
             .fysiskeBrukersteder(List.of("D1"))
             .build();
 
@@ -639,9 +639,9 @@ abstract public class MockBasisTestOrganisering {
             .navident("EKSTERN")
             .sektor(Sektor.EKSTERN)
             .visningsnavn(null)
-            .sluttdato(Optional.empty())
-            .startdato(Optional.of(LocalDate.now().minusYears(1)))
-            .primaryFysiskBrukersted(Optional.empty())
+            .sluttdato(null)
+            .startdato(LocalDate.now().minusYears(1))
+            .primaryFysiskBrukersted(null)
             .fysiskeBrukersteder(List.of("D1"))
             .build();
 

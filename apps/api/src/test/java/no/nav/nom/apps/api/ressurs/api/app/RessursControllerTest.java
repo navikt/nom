@@ -129,7 +129,7 @@ public class RessursControllerTest extends RestTestBase {
 
         when(ressursStateRepository.getAll()).thenReturn(List.of(
             ressursState().toBuilder()
-                .sluttdato(Optional.of(sluttDatoFilterValue))
+                .sluttdato(sluttDatoFilterValue)
                 .sektor(sektorFilterValue).build(),
             ressursState(),
             ressursState()
@@ -151,7 +151,7 @@ public class RessursControllerTest extends RestTestBase {
         assertThat(ressurser)
             .hasSize(1)
             .allMatch(ressursState -> ressursState.sektor().equals(sektorFilterValue))
-            .allMatch(ressursState -> ressursState.sluttdato().equals(Optional.of(sluttDatoFilterValue)));
+            .allMatch(ressursState -> ressursState.sluttdato().equals(sluttDatoFilterValue));
     }
 
     @Test
@@ -183,7 +183,7 @@ public class RessursControllerTest extends RestTestBase {
             .primaryTelefonnummer(primaryTelefonnummer)
             .sektor(Sektor.NAV_STATLIG)
             .startDato(LocalDate.now())
-            .sluttDato(Optional.of(LocalDate.now().plusMonths(1)))
+            .sluttDato(LocalDate.now().plusMonths(1))
             .tilknytningtype(Tilknytningtype.FAST)
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
@@ -241,7 +241,7 @@ public class RessursControllerTest extends RestTestBase {
             .primaryTelefonnummer(primaryTelefonnummer)
             .sektor(Sektor.NAV_STATLIG)
             .startDato(LocalDate.now())
-            .sluttDato(Optional.of(LocalDate.now().plusYears(6)))
+            .sluttDato(LocalDate.now().plusYears(6))
             .tilknytningtype(Tilknytningtype.FAST)
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
@@ -264,7 +264,7 @@ public class RessursControllerTest extends RestTestBase {
         postOpprettRessursRequest(
             testToken.nomWriteGroupAndNomUiAzp(),
             opprettRessursRequest().toBuilder().sektor(Sektor.EKSTERN).visningsetternavn("har mellomrom")
-                .sluttDato(Optional.of(LocalDate.now().plusDays(10)))
+                .sluttDato(LocalDate.now().plusDays(10))
                 .startDato(LocalDate.now().plusDays(10)
                 ).build()
         )
@@ -320,7 +320,7 @@ public class RessursControllerTest extends RestTestBase {
             .primaryTelefonnummer(primaryTelefonnummer)
             .sektor(Sektor.EKSTERN)
             .startDato(LocalDate.now())
-            .sluttDato(Optional.of(LocalDate.now().plusMonths(1)))
+            .sluttDato(LocalDate.now().plusMonths(1))
             .tilknytningtype(Tilknytningtype.KONSULENT)
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
@@ -379,7 +379,7 @@ public class RessursControllerTest extends RestTestBase {
             .primaryTelefonnummer(primaryTelefonnummer)
             .sektor(Sektor.EKSTERN)
             .startDato(LocalDate.now())
-            .sluttDato(Optional.of(LocalDate.now().plusMonths(1)))
+            .sluttDato(LocalDate.now().plusMonths(1))
             .tilknytningtype(Tilknytningtype.KONSULENT)
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
@@ -398,10 +398,10 @@ public class RessursControllerTest extends RestTestBase {
                     Optional.of("YEP"),
                     request.visningsetternavn()
                 ))
-            .primaryTelefonnummer(Optional.of("87654321"))
-            .sluttdato(Optional.of(LocalDate.MIN))
-            .startdato(Optional.of(LocalDate.MIN.plusYears(1)))
-            .primaryFysiskBrukersted(Optional.of("2700"))
+            .primaryTelefonnummer("87654321")
+            .sluttdato(LocalDate.MIN)
+            .startdato(LocalDate.MIN.plusYears(1))
+            .primaryFysiskBrukersted("2700")
             .fysiskeBrukersteder(List.of())
             .identType(STANDARD)
             .build();
@@ -436,7 +436,7 @@ public class RessursControllerTest extends RestTestBase {
         postOpprettRessursRequest(
             testToken.nomWriteGroupAndNomUiAzp(),
             opprettRessursRequest().toBuilder()
-                .sluttDato(Optional.empty()).build()
+                .sluttDato(null).build()
         )
             .expectStatus().isBadRequest()
             .expectBody()
@@ -481,7 +481,7 @@ public class RessursControllerTest extends RestTestBase {
             .primaryTelefonnummer(primaryTelefonnummer)
             .sektor(Sektor.NAV_KOMMUNAL)
             .startDato(LocalDate.now())
-            .sluttDato(Optional.empty())
+            .sluttDato(null)
             .tilknytningtype(Tilknytningtype.INGEN)
             .ansettelsesType(null)
             .orgEnhetId("orgEnhet123")
@@ -524,7 +524,7 @@ public class RessursControllerTest extends RestTestBase {
         postOpprettRessursRequest(
             testToken.nomWriteGroupAndNomUiAzp(),
             opprettRessursRequest().toBuilder()
-                .sluttDato(Optional.empty()).build()
+                .sluttDato(null).build()
         )
             .expectStatus().isForbidden();
     }
@@ -840,8 +840,8 @@ public class RessursControllerTest extends RestTestBase {
 
         var ressursState = ressursState().toBuilder()
             .personident(personident)
-            .primaryTelefonnummer(Optional.of("12345678"))
-            .primaryFysiskBrukersted(Optional.of("1234"))
+            .primaryTelefonnummer("12345678")
+            .primaryFysiskBrukersted("1234")
             .fysiskeBrukersteder(List.of("1234"))
             .build();
 
@@ -862,7 +862,7 @@ public class RessursControllerTest extends RestTestBase {
             .jsonPath("personident")
             .isEqualTo(personident.replaceFirst(".{5}$", "*****"))
             .jsonPath("primaryFysiskBrukersted")
-            .isEqualTo(null)
+            .doesNotExist()
             .jsonPath("fysiskeBrukersteder")
             .isEmpty();
 
@@ -877,8 +877,8 @@ public class RessursControllerTest extends RestTestBase {
 
         var ressursState = ressursState().toBuilder()
             .personident(personident)
-            .primaryTelefonnummer(Optional.of("12345678"))
-            .primaryFysiskBrukersted(Optional.of("1234"))
+            .primaryTelefonnummer("12345678")
+            .primaryFysiskBrukersted("1234")
             .fysiskeBrukersteder(List.of("1234"))
             .build();
 
@@ -915,8 +915,8 @@ public class RessursControllerTest extends RestTestBase {
         var ressursState = ressursState().toBuilder()
             .personident(personident)
             .navident(TestTokensGenerator.LOGGED_IN_USER_NAVIDENT)
-            .primaryTelefonnummer(Optional.of("12345678"))
-            .primaryFysiskBrukersted(Optional.of("1234"))
+            .primaryTelefonnummer("12345678")
+            .primaryFysiskBrukersted("1234")
             .fysiskeBrukersteder(new ArrayList<>(List.of("1234")))
             .build();
 
@@ -937,7 +937,7 @@ public class RessursControllerTest extends RestTestBase {
             .jsonPath("personident")
             .isEqualTo(personident)
             .jsonPath("primaryFysiskBrukersted")
-            .isEqualTo(ressursState.primaryFysiskBrukersted().get())
+            .isEqualTo(ressursState.primaryFysiskBrukersted())
             .jsonPath("fysiskeBrukersteder")
             .isEqualTo(ressursState.fysiskeBrukersteder());
     }
@@ -951,8 +951,8 @@ public class RessursControllerTest extends RestTestBase {
 
         var ressursState = ressursState().toBuilder()
             .personident(personident)
-            .primaryTelefonnummer(Optional.of("12345678"))
-            .primaryFysiskBrukersted(Optional.of("1234"))
+            .primaryTelefonnummer("12345678")
+            .primaryFysiskBrukersted("1234")
             .fysiskeBrukersteder(new ArrayList<>(List.of("1234")))
             .build();
 
@@ -973,7 +973,7 @@ public class RessursControllerTest extends RestTestBase {
             .jsonPath("personident")
             .isEqualTo(personident.replaceFirst(".{5}$", "*****"))
             .jsonPath("primaryFysiskBrukersted")
-            .isEqualTo(ressursState.primaryFysiskBrukersted().get())
+            .isEqualTo(ressursState.primaryFysiskBrukersted())
             .jsonPath("fysiskeBrukersteder")
             .isEqualTo(ressursState.fysiskeBrukersteder());
     }
@@ -987,7 +987,7 @@ public class RessursControllerTest extends RestTestBase {
         var personident = "01010154321";
 
         var ressursState = ressursState().toBuilder()
-            .primaryFysiskBrukersted(Optional.of("1234"))
+            .primaryFysiskBrukersted("1234")
             .fysiskeBrukersteder(List.of("1234"))
             .personident(personident).build();
 
@@ -1016,7 +1016,7 @@ public class RessursControllerTest extends RestTestBase {
         var personident = "01010154321";
 
         var ressursState = ressursState().toBuilder()
-            .primaryFysiskBrukersted(Optional.of("1234"))
+            .primaryFysiskBrukersted("1234")
             .fysiskeBrukersteder(List.of("1234"))
             .personident(personident).build();
 
@@ -1279,10 +1279,10 @@ public class RessursControllerTest extends RestTestBase {
             .primaryTelefonnummer(primaryTelefonnummer)
             .sektor(Sektor.NAV_KOMMUNAL)
             .startDato(LocalDate.now())
-            .sluttDato(Optional.empty())
+            .sluttDato(null)
             .tilknytningtype(Tilknytningtype.INGEN)
             .ansettelsesType(null)
-            .fysiskBrukerstedNr("")
+            .fysiskBrukerstedNr("2400")
             .orgEnhetId("")
             .identType(STANDARD)
             .build();
@@ -1298,10 +1298,10 @@ public class RessursControllerTest extends RestTestBase {
                     Optional.empty(),
                     request.visningsetternavn()
                 ))
-            .primaryTelefonnummer(Optional.of("87654321"))
-            .sluttdato(Optional.of(LocalDate.MIN))
-            .startdato(Optional.of(LocalDate.MIN.plusYears(1)))
-            .primaryFysiskBrukersted(Optional.of("2700"))
+            .primaryTelefonnummer("87654321")
+            .sluttdato(LocalDate.MIN)
+            .startdato(LocalDate.MIN.plusYears(1))
+            .primaryFysiskBrukersted("2700")
             .fysiskeBrukersteder(List.of())
             .identType(STANDARD)
             .build();
@@ -1392,11 +1392,11 @@ public class RessursControllerTest extends RestTestBase {
 
         when(fysiskBrukerstedService.getAlleRessurserMedFysiskBrukersted(fysiskbrukerstedNr)).thenReturn(List.of(
             ressursState().toBuilder()
-                .primaryFysiskBrukersted(Optional.of(fysiskbrukerstedNr))
+                .primaryFysiskBrukersted(fysiskbrukerstedNr)
                 .fysiskeBrukersteder(List.of(fysiskbrukerstedNr))
                 .build(),
             ressursState().toBuilder()
-                .primaryFysiskBrukersted(Optional.of(fysiskbrukerstedNr))
+                .primaryFysiskBrukersted(fysiskbrukerstedNr)
                 .fysiskeBrukersteder(List.of(fysiskbrukerstedNr))
                 .build()
         ));
@@ -1414,7 +1414,7 @@ public class RessursControllerTest extends RestTestBase {
 
         assertThat(ressurser)
             .hasSize(2)
-            .allMatch(ressursState -> Objects.equals(ressursState.primaryFysiskBrukersted().orElse(null), fysiskbrukerstedNr));
+            .allMatch(ressursState -> Objects.equals(ressursState.primaryFysiskBrukersted(), fysiskbrukerstedNr));
     }
 
     @Test
@@ -1442,11 +1442,11 @@ public class RessursControllerTest extends RestTestBase {
 
         when(fysiskBrukerstedService.getAlleRessurserPaaEnhetMedFysiskBrukersted(orgenhetId, fysiskbrukerstedNr)).thenReturn(List.of(
             ressursState().toBuilder()
-                .primaryFysiskBrukersted(Optional.of(fysiskbrukerstedNr))
+                .primaryFysiskBrukersted(fysiskbrukerstedNr)
                 .fysiskeBrukersteder(List.of(fysiskbrukerstedNr))
                 .build(),
             ressursState().toBuilder()
-                .primaryFysiskBrukersted(Optional.of(fysiskbrukerstedNr))
+                .primaryFysiskBrukersted(fysiskbrukerstedNr)
                 .fysiskeBrukersteder(List.of(fysiskbrukerstedNr))
                 .build()
         ));
@@ -1464,7 +1464,7 @@ public class RessursControllerTest extends RestTestBase {
 
         assertThat(ressurser)
             .hasSize(2)
-            .allMatch(ressursState -> Objects.equals(ressursState.primaryFysiskBrukersted().orElse(null), fysiskbrukerstedNr));
+            .allMatch(ressursState -> Objects.equals(ressursState.primaryFysiskBrukersted(), fysiskbrukerstedNr));
     }
 
     @Test
@@ -1589,7 +1589,7 @@ public class RessursControllerTest extends RestTestBase {
             .primaryTelefonnummer(null)
             .sektor(Sektor.NAV_STATLIG)
             .startDato(LocalDate.now())
-            .sluttDato(Optional.empty())
+            .sluttDato(null)
             .tilknytningtype(Tilknytningtype.FAST)
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
@@ -1634,7 +1634,7 @@ public class RessursControllerTest extends RestTestBase {
             .primaryTelefonnummer(null)
             .sektor(Sektor.NAV_STATLIG)
             .startDato(LocalDate.now())
-            .sluttDato(Optional.empty())
+            .sluttDato(null)
             .tilknytningtype(Tilknytningtype.FAST)
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
@@ -1670,7 +1670,7 @@ public class RessursControllerTest extends RestTestBase {
             .primaryTelefonnummer(null)
             .sektor(Sektor.NAV_STATLIG)
             .startDato(LocalDate.now())
-            .sluttDato(Optional.empty())
+            .sluttDato(null)
             .tilknytningtype(Tilknytningtype.FAST)
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
@@ -1720,7 +1720,7 @@ public class RessursControllerTest extends RestTestBase {
             .primaryTelefonnummer(null)
             .sektor(Sektor.NAV_STATLIG)
             .startDato(LocalDate.now())
-            .sluttDato(Optional.empty())
+            .sluttDato(null)
             .tilknytningtype(Tilknytningtype.FAST)
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
@@ -1779,7 +1779,7 @@ public class RessursControllerTest extends RestTestBase {
             .primaryTelefonnummer(null)
             .sektor(Sektor.NAV_STATLIG)
             .startDato(LocalDate.now())
-            .sluttDato(Optional.empty())
+            .sluttDato(null)
             .tilknytningtype(Tilknytningtype.FAST)
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
@@ -1836,7 +1836,7 @@ public class RessursControllerTest extends RestTestBase {
             .primaryTelefonnummer(null)
             .sektor(Sektor.NAV_STATLIG)
             .startDato(LocalDate.now())
-            .sluttDato(Optional.empty())
+            .sluttDato(null)
             .tilknytningtype(Tilknytningtype.FAST)
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
@@ -1880,7 +1880,7 @@ public class RessursControllerTest extends RestTestBase {
             .primaryTelefonnummer(null)
             .sektor(Sektor.NAV_STATLIG)
             .startDato(LocalDate.now())
-            .sluttDato(Optional.empty())
+            .sluttDato(null)
             .tilknytningtype(Tilknytningtype.FAST)
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")
@@ -1915,7 +1915,7 @@ public class RessursControllerTest extends RestTestBase {
             .primaryTelefonnummer(null)
             .sektor(Sektor.NAV_STATLIG)
             .startDato(LocalDate.now())
-            .sluttDato(Optional.empty())
+            .sluttDato(null)
             .tilknytningtype(Tilknytningtype.FAST)
             .ansettelsesType(null)
             .fysiskBrukerstedNr("")

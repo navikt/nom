@@ -13,7 +13,12 @@ import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.Grouped;
+import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Printed;
+import org.apache.kafka.streams.kstream.Produced;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.support.serializer.JsonSerde;
@@ -57,11 +62,11 @@ public class EventsourceToExternalEvents {
                             ressursAggregate.put("fid", event.getFid());
 
                             if (event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData) {
-                                if (additionalData.navident().isPresent()) {
-                                    ressursAggregate.put("navident", additionalData.navident().get());
+                                if (additionalData.navident() != null) {
+                                    ressursAggregate.put("navident", additionalData.navident());
                                 }
-                                if (additionalData.startdato().isPresent()) {
-                                    ressursAggregate.put("startdato", String.valueOf(additionalData.startdato().get()));
+                                if (additionalData.startdato() != null) {
+                                    ressursAggregate.put("startdato", String.valueOf(additionalData.startdato()));
                                 }
                             }
 

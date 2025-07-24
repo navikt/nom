@@ -91,13 +91,13 @@ public class RessursUtloperSnartEmailServiceTest {
         String ressursForNavn = "ressursForNavn";
         String ressursEtterNavn = "ressursForNavn";
         Visningsnavn vis1 = new Visningsnavn(ressursForNavn, Optional.empty(), ressursEtterNavn);
-        Optional<LocalDate> ressursSluttdato = Optional.of(LocalDate.now().plusWeeks(2));
+        LocalDate ressursSluttdato = LocalDate.now().plusWeeks(2);
 
         String ressursNavIdent2 = "ressurNavnOgNavIdent2";
         String ressursForNavn2 = "ressursForNavn2";
         String ressursEtterNavn2 = "ressursEtterNavn2";
         Visningsnavn vis2 = new Visningsnavn(ressursForNavn2, Optional.empty(), ressursEtterNavn2);
-        Optional<LocalDate> ressursSluttdato2 = Optional.of(LocalDate.now().plusWeeks(5));
+        LocalDate ressursSluttdato2 = LocalDate.now().plusWeeks(5);
 
         String orgEnhet = "orgenhet123456";
         String orgEnhetNavn = "orgenhetNavn";
@@ -125,8 +125,8 @@ public class RessursUtloperSnartEmailServiceTest {
                     .erDagligOppfolging(true)
                     .navident(ressusNavIdent)
                     .orgEnhetId(orgEnhet)
-                    .gyldigFom(ressursSluttdato.get().minusYears(5))
-                    .gyldigTom(ressursSluttdato)
+                    .gyldigFom(ressursSluttdato.minusYears(5))
+                    .gyldigTom(Optional.of(ressursSluttdato))
                     .build()
             )
         );
@@ -136,8 +136,8 @@ public class RessursUtloperSnartEmailServiceTest {
                     .erDagligOppfolging(true)
                     .navident(ressursNavIdent2)
                     .orgEnhetId(orgEnhet)
-                    .gyldigFom(ressursSluttdato2.get().minusYears(5))
-                    .gyldigTom(ressursSluttdato2)
+                    .gyldigFom(ressursSluttdato2.minusYears(5))
+                    .gyldigTom(Optional.of(ressursSluttdato2))
                     .build()
             )
         );
@@ -164,14 +164,14 @@ public class RessursUtloperSnartEmailServiceTest {
         var ressursEn = RessursUtloperData.builder()
             .ressurNavn(vis1.getFormattedVisningsnavn())
             .ressursNavident(ressusNavIdent)
-            .ressursSluttdato(ressursSluttdato.get())
+            .ressursSluttdato(ressursSluttdato)
             .orgenhetNavn(orgEnhetNavn)
             .orgenhetLederNavident(orgenhetLederNavIdent)
             .build();
         var ressursTwo = RessursUtloperData.builder()
             .ressurNavn(vis2.getFormattedVisningsnavn())
             .ressursNavident(ressursNavIdent2)
-            .ressursSluttdato(ressursSluttdato2.get())
+            .ressursSluttdato(ressursSluttdato2)
             .orgenhetNavn(orgEnhetNavn)
             .orgenhetLederNavident(orgenhetLederNavIdent)
             .build();
@@ -190,13 +190,13 @@ public class RessursUtloperSnartEmailServiceTest {
         String ressursForNavn = "ressursForNavn";
         String ressursEtterNavn = "ressursForNavn";
         Visningsnavn vis1 = new Visningsnavn(ressursForNavn, Optional.empty(), ressursEtterNavn);
-        Optional<LocalDate> ressursSluttdato = Optional.of(LocalDate.now().plusWeeks(2));
+        LocalDate ressursSluttdato = LocalDate.now().plusWeeks(2);
 
         String ressursNavIdent2 = "ressurNavnOgNavIdent2";
         String ressursForNavn2 = "ressursForNavn2";
         String ressursEtterNavn2 = "ressursEtterNavn2";
         Visningsnavn vis2 = new Visningsnavn(ressursForNavn2, Optional.empty(), ressursEtterNavn2);
-        Optional<LocalDate> ressursSluttdato2 = Optional.of(LocalDate.now().plusWeeks(5));
+        LocalDate ressursSluttdato2 = LocalDate.now().plusWeeks(5);
 
         String orgEnhet = "orgenhet123456";
         String orgEnhetNavn = "orgenhetNavn";
@@ -229,8 +229,8 @@ public class RessursUtloperSnartEmailServiceTest {
                     .erDagligOppfolging(true)
                     .navident(ressusNavIdent)
                     .orgEnhetId(orgEnhet)
-                    .gyldigFom(ressursSluttdato.get().minusYears(5))
-                    .gyldigTom(Optional.of(ressursSluttdato.get().minusDays(7)))
+                    .gyldigFom(ressursSluttdato.minusYears(5))
+                    .gyldigTom(Optional.of(ressursSluttdato.minusDays(7)))
                     .build()
             )
         );
@@ -240,8 +240,8 @@ public class RessursUtloperSnartEmailServiceTest {
                     .erDagligOppfolging(true)
                     .navident(ressursNavIdent2)
                     .orgEnhetId(orgEnhet)
-                    .gyldigFom(ressursSluttdato2.get().minusYears(5))
-                    .gyldigTom(Optional.of(ressursSluttdato2.get().plusDays(8)))
+                    .gyldigFom(ressursSluttdato2.minusYears(5))
+                    .gyldigTom(Optional.of(ressursSluttdato2.plusDays(8)))
                     .build()
             )
         );
@@ -269,12 +269,12 @@ public class RessursUtloperSnartEmailServiceTest {
             RessursUtloperData.builder()
                 .ressurNavn(vis1.getFormattedVisningsnavn())
                 .ressursNavident(ressusNavIdent)
-                .ressursSluttdato(ressursSluttdato.get())
+                .ressursSluttdato(ressursSluttdato)
                 .build(),
             RessursUtloperData.builder()
                 .ressurNavn(vis2.getFormattedVisningsnavn())
                 .ressursNavident(ressursNavIdent2)
-                .ressursSluttdato(ressursSluttdato2.get())
+                .ressursSluttdato(ressursSluttdato2)
                 .build()
         );
 

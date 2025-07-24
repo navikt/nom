@@ -58,7 +58,7 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
 
         List<RessursState> aktuellaktive = ressursStateRepository.getAll().stream()
             .filter(r -> inkluderEksterne || !r.sektor().equals(Sektor.EKSTERN))
-            .filter(r -> r.sluttdato().isEmpty() || r.sluttdato().get().isAfter(LocalDate.now().minusYears(1)))
+            .filter(r -> r.sluttdato() == null || r.sluttdato().isAfter(LocalDate.now().minusYears(1)))
             .toList();
 
         List<String> aktiveNavidenter = aktuellaktive.stream().map(RessursState::navident).toList();

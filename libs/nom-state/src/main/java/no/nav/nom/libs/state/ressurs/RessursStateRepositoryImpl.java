@@ -16,6 +16,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+import static no.nav.nom.libs.utils.common.util.DateUtil.sluttdatoIsAfterToday;
+import static no.nav.nom.libs.utils.common.util.DateUtil.startdatoIsAfterToday;
+
 @Slf4j
 public class RessursStateRepositoryImpl implements RessursStateRepository {
     private final Map<String, RessursState> ressursByFid = new ConcurrentHashMap<>();
@@ -77,15 +81,15 @@ public class RessursStateRepositoryImpl implements RessursStateRepository {
     @Override
     public Map<String, RessursState> findAllWithSluttdatoBeforeToday() {
         return ressursByNavident.values().stream()
-            .filter(ressurs -> ressurs.sluttdato().isPresent())
-            .filter(ressurs -> ressurs.sluttdato().get().isBefore(LocalDate.now()))
+            .filter(ressurs -> ressurs.sluttdato() != null)
+            .filter(ressurs -> ressurs.sluttdato().isBefore(LocalDate.now()))
             .collect(Collectors.toMap(RessursState::navident, ressurs -> ressurs));
     }
 
     @Override
     public Map<String, RessursState> findAllActiveRessurser() {
         return ressursByNavident.values().stream()
-            .filter(ressurs -> ressurs.sluttdato().isEmpty() || !ressurs.sluttdato().get().isBefore(LocalDate.now()))
+            .filter(ressurs -> isNull(ressurs.sluttdato()) || !ressurs.sluttdato().isBefore(LocalDate.now()))
             .collect(Collectors.toMap(RessursState::navident, ressurs -> ressurs));
     }
 
@@ -186,41 +190,43 @@ public class RessursStateRepositoryImpl implements RessursStateRepository {
 
     @Override
     public long countIkkeAvsluttede() {
-        return getAll().stream().filter( r -> r.sluttdato().orElse(LocalDate.MAX).isAfter(LocalDate.now().plusDays(1))).count();
+        return getAll().stream().filter( r -> sluttdatoIsAfterToday(r.sluttdato())).count();
     }
 
     @Override
     public long countIkkeAvsluttedeEksterne() {
-        return getAll().stream().filter(RessursState::isEkstern).filter( r -> r.sluttdato().orElse(LocalDate.MAX).isAfter(LocalDate.now().plusDays(1))).count();
+        return getAll().stream().filter(RessursState::isEkstern).filter( r -> sluttdatoIsAfterToday(r.sluttdato())).count();
     }
 
     @Override
     public long countIkkeAvsluttedeKommunale() {
-        return getAll().stream().filter(RessursState::isKommunal).filter( r -> r.sluttdato().orElse(LocalDate.MAX).isAfter(LocalDate.now().plusDays(1))).count();
+        return getAll().stream().filter(RessursState::isKommunal).filter( r -> sluttdatoIsAfterToday(r.sluttdato())).count();
     }
 
     @Override
     public long countIkkeAvsluttedeStatlige() {
-        return getAll().stream().filter(RessursState::isStatlig).filter( r -> r.sluttdato().orElse(LocalDate.MAX).isAfter(LocalDate.now().plusDays(1))).count();
+        return getAll().stream().filter(RessursState::isStatlig).filter( r -> sluttdatoIsAfterToday(r.sluttdato())).count();
     }
 
     @Override
     public long countFremtidige() {
-        return getAll().stream().filter( r -> r.startdato().orElse(LocalDate.MIN).isAfter(LocalDate.now())).count();
+        return getAll().stream().filter(r -> startdatoIsAfterToday(r.startdato())).count();
     }
 
     @Override
     public long countFremtidigeEksterne() {
-        return getAll().stream().filter(RessursState::isEkstern).filter( r -> r.startdato().orElse(LocalDate.MIN).isAfter(LocalDate.now())).count();
+        return getAll().stream().filter(RessursState::isEkstern).filter(r -> startdatoIsAfterToday(r.startdato())).count();
     }
 
     @Override
     public long countFremtidigeKommunale() {
-        return getAll().stream().filter(RessursState::isKommunal).filter( r -> r.startdato().orElse(LocalDate.MIN).isAfter(LocalDate.now())).count();
+        return getAll().stream().filter(RessursState::isKommunal).filter(r -> startdatoIsAfterToday(r.startdato())).count();
     }
 
     @Override
     public long countFremtidigeStatlige() {
-        return getAll().stream().filter(RessursState::isStatlig).filter( r -> r.startdato().orElse(LocalDate.MIN).isAfter(LocalDate.now())).count();
+        return getAll().stream().filter(RessursState::isStatlig).filter(r -> startdatoIsAfterToday(r.startdato())).count();
     }
+
+
 }

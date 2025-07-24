@@ -5,12 +5,22 @@ import no.nav.nom.apps.streams.kafkaapi.ressurs.hendelser.v1.RessursOpprettetEve
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
-import no.nav.nom.contract.nom.eventsource.*;
+import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningAvsluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningAvsluttetEventV1.OrgtilknytningAvsluttetEventData;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningSektorEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningTilknytningtypeEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOpprettetAdditionalData;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOpprettetEventData;
+import no.nav.nom.contract.nom.eventsource.RessursSektorOppdatertV1;
+import no.nav.nom.contract.nom.eventsource.RessursStartDatoOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursStartDatoOppdatertV1.StartDatoOppdatertEventData;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import org.apache.kafka.streams.KeyValue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -187,7 +197,7 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
                                 Optional.empty(),
                                 "etternavn"
                         ))
-                        .primaryTelefonnummer(Optional.empty())
+                        .primaryTelefonnummer(null)
                         .fysiskeBrukersteder(List.of("2021"))
                         .primaryFysiskBrukersted("2021")
                         .identType(IdentType.STANDARD)
@@ -195,13 +205,13 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
 
         final RessursOpprettetAdditionalData additionalData =
                 RessursOpprettetAdditionalData.builder()
-                        .navident(Optional.of(navident))
-                        .kjoenn(Optional.empty())
-                        .folkeregistrertNavn(Optional.empty())
-                        .foedselsdato(Optional.empty())
-                        .startdato(Optional.ofNullable(startDato))
-                        .orgEnhet(Optional.empty())
-                        .ansettelsesType(Optional.empty())
+                        .navident(navident)
+                        .kjoenn(null)
+                        .folkeregistrertNavn(null)
+                        .foedselsdato(null)
+                        .startdato(startDato)
+                        .orgEnhet(null)
+                        .ansettelsesType(null)
                         .build();
 
         return new RessursOpprettetEventV1(

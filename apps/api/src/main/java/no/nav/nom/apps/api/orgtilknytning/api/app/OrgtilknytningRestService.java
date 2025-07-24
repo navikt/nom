@@ -241,9 +241,9 @@ public class OrgtilknytningRestService {
             .map(EndreOrgtilknytningRequest::gyldigFom);
         var nyeFomDatoer = request.nyeOrgtilknytninger().stream()
             .map(LeggTilOrgtilknytningRequest::gyldigFom);
-
+        var tilknyttetRessursStartdato = tilknyttetRessurs.startdato() != null ? tilknyttetRessurs.startdato() : null;
         var nyMinimumStartdato = Stream.concat(endredeFomDatoer, nyeFomDatoer).reduce(LocalDate.MAX, (it, acc) -> it.isBefore(acc) ? it : acc);
-        if (nyMinimumStartdato != LocalDate.MAX && !nyMinimumStartdato.equals(tilknyttetRessurs.startdato().orElse(null))) {
+        if (nyMinimumStartdato != LocalDate.MAX && !nyMinimumStartdato.equals(tilknyttetRessursStartdato)) {
             ressursCommandService.oppdaterRessursStartdatoEvent(
                 new OppdaterStartdatoCommand(tilknyttetRessurs.fid(), nyMinimumStartdato),
                 getInputMetadataOppdaterOrgtilknytningerForRessurs(request)
@@ -632,23 +632,25 @@ public class OrgtilknytningRestService {
                     .map(LeggTilOrgtilknytningRequest::gyldigTom)
             )
             .flatMap(Function.identity())
-            .map(gyldigTom -> Optional.ofNullable(gyldigTom).orElse(LocalDate.MAX))
+            .map(gyldigTom -> gyldigTom != null ? gyldigTom : LocalDate.MAX)
             .max(Comparator.naturalOrder());
 
-        if (!newSluttdato.equals(tilknyttetRessurs.sluttdato())) {
-            if (newSluttdato.isPresent() &&  newSluttdato.get().equals(LocalDate.MAX)) {
-                newSluttdato = Optional.empty();
+        newSluttdato.ifPresent(sluttdato -> {
+            if (!sluttdato.equals(tilknyttetRessurs.sluttdato())) {
+                if (sluttdato.equals(LocalDate.MAX)) {
+                    sluttdato = null;
+                }
+                ressursCommandService.oppdaterRessursSluttdatoEvent(
+                    OppdaterSluttdatoCommand.builder()
+                        .fid(tilknyttetRessurs.fid())
+                        .sluttdato(sluttdato)
+                        .inputMetadata(
+                            getInputMetadataOppdaterOrgtilknytningerForRessurs(oppdaterOrgtilknytningerForRessursRequest)
+                        )
+                        .build()
+                );
             }
-            ressursCommandService.oppdaterRessursSluttdatoEvent(
-                OppdaterSluttdatoCommand.builder()
-                    .fid(tilknyttetRessurs.fid())
-                    .sluttdato(newSluttdato)
-                    .inputMetadata(
-                        getInputMetadataOppdaterOrgtilknytningerForRessurs(oppdaterOrgtilknytningerForRessursRequest)
-                    )
-                    .build()
-            );
-        }
+        });
     }
 
     private static InputMetadata getInputMetadataOppdaterOrgtilknytningerForRessurs(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {

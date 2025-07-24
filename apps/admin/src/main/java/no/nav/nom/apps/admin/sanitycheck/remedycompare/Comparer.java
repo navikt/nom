@@ -49,20 +49,20 @@ public class Comparer {
             if (remedyUser == null) {
                 nomRessurserNotInRemedy.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), null, null));
             } else {
-                if (nameDiffers(ressursState, remedyUser) && !isNomHistorical(ressursState)) {
+                if (nameDiffers(ressursState, remedyUser) && isRessursActive(ressursState)) {
                     diffPaaNavn.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), epost(ressursState), remedyUser));
                 }
-                if (ressursState.sektor() != remedyUser.sektor() && !isNomHistorical(ressursState)) {
+                if (ressursState.sektor() != remedyUser.sektor() && isRessursActive(ressursState)) {
                     diffPaaSektor.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), null, remedyUser));
                 }
                 if (!ressursState.isEkstern() || sluttdatoErPassert(ressursState)) {
-                    if (sluttdatoDiffers(ressursState, remedyUser) && !sluttdatoInFuture(ressursState)  && !isNomHistorical(ressursState)) {
+                    if (sluttdatoDiffers(ressursState, remedyUser) && !sluttdatoInFuture(ressursState)  && isRessursActive(ressursState)) {
                         if (!sluttdatoErFremITidOgRemedyErNull(ressursState, remedyUser)) {
                             diffPaaSluttdato.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), null, remedyUser));
                         }
                     }
                 } else { // Ekstern hvor sluttdato ikke er passert
-                    if (!Objects.equals(ressursState.sluttdato().orElse(null), remedyUser.utlopsDato())) {
+                    if (!Objects.equals(ressursState.sluttdato(), remedyUser.utlopsDato())) {
                         diffPaaUtlopsdato.put(ressursState.navident(), new RemedyCompareResult(isMastred(ressursState), ressursState, remedyEnhet(ressursState), null, remedyUser));
                     }
                 }
@@ -106,11 +106,11 @@ public class Comparer {
     }
 
     private boolean sluttdatoInFuture(RessursState ressursState) {
-        return ressursState.sluttdato().orElse(LocalDate.MIN).isAfter(LocalDate.now());
+        return ressursState.sluttdato() != null ? ressursState.sluttdato().isAfter(LocalDate.now()) : LocalDate.MIN.isAfter(LocalDate.now());
     }
 
     private static boolean sluttdatoDiffers(RessursState ressursState, ImportedRemedyUser remedyUser) {
-        return !Objects.equals(ressursState.sluttdato().orElse(null), remedyUser.sluttDato());
+        return !Objects.equals(ressursState.sluttdato(), remedyUser.sluttDato());
     }
 
     private static boolean nameDiffers(RessursState ressursState, ImportedRemedyUser remedyUser) {
@@ -121,7 +121,11 @@ public class Comparer {
 
 
     private boolean isNomHistorical(RessursState ressursState) {
-        return ressursState.sluttdato().orElse(LocalDate.MAX).isBefore(LocalDate.of(2024,1,1));
+        return ressursState.sluttdato() != null ? ressursState.sluttdato().isBefore(LocalDate.of(2024, 1, 1)) : LocalDate.MAX.isBefore(LocalDate.of(2024,1,1));
+    }
+
+    private boolean isRessursActive(RessursState ressursState) {
+        return ressursState.sluttdato() == null || !ressursState.sluttdato().isBefore(LocalDate.now());
     }
 
     public HashMap<String, RemedyCompareResult> getRessursNotInRemedy() {
@@ -180,17 +184,16 @@ public class Comparer {
     }
 
     private static boolean erRessursAktiv(RessursState ressursState) {
-        return ressursState.startdato().orElse(LocalDate.MIN).isBefore(LocalDate.now().plusDays(1)) && ressursState.sluttdato()
-            .orElse(LocalDate.MAX)
-            .isAfter(LocalDate.now().minusDays(1));
+        return ressursState.startdato() != null ? ressursState.startdato().isBefore(LocalDate.now().plusDays(1)) : LocalDate.MIN.isBefore(LocalDate.now().plusDays(1))
+            && ressursState.sluttdato() != null ? ressursState.sluttdato().isAfter(LocalDate.now().minusDays(1)) : LocalDate.MAX.isAfter(LocalDate.now().minusDays(1));
     }
 
     private static boolean sluttdatoErFremITidOgRemedyErNull(RessursState ressursState, ImportedRemedyUser remedyUser) {
-        return ressursState.sluttdato().isPresent() && ressursState.sluttdato().get().isAfter(LocalDate.now()) && remedyUser.sluttDato() != null;
+        return ressursState.sluttdato() != null && ressursState.sluttdato().isAfter(LocalDate.now()) && remedyUser.sluttDato() != null;
     }
 
     private static boolean sluttdatoErPassert(RessursState ressursState) {
-        return ressursState.sluttdato().isPresent() && ressursState.sluttdato().get().isBefore(LocalDate.now());
+        return ressursState.sluttdato() != null && ressursState.sluttdato().isBefore(LocalDate.now());
     }
 
     private boolean isMastred(RessursState ressursState) {

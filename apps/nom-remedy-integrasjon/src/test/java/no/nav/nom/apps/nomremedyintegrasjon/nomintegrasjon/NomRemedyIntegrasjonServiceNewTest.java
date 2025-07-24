@@ -361,7 +361,7 @@ public class NomRemedyIntegrasjonServiceNewTest {
         String navident = "S123456";
         LocalDate gyldigFom = LocalDate.now().minusYears(2).withDayOfMonth(1);
 
-        var ressursState = ressurs(ressursFid, navident, gyldigFom).toBuilder().sluttdato(Optional.of(LocalDate.now().minusDays(1))).sistEndretAv("X123456").build();
+        var ressursState = ressurs(ressursFid, navident, gyldigFom).toBuilder().sluttdato(LocalDate.now().minusDays(1)).sistEndretAv("X123456").build();
         var orgtilknytningState = orgtilknytning(orgtilknytningFid, navident, gyldigFom).toBuilder().gyldigTom(Optional.of(LocalDate.now().minusDays(2))).sistEndretAv("X123456").build();
         var aggregateState = aggregate(ressursFid, ressursState.getClass().getSimpleName(), navident);
         var nomIntegrasjonEntity = nomIntegrasjonEntityFromNomData(ressursState, orgtilknytningState, false).toBuilder().entryOperasjon("Ny").build();
@@ -555,10 +555,10 @@ public class NomRemedyIntegrasjonServiceNewTest {
                 .navident(navident)
                 .sektor(Sektor.NAV_STATLIG)
                 .visningsnavn(new Visningsnavn("Nav", Optional.empty(), "Navesen"))
-                .primaryTelefonnummer(Optional.empty())
-                .startdato(Optional.of(gyldigFom))
-                .sluttdato(Optional.empty())
-                .primaryFysiskBrukersted(Optional.of("2700"))
+                .primaryTelefonnummer(null)
+                .startdato(gyldigFom)
+                .sluttdato(null)
+                .primaryFysiskBrukersted("2700")
                 .fysiskeBrukersteder(Collections.emptyList())
                 .identType(IdentType.STANDARD)
                 .sistEndretAv("T123456")
@@ -582,7 +582,7 @@ public class NomRemedyIntegrasjonServiceNewTest {
                 .fodselsnummer(ressursState.personident())
                 .sektor(sektor)
                 .enhetsId("2990")
-                .fysiskBrukerstedId(ressursState.primaryFysiskBrukersted().orElse(null))
+                .fysiskBrukerstedId(ressursState.primaryFysiskBrukersted())
                 .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dolOrgtilknytning.gyldigFom()))
                 .utlopsdato(utlopsdato.map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null))
                 .mobil("12345678")

@@ -93,9 +93,9 @@ public class PdlFullmaktControllerTest extends RestTestBase {
                 "etter"
             ),
             new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
-            Optional.empty(),
-            Optional.of(slutt),
-            Optional.of(start),
+            null,
+            slutt,
+            start,
             null,
             Collections.emptyList(),
             IdentType.STANDARD,

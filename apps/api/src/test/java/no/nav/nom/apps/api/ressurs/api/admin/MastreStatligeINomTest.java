@@ -150,13 +150,13 @@ class MastreStatligeINomTest {
         var res3 = oppdaterSluttdatoCommandCaptor.getAllValues().get(2);
 
         assertEquals("FID_1", res1.fid());
-        assertEquals(LocalDate.parse("2023-12-31"), res1.sluttdato().orElse(null));
+        assertEquals(LocalDate.parse("2023-12-31"), res1.sluttdato());
 
         assertEquals("FID_2", res2.fid());
-        assertEquals(LocalDate.parse("2024-07-01"), res2.sluttdato().orElse(null));
+        assertEquals(LocalDate.parse("2024-07-01"), res2.sluttdato());
 
         assertEquals("FID_3", res3.fid());
-        assertNull(res3.sluttdato().orElse(null));
+        assertNull(res3.sluttdato());
 
         log.info(output);
     }
@@ -470,8 +470,8 @@ class MastreStatligeINomTest {
         return RessursState.builder()
             .navident(navident)
             .sektor(sektor)
-            .startdato(startdato == null ? Optional.empty() : Optional.of(startdato))
-            .sluttdato(sluttdato == null ? Optional.empty() : Optional.of(sluttdato))
+            .startdato(startdato)
+            .sluttdato(sluttdato)
             .build();
     }
 

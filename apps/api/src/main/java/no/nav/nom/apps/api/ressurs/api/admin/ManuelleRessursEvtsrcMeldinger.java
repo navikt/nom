@@ -478,7 +478,7 @@ public class ManuelleRessursEvtsrcMeldinger {
             )
         );
 
-        Optional<LocalDate> sanitizedSluttdato  = sluttDato.equals(NO_END_DATE) ? Optional.empty() : Optional.of(sluttDato);
+        LocalDate sanitizedSluttdato  = sluttDato.equals(NO_END_DATE) ? null : sluttDato;
         ressursCommandService.oppdaterRessursSluttdatoEvent(
             new OppdaterSluttdatoCommand(ressursState.get().fid(),
                 sanitizedSluttdato, metaData)
@@ -664,7 +664,7 @@ public class ManuelleRessursEvtsrcMeldinger {
             var ressursState = ressursStateRepository.findByNavident(ressursTobeUpdated.navident());
             if (ressursState.isEmpty() || isNull(ressursTobeUpdated.telefonummer())) {
                 log.warn("Ressurs for navidenten %s finnes ikke eller telefonnummer er ikke gitt %s".formatted(ressursTobeUpdated.navident(), ressursTobeUpdated.telefonummer()));
-            } else if(ressursState.get().primaryTelefonnummer().isPresent()) {
+            } else if (ressursState.get().primaryTelefonnummer() != null && !ressursState.get().primaryTelefonnummer().isEmpty()) {
                 log.warn("Ressurs for navidenten %s allerede har telefonnummer %s".formatted(ressursTobeUpdated.navident(), ressursTobeUpdated.telefonummer()));
             } else {
                 var metaData = new InputMetadata(

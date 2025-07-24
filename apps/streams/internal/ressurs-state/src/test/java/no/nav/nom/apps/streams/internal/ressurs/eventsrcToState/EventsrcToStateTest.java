@@ -95,7 +95,7 @@ public class EventsrcToStateTest {
         );
 
         final RessursState expectedSluttet = opprettetRessurs.toBuilder()
-            .sluttdato(Optional.of(sluttetEventData.sluttdato()))
+            .sluttdato(sluttetEventData.sluttdato())
             .build();
 
 
@@ -177,20 +177,20 @@ public class EventsrcToStateTest {
                 null,
                 "etternavn"
             ),
-            Optional.empty(),
+            null,
             Collections.emptyList(),
             null,
             IdentType.STANDARD
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
-            Optional.of("navident"),
+            "navident",
             null,
             null,
             null,
-            Optional.of(LocalDate.now()),
-            Optional.empty(),
-            Optional.empty()
+            LocalDate.now(),
+            null,
+            null
         );
 
         final RessursEvent opprettEvent = new RessursOpprettetEventV1(
@@ -203,7 +203,7 @@ public class EventsrcToStateTest {
         final RessursState expectedOpprettet = new RessursState(
             fid,
             eventData.personident(),
-            additionalData.navident().get(),
+            additionalData.navident(),
             eventData.sektor(),
             new Visningsnavn(
                 "fornavn",
@@ -211,9 +211,10 @@ public class EventsrcToStateTest {
                 "etternavn"
             ),
             null,
-            Optional.empty(),
-            Optional.empty(), additionalData.startdato(),
-            Optional.empty(),
+            null,
+            null,
+            additionalData.startdato(),
+            null,
             Collections.emptyList(),
             IdentType.STANDARD,
             null
@@ -249,7 +250,7 @@ public class EventsrcToStateTest {
 
 
         final RessursState expectedEndret = opprettetRessurs.toBuilder()
-            .primaryFysiskBrukersted(Optional.ofNullable(ressursFysiskeBrukerstederOppdatertEventData.primaryFysiskBrukersted()))
+            .primaryFysiskBrukersted(ressursFysiskeBrukerstederOppdatertEventData.primaryFysiskBrukersted())
             .fysiskeBrukersteder(ressursFysiskeBrukerstederOppdatertEventData.fysiskeBrukersteder())
             .build();
 
@@ -271,7 +272,7 @@ public class EventsrcToStateTest {
 
         final RessursSluttdatoOppdatertEventV1.RessursSluttdatoOppdatertEventData ressursSluttdatoOppdatertEventData =
             new RessursSluttdatoOppdatertEventV1.RessursSluttdatoOppdatertEventData(
-                Optional.of(LocalDate.now().plusYears(1))
+                LocalDate.now().plusYears(1)
             );
 
         final RessursEvent ressursSluttdatoOppdatertEventV1 = new RessursSluttdatoOppdatertEventV1(
@@ -369,20 +370,20 @@ public class EventsrcToStateTest {
                 Optional.empty(),
                 "etternavn"
             ),
-            Optional.empty(),
+            null,
             List.of("2011"),
             "2011",
             IdentType.STANDARD
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData ressursOpprettetAdditionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
-            Optional.of("navident"),
+           "navident",
             null,
             null,
             null,
-            Optional.of(LocalDate.now()),
-            Optional.empty(),
-            Optional.empty()
+            LocalDate.now(),
+            null,
+            null
         );
 
         final RessursEvent event = new RessursOpprettetEventV1(
@@ -399,14 +400,14 @@ public class EventsrcToStateTest {
         return new RessursState(
             event.getFid(),
             ressursOpprettetEventData.personident(),
-            ressursOpprettetAdditionalData.navident().get(),
+            ressursOpprettetAdditionalData.navident(),
             ressursOpprettetEventData.sektor(),
             ressursOpprettetEventData.visningsnavn(),
             null,
-            Optional.empty(),
-            Optional.empty(),
+            null,
+            null,
             ressursOpprettetAdditionalData.startdato(),
-            Optional.ofNullable(ressursOpprettetEventData.primaryFysiskBrukersted()),
+            ressursOpprettetEventData.primaryFysiskBrukersted(),
             ressursOpprettetEventData.fysiskeBrukersteder(),
             IdentType.STANDARD,
             null
@@ -423,20 +424,20 @@ public class EventsrcToStateTest {
                 Optional.empty(),
                 "etternavn"
             ),
-            Optional.empty(),
+            null,
             List.of("2011"),
             "2011",
             IdentType.STANDARD
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData ressursOpprettetAdditionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
-            Optional.of("navident"),
+            "navident",
             null,
             null,
             null,
-            Optional.of(LocalDate.now()),
-            Optional.empty(),
-            Optional.empty()
+            LocalDate.now(),
+            null,
+            null
         );
 
         final RessursEvent event = new RessursOpprettetEventV1(
@@ -451,7 +452,7 @@ public class EventsrcToStateTest {
         inputTopic.pipeInput(UUID.randomUUID().toString(), event);
 
         final RessursJobbtelefonOppdatertEventV1.JobbtelefonOppdatertEventData ressursJobbtelefonOppdatertEventV1Data = new RessursJobbtelefonOppdatertEventV1.JobbtelefonOppdatertEventData(
-            ressursOpprettetAdditionalData.navident().get(),
+            ressursOpprettetAdditionalData.navident(),
             new Jobbtelefon("12345678",
                 TelefonType.NAV_TJENESTE_TELEFON)
         );
@@ -467,14 +468,14 @@ public class EventsrcToStateTest {
         return new RessursState(
             event.getFid(),
             ressursOpprettetEventData.personident(),
-            ressursOpprettetAdditionalData.navident().get(),
+            ressursOpprettetAdditionalData.navident(),
             ressursOpprettetEventData.sektor(),
             ressursOpprettetEventData.visningsnavn(),
             new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
-            Optional.empty(),
-            Optional.empty(),
+            null,
+            null,
             ressursOpprettetAdditionalData.startdato(),
-            Optional.ofNullable(ressursOpprettetEventData.primaryFysiskBrukersted()),
+            ressursOpprettetEventData.primaryFysiskBrukersted(),
             ressursOpprettetEventData.fysiskeBrukersteder(),
             IdentType.STANDARD,
             null

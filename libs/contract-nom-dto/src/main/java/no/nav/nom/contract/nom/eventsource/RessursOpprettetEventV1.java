@@ -9,7 +9,6 @@ import no.nav.nom.contract.nom.Sektor;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public class RessursOpprettetEventV1 extends RessursEvent {
 
@@ -37,7 +36,7 @@ public class RessursOpprettetEventV1 extends RessursEvent {
         String personident,
         Sektor sektor,
         Visningsnavn visningsnavn,
-        Optional<String> primaryTelefonnummer,
+        String primaryTelefonnummer,
         List<String> fysiskeBrukersteder,
         String primaryFysiskBrukersted,
         IdentType identType
@@ -45,13 +44,13 @@ public class RessursOpprettetEventV1 extends RessursEvent {
 
     @Builder(toBuilder = true)
     public record RessursOpprettetAdditionalData(
-        Optional<String> navident,
-        Optional<String> kjoenn,
-        Optional<FolkeregistrertNavn> folkeregistrertNavn,
-        Optional<LocalDate> foedselsdato,
-        Optional<LocalDate> startdato,
-        Optional<String> orgEnhet,
-        Optional<AnsettelsesType> ansettelsesType
+        String navident,
+        String kjoenn,
+        FolkeregistrertNavn folkeregistrertNavn,
+        LocalDate foedselsdato,
+        LocalDate startdato,
+        String orgEnhet,
+        AnsettelsesType ansettelsesType
     ) implements Data {
         public record FolkeregistrertNavn(
             String fornavn,

@@ -121,14 +121,14 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
         var ressursOpprettetAdditionalData = ressursOpprettetEventV1.getRessursOpprettetAdditionalData();
         var inputMetadata = ressursOpprettetEventV1.getMetadata();
 
-        when(nomApiClient.getOrgEnhet(ressursOpprettetAdditionalData.orgEnhet().get()))
+        when(nomApiClient.getOrgEnhet(ressursOpprettetAdditionalData.orgEnhet()))
             .thenReturn(new OrgEnhet().remedyEnhetId(remedyEnhetId));
-        when(nomApiClient.getTelefonnummere(ressursOpprettetEventV1.getRessursOpprettetAdditionalData().navident().get()))
+        when(nomApiClient.getTelefonnummere(ressursOpprettetEventV1.getRessursOpprettetAdditionalData().navident()))
             .thenReturn(telefoner);
 
         nomRemedyIntegrasjonServiceOld.handleRessursEvent(ressursOpprettetEventV1);
 
-        var nomIntegrasjonEntry = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(ressursOpprettetAdditionalData.navident().get());
+        var nomIntegrasjonEntry = remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(ressursOpprettetAdditionalData.navident());
         var mobil = telefoner.isEmpty() ? null : telefoner.getFirst().getNummer();
         assertThat(nomIntegrasjonEntry)
             .usingRecursiveComparison()
@@ -143,9 +143,9 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
                     .fodselsnummer(ressursOpprettetEventData.personident())
                     .fornavn(capitalizeNavn(ressursOpprettetEventData.visningsnavn().fornavn()))
                     .fysiskBrukerstedId(fysiskBrukerstedNr)
-                    .navId(ressursOpprettetAdditionalData.navident().get())
+                    .navId(ressursOpprettetAdditionalData.navident())
                     .sektor(nomSektorToRemedyCode(ressursOpprettetEventV1.getRessursOpprettetEventData().sektor()))
-                    .tiltredelsesdato(epochSecondsNorwegianTimeNoon(ressursOpprettetAdditionalData.startdato().get()))
+                    .tiltredelsesdato(epochSecondsNorwegianTimeNoon(ressursOpprettetAdditionalData.startdato()))
                     .utlopsdato((!ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().equals(Sektor.EKSTERN) || isNull(sluttDato)) ? null : epochSecondsNorwegianTimeEndOfDay(sluttDato))
                     .mobil(mobil)
                     .build()
@@ -171,15 +171,15 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
                 .personident(personident)
                 .visningsnavn(new Visningsnavn(fornavn, Optional.empty(), etternavn))
                 .sektor(Sektor.EKSTERN)
-                .primaryTelefonnummer(Optional.of(primaryTelefonnnummer))
+                .primaryTelefonnummer(primaryTelefonnnummer)
                 .build(),
             inputMetadata().toBuilder()
                 .origination(new Origination(initiatedBy, ""))
                 .build(),
             ressursOpprettetAdditionalData().toBuilder()
-                .orgEnhet(Optional.of(orgEnhetId))
-                .navident(Optional.of(navident))
-                .startdato(Optional.of(startDato))
+                .orgEnhet(orgEnhetId)
+                .navident(navident)
+                .startdato(startDato)
                 .build()
         );
         return Stream.of(
@@ -1062,7 +1062,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
                                 .navId(existingRessurs.getNavident())
                                 .sektor(nomSektorToRemedyCode(existingRessurs.getSektor()))
                                 .tiltredelsesdato(existingNomIntegrasjonEntity.getTiltredelsesdato())
-                                .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(ressursSluttdatoOppdatertEventV1.getRessursSluttdatoOppdatertEventData().sluttdato().get()) : null)
+                                .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(ressursSluttdatoOppdatertEventV1.getRessursSluttdatoOppdatertEventData().sluttdato()) : null)
                                 .direkteTelefon(null)
                                 .mobil(null)
                                 .build()

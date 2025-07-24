@@ -166,8 +166,8 @@ public class TeamcatController {
 
 
         return new TeamcatRessursDTO(
-            ressurs.startdato().orElse(null),
-            ressurs.sluttdato().orElse(null),
+            ressurs.startdato(),
+            ressurs.sluttdato(),
             adResource.get(navident) != null ? adResource.get(navident).getEmail() : null,
             navident,
             TeamcatRessursDTO.ResourceType.from(ressurs.sektor(), dvhRepository.getIsAnnenStat(navident)),
@@ -221,7 +221,7 @@ public class TeamcatController {
         var alleressurser = ressursStateRepository.getAll();
         var adResources = adclient.fetchInAdRessursInBatches(alleressurser.stream()
             // only active resources are available in ad
-            .filter(it -> it.sluttdato().map(sluttdato -> sluttdato.isAfter(LocalDate.now())).orElse(true))
+            .filter(it -> it.sluttdato() == null || it.sluttdato().isAfter(LocalDate.now()))
             .map(RessursState::navident).toList());
 
         var perRequestCache = new PerRequestCache();

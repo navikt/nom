@@ -6,5 +6,5 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public enum TelefonType {
     NAV_TJENESTE_TELEFON,
     NAV_KONTOR_TELEFON,
-    PRIVAT_TELEFON;
+    PRIVAT_TELEFON
 }

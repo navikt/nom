@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.rest.admin;
 
-import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -43,10 +42,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -333,16 +329,13 @@ public class SanityCheck {
             .filter(t -> {
                 var ressurs = ressursStateRepository.findByNavident(t.navident());
 
-                if (ressurs.get().sluttdato().isPresent() && ressurs.get().sluttdato().get().isBefore(t.gyldigFom())) {
+                if (ressurs.get().sluttdato() != null && ressurs.get().sluttdato().isBefore(t.gyldigFom())) {
                     return true; // ressurs.sluttDato < tilknytning.gyldigFom
                 }
-                if (t.gyldigTom().isPresent() && ressurs.get().startdato().isPresent() && ressurs.get().startdato().get().isAfter(t.gyldigTom().get())) {
+                if (t.gyldigTom().isPresent() && ressurs.get().startdato() != null && ressurs.get().startdato().isAfter(t.gyldigTom().get())) {
                     return true; // ressurs.startDato > tilknytning.gyldigTom
                 }
-                if (t.gyldigTom().isEmpty() && ressurs.get().sluttdato().isPresent()) {
-                    return true; // ressurs avsluttet > tilknytning ikke avsluttet
-                }
-                return false;
+                return t.gyldigTom().isEmpty() && ressurs.get().sluttdato() != null; // ressurs avsluttet > tilknytning ikke avsluttet
             }).toList();
     }
 
@@ -658,7 +651,7 @@ public class SanityCheck {
         }
     )
     @GetMapping(value = "/sluttetRessursMedLederRollePaaOrgEnhet")
-    public List<EnhtetMedRessursSomHarSluttetOgErLederSanityCheckResponse> validerRessursMedLederRollePaaOrgEnhet() {
+    public List<EnhetMedRessursSomHarSluttetOgErLederSanityCheckResponse> validerRessursMedLederRollePaaOrgEnhet() {
         var alleEnheter = orgenhetService.getAllEnheterMedOrganisering().stream().toList(); // Aktive enheter i organisasjonstreet
         var alleRessurserWithSluttDatoBeforeToday = ressursStateRepository.findAllWithSluttdatoBeforeToday();
         Map<RessursState, List<IOrgenhet>> alleOrgEnheterMedLederSomHarSluttet = new HashMap<>();
@@ -671,7 +664,7 @@ public class SanityCheck {
                 }
             });
         }
-        return EnhtetMedRessursSomHarSluttetOgErLederSanityCheckResponse.from(alleOrgEnheterMedLederSomHarSluttet);
+        return EnhetMedRessursSomHarSluttetOgErLederSanityCheckResponse.from(alleOrgEnheterMedLederSomHarSluttet);
     }
 
     // TODO Lagt over til nom-admin, kan fjernes
@@ -692,13 +685,13 @@ public class SanityCheck {
 
         for (OrgtilknytningState orgtilknytning : sisteOrgtilknytninger.values().stream().flatMap(Collection::stream).toList()) {
             var ressurs = alleRessurserSomErAktive.get(orgtilknytning.navident());
-            if (orgtilknytning.gyldigTom().isPresent() && ressurs.sluttdato().isPresent()) {
-                if (!orgtilknytning.gyldigTom().get().isEqual(ressurs.sluttdato().get())) {
+            if (orgtilknytning.gyldigTom().isPresent() && ressurs.sluttdato() != null) {
+                if (!orgtilknytning.gyldigTom().get().isEqual(ressurs.sluttdato())) {
                     appendUlikeDatoerToString(orgtilknytning, ulikeSluttdatoer, ressurs);
                 }
             } else if (orgtilknytning.gyldigTom().isPresent()) {
                 appendUlikeDatoerToString(orgtilknytning, ulikeSluttdatoer, ressurs);
-            } else if (ressurs.sluttdato().isPresent()) {
+            } else if (ressurs.sluttdato() != null) {
                 appendUlikeDatoerToString(orgtilknytning, ulikeSluttdatoer, ressurs);
             }
         }
@@ -838,15 +831,15 @@ public class SanityCheck {
                     navident,
                     ressurs.visningsnavn().getFormattedVisningsnavn(),
                     ressurs.sektor(),
-                    ressurs.startdato().isPresent() ? ressurs.startdato() : null,
-                    ressurs.sluttdato().isPresent() ? ressurs.sluttdato() : null,
+                    ressurs.startdato(),
+                    ressurs.sluttdato(),
                     alleOrgtilknytningerKobletTilRessurs.get(navident)
                         .stream()
                         .map(orgtilknytningState -> new RobotRessursSanityCheckResponse.RobotOrgtilknytningSanityCheckResponse(
                             orgtilknytningState.orgEnhetId(),
                             orgenhetService.getById(orgtilknytningState.orgEnhetId()).isPresent() ? orgenhetService.getById(orgtilknytningState.orgEnhetId()).get().getNavn() : "Ukjent",
                             orgtilknytningState.gyldigFom(),
-                            Optional.of(orgtilknytningState.gyldigTom()).orElse(null)
+                            orgtilknytningState.gyldigTom().orElse(null)
                         ))
                         .toList()
                 ));
@@ -855,8 +848,8 @@ public class SanityCheck {
                     navident,
                     ressurs.visningsnavn().getFormattedVisningsnavn(),
                     ressurs.sektor(),
-                    ressurs.startdato().isPresent() ? ressurs.startdato() : null,
-                    ressurs.sluttdato().isPresent() ? ressurs.sluttdato() : null,
+                    ressurs.startdato(),
+                    ressurs.sluttdato(),
                     Collections.emptyList()
                 ));
             }
@@ -893,7 +886,7 @@ public class SanityCheck {
             .append(orgtilknytning.orgEnhetId())
             .append(";")
             .append("RessursSluttdato:")
-            .append(ressurs.sluttdato().isPresent() ? ressurs.sluttdato().get() : "null")
+            .append(Objects.requireNonNullElse(ressurs.sluttdato(), "null"))
             .append(";")
             .append("OrgGyldigTom:")
             .append(orgtilknytning.gyldigTom().isPresent() ? orgtilknytning.gyldigTom().get() : "null")

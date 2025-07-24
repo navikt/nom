@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * Så vil den benytte seg av DVH sin OrgenhetPaaRessurs info som er en best effort tolkning av Remedy enhet etc for å plassere i organisasjonen.
  * Og lage en liksom OT - som kun tas vare på i ShadowOrgtilknytningerKommunaleRepository
  * NOM bruker aldri denne infoen selv, men den leveres til Omada, slik at Omada får tilknytning på 'aktive' Kommmunale ressurser som (enda) ikke har fått noen Stilling i Unit4
- *
  * Når NOM blir full master for alle kommunale så kan dette fjernes
  */
 @Slf4j
@@ -82,8 +81,8 @@ public class KommunaleRessurserLoader {
 
     private List<String> getAktiveKommunaleNavidenter() {
         return ressursStateRepository.getAll().stream()
-            .filter(r -> (r.startdato().isEmpty() || r.startdato().get().isBefore(LocalDate.now()))
-                && (r.sluttdato().isEmpty() || r.sluttdato().get().isAfter(LocalDate.now()))
+            .filter(r -> (r.startdato() == null || r.startdato().isBefore(LocalDate.now()))
+                && (r.sluttdato() == null || r.sluttdato().isAfter(LocalDate.now()))
             )
             .filter(r -> r.sektor().equals(Sektor.NAV_KOMMUNAL))
             .map(RessursState::navident)

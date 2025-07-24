@@ -188,10 +188,10 @@ public class ImportMissingOrgtilknytninger {
             return "";
         }
 
-        LocalDate fomDato = getFomDato(orgEnhet.gyldigFom(), ressurs.startdato().orElse(null));
+        LocalDate fomDato = getFomDato(orgEnhet.gyldigFom(), ressurs.startdato());
         
-        if (ressurs.sluttdato().isPresent() && ressurs.sluttdato().get().isBefore(LocalDate.now())) {
-            log.info(TEAM_LOGS, "Sluttdato {} er passert for ressurs {}, så oppretter ikke orgtilknytning", ressurs.sluttdato().get(), ressurs.navident());
+        if (ressurs.sluttdato() != null && ressurs.sluttdato().isBefore(LocalDate.now())) {
+            log.info(TEAM_LOGS, "Sluttdato {} er passert for ressurs {}, så oppretter ikke orgtilknytning", ressurs.sluttdato(), ressurs.navident());
             return "";
         }
 
@@ -230,7 +230,7 @@ public class ImportMissingOrgtilknytninger {
                         .navident(missingOt.navident())
                         .orgenhetId(missingOt.orgId())
                         .gyldigFom(fomDato)
-                        .gyldigTom(ressurs.sluttdato())
+                        .gyldigTom(Optional.ofNullable(ressurs.sluttdato()))
                         .erDagligOppfolging(true)
                         .inputMetadata(inputMetadata)
                         .additionalAgressoData(null)

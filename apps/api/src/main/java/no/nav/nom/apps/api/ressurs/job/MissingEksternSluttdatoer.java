@@ -90,7 +90,7 @@ public class MissingEksternSluttdatoer {
             if (!nomMastered.isMastered(remedyRessurs.navident())) {
                 stats.append(";");
 
-                if (ressurs.sluttdato().isPresent()) {
+                if (ressurs.sluttdato() != null) {
                     stats.append(("x"));
                 } else if (!dryRun) {
                     avvikleRessurs(ressurs.fid(), remedyRessurs);

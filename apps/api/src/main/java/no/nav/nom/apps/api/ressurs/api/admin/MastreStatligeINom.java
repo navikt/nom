@@ -299,7 +299,7 @@ public class MastreStatligeINom {
                 ressursCommandService.oppdaterRessursSluttdatoEvent(
                     new OppdaterSluttdatoCommand(
                         ressurs.fid(),
-                        ressurs.maxOtSluttDato().equals(MAX_DATE) ? Optional.empty() : Optional.of(ressurs.maxOtSluttDato()),
+                        ressurs.maxOtSluttDato().equals(MAX_DATE) ? null : ressurs.maxOtSluttDato(),
                         inputMetadata
                     )
                 )
@@ -350,8 +350,8 @@ public class MastreStatligeINom {
                     ressurs.fid(),
                     ressurs.navident(),
                     ressurs.sektor(),
-                    ressurs.startdato().orElse(null),
-                    ressurs.sluttdato().orElse(null),
+                    ressurs.startdato(),
+                    ressurs.sluttdato(),
                     maxOtSluttDato
                 );
             })
@@ -368,8 +368,8 @@ public class MastreStatligeINom {
                     ressurs.fid(),
                     ressurs.navident(),
                     ressurs.sektor(),
-                    ressurs.startdato().orElse(null),
-                    ressurs.sluttdato().orElse(null),
+                    ressurs.startdato(),
+                    ressurs.sluttdato(),
                     maxOtSluttDato
                 );
             })

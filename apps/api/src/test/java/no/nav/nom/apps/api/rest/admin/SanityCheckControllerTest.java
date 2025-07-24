@@ -21,7 +21,7 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -51,17 +51,17 @@ public class SanityCheckControllerTest extends RestTestBase {
     @Autowired
     TestTokensGenerator testToken;
 
-    @MockBean
-    private OrgenhetService orgenhetServiceMock;
+    @MockitoBean
+    OrgenhetService orgenhetServiceMock;
 
-    @MockBean
-    private DvhRepository dvhRepositoryMock;
+    @MockitoBean
+    DvhRepository dvhRepositoryMock;
 
-    @MockBean
-    private OrgtilknytningService orgtilknytningServiceMock;
+    @MockitoBean
+    OrgtilknytningService orgtilknytningServiceMock;
 
-    @MockBean
-    private RessursStateRepository ressursStateRepository;
+    @MockitoBean
+    RessursStateRepository ressursStateRepository;
 
     @Test
     @DisplayName("Henter orgenheter uten leder og tom NAV hierarkiet")
@@ -151,7 +151,7 @@ public class SanityCheckControllerTest extends RestTestBase {
     void test_ressurs_har_to_eller_flere_DOL_med_overlappende_datoer() {
         var ressurs = getMockRessursEkstern().toBuilder()
             .sektor(Sektor.NAV_STATLIG)
-            .sluttdato(Optional.empty())
+            .sluttdato(null)
             .build();
         Map<String, RessursState> ressursMap = new HashMap<>();
         ressursMap.put(ressurs.navident(), ressurs);
@@ -213,7 +213,7 @@ public class SanityCheckControllerTest extends RestTestBase {
     void test_ressurs_har_to_eller_flere_DOL() {
         var ressurs = getMockRessursEkstern().toBuilder()
             .sektor(Sektor.NAV_STATLIG)
-            .sluttdato(Optional.empty())
+            .sluttdato(null)
             .build();
         Map<String, RessursState> ressursMap = new HashMap<>();
         ressursMap.put(ressurs.navident(), ressurs);
@@ -275,7 +275,7 @@ public class SanityCheckControllerTest extends RestTestBase {
     void test_ressurs_har_to_eller_flere_DOL_med_siste_dato_som_overlapper() {
         var ressurs = getMockRessursEkstern().toBuilder()
             .sektor(Sektor.NAV_STATLIG)
-            .sluttdato(Optional.empty())
+            .sluttdato(null)
             .build();
         Map<String, RessursState> ressursMap = new HashMap<>();
         ressursMap.put(ressurs.navident(), ressurs);
@@ -417,18 +417,18 @@ public class SanityCheckControllerTest extends RestTestBase {
             .personident("01234598765")
             .navident("X123456")
             .visningsnavn(new Visningsnavn("Nav", Optional.empty(), "Navesen"))
-            .primaryTelefonnummer(Optional.of("12345678"))
-            .sluttdato(Optional.of(LocalDate.of(2024, 12, 31)))
-            .startdato(Optional.of(LocalDate.of(2024, 1, 1)))
+            .primaryTelefonnummer("12345678")
+            .sluttdato(LocalDate.of(2024, 12, 31))
+            .startdato(LocalDate.of(2024, 1, 1))
             .build();
 
         RessursState ressursEksternErIkkeAktiv = getMockRessursEkstern().toBuilder()
             .personident("98765412345")
             .navident("X987654")
             .visningsnavn(new Visningsnavn("Her", Optional.empty(), "Hermansen"))
-            .primaryTelefonnummer(Optional.of("87654321"))
-            .sluttdato(Optional.of(LocalDate.of(2023, 6, 30)))
-            .startdato(Optional.of(LocalDate.of(2023, 1, 1)))
+            .primaryTelefonnummer("87654321")
+            .sluttdato(LocalDate.of(2023, 6, 30))
+            .startdato(LocalDate.of(2023, 1, 1))
             .build();
 
         RessursState ressursStatligAktiv = getMockRessursEkstern().toBuilder()
@@ -436,9 +436,9 @@ public class SanityCheckControllerTest extends RestTestBase {
             .navident("S123456")
             .sektor(Sektor.NAV_STATLIG)
             .visningsnavn(new Visningsnavn("Lars", Optional.empty(), "Larsen"))
-            .primaryTelefonnummer(Optional.empty())
-            .sluttdato(Optional.empty())
-            .startdato(Optional.of(LocalDate.of(2022, 1, 1)))
+            .primaryTelefonnummer(null)
+            .sluttdato(null)
+            .startdato(LocalDate.of(2022, 1, 1))
             .build();
 
         RessursState ressursStatligAktivTo = getMockRessursEkstern().toBuilder()
@@ -446,9 +446,9 @@ public class SanityCheckControllerTest extends RestTestBase {
             .navident("S987654")
             .sektor(Sektor.NAV_STATLIG)
             .visningsnavn(new Visningsnavn("Trude", Optional.empty(), "Trudesen"))
-            .primaryTelefonnummer(Optional.empty())
-            .sluttdato(Optional.empty())
-            .startdato(Optional.of(LocalDate.of(2021, 1, 1)))
+            .primaryTelefonnummer(null)
+            .sluttdato(null)
+            .startdato(LocalDate.of(2021, 1, 1))
             .build();
 
         ressursStateMap.put(ressursStatligAktiv.navident(), ressursStatligAktiv);
@@ -465,10 +465,10 @@ public class SanityCheckControllerTest extends RestTestBase {
             .navident("X123456")
             .sektor(Sektor.EKSTERN)
             .visningsnavn(new Visningsnavn("Nav", Optional.empty(), "Navesen"))
-            .primaryTelefonnummer(Optional.of("12345678"))
-            .sluttdato(Optional.of(LocalDate.of(2024, 12, 31)))
-            .startdato(Optional.of(LocalDate.of(2024, 1, 1)))
-            .primaryFysiskBrukersted(Optional.of("2700"))
+            .primaryTelefonnummer("12345678")
+            .sluttdato(LocalDate.of(2024, 12, 31))
+            .startdato(LocalDate.of(2024, 1, 1))
+            .primaryFysiskBrukersted("2700")
             .fysiskeBrukersteder(List.of("2700"))
             .build();
     }

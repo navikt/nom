@@ -137,20 +137,20 @@ public class HendelserTestUtils {
                 Optional.empty(),
                 "etternavn"
             ),
-            Optional.empty(),
+            null,
             List.of("fysiskBrukersted1", "fysiskBrukersted2"),
             "fysiskBrukersted1",
             IdentType.STANDARD
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
-            Optional.of(navident),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.of(LocalDate.now()),
-            Optional.empty(),
-            Optional.empty()
+            navident,
+            null,
+            null,
+            null,
+            LocalDate.now(),
+            null,
+            null
         );
 
         return new RessursOpprettetEventV1(

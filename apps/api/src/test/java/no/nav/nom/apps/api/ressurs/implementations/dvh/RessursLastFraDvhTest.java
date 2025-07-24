@@ -175,10 +175,10 @@ public class RessursLastFraDvhTest extends DvhTestBase {
                 "ENavn 1"
             ),
             null,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
+            null,
+            null,
+            null,
+            null,
             Collections.emptyList(),
             IdentType.STANDARD,
             null
@@ -225,10 +225,10 @@ public class RessursLastFraDvhTest extends DvhTestBase {
                 "ENavn 1"
             ),
             null,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
+            null,
+            null,
+            null,
+            null,
             Collections.emptyList(),
             IdentType.STANDARD,
             null
@@ -271,10 +271,10 @@ public class RessursLastFraDvhTest extends DvhTestBase {
                 "ENavn 1"
             ),
             null,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
+            null,
+            null,
+            null,
+            null,
             Collections.emptyList(),
             IdentType.STANDARD,
             null
@@ -317,10 +317,10 @@ public class RessursLastFraDvhTest extends DvhTestBase {
                 "ENavn 1"
             ),
             null,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
+            null,
+            null,
+            null,
+            null,
             Collections.emptyList(),
             IdentType.STANDARD,
             null
@@ -366,10 +366,10 @@ public class RessursLastFraDvhTest extends DvhTestBase {
                  "ENavn 1"
              ),
              null,
-             Optional.empty(),
-             Optional.empty(),
-             Optional.empty(),
-             Optional.empty(),
+             null,
+             null,
+             null,
+             null,
              Collections.emptyList(),
              IdentType.STANDARD,
              null
@@ -411,10 +411,10 @@ public class RessursLastFraDvhTest extends DvhTestBase {
                 "ENavn 1"
             ),
             null,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
+            null,
+            null,
+            null,
+            null,
             Collections.emptyList(),
             IdentType.STANDARD,
             null
@@ -457,9 +457,9 @@ public class RessursLastFraDvhTest extends DvhTestBase {
                 "etternavn" + suffix
             ),
             null,
-            Optional.empty(),
             null,
-            Optional.of(LocalDate.now()),
+            null,
+            LocalDate.now(),
             null,
             Collections.emptyList(),
             IdentType.STANDARD,

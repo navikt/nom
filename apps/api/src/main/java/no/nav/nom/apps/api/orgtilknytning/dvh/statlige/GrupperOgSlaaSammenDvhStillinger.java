@@ -65,8 +65,8 @@ public class GrupperOgSlaaSammenDvhStillinger {
         List<StillingPeriode> perioderGruppert = new ArrayList<>();
 
         var ressurs = ressursStateRepository.findByNavident(sspForNavident.navident()).orElseThrow();
-        LocalDate ressursStartdato = ressurs.startdato().orElse(null);
-        LocalDate ressursSluttdato = ressurs.sluttdato().orElse(null);
+        LocalDate ressursStartdato = ressurs.startdato() != null ? ressurs.startdato() : null;
+        LocalDate ressursSluttdato = ressurs.sluttdato() != null ? ressurs.sluttdato() : null;
 
         // Sorter og slå sammen sammenhengende perioder
         grupperteDvhStillinger.forEach((stillingPeriodeKey, grupperteRessursStillinger) -> {

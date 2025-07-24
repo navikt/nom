@@ -248,7 +248,7 @@ public class RessursUtloperSnartEmailService {
             var utloperRessursData = RessursUtloperData.builder()
                 .ressurNavn(ressurs.visningsnavn().getFormattedVisningsnavn())
                 .ressursNavident(ressurs.navident())
-                .ressursSluttdato(ressurs.sluttdato().orElse(null))
+                .ressursSluttdato(ressurs.sluttdato())
                 .build();
 
             if (isNull(dolOrgtilknytning)) {
@@ -289,15 +289,15 @@ public class RessursUtloperSnartEmailService {
     }
 
     private static boolean ressursMedUtlopsDatoOmFemEllerToUker(RessursState ressurs) {
-        return ressurs.sluttdato().isPresent() && (ressurs.sluttdato().get().isEqual(LocalDate.now().plusWeeks(2)) ||
-            ressurs.sluttdato().get().isEqual(LocalDate.now().plusWeeks(5)));
+        return ressurs.sluttdato() != null && (ressurs.sluttdato().isEqual(LocalDate.now().plusWeeks(2)) ||
+            ressurs.sluttdato().isEqual(LocalDate.now().plusWeeks(5)));
     }
 
     private static boolean isRessursSluttdatoEqualToOrgtilknytningGyldigTom(RessursState ressurs, OrgtilknytningState orgtilknytningState) {
         return orgtilknytningState.gyldigTom() != null
             && orgtilknytningState.gyldigTom().isPresent()
-            && ressurs.sluttdato().isPresent()
-            && orgtilknytningState.gyldigTom().get().isEqual(ressurs.sluttdato().get());
+            && ressurs.sluttdato() != null
+            && orgtilknytningState.gyldigTom().get().isEqual(ressurs.sluttdato());
     }
 
     private List<String> bccRecipientsEmailAddresses() {

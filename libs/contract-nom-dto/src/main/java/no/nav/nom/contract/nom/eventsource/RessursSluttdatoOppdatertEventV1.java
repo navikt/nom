@@ -24,7 +24,7 @@ public class RessursSluttdatoOppdatertEventV1 extends RessursEvent {
     }
 
     public record RessursSluttdatoOppdatertEventData(
-        Optional<LocalDate> sluttdato
+        LocalDate sluttdato
     ) implements Data{
     }
 }

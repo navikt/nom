@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static java.util.Objects.isNull;
+
 public class DateUtils {
 
     public static String formatDateTime(LocalDate localDate) {
@@ -28,6 +30,7 @@ public class DateUtils {
     }
 
     public static boolean isPeriodActive(LocalDate periodStart, LocalDate periodEnd) {
+        periodStart = isNull(periodStart) ? LocalDate.now() : periodStart;
         var today = LocalDate.now();
         var isPeriodStartBeforeOrEqualToToday = periodStart.isBefore(today.plusDays(1));
         var isPeriodEndAfterOrEqualToToday = periodEnd == null || periodEnd.isAfter(today.minusDays(1));

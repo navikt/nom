@@ -3,7 +3,24 @@ package no.nav.nom.apps.streams.kafkaapi.hendelser;
 import no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelse;
 import no.nav.nom.contract.nom.EntityType;
 import no.nav.nom.contract.nom.HendelseType;
-import no.nav.nom.contract.nom.eventsource.*;
+import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetAvvikletEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetKorrigertEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrganiseringEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
+import no.nav.nom.contract.nom.eventsource.OrganiseringOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningAvsluttetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursEvent;
+import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -157,7 +174,7 @@ public class EventsrcToHendelser {
 
             if (event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data) {
                 hendelserStateBuilder
-                    .id(data.navident().orElse(null))
+                    .id(data.navident())
                     .hendelseType(HendelseType.NY);
             } else if (event.getData() instanceof RessursSluttetEventV1.RessursSluttetEventData) {
                 hendelserStateBuilder

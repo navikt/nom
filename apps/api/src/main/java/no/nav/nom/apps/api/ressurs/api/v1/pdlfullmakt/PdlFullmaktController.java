@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-
 @Slf4j
 @Tag(name = "Pdl-fullmakt")
 @RestController
@@ -49,8 +47,8 @@ public class PdlFullmaktController {
         var ansattPersonResponse = ressursStateRepository.findByPersonident(fnr)
             .map(it -> new AnsattPersonResponse(new AnsattPersonResponse.AnsattPerson(
                 it.navident(),
-                it.startdato().map(LocalDate::toString).orElse(null),
-                it.sluttdato().map(LocalDate::toString).orElse(null),
+                it.startdato() != null ? it.startdato().toString() : null,
+                it.sluttdato() != null ? it.sluttdato().toString() : null,
                 it.sektor()
             )))
             .orElse(new AnsattPersonResponse(null));

@@ -9,7 +9,7 @@ import java.util.Optional;
 @Builder(toBuilder = true)
 public record OppdaterSluttdatoCommand(
     String fid,
-    Optional<LocalDate> sluttdato,
+    LocalDate sluttdato,
     InputMetadata inputMetadata
 ) implements RessursCommand{
 }

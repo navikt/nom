@@ -6,6 +6,7 @@ import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.state.RessursState;
 
 import static java.util.Collections.singletonList;
+import static java.util.Objects.isNull;
 
 public class MappingUtils {
 
@@ -13,7 +14,9 @@ public class MappingUtils {
         final var sektor = singletonList(ressursState.sektor());
 
         var sladdetPersonIdent = ressursState.personident().replaceFirst(".{5}$","*****");
-
+        var startdato = isNull(ressursState.startdato()) ? null : ressursState.startdato();
+        var sluttdato = isNull(ressursState.sluttdato()) ? null : ressursState.sluttdato();
+        var primaryTelefonnummer = isNull(ressursState.primaryTelefonnummer()) ? null : ressursState.primaryTelefonnummer();
         return Ressurs.builder()
                 .navident(ressursState.navident())
                 .navIdent(ressursState.navident())
@@ -21,13 +24,13 @@ public class MappingUtils {
                 .personIdent(sladdetPersonIdent)
                 .ressurstype(sektor)
                 .sektor(sektor)
-                .startdato(ressursState.startdato().orElse(null))
-                .sluttdato(ressursState.sluttdato().orElse(null))
+                .startdato(startdato)
+                .sluttdato(sluttdato)
                 .fornavn(ressursState.visningsnavn().getFornavnMellomnavn())
                 .etternavn(ressursState.visningsnavn().etternavn())
                 .visningsNavn(ressursState.visningsnavn().getFormattedVisningsnavn())
                 .visningsnavn(ressursState.visningsnavn().getFormattedVisningsnavn())
-                .primaryTelefon(ressursState.primaryTelefonnummer().orElse(null))
+                .primaryTelefon(primaryTelefonnummer)
                 .build();
     }
 

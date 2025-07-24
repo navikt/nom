@@ -386,26 +386,26 @@ public class NomRemedyIntegrasjonServiceOld {
             updateUtlopsdatoEkstern(ressursSluttdatoOppdatertEventV1, ressursState);
         }
 
-        ressursSluttdatoOppdatertEventV1.getRessursSluttdatoOppdatertEventData().sluttdato().ifPresent(
-            sluttdatoForRessurs -> {
-                if (sluttdatoForRessurs.isBefore(LocalDate.now())) {
-                    avsluttRessursInRemedy(
-                        ressursSluttdatoOppdatertEventV1.getFid(),
-                        sluttdatoForRessurs,
-                        ressursSluttdatoOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy()
-                    );
-                } else {
-                    delayEventUpdate(ressursSluttdatoOppdatertEventV1, sluttdatoForRessurs.plusDays(1));
-                }
+        var sluttdato = ressursSluttdatoOppdatertEventV1.getRessursSluttdatoOppdatertEventData().sluttdato();
+        if (sluttdato != null) {
+            if (sluttdato.isBefore(LocalDate.now())) {
+                avsluttRessursInRemedy(
+                    ressursSluttdatoOppdatertEventV1.getFid(),
+                    sluttdato,
+                    ressursSluttdatoOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy()
+                );
+            } else {
+                delayEventUpdate(ressursSluttdatoOppdatertEventV1, sluttdato.plusDays(1));
             }
-        );
+        }
     }
 
     private void updateUtlopsdatoEkstern(RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1, Ressurs ressursState) {
         var ressursSluttdatoOppdatertEventData = ressursSluttdatoOppdatertEventV1.getRessursSluttdatoOppdatertEventData();
         var nomIntegrasjonEntityWithDefaultDataFromNom = nomIntegrasjonEntityFromNomData(ressursState);
 
-        ressursSluttdatoOppdatertEventData.sluttdato().ifPresent(sluttdato -> {
+        var sluttdato = ressursSluttdatoOppdatertEventData.sluttdato();
+        if (sluttdato != null) {
             if (sluttdato.isAfter(LocalDate.now())) {
                 var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
                     .utlopsdato(epochSecondsNorwegianTimeEndOfDay(sluttdato))
@@ -416,7 +416,7 @@ public class NomRemedyIntegrasjonServiceOld {
                     ressursSluttdatoOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy()
                 );
             }
-        });
+        }
     }
 
     private void delayEventUpdate(Event event, LocalDate until) {
@@ -436,7 +436,7 @@ public class NomRemedyIntegrasjonServiceOld {
         var ressursState = nomApiClient.getRessursByFid(ressursSluttdatoOppdatertEventV1.getFid());
 
         var sluttDatoInEventIsStillSluttdatoForRessurs = ressursSluttdatoOppdatertEventV1.getRessursSluttdatoOppdatertEventData().sluttdato()
-            .equals(Optional.ofNullable(ressursState.getSluttdato()));
+            .equals(ressursState.getSluttdato());
 
         if (sluttDatoInEventIsStillSluttdatoForRessurs) {
             handleRessursSluttdatoOppdatertEventV1(ressursSluttdatoOppdatertEventV1);
@@ -529,6 +529,8 @@ public class NomRemedyIntegrasjonServiceOld {
                 .orElseThrow(() -> RequiredValueMissingException.forField("orgEnhetId"))
         );
 
+        var tiltredelsesdato = epochSecondsNorwegianTimeNoon(ressursOpprettetAdditionalData.startdato());
+
         var sluttDato = Optional.ofNullable((String) inputInterfaceMethodArgumentsMap.get("sluttDato"))
             .filter(ressursSluttdato -> ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().equals(Sektor.EKSTERN))
             .map(LocalDate::parse)
@@ -537,7 +539,7 @@ public class NomRemedyIntegrasjonServiceOld {
         var fysiskBrukerstedNr = Optional.ofNullable((String) inputInterfaceMethodArgumentsMap.get("fysiskBrukerstedNr"))
             .orElseThrow(() -> RequiredValueMissingException.forField("fysiskBrukerstedNr"));
 
-        var telefoner = getTelefonerFromNom(ressursOpprettetAdditionalData.navident().orElseThrow(() -> RequiredValueMissingException.forField("navId")));
+        var telefoner = getTelefonerFromNom(ressursOpprettetAdditionalData.navident());
         var mobil = telefoner.isEmpty() ? null : mapAndTrimNumber(telefoner.getFirst());
 
         NomIntegrasjonEntity newNomIntegrasjonEntity = NomIntegrasjonEntity.builder()
@@ -546,11 +548,9 @@ public class NomRemedyIntegrasjonServiceOld {
             .fodselsnummer(ressursOpprettetEventData.personident())
             .fornavn(capitalizeNavn(ressursOpprettetEventData.visningsnavn().getFornavnMellomnavn()).trim())
             .fysiskBrukerstedId(fysiskBrukerstedNr)
-            .navId(ressursOpprettetAdditionalData.navident().get())
+            .navId(ressursOpprettetAdditionalData.navident())
             .sektor(nomSektorToRemedyCode(ressursOpprettetEventData.sektor()))
-            .tiltredelsesdato(ressursOpprettetAdditionalData.startdato()
-                .map(Utils::epochSecondsNorwegianTimeNoon)
-                .orElseThrow(() -> RequiredValueMissingException.forField("tiltredelsesdato")))
+            .tiltredelsesdato(tiltredelsesdato)
             .utlopsdato(ressursOpprettetEventData.sektor().erEkstern() && !isNull(sluttDato)? epochSecondsNorwegianTimeEndOfDay(sluttDato) : null)
             .mobil(mobil)
             .build();

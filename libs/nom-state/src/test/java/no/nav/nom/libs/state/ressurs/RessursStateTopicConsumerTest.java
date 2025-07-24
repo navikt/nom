@@ -34,7 +34,7 @@ public class RessursStateTopicConsumerTest  extends StateTopicConsumerTestBase<R
             .navident("A000001")
             .personident("12345678901")
             .visningsnavn(new Visningsnavn("John", Optional.empty(), "Doe"))
-            .startdato(Optional.of(LocalDate.of(2022, 1, 1)))
+            .startdato(LocalDate.of(2022, 1, 1))
             .sektor(Sektor.NAV_STATLIG)
             .build();
     }
@@ -60,11 +60,11 @@ public class RessursStateTopicConsumerTest  extends StateTopicConsumerTestBase<R
                 .navident("A000002")
                 .personident("12345678902")
                 .visningsnavn(new Visningsnavn("Jane", Optional.empty(), "Doe"))
-                .startdato(Optional.of(LocalDate.of(2022, 1, 1)))
+                .startdato(LocalDate.of(2022, 1, 1))
                 .sektor(Sektor.NAV_STATLIG)
-                .primaryFysiskBrukersted(Optional.of("1234"))
+                .primaryFysiskBrukersted("1234")
                 .fysiskeBrukersteder(List.of("1234", "5678"))
-                .primaryTelefonnummer(Optional.of("12345678"))
+                .primaryTelefonnummer("12345678")
                 .build()
         );
 

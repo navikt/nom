@@ -11,7 +11,6 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -22,10 +21,10 @@ public record RessursState(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Sektor sektor,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Visningsnavn visningsnavn,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Jobbtelefon jobbtelefon,
-    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<String> primaryTelefonnummer,
-    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> sluttdato,
-    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> startdato,
-    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<String> primaryFysiskBrukersted,
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) String primaryTelefonnummer,
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) LocalDate sluttdato,
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) LocalDate startdato,
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) String primaryFysiskBrukersted,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<String> fysiskeBrukersteder,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, defaultValue = "STANDARD") IdentType identType,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) String sistEndretAv

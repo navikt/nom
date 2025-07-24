@@ -181,7 +181,7 @@ class TelefonServiceTest {
         return TestData.ressursState()
                 .toBuilder()
                 .navident(navident)
-                .primaryTelefonnummer(Optional.of(primaryTelefonnummer))
+                .primaryTelefonnummer(primaryTelefonnummer)
                 .build();
     }
 

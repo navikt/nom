@@ -99,7 +99,7 @@ public class LuceneService {
                         ressurs.visningsnavn().getFormattedVisningsnavn(),
                         "tlf-nr",
                         "epost",
-                        ressurs.sluttdato().map(date -> date.isAfter(LocalDate.now())).orElse(true),
+                        ressurs.sluttdato() == null || !ressurs.sluttdato().isBefore(LocalDate.now()),
                         ressurs.sektor() != null ? ressurs.sektor().toString() : null
                     )
                 );

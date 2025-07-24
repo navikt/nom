@@ -8,8 +8,8 @@ import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.OrgtilknytningCmdServiceTestBase;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
-import no.nav.nom.apps.api.u4diff.U4DiffPaaMastrede;
 import no.nav.nom.apps.api.ressurs.NomMastered;
+import no.nav.nom.apps.api.u4diff.U4DiffPaaMastrede;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -107,8 +107,8 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
     RessursState ressurs(String navident, LocalDate startDato, LocalDate sluttDato) {
         return RessursState.builder()
             .navident(navident)
-            .startdato(Optional.ofNullable(startDato))
-            .sluttdato(Optional.ofNullable(sluttDato))
+            .startdato(startDato)
+            .sluttdato(sluttDato)
             .sektor(Sektor.NAV_STATLIG)
             .build();
     }

@@ -26,8 +26,8 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -46,24 +46,23 @@ import static org.springframework.util.Assert.isTrue;
 
 public class TeamcatControllerTest extends RestTestBase {
 
-    @MockBean
+    @MockitoBean
     protected RessursStateRepository ressursStateRepository;
 
-    @MockBean
+    @MockitoBean
+    protected OrgenhetService orgenhetService;
 
-    private OrgenhetService orgenhetService;
+    @MockitoBean
+    protected OrgtilknytningService orgtilknytningService;
 
-    @MockBean
-    private OrgtilknytningService orgtilknytningService;
+    @MockitoBean
+    protected AdClient adClient;
 
-    @MockBean
-    private AdClient adClient;
+    @MockitoBean
+    protected RessursLedereResolver ressursLedereResolver;
 
-    @MockBean
-    private RessursLedereResolver ressursLedereResolver;
-
-    @MockBean
-    private OrgEnhetMapper orgEnhetMapper;
+    @MockitoBean
+    protected OrgEnhetMapper orgEnhetMapper;
 
     @Autowired
     TestTokensGenerator testTokensGenerator;
@@ -80,9 +79,9 @@ public class TeamcatControllerTest extends RestTestBase {
                 "e" + navident
             ),
             new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
-            Optional.empty(),
-            Optional.of(LocalDate.now().plusDays(10)),
-            Optional.empty(),
+            null,
+            LocalDate.now().plusDays(10),
+            null,
             null,
             Collections.emptyList(),
             IdentType.STANDARD,

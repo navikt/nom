@@ -133,7 +133,7 @@ public class RessursHendelseForEventsourceService {
         return Map.entry(ressurs, ressursCommandService.createRessursEvent(new OpprettRessursCommand(
             ressurs.getPersonIdent(),
             ressurs.getNavIdent(),
-            Optional.empty(),
+            null,
             DvhRessurs.toSektor(ressurs.getRemedyAnsattType()),
             toVisningsnavn(ressurs),
             null,
@@ -150,28 +150,29 @@ public class RessursHendelseForEventsourceService {
         if (skipDueToNomMastered(dvhRessurs.getNavIdent())) {
             return;
         }
-
-        ressursState.sluttdato().ifPresentOrElse((stateSluttdato) -> {
+        var stateSluttdato = ressursState.sluttdato();
+        if (stateSluttdato != null) {
             if (!stateSluttdato.equals(dvhRessurs.getSluttdato())) {
                 //  I tilfeller hvor ressurs.sluttDato var satt i state, men så endres i Dvh (kan være null også!),
                 //  så skal vi sende RessursCommandService.oppdaterRessursSluttdatoEvent
                 ressursSluttdatoUpdate(ressursState.fid(), dvhRessurs);
             }
-        }, () -> {
+        } else {
             if (dvhRessurs.getSluttdato() != null) {
                 ressursSluttet(ressursState.fid(), dvhRessurs);
             }
-        });
+        }
 
-        ressursState.startdato().ifPresentOrElse((stateStartdato) -> {
+        var stateStartdato = ressursState.startdato();
+        if (stateStartdato != null) {
             if (!stateStartdato.equals(dvhRessurs.getStartDato())) {
                 ressursStartet(ressursState.fid(), dvhRessurs);
             }
-        }, () -> {
+        } else {
             if (dvhRessurs.getStartDato() != null) {
                 ressursStartet(ressursState.fid(), dvhRessurs);
             }
-        });
+        }
 
         final var currentVisningsnavn = toVisningsnavn(dvhRessurs);
 
@@ -185,15 +186,16 @@ public class RessursHendelseForEventsourceService {
             ressursEndretSektor(ressursState.fid(), dvhRessurs);
         }
 
-        ressursState.primaryFysiskBrukersted().ifPresentOrElse((s) -> {
-            if (!s.equals(dvhRessurs.getFysiskBrukersted())) {
+        var stateFysiskBrukersted = ressursState.primaryFysiskBrukersted();
+        if (stateFysiskBrukersted != null) {
+            if (!stateFysiskBrukersted.equals(dvhRessurs.getFysiskBrukersted())) {
                 ressursEndretFysiskBrukersted(ressursState.fid(), dvhRessurs);
             }
-        }, () -> {
+        } else {
             if (dvhRessurs.getFysiskBrukersted() != null) {
                 ressursEndretFysiskBrukersted(ressursState.fid(), dvhRessurs);
             }
-        });
+        }
     }
 
     private void ressursSluttet(String fid, DvhRessurs dvhRessurs) {
@@ -212,7 +214,7 @@ public class RessursHendelseForEventsourceService {
         ressursCommandService.oppdaterRessursSluttdatoEvent(
             new OppdaterSluttdatoCommand(
                 fid,
-                Optional.ofNullable(dvhRessurs.getSluttdato()),
+                dvhRessurs.getSluttdato(),
                 createInputMetadata(dvhRessurs.getRawData())
             )
         );

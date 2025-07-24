@@ -2,12 +2,12 @@ package no.nav.nom.apps.admin;
 
 import io.getunleash.Unleash;
 import no.nav.nom.apps.admin.dto.EventSearchParams;
+import no.nav.nom.apps.admin.events.ressurs.eventsource.RessursEvtsrcRepository;
 import no.nav.nom.contract.nom.AnsettelsesType;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
-import no.nav.nom.apps.admin.events.ressurs.eventsource.RessursEvtsrcRepository;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursSektorOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -54,20 +54,20 @@ class SinkControllerTest {
                 .personident("12345698765")
                 .sektor(Sektor.NAV_STATLIG)
                 .visningsnavn(new Visningsnavn("Nav", Optional.empty(), "Navesen"))
-                .primaryTelefonnummer(Optional.of("12345678"))
+                .primaryTelefonnummer("12345678")
                 .fysiskeBrukersteder(List.of("brukersted1"))
                 .primaryFysiskBrukersted("brukersted1")
                 .identType(IdentType.STANDARD)
                 .build(),
             new InputMetadata("REST-API", "createRessurs", null, null),
             RessursOpprettetEventV1.RessursOpprettetAdditionalData.builder()
-                .navident(Optional.of("A123456"))
-                .kjoenn(Optional.of("M"))
-                .folkeregistrertNavn(Optional.of(new RessursOpprettetEventV1.RessursOpprettetAdditionalData.FolkeregistrertNavn("Nav", null, "Navesen")))
-                .foedselsdato(Optional.of(LocalDate.of(1990, 1, 1)))
-                .startdato(Optional.of(LocalDate.of(2023, 1, 1)))
-                .orgEnhet(Optional.of("org1"))
-                .ansettelsesType(Optional.of(AnsettelsesType.FAST))
+                .navident("A123456")
+                .kjoenn("M")
+                .folkeregistrertNavn(new RessursOpprettetEventV1.RessursOpprettetAdditionalData.FolkeregistrertNavn("Nav", null, "Navesen"))
+                .foedselsdato(LocalDate.of(1990, 1, 1))
+                .startdato(LocalDate.of(2023, 1, 1))
+                .orgEnhet("org1")
+                .ansettelsesType(AnsettelsesType.FAST)
                 .build()
         );
 

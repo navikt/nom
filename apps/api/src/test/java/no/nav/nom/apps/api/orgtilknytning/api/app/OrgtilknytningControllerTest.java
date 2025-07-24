@@ -1818,7 +1818,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .matches(oppdaterStartdatoCommand -> oppdaterStartdatoCommand.fid().equals(tilknyttetRessurs.fid()));
 
         assertThat(oppdaterSluttdatoCommandArgumentCaptor.getValue())
-            .matches(oppdaterSluttdatoCommand -> oppdaterSluttdatoCommand.sluttdato().orElseThrow().equals(newSluttdato))
+            .matches(oppdaterSluttdatoCommand -> oppdaterSluttdatoCommand.sluttdato().equals(newSluttdato))
             .matches(oppdaterSluttdatoCommand -> oppdaterSluttdatoCommand.fid().equals(tilknyttetRessurs.fid()));
 
     }
@@ -1875,7 +1875,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .matches(oppdaterStartdatoCommand -> oppdaterStartdatoCommand.fid().equals(tilknyttetRessurs.fid()));
 
         assertThat(oppdaterSluttdatoCommandArgumentCaptor.getValue())
-            .matches(oppdaterSluttdatoCommand -> oppdaterSluttdatoCommand.sluttdato().orElseThrow().equals(newSluttdato))
+            .matches(oppdaterSluttdatoCommand -> oppdaterSluttdatoCommand.sluttdato().equals(newSluttdato))
             .matches(oppdaterSluttdatoCommand -> oppdaterSluttdatoCommand.fid().equals(tilknyttetRessurs.fid()));
     }
 

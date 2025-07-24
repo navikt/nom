@@ -61,17 +61,17 @@ class FysiskBrukerstedServiceTest {
             List.of(
                 ressursState(),
                 ressursState().toBuilder()
-                    .primaryFysiskBrukersted(Optional.of(fysiskBrukerstedToMatch))
+                    .primaryFysiskBrukersted(fysiskBrukerstedToMatch)
                     .build(),
                 ressursState(),
                 ressursState().toBuilder()
-                    .primaryFysiskBrukersted(Optional.of("DO NOT MATCH"))
+                    .primaryFysiskBrukersted("DO NOT MATCH")
                     .build()
             )
         );
 
         var result  = fysiskBrukerstedService.getAlleRessurserMedFysiskBrukersted(fysiskBrukerstedToMatch);
-        assertTrue(result.stream().allMatch(ressurs -> fysiskBrukerstedToMatch.equals(ressurs.primaryFysiskBrukersted().orElse(null))));
+        assertTrue(result.stream().allMatch(ressurs -> fysiskBrukerstedToMatch.equals(ressurs.primaryFysiskBrukersted())));
         assertEquals(1, result.size());
     }
 
@@ -86,15 +86,15 @@ class FysiskBrukerstedServiceTest {
 
         var ressurs1 = ressursState().toBuilder()
             .navident(navident1)
-            .primaryFysiskBrukersted(Optional.of(fysiskBrukerstedToMatch))
+            .primaryFysiskBrukersted(fysiskBrukerstedToMatch)
             .build();
         var ressurs2 = ressursState().toBuilder()
             .navident(navident2)
-            .primaryFysiskBrukersted(Optional.of(fysiskBrukerstedToMatch))
+            .primaryFysiskBrukersted(fysiskBrukerstedToMatch)
             .build();
         var ressurs3 = ressursState().toBuilder()
             .navident(navident3)
-            .primaryFysiskBrukersted(Optional.of("DO NOT MATCH"))
+            .primaryFysiskBrukersted("DO NOT MATCH")
             .build();
 
         when(orgtilknytningStateRepositoryMock.getAktiveEllerFremtidigeNavidenterPaaEnhet(orgenhetId)).thenReturn(
@@ -106,7 +106,7 @@ class FysiskBrukerstedServiceTest {
         );
 
         var result  = fysiskBrukerstedService.getAlleRessurserPaaEnhetMedFysiskBrukersted(orgenhetId, fysiskBrukerstedToMatch);
-        assertTrue(result.stream().allMatch(ressurs -> fysiskBrukerstedToMatch.equals(ressurs.primaryFysiskBrukersted().orElse(null))));
+        assertTrue(result.stream().allMatch(ressurs -> fysiskBrukerstedToMatch.equals(ressurs.primaryFysiskBrukersted())));
         assertEquals(2, result.size());
     }
 
@@ -119,11 +119,11 @@ class FysiskBrukerstedServiceTest {
 
         var ressurs1 = ressursState().toBuilder()
             .navident(navident1)
-            .primaryFysiskBrukersted(Optional.of(fysiskBrukerstedToMatch))
+            .primaryFysiskBrukersted(fysiskBrukerstedToMatch)
             .build();
         var ressurs2 = ressursState().toBuilder()
             .navident(navident2)
-            .primaryFysiskBrukersted(Optional.of(fysiskBrukerstedNotToMatch))
+            .primaryFysiskBrukersted(fysiskBrukerstedNotToMatch)
             .build();
 
         when(ressursStateRepositoryMock.getAll()).thenReturn(
@@ -157,11 +157,11 @@ class FysiskBrukerstedServiceTest {
 
         var ressurs1 = ressursState().toBuilder()
             .navident(navident1)
-            .primaryFysiskBrukersted(Optional.of(fysiskBrukerstedToMatch))
+            .primaryFysiskBrukersted(fysiskBrukerstedToMatch)
             .build();
         var ressurs2 = ressursState().toBuilder()
             .navident(navident2)
-            .primaryFysiskBrukersted(Optional.of(fysiskBrukerstedNotToMatch))
+            .primaryFysiskBrukersted(fysiskBrukerstedNotToMatch)
             .build();
 
         when(ressursStateRepositoryMock.getAll()).thenReturn(
@@ -197,11 +197,11 @@ class FysiskBrukerstedServiceTest {
 
         var ressurs1 = ressursState().toBuilder()
             .navident(navident1)
-            .primaryFysiskBrukersted(Optional.of(fysiskBrukerstedToMatch))
+            .primaryFysiskBrukersted(fysiskBrukerstedToMatch)
             .build();
         var ressurs2 = ressursState().toBuilder()
             .navident(navident2)
-            .primaryFysiskBrukersted(Optional.of(fysiskBrukerstedToMatch))
+            .primaryFysiskBrukersted(fysiskBrukerstedToMatch)
             .build();
 
         when(ressursStateRepositoryMock.getAll()).thenReturn(
@@ -241,19 +241,19 @@ class FysiskBrukerstedServiceTest {
 
         var ressurs1 = ressursState().toBuilder()
             .navident(navident1)
-            .primaryFysiskBrukersted(Optional.of(fysiskBrukerstedToMatch))
+            .primaryFysiskBrukersted(fysiskBrukerstedToMatch)
             .build();
         var ressurs2 = ressursState().toBuilder()
             .navident(navident2)
-            .primaryFysiskBrukersted(Optional.of(fysiskBrukerstedNotToMatch))
+            .primaryFysiskBrukersted(fysiskBrukerstedNotToMatch)
             .build();
         var ressurs3 = ressursState().toBuilder()
             .navident(navident3)
-            .primaryFysiskBrukersted(Optional.of(fysiskBrukerstedToMatch))
+            .primaryFysiskBrukersted(fysiskBrukerstedToMatch)
             .build();
         var ressurs4 = ressursState().toBuilder()
             .navident(navident4)
-            .primaryFysiskBrukersted(Optional.of(fysiskBrukerstedToMatch))
+            .primaryFysiskBrukersted(fysiskBrukerstedToMatch)
             .build();
 
         when(orgtilknytningStateRepositoryMock.getAktiveNavidenterPaaEnhet(orgenhetToMatch)).thenReturn(
@@ -373,10 +373,10 @@ class FysiskBrukerstedServiceTest {
             Sektor.NAV_STATLIG,
             new Visningsnavn("Nav", Optional.empty(), "Navesen"),
             null,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
+            null,
+            null,
+            null,
+            null,
             Collections.emptyList(),
             IdentType.STANDARD,
             "S123456"

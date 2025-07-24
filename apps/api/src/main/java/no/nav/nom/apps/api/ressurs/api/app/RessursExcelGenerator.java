@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNullElse;
 
 @Slf4j
 @Component
@@ -153,13 +154,11 @@ public class RessursExcelGenerator {
             orgEnhet.setCellValue(orgEnhetNavn);
             fom.setCellValue(gyldigFom == null ? "UKJENT" : gyldigFom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
             jobbtelefon.setCellValue(isNull(ressurs.state().jobbtelefon()) ? "" : ressurs.state().jobbtelefon().nummer());
-            ressurs.state().primaryTelefonnummer().ifPresentOrElse(privatTelefon::setCellValue, () -> privatTelefon.setCellValue(""));
+            privatTelefon.setCellValue(requireNonNullElse(ressurs.state().primaryTelefonnummer(), ""));
             epost.setCellValue(ressurs.epost());
             if (kanSeSluttdato) {
-                ressurs.state().sluttdato().ifPresentOrElse(
-                    gyldigTom -> sluttdato.setCellValue(gyldigTom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))),
-                    () -> sluttdato.setCellValue("")
-                );
+                sluttdato.setCellValue(
+                    requireNonNullElse(ressurs.state().sluttdato().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")), ""));
             }
         }
     }

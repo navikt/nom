@@ -76,11 +76,11 @@ class EventsrcToState {
                     state.put("kafkaTimestamp", extEvent.messageMetadata().timestamp());
 
                     if (event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data) {
-                        if (data.navident().isPresent()) {
-                            state.put("navident", data.navident().get());
+                        if (data.navident() != null) {
+                            state.put("navident", data.navident());
                         }
-                        if (data.startdato().isPresent()) {
-                            state.put("startdato", String.valueOf(data.startdato().get()));
+                        if (data.startdato() != null) {
+                            state.put("startdato", String.valueOf(data.startdato()));
                         }
                     }
                     if (event.getData() == null && event instanceof RessursJobbtelefonOppdatertEventV1 && event.getFid().equals(state.get("fid").asText())) {

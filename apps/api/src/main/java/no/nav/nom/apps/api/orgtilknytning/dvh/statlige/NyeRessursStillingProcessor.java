@@ -15,8 +15,8 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreT
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OrgtilknytningCommand;
-import no.nav.nom.apps.api.u4diff.U4DiffPaaMastrede;
 import no.nav.nom.apps.api.ressurs.NomMastered;
+import no.nav.nom.apps.api.u4diff.U4DiffPaaMastrede;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.Origination;

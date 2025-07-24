@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-public record EnhtetMedRessursSomHarSluttetOgErLederSanityCheckResponse(
+public record EnhetMedRessursSomHarSluttetOgErLederSanityCheckResponse(
     String navident,
     String visningsnavn,
     LocalDate sluttdato,
@@ -19,15 +19,15 @@ public record EnhtetMedRessursSomHarSluttetOgErLederSanityCheckResponse(
         String agressoId
     ) {}
 
-    public static List<EnhtetMedRessursSomHarSluttetOgErLederSanityCheckResponse> from(Map<RessursState, List<IOrgenhet>> ressursEnhetMap) {
+    public static List<EnhetMedRessursSomHarSluttetOgErLederSanityCheckResponse> from(Map<RessursState, List<IOrgenhet>> ressursEnhetMap) {
         return ressursEnhetMap.entrySet().stream().map(ressursStateListEntry -> from(ressursStateListEntry.getKey(), ressursStateListEntry.getValue())).toList();
     }
 
-    public static EnhtetMedRessursSomHarSluttetOgErLederSanityCheckResponse from(RessursState ressursState, List<IOrgenhet> orgenheter) {
-        return new EnhtetMedRessursSomHarSluttetOgErLederSanityCheckResponse(
+    public static EnhetMedRessursSomHarSluttetOgErLederSanityCheckResponse from(RessursState ressursState, List<IOrgenhet> orgenheter) {
+        return new EnhetMedRessursSomHarSluttetOgErLederSanityCheckResponse(
             ressursState.navident(),
             ressursState.visningsnavn().getFormattedVisningsnavn(),
-            ressursState.sluttdato().orElse(null),
+            ressursState.sluttdato(),
             orgenheter.stream().map(orgenhet -> new EnhetsOrganisasjonSanityCheckResponse(orgenhet.getNavn(), orgenhet.getId(), orgenhet.getAgressoId())).toList());
     }
 }

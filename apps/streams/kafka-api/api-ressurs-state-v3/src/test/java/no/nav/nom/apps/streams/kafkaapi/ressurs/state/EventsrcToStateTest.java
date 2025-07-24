@@ -306,20 +306,20 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
                 Optional.empty(),
                 "etternavn"
             ),
-            Optional.empty(),
+            null,
             List.of("2021"),
             "2021",
             IdentType.STANDARD
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
-            Optional.of(navident),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.of(LocalDate.now()),
-            Optional.empty(),
-            Optional.empty()
+            navident,
+            null,
+            null,
+            null,
+            LocalDate.now(),
+            null,
+            null
         );
 
         return new RessursOpprettetEventV1(
@@ -518,12 +518,12 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
 
         return new RessursState(
             data.personident(),
-            additionalData.navident().orElse("MANGLENDE_NAVIDENT"),
+            additionalData.navident() != null ? additionalData.navident() : "MANGLENDE_NAVIDENT",
             data.visningsnavn(),
             Optional.empty(),
             data.sektor(),
             Optional.empty(),
-            additionalData.startdato(),
+            Optional.ofNullable(additionalData.startdato()),
             Optional.empty()
         );
     }

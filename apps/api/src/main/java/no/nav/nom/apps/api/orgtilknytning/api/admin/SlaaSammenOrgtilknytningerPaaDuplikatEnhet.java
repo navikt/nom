@@ -86,8 +86,8 @@ public class SlaaSammenOrgtilknytningerPaaDuplikatEnhet {
         }
 
         result.append("\n");
-        result.append("Slår sammen OT'er i Gammel enhet (%s) og Ny enhet (%s) ".formatted(enhetToString(gammelEnhet), enhetToString(nyEnhet))).append("\n");;
-        result.append("Ny enhet vil få ny gyldigFom: ").append(nyGyldigFom).append("\n");;
+        result.append("Slår sammen OT'er i Gammel enhet (%s) og Ny enhet (%s) ".formatted(enhetToString(gammelEnhet), enhetToString(nyEnhet))).append("\n");
+        result.append("Ny enhet vil få ny gyldigFom: ").append(nyGyldigFom).append("\n");
         result.append("\n");
 
         var orgtilknytningerForGammelEnhet = orgtilknytningService.getByEnhet(gammelEnhet.getId());
@@ -103,7 +103,7 @@ public class SlaaSammenOrgtilknytningerPaaDuplikatEnhet {
         Map<OrgtilknytningState, OrgtilknytningState> oterSomIkkeHengerSammen = new HashMap<>();
 
         ressurserForGammelEnhet.forEach(navident -> {
-            result.append("Ressurs: ").append(navident).append("\n");;
+            result.append("Ressurs: ").append(navident).append("\n");
 
             var otIGammelEnhet = orgtilknytningerForGammelEnhet.stream()
                 .filter(ot -> ot.navident().equals(navident))
@@ -113,13 +113,13 @@ public class SlaaSammenOrgtilknytningerPaaDuplikatEnhet {
                 filter(ot -> ot.navident().equals(navident))
                 .findFirst();
 
-            result.append("\t").append("OT på gammel enhet: ").append(otToString(otIGammelEnhet)).append("\n");;
+            result.append("\t").append("OT på gammel enhet: ").append(otToString(otIGammelEnhet)).append("\n");
 
             otINyEnhet.ifPresentOrElse(
                 nyOt -> { // Slå sammen
-                    result.append("\t").append("OT på ny enhet: ").append(otToString(nyOt)).append("\n");;
+                    result.append("\t").append("OT på ny enhet: ").append(otToString(nyOt)).append("\n");
                     if (otHengerSammen(otIGammelEnhet, nyOt, result)) {
-                        result.append("\t").append("Fjerner OT i gammel enhet, endrer startdato i ny OT").append("\n");;
+                        result.append("\t").append("Fjerner OT i gammel enhet, endrer startdato i ny OT").append("\n");
                         oterAaFjerne.add(otIGammelEnhet);
                         oterAaEndreStartdatoPaa.put(nyOt, otIGammelEnhet.gyldigFom());
                     } else {
@@ -127,7 +127,7 @@ public class SlaaSammenOrgtilknytningerPaaDuplikatEnhet {
                     }
                 },
                 () -> { // Kun opprette OT på ny enhet
-                    result.append("\t").append("Fjerner OT i gammel enhet, oppretter identisk i ny enhet").append("\n");;
+                    result.append("\t").append("Fjerner OT i gammel enhet, oppretter identisk i ny enhet").append("\n");
                     oterAaFjerne.add(otIGammelEnhet);
                     gamleOterSomSkalOpprettesPaaNyEnhet.add(otIGammelEnhet);
                 }
@@ -239,19 +239,19 @@ public class SlaaSammenOrgtilknytningerPaaDuplikatEnhet {
 
     private boolean otHengerSammen(OrgtilknytningState gammelOt, OrgtilknytningState nyOt, StringBuffer result) {
         if (gammelOt.gyldigTom().isEmpty()) {
-            result.append("\t").append("Gammel OT har ingen gyldig tom - kan ikke slå sammen").append("\n");;
+            result.append("\t").append("Gammel OT har ingen gyldig tom - kan ikke slå sammen").append("\n");
             return false;
         }
         if (!gammelOt.gyldigTom().get().plusDays(1).isEqual(nyOt.gyldigFom())) {
-            result.append("\t").append("Gammel og ny OT henger ikke sammen på dato - kan ikke slå sammen").append("\n");;
+            result.append("\t").append("Gammel og ny OT henger ikke sammen på dato - kan ikke slå sammen").append("\n");
             return false;
         }
         if (!Objects.equals(gammelOt.orgtilknytningType(), nyOt.orgtilknytningType())) {
-            result.append("\t").append("Gammel og ny OT har ulik tilknytningstype - kan ikke slå sammen").append("\n");;
+            result.append("\t").append("Gammel og ny OT har ulik tilknytningstype - kan ikke slå sammen").append("\n");
             return false;
         }
         if (!Objects.equals(gammelOt.sektor(), nyOt.sektor())) {
-            result.append("\t").append("Gammel og ny OT har ulik sektor - kan ikke slå sammen").append("\n");;
+            result.append("\t").append("Gammel og ny OT har ulik sektor - kan ikke slå sammen").append("\n");
             return false;
         }
         return true;

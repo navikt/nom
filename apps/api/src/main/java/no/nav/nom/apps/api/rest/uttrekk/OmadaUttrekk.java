@@ -37,6 +37,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.time.format.DateTimeFormatter;
 
+import static java.util.Objects.requireNonNullElse;
+
 @Tag(name = "Omada uttrekk")
 @RestController
 @RequestMapping("/api/v1/uttrekk/omada")
@@ -103,8 +105,8 @@ public class OmadaUttrekk {
                         ressurs.visningsnavn().etternavn().trim(),
                         ressurs.visningsnavn().getFormattedVisningsnavn(),
                         ressurs.sektor(),
-                        ressurs.sluttdato().map(dateTimeFormatter::format).orElse(""),
-                        ressurs.startdato().map(dateTimeFormatter::format).orElse("")
+                        requireNonNullElse(ressurs.sluttdato().format(dateTimeFormatter), ""),
+                        requireNonNullElse(ressurs.startdato().format(dateTimeFormatter), "")
                     );
 
                     writer.close();

@@ -74,8 +74,8 @@ public class DvhRessursRestService {
             ressursState.visningsnavn().fornavn(),
             ressursState.visningsnavn().mellomnavn().orElse(null),
             ressursState.visningsnavn().etternavn(),
-            ressursState.startdato().orElse(null),
-            ressursState.sluttdato().orElse(null),
+            ressursState.startdato(),
+            ressursState.sluttdato(),
             orgtilknytninger
         );
     }

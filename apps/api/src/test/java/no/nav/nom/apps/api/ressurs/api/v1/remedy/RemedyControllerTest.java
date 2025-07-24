@@ -24,9 +24,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -40,14 +40,14 @@ import static org.mockito.Mockito.when;
 
 public class RemedyControllerTest extends RestTestBase {
 
-    @MockBean
-    private NIKClient nikClient;
+    @MockitoBean
+    NIKClient nikClient;
 
-    @MockBean
-    private RessursCommandService ressursCommandService;
+    @MockitoBean
+    RessursCommandService ressursCommandService;
 
-    @MockBean
-    protected RessursStateRepository ressursStateRepository;
+    @MockitoBean
+    RessursStateRepository ressursStateRepository;
 
     @Autowired
     TestTokensGenerator testToken;
@@ -64,9 +64,9 @@ public class RemedyControllerTest extends RestTestBase {
                 navn.getEtternavn()
             ),
             new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
-            Optional.empty(),
-            Optional.of(LocalDate.now().plusDays(10)),
-            Optional.empty(),
+            null,
+            LocalDate.now().plusDays(10),
+            null,
             null,
             Collections.emptyList(),
             IdentType.STANDARD,
@@ -196,8 +196,9 @@ public class RemedyControllerTest extends RestTestBase {
                 Sektor.EKSTERN,
                 new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
                 new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
-                Optional.empty(),
-                Optional.empty(), Optional.empty(),
+                null,
+                null,
+                null,
                 null,
                 Collections.emptyList(),
                 IdentType.STANDARD,
@@ -317,9 +318,9 @@ public class RemedyControllerTest extends RestTestBase {
             Sektor.NAV_STATLIG,
             new Visningsnavn("Opprinnelig_fornavn", Optional.empty(), "Opprinnelig_etternavn"),
             new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
+            null,
+            null,
+            null,
             null,
             Collections.emptyList(),
             IdentType.STANDARD,
@@ -334,9 +335,9 @@ public class RemedyControllerTest extends RestTestBase {
                 Sektor.NAV_STATLIG,
                 new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
                 new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
+                null,
+                null,
+                null,
                 null,
                 Collections.emptyList(),
                 IdentType.STANDARD,

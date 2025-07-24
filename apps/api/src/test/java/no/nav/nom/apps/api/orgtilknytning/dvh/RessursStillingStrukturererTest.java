@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -39,10 +39,10 @@ class RessursStillingStrukturererTest extends TestBase {
     @Autowired
     private RessursStillingStrukturerer ressursStillingStrukturerer;
 
-    @MockBean
+    @MockitoBean
     OrgenhetService orgenhetService;
 
-    @MockBean
+    @MockitoBean
     RessursStateRepository ressursStateRepository;
 
     private static IOrgenhet dummyEnhet_1, dummyEnhet_2, dummyEnhet_3, dummyEnhet_4;
@@ -66,9 +66,9 @@ class RessursStillingStrukturererTest extends TestBase {
                 Sektor.NAV_STATLIG,
                 null,
                 null,
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
+                null,
+                null,
+                null,
                 null,
                 Collections.emptyList(),
                 IdentType.STANDARD,
@@ -82,9 +82,9 @@ class RessursStillingStrukturererTest extends TestBase {
                 Sektor.NAV_STATLIG,
                 null,
                 null,
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
+                null,
+                null,
+                null,
                 null,
                 Collections.emptyList(),
                 IdentType.STANDARD,
@@ -323,9 +323,9 @@ class RessursStillingStrukturererTest extends TestBase {
                 Sektor.NAV_STATLIG,
                 null,
                 null,
-                Optional.empty(),
-                Optional.of(ressursSluttdato),
-                Optional.empty(),
+                null,
+                ressursSluttdato,
+                null,
                 null,
                 Collections.emptyList(),
                 IdentType.STANDARD,

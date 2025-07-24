@@ -13,9 +13,9 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
+import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
-import no.nav.nom.contract.nom.state.OrganiseringState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -80,12 +80,16 @@ public class OmadaController {
     public ResponseEntity<OmadaRessursTelefonDTO> getRessursTelefon(@PathVariable String navIdent) {
         var ressursState = ressursStateRepository.findByNavident(navIdent).orElse(null);
 
-        if (!isNull(ressursState) && ressursState.isEkstern())
-            return ressursState.primaryTelefonnummer().map(telefonnummer -> {
-                var ressursInfo = new OmadaRessursTelefonDTO(ressursState.navident(), telefonnummer);
-                logger.debug("Telefonnummer til Omada for ressurs {}: {}", navIdent, ressursInfo);
+        if (!isNull(ressursState) && ressursState.isEkstern()) {
+            var primaryTelefonnummer = ressursState.primaryTelefonnummer();
+            if (primaryTelefonnummer != null) {
+                var ressursInfo = new OmadaRessursTelefonDTO(ressursState.navident(), primaryTelefonnummer);
+                logger.debug("Telefonnummer til Omada for ekstern ressurs {}: {}", navIdent, ressursInfo);
                 return ResponseEntity.ok(ressursInfo);
-            }).orElse(ResponseEntity.notFound().build());
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        }
 
         return dvhRepository.getTelefonNrListByNavIdent(navIdent).stream()
             .findFirst()

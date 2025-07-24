@@ -336,8 +336,8 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
                 .fid(UUID.randomUUID().toString())
                 .navident(NAVIDENT)
                 .sektor(Sektor.NAV_KOMMUNAL)
-                .startdato(Optional.of(LocalDate.of(2024, 1, 1)))
-                .sluttdato(Optional.empty())
+                .startdato(LocalDate.of(2024, 1, 1))
+                .sluttdato(null)
                 .build();
     }
 

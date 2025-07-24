@@ -6,5 +6,5 @@ public enum Relasjon {
     BARN,
     SOSKEN,
     FORELDER,
-    ANNET;
+    ANNET
 }

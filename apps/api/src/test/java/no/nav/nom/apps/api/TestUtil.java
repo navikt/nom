@@ -41,9 +41,9 @@ public class TestUtil {
                 "etternavn" + suffix
             ),
             new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
-            Optional.empty(),
             null,
-            Optional.of(LocalDate.now()),
+            null,
+            LocalDate.now(),
             null,
             Collections.emptyList(),
             IdentType.STANDARD,

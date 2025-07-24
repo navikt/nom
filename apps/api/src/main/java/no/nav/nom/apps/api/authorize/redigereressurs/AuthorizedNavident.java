@@ -300,7 +300,7 @@ public class AuthorizedNavident {
             return false;
         }
         var ressurs = ressursStateRepository.findByNavident(delegertLeder).get();
-        return DateUtils.isPeriodActive(ressurs.startdato().orElse(LocalDate.now()), ressurs.sluttdato().orElse(null));
+        return DateUtils.isPeriodActive(ressurs.startdato(), ressurs.sluttdato());
     }
 
     private boolean erEkstern(String delegertLeder) {

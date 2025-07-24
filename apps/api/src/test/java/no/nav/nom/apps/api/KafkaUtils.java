@@ -20,7 +20,6 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
@@ -28,6 +27,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -48,13 +48,13 @@ public class KafkaUtils {
 
     private final Admin adminClient;
 
-    @SpyBean
+    @MockitoSpyBean
     final NomStateRessursListener nomStateRessursListener;
 
-    @SpyBean
+    @MockitoSpyBean
     final NomStateMasteredRessursListener nomStateMasteredRessursListener;
 
-    @SpyBean
+    @MockitoSpyBean
     final NomStateOrgEnhetListener nomStateOrgEnhetListener;
 
     private final KafkaTemplate<String, RessursState> ressursStateKafkaTemplate;
@@ -144,9 +144,9 @@ public class KafkaUtils {
                 "etternavn" + suffix
             ),
             new Jobbtelefon("12345678" + suffix, TelefonType.NAV_TJENESTE_TELEFON),
-            Optional.empty(),
             null,
-            Optional.of(LocalDate.now()),
+            null,
+            LocalDate.now(),
             null,
             Collections.emptyList(),
             IdentType.STANDARD,

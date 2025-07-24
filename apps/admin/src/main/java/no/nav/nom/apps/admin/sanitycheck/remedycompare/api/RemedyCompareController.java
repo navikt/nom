@@ -4,7 +4,6 @@ import no.nav.nom.apps.admin.sanitycheck.remedycompare.Comparer;
 import no.nav.nom.apps.admin.sanitycheck.remedycompare.ImportedRemedyUser;
 import no.nav.nom.apps.admin.sanitycheck.remedycompare.RemedyCompareResult;
 import no.nav.nom.apps.admin.sanitycheck.remedycompare.RemedyDataFileRepository;
-import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,8 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
 
 @RestController
 @RequestMapping("/RemedyCompare")

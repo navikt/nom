@@ -8,15 +8,14 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 public record OpprettRessursCommand(
     String personident,
     String navident,
-    Optional<Person> pdlPerson,
+    Person pdlPerson,
     Sektor sektor,
     Visningsnavn visningsnavn,
-    Optional<String> primaryTelefonnummer,
+    String primaryTelefonnummer,
     InputMetadata inputMetadata,
     LocalDate startdato,
     String orgEnhetId,

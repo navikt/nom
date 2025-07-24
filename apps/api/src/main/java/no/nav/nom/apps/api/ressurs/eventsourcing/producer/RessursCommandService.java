@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.ressurs.eventsourcing.producer;
 
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
-import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterJobbTelefonCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
@@ -35,7 +34,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -137,6 +135,12 @@ public class RessursCommandService {
 
 
     private CompletableFuture<SendResult<String, RessursEvent>> createRessurs(String fid, OpprettRessursCommand opprettRessursCommand) {
+        var pdlPerson = opprettRessursCommand.pdlPerson();
+        var kjoenn = opprettRessursCommand.pdlPerson() != null ? opprettRessursCommand.pdlPerson().getKjonn().name() : null;
+        var folkeregistrertNavn = opprettRessursCommand.pdlPerson() != null ? new RessursOpprettetEventV1.RessursOpprettetAdditionalData.FolkeregistrertNavn(
+            pdlPerson.getFornavn(), pdlPerson.getMellomnavn(), pdlPerson.getEtternavn()) : null;
+        var foedselsdato = opprettRessursCommand.pdlPerson() != null ? opprettRessursCommand.pdlPerson().getFoedselsdato() : null;
+
         return eventProducer.sendMessage(new RessursOpprettetEventV1(
             fid,
             new RessursOpprettetEventV1.RessursOpprettetEventData(
@@ -150,21 +154,15 @@ public class RessursCommandService {
             ),
             opprettRessursCommand.inputMetadata(),
             new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
-                Optional.ofNullable(opprettRessursCommand.navident()),
-                opprettRessursCommand.pdlPerson().map(r -> r.getKjonn().name()),
-                opprettRessursCommand.pdlPerson()
-                    .map(pdlPerson -> new RessursOpprettetEventV1.RessursOpprettetAdditionalData.FolkeregistrertNavn(
-                        pdlPerson.getFornavn(),
-                        pdlPerson.getMellomnavn(),
-                        pdlPerson.getEtternavn()
-                    )),
-
-                opprettRessursCommand.pdlPerson().map(Person::getFoedselsdato),
-                Optional.ofNullable(opprettRessursCommand.startdato()),
-                Optional.ofNullable(opprettRessursCommand.orgEnhetId()),
-                Optional.ofNullable(opprettRessursCommand.ansettelsesType())
+                opprettRessursCommand.navident(),
+                kjoenn,
+                folkeregistrertNavn,
+                foedselsdato,
+                opprettRessursCommand.startdato(),
+                opprettRessursCommand.orgEnhetId(),
+                opprettRessursCommand.ansettelsesType())
             )
-        ));
+        );
     }
 
     public CompletableFuture<SendResult<String, RessursEvent>> oppdaterPersonidentCommand(

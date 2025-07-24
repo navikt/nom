@@ -56,16 +56,15 @@ public class FysiskBrukerstedService {
     }
 
     public List<RessursState> getAlleRessurserMedFysiskBrukersted(String fysiskBrukerstedNr) {
-        var result =  ressursStateRepository.getAll().stream()
-                .filter(ressurs -> Objects.equals(ressurs.primaryFysiskBrukersted().orElse(null), fysiskBrukerstedNr))
+        return ressursStateRepository.getAll().stream()
+                .filter(ressurs -> Objects.equals(ressurs.primaryFysiskBrukersted(), fysiskBrukerstedNr))
                 .toList();
-        return result;
     }
 
     public List<RessursState> getAlleRessurserPaaEnhetMedFysiskBrukersted(String orgenhetId, String fysiskBrukerstedNr) {
         var navidenter = orgtilknytningStateRepository.getAktiveEllerFremtidigeNavidenterPaaEnhet(orgenhetId);
         return ressursStateRepository.findByNavidentBulk(navidenter).values().stream()
-            .filter(ressurs -> Objects.equals(ressurs.primaryFysiskBrukersted().orElse(null), fysiskBrukerstedNr))
+            .filter(ressurs -> Objects.equals(ressurs.primaryFysiskBrukersted(), fysiskBrukerstedNr))
             .toList();
     }
 

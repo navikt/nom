@@ -62,7 +62,7 @@ public class TestData {
             new Visningsnavn(
                 "Fornavn", Optional.empty(), "Etternavn"
             ),
-            Optional.of("12345678"),
+            "12345678",
             List.of("2021"),
             "2021",
             IdentType.STANDARD
@@ -80,7 +80,7 @@ public class TestData {
     public static RessursSluttdatoOppdatertEventV1 ressursSluttdatoOppdatertEventV1(LocalDate sluttdato) {
         return new RessursSluttdatoOppdatertEventV1(
             UUID.randomUUID().toString(),
-            new RessursSluttdatoOppdatertEventV1.RessursSluttdatoOppdatertEventData(Optional.of(sluttdato)),
+            new RessursSluttdatoOppdatertEventV1.RessursSluttdatoOppdatertEventData(sluttdato),
             inputMetadata()
         );
     }
@@ -251,9 +251,9 @@ public class TestData {
 
     public static RessursOpprettetEventV1.RessursOpprettetAdditionalData ressursOpprettetAdditionalData() {
         return RessursOpprettetEventV1.RessursOpprettetAdditionalData.builder()
-            .navident(Optional.of("Z654321"))
-            .startdato(Optional.of(LocalDate.now()))
-            .orgEnhet(Optional.of("orgenhet"))
+            .navident("Z654321")
+            .startdato(LocalDate.now())
+            .orgEnhet("orgenhet")
             .build();
     }
 
@@ -298,14 +298,14 @@ public class TestData {
         return new RessursState(
             v1.getFid(),
             v1.getRessursOpprettetEventData().personident(),
-            v1.getRessursOpprettetAdditionalData().navident().get(),
+            v1.getRessursOpprettetAdditionalData().navident(),
             v1.getRessursOpprettetEventData().sektor(),
             v1.getRessursOpprettetEventData().visningsnavn(),
             null,
             v1.getRessursOpprettetEventData().primaryTelefonnummer(),
-            Optional.empty(),
+            null,
             v1.getRessursOpprettetAdditionalData().startdato(),
-            Optional.of(v1.getRessursOpprettetEventData().primaryFysiskBrukersted()),
+            v1.getRessursOpprettetEventData().primaryFysiskBrukersted(),
             v1.getRessursOpprettetEventData().fysiskeBrukersteder(),
             IdentType.STANDARD,
             null
@@ -320,10 +320,10 @@ public class TestData {
             Sektor.NAV_STATLIG,
             new Visningsnavn("Nav", Optional.empty(), "Navnesen"),
             new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.of(LocalDate.now()),
-            Optional.of("2700"),
+            null,
+            null,
+            LocalDate.now(),
+            "2700",
             new ArrayList<>(),
             IdentType.STANDARD,
             null

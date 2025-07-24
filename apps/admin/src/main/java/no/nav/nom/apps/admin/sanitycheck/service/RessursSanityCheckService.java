@@ -1,7 +1,11 @@
 package no.nav.nom.apps.admin.sanitycheck.service;
 
 import no.nav.nom.apps.admin.PeriodeUtil;
-import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.*;
+import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedEnhet;
+import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedFlereDOL;
+import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningKoblingInfo;
+import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningUlikSluttdato;
+import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RobotRessurs;
 import no.nav.nom.apps.admin.webclient.nomremedyapiclient.NomRemedyApiClient;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
@@ -19,7 +23,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -140,8 +154,8 @@ public class RessursSanityCheckService {
                             ressurs.navident(),
                             ressurs.fid(),
                             ressurs.visningsnavn().getFormattedVisningsnavn(),
-                            ressurs.startdato().orElse(null),
-                            ressurs.sluttdato().orElse(null),
+                            ressurs.startdato(),
+                            ressurs.sluttdato(),
                             ressurs.sektor(),
                             orgEnhet.map(OrgEnhetState::id).orElse(""),
                             orgEnhet.map(OrgEnhetState::navn).orElse(""),
@@ -169,8 +183,8 @@ public class RessursSanityCheckService {
                     ressurs.map(RessursState::navident).orElse(""),
                     ressurs.map(RessursState::fid).orElse(""),
                     ressurs.map(ressursState -> ressursState.visningsnavn().getFormattedVisningsnavn()).orElse(""),
-                    ressurs.flatMap(RessursState::startdato).orElse(null),
-                    ressurs.flatMap(RessursState::sluttdato).orElse(null),
+                    ressurs.map(RessursState::startdato).orElse(null),
+                    ressurs.map(RessursState::sluttdato).orElse(null),
                     ressurs.map(RessursState::sektor).orElse(null),
                     oe.map(OrgEnhetState::id).orElse(""),
                     oe.map(OrgEnhetState::navn).orElse(""),
@@ -204,7 +218,7 @@ public class RessursSanityCheckService {
         for (OrgtilknytningState orgtilknytning : sisteOrgtilknytninger.values().stream().flatMap(Collection::stream).toList()) {
             var ressurs = alleRessurserSomErAktive.get(orgtilknytning.navident());
 
-            if (!orgtilknytning.gyldigTom().equals(ressurs.sluttdato())) {
+            if (!orgtilknytning.gyldigTom().equals(Optional.ofNullable(ressurs.sluttdato()))) {
                 ulikeSluttdatoer.add(getRessursOrgtilknytningUlikSluttdato(ressurs, orgtilknytning));
             }
         }
@@ -236,7 +250,7 @@ public class RessursSanityCheckService {
         return RessursOrgtilknytningUlikSluttdato.builder()
                 .navident(ressurs.navident())
                 .orgEnhetId(orgtilknytning.orgEnhetId())
-                .ressursSluttdato(ressurs.sluttdato().isPresent() ? ressurs.sluttdato().get() : null)
+                .ressursSluttdato(ressurs.sluttdato())
                 .orgtilknytningSluttdato(orgtilknytning.gyldigTom().isPresent() ? orgtilknytning.gyldigTom().get() : null)
                 .build();
     }
@@ -282,8 +296,8 @@ public class RessursSanityCheckService {
                                 .navident(navident)
                                 .visningsnavn(ressurs.visningsnavn().getFormattedVisningsnavn())
                                 .sektor(ressurs.sektor())
-                                .startdato(ressurs.startdato())
-                                .sluttdato(ressurs.sluttdato())
+                                .startdato(Optional.ofNullable(ressurs.startdato()))
+                                .sluttdato(Optional.ofNullable(ressurs.sluttdato()))
                                 .orgtilknytninger(
                                         alleOrgtilknytningerKobletTilRobotRessurs.get(navident).stream()
                                                 .map(orgtilknytningState ->
@@ -309,8 +323,8 @@ public class RessursSanityCheckService {
                                 .navident(navident)
                                 .visningsnavn(ressurs.visningsnavn().getFormattedVisningsnavn())
                                 .sektor(ressurs.sektor())
-                                .startdato(ressurs.startdato())
-                                .sluttdato(ressurs.sluttdato())
+                                .startdato(Optional.ofNullable(ressurs.startdato()))
+                                .sluttdato(Optional.ofNullable(ressurs.sluttdato()))
                                 .orgtilknytninger(Collections.emptyList())
                                 .build()
                 );
@@ -466,13 +480,13 @@ public class RessursSanityCheckService {
                     if (ressurs.isEmpty()) {
                         return false;
                     }
-                    if (ressurs.get().sluttdato().isPresent() && ressurs.get().sluttdato().get().isBefore(t.gyldigFom())) {
+                    if (ressurs.get().sluttdato() != null && ressurs.get().sluttdato().isBefore(t.gyldigFom())) {
                         return true; // ressurs.sluttDato < tilknytning.gyldigFom
                     }
-                    if (t.gyldigTom().isPresent() && ressurs.get().startdato().isPresent() && ressurs.get().startdato().get().isAfter(t.gyldigTom().get())) {
+                    if (t.gyldigTom().isPresent() && ressurs.get().startdato() != null && ressurs.get().startdato().isAfter(t.gyldigTom().get())) {
                         return true; // ressurs.startDato > tilknytning.gyldigTom
                     }
-                    return t.gyldigTom().isEmpty() && ressurs.get().sluttdato().isPresent(); // ressurs avsluttet > tilknytning ikke avsluttet
+                    return t.gyldigTom().isEmpty() && ressurs.get().sluttdato() != null; // ressurs avsluttet > tilknytning ikke avsluttet
                 }).toList();
     }
 
@@ -504,8 +518,8 @@ public class RessursSanityCheckService {
     public List<RessursState> compareFutureChangedWithDelayEvents() {
         List<RessursState> futureRessursStates = ressursStateRepository.findAllActiveRessurser().values()
             .stream()
-            .filter(ressursState -> ressursState.sluttdato().isPresent()
-                && ressursState.sluttdato().get().isAfter(LocalDate.now()))
+            .filter(ressursState -> ressursState.sluttdato() != null
+                && ressursState.sluttdato().isAfter(LocalDate.now()))
             .toList();
         List<String> delayedEvents = getAllDelayedEventsBlocking();
         List<RessursState> ressurserMedForsinkedeHendelser = new ArrayList<>();

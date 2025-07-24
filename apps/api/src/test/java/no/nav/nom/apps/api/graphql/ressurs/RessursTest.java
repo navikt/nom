@@ -182,9 +182,9 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
                 "etternavn"
             ),
             new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
-            Optional.empty(),
-            Optional.of(LocalDate.now().plusDays(10)),
-            Optional.empty(),
+            null,
+            LocalDate.now().plusDays(10),
+            null,
             null,
             Collections.emptyList(),
             IdentType.STANDARD,
@@ -198,7 +198,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
         assertEquals(ressursState.navident(), outputRessurs.getNavIdent());
         assertEquals(sladdetPersonident(ressursState.personident()), outputRessurs.getPersonIdent());
-        assertEquals(ressursState.sluttdato().orElseThrow(), outputRessurs.getSluttdato());
+        assertEquals(ressursState.sluttdato(), outputRessurs.getSluttdato());
     }
 
     @Test
@@ -215,9 +215,9 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
                 "etternavn"
             ),
             new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
-            Optional.empty(),
-            Optional.of(LocalDate.now().plusDays(10)),
-            Optional.of(LocalDate.now().minusDays(10)),
+            null,
+            LocalDate.now().plusDays(10),
+            LocalDate.now().minusDays(10),
             null,
             Collections.emptyList(),
             IdentType.STANDARD,
@@ -231,7 +231,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
         assertEquals(ressursState.navident(), outputRessurs.getNavIdent());
         assertEquals(sladdetPersonident(ressursState.personident()), outputRessurs.getPersonIdent());
-        assertEquals(ressursState.startdato().orElseThrow(), outputRessurs.getStartdato());
+        assertEquals(ressursState.startdato(), outputRessurs.getStartdato());
     }
 
 

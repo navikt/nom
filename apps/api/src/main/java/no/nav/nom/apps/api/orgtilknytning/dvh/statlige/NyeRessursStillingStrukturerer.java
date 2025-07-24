@@ -92,8 +92,8 @@ public class NyeRessursStillingStrukturerer {
 
     private void sjekkStillingPerioderMotRessursensPeriode(StrukturerteStillingPerioderForNavident sspForNavident) {
         var ressurs = ressursStateRepository.findByNavident(sspForNavident.navident()).orElseThrow();
-        var ressursStart = ressurs.startdato().orElse(LocalDate.of(1900, 1,1));
-        var ressursSlutt = ressurs.sluttdato().orElse(null);
+        var ressursStart = ressurs.startdato() != null ? ressurs.startdato() : LocalDate.of(1900, 1,1);
+        var ressursSlutt = ressurs.sluttdato();
         sspForNavident.stillingPerioder().forEach(sp -> {
             if (foer(sp.gyldigFom(), ressursStart) || etter(sp.gyldigTom(), ressursSlutt)) {
                 sspForNavident.addError(

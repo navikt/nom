@@ -56,8 +56,8 @@ public class RessursEventListener {
     }
 
     private void process(ConsumerRecord<String, RessursEvent> record) {
-        if (RessursOpprettetEventV1.class.isInstance(record.value())) {
-            var key = ((RessursOpprettetEventV1) record.value()).getRessursOpprettetAdditionalData().navident().get();
+        if (record.value() instanceof RessursOpprettetEventV1) {
+            var key = ((RessursOpprettetEventV1) record.value()).getRessursOpprettetAdditionalData().navident();
 
             ressursMetadataRepository.saveOpprettelseMetadata(key, record.value().getMetadata());
         }

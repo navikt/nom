@@ -78,11 +78,11 @@ class EventsrcToState {
                         }
                         state.put("fid", event.getFid()); // store this for later retrieval
                         if (event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data) {
-                            if (data.navident().isPresent()) {
-                                state.put("navident", data.navident().get());
+                            if (data.navident() != null) {
+                                state.put("navident", data.navident());
                             }
-                            if (data.startdato().isPresent()) {
-                                state.put("startdato", data.startdato().get().toString());
+                            if (data.startdato() != null) {
+                                state.put("startdato", data.startdato().toString());
                             }
                         }
                         leggTilFysiskBrukerstedArrayIfMissing(event, state);
@@ -203,10 +203,10 @@ class EventsrcToState {
                     jobbtelefon.hasNonNull("nummer") ? jobbtelefon.get("nummer").asText() : null,
                     jobbtelefon.hasNonNull("type") ? TelefonType.valueOf(jobbtelefon.get("type").asText()) : null
                 ) : null,
-                Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "primaryTelefonnummer")),
-                Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "sluttdato", LocalDate::parse)),
-                Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "startdato", LocalDate::parse)),
-                Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "primaryFysiskBrukersted")),
+                parseNullableFromJson(eventStateAggregate, "primaryTelefonnummer"),
+                parseNullableFromJson(eventStateAggregate, "sluttdato", LocalDate::parse),
+                parseNullableFromJson(eventStateAggregate, "startdato", LocalDate::parse),
+                parseNullableFromJson(eventStateAggregate, "primaryFysiskBrukersted"),
                 fysiskBrukerstedList,
 
                 identTypeFromJson != null ? IdentType.valueOf(identTypeFromJson) : null,

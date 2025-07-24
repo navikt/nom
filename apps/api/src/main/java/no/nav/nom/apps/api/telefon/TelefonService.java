@@ -67,8 +67,8 @@ public class TelefonService {
     public List<Telefon> fetchPrivattelefoner() {
         return ressursStateRepository.findAllActiveRessurser()
                 .values().stream()
-                .filter(ressurs -> ressurs.primaryTelefonnummer().isPresent() && !ressurs.primaryTelefonnummer().get().isBlank())
-                .map(r -> new Telefon(r.navident(), r.primaryTelefonnummer().get(), TelefonType.PRIVAT_TELEFON))
+                .filter(ressurs -> ressurs.primaryTelefonnummer() != null && !ressurs.primaryTelefonnummer().isBlank())
+                .map(r -> new Telefon(r.navident(), r.primaryTelefonnummer(), TelefonType.PRIVAT_TELEFON))
                 .toList();
     }
 
@@ -84,7 +84,7 @@ public class TelefonService {
                 .map(DvhTelefon::toTelefon)
                 .toList();
 
-        Optional<Telefon> privatNummer = findRessursStateByNavident(navident).flatMap(RessursState::primaryTelefonnummer)
+        Optional<Telefon> privatNummer = findRessursStateByNavident(navident).map(RessursState::primaryTelefonnummer)
                 .flatMap(
                         p -> Optional.of(new Telefon(navident, p, TelefonType.PRIVAT_TELEFON))
                 );
