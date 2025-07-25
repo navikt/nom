@@ -320,6 +320,9 @@ app:
   orgenhet:
     nav: sa312u
     vikafossenId: ru151s
+    helfo: mu405g
+    skatt: ja464g
+    riksrev: ge146b
     linjeenhetene: me177r,su645c,ju219d,tu734a
   google-storage-bucket-name:
     missing-ot: no-nav-org-dev-missing-orgtilnytninger-storage-bucket
@@ -494,6 +497,9 @@ app:
 
   orgenhet:
     nav: py437s
+    helfo: je305h
+    skatt: ne938h
+    riksrev: ke602d
     linjeenhetene: ry630r,te464t,se232x,ne994m
     vikafossenId: ru664y
   google-storage-bucket-name:

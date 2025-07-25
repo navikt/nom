@@ -29,6 +29,16 @@ public class DateUtils {
         return periode1.start().isBefore(periode2.end) && periode2.start.isBefore(periode1.end);
     }
 
+    public static boolean isPeriodActiveOrFuture(LocalDate periodStart, LocalDate periodEnd) {
+        return isPeriodFuture(periodStart) || isPeriodActive(periodStart, periodEnd);
+    }
+
+    public static boolean isPeriodFuture(LocalDate periodStart) {
+        periodStart = isNull(periodStart) ? LocalDate.now() : periodStart;
+        var today = LocalDate.now();
+        return periodStart.isAfter(today);
+    }
+
     public static boolean isPeriodActive(LocalDate periodStart, LocalDate periodEnd) {
         periodStart = isNull(periodStart) ? LocalDate.now() : periodStart;
         var today = LocalDate.now();

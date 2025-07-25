@@ -64,6 +64,9 @@ app:
         scopes: ["NOM_WRITE_ROBOT", "MUTATE_RESSURS"]
   orgenhet:
     vikafossenId: dummyVikafossenId
+    helfo: dummyHelfoId
+    skatt: dummySkattId
+    riksrev: dummyRiksrevisjonenId
     linjeenhetene: linje-enhet,en-annen-linjeenhet
     nav: dummyNavId
   google-storage-bucket-name:
