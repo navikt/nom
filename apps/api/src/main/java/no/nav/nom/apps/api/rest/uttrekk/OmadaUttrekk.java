@@ -105,7 +105,7 @@ public class OmadaUttrekk {
                         ressurs.visningsnavn().etternavn().trim(),
                         ressurs.visningsnavn().getFormattedVisningsnavn(),
                         ressurs.sektor(),
-                        requireNonNullElse(ressurs.sluttdato().format(dateTimeFormatter), ""),
+                        ressurs.sluttdato() != null ? ressurs.sluttdato().format(dateTimeFormatter) : "",
                         requireNonNullElse(ressurs.startdato().format(dateTimeFormatter), "")
                     );
 
