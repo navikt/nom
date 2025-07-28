@@ -243,6 +243,9 @@ management:
 app:
   email:
     enabled: false
+  clients:
+    microsoft-graph:
+      send-email: false
   granted-authorities:
     clients:
       nom-ui2:
