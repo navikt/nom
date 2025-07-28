@@ -21,17 +21,17 @@ import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
 const schema = z.object({
   lederNavident: z
     .string({
-      invalid_type_error: "Obligatorisk",
+      error: () => "Ugyldig verdi",
     })
     .min(1, "Obligatorisk"),
   delegertNavident: z
     .string({
-      invalid_type_error: "Obligatorisk",
+      error: () => "Ugyldig verdi",
     })
     .min(1, "Obligatorisk"),
   orgenhetId: z
     .string({
-      invalid_type_error: "Obligatorisk",
+      error: () => "Ugyldig verdi",
     })
     .min(1, "Obligatorisk"),
   gyldigTom: z.string().nullable(),

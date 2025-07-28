@@ -23,7 +23,7 @@ const schema = z.object({
   navident: navidentValidator(),
   sluttdato: z
     .string({
-      invalid_type_error: "Obligatorisk",
+      error: () => "Ugyldig verdi",
     })
     .min(1, "Obligatorisk"),
   confirm: confirmTextValidator(),

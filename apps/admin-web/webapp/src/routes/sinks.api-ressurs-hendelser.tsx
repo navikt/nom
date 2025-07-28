@@ -1,18 +1,22 @@
-import {createFileRoute, Link} from "@tanstack/react-router";
-import {getApiRessursHendelseEventsOptions, searchSchema} from "~/api/queries.ts";
-import {GenericSearchBar} from "~/components/GenericSearchBar.tsx";
-import {ErrorBoundary} from "react-error-boundary";
-import {Alert, Button, HStack, Table} from "@navikt/ds-react";
-import {Suspense} from "react";
-import {BigLoader} from "~/components/BigLoader.tsx";
-import {useSuspenseQuery} from "@tanstack/react-query";
-import {useTableSort} from "~/hooks/useTableSort.ts";
-import {FilesIcon} from "@navikt/aksel-icons";
-import {copyToClipboard} from "~/components/quickdialog.tsx";
-import {EmbeddedJsonView} from "~/components/KafkaEventTable.tsx";
-import {formatDisplayDatetime, formatVisningsnavn} from "~/utils.ts";
-import {NomLink} from "~/components/NomLink.tsx";
-import {JsonModal} from "~/components/JsonModal.tsx";
+import { FilesIcon } from "@navikt/aksel-icons";
+import { Alert, Button, HStack, Table } from "@navikt/ds-react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+
+import {
+  getApiRessursHendelseEventsOptions,
+  searchSchema,
+} from "~/api/queries.ts";
+import { BigLoader } from "~/components/BigLoader.tsx";
+import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
+import { JsonModal } from "~/components/JsonModal.tsx";
+import { EmbeddedJsonView } from "~/components/KafkaEventTable.tsx";
+import { NomLink } from "~/components/NomLink.tsx";
+import { copyToClipboard } from "~/components/quickdialog.tsx";
+import { useTableSort } from "~/hooks/useTableSort.ts";
+import { formatDisplayDatetime, formatVisningsnavn } from "~/utils.ts";
 
 export const Route = createFileRoute("/sinks/api-ressurs-hendelser")({
   validateSearch: searchSchema.parse,
@@ -29,7 +33,6 @@ export const Route = createFileRoute("/sinks/api-ressurs-hendelser")({
     );
   },
 });
-
 
 function ApiRessursHendelserPage() {
   const search = Route.useSearch();

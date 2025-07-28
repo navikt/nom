@@ -23,7 +23,7 @@ const schema = z.object({
   orgenhetId: z.string().min(1, "Må oppgis"),
   gyldigTom: z
     .string({
-      invalid_type_error: "Obligatorisk",
+      error: () => "Ugyldig verdi",
     })
     .min(1, "Obligatorisk"),
   confirm: confirmTextValidator(),

@@ -22,7 +22,8 @@ import type {
   OrgEnhetStateDTO,
   OrgtilknytningMedOrgEnhet,
   OverlappendeOrgtilknytning,
-  RemedyCompareResult, RessursHendelseKafkaDTO,
+  RemedyCompareResult,
+  RessursHendelseKafkaDTO,
   RessursMedEnhet,
   RessursMedFlereDOL,
   RessursOrgtilknytningKoblingInfo,
@@ -234,7 +235,6 @@ export function getApiRessursHendelseEventsOptions(search: searchType) {
       ).json<RessursHendelseKafkaDTO[]>(),
   });
 }
-
 
 export function getRessurs(navident: string | undefined) {
   return queryOptions({
