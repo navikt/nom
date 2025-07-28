@@ -3,6 +3,8 @@ package no.nav.nom.apps.api.ressurs.api.app;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
+import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
+import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.nik.NIKClient;
@@ -104,6 +106,7 @@ public class RessursRestService {
     private final FysiskBrukerstedService fysiskBrukerstedService;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgtilknytningService orgtilknytningService;
+    private final MicrosoftGraphClient microsoftGraphClient;
 
     @Value("${app.orgenhet.vikafossenId}")
     private String vikafossenOrgEnhetId;
@@ -123,7 +126,7 @@ public class RessursRestService {
         KafkaTopicReader kafkaTopicReader,
         NomMastered nomMastered,
         AuthResolver authResolver, FysiskBrukerstedService fysiskBrukerstedService, RemedyEnhetMapperService remedyEnhetMapperService,
-        OrgtilknytningService orgtilknytningService
+        OrgtilknytningService orgtilknytningService, MicrosoftGraphClient microsoftGraphClient
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -143,6 +146,7 @@ public class RessursRestService {
         this.fysiskBrukerstedService = fysiskBrukerstedService;
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.orgtilknytningService = orgtilknytningService;
+        this.microsoftGraphClient = microsoftGraphClient;
     }
 
     public List<RessursState> findRessurser(RessursFilter ressursFilter) {
@@ -623,7 +627,28 @@ public class RessursRestService {
 
         logger.debug("createRessurs for {} - {}", reaktivertRessurs.navident(), request.visningsetternavn());
 
+        try {
+            emailNotificationForReaktivertRessurs(existingRessurs, reaktivertRessurs);
+        } catch (Exception ignored) {}
+
         return reaktivertRessurs;
+    }
+
+    private void emailNotificationForReaktivertRessurs(RessursState existingRessurs, RessursState reaktivertRessurs) {
+        try {
+            List<String> recipients = new ArrayList<>();
+            recipients.add("Linn.Renate.Fredriksen@nav.no");
+            recipients.add("Roy.Grini@nav.no");
+
+            var emailMessage = new EmailMessage("Reaktivering av ressurs - " + existingRessurs.navident(),
+            """
+            Navident: %s
+            
+            Tidligere sektor: %s
+            Ny sektor: %s
+            """.formatted(existingRessurs.navident(), existingRessurs.sektor(), reaktivertRessurs.sektor()), recipients);
+            microsoftGraphClient.sendEmail(emailMessage).subscribe();
+        } catch (Exception ignored) {}
     }
 
     private String createNavident(OpprettRessursRequest request) {

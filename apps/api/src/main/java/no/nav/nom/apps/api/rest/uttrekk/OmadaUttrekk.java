@@ -37,8 +37,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.time.format.DateTimeFormatter;
 
-import static java.util.Objects.requireNonNullElse;
-
 @Tag(name = "Omada uttrekk")
 @RestController
 @RequestMapping("/api/v1/uttrekk/omada")
