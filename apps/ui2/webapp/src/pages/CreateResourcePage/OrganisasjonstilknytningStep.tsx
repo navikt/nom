@@ -504,7 +504,9 @@ function InnerOrgEnhetSelect() {
   const { watch } = useFormContext();
 
   const orgEnheterSomKanHaRessurser =
-    useQuery(getOrgEnheterSomKanHaRessurser).data || [];
+    useQuery(getOrgEnheterSomKanHaRessurser).data?.filter(
+      (enhet) => !enhet.navn.toLowerCase().includes("vikafossen"),
+    ) || [];
 
   const selectedOrgEnhet = orgEnheterSomKanHaRessurser.find(
     (orgEnhet) => orgEnhet.id === watch("orgEnhetId"),

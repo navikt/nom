@@ -102,7 +102,7 @@ export const ValgtOrgEnhet = ({
 
   const valgtOrgenhetKanHaRessurser = (
     enheterSomKanHaRessurser.data || []
-  ).some((it) => it.id === orgEnhet.id);
+  ).some((enhet) => enhet.id === orgEnhet.id);
 
   const visTabellKnapp = isOrgEnhetDriftsenhetQuery.data ?? false;
 

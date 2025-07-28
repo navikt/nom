@@ -102,6 +102,7 @@ import {
   formatDisplayDate,
   formatVisningsnavn,
   isGyldighetsPeriodeActive,
+  isInDevelopment,
   isSameDateOrAfter,
   todayWithoutTimezone,
 } from "~/utils";
@@ -241,17 +242,25 @@ export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
   );
 }
 
-function defaultNyOrgtilknytning(sektor: Sektor) {
+function defaultNyOrgtilknytning(ressurs: Ressurs) {
+  const inDevelopment = isInDevelopment();
+
+  const vikafossenId = inDevelopment ? "ru151s" : "ru664y";
+
+  const vikafossenRessurs = ressurs.identType === IdentType.VIKAFOSSEN;
+
+  const ressursSektor = ressurs.sektor;
+
   return {
     erDagligOppfolging: false,
-    orgEnhetId: "",
+    orgEnhetId: vikafossenRessurs ? vikafossenId : "",
     gyldigFom: "",
     gyldigTom: "",
-    sektor: sektor,
+    sektor: ressursSektor,
     orgtilknytningType:
-      sektor === Sektor.NAV_KOMMUNAL
+      ressursSektor === Sektor.NAV_KOMMUNAL
         ? Tilknytningtype.INGEN
-        : (sektor === Sektor.NAV_STATLIG
+        : (ressursSektor === Sektor.NAV_STATLIG
             ? tilknytningstyperStatlige
             : tilknytningstyperEksterne)[0],
   };
@@ -309,7 +318,7 @@ function OrgtilknytningForm({
   const defaultOrgtilknytninger =
     orgtilknytninger.length > 0
       ? orgtilknytninger
-      : [defaultNyOrgtilknytning(ressurs.sektor)];
+      : [defaultNyOrgtilknytning(ressurs)];
 
   const methods = useForm<{
     mappedeOrgtilknytninger: Partial<OrgtilknytningState>[];
@@ -450,7 +459,7 @@ function OrgtilknytningForm({
               <Button
                 icon={<PlusCircleIcon />}
                 onClick={() => {
-                  prepend(defaultNyOrgtilknytning(ressurs.sektor), {
+                  prepend(defaultNyOrgtilknytning(ressurs), {
                     focusIndex: 0,
                   });
                 }}
@@ -464,8 +473,8 @@ function OrgtilknytningForm({
           )}
 
         {fields.map((field, index) => {
-          const gyldigTom = watch(`mappedeOrgtilknytninger.${index}.gyldigTom`);
           const gyldigFom = watch(`mappedeOrgtilknytninger.${index}.gyldigFom`);
+          const gyldigTom = watch(`mappedeOrgtilknytninger.${index}.gyldigTom`);
 
           const existingOt = !!field.fid;
 
@@ -476,7 +485,7 @@ function OrgtilknytningForm({
             subMonths(todayWithoutTimezone(), 2),
           );
 
-          const fremtidig = nomDateIsAfterToday(gyldigFom);
+          const fremtidig = !!gyldigFom && nomDateIsAfterToday(gyldigFom);
 
           const editOtDisabled =
             existingOt &&
@@ -508,19 +517,14 @@ function OrgtilknytningForm({
               `}
               key={field.id}
             >
-              {existingOt ? (
-                <EditOrgilkntyningFormPart
-                  avsluttet={avsluttet}
-                  fremtidig={fremtidig}
-                  index={index}
-                />
-              ) : (
-                <NewOrgtilknytningFormPart
-                  index={index}
-                  key={field.id}
-                  onRemove={() => remove(index)}
-                />
-              )}
+              <OrgEnhetFormPart
+                avsluttet={avsluttet}
+                existingOt={existingOt}
+                fremtidig={fremtidig}
+                index={index}
+                onRemove={() => remove(index)}
+                vikafossen={ressurs.identType === IdentType.VIKAFOSSEN}
+              />
 
               <HStack
                 css={css`
@@ -537,7 +541,6 @@ function OrgtilknytningForm({
                   }
                   label="Fra og med"
                   name={`mappedeOrgtilknytninger.${index}.gyldigFom`}
-                  triggerOthers={[`mappedeOrgtilknytninger.${index}.gyldigTom`]}
                 />
 
                 <FormDateWrapper
@@ -680,20 +683,31 @@ function OrgtilknytningForm({
   );
 }
 
-function NewOrgtilknytningFormPart({
+function OrgEnhetFormPart({
   index,
+  avsluttet,
+  fremtidig,
+  existingOt,
+  vikafossen,
   onRemove,
 }: {
   index: number;
+  avsluttet: boolean;
+  fremtidig: boolean;
+  existingOt: boolean;
+  vikafossen: boolean;
   onRemove: () => void;
 }) {
   const { watch } = useFormContext();
   const field = watch(`mappedeOrgtilknytninger.${index}`);
+
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(field.orgEnhetId as string),
     queryFn: () => getOrgEnhet.queryFn(field.orgEnhetId as string),
     enabled: !!field.orgEnhetId,
   });
+
+  const selectOrgEnhet = !existingOt && !vikafossen;
 
   return (
     <>
@@ -703,95 +717,92 @@ function NewOrgtilknytningFormPart({
           justify-content: space-between;
         `}
       >
-        <Heading data-cy="ny-orgtilknytning-header" size="medium">
-          Legg til ny organisasjonstilknytning
-        </Heading>
+        <div>
+          <Heading size="medium">
+            {selectOrgEnhet
+              ? "Legg til ny organisasjonstilknytning"
+              : orgEnhetQuery.data?.navn}
+          </Heading>
 
-        <Button
-          icon={<MinusCircleIcon />}
-          onClick={onRemove}
-          size="small"
-          type="button"
-          variant="secondary"
-        >
-          Forkast
-        </Button>
-      </div>
-      <div
-        css={css`
-          font-size: var(--a-font-size-large);
-          font-weight: 100;
-          width: 100%;
-          margin-top: var(--a-spacing-4);
-        `}
-      >
-        <FormOrgEnhetSelectWrapper
-          name={`mappedeOrgtilknytninger.${index}.orgEnhetId`}
-        />
+          {!selectOrgEnhet && (
+            <BodyShort>
+              Enhet i Remedy: <b>{orgEnhetQuery.data?.remedyEnhetId}</b>
+            </BodyShort>
+          )}
+        </div>
+
+        {existingOt ? (
+          <>
+            {avsluttet && (
+              <Tag
+                css={css`
+                  height: fit-content;
+                `}
+                size="medium"
+                variant="warning"
+              >
+                Avsluttet
+              </Tag>
+            )}
+
+            {fremtidig && (
+              <Tag
+                css={css`
+                  height: fit-content;
+                `}
+                size="medium"
+                variant="success"
+              >
+                Fremtidig
+              </Tag>
+            )}
+          </>
+        ) : (
+          <Button
+            css={css`
+              height: fit-content;
+            `}
+            icon={<MinusCircleIcon />}
+            onClick={onRemove}
+            size="small"
+            type="button"
+            variant="secondary"
+          >
+            Forkast
+          </Button>
+        )}
       </div>
 
-      <BodyLong
-        css={css`
-          margin-top: var(--a-spacing-2);
-        `}
-      >
-        Enhet i Remedy: <b>{orgEnhetQuery.data?.remedyEnhetId}</b>
-      </BodyLong>
+      {selectOrgEnhet && (
+        <div>
+          <div
+            css={css`
+              margin-top: var(--a-spacing-4);
+            `}
+          >
+            <FormOrgEnhetSelectWrapper
+              name={`mappedeOrgtilknytninger.${index}.orgEnhetId`}
+            />
+          </div>
+
+          <BodyShort
+            css={css`
+              margin-top: var(--a-spacing-2);
+            `}
+          >
+            Enhet i Remedy: <b>{orgEnhetQuery.data?.remedyEnhetId}</b>
+          </BodyShort>
+        </div>
+      )}
     </>
-  );
-}
-
-function EditOrgilkntyningFormPart({
-  index,
-  avsluttet,
-  fremtidig,
-}: {
-  index: number;
-  avsluttet: boolean;
-  fremtidig: boolean;
-}) {
-  const { watch } = useFormContext();
-  const field = watch(`mappedeOrgtilknytninger.${index}`);
-
-  const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(field.orgEnhetId as string),
-    queryFn: () => getOrgEnhet.queryFn(field.orgEnhetId as string),
-    enabled: !!field.orgEnhetId,
-  });
-
-  return (
-    <div>
-      <div
-        css={css`
-          display: flex;
-          justify-content: space-between;
-        `}
-      >
-        <Heading size="medium">{orgEnhetQuery.data?.navn}</Heading>
-
-        {avsluttet && (
-          <Tag size="medium" variant="warning">
-            Avsluttet
-          </Tag>
-        )}
-
-        {fremtidig && (
-          <Tag size="medium" variant="success">
-            Fremtidig
-          </Tag>
-        )}
-      </div>
-
-      <BodyLong>
-        Enhet i Remedy: <b>{orgEnhetQuery.data?.remedyEnhetId}</b>
-      </BodyLong>
-    </div>
   );
 }
 
 function FormOrgEnhetSelectWrapper({ name }: { name: string }) {
   const orgEnheterSomKanHaRessurser =
-    useQuery(getOrgEnheterSomKanHaRessurser).data || [];
+    useQuery(getOrgEnheterSomKanHaRessurser).data?.filter(
+      (enhet) => !enhet.navn.toLowerCase().includes("vikafossen"),
+    ) || [];
 
   return (
     <OrgEnhetSelectFormPart
