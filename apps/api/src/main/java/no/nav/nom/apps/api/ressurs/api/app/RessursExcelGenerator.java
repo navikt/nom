@@ -156,7 +156,7 @@ public class RessursExcelGenerator {
             jobbtelefon.setCellValue(isNull(ressurs.state().jobbtelefon()) ? "" : ressurs.state().jobbtelefon().nummer());
             privatTelefon.setCellValue(requireNonNullElse(ressurs.state().primaryTelefonnummer(), ""));
             epost.setCellValue(ressurs.epost());
-            if (kanSeSluttdato) {
+            if (kanSeSluttdato && ressurs.state().sluttdato() != null) {
                 sluttdato.setCellValue(
                     requireNonNullElse(ressurs.state().sluttdato().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")), ""));
             }
