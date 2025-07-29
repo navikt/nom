@@ -586,7 +586,7 @@ public class RessursRestService {
                 metadata
             );
 
-        if (reaktivertRessurs.primaryTelefonnummer() != null && !existingRessurs.primaryTelefonnummer().equals(reaktivertRessurs.primaryTelefonnummer()))
+        if (reaktivertRessurs.primaryTelefonnummer() != null && !Objects.equals(existingRessurs.primaryTelefonnummer(), reaktivertRessurs.primaryTelefonnummer()))
             ressursCommandService.oppdatertPrimaryTelefonnummer(
                 new OppdaterPrimaryTelefonnummerCommand(existingRessurs.fid(), reaktivertRessurs.primaryTelefonnummer()),
                 metadata
