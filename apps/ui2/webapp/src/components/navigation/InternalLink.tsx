@@ -1,3 +1,4 @@
+import { css } from "@emotion/react";
 import { Link } from "@tanstack/react-router";
 
 export function InternalLink({
@@ -18,6 +19,11 @@ export function InternalLink({
   return (
     <Link
       className={className}
+      css={css`
+        :hover {
+          text-decoration: none;
+        }
+      `}
       rel={rel}
       target={target ?? undefined}
       title={title}

@@ -422,21 +422,21 @@ function OrgEnheterStatistikkGridWrapper({
   }
   if (antallNavKontaktsenter > 0 && hasAdminAccess) {
     statistikkItems.push({
-      label: "Nav Kontaktsenter:",
+      label: "Nav kontaktsenter:",
       value: antallNavKontaktsenter,
       helpText: "Hjelpetekst",
     });
   }
   if (antallNavArbeidOgYtelser > 0 && hasAdminAccess) {
     statistikkItems.push({
-      label: "Nav Arbeid og ytelser:",
+      label: "Nav arbeid og ytelser:",
       value: antallNavArbeidOgYtelser,
       helpText: "Hjelpetekst",
     });
   }
   if (antallNavFamilieOgPensjonsytelser > 0 && hasAdminAccess) {
     statistikkItems.push({
-      label: "Nav Familie og pensjonsytelser:",
+      label: "Nav familie- og pensjonsytelser:",
       value: antallNavFamilieOgPensjonsytelser,
       helpText: "Hjelpetekst",
     });

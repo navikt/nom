@@ -12,7 +12,7 @@ import {
   VStack,
 } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Link as ReactRouterLink, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import React, { useState } from "react";
 
@@ -30,6 +30,7 @@ import {
   ModalProvider,
   useModal,
 } from "~/components/modalProvider/ModalProvider";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { FysiskBrukerstedSelect } from "~/components/select/FysiskBrukerstedSelect";
 import { useTableSort } from "~/hooks/useTableSort";
@@ -556,52 +557,32 @@ function FysiskBrukerstedFlyttingTable() {
                   key={ressurs.navident}
                 >
                   <Table.DataCell>
-                    <ReactRouterLink
-                      css={css`
-                        :hover {
-                          text-decoration: none;
-                        }
-                      `}
-                      params={{ id: ressurs.navident }}
+                    <SmartLink
+                      href={`/ressurs/${ressurs.navident}`}
                       target="_blank"
-                      to="/ressurs/$id"
                     >
                       {ressurs.navident}
-                    </ReactRouterLink>
+                    </SmartLink>
                   </Table.DataCell>
                   <Table.DataCell>
-                    <ReactRouterLink
-                      css={css`
-                        :hover {
-                          text-decoration: none;
-                        }
-                      `}
-                      params={{ id: ressurs.navident }}
+                    <SmartLink
+                      href={`/ressurs/${ressurs.navident}`}
                       target="_blank"
-                      to="/ressurs/$id"
                     >
                       {formatVisningsnavn(ressurs.visningsnavn)}
-                    </ReactRouterLink>
+                    </SmartLink>
                   </Table.DataCell>
                   <Table.DataCell>
                     {SektorNameMapping[ressurs.sektor]}
                   </Table.DataCell>
                   <Table.DataCell>
-                    {ressurs.orgEnhet ? (
-                      <ReactRouterLink
-                        css={css`
-                          :hover {
-                            text-decoration: none;
-                          }
-                        `}
-                        params={{ id: ressurs.navident }}
+                    {ressurs.orgEnhet && (
+                      <SmartLink
+                        href={`/org/${ressurs.orgEnhet.id}`}
                         target="_blank"
-                        to="/ressurs/$id"
                       >
                         {`${ressurs.orgEnhet.name} (${ressurs.orgEnhet.id})`}
-                      </ReactRouterLink>
-                    ) : (
-                      ""
+                      </SmartLink>
                     )}
                   </Table.DataCell>
                   <Table.DataCell>

@@ -1,3 +1,4 @@
+import { css } from "@emotion/react";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { Link } from "@navikt/ds-react";
 
@@ -23,6 +24,11 @@ export function ExternalLink({
   return (
     <Link
       className={className}
+      css={css`
+        :hover {
+          text-decoration: none;
+        }
+      `}
       href={href}
       inlineText={inline}
       rel={rel}
