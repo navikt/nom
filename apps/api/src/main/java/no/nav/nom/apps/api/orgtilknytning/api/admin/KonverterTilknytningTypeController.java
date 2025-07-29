@@ -1,6 +1,9 @@
 package no.nav.nom.apps.api.orgtilknytning.api.admin;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.job.KonverterEksternSamarbeidspartnerTilknytningtype;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import org.springframework.http.HttpStatus;
@@ -24,6 +27,10 @@ public class KonverterTilknytningTypeController {
         this.konverterEksternSamarbeidspartnerTilknytningtype = konverterEksternSamarbeidspartnerTilknytningtype;
     }
 
+    @Operation(
+        description = "Konverter Tilknytningstyper for eksterne samarbeidspartnere til Helfo, skatt og Riksrevisjonen",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
     @PostMapping("/konverter-tilknytning-typer")
     public ResponseEntity<StandardResponse> konverterTilknytningTyper() {
         var result = konverterEksternSamarbeidspartnerTilknytningtype.konverterTilknytningtyperTilEksterneOrgEnheter();
