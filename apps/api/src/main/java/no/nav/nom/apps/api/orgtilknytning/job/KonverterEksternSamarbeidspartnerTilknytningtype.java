@@ -59,7 +59,7 @@ public class KonverterEksternSamarbeidspartnerTilknytningtype {
                         .tilknytningtype(Optional.of(tilknytningtype))
                         .inputMetadata(InputMetadata.builder()
                             .inputInterfaceName("REST-API")
-                            .inputInterfaceMethodName("konverterHelfo")
+                            .inputInterfaceMethodName("konverter-tilknytning-typer")
                             .inputInterfaceMethodArguments(orgtilknytningState)
                             .origination(new Origination(getAuthenticatedNavIdent(), "Swagger"))
                             .build())
