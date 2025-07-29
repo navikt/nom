@@ -14,6 +14,7 @@ import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedeve
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorStateRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -399,10 +400,17 @@ public class NomRemedyIntegrasjonServiceNew {
     }
 
     private Optional<LocalDate> getUtlopsdato(Integer sektor, OrgtilknytningState dolOrgtilknytning) {
-        if (sektor == 2 && dolOrgtilknytning.gyldigTom().isEmpty()) {
+        var maaHaSluttDato = erKonsulentSomMaaHaSluttDato(sektor, dolOrgtilknytning);
+        if (maaHaSluttDato && dolOrgtilknytning.gyldigTom().isEmpty() ) {
             throw new RequiredValueMissingException("Utløpsdato er påkrevd for ekstern sektor");
         }
-        return sektor == 2 ? dolOrgtilknytning.gyldigTom() : Optional.empty();
+        return maaHaSluttDato ? dolOrgtilknytning.gyldigTom() : Optional.empty();
+    }
+
+    private boolean erKonsulentSomMaaHaSluttDato(Integer sektor, OrgtilknytningState ot) {
+        var tilknytningstype = ot.orgtilknytningType().orElse(Tilknytningtype.ANNET);
+        //Hvis 'Ekstern' sektor, krev sluttdato med unntak av HELFO og Skatteetaten
+        return sektor == 2 && tilknytningstype != Tilknytningtype.HELFO && tilknytningstype != Tilknytningtype.SKATTEETATEN;
     }
 
     public List<ErrorState> getAllErrorStates() {

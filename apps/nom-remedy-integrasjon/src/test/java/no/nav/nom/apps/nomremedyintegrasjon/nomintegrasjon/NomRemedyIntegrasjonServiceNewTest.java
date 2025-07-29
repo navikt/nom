@@ -566,9 +566,17 @@ public class NomRemedyIntegrasjonServiceNewTest {
     }
 
     private Optional<LocalDate> getUtlopsdato(Integer sektor, OrgtilknytningState dolOrgtilknytning) {
-        if (sektor == 2 && dolOrgtilknytning.gyldigTom().isEmpty())
+        var maaHaSluttDato = erKonsulentSomMaaHaSluttDato(sektor, dolOrgtilknytning);
+        if (maaHaSluttDato && dolOrgtilknytning.gyldigTom().isEmpty() ) {
             throw new RequiredValueMissingException("Utløpsdato er påkrevd for ekstern sektor");
-        return sektor == 2 ? dolOrgtilknytning.gyldigTom() : Optional.empty();
+        }
+        return maaHaSluttDato ? dolOrgtilknytning.gyldigTom() : Optional.empty();
+    }
+
+    private boolean erKonsulentSomMaaHaSluttDato(Integer sektor, OrgtilknytningState ot) {
+        var tilknytningstype = ot.orgtilknytningType().orElse(Tilknytningtype.ANNET);
+        //Hvis 'Ekstern' sektor, krev sluttdato med unntak av HELFO og Skatteetaten
+        return sektor == 2 && tilknytningstype != Tilknytningtype.HELFO && tilknytningstype != Tilknytningtype.SKATTEETATEN;
     }
 
     private NomIntegrasjonEntity nomIntegrasjonEntityFromNomData(RessursState ressursState, OrgtilknytningState dolOrgtilknytning, boolean isMasseflytting) {
