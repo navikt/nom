@@ -25,8 +25,8 @@ public class KonverterTilknytningTypeController {
 
     @RequestMapping("/konverter-tilknytning-typer")
     public ResponseEntity<StandardResponse> konverterTilknytningTyper() {
-        konverterEksternSamarbeidspartnerTilknytningtype.konverterTilknytningtyperTilEksterneOrgEnheter();
-        return ResponseEntity.ok(StandardResponse.builder().message("Konvertert tilknytningstyper vellykket").build());
+        var result = konverterEksternSamarbeidspartnerTilknytningtype.konverterTilknytningtyperTilEksterneOrgEnheter();
+        return ResponseEntity.ok(StandardResponse.builder().message("Konvertert tilknytningstyper vellykket\n" + result).build());
     }
 
     @ExceptionHandler(Exception.class)
