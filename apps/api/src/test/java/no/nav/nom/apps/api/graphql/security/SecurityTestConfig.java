@@ -17,8 +17,8 @@ import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @Import({
 //    WebsocketSourceConfiguration.class,
@@ -32,24 +32,24 @@ import org.springframework.context.annotation.Import;
 })
 @EnableConfigurationProperties(value = AppGrantedAuthoritiesProperties.class)
 public class SecurityTestConfig {
-    @MockBean
+    @MockitoBean
     OrgenhetService orgenhetService;
-    @MockBean
+    @MockitoBean
     Unleash unleash;
-    @MockBean
+    @MockitoBean
     OrgtilknytningService orgtilknytningService;
-    @MockBean
+    @MockitoBean
     RessursStateRepository ressursStateRepository;
-    @MockBean
+    @MockitoBean
     DvhRepository dvhRepository;
-    @MockBean
+    @MockitoBean
     OrganiseringStateRepository organiseringStateRepository;
-    @MockBean
+    @MockitoBean
     RemedyEnhetMapperService remedyEnhetMapperService;
-    @MockBean
+    @MockitoBean
     GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
-    @MockBean
+    @MockitoBean
     RessursMetadataRepository ressursMetadataRepository;
-    @MockBean
+    @MockitoBean
     LuceneService luceneService;
 }

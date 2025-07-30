@@ -18,7 +18,6 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
@@ -28,6 +27,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidationException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Instant;
@@ -64,9 +64,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @Disabled("Depends on external resources. Run explicitly")
 public class E2ENavIdent {
 
-    @MockBean
+    @MockitoBean
     RnRTestNeedProducer rnRTestNeedProducer;
-    @MockBean
+    @MockitoBean
     RnRTestListener rnRTestListener;
 
     @LocalServerPort
