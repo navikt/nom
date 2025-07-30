@@ -77,7 +77,7 @@ public class PdlUtils {
         var personDataJson = objectMapper.createObjectNode();
         personDataJson.set("navn", objectMapper.createArrayNode().add(objectMapper.valueToTree(navn)));
         personDataJson.set("kjoenn", objectMapper.createArrayNode().add(objectMapper.valueToTree(kjoenn)));
-        personDataJson.set("foedsel", objectMapper.createArrayNode().add(foedselsdato));
+        personDataJson.set("foedselsdato", objectMapper.createArrayNode().add(foedselsdato));
 
         var result = objectMapper.createObjectNode();
         result.set("data", objectMapper.createObjectNode().set("hentPerson", personDataJson));

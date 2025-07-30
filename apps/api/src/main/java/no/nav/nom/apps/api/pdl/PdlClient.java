@@ -32,7 +32,7 @@ public class PdlClient {
                 kjoenn {
                     kjoenn
                 }
-                foedsel {
+                foedselsdato {
                    foedselsdato
                    foedselsaar
                 }
@@ -89,7 +89,7 @@ public class PdlClient {
             .get("kjoenn")
             .asText();
 
-        final var jsonFoedsel = person.get("foedsel").get(0);
+        final var jsonFoedsel = person.get("foedselsdato").get(0);
 
         // foedselsdato might be missing, foedselsaar is always present.
         LocalDate foedselsdato = jsonFoedsel.hasNonNull("foedselsdato") ? LocalDate.parse(jsonFoedsel.get("foedselsdato").asText()) :
