@@ -44,9 +44,9 @@ import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.apps.api.u4diff.U4DiffPaaMastrede;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @Import({
      TestTokensGenerator.class
@@ -77,44 +77,44 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 public class GraphqlTestConfig {
-    @MockBean
+    @MockitoBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
-    @MockBean
+    @MockitoBean
     OrgEnhetCommandService orgEnhetCommandService;
-    @MockBean
+    @MockitoBean
     KafkaTopicReader kafkaTopicReader;
-    @MockBean
+    @MockitoBean
     RemedyEnhetMapperService remedyEnhetMapperService;
-    @MockBean
+    @MockitoBean
     GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
-    @MockBean
+    @MockitoBean
     RessursCommandService ressursCommandService;
-    @MockBean
+    @MockitoBean
     NomMastered nomMastered;
-    @MockBean
+    @MockitoBean
     DvhOrgenhetsLast dvhOrgenhetsLast;
-    @MockBean
+    @MockitoBean
     OrgEnhetTypeHandler orgEnhetTypeHandler;
-    @MockBean
+    @MockitoBean
     RessursStillingLoader ressursStillingLoader;
-    @MockBean
+    @MockitoBean
     EksterneRessurserLoader eksterneRessurserLoader;
-    @MockBean
+    @MockitoBean
     OrganiseringService organiseringService;
-    @MockBean
+    @MockitoBean
     KommunaleRessurserLoader kommunaleRessurserLoader;
-    @MockBean
+    @MockitoBean
     AuthorizedNavident authorizedNavident;
-    @MockBean
+    @MockitoBean
     ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState;
-    @MockBean
+    @MockitoBean
     NomStateDelegertLederListener nomStateDelegertLederListener;
-    @MockBean
+    @MockitoBean
     RessursEventSourceRepository ressursEventSourceRepository;
-    @MockBean
+    @MockitoBean
     ValidationRepository validationRepository;
-    @MockBean
+    @MockitoBean
     Unleash unleash;
-    @MockBean
+    @MockitoBean
     U4DiffPaaMastrede u4DiffPaaMastrede;
 }
