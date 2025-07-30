@@ -113,9 +113,11 @@ public class RemedyIntegrasjonRepositoryService {
             throw RequiredValueMissingException.forField("tiltredelsesdato");
         }
 
-        if (nomIntegrasjonEntity.getSektor() == 2 && nomIntegrasjonEntity.getUtlopsdato() == null) {
-            throw RequiredValueMissingException.forField("utløpsdato");
-        }
+        // Skal ikke trenge å validere dette her - utløpsdato kan være null for eksterne med tilknytningstype Helfo og Skatt.
+        // Kravet til utløpsdato for andre er satt og gjort i nomIntegrasjonEntityFromNomData(...) før denne kalles
+//        if (nomIntegrasjonEntity.getSektor() == 2 && nomIntegrasjonEntity.getUtlopsdato() == null) {
+//            throw RequiredValueMissingException.forField("utløpsdato");
+//        }
     }
 
     private boolean nomIntegrasjonEntityProvidesNewDataFromNom(NomIntegrasjonEntity newNomIntegrasjonEntity) {
