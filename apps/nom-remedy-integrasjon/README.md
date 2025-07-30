@@ -38,6 +38,7 @@ FORNAVN og ETTERNAVN skal ha stor forbokstav i hvert ord, og resten små bokstav
 (Eksempel: Anne-Lise Berg Hansen)
 TILTREDELSESDATO skal inneholde en tallverdi som representerer antall sekunder siden 01.01.1970.
 UTLØPSDATO skal stå blank for statlige og kommunalt ansatte. For eksterne skal den inneholde en tallverdi som representerer antall sekunder siden 01.01.1970. Utløpsdatoen kan maksimalt settes til ett åt fra dagens dato.
+ Unntak for utløpsdato krav på eksterrne gjelder for SKATT og HELFO brukere. Disse kan ha tom utløpsdato. 
 ENTRY_OPERASJON settes til verdien 'Slette' hvis ansettelsesforholdet til en eksisterende identitet opphører.
 ENTRY_OPERASJON settes til verdien 'Ny' i alle andre tilfeller
 ```
