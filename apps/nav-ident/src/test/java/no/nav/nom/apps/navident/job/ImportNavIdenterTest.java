@@ -14,8 +14,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -36,13 +36,13 @@ class ImportNavIdenterTest extends SpringBootTestBase {
     @Autowired
     ImportNavIdenter importNavIdenter;
 
-    @MockBean
+    @MockitoBean
     SourceEventRepository sourceEventRepository;
 
-    @MockBean
+    @MockitoBean
     KafkaTemplate<String, SourceEvent> producer;
 
-    @MockBean
+    @MockitoBean
     EventSourceService eventSourceService;
 
     @Captor

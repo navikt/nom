@@ -5,7 +5,7 @@ import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.time.LocalDate;
@@ -19,7 +19,7 @@ public class OrgEnhetIdGeneratorTest {
     @Autowired
     private OrgEnhetIdGenerator orgEnhetIdGenerator;
 
-    @MockBean
+    @MockitoBean
     OrgEnhetStateRepository orgEnhetStateService;
 
     String idRegex = "^[bdfghjkmnprstv][aeuy]\\d{3}[abcdefghjkmnprstuvwxyz]$"; // 2 lowercase letters (consonant + vovel) + 3 digits + 1 lowercase letter
