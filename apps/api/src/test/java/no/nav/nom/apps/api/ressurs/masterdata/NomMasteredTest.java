@@ -10,11 +10,8 @@ import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.testcontainers.shaded.org.checkerframework.checker.units.qual.A;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -36,7 +33,7 @@ class NomMasteredTest extends TestBase {
     @Autowired
     NomStateMasteredRessursListener nomStateMasteredRessursListener;
 
-    @MockBean
+    @MockitoBean
     RessursStateRepository ressursStateRepository;
 
     CountDownLatch latch;

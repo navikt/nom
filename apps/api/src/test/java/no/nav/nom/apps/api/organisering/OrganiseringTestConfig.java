@@ -39,9 +39,9 @@ import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @Import({
     DvhOrganiseringMockUtils.class
@@ -69,51 +69,51 @@ import org.springframework.kafka.annotation.EnableKafka;
 @EnableKafka
 @AutoConfigureJson
 public class OrganiseringTestConfig {
-    @MockBean
+    @MockitoBean
     OrganiseringEventSourceRepository organiseringEventSourceRepository;
-    @MockBean
+    @MockitoBean
     OrgtilknytningStateRepository orgtilknytningStateRepository;
-    @MockBean
+    @MockitoBean
     NomStateRessursListener nomStateRessursListener;
-    @MockBean
+    @MockitoBean
     NomStateOrgEnhetListener nomStateOrgEnhetListener;
-    @MockBean
+    @MockitoBean
     NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
-    @MockBean
+    @MockitoBean
     NomStateOrganiseringListener nomStateOrganiseringListener;
-    @MockBean
+    @MockitoBean
     NomStateMasteredRessursListener nomStateMasteredRessursListener;
-    @MockBean
+    @MockitoBean
     NomStateDelegertLederListener nomStateDelegertLederListener;
 
-    @MockBean
+    @MockitoBean
     RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
 
-    @MockBean
+    @MockitoBean
     ValidationRepository validationRepository;
 
-    @MockBean
+    @MockitoBean
     OrgEnhetCommandService orgEnhetCommandService;
 
-    @MockBean
+    @MockitoBean
     OrgEnhetTypeHandler orgEnhetTypeHandler;
 
-    @MockBean
+    @MockitoBean
     RessursStillingLoader ressursStillingLoader;
 
-    @MockBean
+    @MockitoBean
     EksterneRessurserLoader eksterneRessurserLoader;
 
-    @MockBean
+    @MockitoBean
     KommunaleRessurserLoader kommunaleRessurserLoader;
 
-    @MockBean
+    @MockitoBean
     AuthorizedNavident authorizedNavident;
 
-    @MockBean
+    @MockitoBean
     ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState;
 
-    @MockBean
+    @MockitoBean
     DvhOrdsClient dvHOrdsClient;
 }
 

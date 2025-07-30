@@ -33,9 +33,9 @@ import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @Import({
     DvhRestConsumer.class
@@ -54,52 +54,52 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 public class DvhTestConfig {
-    @MockBean
+    @MockitoBean
     RessursStateRepository ressursStateRepository;
-    @MockBean
+    @MockitoBean
     OrgenhetService orgenhetService;
-    @MockBean
+    @MockitoBean
     OrgEnhetStateRepository orgEnhetStateRepository;
-    @MockBean
+    @MockitoBean
     OrgtilknytningStateRepository orgtilknytningStateRepository;
-//    @MockBean
+//    @MockitoBean
 //    DvhOrdsClient dvHOrdsClient;
-    @MockBean
+    @MockitoBean
     NomStateRessursListener nomStateRessursListener;
-    @MockBean
+    @MockitoBean
     NomStateOrgEnhetListener nomStateOrgEnhetListener;
-    @MockBean
+    @MockitoBean
     NomStateOrganiseringListener nomStateOrganiseringListener;
-    @MockBean
+    @MockitoBean
     NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
-    @MockBean
+    @MockitoBean
     NomStateMasteredRessursListener nomStateMasteredRessursListener;
-    @MockBean
+    @MockitoBean
     NomStateDelegertLederListener nomStateDelegertLederListener;
-    @MockBean
+    @MockitoBean
     RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
-    @MockBean
+    @MockitoBean
     ValidationRepository validationRepository;
-    @MockBean
+    @MockitoBean
     OrgEnhetCommandService orgEnhetCommandService;
-    @MockBean
+    @MockitoBean
     OrgEnhetIdGenerator orgEnhetIdGenerator;
-    @MockBean
+    @MockitoBean
     OrgEnhetTypeHandler orgEnhetTypeHandler;
-    @MockBean
+    @MockitoBean
     RessursStillingLoader ressursStillingLoader;
-    @MockBean
+    @MockitoBean
     EksterneRessurserLoader eksterneRessurserLoader;
-    @MockBean
+    @MockitoBean
     OrganiseringService organiseringService;
-    @MockBean
+    @MockitoBean
     KommunaleRessurserLoader kommunaleRessurserLoader;
-    @MockBean
+    @MockitoBean
     AuthorizedNavident authorizedNavident;
-    @MockBean
+    @MockitoBean
     DvhStartupLoadMonitor dvhStartupLoadMonitor;
-    @MockBean
+    @MockitoBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
-    @MockBean
+    @MockitoBean
     ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState;
 }
