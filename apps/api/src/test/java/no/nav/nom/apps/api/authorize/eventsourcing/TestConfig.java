@@ -9,9 +9,9 @@ import no.nav.nom.libs.state.authorize.DelegertLederStateAutoconfiguration;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @Import({
     AuthorizeCommandService.class,
@@ -25,6 +25,6 @@ import org.springframework.kafka.annotation.EnableKafka;
 @EnableKafka
 @AutoConfigureJson
 public class TestConfig {
-    @MockBean
+    @MockitoBean
     AuthorizeEventSourceRepository authorizeEventSourceRepository;
 }

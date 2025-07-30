@@ -14,13 +14,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -46,16 +46,16 @@ class NavidentControllerWebMvcTest {
     @Autowired
     MockOAuth2Server mockOAuth2Server;
 
-    @MockBean
+    @MockitoBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     IdentService identService;
 
-    @MockBean
+    @MockitoBean
     EventSourceProducer eventSourceProducer;
 
     @BeforeEach
