@@ -108,7 +108,7 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
     }
 
     @Operation(
-        description = "Lager en fjernOrgtilknytning Eventsrc meldinger for liste av orgtilknytning FID's",
+        description = "Lager fjernOrgtilknytning Eventsrc meldinger for liste av orgtilknytning FID's",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -129,18 +129,18 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
 
         otFids.forEach(fid -> {
             if (!validFid(fid)) {
-                response.append("FID %s er ikke gyldig".formatted(HtmlUtils.htmlEscape(fid)));
+                response.append("FID %s er ikke gyldig".formatted(HtmlUtils.htmlEscape(fid))).append("\n");
                 hasError.set(true);
             }
 
             var orgtilknytning = orgtilknytningService.findByFid(fid);
             if (orgtilknytning.isEmpty()) {
-                response.append("Finner ingen orgtilknytning med FID: " + HtmlUtils.htmlEscape(fid));
+                response.append("Finner ingen orgtilknytning med FID: " + HtmlUtils.htmlEscape(fid)).append("\n");
                 hasError.set(true);
             }
 
             if (!"CONFIRM".equals(confirm)) {
-                response.append("Orgtilknytning med FID %s er funnet.. Men vil ikke slettes da handling ikke er bekreftet".formatted(HtmlUtils.htmlEscape(fid)));
+                response.append("Orgtilknytning med FID %s er funnet.. Men vil ikke slettes da handling ikke er bekreftet".formatted(HtmlUtils.htmlEscape(fid))).append("\n");
             }
         });
         if (!hasError.get() && "CONFIRM".equals(confirm)) {
