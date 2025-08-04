@@ -108,7 +108,7 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
     }
 
     @Operation(
-        description = "Lag en fjernOrgtilknytning Eventsrc melding",
+        description = "Lager en fjernOrgtilknytning Eventsrc meldinger for liste av orgtilknytning FID's",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -168,7 +168,7 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
                 );
             });
         }
-        if (hasError.get()) {
+        if (hasError.get() || !"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response.toString());
         }
         return ResponseEntity.ok().body("Fjern event er nå sendt for %s orgtilknytninger ".formatted(otFids.size()));
