@@ -24,13 +24,16 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Objects.isNull;
 
@@ -102,6 +105,73 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
             )
         );
         return ResponseEntity.ok().body("Orgtilknytning med FID %s er funnet. Fjern event er nå sendt".formatted(HtmlUtils.htmlEscape(fid)));
+    }
+
+    @Operation(
+        description = "Lag en fjernOrgtilknytning Eventsrc melding",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+        }
+    )
+    @PostMapping(value = "/fjernOrgtilknytninger")
+    public ResponseEntity<String> fjernOrgtilknytning(
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
+        @Parameter(description = "Liste over FID's å slette") @RequestBody List<String> otFids
+    ) {
+        StringBuffer response = new StringBuffer();
+        AtomicBoolean hasError = new AtomicBoolean(false);
+
+        otFids.forEach(fid -> {
+            if (!validFid(fid)) {
+                response.append("FID %s er ikke gyldig".formatted(HtmlUtils.htmlEscape(fid)));
+                hasError.set(true);
+            }
+
+            var orgtilknytning = orgtilknytningService.findByFid(fid);
+            if (orgtilknytning.isEmpty()) {
+                response.append("Finner ingen orgtilknytning med FID: " + HtmlUtils.htmlEscape(fid));
+                hasError.set(true);
+            }
+
+            if (!"CONFIRM".equals(confirm)) {
+                response.append("Orgtilknytning med FID %s er funnet.. Men vil ikke slettes da handling ikke er bekreftet".formatted(HtmlUtils.htmlEscape(fid)));
+            }
+        });
+        if (!hasError.get() && "CONFIRM".equals(confirm)) {
+            otFids.forEach(fid -> {
+                var orgtilknytning = orgtilknytningService.findByFid(fid);
+
+                orgtilknytningCommandService.fjernOrgtilknytning(
+                    fid,
+                    new FjernOrgtilknytning(
+                        orgtilknytning.get().navident(),
+                        orgtilknytning.get().orgEnhetId(),
+                        orgtilknytning.get().gyldigFom(),
+                        orgtilknytning.get().gyldigTom(),
+                        new InputMetadata(
+                            "/api/admin/manuelleEvtsrcMeldinger",
+                            "fjernOrgtilknytninger",
+                            fid,
+                            new Origination(
+                                SecurityUtil.getAuthenticatedNavIdent(),
+                                "Admin swagger/rest"
+                            )
+                        ),
+                        null
+                    )
+                );
+            });
+        }
+        if (hasError.get()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response.toString());
+        }
+        return ResponseEntity.ok().body("Fjern event er nå sendt for %s orgtilknytninger ".formatted(otFids.size()));
     }
 
     @Operation(
