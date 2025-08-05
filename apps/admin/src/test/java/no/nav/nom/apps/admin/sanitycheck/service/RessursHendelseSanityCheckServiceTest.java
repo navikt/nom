@@ -52,6 +52,6 @@ class RessursHendelseSanityCheckServiceTest {
         var res = service.getDuplikateHendelser(List.of(hendelse1, hendelse2, hendelse3, hendelse4));
         
         
-        assertThat(res.size()).as("Forventet antall duplikater").isEqualTo(1);
+        assertThat(res.size()).as("Forventet antall duplikater").isEqualTo(2);
     }
 }
