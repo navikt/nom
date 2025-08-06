@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -26,7 +27,11 @@ public class RessursHendelseSanityCheckService {
 
     public List<RessursHendelseKafkaDTO> finnDuplikateHendelser() {
         Instant start = Instant.now();
-        var duplikater = getDuplikateHendelser(hendelseApiRepository.getRessursHendelser());
+        List<RessursHendelseKafkaDTO> duplikater = getDuplikateHendelser(hendelseApiRepository.getRessursHendelser())
+            .stream()
+            .sorted(Comparator.comparing(RessursHendelseKafkaDTO::navident))
+            .toList();
+
         Duration duration = Duration.between(start, Instant.now());
         String timeUsed = "%02d m %02d s %03d ms".formatted(duration.toMinutesPart(), duration.toSecondsPart(), duration.toMillisPart());
 

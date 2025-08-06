@@ -40,7 +40,7 @@ public class RessursHendelseSanityCheckController {
         }
     )
     @GetMapping(value = "/duplikater")
-    public ResponseEntity<List<RessursHendelseKafkaDTO>> dataSanityCheckRessurser() {
+    public ResponseEntity<List<RessursHendelseKafkaDTO>> finnDuplikateRessursHendelser() {
         return ok(service.finnDuplikateHendelser());
     }
 
