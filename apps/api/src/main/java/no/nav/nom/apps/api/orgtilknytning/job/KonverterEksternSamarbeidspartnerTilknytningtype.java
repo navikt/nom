@@ -19,7 +19,7 @@ import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNa
 
 @Component
 public class KonverterEksternSamarbeidspartnerTilknytningtype {
-    private final List<String> EXCLUDE_2310 = Arrays.asList("L105654	", "Y130043	", "L133149	", "H157490	", "B100739	", "S127124	", "S155717	", "N153314	", "S120955	", "S108637	", "S122231	", "S108216	", "A100148	", "A100212	", "P155451	", "T109635	", "L105471	", "S107967	", "S109003	", "K172311");
+    private final List<String> EXCLUDE_2310 = Arrays.asList("L105654", "Y130043	", "L133149	", "H157490	", "B100739	", "S127124	", "S155717	", "N153314	", "S120955	", "S108637	", "S122231	", "S108216	", "A100148	", "A100212	", "P155451	", "T109635	", "L105471	", "S107967	", "S109003	", "K172311");
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final NomMastered nomMastered;
