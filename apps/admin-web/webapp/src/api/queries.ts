@@ -716,3 +716,14 @@ export async function getOverlappendeHistoriskeDolOrgtilknytninger(): Promise<
     )
     .json<OverlappendeOrgtilknytning[]>();
 }
+
+export async function getDuplikateRessursHendelser(): Promise<RessursHendelseKafkaDTO[]> {
+  return await ky
+    .get(
+      `${API_BASE_URL}/SanityCheck/ressurshendelser/duplikater`,
+      {
+        timeout: 120_000, // 120 seconds
+      },
+    )
+    .json<RessursHendelseKafkaDTO[]>();
+}

@@ -14,6 +14,7 @@ import { RessursRoboter } from "~/sanitychecks/Ressurs/RessursRoboter.tsx";
 import { RessursSluttetMedAktivOT } from "~/sanitychecks/Ressurs/RessursSluttetMedAktivOT.tsx";
 import { RessursUlikSluttdatoOrgtilknytning } from "~/sanitychecks/Ressurs/RessursUlikSluttdatoOrgtilknytning.tsx";
 import { RessursUtenOrgtilknytning } from "~/sanitychecks/Ressurs/RessursUtenOrgtilknytning.tsx";
+import {DuplikateRessursHendelser} from "~/sanitychecks/Hendelser/DuplikateRessursHendelser.tsx";
 
 export const Route = createFileRoute("/sanity-checks/ressurs")({
   component: () => {
@@ -82,6 +83,9 @@ function ListSelector(props: { selected: string }) {
     case "RessursDelayedEventComparison": {
       return <RessursDelayedEventComparison />;
     }
+    case "DuplikateRessurshendelser": {
+      return <DuplikateRessursHendelser />
+    }
     default: {
       return <></>;
     }
@@ -123,6 +127,9 @@ function RessursSanityChecks() {
         <option value="RessursRoboter">Robot-ressurser</option>
         <option value="RessursDelayedEventComparison">
           Ressurser med fremtidig endring som ikke er i DelayedEvent
+        </option>
+        <option value="DuplikateRessurshendelser">
+          Duplikate ressurs-hendelser
         </option>
       </Select>
       <ListSelector selected={selected} />
