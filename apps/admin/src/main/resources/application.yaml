@@ -53,6 +53,9 @@ authentication:
     extendedReadOnly: ${EXTENDED_READONLY_GROUPID:readOnlyGroup}
 
 management:
+  metrics:
+    tags:
+      app: ${app.name}
   endpoint:
     health:
       show-details: always
