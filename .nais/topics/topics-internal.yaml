@@ -78,6 +78,9 @@ spec:
     - team: org
       application: nom-rdbms-data
       access: read     
+    - team: nom
+      application: skjermede-personer
+      access: read
 
 ---
 
