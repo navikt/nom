@@ -5,23 +5,31 @@ import io.getunleash.Unleash;
 import lombok.SneakyThrows;
 import no.nav.nom.apps.api.KafkaUtils;
 import no.nav.nom.apps.api.TestTokensGenerator;
+import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
+import no.nav.nom.apps.api.graphql.common.metrics.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.graphql.controller.GraphQLOrgEnhetController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLPersonController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLRessursController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLSearchController;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
+import no.nav.nom.apps.api.ressurs.eventsourcing.recoverybackup.RessursEventSourceRepository;
 import no.nav.nom.apps.api.telefon.TelefonService;
+import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
+import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.organisering.OrganiseringStateAutoconfiguration;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateAutoconfiguration;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateAutoconfiguration;
 import no.nav.nom.libs.state.ressurs.RessursStateAutoconfiguration;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateAutoconfiguration;
+import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +58,6 @@ import static java.util.Collections.emptyMap;
 @ContextConfiguration(
     classes = {
         GraphqlTestConfig.class,
-        GraphQLExtendedIntegrationTestConfig.class,
         RessursStateAutoconfiguration.class,
         OrgEnhetStateAutoconfiguration.class,
         OrganiseringStateAutoconfiguration.class,
@@ -126,6 +133,30 @@ public class GraphQLExtendedIntegrationTestBase {
 
     @MockitoBean
     TelefonService telefonService;
+
+    @MockitoBean
+    OrgEnhetCommandService orgEnhetCommandService;
+
+    @MockitoBean
+    NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
+
+    @MockitoBean
+    NomStateOrganiseringListener nomStateOrganiseringListener;
+
+    @MockitoBean
+    NomStateMasteredRessursListener nomStateMasteredRessursListener;
+
+    @MockitoBean
+    NomStateDelegertLederListener nomStateDelegertLederListener;
+
+    @MockitoBean
+    RessursEventSourceRepository ressursEventSourceRepository;
+
+    @MockitoBean
+    AuthorizedNavident authorizedNavident;
+
+    @MockitoBean
+    GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
 
     @BeforeEach
     protected void setup() {

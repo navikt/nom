@@ -31,10 +31,12 @@ import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
+import org.mockito.Mockito;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockReset;
 
 @Import({
     DvhRestConsumer.class
@@ -52,52 +54,100 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 public class DvhTestConfig {
-    @MockitoBean
-    RessursStateRepository ressursStateRepository;
-    @MockitoBean
-    OrgenhetService orgenhetService;
-    @MockitoBean
-    OrgEnhetStateRepository orgEnhetStateRepository;
-    @MockitoBean
-    OrgtilknytningStateRepository orgtilknytningStateRepository;
-//    @MockitoBean
-//    DvhOrdsClient dvHOrdsClient;
-    @MockitoBean
-    NomStateRessursListener nomStateRessursListener;
-    @MockitoBean
-    NomStateOrgEnhetListener nomStateOrgEnhetListener;
-    @MockitoBean
-    NomStateOrganiseringListener nomStateOrganiseringListener;
-    @MockitoBean
-    NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
-    @MockitoBean
-    NomStateMasteredRessursListener nomStateMasteredRessursListener;
-    @MockitoBean
-    NomStateDelegertLederListener nomStateDelegertLederListener;
-    @MockitoBean
-    RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
-    @MockitoBean
-    ValidationRepository validationRepository;
-    @MockitoBean
-    OrgEnhetCommandService orgEnhetCommandService;
-    @MockitoBean
-    OrgEnhetIdGenerator orgEnhetIdGenerator;
-    @MockitoBean
-    OrgEnhetTypeHandler orgEnhetTypeHandler;
-    @MockitoBean
-    RessursStillingLoader ressursStillingLoader;
-    @MockitoBean
-    EksterneRessurserLoader eksterneRessurserLoader;
-    @MockitoBean
-    OrganiseringService organiseringService;
-    @MockitoBean
-    KommunaleRessurserLoader kommunaleRessurserLoader;
-    @MockitoBean
-    AuthorizedNavident authorizedNavident;
-    @MockitoBean
-    DvhStartupLoadMonitor dvhStartupLoadMonitor;
-    @MockitoBean
-    OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
-    @MockitoBean
-    ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState;
+    @Bean
+    RessursStateRepository ressursStateRepository() {
+        return Mockito.mock(RessursStateRepository.class, MockReset.after());
+    }
+    @Bean
+    OrgenhetService orgenhetService() {
+        return Mockito.mock(OrgenhetService.class, MockReset.after());
+    }
+    @Bean
+    OrgEnhetStateRepository orgEnhetStateRepository() {
+        return Mockito.mock(OrgEnhetStateRepository.class, MockReset.after());
+    }
+    @Bean
+    OrgtilknytningStateRepository orgtilknytningStateRepository() {
+        return Mockito.mock(OrgtilknytningStateRepository.class, MockReset.after());
+    }
+//    @Bean
+//    DvhOrdsClient dvHOrdsClient() {
+//        return Mockito.mock(DvhOrdsClient.class, MockReset.after());
+//    }
+    @Bean
+    NomStateRessursListener nomStateRessursListener() {
+        return Mockito.mock(NomStateRessursListener.class, MockReset.after());
+    }
+    @Bean
+    NomStateOrgEnhetListener nomStateOrgEnhetListener() {
+        return Mockito.mock(NomStateOrgEnhetListener.class, MockReset.after());
+    }
+    @Bean
+    NomStateOrganiseringListener nomStateOrganiseringListener() {
+        return Mockito.mock(NomStateOrganiseringListener.class, MockReset.after());
+    }
+    @Bean
+    NomStateOrgtilknytningListener nomStateOrgtilknytningListener() {
+        return Mockito.mock(NomStateOrgtilknytningListener.class, MockReset.after());
+    }
+    @Bean
+    NomStateMasteredRessursListener nomStateMasteredRessursListener() {
+        return Mockito.mock(NomStateMasteredRessursListener.class, MockReset.after());
+    }
+    @Bean
+    NomStateDelegertLederListener nomStateDelegertLederListener() {
+        return Mockito.mock(NomStateDelegertLederListener.class, MockReset.after());
+    }
+    @Bean
+    RessursHendelseForEventsourceService ressursHendelseForEventsourceService() {
+        return Mockito.mock(RessursHendelseForEventsourceService.class, MockReset.after());
+    }
+    @Bean
+    ValidationRepository validationRepository() {
+        return Mockito.mock(ValidationRepository.class, MockReset.after());
+    }
+    @Bean
+    OrgEnhetCommandService orgEnhetCommandService() {
+        return Mockito.mock(OrgEnhetCommandService.class, MockReset.after());
+    }
+    @Bean
+    OrgEnhetIdGenerator orgEnhetIdGenerator() {
+        return Mockito.mock(OrgEnhetIdGenerator.class, MockReset.after());
+    }
+    @Bean
+    OrgEnhetTypeHandler orgEnhetTypeHandler() {
+        return Mockito.mock(OrgEnhetTypeHandler.class, MockReset.after());
+    }
+    @Bean
+    RessursStillingLoader ressursStillingLoader() {
+        return Mockito.mock(RessursStillingLoader.class, MockReset.after());
+    }
+    @Bean
+    EksterneRessurserLoader eksterneRessurserLoader() {
+        return Mockito.mock(EksterneRessurserLoader.class, MockReset.after());
+    }
+    @Bean
+    OrganiseringService organiseringService() {
+        return Mockito.mock(OrganiseringService.class, MockReset.after());
+    }
+    @Bean
+    KommunaleRessurserLoader kommunaleRessurserLoader() {
+        return Mockito.mock(KommunaleRessurserLoader.class, MockReset.after());
+    }
+    @Bean
+    AuthorizedNavident authorizedNavident() {
+        return Mockito.mock(AuthorizedNavident.class, MockReset.after());
+    }
+    @Bean
+    DvhStartupLoadMonitor dvhStartupLoadMonitor() {
+        return Mockito.mock(DvhStartupLoadMonitor.class, MockReset.after());
+    }
+    @Bean
+    OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager() {
+        return Mockito.mock(OAuth2AuthorizedClientManager.class, MockReset.after());
+    }
+    @Bean
+    ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState() {
+        return Mockito.mock(ManuelleRessurserOgLedereTilState.class, MockReset.after());
+    }
 }
