@@ -55,8 +55,7 @@ public class KontaktinfoClient {
             .build();
 
         return onBehalfOfAuthorizedWebClient.post()
-                .uri(uriBuilder -> uriBuilder
-                    .path("/api/kontaktinfo/ressurser/" + "{orgenhetId}")
+                .uri("/api/kontaktinfo/ressurser/{orgenhetId}", uriBuilder -> uriBuilder
                     .build(orgenhetId))
                 .body(Mono.just(navidents), List.class)
                 .retrieve()
