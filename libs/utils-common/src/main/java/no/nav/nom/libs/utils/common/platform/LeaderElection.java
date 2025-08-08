@@ -18,8 +18,8 @@ public class LeaderElection {
     private final WebClient webClient;
 
 
-    public LeaderElection(Environment environment) {
-        this.webClient = WebClient.builder()
+    public LeaderElection(Environment environment, WebClient.Builder builder) {
+        this.webClient = builder.clone()
             .baseUrl("http://" + environment.getRequiredProperty(ELECTOR_PATH_NAME))
             .build();
         this.environment = environment;

@@ -32,13 +32,14 @@ public class MicrosoftGraphClient {
 
     public MicrosoftGraphClient(
             @Qualifier("authorizedClientManager") OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager,
-            AppProperties appProperties
+            AppProperties appProperties,
+            WebClient.Builder builder
     ) {
         this.msGraphClientProperties = appProperties.clients().microsoftGraph();
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("email");
 
-        this.webClient = WebClient.builder()
+        this.webClient = builder.clone()
                 .filter(oAuth2Filter)
                 .baseUrl(msGraphClientProperties.baseUrl())
                 .build();

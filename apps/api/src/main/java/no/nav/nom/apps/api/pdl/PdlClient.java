@@ -44,20 +44,23 @@ public class PdlClient {
     @Autowired
     public PdlClient(
         AppProperties appProperties,
-        OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager
+        OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager,
+        WebClient.Builder builder
     ) {
         final var pdlProperties = appProperties.clients().pdl();
 
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("pdl");
-        this.graphQlClient = HttpGraphQlClient.builder(WebClient.builder().filter(oAuth2Filter))
+        this.graphQlClient = HttpGraphQlClient.builder(
+            builder.clone()
+            .filter(oAuth2Filter))
             .url(pdlProperties.baseUrl() + "/graphql")
             .headers(headers -> {
                 headers.setContentType(MediaType.APPLICATION_JSON);
                 headers.add("Tema", pdlProperties.tema());
                 headers.add("behandlingsnummer", pdlProperties.behandlingsnummer());
-            })
-            .build();
+            }
+        ).build();
     }
 
     public Optional<Person> hentPerson(String personIdent) {

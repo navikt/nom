@@ -49,6 +49,7 @@ import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -84,6 +85,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
     , OTUtenforHierarki.class
     , OrgtilknytningService.class
     , DvhOrdsClientImpl.class
+    , WebClientAutoConfiguration.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 @EnableKafka

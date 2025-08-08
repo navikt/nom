@@ -14,12 +14,12 @@ public class ClientConfig {
     private String baseUrl;
 
     @Bean
-    public WebClient webClient(OAuth2AuthorizedClientManager authorizedClientManager) {
+    public WebClient webClient(OAuth2AuthorizedClientManager authorizedClientManager, WebClient.Builder builder) {
         ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2Client =
             new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
         oauth2Client.setDefaultClientRegistrationId("nom-paarorende");
 
-        return WebClient.builder()
+        return builder.clone()
             .baseUrl(baseUrl)
             .apply(oauth2Client.oauth2Configuration())
             .build();

@@ -34,9 +34,9 @@ public class OnBehalfOfTokenRepository {
     private final JWSSigner jwsSigner;
     private final Map<String, SignedJWT> cachedAadTokensByUserAndScope = new ConcurrentHashMap<>(2);
 
-    public OnBehalfOfTokenRepository(AuthenticationProperties authenticationProperties) throws Exception {
+    public OnBehalfOfTokenRepository(AuthenticationProperties authenticationProperties, WebClient.Builder builder) throws Exception {
         this.aadAuthenticationProperties = authenticationProperties.aad();
-        this.webClient = WebClient.builder()
+        this.webClient = builder.clone()
             .baseUrl(aadAuthenticationProperties.issuerBaseUrl())
             .build();
         this.jwsSigner = new DefaultJWSSignerFactory().createJWSSigner(aadAuthenticationProperties.jwk());

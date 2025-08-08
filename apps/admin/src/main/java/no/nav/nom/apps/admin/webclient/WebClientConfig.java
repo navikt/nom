@@ -40,22 +40,22 @@ public class WebClientConfig {
     }
 
     @Bean
-    public WebClient nomApiAuthorizedWebClient(@Value("${app.clients.nom-api.url}") String baseUrl , OAuth2AuthorizedClientManager authorizedClientManager) {
+    public WebClient nomApiAuthorizedWebClient(@Value("${app.clients.nom-api.url}") String baseUrl , OAuth2AuthorizedClientManager authorizedClientManager, WebClient.Builder builder) {
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("nom-api");
 
-        return WebClient.builder()
+        return builder.clone()
             .baseUrl(baseUrl)
             .filter(oAuth2Filter)
             .build();
     }
 
     @Bean
-    public WebClient nomRemedyApiAuthorizedWebClient(@Value("${app.clients.nom-remedy-integrasjon.url}") String baseUrl, OAuth2AuthorizedClientManager authorizedClientManager) {
+    public WebClient nomRemedyApiAuthorizedWebClient(@Value("${app.clients.nom-remedy-integrasjon.url}") String baseUrl, OAuth2AuthorizedClientManager authorizedClientManager, WebClient.Builder builder) {
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("nom-remedy-integrasjon");
 
-        return WebClient.builder()
+        return builder.clone()
             .baseUrl(baseUrl)
             .filters(exchangeFilterFunctions -> {
                 exchangeFilterFunctions.add(oAuth2Filter);

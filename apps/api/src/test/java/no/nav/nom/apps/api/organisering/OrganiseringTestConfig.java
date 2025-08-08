@@ -36,6 +36,7 @@ import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -49,6 +50,7 @@ import org.springframework.kafka.annotation.EnableKafka;
     , DvhService.class
     , DvhOrgenhetsLast.class
     , DvhOrdsService.class
+    , WebClientAutoConfiguration.class
     , ValidationService.class
     , NomProxyClient.class
     , OrgEnhetStateRepositoryImpl.class

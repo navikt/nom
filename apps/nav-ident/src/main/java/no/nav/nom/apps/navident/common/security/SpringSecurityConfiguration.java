@@ -44,8 +44,8 @@ public class SpringSecurityConfiguration {
     }
 
     @Bean
-    public WebClient aadWebClient(AuthenticationProperties authenticationProperties) {
-        return WebClient.builder()
+    public WebClient aadWebClient(AuthenticationProperties authenticationProperties, WebClient.Builder builder) {
+        return builder.clone()
             .baseUrl(authenticationProperties.getAad().getIssuerBaseUrl())
             .build();
     }

@@ -13,17 +13,18 @@ import reactor.core.publisher.Mono;
 @Service
 public class NIKClient {
     private final WebClient clientCredentialsAuthorizedWebClient;
-    private final WebClient.Builder webClientBuilder;
+    private final WebClient.Builder nikWebClientBuilder;
 
     private final OnBehalfOfTokenRepository onBehalfOfTokenRepository;
     private final String nikScope;
 
-    public NIKClient(OnBehalfOfTokenRepository onBehalfOfTokenRepository, OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager, AppProperties appProperties) {
+    public NIKClient(OnBehalfOfTokenRepository onBehalfOfTokenRepository, OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager,
+                     WebClient.Builder builder, AppProperties appProperties) {
 
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("nik");
 
-        WebClient.Builder baseWebClientBuilder = WebClient.builder()
+        WebClient.Builder baseWebClientBuilder = builder.clone()
             .baseUrl(appProperties.clients().nik().baseUrl())
             .defaultHeaders(headers -> {
                 headers.add("Nav-Consumer-Id", appProperties.name());
@@ -34,7 +35,7 @@ public class NIKClient {
             .filter(oAuth2Filter)
             .build();
 
-        this.webClientBuilder = baseWebClientBuilder;
+        this.nikWebClientBuilder = baseWebClientBuilder;
 
         this.nikScope = appProperties.clients().nik().aadScope();
         this.onBehalfOfTokenRepository = onBehalfOfTokenRepository;
@@ -48,7 +49,7 @@ public class NIKClient {
     public ResponseEntity<OpprettNavidentResponse> opprettNavidentOnBehalfOfUser(OpprettNavidentRequest opprettNavidentRequest) {
         String onBehalfOfToken = onBehalfOfTokenRepository.getOnbehalfofTokenFor(nikScope);
 
-        var onBehalfOfAuthorizedWebClient = webClientBuilder
+        var onBehalfOfAuthorizedWebClient = nikWebClientBuilder
             .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
             .build();
 

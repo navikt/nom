@@ -42,6 +42,7 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -75,6 +76,7 @@ import org.springframework.kafka.annotation.EnableKafka;
     , OTUtenforHierarki.class
     , OrgtilknytningService.class
     , DvhOrdsClientImpl.class
+    , WebClientAutoConfiguration.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 @EnableKafka

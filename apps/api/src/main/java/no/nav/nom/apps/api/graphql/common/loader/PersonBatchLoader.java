@@ -49,17 +49,19 @@ public class PersonBatchLoader {
             """;
     private final HttpGraphQlClient graphQlClient;
 
-    public PersonBatchLoader(AppProperties appProperties, OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager) {
+    public PersonBatchLoader(AppProperties appProperties, OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager, WebClient.Builder builder) {
         var pdlProperties = appProperties.clients().pdl();
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("pdl");
-        this.graphQlClient = HttpGraphQlClient.builder(WebClient.builder().filter(oAuth2Filter))
+        this.graphQlClient = HttpGraphQlClient.builder(
+            builder.clone()
+            .filter(oAuth2Filter))
             .url(pdlProperties.baseUrl() + "/graphql")
             .headers(headers -> {
                 headers.setContentType(MediaType.APPLICATION_JSON);
                 headers.add("Tema", pdlProperties.tema());
-            })
-            .build();
+            }
+        ).build();
     }
 
     public <T> Mono<Map<T, DataFetcherResult<FolkeregisterPerson>>> loadMany(Collection<T> ressurser, Function<T, String> identResolver) {

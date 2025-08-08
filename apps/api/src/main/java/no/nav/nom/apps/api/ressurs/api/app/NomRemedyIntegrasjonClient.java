@@ -18,12 +18,12 @@ public class NomRemedyIntegrasjonClient {
 
     private final WebClient webClient;
 
-    public NomRemedyIntegrasjonClient(OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager, AppProperties appProperties) {
+    public NomRemedyIntegrasjonClient(OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager, AppProperties appProperties, WebClient.Builder builder) {
 
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("nom-remedy-integrasjon");
 
-        this.webClient = WebClient.builder()
+        this.webClient = builder.clone()
             .filter(oAuth2Filter)
             .baseUrl(appProperties.clients().nomRemedyIntegrasjon().baseUrl())
             .build();

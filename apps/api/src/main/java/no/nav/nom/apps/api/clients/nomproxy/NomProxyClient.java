@@ -13,11 +13,11 @@ public class NomProxyClient {
     private static final int MAX_IN_MEMORY_MB = 300;
     private final WebClient webClient;
 
-    public NomProxyClient(OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager, AppProperties appProperties) {
+    public NomProxyClient(OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager, AppProperties appProperties, WebClient.Builder builder) {
 
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("nom-proxy");
-        this.webClient = WebClient.builder()
+        this.webClient = builder.clone()
             .exchangeStrategies(
                 ExchangeStrategies.builder().codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(MAX_IN_MEMORY_MB * 1024 * 1024)).build()
             )

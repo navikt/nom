@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cache.annotation.EnableCaching;
@@ -11,6 +12,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableJpaRepositories
 @EnableAsync
 @ConfigurationPropertiesScan
+@EnableAutoConfiguration
 public class ApiStarter {
 
 // NOM-UNIT4 appen er skrudd av

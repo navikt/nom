@@ -23,7 +23,7 @@ public class DvhOrdsClientLocalImpl implements DvhOrdsClient {
     private static final int MAX_IN_MEMORY_MB = 400;
     private final WebClient webClient;
 
-    public DvhOrdsClientLocalImpl(OAuth2AuthorizedClientManager authorizedClientManager, AppProperties appProperties) {
+    public DvhOrdsClientLocalImpl(OAuth2AuthorizedClientManager authorizedClientManager, AppProperties appProperties, WebClient.Builder builder) {
         dvhOrdsProperties = appProperties.clients().dvhOrds();
 
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
@@ -32,7 +32,7 @@ public class DvhOrdsClientLocalImpl implements DvhOrdsClient {
         DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(dvhOrdsProperties.baseUrl());
         factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
 
-        this.webClient = WebClient.builder()
+        this.webClient = builder.clone()
             .uriBuilderFactory(factory)
             .exchangeStrategies(
                 ExchangeStrategies.builder().codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(MAX_IN_MEMORY_MB * 1024 * 1024)).build()
@@ -56,10 +56,9 @@ public class DvhOrdsClientLocalImpl implements DvhOrdsClient {
     public JsonNode dvhGetJsonDataLimitRows(String urlPath, int numRowsToFetch) {
         return webClient
             .get()
-            .uri(uriBuilder -> uriBuilder
-                .path(urlPath)
-                .queryParam("numRows", numRowsToFetch)
-                .build()
+            .uri(urlPath, uriBuilder -> uriBuilder
+                    .queryParam("numRows", numRowsToFetch)
+                    .build()
             )
             .retrieve()
             .bodyToMono(JsonNode.class)
@@ -70,8 +69,7 @@ public class DvhOrdsClientLocalImpl implements DvhOrdsClient {
     public JsonNode dvhGetJsonDataOrdsFilter(String urlPath, String ordsFilter) {
         return webClient
             .get()
-            .uri(uriBuilder -> uriBuilder
-                .path(urlPath)
+            .uri(urlPath, uriBuilder -> uriBuilder
                 .queryParam("ordsFilter", UriUtils.encodeQueryParam(ordsFilter, StandardCharsets.UTF_8))
                 .build()
             )
@@ -84,8 +82,7 @@ public class DvhOrdsClientLocalImpl implements DvhOrdsClient {
     public JsonNode dvhGetJsonDataOrdsPaginated(String urlPath, int offset, int limit) {
         return webClient
             .get()
-            .uri(uriBuilder -> uriBuilder
-                .path(urlPath.replace("?numRows=0", "Paginated"))
+            .uri(urlPath.replace("?numRows=0", "Paginated"), uriBuilder -> uriBuilder
                 .queryParam("offset", UriUtils.encodeQueryParam(Integer.toString(offset), StandardCharsets.UTF_8))
                 .queryParam("limit", UriUtils.encodeQueryParam(Integer.toString(limit), StandardCharsets.UTF_8))
                 .build()

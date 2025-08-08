@@ -30,9 +30,9 @@ public class AADServiceTokenProvider_ForTests {
     private final AuthenticationProperties authenticationProperties;
     private final WebClient webClient;
 
-    public AADServiceTokenProvider_ForTests(AuthenticationProperties authenticationProperties) {
+    public AADServiceTokenProvider_ForTests(AuthenticationProperties authenticationProperties, WebClient.Builder builder) {
         this.authenticationProperties = authenticationProperties;
-        this.webClient = WebClient.builder().baseUrl(authenticationProperties.getAad().getIssuerBaseUrl()).build();
+        this.webClient = builder.clone().baseUrl(authenticationProperties.getAad().getIssuerBaseUrl()).build();
     }
 
     @SneakyThrows

@@ -13,7 +13,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,11 +20,11 @@ import static no.nav.nom.apps.api.clients.WebClientUtils.defaultRetry;
 
 @Service
 public class KontaktinfoClient {
-
     public static final Logger log = LogManager.getLogger(KontaktinfoClient.class);
     private final String paarorendeScope;
     private final OnBehalfOfTokenRepository onBehalfOfTokenRepository;
     private final String kontaktinfoBaseUrl;
+    private final WebClient.Builder builder;
 
     @Value("${app.clients.nom-paarorende.max-attempts}")
     private Integer maxAttempts;
@@ -36,19 +35,21 @@ public class KontaktinfoClient {
     public KontaktinfoClient(
             OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager,
             OnBehalfOfTokenRepository onBehalfOfTokenRepository,
-            AppProperties appProperties
-    ) throws IOException {
+            AppProperties appProperties,
+            WebClient.Builder builder
+    ) {
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("nom-paarorende");
         this.onBehalfOfTokenRepository = onBehalfOfTokenRepository;
         this.paarorendeScope = appProperties.clients().nomPaarorende().aadScope();
         kontaktinfoBaseUrl = appProperties.clients().nomPaarorende().baseUrl();
+        this.builder = builder;
     }
 
     public List<RessursKontaktinfo> getKontaktinfoForRessurser(List<String> navidents, String orgenhetId) {
         String onBehalfOfToken = onBehalfOfTokenRepository.getOnbehalfofTokenFor(paarorendeScope);
 
-        var onBehalfOfAuthorizedWebClient = WebClient.builder()
+        var onBehalfOfAuthorizedWebClient = builder.clone()
             .baseUrl(kontaktinfoBaseUrl)
             .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
             .build();

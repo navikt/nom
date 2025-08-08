@@ -37,11 +37,11 @@ public class WebClientConfig {
     }
 
     @Bean
-    public WebClient nomApiAuthorizedWebClient(@Value("${app.clients.nom-api.url}") String baseUrl , OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager) {
+    public WebClient nomApiAuthorizedWebClient(@Value("${app.clients.nom-api.url}") String baseUrl , OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager, WebClient.Builder builder) {
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("nom-api");
 
-        return WebClient.builder()
+        return builder.clone()
             .baseUrl(baseUrl)
             .filter(oAuth2Filter)
             .build();

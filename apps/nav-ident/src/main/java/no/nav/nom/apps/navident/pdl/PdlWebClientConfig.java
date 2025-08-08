@@ -37,14 +37,14 @@ public class PdlWebClientConfig {
     @Bean
     public WebClient pdlWebClient(
             PdlConfig pdlConfig, 
-            @Qualifier("pdlAuthorizedClientManager") OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager
+            @Qualifier("pdlAuthorizedClientManager") OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager,
+            WebClient.Builder builder
     ) {
 
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("pdl");
 
-        return WebClient.builder()
-                .clone()
+        return builder.clone()
                 .filter(oAuth2Filter)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader(HEADER_CONSUMER_ID_KEY, pdlConfig.getAppName())

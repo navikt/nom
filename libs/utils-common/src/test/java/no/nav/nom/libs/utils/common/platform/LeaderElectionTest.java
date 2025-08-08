@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
@@ -20,7 +21,6 @@ import java.util.Map;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 
 @SpringBootTest(
     classes = LeaderElectionTest.TestApplication.class,
@@ -45,6 +45,8 @@ public class LeaderElectionTest {
 
     @Autowired
     ConfigurableEnvironment environment;
+    @Autowired
+    WebClient.Builder builder;
 
     @BeforeEach
     void setElectorPathWithDynamicPort() {
@@ -54,7 +56,7 @@ public class LeaderElectionTest {
         prop.put("ELECTOR_PATH", "localhost:" + port + "/elect");
         propertySources.addFirst(new MapPropertySource("testProperty", prop));
 
-        leaderElection = new LeaderElection(environment);
+        leaderElection = new LeaderElection(environment, builder);
     }
 
     @Test

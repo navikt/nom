@@ -22,7 +22,11 @@ public class DvhOrdsClientImpl implements DvhOrdsClient {
     private static final int MAX_IN_MEMORY_MB = 350;
     private final WebClient webClient;
 
-    public DvhOrdsClientImpl(OAuth2AuthorizedClientManager authorizedClientManager, AppProperties appProperties) {
+    public DvhOrdsClientImpl(
+        OAuth2AuthorizedClientManager authorizedClientManager,
+        AppProperties appProperties,
+        WebClient.Builder builder
+    ) {
         AppProperties.DvhOrds dvhOrdsProperties = appProperties.clients().dvhOrds();
 
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
@@ -31,7 +35,7 @@ public class DvhOrdsClientImpl implements DvhOrdsClient {
         DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(dvhOrdsProperties.baseUrl());
         factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
 
-        this.webClient = WebClient.builder()
+        webClient = builder.clone()
             .uriBuilderFactory(factory)
             .exchangeStrategies(
                 ExchangeStrategies.builder().codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(MAX_IN_MEMORY_MB * 1024 * 1024)).build()

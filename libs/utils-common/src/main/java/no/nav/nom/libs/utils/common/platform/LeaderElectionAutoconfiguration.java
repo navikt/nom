@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.core.env.Environment;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @AutoConfiguration
 @Conditional(LeaderElectionAutoconfiguration.LeaderElectionEnabledCondition.class)
@@ -14,8 +15,8 @@ public class LeaderElectionAutoconfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    LeaderElection leaderElection(Environment environment) {
-        return new LeaderElection(environment);
+    LeaderElection leaderElection(Environment environment, WebClient.Builder builder) {
+        return new LeaderElection(environment, builder);
     }
 
     static class LeaderElectionEnabledCondition extends AllNestedConditions {

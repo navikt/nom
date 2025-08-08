@@ -23,7 +23,8 @@ public class DvhOrdsClient {
 
     public DvhOrdsClient(
         @Value("${dvh.ords-endpoint}") String ordsEndpoint,
-        OAuth2AuthorizedClientManager authorizedClientManager
+        OAuth2AuthorizedClientManager authorizedClientManager,
+        WebClient.Builder builder
     ) {
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("dvh-ords");
@@ -31,7 +32,7 @@ public class DvhOrdsClient {
         DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(ordsEndpoint);
         factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
 
-        this.webClient = WebClient.builder()
+        this.webClient = builder.clone()
             .uriBuilderFactory(factory)
             .exchangeStrategies(
                 ExchangeStrategies.builder().codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(MAX_IN_MEMORY_MB * 1024 * 1024)).build()

@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
@@ -28,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Slf4j
 @ActiveProfiles("test")
 @SpringBootTest
-@ContextConfiguration(classes= {DvhOrdsClientImpl.class, DvhOrdsService.class}, initializers = MockOAuth2ServerInitializer.class)
+@ContextConfiguration(classes= {DvhOrdsClientImpl.class, DvhOrdsService.class, WebClientAutoConfiguration.class}, initializers = MockOAuth2ServerInitializer.class)
 @EnableConfigurationProperties(value = AppProperties.class)
 @AutoConfigureWireMock(port = 0)
 class DvhOrdsServiceTest {
