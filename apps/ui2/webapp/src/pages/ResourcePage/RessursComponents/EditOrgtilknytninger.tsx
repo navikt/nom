@@ -609,6 +609,7 @@ function OrgtilknytningForm({
                   selectedSektor={watch(
                     `mappedeOrgtilknytninger.${index}.sektor`,
                   )}
+                  triggerOthers={[`mappedeOrgtilknytninger.${index}.gyldigTom`]}
                 />
               </div>
             </div>
@@ -1085,7 +1086,10 @@ function FormTilknytningstypeSelectWrapper({
             : tilknytningstyperStatlige
           ).map((tilknytningstype) => {
             if (
-              tilknytningstype === Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER &&
+              (tilknytningstype === Tilknytningtype.HELFO ||
+                tilknytningstype === Tilknytningtype.SKATTEETATEN ||
+                tilknytningstype === Tilknytningtype.RIKSREVISJONEN ||
+                tilknytningstype === Tilknytningtype.STATSFORVALTEREN) &&
               !brukerJobberIDirektoratet &&
               !hasAdminAccess
             ) {
@@ -1329,12 +1333,18 @@ const orgtilknytningSchema = yup.object().shape({
     .string()
     .nullable()
     .test({
-      name: "gyldigTom-required",
+      name: "gyldigTom-required-some-external",
       message: "Obligatorisk for eksterne",
       test: function (value, context) {
         const otSektor = context?.parent?.sektor;
+        const otTilknytningtype = context?.parent?.orgtilknytningType;
 
-        return otSektor !== Sektor.EKSTERN || !!value;
+        const isRequired =
+          otSektor === Sektor.EKSTERN &&
+          otTilknytningtype !== Tilknytningtype.HELFO &&
+          otTilknytningtype !== Tilknytningtype.SKATTEETATEN;
+
+        return !isRequired || !!value;
       },
     })
     .test({
@@ -1394,17 +1404,23 @@ const validateMaxTime = (
   context: yup.TestContext<yup.AnyObject>,
 ) => {
   const otSektor = context?.parent?.sektor;
+  const otTilknytningtype = context?.parent?.orgtilknytningType;
+
+  const obligatoriskTom =
+    otSektor === Sektor.EKSTERN &&
+    otTilknytningtype !== Tilknytningtype.HELFO &&
+    otTilknytningtype !== Tilknytningtype.SKATTEETATEN;
 
   const maxDate = dateWithoutTimezone(
-    addYears(todayWithoutTimezone(), otSektor === Sektor.EKSTERN ? 1 : 6),
+    addYears(todayWithoutTimezone(), obligatoriskTom ? 1 : 6),
   );
 
   if (
-    (otSektor === Sektor.EKSTERN && !value) ||
+    (obligatoriskTom && !value) ||
     (value && isSameDateOrAfter(dateWithoutTimezone(value), maxDate))
   ) {
     return context.createError({
-      message: `Må være under ${otSektor === Sektor.EKSTERN ? "ett" : "seks"} år frem i tid fra dagens dato${otSektor === Sektor.EKSTERN ? " for eksterne medarbeidere" : ", eller ikke satt"}`,
+      message: `Må være under ${obligatoriskTom ? "ett" : "seks"} år frem i tid fra dagens dato${obligatoriskTom ? " for eksterne medarbeidere" : ", eller ikke satt"}`,
     });
   }
 

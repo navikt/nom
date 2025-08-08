@@ -197,8 +197,10 @@ export function SektorStep() {
                 : tilknytningstyperStatlige
               ).map((tilknytningstype) => {
                 if (
-                  tilknytningstype ===
-                    Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER &&
+                  (tilknytningstype === Tilknytningtype.HELFO ||
+                    tilknytningstype === Tilknytningtype.SKATTEETATEN ||
+                    tilknytningstype === Tilknytningtype.RIKSREVISJONEN ||
+                    tilknytningstype === Tilknytningtype.STATSFORVALTEREN) &&
                   !brukerJobberIDirektoratet &&
                   !hasAdminAccess
                 ) {
@@ -207,7 +209,7 @@ export function SektorStep() {
 
                 return (
                   <option key={tilknytningstype} value={tilknytningstype}>
-                    {`${TilknytningtypeNameMapping[tilknytningstype]}${tilknytningstype === Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER ? " (f.eks. Helfo, Skatteetaten, osv.)" : ""}`}
+                    {TilknytningtypeNameMapping[tilknytningstype]}
                   </option>
                 );
               })}

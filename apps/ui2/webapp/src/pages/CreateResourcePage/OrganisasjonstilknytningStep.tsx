@@ -10,7 +10,7 @@ import {
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { addYears, subDays } from "date-fns";
+import { addYears, isDate, subDays } from "date-fns";
 import pickBy from "lodash/pickBy";
 import { useEffect, useState } from "react";
 import {
@@ -29,15 +29,23 @@ import { useHasAdminAccess } from "~/api/useGetSession";
 import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
 import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBrukerstedSelect";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
+import { dateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
 import { defaultFormStyle, fullwidthRow } from "~/resources/NomStyles";
 import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
-import { Sektor } from "~/types/api-models";
-import { formatDateWithoutTimezone } from "~/utils";
+import { Sektor, Tilknytningtype } from "~/types/api-models";
+import {
+  formatDateWithoutTimezone,
+  isSameDateOrAfter,
+  todayWithoutTimezone,
+} from "~/utils";
 
 export function OrganisasjonstilknytningStep() {
-  const { sektor } = useSearch({ from: "/ressurs/create/$step" });
+  const { sektor } = useSearch({
+    from: "/ressurs/create/$step",
+  });
+
   return (
     <ContainerWithHighlightedTop
       icon={opprettRessursIconRoundedBackground}
@@ -156,10 +164,17 @@ export function OrganisasjonstilknytningStep() {
 
 function CreateEksternRessurs() {
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
-  const { orgEnhetId, gyldigFom, gyldigTom, fysiskBrukerstedNr, sektor } =
-    useSearch({
-      from: "/ressurs/create/$step",
-    });
+
+  const {
+    orgEnhetId,
+    gyldigFom,
+    gyldigTom,
+    fysiskBrukerstedNr,
+    sektor,
+    tilknytningtype,
+  } = useSearch({
+    from: "/ressurs/create/$step",
+  });
 
   const methods = useForm({
     defaultValues: {
@@ -169,6 +184,7 @@ function CreateEksternRessurs() {
       fysiskBrukerstedNr: fysiskBrukerstedNr,
     },
 
+    context: { tilknytningtype, sektor },
     resolver: yupResolver(
       eksternValidationSchema.concat(fysiskBrukerstedNrSchema),
     ),
@@ -187,7 +203,11 @@ function CreateEksternRessurs() {
       try {
         eksternValidationSchema
           .concat(fysiskBrukerstedNrSchema)
-          .validateSyncAt(key, { [key]: value });
+          .validateSyncAt(
+            key,
+            { [key]: value },
+            { context: { tilknytningtype, sektor } },
+          );
         return true;
       } catch {
         return false;
@@ -198,7 +218,7 @@ function CreateEksternRessurs() {
       to: "/ressurs/create/$step",
       params: { step: "2" },
       search: (oldSearch) => ({ ...oldSearch, ...validValues }),
-    });
+    }).then();
   };
 
   return (
@@ -209,7 +229,11 @@ function CreateEksternRessurs() {
           navigate({
             to: "/ressurs/create/$step",
             params: { step: "9" },
-            search: (oldSearch) => ({ ...oldSearch, ...values }),
+            search: (oldSearch) => ({
+              ...oldSearch,
+              ...values,
+              gyldigTom: values.gyldigTom ?? undefined,
+            }),
           }),
         )}
       >
@@ -245,7 +269,7 @@ function CreateKommunaleRessurs() {
     },
 
     resolver: yupResolver(
-      kommunalValidationSchema.concat(fysiskBrukerstedNrSchema),
+      kommunalStatligValidationSchema.concat(fysiskBrukerstedNrSchema),
     ),
   });
 
@@ -256,7 +280,7 @@ function CreateKommunaleRessurs() {
 
     const validValues = pickBy(values, (value, key) => {
       try {
-        kommunalValidationSchema
+        kommunalStatligValidationSchema
           .concat(fysiskBrukerstedNrSchema)
           .validateSyncAt(key, { [key]: value });
         return true;
@@ -269,7 +293,7 @@ function CreateKommunaleRessurs() {
       to: "/ressurs/create/$step",
       params: { step: "2" },
       search: (oldSearch) => ({ ...oldSearch, ...validValues }),
-    });
+    }).then();
   };
 
   if (sektor === undefined) {
@@ -309,27 +333,41 @@ const orgEnhetIdSchema = yup.object().shape({
   orgEnhetId: yup.string().required("Obligatorisk"),
 });
 
-/*
-const statligValidationSchema = yup.object({
-  orgEnhetId: yup.string().required("Obligatorisk"),
-  gyldigFom: yup.string().required("Obligatorisk"),
-  ansettelsesType: yup
-    .mixed<AnsettelsesType>()
-    .oneOf(Object.values(AnsettelsesType))
-    .required("Obligatorisk"),
-});
-*/
-const kommunalPeriodeValidationSchema = yup.object().shape({
+const ikkeEksternValidationSchema = yup.object().shape({
   gyldigFom: yup.string().required("Obligatorisk"),
   gyldigTom: yup.string().max6YearsInTheFuture().optional(),
 });
 
-const kommunalValidationSchema =
-  kommunalPeriodeValidationSchema.concat(orgEnhetIdSchema);
+const kommunalStatligValidationSchema =
+  ikkeEksternValidationSchema.concat(orgEnhetIdSchema);
 
 export const eksternPeriodeValidationSchema = yup.object().shape({
   gyldigFom: yup.string().required("Obligatorisk"),
-  gyldigTom: yup.string().max1YearInTheFuture().required("Obligatorisk"),
+  gyldigTom: yup
+    .string()
+    .nullable()
+    .test({
+      name: "gyldigTom-required-some-external",
+      message: "Obligatorisk",
+      test: function (value) {
+        const tilknytningtype = this?.options?.context?.tilknytningtype;
+
+        const isRequired =
+          tilknytningtype !== Tilknytningtype.HELFO &&
+          tilknytningtype !== Tilknytningtype.SKATTEETATEN;
+
+        return !isRequired || !!value;
+      },
+    })
+    .test({
+      name: "gyldigTom-maks-tid",
+      test: function (value, context) {
+        const tilknytningtype = this?.options?.context?.tilknytningtype;
+        const sektor = this?.options?.context?.sektor;
+
+        return validateMaxTimeExternal(value, context, sektor, tilknytningtype);
+      },
+    }),
   setRessursSluttdato: yup.boolean(),
 });
 
@@ -414,6 +452,14 @@ function Orgtilknytningsvarighet({
     name: "gyldigTom",
   });
 
+  const { tilknytningtype } = useSearch({
+    from: "/ressurs/create/$step",
+  });
+
+  const optionalExternal =
+    tilknytningtype === Tilknytningtype.HELFO ||
+    tilknytningtype === Tilknytningtype.SKATTEETATEN;
+
   useEffect(() => {
     if (defaultStartDato) {
       gyldigFomController.field.onChange(defaultStartDato);
@@ -461,6 +507,7 @@ function Orgtilknytningsvarighet({
           />
         </DatePicker>
       </FullWidthDatePickerWrapper>
+
       <FullWidthDatePickerWrapper>
         <DatePicker {...sluttDatePicker.datepickerProps}>
           <DatePicker.Input
@@ -477,7 +524,7 @@ function Orgtilknytningsvarighet({
                         gap: var(--a-spacing-2);
                       `}
                     >
-                      Sluttdato
+                      Sluttdato {optionalExternal && " (valgfritt)"}
                       <HelpText strategy="fixed">
                         Siste arbeidsdag iht. avtalen. Opsjoner skal ikke
                         beregnes med her, før de utløses. Datoen må være under
@@ -486,8 +533,7 @@ function Orgtilknytningsvarighet({
                     </span>
                   );
                 }
-                case Sektor.NAV_KOMMUNAL:
-                case Sektor.NAV_STATLIG: {
+                default: {
                   return "Sluttdato (valgfritt)";
                 }
               }
@@ -518,7 +564,8 @@ function InnerOrgEnhetSelect() {
         name="orgEnhetId"
         orgEnheter={orgEnheterSomKanHaRessurser}
       />
-      {selectedOrgEnhet ? (
+
+      {selectedOrgEnhet && (
         <div
           css={css`
             display: flex;
@@ -544,7 +591,34 @@ function InnerOrgEnhetSelect() {
             </HelpText>
           </div>
         </div>
-      ) : undefined}
+      )}
     </>
   );
 }
+
+const validateMaxTimeExternal = (
+  value: string | undefined | null,
+  context: yup.TestContext<yup.AnyObject>,
+  sektor: Sektor,
+  tilknytningtype: Tilknytningtype,
+) => {
+  const obligatoriskTom =
+    sektor === Sektor.EKSTERN &&
+    tilknytningtype !== Tilknytningtype.HELFO &&
+    tilknytningtype !== Tilknytningtype.SKATTEETATEN;
+
+  const maxDate = dateWithoutTimezone(
+    addYears(todayWithoutTimezone(), obligatoriskTom ? 1 : 6),
+  );
+
+  if (
+    (obligatoriskTom && !value) ||
+    (value && isSameDateOrAfter(dateWithoutTimezone(value), maxDate))
+  ) {
+    return context.createError({
+      message: `Må være under ${obligatoriskTom ? "ett" : "seks"} år frem i tid fra dagens dato${obligatoriskTom ? " for eksterne medarbeidere" : ", eller ikke satt"}`,
+    });
+  }
+
+  return true;
+};
