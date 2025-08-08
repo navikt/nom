@@ -33,21 +33,18 @@ import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
-import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
-import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
-import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
-import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
-import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
+import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockReset;
 
 @Import({
     DvhOrgEnhetMockUtils.class
@@ -82,60 +79,79 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @EnableKafka
 @AutoConfigureJson
 public class OrgEnhetTestConfig {
-    @MockitoBean
-    ValidationRepository validationRepository;
+    @Bean
+    ValidationRepository validationRepository() {
+        return Mockito.mock(ValidationRepository.class, MockReset.after());
+    }
 
-    @MockitoBean
-    RessursStateRepository ressursStateRepository;
+    @Bean
+    RessursStateRepository ressursStateRepository() {
+        return Mockito.mock(RessursStateRepository.class, MockReset.after());
+    }
 
-    @MockitoBean
-    OrgtilknytningStateRepository orgtilknytningStateRepository;
+    @Bean
+    OrgtilknytningStateRepository orgtilknytningStateRepository() {
+        return Mockito.mock(OrgtilknytningStateRepository.class, MockReset.after());
+    }
 
-    @MockitoBean
-    NomStateRessursListener nomStateRessursListener;
-    @MockitoBean
-    NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
-    @MockitoBean
-    NomStateOrganiseringListener nomStateOrganiseringListener;
-    @MockitoBean
-    NomStateMasteredRessursListener nomStateMasteredRessursListener;
-    @MockitoBean
-    NomStateDelegertLederListener nomStateDelegertLederListener;
+    @Bean
+    RessursHendelseForEventsourceService ressursHendelseForEventsourceService() {
+        return Mockito.mock(RessursHendelseForEventsourceService.class, MockReset.after());
+    }
 
-    @MockitoBean
-    RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
+    @Bean
+    KafkaTopicReader kafkaTopicReader() {
+        return Mockito.mock(KafkaTopicReader.class, MockReset.after());
+    }
 
-    @MockitoBean
-    KafkaTopicReader kafkaTopicReader;
+    @Bean
+    RessursStillingLoader ressursStillingLoader() {
+        return Mockito.mock(RessursStillingLoader.class, MockReset.after());
+    }
 
-    @MockitoBean
-    RessursStillingLoader ressursStillingLoader;
+    @Bean
+    EksterneRessurserLoader eksterneRessurserLoader() {
+        return Mockito.mock(EksterneRessurserLoader.class, MockReset.after());
+    }
 
-    @MockitoBean
-    EksterneRessurserLoader eksterneRessurserLoader;
+    @Bean
+    OrganiseringService organiseringService() {
+        return Mockito.mock(OrganiseringService.class, MockReset.after());
+    }
 
-    @MockitoBean
-    OrganiseringService organiseringService;
+    @Bean
+    KommunaleRessurserLoader kommunaleRessurserLoader() {
+        return Mockito.mock(KommunaleRessurserLoader.class, MockReset.after());
+    }
 
-    @MockitoBean
-    KommunaleRessurserLoader kommunaleRessurserLoader;
+    @Bean
+    AuthorizedNavident authorizedNavident() {
+        return Mockito.mock(AuthorizedNavident.class, MockReset.after());
+    }
 
-    @MockitoBean
-    AuthorizedNavident authorizedNavident;
+    @Bean
+    OrgEnhetEventSourceRepository orgEnhetEventSourceRepository() {
+        return Mockito.mock(OrgEnhetEventSourceRepository.class, MockReset.after());
+    }
 
-    @MockitoBean
-    OrgEnhetEventSourceRepository orgEnhetEventSourceRepository;
+    @Bean
+    NomMastered nomMastered() {
+        return Mockito.mock(NomMastered.class, MockReset.after());
+    }
 
-    @MockitoBean
-    NomMastered nomMastered;
+    @Bean
+    LuceneService luceneService() {
+        return Mockito.mock(LuceneService.class, MockReset.after());
+    }
 
-    @MockitoBean
-    LuceneService luceneService;
+    @Bean
+    Unleash unleash() {
+        return Mockito.mock(Unleash.class, MockReset.after());
+    }
 
-    @MockitoBean
-    Unleash unleash;
-
-    @MockitoBean
-    ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState;
+    @Bean
+    ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState() {
+        return Mockito.mock(ManuelleRessurserOgLedereTilState.class, MockReset.after());
+    }
 }
 
