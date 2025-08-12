@@ -67,7 +67,7 @@ jobs:
       contents: "read"
       id-token: "write"
     name: "Build app and push docker image to GAR"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-8-cores
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -113,7 +113,7 @@ jobs:
       contents: "read"
       id-token: "write"
     name: "Build app and test"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-8-cores
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -139,7 +139,7 @@ jobs:
   salsa:
     name: Generate SBOM, attest and sign image
     needs: [ build-app-docker ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-8-cores
     permissions:
       id-token: "write"
     steps:
