@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { BigLoader } from "~/components/BigLoader.tsx";
+import { DuplikateRessursHendelser } from "~/sanitychecks/Hendelser/DuplikateRessursHendelser.tsx";
 import { RessursDelayedEventComparison } from "~/sanitychecks/Ressurs/RessursDelayedEventComparison.tsx";
 import { RessursDuplikat } from "~/sanitychecks/Ressurs/RessursDuplikat.tsx";
 import { Ressurser } from "~/sanitychecks/Ressurs/Ressurser.tsx";
@@ -14,7 +15,6 @@ import { RessursRoboter } from "~/sanitychecks/Ressurs/RessursRoboter.tsx";
 import { RessursSluttetMedAktivOT } from "~/sanitychecks/Ressurs/RessursSluttetMedAktivOT.tsx";
 import { RessursUlikSluttdatoOrgtilknytning } from "~/sanitychecks/Ressurs/RessursUlikSluttdatoOrgtilknytning.tsx";
 import { RessursUtenOrgtilknytning } from "~/sanitychecks/Ressurs/RessursUtenOrgtilknytning.tsx";
-import {DuplikateRessursHendelser} from "~/sanitychecks/Hendelser/DuplikateRessursHendelser.tsx";
 
 export const Route = createFileRoute("/sanity-checks/ressurs")({
   component: () => {
@@ -84,7 +84,7 @@ function ListSelector(props: { selected: string }) {
       return <RessursDelayedEventComparison />;
     }
     case "DuplikateRessurshendelser": {
-      return <DuplikateRessursHendelser />
+      return <DuplikateRessursHendelser />;
     }
     default: {
       return <></>;
