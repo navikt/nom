@@ -70,6 +70,7 @@ import no.nav.nom.apps.api.u4diff.U4DiffPaaMastrede;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -132,6 +133,7 @@ import org.springframework.test.context.bean.override.mockito.MockReset;
     , OTUtenforHierarki.class
     , OrgtilknytningService.class
     , DvhOrdsClientImpl.class
+    , WebClientAutoConfiguration.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 @EnableKafka
