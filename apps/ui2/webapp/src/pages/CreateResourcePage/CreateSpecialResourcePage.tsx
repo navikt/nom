@@ -715,10 +715,7 @@ function UtenlandskKonsulentFormSection() {
 function VikafossenFormSection() {
   return (
     <>
-      <div>
-        <Label>Visningsnavn</Label>
-        <BodyShort>Medarbeideren får visningsnavnet Nav Anonym</BodyShort>
-      </div>
+      <VikafossenVisningsnavnFormSection />
 
       <div>
         <Label>Organisasjonsenhet</Label>
@@ -749,7 +746,7 @@ function VisningsnavnFormSection({ identType }: { identType: IdentType }) {
 
   return (
     <div>
-      <b>Visningnavn</b>
+      <b>Visningsnavn</b>
       <BodyShort spacing>
         Visningsnavnet vil bli brukt i alle Navs applikasjoner, og fornavn og
         etternavn er obligatorisk. Visningsnavnet blir benyttet til å generere
@@ -770,7 +767,7 @@ function VisningsnavnFormSection({ identType }: { identType: IdentType }) {
           type="text"
           {...register("visningsmellomnavn")}
         />
-        {identType === IdentType.UTENLANDSK_KONSULENT ? (
+        {identType !== IdentType.ROBOT ? (
           <TextField
             autoComplete="off"
             error={visningsetternavnFieldState?.error?.message}
@@ -794,6 +791,31 @@ function VisningsnavnFormSection({ identType }: { identType: IdentType }) {
         )}
       </div>
     </div>
+  );
+}
+
+function VikafossenVisningsnavnFormSection() {
+  const { field, fieldState } = useController({ name: "visningsetternavn" });
+
+  return (
+    <Select
+      css={css`
+        width: 40%;
+      `}
+      error={fieldState.error?.message}
+      label="Visningsnavn"
+      onChange={(event) => {
+        field.onChange(event.target.value);
+      }}
+      ref={field.ref}
+      value={field.value}
+    >
+      <option value={""}></option>
+      <option value={"Anonym"}>Nav Anonym</option>
+      <option value={"Ukjent"}>Nav Ukjent</option>
+      <option value={"Fiktiv"}>Nav Fiktiv</option>
+      <option value={"Skjult"}>Nav Skjult</option>
+    </Select>
   );
 }
 
@@ -905,8 +927,8 @@ function lagRessursRequest(values: {
   startDato: string;
 }): OpprettRessursRequest {
   const getVisningsEtternavn = (identType: IdentType, etternavn?: string) => {
-    if (identType === IdentType.VIKAFOSSEN) return "Anonym";
     if (identType === IdentType.ROBOT) return "RPARobot";
+
     return etternavn ?? "";
   };
 
@@ -979,12 +1001,12 @@ const opprettSpesiellValidationSchema = yup.object().shape({
   visningsetternavn: yup
     .string()
     .test({
-      name: "etternavn-obligatorisk-utenlandsk",
+      name: "etternavn-obligatorisk-ikke-robot",
       message: "Obligatorisk",
       test: function (value, context) {
         const ressursIdentType = context?.parent?.identType;
 
-        const required = ressursIdentType === IdentType.UTENLANDSK_KONSULENT;
+        const required = ressursIdentType !== IdentType.ROBOT;
 
         return required ? !!value : true;
       },
