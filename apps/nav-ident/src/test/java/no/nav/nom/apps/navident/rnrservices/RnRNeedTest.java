@@ -14,8 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,8 +49,8 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
     @Autowired    private RnRTestNeedProducer rnrTestNeedProducer;
     @Autowired private DomainTestData domainTestData;
 
-    @MockBean private PdlService pdlService;
-    @MockBean private NavidRepository navidRepository;
+    @MockitoBean private PdlService pdlService;
+    @MockitoBean private NavidRepository navidRepository;
 
     public static final int AWAIT_AT_MOST = 3;
 

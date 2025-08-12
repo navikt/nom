@@ -15,7 +15,7 @@ import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Collections;
 import java.util.List;
@@ -36,16 +36,16 @@ class OmadaControllerTest extends RestTestBase {
     private static final String TELEFONNUMMER = "87654321";
 
 
-    @MockBean
+    @MockitoBean
     private OrganiseringStateRepository organiseringStateRepositoryMock;
 
-    @MockBean
+    @MockitoBean
     private RemedyEnhetMapperService remedyEnhetMapperServiceMock;
 
-    @MockBean
+    @MockitoBean
     private OrgenhetService orgenhetServiceMock;
 
-    @MockBean
+    @MockitoBean
     private DvhRepository dvhRepositoryMock;
 
     @Autowired

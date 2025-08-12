@@ -9,9 +9,9 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Map;
 import java.util.UUID;
@@ -32,7 +32,7 @@ public class EventSourceProducerTest extends EmbeddedKafkaTestBase {
     @Autowired
     private KafkaTemplate<String, Need> kafkaTemplate;
 
-    @MockBean
+    @MockitoBean
     private SourceEventRepository sourceEventRepository;
 
     @Test

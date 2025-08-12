@@ -5,10 +5,15 @@ import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
 import no.nav.nom.apps.api.KafkaUtils;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.apps.api.telefon.TelefonService;
+import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
+import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.organisering.OrganiseringStateAutoconfiguration;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateAutoconfiguration;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
+import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
+import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +64,17 @@ public class OrgEnhetTestBase {
 
     @Autowired
     KafkaUtils kafkaUtils;
+
+    @MockitoBean
+    NomStateRessursListener nomStateRessursListener;
+    @MockitoBean
+    NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
+    @MockitoBean
+    NomStateOrganiseringListener nomStateOrganiseringListener;
+    @MockitoBean
+    NomStateMasteredRessursListener nomStateMasteredRessursListener;
+    @MockitoBean
+    NomStateDelegertLederListener nomStateDelegertLederListener;
 
     @BeforeEach
     void setup() {

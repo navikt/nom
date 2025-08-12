@@ -7,11 +7,13 @@ import no.nav.nom.apps.api.authorize.eventsourcing.recoverybackup.AuthorizeEvent
 import no.nav.nom.apps.api.common.LocalConfiguration;
 import no.nav.nom.libs.state.authorize.DelegertLederStateAutoconfiguration;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
+import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.test.context.bean.override.mockito.MockReset;
 
 @Import({
     AuthorizeCommandService.class,
@@ -25,6 +27,8 @@ import org.springframework.kafka.annotation.EnableKafka;
 @EnableKafka
 @AutoConfigureJson
 public class TestConfig {
-    @MockBean
-    AuthorizeEventSourceRepository authorizeEventSourceRepository;
+    @Bean
+    AuthorizeEventSourceRepository authorizeEventSourceRepository() {
+        return Mockito.mock(AuthorizeEventSourceRepository.class, MockReset.after());
+    }
 }

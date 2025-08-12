@@ -3,8 +3,14 @@ package no.nav.nom.apps.api.organisering;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventKafkaConfig;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.apps.api.telefon.TelefonService;
+import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
+import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.organisering.OrganiseringStateAutoconfiguration;
+import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
+import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
+import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateAutoconfiguration;
+import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -49,5 +55,23 @@ public class OrganiseringTestBase {
 
     @MockitoBean
     TelefonService telefonService;
+
+    @MockitoBean
+    NomStateRessursListener nomStateRessursListener;
+
+    @MockitoBean
+    NomStateOrgEnhetListener nomStateOrgEnhetListener;
+
+    @MockitoBean
+    NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
+
+    @MockitoBean
+    NomStateOrganiseringListener nomStateOrganiseringListener;
+
+    @MockitoBean
+    NomStateMasteredRessursListener nomStateMasteredRessursListener;
+
+    @MockitoBean
+    NomStateDelegertLederListener nomStateDelegertLederListener;
 }
 

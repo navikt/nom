@@ -18,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
@@ -28,6 +27,7 @@ import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,10 +58,10 @@ public class ImportNavIdenterKafkaTest extends SpringBootTestBase {
     @Autowired
     ImportNavIdenter importNavIdenter;
 
-    @MockBean
+    @MockitoBean
     EventSourceService eventSourceService;
 
-    @MockBean
+    @MockitoBean
     SourceEventRepository sourceEventRepository;
 
     BlockingQueue<ConsumerRecord<String, SourceEvent>> recordsQueue;
