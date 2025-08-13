@@ -4,12 +4,15 @@ import React from "react";
 export function Divider({
   size = "large",
   noMargins = false,
+  className,
 }: {
   size?: "large" | "small";
   noMargins?: boolean;
+  className?: string;
 }) {
   return (
     <div
+      className={className}
       css={[
         css`
           height: 1px;
