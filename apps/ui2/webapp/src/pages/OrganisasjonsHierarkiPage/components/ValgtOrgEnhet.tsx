@@ -43,6 +43,7 @@ import { IdentType, NomNivaa, OrgEnhetsType, Sektor } from "~/types/api-models";
 import {
   formatDisplayDate,
   formatVisningsnavn,
+  isEksternSamarbeidspartnerOrgEnhet,
   isInDevelopment,
 } from "~/utils";
 
@@ -88,6 +89,10 @@ export const ValgtOrgEnhet = ({
 
   const enheterSomKanHaRessurser = useQuery(getOrgEnheterSomKanHaRessurser);
 
+  const valgtOrgenhetKanHaRessurser = (
+    enheterSomKanHaRessurser.data || []
+  ).some((enhet) => enhet.id === orgEnhet.id);
+
   const tekAvdNavId = inDevelopment ? "je104d" : "te627k";
 
   const enheterUnderTekAvdQuery = useQuery({
@@ -100,11 +105,12 @@ export const ValgtOrgEnhet = ({
   const underTeknologiavdelingen =
     orgEnhet.id === tekAvdNavId || enheterUnderTekAvd?.includes(orgEnhet.id);
 
-  const valgtOrgenhetKanHaRessurser = (
-    enheterSomKanHaRessurser.data || []
-  ).some((enhet) => enhet.id === orgEnhet.id);
+  const eksternSamarbeidspartner = isEksternSamarbeidspartnerOrgEnhet(
+    orgEnhet.id,
+  );
 
-  const visTabellKnapp = isOrgEnhetDriftsenhetQuery.data ?? false;
+  const visTabellKnapp =
+    (isOrgEnhetDriftsenhetQuery.data ?? false) || eksternSamarbeidspartner;
 
   const visRessursAdministeringKnapper =
     isOrgEnhetArbeidsomraadeQuery.data ?? false;
@@ -531,6 +537,10 @@ function DropdownMeny({
   const adminOrWriteForOrgenhet =
     (hasWriteAccess && hasWriteAccessForOrgenhet) || hasAdminAccess;
 
+  const eksternSamarbeidspartner = isEksternSamarbeidspartnerOrgEnhet(
+    orgEnhet.id,
+  );
+
   const visOpprettMedarbeidere =
     visRessursAdministeringKnapper && adminOrWriteForOrgenhet;
 
@@ -538,6 +548,9 @@ function DropdownMeny({
     visRessursAdministeringKnapper &&
     valgtEnhetKanHaRessurser &&
     hasAdminAccess;
+
+  const visKontaktpersonEksport =
+    adminOrWriteForOrgenhet && !eksternSamarbeidspartner;
 
   return (
     <div
@@ -598,7 +611,7 @@ function DropdownMeny({
               </>
             )}
 
-            {adminOrWriteForOrgenhet && (
+            {visKontaktpersonEksport && (
               <>
                 <Dropdown.Menu.Divider />
                 <Dropdown.Menu.GroupedList.Item

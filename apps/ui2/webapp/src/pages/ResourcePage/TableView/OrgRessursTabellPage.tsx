@@ -1,13 +1,6 @@
 import { css } from "@emotion/react";
 import { ChevronLeftIcon, FileExcelIcon } from "@navikt/aksel-icons";
-import {
-  Alert,
-  Button,
-  Checkbox,
-  Heading,
-  Link,
-  Loader,
-} from "@navikt/ds-react";
+import { Alert, Button, Checkbox, Heading, Loader } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import React, { useState } from "react";
@@ -19,10 +12,12 @@ import {
   isOrgEnhetDriftsenhet,
 } from "~/api/react-query-endpoints";
 import ContentWrapper from "~/components/ContentWrapper";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { isPeriodActiveOrFuture } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { OrgRessursTabellPageInner } from "~/pages/ResourcePage/TableView/OrgRessursTabellPageInner";
 import type { ExcelExportRequest, OrgEnhet } from "~/types/api-models";
+import { isEksternSamarbeidspartnerOrgEnhet } from "~/utils";
 
 export const OrgRessursTabellPage = () => {
   const { id } = useParams({ from: "/org/table/$id" });
@@ -70,6 +65,8 @@ export const OrgRessursTabellPage = () => {
     ...new Set(allRessursKoblinger.map((tilknytning) => tilknytning.navident)),
   ];
 
+  const eksternSamarbeidspartner = isEksternSamarbeidspartnerOrgEnhet(id);
+
   const excelFilNavn = () => {
     return includeUnderliggende &&
       underliggendeOrgEnhetQuery.isSuccess &&
@@ -103,7 +100,10 @@ export const OrgRessursTabellPage = () => {
     );
   }
 
-  if (isOrgEnhetDriftsenhetQuery.data?.valueOf() === false) {
+  if (
+    isOrgEnhetDriftsenhetQuery.data?.valueOf() === false &&
+    !eksternSamarbeidspartner
+  ) {
     return (
       <Alert variant="error">
         <Heading level="3" size="small">
@@ -124,7 +124,8 @@ export const OrgRessursTabellPage = () => {
   }
 
   if (
-    isOrgEnhetDriftsenhetQuery.data?.valueOf() === true &&
+    (isOrgEnhetDriftsenhetQuery.data?.valueOf() === true ||
+      eksternSamarbeidspartner) &&
     orgEnhetQuery.data &&
     underliggendeOrgEnhetQuery.data
   ) {
@@ -133,17 +134,24 @@ export const OrgRessursTabellPage = () => {
         <PageBanner text={"Medarbeidere i " + orgEnhetQuery.data?.navn || ""} />
 
         <ContentWrapper limitWidth={false}>
-          <Link
+          <SmartLink
             css={css`
               color: #000;
               font-size: 1.2rem;
-              margin-bottom: 20px;
             `}
             href={`/org/${id}`}
           >
-            <ChevronLeftIcon fontSize="1.8rem" />
-            <b>Tilbake til {orgEnhetQuery.data?.navn}</b>
-          </Link>
+            <span
+              css={css`
+                display: flex;
+                align-items: center;
+              `}
+            >
+              <ChevronLeftIcon fontSize="1.8rem" />
+              <b>Tilbake til {orgEnhetQuery.data?.navn}</b>
+            </span>
+          </SmartLink>
+
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <Checkbox
               checked={includeUnderliggende}

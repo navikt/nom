@@ -69,6 +69,8 @@ import {
   isBeforeToday,
   isGyldighetsPeriodeActive,
   isInDevelopment,
+  isTodayOrAfter,
+  isTodayOrBefore,
   todayWithoutTimezone,
 } from "~/utils";
 
@@ -86,6 +88,21 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   });
 
   const orgtilknytninger = orgtilknytningerQuery.data ?? [];
+
+  const dagensDolOrgtilknytningTilknytningstype = orgtilknytninger.find(
+    (tilknytning) =>
+      isTodayOrBefore(tilknytning.gyldigFom) &&
+      isTodayOrAfter(tilknytning.gyldigTom) &&
+      tilknytning.erDagligOppfolging,
+  )?.orgtilknytningType;
+
+  const eksternSamarbeidspartner =
+    dagensDolOrgtilknytningTilknytningstype === Tilknytningtype.HELFO ||
+    dagensDolOrgtilknytningTilknytningstype === Tilknytningtype.SKATTEETATEN ||
+    dagensDolOrgtilknytningTilknytningstype ===
+      Tilknytningtype.RIKSREVISJONEN ||
+    dagensDolOrgtilknytningTilknytningstype ===
+      Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER;
 
   const orgenheterLederKanRedigereQuery = useQuery({
     queryKey: getOrgEnheterLederKanRedigere.queryKey(),
@@ -145,6 +162,7 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
       ) : (
         <>
           <SummarySection
+            eksternSamarbeidspartner={eksternSamarbeidspartner}
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
             ressurs={ressurs}
             tidligereLeder={tidligereLeder}
@@ -683,10 +701,12 @@ function SummarySection({
   ressurs,
   hasWriteAccessForRessurs,
   tidligereLeder,
+  eksternSamarbeidspartner,
 }: {
   ressurs: Ressurs;
   hasWriteAccessForRessurs: boolean;
   tidligereLeder: boolean;
+  eksternSamarbeidspartner: boolean;
 }) {
   const { editPersonopplysninger } = useSearch({
     from: "/ressurs/$id",
@@ -756,6 +776,7 @@ function SummarySection({
   return (
     <PersonOpplysninger
       canEditPersonopplysninger={canEditPersonopplysninger}
+      eksternSamarbeidspartner={eksternSamarbeidspartner}
       ressurs={ressurs}
     />
   );

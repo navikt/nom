@@ -195,7 +195,11 @@ export function isTodayOrBefore(date: Date | string) {
   );
 }
 
-export function isTodayOrAfter(date: Date | string) {
+export function isTodayOrAfter(date: Date | string | undefined) {
+  if (!date) {
+    return true;
+  }
+
   const providedDateWithoutTimezone = dateWithoutTimezone(date);
 
   return (
@@ -296,4 +300,37 @@ export function promiseIsRejected<T>(
   promise: PromiseSettledResult<T>,
 ): promise is PromiseRejectedResult {
   return promise.status === "rejected";
+}
+
+export function isHelfoOrgEnhet(orgEnhetId: string) {
+  const helfoId = isInDevelopment() ? "mu405g" : "je305h";
+
+  return orgEnhetId === helfoId;
+}
+
+export function isSkatteetatenOrgEnhet(orgEnhetId: string) {
+  const skatteetatenId = isInDevelopment() ? "ja464g" : "ne938h";
+
+  return orgEnhetId === skatteetatenId;
+}
+
+export function isVikafossenOrgEnhet(orgEnhetId: string) {
+  const vikafossenId = isInDevelopment() ? "ru151s" : "ru664y";
+
+  return orgEnhetId === vikafossenId;
+}
+
+export function isRiksrevisjonenOrgEnhet(orgEnhetId: string) {
+  const riksrevisjonenId = isInDevelopment() ? "ge146b" : "ke602d";
+
+  return orgEnhetId === riksrevisjonenId;
+}
+
+export function isEksternSamarbeidspartnerOrgEnhet(orgEnhetId: string) {
+  return (
+    isHelfoOrgEnhet(orgEnhetId) ||
+    isSkatteetatenOrgEnhet(orgEnhetId) ||
+    isVikafossenOrgEnhet(orgEnhetId) ||
+    isRiksrevisjonenOrgEnhet(orgEnhetId)
+  );
 }

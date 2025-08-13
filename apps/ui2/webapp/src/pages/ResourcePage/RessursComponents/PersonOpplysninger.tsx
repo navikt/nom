@@ -57,9 +57,11 @@ import {
 export function PersonOpplysninger({
   ressurs,
   canEditPersonopplysninger,
+  eksternSamarbeidspartner,
 }: {
   ressurs: Ressurs;
   canEditPersonopplysninger: boolean;
+  eksternSamarbeidspartner: boolean;
 }) {
   const navident = ressurs.navident;
 
@@ -86,6 +88,14 @@ export function PersonOpplysninger({
   const identTypeUtenKontaktpersoner =
     ressurs.identType === IdentType.ROBOT ||
     ressurs.identType === IdentType.VIKAFOSSEN;
+
+  const visKontaktpersoner =
+    (hasKontaktinfoAccessForRessurs ||
+      hasSelfServiceAccess ||
+      hasAdminAccess) &&
+    !sluttetOverToMndSiden &&
+    !identTypeUtenKontaktpersoner &&
+    !eksternSamarbeidspartner;
 
   return (
     <HStack>
@@ -138,46 +148,42 @@ export function PersonOpplysninger({
             <FysiskBrukersted ressurs={ressurs} />
           )}
           <TelefonNummere ressurs={ressurs} />
-          {(hasKontaktinfoAccessForRessurs ||
-            hasSelfServiceAccess ||
-            hasAdminAccess) &&
-            !sluttetOverToMndSiden &&
-            !identTypeUtenKontaktpersoner && (
-              <>
-                <span>Kontaktpersoner:</span>
+          {visKontaktpersoner && (
+            <>
+              <span>Kontaktpersoner:</span>
 
-                <div
-                  css={css`
-                    display: flex;
-                  `}
+              <div
+                css={css`
+                  display: flex;
+                `}
+              >
+                <ReactRouterLink
+                  params={{ id: ressurs.navident }}
+                  to="/kontaktpersoner/$id"
                 >
-                  <ReactRouterLink
-                    params={{ id: ressurs.navident }}
-                    to="/kontaktpersoner/$id"
+                  {/* Egentlig ikke anbefalt å bruke negativ margin, men det er den eneste måten jeg klarte å oppnå designet som var ønsket */}
+                  <Button
+                    css={css`
+                      width: fit-content;
+                      margin-left: -12px;
+                      margin-top: -4px;
+                    `}
+                    icon={<PersonTallShortIcon title="a11y-title" />}
+                    size="small"
+                    type="button"
+                    variant="tertiary"
                   >
-                    {/* Egentlig ikke anbefalt å bruke negativ margin, men det er den eneste måten jeg klarte å oppnå designet som var ønsket */}
-                    <Button
-                      css={css`
-                        width: fit-content;
-                        margin-left: -12px;
-                        margin-top: -4px;
-                      `}
-                      icon={<PersonTallShortIcon title="a11y-title" />}
-                      size="small"
-                      type="button"
-                      variant="tertiary"
-                    >
-                      Se kontaktpersoner
-                    </Button>
-                  </ReactRouterLink>
+                    Se kontaktpersoner
+                  </Button>
+                </ReactRouterLink>
 
-                  <HelpText title="Hvem kan se denne informasjonen?">
-                    Kun synlig for medarbeideren selv og ledere/lederstøtte med
-                    redigeringstilgang til medarbeideren.
-                  </HelpText>
-                </div>
-              </>
-            )}
+                <HelpText title="Hvem kan se denne informasjonen?">
+                  Kun synlig for medarbeideren selv og ledere/lederstøtte med
+                  redigeringstilgang til medarbeideren.
+                </HelpText>
+              </div>
+            </>
+          )}
         </div>
       </VStack>
 
