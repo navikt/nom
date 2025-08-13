@@ -16,8 +16,15 @@ import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
+import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
+import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
+import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -30,6 +37,7 @@ import java.util.Set;
 
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
+import static no.nav.nom.apps.api.common.SpringCacheConfig.STATISTIKK_REST_SERVICE_CACHE_NAME;
 
 @Slf4j
 @Service
@@ -37,23 +45,39 @@ public class StatistikkRestService {
 
     private final RessursStateRepository ressursStateRepository;
     private final OrganiseringStateRepository organiseringStateRepository;
+
     private final OrgenhetService orgenhetService;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgEnhetMapper orgEnhetMapper;
+
+    private final NomStateRessursListener nomStateRessursListener;
+    private final NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
+    private final NomStateOrganiseringListener nomStateOrganiseringListener;
+    private final NomStateOrgEnhetListener nomStateOrgEnhetListener;
+
     private final Unleash unleash;
 
-    public StatistikkRestService(RessursStateRepository ressursStateRepository,
-                                 OrganiseringStateRepository organiseringStateRepository,
-                                 OrgenhetService orgenhetService,
-                                 RemedyEnhetMapperService remedyEnhetMapperService,
-                                 OrgEnhetMapper orgEnhetMapper,
-                                 Unleash unleash
+    public StatistikkRestService(
+        RessursStateRepository ressursStateRepository,
+        OrganiseringStateRepository organiseringStateRepository,
+        OrgenhetService orgenhetService,
+        RemedyEnhetMapperService remedyEnhetMapperService,
+        OrgEnhetMapper orgEnhetMapper,
+        NomStateRessursListener nomStateRessursListener,
+        NomStateOrgtilknytningListener nomStateOrgtilknytningListener,
+        NomStateOrganiseringListener nomStateOrganiseringListener,
+        NomStateOrgEnhetListener nomStateOrgEnhetListener,
+        Unleash unleash
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.organiseringStateRepository = organiseringStateRepository;
         this.orgenhetService = orgenhetService;
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.orgEnhetMapper = orgEnhetMapper;
+        this.nomStateRessursListener = nomStateRessursListener;
+        this.nomStateOrgtilknytningListener = nomStateOrgtilknytningListener;
+        this.nomStateOrganiseringListener = nomStateOrganiseringListener;
+        this.nomStateOrgEnhetListener = nomStateOrgEnhetListener;
         this.unleash = unleash;
     }
 
@@ -98,6 +122,28 @@ public class StatistikkRestService {
             antallFylker,
             antallNavKontorer
         );
+    }
+
+
+    public void loadStatistikkCache() {
+        log.info("Loading statistikkRestService");
+        while (!isInitialStateReady()) {
+            log.info("Waiting for NomState listeners to be ready before loading statistikk cache");
+            try {
+                Thread.sleep(10000L); // Wait for 10 seconds before checking again
+            } catch (InterruptedException e) {
+                log.error("Thread interrupted while waiting for NomState listeners to be ready", e);
+                Thread.currentThread().interrupt();
+            }
+        }
+        var alleOrgEnheterSomErLinjeEllerDriftId = orgenhetService.getAllEnheterMedOrganisering()
+            .stream()
+            .filter(iOrgenhet -> iOrgenhet.getNomNivaa().isPresent() &&
+                (iOrgenhet.getNomNivaa().get().equals(NomNivaa.LINJEENHET) || iOrgenhet.getNomNivaa().get().equals(NomNivaa.DRIFTSENHET)))
+            .map(IOrgenhet::getId)
+            .toList();
+
+        alleOrgEnheterSomErLinjeEllerDriftId.forEach(this::getStatistikkForOrgEnhetCache);
     }
 
     public OrgEnhetStatistikkResponse hentStatistikkForOrgEnhet(String orgEnhetId) {
@@ -156,10 +202,20 @@ public class StatistikkRestService {
         );
     }
 
-    private OrgEnhetStatistikkResponse hentStatistikkForLinjeenhet(RessursStatistikk ressursStatistikk, int antallLovnoder, Collection<IOrgenhet> underliggendeOrgEnheter) {
+    private OrgEnhetStatistikkResponse hentStatistikkForLinjeenhet(
+        RessursStatistikk ressursStatistikk,
+        int antallLovnoder,
+        Collection<IOrgenhet> underliggendeOrgEnheter
+    ) {
         var antallNavArbeidOgYtelser = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.NAV_ARBEID_OG_YTELSER);
-        var antallNavFamilieOgPensjonsytelser = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.NAV_FAMILIE_OG_PENSJONSYTELSER);
-        var antallHjelpemidlerOgTilrettelegging = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.HJELPEMIDLER_OG_TILRETTELEGGING);
+        var antallNavFamilieOgPensjonsytelser = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(
+            underliggendeOrgEnheter,
+            OrgEnhetsType.NAV_FAMILIE_OG_PENSJONSYTELSER
+        );
+        var antallHjelpemidlerOgTilrettelegging = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(
+            underliggendeOrgEnheter,
+            OrgEnhetsType.HJELPEMIDLER_OG_TILRETTELEGGING
+        );
         var antallKlageinstanser = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.KLAGEINSTANS);
         var antallNavKontaktsenter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.NAV_KONTAKTSENTER);
         var antallKontrollKonrollenheter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.KONTROLL_KONTROLLENHET);
@@ -186,10 +242,20 @@ public class StatistikkRestService {
         );
     }
 
-    private OrgEnhetStatistikkResponse hentStatistikkForDriftsenhet(RessursStatistikk ressursStatistikk, int antallLovnoder, Collection<IOrgenhet> underliggendeOrgEnheter) {
+    private OrgEnhetStatistikkResponse hentStatistikkForDriftsenhet(
+        RessursStatistikk ressursStatistikk,
+        int antallLovnoder,
+        Collection<IOrgenhet> underliggendeOrgEnheter
+    ) {
         var antallNavArbeidOgYtelser = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.NAV_ARBEID_OG_YTELSER);
-        var antallNavFamilieOgPensjonsytelser = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.NAV_FAMILIE_OG_PENSJONSYTELSER);
-        var antallHjelpemidlerOgTilrettelegging = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.HJELPEMIDLER_OG_TILRETTELEGGING);
+        var antallNavFamilieOgPensjonsytelser = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(
+            underliggendeOrgEnheter,
+            OrgEnhetsType.NAV_FAMILIE_OG_PENSJONSYTELSER
+        );
+        var antallHjelpemidlerOgTilrettelegging = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(
+            underliggendeOrgEnheter,
+            OrgEnhetsType.HJELPEMIDLER_OG_TILRETTELEGGING
+        );
         var antallKlageinstanser = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.KLAGEINSTANS);
         var antallNavKontaktsenter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.NAV_KONTAKTSENTER);
         var antallKontrollKonrollenheter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.KONTROLL_KONTROLLENHET);
@@ -270,5 +336,25 @@ public class StatistikkRestService {
             }
             return !ressursState.identType().equals(IdentType.ROBOT);
         }
+    }
+
+    @Cacheable(cacheNames = STATISTIKK_REST_SERVICE_CACHE_NAME, cacheManager = "cacheManager")
+    public OrgEnhetStatistikkResponse getStatistikkForOrgEnhetCache(String orgEnhet) {
+        log.info("Fetching statistikk for org enhet: {}", orgEnhet);
+        return hentStatistikkForOrgEnhet(orgEnhet);
+    }
+
+    @CacheEvict(value = STATISTIKK_REST_SERVICE_CACHE_NAME, allEntries = true)
+    @Scheduled(fixedDelayString = "12h")
+    public void emptyCache() {
+        log.info("Emptying Statistikk cache");
+        loadStatistikkCache();
+    }
+
+    private boolean isInitialStateReady() {
+        return  nomStateRessursListener.hasReadToEndOnStartup()
+            && nomStateOrgEnhetListener.hasReadToEndOnStartup()
+            && nomStateOrganiseringListener.hasReadToEndOnStartup()
+            && nomStateOrgtilknytningListener.hasReadToEndOnStartup();
     }
 }
