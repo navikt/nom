@@ -13,7 +13,7 @@
   "author": "NAV",
   "license": "MIT",
   "dependencies": {
-    "@navikt/vite-mode": "0.13.5",
+    "@navikt/vite-mode": "0.13.6",
     "@navikt/oasis": "3.8.0",
     "cookie-parser": "1.4.7",
     "express": "5.1.0",
