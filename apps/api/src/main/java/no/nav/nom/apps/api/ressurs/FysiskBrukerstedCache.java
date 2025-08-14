@@ -20,7 +20,7 @@ public class FysiskBrukerstedCache {
     @Autowired
     private NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient;
 
-    @Cacheable(FYSISK_BRUKERSTED_CACHE_NAME)
+    @Cacheable(cacheNames = FYSISK_BRUKERSTED_CACHE_NAME, cacheManager = "cacheManager")
     public List<FysiskBrukersted> getAll() {
         return nomRemedyIntegrasjonClient.getFysiskeBrukersteder();
     }

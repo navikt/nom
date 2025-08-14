@@ -431,6 +431,82 @@ public class RessursControllerTest extends RestTestBase {
 
     @Test
     @SneakyThrows
+    @DisplayName("Skal reaktivere sluttet ekstern ressurs som starter opp igjen som Statlig ressurs")
+    void skal_reaktivere_ekstern_ressurs_som_blir_statlig() {
+        String personident = "12345678910";
+        String navident = "x123456";
+        val navn = pdlUtils.mockSinglePersonResponse();
+        String primaryTelefonnummer = "12345678";
+
+        when(nikClient.opprettNavidentOnBehalfOfUser(
+            eq(OpprettNavidentRequest.builder()
+                .personid(personident)
+                .identPrefix(navn.getEtternavn().substring(0, 1))
+                .identType("STANDARD")
+                .build())
+        )).thenReturn(ResponseEntity.ok(
+            OpprettNavidentResponse.builder()
+                .navident(navident)
+                .build()));
+
+        when(pdlClient.hentPerson(eq(personident))).thenReturn(Optional.empty());
+
+        var request = opprettRessursRequest().toBuilder()
+            .personident(personident)
+            .visningsfornavn(navn.getFornavn())
+            .visningsmellomnavn("")
+            .visningsetternavn(navn.getEtternavn())
+            .primaryTelefonnummer(primaryTelefonnummer)
+            .sektor(Sektor.NAV_STATLIG)
+            .startDato(LocalDate.now().plusMonths(1))
+            .sluttDato(null)
+            .tilknytningtype(Tilknytningtype.FAST)
+            .ansettelsesType(null)
+            .fysiskBrukerstedNr("")
+            .orgEnhetId("")
+            .identType(STANDARD)
+            .build();
+
+        RessursState existingRessurs = RessursState.builder()
+            .fid("Ressurs-XvSgpsGRF")
+            .personident(request.personident())
+            .navident(navident)
+            .sektor(Sektor.EKSTERN)
+            .visningsnavn(
+                new Visningsnavn(
+                    request.visningsfornavn(),
+                    Optional.empty(),
+                    request.visningsetternavn()
+                ))
+            .primaryTelefonnummer(null)
+            .sluttdato(LocalDate.now().minusYears(3))
+            .startdato(LocalDate.now().minusYears(2))
+            .primaryFysiskBrukersted("1234")
+            .fysiskeBrukersteder(List.of("1234"))
+            .identType(STANDARD)
+            .build();
+
+        when(ressursStateRepository.findByNavident(navident)).thenReturn(Optional.of(existingRessurs));
+
+        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+            .thenReturn(Set.of(request.fysiskBrukerstedNr()));
+
+        postOpprettRessursRequest(
+            testToken.nomWriteGroupAndNomUiAzp(),
+            request
+        )
+            .expectStatus().is2xxSuccessful()
+            .expectBody(OpprettRessursResponse.class);
+
+        verify(ressursCommandService, times(1)).oppdatertPrimaryTelefonnummer(any(), any());
+        verify(ressursCommandService, times(1)).oppdaterSektorEvent(any(), any());
+
+        verify(orgtilknytningCommandService, times(1)).opprettOrgtilknytning(any());
+        verify(orgtilknytningCommandService, times(1)).endreDagligOppfolgingOrgtilknytning(any(), any());
+    }
+
+    @Test
+    @SneakyThrows
     void skal_ikke_opprette_ekstern_ressurs_uten_sluttDato() {
 
         postOpprettRessursRequest(

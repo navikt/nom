@@ -50,6 +50,6 @@ public class StatistikkController {
         }
     )
     public ResponseEntity<OrgEnhetStatistikkResponse> hentOrgEnhetStatistikk(@PathVariable String orgenhetId) {
-        return ResponseEntity.ok(statistikkRestService.hentStatistikkForOrgEnhet(orgenhetId));
+        return ResponseEntity.ok(statistikkRestService.getStatistikkForOrgEnhetCache(orgenhetId));
     }
 }

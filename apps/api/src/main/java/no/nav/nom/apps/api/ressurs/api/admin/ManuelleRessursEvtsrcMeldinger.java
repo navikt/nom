@@ -478,7 +478,7 @@ public class ManuelleRessursEvtsrcMeldinger {
             )
         );
 
-        LocalDate sanitizedSluttdato  = sluttDato.equals(NO_END_DATE) ? null : sluttDato;
+        LocalDate sanitizedSluttdato  = isNull(sluttDato) || sluttDato.equals(NO_END_DATE) ? null : sluttDato;
         ressursCommandService.oppdaterRessursSluttdatoEvent(
             new OppdaterSluttdatoCommand(ressursState.get().fid(),
                 sanitizedSluttdato, metaData)
@@ -511,7 +511,7 @@ public class ManuelleRessursEvtsrcMeldinger {
     )
     public ResponseEntity<String> oppdaterStartDatoRessurs(
         @Parameter(description = "NAVIDENT for ressursen") @RequestParam String navident,
-        @Parameter(description = "Startdato for ressursen som skal oppdateres") @RequestParam(required = true) LocalDate startdato,
+        @Parameter(description = "Startdato for ressursen som skal oppdateres") @RequestParam LocalDate startdato,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
     ) {
         var ressursState = ressursStateRepository.findByNavident(navident);

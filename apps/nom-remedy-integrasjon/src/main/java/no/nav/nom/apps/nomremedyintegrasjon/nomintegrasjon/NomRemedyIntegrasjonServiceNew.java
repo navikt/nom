@@ -372,7 +372,7 @@ public class NomRemedyIntegrasjonServiceNew {
     }
 
     private Integer getSektor(RessursState ressursState, OrgtilknytningState dolOrgtilknytning) {
-        return isNull(ressursState.sektor()) ? nomSektorToRemedyCode(dolOrgtilknytning.sektor()) : nomSektorToRemedyCode(ressursState.sektor());
+        return isNull(dolOrgtilknytning.sektor()) ? nomSektorToRemedyCode(ressursState.sektor()) : nomSektorToRemedyCode(dolOrgtilknytning.sektor());
     }
 
     private String getTelefonerFromNom(String navident) {

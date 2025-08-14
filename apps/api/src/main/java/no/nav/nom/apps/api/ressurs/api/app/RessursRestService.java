@@ -586,11 +586,7 @@ public class RessursRestService {
                 metadata
             );
 
-        if (reaktivertRessurs.primaryTelefonnummer() != null && !Objects.equals(existingRessurs.primaryTelefonnummer(), reaktivertRessurs.primaryTelefonnummer()))
-            ressursCommandService.oppdatertPrimaryTelefonnummer(
-                new OppdaterPrimaryTelefonnummerCommand(existingRessurs.fid(), reaktivertRessurs.primaryTelefonnummer()),
-                metadata
-            );
+
 
         if (!reaktivertRessurs.sektor().name().equals(existingRessurs.sektor().name()))
             ressursCommandService.oppdaterSektorEvent(
@@ -624,6 +620,12 @@ public class RessursRestService {
                 metadata
             );
         }
+
+        if (reaktivertRessurs.primaryTelefonnummer() != null && !Objects.equals(existingRessurs.primaryTelefonnummer(), reaktivertRessurs.primaryTelefonnummer()))
+            ressursCommandService.oppdatertPrimaryTelefonnummer(
+                new OppdaterPrimaryTelefonnummerCommand(existingRessurs.fid(), reaktivertRessurs.primaryTelefonnummer()),
+                metadata
+            );
 
         logger.debug("createRessurs for {} - {}", reaktivertRessurs.navident(), request.visningsetternavn());
 

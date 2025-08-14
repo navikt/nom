@@ -45,6 +45,7 @@ import { Divider } from "~/components/Divider";
 import { ModalProvider } from "~/components/modalProvider/ModalProvider";
 import {
   SektorNameMapping,
+  tilknytningstyperStatlige,
   TilknytningtypeNameMapping,
 } from "~/pages/CreateResourcePage/SektorStep";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
@@ -505,11 +506,14 @@ function OrganisationHierarchyTree({
     orgtilknytningType,
   } = orgTilknytning;
 
-  const nyeTilknytningtyper = [
+  const tilknytningTyperVisesUtenSektor = [
     Tilknytningtype.VIKAR,
     Tilknytningtype.UFORUTSETT_BEHOV,
     Tilknytningtype.PRAKSISARBEID,
     Tilknytningtype.UTDANNINGSSTILLINGER,
+    Tilknytningtype.HELFO,
+    Tilknytningtype.SKATTEETATEN,
+    Tilknytningtype.RIKSREVISJONEN,
   ];
 
   const startsInTheFuture = gyldigFom && isAfterToday(new Date(gyldigFom));
@@ -566,6 +570,7 @@ function OrganisationHierarchyTree({
             </>
           )}
         </ExpansionCard.Title>
+
         <ExpansionCard.Description>
           <Label size="small">
             <span
@@ -596,15 +601,21 @@ function OrganisationHierarchyTree({
           css={css`
             display: flex;
             justify-content: space-between;
+            margin-top: var(--a-spacing-2);
           `}
         >
-          <div>
+          <div
+            css={css`
+              display: flex;
+              flex-direction: column;
+            `}
+          >
             {gyldigFom && (
               <span>
                 <b>Fra og med:</b> {formatDisplayDate(gyldigFom)}
               </span>
             )}
-            <br />
+
             {gyldigTom && (
               <span>
                 <b>Til og med:</b> {formatDisplayDate(gyldigTom)}
@@ -612,18 +623,21 @@ function OrganisationHierarchyTree({
             )}
           </div>
 
-          <div>
+          <div
+            css={css`
+              display: flex;
+              flex-direction: column;
+            `}
+          >
             {sektor && (
               <span>
                 <b>Sektor</b>: {SektorNameMapping[sektor]}
               </span>
             )}
-            <br />
+
             {orgtilknytningType &&
               (sektor ||
-                nyeTilknytningtyper.find(
-                  (value) => value === orgtilknytningType,
-                )) &&
+                tilknytningTyperVisesUtenSektor.includes(orgtilknytningType)) &&
               orgtilknytningType !== Tilknytningtype.INGEN &&
               (orgtilknytningType !== Tilknytningtype.ARBEIDSTRENING ||
                 kanAlltidSeTilknytningstype) && (
@@ -634,14 +648,16 @@ function OrganisationHierarchyTree({
               )}
           </div>
         </div>
+
         <Divider size="small" />
+
         <CompactOrganisasjonHierarki orgEnhet={orgEnhet} ressurs={ressurs} />
       </ExpansionCard.Content>
     </ExpansionCard>
   );
 }
 
-const nomIdVikafossen = new Set(["ru664y", "fe178t"]);
+const vikafossenOrgEnhetIder = new Set(["ru664y", "fe178t"]);
 
 function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
   const hasAdminAccess = useHasAdminAccess();
@@ -651,7 +667,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
   const lederForOrgenheterFiltrert =
     hasAdminAccess || isInDevelopment()
       ? lederForOrgenheter
-      : lederForOrgenheter.filter((enh) => !nomIdVikafossen.has(enh.id));
+      : lederForOrgenheter.filter((enh) => !vikafossenOrgEnhetIder.has(enh.id));
 
   if (lederForOrgenheterFiltrert.length === 0) {
     return <></>;
