@@ -515,9 +515,67 @@ public class NomRemedyIntegrasjonServiceNewTest {
         verify(aggregateStateRepository, times(1)).save(any(AggregateState.class));
     }
 
+    @Test
+    @DisplayName("Ressurs har sluttet som ekstern og skal starte noen år senere som Statlig")
+    void test_011() {
+        String ressursFid = UUID.randomUUID().toString();
+        String pastOrgtilknytningFid = UUID.randomUUID().toString();
+        String futureOrgtilknytningFid = UUID.randomUUID().toString();
+        String navident = "S123456";
+        LocalDate gyldigFom = LocalDate.now().minusYears(4).withDayOfMonth(1);
+
+        var ressursState = ressurs(ressursFid, navident, gyldigFom).toBuilder()
+                .sektor(Sektor.EKSTERN)
+                .sluttdato(LocalDate.now().minusYears(3))
+                .sistEndretAv("X123456")
+                .build();
+
+        var pastOrgtilknytningState = orgtilknytning(pastOrgtilknytningFid, navident, gyldigFom)
+                .toBuilder()
+                .sektor(Sektor.EKSTERN)
+                .gyldigTom(Optional.of(LocalDate.now().minusYears(3)))
+                .sistEndretAv("X123456")
+                .build();
+
+        var futureOrgtilknytningState = orgtilknytning(futureOrgtilknytningFid, navident, LocalDate.now().plusMonths(1).withDayOfMonth(1))
+                .toBuilder()
+                .sektor(Sektor.NAV_STATLIG)
+                .orgtilknytningType(Optional.of(Tilknytningtype.FAST))
+                .sistEndretAv("X123456")
+                .build();
+
+        var aggregateState = aggregate(futureOrgtilknytningFid, futureOrgtilknytningState.getClass().getSimpleName(), navident);
+        var nomIntegrasjonEntity = nomIntegrasjonEntityFromNomData(ressursState, futureOrgtilknytningState, false).toBuilder().entryOperasjon("Ny").build();
+
+        // And
+        doReturn(List.of(aggregateState))
+                .when(aggregateStateRepository)
+                .findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
+
+        doReturn(Optional.of(futureOrgtilknytningState))
+            .when(orgtilknytningStateRepository)
+                .findByFid(futureOrgtilknytningFid);
+
+        doReturn(Optional.of(ressursState))
+                .when(ressursStateRepository)
+                .findByNavident(navident);
+
+        doReturn(List.of(pastOrgtilknytningState, futureOrgtilknytningState))
+                .when(orgtilknytningStateRepository)
+                .findByNavident(navident);
+
+        // When
+        nomRemedyIntegrasjonService.executeImmediateStateUpdate();
+
+        // Then
+        verify(aggregateStateRepository, times(1)).findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
+        verify(aggregateStateRepository, times(1)).deleteAllById(List.of(aggregateState.getAggregateStateId()));
+        verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString());
+    }
+
 
     private Integer getSektor(RessursState ressursState, OrgtilknytningState dolOrgtilknytning) {
-        return isNull(ressursState.sektor()) ? nomSektorToRemedyCode(dolOrgtilknytning.sektor()) : nomSektorToRemedyCode(ressursState.sektor());
+        return isNull(dolOrgtilknytning.sektor()) ? nomSektorToRemedyCode(ressursState.sektor()) : nomSektorToRemedyCode(dolOrgtilknytning.sektor());
     }
 
     private AggregateState aggregate(String fid, String stateType, String navident) {
