@@ -255,7 +255,7 @@ public class OrgEnhetSanityCheckService {
         List<OrgEnhetArbeidsomraadeInfo.LoevnodeMedFeilAntallArbOmr> loevnoderMedFeilAntallArbOmr = new ArrayList<>();
         alleLeafNoder.forEach(orgenhet -> {
             var count = findArbeidsomraadeCountInHierarkiAbove(orgenhet);
-            if (count != 1) {
+            if (count != 1 && orgenhet.isActive()) { // inkluderer orgenheter de som er aktiv og mangler ARBEIDSOMRÅDE
                 loevnoderMedFeilAntallArbOmr.add(
                         OrgEnhetArbeidsomraadeInfo.LoevnodeMedFeilAntallArbOmr.builder()
                                 .orgenhetId(orgenhet.id())
