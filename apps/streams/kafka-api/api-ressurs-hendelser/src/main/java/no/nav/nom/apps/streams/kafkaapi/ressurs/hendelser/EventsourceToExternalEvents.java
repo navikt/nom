@@ -49,6 +49,7 @@ public class EventsourceToExternalEvents {
 
         // Output-meldinger
         final var ressursOpprettetEventSerde = objectSerde.copyWithType(RessursOpprettetEvent.class);
+        ressursOpprettetEventSerde.serializer().noTypeInfo(); // Ikke inkludere type i eksterne meldinger
 
 
         // Aggregerer ressurser siden det kan være RessursOpprettet-events som ikke har alle nødvendige felt
@@ -98,12 +99,35 @@ public class EventsourceToExternalEvents {
                         Materialized.with(stringSerde, jsonSerde)
                 );
 
+        ressursAggregateKTable
+            .toStream()
+            .print(Printed.<String, ObjectNode>toSysOut().withLabel("ressursAggregateKTable"));
+
         // Snur til å være pr. navident og kun ha med ressurser hvor nødvendige felter har fått verdi
         KTable<String, ObjectNode> ressursPerNavident = ressursAggregateKTable.toStream()
-                .filter((k, event) -> isFieldSetAndTrue(event, "ressursReadyForJoin"))
-                .selectKey((key, otJson) -> otJson.get("navident").asText())
-                .groupByKey(Grouped.with(stringSerde, jsonSerde))
-                .reduce((previousValue, newValue) -> newValue);
+            .filter((k, event) -> isFieldSetAndTrue(event, "ressursReadyForJoin"))
+            .selectKey((key, otJson) -> otJson.get("navident").asText())
+            .groupByKey(Grouped.with(stringSerde, jsonSerde))
+            .aggregate(
+                objectMapper::createObjectNode,
+                (String key, ObjectNode newEvent, ObjectNode aggregate) -> {
+                    log.debug("Aggregate before: {}", aggregate);
+
+                    aggregate.setAll(newEvent);
+
+                    // Merke navidenten første gang og ellers fjerne merket, slik at det bare sendes en melding pr. navident
+                    if (aggregate.get("sendMessage") == null) {
+                        aggregate.put("sendMessage", "true");
+                    } else {
+                        aggregate.put("sendMessage", "false");
+                    }
+
+                    log.debug("Aggregate after: {}", aggregate);
+                    return aggregate;
+                },
+                Materialized.with(stringSerde, jsonSerde)
+            );
+
 
         ressursPerNavident
                 .toStream()
@@ -235,7 +259,7 @@ public class EventsourceToExternalEvents {
                             visningsnavn.get("etternavn").asText()
                     ))
                     .startdato(ressursAggregate.hasNonNull("startdato") ? LocalDate.parse(ressursAggregate.get("startdato").asText()) : null)
-                    .sluttdato(Optional.ofNullable(ressursAggregate.hasNonNull("sluttdato") ? LocalDate.parse(ressursAggregate.get("sluttdato").asText()) : null))
+                    .sluttdato(ressursAggregate.hasNonNull("sluttdato") ? LocalDate.parse(ressursAggregate.get("sluttdato").asText()) : null)
                     .sektor(ressursAggregate.hasNonNull("sektor") ? Sektor.valueOf(ressursAggregate.get("sektor").asText()) : null)
                     .orgtilknytning(orgtilknytning)
                     .build();
