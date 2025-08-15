@@ -248,14 +248,16 @@ public class OrgEnhetSanityCheckService {
     
     public OrgEnhetArbeidsomraadeInfo validerArbeidsomraade() {
         var alleEnheter =  orgEnhetStateRepository.getAll().stream().toList(); // Aktive enheter i organisasjonstreet
+        var alleAktiveEnheter  = aktiveEnheter(alleEnheter);
+
         var alleIdOver = organiseringStateRepository.getActiveOrganisering().values().stream()
                 .map(OrganiseringState::idOver).toList();
-        var alleLeafNoder = alleEnheter.stream().filter(o -> !alleIdOver.contains(o.id())).toList();
+        var alleLeafNoder = alleAktiveEnheter.stream().filter(o -> !alleIdOver.contains(o.id())).toList();
 
         List<OrgEnhetArbeidsomraadeInfo.LoevnodeMedFeilAntallArbOmr> loevnoderMedFeilAntallArbOmr = new ArrayList<>();
         alleLeafNoder.forEach(orgenhet -> {
             var count = findArbeidsomraadeCountInHierarkiAbove(orgenhet);
-            if (count != 1 && orgenhet.isActive()) { // inkluderer orgenheter de som er aktiv og mangler ARBEIDSOMRÅDE
+            if (count != 1) {
                 loevnoderMedFeilAntallArbOmr.add(
                         OrgEnhetArbeidsomraadeInfo.LoevnodeMedFeilAntallArbOmr.builder()
                                 .orgenhetId(orgenhet.id())
