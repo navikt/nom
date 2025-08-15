@@ -82,8 +82,8 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
         assertThat(outputTopic.isEmpty()).as("Det er produsert en event").isFalse();
         KeyValue<String, RessursOpprettetEvent> ressursOpprettetEvent = outputTopic.readKeyValue();
 
-        assertThat(ressursOpprettetEvent.value.navident()).isEqualTo(NAVIDENT);
-        assertThat(ressursOpprettetEvent.value.orgtilknytning().fid()).isEqualTo(ORGTILKNYTNING_FID_1);
+        assertThat(ressursOpprettetEvent.value.getNavident()).isEqualTo(NAVIDENT);
+        assertThat(ressursOpprettetEvent.value.getOrgtilknytning().fid()).isEqualTo(ORGTILKNYTNING_FID_1);
     }
 
     @Test
@@ -106,7 +106,7 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
 
         var startDatoOppdatertEventData = (StartDatoOppdatertEventData) ressursStartDatoOppdatert.getData();
         KeyValue<String, RessursOpprettetEvent> ressursOpprettetEvent = outputTopic.readKeyValue();
-        assertThat(ressursOpprettetEvent.value.startdato()).isEqualTo(startDatoOppdatertEventData.startdato());
+        assertThat(ressursOpprettetEvent.value.getStartdato()).isEqualTo(startDatoOppdatertEventData.startdato());
     }
 
     @Test
@@ -184,7 +184,7 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
         var dolEventData = (OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData) dolEvent.getData();
         KeyValue<String, RessursOpprettetEvent> ressursOpprettetEvent = outputTopic.readKeyValue();
         //noinspection OptionalGetWithoutIsPresent
-        assertThat(ressursOpprettetEvent.value.orgtilknytning().gyldigTom().get()).isEqualTo(dolEventData.gyldigTom().get());
+        assertThat(ressursOpprettetEvent.value.getOrgtilknytning().gyldigTom().get()).isEqualTo(dolEventData.gyldigTom().get());
     }
 
     @Test

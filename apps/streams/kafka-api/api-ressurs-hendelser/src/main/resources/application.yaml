@@ -42,3 +42,7 @@ management:
       exposure:
         include: prometheus, info, health, metrics
       base-path: /internal
+
+logging:
+  level:
+    no.nav: DEBUG
