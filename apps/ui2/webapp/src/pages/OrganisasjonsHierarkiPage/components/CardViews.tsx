@@ -131,7 +131,7 @@ function UnitContainerLink({
         gap: var(--a-spacing-4);
         cursor: pointer;
 
-        &:hover {
+        :hover {
           background: var(--nom-secondary-hover);
         }
       `}

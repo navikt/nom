@@ -525,7 +525,7 @@ function OrganisationHierarchyTree({
     <ExpansionCard
       aria-label="organisasjons-hierarki"
       css={css`
-        &.navds-expansioncard--open #title-start-date {
+        .navds-expansioncard--open #title-start-date {
           color: blue;
           visibility: hidden;
         }

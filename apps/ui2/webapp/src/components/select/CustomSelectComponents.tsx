@@ -24,12 +24,12 @@ const commonSelectCss = css`
 
   color: var(--a-gray-900);
 
-  & > div {
+  > div {
     cursor: text;
     height: 100%;
   }
 
-  &:focus-within {
+  :focus-within {
     outline: none;
     box-shadow: var(--a-shadow-focus);
   }
