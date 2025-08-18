@@ -1,6 +1,8 @@
 package no.nav.nom.apps.admin.events;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.admin.dto.ressurs.RessursStateKafkaDTO;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -10,6 +12,8 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JsonSerde;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -31,10 +35,38 @@ public class GenericApiKafkaConfig {
 
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, Object> genericApiEventKafkaListenerContainerFactory(
-        ConsumerFactory<String, Object> consumerFactory
+        ConsumerFactory<String, Object> genericApiEventDTOConsumerFactory
     ) {
         final var factory = new ConcurrentKafkaListenerContainerFactory<String, Object>();
-        factory.setConsumerFactory(consumerFactory);
+        factory.setConsumerFactory(genericApiEventDTOConsumerFactory);
+        factory.setBatchListener(true);
+        factory.getContainerProperties().setIdleEventInterval(5 * 1000L);
+
+        // If authentication towards kafka broker topic fails, retry every 10s
+        factory.setContainerCustomizer(container -> {
+                container.getContainerProperties().setAuthExceptionRetryInterval(Duration.ofSeconds(10));
+                log.info(container.toString());
+            }
+        );
+
+        return factory;
+    }
+
+    @Bean
+    ConsumerFactory<String, RessursStateKafkaDTO> ressursApiStateV4EventDTOConsumerFactory(KafkaProperties properties) {
+        return new DefaultKafkaConsumerFactory<>(
+            properties.buildConsumerProperties(),
+            new StringDeserializer(),
+            new JsonSerde<>(RessursStateKafkaDTO.class).deserializer()
+        );
+    }
+
+    @Bean
+    ConcurrentKafkaListenerContainerFactory<String, RessursStateKafkaDTO> ressursApiStateV4EventKafkaListenerContainerFactory(
+        ConsumerFactory<String, RessursStateKafkaDTO> ressursApiStateV4EventDTOConsumerFactory
+    ) {
+        final var factory = new ConcurrentKafkaListenerContainerFactory<String, RessursStateKafkaDTO>();
+        factory.setConsumerFactory(ressursApiStateV4EventDTOConsumerFactory);
         factory.setBatchListener(true);
         factory.getContainerProperties().setIdleEventInterval(5 * 1000L);
 
@@ -59,6 +91,9 @@ public class GenericApiKafkaConfig {
 
     @Bean
     public String apiStateRessursV3UniqueListenerId(@Value("${app.kafka.ressurs.apiEventTopicV3-listener-id}") String listenerId) { return getUniqueListenerIdString(listenerId); }
+
+    @Bean
+    public String apiStateRessursV4UniqueListenerId(@Value("{app.kafka.ressurs.apiEventTopicV4-listener-id}") String listenerId) { return getUniqueListenerIdString(listenerId); }
 
     @Bean
     public String apiHendelseRessursUniqueListenerId(@Value("${app.kafka.ressurs-hendelser.apiEventTopic-listener-id}") String listenerId) { return getUniqueListenerIdString(listenerId); }

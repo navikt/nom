@@ -49,7 +49,7 @@ public class RessursApiStateListener {
                 .visningsnavn(record.value().visningsnavn())
                 .primaryTelefonnummer(record.value().primaryTelefonnummer())
                 .sektor(record.value().sektor())
-                .orgtilknytninger(record.value().orgtilknytninger())
+                .orgtilknytninger(record.value().orgtilknytninger() == null ? List.of() : record.value().orgtilknytninger())
                 .startdato(record.value().startdato())
                 .sluttdato(record.value().sluttdato())
             .build()));
@@ -73,14 +73,14 @@ public class RessursApiStateListener {
             var numWithoutSluttdato =
                 ressursApiStateRepository.getLatestRessursStatePerNavident().values()
                     .stream()
-                    .filter(ressurs -> ressurs.sluttdato().isEmpty() || ressurs.sluttdato().get().isAfter(LocalDate.now()))
+                    .filter(ressurs -> ressurs.sluttdato() == null || ressurs.sluttdato().isAfter(LocalDate.now()))
                     .count();
 
             var numWithOTWithoutSluttdato =
                 ressursApiStateRepository.getLatestRessursStatePerNavident().values()
                     .stream()
                     .filter(ressurs -> !ressurs.orgtilknytninger().isEmpty())
-                    .filter(ressurs -> ressurs.sluttdato().isEmpty() || ressurs.sluttdato().get().isAfter(LocalDate.now()))
+                    .filter(ressurs -> ressurs.sluttdato() == null || ressurs.sluttdato().isAfter(LocalDate.now()))
                     .count();
 
             log.info("Ressurs API topic - Total num of Ressurser: {} - Number of Ressurser without sluttdato: {} - With OT and without sluttdato {}", ressursApiStateRepository.countDistinctNavident(), numWithoutSluttdato, numWithOTWithoutSluttdato);

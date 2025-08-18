@@ -86,6 +86,52 @@ spec:
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
+  name: nom.api-ressurs-state-v4
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 10
+    replication: 3
+    cleanupPolicy: compact
+    maxCompactionLagMs: 3600000  # 1000 * 60 * 60 = 3600000 = 1 hour
+  acl:
+    - team: org
+      application: nom-kafka-api-ressurs-state-v4
+      access: readwrite
+    - team: org
+      application: org-kafka-manager
+      access: read
+    - team: repr
+      application: repr-fullmakt
+      access: read
+    - team: shout-out
+      application: shout-out-sync-service
+      access: read
+    - team: idm
+      application: idm-kafka-omada-integration
+      access: read
+    - team: org
+      application: nom-admin
+      access: read
+    - team: team-nof
+      application: fullmaktsregister-api
+      access: read
+    - team: org
+      application: team-catalog-backend
+      access: read
+    - team: tilgangsmaskin
+      application: populasjonstilgangskontroll
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
   name: nom.api-orgenhet-state-v3
   namespace: org
   labels:

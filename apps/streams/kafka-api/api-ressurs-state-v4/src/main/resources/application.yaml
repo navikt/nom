@@ -1,0 +1,61 @@
+app:
+  kafka:
+    state-topic: org.nom.api-ressurs-state-v4
+    ressurs-evtsrc-topic: org.nom.ressurs-eventsource
+    orgtilknytning-evtsrc-topic: org.nom.orgtilknytning-eventsource
+    navidentTopic: org.nav-ident
+
+spring:
+  kafka:
+    security:
+      protocol: SSL
+    ssl:
+      key-store-type: PKCS12
+      key-store-location: file:${KAFKA_KEYSTORE_PATH}
+      key-store-password: ${KAFKA_CREDSTORE_PASSWORD}
+      trust-store-type: JKS
+      trust-store-location: file:${KAFKA_TRUSTSTORE_PATH}
+      trust-store-password: ${KAFKA_CREDSTORE_PASSWORD}
+    streams:
+      application-id: ${KAFKA_STREAMS_APPLICATION_ID}-4 # Versjonert app id for å få nye consumer grupper
+      properties:
+        commit.interval.ms: 0
+    bootstrap-servers: ${KAFKA_BROKERS}
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, info, health, metrics
+      base-path: /internal
+
+--- # PROD config
+spring:
+  config:
+    activate:
+      on-profile: prod && !dev
+
+app:
+  kafka:
+    # Se Readme.md    org.nom-kafka-api-ressurs-state_stream_-2
+    skip-producing-state-events-until-ressurs-evtsrc-offset: 0
+    skip-producing-state-events-until-orgtilknytning-evtsrc-offset: 0
+
+--- # DEV config
+spring:
+  config:
+    activate:
+      on-profile: dev && !prod
+
+app:
+  kafka:
+    skip-producing-state-events-until-ressurs-evtsrc-offset: 0
+    skip-producing-state-events-until-orgtilknytning-evtsrc-offset: 0

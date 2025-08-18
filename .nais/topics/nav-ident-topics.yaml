@@ -23,6 +23,9 @@ spec:
     - team: org
       application: nom-intern-ressurs-state
       access: read
+    - team: org
+      application: nom-kafka-api-ressurs-state-v4
+      access: read
 
 ---
 

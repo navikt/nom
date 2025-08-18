@@ -5,9 +5,11 @@ app:
       eventsourceTopic: org.nom.ressurs-eventsource
       apiEventTopic: org.nom.api-ressurs-state-v2
       apiEventTopicV3: org.nom.api-ressurs-state-v3
+      apiEventTopicV4: org.nom.api-ressurs-state-v4
       eventsource-listener-id: nom-admin_ressursEvtsrcListener_${HOSTNAME}
       apiEventTopic-listener-id: nom-admin_apiRessursListener_${HOSTNAME}
       apiEventTopicV3-listener-id: nom-admin_apiRessursListener_v3_${HOSTNAME}
+      apiEventTopicV4-listener-id: nom-admin_apiRessursListener_v4_${HOSTNAME}
     orgenhet:
       eventsourceTopic: org.nom.orgenhet-eventsource
       apiEventTopic: org.nom.api-orgenhet-state-v3
