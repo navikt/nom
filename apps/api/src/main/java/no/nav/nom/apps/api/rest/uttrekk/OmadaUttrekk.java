@@ -38,6 +38,8 @@ import java.io.StringWriter;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
+import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
+
 @Tag(name = "Omada uttrekk")
 @RestController
 @RequestMapping("/api/v1/uttrekk/omada")
@@ -154,7 +156,7 @@ public class OmadaUttrekk {
                             kobling.fid(),
                             kobling.erDagligOppfolging(),
                             kobling.gyldigFom().format(dateTimeFormatter),
-                            Objects.requireNonNullElse(kobling.gyldigTom().format(dateTimeFormatter), ""),
+                            isNotNull(kobling.gyldigTom()) ? kobling.gyldigTom().format(dateTimeFormatter) : "",
                             Objects.requireNonNullElse(kobling.masseflyttetFraFid(), "")
                         );
 

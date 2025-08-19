@@ -28,12 +28,12 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
 
         <logstash-logback-encoder.version>8.1</logstash-logback-encoder.version>
-        <gcp.libraries-bom.version>26.65.0</gcp.libraries-bom.version>
+        <gcp.libraries-bom.version>26.66.0</gcp.libraries-bom.version>
         <springdoc.version>2.8.9</springdoc.version>
         <springdoc-openapi-security.version>1.8.0</springdoc-openapi-security.version>
         <hypersistence-utils-hibernate-63.version>3.10.3</hypersistence-utils-hibernate-63.version>
         <graphql-extended-scalars.version>24.0</graphql-extended-scalars.version>
-        <unleash.version>11.0.2</unleash.version>
+        <unleash.version>11.1.0</unleash.version>
         <opencsv.version>5.12.0</opencsv.version>
         <apache.common.csv.version>1.14.1</apache.common.csv.version>
         <commons-fileupload.version>1.6.0</commons-fileupload.version>
@@ -42,16 +42,16 @@
         <swagger-annotations-jakarta.version>2.2.35</swagger-annotations-jakarta.version>
         <wiremock.version>2.35.2</wiremock.version>
         <org.wiremock.version>3.13.1</org.wiremock.version>
-        <org.wiremock-spring-boot.version>3.10.0</org.wiremock-spring-boot.version>
+        <org.wiremock-spring-boot.version>3.10.6</org.wiremock-spring-boot.version>
         <spring-cloud-contract-wiremock.version>4.3.0</spring-cloud-contract-wiremock.version>
         <mock-oauth2-server.version>2.2.1</mock-oauth2-server.version>
-        <nimbus-jose-jwt.version>10.4.1</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>10.4.2</nimbus-jose-jwt.version>
         <hibernate-validator.version>8.0.3.Final</hibernate-validator.version>
         <ojdbc.version>23.9.0.25.07</ojdbc.version>
         <poi-ooxml.version>5.4.1</poi-ooxml.version>
         <commons-compress.version>1.28.0</commons-compress.version>
         <postgresql.version>42.7.7</postgresql.version>
-        <microsoft-graph.version>6.49.0</microsoft-graph.version>
+        <microsoft-graph.version>6.50.0</microsoft-graph.version>
         <azure-identity.version>1.17.0</azure-identity.version>
         <caffeine.version>3.2.2</caffeine.version>
 
