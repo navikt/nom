@@ -20,7 +20,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static no.nav.nom.contract.nom.Sektor.EKSTERN;
 import static no.nav.nom.contract.nom.Sektor.NAV_KOMMUNAL;
@@ -480,10 +479,10 @@ class MastreStatligeINomTest {
             .navident(navident)
             .orgEnhetId(orgEnhetId)
             .sektor(sektor)
-            .orgtilknytningType(tilknytningtype == null ? Optional.empty() : Optional.of(tilknytningtype))
+            .orgtilknytningType(tilknytningtype)
             .erDagligOppfolging(dol)
             .gyldigFom(gyldigFom)
-            .gyldigTom(gyldigTom == null ? Optional.empty() : Optional.of(gyldigTom))
+            .gyldigTom(gyldigTom)
             .build();
     }
 }

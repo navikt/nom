@@ -60,17 +60,17 @@ public record StrukturerteStillingPerioderForNavident(
         public boolean erAktivEllerFremtidig(List<Endring> endringer) {
             switch (command) {
                 case AvvikleOrgtilknytning cmd                      -> { return isCurrentOrFuture(cmd.gyldigTom()); }
-                case EndreDagligOppfolgingOrgtilknytning cmd        -> { return isCurrentOrFuture(cmd.gyldigTom().orElse(null)); }
-                case EndreDagligOppfolgingOrgtilknytningCommand cmd -> { return isCurrentOrFuture(cmd.gyldigTom().orElse(null)); }
-                case EndreOrgtilknytningDato cmd                    -> { return isCurrentOrFuture(cmd.gyldigTom().orElse(null)); }
-                case EndreOrgtilknytningDatoCommand cmd             -> { return isCurrentOrFuture(cmd.gyldigTom().orElse(null)); }
-                case FjernOrgtilknytning cmd                        -> { return isCurrentOrFuture(cmd.gyldigTom().orElse(null)); }
+                case EndreDagligOppfolgingOrgtilknytning cmd        -> { return isCurrentOrFuture(cmd.gyldigTom()); }
+                case EndreDagligOppfolgingOrgtilknytningCommand cmd -> { return isCurrentOrFuture(cmd.gyldigTom()); }
+                case EndreOrgtilknytningDato cmd                    -> { return isCurrentOrFuture(cmd.gyldigTom()); }
+                case EndreOrgtilknytningDatoCommand cmd             -> { return isCurrentOrFuture(cmd.gyldigTom()); }
+                case FjernOrgtilknytning cmd                        -> { return isCurrentOrFuture(cmd.gyldigTom()); }
                 case OpprettOrgtilknytning cmd -> {
                         var endreDatoCmd = endringer.stream().filter(e -> e.command() instanceof EndreOrgtilknytningDatoCommand || e.command() instanceof EndreOrgtilknytningDato).findFirst();
                         if (endreDatoCmd.isPresent()) {
                             switch (endreDatoCmd.get().command) {
-                                case EndreOrgtilknytningDato endreCmd           -> { return isCurrentOrFuture(endreCmd.gyldigTom().orElse(null)); }
-                                case EndreOrgtilknytningDatoCommand endreCmd    -> { return isCurrentOrFuture(endreCmd.gyldigTom().orElse(null)); }
+                                case EndreOrgtilknytningDato endreCmd           -> { return isCurrentOrFuture(endreCmd.gyldigTom()); }
+                                case EndreOrgtilknytningDatoCommand endreCmd    -> { return isCurrentOrFuture(endreCmd.gyldigTom()); }
                                 default -> { return false; }
                             }
                         } else {
@@ -144,9 +144,7 @@ public record StrukturerteStillingPerioderForNavident(
         if (endringer == null) {
             return result;
         }
-        endringer.forEach( e -> {
-            result.add(new Endring(e.getKey(), e.getValue().getClass().getSimpleName(), e.getValue()));
-        });
+        endringer.forEach( e -> result.add(new Endring(e.getKey(), e.getValue().getClass().getSimpleName(), e.getValue())));
         return result;
     }
 }

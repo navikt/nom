@@ -36,6 +36,7 @@ import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitali
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeNoon;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.formatFornavnWithMellomnavn;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.nomSektorToRemedyCode;
+import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -286,7 +287,7 @@ public class NomRemedyIntegrasjonServiceNewTest {
         LocalDate gyldigFom = LocalDate.now().plusMonths(2).withDayOfMonth(1);
 
         var ressursState = ressurs(ressursFid, navident, gyldigFom.minusYears(2).withDayOfMonth(1)).toBuilder().sistEndretAv("X123456").build();
-        var orgtilknytningState = orgtilknytning(orgtilknytningFid, navident, LocalDate.now()).toBuilder().masseflyttetFraFid(Optional.of(UUID.randomUUID().toString())).sistEndretAv("T123456").build();
+        var orgtilknytningState = orgtilknytning(orgtilknytningFid, navident, LocalDate.now()).toBuilder().masseflyttetFraFid(UUID.randomUUID().toString()).sistEndretAv("T123456").build();
         var aggregateState = aggregate(orgtilknytningFid, orgtilknytningState.getClass().getSimpleName(), navident).toBuilder().masseflytting(true).build();
         var nomIntegrasjonEntity = nomIntegrasjonEntityFromNomData(ressursState, orgtilknytningState, true);
 
@@ -324,7 +325,7 @@ public class NomRemedyIntegrasjonServiceNewTest {
         LocalDate gyldigFom = LocalDate.now().plusMonths(2).withDayOfMonth(1);
 
         var ressursState = ressurs(ressursFid, navident, gyldigFom.minusYears(2).withDayOfMonth(1)).toBuilder().sistEndretAv("X123456").build();
-        var orgtilknytningState = orgtilknytning(orgtilknytningFid, navident, LocalDate.now().plusMonths(2).withDayOfMonth(1)).toBuilder().masseflyttetFraFid(Optional.of(UUID.randomUUID().toString())).sistEndretAv("T123456").build();
+        var orgtilknytningState = orgtilknytning(orgtilknytningFid, navident, LocalDate.now().plusMonths(2).withDayOfMonth(1)).toBuilder().masseflyttetFraFid(UUID.randomUUID().toString()).sistEndretAv("T123456").build();
         var aggregateState = aggregate(orgtilknytningFid, orgtilknytningState.getClass().getSimpleName(), navident).toBuilder().masseflytting(true).build();
         var nomIntegrasjonEntity = nomIntegrasjonEntityFromNomData(ressursState, orgtilknytningState, true);
 
@@ -362,7 +363,7 @@ public class NomRemedyIntegrasjonServiceNewTest {
         LocalDate gyldigFom = LocalDate.now().minusYears(2).withDayOfMonth(1);
 
         var ressursState = ressurs(ressursFid, navident, gyldigFom).toBuilder().sluttdato(LocalDate.now().minusDays(1)).sistEndretAv("X123456").build();
-        var orgtilknytningState = orgtilknytning(orgtilknytningFid, navident, gyldigFom).toBuilder().gyldigTom(Optional.of(LocalDate.now().minusDays(2))).sistEndretAv("X123456").build();
+        var orgtilknytningState = orgtilknytning(orgtilknytningFid, navident, gyldigFom).toBuilder().gyldigTom(LocalDate.now().minusDays(2)).sistEndretAv("X123456").build();
         var aggregateState = aggregate(ressursFid, ressursState.getClass().getSimpleName(), navident);
         var nomIntegrasjonEntity = nomIntegrasjonEntityFromNomData(ressursState, orgtilknytningState, false).toBuilder().entryOperasjon("Ny").build();
 
@@ -404,12 +405,12 @@ public class NomRemedyIntegrasjonServiceNewTest {
         var orgtilknytningState = orgtilknytning(orgtilknytningFid, navident, gyldigFom)
                 .toBuilder()
                 .gyldigFom(LocalDate.now().plusMonths(1).withDayOfMonth(1))
-                .masseflyttetFraFid(Optional.of(UUID.randomUUID().toString()))
+                .masseflyttetFraFid(UUID.randomUUID().toString())
                 .sistEndretAv("X123456")
                 .build();
         var aggregateState = aggregate(orgtilknytningFid, orgtilknytningState.getClass().getSimpleName(), navident)
                 .toBuilder()
-                .masseflyttetFraFid(orgtilknytningState.masseflyttetFraFid().get())
+                .masseflyttetFraFid(orgtilknytningState.masseflyttetFraFid())
                 .masseflytting(true)
                 .build();
 
@@ -454,15 +455,15 @@ public class NomRemedyIntegrasjonServiceNewTest {
         var orgtilknytningState = orgtilknytning(orgtilknytningFid, navident, gyldigFom)
             .toBuilder()
             .sektor(Sektor.EKSTERN)
-            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1).withDayOfMonth(14)))
+            .orgtilknytningType(Tilknytningtype.KONSULENT)
+            .gyldigTom(LocalDate.now().plusMonths(1).withDayOfMonth(14))
             .sistEndretAv("X123456")
             .build();
 
         var orgtilknytningState2 = orgtilknytning(orgtilknytningFid2, navident, gyldigFom2)
             .toBuilder()
             .sektor(Sektor.EKSTERN)
-            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .orgtilknytningType(Tilknytningtype.KONSULENT)
             .sistEndretAv("X123456")
             .build();
 
@@ -473,12 +474,12 @@ public class NomRemedyIntegrasjonServiceNewTest {
 
         var aggregateStateOrgtilknytningOne = aggregate(orgtilknytningFid, orgtilknytningState.getClass().getSimpleName(), navident)
                 .toBuilder()
-                .masseflyttetFraFid(orgtilknytningState.masseflyttetFraFid().orElse(null))
+                .masseflyttetFraFid(orgtilknytningState.masseflyttetFraFid())
                 .build();
 
         var aggregateStateOrgtilknytningTwo = aggregate(orgtilknytningFid2, orgtilknytningState2.getClass().getSimpleName(), navident)
                 .toBuilder()
-                .masseflyttetFraFid(orgtilknytningState2.masseflyttetFraFid().orElse(null))
+                .masseflyttetFraFid(orgtilknytningState2.masseflyttetFraFid())
                 .build();
 
         // And
@@ -533,14 +534,14 @@ public class NomRemedyIntegrasjonServiceNewTest {
         var pastOrgtilknytningState = orgtilknytning(pastOrgtilknytningFid, navident, gyldigFom)
                 .toBuilder()
                 .sektor(Sektor.EKSTERN)
-                .gyldigTom(Optional.of(LocalDate.now().minusYears(3)))
+                .gyldigTom(LocalDate.now().minusYears(3))
                 .sistEndretAv("X123456")
                 .build();
 
         var futureOrgtilknytningState = orgtilknytning(futureOrgtilknytningFid, navident, LocalDate.now().plusMonths(1).withDayOfMonth(1))
                 .toBuilder()
                 .sektor(Sektor.NAV_STATLIG)
-                .orgtilknytningType(Optional.of(Tilknytningtype.FAST))
+                .orgtilknytningType(Tilknytningtype.FAST)
                 .sistEndretAv("X123456")
                 .build();
 
@@ -599,9 +600,9 @@ public class NomRemedyIntegrasjonServiceNewTest {
                 .sektor(Sektor.NAV_STATLIG)
                 .erDagligOppfolging(true)
                 .gyldigFom(gyldigFom)
-                .gyldigTom(Optional.empty())
-                .orgtilknytningType(Optional.of(Tilknytningtype.FAST))
-                .masseflyttetFraFid(Optional.empty())
+                .gyldigTom(null)
+                .orgtilknytningType(Tilknytningtype.FAST)
+                .masseflyttetFraFid(null)
                 .sistEndretAv("T123456")
                 .build();
     }
@@ -625,14 +626,14 @@ public class NomRemedyIntegrasjonServiceNewTest {
 
     private Optional<LocalDate> getUtlopsdato(Integer sektor, OrgtilknytningState dolOrgtilknytning) {
         var maaHaSluttDato = erKonsulentSomMaaHaSluttDato(sektor, dolOrgtilknytning);
-        if (maaHaSluttDato && dolOrgtilknytning.gyldigTom().isEmpty() ) {
+        if (maaHaSluttDato && isNull(dolOrgtilknytning.gyldigTom()) ) {
             throw new RequiredValueMissingException("Utløpsdato er påkrevd for ekstern sektor");
         }
-        return maaHaSluttDato ? dolOrgtilknytning.gyldigTom() : Optional.empty();
+        return maaHaSluttDato ? Optional.of(dolOrgtilknytning.gyldigTom()): Optional.empty();
     }
 
     private boolean erKonsulentSomMaaHaSluttDato(Integer sektor, OrgtilknytningState ot) {
-        var tilknytningstype = ot.orgtilknytningType().orElse(Tilknytningtype.ANNET);
+        var tilknytningstype = isNotNull(ot.orgtilknytningType()) ? ot.orgtilknytningType() : Tilknytningtype.ANNET;
         //Hvis 'Ekstern' sektor, krev sluttdato med unntak av HELFO og Skatteetaten
         return sektor == 2 && tilknytningstype != Tilknytningtype.HELFO && tilknytningstype != Tilknytningtype.SKATTEETATEN;
     }

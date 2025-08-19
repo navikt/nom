@@ -227,7 +227,7 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
             orgtilknytningState().toBuilder()
                 .orgEnhetId("ORGENHET_A")
                 .gyldigFom(yesterday)
-                .gyldigTom(Optional.of(tomorrow))
+                .gyldigTom(tomorrow)
                 .build()
         ));
 
@@ -247,7 +247,7 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
                 .fid("FID_A")
                 .orgEnhetId("ORGENHET_A")
                 .gyldigFom(yesterday)
-                .gyldigTom(Optional.of(today)).build()
+                .gyldigTom(today).build()
         ));
 
         eksterneRessurserProcessor.process(ekstern);
@@ -389,7 +389,7 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
         var mockPreviousOrgtilknytning = OrgtilknytningState.builder()
             .navident("A000001")
             .orgEnhetId(ORGENHET_A.getId())
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .gyldigFom(LocalDate.now())
             .build();
 
@@ -406,14 +406,16 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
     }
 
     static final IOrgenhet ORGENHET_A = new OrgEnhet(
-        new OrgEnhetState("FID_ENHET_A", "ORGENHET_A", "ENHET A", LocalDate.of(2022, 1, 1),
+        new OrgEnhetState(
+            "FID_ENHET_A", "ORGENHET_A", "ENHET A", LocalDate.of(2022, 1, 1),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
             Optional.of("8000100-ENHET A-ORGENHET"), Optional.of("8000100"), Optional.of("ORGENHET"), Optional.empty()
         )
     );
 
     static final IOrgenhet ORGENHET_VIKAFOSSEN = new OrgEnhet(
-        new OrgEnhetState("FID_ENHET_VIKAFOSSEN", "ORGENHET_VIKAFOSSEN", "ENHET VIKAFOSSEN", LocalDate.of(2022, 1, 1),
+        new OrgEnhetState(
+            "FID_ENHET_VIKAFOSSEN", "ORGENHET_VIKAFOSSEN", "ENHET VIKAFOSSEN", LocalDate.of(2022, 1, 1),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
             Optional.of("8000100-ENHET VIKAFOSSEN-ORGENHET"), Optional.of("EV00001"), Optional.of("ORGENHET"), Optional.empty()
         )

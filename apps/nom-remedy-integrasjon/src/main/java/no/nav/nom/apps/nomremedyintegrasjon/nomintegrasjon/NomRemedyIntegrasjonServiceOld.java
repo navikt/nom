@@ -44,6 +44,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -53,6 +54,7 @@ import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSec
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeNoon;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.formatFornavnWithMellomnavn;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.isActive;
+import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 import static org.apache.kafka.common.utils.Utils.isBlank;
 
 @Service
@@ -187,12 +189,12 @@ public class NomRemedyIntegrasjonServiceOld {
 
     private static boolean isOrgtilknytningHistorical(OrgtilknytningEvent orgtilknytningEvent) {
         if (orgtilknytningEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1
-            && orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom().isPresent()) {
-            return orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom().get().isBefore(LocalDate.now());
+            && orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom() != null) {
+            return orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom().isBefore(LocalDate.now());
         }
         if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2
-            && orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigTom().isPresent()) {
-            return orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigTom().get().isBefore(LocalDate.now());
+            && orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigTom() != null) {
+            return orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigTom().isBefore(LocalDate.now());
         }
         return false;
     }
@@ -212,7 +214,7 @@ public class NomRemedyIntegrasjonServiceOld {
     }
 
     private static boolean orgtilknytningIsActiveOnCurrentDate(OrgtilknytningState orgtilknytningState) {
-        return !orgtilknytningState.getGyldigFom().isAfter(LocalDate.now()) && !orgtilknytningState.getGyldigTom().isBefore(LocalDate.now());
+        return !orgtilknytningState.getGyldigFom().isAfter(LocalDate.now()) && isNotNull(orgtilknytningState.getGyldigTom()) && !orgtilknytningState.getGyldigTom().isBefore(LocalDate.now());
     }
 
     private void handleDelayedOrgtiknytning(OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
@@ -224,7 +226,7 @@ public class NomRemedyIntegrasjonServiceOld {
 
             if (orgtilknytningState.getErDagligOppfolging() &&
                 orgtilknytningDolEventData.gyldigFom().equals(orgtilknytningState.getGyldigFom()) &&
-                orgtilknytningDolEventData.gyldigTom().equals(Optional.ofNullable(orgtilknytningState.getGyldigTom()))) {
+                Objects.equals(orgtilknytningDolEventData.gyldigTom(), orgtilknytningState.getGyldigTom())) {
                 updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
             }
         } catch (OrgtilknytningNotFoundException e) {
@@ -239,8 +241,8 @@ public class NomRemedyIntegrasjonServiceOld {
             var orgtilknytningState = nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid());
 
             if (orgtilknytningState.getErDagligOppfolging()
-                && orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom().equals(orgtilknytningState.getGyldigFom())
-                && orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigTom().equals(Optional.ofNullable(orgtilknytningState.getGyldigTom()))) {
+                && Objects.equals(orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigFom(), orgtilknytningState.getGyldigFom())
+                && Objects.equals(orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData().gyldigTom(), orgtilknytningState.getGyldigTom())) {
                 updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
             }
         } catch (OrgtilknytningNotFoundException e) {
@@ -307,9 +309,8 @@ public class NomRemedyIntegrasjonServiceOld {
 
         var newRemedyEnhetId = getRemedyEnhetId(orgtilknytningDagligOppfolgingEndretEventData.orgEnhetId());
 
-        var gyldigTom = orgtilknytningDagligOppfolgingEndretEventData.gyldigTom()
-            .filter(dato -> remedyCodeToNomSektor(nomIntegrasjonEntityWithDefaultDataFromNom.getSektor()).equals(Sektor.EKSTERN))
-            .orElse(null);
+        var gyldigTom = remedyCodeToNomSektor(nomIntegrasjonEntityWithDefaultDataFromNom.getSektor()).equals(Sektor.EKSTERN) ?
+            orgtilknytningDagligOppfolgingEndretEventData.gyldigTom() : null;
 
         var newNomIntegrasjonEntity = nomIntegrasjonEntityWithDefaultDataFromNom.toBuilder()
             .enhetsId(newRemedyEnhetId)

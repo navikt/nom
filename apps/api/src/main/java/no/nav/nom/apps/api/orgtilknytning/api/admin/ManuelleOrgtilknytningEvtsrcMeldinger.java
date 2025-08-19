@@ -32,7 +32,6 @@ import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Objects.isNull;
@@ -315,7 +314,7 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ny sluttdato kan ikke være før startdato");
         }
 
-        if (orgtilknytning.get().gyldigTom().isEmpty()) {
+        if (isNull(orgtilknytning.get().gyldigTom())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Orgtilknytning uten sluttdato kan ikke få endret sluttdato, den må avvikles i stedet");
         }
 
@@ -323,7 +322,7 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Orgtilknytning med FID %s og sluttdato %s er funnet, men vil ikke endres da handling ikke er bekreftet".formatted(
                     HtmlUtils.htmlEscape(fid),
-                    orgtilknytning.get().gyldigTom().get())
+                    orgtilknytning.get().gyldigTom())
                 );
         }
 
@@ -331,7 +330,7 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
             new EndreOrgtilknytningDatoCommand(
                 fid,
                 orgtilknytning.get().gyldigFom(),
-                Optional.of(nySluttDato),
+                nySluttDato,
                 new InputMetadata(
                     "/api/admin/manuelleEvtsrcMeldinger",
                     "endreSektorOrgtilknytning",
@@ -346,7 +345,7 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
         return ResponseEntity.ok()
             .body("Orgtilknytning med FID %s og sluttdato %s er funnet, og sluttdato er endret til %s".formatted(
                 HtmlUtils.htmlEscape(fid),
-                orgtilknytning.get().gyldigTom().get(),
+                orgtilknytning.get().gyldigTom(),
                 nySluttDato)
             );
     }

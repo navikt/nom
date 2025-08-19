@@ -18,10 +18,9 @@ import org.mockito.Mock;
 import org.mockito.verification.VerificationMode;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
@@ -307,13 +306,13 @@ public class OrgtilknytningCmdServiceTestBase {
 
         @Override
         public OrgtilknytningAssert gyldigTom(LocalDate gyldigTom) {
-            assertEquals(gyldigTom, fjernOrgtilknytning.gyldigTom().orElse(null), "GyldigFOM dato er ikke korrekt for FjernOrgtilknytning");
+            assertEquals(gyldigTom, fjernOrgtilknytning.gyldigTom(), "GyldigFOM dato er ikke korrekt for FjernOrgtilknytning");
             return this;
         }
 
         @Override
         public OrgtilknytningAssert erUtenGyldigTom() {
-            assertTrue(fjernOrgtilknytning.gyldigTom().isEmpty(), "GyldigTOM er satt for FjernOrgtilknytning");
+            assertNull(fjernOrgtilknytning.gyldigTom(), "GyldigTOM er satt for FjernOrgtilknytning");
             return this;
         }
     }
@@ -340,7 +339,7 @@ public class OrgtilknytningCmdServiceTestBase {
 
         @Override
         public OrgtilknytningAssert gyldigTom(LocalDate gyldigTom) {
-            assertEquals(gyldigTom, endreOrgtilknytningDato.gyldigTom().orElse(null), "GyldigTOM dato er ikke korrekt for EndreOrgtilknytningDato");
+            assertEquals(gyldigTom, endreOrgtilknytningDato.gyldigTom(), "GyldigTOM dato er ikke korrekt for EndreOrgtilknytningDato");
             return this;
         }
     }
@@ -412,13 +411,13 @@ public class OrgtilknytningCmdServiceTestBase {
 
         @Override
         public OrgtilknytningAssert gyldigTom(LocalDate gyldigTom) {
-            assertEquals(gyldigTom, endreDagligOppfolgingOrgtilknytning.gyldigTom().orElse(null), "GyldigTOM dato er ikke korrekt for EndreDagligOppfolgingOrgtilknytning");
+            assertEquals(gyldigTom, endreDagligOppfolgingOrgtilknytning.gyldigTom(), "GyldigTOM dato er ikke korrekt for EndreDagligOppfolgingOrgtilknytning");
             return this;
         }
 
         @Override
         public OrgtilknytningAssert erUtenGyldigTom() {
-            assertTrue(endreDagligOppfolgingOrgtilknytning.gyldigTom().isEmpty(), "GyldigTOM er satt for EndreDagligOppfolgingOrgtilknytning");
+            assertNull(endreDagligOppfolgingOrgtilknytning.gyldigTom(), "GyldigTOM er satt for EndreDagligOppfolgingOrgtilknytning");
             return this;
         }
 
@@ -477,7 +476,7 @@ public class OrgtilknytningCmdServiceTestBase {
 
         @Override
         public OrgtilknytningAssert tilTilknytningtype(Tilknytningtype tilknytningtype) {
-            assertEquals(Optional.of(tilknytningtype), endreTilknytningtypeCommand.tilknytningtype(), "Tilknytningtype er ikke korrekt for EndreTilknytningtypeCommand");
+            assertEquals(tilknytningtype, endreTilknytningtypeCommand.tilknytningtype(), "Tilknytningtype er ikke korrekt for EndreTilknytningtypeCommand");
             return this;
         }
     }

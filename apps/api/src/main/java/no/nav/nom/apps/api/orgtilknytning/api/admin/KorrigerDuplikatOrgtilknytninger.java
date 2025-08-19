@@ -7,10 +7,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
@@ -23,13 +19,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 
 @Slf4j
 @Tag(name = "Admin for korrigeringer")
@@ -73,7 +71,7 @@ public class KorrigerDuplikatOrgtilknytninger {
                     if (original != null) {
                         if (original.orgEnhetId().equals(ot.orgEnhetId())
                             && original.gyldigFom().equals(ot.gyldigFom())
-                            && original.gyldigTom().equals(ot.gyldigTom())
+                            && Objects.equals(original.gyldigTom(), ot.gyldigTom())
                         ) {
                             duplikater.putIfAbsent(original.fid(), new ArrayList<>());
                             duplikater.get(original.fid()).add(ot);
@@ -92,7 +90,7 @@ public class KorrigerDuplikatOrgtilknytninger {
             ObjectNode node = mapper.createObjectNode();
             node.put("Duplikate of", originalFid);
             node.put("For enhetId", duplikat.orgEnhetId());
-            node.put("With period", duplikat.gyldigFom().toString() + " - " + (duplikat.gyldigTom().isPresent() ? duplikat.gyldigTom().get() :  " "));
+            node.put("With period", duplikat.gyldigFom().toString() + " - " + (isNotNull(duplikat.gyldigTom()) ? duplikat.gyldigTom() :  " "));
             FjernOrgtilknytning fjernOrgtilknytning =
                 new FjernOrgtilknytning(
                     duplikat.navident(),

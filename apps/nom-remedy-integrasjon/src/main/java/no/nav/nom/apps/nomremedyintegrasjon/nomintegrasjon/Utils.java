@@ -65,11 +65,11 @@ public class Utils {
     }
 
     public static boolean isActive(OrgtilknytningState orgtilknytningState) {
-        return isActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom().orElse(null));
+        return isActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom());
     }
 
     public static boolean isFuture(OrgtilknytningState orgtilknytningState) {
-        return orgtilknytningState.gyldigTom().map(gyldigTom -> gyldigTom.isAfter(LocalDate.now())).orElse(true);
+        return orgtilknytningState.gyldigTom() == null || orgtilknytningState.gyldigTom().isAfter(LocalDate.now());
     }
 
     public static Integer nomSektorToRemedyCode(Sektor sektor) {

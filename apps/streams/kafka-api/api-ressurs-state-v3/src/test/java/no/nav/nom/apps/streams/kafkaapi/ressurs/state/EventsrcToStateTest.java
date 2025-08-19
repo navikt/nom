@@ -481,7 +481,7 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
                 opprettetData.navident(),
                 opprettetData.orgEnhetId(),
                 opprettetData.gyldigFom(),
-                Optional.ofNullable(gyldigTom),
+                gyldigTom,
                 isDagligOppfolging
             );
 
@@ -568,7 +568,7 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
             evt.getFid(),
             evtData.orgEnhetId(),
             evtData.gyldigFom(),
-            Optional.empty(),
+            null,
             false
         );
         nyOrgtilknytningerList.add(ny);
@@ -616,7 +616,7 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
             gammel.fid(),
             gammel.orgenhetId(),
             gammel.gyldigFom(),
-            Optional.of(evtData.gyldigTom()),
+            evtData.gyldigTom(),
             gammel.dagligOppfolging()
         );
         nyOrgtilknytningerList.set(orgtilknytninger.indexOf(gammel), ny);

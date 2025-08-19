@@ -36,10 +36,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.AbstractMap.SimpleEntry;
 import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNullElse;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.NO_END_DATE;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isCurrentOrFuture;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.lik;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.overlapsInterval;
+import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 
 @Component
 @Slf4j
@@ -69,7 +71,7 @@ public class NyeRessursStillingProcessor {
         Map<String, StrukturerteStillingPerioderForNavident> stillingPerioderPerNavidentResultat = new HashMap<>();
         stillingPerioderPerNavident.forEach( (navident, sspForNavident) -> {
             var resultat = process(navident, sspForNavident);
-            if (resultat != null) {
+            if (isNotNull(resultat)) {
                 stillingPerioderPerNavidentResultat.put(navident, resultat);
             }
         });
@@ -121,17 +123,17 @@ public class NyeRessursStillingProcessor {
 
         matchedeOTer.forEach( (sp, ot) -> {
             boolean gyldigTomErUlik = false;
-            if (!lik(ot.gyldigTom().orElse(null), sp.gyldigTom())) {
+            if (!lik(ot.gyldigTom(), sp.gyldigTom())) {
                 gyldigTomErUlik = true;
-                if (ot.gyldigTom().isEmpty()) {
+                if (isNull(ot.gyldigTom())) {
                     endringer.add(lagAvvikleEventCmd(ot, sp, sspForNavident));
                 } else {
                     endringer.add(lagEndreGyldigTomCmd(ot, sp, sspForNavident));
                 }
-            } else if (ot.gyldigTom().isPresent() && sp.gyldigTom() != null) {
+            } else if (isNotNull(ot.gyldigTom()) && isNotNull(sp.gyldigTom())) {
                 // hvis begge lik og 2099-12-31, set null og legge til endringer lista
                 // kanskje legge til lagEndreDOLCmd også?
-                if (sp.gyldigTom().isEqual(PeriodeUtil.NO_END_DATE) || ot.gyldigTom().get().isEqual(PeriodeUtil.NO_END_DATE)) {
+                if (sp.gyldigTom().isEqual(PeriodeUtil.NO_END_DATE) || ot.gyldigTom().isEqual(PeriodeUtil.NO_END_DATE)) {
                     endringer.add(lagEndreGyldigTomCmd(ot, sp, sspForNavident));
                 }
             }
@@ -142,20 +144,20 @@ public class NyeRessursStillingProcessor {
 
             if (!lik(ot.gyldigFom(), sp.gyldigFom())) {
                 var cmd = lagEndreGyldigFomCmd(ot, sp, sspForNavident, gyldigTomErUlik);
-                if (cmd != null) {
+                if (isNotNull(cmd)) {
                     endringer.add(cmd);
                 }
             }
 
             if (isCurrentOrFuture(sp.gyldigTom())) {
-                if (sp.sektor() != null) {
+                if (isNotNull(sp.sektor())) {
                     if (isNull(ot.sektor()) || ot.sektor() != sp.sektor()) {
                         endringer.add(lagSektorEndringCmd(ot, sp, sspForNavident));
                     }
                 }
             }
-            if (sp.tilknytningtype().isPresent()) {
-                if (ot.orgtilknytningType().isEmpty() || ot.orgtilknytningType().get() != sp.tilknytningtype().get()) {
+            if (isNotNull(sp.tilknytningtype())) {
+                if (isNull(ot.orgtilknytningType()) || !Objects.equals(ot.orgtilknytningType(), sp.tilknytningtype())) {
                     endringer.add(lagEndreTilknytningtypeCmd(ot, sp));
                 }
             }
@@ -306,11 +308,11 @@ public class NyeRessursStillingProcessor {
             }
 
             if (isCurrentOrFuture(sp.gyldigTom())) {
-                if (sp.sektor() != null) {
+                if (isNotNull(sp.sektor())) {
                     nye.add(lagSektorEndringCmd(fiktivFID, sp, sspForNavident));
                 }
             }
-            if (sp.tilknytningtype().isPresent()) {
+            if (isNotNull(sp.tilknytningtype())) {
                 nye.add(lagEndreTilknytningtypeCmd(fiktivFID, sp, sspForNavident));
             }
 
@@ -350,7 +352,7 @@ public class NyeRessursStillingProcessor {
             sspForNavident.navident(),
             stillingPeriode.orgenhet().getId(),
             stillingPeriode.gyldigFom(),
-            stillingPeriode.gyldigTom().equals(NO_END_DATE) ? Optional.empty() : Optional.of(stillingPeriode.gyldigTom()),
+            stillingPeriode.gyldigTom().equals(NO_END_DATE) ? null : stillingPeriode.gyldigTom(),
             stillingPeriode.erDagligOppfolging(),
             metadata,
             additionalData
@@ -367,7 +369,7 @@ public class NyeRessursStillingProcessor {
             sspForNavident.navident(),
             stillingPeriode.orgenhet().getId(),
             stillingPeriode.gyldigFom(),
-            stillingPeriode.gyldigTom().equals(NO_END_DATE) ? Optional.empty() : Optional.of(stillingPeriode.gyldigTom()),
+            stillingPeriode.gyldigTom().equals(NO_END_DATE) ? null : stillingPeriode.gyldigTom(),
             metadata,
             additionalData
         );
@@ -402,7 +404,7 @@ public class NyeRessursStillingProcessor {
             originalOrgtilknytning.navident(),
             originalOrgtilknytning.orgEnhetId(),
             originalOrgtilknytning.gyldigFom(),
-            stillingPeriode.gyldigTom().equals(NO_END_DATE) ? Optional.empty() : Optional.of(stillingPeriode.gyldigTom()),
+            stillingPeriode.gyldigTom().equals(NO_END_DATE) ? null : stillingPeriode.gyldigTom(),
             metadata,
             additionalData
         );
@@ -419,7 +421,7 @@ public class NyeRessursStillingProcessor {
         InputMetadata metadata = getMetadata(originalOrgtilknytning);
 
         LocalDate threeYearsAgo = LocalDate.now().minusYears(3).plusMonths(1);
-        Optional<LocalDate> gyldigTom = gyldigTomErUlik ? Optional.of(stillingPeriode.gyldigTom()) : originalOrgtilknytning.gyldigTom();
+        LocalDate gyldigTom = gyldigTomErUlik ? stillingPeriode.gyldigTom() : originalOrgtilknytning.gyldigTom();
 
         // Allow the update if the original gyldigFom is within the last three years or the new gyldigFom is within the last three years
         if (originalOrgtilknytning.gyldigFom().isAfter(threeYearsAgo) || stillingPeriode.gyldigFom().isAfter(threeYearsAgo)) {
@@ -427,7 +429,7 @@ public class NyeRessursStillingProcessor {
                 originalOrgtilknytning.navident(),
                 originalOrgtilknytning.orgEnhetId(),
                 stillingPeriode.gyldigFom(),
-                gyldigTom.equals(Optional.of(NO_END_DATE)) ? Optional.empty() : gyldigTom,
+                gyldigTom.equals(NO_END_DATE) ? null : gyldigTom,
                 metadata,
                 additionalData
             );
@@ -446,7 +448,7 @@ public class NyeRessursStillingProcessor {
             originalOrgtilknytning.navident(),
             originalOrgtilknytning.orgEnhetId(),
             stillingPeriode.gyldigFom(),
-            stillingPeriode.gyldigTom().equals(NO_END_DATE) ? Optional.empty() : Optional.of(stillingPeriode.gyldigTom()), //ikke sett 2099-12-31
+            stillingPeriode.gyldigTom().equals(NO_END_DATE) ? null : stillingPeriode.gyldigTom(), //ikke sett 2099-12-31
             stillingPeriode.erDagligOppfolging(),
             metadata,
             additionalData
@@ -516,7 +518,7 @@ public class NyeRessursStillingProcessor {
                 // Sjekk om dette er gammel historisk hvor data last med 3 års historikk ikke er tilgjengelig, men NOM har akkumulert denne gamle historikken.
                 match = eksisterendeOTer.stream()
                     .filter(ot -> ot.gyldigFom().isBefore(nestenTreAarSiden)
-                        && lik(ot.gyldigTom().orElse(null), sp.gyldigTom())
+                        && lik(ot.gyldigTom(), sp.gyldigTom())
                         && ot.orgEnhetId().equals(sp.orgenhet().getId())
                     )
                     .findFirst();
@@ -546,7 +548,7 @@ public class NyeRessursStillingProcessor {
             var match = eksisterendeOTer.stream()
                 .filter(ot -> ot.gyldigFom().equals(sp.gyldigFom())
                     && ot.orgEnhetId().equals(sp.orgenhet().getId())
-                    && ot.orgtilknytningType().equals(sp.tilknytningtype()))
+                    && Objects.equals(ot.orgtilknytningType(), sp.tilknytningtype()))
                 .findFirst();
 
             var overlappendeOTerPaaSP = harFlereOTerSomOverlapperMedSp(eksisterendeOTer, sp);
@@ -555,7 +557,7 @@ public class NyeRessursStillingProcessor {
                 if (!sp.erDagligOppfolging()) {
                     match = overlappendeOTerPaaSP.stream()
                             .filter(ot -> ot.gyldigFom().equals(sp.gyldigFom())
-                                    && ot.gyldigTom().orElse(NO_END_DATE).equals(sp.gyldigTom()))
+                                    && requireNonNullElse(ot.gyldigTom(), NO_END_DATE).equals(sp.gyldigTom()))
                             .findFirst();
                 } else {
                     match = Optional.ofNullable(overlappendeOTerPaaSP.getFirst());
@@ -565,9 +567,9 @@ public class NyeRessursStillingProcessor {
             if (match.isEmpty()) {
                 match = eksisterendeOTer.stream()
                     .filter(ot -> ot.gyldigFom().isBefore(nestenTreAarSiden)
-                        && ot.gyldigTom().orElse(NO_END_DATE).isAfter(sp.gyldigTom())
+                        && requireNonNullElse(ot.gyldigTom(), NO_END_DATE).isAfter(sp.gyldigTom())
                         && ot.erDagligOppfolging() == sp.erDagligOppfolging()
-                        && ot.orgtilknytningType().equals(sp.tilknytningtype())
+                        && Objects.equals(ot.orgtilknytningType(), sp.tilknytningtype())
                         && ot.orgEnhetId().equals(sp.orgenhet().getId()))
                     .findFirst();
             }
@@ -576,9 +578,9 @@ public class NyeRessursStillingProcessor {
                 // Sjekk om dette er gammel historisk hvor data last med 3 års historikk ikke er tilgjengelig, men NOM har akkumulert denne gamle historikken.
                 match = eksisterendeOTer.stream()
                     .filter(ot -> ot.gyldigFom().isBefore(nestenTreAarSiden)
-                        && lik(ot.gyldigTom().orElse(null), sp.gyldigTom())
+                        && lik(ot.gyldigTom(), sp.gyldigTom())
                         && ot.orgEnhetId().equals(sp.orgenhet().getId())
-                        && ot.orgtilknytningType().equals(sp.tilknytningtype())
+                        && Objects.equals(ot.orgtilknytningType(), sp.tilknytningtype())
                     )
                     .findFirst();
 
@@ -607,7 +609,7 @@ public class NyeRessursStillingProcessor {
         return eksisterendeOTer.stream()
             .filter(ot -> ot.orgEnhetId().equals(sp.orgenhet().getId()))
             .filter(ot -> overlapsInterval(sp.gyldigFom(), sp.gyldigTom(), ot))
-            .filter(ot -> ot.orgtilknytningType().equals(sp.tilknytningtype()))
+            .filter(ot -> Objects.equals(ot.orgtilknytningType(), sp.tilknytningtype()))
             .sorted(Comparator.comparing(OrgtilknytningState::gyldigFom))
             .toList();
     }
@@ -615,7 +617,7 @@ public class NyeRessursStillingProcessor {
     private static List<OrgtilknytningState> getOTerAaFjerne(List<OrgtilknytningState> eksisterendeOTer, Map<StillingPeriode, OrgtilknytningState> matchedeOTer) {
         var nestenTreAarSiden = LocalDate.now().minusYears(3).plusMonths(1);
         return eksisterendeOTer.stream()
-            .filter(eksisterende -> eksisterende.gyldigTom().isEmpty() || eksisterende.gyldigTom().get().isAfter(nestenTreAarSiden))
+            .filter(eksisterende -> isNull(eksisterende.gyldigTom()) || eksisterende.gyldigTom().isAfter(nestenTreAarSiden))
             .filter(eksisterende -> matchedeOTer.values().stream().map(OrgtilknytningState::fid).noneMatch( matchetFid -> eksisterende.fid().equals(matchetFid)))
             .toList();
     }

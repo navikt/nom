@@ -155,8 +155,8 @@ public class RessursRestService {
             loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP);
 
         return ressursStateRepository.getAll().stream()
-            .filter(ressursState -> (ressursFilter.sektor() == null || ressursState.sektor().equals(ressursFilter.sektor()))
-                && (ressursFilter.sluttdato() == null || ressursState.sluttdato().equals(ressursFilter.sluttdato())))
+            .filter(ressursState -> (ressursFilter.sektor() == null || Objects.equals(ressursState.sektor(), ressursFilter.sektor()))
+                && (ressursFilter.sluttdato() == null || Objects.equals(ressursState.sluttdato(), ressursFilter.sluttdato())))
             .map(ressursState -> ressursState.toBuilder()
                 .personident(ressursState.personident().replaceFirst(".{5}$", "*****"))
                 .primaryFysiskBrukersted(showFysiskBrukersted ? ressursState.primaryFysiskBrukersted() : null)
@@ -390,7 +390,7 @@ public class RessursRestService {
 
     private boolean isActive(RessursState ressursState) {
         return orgtilknytningStateRepository.findByNavident(ressursState.navident()).stream()
-            .anyMatch(state -> !(state.gyldigTom().isPresent() && state.gyldigTom().get().isBefore(LocalDate.now())));
+            .anyMatch(state -> !(state.gyldigTom() != null && state.gyldigTom().isBefore(LocalDate.now())));
     }
 
 
@@ -456,7 +456,7 @@ public class RessursRestService {
                     opprettetRessurs.navident(),
                     request.orgEnhetId(),
                     request.startDato(),
-                    Optional.ofNullable(request.sluttDato()),
+                    request.sluttDato(),
                     true,
                     metaData,
                     null
@@ -466,7 +466,7 @@ public class RessursRestService {
             orgtilknytningCommandService.endreTilknytningtype(
                 new EndreTilknytningtypeCommand(
                     orgTilknytningFid,
-                    Optional.of(request.tilknytningtype()),
+                    request.tilknytningtype(),
                     metaData
                 )
             );
@@ -546,7 +546,7 @@ public class RessursRestService {
                 existingRessurs.navident(),
                 request.orgEnhetId(),
                 request.startDato(),
-                Optional.ofNullable(request.sluttDato()),
+                request.sluttDato(),
                 true,
                 metadata,
                 null
@@ -556,7 +556,7 @@ public class RessursRestService {
         orgtilknytningCommandService.endreTilknytningtype(
             new EndreTilknytningtypeCommand(
                 orgTilknytningFid,
-                Optional.of(request.tilknytningtype()),
+                request.tilknytningtype(),
                 metadata
             )
         );
@@ -705,7 +705,7 @@ public class RessursRestService {
 
         orgtilknytninger.forEach(orgtilknytningState -> {
             var gyldigFomIsAfterAvvikletDato = orgtilknytningState.gyldigFom().isAfter(request.sluttDato());
-            var gyldigTomIsAfterAvvikletDato = orgtilknytningState.gyldigTom().orElse(LocalDate.MAX).isAfter(request.sluttDato());
+            var gyldigTomIsAfterAvvikletDato = orgtilknytningState.gyldigTom() != null ? orgtilknytningState.gyldigTom().isAfter(request.sluttDato()) : LocalDate.MAX.isAfter(request.sluttDato());
             if (gyldigFomIsAfterAvvikletDato) {
                 orgtilknytningCommandService.fjernOrgtilknytning(
                     orgtilknytningState.fid(),

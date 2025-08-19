@@ -21,7 +21,6 @@ import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Component
 class KafkaStreamProcessor {
@@ -84,9 +83,9 @@ class KafkaStreamProcessor {
                 eventStateAggregate.hasNonNull("sektor") ? Sektor.valueOf(eventStateAggregate.get("sektor").asText()) : null,
                 Boolean.parseBoolean(eventStateAggregate.hasNonNull("dagligOppfolging") ? eventStateAggregate.get("dagligOppfolging").asText() : null),
                 LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
-                Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null),
-                Optional.ofNullable(tilknytningType),
-                Optional.ofNullable(eventStateAggregate.hasNonNull("masseflyttetFraFid") ? eventStateAggregate.get("masseflyttetFraFid").asText() : null),
+                eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null,
+                tilknytningType,
+                eventStateAggregate.hasNonNull("masseflyttetFraFid") ? eventStateAggregate.get("masseflyttetFraFid").asText() : null,
                 eventStateAggregate.hasNonNull("sistEndretAv") ? eventStateAggregate.get("sistEndretAv").asText() : null
             );
         } catch (Exception e) {

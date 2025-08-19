@@ -74,7 +74,7 @@ class OTUtenforHierarkiTest {
     void test_basic_ok_autoflytt() {
         setupOrganisering();
 
-        var ot1 = new OrgtilknytningState("FID_1", "A000001", enhet1.getId(), NAV_STATLIG, true, LocalDate.now().minusYears(1), Optional.empty(), Optional.of(FAST), Optional.empty(), null);
+        var ot1 = new OrgtilknytningState("FID_1", "A000001", enhet1.getId(), NAV_STATLIG, true, LocalDate.now().minusYears(1), null, FAST, null, null);
 
         HashMap<IOrgenhet, List<OrgtilknytningState>> perAlternativOrgenhet = new HashMap<>();
         perAlternativOrgenhet.put(enhet2, List.of(ot1));
@@ -96,7 +96,7 @@ class OTUtenforHierarkiTest {
     void test_autoflytt_feil_paa_organisering() {
         setupOrganisering();
 
-        var ot1 = new OrgtilknytningState("FID_1", "A000001", enhet1.getId(), NAV_STATLIG, true, LocalDate.now().minusYears(1), Optional.empty(), Optional.of(FAST), Optional.empty(), null);
+        var ot1 = new OrgtilknytningState("FID_1", "A000001", enhet1.getId(), NAV_STATLIG, true, LocalDate.now().minusYears(1), null, FAST, null, null);
 
         HashMap<IOrgenhet, List<OrgtilknytningState>> perAlternativOrgenhet = new HashMap<>();
         perAlternativOrgenhet.put(enhet3, List.of(ot1));
@@ -111,7 +111,7 @@ class OTUtenforHierarkiTest {
     void test_autoflytt_feil_paa_flyttOrgtilknytninger_kall() {
         setupOrganisering();
 
-        var ot1 = new OrgtilknytningState("FID_1", "A000001", enhet1.getId(), NAV_STATLIG, true, LocalDate.now().minusYears(1), Optional.empty(), Optional.of(FAST), Optional.empty(), null);
+        var ot1 = new OrgtilknytningState("FID_1", "A000001", enhet1.getId(), NAV_STATLIG, true, LocalDate.now().minusYears(1), null, FAST, null, null);
 
         HashMap<IOrgenhet, List<OrgtilknytningState>> perAlternativOrgenhet = new HashMap<>();
         perAlternativOrgenhet.put(enhet1, List.of(ot1));
@@ -132,8 +132,8 @@ class OTUtenforHierarkiTest {
         when(orgenhetService.getById(enhet1.getId())).thenReturn(Optional.of(enhet1));
         setupOrganisering();
 
-        var ot1 = new OrgtilknytningState("FID_1", "A000001", enhet1.getId(), NAV_STATLIG, true, LocalDate.now().minusYears(1), Optional.empty(), Optional.of(FAST), Optional.empty(), null);
-        var ot2 = new OrgtilknytningState("FID_2", "A000002", enhet2.getId(), NAV_STATLIG, true, LocalDate.now().minusYears(1), Optional.empty(), Optional.of(FAST), Optional.empty(), null);
+        var ot1 = new OrgtilknytningState("FID_1", "A000001", enhet1.getId(), NAV_STATLIG, true, LocalDate.now().minusYears(1), null, FAST, null, null);
+        var ot2 = new OrgtilknytningState("FID_2", "A000002", enhet2.getId(), NAV_STATLIG, true, LocalDate.now().minusYears(1), null, FAST, null, null);
 
         when(orgtilknytningService.getAll()).thenReturn(List.of(ot1, ot2));
 

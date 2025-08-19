@@ -38,6 +38,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNullElse;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitalizeNavn;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeNoon;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.formatFornavnWithMellomnavn;
@@ -202,7 +203,7 @@ public class NomRemedyIntegrasjonServiceNew {
     }
 
     private boolean orgtilknytningStateUpdate(OrgtilknytningState orgtilknytningState, AggregateState aggregateState) {
-        if (orgtilknytningState.gyldigTom().isPresent() && orgtilknytningState.gyldigTom().get().isBefore(LocalDate.now())) {
+        if (orgtilknytningState.gyldigTom() != null && orgtilknytningState.gyldigTom().isBefore(LocalDate.now())) {
             return true;
         }
 
@@ -401,14 +402,14 @@ public class NomRemedyIntegrasjonServiceNew {
 
     private Optional<LocalDate> getUtlopsdato(Integer sektor, OrgtilknytningState dolOrgtilknytning) {
         var maaHaSluttDato = erKonsulentSomMaaHaSluttDato(sektor, dolOrgtilknytning);
-        if (maaHaSluttDato && dolOrgtilknytning.gyldigTom().isEmpty() ) {
+        if (maaHaSluttDato && isNull(dolOrgtilknytning.gyldigTom())) {
             throw new RequiredValueMissingException("Utløpsdato er påkrevd for ekstern sektor");
         }
-        return maaHaSluttDato ? dolOrgtilknytning.gyldigTom() : Optional.empty();
+        return maaHaSluttDato ? Optional.of(dolOrgtilknytning.gyldigTom()) : Optional.empty();
     }
 
     private boolean erKonsulentSomMaaHaSluttDato(Integer sektor, OrgtilknytningState ot) {
-        var tilknytningstype = ot.orgtilknytningType().orElse(Tilknytningtype.ANNET);
+        var tilknytningstype = requireNonNullElse(ot.orgtilknytningType(), Tilknytningtype.ANNET);
         //Hvis 'Ekstern' sektor, krev sluttdato med unntak av HELFO og Skatteetaten
         return sektor == 2 && tilknytningstype != Tilknytningtype.HELFO && tilknytningstype != Tilknytningtype.SKATTEETATEN;
     }

@@ -16,7 +16,7 @@ public record StillingPeriode(
     IOrgenhet orgenhet,
     DagligOppfolging dagligOppfolging,
     Sektor sektor,
-    Optional<Tilknytningtype> tilknytningtype
+    Tilknytningtype tilknytningtype
 ) {
     public StillingPeriode(StillingPeriode copy, IOrgenhet orgenhet) {
         this(copy.stilling, copy.gyldigFom, copy.gyldigTom, orgenhet, copy.dagligOppfolging, copy.sektor, copy.tilknytningtype);
@@ -31,15 +31,15 @@ public record StillingPeriode(
     }
 
     public StillingPeriode(StillingAgressoOrgIdOgNavn stillingAgressoOrgIdOgNavn, LocalDate gyldigFom, LocalDate gyldigTom, IOrgenhet orgenhet) {
-        this(stillingAgressoOrgIdOgNavn, gyldigFom, gyldigTom, orgenhet, DagligOppfolging.UKJENT, null, Optional.empty());
+        this(stillingAgressoOrgIdOgNavn, gyldigFom, gyldigTom, orgenhet, DagligOppfolging.UKJENT, null, null);
     }
 
     public StillingPeriode(StillingAgressoOrgIdOgNavn stillingAgressoOrgIdOgNavn, LocalDate gyldigFom, LocalDate gyldigTom, IOrgenhet orgenhet, Sektor sektor, Tilknytningtype tilknytningtype) {
-        this(stillingAgressoOrgIdOgNavn, gyldigFom, gyldigTom, orgenhet, DagligOppfolging.UKJENT, sektor, Optional.ofNullable(tilknytningtype));
+        this(stillingAgressoOrgIdOgNavn, gyldigFom, gyldigTom, orgenhet, DagligOppfolging.UKJENT, sektor, tilknytningtype);
     }
 
     public StillingPeriode(StillingAgressoOrgIdOgNavn stillingAgressoOrgIdOgNavn, LocalDate gyldigFom, LocalDate gyldigTom, IOrgenhet orgenhet, DagligOppfolging dagligOppfolging) {
-        this(stillingAgressoOrgIdOgNavn, gyldigFom, gyldigTom, orgenhet, dagligOppfolging, null, Optional.empty());
+        this(stillingAgressoOrgIdOgNavn, gyldigFom, gyldigTom, orgenhet, dagligOppfolging, null, null);
     }
 
     @Override

@@ -4,12 +4,16 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 
 import java.time.LocalDate;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNullElse;
+
 public class PeriodeUtil {
     public static final LocalDate NO_END_DATE = LocalDate.of(2099, 12, 31);
 
     public static boolean isFuturePeriod(OrgtilknytningState orgtilknytning) {
         return orgtilknytning.gyldigFom().isAfter(LocalDate.now());
     }
+
     public static boolean isFuturePeriod(StillingPeriode stillingPeriode) {
         return stillingPeriode.gyldigFom().isAfter(LocalDate.now());
     }
@@ -23,7 +27,7 @@ public class PeriodeUtil {
     }
 
     public static boolean isHistoricPeriod(OrgtilknytningState orgtilknytning) {
-        return orgtilknytning.gyldigTom().orElse(NO_END_DATE).isBefore(tomorrow());
+        return requireNonNullElse(orgtilknytning.gyldigTom(), NO_END_DATE).isBefore(tomorrow());
     }
 
     public static boolean isHistoricPeriod(StillingPeriode stillingPeriode) {
@@ -35,7 +39,7 @@ public class PeriodeUtil {
     }
 
     public static boolean isCurrentOrFuturePeriod(OrgtilknytningState orgtilknytning) {
-        return orgtilknytning.gyldigTom().isEmpty() || orgtilknytning.gyldigTom().get().isAfter(yesterday());
+        return isNull(orgtilknytning.gyldigTom()) || orgtilknytning.gyldigTom().isAfter(yesterday());
     }
 
     public static boolean isCurrentOrFuture(LocalDate date) {
@@ -54,11 +58,11 @@ public class PeriodeUtil {
 
     public static boolean overlapsInterval(StillingPeriode stillingPeriode, OrgtilknytningState orgtilknytning) {
         return orgtilknytning.gyldigFom().isBefore(dayAfter(stillingPeriode.gyldigTom())) &&
-            orgtilknytning.gyldigTom().orElse(NO_END_DATE).isAfter(dayBefore(stillingPeriode.gyldigFom()));
+            requireNonNullElse(orgtilknytning.gyldigTom(), NO_END_DATE).isAfter(dayBefore(stillingPeriode.gyldigFom()));
     }
 
     public static boolean overlapsInterval(OrgtilknytningState orgtilknytning1, OrgtilknytningState orgtilknytning2) {
-        return overlapsInterval(orgtilknytning1.gyldigFom(), orgtilknytning1.gyldigTom().orElse(NO_END_DATE), orgtilknytning2);
+        return overlapsInterval(orgtilknytning1.gyldigFom(), requireNonNullElse(orgtilknytning1.gyldigTom(), NO_END_DATE), orgtilknytning2);
     }
 
     public static boolean overlapsInterval(LocalDate start, LocalDate end, StillingPeriode stillingPeriode) {
@@ -67,7 +71,7 @@ public class PeriodeUtil {
     }
 
     public static boolean overlapsInterval(LocalDate start, LocalDate end, OrgtilknytningState orgtilknytning) {
-        return orgtilknytning.gyldigFom().isBefore(dayAfter(end)) && orgtilknytning.gyldigTom().orElse(NO_END_DATE).isAfter(dayBefore(start));
+        return orgtilknytning.gyldigFom().isBefore(dayAfter(end)) && requireNonNullElse(orgtilknytning.gyldigTom(), NO_END_DATE).isAfter(dayBefore(start));
     }
 
     public static boolean intervalCoversDate(LocalDate intervalStart, LocalDate intervalEnd, LocalDate date) {
@@ -79,7 +83,7 @@ public class PeriodeUtil {
     }
 
     public static boolean intervalCoversDate(OrgtilknytningState orgtilknytning, LocalDate date) {
-        return intervalCoversDate(orgtilknytning.gyldigFom(), orgtilknytning.gyldigTom().orElse(NO_END_DATE), date);
+        return intervalCoversDate(orgtilknytning.gyldigFom(), requireNonNullElse(orgtilknytning.gyldigTom(), NO_END_DATE), date);
     }
 
     public static LocalDate dayAfter(LocalDate localDate) { return localDate.plusDays(1); }

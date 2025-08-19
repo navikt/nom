@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
@@ -48,7 +49,7 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         List<StillingPeriode> historicStillingPerioder = handleHistoricPerioder(
             sspForNavident, splittedeSPer.stream()
                 .filter(sp -> historicFomDates.contains(sp.gyldigFom()))
-                .sorted((o1, o2) -> compare(o1.tilknytningtype().orElse(null), o2.tilknytningtype().orElse(null)))
+                .sorted((o1, o2) -> compare(o1.tilknytningtype(), o2.tilknytningtype()))
                 .toList(),
             historicFomDates
         );
@@ -56,14 +57,14 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         List<StillingPeriode> currentStillingPerioder = handleCurrentPerioder(
             sspForNavident, splittedeSPer.stream()
                 .filter(sp -> sp.gyldigFom().equals(currentFomDate))
-                .sorted((o1, o2) -> compare(o1.tilknytningtype().orElse(null), o2.tilknytningtype().orElse(null)))
+                .sorted((o1, o2) -> compare(o1.tilknytningtype(), o2.tilknytningtype()))
                 .toList()
         );
 
         List<StillingPeriode> futureStillingPerioder = handleFuturePerioder(
             sspForNavident, splittedeSPer.stream()
                 .filter(sp -> futureFomDates.contains(sp.gyldigFom()))
-                .sorted((o1, o2) -> compare(o1.tilknytningtype().orElse(null), o2.tilknytningtype().orElse(null)))
+                .sorted((o1, o2) -> compare(o1.tilknytningtype(), o2.tilknytningtype()))
                 .toList(),
             futureFomDates
         );
@@ -93,7 +94,7 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
                 .forEach(brekkDatoer::add);
 
         orgtilknytningStateRepository.findByNavident(sspForNavident.navident()).stream()
-            .map( ot -> ot.gyldigTom().orElse(NO_END_DATE))
+            .map( ot -> requireNonNullElse(ot.gyldigTom(), NO_END_DATE))
             .map(PeriodeUtil::dayAfter)
             .forEach(brekkDatoer::add);
 

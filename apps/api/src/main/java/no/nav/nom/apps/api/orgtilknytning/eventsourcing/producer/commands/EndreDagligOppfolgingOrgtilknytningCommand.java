@@ -5,7 +5,6 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Builder(toBuilder = true)
 public record EndreDagligOppfolgingOrgtilknytningCommand(
@@ -13,7 +12,7 @@ public record EndreDagligOppfolgingOrgtilknytningCommand(
     String navident,
     String orgenhetId,
     LocalDate gyldigFom,
-    Optional<LocalDate> gyldigTom,
+    LocalDate gyldigTom,
     boolean erDagligOppfolging,
     InputMetadata inputMetadata,
     OrgtilknytningEvent.AdditionalAgressoData additionalAgressoData

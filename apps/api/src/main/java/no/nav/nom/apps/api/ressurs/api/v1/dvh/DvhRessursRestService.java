@@ -58,7 +58,7 @@ public class DvhRessursRestService {
         logger.debug("Henter orgenheter. Bruke ny organisering");
 
         return orgenhetService.getAllEnheterMedOrganisering().stream()
-            .map(oe -> toDTO(oe))
+            .map(this::toDTO)
             .toList();
     }
 
@@ -84,10 +84,10 @@ public class DvhRessursRestService {
         return new DvhOrgtilknytningDTO(
             orgtilknytningState.orgEnhetId(),
             orgtilknytningState.gyldigFom(),
-            orgtilknytningState.gyldigTom().orElse(null),
+            orgtilknytningState.gyldigTom(),
             orgtilknytningState.sektor() != null ? orgtilknytningState.sektor().name() : null,
             orgtilknytningState.erDagligOppfolging(),
-            orgtilknytningState.orgtilknytningType() != null && orgtilknytningState.orgtilknytningType().isPresent() ? orgtilknytningState.orgtilknytningType().get().name() : null,
+            orgtilknytningState.orgtilknytningType() != null ? orgtilknytningState.orgtilknytningType().name() : null,
             orgtilknytningState.fid()
         );
     }

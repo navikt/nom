@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import no.nav.nom.contract.nom.Tilknytningtype;
 
-import java.util.Optional;
-
 // Finnes kun én event (event-01HKVS7C954KP32GJAMPJJW128) av den her typen på kafka i dev, ingen i prod. Burde slette event-01HKVS7C954KP32GJAMPJJW128 og fjerne denne klassen når vi har tid.
 public class OrgtilknytningTypeEndretEventV1 extends OrgtilknytningEvent {
 
@@ -26,6 +24,6 @@ public class OrgtilknytningTypeEndretEventV1 extends OrgtilknytningEvent {
 
     @Builder(toBuilder = true)
     public record OrgtilknytningTypeEndretEventData(
-        Optional<Tilknytningtype> orgtilknytningType
+        Tilknytningtype orgtilknytningType
     ) implements Data {}
 }

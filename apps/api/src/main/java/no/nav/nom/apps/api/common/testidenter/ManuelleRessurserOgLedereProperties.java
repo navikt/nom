@@ -51,9 +51,9 @@ public record ManuelleRessurserOgLedereProperties(
                 Sektor.valueOf(sektor),
                 true,
                 LocalDate.of(2022, 1, 1),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
+                null,
+                null,
+                null,
                 "nom-api"
             );
         }

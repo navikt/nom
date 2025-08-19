@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
@@ -244,7 +243,7 @@ public class RessursLedereResolverTest {
             .navident(NAV_IDENT_RESSURS)
             .orgEnhetId(ORG_ENHET_1_ID)
             .gyldigFom(LocalDate.now().minusMonths(6))
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(6)))
+            .gyldigTom(LocalDate.now().plusMonths(6))
             .build();
         when(orgtilknytningServiceMock.getByNavIdent(NAV_IDENT_RESSURS)).thenReturn(List.of(orgtilknytning));
 

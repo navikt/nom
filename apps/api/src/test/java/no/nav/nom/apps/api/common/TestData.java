@@ -27,9 +27,9 @@ public class TestData {
             .sektor(Sektor.NAV_STATLIG)
             .erDagligOppfolging(false)
             .gyldigFom(LocalDate.now().minusMonths(1))
-            .gyldigTom(Optional.empty())
-            .orgtilknytningType(Optional.of(Tilknytningtype.FAST))
-            .masseflyttetFraFid(Optional.empty())
+            .gyldigTom(null)
+            .orgtilknytningType(Tilknytningtype.FAST)
+            .masseflyttetFraFid(null)
             .build();
     }
 

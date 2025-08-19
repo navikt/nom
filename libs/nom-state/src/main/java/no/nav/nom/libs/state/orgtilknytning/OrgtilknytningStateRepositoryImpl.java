@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+
 @Service
 public class OrgtilknytningStateRepositoryImpl implements OrgtilknytningStateRepository {
     private final Map<String, OrgtilknytningState> orgtilknytningByFid = new ConcurrentHashMap<>();
@@ -158,7 +160,7 @@ public class OrgtilknytningStateRepositoryImpl implements OrgtilknytningStateRep
     }
 
     public boolean isCurrentOrFuturePeriod(OrgtilknytningState orgtilknytning) {
-        return orgtilknytning.gyldigTom().isEmpty() || orgtilknytning.gyldigTom().get().isAfter(yesterday());
+        return isNull(orgtilknytning.gyldigTom()) || orgtilknytning.gyldigTom().isAfter(yesterday());
     }
 
     public LocalDate today() { return LocalDate.now(); }

@@ -35,6 +35,7 @@ import java.util.Optional;
 
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
+import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 
 @Service
 @Slf4j
@@ -109,7 +110,7 @@ public class ImportMissingOrgtilknytninger {
         List<MissingOrgtilknytning> missingOts = new ArrayList<>();
 
         String line;
-        while ((line = reader.readLine()) != null) {
+        while (isNotNull(line = reader.readLine())) {
             if (!isHeaderLine(line)) {
                 parseAndValidateLine(line).ifPresent(missingOts::add);
             }
@@ -190,7 +191,7 @@ public class ImportMissingOrgtilknytninger {
 
         LocalDate fomDato = getFomDato(orgEnhet.gyldigFom(), ressurs.startdato());
         
-        if (ressurs.sluttdato() != null && ressurs.sluttdato().isBefore(LocalDate.now())) {
+        if (isNotNull(ressurs.sluttdato()) && ressurs.sluttdato().isBefore(LocalDate.now())) {
             log.info(TEAM_LOGS, "Sluttdato {} er passert for ressurs {}, så oppretter ikke orgtilknytning", ressurs.sluttdato(), ressurs.navident());
             return "";
         }
@@ -230,7 +231,7 @@ public class ImportMissingOrgtilknytninger {
                         .navident(missingOt.navident())
                         .orgenhetId(missingOt.orgId())
                         .gyldigFom(fomDato)
-                        .gyldigTom(Optional.ofNullable(ressurs.sluttdato()))
+                        .gyldigTom(ressurs.sluttdato())
                         .erDagligOppfolging(true)
                         .inputMetadata(inputMetadata)
                         .additionalAgressoData(null)
@@ -241,7 +242,7 @@ public class ImportMissingOrgtilknytninger {
         orgtilknytningCommandService.endreTilknytningtype(
                 EndreTilknytningtypeCommand.builder()
                         .fid(opprettetOrgtilknytningFid)
-                        .tilknytningtype(Optional.of(Tilknytningtype.INGEN))
+                        .tilknytningtype(Tilknytningtype.INGEN)
                         .inputMetadata(inputMetadata)
                         .build()
         );
@@ -257,7 +258,7 @@ public class ImportMissingOrgtilknytninger {
     }
     
     private boolean otIsExpired(OrgtilknytningState ot) {
-        return ot.gyldigTom().isPresent() && ot.gyldigTom().get().isBefore(LocalDate.now());
+        return isNotNull(ot.gyldigTom()) && ot.gyldigTom().isBefore(LocalDate.now());
     }
 
     public record MissingOrgtilknytning(

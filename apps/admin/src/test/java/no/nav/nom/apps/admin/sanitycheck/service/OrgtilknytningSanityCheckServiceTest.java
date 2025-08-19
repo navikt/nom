@@ -19,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,7 +54,7 @@ class OrgtilknytningSanityCheckServiceTest {
         var orgTilknytning2 = orgTilknytning().toBuilder()
                 .fid("orgtilknytning-123abc")
                 .gyldigFom(now.plusYears(1).plusDays(1))
-                .gyldigTom(Optional.of(now.plusYears(2)))
+                .gyldigTom(now.plusYears(2))
                 .build();
         when(orgtilknytningStateRepository.getAll()).thenReturn(List.of(orgTilknytning(), orgTilknytning2));
 
@@ -69,7 +68,7 @@ class OrgtilknytningSanityCheckServiceTest {
         var orgTilknytning2 = orgTilknytning().toBuilder()
                 .fid("orgtilknytning-123abc")
                 .gyldigFom(now.plusMonths(2))
-                .gyldigTom(Optional.of(now.plusYears(2)))
+                .gyldigTom(now.plusYears(2))
                 .build();
         when(orgtilknytningStateRepository.getAll()).thenReturn(List.of(orgTilknytning(), orgTilknytning2));
 
@@ -97,7 +96,7 @@ class OrgtilknytningSanityCheckServiceTest {
         var orgTilknytning2 = orgTilknytning().toBuilder()
                 .fid("orgtilknytning-123abc")
                 .gyldigFom(now.minusYears(1))
-                .gyldigTom(Optional.of(now.minusYears(1).plusMonths(6)))
+                .gyldigTom(now.minusYears(1).plusMonths(6))
                 .build();
         when(orgtilknytningStateRepository.getAll()).thenReturn(List.of(orgTilknytning(), orgTilknytning2));
 
@@ -111,12 +110,12 @@ class OrgtilknytningSanityCheckServiceTest {
         var orgTilknytning2 = orgTilknytning().toBuilder()
                 .fid("orgtilknytning-123abc")
                 .gyldigFom(now.plusMonths(2))
-                .gyldigTom(Optional.of(now.plusYears(2)))
+                .gyldigTom(now.plusYears(2))
                 .build();
         var orgTilknytning3 = orgTilknytning().toBuilder()
                 .fid("orgtilknytning-456def")
                 .gyldigFom(now.plusMonths(4))
-                .gyldigTom(Optional.of(now.plusYears(3)))
+                .gyldigTom(now.plusYears(3))
                 .build();
         when(orgtilknytningStateRepository.getAll()).thenReturn(List.of(orgTilknytning(), orgTilknytning2, orgTilknytning3));
 
@@ -153,7 +152,7 @@ class OrgtilknytningSanityCheckServiceTest {
                 .orgEnhetId(orgEnhetId)
                 .sektor(sektor)
                 .gyldigFom(gyldigFom)
-                .orgtilknytningType(Optional.ofNullable(tilknytningtype))
+                .orgtilknytningType(tilknytningtype)
                 .build();
         when(orgtilknytningStateRepository.getAll()).thenReturn(List.of(orgTilknytning(), orgTilknytning2));
 
@@ -179,7 +178,7 @@ class OrgtilknytningSanityCheckServiceTest {
     @MethodSource("lessThanSixMonthsTestCases")
     void orgtilknytninger_avsluttet_mer_enn_6_mnd_siden_skal_ikke_tas_med(LocalDate gyldigTom, int forventetAntall) {
         var orgTilknytning2 = orgTilknytning().toBuilder()
-                .gyldigTom(Optional.of(gyldigTom))
+                .gyldigTom(gyldigTom)
                 .build();
         when(orgtilknytningStateRepository.getAll()).thenReturn(List.of(orgTilknytning(), orgTilknytning2));
 
@@ -203,8 +202,8 @@ class OrgtilknytningSanityCheckServiceTest {
                 .sektor(Sektor.NAV_STATLIG)
                 .erDagligOppfolging(true)
                 .gyldigFom(now)
-                .gyldigTom(Optional.of(now.plusYears(1)))
-                .orgtilknytningType(Optional.of(Tilknytningtype.FAST))
+                .gyldigTom(now.plusYears(1))
+                .orgtilknytningType(Tilknytningtype.FAST)
                 .build();
     }
 }

@@ -9,25 +9,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import java.time.LocalDate;
+import java.util.List;
 
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class KonverterEksternSamarbeidspartnerTilknytningtypeTest {
@@ -68,28 +65,28 @@ public class KonverterEksternSamarbeidspartnerTilknytningtypeTest {
                 .fid("fid-1")
                 .navident("A123456")
                 .orgEnhetId("dummyHelfoId")
-                .orgtilknytningType(Optional.of(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER))
-                .gyldigTom(Optional.of(LocalDate.now().minusWeeks(2)))
+                .orgtilknytningType(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER)
+                .gyldigTom(LocalDate.now().minusWeeks(2))
                 .build(),
             orgtilknytningState().toBuilder()
                 .fid("fid-2")
                 .navident("B123456")
                 .orgEnhetId("dummyHelfoId")
-                .orgtilknytningType(Optional.of(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER))
-                .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+                .orgtilknytningType(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER)
+                .gyldigTom(LocalDate.now().plusYears(1))
                 .build(),
             orgtilknytningState().toBuilder()
                 .fid("fid-3")
                 .navident("C123456")
                 .orgEnhetId("dummySkattId")
-                .orgtilknytningType(Optional.of(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER))
-                .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+                .orgtilknytningType(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER)
+                .gyldigTom(LocalDate.now().plusYears(1))
                 .build(),
             orgtilknytningState().toBuilder()
                 .fid("fid-4")
                 .navident("D123456")
                 .orgEnhetId("dummyRiksrevisjonId")
-                .orgtilknytningType(Optional.of(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER))
+                .orgtilknytningType(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER)
                 .build()
         );
         when(getAuthenticatedNavIdent()).thenReturn("X123456");

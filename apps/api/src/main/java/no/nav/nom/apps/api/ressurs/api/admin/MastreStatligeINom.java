@@ -29,9 +29,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 
+import static java.util.Objects.requireNonNullElse;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.etter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerEtter;
@@ -378,7 +378,7 @@ public class MastreStatligeINom {
 
     LocalDate getMaxOTDate(String navident) {
         return orgtilknytningService.getByNavIdent(navident).stream()
-            .map(orgtilknytning -> orgtilknytning.gyldigTom().orElse(MAX_DATE))
+            .map(orgtilknytning -> requireNonNullElse(orgtilknytning.gyldigTom(), MAX_DATE))
             .max(LocalDate::compareTo).orElse(null);
     }
 

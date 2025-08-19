@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.job;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
@@ -33,6 +34,7 @@ public class OTUtenforHierarki {
     private final HashMap<OrgtilknytningState, IOrgenhet> otUtenforHierarkieMedAlternativOrgenhet = new HashMap<>();
     private final HashMap<IOrgenhet, List<OrgtilknytningState>> perAlternativOrgenhet = new HashMap<>();
 
+    @Setter
     private boolean ventPaaState = true;
 
     public OTUtenforHierarki(OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService,
@@ -61,7 +63,7 @@ public class OTUtenforHierarki {
         var aktiveOrgenhetIder = aktiveOrgenheter.stream().map(IOrgenhet::getId).toList();
         var oterUtenforHierarki = orgtilknytningService.getAll().stream()
             .filter(ot -> !aktiveOrgenhetIder.contains(ot.orgEnhetId()))
-            .filter(ot -> likEllerEtter(ot.gyldigTom().orElse(null), today()))
+            .filter(ot -> likEllerEtter(ot.gyldigTom(), today()))
             .filter(ot -> !ot.fid().startsWith("FID_MANUELL"))
             .toList();
 
@@ -121,9 +123,7 @@ public class OTUtenforHierarki {
 
     private void loggFeilede(List<String> otFids, String formatted) {
         HashMap<OrgtilknytningState, String> feilede = new HashMap<>();
-        otFids.forEach(otFid -> {
-            orgtilknytningService.findByFid(otFid).ifPresent(ot -> feilede.put(ot, formatted));
-        });
+        otFids.forEach(otFid -> orgtilknytningService.findByFid(otFid).ifPresent(ot -> feilede.put(ot, formatted)));
         loggFeilede(feilede);
     }
 
@@ -133,9 +133,7 @@ public class OTUtenforHierarki {
         }
         var antallFeilede = feilede.size();
         log.error("Fant {} OTer utenfor hierarki som ikke ble flyttet", antallFeilede);
-        feilede.forEach((ot, msg) -> {
-            log.error("Orgtilknytning {} {} {} [{} - {}]  - {}", ot.fid(), ot.navident(), ot.orgEnhetId(), ot.gyldigFom(), ot.gyldigTom(), msg);
-        });
+        feilede.forEach((ot, msg) -> log.error("Orgtilknytning {} {} {} [{} - {}]  - {}", ot.fid(), ot.navident(), ot.orgEnhetId(), ot.gyldigFom(), ot.gyldigTom(), msg));
     }
 
     private static InputMetadata getInputMetadata(IOrgenhet alternativOrgenhet, List<String> otFids, LocalDate flyttedato) {
@@ -191,7 +189,4 @@ public class OTUtenforHierarki {
 
     public HashMap<OrgtilknytningState, IOrgenhet> getOtUtenforHierarkiMedAlternativOrgenhet() { return otUtenforHierarkieMedAlternativOrgenhet; }
 
-    public void setVentPaaState(boolean ventPaaState) {
-        this.ventPaaState = ventPaaState;
-    }
 }

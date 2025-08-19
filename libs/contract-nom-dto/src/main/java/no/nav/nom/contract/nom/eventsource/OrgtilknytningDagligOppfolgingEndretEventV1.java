@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 public class OrgtilknytningDagligOppfolgingEndretEventV1 extends OrgtilknytningEvent {
 
@@ -28,7 +27,7 @@ public class OrgtilknytningDagligOppfolgingEndretEventV1 extends OrgtilknytningE
             String navident,
             String orgEnhetId,
             LocalDate gyldigFom,
-            Optional<LocalDate> gyldigTom,
+            LocalDate gyldigTom,
             boolean dagligOppfolging
     ) implements Data{ }
 

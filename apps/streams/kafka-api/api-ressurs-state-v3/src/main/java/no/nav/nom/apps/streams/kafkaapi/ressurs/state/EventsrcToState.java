@@ -266,7 +266,7 @@ class EventsrcToState {
                 otJson.get("fid").asText(),
                 otJson.get("orgEnhetId").asText(),
                 LocalDate.parse(otJson.get("gyldigFom").asText()),
-                Optional.ofNullable(otJson.hasNonNull("gyldigTom") ? LocalDate.parse(otJson.get("gyldigTom").asText()) : null),
+                otJson.hasNonNull("gyldigTom") ? LocalDate.parse(otJson.get("gyldigTom").asText()) : null,
                 otJson.hasNonNull("dagligOppfolging") && otJson.get("dagligOppfolging").asBoolean()
             );
 

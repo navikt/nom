@@ -265,7 +265,7 @@ public class HendelserTestUtils {
                 navident,
                 "orgEnhetId",
                 LocalDate.now(),
-                Optional.of(LocalDate.now())
+                LocalDate.now()
             ),
             eventMetadata,
             new OrgtilknytningEvent.AdditionalAgressoData(
@@ -315,7 +315,7 @@ public class HendelserTestUtils {
                 navident,
                 "orgEnhetId",
                 LocalDate.now(),
-                Optional.of(LocalDate.now()),
+                LocalDate.now(),
                 true
             ),
             eventMetadata,

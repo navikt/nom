@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 
 @Slf4j
@@ -96,7 +97,7 @@ public class MissingEksternSluttdatoer {
                     avvikleRessurs(ressurs.fid(), remedyRessurs);
 
                     orgtilknytningService.getByNavIdent(remedyRessurs.navident()).stream()
-                        .filter(ot -> ot.gyldigTom().isEmpty())
+                        .filter(ot -> isNull(ot.gyldigTom()))
                         .forEach(ot -> avvikleOrgtilknytning(ot, remedyRessurs));
 
                     nomMastered.markRessursAsMasteredInNom(remedyRessurs.navident());

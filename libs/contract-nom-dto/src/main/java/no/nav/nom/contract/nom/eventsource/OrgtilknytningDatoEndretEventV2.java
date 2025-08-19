@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 public class OrgtilknytningDatoEndretEventV2 extends OrgtilknytningEvent {
 
@@ -26,6 +25,6 @@ public class OrgtilknytningDatoEndretEventV2 extends OrgtilknytningEvent {
     @Builder(toBuilder = true)
     public record OrgtilknytningDatoEndretEventData(
         LocalDate gyldigFom,
-        Optional<LocalDate> gyldigTom
+        LocalDate gyldigTom
     ) implements Data {}
 }

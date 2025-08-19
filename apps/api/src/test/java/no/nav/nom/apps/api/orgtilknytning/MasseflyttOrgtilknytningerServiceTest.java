@@ -162,7 +162,7 @@ class MasseflyttOrgtilknytningerServiceTest {
         verify(orgtilknytningCommandService, times(0)).opprettOrgtilknytning(any());
 
         assertEquals(1, res.size());
-        assertEquals("Orgtilknytning er ikke gyldig for flytting på angitt flyttedato", res.get(orgtilknytninger.get(0)));
+        assertEquals("Orgtilknytning er ikke gyldig for flytting på angitt flyttedato", res.get(orgtilknytninger.getFirst()));
     }
 
     @Test
@@ -188,7 +188,7 @@ class MasseflyttOrgtilknytningerServiceTest {
         verify(orgtilknytningCommandService, times(0)).opprettOrgtilknytning(opprettOrgtilknytningArgumentCaptor.capture());
 
         assertEquals(1, res.size());
-        assertEquals("Orgtilknytning er ikke gyldig for flytting på angitt flyttedato", res.get(orgtilknytninger.get(0)));
+        assertEquals("Orgtilknytning er ikke gyldig for flytting på angitt flyttedato", res.get(orgtilknytninger.getFirst()));
     }
 
     @Test
@@ -330,9 +330,9 @@ class MasseflyttOrgtilknytningerServiceTest {
             sektor,
             erDagligOppfolging,
             gyldigFom,
-            gyldigTom == null ? Optional.empty() : Optional.of(gyldigTom),
-            tilknytningType == null ? Optional.empty() : Optional.of(tilknytningType),
-            Optional.empty(),
+            gyldigTom,
+            tilknytningType,
+            null,
             "S123456"
         );
     }

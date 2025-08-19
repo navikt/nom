@@ -84,7 +84,7 @@ public class OrgtilknytningEndretEmailServiceTest {
         // dump the generated output to System.err
         var stringWriter = new StringWriter();
         template.process(data, stringWriter);
-        System.err.println(stringWriter.getBuffer().toString());
+        System.err.println(stringWriter.getBuffer());
     }
 
 
@@ -103,7 +103,7 @@ public class OrgtilknytningEndretEmailServiceTest {
                 .navident(navident)
                 .orgEnhetId(orgEnhet)
                 .gyldigFom(LocalDate.now().minusDays(10))
-                .gyldigTom(Optional.of(LocalDate.now().plusDays(10)))
+                .gyldigTom(LocalDate.now().plusDays(10))
                 .build()
             )
         );
@@ -157,7 +157,7 @@ public class OrgtilknytningEndretEmailServiceTest {
                 .navident(navident)
                 .orgEnhetId(orgEnhet)
                 .gyldigFom(LocalDate.now().minusDays(10))
-                .gyldigTom(Optional.of(LocalDate.now().plusDays(10)))
+                .gyldigTom(LocalDate.now().plusDays(10))
                 .build()
             )
         );
@@ -196,7 +196,7 @@ public class OrgtilknytningEndretEmailServiceTest {
             )
         );
 
-        assertEquals(result.size(), 2);
+        assertEquals(2, result.size());
         assertTrue(result.contains(navidentChangedBy));
         assertTrue(result.contains(orgenhetLederNavIdent));
     }

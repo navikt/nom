@@ -186,7 +186,7 @@ public class TestData {
             .navident("Z654321")
             .orgEnhetId("orgenhet")
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(11)))
+            .gyldigTom(LocalDate.now().plusMonths(11))
             .dagligOppfolging(true)
             .build();
     }
@@ -209,7 +209,7 @@ public class TestData {
     public static OrgtilknytningDatoEndretEventV2.OrgtilknytningDatoEndretEventData orgtilknytningDatoEndretEventData() {
         return OrgtilknytningDatoEndretEventV2.OrgtilknytningDatoEndretEventData.builder()
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(11)))
+            .gyldigTom(LocalDate.now().plusMonths(11))
             .build();
     }
 
@@ -349,8 +349,8 @@ public class TestData {
             v1.getOrgtilknytningDagligOppfolgingEndretEventData().dagligOppfolging(),
             v1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom(),
             v1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom(),
-            Optional.empty(),
-            Optional.empty(),
+            null,
+            null,
             null
         );
     }
@@ -363,9 +363,9 @@ public class TestData {
             Sektor.NAV_STATLIG,
             true,
             LocalDate.now(),
-            Optional.of(LocalDate.now().plusMonths(10)),
-            Optional.of(Tilknytningtype.FAST),
-            Optional.empty(),
+            LocalDate.now().plusMonths(10),
+            Tilknytningtype.FAST,
+            null,
             null
         );
     }

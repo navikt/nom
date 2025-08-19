@@ -670,7 +670,7 @@ public class RessursControllerTest extends RestTestBase {
             orgtilknytningState().toBuilder().navident(ressursSomSkalAvvikles.navident()).build(),
             orgtilknytningState().toBuilder()
                 .navident(ressursSomSkalAvvikles.navident())
-                .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
+                .gyldigTom(LocalDate.now().minusDays(1))
                 .build()
         );
 
@@ -716,7 +716,7 @@ public class RessursControllerTest extends RestTestBase {
             orgtilknytningState().toBuilder().navident(ressursSomSkalAvvikles.navident()).build(),
             orgtilknytningState().toBuilder()
                 .navident(ressursSomSkalAvvikles.navident())
-                .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
+                .gyldigTom(LocalDate.now().minusDays(1))
                 .build()
         );
 

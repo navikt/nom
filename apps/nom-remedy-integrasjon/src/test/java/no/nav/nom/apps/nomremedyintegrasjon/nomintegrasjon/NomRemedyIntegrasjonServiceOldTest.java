@@ -336,11 +336,15 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
                     .navId(existingRessurs.getNavident())
                     .sektor(nomSektorToRemedyCode(existingRessurs.getSektor()))
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
-                    .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()): null)
+                    .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(getGyldigTomOrMax(dagligOppfolgingOrgtilknytning)) : null)
                     .mobil(mobil)
                     .build()
 
             ));
+    }
+
+    private static LocalDate getGyldigTomOrMax(OrgtilknytningState dagligOppfolgingOrgtilknytning) {
+        return isNull(dagligOppfolgingOrgtilknytning.getGyldigTom()) ? LocalDate.MAX : dagligOppfolgingOrgtilknytning.getGyldigTom();
     }
 
     @ParameterizedTest
@@ -384,7 +388,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
                     .navId(existingRessurs.getNavident())
                     .sektor(nomSektorToRemedyCode(existingRessurs.getSektor()))
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
-                    .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()): null)
+                    .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(getGyldigTomOrMax(dagligOppfolgingOrgtilknytning)) : null)
                     .mobil(mobil)
                     .build()
 
@@ -428,7 +432,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
                     .navId(existingRessurs.getNavident())
                     .sektor(nomSektorToRemedyCode(existingRessurs.getSektor()))
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
-                    .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()): null)
+                    .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(getGyldigTomOrMax(dagligOppfolgingOrgtilknytning)) : null)
                     .mobil(mobil)
                     .build()
 
@@ -476,7 +480,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
                     .navId(existingRessurs.getNavident())
                     .sektor(nomSektorToRemedyCode(existingRessurs.getSektor()))
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dagligOppfolgingOrgtilknytning.getGyldigFom()))
-                    .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(dagligOppfolgingOrgtilknytning.getGyldigTom()): null)
+                    .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(getGyldigTomOrMax(dagligOppfolgingOrgtilknytning)) : null)
                     .mobil(mobil)
                     .build()
             ));
@@ -498,7 +502,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
                 .navident(existingRessurs.getNavident())
                 .dagligOppfolging(true)
                 .gyldigFom(LocalDate.now())
-                .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+                .gyldigTom(LocalDate.now().plusMonths(1))
                 .orgEnhetId("new-orgenhet")
                 .build()
         );
@@ -534,7 +538,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(
                         orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigFom())
                     )
-                    .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom().get()): null)
+                    .utlopsdato(existingRessurs.getSektor().equals(no.nav.nom.generated.model.Sektor.EKSTERN) ? epochSecondsNorwegianTimeEndOfDay(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().gyldigTom()) : null)
                     .mobil(mobil)
                     .build()
             ));
@@ -575,7 +579,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
                 .navident(existingRessurs.getNavident())
                 .dagligOppfolging(true)
                 .gyldigFom(LocalDate.now().minusYears(1))
-                .gyldigTom(Optional.of(LocalDate.now().minusMonths(1)))
+                .gyldigTom(LocalDate.now().minusMonths(1))
                 .orgEnhetId("new-orgenhet")
                 .build()
         );
@@ -653,7 +657,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
             orgtilknytningDagligOppfolgingEndretEventData().toBuilder()
                 .navident(existingRessurs.getNavident())
                 .orgEnhetId(orgtilknytning.getOrgEnhetId())
-                .gyldigTom(Optional.of(orgtilknytning.getGyldigTom()))
+                .gyldigTom(orgtilknytning.getGyldigTom())
                 .build()
         );
 
@@ -684,7 +688,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
         var orgtilknytningEvent = orgtilknytningDatoEndretEventV2(
                 orgtilknytningDatoEndretEventData().toBuilder()
                         .gyldigFom(LocalDate.now().plusMonths(1))
-                        .gyldigTom(Optional.of(LocalDate.now().plusMonths(3)))
+                        .gyldigTom(LocalDate.now().plusMonths(3))
                         .build()
         );
 
@@ -750,7 +754,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
                             orgtilknytningDagligOppfolgingEndretEventData().toBuilder()
                                 .navident(existingRessurs.getNavident())
                                 .orgEnhetId(orgtilknytning.getOrgEnhetId())
-                                .gyldigTom(Optional.of(orgtilknytning.getGyldigTom().plusDays(1)))
+                                .gyldigTom(orgtilknytning.getGyldigTom().plusDays(1))
                                 .build()))
                     .build(),
                 orgtilknytning,
@@ -764,7 +768,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
                             orgtilknytningDagligOppfolgingEndretEventData().toBuilder()
                                 .navident(existingRessurs.getNavident())
                                 .orgEnhetId(orgtilknytning.getOrgEnhetId())
-                                .gyldigTom(Optional.of(orgtilknytning.getGyldigTom().minusDays(1)))
+                                .gyldigTom(orgtilknytning.getGyldigTom().minusDays(1))
                                 .build()))
                     .build(),
                 orgtilknytning,
@@ -784,7 +788,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
                     .event(
                         orgtilknytningDatoEndretEventV2(
                             orgtilknytningDatoEndretEventData().toBuilder()
-                                .gyldigTom(Optional.of(orgtilknytning.getGyldigTom().plusDays(1)))
+                                .gyldigTom(orgtilknytning.getGyldigTom().plusDays(1))
                                 .build()))
                     .build(),
                 orgtilknytning,
@@ -796,7 +800,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
                     .event(
                         orgtilknytningDatoEndretEventV2(
                             orgtilknytningDatoEndretEventData().toBuilder()
-                                .gyldigTom(Optional.of(orgtilknytning.getGyldigTom().minusDays(1)))
+                                .gyldigTom(orgtilknytning.getGyldigTom().minusDays(1))
                                 .build()))
                     .build(),
                 orgtilknytning,
@@ -827,7 +831,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
             .getOrgtilknytningDatoEndretEventData()
             .toBuilder()
             .gyldigFom(LocalDate.now().minusYears(2))
-            .gyldigTom(Optional.of(LocalDate.now().minusYears(1)))
+            .gyldigTom(LocalDate.now().minusYears(1))
             .build();
 
         var orgtilknytningDatoEndretEventV2 = orgtilknytningDatoEndretEventV2(orgtilknytningDatoEndretEventV2EventData);
@@ -981,7 +985,7 @@ public class NomRemedyIntegrasjonServiceOldTest extends TestBase {
         var orgtilknytningDatoEndretEventV2 = orgtilknytningDatoEndretEventV2(
             orgtilknytningDatoEndretEventData().toBuilder()
                 .gyldigFom(LocalDate.now())
-                .gyldigTom(Optional.of(orgtilknytning.getGyldigTom().plusMonths(1)))
+                .gyldigTom(orgtilknytning.getGyldigTom().plusMonths(1))
                 .build()
         );
 

@@ -7,10 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
@@ -25,11 +22,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import static java.util.Objects.isNull;
+import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 
 @Slf4j
 @Tag(name = "Admin for korrigeringer")
@@ -69,7 +66,7 @@ public class KorrigerOrgtilknytningerUtoverOrgenhetensPeriode {
                     ot.navident(),
                     ot.orgEnhetId(),
                     ot.gyldigFom(),
-                    ot.gyldigTom().isPresent() ? ot.gyldigTom().get() : " "
+                    isNotNull(ot.gyldigTom()) ? ot.gyldigTom() : " "
                 );
                 String orgenhetDescription = "Orgenhet %s %s med periode %s - %s".formatted(
                     orgenhet.getId(),
@@ -132,26 +129,23 @@ public class KorrigerOrgtilknytningerUtoverOrgenhetensPeriode {
     private List<OrgtilknytningState> aktiveOrgtilknytninger(Collection<OrgtilknytningState> orgtilknytninger) {
         return orgtilknytninger.stream().filter( ot ->
             ot.gyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
-                (!ot.gyldigTom().isPresent() || ot.gyldigTom().get().isAfter(LocalDate.now()))
+                (isNull(ot.gyldigTom()) || ot.gyldigTom().isAfter(LocalDate.now()))
         ).toList();
     }
     private List<OrgtilknytningState> orgtilknytningerUtoverEnhetPeriode(List<OrgtilknytningState> orgtilknytninger) {
         return orgtilknytninger.stream()
-            .filter( t -> {
-                var orgEnhet = orgenhetService.getById(t.orgEnhetId());
-                if (orgEnhet.get().getGyldigTom().isPresent() && orgEnhet.get().getGyldigTom().get().isBefore(t.gyldigFom())) {
+            .filter( ot -> {
+                var orgEnhet = orgenhetService.getById(ot.orgEnhetId());
+                if (orgEnhet.get().getGyldigTom().isPresent() && orgEnhet.get().getGyldigTom().get().isBefore(ot.gyldigFom())) {
                     return true; // orgEnhet.gyldigTom < tilknytning.gyldigFom
                 }
-                if (t.gyldigTom().isPresent() && orgEnhet.get().getGyldigFom().isAfter(t.gyldigTom().get())) {
+                if (isNotNull(ot.gyldigTom()) && orgEnhet.get().getGyldigFom().isAfter(ot.gyldigTom())) {
                     return true; // orgEnhet.gyldigFom > tilknytning.gyldigTom
                 }
-                if (t.gyldigTom().isEmpty() && orgEnhet.get().getGyldigTom().isPresent()) {
+                if (isNull(ot.gyldigTom()) && orgEnhet.get().getGyldigTom().isPresent()) {
                     return true; // orgEnhet avsluttet < tilknytning ikke avsluttet
                 }
-                if (t.gyldigTom().isPresent() && orgEnhet.get().getGyldigTom().isPresent() && orgEnhet.get().getGyldigTom().get().isBefore(t.gyldigTom().get())) {
-                    return true; // orgEnhet avsluttet < tilknytning avsluttet
-                }
-                return false;
+                return isNotNull(ot.gyldigTom()) && orgEnhet.get().getGyldigTom().isPresent() && orgEnhet.get().getGyldigTom().get().isBefore(ot.gyldigTom()); // orgEnhet avsluttet < tilknytning avsluttet
             } ).toList();
     }
 }

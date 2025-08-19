@@ -184,7 +184,7 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
         var dolEventData = (OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData) dolEvent.getData();
         KeyValue<String, RessursOpprettetEvent> ressursOpprettetEvent = outputTopic.readKeyValue();
         //noinspection OptionalGetWithoutIsPresent
-        assertThat(ressursOpprettetEvent.value.getOrgtilknytning().gyldigTom().get()).isEqualTo(dolEventData.gyldigTom().get());
+        assertThat(ressursOpprettetEvent.value.getOrgtilknytning().gyldigTom().get()).isEqualTo(dolEventData.gyldigTom());
     }
 
     @Test
@@ -338,7 +338,7 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
             navident,
             orgenhet,
             fomDato,
-            Optional.ofNullable(tomDato),
+            tomDato,
             dol
         );
 
@@ -398,7 +398,7 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
 
     OrgtilknytningTilknytningtypeEndretEventV1 orgtilknytningTilknytningtypeEndretEvent() {
         final var eventData = new OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData(
-            Optional.of(Tilknytningtype.ARBEIDSTRENING)
+            Tilknytningtype.ARBEIDSTRENING
         );
 
         return new OrgtilknytningTilknytningtypeEndretEventV1(
@@ -411,7 +411,7 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
     OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2(String fid, LocalDate gyldigFom, LocalDate gyldigTom) {
         final var eventData = new OrgtilknytningDatoEndretEventV2.OrgtilknytningDatoEndretEventData(
             gyldigFom,
-            Optional.of(gyldigTom)
+            gyldigTom
         );
 
         return new OrgtilknytningDatoEndretEventV2(

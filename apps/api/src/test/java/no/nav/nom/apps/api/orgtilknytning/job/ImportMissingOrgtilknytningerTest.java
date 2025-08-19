@@ -120,12 +120,12 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
         masteredRessursStateRepository.clear();
 
         Map<String, Object> consumerProps = new HashMap<>(KafkaTestUtils
-                .consumerProps("consumerGroup", "false", embeddedKafkaBroker));
+            .consumerProps("consumerGroup", "false", embeddedKafkaBroker));
 
         DefaultKafkaConsumerFactory<String, OrgtilknytningEvent> consumerFactory = new DefaultKafkaConsumerFactory<>(
-                consumerProps,
-                new StringDeserializer(),
-                new JsonDeserializer<>(OrgtilknytningEvent.class, objectMapper)
+            consumerProps,
+            new StringDeserializer(),
+            new JsonDeserializer<>(OrgtilknytningEvent.class, objectMapper)
         );
 
         recordsQueue = new LinkedBlockingQueue<>();
@@ -145,9 +145,9 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
         jsonSerializer.addTrustedPackages("java.time");
 
         DefaultKafkaConsumerFactory<String, LocalDateTime> nomMasteredConsumerFactory = new DefaultKafkaConsumerFactory<>(
-                consumerProps,
-                new StringDeserializer(),
-                jsonSerializer
+            consumerProps,
+            new StringDeserializer(),
+            jsonSerializer
         );
 
         ContainerProperties nomMasteredContainerProperties = new ContainerProperties(NOM_MASTERED_TOPIC);
@@ -187,10 +187,10 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
     @Test
     void should_parse_file_with_header() throws IOException {
         BufferedReader br = new BufferedReader(new StringReader(
-                """
-                        NAV-ident,Navn,Sektor,Enhetsnummer,Orgenhet Unit4 nr,Orgenhet Unit4 navn,NOM_orgenhet,NOM_orgnavn,gyldig_tom,Kommentar
-                        A123456,Kari Nordmann,NAV_KOMMUNAL,1111,1234567,Orgenhet 1,ab123c,Orgenhet 1,31-Dec-99,
-                        """
+            """
+            NAV-ident,Navn,Sektor,Enhetsnummer,Orgenhet Unit4 nr,Orgenhet Unit4 navn,NOM_orgenhet,NOM_orgnavn,gyldig_tom,Kommentar
+            A123456,Kari Nordmann,NAV_KOMMUNAL,1111,1234567,Orgenhet 1,ab123c,Orgenhet 1,31-Dec-99,
+            """
         ));
 
         List<MissingOrgtilknytning> result = importMissingOrgtilknytninger.readMissingOrgtilknytninger(br);
@@ -216,9 +216,9 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
 
 
         await()
-                .atMost(1, SECONDS)
-                .pollInterval(10, MILLISECONDS)
-                .until(() -> recordsQueue.size() == 3);
+            .atMost(1, SECONDS)
+            .pollInterval(10, MILLISECONDS)
+            .until(() -> recordsQueue.size() == 3);
 
         ConsumerRecord<String, OrgtilknytningEvent> opprettOrgtilknytningRecord = recordsQueue.remove();
         assertThat(opprettOrgtilknytningRecord.value()).isInstanceOf(OrgtilknytningOpprettetEventV1.class);
@@ -233,8 +233,9 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
 
         ConsumerRecord<String, OrgtilknytningEvent> tilknytningstypeRecord = recordsQueue.remove();
         assertThat(tilknytningstypeRecord.value()).isInstanceOf(OrgtilknytningTilknytningtypeEndretEventV1.class);
-        var tilknytningEvent = (OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData) tilknytningstypeRecord.value().getData();
-        assertThat(tilknytningEvent.orgtilknytningType()).isEqualTo(Optional.of(INGEN));
+        var tilknytningEvent = (OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData) tilknytningstypeRecord.value()
+            .getData();
+        assertThat(tilknytningEvent.orgtilknytningType()).isEqualTo(INGEN);
     }
 
     @Test
@@ -246,10 +247,10 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
         var missingOt = new MissingOrgtilknytning(NAVIDENT, NAVN, ORG_ID, ORG_NAVN);
 
         var existingOrgtilknytning = OrgtilknytningState.builder()
-                .navident(NAVIDENT)
-                .orgEnhetId(ORG_ID)
-                .gyldigTom(Optional.of(LocalDate.now().plusMonths(2)))
-                .build();
+            .navident(NAVIDENT)
+            .orgEnhetId(ORG_ID)
+            .gyldigTom(LocalDate.now().plusMonths(2))
+            .build();
         when(orgtilknytningStateRepositoryMock.findByNavident(NAVIDENT)).thenReturn(List.of(existingOrgtilknytning));
 
 
@@ -270,21 +271,21 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
         var missingOt = new MissingOrgtilknytning(NAVIDENT, NAVN, ORG_ID, ORG_NAVN);
 
         var expiredOrgtilknytning = OrgtilknytningState.builder()
-                .navident(NAVIDENT)
-                .orgEnhetId(ORG_ID)
-                .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
-                .build();
+            .navident(NAVIDENT)
+            .orgEnhetId(ORG_ID)
+            .gyldigTom(LocalDate.now().minusDays(1))
+            .build();
         when(orgtilknytningStateRepositoryMock.findByNavident(NAVIDENT)).thenReturn(List.of(expiredOrgtilknytning));
 
-        
+
         importMissingOrgtilknytninger.createEventsForNewOrgtilknytning(missingOt);
 
-        
+
         // Tre meldinger skal sendes
         await()
-                .atMost(1, SECONDS)
-                .pollInterval(10, MILLISECONDS)
-                .until(() -> recordsQueue.size() == 3);
+            .atMost(1, SECONDS)
+            .pollInterval(10, MILLISECONDS)
+            .until(() -> recordsQueue.size() == 3);
     }
 
     @Test
@@ -296,16 +297,16 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
         // Ressursen har ingen orgtilknytninger
         when(orgtilknytningStateRepositoryMock.findByNavident(NAVIDENT)).thenReturn(Collections.emptyList());
 
-        
+
         var missingOt = new MissingOrgtilknytning(NAVIDENT, NAVN, ORG_ID, ORG_NAVN);
 
         importMissingOrgtilknytninger.createEventsForNewOrgtilknytning(missingOt);
 
 
         await()
-                .atMost(1, SECONDS)
-                .pollInterval(10, MILLISECONDS)
-                .until(() -> nomMasteredRecordsQueue.size() == 1);
+            .atMost(1, SECONDS)
+            .pollInterval(10, MILLISECONDS)
+            .until(() -> nomMasteredRecordsQueue.size() == 1);
 
         ConsumerRecord<String, LocalDateTime> nomMasteredRecord = nomMasteredRecordsQueue.remove();
         assertThat(nomMasteredRecord.key()).isEqualTo(NAVIDENT);
@@ -315,38 +316,38 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
     @MethodSource("correctOrgtilknytningFomDatoInput")
     @DisplayName("FomDato for Orgtilknytning skal settes til seneste av orgEnhet.gyldigFom og ressurs.startDato")
     void should_use_latest_date_for_ot_fromDato(
-            LocalDate orgEnhetGyldigFom,
-            LocalDate ressursStartDato,
-            LocalDate otFromDato
+        LocalDate orgEnhetGyldigFom,
+        LocalDate ressursStartDato,
+        LocalDate otFromDato
     ) {
         assertThat(importMissingOrgtilknytninger.getFomDato(orgEnhetGyldigFom, ressursStartDato)).isEqualTo(otFromDato);
     }
 
     private static Stream<Arguments> correctOrgtilknytningFomDatoInput() {
         return Stream.of(
-                // Orgenhet gyldigFom, ressurs startdato, forventet resultat
-                Arguments.of(DATE_IN_2023, DATE_IN_2024, DATE_IN_2024),
-                Arguments.of(DATE_IN_2024, DATE_IN_2019, DATE_IN_2024),
-                Arguments.of(DATE_IN_2024, null, DATE_IN_2024)
+            // Orgenhet gyldigFom, ressurs startdato, forventet resultat
+            Arguments.of(DATE_IN_2023, DATE_IN_2024, DATE_IN_2024),
+            Arguments.of(DATE_IN_2024, DATE_IN_2019, DATE_IN_2024),
+            Arguments.of(DATE_IN_2024, null, DATE_IN_2024)
         );
     }
 
     public static RessursState ressursState() {
         return RessursState.builder()
-                .fid(UUID.randomUUID().toString())
-                .navident(NAVIDENT)
-                .sektor(Sektor.NAV_KOMMUNAL)
-                .startdato(LocalDate.of(2024, 1, 1))
-                .sluttdato(null)
-                .build();
+            .fid(UUID.randomUUID().toString())
+            .navident(NAVIDENT)
+            .sektor(Sektor.NAV_KOMMUNAL)
+            .startdato(LocalDate.of(2024, 1, 1))
+            .sluttdato(null)
+            .build();
     }
 
     public static OrgEnhetState orgEnhetState() {
         return OrgEnhetState.builder()
-                .fid(UUID.randomUUID().toString())
-                .id(ORG_ID)
-                .gyldigFom(LocalDate.now())
-                .build();
+            .fid(UUID.randomUUID().toString())
+            .id(ORG_ID)
+            .gyldigFom(LocalDate.now())
+            .build();
     }
 
 }

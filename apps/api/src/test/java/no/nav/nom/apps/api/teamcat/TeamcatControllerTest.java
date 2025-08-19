@@ -145,7 +145,7 @@ public class TeamcatControllerTest extends RestTestBase {
             .orgEnhetId(orgEnhetId)
             .erDagligOppfolging(true)
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
     }
 

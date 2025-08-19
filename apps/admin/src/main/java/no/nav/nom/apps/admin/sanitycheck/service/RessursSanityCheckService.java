@@ -38,8 +38,11 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNullElse;
 import static no.nav.nom.apps.admin.PeriodeUtil.tomorrow;
 import static no.nav.nom.apps.admin.PeriodeUtil.yesterday;
+import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 
 @Service
 public class RessursSanityCheckService {
@@ -218,7 +221,7 @@ public class RessursSanityCheckService {
         for (OrgtilknytningState orgtilknytning : sisteOrgtilknytninger.values().stream().flatMap(Collection::stream).toList()) {
             var ressurs = alleRessurserSomErAktive.get(orgtilknytning.navident());
 
-            if (!orgtilknytning.gyldigTom().equals(Optional.ofNullable(ressurs.sluttdato()))) {
+            if (!Objects.equals(orgtilknytning.gyldigTom(), ressurs.sluttdato())) {
                 ulikeSluttdatoer.add(getRessursOrgtilknytningUlikSluttdato(ressurs, orgtilknytning));
             }
         }
@@ -232,11 +235,11 @@ public class RessursSanityCheckService {
             Collection<OrgtilknytningState> orgtilknytningState = entry.getValue();
 
             Optional<LocalDate> latestDate = orgtilknytningState.stream()
-                    .map(ot -> ot.gyldigTom().orElse(LocalDate.MAX))
+                    .map(ot -> requireNonNullElse(ot.gyldigTom(), LocalDate.MAX))
                     .max(LocalDate::compareTo);
 
             Collection<OrgtilknytningState> filteredOrgtilknytningState = orgtilknytningState.stream()
-                    .filter(org -> (org.gyldigTom().isEmpty() && latestDate.equals(Optional.of(LocalDate.MAX))) || org.gyldigTom().equals(latestDate))
+                    .filter(org -> (isNull(org.gyldigTom()) && latestDate.equals(Optional.of(LocalDate.MAX))) || org.gyldigTom().equals(latestDate.get()))
                     .toList();
 
             if (!filteredOrgtilknytningState.isEmpty()) {
@@ -251,7 +254,7 @@ public class RessursSanityCheckService {
                 .navident(ressurs.navident())
                 .orgEnhetId(orgtilknytning.orgEnhetId())
                 .ressursSluttdato(ressurs.sluttdato())
-                .orgtilknytningSluttdato(orgtilknytning.gyldigTom().isPresent() ? orgtilknytning.gyldigTom().get() : null)
+                .orgtilknytningSluttdato(orgtilknytning.gyldigTom())
                 .build();
     }
 
@@ -268,7 +271,7 @@ public class RessursSanityCheckService {
         Stream<String> medOrgtilknytningerSomIkkeErAktiv = alleOrgtilknytningerKobletTilRessurs.entrySet().stream()
                 .filter(orgtilknytning -> !orgtilknytning.getValue().isEmpty())
                 .filter(orgtilknytning -> orgtilknytning.getValue().stream()
-                        .allMatch(orgtilknytningState -> orgtilknytningState.gyldigTom().isPresent() && orgtilknytningState.gyldigTom().get().isBefore(LocalDate.now())))
+                        .allMatch(orgtilknytningState -> isNotNull(orgtilknytningState.gyldigTom()) && orgtilknytningState.gyldigTom().isBefore(LocalDate.now())))
                 .map(Map.Entry::getKey);
 
         return Stream.concat(utenOrgtilknytninger, medOrgtilknytningerSomIkkeErAktiv)
@@ -280,7 +283,7 @@ public class RessursSanityCheckService {
         Map<String, RessursState> alleRessurserSomErAktive = ressursStateRepository.findAllActiveRessurser();
 
         Map<String, RessursState> alleAktiveRoboter = alleRessurserSomErAktive.entrySet().stream()
-                .filter(ressurs -> ressurs.getValue().identType() != null)
+                .filter(ressurs -> isNotNull(ressurs.getValue().identType()))
                 .filter(ressurs -> ressurs.getValue().identType().name().equals(IdentType.ROBOT.name()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -296,8 +299,8 @@ public class RessursSanityCheckService {
                                 .navident(navident)
                                 .visningsnavn(ressurs.visningsnavn().getFormattedVisningsnavn())
                                 .sektor(ressurs.sektor())
-                                .startdato(Optional.ofNullable(ressurs.startdato()))
-                                .sluttdato(Optional.ofNullable(ressurs.sluttdato()))
+                                .startdato(ressurs.startdato())
+                                .sluttdato(ressurs.sluttdato())
                                 .orgtilknytninger(
                                         alleOrgtilknytningerKobletTilRobotRessurs.get(navident).stream()
                                                 .map(orgtilknytningState ->
@@ -323,8 +326,8 @@ public class RessursSanityCheckService {
                                 .navident(navident)
                                 .visningsnavn(ressurs.visningsnavn().getFormattedVisningsnavn())
                                 .sektor(ressurs.sektor())
-                                .startdato(Optional.ofNullable(ressurs.startdato()))
-                                .sluttdato(Optional.ofNullable(ressurs.sluttdato()))
+                                .startdato(ressurs.startdato())
+                                .sluttdato(ressurs.sluttdato())
                                 .orgtilknytninger(Collections.emptyList())
                                 .build()
                 );
@@ -355,7 +358,7 @@ public class RessursSanityCheckService {
                         orgtilknytningState.fid(),
                         orgtilknytningState.orgEnhetId(),
                         orgtilknytningState.gyldigFom(),
-                        orgtilknytningState.gyldigTom().isPresent() ? orgtilknytningState.gyldigTom().get() : "");
+                        requireNonNullElse(orgtilknytningState.gyldigTom(), ""));
                 OTer.add(ot);
             });
 
@@ -384,9 +387,9 @@ public class RessursSanityCheckService {
                 OrgtilknytningState orgtilknytningStateTo = DOLSortedByFomDato.get(j);
                 
                 LocalDate startdatoEn = orgtilknytningStateEn.gyldigFom();
-                LocalDate sluttdatoEn = orgtilknytningStateEn.gyldigTom().orElse(LocalDate.MAX);
+                LocalDate sluttdatoEn = requireNonNullElse(orgtilknytningStateEn.gyldigTom(), LocalDate.MAX);
                 LocalDate startdatoTo = orgtilknytningStateTo.gyldigFom();
-                LocalDate sluttdatoTo = orgtilknytningStateTo.gyldigTom().orElse(LocalDate.MAX);
+                LocalDate sluttdatoTo = requireNonNullElse(orgtilknytningStateTo.gyldigTom(), LocalDate.MAX);
 
                 if (!startdatoEn.isAfter(sluttdatoTo) && !sluttdatoEn.isBefore(startdatoTo)) {
                     overlappendeTilknytninger.add(orgtilknytningStateEn);
@@ -399,8 +402,8 @@ public class RessursSanityCheckService {
     }
 
     private final Predicate<OrgtilknytningState> gyldigTomMindreEnnSeksMndSidenEllerIkkeSatt = orgtilknytningState -> {
-        if (orgtilknytningState.gyldigTom() != null && orgtilknytningState.gyldigTom().isPresent()) {
-            return PeriodeUtil.innenforSisteSeksMaaneder(orgtilknytningState.gyldigTom().get());
+        if (isNotNull(orgtilknytningState.gyldigTom())) {
+            return PeriodeUtil.innenforSisteSeksMaaneder(orgtilknytningState.gyldigTom());
         } else {
             return true;
         }
@@ -434,7 +437,7 @@ public class RessursSanityCheckService {
     private List<OrgtilknytningState> aktiveOrgtilknytninger(Collection<OrgtilknytningState> orgtilknytninger) {
         return orgtilknytninger.stream().filter(ot ->
                 ot.gyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
-                        (ot.gyldigTom().isEmpty() || ot.gyldigTom().get().isAfter(LocalDate.now()))
+                        (isNull(ot.gyldigTom()) || ot.gyldigTom().isAfter(LocalDate.now()))
         ).toList();
     }
 
@@ -470,7 +473,7 @@ public class RessursSanityCheckService {
     }
 
     public static boolean isCurrentOrFuturePeriod(OrgtilknytningState orgtilknytning) {
-        return orgtilknytning.gyldigTom().isEmpty() || orgtilknytning.gyldigTom().get().isAfter(yesterday());
+        return isNull(orgtilknytning.gyldigTom()) || orgtilknytning.gyldigTom().isAfter(yesterday());
     }
 
     private List<OrgtilknytningState> orgtilknytningerUtoverRessursPeriode(List<OrgtilknytningState> orgtilknytninger) {
@@ -480,13 +483,13 @@ public class RessursSanityCheckService {
                     if (ressurs.isEmpty()) {
                         return false;
                     }
-                    if (ressurs.get().sluttdato() != null && ressurs.get().sluttdato().isBefore(t.gyldigFom())) {
+                    if (isNotNull(ressurs.get().sluttdato()) && ressurs.get().sluttdato().isBefore(t.gyldigFom())) {
                         return true; // ressurs.sluttDato < tilknytning.gyldigFom
                     }
-                    if (t.gyldigTom().isPresent() && ressurs.get().startdato() != null && ressurs.get().startdato().isAfter(t.gyldigTom().get())) {
+                    if (isNotNull(t.gyldigTom()) && isNotNull(ressurs.get().startdato()) && ressurs.get().startdato().isAfter(t.gyldigTom())) {
                         return true; // ressurs.startDato > tilknytning.gyldigTom
                     }
-                    return t.gyldigTom().isEmpty() && ressurs.get().sluttdato() != null; // ressurs avsluttet > tilknytning ikke avsluttet
+                    return isNull(t.gyldigTom()) && isNotNull(ressurs.get().sluttdato()); // ressurs avsluttet > tilknytning ikke avsluttet
                 }).toList();
     }
 
@@ -497,16 +500,16 @@ public class RessursSanityCheckService {
                     if (orgEnhet.isPresent() && orgEnhet.get().gyldigTom().isPresent() && orgEnhet.get().gyldigTom().get().isBefore(t.gyldigFom())) {
                         return true; // orgEnhet.gyldigTom < tilknytning.gyldigFom
                     }
-                    if (t.gyldigTom().isPresent() && orgEnhet.isPresent() && orgEnhet.get().gyldigFom().isAfter(t.gyldigTom().get())) {
+                    if (isNotNull(t.gyldigTom()) && orgEnhet.isPresent() && orgEnhet.get().gyldigFom().isAfter(t.gyldigTom())) {
                         return true; // orgEnhet.gyldigFom > tilknytning.gyldigTom
                     }
-                    return t.gyldigTom().isEmpty() && orgEnhet.isPresent() && orgEnhet.get().gyldigTom().isPresent(); // orgEnhet avsluttet > tilknytning ikke avsluttet
+                    return isNull(t.gyldigTom()) && orgEnhet.isPresent() && orgEnhet.get().gyldigTom().isPresent(); // orgEnhet avsluttet > tilknytning ikke avsluttet
                 }).toList();
     }
 
     private final Predicate<OrgtilknytningState> gyldigTomEmptyOrBefore2099 = orgtilknytningState ->
-        orgtilknytningState.gyldigTom().isEmpty() ||
-            orgtilknytningState.gyldigTom().get().isBefore(LocalDate.of(2099, 1, 1));
+        isNull(orgtilknytningState.gyldigTom()) ||
+            orgtilknytningState.gyldigTom().isBefore(LocalDate.of(2099, 1, 1));
 
     public List<RessursState> ressurserMedBlankMellomnavn() {
         return ressursStateRepository.getAll().stream()
@@ -518,7 +521,7 @@ public class RessursSanityCheckService {
     public List<RessursState> compareFutureChangedWithDelayEvents() {
         List<RessursState> futureRessursStates = ressursStateRepository.findAllActiveRessurser().values()
             .stream()
-            .filter(ressursState -> ressursState.sluttdato() != null
+            .filter(ressursState -> isNotNull(ressursState.sluttdato())
                 && ressursState.sluttdato().isAfter(LocalDate.now()))
             .toList();
         List<String> delayedEvents = getAllDelayedEventsBlocking();

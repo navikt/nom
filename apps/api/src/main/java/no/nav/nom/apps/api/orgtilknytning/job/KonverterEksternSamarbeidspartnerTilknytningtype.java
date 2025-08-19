@@ -12,8 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
+import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodActiveOrFuture;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
@@ -59,11 +60,11 @@ public class KonverterEksternSamarbeidspartnerTilknytningtype {
             .forEach(orgtilknytningState -> {
                 if (EXCLUDE_2310.contains(orgtilknytningState.navident())) {
                     result.append("Ekskludert: ").append(orgtilknytningState.navident()).append("\n");
-                } else if (isPeriodActiveOrFuture(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom().orElse(null))) {
-                    if (orgtilknytningState.orgtilknytningType().isEmpty()  || orgtilknytningState.orgtilknytningType().equals(Optional.of(Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER))) {
+                } else if (isPeriodActiveOrFuture(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom())) {
+                    if (isNull(orgtilknytningState.orgtilknytningType())  || Objects.equals(orgtilknytningState.orgtilknytningType(), Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER)) {
                         orgtilknytningCommandService.endreTilknytningtype(EndreTilknytningtypeCommand.builder()
                             .fid(orgtilknytningState.fid())
-                            .tilknytningtype(Optional.of(tilknytningtype))
+                            .tilknytningtype(tilknytningtype)
                             .inputMetadata(InputMetadata.builder()
                                 .inputInterfaceName("REST-API")
                                 .inputInterfaceMethodName("konverter-tilknytning-typer")

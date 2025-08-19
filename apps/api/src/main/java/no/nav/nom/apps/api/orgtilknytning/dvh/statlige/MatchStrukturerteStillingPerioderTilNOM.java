@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
 
+import static java.util.Objects.requireNonNullElse;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.NO_END_DATE;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.dayAfter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.dayBefore;
@@ -91,7 +92,7 @@ public class MatchStrukturerteStillingPerioderTilNOM {
                         new StillingPeriode(
                             stillingPeriode.stilling(),
                             OTSomMatcherAgressoIdIPerioden.gyldigFom(),
-                            OTSomMatcherAgressoIdIPerioden.gyldigTom().orElse(NO_END_DATE),
+                            requireNonNullElse(OTSomMatcherAgressoIdIPerioden.gyldigTom(), NO_END_DATE),
                             orgenhetService.getById(OTSomMatcherAgressoIdIPerioden.orgEnhetId()).orElseThrow()
                         ));
                     lagErrorSomBrukerEksisterendeOTSomMatcherUpresisAgressoId(sspForNavident, stillingPeriode, OTSomMatcherAgressoIdIPerioden, navident);
@@ -154,7 +155,7 @@ public class MatchStrukturerteStillingPerioderTilNOM {
 
     private NyGyldigFomTom getNyGyldigFomTomAvOverlappendeOT(StillingPeriode stillingPeriode, IOrgenhet orgenhet, List<OrgtilknytningState> eksisterendeOT) {
         LocalDate minOTGyldigFom = eksisterendeOT.stream().map(OrgtilknytningState::gyldigFom).min(LocalDate::compareTo).orElseThrow();
-        LocalDate maxOTGyldigTom = eksisterendeOT.stream().map(ot -> ot.gyldigTom().orElse(NO_END_DATE)).max(LocalDate::compareTo).get();
+        LocalDate maxOTGyldigTom = eksisterendeOT.stream().map(ot -> requireNonNullElse(ot.gyldigTom(), NO_END_DATE)).max(LocalDate::compareTo).get();
 
         LocalDate nyGyldigFom = getLatestDate(
             getEarliestDate(minOTGyldigFom, orgenhet.getGyldigFom()),
@@ -220,7 +221,7 @@ public class MatchStrukturerteStillingPerioderTilNOM {
                             nyGyldigTom,
                             aktuellOrgEnhet,
                             stillingPeriode.sektor(),
-                            stillingPeriode.tilknytningtype().orElse(null)
+                            stillingPeriode.tilknytningtype()
                         );
 
                         lagErrorForDelAvStillingPeriodeSomGaarUtoverEnhetPeriodeUtenMatchendeEksisterendeOT(
@@ -241,7 +242,7 @@ public class MatchStrukturerteStillingPerioderTilNOM {
                         aktuellGyldigTom,
                         aktuellOrgEnhet,
                         stillingPeriode.sektor(),
-                        stillingPeriode.tilknytningtype().orElse(null)
+                        stillingPeriode.tilknytningtype()
                     );
                     splittetPerioder.add(nyStillingsPeriode);
                 }
@@ -447,7 +448,7 @@ public class MatchStrukturerteStillingPerioderTilNOM {
 
     private OrgtilknytningState getBestMatchPaaPerioden(List<OrgtilknytningState> OTer, LocalDate gyldigFom, LocalDate gyldigTom) {
         // finn evt presise matcher på periode
-        var presisMatch = OTer.stream().filter(ot -> lik(gyldigFom, ot.gyldigFom()) && lik(gyldigTom, ot.gyldigTom().orElse(null))).toList();
+        var presisMatch = OTer.stream().filter(ot -> lik(gyldigFom, ot.gyldigFom()) && lik(gyldigTom, ot.gyldigTom())).toList();
         if (!presisMatch.isEmpty()) {
             OTer = presisMatch;
         } else {
@@ -471,7 +472,7 @@ public class MatchStrukturerteStillingPerioderTilNOM {
         return orgtilknytningStateRepository.findByNavident(navident).stream()
             .filter(ot ->
                 ot.gyldigFom().equals(gyldigFom) &&
-                    ot.gyldigTom().orElse(NO_END_DATE).equals(gyldigTom)
+                    requireNonNullElse(ot.gyldigTom(), NO_END_DATE).equals(gyldigTom)
             )
             .toList();
     }
@@ -689,7 +690,7 @@ public class MatchStrukturerteStillingPerioderTilNOM {
                     stillingPeriode.gyldigFom(), stillingPeriode.gyldigTom(),
                     stillingPeriode.stilling().agressoId(),
                     oe.getId(), oe.getNavn(), oe.getAgressoId(),
-                    otSomMatcherAgressoIdIPerioden.gyldigFom(), otSomMatcherAgressoIdIPerioden.gyldigTom().orElse(null)
+                    otSomMatcherAgressoIdIPerioden.gyldigFom(), otSomMatcherAgressoIdIPerioden.gyldigTom()
                 ),
             stillingPeriode
         );

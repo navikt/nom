@@ -259,7 +259,7 @@ public class KafkaProcessorTest {
         final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEventV1 = lagOpprettEvent(navident, orgEnhetId, sektor, LocalDate.of(2022, 1,  1));
         final OrgtilknytningTypeEndretEventV1 orgtilknytningTypeEndretEventV1 = new OrgtilknytningTypeEndretEventV1(
             orgtilknytningOpprettetEventV1.getFid(),
-            new OrgtilknytningTypeEndretEventV1.OrgtilknytningTypeEndretEventData(Optional.of(Tilknytningtype.KONSULENT)),
+            new OrgtilknytningTypeEndretEventV1.OrgtilknytningTypeEndretEventData(Tilknytningtype.KONSULENT),
             (Event.Metadata) null
         );
 
@@ -296,7 +296,7 @@ public class KafkaProcessorTest {
         final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEventV1 = lagOpprettEvent(navident, orgEnhetId, sektor, LocalDate.of(2022, 1,  1));
         final OrgtilknytningTilknytningtypeEndretEventV1 orgtilknytningTilknytningtypeEndretEventV1 = new OrgtilknytningTilknytningtypeEndretEventV1(
             orgtilknytningOpprettetEventV1.getFid(),
-            new OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData(Optional.of(Tilknytningtype.KONSULENT)),
+            new OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData(Tilknytningtype.KONSULENT),
             (Event.Metadata) null
         );
 
@@ -346,12 +346,12 @@ public class KafkaProcessorTest {
         final OrgtilknytningEvent opprettDagligOppfolgingEventTo = lagDagligOppfolgingEndretEvent("FID_2", "A000002", nyOrgEnhetId, LocalDate.now(), gyldigTom, true);
         final OrgtilknytningEvent endreTilnytningTypeEventEn = new OrgtilknytningTypeEndretEventV1(
             "FID_1",
-            new OrgtilknytningTypeEndretEventV1.OrgtilknytningTypeEndretEventData(Optional.of(Tilknytningtype.INGEN)),
+            new OrgtilknytningTypeEndretEventV1.OrgtilknytningTypeEndretEventData(Tilknytningtype.INGEN),
             (Event.Metadata) null
         );
         final OrgtilknytningEvent endreTilnytningTypeEventTo = new OrgtilknytningTypeEndretEventV1(
             "FID_2",
-            new OrgtilknytningTypeEndretEventV1.OrgtilknytningTypeEndretEventData(Optional.of(Tilknytningtype.INGEN)),
+            new OrgtilknytningTypeEndretEventV1.OrgtilknytningTypeEndretEventData(Tilknytningtype.INGEN),
             (Event.Metadata) null
         );
 
@@ -623,7 +623,7 @@ public class KafkaProcessorTest {
                 navident,
                 orgEnhetId,
                 gyldigFom,
-                Optional.ofNullable(gyldigTom),
+                gyldigTom,
                 dagligOppfolging
             ),
             (Event.Metadata) null,
@@ -660,7 +660,7 @@ public class KafkaProcessorTest {
                 navident,
                 orgEnhetId,
                 gyldigFom,
-                Optional.ofNullable(gyldigTom)
+                gyldigTom
             ),
             lagMetadata(),
             dummyAdditionalAgressoData
@@ -677,9 +677,9 @@ public class KafkaProcessorTest {
             .sektor(sektor)
             .erDagligOppfolging(erDagligOppfolging)
             .gyldigFom(gyldigFom)
-            .gyldigTom(Optional.ofNullable(gyldigTom))
-            .orgtilknytningType(Optional.empty())
-            .masseflyttetFraFid(Optional.empty())
+            .gyldigTom(gyldigTom)
+            .orgtilknytningType(null)
+            .masseflyttetFraFid(null)
             .sistEndretAv(null)
             .build();
     }
@@ -694,9 +694,9 @@ public class KafkaProcessorTest {
             .sektor(sektor)
             .erDagligOppfolging(erDagligOppfolging)
             .gyldigFom(gyldigFom)
-            .gyldigTom(Optional.ofNullable(gyldigTom))
-            .orgtilknytningType(Optional.empty())
-            .masseflyttetFraFid(Optional.empty())
+            .gyldigTom(gyldigTom)
+            .orgtilknytningType(null)
+            .masseflyttetFraFid(null)
             .sistEndretAv(sistEndretAv)
             .build();
     }
@@ -721,9 +721,9 @@ public class KafkaProcessorTest {
             .sektor(sektor)
             .erDagligOppfolging(erDagligOppfolging)
             .gyldigFom(gyldigFom)
-            .gyldigTom(Optional.ofNullable(gyldigTom))
-            .orgtilknytningType(Optional.ofNullable(tilknytningtype))
-            .masseflyttetFraFid(Optional.ofNullable(masseflyttetFraFid))
+            .gyldigTom(gyldigTom)
+            .orgtilknytningType(tilknytningtype)
+            .masseflyttetFraFid(masseflyttetFraFid)
             .sistEndretAv(null)
             .build();
     }
@@ -749,9 +749,9 @@ public class KafkaProcessorTest {
             .sektor(sektor)
             .erDagligOppfolging(erDagligOppfolging)
             .gyldigFom(gyldigFom)
-            .gyldigTom(Optional.ofNullable(gyldigTom))
-            .orgtilknytningType(Optional.ofNullable(tilknytningtype))
-            .masseflyttetFraFid(Optional.ofNullable(masseflyttetFraFid))
+            .gyldigTom(gyldigTom)
+            .orgtilknytningType(tilknytningtype)
+            .masseflyttetFraFid(masseflyttetFraFid)
             .sistEndretAv(sistEndretAv)
             .build();
     }

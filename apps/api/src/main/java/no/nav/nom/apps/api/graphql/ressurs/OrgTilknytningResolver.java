@@ -52,8 +52,8 @@ public class OrgTilknytningResolver {
             .orgEnhet(orgEnhetGqlResponse)
             .erDagligOppfolging(orgtilknytning.erDagligOppfolging())
             .gyldigFom(orgtilknytning.gyldigFom())
-            .gyldigTom(orgtilknytning.gyldigTom().orElse(null))
-            .tilknytningType(orgtilknytning.orgtilknytningType().orElse(null))
+            .gyldigTom(orgtilknytning.gyldigTom())
+            .tilknytningType(orgtilknytning.orgtilknytningType())
             .build();
     }
 }

@@ -569,7 +569,7 @@ abstract public class MockBasisTestOrganisering {
             .navident("B110001")
             .orgEnhetId("B11")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrgtilknytningState ot_B11_B110002 = OrgtilknytningState.builder()
@@ -577,7 +577,7 @@ abstract public class MockBasisTestOrganisering {
             .navident("B110002")
             .orgEnhetId("B11")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrgtilknytningState ot_C11_C110001 = OrgtilknytningState.builder()
@@ -585,7 +585,7 @@ abstract public class MockBasisTestOrganisering {
             .navident("C110001")
             .orgEnhetId("C11")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrgtilknytningState ot_C22_C220001 = OrgtilknytningState.builder()
@@ -593,7 +593,7 @@ abstract public class MockBasisTestOrganisering {
             .navident("C220001")
             .orgEnhetId("C22")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrgtilknytningState ot_D1_D100001 = OrgtilknytningState.builder()
@@ -601,7 +601,7 @@ abstract public class MockBasisTestOrganisering {
             .navident("D100001")
             .orgEnhetId("D1")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrgtilknytningState ot_E1_E100001 = OrgtilknytningState.builder()
@@ -609,7 +609,7 @@ abstract public class MockBasisTestOrganisering {
             .navident("E100001")
             .orgEnhetId("E1")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         lenient().when(orgtilknytningStateRepository.findByNavident("B110001")).thenReturn(List.of(ot_B11_B110001));

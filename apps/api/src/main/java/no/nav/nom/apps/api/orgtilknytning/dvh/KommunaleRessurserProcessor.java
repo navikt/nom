@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
@@ -38,7 +39,7 @@ public class KommunaleRessurserProcessor {
 
         var aktiveEksisterendeOrgtilknytninger = eksisterendeOrgtilknytninger.stream().filter(PeriodeUtil::isCurrentPeriod).toList();
 
-        if (aktiveEksisterendeOrgtilknytninger.size() == 0) {
+        if (aktiveEksisterendeOrgtilknytninger.isEmpty()) {
             String fid = PrefixedUlidCreator.createTmpOrgtilknytningUlid();
             log.debug(TEAM_LOGS, "Kommunal Ressurs {} har ingen eksisterende aktive orgtilknytninger. Lager en temporær som er basert på OrgenhetPaaRessurs.", kommunalRessurs.getNavIdent());
 
@@ -73,8 +74,8 @@ public class KommunaleRessurserProcessor {
                 null,
                 true,
                 startDatoPaaTmpOT,
-                Optional.ofNullable(sluttDatoPaaTmpOT),
-                Optional.of(Tilknytningtype.INGEN),
+                sluttDatoPaaTmpOT,
+                Tilknytningtype.INGEN,
                 null,
                 null
             );
@@ -86,8 +87,7 @@ public class KommunaleRessurserProcessor {
     private static LocalDate maksSluttDatoIFortiden(Collection<OrgtilknytningState> eksisterendeOrgtilknytninger) {
         return eksisterendeOrgtilknytninger.stream()
             .map(OrgtilknytningState::gyldigTom)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
+            .filter(Objects::nonNull)
             .filter(d -> d.isBefore(LocalDate.now()))
             .max(LocalDate::compareTo)
             .orElse(null);

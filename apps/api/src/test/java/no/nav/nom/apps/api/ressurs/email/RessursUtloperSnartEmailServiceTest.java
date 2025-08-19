@@ -81,7 +81,7 @@ public class RessursUtloperSnartEmailServiceTest {
         // dump the generated output to System.err
         var stringWriter = new StringWriter();
         template.process(data, stringWriter);
-        System.err.println(stringWriter.getBuffer().toString());
+        System.err.println(stringWriter.getBuffer());
     }
 
     @Test
@@ -126,7 +126,7 @@ public class RessursUtloperSnartEmailServiceTest {
                     .navident(ressusNavIdent)
                     .orgEnhetId(orgEnhet)
                     .gyldigFom(ressursSluttdato.minusYears(5))
-                    .gyldigTom(Optional.of(ressursSluttdato))
+                    .gyldigTom(ressursSluttdato)
                     .build()
             )
         );
@@ -137,7 +137,7 @@ public class RessursUtloperSnartEmailServiceTest {
                     .navident(ressursNavIdent2)
                     .orgEnhetId(orgEnhet)
                     .gyldigFom(ressursSluttdato2.minusYears(5))
-                    .gyldigTom(Optional.of(ressursSluttdato2))
+                    .gyldigTom(ressursSluttdato2)
                     .build()
             )
         );
@@ -230,7 +230,7 @@ public class RessursUtloperSnartEmailServiceTest {
                     .navident(ressusNavIdent)
                     .orgEnhetId(orgEnhet)
                     .gyldigFom(ressursSluttdato.minusYears(5))
-                    .gyldigTom(Optional.of(ressursSluttdato.minusDays(7)))
+                    .gyldigTom(ressursSluttdato.minusDays(7))
                     .build()
             )
         );
@@ -241,7 +241,7 @@ public class RessursUtloperSnartEmailServiceTest {
                     .navident(ressursNavIdent2)
                     .orgEnhetId(orgEnhet)
                     .gyldigFom(ressursSluttdato2.minusYears(5))
-                    .gyldigTom(Optional.of(ressursSluttdato2.plusDays(8)))
+                    .gyldigTom(ressursSluttdato2.plusDays(8))
                     .build()
             )
         );

@@ -1,11 +1,9 @@
 package no.nav.nom.apps.api.u4diff;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
-import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -15,6 +13,7 @@ import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -165,7 +164,7 @@ public class U4DiffPaaMastrede {
                 .nomOrgenhetId(orgenhet.id())
                 .nomOrgenhetNavn(orgenhet.navn())
                 .nomGyldigFom(ot.gyldigFom())
-                .nomGyldigTom(ot.gyldigTom().orElse(null))
+                .nomGyldigTom(ot.gyldigTom())
                 .nomDol(ot.erDagligOppfolging())
                 .nomOtSektor(ot.sektor())
                 .nomOrgtilknytning(otJson.toPrettyString())
@@ -191,7 +190,7 @@ public class U4DiffPaaMastrede {
                 .nomOrgenhetId(orgenhet.id())
                 .nomOrgenhetNavn(orgenhet.navn())
                 .nomGyldigFom(ot.gyldigFom())
-                .nomGyldigTom(ot.gyldigTom().orElse(null))
+                .nomGyldigTom(ot.gyldigTom())
                 .nomDol(ot.erDagligOppfolging())
                 .nomOtSektor(ot.sektor())
                 .nomOrgtilknytning(otJson.toPrettyString())
@@ -199,7 +198,7 @@ public class U4DiffPaaMastrede {
     }
 
     private static boolean erStillingPeriodeEgentligLikOT(StillingPeriode sp, OrgtilknytningState ot) {
-        if (ot.erDagligOppfolging() == sp.erDagligOppfolging() && Objects.equals(ot.gyldigTom().orElse(null), sp.gyldigTom())) {
+        if (ot.erDagligOppfolging() == sp.erDagligOppfolging() && Objects.equals(ot.gyldigTom(), sp.gyldigTom())) {
             if (ot.gyldigFom().isAfter(sp.gyldigFom()) && ot.gyldigFom().isBefore(LocalDate.now().minusYears(3).withDayOfMonth(1))) {
                 log.debug("Forskjell i U4 periode er klipp av historisk periode på 3år. Rapporteres ikke som diff");
                 return true;

@@ -12,8 +12,11 @@ import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
+import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 
 @Service
 public class SpeilingService {
@@ -49,8 +52,8 @@ public class SpeilingService {
         var dolOrgtilknytninger = orgtilknytningStateRepository.getAll()
             .stream()
             .filter(OrgtilknytningState::erDagligOppfolging)
-            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom().orElse(null)))
-            .filter(orgtilknytningState -> orgtilknytningState.sektor() != null)
+            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
+            .filter(orgtilknytningState -> isNotNull(orgtilknytningState.sektor()))
             .filter(orgtilknytningState -> nomMastered.isMastered(orgtilknytningState.navident()))
             .toList();
 
@@ -61,7 +64,7 @@ public class SpeilingService {
             .build();
 
         dolOrgtilknytninger.forEach(orgtilknytningState -> ressursStateRepository.findByNavident(orgtilknytningState.navident()).ifPresent(ressursState -> {
-            if (isNull(ressursState.sektor()) || !ressursState.sektor().equals(orgtilknytningState.sektor())) {
+            if (isNull(ressursState.sektor()) || !Objects.equals(ressursState.sektor(), orgtilknytningState.sektor())) {
                 OppdaterSektorCommand oppdaterSektorCommand = new OppdaterSektorCommand(ressursState.fid(), orgtilknytningState.sektor());
                 ressursCommandService.oppdaterSektorEvent(oppdaterSektorCommand, inputMetadata);
             }

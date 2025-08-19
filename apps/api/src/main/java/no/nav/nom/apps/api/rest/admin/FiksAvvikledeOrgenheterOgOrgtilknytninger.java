@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+
+import static java.util.Objects.isNull;
 
 @Tag(name = "Admin for korrigeringer")
 @RestController
@@ -65,7 +68,7 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
 
         List<OrgtilknytningState> aktiveOrgtilknytningerTilIkkeAktiveEnheter = orgtilknytningService.getAll().stream()
             .filter(ot -> ikkeAktiveEnheterIds.contains(ot.orgEnhetId()) && aktiveNavidenter.contains(ot.navident()))
-            .filter(ot -> ot.gyldigTom().isEmpty() || ot.gyldigTom().get().isAfter(LocalDate.now()))
+            .filter(ot -> isNull(ot.gyldigTom()) || ot.gyldigTom().isAfter(LocalDate.now()))
             .toList();
         List<String> aktiveOrgtilknytningerTilIkkeAktiveEnheterFids = aktiveOrgtilknytningerTilIkkeAktiveEnheter.stream()
             .map(OrgtilknytningState::fid)
@@ -90,7 +93,7 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
                     output.append("    %s  =>  %s - %s\n".formatted(
                         getEnhetText(ot.orgEnhetId()),
                         ot.gyldigFom(),
-                        ot.gyldigTom().isEmpty() ? " " : ot.gyldigTom().get()
+                        Objects.requireNonNullElse(ot.gyldigTom(), " ")
                     ));
                 });
         });

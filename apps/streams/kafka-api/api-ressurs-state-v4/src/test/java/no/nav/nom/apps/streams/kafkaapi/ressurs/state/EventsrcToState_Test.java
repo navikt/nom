@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -571,7 +570,7 @@ public class EventsrcToState_Test extends EventsrcToStateTestTopology {
                 opprettetData.navident(),
                 opprettetData.orgEnhetId(),
                 opprettetData.gyldigFom(),
-                Optional.ofNullable(gyldigTom),
+                gyldigTom,
                 isDagligOppfolging
             );
 
@@ -585,7 +584,7 @@ public class EventsrcToState_Test extends EventsrcToStateTestTopology {
 
     private OrgtilknytningTilknytningtypeEndretEventV1 endreTilknytningTypeEvent(String fid, Tilknytningtype tilknytningType) {
         final OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData eventData =
-            new OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData(Optional.of(tilknytningType));
+            new OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData(tilknytningType);
 
         return new OrgtilknytningTilknytningtypeEndretEventV1(
             fid,
@@ -706,7 +705,7 @@ public class EventsrcToState_Test extends EventsrcToStateTestTopology {
             gammel.fid(),
             gammel.orgenhetId(),
             gammel.gyldigFom(),
-            evtData.gyldigTom().orElse(null),
+            evtData.gyldigTom(),
             evtData.dagligOppfolging(),
             gammel.sektor(),
             gammel.tilknytningtype()
@@ -735,7 +734,7 @@ public class EventsrcToState_Test extends EventsrcToStateTestTopology {
             gammel.gyldigTom(),
             gammel.dagligOppfolging(),
             gammel.sektor(),
-            evtData.orgtilknytningType().orElse(null)
+            evtData.orgtilknytningType()
         );
         nyOrgtilknytningerList.set(orgtilknytninger.indexOf(gammel), ny);
         return ressursStateByttUtOrgtilknytninger(ressursState, nyOrgtilknytningerList);

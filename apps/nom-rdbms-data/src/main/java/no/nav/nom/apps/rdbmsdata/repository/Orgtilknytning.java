@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,9 +16,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
-import no.nav.nom.contract.nom.state.OrgtilknytningState;
-
 import java.time.LocalDate;
 
 @Entity
@@ -74,9 +72,9 @@ public class Orgtilknytning {
             .sektor(orgtilknytningState.sektor())
             .erDagligOppfolging(orgtilknytningState.erDagligOppfolging())
             .gyldigFom(orgtilknytningState.gyldigFom())
-            .gyldigTom(orgtilknytningState.gyldigTom().orElse(null))
-            .orgtilknytningType(orgtilknytningState.orgtilknytningType().orElse(null))
-            .masseflyttetFraFid(orgtilknytningState.masseflyttetFraFid().orElse(null))
+            .gyldigTom(orgtilknytningState.gyldigTom())
+            .orgtilknytningType(orgtilknytningState.orgtilknytningType())
+            .masseflyttetFraFid(orgtilknytningState.masseflyttetFraFid())
             .sistEndretAv(orgtilknytningState.sistEndretAv())
             .build();
     }

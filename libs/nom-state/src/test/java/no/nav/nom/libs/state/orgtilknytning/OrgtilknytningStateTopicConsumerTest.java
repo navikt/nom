@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Import;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Slf4j
 @Import({
@@ -28,9 +27,9 @@ public class OrgtilknytningStateTopicConsumerTest extends StateTopicConsumerTest
             .navident("Z999999")
             .orgEnhetId("ab123c")
             .gyldigFom(LocalDate.now().minusMonths(3))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .erDagligOppfolging(true)
-            .orgtilknytningType(Optional.of(Tilknytningtype.INGEN))
+            .orgtilknytningType(Tilknytningtype.INGEN)
             .build();
     }
 

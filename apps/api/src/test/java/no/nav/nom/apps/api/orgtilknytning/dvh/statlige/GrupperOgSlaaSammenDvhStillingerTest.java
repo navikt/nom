@@ -519,7 +519,7 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(DVH_RESSURSSTILLING_UTOVER_NAVIDENT_GYLDIGHET, result.errors().getLast().errorType());
     }
 
-    @Test    
+    @Test
     // Test referanser 4.i
     @DisplayName("Like enheter, men overlapp av periode")
     void test_OverlappAvPeriode() {
@@ -603,7 +603,7 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2021, 6, 15), forsteStillingPeriode.gyldigTom());
         assertEquals(Sektor.NAV_STATLIG, forsteStillingPeriode.sektor());
-        assertEquals(Tilknytningtype.MIDLERTIDIG, forsteStillingPeriode.tilknytningtype().orElse(null));
+        assertEquals(Tilknytningtype.MIDLERTIDIG, forsteStillingPeriode.tilknytningtype());
         var andreStillingPeriode = result.stillingPerioder().getLast();
         assertEquals("AGRID_1", andreStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("Enhet_1", andreStillingPeriode.stilling().enhetNavn());
@@ -611,7 +611,7 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(LocalDate.of(2021, 6, 16), andreStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, andreStillingPeriode.gyldigTom());
         assertEquals(Sektor.NAV_STATLIG, andreStillingPeriode.sektor());
-        assertEquals(Tilknytningtype.FAST, andreStillingPeriode.tilknytningtype().orElse(null));
+        assertEquals(Tilknytningtype.FAST, andreStillingPeriode.tilknytningtype());
     }
 
     @Test
@@ -637,7 +637,7 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
         assertEquals(Sektor.NAV_STATLIG, forsteStillingPeriode.sektor());
-        assertEquals(Tilknytningtype.FAST, forsteStillingPeriode.tilknytningtype().orElse(null));
+        assertEquals(Tilknytningtype.FAST, forsteStillingPeriode.tilknytningtype());
     }
 
     @Test
@@ -665,21 +665,21 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2020, 12, 31), forsteStillingPeriode.gyldigTom());
         assertEquals(Sektor.NAV_STATLIG, forsteStillingPeriode.sektor());
-        assertEquals(Tilknytningtype.MIDLERTIDIG, forsteStillingPeriode.tilknytningtype().orElse(null));
+        assertEquals(Tilknytningtype.MIDLERTIDIG, forsteStillingPeriode.tilknytningtype());
         assertEquals("AGRID_1", andreStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("Enhet_1", andreStillingPeriode.stilling().enhetNavn());
         assertEquals("ORGENHET", andreStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
         assertEquals(LocalDate.of(2021, 1, 1), andreStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2021, 6, 15), andreStillingPeriode.gyldigTom());
         assertEquals(Sektor.NAV_STATLIG, andreStillingPeriode.sektor());
-        assertEquals(Tilknytningtype.FAST, andreStillingPeriode.tilknytningtype().orElse(null));
+        assertEquals(Tilknytningtype.FAST, andreStillingPeriode.tilknytningtype());
         assertEquals("AGRID_1", tredjeStillingPeriode.stilling().agressoId().orElse(null));
         assertEquals("Enhet_1", tredjeStillingPeriode.stilling().enhetNavn());
         assertEquals("ORGENHET", tredjeStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
         assertEquals(LocalDate.of(2021, 6, 16), tredjeStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, tredjeStillingPeriode.gyldigTom());
         assertEquals(Sektor.NAV_STATLIG, tredjeStillingPeriode.sektor());
-        assertEquals(Tilknytningtype.MIDLERTIDIG, tredjeStillingPeriode.tilknytningtype().orElse(null));
+        assertEquals(Tilknytningtype.MIDLERTIDIG, tredjeStillingPeriode.tilknytningtype());
     }
 
     @Test
@@ -704,13 +704,13 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         var fjerdeStillingPeriode = result.stillingPerioder().getLast();
 
         assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
-        assertEquals(Optional.of(Tilknytningtype.FAST), forsteStillingPeriode.tilknytningtype());
+        assertEquals(Tilknytningtype.FAST, forsteStillingPeriode.tilknytningtype());
         assertEquals("AGRID_1", andreStillingPeriode.stilling().agressoId().orElse(null));
-        assertEquals(Optional.of(Tilknytningtype.MIDLERTIDIG), andreStillingPeriode.tilknytningtype());
+        assertEquals(Tilknytningtype.MIDLERTIDIG, andreStillingPeriode.tilknytningtype());
         assertEquals("AGRID_2", tredjeStillingPeriode.stilling().agressoId().orElse(null));
-        assertEquals(Optional.of(Tilknytningtype.FAST), tredjeStillingPeriode.tilknytningtype());
+        assertEquals(Tilknytningtype.FAST, tredjeStillingPeriode.tilknytningtype());
         assertEquals("AGRID_2", fjerdeStillingPeriode.stilling().agressoId().orElse(null));
-        assertEquals(Optional.of(Tilknytningtype.UTDANNINGSSTILLINGER), fjerdeStillingPeriode.tilknytningtype());
+        assertEquals(Tilknytningtype.UTDANNINGSSTILLINGER, fjerdeStillingPeriode.tilknytningtype());
     }
 
     @Test
@@ -733,9 +733,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         var andreStillingPeriode = result.stillingPerioder().getLast();
 
         assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
-        assertEquals(Optional.of(Tilknytningtype.FAST), forsteStillingPeriode.tilknytningtype());
+        assertEquals(Tilknytningtype.FAST, forsteStillingPeriode.tilknytningtype());
         assertEquals("AGRID_2", andreStillingPeriode.stilling().agressoId().orElse(null));
-        assertEquals(Optional.of(Tilknytningtype.UFORUTSETT_BEHOV), andreStillingPeriode.tilknytningtype());
+        assertEquals(Tilknytningtype.UFORUTSETT_BEHOV, andreStillingPeriode.tilknytningtype());
     }
 
     @Test
@@ -757,7 +757,7 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
 
         assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
-        assertEquals(Optional.of(Tilknytningtype.FAST), forsteStillingPeriode.tilknytningtype());
+        assertEquals(Tilknytningtype.FAST, forsteStillingPeriode.tilknytningtype());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 12, 31), forsteStillingPeriode.gyldigTom());
     }
@@ -784,15 +784,15 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertAll(
             () -> assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null)),
-            () -> assertEquals(Optional.empty(), forsteStillingPeriode.tilknytningtype()),
+            () -> assertNull(forsteStillingPeriode.tilknytningtype()),
             () -> assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom()),
             () -> assertEquals(LocalDate.of(2020, 12, 31), forsteStillingPeriode.gyldigTom()),
             () -> assertEquals("AGRID_1", andreStillingPeriode.stilling().agressoId().orElse(null)),
-            () -> assertEquals(Optional.of(Tilknytningtype.FAST), andreStillingPeriode.tilknytningtype()),
+            () -> assertEquals(Tilknytningtype.FAST, andreStillingPeriode.tilknytningtype()),
             () -> assertEquals(LocalDate.of(2021, 1, 1), andreStillingPeriode.gyldigFom()),
             () -> assertEquals(LocalDate.of(2021, 12, 31), andreStillingPeriode.gyldigTom()),
             () -> assertEquals("AGRID_1", tredjeStillingPeriode.stilling().agressoId().orElse(null)),
-            () -> assertEquals(Optional.empty(), tredjeStillingPeriode.tilknytningtype()),
+            () -> assertNull(tredjeStillingPeriode.tilknytningtype()),
             () -> assertEquals(LocalDate.of(2022, 1, 1), tredjeStillingPeriode.gyldigFom()),
             () -> assertEquals(LocalDate.of(2022, 12, 31), tredjeStillingPeriode.gyldigTom())
         );
@@ -818,13 +818,13 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         var tredjeStillingPeriode = result.stillingPerioder().getLast();
 
         assertAll(
-            () -> assertEquals(Optional.empty(), forsteStillingPeriode.tilknytningtype()),
+            () -> assertNull(forsteStillingPeriode.tilknytningtype()),
             () -> assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom()),
             () -> assertEquals(LocalDate.of(2020, 6, 30), forsteStillingPeriode.gyldigTom()),
-            () -> assertEquals(Optional.of(Tilknytningtype.FAST), andreStillingPeriode.tilknytningtype()),
+            () -> assertEquals(Tilknytningtype.FAST, andreStillingPeriode.tilknytningtype()),
             () -> assertEquals(LocalDate.of(2020, 7, 1), andreStillingPeriode.gyldigFom()),
             () -> assertEquals(LocalDate.of(2021, 6, 30), andreStillingPeriode.gyldigTom()),
-            () -> assertEquals(Optional.empty(), tredjeStillingPeriode.tilknytningtype()),
+            () -> assertNull(tredjeStillingPeriode.tilknytningtype()),
             () -> assertEquals(LocalDate.of(2021, 7, 1), tredjeStillingPeriode.gyldigFom()),
             () -> assertEquals(LocalDate.of(2021, 12, 31), tredjeStillingPeriode.gyldigTom())
         );
@@ -855,19 +855,19 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         var femteStillingPeriode = result.stillingPerioder().getLast();
 
         assertAll(
-            () -> assertEquals(Optional.empty(), forsteStillingPeriode.tilknytningtype()),
+            () -> assertNull(forsteStillingPeriode.tilknytningtype()),
             () -> assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom()),
             () -> assertEquals(LocalDate.of(2020, 6, 30), forsteStillingPeriode.gyldigTom()),
-            () -> assertEquals(Optional.of(Tilknytningtype.FAST), andreStillingPeriode.tilknytningtype()),
+            () -> assertEquals(Tilknytningtype.FAST, andreStillingPeriode.tilknytningtype()),
             () -> assertEquals(LocalDate.of(2020, 7, 1), andreStillingPeriode.gyldigFom()),
             () -> assertEquals(LocalDate.of(2021, 5, 31), andreStillingPeriode.gyldigTom()),
-            () -> assertEquals(Optional.empty(), tredjeStillingPeriode.tilknytningtype()),
+            () -> assertNull(tredjeStillingPeriode.tilknytningtype()),
             () -> assertEquals(LocalDate.of(2021, 6, 1), tredjeStillingPeriode.gyldigFom()),
             () -> assertEquals(LocalDate.of(2021, 6, 30), tredjeStillingPeriode.gyldigTom()),
-            () -> assertEquals(Optional.of(Tilknytningtype.FAST), fjerdeStillingPeriode.tilknytningtype()),
+            () -> assertEquals(Tilknytningtype.FAST, fjerdeStillingPeriode.tilknytningtype()),
             () -> assertEquals(LocalDate.of(2021, 7, 1), fjerdeStillingPeriode.gyldigFom()),
             () -> assertEquals(LocalDate.of(2022, 6, 30), fjerdeStillingPeriode.gyldigTom()),
-            () -> assertEquals(Optional.empty(), femteStillingPeriode.tilknytningtype()),
+            () -> assertNull(femteStillingPeriode.tilknytningtype()),
             () -> assertEquals(LocalDate.of(2022, 7, 1), femteStillingPeriode.gyldigFom()),
             () -> assertEquals(LocalDate.of(2022, 10, 31), femteStillingPeriode.gyldigTom())
         );
@@ -946,13 +946,13 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertAll(
             () -> assertEquals(stillingPeriode1.gyldigFom(), LocalDate.of(2022, 4, 1)),
             () -> assertEquals(stillingPeriode1.gyldigTom(), LocalDate.of(2022, 5, 31)),
-            () -> assertEquals(stillingPeriode1.tilknytningtype(), Optional.of(Tilknytningtype.FAST)),
+            () -> assertEquals(Tilknytningtype.FAST, stillingPeriode1.tilknytningtype()),
             () -> assertEquals(stillingPeriode2.gyldigFom(), LocalDate.of(2022, 6, 1)),
             () -> assertEquals(stillingPeriode2.gyldigTom(), LocalDate.of(2022, 7, 31)),
-            () -> assertEquals(stillingPeriode2.tilknytningtype(), Optional.of(Tilknytningtype.FAST)),
+            () -> assertEquals(Tilknytningtype.FAST, stillingPeriode2.tilknytningtype()),
             () -> assertEquals(stillingPeriode3.gyldigFom(), LocalDate.of(2022, 8, 1)),
             () -> assertEquals(stillingPeriode3.gyldigTom(), LocalDate.of(2099, 12, 31)),
-            () -> assertEquals(stillingPeriode3.tilknytningtype(), Optional.of(Tilknytningtype.FAST))
+            () -> assertEquals(Tilknytningtype.FAST, stillingPeriode3.tilknytningtype())
         );
     }
 
@@ -1011,13 +1011,13 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertAll(
             () -> assertEquals(stillingPeriode1.gyldigFom(), LocalDate.of(2022, 4, 1)),
             () -> assertEquals(stillingPeriode1.gyldigTom(), LocalDate.of(2024, 8, 14)),
-            () -> assertEquals(stillingPeriode1.tilknytningtype(), Optional.of(Tilknytningtype.FAST)),
+            () -> assertEquals(Tilknytningtype.FAST, stillingPeriode1.tilknytningtype()),
             () -> assertEquals(stillingPeriode2.gyldigFom(), LocalDate.of(2024, 8, 15)),
             () -> assertEquals(stillingPeriode2.gyldigTom(), LocalDate.of(2024, 8, 31)),
-            () -> assertEquals(stillingPeriode2.tilknytningtype(), Optional.empty()),
+            () -> assertNull(stillingPeriode2.tilknytningtype()),
             () -> assertEquals(stillingPeriode3.gyldigFom(), LocalDate.of(2024, 9, 1)),
             () -> assertEquals(stillingPeriode3.gyldigTom(), LocalDate.of(2099, 12, 31)),
-            () -> assertEquals(stillingPeriode3.tilknytningtype(), Optional.of(Tilknytningtype.FAST))
+            () -> assertEquals(Tilknytningtype.FAST, stillingPeriode3.tilknytningtype())
         );
     }
 

@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import no.nav.nom.contract.nom.Tilknytningtype;
 
-import java.util.Optional;
-
 public class OrgtilknytningTilknytningtypeEndretEventV1 extends OrgtilknytningEvent {
 
     @JsonCreator
@@ -25,6 +23,6 @@ public class OrgtilknytningTilknytningtypeEndretEventV1 extends OrgtilknytningEv
 
     @Builder(toBuilder = true)
     public record OrgtilknytningTilknytningtypeEndretEventData(
-        Optional<Tilknytningtype> orgtilknytningType
+        Tilknytningtype orgtilknytningType
     ) implements Data {}
 }

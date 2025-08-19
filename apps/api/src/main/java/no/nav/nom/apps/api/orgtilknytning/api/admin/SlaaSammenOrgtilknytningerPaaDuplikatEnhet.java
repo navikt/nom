@@ -35,6 +35,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.Objects.isNull;
+import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
+
 @Slf4j
 @Tag(name = "Admin for korrigeringer")
 @RestController
@@ -221,11 +224,11 @@ public class SlaaSammenOrgtilknytningerPaaDuplikatEnhet {
             fid = "DRY RUN fid";
         }
 
-        ot.gyldigTom().ifPresent(gyldigTom -> {
+        if (isNotNull(ot.gyldigTom())) {
             var avvikleOtDatoCmd = new AvvikleOrgtilknytning(
                 ot.navident(),
                 nyEnhet.getId(),
-                gyldigTom,
+                ot.gyldigTom(),
                 metadata,
                 null
             );
@@ -233,16 +236,16 @@ public class SlaaSammenOrgtilknytningerPaaDuplikatEnhet {
             if (commit) {
                 orgtilknytningCommandService.avvikleOrgtilknytning(fid, avvikleOtDatoCmd);
             }
-        });
+        }
 
     }
 
     private boolean otHengerSammen(OrgtilknytningState gammelOt, OrgtilknytningState nyOt, StringBuffer result) {
-        if (gammelOt.gyldigTom().isEmpty()) {
+        if (isNull(gammelOt.gyldigTom())) {
             result.append("\t").append("Gammel OT har ingen gyldig tom - kan ikke slå sammen").append("\n");
             return false;
         }
-        if (!gammelOt.gyldigTom().get().plusDays(1).isEqual(nyOt.gyldigFom())) {
+        if (!gammelOt.gyldigTom().plusDays(1).isEqual(nyOt.gyldigFom())) {
             result.append("\t").append("Gammel og ny OT henger ikke sammen på dato - kan ikke slå sammen").append("\n");
             return false;
         }
@@ -287,7 +290,7 @@ public class SlaaSammenOrgtilknytningerPaaDuplikatEnhet {
             ot.orgtilknytningType(),
             ot.sektor(),
             ot.gyldigFom(),
-            ot.gyldigTom().orElse(null)
+            ot.gyldigTom()
         );
     }
 }

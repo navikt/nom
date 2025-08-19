@@ -25,8 +25,8 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
+import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 
 @Slf4j
@@ -65,7 +65,7 @@ public class EksterneRessurserProcessor {
 
         log.debug(TEAM_LOGS, "Prosesserer ekstern ressurs {}\n{}", eksternRessurs.navident(), eksternRessurs.payload());
         if (!eksternRessurs.remedyAktiv()) {
-            var aktiveOrgtilkntyninger = eksisterendeOrgtilknytninger.stream().filter( o -> o.gyldigTom().isEmpty()).toList();
+            var aktiveOrgtilkntyninger = eksisterendeOrgtilknytninger.stream().filter( o -> isNull(o.gyldigTom())).toList();
             if (aktiveOrgtilkntyninger.isEmpty()) {
                 log.debug(TEAM_LOGS, "Ekstern ressurs {} er ikke aktiv - skipping", eksternRessurs.navident());
                 return;
@@ -155,7 +155,7 @@ public class EksterneRessurserProcessor {
     }
 
     private static boolean harSammeSluttdato(DvhEksternRessurs eksternRessurs, OrgtilknytningState sisteEksisterendeOrgtilknytning) {
-        return Objects.equals(sisteEksisterendeOrgtilknytning.gyldigTom().orElse(null), eksternRessurs.remedySlutt());
+        return Objects.equals(sisteEksisterendeOrgtilknytning.gyldigTom(), eksternRessurs.remedySlutt());
     }
 
     private void rapporterEvtDiffPaaRemedyenhet(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet) {
@@ -217,7 +217,7 @@ public class EksterneRessurserProcessor {
                 log.debug(
                     "For navident {} - Fant orgenhet {} for ORGENHET_PAA_RESSURS i DVH. DVH agressoId/Nivå: {}/{}.",
                     navident,
-                    nomOrgenheterByOrgenhetPaaRessurs.get(0).getId(),
+                    nomOrgenheterByOrgenhetPaaRessurs.getFirst().getId(),
                     orgenhetPaaRessurs,
                     remedyEnhet
                 );
@@ -398,7 +398,7 @@ public class EksterneRessurserProcessor {
             eksternRessurs.navident(),
             orgenhet.getId(),
             gyldigFom,
-            Optional.ofNullable(eksternRessurs.remedySlutt()),
+            eksternRessurs.remedySlutt(),
             true,
             metadata,
             null
@@ -426,7 +426,7 @@ public class EksterneRessurserProcessor {
             orgtilknytning.navident(),
             orgtilknytning.orgEnhetId(),
             orgtilknytning.gyldigFom(),
-            Optional.ofNullable(gyldigTom),
+            gyldigTom,
             metadata,
             null
         );
@@ -457,7 +457,7 @@ public class EksterneRessurserProcessor {
         orgtilknytningCommandService.avvikleOrgtilknytning(orgtilknytning.fid(), avvikleOrgtilknytning);
     }
 
-    private void settTilknytningtype(Tilknytningtype type, String orgtilknytningFid, String navident, InputMetadata metadata) {
+    private void settTilknytningtype(Tilknytningtype tilknytningtype, String orgtilknytningFid, String navident, InputMetadata metadata) {
         if (nomMastered.isMastered(navident)) {
             log.debug("Navident {} er mastered. Vi avslutter ikke orgtilknytning for denne", navident);
             return;
@@ -465,11 +465,11 @@ public class EksterneRessurserProcessor {
 
         var endreTilknytningtype =  new EndreTilknytningtypeCommand(
             orgtilknytningFid,
-            Optional.of(type),
+            tilknytningtype,
             metadata
         );
 
-        log.debug(TEAM_LOGS, "Endrer tilknytningtype til {} for navident {}.", type, navident);
+        log.debug(TEAM_LOGS, "Endrer tilknytningtype til {} for navident {}.", tilknytningtype, navident);
 
         orgtilknytningCommandService.endreTilknytningtype(endreTilknytningtype);
     }
@@ -506,6 +506,6 @@ public class EksterneRessurserProcessor {
     }
 
     private static boolean erTypeEksternSamarbeidspartner(OrgtilknytningState orgtilknytning) {
-        return Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER.equals(orgtilknytning.orgtilknytningType().orElse(null));
+        return Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER.equals(orgtilknytning.orgtilknytningType());
     }
 }

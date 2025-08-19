@@ -36,6 +36,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 @Tag(name = "Omada uttrekk")
 @RestController
@@ -153,8 +154,8 @@ public class OmadaUttrekk {
                             kobling.fid(),
                             kobling.erDagligOppfolging(),
                             kobling.gyldigFom().format(dateTimeFormatter),
-                            kobling.gyldigTom().map(dateTimeFormatter::format).orElse(""),
-                            kobling.masseflyttetFraFid().orElse("")
+                            Objects.requireNonNullElse(kobling.gyldigTom().format(dateTimeFormatter), ""),
+                            Objects.requireNonNullElse(kobling.masseflyttetFraFid(), "")
                         );
 
                         writer.close();
@@ -194,7 +195,7 @@ public class OmadaUttrekk {
                             kobling.navident(),
                             kobling.orgEnhetId(),
                             kobling.gyldigFom().format(dateTimeFormatter),
-                            kobling.gyldigTom().map(dateTimeFormatter::format).orElse("")
+                            Objects.requireNonNullElse(kobling.gyldigTom().format(dateTimeFormatter), "")
                         );
                         writer.close();
                     } catch (IOException e) {

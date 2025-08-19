@@ -82,7 +82,7 @@ class RessursSanityCheckServiceTest {
         when(ressursStateRepositoryMock.findAllActiveRessurser()).thenReturn(ressursStateMap);
 
         var orgtilknytning = getMockOrgtilknytningEkstern().toBuilder()
-                .gyldigTom(Optional.ofNullable(gyldigTom))
+                .gyldigTom(gyldigTom)
                 .build();
         when(orgtilknytningStateRepositoryMock.findByNavident(ressurs.navident())).thenReturn(List.of(orgtilknytning));
 
@@ -110,11 +110,11 @@ class RessursSanityCheckServiceTest {
 
         var gammelOT = getMockOrgtilknytningEkstern().toBuilder()
                 .gyldigFom(LocalDate.of(2024, 1, 1))
-                .gyldigTom(Optional.of(LocalDate.of(2024, 6, 30)))
+                .gyldigTom(LocalDate.of(2024, 6, 30))
                 .build();
         var sisteOT = getMockOrgtilknytningEkstern().toBuilder()
                 .gyldigFom(LocalDate.of(2024, 7, 1))
-                .gyldigTom(Optional.of(LocalDate.of(2025, 6, 1)))
+                .gyldigTom(LocalDate.of(2025, 6, 1))
                 .build();
         when(orgtilknytningStateRepositoryMock.findByNavident(ressurs.navident())).thenReturn(List.of(gammelOT, sisteOT));
 
@@ -135,7 +135,7 @@ class RessursSanityCheckServiceTest {
 
         var otLangtFremITid = getMockOrgtilknytningEkstern().toBuilder()
                 .gyldigFom(LocalDate.of(2024, 1, 1))
-                .gyldigTom(Optional.of(LocalDate.of(2099, 1, 1)))
+                .gyldigTom(LocalDate.of(2099, 1, 1))
                 .build();
         when(orgtilknytningStateRepositoryMock.findByNavident(ressurs.navident())).thenReturn(List.of(otLangtFremITid));
 
@@ -157,19 +157,19 @@ class RessursSanityCheckServiceTest {
 
         var forsteDOL = getMockOrgtilknytningEkstern().toBuilder()
                 .gyldigFom(fomDato)
-                .gyldigTom(Optional.of(tomDato))
+                .gyldigTom(tomDato)
                 .orgEnhetId(ID_ORGENHET_1)
                 .build();
         var andreDOL = getMockOrgtilknytningEkstern().toBuilder()
                 .fid(FID_ORGTILKNYTNING_2)
                 .gyldigFom(fomDato)
-                .gyldigTom(Optional.of(tomDatoDOLto))
+                .gyldigTom(tomDatoDOLto)
                 .orgEnhetId(ID_ORGENHET_1)
                 .build();
         var tredjeDOL = getMockOrgtilknytningEkstern().toBuilder()
                 .fid("orgtilnytning-3")
                 .gyldigFom(today().minusMonths(1))
-                .gyldigTom(Optional.of(today().plusYears(1)))
+                .gyldigTom(today().plusYears(1))
                 .orgEnhetId(ID_ORGENHET_2)
                 .build();
         when(orgtilknytningStateRepositoryMock.findByNavident(ressurs.navident())).thenReturn(List.of(forsteDOL, andreDOL, tredjeDOL));
@@ -189,16 +189,16 @@ class RessursSanityCheckServiceTest {
     void should_handle_all_possible_cases_of_DOL_overlap(LocalDate startDato1, LocalDate sluttDato1, LocalDate startDato2, LocalDate sluttDato2, int forventetAntallOverlapp) {
         RessursState ressurs = getMockRessursEkstern();
         when(ressursStateRepositoryMock.findAllActiveRessurser()).thenReturn(getRessursStateMap(ressurs));
-        
+
         var forsteDOL = getMockOrgtilknytningEkstern().toBuilder()
                 .gyldigFom(startDato1)
-                .gyldigTom(Optional.of(sluttDato1))
+                .gyldigTom(sluttDato1)
                 .orgEnhetId(ID_ORGENHET_1)
                 .build();
         var andreDOL = getMockOrgtilknytningEkstern().toBuilder()
                 .fid(FID_ORGTILKNYTNING_2)
                 .gyldigFom(startDato2)
-                .gyldigTom(Optional.of(sluttDato2))
+                .gyldigTom(sluttDato2)
                 .orgEnhetId(ID_ORGENHET_1)
                 .build();
 
@@ -228,12 +228,12 @@ class RessursSanityCheckServiceTest {
 
         var forsteDOL = getMockOrgtilknytningEkstern().toBuilder()
                 .gyldigFom(today().minusMonths(6).plusDays(1))
-                .gyldigTom(Optional.of(today().minusMonths(3)))
+                .gyldigTom(today().minusMonths(3))
                 .orgEnhetId(ID_ORGENHET_1)
                 .build();
         var andreDOL = getMockOrgtilknytningEkstern().toBuilder()
                 .gyldigFom(today().minusMonths(3).plusDays(1))
-                .gyldigTom(Optional.of(today().plusYears(1)))
+                .gyldigTom(today().plusYears(1))
                 .orgEnhetId(ID_ORGENHET_1)
                 .build();
         when(orgtilknytningStateRepositoryMock.findByNavident(ressurs.navident())).thenReturn(List.of(forsteDOL, andreDOL));
@@ -251,19 +251,19 @@ class RessursSanityCheckServiceTest {
 
         var forsteDOL = getMockOrgtilknytningEkstern().toBuilder()
                 .gyldigFom(today().minusMonths(3))
-                .gyldigTom(Optional.of(today().plusYears(1)))
+                .gyldigTom(today().plusYears(1))
                 .erDagligOppfolging(true)
                 .orgEnhetId(ID_ORGENHET_1)
                 .build();
         var andreDOL = getMockOrgtilknytningEkstern().toBuilder()
                 .gyldigFom(today().minusMonths(2))
-                .gyldigTom(Optional.of(today().plusYears(1).minusMonths(3)))
+                .gyldigTom(today().plusYears(1).minusMonths(3))
                 .erDagligOppfolging(true)
                 .orgEnhetId(ID_ORGENHET_1)
                 .build();
         var annenOT = getMockOrgtilknytningEkstern().toBuilder()
                 .gyldigFom(today().minusMonths(3))
-                .gyldigTom(Optional.of(today().plusYears(1)))
+                .gyldigTom(today().plusYears(1))
                 .erDagligOppfolging(false)
                 .orgEnhetId(ID_ORGENHET_2)
                 .build();
@@ -283,19 +283,19 @@ class RessursSanityCheckServiceTest {
         // DOL 1 og 2 overlapper, men er eldre enn 6 mnd.
         var utloptDOL1 = getMockOrgtilknytningEkstern().toBuilder()
                 .gyldigFom(LocalDate.now().minusYears(1))
-                .gyldigTom(Optional.of(LocalDate.now().minusYears(1).plusMonths(3)))
+                .gyldigTom((LocalDate.now().minusYears(1).plusMonths(3)))
                 .erDagligOppfolging(true)
                 .orgEnhetId(ID_ORGENHET_1)
                 .build();
         var utloptDOL2 = getMockOrgtilknytningEkstern().toBuilder()
                 .gyldigFom(LocalDate.now().minusYears(1).plusDays(7))
-                .gyldigTom(Optional.of(LocalDate.now().minusYears(1).plusMonths(3)))
+                .gyldigTom(LocalDate.now().minusYears(1).plusMonths(3))
                 .erDagligOppfolging(true)
                 .orgEnhetId(ID_ORGENHET_1)
                 .build();
         var gyldigDOL = getMockOrgtilknytningEkstern().toBuilder()
                 .gyldigFom(LocalDate.now().minusYears(1).plusMonths(4))
-                .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+                .gyldigTom(LocalDate.now().plusYears(1))
                 .erDagligOppfolging(true)
                 .orgEnhetId(ID_ORGENHET_1)
                 .build();
@@ -317,22 +317,22 @@ class RessursSanityCheckServiceTest {
         alleOrgTilknytninger.put(ressurs1.navident(),
             List.of(
                 getMockOrgtilknytningEkstern().toBuilder()
-                    .gyldigTom(Optional.of(LocalDate.now().minusMonths(2)))
+                    .gyldigTom((LocalDate.now().minusMonths(2)))
                     .build(),
                 getMockOrgtilknytningEkstern().toBuilder()
-                    .gyldigTom(Optional.of(LocalDate.now().minusMonths(1)))
+                    .gyldigTom((LocalDate.now().minusMonths(1)))
                     .build(),
                 getMockOrgtilknytningEkstern().toBuilder()
-                    .gyldigTom(Optional.of(LocalDate.MAX))
+                    .gyldigTom((LocalDate.MAX))
                     .build(),
                 getMockOrgtilknytningEkstern().toBuilder()
-                    .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+                    .gyldigTom((LocalDate.now().plusMonths(1)))
                     .build()
             ));
         alleOrgTilknytninger.put(ressurs2.navident(),
             List.of(
                 getMockOrgtilknytningEkstern().toBuilder()
-                    .gyldigTom(Optional.empty())
+                    .gyldigTom(null)
                     .build()
             ));
 
@@ -345,12 +345,12 @@ class RessursSanityCheckServiceTest {
         assertThat(sisteOrgtilknytninger
             .get(ressurs1.navident())
             .stream()
-            .findFirst().get().gyldigTom()).isEqualTo(Optional.of(LocalDate.MAX));
+            .findFirst().get().gyldigTom()).isEqualTo(LocalDate.MAX);
 
         assertThat(sisteOrgtilknytninger
             .get(ressurs2.navident())
             .stream()
-            .findFirst().get().gyldigTom()).isEmpty();
+            .findFirst().get().gyldigTom());
     }
 
     private Map<String, RessursState> getRessursStateMap(RessursState ressurs) {
@@ -381,8 +381,8 @@ class RessursSanityCheckServiceTest {
                 .orgEnhetId("TestId")
                 .erDagligOppfolging(true)
                 .gyldigFom(LocalDate.of(2024, 1, 1))
-                .gyldigTom(Optional.of(LocalDate.of(2024, 12, 31)))
-                .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+                .gyldigTom(LocalDate.of(2024, 12, 31))
+                .orgtilknytningType((Tilknytningtype.KONSULENT))
                 .build();
     }
 

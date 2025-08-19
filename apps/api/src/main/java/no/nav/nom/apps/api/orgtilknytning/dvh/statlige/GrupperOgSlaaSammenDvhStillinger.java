@@ -16,7 +16,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,6 +33,7 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.overlapsInterva
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.erEtterRessursensSluttDato;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.erFoerRessursensStartDato;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.erLikEllerEtterRessursensSluttDato;
+import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 
 @Component
 @Slf4j
@@ -58,15 +58,15 @@ public class GrupperOgSlaaSammenDvhStillinger {
                         rs.getRessursOrgenhetNiv()
                     ),
                     rs.getSektor(),
-                    rs.getTilknytningtype()
+                    rs.getTilknytningtype().orElse(null)
                 )
             ));
 
         List<StillingPeriode> perioderGruppert = new ArrayList<>();
 
         var ressurs = ressursStateRepository.findByNavident(sspForNavident.navident()).orElseThrow();
-        LocalDate ressursStartdato = ressurs.startdato() != null ? ressurs.startdato() : null;
-        LocalDate ressursSluttdato = ressurs.sluttdato() != null ? ressurs.sluttdato() : null;
+        LocalDate ressursStartdato = isNotNull(ressurs.startdato()) ? ressurs.startdato() : null;
+        LocalDate ressursSluttdato = isNotNull(ressurs.sluttdato()) ? ressurs.sluttdato() : null;
 
         // Sorter og slå sammen sammenhengende perioder
         grupperteDvhStillinger.forEach((stillingPeriodeKey, grupperteRessursStillinger) -> {
@@ -124,7 +124,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                         previousEnd,
                         null,
                         stillingPeriodeKey.sektor,
-                        stillingPeriodeKey.tilknytningtype.orElse(null)
+                        stillingPeriodeKey.tilknytningtype
                     ));
                     periodStart = start;
                     previousEnd = end;
@@ -138,14 +138,14 @@ public class GrupperOgSlaaSammenDvhStillinger {
             }
 
             // Siste RessursStilling er slått sammen - Lag StillingsPeriode, hvis vi har en periode
-            if (periodStart != null) {
+            if (isNotNull(periodStart)) {
                 perioderGruppert.add(new StillingPeriode(
                     stillingPeriodeKey.stillingAgressoOrgIdOgNavn,
                     periodStart,
                     previousEnd,
                     null,
                     stillingPeriodeKey.sektor,
-                    stillingPeriodeKey.tilknytningtype.orElse(null)
+                    stillingPeriodeKey.tilknytningtype
                 ));
             }
         });
@@ -157,7 +157,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
             .sorted(
                 Comparator.comparing(StillingPeriode::gyldigFom)
                     .thenComparing(
-                        sp -> sp.tilknytningtype().orElse(null),
+                        StillingPeriode::tilknytningtype,
                         Comparator.nullsLast(Comparator.naturalOrder())
                     ))
             .toList()
@@ -168,12 +168,12 @@ public class GrupperOgSlaaSammenDvhStillinger {
         if (isNull(perioderGruppert) || perioderGruppert.isEmpty() || isDatoerSammenhengende(perioderGruppert)) return;
 
         var spMedTilknytningtype = perioderGruppert.stream()
-            .filter(sp -> sp.tilknytningtype().isPresent())
+            .filter(sp -> isNotNull(sp.tilknytningtype()))
             .sorted(Comparator.comparing(StillingPeriode::gyldigFom))
             .toList();
 
         var spUtenTilknytningtype = perioderGruppert.stream()
-            .filter(sp -> sp.tilknytningtype().isEmpty())
+            .filter(sp -> isNull(sp.tilknytningtype()))
             .sorted(Comparator.comparing(StillingPeriode::gyldigFom))
             .collect(Collectors.toList());
 
@@ -188,7 +188,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
             LocalDate stillingMedTilknytningFom = stillingPeriodeMedTilknytning.gyldigFom();
             LocalDate stillingMedTilknytningTom = stillingPeriodeMedTilknytning.gyldigTom();
 
-            if (stillingPeriodeBeforeBreak != null) {
+            if (isNotNull(stillingPeriodeBeforeBreak)) {
                 spUtenTilknytningtype.remove(stillingPeriodeBeforeBreak);
                 stillingPeriodeBeforeBreak = null;
             }
@@ -198,7 +198,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                 if (lik(sp.gyldigFom(), stillingMedTilknytningFom) && lik(sp.gyldigTom(), stillingMedTilknytningTom) && stillingIsEquals) {
                     continue;
                 }
-                if (brekkpunktFom != null && stillingIsEquals && isBetween(stillingMedTilknytningFom, stillingMedTilknytningTom, sp.gyldigTom())) {
+                if (isNotNull(brekkpunktFom) && stillingIsEquals && isBetween(stillingMedTilknytningFom, stillingMedTilknytningTom, sp.gyldigTom())) {
                     brekkpunktTom = stillingMedTilknytningFom.minusDays(1);
                     perioderSomSkalBeholdes.add(new StillingPeriode(
                         sp.stilling(),
@@ -206,7 +206,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                         brekkpunktTom,
                         sp.orgenhet(),
                         sp.sektor(),
-                        sp.tilknytningtype().orElse(null)
+                        sp.tilknytningtype()
                     ));
                     stillingPeriodeBeforeBreak = sp;
                     brekkpunktFom = null;
@@ -221,7 +221,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                         stillingMedTilknytningFom.minusDays(1),
                         sp.orgenhet(),
                         sp.sektor(),
-                        sp.tilknytningtype().orElse(null)
+                        sp.tilknytningtype()
                     ));
                     brekkpunktFom = stillingMedTilknytningTom.plusDays(1);
                     if (spMedTilknytningtype.size() == 1) {
@@ -231,7 +231,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                             sp.gyldigTom(),
                             sp.orgenhet(),
                             sp.sektor(),
-                            sp.tilknytningtype().orElse(null)
+                            sp.tilknytningtype()
                         ));
                         stillingPeriodeBeforeBreak = sp;
                     }
@@ -245,7 +245,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                         stillingMedTilknytningFom.minusDays(1),
                         sp.orgenhet(),
                         sp.sektor(),
-                        sp.tilknytningtype().orElse(null)
+                        sp.tilknytningtype()
                     ));
                     stillingPeriodeBeforeBreak = sp;
                 } else if (isBetween(stillingMedTilknytningFom, stillingMedTilknytningTom, sp.gyldigFom()) && sp.gyldigTom().isAfter(stillingMedTilknytningTom) && stillingIsEquals) {
@@ -259,7 +259,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                 }
             }
         }
-        if (brekkpunktTom != null && !spUtenTilknytningtype.isEmpty()) {
+        if (isNotNull(brekkpunktTom) && !spUtenTilknytningtype.isEmpty()) {
             var stillingPeriode = spUtenTilknytningtype.getLast();
             perioderSomSkalBeholdes.add(new StillingPeriode(
                 stillingPeriode.stilling(),
@@ -267,7 +267,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                 brekkpunktTom,
                 stillingPeriode.orgenhet(),
                 stillingPeriode.sektor(),
-                stillingPeriode.tilknytningtype().orElse(null)
+                stillingPeriode.tilknytningtype()
             ));
         }
         perioderGruppert.clear();
@@ -386,6 +386,6 @@ public class GrupperOgSlaaSammenDvhStillinger {
     record StillingPeriodeKey(
         StillingPeriode.StillingAgressoOrgIdOgNavn stillingAgressoOrgIdOgNavn,
         Sektor sektor,
-        Optional<Tilknytningtype> tilknytningtype
+        Tilknytningtype tilknytningtype
     ) {}
 }

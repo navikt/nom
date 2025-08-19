@@ -42,6 +42,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -55,6 +56,7 @@ import static no.nav.nom.contract.nom.IdentType.ROBOT;
 import static no.nav.nom.contract.nom.IdentType.STANDARD;
 import static no.nav.nom.contract.nom.IdentType.UTENLANDSK_KONSULENT;
 import static no.nav.nom.contract.nom.IdentType.VIKAFOSSEN;
+import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -199,7 +201,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         ));
 
         var endreTilknytningtypeRequest = endreTilknytningtypeRequest().toBuilder()
-            .tilknytningtype(Optional.of((Tilknytningtype.KONSULENT)))
+            .tilknytningtype(Tilknytningtype.KONSULENT)
             .build();
 
         postEndreTilknytningtypeRequest(
@@ -219,7 +221,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .matches(endreTilknytningtypeCommand ->
                 endreTilknytningtypeCommand.fid().equals(orgtilknytningToUpdate.fid()))
             .matches(endreTilknytningtypeCommand ->
-                endreTilknytningtypeCommand.tilknytningtype().equals(endreTilknytningtypeRequest.tilknytningtype())
+                Objects.equals(endreTilknytningtypeCommand.tilknytningtype(), endreTilknytningtypeRequest.tilknytningtype())
             );
     }
 
@@ -240,7 +242,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         ));
 
         var endreTilknytningtypeRequest = endreTilknytningtypeRequest().toBuilder()
-            .tilknytningtype(Optional.of((Tilknytningtype.KONSULENT)))
+            .tilknytningtype(Tilknytningtype.KONSULENT)
             .build();
 
         postEndreTilknytningtypeRequest(
@@ -260,7 +262,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .matches(endreTilknytningtypeCommand ->
                 endreTilknytningtypeCommand.fid().equals(orgtilknytningToUpdate.fid()))
             .matches(endreTilknytningtypeCommand ->
-                endreTilknytningtypeCommand.tilknytningtype().equals(endreTilknytningtypeRequest.tilknytningtype())
+                Objects.equals(endreTilknytningtypeCommand.tilknytningtype(), endreTilknytningtypeRequest.tilknytningtype())
             );
     }
 
@@ -499,7 +501,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .gyldigTom(LocalDate.now().plusMonths(1))
             .build();
 
         saveOrgtilknytninger(List.of(existingOrgtilknytning));
@@ -544,7 +546,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .gyldigTom(LocalDate.now().plusMonths(1))
             .build();
 
         saveOrgtilknytninger(List.of(existingOrgtilknytning));
@@ -591,7 +593,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().minusMonths(2).minusDays(1)))
+            .gyldigTom(LocalDate.now().minusMonths(2).minusDays(1))
             .build();
 
 
@@ -599,7 +601,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
 
         var newStartdato = existingOrgtilknytning.gyldigFom().minusMonths(24);
-        LocalDate newSluttdato = existingOrgtilknytning.gyldigTom().isPresent() ? existingOrgtilknytning.gyldigTom().get().minusMonths(3).minusDays(1) : null;
+        LocalDate newSluttdato = isNotNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
 
         var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
             .gyldigFom(
@@ -640,7 +642,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().minusMonths(1)))
+            .gyldigTom(LocalDate.now().minusMonths(1))
             .build();
 
         saveOrgtilknytninger(List.of(existingOrgtilknytning));
@@ -683,7 +685,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
+            .gyldigTom(LocalDate.now().minusDays(1))
             .build();
 
 
@@ -691,7 +693,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
 
         var newStartdato = existingOrgtilknytning.gyldigFom().minusMonths(24);
-        LocalDate newSluttdato = existingOrgtilknytning.gyldigTom().isPresent() ? existingOrgtilknytning.gyldigTom().get().minusMonths(3).minusDays(1) : null;
+        LocalDate newSluttdato = isNotNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
 
         var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
             .gyldigFom(
@@ -732,7 +734,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
+            .gyldigTom(LocalDate.now().minusDays(1))
             .build();
 
 
@@ -740,7 +742,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
 
         var newStartdato = existingOrgtilknytning.gyldigFom().minusMonths(24);
-        LocalDate newSluttdato = existingOrgtilknytning.gyldigTom().isPresent() ? existingOrgtilknytning.gyldigTom().get().minusMonths(3).minusDays(1) : null;
+        LocalDate newSluttdato = isNotNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
 
         var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
             .gyldigFom(
@@ -783,7 +785,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
+            .gyldigTom(LocalDate.now().minusDays(1))
             .build();
 
 
@@ -791,7 +793,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
 
         var newStartdato = existingOrgtilknytning.gyldigFom().minusMonths(24);
-        LocalDate newSluttdato = existingOrgtilknytning.gyldigTom().isPresent() ? existingOrgtilknytning.gyldigTom().get().minusMonths(3).minusDays(1) : null;
+        LocalDate newSluttdato = isNotNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
 
         var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
             .gyldigFom(
@@ -834,14 +836,14 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
+            .gyldigTom(LocalDate.now().minusDays(1))
             .build();
 
         saveOrgtilknytninger(List.of(existingOrgtilknytning));
         when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
 
         var newStartdato = existingOrgtilknytning.gyldigFom().minusMonths(24);
-        LocalDate newSluttdato = existingOrgtilknytning.gyldigTom().isPresent() ? existingOrgtilknytning.gyldigTom().get().minusMonths(3).minusDays(1) : null;
+        LocalDate newSluttdato = isNotNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
 
         var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
             .gyldigFom(
@@ -884,14 +886,14 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
+            .gyldigTom(LocalDate.now().minusDays(1))
             .build();
 
         saveOrgtilknytninger(List.of(existingOrgtilknytning));
         when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
 
         var newStartdato = existingOrgtilknytning.gyldigFom().minusMonths(24);
-        LocalDate newSluttdato = existingOrgtilknytning.gyldigTom().isPresent() ? existingOrgtilknytning.gyldigTom().get().minusMonths(3).minusDays(1) : null;
+        LocalDate newSluttdato = isNotNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
 
         var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
             .gyldigFom(
@@ -934,14 +936,14 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
+            .gyldigTom(LocalDate.now().minusDays(1))
             .build();
 
         saveOrgtilknytninger(List.of(existingOrgtilknytning));
         when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
 
         var newStartdato = existingOrgtilknytning.gyldigFom().minusMonths(24);
-        LocalDate newSluttdato = existingOrgtilknytning.gyldigTom().isPresent() ? existingOrgtilknytning.gyldigTom().get().minusMonths(3).minusDays(1) : null;
+        LocalDate newSluttdato = isNotNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
 
         var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
             .gyldigFom(
@@ -984,7 +986,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigTom(LocalDate.now().plusYears(1))
             .erDagligOppfolging(true)
             .build();
 
@@ -1033,7 +1035,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigTom(LocalDate.now().plusYears(1))
             .erDagligOppfolging(true)
             .build();
 
@@ -1083,7 +1085,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigTom(LocalDate.now().plusYears(1))
             .erDagligOppfolging(true)
             .build();
 
@@ -1134,7 +1136,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigTom(LocalDate.now().plusYears(1))
             .erDagligOppfolging(true)
             .build();
 
@@ -1185,7 +1187,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigTom(LocalDate.now().plusYears(1))
             .erDagligOppfolging(true)
             .build();
 
@@ -1236,7 +1238,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigTom(LocalDate.now().plusYears(1))
             .erDagligOppfolging(true)
             .build();
 
@@ -1287,7 +1289,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigTom(LocalDate.now().plusYears(1))
             .erDagligOppfolging(true)
             .build();
 
@@ -1337,7 +1339,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigTom(LocalDate.now().plusYears(1))
             .erDagligOppfolging(true)
             .build();
 
@@ -1385,7 +1387,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigTom(LocalDate.now().plusYears(1))
             .erDagligOppfolging(true)
             .build();
 
@@ -1435,7 +1437,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigTom(LocalDate.now().plusYears(1))
             .erDagligOppfolging(true)
             .build();
 
@@ -1485,7 +1487,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigTom(LocalDate.now().plusYears(1))
             .erDagligOppfolging(true)
             .build();
 
@@ -1535,7 +1537,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigTom(LocalDate.now().plusYears(1))
             .erDagligOppfolging(true)
             .build();
 
@@ -1585,7 +1587,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigTom(LocalDate.now().plusYears(1))
             .erDagligOppfolging(true)
             .build();
 
@@ -1635,7 +1637,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigTom(LocalDate.now().plusYears(1))
             .erDagligOppfolging(true)
             .build();
 
@@ -1685,7 +1687,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigTom(LocalDate.now().plusYears(1))
             .erDagligOppfolging(true)
             .build();
 
@@ -1735,7 +1737,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigTom(LocalDate.now().plusYears(1))
             .erDagligOppfolging(true)
             .build();
 
@@ -1780,13 +1782,13 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .gyldigTom(LocalDate.now().plusMonths(1))
             .build();
 
         saveOrgtilknytninger(List.of(existingOrgtilknytning));
 
         var newStartdato = existingOrgtilknytning.gyldigFom().plusMonths(1);
-        var newSluttdato = existingOrgtilknytning.gyldigTom().orElseThrow().plusMonths(1);
+        var newSluttdato = existingOrgtilknytning.gyldigTom().plusMonths(1);
 
         var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
             .gyldigFom(
@@ -1837,13 +1839,13 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .gyldigTom(LocalDate.now().plusMonths(1))
             .build();
 
         saveOrgtilknytninger(List.of(existingOrgtilknytning));
 
         var newStartdato = existingOrgtilknytning.gyldigFom().plusMonths(1);
-        var newSluttdato = existingOrgtilknytning.gyldigTom().orElseThrow().plusMonths(1);
+        var newSluttdato = existingOrgtilknytning.gyldigTom().plusMonths(1);
 
         var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
             .gyldigFom(
@@ -1893,19 +1895,19 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("1")
             .sektor(tilknyttetRessurs.sektor())
-            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .orgtilknytningType(Tilknytningtype.KONSULENT)
             .erDagligOppfolging(false)
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .gyldigTom(LocalDate.now().plusMonths(1))
             .build();
 
         var existingOrgtilknytningAnticipatingDolChange = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("2")
             .sektor(tilknyttetRessurs.sektor())
-            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .orgtilknytningType(Tilknytningtype.KONSULENT)
             .erDagligOppfolging(false)
-            .gyldigFom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().orElseThrow().plusDays(1))
-            .gyldigTom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(gyldigTom -> gyldigTom.plusMonths(1)))
+            .gyldigFom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().plusDays(1))
+            .gyldigTom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().plusMonths(1))
             .build();
 
         saveOrgtilknytninger(List.of(
@@ -1915,7 +1917,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         var endreDatoOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingNewDate).toBuilder()
             .gyldigTom(
-                existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(localDate -> localDate.plusMonths(1)).orElseThrow()
+                existingOrgtilknytningAnticipatingNewDate.gyldigTom().plusMonths(1)
             )
             .build();
 
@@ -1955,7 +1957,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .isEqualTo(EndreDagligOppfolgingOrgtilknytningCommand.builder()
                 .fid(endreDolOrgtilknytningRequest.fid())
                 .gyldigFom(endreDolOrgtilknytningRequest.gyldigFom())
-                .gyldigTom(Optional.ofNullable(endreDolOrgtilknytningRequest.gyldigTom()))
+                .gyldigTom(endreDolOrgtilknytningRequest.gyldigTom())
                 .erDagligOppfolging(endreDolOrgtilknytningRequest.erDagligOppfolging())
                 .navident(existingOrgtilknytningAnticipatingDolChange.navident())
                 .orgenhetId(existingOrgtilknytningAnticipatingDolChange.orgEnhetId())
@@ -1968,7 +1970,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .ignoringFields("inputMetadata")
             .isEqualTo(EndreTilknytningtypeCommand.builder()
                 .fid(opprettetOrgtilknytningFid)
-                .tilknytningtype(Optional.ofNullable(leggTilOrgtilknytningRequest.tilknytningtype()))
+                .tilknytningtype(leggTilOrgtilknytningRequest.tilknytningtype())
                 .build()
             );
 
@@ -1979,12 +1981,12 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 EndreOrgtilknytningDatoCommand.builder()
                     .fid(endreDatoOrgtilknytningRequest.fid())
                     .gyldigFom(endreDatoOrgtilknytningRequest.gyldigFom())
-                    .gyldigTom(Optional.ofNullable(endreDatoOrgtilknytningRequest.gyldigTom()))
+                    .gyldigTom(endreDatoOrgtilknytningRequest.gyldigTom())
                     .build(),
                 EndreOrgtilknytningDatoCommand.builder()
                     .fid(opprettetOrgtilknytningFid)
                     .gyldigFom(leggTilOrgtilknytningRequest.gyldigFom())
-                    .gyldigTom(Optional.ofNullable(leggTilOrgtilknytningRequest.gyldigTom()))
+                    .gyldigTom(leggTilOrgtilknytningRequest.gyldigTom())
                     .build()
             ));
 
@@ -2015,20 +2017,20 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("1")
             .sektor(null)
-            .orgtilknytningType(Optional.empty())
+            .orgtilknytningType(null)
             .erDagligOppfolging(true)
             .gyldigFom(LocalDate.now().minusMonths(3))
-            .gyldigTom(Optional.of(LocalDate.now().minusMonths(2).minusDays(2)))
+            .gyldigTom(LocalDate.now().minusMonths(2).minusDays(2))
             .build();
 
         var existingOrgtilknytningAnticipatingGyldigTomChange = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("2")
             .sektor(null)
-            .orgtilknytningType(Optional.of(Tilknytningtype.INGEN))
+            .orgtilknytningType(Tilknytningtype.INGEN)
             .erDagligOppfolging(true)
-            .gyldigFom(existingExpiredOrgtilknytning.gyldigTom().orElseThrow().plusDays(1))
-            .gyldigTom(Optional.empty())
+            .gyldigFom(existingExpiredOrgtilknytning.gyldigTom().plusDays(1))
+            .gyldigTom(null)
             .build();
 
         saveOrgtilknytninger(List.of(
@@ -2039,7 +2041,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var endreDatoOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingGyldigTomChange).toBuilder()
             .sektor(Sektor.NAV_STATLIG)
             .tilknytningtype(Tilknytningtype.FAST)
-            .gyldigTom(existingExpiredOrgtilknytning.gyldigTom().orElseThrow().plusDays(2))
+            .gyldigTom(existingExpiredOrgtilknytning.gyldigTom().plusDays(2))
             .build();
 
         var expiredOrgtilknytningRequest = endreOrgtilknytningRequest(existingExpiredOrgtilknytning);
@@ -2079,7 +2081,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .fid(opprettetOrgtilknytningFid)
                 .orgenhetId(leggTilOrgtilknytningRequest.orgEnhetId())
                 .gyldigFom(leggTilOrgtilknytningRequest.gyldigFom())
-                .gyldigTom(Optional.ofNullable(leggTilOrgtilknytningRequest.gyldigTom()))
+                .gyldigTom(leggTilOrgtilknytningRequest.gyldigTom())
                 .erDagligOppfolging(leggTilOrgtilknytningRequest.erDagligOppfolging())
                 .navident(tilknyttetRessurs.navident())
                 .additionalAgressoData(null)
@@ -2090,7 +2092,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .ignoringFields("inputMetadata")
             .isEqualTo(EndreTilknytningtypeCommand.builder()
                 .fid(opprettetOrgtilknytningFid)
-                .tilknytningtype(Optional.ofNullable(leggTilOrgtilknytningRequest.tilknytningtype()))
+                .tilknytningtype(leggTilOrgtilknytningRequest.tilknytningtype())
                 .build()
             );
 
@@ -2101,7 +2103,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 EndreOrgtilknytningDatoCommand.builder()
                     .fid(endreDatoOrgtilknytningRequest.fid())
                     .gyldigFom(endreDatoOrgtilknytningRequest.gyldigFom())
-                    .gyldigTom(Optional.of(endreDatoOrgtilknytningRequest.gyldigTom()))
+                    .gyldigTom(endreDatoOrgtilknytningRequest.gyldigTom())
                     .build()
             ));
 
@@ -2144,10 +2146,10 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("1")
             .sektor(tilknyttetRessurs.sektor())
-            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .orgtilknytningType(Tilknytningtype.KONSULENT)
             .erDagligOppfolging(true)
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .gyldigTom(LocalDate.now().plusMonths(1))
             .build();
 
         saveOrgtilknytninger(List.of(
@@ -2197,10 +2199,10 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("1")
             .sektor(tilknyttetRessurs.sektor())
-            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .orgtilknytningType(Tilknytningtype.KONSULENT)
             .erDagligOppfolging(true)
             .gyldigFom(LocalDate.now().minusMonths(1))
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .gyldigTom(LocalDate.now().plusMonths(1))
             .build();
 
         saveOrgtilknytninger(List.of(
@@ -2249,10 +2251,10 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("1")
             .sektor(tilknyttetRessurs.sektor())
-            .orgtilknytningType(Optional.of(Tilknytningtype.FAST))
+            .orgtilknytningType(Tilknytningtype.FAST)
             .erDagligOppfolging(true)
             .gyldigFom(LocalDate.now().minusMonths(1))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         saveOrgtilknytninger(List.of(
@@ -2301,10 +2303,10 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("1")
             .sektor(tilknyttetRessurs.sektor())
-            .orgtilknytningType(Optional.of(Tilknytningtype.FAST))
+            .orgtilknytningType(Tilknytningtype.FAST)
             .erDagligOppfolging(true)
             .gyldigFom(LocalDate.now().minusMonths(1))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         saveOrgtilknytninger(List.of(
@@ -2356,8 +2358,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .orgEnhetId("1")
             .erDagligOppfolging(false)
             .sektor(tilknyttetRessurs.sektor())
-            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .orgtilknytningType(Tilknytningtype.KONSULENT)
+            .gyldigTom(LocalDate.now().plusMonths(1))
             .build();
 
         var existingOrgtilknytningAnticipatingDolChange = orgtilknytningState().toBuilder()
@@ -2365,8 +2367,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .orgEnhetId("2")
             .erDagligOppfolging(false)
             .sektor(tilknyttetRessurs.sektor())
-            .gyldigFom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().orElseThrow().plusDays(1))
-            .gyldigTom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(gyldigTom -> gyldigTom.plusMonths(1)))
+            .gyldigFom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().plusDays(1))
+            .gyldigTom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().plusMonths(1))
             .build();
 
         var existingOrgtilknytningAnticipatingNewTilknytningtype = orgtilknytningState().toBuilder()
@@ -2374,7 +2376,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .orgEnhetId("3")
             .erDagligOppfolging(false)
             .sektor(tilknyttetRessurs.sektor())
-            .orgtilknytningType(Optional.empty())
+            .orgtilknytningType(null)
             .build();
 
         saveOrgtilknytninger(List.of(
@@ -2385,7 +2387,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         var endreDatoOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingNewDate).toBuilder()
             .gyldigTom(
-                existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(localDate -> localDate.plusMonths(1)).orElseThrow()
+                existingOrgtilknytningAnticipatingNewDate.gyldigTom().plusMonths(1)
             )
             .build();
 
@@ -2430,7 +2432,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .isEqualTo(EndreDagligOppfolgingOrgtilknytningCommand.builder()
                 .fid(endreDolOrgtilknytningRequest.fid())
                 .gyldigFom(endreDolOrgtilknytningRequest.gyldigFom())
-                .gyldigTom(Optional.ofNullable(endreDolOrgtilknytningRequest.gyldigTom()))
+                .gyldigTom(endreDolOrgtilknytningRequest.gyldigTom())
                 .erDagligOppfolging(endreDolOrgtilknytningRequest.erDagligOppfolging())
                 .navident(existingOrgtilknytningAnticipatingDolChange.navident())
                 .orgenhetId(existingOrgtilknytningAnticipatingDolChange.orgEnhetId())
@@ -2445,11 +2447,11 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 List.of(
                     EndreTilknytningtypeCommand.builder()
                         .fid(endreTilknytningtypeRequest.fid())
-                        .tilknytningtype(Optional.ofNullable(endreTilknytningtypeRequest.tilknytningtype()))
+                        .tilknytningtype(endreTilknytningtypeRequest.tilknytningtype())
                         .build(),
                     EndreTilknytningtypeCommand.builder()
                         .fid(opprettetOrgtilknytningFid)
-                        .tilknytningtype(Optional.ofNullable(leggTilOrgtilknytningRequest.tilknytningtype()))
+                        .tilknytningtype(leggTilOrgtilknytningRequest.tilknytningtype())
                         .build())
             );
 
@@ -2460,12 +2462,12 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 EndreOrgtilknytningDatoCommand.builder()
                     .fid(endreDatoOrgtilknytningRequest.fid())
                     .gyldigFom(endreDatoOrgtilknytningRequest.gyldigFom())
-                    .gyldigTom(Optional.ofNullable(endreDatoOrgtilknytningRequest.gyldigTom()))
+                    .gyldigTom(endreDatoOrgtilknytningRequest.gyldigTom())
                     .build(),
                 EndreOrgtilknytningDatoCommand.builder()
                     .fid(opprettetOrgtilknytningFid)
                     .gyldigFom(leggTilOrgtilknytningRequest.gyldigFom())
-                    .gyldigTom(Optional.ofNullable(leggTilOrgtilknytningRequest.gyldigTom()))
+                    .gyldigTom(leggTilOrgtilknytningRequest.gyldigTom())
                     .build()
             ));
 
@@ -2532,7 +2534,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .isEqualTo(EndreDagligOppfolgingOrgtilknytningCommand.builder()
                 .fid(opprettetOrgtilknytningFid)
                 .gyldigFom(leggTilDagligOppfolgingOrgtilknytningWithTilknytningtypeRequest.gyldigFom())
-                .gyldigTom(Optional.ofNullable(leggTilDagligOppfolgingOrgtilknytningWithTilknytningtypeRequest.gyldigTom()))
+                .gyldigTom(leggTilDagligOppfolgingOrgtilknytningWithTilknytningtypeRequest.gyldigTom())
                 .erDagligOppfolging(leggTilDagligOppfolgingOrgtilknytningWithTilknytningtypeRequest.erDagligOppfolging())
                 .navident(tilknyttetRessurs.navident())
                 .orgenhetId(leggTilDagligOppfolgingOrgtilknytningWithTilknytningtypeRequest.orgEnhetId())
@@ -2545,7 +2547,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .ignoringFields("inputMetadata")
             .isEqualTo(EndreTilknytningtypeCommand.builder()
                 .fid(opprettetOrgtilknytningFid)
-                .tilknytningtype(Optional.ofNullable(leggTilDagligOppfolgingOrgtilknytningWithTilknytningtypeRequest.tilknytningtype()))
+                .tilknytningtype(leggTilDagligOppfolgingOrgtilknytningWithTilknytningtypeRequest.tilknytningtype())
                 .build()
             );
     }
@@ -2562,7 +2564,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .gyldigTom(LocalDate.now().plusMonths(1))
             .build();
 
         saveOrgtilknytninger(List.of(existingOrgtilknytning));
@@ -2600,7 +2602,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                         .sektor(tilknyttetRessurs.sektor())
                         .erDagligOppfolging(false)
                         .navident(tilknyttetRessurs.navident())
-                        .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+                        .orgtilknytningType(Tilknytningtype.KONSULENT)
                         .build()
         ).toList());
 
@@ -2630,7 +2632,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                         .sektor(Sektor.NAV_STATLIG)
                         .erDagligOppfolging(false)
                         .navident("whatever")
-                        .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+                        .orgtilknytningType(Tilknytningtype.KONSULENT)
                         .build()
                 ).toList());
 
@@ -2654,28 +2656,28 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("1")
             .sektor(tilknyttetRessurs.sektor())
-            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .orgtilknytningType(Tilknytningtype.KONSULENT)
             .erDagligOppfolging(false)
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
+            .gyldigTom(LocalDate.now().plusMonths(1))
             .build();
 
         var existingOrgtilknytningAnticipatingDolChange = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("2")
             .sektor(tilknyttetRessurs.sektor())
-            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .orgtilknytningType(Tilknytningtype.KONSULENT)
             .erDagligOppfolging(false)
-            .gyldigFom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().orElseThrow().plusDays(1))
-            .gyldigTom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(gyldigTom -> gyldigTom.plusMonths(1)))
+            .gyldigFom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().plusDays(1))
+            .gyldigTom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().plusMonths(1))
             .build();
 
         var existingOrgtilknytningAnticipatingNewTilknytningtype = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("3")
             .sektor(tilknyttetRessurs.sektor())
-            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .orgtilknytningType(Tilknytningtype.KONSULENT)
             .erDagligOppfolging(false)
-            .orgtilknytningType(Optional.empty())
+            .orgtilknytningType(null)
             .build();
 
         saveOrgtilknytninger(List.of(
@@ -2686,7 +2688,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         var endreDatoOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingNewDate).toBuilder()
             .gyldigTom(
-                existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(localDate -> localDate.plusMonths(1)).orElseThrow()
+                existingOrgtilknytningAnticipatingNewDate.gyldigTom().plusMonths(1)
             )
             .build();
 
@@ -2740,27 +2742,27 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .orgEnhetId("1")
             .sektor(tilknyttetRessurs.sektor())
             .erDagligOppfolging(false)
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
-            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .gyldigTom(LocalDate.now().plusMonths(1))
+            .orgtilknytningType(Tilknytningtype.KONSULENT)
             .build();
 
         var existingOrgtilknytningAnticipatingDolChange = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("2")
             .sektor(tilknyttetRessurs.sektor())
-            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .orgtilknytningType(Tilknytningtype.KONSULENT)
             .erDagligOppfolging(false)
-            .gyldigFom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().orElseThrow().plusDays(1))
-            .gyldigTom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(gyldigTom -> gyldigTom.plusMonths(1)))
+            .gyldigFom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().plusDays(1))
+            .gyldigTom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().plusMonths(1))
             .build();
 
         var existingOrgtilknytningAnticipatingNewTilknytningtype = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .orgEnhetId("3")
             .sektor(tilknyttetRessurs.sektor())
-            .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+            .orgtilknytningType(Tilknytningtype.KONSULENT)
             .erDagligOppfolging(false)
-            .orgtilknytningType(Optional.empty())
+            .orgtilknytningType(null)
             .build();
 
         saveOrgtilknytninger(List.of(
@@ -2771,7 +2773,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         var endreDatoOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingNewDate).toBuilder()
             .gyldigTom(
-                existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(localDate -> localDate.plusMonths(1)).orElseThrow()
+                existingOrgtilknytningAnticipatingNewDate.gyldigTom().plusMonths(1)
             )
             .build();
 
@@ -2825,8 +2827,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .orgEnhetId("1")
             .sektor(tilknyttetRessurs.sektor())
             .erDagligOppfolging(false)
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
-            .orgtilknytningType(Optional.empty())
+            .gyldigTom(LocalDate.now().plusMonths(1))
+            .orgtilknytningType(null)
             .build();
 
         saveOrgtilknytninger(List.of(
@@ -2835,7 +2837,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         var endreDatoOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingNewDate).toBuilder()
             .gyldigTom(
-                existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(localDate -> localDate.plusMonths(1)).orElseThrow()
+                existingOrgtilknytningAnticipatingNewDate.gyldigTom().plusMonths(1)
             )
             .build();
 
@@ -2868,8 +2870,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .orgEnhetId("1")
             .sektor(tilknyttetRessurs.sektor())
             .erDagligOppfolging(false)
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
-            .orgtilknytningType(Optional.empty())
+            .gyldigTom(LocalDate.now().plusMonths(1))
+            .orgtilknytningType(null)
             .build();
 
         saveOrgtilknytninger(List.of(
@@ -2878,7 +2880,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         var endreDatoOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytningAnticipatingNewDate).toBuilder()
             .gyldigTom(
-                existingOrgtilknytningAnticipatingNewDate.gyldigTom().map(localDate -> localDate.plusMonths(1)).orElseThrow()
+                existingOrgtilknytningAnticipatingNewDate.gyldigTom().plusMonths(1)
             )
             .build();
 
@@ -2981,7 +2983,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                         .sektor(tilknyttetRessurs.sektor())
                         .erDagligOppfolging(false)
                         .navident("ANNEN IDENT")
-                        .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+                        .orgtilknytningType(Tilknytningtype.KONSULENT)
                         .build()
                 ).toList()
         );
@@ -3007,8 +3009,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .orgEnhetId("1")
             .sektor(tilknyttetRessurs.sektor())
             .erDagligOppfolging(false)
-            .gyldigTom(Optional.of(LocalDate.now().plusMonths(1)))
-            .orgtilknytningType(Optional.of(Tilknytningtype.FAST))
+            .gyldigTom(LocalDate.now().plusMonths(1))
+            .orgtilknytningType(Tilknytningtype.FAST)
             .build();
 
         saveOrgtilknytninger(List.of(
@@ -3058,7 +3060,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .sektor(tilknyttetRessurs.sektor())
                 .erDagligOppfolging(false)
                 .navident(tilknyttetRessurs.navident())
-                .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+                .orgtilknytningType(Tilknytningtype.KONSULENT)
                 .build()
         ).toList());
 
@@ -3071,7 +3073,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                         .sektor(tilknyttetRessurs.sektor())
                         .erDagligOppfolging(false)
                         .navident("ANNEN IDENT")
-                        .orgtilknytningType(Optional.of(Tilknytningtype.KONSULENT))
+                        .orgtilknytningType(Tilknytningtype.KONSULENT)
                         .build()
                 ).toList()
         );
@@ -3144,8 +3146,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         LocalDate flytteDato = LocalDate.now();
 
-        var orgtilknytningState1 = new OrgtilknytningState("fid1", "navident1", "orgEnhetId1", Sektor.NAV_STATLIG, false, flytteDato.minusMonths(1), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty(), "S123456");
-        var orgtilknytningState2 = new OrgtilknytningState("fid2", "navident2", "orgEnhetId2", Sektor.NAV_STATLIG, true, flytteDato.plusMonths(1), Optional.empty(), Optional.of(Tilknytningtype.FAST), Optional.empty(), "S123456");
+        var orgtilknytningState1 = new OrgtilknytningState("fid1", "navident1", "orgEnhetId1", Sektor.NAV_STATLIG, false, flytteDato.minusMonths(1), null, Tilknytningtype.FAST, null, "S123456");
+        var orgtilknytningState2 = new OrgtilknytningState("fid2", "navident2", "orgEnhetId2", Sektor.NAV_STATLIG, true, flytteDato.plusMonths(1), null, Tilknytningtype.FAST, null, "S123456");
         saveOrgtilknytninger(List.of(orgtilknytningState1, orgtilknytningState2));
 
         when(orgenhetService.getById("orgEnhetId1")).thenReturn(Optional.of(new OrgEnhet(OrgEnhetState.builder().fid("FID_1").id("orgEnhetId1").navn("Enhet 1").build())));
@@ -3200,7 +3202,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     private static EndreTilknytningtypeRequest endreTilknytningtypeRequest() {
         return EndreTilknytningtypeRequest.builder()
-            .tilknytningtype(Optional.empty())
+            .tilknytningtype(null)
             .build();
     }
 
@@ -3231,10 +3233,10 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         return EndreOrgtilknytningRequest.builder()
             .fid(fromOrgtilknytningState.fid())
             .gyldigFom(fromOrgtilknytningState.gyldigFom())
-            .gyldigTom(fromOrgtilknytningState.gyldigTom().orElse(null))
+            .gyldigTom(fromOrgtilknytningState.gyldigTom())
             .erDagligOppfolging(fromOrgtilknytningState.erDagligOppfolging())
             .sektor(fromOrgtilknytningState.sektor())
-            .tilknytningtype(fromOrgtilknytningState.orgtilknytningType().orElse(null))
+            .tilknytningtype(fromOrgtilknytningState.orgtilknytningType())
             .build();
     }
 

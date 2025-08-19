@@ -6,7 +6,6 @@ import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Builder
 public record DuplikatOrgtilknytning(
@@ -17,6 +16,6 @@ public record DuplikatOrgtilknytning(
         @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Sektor sektor,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean erDagligOppfolging,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate gyldigFom,
-        @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<Tilknytningtype> orgtilknytningType
+        @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Tilknytningtype orgtilknytningType
 ) {
 }

@@ -115,10 +115,6 @@ public class RessursUtloperSnartEmailService {
         if (!ressursUtloperOmFemEllerToUker.isEmpty()) {
             ressursUtloperOmFemEllerToUker.forEach(this::sendEmail);
         }
-
-        if (!ressursUtloperOmToUker.isEmpty()) {
-            //ressursUtloperOmToUker.forEach(this::sendEmailTilAnsatt);
-        }
     }
 
     private void sendEmail(RessursUtloperData utlopendeRessurs) {
@@ -239,8 +235,8 @@ public class RessursUtloperSnartEmailService {
         try {
             var dolOrgtilknytning = orgtilknytningStateRepository.findByNavident(ressurs.navident()).stream()
                 .filter(OrgtilknytningState::erDagligOppfolging)
-                .filter(ot -> ot.gyldigTom() != null && ot.gyldigTom().isPresent())
-                .filter(ot -> DateUtils.isPeriodActive(ot.gyldigFom(), ot.gyldigTom().get()) || ot.gyldigFom().isAfter(LocalDate.now()))
+                .filter(ot -> ot.gyldigTom() != null)
+                .filter(ot -> DateUtils.isPeriodActive(ot.gyldigFom(), ot.gyldigTom()) || ot.gyldigFom().isAfter(LocalDate.now()))
                 .filter(ot -> isRessursSluttdatoEqualToOrgtilknytningGyldigTom(ressurs, ot))
                 .findFirst()
                 .orElse(null);
@@ -295,9 +291,8 @@ public class RessursUtloperSnartEmailService {
 
     private static boolean isRessursSluttdatoEqualToOrgtilknytningGyldigTom(RessursState ressurs, OrgtilknytningState orgtilknytningState) {
         return orgtilknytningState.gyldigTom() != null
-            && orgtilknytningState.gyldigTom().isPresent()
             && ressurs.sluttdato() != null
-            && orgtilknytningState.gyldigTom().get().isEqual(ressurs.sluttdato());
+            && orgtilknytningState.gyldigTom().isEqual(ressurs.sluttdato());
     }
 
     private List<String> bccRecipientsEmailAddresses() {

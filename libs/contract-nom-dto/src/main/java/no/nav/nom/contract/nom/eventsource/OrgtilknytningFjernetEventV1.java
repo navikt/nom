@@ -3,7 +3,6 @@ package no.nav.nom.contract.nom.eventsource;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 public class OrgtilknytningFjernetEventV1 extends OrgtilknytningEvent {
 
@@ -20,7 +19,7 @@ public class OrgtilknytningFjernetEventV1 extends OrgtilknytningEvent {
         String navident,
         String orgEnhetId,
         LocalDate gyldigFom,
-        Optional<LocalDate> gyldigTom
+        LocalDate gyldigTom
     ) implements Data{ }
 
 }

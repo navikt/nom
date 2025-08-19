@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -126,7 +127,7 @@ public class Util {
             return false;
         }
 
-        return sp.sektor().equals(forrige.sektor()) && sp.tilknytningtype().equals(forrige.tilknytningtype());
+        return Objects.equals(sp.sektor(), forrige.sektor()) && Objects.equals(sp.tilknytningtype(), forrige.tilknytningtype());
     }
 
     private static List<StillingPeriode> advarOgFjernNegativePerioder(List<StillingPeriode> stillingPerioder, StrukturerteStillingPerioderForNavident sspForNavident) {

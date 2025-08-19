@@ -65,10 +65,10 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
             .navident(navident)
             .orgEnhetId(orgEnhetId)
             .gyldigFom(gyldigFom)
-            .gyldigTom(Optional.ofNullable(gyldigTom))
+            .gyldigTom(gyldigTom)
             .erDagligOppfolging(erDagligOppfolging)
             .sektor(sektor)
-            .orgtilknytningType(Optional.ofNullable(tilknytningtype))
+            .orgtilknytningType(tilknytningtype)
             .build();
     }
 
@@ -206,7 +206,7 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
             orgenhet,
             dol,
             null,
-            Optional.empty()
+            null
         );
     }
 

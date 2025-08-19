@@ -313,7 +313,7 @@ public class OrgtilknytningEndretEmailService {
                     event.navident(),
                     ot,
                     DateUtils.formatDateTime(ot.gyldigFom()),
-                    DateUtils.formatDateTime(ot.gyldigTom().isPresent() ? ot.gyldigTom().get() : null)
+                    DateUtils.formatDateTime(ot.gyldigTom())
                 );
                 log.info("Sender OT endringer utfortAv: {}, {}, {}", utfortAvNavIdent, utfortAvRessurs, utfortAvRessursNavn);
                 var orgenhetNavn = orgEnhetStateRepository.findById(ot.orgEnhetId()).map(OrgEnhetState::navn).orElse("Ukjent");
@@ -321,7 +321,7 @@ public class OrgtilknytningEndretEmailService {
                     orgenhetNavn,
                     ot.orgEnhetId(),
                     DateUtils.formatDateTime(ot.gyldigFom()),
-                    DateUtils.formatDateTime(ot.gyldigTom().isPresent() ? ot.gyldigTom().get() : null),
+                    DateUtils.formatDateTime(ot.gyldigTom()),
                     utfortAvRessursNavn,
                     event.timestamp()
                 );

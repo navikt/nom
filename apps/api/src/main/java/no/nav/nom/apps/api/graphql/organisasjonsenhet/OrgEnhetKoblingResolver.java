@@ -32,7 +32,7 @@ public class OrgEnhetKoblingResolver {
             .ressurs(MappingUtils.toRessurs(ressursStateRepository.findByNavident(orgtilknytning.navident()).get()))
             .erDagligOppfolging(orgtilknytning.erDagligOppfolging())
             .gyldigFom(orgtilknytning.gyldigFom())
-            .gyldigTom(orgtilknytning.gyldigTom().orElse(null))
+            .gyldigTom(orgtilknytning.gyldigTom())
             .build();
     }
 }

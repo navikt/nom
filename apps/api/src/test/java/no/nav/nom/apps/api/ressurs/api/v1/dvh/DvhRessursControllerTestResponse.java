@@ -80,7 +80,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
                 .navident("A000001")
                 .orgEnhetId("ENHET_1")
                 .gyldigFom(LocalDate.of(2007, 12, 1))
-                .gyldigTom(Optional.empty())
+                .gyldigTom(null)
                 .erDagligOppfolging(true)
                 .build());
 
@@ -91,7 +91,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
                 .navident("A000002")
                 .orgEnhetId("ENHET_1")
                 .gyldigFom(LocalDate.of(2008, 12, 1))
-                .gyldigTom(Optional.of(LocalDate.of(2012, 11, 30)))
+                .gyldigTom(LocalDate.of(2012, 11, 30))
                 .erDagligOppfolging(true)
                 .build());
 
@@ -102,7 +102,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
                 .navident("A000002")
                 .orgEnhetId("ENHET_2")
                 .gyldigFom(LocalDate.of(2012, 12, 1))
-                .gyldigTom(Optional.empty())
+                .gyldigTom(null)
                 .erDagligOppfolging(true)
                 .build());
 
@@ -113,7 +113,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
                 .navident("A000003")
                 .orgEnhetId("ENHET_1")
                 .gyldigFom(LocalDate.of(2009, 12, 1))
-                .gyldigTom(Optional.empty())
+                .gyldigTom(null)
                 .erDagligOppfolging(true)
                 .build());
 
@@ -124,7 +124,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
                 .navident("A000003")
                 .orgEnhetId("ENHET_2")
                 .gyldigFom(LocalDate.of(2012, 12, 1))
-                .gyldigTom(Optional.of(LocalDate.of(2018, 12, 31)))
+                .gyldigTom(LocalDate.of(2018, 12, 31))
                 .erDagligOppfolging(false)
                 .build());
 
@@ -135,7 +135,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
                 .navident("A000004")
                 .orgEnhetId("ENHET_2")
                 .gyldigFom(LocalDate.of(2010, 12, 1))
-                .gyldigTom(Optional.empty())
+                .gyldigTom(null)
                 .erDagligOppfolging(true)
                 .build());
 

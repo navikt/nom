@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -148,11 +147,11 @@ public class MasseflyttOrgtilknytningerService {
 
         orgtilknytninger.forEach(ot -> {
 
-            if (!etter(ot.gyldigTom().orElse(null), flyttedato)) {
+            if (!etter(ot.gyldigTom(), flyttedato)) {
                 orgtilknytningerIkkeFlyttet.put(ot, "Orgtilknytning er ikke gyldig for flytting på angitt flyttedato");
                 return;
             }
-            if (etter(ot.gyldigTom().orElse(null), nyOrgenhet.getGyldigTom().orElse(null))) {
+            if (etter(ot.gyldigTom(), nyOrgenhet.getGyldigTom().orElse(null))) {
                 orgtilknytningerIkkeFlyttet.put(ot, "Orgtilknytning er gyldig etter ny orgenhet sin gyldighetsperiode");
                 return;
             }
@@ -174,9 +173,9 @@ public class MasseflyttOrgtilknytningerService {
                     nyOrgenhetId,
                     beholdTilganger,
                     ot.gyldigFom(),
-                    ot.gyldigTom().orElse(null),
+                    ot.gyldigTom(),
                     ot.sektor(),
-                    ot.orgtilknytningType().orElse(null),
+                    ot.orgtilknytningType(),
                     ot.erDagligOppfolging(),
                     inputMetadata,
                     ventPaaState
@@ -197,9 +196,9 @@ public class MasseflyttOrgtilknytningerService {
                     nyOrgenhetId,
                     beholdTilganger,
                     flyttedato,
-                    ot.gyldigTom().orElse(null),
+                    ot.gyldigTom(),
                     ot.sektor(),
-                    ot.orgtilknytningType().orElse(null),
+                    ot.orgtilknytningType(),
                     ot.erDagligOppfolging(),
                     inputMetadata,
                     ventPaaState
@@ -259,7 +258,7 @@ public class MasseflyttOrgtilknytningerService {
             navident,
             nyOrgenhetId,
             gyldigFom,
-            Optional.ofNullable(gyldigTom),
+            gyldigTom,
             isDOL,
             inputMetadata,
             null
@@ -268,7 +267,7 @@ public class MasseflyttOrgtilknytningerService {
         if (tilknytningType != null) {
             orgtilknytningCommandService.endreTilknytningtype(new EndreTilknytningtypeCommand(
                 newFid,
-                Optional.of(tilknytningType),
+                tilknytningType,
                 inputMetadata
             ));
         }
