@@ -62,7 +62,7 @@ public class ComparerTest {
                 new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
                 null,
                 null,
-                LocalDate.now().minusYears(3),
+                null,
                 "2700",
                 List.of(),
                 IdentType.STANDARD,
