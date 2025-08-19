@@ -8,7 +8,6 @@ import no.nav.nom.apps.streams.kafkaapi.ressurs.hendelser.v1.RessursOpprettetEve
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
-import no.nav.nom.contract.nom.eventsource.RessursJobbtelefonOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import org.apache.kafka.common.serialization.Serdes;
@@ -71,26 +70,12 @@ public class EventsourceToExternalEvents {
                                 }
                             }
 
-                            if (event.getData() == null && event instanceof RessursJobbtelefonOppdatertEventV1 && event.getFid().equals(ressursAggregate.get("fid").asText())) {
-                                RessursJobbtelefonOppdatertEventV1 jobbtelefonOppdatertEventV1 = new RessursJobbtelefonOppdatertEventV1(
-                                    event.getFid(),
-                                    new RessursJobbtelefonOppdatertEventV1.JobbtelefonOppdatertEventData(
-                                        ressursAggregate.get("navident").asText(),
-                                        null
-                                    ),
-                                    event.getMetadata().inputMetadata()
-                                );
-                                ressursAggregate.setAll(objectMapper.convertValue(jobbtelefonOppdatertEventV1.getData(), ObjectNode.class));
-                            } else {
-                                ressursAggregate.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
-                            }
+                            ressursAggregate.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
 
+                            // Merke ressursen når den har nødvendige felter
                             if (ressursHasRequiredFields(ressursAggregate)) {
-
                                 if (ressursAggregate.get("ressursReadyForJoin") == null) {
                                     ressursAggregate.put("ressursReadyForJoin", "true");
-                                } else {
-                                    ressursAggregate.put("ressursReadyForJoin", "false");
                                 }
                             }
 
@@ -132,7 +117,15 @@ public class EventsourceToExternalEvents {
         ressursPerNavident
                 .toStream()
                 .print(Printed.<String, ObjectNode>toSysOut().withLabel("ressursPerNavident"));
-        
+
+        // Kun ta med ressurser som det skal sendes melding for
+        KTable<String, ObjectNode> ressurserKlarTilSending = ressursPerNavident.toStream()
+            .filter((key, rJson) -> isFieldSetAndTrue(rJson, "sendMessage"))
+            .toTable();
+
+        ressurserKlarTilSending
+            .toStream()
+            .print(Printed.<String, ObjectNode>toSysOut().withLabel("ressurserKlarTilSending"));
 
         // Aggregerer orgtilknytninger
         KTable<String, ObjectNode> orgtilknytningAggregateKTable = streamsBuilder
@@ -143,13 +136,13 @@ public class EventsourceToExternalEvents {
                         objectMapper::createObjectNode,
                         (String key, OrgtilknytningEvent newEvent, ObjectNode orgtilknytningAggregate) -> {
                             orgtilknytningAggregate.put("fid", newEvent.getFid());
-                            
+
                             orgtilknytningAggregate.setAll(objectMapper.convertValue(newEvent.getData(), ObjectNode.class));
 
                             // Hvis DagligOppfolgingEndretEvent mottas og setter DOL så kan OTen gå videre til neste steg
                             // For påfølgende eventer hvor DOL er satt skal join ikke trigges
                             if (orgtilknytningHasRequiredFields(orgtilknytningAggregate)) {
-                                var existingStatus = orgtilknytningAggregate.get("otReadyForJoin");
+                                JsonNode existingStatus = orgtilknytningAggregate.get("otReadyForJoin");
                                 if (existingStatus != null && existingStatus.asText().equals("true")) {
                                     orgtilknytningAggregate.put("otReadyForJoin", "false");
                                 } else {
@@ -165,7 +158,7 @@ public class EventsourceToExternalEvents {
         orgtilknytningAggregateKTable
                 .toStream()
                 .print(Printed.<String, ObjectNode>toSysOut().withLabel("orgtilknytningAggregateKTable"));
-        
+
 
         // Ta med OTer som er DOL, snu til å være per navident og merke første OT for denne navidenten for sending 
         KTable<String, ObjectNode> orgtilknytningMappedToNavident = orgtilknytningAggregateKTable.toStream()
@@ -192,21 +185,21 @@ public class EventsourceToExternalEvents {
         orgtilknytningMappedToNavident
                 .toStream()
                 .print(Printed.<String, ObjectNode>toSysOut().withLabel("orgtilknytningMappedToNavident"));
-        
+
 
         // Kun ta med orgtilkyntinger som skal joines 
         KTable<String, ObjectNode> forsteDOLOrgtilknytningPrNavident = orgtilknytningMappedToNavident.toStream()
                 .filter((key, otJson) -> isFieldSetAndTrue(otJson, "sendMessage"))
                 .toTable();
-        
+
         forsteDOLOrgtilknytningPrNavident
                 .toStream()
                 .print(Printed.<String, ObjectNode>toSysOut().withLabel("forsteDOLOrgtilknytningPrNavident"));
-        
+
 
 
         // Joiner på navident
-        ressursPerNavident.join(
+        ressurserKlarTilSending.join(
                         forsteDOLOrgtilknytningPrNavident,
                         this::toRessursOpprettetEvent,
                         Materialized.with(stringSerde, ressursOpprettetEventSerde))
@@ -218,7 +211,7 @@ public class EventsourceToExternalEvents {
         return orgtilknytningAggregate.get("dagligOppfolging") != null &&
                 orgtilknytningAggregate.get("dagligOppfolging").asText().equals("true");
     }
-    
+
     private boolean ressursHasRequiredFields(ObjectNode ressursAggregate) {
         JsonNode navidentNode = ressursAggregate.get("navident");
         JsonNode startdatoNode = ressursAggregate.get("startdato");
@@ -226,12 +219,10 @@ public class EventsourceToExternalEvents {
         return navidentNode != null && navidentNode.textValue() != null && !navidentNode.textValue().isEmpty()
                 && startdatoNode != null && startdatoNode.textValue() != null && !startdatoNode.textValue().isEmpty();
     }
-    
-    
 
     private static boolean isFieldSetAndTrue(ObjectNode value, String fieldName) {
-        JsonNode dolNode = value.get(fieldName);
-        return dolNode != null && dolNode.asText().equals("true");
+        JsonNode jsonNode = value.get(fieldName);
+        return jsonNode != null && jsonNode.asText().equals("true");
     }
 
     private RessursOpprettetEvent toRessursOpprettetEvent(

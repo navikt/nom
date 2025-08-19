@@ -12,6 +12,7 @@ import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
 
@@ -28,6 +29,8 @@ public class EventsourceToExternalEventsTestTopology {
 
     ObjectMapper objectMapper = configureObjectMapper();
 
+    private TopologyTestDriver topologyTestDriver;
+
     TestInputTopic<String, RessursEvent> ressursInputTopic;
     TestInputTopic<String, OrgtilknytningEvent> orgtilknytningInputTopic;
     TestOutputTopic<String, RessursOpprettetEvent> outputTopic;
@@ -39,6 +42,13 @@ public class EventsourceToExternalEventsTestTopology {
     @BeforeEach
     public void setup() {
         setupKafkaTransformer();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        if (topologyTestDriver != null) {
+            topologyTestDriver.close();
+        }
     }
 
     private void setupKafkaTransformer() {
@@ -60,7 +70,7 @@ public class EventsourceToExternalEventsTestTopology {
 
 
         Topology topology = streamsBuilder.build();
-        TopologyTestDriver topologyTestDriver = new TopologyTestDriver(topology, new Properties());
+        topologyTestDriver = new TopologyTestDriver(topology, new Properties());
 
 //        log.info(topology.describe().toString());
 
