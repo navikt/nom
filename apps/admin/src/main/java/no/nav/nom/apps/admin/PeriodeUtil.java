@@ -1,6 +1,7 @@
 package no.nav.nom.apps.admin;
 
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.contract.nom.state.RessursState;
 
 import java.time.LocalDate;
 
@@ -17,9 +18,17 @@ public class PeriodeUtil {
     public static LocalDate yesterday() { return today().minusDays(1); }
 
     public static LocalDate tomorrow() { return today().plusDays(1); }
+
+    public static boolean isCurrentPeriod(RessursState ressursState) {
+        return isCurrentOrFuturePeriod(ressursState) && ressursState.startdato().isBefore(tomorrow());
+    }
     
     public static boolean isCurrentOrFuturePeriod(OrgtilknytningState orgtilknytning) {
         return isNull(orgtilknytning.gyldigTom()) || orgtilknytning.gyldigTom().isAfter(yesterday());
+    }
+
+    public static boolean isCurrentOrFuturePeriod(RessursState ressursState) {
+        return isNull(ressursState.sluttdato()) || ressursState.sluttdato().isAfter(yesterday());
     }
 
     public static boolean overlapsInterval(OrgtilknytningState orgtilknytning1, OrgtilknytningState orgtilknytning2) {

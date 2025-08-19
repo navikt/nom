@@ -1,6 +1,7 @@
 package no.nav.nom.apps.admin.sanitycheck.remedycompare;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.admin.PeriodeUtil;
 import no.nav.nom.apps.admin.webclient.nomapiclient.NomApiClient;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -184,8 +185,7 @@ public class Comparer {
     }
 
     private static boolean erRessursAktiv(RessursState ressursState) {
-        return ressursState.startdato() != null ? ressursState.startdato().isBefore(LocalDate.now().plusDays(1)) : LocalDate.MIN.isBefore(LocalDate.now().plusDays(1))
-            && ressursState.sluttdato() != null ? ressursState.sluttdato().isAfter(LocalDate.now().minusDays(1)) : LocalDate.MAX.isAfter(LocalDate.now().minusDays(1));
+        return PeriodeUtil.isCurrentPeriod(ressursState);
     }
 
     private static boolean sluttdatoErFremITidOgRemedyErNull(RessursState ressursState, ImportedRemedyUser remedyUser) {
