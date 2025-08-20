@@ -115,9 +115,10 @@ public class Comparer {
     }
 
     private static boolean nameDiffers(RessursState ressursState, ImportedRemedyUser remedyUser) {
-        var nomName = ressursState.visningsnavn().getFormattedVisningsnavn().trim();
-        var nomNameRemedyCapitalized = capitalizeNavn(ressursState.visningsnavn().getFormattedVisningsnavn()).trim();
-        return !nomName.equals(remedyUser.getVisningsnavn().trim()) && !nomNameRemedyCapitalized.equals(remedyUser.getVisningsnavn().trim());
+        var nomName = ressursState.visningsnavn().getFormattedVisningsnavn().replaceAll("\\s+", " "); // replace multiples spaces with one
+        var nomNameRemedyCapitalized = capitalizeNavn(ressursState.visningsnavn().getFormattedVisningsnavn()).replaceAll("\\s+", " ");
+        var remedyVisningsnavn = remedyUser.getVisningsnavn().replaceAll("\\s+", " ");
+        return !nomName.equals(remedyVisningsnavn) && !nomNameRemedyCapitalized.equals(remedyVisningsnavn);
     }
 
 
