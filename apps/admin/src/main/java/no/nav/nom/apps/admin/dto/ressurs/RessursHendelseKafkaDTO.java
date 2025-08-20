@@ -7,7 +7,6 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Builder
 public record RessursHendelseKafkaDTO(
@@ -17,7 +16,8 @@ public record RessursHendelseKafkaDTO(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String navident,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Visningsnavn visningsnavn,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate startdato,
-        @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> sluttdato,
+        @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) LocalDate sluttdato,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Sektor sektor,
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) RessursHendelseOrgtilknytningKafkaDTO orgtilknytning
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) RessursHendelseOrgtilknytningKafkaDTO orgtilknytning,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String eventtype
 ) { }

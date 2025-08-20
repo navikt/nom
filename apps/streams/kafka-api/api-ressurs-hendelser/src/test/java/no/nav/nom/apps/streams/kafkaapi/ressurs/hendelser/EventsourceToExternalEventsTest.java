@@ -185,8 +185,7 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
 
         var dolEventData = (OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData) dolEvent.getData();
         KeyValue<String, RessursOpprettetEvent> ressursOpprettetEvent = outputTopic.readKeyValue();
-        //noinspection OptionalGetWithoutIsPresent
-        assertThat(ressursOpprettetEvent.value.getOrgtilknytning().gyldigTom().get()).isEqualTo(dolEventData.gyldigTom());
+        assertThat(ressursOpprettetEvent.value.getOrgtilknytning().gyldigTom()).isEqualTo(dolEventData.gyldigTom());
     }
 
     @Test

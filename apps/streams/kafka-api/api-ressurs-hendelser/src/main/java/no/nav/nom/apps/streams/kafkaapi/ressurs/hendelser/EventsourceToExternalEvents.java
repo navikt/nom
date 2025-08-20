@@ -55,14 +55,14 @@ public class EventsourceToExternalEvents {
         // Aggregerer ressurser siden det kan være RessursOpprettet-events som ikke har alle nødvendige felt
         KTable<String, ObjectNode> ressursAggregateKTable = streamsBuilder
             .stream(appProperties.ressursEvtsrcTopic(), Consumed.with(stringSerde, ressursEventSerde))
-            .filter((k, event) -> !event.getFid().startsWith("FID_MANUELL")) // Ikke behandle manuelle test ressurser/orgtilknytninger
-            .groupBy((k, event) -> event.getFid(), Grouped.with(stringSerde, ressursEventSerde))
+            .filter((key, event) -> !event.getFid().startsWith("FID_MANUELL")) // Ikke behandle manuelle test ressurser/orgtilknytninger
+            .groupBy((key, event) -> event.getFid(), Grouped.with(stringSerde, ressursEventSerde))
             .aggregate(
                 objectMapper::createObjectNode,
-                (String key, RessursEvent event, ObjectNode ressursAggregate) -> {
-                    ressursAggregate.put("fid", event.getFid());
+                (String key, RessursEvent newEvent, ObjectNode ressursAggregate) -> {
+                    ressursAggregate.put("fid", newEvent.getFid());
 
-                    if (event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData) {
+                    if (newEvent.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData) {
                         if (additionalData.navident() != null) {
                             ressursAggregate.put("navident", additionalData.navident());
                         }
@@ -71,19 +71,19 @@ public class EventsourceToExternalEvents {
                         }
                     }
 
-                    if (event.getData() == null && event instanceof RessursJobbtelefonOppdatertEventV1 && event.getFid()
+                    if (newEvent.getData() == null && newEvent instanceof RessursJobbtelefonOppdatertEventV1 && newEvent.getFid()
                         .equals(ressursAggregate.get("fid").asText())) {
                         RessursJobbtelefonOppdatertEventV1 jobbtelefonOppdatertEventV1 = new RessursJobbtelefonOppdatertEventV1(
-                            event.getFid(),
+                            newEvent.getFid(),
                             new RessursJobbtelefonOppdatertEventV1.JobbtelefonOppdatertEventData(
                                 ressursAggregate.get("navident").asText(),
                                 null
                             ),
-                            event.getMetadata().inputMetadata()
+                            newEvent.getMetadata().inputMetadata()
                         );
                         ressursAggregate.setAll(objectMapper.convertValue(jobbtelefonOppdatertEventV1.getData(), ObjectNode.class));
                     } else {
-                        ressursAggregate.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                        ressursAggregate.setAll(objectMapper.convertValue(newEvent.getData(), ObjectNode.class));
                     }
 
 
@@ -103,25 +103,22 @@ public class EventsourceToExternalEvents {
 
         // Snur til å være pr. navident og kun ha med ressurser hvor nødvendige felter har fått verdi
         KTable<String, ObjectNode> ressursPerNavident = ressursAggregateKTable.toStream()
-            .filter((k, event) -> isFieldSetAndTrue(event, "ressursReadyForJoin"))
-            .selectKey((key, otJson) -> otJson.get("navident").asText())
+            .filter((key, event) -> isFieldSetAndTrue(event, "ressursReadyForJoin"))
+            .selectKey((key, ressursJson) -> ressursJson.get("navident").asText())
             .groupByKey(Grouped.with(stringSerde, jsonSerde))
             .aggregate(
                 objectMapper::createObjectNode,
-                (String key, ObjectNode newEvent, ObjectNode aggregate) -> {
-                    log.debug("Aggregate before: {}", aggregate);
-
-                    aggregate.setAll(newEvent);
+                (String key, ObjectNode newEvent, ObjectNode ressursAggregate) -> {
+                    ressursAggregate.setAll(newEvent);
 
                     // Merke navidenten første gang og ellers fjerne merket, slik at det bare sendes en melding pr. navident
-                    if (aggregate.get("sendMessage") == null) {
-                        aggregate.put("sendMessage", "true");
+                    if (ressursAggregate.get("sendMessage") == null) {
+                        ressursAggregate.put("sendMessage", "true");
                     } else {
-                        aggregate.put("sendMessage", "false");
+                        ressursAggregate.put("sendMessage", "false");
                     }
 
-                    log.debug("Aggregate after: {}", aggregate);
-                    return aggregate;
+                    return ressursAggregate;
                 },
                 Materialized.with(stringSerde, jsonSerde)
             );
@@ -133,7 +130,7 @@ public class EventsourceToExternalEvents {
 
         // Kun ta med ressurser som det skal sendes melding for
         KTable<String, ObjectNode> ressurserKlarTilSending = ressursPerNavident.toStream()
-            .filter((key, rJson) -> isFieldSetAndTrue(rJson, "sendMessage"))
+            .filter((key, ressursJson) -> isFieldSetAndTrue(ressursJson, "sendMessage"))
             .toTable();
 
         ressurserKlarTilSending
@@ -143,8 +140,8 @@ public class EventsourceToExternalEvents {
         // Aggregerer orgtilknytninger
         KTable<String, ObjectNode> orgtilknytningAggregateKTable = streamsBuilder
             .stream(appProperties.orgtilknytningEvtsrcTopic(), Consumed.with(stringSerde, orgtilknytningEventSerde))
-            .filter((k, event) -> !event.getFid().startsWith("FID_MANUELL")) // Ikke behandle manuelle test ressurser/orgtilknytninger
-            .groupBy((String k, OrgtilknytningEvent event) -> event.getFid(), Grouped.with(stringSerde, orgtilknytningEventSerde))
+            .filter((key, event) -> !event.getFid().startsWith("FID_MANUELL")) // Ikke behandle manuelle test ressurser/orgtilknytninger
+            .groupBy((String key, OrgtilknytningEvent event) -> event.getFid(), Grouped.with(stringSerde, orgtilknytningEventSerde))
             .aggregate(
                 objectMapper::createObjectNode,
                 (String key, OrgtilknytningEvent newEvent, ObjectNode orgtilknytningAggregate) -> {
@@ -180,17 +177,17 @@ public class EventsourceToExternalEvents {
             .groupByKey(Grouped.with(stringSerde, jsonSerde))
             .aggregate(
                 objectMapper::createObjectNode,
-                (String key, ObjectNode newEvent, ObjectNode aggregate) -> {
-                    aggregate.setAll(newEvent);
+                (String key, ObjectNode newEvent, ObjectNode orgtilknytningAggregate) -> {
+                    orgtilknytningAggregate.setAll(newEvent);
 
                     // Merke første OT for navidenten og ellers fjerne merket, slik at det bare sendes en melding pr. navident
-                    if (aggregate.get("sendMessage") == null) {
-                        aggregate.put("sendMessage", "true");
+                    if (orgtilknytningAggregate.get("sendMessage") == null) {
+                        orgtilknytningAggregate.put("sendMessage", "true");
                     } else {
-                        aggregate.put("sendMessage", "false");
+                        orgtilknytningAggregate.put("sendMessage", "false");
                     }
 
-                    return aggregate;
+                    return orgtilknytningAggregate;
                 },
                 Materialized.with(stringSerde, jsonSerde)
             );
@@ -248,8 +245,8 @@ public class EventsourceToExternalEvents {
                 .orgEnhetId(orgtilknytningAggregate.get("orgEnhetId").asText())
                 .gyldigFom(orgtilknytningAggregate.hasNonNull("gyldigFom") ?
                     LocalDate.parse(orgtilknytningAggregate.get("gyldigFom").asText()) : null)
-                .gyldigTom(Optional.ofNullable(orgtilknytningAggregate.hasNonNull("gyldigTom") ?
-                    LocalDate.parse(orgtilknytningAggregate.get("gyldigTom").asText()) : null))
+                .gyldigTom(orgtilknytningAggregate.hasNonNull("gyldigTom") ?
+                    LocalDate.parse(orgtilknytningAggregate.get("gyldigTom").asText()) : null)
                 .dagligOppfolging(orgtilknytningAggregate.get("dagligOppfolging").asBoolean())
                 .build();
 
