@@ -115,9 +115,9 @@ public class Comparer {
     }
 
     private static boolean nameDiffers(RessursState ressursState, ImportedRemedyUser remedyUser) {
-        var nomName = ressursState.visningsnavn().getFormattedVisningsnavn();
-        var nomNameRemedyCapitalized = capitalizeNavn(ressursState.visningsnavn().getFormattedVisningsnavn());
-        return !nomName.equals(remedyUser.getVisningsnavn()) && !nomNameRemedyCapitalized.equals(remedyUser.getVisningsnavn());
+        var nomName = ressursState.visningsnavn().getFormattedVisningsnavn().trim();
+        var nomNameRemedyCapitalized = capitalizeNavn(ressursState.visningsnavn().getFormattedVisningsnavn()).trim();
+        return !nomName.equals(remedyUser.getVisningsnavn().trim()) && !nomNameRemedyCapitalized.equals(remedyUser.getVisningsnavn().trim());
     }
 
 
