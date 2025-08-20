@@ -124,6 +124,7 @@ unleash:
 logging:
   level:
     no.nav.nom.apps.admin.sanitycheck: DEBUG
+    no.nav.nom.apps.admin.events.ressurs.api: DEBUG
 
 --- # This is the same as having an application-dev.yaml file
 spring:

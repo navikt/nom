@@ -4,7 +4,6 @@ import no.nav.nom.apps.admin.dto.ressurs.RessursHendelseKafkaDTO;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.PartitionOffset;
@@ -44,6 +43,8 @@ public class RessursHendelseApiListener {
     )
     public void onMessage(ConsumerRecords<String, RessursHendelseKafkaDTO> records) {
         List<RessursHendelseKafkaDTO> ressursHendelser = new ArrayList<>();
+
+        log.debug("Records received: {}", records);
 
         records.forEach(record -> ressursHendelser.add(
                 RessursHendelseKafkaDTO.builder()
