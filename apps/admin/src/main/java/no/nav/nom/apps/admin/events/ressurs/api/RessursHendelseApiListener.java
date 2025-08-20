@@ -44,10 +44,10 @@ public class RessursHendelseApiListener {
     public void onMessage(ConsumerRecords<String, RessursHendelseKafkaDTO> records) {
         List<RessursHendelseKafkaDTO> ressursHendelser = new ArrayList<>();
 
-        log.debug("Records received: {}", records);
-
-        records.forEach(record -> ressursHendelser.add(
-                RessursHendelseKafkaDTO.builder()
+        records.forEach(record -> {
+            log.debug("Record received - Key: {} Value: {}", record.key(), record.value());
+            ressursHendelser.add(
+                    RessursHendelseKafkaDTO.builder()
                         .key(record.key())
                         .timestamp(LocalDateTime.ofInstant(Instant.ofEpochMilli(record.timestamp()), ZoneId.systemDefault()))
                         .fid(record.value().fid())
@@ -57,7 +57,8 @@ public class RessursHendelseApiListener {
                         .sluttdato(record.value().sluttdato())
                         .sektor(record.value().sektor())
                         .orgtilknytning(record.value().orgtilknytning())
-                        .build()));
+                        .build());
+        });
 
         ressursHendelseApiRepository.add(ressursHendelser);
     }
