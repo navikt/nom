@@ -259,7 +259,7 @@ public class OrgEnhetSanityCheckService {
         List<OrgEnhetArbeidsomraadeInfo.LoevnodeMedFeilAntallArbOmr> loevnoderMedFeilAntallArbOmr = new ArrayList<>();
         alleLeafNoder.forEach(orgenhet -> {
             var count = findArbeidsomraadeCountInHierarkiAbove(orgenhet);
-            if (count != 1 && !manglerOvernode(orgenhet, alleIdUnder)) {
+            if (count != 1 /*&& !manglerOvernode(orgenhet, alleIdUnder) */) {
                 loevnoderMedFeilAntallArbOmr.add(
                         OrgEnhetArbeidsomraadeInfo.LoevnodeMedFeilAntallArbOmr.builder()
                                 .orgenhetId(orgenhet.id())
