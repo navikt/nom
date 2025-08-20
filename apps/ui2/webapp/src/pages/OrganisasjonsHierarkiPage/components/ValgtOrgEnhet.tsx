@@ -6,9 +6,11 @@ import {
 import {
   BodyShort,
   Button,
+  CopyButton,
   Dropdown,
   Heading,
   HGrid,
+  HStack,
   Link,
   Loader,
   ReadMore,
@@ -163,54 +165,54 @@ export const ValgtOrgEnhet = ({
             </Heading>
 
             <HGrid
-              columns={2}
+              columns="max-content max-content"
               css={css`
                 row-gap: var(--a-spacing-2);
               `}
               gap="4"
             >
-              {orgEnhet.id && (
-                <BodyShort size="small">
-                  ID: <b>{orgEnhet.id}</b>
-                </BodyShort>
+              <OrgEnhetInformasjon copyButton label="ID" value={orgEnhet.id} />
+              <OrgEnhetInformasjon
+                label="Remedy-enhet"
+                value={orgEnhet.remedyEnhetId}
+              />
+              {orgEnhet.navn.toLowerCase() !== "nav" && (
+                <OrgEnhetInformasjon
+                  label="Gyldig f.o.m."
+                  value={formatDisplayDate(orgEnhet.gyldigFom)}
+                />
               )}
-              {orgEnhet.remedyEnhetId && (
-                <BodyShort size="small">
-                  Remedy-enhet: <b>{orgEnhet.remedyEnhetId}</b>
-                </BodyShort>
-              )}
-              {orgEnhet.gyldigFom && orgEnhet.navn.toLowerCase() !== "nav" && (
-                <BodyShort size="small">
-                  Gyldig f.o.m.: <b>{formatDisplayDate(orgEnhet.gyldigFom)}</b>
-                </BodyShort>
-              )}
-              {orgEnhet.gyldigTom && (
-                <BodyShort size="small">
-                  Gyldig t.o.m.: <b>{formatDisplayDate(orgEnhet.gyldigTom)}</b>
-                </BodyShort>
-              )}
-              {orgEnhet.orgEnhetsType && (
-                <BodyShort size="small">
-                  Enhetstype:{" "}
-                  <b>{OrgEnhetsTypeNameMapping[orgEnhet.orgEnhetsType]}</b>
-                </BodyShort>
-              )}
-              {orgEnhet.nomNivaa && (
-                <BodyShort size="small">
-                  NOM-nivå: <b>{NomNivaaNameMapping[orgEnhet.nomNivaa]}</b>
-                </BodyShort>
-              )}
-              {orgEnhet.agressoId && (
-                <BodyShort size="small">
-                  Unit4-ID: <b>{orgEnhet.agressoId}</b>
-                </BodyShort>
-              )}
-              {orgEnhet.orgNiv &&
-                orgEnhet.orgNiv !== "ORGNIV0" &&
+              <OrgEnhetInformasjon
+                label="Gyldig t.o.m."
+                value={formatDisplayDate(orgEnhet.gyldigTom)}
+              />
+              <OrgEnhetInformasjon
+                label="Enhetstype"
+                value={
+                  orgEnhet.orgEnhetsType
+                    ? OrgEnhetsTypeNameMapping[orgEnhet.orgEnhetsType]
+                    : undefined
+                }
+              />
+              <OrgEnhetInformasjon
+                label="NOM-nivå"
+                value={
+                  orgEnhet.nomNivaa
+                    ? NomNivaaNameMapping[orgEnhet.nomNivaa]
+                    : undefined
+                }
+              />
+              <OrgEnhetInformasjon
+                copyButton
+                label="Unit4-ID"
+                value={orgEnhet.agressoId}
+              />
+              {orgEnhet.orgNiv !== "ORGNIV0" &&
                 orgEnhet.orgNiv !== "ORGENHET" && (
-                  <BodyShort size="small">
-                    Unit4-nivå: <b>{orgEnhet.orgNiv}</b>
-                  </BodyShort>
+                  <OrgEnhetInformasjon
+                    label="Unit4-nivå"
+                    value={orgEnhet.orgNiv}
+                  />
                 )}
             </HGrid>
           </div>
@@ -279,6 +281,29 @@ export const ValgtOrgEnhet = ({
     </div>
   );
 };
+
+function OrgEnhetInformasjon({
+  label,
+  value,
+  copyButton = false,
+}: {
+  label: string;
+  value: string | undefined;
+  copyButton?: boolean;
+}) {
+  if (!value) {
+    return;
+  }
+
+  return (
+    <HStack gap="2">
+      <BodyShort>
+        {label}: <b>{value}</b>
+      </BodyShort>
+      {copyButton && <CopyButton copyText={value} size="xsmall" />}
+    </HStack>
+  );
+}
 
 function MedarbeidereList({
   orgEnhet,

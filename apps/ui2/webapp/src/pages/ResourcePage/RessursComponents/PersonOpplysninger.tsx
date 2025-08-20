@@ -259,7 +259,9 @@ export function Type({ ressurs }: { ressurs: Ressurs }) {
 }
 
 export function Navident({ ressurs }: { ressurs: Ressurs }) {
-  return <LabelWithValue label="Nav-ident" value={ressurs.navident} />;
+  return (
+    <LabelWithValue copyButton label="Nav-ident" value={ressurs.navident} />
+  );
 }
 
 export function StartDato({ ressurs }: { ressurs: Ressurs }) {
@@ -317,7 +319,7 @@ export function SektorView({ ressurs }: { ressurs: Ressurs }) {
 }
 
 export function Epost({ ressurs }: { ressurs: Ressurs }) {
-  return <LabelWithValue label="E-post" value={ressurs.epost?.toLowerCase()} />;
+  return <LabelWithValue copyButton label="E-post" value={ressurs.epost} />;
 }
 
 export function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {

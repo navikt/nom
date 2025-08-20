@@ -1,4 +1,4 @@
-import { HelpText, HStack } from "@navikt/ds-react";
+import { CopyButton, HelpText, HStack } from "@navikt/ds-react";
 import React from "react";
 
 export function LabelWithValue({
@@ -7,12 +7,14 @@ export function LabelWithValue({
   helpText,
   wrapped = false,
   displayEmpty = false,
+  copyButton = false,
 }: {
   label: string;
   value: string | null | undefined;
   helpText?: string;
   wrapped?: boolean;
   displayEmpty?: boolean;
+  copyButton?: boolean;
 }) {
   if (!value && !displayEmpty) {
     return <></>;
@@ -21,7 +23,8 @@ export function LabelWithValue({
   if (wrapped) {
     return (
       <span>
-        {label}: <ValueView helpText={helpText} value={value} />
+        {label}:{" "}
+        <ValueView copyButton={copyButton} helpText={helpText} value={value} />
       </span>
     );
   }
@@ -29,7 +32,7 @@ export function LabelWithValue({
   return (
     <>
       <span>{label}:</span>
-      <ValueView helpText={helpText} value={value} />
+      <ValueView copyButton={copyButton} helpText={helpText} value={value} />
     </>
   );
 }
@@ -37,18 +40,17 @@ export function LabelWithValue({
 function ValueView({
   value,
   helpText,
+  copyButton,
 }: {
   value: string | null | undefined;
   helpText?: string;
+  copyButton: boolean;
 }) {
-  if (helpText) {
-    return (
-      <HStack gap="2">
-        <b>{value}</b>
-        <HelpText>{helpText}</HelpText>
-      </HStack>
-    );
-  }
-
-  return <b>{value}</b>;
+  return (
+    <HStack gap="2">
+      <b>{value}</b>
+      {copyButton && value && <CopyButton copyText={value} size="xsmall" />}
+      {helpText && <HelpText>{helpText}</HelpText>}
+    </HStack>
+  );
 }
