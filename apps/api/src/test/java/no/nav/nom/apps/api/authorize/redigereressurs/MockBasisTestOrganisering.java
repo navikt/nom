@@ -213,6 +213,33 @@ abstract public class MockBasisTestOrganisering {
             .orgNiv("ORGENHET")
             .build();
 
+        IOrgenhet orgenhet_helfo = MockOrgenhet.builder()
+            .fid("FID_HELFO")
+            .id("dummyHelfoId")
+            .navn("OrgEnhet HELFO")
+            .nomNivaa(Optional.empty())
+            .agressoId("HELFO")
+            .orgNiv("NAV")
+            .build();
+
+        IOrgenhet orgenhet_skatt = MockOrgenhet.builder()
+            .fid("FID_SKATT")
+            .id("dummySkattId")
+            .navn("OrgEnhet SKATT")
+            .nomNivaa(Optional.empty())
+            .agressoId("SKATT")
+            .orgNiv("NAV")
+            .build();
+
+        IOrgenhet orgenhet_riksrev = MockOrgenhet.builder()
+            .fid("FID_RIKSREV")
+            .id("dummyRiksrevisjonId")
+            .navn("OrgEnhet RIKSREV")
+            .nomNivaa(Optional.empty())
+            .agressoId("RIKSREV")
+            .orgNiv("NAV")
+            .build();
+
         lenient().when(orgenhetService.getById("X")).thenReturn(Optional.of(orgenhet_X));
         lenient().when(orgenhetService.getById("A")).thenReturn(Optional.of(orgenhet_A));
         lenient().when(orgenhetService.getById("A1")).thenReturn(Optional.of(orgenhet_A1));
@@ -229,6 +256,9 @@ abstract public class MockBasisTestOrganisering {
         lenient().when(orgenhetService.getById("D1")).thenReturn(Optional.of(orgenhet_D1));
         lenient().when(orgenhetService.getById("E")).thenReturn(Optional.of(orgenhet_E));
         lenient().when(orgenhetService.getById("E1")).thenReturn(Optional.of(orgenhet_E1));
+        lenient().when(orgenhetService.getById("dummyHelfoId")).thenReturn(Optional.of(orgenhet_helfo));
+        lenient().when(orgenhetService.getById("dummySkattId")).thenReturn(Optional.of(orgenhet_skatt));
+        lenient().when(orgenhetService.getById("dummyRiksrevisjonId")).thenReturn(Optional.of(orgenhet_riksrev));
 
         when(orgenhetService.getByIdBulk(argThat(list -> containsInAnyOrder("C", "C1", "C11", "C2", "C22").matches(list)))).thenReturn(Map.of(
             "C", orgenhet_C,
@@ -262,6 +292,9 @@ abstract public class MockBasisTestOrganisering {
         when(orgenhetService.getEnheterByLeder("D1")).thenReturn(List.of(orgenhet_D1));
         when(orgenhetService.getEnheterByLeder("E")).thenReturn(List.of(orgenhet_E));
         when(orgenhetService.getEnheterByLeder("E1")).thenReturn(List.of(orgenhet_E1));
+        when(orgenhetService.getEnheterByLeder("H1")).thenReturn(List.of(orgenhet_helfo));
+        when(orgenhetService.getEnheterByLeder("S1")).thenReturn(List.of(orgenhet_skatt));
+        when(orgenhetService.getEnheterByLeder("R1")).thenReturn(List.of(orgenhet_riksrev));
     }
 
     private void setupBasisOrganisering() {
@@ -558,8 +591,29 @@ abstract public class MockBasisTestOrganisering {
             .orgNiv("ORGENHET")
             .build();
 
+        DvhLeder leder_HELFO = DvhLeder.builder()
+            .navIdent("H1")
+            .orgEnhetNr("HELFO")
+            .orgenhetNavn("OrgEnhet HELFO")
+            .orgNiv("NAV")
+            .build();
+
+        DvhLeder leder_SKATT = DvhLeder.builder()
+            .navIdent("S1")
+            .orgEnhetNr("SKATT")
+            .orgenhetNavn("OrgEnhet SKATT")
+            .orgNiv("NAV")
+            .build();
+
+        DvhLeder leder_RIKSREV = DvhLeder.builder()
+            .navIdent("R1")
+            .orgEnhetNr("RIKSREV")
+            .orgenhetNavn("OrgEnhet RIKSREV")
+            .orgNiv("NAV")
+            .build();
+
         when(dvhRepository.getLedere()).thenReturn(List.of(
-            leder_A, leder_A1, leder_A11, leder_B, leder_B1, leder_B11, leder_C, leder_C1, leder_C11, leder_C2, leder_C22, leder_D, leder_D1, leder_E, leder_E1
+            leder_A, leder_A1, leder_A11, leder_B, leder_B1, leder_B11, leder_C, leder_C1, leder_C11, leder_C2, leder_C22, leder_D, leder_D1, leder_E, leder_E1, leder_HELFO, leder_SKATT, leder_RIKSREV
         ));
     }
 
@@ -612,12 +666,39 @@ abstract public class MockBasisTestOrganisering {
             .gyldigTom(null)
             .build();
 
+        OrgtilknytningState ot_HELFO_H100001 = OrgtilknytningState.builder()
+            .fid("FID_HELFO_H100001")
+            .navident("H100001")
+            .orgEnhetId("dummyHelfoId")
+            .gyldigFom(LocalDate.now().minusDays(10))
+            .gyldigTom(null)
+            .build();
+
+        OrgtilknytningState ot_SKATT_S100001 = OrgtilknytningState.builder()
+            .fid("FID_SKATT_S100001")
+            .navident("S100001")
+            .orgEnhetId("dummySkattId")
+            .gyldigFom(LocalDate.now().minusDays(10))
+            .gyldigTom(null)
+            .build();
+
+        OrgtilknytningState ot_RIKSREV_R100001 = OrgtilknytningState.builder()
+            .fid("FID_RIKSREV_R100001")
+            .navident("R100001")
+            .orgEnhetId("dummyRiksrevisjonId")
+            .gyldigFom(LocalDate.now().minusDays(10))
+            .gyldigTom(null)
+            .build();
+
         lenient().when(orgtilknytningStateRepository.findByNavident("B110001")).thenReturn(List.of(ot_B11_B110001));
         lenient().when(orgtilknytningStateRepository.findByNavident("B110002")).thenReturn(List.of(ot_B11_B110002));
         lenient().when(orgtilknytningStateRepository.findByNavident("C110001")).thenReturn(List.of(ot_C11_C110001));
         lenient().when(orgtilknytningStateRepository.findByNavident("C220001")).thenReturn(List.of(ot_C22_C220001));
         lenient().when(orgtilknytningStateRepository.findByNavident("D100001")).thenReturn(List.of(ot_D1_D100001));
         lenient().when(orgtilknytningStateRepository.findByNavident("E100001")).thenReturn(List.of(ot_E1_E100001));
+        lenient().when(orgtilknytningStateRepository.findByNavident("H100001")).thenReturn(List.of(ot_HELFO_H100001));
+        lenient().when(orgtilknytningStateRepository.findByNavident("S100001")).thenReturn(List.of(ot_SKATT_S100001));
+        lenient().when(orgtilknytningStateRepository.findByNavident("R100001")).thenReturn(List.of(ot_RIKSREV_R100001));
     }
 
     private void setupRessursState() {
@@ -645,8 +726,47 @@ abstract public class MockBasisTestOrganisering {
             .fysiskeBrukersteder(List.of("D1"))
             .build();
 
+        var helfo = RessursState.builder()
+            .fid("FID_HELFO")
+            .personident("098765431234")
+            .navident("H100001")
+            .sektor(Sektor.EKSTERN)
+            .visningsnavn(null)
+            .sluttdato(null)
+            .startdato(LocalDate.now().minusYears(1))
+            .primaryFysiskBrukersted(null)
+            .fysiskeBrukersteder(List.of("HELFO"))
+            .build();
+
+        var skatt = RessursState.builder()
+            .fid("FID_SKATT")
+            .personident("12345678901")
+            .navident("S100001")
+            .sektor(Sektor.EKSTERN)
+            .visningsnavn(null)
+            .sluttdato(null)
+            .startdato(LocalDate.now().minusYears(1))
+            .primaryFysiskBrukersted(null)
+            .fysiskeBrukersteder(List.of("SKATT"))
+            .build();
+
+        var riksrevisjonen = RessursState.builder()
+            .fid("FID_RIKSREV")
+            .personident("12345678902")
+            .navident("R100001")
+            .sektor(Sektor.NAV_STATLIG)
+            .visningsnavn(null)
+            .sluttdato(null)
+            .startdato(LocalDate.now().minusYears(1))
+            .primaryFysiskBrukersted(null)
+            .fysiskeBrukersteder(List.of("EKSTERN"))
+            .build();
+
         lenient().when(ressursStateRepository.findByNavident("HR")).thenReturn(Optional.of(hr));
         lenient().when(ressursStateRepository.findByNavident("EKSTERN")).thenReturn(Optional.of(ekstern));
+        lenient().when(ressursStateRepository.findByNavident("H100001")).thenReturn(Optional.of(helfo));
+        lenient().when(ressursStateRepository.findByNavident("S100001")).thenReturn(Optional.of(skatt));
+        lenient().when(ressursStateRepository.findByNavident("R100001")).thenReturn(Optional.of(riksrevisjonen));
     }
 
     @Getter

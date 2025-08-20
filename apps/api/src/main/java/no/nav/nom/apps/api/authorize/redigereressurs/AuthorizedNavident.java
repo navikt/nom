@@ -73,6 +73,9 @@ public class AuthorizedNavident {
     private final MicrosoftGraphClient microsoftGraphClient;
     private final String nomWriteDelegertAdGroup;
     private final String nomWriteLederAdGroup;
+    @Value("${app.orgenhet.helfo}") private String helfoOrgenhetId;
+    @Value("${app.orgenhet.skatt}") private String skattOrgenhetId;
+    @Value("${app.orgenhet.riksrev}") private String riksrevisjonenOrgenhetId;
     // Per leder for alle orgenheter på ARBEIDSOMRÅDE nivå og nedover. For den enkelte leder er alle under-nivåer lagt til.
     //   map <leder navident> -> Set<orgenhet-id>
     Map<String, HashSet<String>> lederForOrgenhetSomKanRedigere = new ConcurrentHashMap<>();
@@ -330,24 +333,26 @@ public class AuthorizedNavident {
         Map<String, HashSet<String>> nyLederForOrgenhetListe = new HashMap<>();
 
         enheterIHierarkiFraDriftsenhet.forEach(
-            enhetId -> {
-                var orgenhet = orgenhetService.getById(enhetId).get();
-                var lederNavident = dvhRepository.getLedere().stream()
-                    .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
-                        .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
-                    .findAny()
-                    .map(DvhLeder::getNavIdent)
-                    .orElse(null);
-                if (lederNavident != null) {
-                    addLederForOrgenhetToList(nyLederForOrgenhetListe, lederNavident, enhetId);
-                }
-            }
+            enhetId -> orgenhetService.getById(enhetId).flatMap(orgenhet -> dvhRepository.getLedere().stream()
+                .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
+                    .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
+                .findAny()
+                .map(DvhLeder::getNavIdent)).ifPresent(lederNavident -> addLederForOrgenhetToList(nyLederForOrgenhetListe, lederNavident, enhetId))
+        );
+
+        List.of(helfoOrgenhetId, skattOrgenhetId, riksrevisjonenOrgenhetId).forEach(
+            orgenhetId -> orgenhetService.getById(orgenhetId).flatMap(orgenhet -> dvhRepository.getLedere().stream()
+                .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
+                    .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
+                .findAny()
+                .map(DvhLeder::getNavIdent)).ifPresent(lederNavident -> addLederForOrgenhetToList(nyLederForOrgenhetListe, lederNavident, orgenhetId))
         );
         synchronized (this) {
             lederForOrgenhetSomKanRedigere.clear();
             lederForOrgenhetSomKanRedigere.putAll(nyLederForOrgenhetListe);
         }
-        log.info("Oppdatert {} ledere for {} orgenheter i redigere ressurs auth liste",
+        log.info(
+            "Oppdatert {} ledere for {} orgenheter i redigere ressurs auth liste",
             lederForOrgenhetSomKanRedigere.size(), orgenheterMedAuthedLederCount()
         );
     }
@@ -411,7 +416,7 @@ public class AuthorizedNavident {
     }
 
     private boolean erRessursInnunderOrgenhet(String ressursNavident, String orgenhetId) {
-        List<String> orgenheterIHierarki = alleEnheterIHierarkiFra(orgenhetId);
+        Set<String> orgenheterIHierarki = alleEnheterIHierarkiFra(orgenhetId);
 
         return orgtilknytningStateRepository
             .findByNavident(ressursNavident).stream()
@@ -449,13 +454,13 @@ public class AuthorizedNavident {
         return orgenheter;
     }
 
-    private List<String> alleEnheterIHierarkiFra(String orgenhetId) {
+    private Set<String> alleEnheterIHierarkiFra(String orgenhetId) {
         var aktiveOrganiseringer = organiseringStateRepository.getActiveOrganisering().values();
         return alleEnheterIHierarkiFra(orgenhetId, aktiveOrganiseringer);
     }
 
-    private List<String> alleEnheterIHierarkiFra(String orgenhetId, Collection<OrganiseringState> aktiveOrganiseringer) {
-        List<String> orgenheter = new ArrayList<>();
+    private Set<String> alleEnheterIHierarkiFra(String orgenhetId, Collection<OrganiseringState> aktiveOrganiseringer) {
+        Set<String> orgenheter = new HashSet<>();
         orgenheter.add(orgenhetId);
 
         underenheterFor(orgenhetId, aktiveOrganiseringer).forEach(id -> orgenheter.addAll(alleEnheterIHierarkiFra(id, aktiveOrganiseringer)));
