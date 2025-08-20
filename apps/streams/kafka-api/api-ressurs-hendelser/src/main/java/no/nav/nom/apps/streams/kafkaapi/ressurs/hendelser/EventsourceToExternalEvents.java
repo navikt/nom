@@ -74,9 +74,7 @@ public class EventsourceToExternalEvents {
 
                             // Merke ressursen når den har nødvendige felter
                             if (ressursHasRequiredFields(ressursAggregate)) {
-                                if (ressursAggregate.get("ressursReadyForJoin") == null) {
-                                    ressursAggregate.put("ressursReadyForJoin", "true");
-                                }
+                                ressursAggregate.put("ressursReadyForJoin", "true");
                             }
 
                             return ressursAggregate;
