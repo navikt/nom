@@ -22,6 +22,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningSektorEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningTilknytningtypeEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursJobbtelefonOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOpprettetAdditionalData;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOpprettetEventData;
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -246,6 +248,32 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
 
         KeyValue<String, RessursOpprettetEvent> ressursOpprettetEvent = outputTopic.readKeyValue();
         log.info("Melding produsert: {}", prettyPrint(ressursOpprettetEvent));
+    }
+
+    @Test
+    @DisplayName("Skal håndtere jobbtelefonOppdatertEvent med tomt data-felt")
+    void skal_handtere_jobbtelefonOppdatertEvent_med_tomt_data_felt() {
+        sendToRessursTopic(ressursOpprettetEvent(RESSURS_FID, NAVIDENT));
+
+        RessursJobbtelefonOppdatertEventV1 jobbtelefonOppdatertEventV1 = new RessursJobbtelefonOppdatertEventV1(
+            RESSURS_FID,
+            null,
+            new Event.Metadata(
+                null,
+                LocalDateTime.now()
+            )
+        );
+
+        sendToRessursTopic(jobbtelefonOppdatertEventV1);
+
+
+        // Opprettet + DOL mottas først
+        sendToOrgtilknytningTopic(orgtilknytningOpprettetEvent(ORGTILKNYTNING_FID_1, NAVIDENT, ORGENHET_ID_1));
+        sendToOrgtilknytningTopic(orgtilknytningDagligOppfolgingEndretEvent(ORGTILKNYTNING_FID_1, NAVIDENT, true));
+
+        assertThat(outputTopic.getQueueSize())
+            .as("RessursOpprettet-melding har blitt produsert")
+            .isEqualTo(1);
     }
 
     RessursOpprettetEventV1 ressursOpprettetEvent(String fid, String navident) {
