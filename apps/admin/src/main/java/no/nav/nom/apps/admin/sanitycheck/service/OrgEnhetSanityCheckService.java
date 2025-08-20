@@ -253,11 +253,13 @@ public class OrgEnhetSanityCheckService {
         var alleIdOver = organiseringStateRepository.getActiveOrganisering().values().stream()
                 .map(OrganiseringState::idOver).toList();
         var alleLeafNoder = alleAktiveEnheter.stream().filter(o -> !alleIdOver.contains(o.id())).toList();
+        var alleIdUnder = organiseringStateRepository.getActiveOrganisering().values().stream()
+            .map(OrganiseringState::id).toList();
 
         List<OrgEnhetArbeidsomraadeInfo.LoevnodeMedFeilAntallArbOmr> loevnoderMedFeilAntallArbOmr = new ArrayList<>();
         alleLeafNoder.forEach(orgenhet -> {
             var count = findArbeidsomraadeCountInHierarkiAbove(orgenhet);
-            if (count != 1) {
+            if (count != 1 && !manglerOvernode(orgenhet, alleIdUnder)) {
                 loevnoderMedFeilAntallArbOmr.add(
                         OrgEnhetArbeidsomraadeInfo.LoevnodeMedFeilAntallArbOmr.builder()
                                 .orgenhetId(orgenhet.id())
@@ -272,6 +274,10 @@ public class OrgEnhetSanityCheckService {
                 .antallLoevnoder(alleLeafNoder.size())
                 .loevnoderMedFeil(loevnoderMedFeilAntallArbOmr)
                 .build();
+    }
+
+    private boolean manglerOvernode(OrgEnhetState orgenhet, List<String> alleIdUnder) {
+        return alleIdUnder.stream().noneMatch(idUnder -> idUnder.equals(orgenhet.id()));
     }
 
     private int findArbeidsomraadeCountInHierarkiAbove(OrgEnhetState orgenhet) {
