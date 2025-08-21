@@ -19,6 +19,8 @@ public interface DelegertLederStateRepository {
 
     Optional<LederTilgangState> lederTilgangForOrgenhetOgNavident(String orgenhetId, String navident);
 
+    List<LederTilgangState> getDelegertLederByEnhet(String enhetId);
+
     Collection<LederTilgangState> getAll();
 
     int count();

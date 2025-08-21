@@ -114,6 +114,11 @@ public class AuthorizedNavident {
         return delegertLederStateRepository.findDelegertAvNavident(getAuthenticatedNavIdent());
     }
 
+    public List<LederTilgangState> getLederTilgangerForOrgenhet() {
+        Set<String> lederForOrgenhet = lederForOrgenhetSomKanRedigere.get(getAuthenticatedNavIdent());
+        return lederForOrgenhet.stream().map(delegertLederStateRepository::getDelegertLederByEnhet).flatMap(Collection::stream).toList();
+    }
+
     // Har ressurs aktiv eller fremtidig tilknytning på enhet eller enhet i hierarki under som bruker er leder for eller er delegert leder for
     public boolean kanBrukerRedigereRessurs(String bruker, String ressursNavident) {
         Set<String> orgenhetIder = new HashSet<>();

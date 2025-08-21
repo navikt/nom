@@ -16,6 +16,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Slf4j
 public class DelegertLederStateRepositoryImpl implements DelegertLederStateRepository {
     private final Map<String, LederTilgangState> delegertLederByFid = new ConcurrentHashMap<>();
+    private final Map<String, List<LederTilgangState>> delegertLederByEnhet = new ConcurrentHashMap<>();
     private final Map<String, Map<String, List<LederTilgangState>>> delegertLederByNavidentAndEnhet = new ConcurrentHashMap<>();
     private final Map<String, Map<String, List<LederTilgangState>>> delegertLederByEnhetAndNavident = new ConcurrentHashMap<>();
 
@@ -59,6 +60,10 @@ public class DelegertLederStateRepositoryImpl implements DelegertLederStateRepos
             .findFirst();
     }
 
+    public List<LederTilgangState> getDelegertLederByEnhet(String enhetId) {
+        return delegertLederByEnhet.getOrDefault(enhetId, Collections.emptyList());
+    }
+
     @Override
     public Collection<LederTilgangState> getAll() {
         return delegertLederByFid.values();
@@ -77,10 +82,12 @@ public class DelegertLederStateRepositoryImpl implements DelegertLederStateRepos
         if (oldState!= null) {
             removeFromByNavidentAndEnhet(oldState);
             removeFromByEnhetAndNavident(oldState);
+            removeFromByEnhet(oldState);
         }
 
         addToByNavidentAndEnhet(state);
         addToByEnhetAndNavident(state);
+        addToByEnhet(state);
     }
 
     @Override
@@ -102,11 +109,19 @@ public class DelegertLederStateRepositoryImpl implements DelegertLederStateRepos
             .add(newState);
     }
 
+    private void addToByEnhet(LederTilgangState newState) {
+        delegertLederByEnhet.computeIfAbsent(newState.orgenhetId(), k -> new CopyOnWriteArrayList<>()).add(newState);
+    }
+
     private void removeFromByNavidentAndEnhet(LederTilgangState oldState) {
         delegertLederByNavidentAndEnhet.getOrDefault(oldState.til(), Collections.emptyMap()).get(oldState.orgenhetId()).remove(oldState);
     }
 
     private void removeFromByEnhetAndNavident(LederTilgangState oldState) {
         delegertLederByEnhetAndNavident.getOrDefault(oldState.orgenhetId(), Collections.emptyMap()).get(oldState.til()).remove(oldState);
+    }
+
+    private void removeFromByEnhet(LederTilgangState oldState) {
+        delegertLederByEnhet.getOrDefault(oldState.orgenhetId(), Collections.emptyList()).remove(oldState);
     }
 }

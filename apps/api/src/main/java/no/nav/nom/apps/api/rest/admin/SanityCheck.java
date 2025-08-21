@@ -107,16 +107,6 @@ public class SanityCheck {
         return EnhetMedRessursSomHarSluttetOgErLederSanityCheckResponse.from(alleOrgEnheterMedLederSomHarSluttet);
     }
 
-    private <K, V> Map<K, List<V>> addOrPut(Map<K, List<V>> map, K key, V value) {
-        if (map.containsKey(key)) {
-            map.get(key).add(value);
-        } else {
-            map.put(key, new ArrayList<>());
-            map.get(key).add(value);
-        }
-        return map;
-    }
-
     private Optional<RessursState> validerEnhetsledereSomHarSluttet(IOrgenhet orgenhet, Map<String, RessursState> alleRessurserWithSluttDatoBeforeToday) {
         return dvhRepository.getLederByAgressoIdAndNivAndNavn(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn()).stream()
             .map(leder -> alleRessurserWithSluttDatoBeforeToday.get(leder.getNavIdent()))
