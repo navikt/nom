@@ -230,7 +230,6 @@ class EventsrcToState {
     public Map.Entry<String, RessursStateExt> toRessursStateExt(JsonNode eventStateAggregate, Map<String, OrgtilknytningExt> orgtilknytningerMap) {
         try {
             final var visningsnavn = eventStateAggregate.get("visningsnavn");
-
             final var orgtilknytninger = orgtilknytningerMap == null ? null : orgtilknytningerMap.values().stream().map(OrgtilknytningExt::orgtilknytning).toList();
 
             var orgtilknytningerMetaData = orgtilknytningerMap == null ?
