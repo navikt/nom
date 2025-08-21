@@ -1,8 +1,8 @@
 package no.nav.nom.apps.admin.events;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.admin.dto.ressurs.RessursHendelseKafkaDTO;
 import no.nav.nom.apps.admin.dto.ressurs.RessursStateKafkaDTO;
-import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -12,7 +12,6 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerde;
 
 import java.time.Duration;
@@ -67,6 +66,34 @@ public class GenericApiKafkaConfig {
     ) {
         final var factory = new ConcurrentKafkaListenerContainerFactory<String, RessursStateKafkaDTO>();
         factory.setConsumerFactory(ressursApiStateV4EventDTOConsumerFactory);
+        factory.setBatchListener(true);
+        factory.getContainerProperties().setIdleEventInterval(5 * 1000L);
+
+        // If authentication towards kafka broker topic fails, retry every 10s
+        factory.setContainerCustomizer(container -> {
+                container.getContainerProperties().setAuthExceptionRetryInterval(Duration.ofSeconds(10));
+                log.info(container.toString());
+            }
+        );
+
+        return factory;
+    }
+
+    @Bean
+    ConsumerFactory<String, RessursHendelseKafkaDTO> ressursHendelseKafkaConsumerFactory(KafkaProperties properties) {
+        return new DefaultKafkaConsumerFactory<>(
+            properties.buildConsumerProperties(),
+            new StringDeserializer(),
+            new JsonSerde<>(RessursHendelseKafkaDTO.class).deserializer()
+        );
+    }
+
+    @Bean
+    ConcurrentKafkaListenerContainerFactory<String, RessursHendelseKafkaDTO> ressursHendelseKafkaListenerContainerFactory(
+        ConsumerFactory<String, RessursHendelseKafkaDTO> ressursHendelseKafkaConsumerFactory
+    ) {
+        final var factory = new ConcurrentKafkaListenerContainerFactory<String, RessursHendelseKafkaDTO>();
+        factory.setConsumerFactory(ressursHendelseKafkaConsumerFactory);
         factory.setBatchListener(true);
         factory.getContainerProperties().setIdleEventInterval(5 * 1000L);
 

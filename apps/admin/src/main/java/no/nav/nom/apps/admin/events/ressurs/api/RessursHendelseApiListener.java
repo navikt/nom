@@ -34,7 +34,7 @@ public class RessursHendelseApiListener {
 
     
     @KafkaListener(
-            containerFactory = "genericApiEventKafkaListenerContainerFactory",
+            containerFactory = "ressursHendelseKafkaListenerContainerFactory",
             id = "#{apiHendelseRessursUniqueListenerId}",
             topicPartitions = @TopicPartition(
                     topic = "${app.kafka.ressurs-hendelser.apiEventTopic}", 
