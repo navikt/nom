@@ -17,7 +17,6 @@ import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
-import org.apache.kafka.streams.kstream.Printed;
 import org.apache.kafka.streams.kstream.Produced;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,10 +96,6 @@ public class EventsourceToExternalEvents {
                 Materialized.with(stringSerde, jsonSerde)
             );
 
-        ressursAggregateKTable
-            .toStream()
-            .print(Printed.<String, ObjectNode>toSysOut().withLabel("ressursAggregateKTable"));
-
         // Snur til å være pr. navident og kun ha med ressurser hvor nødvendige felter har fått verdi
         KTable<String, ObjectNode> ressursPerNavident = ressursAggregateKTable.toStream()
             .filter((key, event) -> isFieldSetAndTrue(event, "ressursReadyForJoin"))
@@ -123,19 +118,11 @@ public class EventsourceToExternalEvents {
                 Materialized.with(stringSerde, jsonSerde)
             );
 
-
-        ressursPerNavident
-            .toStream()
-            .print(Printed.<String, ObjectNode>toSysOut().withLabel("ressursPerNavident"));
-
         // Kun ta med ressurser som det skal sendes melding for
         KTable<String, ObjectNode> ressurserKlarTilSending = ressursPerNavident.toStream()
             .filter((key, ressursJson) -> isFieldSetAndTrue(ressursJson, "sendMessage"))
             .toTable();
 
-        ressurserKlarTilSending
-            .toStream()
-            .print(Printed.<String, ObjectNode>toSysOut().withLabel("ressurserKlarTilSending"));
 
         // Aggregerer orgtilknytninger
         KTable<String, ObjectNode> orgtilknytningAggregateKTable = streamsBuilder
@@ -165,11 +152,6 @@ public class EventsourceToExternalEvents {
                 Materialized.with(stringSerde, jsonSerde)
             );
 
-        orgtilknytningAggregateKTable
-            .toStream()
-            .print(Printed.<String, ObjectNode>toSysOut().withLabel("orgtilknytningAggregateKTable"));
-
-
         // Ta med OTer som er DOL, snu til å være per navident og merke første OT for denne navidenten for sending 
         KTable<String, ObjectNode> orgtilknytningMappedToNavident = orgtilknytningAggregateKTable.toStream()
             .filter((key, otJson) -> isFieldSetAndTrue(otJson, "otReadyForJoin"))
@@ -192,19 +174,10 @@ public class EventsourceToExternalEvents {
                 Materialized.with(stringSerde, jsonSerde)
             );
 
-        orgtilknytningMappedToNavident
-            .toStream()
-            .print(Printed.<String, ObjectNode>toSysOut().withLabel("orgtilknytningMappedToNavident"));
-
-
         // Kun ta med orgtilkyntinger som skal joines 
         KTable<String, ObjectNode> forsteDOLOrgtilknytningPrNavident = orgtilknytningMappedToNavident.toStream()
             .filter((key, otJson) -> isFieldSetAndTrue(otJson, "sendMessage"))
             .toTable();
-
-        forsteDOLOrgtilknytningPrNavident
-            .toStream()
-            .print(Printed.<String, ObjectNode>toSysOut().withLabel("forsteDOLOrgtilknytningPrNavident"));
 
 
         // Joiner på navident

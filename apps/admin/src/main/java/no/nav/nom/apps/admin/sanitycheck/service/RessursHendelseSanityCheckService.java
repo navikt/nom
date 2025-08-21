@@ -44,6 +44,8 @@ public class RessursHendelseSanityCheckService {
         Map<String, List<RessursHendelseKafkaDTO>> hendelserPrNavident = alleHendelser.stream()
             .collect(Collectors.groupingBy(RessursHendelseKafkaDTO::navident, Collectors.mapping(Function.identity(), Collectors.toList())));
 
+        log.debug("Antall hendelser gruppert på navident: {}", hendelserPrNavident);
+
         return hendelserPrNavident.values().stream()
             .filter(hendelseList -> hendelseList.size() > 1)
             .flatMap(List::stream)
