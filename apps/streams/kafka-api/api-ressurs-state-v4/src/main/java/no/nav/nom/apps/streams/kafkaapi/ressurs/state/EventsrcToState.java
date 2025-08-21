@@ -13,12 +13,7 @@ import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v4.RessursStateExt;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
-import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
-import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
-import no.nav.nom.contract.nom.eventsource.RessursEvent;
-import no.nav.nom.contract.nom.eventsource.RessursJobbtelefonOppdatertEventV1;
-import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
-import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.eventsource.*;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -80,26 +75,30 @@ class EventsrcToState {
                     state.put("kafkaOffset", extEvent.messageMetadata().offset());
                     state.put("kafkaTimestamp", extEvent.messageMetadata().timestamp());
 
-                    if (event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data) {
-                        if (data.navident() != null) {
-                            state.put("navident", data.navident());
-                        }
-                        if (data.startdato() != null) {
-                            state.put("startdato", String.valueOf(data.startdato()));
-                        }
-                    }
-                    if (event.getData() == null && event instanceof RessursJobbtelefonOppdatertEventV1 && event.getFid().equals(state.get("fid").asText())) {
-                        RessursJobbtelefonOppdatertEventV1 jobbtelefonOppdatertEventV1 = new RessursJobbtelefonOppdatertEventV1(
-                            event.getFid(),
-                            new RessursJobbtelefonOppdatertEventV1.JobbtelefonOppdatertEventData(
-                                state.get("navident").asText(),
-                                null
-                            ),
-                            event.getMetadata().inputMetadata()
-                        );
-                        state.setAll(objectMapper.convertValue(jobbtelefonOppdatertEventV1.getData(), ObjectNode.class));
+                    if (event instanceof RessursTekniskSlettetEventV1) {
+                        state.put("RESSURS TOMBSTONE", true);
                     } else {
-                        state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                        if (event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data) {
+                            if (data.navident() != null) {
+                                state.put("navident", data.navident());
+                            }
+                            if (data.startdato() != null) {
+                                state.put("startdato", String.valueOf(data.startdato()));
+                            }
+                        }
+                        if (event.getData() == null && event instanceof RessursJobbtelefonOppdatertEventV1 && event.getFid().equals(state.get("fid").asText())) {
+                            RessursJobbtelefonOppdatertEventV1 jobbtelefonOppdatertEventV1 = new RessursJobbtelefonOppdatertEventV1(
+                                    event.getFid(),
+                                    new RessursJobbtelefonOppdatertEventV1.JobbtelefonOppdatertEventData(
+                                            state.get("navident").asText(),
+                                            null
+                                    ),
+                                    event.getMetadata().inputMetadata()
+                            );
+                            state.setAll(objectMapper.convertValue(jobbtelefonOppdatertEventV1.getData(), ObjectNode.class));
+                        } else {
+                            state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                        }
                     }
                     state.put("fid", event.getFid()); // Keep fid - Ønsker å benytte denne som key på output
                     return state;
@@ -128,7 +127,7 @@ class EventsrcToState {
                     state.put("kafkaTimestamp", extEvent.messageMetadata().timestamp());
 
                     if (event instanceof OrgtilknytningFjernetEventV1) {
-                        state.put("TOMBSTONE", true);
+                        state.put("OT TOMBSTONE", true);
                         // return null; Create TOMBSTONE - should skip mapValues and get forwarded directly to output stream. -
                         // (See https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Stream+Usage+Patterns#KafkaStreamUsagePatterns-Howtomanagethesizeofstatestoresusingtombstones?)
                         // NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
@@ -149,7 +148,7 @@ class EventsrcToState {
                 HashMap::new,
                 (navident, otJson, map) -> {
                     var fid = otJson.get("fid").asText();
-                    if (otJson.has("TOMBSTONE")) {
+                    if (otJson.has("OT TOMBSTONE")) {
                         map.remove(fid);
                     } else {
                         map.put(otJson.get("fid").asText(), toOrgtilknytningExt(otJson));
@@ -193,7 +192,7 @@ class EventsrcToState {
             .mapValues(Map.Entry::getValue)
             .filter((k,v) -> !skipRelayMessages(k,v))
             .map(this::toRessursState)
-            .filter((s, ressursState) -> ressursState.sektor() != null && ressursState.identType() != null) // Påkrevd å ha Sektor og identType
+            .filter((s, ressursState) -> ressursState == null ||  (ressursState.sektor() != null && ressursState.identType() != null)) // Påkrevd å ha Sektor og identType
             .to(appProperties.stateTopic(), Produced.with(stringSerde, objectSerde.copyWithType(RessursState.class)));
     }
 
@@ -247,26 +246,34 @@ class EventsrcToState {
             );
 
             var fid = eventStateAggregate.get("fid").asText(); // Plukk ut igjen Fid til key
-            var ressursState = new RessursState(
-                eventStateAggregate.get("personident").asText(),
-                eventStateAggregate.get("navident").asText(),
-                new Visningsnavn(
-                    visningsnavn.get("fornavn").asText(),
-                    Optional.ofNullable(visningsnavn.hasNonNull("mellomnavn") ? visningsnavn.get("mellomnavn").asText() : null),
-                    visningsnavn.get("etternavn").asText()
-                ),
-                eventStateAggregate.hasNonNull("startdato") ? LocalDate.parse(eventStateAggregate.get("startdato").asText()) : null,
-                eventStateAggregate.hasNonNull("sluttdato") ? LocalDate.parse(eventStateAggregate.get("sluttdato").asText()) : null,
-                eventStateAggregate.hasNonNull("sektor") ? Sektor.valueOf(eventStateAggregate.get("sektor").asText()) : null,
-                eventStateAggregate.hasNonNull("identType") ? IdentType.valueOf(eventStateAggregate.get("identType").asText()) : null,
-                getPrimaryTelefonnummer(eventStateAggregate),
-                eventStateAggregate.hasNonNull("primaryFysiskBrukersted") ? eventStateAggregate.get("primaryFysiskBrukersted").asText() : null,
-                orgtilknytninger
-            );
 
-            return new AbstractMap.SimpleEntry<>(
-                fid, new RessursStateExt(ressursState, ressursMetaData, orgtilknytningerMetaData)
-            );
+            if (eventStateAggregate.hasNonNull("RESSURS TOMBSTONE")) {
+                log.info("SlettRessursEvent for fid {} received - create TOMBSTONE in StateTopic", fid);
+                return new AbstractMap.SimpleEntry<>(
+                        fid, new RessursStateExt(null, ressursMetaData, orgtilknytningerMetaData)
+                );
+            } else {
+                var ressursState = new RessursState(
+                        eventStateAggregate.get("personident").asText(),
+                        eventStateAggregate.get("navident").asText(),
+                        new Visningsnavn(
+                                visningsnavn.get("fornavn").asText(),
+                                Optional.ofNullable(visningsnavn.hasNonNull("mellomnavn") ? visningsnavn.get("mellomnavn").asText() : null),
+                                visningsnavn.get("etternavn").asText()
+                        ),
+                        eventStateAggregate.hasNonNull("startdato") ? LocalDate.parse(eventStateAggregate.get("startdato").asText()) : null,
+                        eventStateAggregate.hasNonNull("sluttdato") ? LocalDate.parse(eventStateAggregate.get("sluttdato").asText()) : null,
+                        eventStateAggregate.hasNonNull("sektor") ? Sektor.valueOf(eventStateAggregate.get("sektor").asText()) : null,
+                        eventStateAggregate.hasNonNull("identType") ? IdentType.valueOf(eventStateAggregate.get("identType").asText()) : null,
+                        getPrimaryTelefonnummer(eventStateAggregate),
+                        eventStateAggregate.hasNonNull("primaryFysiskBrukersted") ? eventStateAggregate.get("primaryFysiskBrukersted").asText() : null,
+                        orgtilknytninger
+                );
+
+                return new AbstractMap.SimpleEntry<>(
+                        fid, new RessursStateExt(ressursState, ressursMetaData, orgtilknytningerMetaData)
+                );
+            }
         } catch (Exception e) {
             log.error("Error mapping to RessursState", e);
             throw e;

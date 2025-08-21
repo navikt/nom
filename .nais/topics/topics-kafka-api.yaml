@@ -86,6 +86,8 @@ spec:
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
+  annotations:
+    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
   name: nom.api-ressurs-state-v4
   namespace: org
   labels:
