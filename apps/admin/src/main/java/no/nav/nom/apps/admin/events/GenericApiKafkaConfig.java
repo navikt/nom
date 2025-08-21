@@ -81,10 +81,13 @@ public class GenericApiKafkaConfig {
 
     @Bean
     ConsumerFactory<String, RessursHendelseKafkaDTO> ressursHendelseKafkaConsumerFactory(KafkaProperties properties) {
+        var jsonSerde = new JsonSerde<>(RessursHendelseKafkaDTO.class);
+        jsonSerde.deserializer().addTrustedPackages("no.nav.nom.apps.streams.kafkaapi.ressurs.hendelser.v1.RessursOpprettetEvent");
+
         return new DefaultKafkaConsumerFactory<>(
             properties.buildConsumerProperties(),
             new StringDeserializer(),
-            new JsonSerde<>(RessursHendelseKafkaDTO.class).deserializer()
+            jsonSerde.deserializer()
         );
     }
 
