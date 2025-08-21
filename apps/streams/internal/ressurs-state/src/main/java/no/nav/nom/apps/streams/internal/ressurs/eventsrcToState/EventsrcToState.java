@@ -35,7 +35,6 @@ import java.util.function.Function;
 
 @Component
 class EventsrcToState {
-
     private final static Logger log = LoggerFactory.getLogger(EventsrcToState.class);
 
     public EventsrcToState(
