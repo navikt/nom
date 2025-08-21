@@ -44,21 +44,18 @@ public class RessursHendelseApiListener {
     public void onMessage(ConsumerRecords<String, RessursHendelseKafkaDTO> records) {
         List<RessursHendelseKafkaDTO> ressursHendelser = new ArrayList<>();
 
-        records.forEach(record -> {
-            log.debug("Record received - Key: {} Value: {}", record.key(), record.value());
-            ressursHendelser.add(
-                    RessursHendelseKafkaDTO.builder()
-                        .key(record.key())
-                        .timestamp(LocalDateTime.ofInstant(Instant.ofEpochMilli(record.timestamp()), ZoneId.systemDefault()))
-                        .fid(record.value().fid())
-                        .navident(record.value().navident())
-                        .visningsnavn(record.value().visningsnavn())
-                        .startdato(record.value().startdato())
-                        .sluttdato(record.value().sluttdato())
-                        .sektor(record.value().sektor())
-                        .orgtilknytning(record.value().orgtilknytning())
-                        .build());
-        });
+        records.forEach(record -> ressursHendelser.add(
+                RessursHendelseKafkaDTO.builder()
+                    .key(record.key())
+                    .timestamp(LocalDateTime.ofInstant(Instant.ofEpochMilli(record.timestamp()), ZoneId.systemDefault()))
+                    .fid(record.value().fid())
+                    .navident(record.value().navident())
+                    .visningsnavn(record.value().visningsnavn())
+                    .startdato(record.value().startdato())
+                    .sluttdato(record.value().sluttdato())
+                    .sektor(record.value().sektor())
+                    .orgtilknytning(record.value().orgtilknytning())
+                    .build()));
 
         ressursHendelseApiRepository.add(ressursHendelser);
     }
