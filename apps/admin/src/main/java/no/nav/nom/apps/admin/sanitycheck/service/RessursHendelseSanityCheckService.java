@@ -35,7 +35,7 @@ public class RessursHendelseSanityCheckService {
         Duration duration = Duration.between(start, Instant.now());
         String timeUsed = "%02d m %02d s %03d ms".formatted(duration.toMinutesPart(), duration.toSecondsPart(), duration.toMillisPart());
 
-        log.debug("Antall Duplikate hendelser = {}, brukte {} ", duplikater.size(), timeUsed);
+        log.debug("Antall Duplikate hendelser = {}, brukte {}. Totalt antall hendelser: {}", duplikater.size(), timeUsed, hendelseApiRepository.count());
 
         return duplikater;
     }
