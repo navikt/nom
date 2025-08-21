@@ -120,7 +120,7 @@ public class AuthorizedNavidentController {
         return authorizedNavident.getLederTilgangerForUser();
     }
 
-    @GetMapping("getLederTilgangerDelegertTilOrgEnhet")
+    @GetMapping("getLederTilgangerDelegertForOrgEnhet")
     @PreAuthorize("hasAuthority('MUTATE_RESSURS') && hasAuthority('NOM_UI_APP')")
     List<LederTilgangState> getLederTilgangerForOrgEnhet() {
         return authorizedNavident.getLederTilgangerForOrgenhet();

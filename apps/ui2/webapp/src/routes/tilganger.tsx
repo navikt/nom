@@ -33,7 +33,7 @@ import {
   getOrgEnhet,
   getRessurserWhichCanBeDelegatedTo,
   getSession,
-  getTilgangerDelegertByUserOptions,
+  getTilgangerDelegertForOrgEnhetOptions,
   getTilgangerDelegertTilMegOptions,
   tilgangerKeys,
 } from "~/api/react-query-endpoints";
@@ -298,7 +298,7 @@ function OrgEnhetCard({
 
   const tilgangerDelegertAvMeg =
     useQuery({
-      ...getTilgangerDelegertByUserOptions(),
+      ...getTilgangerDelegertForOrgEnhetOptions(),
       select: (tilganger) => {
         const relevanteTilganger = tilganger.filter(
           (tilgang) => tilgang.orgenhetId === orgEnhet.id,
@@ -370,7 +370,7 @@ function OrgEnhetCard({
     onSettled: () => {
       queryClient
         .invalidateQueries({
-          queryKey: getTilgangerDelegertByUserOptions().queryKey,
+          queryKey: getTilgangerDelegertForOrgEnhetOptions().queryKey,
         })
         .then();
     },

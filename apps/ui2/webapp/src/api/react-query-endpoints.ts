@@ -596,13 +596,13 @@ export function getTilgangerDelegertTilMegOptions() {
   });
 }
 
-export function getTilgangerDelegertByUserOptions() {
+export function getTilgangerDelegertForOrgEnhetOptions() {
   return queryOptions({
     queryKey: tilgangerKeys.delegerteByUser(),
     queryFn: async () =>
       (
         await axios.get<LederTilgangState[]>(
-          `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/getDelegerteLederTilgangerAvUser`,
+          `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/getLederTilgangerDelegertForOrgEnhet`,
         )
       ).data,
   });
