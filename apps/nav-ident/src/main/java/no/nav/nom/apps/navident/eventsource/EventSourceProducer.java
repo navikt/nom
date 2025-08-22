@@ -37,28 +37,33 @@ public class EventSourceProducer {
             log.debug(LogConfig.TEAM_LOGS,"Producing and persisting SourceEvent for need: {}", need);
             log.debug("Producing and persisting SourceEvent for need: %s".formatted(need.maskedToString()));
             val responseBody = need.getRespons().getBody();
-            val sourceEvent = SourceEvent.builder()
-                    .event(EventType.OPPRETT)
-                    .payload(
-                            EventPayload.builder()
-                                    .navident(responseBody.getNavident())
-                                    .identType(need.getIdentType())
-                                    .personid(need.getPersonid())
-                                    .build()
-                    ).build();
 
             // Since this is async from request there is no SecurityContext.Authentication present.
             // This is needed for jpa @CreatedBy
             cache.setCachedTokedBackOnSecurityContext(need.getUuid());
 
-            val persistedSourceEvent = sourceEventRepository.save(sourceEvent);
-
-            producer.send(eventSourceTopic, persistedSourceEvent);
-
-            log.debug("Persisted SourceEvent posted: %s".formatted(persistedSourceEvent.maskedToString()));
+            produceOpprettNavidentEvent(responseBody.getNavident(), need.getIdentType(), need.getPersonid());
 
             MDC.clear();
         }
+    }
+
+    public void produceOpprettNavidentEvent(String navident, IdentType identType, String personid) {
+        val sourceEvent = SourceEvent.builder()
+            .event(EventType.OPPRETT)
+            .payload(
+                EventPayload.builder()
+                    .navident(navident)
+                    .identType(identType)
+                    .personid(personid)
+                    .build()
+            ).build();
+
+        val persistedSourceEvent = sourceEventRepository.save(sourceEvent);
+
+        producer.send(eventSourceTopic, persistedSourceEvent);
+
+        log.debug("Persisted SourceEvent posted: %s".formatted(persistedSourceEvent.maskedToString()));
     }
 
     public void produceSlettEvent(String navident, IdentType identType, String personid) {

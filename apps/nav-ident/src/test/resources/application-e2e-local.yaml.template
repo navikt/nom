@@ -47,3 +47,6 @@ DATABASE_PASSWORD: password
 #Embedded redis
 REDIS_HOST: "localhost"
 
+GROUP_ID_ADMIN: 'c5752f26-105a-460f-a538-1859273f5057'
+
+

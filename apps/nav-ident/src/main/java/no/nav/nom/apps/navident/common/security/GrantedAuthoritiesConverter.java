@@ -17,7 +17,7 @@ import java.util.Optional;
 public class GrantedAuthoritiesConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
     private final String groupsClaimName = "groups";
 
-    @Value("${GROUP_ID_NOM_WRITE}")
+    @Value("${GROUP_ID_ADMIN}")
     String adminADGroupId;
     private final JwtGrantedAuthoritiesConverter defaultConverter = new JwtGrantedAuthoritiesConverter();
 
@@ -26,7 +26,7 @@ public class GrantedAuthoritiesConverter implements Converter<Jwt, Collection<Gr
         final var grantedAuthorities = defaultConverter.convert(jwt);
         final var jwtGroups = Optional.ofNullable(jwt.getClaimAsStringList(groupsClaimName)).orElse(new ArrayList<>());
         if (jwtGroups.contains(adminADGroupId)) {
-            grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_NOM_WRITE"));
+            grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         }
         return grantedAuthorities;
     }
