@@ -42,6 +42,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNullElse;
 import static no.nav.nom.apps.admin.PeriodeUtil.tomorrow;
 import static no.nav.nom.apps.admin.PeriodeUtil.yesterday;
+import static no.nav.nom.libs.utils.common.util.DateUtil.sluttdatoIsNotPassed;
 import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 
 @Service
@@ -259,22 +260,21 @@ public class RessursSanityCheckService {
     }
 
     public List<RessursState> aktiveRessurserUtenOrgtilknytning() {
-        Map<String, RessursState> alleRessurserSomErAktive = ressursStateRepository.findAllActiveRessurser();
+        var alleRessurserSomErAktive = ressursStateRepository.findAllActiveRessurser();
 
-        Map<String, Collection<OrgtilknytningState>> alleOrgtilknytningerKobletTilRessurs =
-                getOrgtilknytningerForNavidenter(alleRessurserSomErAktive.keySet(), gyldigTomEmptyOrBefore2099);
+       var ressursOrgtilknytningMap = orgtilknytningStateRepository.findByNavidentIn(alleRessurserSomErAktive.keySet().stream().toList()).stream().collect(Collectors.groupingBy(OrgtilknytningState::navident));
 
-        Stream<String> utenOrgtilknytninger = alleOrgtilknytningerKobletTilRessurs.entrySet().stream()
-                .filter(orgtilknytning -> orgtilknytning.getValue().isEmpty())
-                .map(Map.Entry::getKey);
+       var alleRessurserUtenOrgtilknytninger = ressursOrgtilknytningMap.entrySet().stream()
+           .filter(ressursOt -> ressursOt.getValue().isEmpty())
+           .map(Map.Entry::getKey);
 
-        Stream<String> medOrgtilknytningerSomIkkeErAktiv = alleOrgtilknytningerKobletTilRessurs.entrySet().stream()
-                .filter(orgtilknytning -> !orgtilknytning.getValue().isEmpty())
-                .filter(orgtilknytning -> orgtilknytning.getValue().stream()
-                        .allMatch(orgtilknytningState -> isNotNull(orgtilknytningState.gyldigTom()) && orgtilknytningState.gyldigTom().isBefore(LocalDate.now())))
-                .map(Map.Entry::getKey);
+       var alleRessursMedOrgtilknytningerSomHarOTMenIkkeAktiv = ressursOrgtilknytningMap.entrySet().stream()
+           .filter(ressursOt -> !ressursOt.getValue().isEmpty())
+           .filter(ressursOtList -> ressursOtList.getValue().stream()
+               .noneMatch(orgtilknytningState -> isNull(orgtilknytningState.gyldigTom()) || sluttdatoIsNotPassed(orgtilknytningState.gyldigTom())))
+           .map(Map.Entry::getKey);
 
-        return Stream.concat(utenOrgtilknytninger, medOrgtilknytningerSomIkkeErAktiv)
+        return Stream.concat(alleRessurserUtenOrgtilknytninger, alleRessursMedOrgtilknytningerSomHarOTMenIkkeAktiv)
                 .map(alleRessurserSomErAktive::get)
                 .toList();
     }

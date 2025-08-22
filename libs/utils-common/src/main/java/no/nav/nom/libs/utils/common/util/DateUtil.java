@@ -19,4 +19,12 @@ public class DateUtil {
     public static boolean startdatoIsAfterToday(LocalDate startdato) {
         return startdato != null ? startdato.isAfter(LocalDate.now()) : LocalDate.MIN.isAfter(LocalDate.now());
     }
+
+    public static boolean sluttdatoIsPassed(LocalDate sluttdato) {
+        return sluttdato != null ? sluttdato.isBefore(LocalDate.now()) : LocalDate.MAX.isBefore(LocalDate.now());
+    }
+
+    public static boolean sluttdatoIsNotPassed(LocalDate sluttdato) {
+        return sluttdato != null ? !sluttdato.isBefore(LocalDate.now()) : LocalDate.MAX.isAfter(LocalDate.now());
+    }
 }
