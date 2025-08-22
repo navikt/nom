@@ -87,8 +87,8 @@ spec:
       allowAllUsers: true
       claims:
         groups:
-          # AD gruppe NOM-WRITE
-          - id: "c5752f26-105a-460f-a538-1859273f5057"
+          # AD gruppe NOM-ADMIN
+          - id: "9e0e2958-df7a-4376-83f3-9bcbec1f2650"
 
   kafka:
     pool: nav-dev
