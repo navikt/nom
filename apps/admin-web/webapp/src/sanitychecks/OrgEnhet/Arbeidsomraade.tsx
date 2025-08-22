@@ -45,7 +45,7 @@ export function Arbeidsomraade() {
   return (
     <div>
       <BodyShort size="medium" spacing>
-        <b>Antall løvnoder:</b> {arbOmraadeInfo?.antallLoevnoder}
+        <b>Antall:</b> {arbOmraadeInfo?.antallLoevnoder}
       </BodyShort>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>

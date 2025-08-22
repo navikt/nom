@@ -271,7 +271,7 @@ public class OrgEnhetSanityCheckService {
         });
         
         return OrgEnhetArbeidsomraadeInfo.builder()
-                .antallLoevnoder(alleLeafNoder.size())
+                .antallLoevnoder(loevnoderMedFeilAntallArbOmr.size())
                 .loevnoderMedFeil(loevnoderMedFeilAntallArbOmr)
                 .build();
     }
