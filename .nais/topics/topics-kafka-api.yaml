@@ -77,7 +77,7 @@ spec:
     - team: org
       application: team-catalog-backend
       access: read
-    - team: tilgangsmaskin
+    - team: tilgangsmaskin    # Har migrert til v4 - https://nav-it.slack.com/archives/C07GGDP38S2/p1755858671839959
       application: populasjonstilgangskontroll
       access: read
 
