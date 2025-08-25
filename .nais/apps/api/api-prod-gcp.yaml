@@ -250,6 +250,9 @@ spec:
         - application: behandlingskatalog-backend
           namespace: teamdatajegerne
           cluster: prod-gcp
+        - application: ung-deltakelse-opplyser
+          namespace: k9saksbehandling
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
