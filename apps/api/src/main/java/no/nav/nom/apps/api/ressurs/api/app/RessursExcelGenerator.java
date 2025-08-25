@@ -12,6 +12,10 @@ import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.AreaReference;
+import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFTable;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +23,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,6 +33,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNullElse;
+import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 
 @Slf4j
 @Component
@@ -45,7 +52,8 @@ public class RessursExcelGenerator {
 
     public RessursExcelGenerator(
         OrgtilknytningStateRepository orgtilknytningStateRepository,
-        OrgEnhetStateRepository orgEnhetStateRepository, OrgenhetService orgenhetService,
+        OrgEnhetStateRepository orgEnhetStateRepository,
+        OrgenhetService orgenhetService,
         AuthResolver authResolver
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -69,77 +77,114 @@ public class RessursExcelGenerator {
                 .flatMap(List::stream)
                 .map(OrgtilknytningState::orgEnhetId)
                 .collect(Collectors.toSet())
-        ).stream().collect(Collectors.toMap(OrgEnhetState::id, OrgEnhetState::navn));
+        ).stream().collect(Collectors.toMap(OrgEnhetState::id, orgEnhet -> orgEnhet));
+
+        List<ExcelRows> excelRows = new ArrayList<>();
+
+        for (Ressurs ressurs : ressurser) {
+            var entry = otMap.get(ressurs.state().navident());
+            if (entry == null || entry.isEmpty()) {
+                log.error("Ressurs {} har ingen OTer.", ressurs.state().navident());
+                excelRows.add(createExcelRow(
+                        ressurs,
+                        "UKJENT",
+                        "UKJENT",
+                        null,
+                        kanSeSluttdato
+                    )
+                );
+            } else {
+                var gyldigFromCandidates = entry.stream().map(OrgtilknytningState::gyldigFom).filter(Objects::nonNull).toList();
+                var gyldigFom = Collections.min(gyldigFromCandidates);
+
+                var orgEnheterIdOgNavn = otMap.get(ressurs.state().navident()).stream()
+                    .map(orgtilknytningState -> orgenhetNavnMap.get(orgtilknytningState.orgEnhetId()))
+                    .collect(Collectors.toMap(OrgEnhetState::id, OrgEnhetState::navn, (existing, replacement) -> existing));
+
+                for (Map.Entry<String, String> orgEnhetEntry : orgEnheterIdOgNavn.entrySet()) {
+                    excelRows.add(createExcelRow(ressurs, orgEnhetEntry.getKey(), orgEnhetEntry.getValue(), gyldigFom, kanSeSluttdato));
+                }
+            }
+        }
+
+        excelRows.sort(
+            Comparator.comparing(ExcelRows::orgNavn, Comparator.nullsLast(String::compareTo))
+                .thenComparing(ExcelRows::etternavn, Comparator.nullsLast(String::compareTo))
+        );
 
         try (Workbook workbook = new XSSFWorkbook()) {
             var sheet = workbook.createSheet("Ressurser");
             var rowcount = 0;
 
-            addRow(sheet.createRow(rowcount++), null, null, null, kanSeSluttdato);
+            addRow(sheet.createRow(rowcount++), null, kanSeSluttdato);
 
-            for (Ressurs ressurs : ressurser) {
-                var entry = otMap.get(ressurs.state().navident());
-                if(entry == null || entry.isEmpty()){
-                    log.error("Ressurs {} har ingen OTer.", ressurs.state().navident());
-                    addRow(
-                        sheet.createRow(rowcount++),
-                        ressurs,
-                        "UKJENT",
-                        null,
-                        kanSeSluttdato
-                    );
-                }else {
-                    var gyldigFromCandidates = entry.stream().map(OrgtilknytningState::gyldigFom).filter(Objects::nonNull).toList();
-                    var gyldigFom = Collections.min(gyldigFromCandidates);
-                    var orgEnhet = otMap.get(ressurs.state().navident()).stream()
-                        .map(ot -> String.format("%s (%s)", orgenhetNavnMap.get(ot.orgEnhetId()), ot.orgEnhetId()))
-                        .collect(Collectors.joining(", "));
-
-                    addRow(
-                        sheet.createRow(rowcount++),
-                        ressurs,
-                        orgEnhet,
-                        gyldigFom,
-                        kanSeSluttdato
-                    );
-                }
+            for (ExcelRows excelRow : excelRows) {
+                addRow(
+                    sheet.createRow(rowcount++),
+                    excelRow,
+                    kanSeSluttdato
+                );
             }
 
-            var headerRow = sheet.getRow(0);
-            var font = workbook.createFont();
-            var style = workbook.createCellStyle();
-            font.setBold(true);
-            style.setFont(font);
-            headerRow.cellIterator().forEachRemaining(cell -> cell.setCellStyle(style));
             sheet.createFreezePane(0, 1);
 
+            XSSFSheet xssfSheet = (XSSFSheet) sheet;
+            int lastRow = xssfSheet.getLastRowNum();
+            int lastColumn = xssfSheet.getRow(0).getLastCellNum() - 1;
+
+            AreaReference areaRef = new AreaReference(
+                new CellReference(0, 0),
+                new CellReference(lastRow, lastColumn),
+                xssfSheet.getWorkbook().getSpreadsheetVersion()
+            );
+
+            XSSFTable table = xssfSheet.createTable(areaRef);
+            table.setName("RessursTable");
+            table.setDisplayName("RessursTable");
+
+            table.getCTTable().addNewTableStyleInfo().setName("TableStyleMedium4");
+            table.setStyleName("TableStyleMedium4");
+            table.getCTTable().setTotalsRowShown(false);
+            table.getCTTable().getTableStyleInfo().setShowRowStripes(true);
+            table.getCTTable().getTableStyleInfo().setShowColumnStripes(false);
+            table.getCTTable().addNewAutoFilter();
+
+            for (int col = 0; col <= lastColumn; col++) {
+                sheet.autoSizeColumn(col);
+            }
+
             workbook.write(response.getOutputStream());
-        }catch (IOException ioException) {
+        } catch (IOException ioException) {
             throw new RuntimeException("IO-Exception", ioException);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Feil ved generering av ressurs-Excel", e);
             throw e;
         }
     }
 
-    private static void addRow(Row row, Ressurs ressurs, String orgEnhetNavn, LocalDate gyldigFom, boolean kanSeSluttdato) {
+    private static void addRow(Row row, ExcelRows excelRows, boolean kanSeSluttdato) {
         var navident = row.createCell(0, CellType.STRING);
-        var navn = row.createCell(1, CellType.STRING);
-        var sektor = row.createCell(2, CellType.STRING);
-        var orgEnhet = row.createCell(3, CellType.STRING);
-        var fom = row.createCell(4, CellType.STRING);
-        var jobbtelefon = row.createCell(5, CellType.STRING);
-        var privatTelefon = row.createCell(6, CellType.STRING);
-        var epost = row.createCell(7, CellType.STRING);
-        var sluttdato = row.createCell(8, CellType.STRING);
+        var etternavn = row.createCell(1, CellType.STRING);
+        var fornavn = row.createCell(2, CellType.STRING);
+        var mellomnavn = row.createCell(3, CellType.STRING);
+        var sektor = row.createCell(4, CellType.STRING);
+        var orgId = row.createCell(5, CellType.STRING);
+        var orgNavn = row.createCell(6, CellType.STRING);
+        var fom = row.createCell(7, CellType.STRING);
+        var jobbtelefon = row.createCell(8, CellType.STRING);
+        var privatTelefon = row.createCell(9, CellType.STRING);
+        var epost = row.createCell(10, CellType.STRING);
+        var sluttdato = row.createCell(11, CellType.STRING);
 
 
-        if (ressurs == null) {
+        if (excelRows == null) {
             navident.setCellValue("Navident");
-            navn.setCellValue("Navn");
+            etternavn.setCellValue("Etternavn");
+            fornavn.setCellValue("Fornavn");
+            mellomnavn.setCellValue("Mellomnavn");
             sektor.setCellValue("Sektor");
-            orgEnhet.setCellValue("Organisasjonsenhet");
+            orgId.setCellValue("Organisasjonsenhet ID");
+            orgNavn.setCellValue("Organisasjonsenhet Navn");
             fom.setCellValue("Fra og med");
             jobbtelefon.setCellValue("Jobbtelefon");
             privatTelefon.setCellValue("Privat telefon");
@@ -148,17 +193,50 @@ public class RessursExcelGenerator {
                 sluttdato.setCellValue("Sluttdato");
             }
         } else {
-            navident.setCellValue(ressurs.state().navident());
-            navn.setCellValue(ressurs.state().visningsnavn().toString());
-            sektor.setCellValue(sektorMap.get(ressurs.state().sektor().name()));
-            orgEnhet.setCellValue(orgEnhetNavn);
-            fom.setCellValue(gyldigFom == null ? "UKJENT" : gyldigFom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
-            jobbtelefon.setCellValue(isNull(ressurs.state().jobbtelefon()) ? "" : ressurs.state().jobbtelefon().nummer());
-            privatTelefon.setCellValue(requireNonNullElse(ressurs.state().primaryTelefonnummer(), ""));
-            epost.setCellValue(ressurs.epost());
-            if (kanSeSluttdato) {
-                sluttdato.setCellValue(ressurs.state().sluttdato() != null ? ressurs.state().sluttdato().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) : "");
-            }
+            navident.setCellValue(excelRows.navident());
+            etternavn.setCellValue(excelRows.etternavn());
+            fornavn.setCellValue(excelRows.fornavn());
+            mellomnavn.setCellValue(excelRows.mellomnavn());
+            sektor.setCellValue(excelRows.sektor());
+            orgId.setCellValue(excelRows.orgId());
+            orgNavn.setCellValue(excelRows.orgNavn());
+            fom.setCellValue(excelRows.fom());
+            jobbtelefon.setCellValue(excelRows.jobbtelefon());
+            privatTelefon.setCellValue(excelRows.privatTelefon());
+            epost.setCellValue(excelRows.epost());
+            sluttdato.setCellValue(excelRows.sluttdato());
         }
     }
+
+    private ExcelRows createExcelRow(Ressurs ressurs, String orgEnhetId, String orgEnhetNavn, LocalDate gyldigFom, boolean kanSeSluttdato) {
+        return new ExcelRows(
+            ressurs.state().navident(),
+            ressurs.state().visningsnavn().etternavn(),
+            ressurs.state().visningsnavn().fornavn(),
+            ressurs.state().visningsnavn().mellomnavn().orElse(null),
+            sektorMap.get(ressurs.state().sektor().name()),
+            isNotNull(orgEnhetId) ? orgEnhetId : "UKJENT",
+            isNotNull(orgEnhetNavn) ? orgEnhetNavn : "UKJENT",
+            isNull(gyldigFom) ? "UKJENT" : gyldigFom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
+            isNotNull(ressurs.state().jobbtelefon()) ? ressurs.state().jobbtelefon().nummer() : "",
+            requireNonNullElse(ressurs.state().primaryTelefonnummer(), ""),
+            ressurs.epost(),
+            kanSeSluttdato && isNotNull(ressurs.state().sluttdato()) ? ressurs.state().sluttdato().toString() : null
+        );
+    }
+
+    private record ExcelRows(
+        String navident,
+        String etternavn,
+        String fornavn,
+        String mellomnavn,
+        String sektor,
+        String orgId,
+        String orgNavn,
+        String fom,
+        String jobbtelefon,
+        String privatTelefon,
+        String epost,
+        String sluttdato
+    ) {}
 }
