@@ -32,8 +32,8 @@ import {
   isOrgEnhetDriftsenhet,
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
+import { OrgEnhetStatistikk } from "~/components/statistikk/OrgEnhetStatistikk";
 import { UserImage } from "~/components/UserImage";
-import { OrgEnhetStatistikk } from "~/pages/FrontPage/FrontPage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import {
   isPeriodActive,
