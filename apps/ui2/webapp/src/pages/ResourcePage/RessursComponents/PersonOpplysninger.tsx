@@ -253,6 +253,7 @@ export function Type({ ressurs }: { ressurs: Ressurs }) {
   return (
     <LabelWithValue
       label="Type"
+      split
       value={ressurs.identType === IdentType.ROBOT ? "Robot" : undefined}
     />
   );
@@ -260,7 +261,12 @@ export function Type({ ressurs }: { ressurs: Ressurs }) {
 
 export function Navident({ ressurs }: { ressurs: Ressurs }) {
   return (
-    <LabelWithValue copyButton label="Nav-ident" value={ressurs.navident} />
+    <LabelWithValue
+      copyButton
+      label="Nav-ident"
+      split
+      value={ressurs.navident}
+    />
   );
 }
 
@@ -271,6 +277,7 @@ export function StartDato({ ressurs }: { ressurs: Ressurs }) {
       (Historiske startdatoer fra noen år tilbake kan avvike noe fra den faktiske første arbeidsdagen. Datoen vil
       da vanligvis representere dagen Nav-identen ble opprettet.)"
       label="Startdato"
+      split
       value={formatDisplayDate(ressurs.startdato)}
     />
   );
@@ -299,6 +306,7 @@ export function SluttDato({ ressurs }: { ressurs: Ressurs }) {
       <LabelWithValue
         helpText="Medarbeiderens siste arbeidsdag i Nav"
         label="Sluttdato"
+        split
         value={formatDisplayDate(ressurs.sluttdato)}
       />
     );
@@ -313,13 +321,16 @@ export function SektorView({ ressurs }: { ressurs: Ressurs }) {
       helpText="Medarbeiders sektor hentes fra sektoren som er registrert på organisasjonstilknytningen.
       Dersom sektor er feil, må det opprettes en ny organisasjonstilknytning med korrekt sektor."
       label="Sektor"
+      split
       value={SektorNameMapping[ressurs.sektor]}
     />
   );
 }
 
 export function Epost({ ressurs }: { ressurs: Ressurs }) {
-  return <LabelWithValue copyButton label="E-post" value={ressurs.epost} />;
+  return (
+    <LabelWithValue copyButton label="E-post" split value={ressurs.epost} />
+  );
 }
 
 export function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {
@@ -327,6 +338,7 @@ export function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {
   return (
     <LabelWithValue
       label="Fysisk brukersted"
+      split
       value={
         fysiskBrukersted
           ? capitalizeNameFysiskBrukersted(fysiskBrukersted.brukerstedNavn)
@@ -372,11 +384,13 @@ export function TelefonNummere({
     <>
       <LabelWithValue
         label="Kontortelefon"
+        split
         value={kontorTelefoner.join(", ")}
       />
 
       <LabelWithValue
         label="Tjenestetelefon"
+        split
         value={tjenesteTelefoner.join(", ")}
       />
 
@@ -386,6 +400,7 @@ export function TelefonNummere({
             kontorTelefoner.length === 0 && tjenesteTelefoner.length === 0
           }
           label="Telefonnummer"
+          split
           value={privatTelefon}
         />
       )}

@@ -60,14 +60,12 @@ export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
           <LabelWithValue
             label="Sektor"
             value={SektorNameMapping[ressurs.sektor]}
-            wrapped
           />
-          <LabelWithValue label="Nav-ident" value={ressurs.navident} wrapped />
-          <LabelWithValue label="Org.enhet" value={orgEnhet?.navn} wrapped />
+          <LabelWithValue label="Nav-ident" value={ressurs.navident} />
+          <LabelWithValue label="Org.enhet" value={orgEnhet?.navn} />
           <LabelWithValue
             label="Enhetsnummer"
             value={orgEnhet?.remedyEnhetId}
-            wrapped
           />
           {leder && (
             <span>
@@ -90,7 +88,6 @@ export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
                   )
                 : "-"
             }
-            wrapped
           />
         </div>
       </div>

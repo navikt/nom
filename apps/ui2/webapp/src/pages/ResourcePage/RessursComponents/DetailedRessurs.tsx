@@ -45,11 +45,11 @@ import { Divider } from "~/components/Divider";
 import { ModalProvider } from "~/components/modalProvider/ModalProvider";
 import {
   SektorNameMapping,
-  tilknytningstyperStatlige,
   TilknytningtypeNameMapping,
 } from "~/pages/CreateResourcePage/SektorStep";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { EditPersonOpplysninger } from "~/pages/ResourcePage/EditForms/EditPersonOpplysninger";
+import { EnhetKontekstInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
 import {
   nomDateIsBefore,
   nomDateIsBeforeToday,
@@ -597,6 +597,10 @@ function OrganisationHierarchyTree({
       </ExpansionCard.Header>
 
       <ExpansionCard.Content>
+        <EnhetKontekstInfo displayLeder={false} orgEnhet={orgEnhet} />
+
+        <Divider size="small" />
+
         <div
           css={css`
             display: flex;

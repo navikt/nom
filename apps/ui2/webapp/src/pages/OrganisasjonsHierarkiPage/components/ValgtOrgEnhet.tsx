@@ -6,11 +6,9 @@ import {
 import {
   BodyShort,
   Button,
-  CopyButton,
   Dropdown,
   Heading,
   HGrid,
-  HStack,
   Link,
   Loader,
   ReadMore,
@@ -32,6 +30,7 @@ import {
   isOrgEnhetDriftsenhet,
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
+import { LabelWithValue } from "~/components/LabelWithValue";
 import { OrgEnhetStatistikk } from "~/components/statistikk/OrgEnhetStatistikk";
 import { UserImage } from "~/components/UserImage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
@@ -171,22 +170,22 @@ export const ValgtOrgEnhet = ({
               `}
               gap="4"
             >
-              <OrgEnhetInformasjon copyButton label="ID" value={orgEnhet.id} />
-              <OrgEnhetInformasjon
+              <LabelWithValue copyButton label="ID" value={orgEnhet.id} />
+              <LabelWithValue
                 label="Remedy-enhet"
                 value={orgEnhet.remedyEnhetId}
               />
               {orgEnhet.navn.toLowerCase() !== "nav" && (
-                <OrgEnhetInformasjon
+                <LabelWithValue
                   label="Gyldig f.o.m."
                   value={formatDisplayDate(orgEnhet.gyldigFom)}
                 />
               )}
-              <OrgEnhetInformasjon
+              <LabelWithValue
                 label="Gyldig t.o.m."
                 value={formatDisplayDate(orgEnhet.gyldigTom)}
               />
-              <OrgEnhetInformasjon
+              <LabelWithValue
                 label="Enhetstype"
                 value={
                   orgEnhet.orgEnhetsType
@@ -194,7 +193,7 @@ export const ValgtOrgEnhet = ({
                     : undefined
                 }
               />
-              <OrgEnhetInformasjon
+              <LabelWithValue
                 label="NOM-nivå"
                 value={
                   orgEnhet.nomNivaa
@@ -202,17 +201,14 @@ export const ValgtOrgEnhet = ({
                     : undefined
                 }
               />
-              <OrgEnhetInformasjon
+              <LabelWithValue
                 copyButton
                 label="Unit4-ID"
                 value={orgEnhet.agressoId}
               />
               {orgEnhet.orgNiv !== "ORGNIV0" &&
                 orgEnhet.orgNiv !== "ORGENHET" && (
-                  <OrgEnhetInformasjon
-                    label="Unit4-nivå"
-                    value={orgEnhet.orgNiv}
-                  />
+                  <LabelWithValue label="Unit4-nivå" value={orgEnhet.orgNiv} />
                 )}
             </HGrid>
           </div>
@@ -281,29 +277,6 @@ export const ValgtOrgEnhet = ({
     </div>
   );
 };
-
-function OrgEnhetInformasjon({
-  label,
-  value,
-  copyButton = false,
-}: {
-  label: string;
-  value: string | undefined;
-  copyButton?: boolean;
-}) {
-  if (!value) {
-    return;
-  }
-
-  return (
-    <HStack gap="2">
-      <BodyShort>
-        {label}: <b>{value}</b>
-      </BodyShort>
-      {copyButton && <CopyButton copyText={value} size="xsmall" />}
-    </HStack>
-  );
-}
 
 function MedarbeidereList({
   orgEnhet,

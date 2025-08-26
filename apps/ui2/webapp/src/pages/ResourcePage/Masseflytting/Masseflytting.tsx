@@ -28,6 +28,7 @@ import {
   masseflytting,
 } from "~/api/react-query-endpoints";
 import ContentWrapper from "~/components/ContentWrapper";
+import { LabelWithValue } from "~/components/LabelWithValue";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import {
   ModalProvider,
@@ -54,6 +55,7 @@ import type {
   OrgEnhetMedLedernavn,
   OrgtilknytningState,
   Ressurs,
+  RessursState,
 } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn } from "~/utils";
@@ -318,7 +320,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
 
           <EnhetKontekstInfo
             orgEnhet={orgEnheterSomKanHaRessurser.find(
-              (it) => it.id === orgEnhet.id,
+              (ressursEnhet) => ressursEnhet.id === orgEnhet.id,
             )}
           />
         </VStack>
@@ -567,51 +569,59 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
   );
 }
 
-function EnhetKontekstInfo({
+export function EnhetKontekstInfo({
   orgEnhet,
   fallbackMessage,
+  displayLeder = true,
 }: {
-  orgEnhet: OrgEnhetMedLedernavn | undefined;
+  orgEnhet: OrgEnhetMedLedernavn | OrgEnhet | undefined;
   fallbackMessage?: string;
+  displayLeder?: boolean;
 }) {
+  const ledere =
+    "ledere" in (orgEnhet ?? {})
+      ? Array.isArray(orgEnhet?.ledere) &&
+        typeof orgEnhet?.ledere[0] === "string"
+        ? (orgEnhet?.ledere as string[])
+        : (orgEnhet?.ledere as RessursState[]).map((leder) =>
+            formatVisningsnavn(leder.visningsnavn),
+          )
+      : [];
+
   const extraAgressoInfo = useExtraAgressoInfo(orgEnhet?.id);
+
   if (!orgEnhet) {
     return <>{fallbackMessage}</>;
   }
 
   return (
-    <HStack gap="4">
-      <span>
-        NOM-ID: <b>{orgEnhet?.id}</b>
-      </span>
-      <span>
-        Leder: <b>{orgEnhet?.ledere[0]}</b>
-      </span>
-      <span>
-        Enhet i Remedy: <b>{orgEnhet?.remedyEnhetId}</b>
-      </span>
-      {extraAgressoInfo && (
-        <span>
-          Agresso-ID: <b>{extraAgressoInfo.agressoId}</b>
-        </span>
-      )}
+    <HStack
+      css={css`
+        font-size: var(--a-font-size-large);
+      `}
+      gap="4"
+    >
+      <LabelWithValue label="NOM-ID" value={orgEnhet.id} />
+      {displayLeder && <LabelWithValue label="Leder" value={ledere[0]} />}
+      <LabelWithValue label="Enhet i Remedy" value={orgEnhet.remedyEnhetId} />
+      <LabelWithValue label="Agresso-ID" value={extraAgressoInfo?.agressoId} />
     </HStack>
   );
 }
 
 function useExtraAgressoInfo(orgEnhetId: string | undefined) {
-  const qry = useQuery({
-    queryKey: getOrgEnhet.queryKey(orgEnhetId || "nothing"),
-    queryFn: () => getOrgEnhet.queryFn(orgEnhetId || "nothing"),
-    enabled: orgEnhetId !== undefined,
+  const query = useQuery({
+    queryKey: getOrgEnhet.queryKey(orgEnhetId ?? ""),
+    queryFn: () => getOrgEnhet.queryFn(orgEnhetId ?? ""),
+    enabled: !!orgEnhetId,
   });
 
-  if (!qry.data) {
-    return null;
+  if (!query.data) {
+    return undefined;
   }
   return {
-    agressoId: qry.data.agressoId,
-    agressoOrgenhetType: qry.data.agressoOrgenhetType,
+    agressoId: query.data.agressoId,
+    agressoOrgenhetType: query.data.agressoOrgenhetType,
   };
 }
 
