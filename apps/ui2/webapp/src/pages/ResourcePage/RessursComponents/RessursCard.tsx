@@ -53,13 +53,15 @@ export function RessursCard({
           gap: var(--a-spacing-3);
         `}
       >
-        <LabelWithValue label="Nav-ident" value={ressurs.navident} />
+        <LabelWithValue label="Nav-ident" split value={ressurs.navident} />
         <LabelWithValue
           label="Sektor"
+          split
           value={SektorNameMapping[ressurs.sektor]}
         />
         <LabelWithValue
           label="Startdato"
+          split
           value={
             ressurs.startdato &&
             format(new Date(ressurs.startdato), DATE_FORMATS.no)
@@ -67,6 +69,7 @@ export function RessursCard({
         />
         <LabelWithValue
           label="Sluttdato"
+          split
           value={
             ressurs.sluttdato &&
             format(new Date(ressurs.sluttdato), DATE_FORMATS.no)

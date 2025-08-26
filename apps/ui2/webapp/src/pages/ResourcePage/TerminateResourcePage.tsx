@@ -11,8 +11,6 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { isAfter } from "date-fns";
-import { maxTime } from "date-fns/constants";
 import React from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -33,6 +31,7 @@ import {
 } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
+import { nomDateIsAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { RessursCard } from "~/pages/ResourcePage/RessursComponents/RessursCard";
 import fjernRessursIcon from "~/resources/fjernRessursIcon.svg";
 import type { AvvikleRessursRequest } from "~/types/api-models";
@@ -59,10 +58,14 @@ export function TerminateResourcePage() {
           .max1YearInTheFuture()
           .required("Obligatorisk")
           .test(
-            "sluttDato-etter-startDato",
-            "Sluttdato kan ikke være før startdato",
+            "sluttDato-ikke-før-startDato",
+            "Kan ikke være før startdato",
             (sluttDato) => {
-              return isAfter(sluttDato, ressurs?.startdato ?? maxTime);
+              const ressursStartdato = ressurs?.startdato;
+
+              return (
+                !ressursStartdato || nomDateIsAfter(sluttDato, ressursStartdato)
+              );
             },
           ),
       }),

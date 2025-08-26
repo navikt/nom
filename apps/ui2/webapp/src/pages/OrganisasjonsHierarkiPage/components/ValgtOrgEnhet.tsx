@@ -1,8 +1,5 @@
 import { css } from "@emotion/react";
-import {
-  ExternalLinkIcon,
-  MenuElipsisHorizontalCircleIcon,
-} from "@navikt/aksel-icons";
+import { MenuElipsisHorizontalCircleIcon } from "@navikt/aksel-icons";
 import {
   BodyShort,
   Button,
@@ -31,6 +28,7 @@ import {
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
 import { LabelWithValue } from "~/components/LabelWithValue";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import { OrgEnhetStatistikk } from "~/components/statistikk/OrgEnhetStatistikk";
 import { UserImage } from "~/components/UserImage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
@@ -231,16 +229,15 @@ export const ValgtOrgEnhet = ({
         </div>
 
         {!!teamkatalogSeksjon && (
-          <Link
+          <SmartLink
             css={css`
               margin-top: var(--a-spacing-4);
             `}
+            externalIcon
             href={tkatLenke}
-            target="_blank"
           >
-            Se seksjon i Teamkatalogen{" "}
-            <ExternalLinkIcon fontSize="1.333rem" title="a11y-title" />
-          </Link>
+            Se seksjon i Teamkatalogen
+          </SmartLink>
         )}
 
         {loading ? (
