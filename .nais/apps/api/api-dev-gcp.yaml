@@ -296,6 +296,10 @@ spec:
         - application: oppgave
           namespace: aap
           cluster: dev-gcp
+        - application: fagarkiv-administrasjon-q2
+          namespace: isa
+          cluster: dev-gcp
+
     outbound:
       rules:
         - application: nav-ident
