@@ -2,7 +2,7 @@ import "@navikt/ds-css";
 import "./designSystemOverrides.css";
 import "~/types/yupUtility";
 
-import { ApolloProvider } from "@apollo/client";
+import { ApolloProvider } from "@apollo/client/react";
 import { css } from "@emotion/react";
 import { getWebInstrumentations, initializeFaro } from "@grafana/faro-web-sdk";
 import { TracingInstrumentation } from "@grafana/faro-web-tracing";

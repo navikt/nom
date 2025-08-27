@@ -1,6 +1,6 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 import { gql } from '@apollo/client';
-import * as Apollo from '@apollo/client';
+import * as Apollo from '@apollo/client/react';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -820,10 +820,18 @@ export function useSearchOrgenheterLazyQuery(baseOptions?: Apollo.LazyQueryHookO
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>(SearchOrgenheterDocument, options);
         }
-export function useSearchOrgenheterSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>(SearchOrgenheterDocument, options);
-        }
+export function useSearchOrgenheterSuspenseQuery(
+  baseOptions: Apollo.SuspenseQueryHookOptions<
+    SearchOrgenheterQuery,
+    SearchOrgenheterQueryVariables
+  > & { variables: SearchOrgenheterQueryVariables }
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<
+    SearchOrgenheterQuery,
+    SearchOrgenheterQueryVariables
+  >(SearchOrgenheterDocument, options);
+}
 export type SearchOrgenheterQueryHookResult = ReturnType<typeof useSearchOrgenheterQuery>;
 export type SearchOrgenheterLazyQueryHookResult = ReturnType<typeof useSearchOrgenheterLazyQuery>;
 export type SearchOrgenheterSuspenseQueryHookResult = ReturnType<typeof useSearchOrgenheterSuspenseQuery>;
