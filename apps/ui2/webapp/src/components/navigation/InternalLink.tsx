@@ -22,6 +22,7 @@ export function InternalLink({
       css={css`
         :hover {
           text-decoration: none;
+          width: fit-content;
         }
       `}
       rel={rel}

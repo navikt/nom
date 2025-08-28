@@ -10,7 +10,7 @@ import {
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { addYears, isDate, subDays } from "date-fns";
+import { addYears, subDays } from "date-fns";
 import pickBy from "lodash/pickBy";
 import { useEffect, useState } from "react";
 import {
@@ -29,17 +29,14 @@ import { useHasAdminAccess } from "~/api/useGetSession";
 import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
 import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBrukerstedSelect";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
-import { dateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
+import { nomDateIsSameOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { defaultFormStyle, fullwidthRow } from "~/resources/NomStyles";
 import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
 import { Sektor, Tilknytningtype } from "~/types/api-models";
-import {
-  formatDateWithoutTimezone,
-  isSameDateOrAfter,
-  todayWithoutTimezone,
-} from "~/utils";
+import { validateFormDate } from "~/types/yupUtility";
+import { formatDateWithoutTimezone } from "~/utils";
 
 export function OrganisasjonstilknytningStep() {
   const { sektor } = useSearch({
@@ -51,51 +48,41 @@ export function OrganisasjonstilknytningStep() {
       icon={opprettRessursIconRoundedBackground}
       title="Organisasjonstilknytninger"
     >
-      {(() => {
-        switch (sektor) {
-          case Sektor.NAV_KOMMUNAL: {
-            return <CreateKommunaleRessurs />;
-          }
-          case Sektor.EKSTERN: {
-            return <CreateEksternRessurs />;
-          }
-          case Sektor.NAV_STATLIG: {
-            return <CreateKommunaleRessurs />;
-          }
-        }
-      })()}
+      {sektor === Sektor.EKSTERN ? (
+        <CreateEksternRessurs />
+      ) : (
+        <CreateInternRessurs />
+      )}
     </ContainerWithHighlightedTop>
   );
 }
 
-// TODO: må refaktoreres når den tid kommer
-/*function CreateStatligRessurs() {
+function CreateInternRessurs() {
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
-  const { ansettelsesType, orgEnhetId, gyldigFom } = useSearch({
-    from: "/ressurs/create/$step",
-  });
+  const { orgEnhetId, gyldigFom, gyldigTom, fysiskBrukerstedNr, sektor } =
+    useSearch({
+      from: "/ressurs/create/$step",
+    });
+
   const methods = useForm({
     defaultValues: {
-      ansettelsesType: ansettelsesType ?? AnsettelsesType.FAST,
-      orgEnhetId,
+      orgEnhetId: orgEnhetId,
       gyldigFom: undefined,
+      gyldigTom: undefined,
+      fysiskBrukerstedNr: fysiskBrukerstedNr,
     },
-    resolver: yupResolver(statligValidationSchema),
+
+    resolver: yupResolver(validationSchema),
   });
 
-  const {
-    handleSubmit,
-    setValue,
-    control,
-    formState: { errors },
-  } = methods;
+  const { handleSubmit } = methods;
 
   const navigerTilbake = async () => {
     const values = methods.watch();
 
     const validValues = pickBy(values, (value, key) => {
       try {
-        statligValidationSchema.validateSyncAt(key, { [key]: value });
+        validationSchema.validateSyncAt(key, { [key]: value });
         return true;
       } catch {
         return false;
@@ -105,21 +92,17 @@ export function OrganisasjonstilknytningStep() {
     navigate({
       to: "/ressurs/create/$step",
       params: { step: "2" },
-      search: (oldSearch) => ({ ...oldSearch, ...validValues }),
-    });
+      search: (oldSearch) => ({
+        ...oldSearch,
+        ...validValues,
+        gyldigTom: values.gyldigTom ?? undefined,
+      }),
+    }).then();
   };
 
-  useEffect(() => {
-    if (gyldigFom) {
-      setValue("gyldigFom", gyldigFom);
-    }
-  }, [gyldigFom]);
-
-  const startDatePicker = useDatepicker({
-    onDateChange: (date) =>
-      setValue("gyldigFom", date ? formatDateWithoutTimezone(date) : ""),
-    defaultSelected: gyldigFom ? new Date(gyldigFom) : undefined,
-  });
+  if (sektor === undefined) {
+    return <Alert variant="error">Mangler informasjon om sektor</Alert>;
+  }
 
   return (
     <FormProvider {...methods}>
@@ -129,38 +112,26 @@ export function OrganisasjonstilknytningStep() {
           navigate({
             to: "/ressurs/create/$step",
             params: { step: "9" },
-            search: (oldSearch) => ({ ...oldSearch, ...values }),
+            search: (oldSearch) => ({
+              ...oldSearch,
+              ...values,
+              gyldigTom: values.gyldigTom ?? undefined,
+            }),
           }),
         )}
       >
-        <InnerOrgEnhetSelect />
-        <Controller
-          control={control}
-          name="ansettelsesType"
-          render={({ field }) => (
-            <RadioGroup {...field} legend="Ansettelsestype" size="medium">
-              <Radio checked value={AnsettelsesType.FAST}>
-                {AnsettelsesTypeNameMapping[AnsettelsesType.FAST]}
-              </Radio>
-              <Radio value={AnsettelsesType.MIDLERTIDIG}>
-                {AnsettelsesTypeNameMapping[AnsettelsesType.MIDLERTIDIG]}
-              </Radio>
-            </RadioGroup>
-          )}
+        <OrganisasjonstilknytningInnerForm
+          defaultSluttDato={gyldigTom}
+          defaultStartDato={gyldigFom}
+          erDagligOppfolgingLockedToTrue
+          sektor={sektor}
         />
-
-        <DatePicker {...startDatePicker.datepickerProps}>
-          <DatePicker.Input
-            {...startDatePicker.inputProps}
-            error={errors.gyldigFom?.message?.toString()}
-            label="Startdato (første arbeidsdag)"
-          />
-        </DatePicker>
+        <FysiskBrukerstedSelectFormPart />
         <NavigationButtons goBackCallback={navigerTilbake} />
       </form>
     </FormProvider>
   );
-}*/
+}
 
 function CreateEksternRessurs() {
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
@@ -185,9 +156,7 @@ function CreateEksternRessurs() {
     },
 
     context: { tilknytningtype, sektor },
-    resolver: yupResolver(
-      eksternValidationSchema.concat(fysiskBrukerstedNrSchema),
-    ),
+    resolver: yupResolver(validationSchema),
   });
 
   const { handleSubmit } = methods;
@@ -201,13 +170,11 @@ function CreateEksternRessurs() {
 
     const validValues = pickBy(values, (value, key) => {
       try {
-        eksternValidationSchema
-          .concat(fysiskBrukerstedNrSchema)
-          .validateSyncAt(
-            key,
-            { [key]: value },
-            { context: { tilknytningtype, sektor } },
-          );
+        validationSchema.validateSyncAt(
+          key,
+          { [key]: value },
+          { context: { tilknytningtype, sektor } },
+        );
         return true;
       } catch {
         return false;
@@ -240,7 +207,10 @@ function CreateEksternRessurs() {
         <OrganisasjonstilknytningInnerForm
           defaultSluttDato={
             gyldigTom ||
-            formatDateWithoutTimezone(subDays(addYears(new Date(), 1), 1))
+            (tilknytningtype === Tilknytningtype.HELFO ||
+            tilknytningtype === Tilknytningtype.SKATTEETATEN
+              ? undefined
+              : formatDateWithoutTimezone(subDays(addYears(new Date(), 1), 1)))
           }
           defaultStartDato={gyldigFom}
           erDagligOppfolgingLockedToTrue
@@ -252,127 +222,6 @@ function CreateEksternRessurs() {
     </FormProvider>
   );
 }
-
-function CreateKommunaleRessurs() {
-  const navigate = useNavigate({ from: "/ressurs/create/$step" });
-  const { orgEnhetId, gyldigFom, gyldigTom, fysiskBrukerstedNr, sektor } =
-    useSearch({
-      from: "/ressurs/create/$step",
-    });
-
-  const methods = useForm({
-    defaultValues: {
-      orgEnhetId: orgEnhetId,
-      gyldigFom: undefined,
-      gyldigTom: undefined,
-      fysiskBrukerstedNr: fysiskBrukerstedNr,
-    },
-
-    resolver: yupResolver(
-      kommunalStatligValidationSchema.concat(fysiskBrukerstedNrSchema),
-    ),
-  });
-
-  const { handleSubmit } = methods;
-
-  const navigerTilbake = async () => {
-    const values = methods.watch();
-
-    const validValues = pickBy(values, (value, key) => {
-      try {
-        kommunalStatligValidationSchema
-          .concat(fysiskBrukerstedNrSchema)
-          .validateSyncAt(key, { [key]: value });
-        return true;
-      } catch {
-        return false;
-      }
-    });
-
-    navigate({
-      to: "/ressurs/create/$step",
-      params: { step: "2" },
-      search: (oldSearch) => ({ ...oldSearch, ...validValues }),
-    }).then();
-  };
-
-  if (sektor === undefined) {
-    return <Alert variant="error">Mangler informasjon om sektor</Alert>;
-  }
-
-  return (
-    <FormProvider {...methods}>
-      <form
-        css={defaultFormStyle}
-        onSubmit={handleSubmit((values) =>
-          navigate({
-            to: "/ressurs/create/$step",
-            params: { step: "9" },
-            search: (oldSearch) => ({ ...oldSearch, ...values }),
-          }),
-        )}
-      >
-        <OrganisasjonstilknytningInnerForm
-          defaultSluttDato={gyldigTom}
-          defaultStartDato={gyldigFom}
-          erDagligOppfolgingLockedToTrue
-          sektor={sektor}
-        />
-        <FysiskBrukerstedSelectFormPart />
-        <NavigationButtons goBackCallback={navigerTilbake} />
-      </form>
-    </FormProvider>
-  );
-}
-
-const fysiskBrukerstedNrSchema = yup.object().shape({
-  fysiskBrukerstedNr: yup.string().required("Obligatorisk"),
-});
-
-const orgEnhetIdSchema = yup.object().shape({
-  orgEnhetId: yup.string().required("Obligatorisk"),
-});
-
-const ikkeEksternValidationSchema = yup.object().shape({
-  gyldigFom: yup.string().required("Obligatorisk"),
-  gyldigTom: yup.string().max6YearsInTheFuture().optional(),
-});
-
-const kommunalStatligValidationSchema =
-  ikkeEksternValidationSchema.concat(orgEnhetIdSchema);
-
-export const eksternPeriodeValidationSchema = yup.object().shape({
-  gyldigFom: yup.string().required("Obligatorisk"),
-  gyldigTom: yup
-    .string()
-    .nullable()
-    .test({
-      name: "gyldigTom-required-some-external",
-      message: "Obligatorisk",
-      test: function (value) {
-        const tilknytningtype = this?.options?.context?.tilknytningtype;
-
-        const isRequired =
-          tilknytningtype !== Tilknytningtype.HELFO &&
-          tilknytningtype !== Tilknytningtype.SKATTEETATEN;
-
-        return !isRequired || !!value;
-      },
-    })
-    .test({
-      name: "gyldigTom-maks-tid",
-      test: function (value, context) {
-        const tilknytningtype = this?.options?.context?.tilknytningtype;
-        const sektor = this?.options?.context?.sektor;
-
-        return validateMaxTimeExternal(value, context, sektor, tilknytningtype);
-      },
-    }),
-  setRessursSluttdato: yup.boolean(),
-});
-
-export const eksternValidationSchema =
-  eksternPeriodeValidationSchema.concat(orgEnhetIdSchema);
 
 export function OrganisasjonstilknytningInnerForm({
   defaultStartDato,
@@ -404,6 +253,7 @@ export function OrganisasjonstilknytningInnerForm({
   return (
     <>
       <InnerOrgEnhetSelect />
+
       {watch("orgEnhetId") ? (
         <>
           {hasAdminAccess || hasWriteAccessForOrgenhet ? undefined : (
@@ -426,6 +276,7 @@ export function OrganisasjonstilknytningInnerForm({
           </Checkbox>
         </>
       ) : undefined}
+
       <Orgtilknytningsvarighet
         defaultSluttDato={defaultSluttDato}
         defaultStartDato={defaultStartDato}
@@ -596,29 +447,40 @@ function InnerOrgEnhetSelect() {
   );
 }
 
-const validateMaxTimeExternal = (
-  value: string | undefined | null,
-  context: yup.TestContext<yup.AnyObject>,
-  sektor: Sektor,
-  tilknytningtype: Tilknytningtype,
-) => {
-  const obligatoriskTom =
-    sektor === Sektor.EKSTERN &&
-    tilknytningtype !== Tilknytningtype.HELFO &&
-    tilknytningtype !== Tilknytningtype.SKATTEETATEN;
+const validationSchema = yup.object().shape({
+  orgEnhetId: yup.string().required("Obligatorisk"),
+  gyldigFom: yup
+    .string()
+    .required("Obligatorisk")
+    .test({
+      name: "gyldigFom-datovalidering",
+      test: function (value, context) {
+        const sektor = this?.options?.context?.sektor;
+        const tilknytningtype = this?.options?.context?.tilknytningtype;
 
-  const maxDate = dateWithoutTimezone(
-    addYears(todayWithoutTimezone(), obligatoriskTom ? 1 : 6),
-  );
+        return validateFormDate(value, context, sektor, tilknytningtype, true);
+      },
+    }),
+  gyldigTom: yup
+    .string()
+    .nullable()
+    .test({
+      name: "gyldigTom-datovalidering",
+      test: function (value, context) {
+        const sektor = this?.options?.context?.sektor;
+        const tilknytningtype = this?.options?.context?.tilknytningtype;
 
-  if (
-    (obligatoriskTom && !value) ||
-    (value && isSameDateOrAfter(dateWithoutTimezone(value), maxDate))
-  ) {
-    return context.createError({
-      message: `Må være under ${obligatoriskTom ? "ett" : "seks"} år frem i tid fra dagens dato${obligatoriskTom ? " for eksterne medarbeidere" : ", eller ikke satt"}`,
-    });
-  }
+        return validateFormDate(value, context, sektor, tilknytningtype, false);
+      },
+    })
+    .test({
+      name: "gyldigTom-ikke-før-fom",
+      message: "Kan ikke være før startdato",
+      test: function (value, context) {
+        const gyldigFom = context.parent.gyldigFom;
 
-  return true;
-};
+        return !gyldigFom || nomDateIsSameOrAfter(value, gyldigFom);
+      },
+    }),
+  fysiskBrukerstedNr: yup.string().required("Obligatorisk"),
+});

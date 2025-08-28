@@ -253,6 +253,9 @@ spec:
         - application: ung-deltakelse-opplyser
           namespace: k9saksbehandling
           cluster: prod-gcp
+        - application: oppgave
+          namespace: aap
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident

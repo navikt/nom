@@ -19,7 +19,6 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { AxiosError, AxiosResponse } from "axios";
-import { addYears } from "date-fns";
 import React, { useState } from "react";
 import {
   FormProvider,
@@ -53,7 +52,6 @@ import {
 } from "~/components/modalProvider/ModalProvider";
 import { PageBanner } from "~/components/PageBanner";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
-import { dateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import {
@@ -71,12 +69,12 @@ import type {
 import { Tilknytningtype } from "~/types/api-models";
 import { AnsettelsesType, Sektor } from "~/types/api-models";
 import { IdentType, type Person } from "~/types/api-models";
+import { validateFormDate } from "~/types/yupUtility";
 import {
   formatDateWithoutTimezone,
   formatDisplayDate,
   formatVisningsnavn,
   isInDevelopment,
-  todayWithoutTimezone,
 } from "~/utils";
 
 export function CreateSpecialResourcePage() {
@@ -959,16 +957,8 @@ function lagRessursRequest(values: {
     ),
     ansettelsesType: AnsettelsesType.FAST,
     fysiskBrukerstedNr: "2700",
-    sektor:
-      values.identType === IdentType.UTENLANDSK_KONSULENT ||
-      values.identType === IdentType.VIKAFOSSEN
-        ? Sektor.EKSTERN
-        : Sektor.NAV_STATLIG,
-    tilknytningtype:
-      values.identType === IdentType.UTENLANDSK_KONSULENT ||
-      values.identType === IdentType.VIKAFOSSEN
-        ? Tilknytningtype.KONSULENT
-        : Tilknytningtype.FAST,
+    sektor: identTypeSektorMapping(values.identType),
+    tilknytningtype: identTypeTilknytningtypeMapping(values.identType),
   };
 }
 
@@ -980,12 +970,10 @@ const opprettSpesiellValidationSchema = yup.object().shape({
       [IdentType.ROBOT, IdentType.VIKAFOSSEN, IdentType.UTENLANDSK_KONSULENT],
       "Ugyldig type",
     ),
-
   identifikasjonsnummer: yup
     .string()
     .required("Obligatorisk")
     .length(11, "Identifikasjonsnummer må bestå av 11 tegn"),
-
   visningsfornavn: yup.string().test({
     name: "fornavn-obligatorisk-ikke-vikafossen",
     message: "Obligatorisk",
@@ -1018,7 +1006,6 @@ const opprettSpesiellValidationSchema = yup.object().shape({
         return !value || !/\s/.test(value);
       },
     }),
-
   orgEnhetId: yup.string().test({
     name: "orgenhet-obligatorisk-ikke-vikafossen",
     message: "Obligatorisk",
@@ -1030,75 +1017,76 @@ const opprettSpesiellValidationSchema = yup.object().shape({
       return required ? !!value : true;
     },
   }),
-
   startDato: yup
     .string()
     .required("Obligatorisk")
     .test({
-      name: "startdato-maks-tid",
+      name: "startdato-datovalidering",
       test: function (value, context) {
-        return validateMaxTime(value, context);
+        const ressursIdentType = context?.parent?.identType;
+
+        const ressursSektor = identTypeSektorMapping(ressursIdentType);
+
+        const ressursTilknytningtype =
+          identTypeTilknytningtypeMapping(ressursIdentType);
+
+        return validateFormDate(
+          value,
+          context,
+          ressursSektor,
+          ressursTilknytningtype,
+          true,
+        );
       },
     }),
   sluttDato: yup
     .string()
     .nullable()
     .test({
-      name: "sluttdato-obligatorisk-eksterne",
-      message: "Obligatorisk",
+      name: "sluttdato-datovalidering",
       test: function (value, context) {
-        const ressursIdentType = context?.parent?.identType ?? undefined;
+        const ressursIdentType = context?.parent?.identType;
 
-        const ressursEkstern =
-          ressursIdentType === IdentType.UTENLANDSK_KONSULENT ||
-          ressursIdentType === IdentType.VIKAFOSSEN;
+        const ressursSektor = identTypeSektorMapping(ressursIdentType);
 
-        return !ressursEkstern || !!value;
+        const ressursTilknytningtype =
+          identTypeTilknytningtypeMapping(ressursIdentType);
+
+        return validateFormDate(
+          value,
+          context,
+          ressursSektor,
+          ressursTilknytningtype,
+          false,
+        );
       },
     })
     .test({
-      name: "sluttdato-maks-tid",
-      test: function (value, context) {
-        if (!value) {
-          return true;
-        }
-
-        return validateMaxTime(value, context);
-      },
-    })
-    .test({
-      name: "sluttdato-etter-startdato",
-      message: "Må være etter startdato",
+      name: "sluttdato-ikke-før-startdato",
+      message: "Kan ikke være før startdato",
       test: function (value, context) {
         const startdato = context.parent.startDato;
 
-        return nomDateIsSameOrAfter(value, startdato);
+        return !startdato || nomDateIsSameOrAfter(value, startdato);
       },
     }),
 });
 
-const validateMaxTime = (
-  value: string | undefined | null,
-  context: yup.TestContext<yup.AnyObject>,
-) => {
-  const ressursIdentType = context?.parent?.identType;
+function identTypeSektorMapping(identType: IdentType): Sektor {
+  return identType === IdentType.UTENLANDSK_KONSULENT ||
+    identType === IdentType.VIKAFOSSEN
+    ? Sektor.EKSTERN
+    : Sektor.NAV_STATLIG;
+}
 
-  const ressursEkstern =
-    ressursIdentType === IdentType.UTENLANDSK_KONSULENT ||
-    ressursIdentType === IdentType.VIKAFOSSEN;
-
-  const maxDate = dateWithoutTimezone(
-    addYears(todayWithoutTimezone(), ressursEkstern ? 1 : 6),
-  );
-
-  if (nomDateIsSameOrAfter(value, maxDate)) {
-    return context.createError({
-      message: `Må være under ${ressursEkstern ? "ett" : "seks"} år frem i tid fra dagens dato${ressursEkstern ? " for eksterne medarbeidere" : ", eller ikke satt"}`,
-    });
-  }
-
-  return true;
-};
+function identTypeTilknytningtypeMapping(
+  identType: IdentType,
+): Tilknytningtype {
+  return identType === IdentType.UTENLANDSK_KONSULENT ||
+    identType === IdentType.VIKAFOSSEN
+    ? Tilknytningtype.KONSULENT
+    : Tilknytningtype.FAST;
+}
 
 const spesielleIdentTyper = [
   IdentType.ROBOT,

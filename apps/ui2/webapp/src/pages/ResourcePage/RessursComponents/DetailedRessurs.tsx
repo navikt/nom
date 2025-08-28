@@ -355,7 +355,7 @@ function FutureOrgTilknytninger({
   return (
     <>
       <Heading level="2" size="xsmall">
-        Fremtidige org.tilknytninger
+        Fremtidige organisasjonstilknytninger
       </Heading>
       {futureOrgTilknytninger.map((orgTilknytning) => (
         <OrganisationHierarchyTree
@@ -399,13 +399,13 @@ function ExpiredOrgTilknytninger({
         `}
       >
         <Heading level="2" size="xsmall">
-          Avsluttede org.tilknytninger
+          Avsluttede organisasjonstilknytninger
         </Heading>
         <HelpText
           css={css`
             margin-left: var(--a-spacing-2);
           `}
-          title="Hvilke org.-tilknytninger vises her?"
+          title="Avsluttede organisasjonstilknytninger"
         >
           NOM har kun avsluttede organisasjonstilknytninger fra og med 2021.
         </HelpText>
@@ -422,7 +422,7 @@ function ExpiredOrgTilknytninger({
           size="small"
           variant="tertiary"
         >
-          Vis alle avsluttede org.tilknytninger
+          Vis alle avsluttede organisasjonstilknytninger
         </Button>
       )}
     </>

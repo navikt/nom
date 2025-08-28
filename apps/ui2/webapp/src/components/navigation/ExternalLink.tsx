@@ -27,6 +27,7 @@ export function ExternalLink({
       css={css`
         :hover {
           text-decoration: none;
+          width: fit-content;
         }
       `}
       href={href}

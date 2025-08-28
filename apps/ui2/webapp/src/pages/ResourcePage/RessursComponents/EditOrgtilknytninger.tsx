@@ -31,7 +31,7 @@ import {
 } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { addYears, subMonths } from "date-fns";
+import { subMonths } from "date-fns";
 import partition from "lodash/partition";
 import React, { useEffect } from "react";
 import type { SubmitHandler } from "react-hook-form";
@@ -65,7 +65,6 @@ import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import {
-  dateWithoutTimezone,
   earliestDateInList,
   formatDateWithoutTimezone,
 } from "~/dateUtils/dateUtils";
@@ -81,6 +80,7 @@ import {
   nomDateIsAfterToday,
   nomDateIsBefore,
   nomDateIsBeforeToday,
+  nomDateIsSameOrAfter,
   nomDateIsTodayOrAfter,
   nomDateIsTodayOrBefore,
   otCustomStortByDate,
@@ -98,12 +98,12 @@ import type {
 import { IdentType } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
 import { Sektor, Tilknytningtype } from "~/types/api-models";
+import { validateFormDate } from "~/types/yupUtility";
 import {
   formatDisplayDate,
   formatVisningsnavn,
   isGyldighetsPeriodeActive,
   isInDevelopment,
-  isSameDateOrAfter,
   todayWithoutTimezone,
 } from "~/utils";
 
@@ -850,44 +850,50 @@ function FormDateWrapper({
   });
 
   return (
-    <DatePicker {...datePickerProperties.datepickerProps}>
-      <DatePicker.Input
-        data-cy={label.replaceAll(" ", "-")}
-        disabled={disabled}
-        error={error}
-        ref={field.ref}
-        {...datePickerProperties.inputProps}
-        label={
-          <div
-            css={css`
-              display: flex;
-              margin-top: var(--a-spacing-4);
-            `}
-          >
-            <span
+    <div
+      css={css`
+        width: 158px;
+      `}
+    >
+      <DatePicker {...datePickerProperties.datepickerProps}>
+        <DatePicker.Input
+          data-cy={label.replaceAll(" ", "-")}
+          disabled={disabled}
+          error={error}
+          ref={field.ref}
+          {...datePickerProperties.inputProps}
+          label={
+            <div
               css={css`
                 display: flex;
-                height: 24px;
-                align-items: center;
+                margin-top: var(--a-spacing-4);
               `}
             >
-              {label}
-            </span>
-
-            {labelHelpText && (
-              <HelpText
+              <span
                 css={css`
-                  margin-left: var(--a-spacing-2);
+                  display: flex;
+                  height: 24px;
+                  align-items: center;
                 `}
               >
-                {labelHelpText}
-              </HelpText>
-            )}
-          </div>
-        }
-        size="small"
-      />
-    </DatePicker>
+                {label}
+              </span>
+
+              {labelHelpText && (
+                <HelpText
+                  css={css`
+                    margin-left: var(--a-spacing-2);
+                  `}
+                >
+                  {labelHelpText}
+                </HelpText>
+              )}
+            </div>
+          }
+          size="small"
+        />
+      </DatePicker>
+    </div>
   );
 }
 
@@ -1324,42 +1330,45 @@ const orgtilknytningSchema = yup.object().shape({
     .string()
     .required("Obligatorisk")
     .test({
-      name: "gyldigFom-maks-tid",
+      name: "gyldigFom-datovalidering",
       test: function (value, context) {
-        return validateMaxTime(value, context);
+        const otSektor = context?.parent?.sektor;
+        const otTilknytningtype = context?.parent?.orgtilknytningType;
+
+        return validateFormDate(
+          value,
+          context,
+          otSektor,
+          otTilknytningtype,
+          true,
+        );
       },
     }),
   gyldigTom: yup
     .string()
     .nullable()
     .test({
-      name: "gyldigTom-required-some-external",
-      message: "Obligatorisk for eksterne",
+      name: "gyldigTom-datovalidering",
       test: function (value, context) {
         const otSektor = context?.parent?.sektor;
         const otTilknytningtype = context?.parent?.orgtilknytningType;
 
-        const isRequired =
-          otSektor === Sektor.EKSTERN &&
-          otTilknytningtype !== Tilknytningtype.HELFO &&
-          otTilknytningtype !== Tilknytningtype.SKATTEETATEN;
-
-        return !isRequired || !!value;
+        return validateFormDate(
+          value,
+          context,
+          otSektor,
+          otTilknytningtype,
+          false,
+        );
       },
     })
     .test({
-      name: "gyldigTom-maks-tid",
-      test: function (value, context) {
-        return validateMaxTime(value, context);
-      },
-    })
-    .test({
-      name: "gyldigTom-etter-fom",
-      message: "Må være etter fra og med-dato",
+      name: "gyldigTom-ikke-før-fom",
+      message: "Kan ikke være før fra og med-dato",
       test: function (value, context) {
         const gyldigFom = context.parent.gyldigFom;
 
-        return !gyldigFom || !value || new Date(value) >= new Date(gyldigFom);
+        return !gyldigFom || nomDateIsSameOrAfter(value, gyldigFom);
       },
     }),
   sektor: yup.mixed().test({
@@ -1398,31 +1407,3 @@ const orgtilknytningSchema = yup.object().shape({
 const formValuesSchema = yup.object().shape({
   mappedeOrgtilknytninger: yup.array().of(orgtilknytningSchema).required(),
 });
-
-const validateMaxTime = (
-  value: string | undefined | null,
-  context: yup.TestContext<yup.AnyObject>,
-) => {
-  const otSektor = context?.parent?.sektor;
-  const otTilknytningtype = context?.parent?.orgtilknytningType;
-
-  const obligatoriskTom =
-    otSektor === Sektor.EKSTERN &&
-    otTilknytningtype !== Tilknytningtype.HELFO &&
-    otTilknytningtype !== Tilknytningtype.SKATTEETATEN;
-
-  const maxDate = dateWithoutTimezone(
-    addYears(todayWithoutTimezone(), obligatoriskTom ? 1 : 6),
-  );
-
-  if (
-    (obligatoriskTom && !value) ||
-    (value && isSameDateOrAfter(dateWithoutTimezone(value), maxDate))
-  ) {
-    return context.createError({
-      message: `Må være under ${obligatoriskTom ? "ett" : "seks"} år frem i tid fra dagens dato${obligatoriskTom ? " for eksterne medarbeidere" : ", eller ikke satt"}`,
-    });
-  }
-
-  return true;
-};
