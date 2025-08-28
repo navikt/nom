@@ -19,7 +19,7 @@ spec:
     - team: org
       application: org-kafka-manager
       access: read
-    - team: repr
+    - team: repr                      # Har migrert til v4 - https://nav-it.slack.com/archives/CLQSWA83U/p1755859471008789
       application: repr-fullmakt
       access: read
     - team: shout-out
