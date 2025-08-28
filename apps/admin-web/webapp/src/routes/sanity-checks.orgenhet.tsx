@@ -8,6 +8,7 @@ import {
   getBunEnheterUtenEksakt1ArbeidsomradeIHierarkiet,
   getEnheterUtenOverenheter,
   getEnheterUtenOverenheterMedUnderEnheter,
+  getEnheterUtenforHierarkietMenHarAktiveDelegeringer,
 } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { AntallOrgenheter } from "~/sanitychecks/OrgEnhet/AntallOrgenheter.tsx";
@@ -72,6 +73,16 @@ function ListSelector(props: { selected: string }) {
     case "Arbeidsomraade": {
       return <Arbeidsomraade />;
     }
+    case "EnheterUtenforHierarkietMenHarAktiveDelegeringer": {
+      const orgEnhetOrganisering = useQuery(
+        getEnheterUtenforHierarkietMenHarAktiveDelegeringer(),
+      );
+      return (
+        <OrgEnhetOrganiseringTabell
+          orgEnhetOrganisering={orgEnhetOrganisering}
+        />
+      );
+    }
     default: {
       return <></>;
     }
@@ -108,6 +119,9 @@ function OrgEnhetSanityChecks() {
         </option>
         <option value={"Arbeidsomraade"}>
           Enheter med avvikende antall arbeidsområde
+        </option>
+        <option value={"EnheterUtenforHierarkietMenHarAktiveDelegeringer"}>
+          Enheter utenfor hierarkiet men har aktive delegeringer
         </option>
       </Select>
       <ListSelector selected={handleChange} />
