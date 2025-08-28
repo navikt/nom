@@ -5,8 +5,10 @@ import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetArbeidsomraadeInfo
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetStartOgSluttdato;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetOrganisering;
 import no.nav.nom.contract.nom.NomNivaa;
+import no.nav.nom.contract.nom.state.LederTilgangState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
+import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.slf4j.Logger;
@@ -30,11 +32,14 @@ public class OrgEnhetSanityCheckService {
     private final Logger log = LoggerFactory.getLogger(OrgEnhetSanityCheckService.class);
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrganiseringStateRepository organiseringStateRepository;
+    private final DelegertLederStateRepository delegertLederStateRepository;
 
     public OrgEnhetSanityCheckService(OrgEnhetStateRepository orgEnhetStateRepository,
-                                      OrganiseringStateRepository organiseringStateRepository) {
+                                      OrganiseringStateRepository organiseringStateRepository,
+                                      DelegertLederStateRepository delegertLederStateRepository) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.organiseringStateRepository = organiseringStateRepository;
+        this.delegertLederStateRepository = delegertLederStateRepository;
     }
 
     public OrgEnhetStartOgSluttdato sjekkOrgEnhetStartSluttDato() {
@@ -377,6 +382,48 @@ public class OrgEnhetSanityCheckService {
                 return findAllOrgenheterOver(ooe, orgenheterSoFar, aktiveEnheter, aktiveOrganiseringer);
             })
             .orElse(orgenheterSoFar);
+    }
+
+    public List<OrgEnhetOrganisering> getOrgenheterMedAktiveDeliveringerSomLiggerUtenforHierarki() {
+        List<OrgEnhetState> alleEnheter =  orgEnhetStateRepository.getAll().stream().toList();
+        List<OrgEnhetState> aktiveEnheter = aktiveEnheter(alleEnheter);
+        List<OrganiseringState> aktiveOrganiseringer = organiseringStateRepository.getOrganiseringer();
+
+        var alleAktiveDelegeringer = delegertLederStateRepository.getAll().stream().filter(LederTilgangState::isActive).toList();
+        var relevanteDelegeringer = alleAktiveDelegeringer.stream()
+            .filter(delegering -> !validHierarchy(delegering.orgenhetId(), aktiveEnheter, aktiveOrganiseringer))
+            .toList();
+
+        return relevanteDelegeringer.stream()
+            .map(delegering -> getOrgEnhetState(delegering.orgenhetId(), aktiveEnheter))
+            .map(oe ->
+                new OrgEnhetOrganisering(
+                    oe.id(),
+                    oe.uniqueAgressoId().orElse(""),
+                    oe.gyldigFom(),
+                    oe.gyldigTom().orElse(null)))
+            .toList();
+    }
+
+    private boolean validHierarchy(
+        String orgEnhetId,
+        List<OrgEnhetState> aktiveEnheter,
+        List<OrganiseringState> aktiveOrganiseringer
+    ) {
+        OrgEnhetState orgEnhetState = getOrgEnhetState(orgEnhetId, aktiveEnheter);
+        if (orgEnhetState == null) {
+            return false;
+        }
+
+        List<OrgEnhetState> orgenheterOver = findAllOrgenheterOver(orgEnhetState, aktiveEnheter, aktiveOrganiseringer);
+
+        var validHierarchy = orgenheterOver
+            .stream()
+            .filter(oe ->
+                oe.agressoOrgNivaa().isPresent() && oe.agressoOrgNivaa().get().equals("ORGNIV0")
+                    && oe.agressoId().isPresent() && oe.agressoId().get().equals("NAV"))
+            .count() == 1;
+        return validHierarchy;
     }
 
 }

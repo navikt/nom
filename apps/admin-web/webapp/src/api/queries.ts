@@ -343,6 +343,18 @@ export function getEnheterUtenOverenheterMedUnderEnheter() {
   });
 }
 
+export function getEnheterUtenforHierarkietMenHarAktiveDelegeringer() {
+  return queryOptions({
+    queryKey: ["API", "ENHETERUTENFORHIERARKIETMENHARAKTIVEDELEGERINGER"],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/SanityCheck/orgenhet/orgenheterMedAktiveDeliveringerSomLiggerUtenforHierarki`,
+        )
+      ).json<OrgEnhetOrganisering[]>(),
+  });
+}
+
 export async function getRessurserSanityCheck(): Promise<RessursOrgtilknytningKoblingInfo> {
   return await ky
     .get(`${API_BASE_URL}/SanityCheck/ressurs/ressurser`, {
