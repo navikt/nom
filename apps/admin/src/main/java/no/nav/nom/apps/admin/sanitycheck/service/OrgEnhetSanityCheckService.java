@@ -396,6 +396,7 @@ public class OrgEnhetSanityCheckService {
 
         return relevanteDelegeringer.stream()
             .map(delegering -> getOrgEnhetState(delegering.orgenhetId(), aktiveEnheter))
+            .filter(Objects::nonNull)
             .map(oe ->
                 new OrgEnhetOrganisering(
                     oe.id(),
