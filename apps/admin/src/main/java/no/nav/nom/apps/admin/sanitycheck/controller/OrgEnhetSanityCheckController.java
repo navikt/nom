@@ -130,4 +130,18 @@ public class OrgEnhetSanityCheckController {
     public ResponseEntity<OrgEnhetArbeidsomraadeInfo> validerArbeidsomraade() {
         return ResponseEntity.ok(orgEnhetSanityCheckService.validerArbeidsomraade());
     }
+
+    @Operation(
+        description = "List orgenheter med aktive deliveringer som ligger utenfor aktiv organisasjonshierarki",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping("/orgenheterMedAktiveDeliveringerSomLiggerUtenforHierarki")
+    public ResponseEntity<List<OrgEnhetOrganisering>> orgenheterMedAktiveDeliveringerSomLiggerUtenforHierarki() {
+        return ResponseEntity.ok(orgEnhetSanityCheckService.getOrgenheterMedAktiveDeliveringerSomLiggerUtenforHierarki());
+    }
 }
