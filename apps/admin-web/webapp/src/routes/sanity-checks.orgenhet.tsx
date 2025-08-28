@@ -43,6 +43,7 @@ function ListSelector(props: { selected: string }) {
       const orgEnhetOrganisering = useQuery(getEnheterUtenOverenheter());
       return (
         <OrgEnhetOrganiseringTabell
+          exportTypeNavn="enheterUtenOverEnheter"
           orgEnhetOrganisering={orgEnhetOrganisering}
         />
       );
@@ -53,6 +54,7 @@ function ListSelector(props: { selected: string }) {
       );
       return (
         <OrgEnhetOrganiseringTabell
+          exportTypeNavn="enheterUtenOverEnheterMedUnderEnheter"
           orgEnhetOrganisering={orgEnhetOrganisering}
         />
       );
@@ -66,6 +68,7 @@ function ListSelector(props: { selected: string }) {
       );
       return (
         <OrgEnhetOrganiseringTabell
+          exportTypeNavn="bunnEnheterSomIkkeHarEksakt1ArbeidsomradeIOrghierarkietStier"
           orgEnhetOrganisering={orgEnhetOrganisering}
         />
       );
@@ -79,6 +82,7 @@ function ListSelector(props: { selected: string }) {
       );
       return (
         <OrgEnhetOrganiseringTabell
+          exportTypeNavn={undefined}
           orgEnhetOrganisering={orgEnhetOrganisering}
         />
       );

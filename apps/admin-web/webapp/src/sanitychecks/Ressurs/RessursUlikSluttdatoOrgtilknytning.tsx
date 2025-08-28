@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getRessursOrgtilknytningUlikSluttdato } from "~/api/queries.ts";
 import { NomLink } from "~/components/NomLink.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
+import { AntallOgExcelEksportKnapp } from "~/sanitychecks/components/AntallOgExcelEksportKnapp.tsx";
 import { EmptyTable } from "~/sanitychecks/components/EmptyTable.tsx";
 import { LoadingTable } from "~/sanitychecks/components/LoadingTable.tsx";
 import type { RessursOrgtilknytningUlikSluttdato } from "~/types/nom-admin/nom-admin-models.ts";
@@ -31,6 +32,11 @@ export function RessursUlikSluttdatoOrgtilknytning() {
 
   return (
     <div>
+      <AntallOgExcelEksportKnapp
+        antall={data.length}
+        exportName="ressursSluttdatoUlikOrgTilknytningSluttdato"
+        exportType="ressurs"
+      />
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.ColumnHeader scope="col" sortKey="navident" sortable>

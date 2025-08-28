@@ -4,6 +4,7 @@ import { type SetStateAction, useState } from "react";
 
 import { getRessursMedAktivOrgTilknytningHvorEnhetErInaktivMedUnderenhet } from "~/api/queries.ts";
 import { useTableSort } from "~/hooks/useTableSort.ts";
+import { AntallOgExcelEksportKnapp } from "~/sanitychecks/components/AntallOgExcelEksportKnapp.tsx";
 import { RessursMedEnhetTabell } from "~/sanitychecks/Ressurs/RessursMedEnhetTabell.tsx";
 import type { RessursMedEnhet } from "~/types/nom-admin/nom-admin-models.ts";
 
@@ -83,6 +84,11 @@ export function RessursSluttetMedAktivOT() {
 
   return (
     <div>
+      <AntallOgExcelEksportKnapp
+        antall={data.length}
+        exportName="listTilkoblingerUtoverRessursGyldighetPeriode"
+        exportType="ressurs"
+      />
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <RessursMedEnhetTabell sortedData={sortedData} />
       </Table>

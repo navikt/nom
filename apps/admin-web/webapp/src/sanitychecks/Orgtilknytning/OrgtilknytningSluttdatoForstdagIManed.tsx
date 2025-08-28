@@ -4,6 +4,7 @@ import { type SetStateAction, useState } from "react";
 
 import { getOrgtilknytningSluttdatoForstdagIManed } from "~/api/queries.ts";
 import { useTableSort } from "~/hooks/useTableSort.ts";
+import { AntallOgExcelEksportKnapp } from "~/sanitychecks/components/AntallOgExcelEksportKnapp.tsx";
 import { OrgtilknytningStateTabell } from "~/sanitychecks/Orgtilknytning/OrgtilknytningStateTabell.tsx";
 
 export function OrgtilknytningSluttdatoForstdagIManed() {
@@ -26,6 +27,11 @@ export function OrgtilknytningSluttdatoForstdagIManed() {
 
   return (
     <>
+      <AntallOgExcelEksportKnapp
+        antall={data.length}
+        exportName="listTilkoblingerSomharTomDatoForstDagImaneden"
+        exportType="orgtilknytning"
+      />
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <OrgtilknytningStateTabell sortedData={sortedData} />
       </Table>

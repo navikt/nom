@@ -4,6 +4,7 @@ import { type SetStateAction, useState } from "react";
 
 import { getRessurserUtenOrgtilknytning } from "~/api/queries.ts";
 import { useTableSort } from "~/hooks/useTableSort.ts";
+import { AntallOgExcelEksportKnapp } from "~/sanitychecks/components/AntallOgExcelEksportKnapp.tsx";
 import { EmptyTable } from "~/sanitychecks/components/EmptyTable.tsx";
 import { LoadingTable } from "~/sanitychecks/components/LoadingTable.tsx";
 import { RessursStateTabell } from "~/sanitychecks/Ressurs/RessursStateTabell.tsx";
@@ -40,6 +41,11 @@ export function RessursUtenOrgtilknytning() {
 
   return (
     <>
+      <AntallOgExcelEksportKnapp
+        antall={data.length}
+        exportName="ressursUtenOrgtilknytning"
+        exportType="ressurs"
+      />
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <RessursStateTabell sortedData={sortedData} />
       </Table>

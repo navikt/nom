@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { getOrgtilknytningMedUgyldigSektorTilknytningKombinasjon } from "~/api/queries.ts";
 import { useTableSort } from "~/hooks/useTableSort.ts";
+import { AntallOgExcelEksportKnapp } from "~/sanitychecks/components/AntallOgExcelEksportKnapp.tsx";
 import { OrgtilknytningStateTabell } from "~/sanitychecks/Orgtilknytning/OrgtilknytningStateTabell.tsx";
 
 export function OrgtilknytningMedUgyldigSektorTilknytningtypeKombinasjon() {
@@ -28,6 +29,11 @@ export function OrgtilknytningMedUgyldigSektorTilknytningtypeKombinasjon() {
 
   return (
     <>
+      <AntallOgExcelEksportKnapp
+        antall={data.length}
+        exportName="orgtilknytningStatesMedUgyldigeSektorTilknytninger"
+        exportType="orgtilknytning"
+      />
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <OrgtilknytningStateTabell sortedData={sortedData} />
       </Table>

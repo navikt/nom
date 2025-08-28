@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { getOrgtilknytningMedTilknytningtypeUtenSektor } from "~/api/queries.ts";
 import { useTableSort } from "~/hooks/useTableSort.ts";
+import { AntallOgExcelEksportKnapp } from "~/sanitychecks/components/AntallOgExcelEksportKnapp.tsx";
 import { OrgtilknytningStateTabell } from "~/sanitychecks/Orgtilknytning/OrgtilknytningStateTabell.tsx";
 
 export function OrgtilknytningMedTilknytningtypeUtenSektor() {
@@ -28,6 +29,11 @@ export function OrgtilknytningMedTilknytningtypeUtenSektor() {
 
   return (
     <>
+      <AntallOgExcelEksportKnapp
+        antall={data.length}
+        exportName="orgtilknytningStatesMedTilknytningtypeUtenSektor"
+        exportType="orgtilknytning"
+      />
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <OrgtilknytningStateTabell sortedData={sortedData} />
       </Table>

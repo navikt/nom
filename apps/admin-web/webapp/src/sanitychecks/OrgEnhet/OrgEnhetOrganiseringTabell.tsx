@@ -3,11 +3,14 @@ import type { UseQueryResult } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { useTableSort } from "~/hooks/useTableSort.ts";
+import { AntallOgExcelEksportKnapp } from "~/sanitychecks/components/AntallOgExcelEksportKnapp.tsx";
 import type { OrgEnhetOrganisering } from "~/types/nom-admin/nom-admin-models.ts";
 
 export function OrgEnhetOrganiseringTabell({
+  exportTypeNavn,
   orgEnhetOrganisering,
 }: {
+  exportTypeNavn: string | undefined;
   orgEnhetOrganisering: UseQueryResult<OrgEnhetOrganisering[]>;
 }) {
   const [page, setPage] = useState(1);
@@ -58,6 +61,11 @@ export function OrgEnhetOrganiseringTabell({
 
   return (
     <div>
+      <AntallOgExcelEksportKnapp
+        antall={data.length}
+        exportName={exportTypeNavn}
+        exportType="orgEnhet"
+      />
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.ColumnHeader scope="col" sortKey="orgEnhetId" sortable>

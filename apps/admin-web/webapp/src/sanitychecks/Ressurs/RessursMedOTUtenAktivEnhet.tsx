@@ -5,13 +5,16 @@ import { useState } from "react";
 
 import { getRessursMedAktivOrgTilknytningHvorEnhetErInaktiv } from "~/api/queries.ts";
 import { useTableSort } from "~/hooks/useTableSort.ts";
+import { AntallOgExcelEksportKnapp } from "~/sanitychecks/components/AntallOgExcelEksportKnapp.tsx";
 import { RessursMedEnhetTabell } from "~/sanitychecks/Ressurs/RessursMedEnhetTabell.tsx";
 import type { RessursMedEnhet } from "~/types/nom-admin/nom-admin-models.ts";
 
 export function RessursMedOTUtenAktivEnhet({
+  exportTypeNavn,
   inkluderEksterne,
   inkluderHelfo,
 }: {
+  exportTypeNavn: string;
   inkluderEksterne: boolean;
   inkluderHelfo: boolean;
 }) {
@@ -98,6 +101,11 @@ export function RessursMedOTUtenAktivEnhet({
 
   return (
     <div>
+      <AntallOgExcelEksportKnapp
+        antall={data.length}
+        exportName={exportTypeNavn}
+        exportType="ressurs"
+      />
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <RessursMedEnhetTabell sortedData={sortedData} />
       </Table>

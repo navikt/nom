@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNullElse;
-import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
+import static java.util.Objects.nonNull;
 
 @Service
 public class OrgtilknytningSanityCheckService {
@@ -73,7 +73,7 @@ public class OrgtilknytningSanityCheckService {
 
     public List<OrgtilknytningState> orgtilknytningNegativPeriode() {
         return orgtilknytningStateRepository.getAll().stream()
-                .filter(ot -> isNotNull(ot.gyldigTom()) && ot.gyldigTom().isBefore(ot.gyldigFom()))
+                .filter(ot -> nonNull(ot.gyldigTom()) && ot.gyldigTom().isBefore(ot.gyldigFom()))
                 .toList();
     }
 
@@ -94,14 +94,14 @@ public class OrgtilknytningSanityCheckService {
 
     public List<OrgtilknytningState> orgtilknytningStatesMedUgyldigeSektorTilknytninger() {
         return aktiveOrgtilknytninger(orgtilknytningStateRepository.getAll()).stream()
-                .filter(ot -> isNotNull(ot.sektor()) && isNotNull(ot.orgtilknytningType()))
+                .filter(ot -> nonNull(ot.sektor()) && nonNull(ot.orgtilknytningType()))
                 .filter(this::validateOrgtilknytningTypeSektorCombination)
                 .toList();
     }
 
     public List<OrgtilknytningState> orgtilknytningStatesMedTilknytningtypeUtenSektor() {
         return aktiveOrgtilknytninger(orgtilknytningStateRepository.getAll()).stream()
-                .filter(ot -> isNull(ot.sektor()) && isNotNull(ot.orgtilknytningType()))
+                .filter(ot -> isNull(ot.sektor()) && nonNull(ot.orgtilknytningType()))
                 .toList();
     }
 
@@ -137,7 +137,7 @@ public class OrgtilknytningSanityCheckService {
         // Group by navident
         Map<String, List<OrgtilknytningState>> groupedByNavident = orgtilknytningStateRepository.getAll().stream()
                 .filter(orgtilknytningState -> {
-                    if (isNotNull(orgtilknytningState.gyldigTom())) {
+                    if (nonNull(orgtilknytningState.gyldigTom())) {
                         return PeriodeUtil.innenforSisteSeksMaaneder(orgtilknytningState.gyldigTom());
                     } else {
                         return true;
@@ -250,7 +250,7 @@ public class OrgtilknytningSanityCheckService {
                     if (orgEnhet.isPresent() && orgEnhet.get().gyldigTom().isPresent() && orgEnhet.get().gyldigTom().get().isBefore(t.gyldigFom())) {
                         return true; // orgEnhet.gyldigTom < tilknytning.gyldigFom
                     }
-                    if (isNotNull(t.gyldigTom()) && orgEnhet.isPresent() && orgEnhet.get().gyldigFom().isAfter(t.gyldigTom())) {
+                    if (nonNull(t.gyldigTom()) && orgEnhet.isPresent() && orgEnhet.get().gyldigFom().isAfter(t.gyldigTom())) {
                         return true; // orgEnhet.gyldigFom > tilknytning.gyldigTom
                     }
                     return isNull(t.gyldigTom()) && orgEnhet.isPresent() && orgEnhet.get().gyldigTom().isPresent(); // orgEnhet avsluttet > tilknytning ikke avsluttet
@@ -307,7 +307,7 @@ public class OrgtilknytningSanityCheckService {
         var alleOrgtilknytningState = orgtilknytningStateRepository.getAll();
         var aktiveOrgtilknytningState = aktiveOrgtilknytninger(alleOrgtilknytningState);
         return aktiveOrgtilknytningState.stream()
-            .filter(ot -> isNotNull(ot.gyldigTom()) && ot.gyldigTom().getDayOfMonth() == 1)
+            .filter(ot -> nonNull(ot.gyldigTom()) && ot.gyldigTom().getDayOfMonth() == 1)
             .toList();
     }
 
@@ -315,8 +315,8 @@ public class OrgtilknytningSanityCheckService {
         var ressurserSomErAktiv = ressursStateRepository.findAllActiveRessurser();
         var dolOrgtilknytningerSomErAvsluttet = orgtilknytningStateRepository.findByNavidentIn(ressurserSomErAktiv.keySet().stream().toList()).stream()
             .filter(ot -> ot.erDagligOppfolging()
-                && isNotNull(ot.gyldigFom())
-                && isNotNull(ot.gyldigTom())
+                && nonNull(ot.gyldigFom())
+                && nonNull(ot.gyldigTom())
                 && ot.gyldigTom().isBefore(LocalDate.now()))
             .sorted(Comparator.comparing(OrgtilknytningState::gyldigFom))
             .collect(Collectors.groupingBy(OrgtilknytningState::navident));

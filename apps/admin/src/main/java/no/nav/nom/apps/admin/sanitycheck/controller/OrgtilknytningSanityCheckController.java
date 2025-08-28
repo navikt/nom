@@ -5,32 +5,45 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.admin.ExcelGenerator;
+import no.nav.nom.apps.admin.SanityCheckMappingUtils;
 import no.nav.nom.apps.admin.SwaggerConfig;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.DuplikatOrgtilknytning;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OrgtilknytningMedOrgEnhet;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OverlappendeOrgtilknytning;
 import no.nav.nom.apps.admin.sanitycheck.service.OrgtilknytningSanityCheckService;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Admin for å kjøre sanity check på Orgtilknytninger")
+@Slf4j
 @RestController
 @RequestMapping("SanityCheck/orgtilknytning")
 @PreAuthorize("hasAuthority('ADMIN')")
 public class OrgtilknytningSanityCheckController {
 
     private final OrgtilknytningSanityCheckService orgtilknytningSanityCheckService;
+    private final ExcelGenerator excelGenerator;
 
-    public OrgtilknytningSanityCheckController(OrgtilknytningSanityCheckService orgtilknytningSanityCheckService) {
+    public OrgtilknytningSanityCheckController(
+        OrgtilknytningSanityCheckService orgtilknytningSanityCheckService,
+        ExcelGenerator excelGenerator
+    ) {
         this.orgtilknytningSanityCheckService = orgtilknytningSanityCheckService;
+        this.excelGenerator = excelGenerator;
     }
-
 
     @Operation(
         description = "List tilknytninger med sluttdato på først dag i måneden",
@@ -110,13 +123,13 @@ public class OrgtilknytningSanityCheckController {
     }
 
     @Operation(
-            description = "List orgtilknytninger med flere overlappende dagligOppfolging i aktiv eller fremtidig periode (gyldigTom > now)",
-            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+        description = "List orgtilknytninger med flere overlappende dagligOppfolging i aktiv eller fremtidig periode (gyldigTom > now)",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
-            {
-                    @ApiResponse(responseCode = "200", description = "Success")
-            }
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
     )
     @GetMapping(value = "/orgtilknytningMedFlereOverlappendeDagligOppfolgingCurrentOgFuture")
     public ResponseEntity<List<OverlappendeOrgtilknytning>> orgtilknytningMedFlereOverlappendeDagligOppfolgingCurrentOgFuture() {
@@ -124,13 +137,13 @@ public class OrgtilknytningSanityCheckController {
     }
 
     @Operation(
-            description = "List duplikate orgtilknytninger på samme orgenhet og navident",
-            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+        description = "List duplikate orgtilknytninger på samme orgenhet og navident",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
-            {
-                    @ApiResponse(responseCode = "200", description = "Success")
-            }
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
     )
     @GetMapping(value = "/duplikateOrgtilknytninger")
     public ResponseEntity<List<DuplikatOrgtilknytning>> duplikateOrgtilknytninger() {
@@ -152,18 +165,118 @@ public class OrgtilknytningSanityCheckController {
     }
 
     @Operation
-    (
-        description = "List orgtilknytninger med gyldigFom i fremtiden",
+        (
+            description = "List orgtilknytninger med gyldigFom i fremtiden",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+        )
+    @ApiResponses
+        (
+            {
+                @ApiResponse(responseCode = "200", description = "Success")
+            }
+        )
+    @GetMapping(value = "/overlappendeHistoriskeDolOrgtilknytninger")
+    public ResponseEntity<List<OverlappendeOrgtilknytning>> overlappendeHistoriskeDolOrgtilknytninger() {
+        return ResponseEntity.ok(orgtilknytningSanityCheckService.orgtilknytningerMedOverlappendeHistoriskeDol());
+    }
+
+    @Operation(
+        description = "Exporter tabell til Excel",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses
-    (
+    @ApiResponses(
         {
             @ApiResponse(responseCode = "200", description = "Success")
         }
     )
-    @GetMapping(value = "/overlappendeHistoriskeDolOrgtilknytninger")
-    public ResponseEntity<List<OverlappendeOrgtilknytning>> overlappendeHistoriskeDolOrgtilknytninger() {
-        return ResponseEntity.ok(orgtilknytningSanityCheckService.orgtilknytningerMedOverlappendeHistoriskeDol());
+    @GetMapping(value = "/exportToExcel/{exportType}")
+    public void exportToExcel(HttpServletResponse response, @PathVariable("exportType") String exportType) throws IOException {
+        switch (exportType) {
+            case "listTilkoblingerSomharTomDatoForstDagImaneden" -> exportTilkoblingerSomharTomDatoForstDagImaneden(response);
+            case "orgtilknytningStatesMedUgyldigeSektorTilknytninger" -> exportOrgtilknytningStatesMedUgyldigeSektorTilknytninger(response);
+            case "orgtilknytningStatesMedTilknytningtypeUtenSektor" -> exportOrgtilknytningStatesMedTilknytningtypeUtenSektor(response);
+            case "overlappendeHistoriskeDolOrgtilknytninger" -> exportOverlappendeHistoriskeDolOrgtilknytninger(response);
+            default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid export type");
+        }
+    }
+
+    private void exportTilkoblingerSomharTomDatoForstDagImaneden(HttpServletResponse response) throws IOException {
+        try {
+            var tilkoblingerSomharTomDatoForstDagImaneden = orgtilknytningSanityCheckService.listTilkoblingerSomharTomDatoFoorstDagImaneden();
+
+            List<Map<String, Object>> tilkoblingerSomharTomDatoForstDagImanedenMapList = SanityCheckMappingUtils.orgtilknytningStateToMapList(
+                tilkoblingerSomharTomDatoForstDagImaneden);
+            var headers = tilkoblingerSomharTomDatoForstDagImanedenMapList.getFirst().keySet().stream().toList();
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=tilkoblingerMedTomDatoForsteDag.xlsx");
+            excelGenerator.generateWorkbook(
+                response,
+                "tilkoblingerMedTomDatoForsteDag",
+                headers,
+                tilkoblingerSomharTomDatoForstDagImanedenMapList
+            );
+        } catch (Exception e) {
+            log.error("Error generating Excel for tilkoblingerSomharTomDatoForstDagImaneden", e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error generating Excel");
+        }
+    }
+
+    private void exportOrgtilknytningStatesMedUgyldigeSektorTilknytninger(HttpServletResponse response) throws IOException {
+        try {
+            var orgtilknytningStatesMedUgyldigeSektorTilknytninger = orgtilknytningSanityCheckService.orgtilknytningStatesMedUgyldigeSektorTilknytninger();
+
+            List<Map<String, Object>> orgtilknytningStatesMedUgyldigeSektorTilknytningerMapList = SanityCheckMappingUtils.orgtilknytningStateToMapList(
+                orgtilknytningStatesMedUgyldigeSektorTilknytninger);
+            var headers = orgtilknytningStatesMedUgyldigeSektorTilknytningerMapList.getFirst().keySet().stream().toList();
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=orgtilknytningerMedUgyldigeSektorTilknytninger.xlsx");
+            excelGenerator.generateWorkbook(
+                response,
+                "orgtilknytningerMedUgyldigeSektorTilknytninger",
+                headers,
+                orgtilknytningStatesMedUgyldigeSektorTilknytningerMapList
+            );
+        } catch (Exception e) {
+            log.error("Error generating Excel for orgtilknytningStatesMedUgyldigeSektorTilknytninger", e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error generating Excel");
+        }
+    }
+
+    private void exportOrgtilknytningStatesMedTilknytningtypeUtenSektor(HttpServletResponse response) throws IOException {
+        try {
+            var orgtilknytningStatesMedTilknytningtypeUtenSektor = orgtilknytningSanityCheckService.orgtilknytningStatesMedTilknytningtypeUtenSektor();
+
+            List<Map<String, Object>> orgtilknytningStatesMedTilknytningtypeUtenSektorMapList = SanityCheckMappingUtils.orgtilknytningStateToMapList(
+                orgtilknytningStatesMedTilknytningtypeUtenSektor);
+            var headers = orgtilknytningStatesMedTilknytningtypeUtenSektorMapList.getFirst().keySet().stream().toList();
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=orgtilknytningerMedTilknytningtypeUtenSektor.xlsx");
+            excelGenerator.generateWorkbook(
+                response,
+                "orgtilknytningerMedTilknytningtypeUtenSektor",
+                headers,
+                orgtilknytningStatesMedTilknytningtypeUtenSektorMapList
+            );
+        } catch (Exception e) {
+            log.error("Error generating Excel for orgtilknytningStatesMedTilknytningtypeUtenSektor", e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error generating Excel");
+        }
+    }
+
+    private void exportOverlappendeHistoriskeDolOrgtilknytninger(HttpServletResponse response) throws IOException {
+        try {
+            var overlappendeHistoriskeDolOrgtilknytninger = orgtilknytningSanityCheckService.orgtilknytningerMedOverlappendeHistoriskeDol();
+
+            List<Map<String, Object>> overlappendeHistoriskeDolOrgtilknytningerMapList = SanityCheckMappingUtils.overlappendeOrgtilknytningToMapList(
+                overlappendeHistoriskeDolOrgtilknytninger);
+            var headers = overlappendeHistoriskeDolOrgtilknytningerMapList.getFirst().keySet().stream().toList();
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=overlappendeHistoriskeDolOrgtilknytninger.xlsx");
+            excelGenerator.generateWorkbook(
+                response,
+                "overlappendeHistoriskeDolOrgtilknytninger",
+                headers,
+                overlappendeHistoriskeDolOrgtilknytningerMapList
+            );
+        } catch (Exception e) {
+            log.error("Error generating Excel for overlappendeHistoriskeDolOrgtilknytninger", e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error generating Excel");
+        }
     }
 }

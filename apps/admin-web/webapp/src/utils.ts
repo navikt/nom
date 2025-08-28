@@ -1,5 +1,6 @@
 import { format, formatISO, isAfter, isBefore, isToday } from "date-fns";
 
+import { exportSanityCheckToExcelOptions } from "~/api/queries.ts";
 import type { Visningsnavn } from "~/types.ts";
 
 export const DATE_FORMATS = {
@@ -48,3 +49,10 @@ export function isTodayOrAfter(date: Date) {
 
   return isToday(noTzDate) || isAfter(noTzDate, todayWithoutTimezone());
 }
+
+export const exportSanityCheckToExcel = async (
+  exportType: "orgEnhet" | "ressurs" | "orgtilknytning" | "RemedyCompare",
+  exportName: string | undefined,
+) => {
+  await exportSanityCheckToExcelOptions(exportType, exportName);
+};

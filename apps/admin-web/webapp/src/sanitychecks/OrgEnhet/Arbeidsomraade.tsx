@@ -1,9 +1,10 @@
-import { BodyShort, Table } from "@navikt/ds-react";
+import { Table } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 
 import { getArbeidsomraadeInfo } from "~/api/queries.ts";
 import { NomLink } from "~/components/NomLink.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
+import { AntallOgExcelEksportKnapp } from "~/sanitychecks/components/AntallOgExcelEksportKnapp.tsx";
 import { EmptyTable } from "~/sanitychecks/components/EmptyTable.tsx";
 import { LoadingTable } from "~/sanitychecks/components/LoadingTable.tsx";
 import type {
@@ -44,9 +45,11 @@ export function Arbeidsomraade() {
 
   return (
     <div>
-      <BodyShort size="medium" spacing>
-        <b>Antall:</b> {arbOmraadeInfo?.antallLoevnoder}
-      </BodyShort>
+      <AntallOgExcelEksportKnapp
+        antall={arbOmraadeInfo?.loevnoderMedFeil.length}
+        exportName="validerArbeidsomraade"
+        exportType="orgEnhet"
+      />
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.Row>

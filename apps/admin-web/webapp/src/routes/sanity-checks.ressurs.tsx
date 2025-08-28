@@ -53,6 +53,7 @@ function ListSelector(props: { selected: string }) {
             </div>
           </div>
           <RessursMedOTUtenAktivEnhet
+            exportTypeNavn="listRessurserTilIkkeAktivEnhet"
             inkluderEksterne={inkluderEksterne}
             inkluderHelfo={inkluderHelfo}
           />

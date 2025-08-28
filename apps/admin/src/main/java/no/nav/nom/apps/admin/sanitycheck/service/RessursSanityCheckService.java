@@ -43,7 +43,7 @@ import static java.util.Objects.requireNonNullElse;
 import static no.nav.nom.apps.admin.PeriodeUtil.tomorrow;
 import static no.nav.nom.apps.admin.PeriodeUtil.yesterday;
 import static no.nav.nom.libs.utils.common.util.DateUtil.sluttdatoIsNotPassed;
-import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
+import static java.util.Objects.nonNull;
 
 @Service
 public class RessursSanityCheckService {
@@ -283,7 +283,7 @@ public class RessursSanityCheckService {
         Map<String, RessursState> alleRessurserSomErAktive = ressursStateRepository.findAllActiveRessurser();
 
         Map<String, RessursState> alleAktiveRoboter = alleRessurserSomErAktive.entrySet().stream()
-                .filter(ressurs -> isNotNull(ressurs.getValue().identType()))
+                .filter(ressurs -> nonNull(ressurs.getValue().identType()))
                 .filter(ressurs -> ressurs.getValue().identType().name().equals(IdentType.ROBOT.name()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -402,7 +402,7 @@ public class RessursSanityCheckService {
     }
 
     private final Predicate<OrgtilknytningState> gyldigTomMindreEnnSeksMndSidenEllerIkkeSatt = orgtilknytningState -> {
-        if (isNotNull(orgtilknytningState.gyldigTom())) {
+        if (nonNull(orgtilknytningState.gyldigTom())) {
             return PeriodeUtil.innenforSisteSeksMaaneder(orgtilknytningState.gyldigTom());
         } else {
             return true;
@@ -483,13 +483,13 @@ public class RessursSanityCheckService {
                     if (ressurs.isEmpty()) {
                         return false;
                     }
-                    if (isNotNull(ressurs.get().sluttdato()) && ressurs.get().sluttdato().isBefore(t.gyldigFom())) {
+                    if (nonNull(ressurs.get().sluttdato()) && ressurs.get().sluttdato().isBefore(t.gyldigFom())) {
                         return true; // ressurs.sluttDato < tilknytning.gyldigFom
                     }
-                    if (isNotNull(t.gyldigTom()) && isNotNull(ressurs.get().startdato()) && ressurs.get().startdato().isAfter(t.gyldigTom())) {
+                    if (nonNull(t.gyldigTom()) && nonNull(ressurs.get().startdato()) && ressurs.get().startdato().isAfter(t.gyldigTom())) {
                         return true; // ressurs.startDato > tilknytning.gyldigTom
                     }
-                    return isNull(t.gyldigTom()) && isNotNull(ressurs.get().sluttdato()); // ressurs avsluttet > tilknytning ikke avsluttet
+                    return isNull(t.gyldigTom()) && nonNull(ressurs.get().sluttdato()); // ressurs avsluttet > tilknytning ikke avsluttet
                 }).toList();
     }
 
@@ -500,7 +500,7 @@ public class RessursSanityCheckService {
                     if (orgEnhet.isPresent() && orgEnhet.get().gyldigTom().isPresent() && orgEnhet.get().gyldigTom().get().isBefore(t.gyldigFom())) {
                         return true; // orgEnhet.gyldigTom < tilknytning.gyldigFom
                     }
-                    if (isNotNull(t.gyldigTom()) && orgEnhet.isPresent() && orgEnhet.get().gyldigFom().isAfter(t.gyldigTom())) {
+                    if (nonNull(t.gyldigTom()) && orgEnhet.isPresent() && orgEnhet.get().gyldigFom().isAfter(t.gyldigTom())) {
                         return true; // orgEnhet.gyldigFom > tilknytning.gyldigTom
                     }
                     return isNull(t.gyldigTom()) && orgEnhet.isPresent() && orgEnhet.get().gyldigTom().isPresent(); // orgEnhet avsluttet > tilknytning ikke avsluttet
@@ -521,7 +521,7 @@ public class RessursSanityCheckService {
     public List<RessursState> compareFutureChangedWithDelayEvents() {
         List<RessursState> futureRessursStates = ressursStateRepository.findAllActiveRessurser().values()
             .stream()
-            .filter(ressursState -> isNotNull(ressursState.sluttdato())
+            .filter(ressursState -> nonNull(ressursState.sluttdato())
                 && ressursState.sluttdato().isAfter(LocalDate.now()))
             .toList();
         List<String> delayedEvents = getAllDelayedEventsBlocking();

@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNullElse;
-import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
+import static java.util.Objects.nonNull;
 
 // TODO Trekke ut denne og tilsvarende klasse i nom-api til libs/utils-test
 public class PeriodeUtil {
@@ -21,7 +21,7 @@ public class PeriodeUtil {
     public static LocalDate tomorrow() { return today().plusDays(1); }
 
     public static boolean isCurrentPeriod(RessursState ressursState) {
-        return isCurrentOrFuturePeriod(ressursState) && (isNotNull(ressursState.startdato()) ? ressursState.startdato().isBefore(tomorrow()) : LocalDate.MIN.isBefore(tomorrow()));
+        return isCurrentOrFuturePeriod(ressursState) && (nonNull(ressursState.startdato()) ? ressursState.startdato().isBefore(tomorrow()) : LocalDate.MIN.isBefore(tomorrow()));
     }
     
     public static boolean isCurrentOrFuturePeriod(OrgtilknytningState orgtilknytning) {

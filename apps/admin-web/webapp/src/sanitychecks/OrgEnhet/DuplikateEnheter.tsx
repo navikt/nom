@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { getListAvDuplikateEnheter } from "~/api/queries.ts";
 import { useTableSort } from "~/hooks/useTableSort.ts";
+import { AntallOgExcelEksportKnapp } from "~/sanitychecks/components/AntallOgExcelEksportKnapp.tsx";
 import type { OrgEnhetState } from "~/types/nom-admin/nom-admin-models.ts";
 
 export function DuplikateEnheter() {
@@ -82,6 +83,11 @@ export function DuplikateEnheter() {
 
   return (
     <div>
+      <AntallOgExcelEksportKnapp
+        antall={sortedData.length}
+        exportName="duplikateEnheter"
+        exportType="orgEnhet"
+      />
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.ColumnHeader scope="col" sortKey="fid" sortable>

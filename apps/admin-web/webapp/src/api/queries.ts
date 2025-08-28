@@ -738,3 +738,36 @@ export async function getDuplikateRessursHendelser(): Promise<
     })
     .json<RessursHendelseKafkaDTO[]>();
 }
+
+export async function exportSanityCheckToExcelOptions(
+  exportType: "orgEnhet" | "ressurs" | "orgtilknytning" | "RemedyCompare",
+  exportName: string | undefined,
+) {
+  const response =
+    exportType !== "RemedyCompare"
+      ? await ky.get(
+          `${API_BASE_URL}/SanityCheck/${exportType}/exportToExcel/${exportName}`,
+          {
+            timeout: 120_000, // 2 minutes
+          },
+        )
+      : await ky.get(
+          `${API_BASE_URL}/RemedyCompare/exportToExcel/${exportName}`,
+          {
+            timeout: 120_000, // 2 minutes
+          },
+        );
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download =
+    response.headers
+      .get("content-disposition")
+      ?.split("filename=")[1]
+      ?.replace(/"/g, "") || "org.xlsx";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}

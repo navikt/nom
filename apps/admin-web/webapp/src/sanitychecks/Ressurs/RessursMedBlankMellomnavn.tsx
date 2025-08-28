@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { getRessursMedBlankMellomNavn } from "~/api/queries.ts";
 import { useTableSort } from "~/hooks/useTableSort.ts";
+import { AntallOgExcelEksportKnapp } from "~/sanitychecks/components/AntallOgExcelEksportKnapp.tsx";
 import { RessursStateTabell } from "~/sanitychecks/Ressurs/RessursStateTabell.tsx";
 
 export function RessursMedBlankMellomnavn() {
@@ -24,6 +25,11 @@ export function RessursMedBlankMellomnavn() {
   const sortedData = data.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   return (
     <>
+      <AntallOgExcelEksportKnapp
+        antall={data.length}
+        exportName="ressursMedBlankMellomnavn"
+        exportType="ressurs"
+      />
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <RessursStateTabell sortedData={sortedData} />
       </Table>
