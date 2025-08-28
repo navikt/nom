@@ -6,9 +6,9 @@ import { ErrorBoundary } from "react-error-boundary";
 
 import {
   getBunEnheterUtenEksakt1ArbeidsomradeIHierarkiet,
+  getEnheterUtenforHierarkietMenHarAktiveDelegeringer,
   getEnheterUtenOverenheter,
   getEnheterUtenOverenheterMedUnderEnheter,
-  getEnheterUtenforHierarkietMenHarAktiveDelegeringer,
 } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { AntallOrgenheter } from "~/sanitychecks/OrgEnhet/AntallOrgenheter.tsx";
