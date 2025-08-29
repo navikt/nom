@@ -23,9 +23,9 @@ public class RessursApiStateListener {
     private final RessursApiStateRepository ressursApiStateRepository;
     private final String listenerId;
 
-    public RessursApiStateListener(RessursApiStateRepository ressursApiStateRepository, String apiStateRessursV4UniqueListenerId) {
+    public RessursApiStateListener(RessursApiStateRepository ressursApiStateRepository, String apiStateRessursUniqueListenerId) {
         this.ressursApiStateRepository = ressursApiStateRepository;
-        this.listenerId = apiStateRessursV4UniqueListenerId;
+        this.listenerId = apiStateRessursUniqueListenerId;
     }
 
     @KafkaListener(
