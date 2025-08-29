@@ -1,4 +1,5 @@
-import { Table } from "@navikt/ds-react";
+import { FileCsvIcon } from "@navikt/aksel-icons";
+import { Button, Table } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 
 import { getRemedyCompareDiffPaaRemedyEnhet } from "~/api/queries.ts";
@@ -70,14 +71,22 @@ export function RemedyCompareDiffPaaRemedyEnhet() {
 
   return (
     <div>
-      <div style={{ paddingBottom: "20px" }}>
-        <b>Antall: {data.length}</b>
-        <br />
-        (Inkluderer alle fra NOM)
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div style={{ paddingBottom: "20px" }}>
+          <b>Antall: {data.length}</b>
+          <br />
+          (Inkluderer alle fra NOM)
+        </div>
+        <Button
+          as="a"
+          download="compare_diff_pa_remedy_enhet.csv"
+          href={csv()}
+          icon={<FileCsvIcon />}
+          variant="secondary"
+        >
+          Last ned CSV
+        </Button>
       </div>
-      <a download="compare_diff_pa_sektor.csv" href={csv()}>
-        Last ned CSV
-      </a>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.ColumnHeader scope="col" sortKey="navident" sortable>

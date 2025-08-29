@@ -1,3 +1,4 @@
+import { FileCsvIcon } from "@navikt/aksel-icons";
 import { Button, HStack, Table, UNSAFE_Combobox } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -86,7 +87,12 @@ export function RemedyCompareDiffPaaSluttdato() {
 
   return (
     <div>
-      <HStack as="form" gap="8" onSubmit={handleSubmit(onValidSubmit)}>
+      <HStack
+        align="end"
+        as="form"
+        gap="8"
+        onSubmit={handleSubmit(onValidSubmit)}
+      >
         <div style={{ paddingBottom: "20px" }}>
           <b>
             Antall: {filteredData.length}/{data.length}{" "}
@@ -118,10 +124,17 @@ export function RemedyCompareDiffPaaSluttdato() {
         <div>
           <Button type="submit">Oppdater</Button>
         </div>
+        <Button
+          as="a"
+          download="remedy_compare_diff_paa_sluttdato.csv"
+          href={csv()}
+          icon={<FileCsvIcon />}
+          style={{ marginLeft: "auto" }}
+          variant="secondary"
+        >
+          Last ned CSV
+        </Button>
       </HStack>
-      <a download="remedy_compare_diff_paa_sluttdato.csv" href={csv()}>
-        Last ned CSV
-      </a>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.ColumnHeader scope="col" sortKey="navident" sortable>
