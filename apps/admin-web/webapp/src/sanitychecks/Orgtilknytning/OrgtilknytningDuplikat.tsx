@@ -31,6 +31,9 @@ export function OrgtilknytningDuplikat() {
 
   return (
     <div>
+      <div style={{ marginBottom: "20px" }}>
+        <b>Antall duplikate orgtilknytninger: {data.length}</b>
+      </div>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.ColumnHeader scope="col" sortKey="fid1" sortable>

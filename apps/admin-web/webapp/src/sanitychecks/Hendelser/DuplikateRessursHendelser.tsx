@@ -32,6 +32,9 @@ export function DuplikateRessursHendelser() {
 
   return (
     <div>
+      <div style={{ marginBottom: "20px" }}>
+        <b>Antall duplikate ressurs hendelser: {duplikater.length}</b>
+      </div>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.ColumnHeader scope="col" sortKey="navident" sortable>

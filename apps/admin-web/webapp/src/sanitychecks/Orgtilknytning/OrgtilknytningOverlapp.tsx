@@ -35,6 +35,9 @@ export function OrgtilknytningOverlapp() {
 
   return (
     <div>
+      <div style={{ marginBottom: "20px" }}>
+        <b>Antall overlappende orgtilknytninger: {dataWithKey.length}</b>
+      </div>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.ColumnHeader scope="col" sortKey="navident1" sortable>

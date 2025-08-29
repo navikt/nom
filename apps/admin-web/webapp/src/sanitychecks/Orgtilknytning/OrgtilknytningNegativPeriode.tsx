@@ -26,6 +26,12 @@ export function OrgtilknytningNegativPeriode() {
 
   return (
     <>
+      <div style={{ paddingBottom: "20px" }}>
+        <b>
+          Antall orgtilknytninger med negativ periode:{" "}
+          {ressursMedBlankMellomnavn.data?.length ?? 0}
+        </b>
+      </div>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <OrgtilknytningStateTabell sortedData={sortedData} />
       </Table>

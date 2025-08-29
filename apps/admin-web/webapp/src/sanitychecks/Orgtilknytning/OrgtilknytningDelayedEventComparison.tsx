@@ -28,6 +28,12 @@ export function OrgtilknytningDelayedEventComparison() {
 
   return (
     <>
+      <div style={{ paddingBottom: "20px" }}>
+        <b>
+          Antall orgtilknytninger med fremtidig endring som ikke er i delayed
+          event: {eventComparison.data?.length ?? 0}
+        </b>
+      </div>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <OrgtilknytningStateTabell sortedData={sortedData} />
       </Table>

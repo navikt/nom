@@ -76,6 +76,9 @@ export function RessursDuplikat() {
 
   return (
     <>
+      <div style={{ paddingBottom: "20px" }}>
+        <strong>Totalt antall ressurser: {ressursDuplikat?.length}</strong>
+      </div>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <RessursStateTabell sortedData={sortedData} />
       </Table>

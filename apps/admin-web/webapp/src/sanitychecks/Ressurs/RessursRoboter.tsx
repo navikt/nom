@@ -36,6 +36,9 @@ export function RessursRoboter() {
 
   return (
     <div>
+      <div style={{ paddingBottom: "20px" }}>
+        <strong>Totalt antall ressurser: {robotRessurser?.length}</strong>
+      </div>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.ColumnHeader scope="col" sortKey="navident" sortable>

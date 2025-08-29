@@ -28,6 +28,9 @@ export function RessursDelayedEventComparison() {
 
   return (
     <>
+      <div style={{ paddingBottom: "20px" }}>
+        <strong>Totalt antall ressurser: {eventComparison.data?.length}</strong>
+      </div>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <RessursStateTabell sortedData={sortedData} />
       </Table>

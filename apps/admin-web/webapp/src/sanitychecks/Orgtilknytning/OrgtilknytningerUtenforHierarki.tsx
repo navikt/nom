@@ -98,6 +98,9 @@ export function OrgtilknytningerUtenforHierarki() {
 
   return (
     <div>
+      <div style={{ marginBottom: "20px" }}>
+        <b>Antall orgtilknytninger utenfor hierarki: {dataset.length}</b>
+      </div>
       <div style={{ display: "flex", gap: "16px" }}>
         <TextField
           label="Filter by orgenhet"

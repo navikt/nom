@@ -26,6 +26,12 @@ export function OrgtilknytningMedFlereDOLSammePeriode() {
 
   return (
     <>
+      <div style={{ paddingBottom: "20px" }}>
+        <b>
+          Antall orgtilknytninger med flere aktiv DOL i samme periode:{" "}
+          {orgtilknytningMedFlereAktivDOL.data?.length ?? 0}
+        </b>
+      </div>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <OrgtilknytningStateTabell sortedData={sortedData} />
       </Table>

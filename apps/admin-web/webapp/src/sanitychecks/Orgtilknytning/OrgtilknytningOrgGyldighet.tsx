@@ -83,6 +83,12 @@ export function OrgtilknytningOrgGyldighet() {
 
   return (
     <div>
+      <div style={{ paddingBottom: "20px" }}>
+        <b>
+          Antall orgtilknytninger med gyldighet utover orgenhetens gyldighet:{" "}
+          {data.length ?? 0}
+        </b>
+      </div>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.ColumnHeader scope="col" sortKey="navident" sortable>
