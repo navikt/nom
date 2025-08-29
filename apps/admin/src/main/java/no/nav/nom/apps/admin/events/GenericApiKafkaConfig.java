@@ -52,7 +52,7 @@ public class GenericApiKafkaConfig {
     }
 
     @Bean
-    ConsumerFactory<String, RessursStateKafkaDTO> ressursApiStateV4EventDTOConsumerFactory(KafkaProperties properties) {
+    ConsumerFactory<String, RessursStateKafkaDTO> ressursApiStateEventDTOConsumerFactory(KafkaProperties properties) {
         return new DefaultKafkaConsumerFactory<>(
             properties.buildConsumerProperties(),
             new StringDeserializer(),
@@ -61,11 +61,11 @@ public class GenericApiKafkaConfig {
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, RessursStateKafkaDTO> ressursApiStateV4EventKafkaListenerContainerFactory(
-        ConsumerFactory<String, RessursStateKafkaDTO> ressursApiStateV4EventDTOConsumerFactory
+    ConcurrentKafkaListenerContainerFactory<String, RessursStateKafkaDTO> ressursApiStateEventKafkaListenerContainerFactory(
+        ConsumerFactory<String, RessursStateKafkaDTO> ressursApiStateEventDTOConsumerFactory
     ) {
         final var factory = new ConcurrentKafkaListenerContainerFactory<String, RessursStateKafkaDTO>();
-        factory.setConsumerFactory(ressursApiStateV4EventDTOConsumerFactory);
+        factory.setConsumerFactory(ressursApiStateEventDTOConsumerFactory);
         factory.setBatchListener(true);
         factory.getContainerProperties().setIdleEventInterval(5 * 1000L);
 
@@ -118,12 +118,6 @@ public class GenericApiKafkaConfig {
 
     @Bean
     public String apiStateRessursUniqueListenerId(@Value("${app.kafka.ressurs.apiEventTopic-listener-id}") String listenerId) { return getUniqueListenerIdString(listenerId); }
-
-    @Bean
-    public String apiStateRessursV3UniqueListenerId(@Value("${app.kafka.ressurs.apiEventTopicV3-listener-id}") String listenerId) { return getUniqueListenerIdString(listenerId); }
-
-    @Bean
-    public String apiStateRessursV4UniqueListenerId(@Value("{app.kafka.ressurs.apiEventTopicV4-listener-id}") String listenerId) { return getUniqueListenerIdString(listenerId); }
 
     @Bean
     public String apiHendelseRessursUniqueListenerId(@Value("${app.kafka.ressurs-hendelser.apiEventTopic-listener-id}") String listenerId) { return getUniqueListenerIdString(listenerId); }
