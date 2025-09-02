@@ -29,6 +29,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
@@ -88,6 +89,7 @@ public class RessursExcelGenerator {
                 excelRows.add(createExcelRow(
                         ressurs,
                         "UKJENT",
+                        Optional.of("UKJENT"),
                         "UKJENT",
                         null,
                         kanSeSluttdato
@@ -99,10 +101,10 @@ public class RessursExcelGenerator {
 
                 var orgEnheterIdOgNavn = otMap.get(ressurs.state().navident()).stream()
                     .map(orgtilknytningState -> orgenhetNavnMap.get(orgtilknytningState.orgEnhetId()))
-                    .collect(Collectors.toMap(OrgEnhetState::id, OrgEnhetState::navn, (existing, replacement) -> existing));
+                    .collect(Collectors.toMap(OrgEnhetState::id, orgEnhet -> orgEnhet));
 
-                for (Map.Entry<String, String> orgEnhetEntry : orgEnheterIdOgNavn.entrySet()) {
-                    excelRows.add(createExcelRow(ressurs, orgEnhetEntry.getKey(), orgEnhetEntry.getValue(), gyldigFom, kanSeSluttdato));
+                for (Map.Entry<String, OrgEnhetState> orgEnhetEntry : orgEnheterIdOgNavn.entrySet()) {
+                    excelRows.add(createExcelRow(ressurs, orgEnhetEntry.getKey(), orgEnhetEntry.getValue().agressoId(), orgEnhetEntry.getValue().navn(), gyldigFom, kanSeSluttdato));
                 }
             }
         }
@@ -169,12 +171,13 @@ public class RessursExcelGenerator {
         var mellomnavn = row.createCell(3, CellType.STRING);
         var sektor = row.createCell(4, CellType.STRING);
         var orgId = row.createCell(5, CellType.STRING);
-        var orgNavn = row.createCell(6, CellType.STRING);
-        var fom = row.createCell(7, CellType.STRING);
-        var jobbtelefon = row.createCell(8, CellType.STRING);
-        var privatTelefon = row.createCell(9, CellType.STRING);
-        var epost = row.createCell(10, CellType.STRING);
-        var sluttdato = row.createCell(11, CellType.STRING);
+        var agressoId = row.createCell(6, CellType.STRING);
+        var orgNavn = row.createCell(7, CellType.STRING);
+        var fom = row.createCell(8, CellType.STRING);
+        var jobbtelefon = row.createCell(9, CellType.STRING);
+        var privatTelefon = row.createCell(10, CellType.STRING);
+        var epost = row.createCell(11, CellType.STRING);
+        var sluttdato = row.createCell(12, CellType.STRING);
 
 
         if (excelRows == null) {
@@ -184,6 +187,7 @@ public class RessursExcelGenerator {
             mellomnavn.setCellValue("Mellomnavn");
             sektor.setCellValue("Sektor");
             orgId.setCellValue("Organisasjonsenhet ID");
+            agressoId.setCellValue("Agresso ID");
             orgNavn.setCellValue("Organisasjonsenhet Navn");
             fom.setCellValue("Fra og med");
             jobbtelefon.setCellValue("Jobbtelefon");
@@ -199,6 +203,7 @@ public class RessursExcelGenerator {
             mellomnavn.setCellValue(excelRows.mellomnavn());
             sektor.setCellValue(excelRows.sektor());
             orgId.setCellValue(excelRows.orgId());
+            agressoId.setCellValue(excelRows.agressoId());
             orgNavn.setCellValue(excelRows.orgNavn());
             fom.setCellValue(excelRows.fom());
             jobbtelefon.setCellValue(excelRows.jobbtelefon());
@@ -208,7 +213,7 @@ public class RessursExcelGenerator {
         }
     }
 
-    private ExcelRows createExcelRow(Ressurs ressurs, String orgEnhetId, String orgEnhetNavn, LocalDate gyldigFom, boolean kanSeSluttdato) {
+    private ExcelRows createExcelRow(Ressurs ressurs, String orgEnhetId, Optional<String> agressoId, String orgEnhetNavn, LocalDate gyldigFom, boolean kanSeSluttdato) {
         return new ExcelRows(
             ressurs.state().navident(),
             ressurs.state().visningsnavn().etternavn(),
@@ -216,6 +221,7 @@ public class RessursExcelGenerator {
             ressurs.state().visningsnavn().mellomnavn().orElse(null),
             sektorMap.get(ressurs.state().sektor().name()),
             isNotNull(orgEnhetId) ? orgEnhetId : "UKJENT",
+            agressoId.orElse(null),
             isNotNull(orgEnhetNavn) ? orgEnhetNavn : "UKJENT",
             isNull(gyldigFom) ? "UKJENT" : gyldigFom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
             isNotNull(ressurs.state().jobbtelefon()) ? ressurs.state().jobbtelefon().nummer() : "",
@@ -232,6 +238,7 @@ public class RessursExcelGenerator {
         String mellomnavn,
         String sektor,
         String orgId,
+        String agressoId,
         String orgNavn,
         String fom,
         String jobbtelefon,
