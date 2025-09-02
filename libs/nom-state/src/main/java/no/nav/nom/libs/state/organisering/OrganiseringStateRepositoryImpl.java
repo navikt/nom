@@ -9,9 +9,11 @@ import org.springframework.util.ObjectUtils;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -222,6 +224,14 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
         } else {
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public Map<String, OrganiseringState> getActiveOrganiseringInBulk(List<String> ids) {
+        Set<String> idSet = new HashSet<>(ids);
+        return getActiveOrganisering().entrySet().stream()
+            .filter(entry -> idSet.contains(entry.getKey()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override

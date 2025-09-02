@@ -31,6 +31,8 @@ public interface OrganiseringStateRepository {
     List<OrganiseringState> getOrganiseringer();
 
     List<OrganiseringState> getOrganiseringerContainingId(String id);
+
+    Map<String, OrganiseringState> getActiveOrganiseringInBulk(List<String> ids);
     
     boolean orgEnhetHasParent(String id);
     

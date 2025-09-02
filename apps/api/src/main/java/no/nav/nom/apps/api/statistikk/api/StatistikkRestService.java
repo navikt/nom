@@ -176,7 +176,9 @@ public class StatistikkRestService {
             .antallEksterneRessurser(alleRessurser.stream().filter(RessursState::isEkstern).count())
             .build();
 
-        var antallLovnoder = orgenhetService.getAllOrgEnheterThatCanHaveRessurser(optionalOrgEnhet.get().getId()).size();
+        var lovnoder = orgenhetService.getAllOrgEnheterThatCanHaveRessurser(optionalOrgEnhet.get().getId());
+        var erNestNedersteNode = orgenhetService.isOrgEnhetBeforeLeafNode(optionalOrgEnhet.get().getId(), lovnoder);
+        var antallLovnoder = erNestNedersteNode ? 0 : lovnoder.size();
 
         if (optionalOrgEnhet.get().getNomNivaa().isPresent()) {
             if (optionalOrgEnhet.get().getNomNivaa().get().equals(NomNivaa.LINJEENHET)) {

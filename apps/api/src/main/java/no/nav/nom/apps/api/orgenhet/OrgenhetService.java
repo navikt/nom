@@ -131,6 +131,15 @@ public class OrgenhetService {
             .map(this::map).toList();
     }
 
+    public boolean isOrgEnhetBeforeLeafNode(String orgEnhetId, Collection<IOrgenhet> orgEnheter) {
+        return orgEnheter.stream()
+            .map(IOrgenhet::getId)
+            .map(organiseringStateRepository::findActiveById)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .allMatch(organiseringState -> organiseringState.idOver().equals(orgEnhetId));
+    }
+
     public Collection<IOrgenhet> getAllEnheterMedOrganisering() {
         return organiserteEnheter;
     }
