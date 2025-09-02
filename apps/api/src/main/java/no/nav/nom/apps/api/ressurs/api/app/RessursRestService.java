@@ -363,6 +363,18 @@ public class RessursRestService {
     }
 
     public RessursState createRessursAndNotify(OpprettRessursRequest request) {
+        return createRessursAndNotify(request, new InputMetadata(
+            "REST-API",
+            "opprettRessurs",
+            request,
+            new Origination(
+                getAuthenticatedNavIdent(),
+                SecurityUtil.getAuthenticatedAzpName()
+            )
+        ));
+    }
+
+    public RessursState createRessursAndNotify(OpprettRessursRequest request, InputMetadata metadata) {
         validateOpprettRessursRequest(request);
         final var navident = createNavident(request);
         final var existingRessursByNavident = ressursStateRepository.findByNavident(navident);
@@ -373,8 +385,8 @@ public class RessursRestService {
             );
         }
 
-        final var createdRessurs = existingRessursByNavident.map(ressursState -> reactivateRessurs(request, ressursState))
-            .orElseGet(() -> createRessurs(request, navident));
+        final var createdRessurs = existingRessursByNavident.map(ressursState -> reactivateRessurs(request, ressursState, metadata))
+            .orElseGet(() -> createRessurs(request, navident, metadata));
 
         try {
             final var orgEnhet = orgEnhetStateRepository.findById(request.orgEnhetId())
@@ -394,22 +406,12 @@ public class RessursRestService {
     }
 
 
-    private RessursState createRessurs(OpprettRessursRequest request, String navident) {
+    private RessursState createRessurs(OpprettRessursRequest request, String navident, InputMetadata metaData) {
         final var pdlPerson = pdlClient.hentPerson(request.personident());
 
         if (!isNull(request.visningsmellomnavn()) && request.visningsmellomnavn().isBlank()) {
             request = request.toBuilder().visningsmellomnavn(null).build();
         }
-
-        var metaData = new InputMetadata(
-            "REST-API",
-            "opprettRessurs",
-            request,
-            new Origination(
-                getAuthenticatedNavIdent(),
-                SecurityUtil.getAuthenticatedAzpName()
-            )
-        );
 
         final var opprettRessursCommand = new OpprettRessursCommand(
             request.personident(),
@@ -499,7 +501,7 @@ public class RessursRestService {
         }
     }
 
-    private RessursState reactivateRessurs(OpprettRessursRequest request, RessursState existingRessurs) {
+    private RessursState reactivateRessurs(OpprettRessursRequest request, RessursState existingRessurs, InputMetadata metadata) {
         validateOpprettRessursRequest(request);
 
         final var reaktivertRessurs = existingRessurs.toBuilder()
@@ -515,16 +517,6 @@ public class RessursRestService {
             .sluttdato(request.sluttDato())
             .primaryFysiskBrukersted(request.fysiskBrukerstedNr())
             .build();
-
-        var metadata = new InputMetadata(
-            "REST-API",
-            "opprettRessurs",
-            request,
-            new Origination(
-                getAuthenticatedNavIdent(),
-                SecurityUtil.getAuthenticatedAzpName()
-            )
-        );
 
         nomMastered.markRessursAsMasteredInNom(existingRessurs.navident());
 
@@ -680,12 +672,9 @@ public class RessursRestService {
         }
 
         return opprettNavidentResponse.getBody().getNavident();
-
     }
 
     public void avvikleRessurs(String fid, AvvikleRessursRequest request) {
-        var ressursState = findRessursStateByFid(fid);
-
         var metadata = new InputMetadata(
             "REST",
             "avvikleRessurs",
@@ -695,6 +684,11 @@ public class RessursRestService {
                 SecurityUtil.getAuthenticatedAzpName()
             )
         );
+        avvikleRessurs(fid, request, metadata);
+    }
+
+    public void avvikleRessurs(String fid, AvvikleRessursRequest request, InputMetadata metadata) {
+        var ressursState = findRessursStateByFid(fid);
 
         ressursCommandService.avsluttRessursEvent(
             new OpphorRessursCommand(fid, request.sluttDato()),

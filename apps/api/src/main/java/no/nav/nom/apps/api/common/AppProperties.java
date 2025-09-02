@@ -6,7 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record AppProperties(
         Clients clients,
         String name,
-        EpostVarselForEnhetNavnendring epostVarselForEnhetNavnendring
+        EpostVarselForEnhetNavnendring epostVarselForEnhetNavnendring,
+        DollyRessurs dollyRessurs
 ) {
 
     public boolean isSandbox() {
@@ -73,5 +74,10 @@ public record AppProperties(
 
     public record EpostVarselForEnhetNavnendring(
         Integer maxEvtAlderDagerForVarsel
+    ) {}
+
+    public record DollyRessurs(
+        String orgenhetId,
+        String fysiskBrukerstedNr
     ) {}
 }

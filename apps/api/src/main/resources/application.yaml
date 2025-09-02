@@ -54,6 +54,9 @@ app:
       nom-ressurser-path: /dvh_nom/nom_ords_ansatte_historikk.json
   epost-varsel-for-enhet-navnendring:
     max-evt-alder-dager-for-varsel: 60
+  dolly-ressurs:
+    fysisk-brukersted-nr: none
+    orgenhet-id: none
 
   manuelle-ressurser-og-ledere:
     enabled: false
@@ -261,8 +264,8 @@ app:
         client-id: "744e4092-4215-4e02-87df-a61aaf1b95b5"
         scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
       dolly:
-        client-id: "b54ec20c-ab8a-4e3f-bc34-aa452ddf0f3b"
-        scopes: ["MUTATE_RESSURS"]
+        client-id: "0395cdd9-bb3b-4370-adcb-d67e3dd63b7d"
+        scopes: ["MUTATE_RESSURS", "DOLLY"]
       remedy:
         client-id: "92ab93bd-0782-40c0-902b-7758c8878cb4"
         scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
@@ -329,6 +332,9 @@ app:
     missing-ekstern-sluttdato: remedy-ressurs-sluttdato
   epost-varsel-for-enhet-navnendring:
     max-evt-alder-dager-for-varsel: 60
+  dolly-ressurs:
+    fysisk-brukersted-nr: 1424
+    orgenhet-id: ra970u #Årdal
   manuelle-ressurser-og-ledere:
     enabled: true
     ressurser:

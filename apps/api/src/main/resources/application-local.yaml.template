@@ -66,6 +66,10 @@ app:
   orgenhet:
     vikafossenId: dummyVikafossenId
     linjeenhetene: linje-enhet,en-annen-linjeenhet
+    nav: dummyNavId
+    helfo: dummyHelfoId
+    skatt: dummySkattId
+    riksrev: dummyRiksrevId
 
 # DB. Bruk cloud-proxy mot miljø, eller kjør postgres lokalt
 

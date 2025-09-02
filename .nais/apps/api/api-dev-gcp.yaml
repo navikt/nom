@@ -178,7 +178,7 @@ spec:
           cluster: dev-fss
         - application: testnav-nom-proxy-trygdeetaten
           namespace: dolly
-          cluster: dev-fss
+          cluster: dev-gcp
         - application: repr-fullmakt
           namespace: repr
           cluster: dev-fss
