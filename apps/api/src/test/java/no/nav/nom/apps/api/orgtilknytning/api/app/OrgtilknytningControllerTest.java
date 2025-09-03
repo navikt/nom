@@ -47,6 +47,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static java.util.Objects.nonNull;
 import static no.nav.nom.apps.api.TestTokensGenerator.LOGGED_IN_USER_NAVIDENT;
 import static no.nav.nom.apps.api.common.TestData.orgEnhet;
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
@@ -56,7 +57,6 @@ import static no.nav.nom.contract.nom.IdentType.ROBOT;
 import static no.nav.nom.contract.nom.IdentType.STANDARD;
 import static no.nav.nom.contract.nom.IdentType.UTENLANDSK_KONSULENT;
 import static no.nav.nom.contract.nom.IdentType.VIKAFOSSEN;
-import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -601,7 +601,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
 
         var newStartdato = existingOrgtilknytning.gyldigFom().minusMonths(24);
-        LocalDate newSluttdato = isNotNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
+        LocalDate newSluttdato = nonNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
 
         var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
             .gyldigFom(
@@ -693,7 +693,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
 
         var newStartdato = existingOrgtilknytning.gyldigFom().minusMonths(24);
-        LocalDate newSluttdato = isNotNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
+        LocalDate newSluttdato = nonNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
 
         var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
             .gyldigFom(
@@ -742,7 +742,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
 
         var newStartdato = existingOrgtilknytning.gyldigFom().minusMonths(24);
-        LocalDate newSluttdato = isNotNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
+        LocalDate newSluttdato = nonNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
 
         var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
             .gyldigFom(
@@ -793,7 +793,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
 
         var newStartdato = existingOrgtilknytning.gyldigFom().minusMonths(24);
-        LocalDate newSluttdato = isNotNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
+        LocalDate newSluttdato = nonNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
 
         var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
             .gyldigFom(
@@ -843,7 +843,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
 
         var newStartdato = existingOrgtilknytning.gyldigFom().minusMonths(24);
-        LocalDate newSluttdato = isNotNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
+        LocalDate newSluttdato = nonNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
 
         var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
             .gyldigFom(
@@ -893,7 +893,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
 
         var newStartdato = existingOrgtilknytning.gyldigFom().minusMonths(24);
-        LocalDate newSluttdato = isNotNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
+        LocalDate newSluttdato = nonNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
 
         var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
             .gyldigFom(
@@ -943,7 +943,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(orgtilknytningStateRepository.findByFid(existingOrgtilknytning.fid())).thenReturn(Optional.of(existingOrgtilknytning));
 
         var newStartdato = existingOrgtilknytning.gyldigFom().minusMonths(24);
-        LocalDate newSluttdato = isNotNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
+        LocalDate newSluttdato = nonNull(existingOrgtilknytning.gyldigTom()) ? existingOrgtilknytning.gyldigTom().minusMonths(3).minusDays(1) : null;
 
         var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
             .gyldigFom(
@@ -3160,7 +3160,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .id("newOrgEnhetId")
                 .navn("Ny enhet")
                 .gyldigFom(LocalDate.now().minusYears(1))
-                .gyldigTom(Optional.empty())
+                .gyldigTom(null)
                 .build())
         ));
 

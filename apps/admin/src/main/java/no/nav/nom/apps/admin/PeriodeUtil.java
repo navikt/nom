@@ -6,8 +6,8 @@ import no.nav.nom.contract.nom.state.RessursState;
 import java.time.LocalDate;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNullElse;
 
 // TODO Trekke ut denne og tilsvarende klasse i nom-api til libs/utils-test
 public class PeriodeUtil {

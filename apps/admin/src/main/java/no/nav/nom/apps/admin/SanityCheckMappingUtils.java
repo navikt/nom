@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNullElse;
 
 @UtilityClass
 public class SanityCheckMappingUtils {
@@ -42,7 +43,7 @@ public class SanityCheckMappingUtils {
             map.put("OrgEnhet Navn", orgEnhetState.navn());
             map.put("Gyldig FOM", orgEnhetState.gyldigFom());
             map.put("Gyldig TOM", nonNull(orgEnhetState.gyldigTom()) ? orgEnhetState.gyldigTom() : "");
-            map.put("Unik Agresso ID", orgEnhetState.uniqueAgressoId().orElse(""));
+            map.put("Unik Agresso ID", requireNonNullElse(orgEnhetState.uniqueAgressoId(), ""));
             result.add(map);
         }
         return result;
@@ -73,7 +74,7 @@ public class SanityCheckMappingUtils {
             map.put("OrgEnhet ID", ressurs.orgEnhetId());
             map.put("OrgEnhet Navn", ressurs.orgEnhetNavn());
             map.put("Gyldig FOM", ressurs.gyldigFom());
-            map.put("Gyldig TOM", ressurs.gyldigTom().isPresent() ? ressurs.gyldigTom().get() : "");
+            map.put("Gyldig TOM", requireNonNullElse(ressurs.gyldigTom(), ""));
             map.put("Unik Agresso ID", nonNull(ressurs.uniqueAgressoId()) ? ressurs.uniqueAgressoId() : "");
             result.add(map);
         }

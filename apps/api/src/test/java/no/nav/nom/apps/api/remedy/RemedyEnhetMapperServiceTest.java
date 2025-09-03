@@ -112,8 +112,8 @@ public class RemedyEnhetMapperServiceTest {
 
         var result = remedyEnhetMapperService.findByNomId(orgenhetState2.id());
         assertTrue(result.isPresent());
-        assertEquals(orgenhetState1.agressoOrgNivaa().get(), result.get().orgNivaa());
-        assertEquals(orgenhetState1.agressoId().get(), result.get().agressoId());
+        assertEquals(orgenhetState1.agressoOrgNivaa(), result.get().orgNivaa());
+        assertEquals(orgenhetState1.agressoId(), result.get().agressoId());
         assertEquals("2027", result.get().remedyEnhetId());
     }
 
@@ -136,15 +136,15 @@ public class RemedyEnhetMapperServiceTest {
             "fid", id,
             "navn",
             LocalDate.now(),
-            Optional.empty(),
-            Optional.ofNullable(overordnetFid),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.ofNullable(agressoId),
-            Optional.ofNullable(orgnivaa),
-            Optional.empty()
+            null,
+            overordnetFid,
+            null,
+            null,
+            null,
+            null,
+            agressoId,
+            orgnivaa,
+            null
         );
     }
 }

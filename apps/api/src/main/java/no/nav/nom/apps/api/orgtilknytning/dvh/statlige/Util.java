@@ -38,13 +38,13 @@ public class Util {
     public static List<LocalDate> sorterOrgenhetFomDatoerNyesteDatoFoerstPrefererLiktNavn(List<IOrgenhet> orgenheter, String enhetsNavn) {
         var enheterMedLiktNavn = orgenheter.stream().filter(oe -> oe.getNavn().equals(enhetsNavn)).toList();
         var perioderForEnheterMedLiktNavn = enheterMedLiktNavn.stream()
-            .map(oe -> new DateUtils.Periode(oe.getGyldigFom(), oe.getGyldigTom().orElse(null)))
+            .map(oe -> new DateUtils.Periode(oe.getGyldigFom(), oe.getGyldigTom()))
             .toList();
 
         // Ta vekk andre enheter som dekkes av periodene til enheter med likt navn
         var enheterUtenLiktNavnMedPeriodeUtoverLiktNavnPerioder = orgenheter.stream()
             .filter(oe -> !oe.getNavn().equals(enhetsNavn))
-            .filter(oe -> !isPeriodCoveredByAny(oe.getGyldigFom(), oe.getGyldigTom().orElse(LocalDate.MAX), perioderForEnheterMedLiktNavn))
+            .filter(oe -> !isPeriodCoveredByAny(oe.getGyldigFom(), Objects.requireNonNullElse(oe.getGyldigTom(), LocalDate.MAX), perioderForEnheterMedLiktNavn))
             .toList();
 
         return Stream.concat(enheterMedLiktNavn.stream(), enheterUtenLiktNavnMedPeriodeUtoverLiktNavnPerioder.stream())
@@ -78,7 +78,7 @@ public class Util {
 
     public static boolean erOrgenhetGyldigIHeleStillingPerioden(StillingPeriode stillingPeriode, IOrgenhet matchetOrgenhet) {
         return likEllerEtter(stillingPeriode.gyldigFom(), matchetOrgenhet.getGyldigFom())
-            && likEllerFoer(stillingPeriode.gyldigTom(), matchetOrgenhet.getGyldigTom().orElse(NO_END_DATE));
+            && likEllerFoer(stillingPeriode.gyldigTom(), Objects.requireNonNullElse(matchetOrgenhet.getGyldigTom(), NO_END_DATE));
     }
 
 

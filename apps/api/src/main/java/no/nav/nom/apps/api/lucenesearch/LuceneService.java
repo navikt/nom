@@ -3,7 +3,6 @@ package no.nav.nom.apps.api.lucenesearch;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgenhetFilter;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneRessurs;
@@ -25,6 +24,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static java.util.Objects.nonNull;
 
 @Slf4j
 @Service
@@ -115,7 +116,7 @@ public class LuceneService {
                 .map(orgenhet -> new LuceneOrgEnhet(
                     orgenhet.getId(),
                     orgenhet.getNavn(),
-                    orgenhet.getNomNivaa().map(NomNivaa::name).orElse(null),
+                    nonNull(orgenhet.getNomNivaa()) ? orgenhet.getNomNivaa().name() : null,
                     orgenhet.getOrgNiv(),
                     orgenhet.getGyldigTom()
                 ));

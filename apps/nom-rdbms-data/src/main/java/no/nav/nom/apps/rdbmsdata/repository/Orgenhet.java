@@ -74,13 +74,13 @@ public class Orgenhet {
             .id(orgenhetState.id())
             .navn(orgenhetState.navn())
             .gyldigFom(orgenhetState.gyldigFom())
-            .gyldigTom(orgenhetState.gyldigTom().orElse(null))
-            .orgenhetType(orgenhetState.orgEnhetsType().orElse(null))
-            .nomNivaa(orgenhetState.nomNivaa().orElse(null))
-            .uniqueAgressoId(orgenhetState.uniqueAgressoId().orElse(null))
-            .agressoId(orgenhetState.agressoId().orElse(null))
-            .agressoOrgNivaa(orgenhetState.agressoOrgNivaa().orElse(null))
-            .agressoOrgenhetType(orgenhetState.agressoOrgenhetType().orElse(null))
+            .gyldigTom(orgenhetState.gyldigTom())
+            .orgenhetType(orgenhetState.orgEnhetsType())
+            .nomNivaa(orgenhetState.nomNivaa())
+            .uniqueAgressoId(orgenhetState.uniqueAgressoId())
+            .agressoId(orgenhetState.agressoId())
+            .agressoOrgNivaa(orgenhetState.agressoOrgNivaa())
+            .agressoOrgenhetType(orgenhetState.agressoOrgenhetType())
             .build();
     }
 }

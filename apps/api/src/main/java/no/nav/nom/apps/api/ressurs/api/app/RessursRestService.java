@@ -428,7 +428,7 @@ public class RessursRestService {
             request.startDato(),
             Optional.ofNullable(request.orgEnhetId())
                 .flatMap(orgEnhetStateRepository::findById)
-                .flatMap(OrgEnhetState::agressoId)
+                .map(OrgEnhetState::agressoId)
                 .orElse(null), // TODO: Validate not null in RessursCommandService
             request.ansettelsesType(),
             request.fysiskBrukerstedNr(),

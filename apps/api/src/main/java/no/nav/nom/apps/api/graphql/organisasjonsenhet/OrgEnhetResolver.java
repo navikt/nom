@@ -77,7 +77,7 @@ public class OrgEnhetResolver {
         final var orgNiv = search.getOrgNiv();
         final var orgenhetkategori = search.resolveNomNivaaEnum();
         final var orgEnhetResults = result.filter(e -> orgNiv == null || orgNiv.equals(e.getOrgNiv()))
-            .filter(e -> orgenhetkategori.isEmpty() || orgenhetkategori.contains(e.getNomNivaa().orElse(null)))
+            .filter(e -> orgenhetkategori.isEmpty() || orgenhetkategori.contains(e.getNomNivaa()))
             .peek(iOrgenhet -> agressoIder.remove(iOrgenhet.getAgressoId()))
             .map(MappingUtils::toOrgEnhet)
             .map(OrgEnhetResult::new)

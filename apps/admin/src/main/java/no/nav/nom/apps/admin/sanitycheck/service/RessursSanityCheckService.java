@@ -39,11 +39,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNullElse;
 import static no.nav.nom.apps.admin.PeriodeUtil.tomorrow;
 import static no.nav.nom.apps.admin.PeriodeUtil.yesterday;
 import static no.nav.nom.libs.utils.common.util.DateUtil.sluttdatoIsNotPassed;
-import static java.util.Objects.nonNull;
 
 @Service
 public class RessursSanityCheckService {
@@ -165,8 +165,8 @@ public class RessursSanityCheckService {
                             orgEnhet.map(OrgEnhetState::navn).orElse(""),
                             orgEnhet.map(OrgEnhetState::gyldigFom).orElse(null),
                             orgEnhet.map(OrgEnhetState::gyldigTom).orElse(null),
-                            orgEnhet.filter(orgEnhetState -> orgEnhetState.uniqueAgressoId().isPresent())
-                                    .flatMap(OrgEnhetState::uniqueAgressoId).orElse("")
+                            orgEnhet.filter(orgEnhetState -> nonNull(orgEnhetState.uniqueAgressoId()))
+                                    .map(OrgEnhetState::uniqueAgressoId).orElse("")
                     ));
                 }));
         return ressursMedEnhet;
@@ -194,7 +194,7 @@ public class RessursSanityCheckService {
                     oe.map(OrgEnhetState::navn).orElse(""),
                     oe.map(OrgEnhetState::gyldigFom).orElse(null),
                     oe.map(OrgEnhetState::gyldigTom).orElse(null),
-                    oe.flatMap(OrgEnhetState::uniqueAgressoId).orElse("")
+                    oe.map(OrgEnhetState::uniqueAgressoId).orElse("")
             ));
         });
         return ressursMedEnhet;
@@ -497,13 +497,13 @@ public class RessursSanityCheckService {
         return orgtilknytninger.stream()
                 .filter(t -> {
                     var orgEnhet = orgEnhetStateRepository.findByFid(t.orgEnhetId());
-                    if (orgEnhet.isPresent() && orgEnhet.get().gyldigTom().isPresent() && orgEnhet.get().gyldigTom().get().isBefore(t.gyldigFom())) {
+                    if (orgEnhet.isPresent() && nonNull(orgEnhet.get().gyldigTom()) && orgEnhet.get().gyldigTom().isBefore(t.gyldigFom())) {
                         return true; // orgEnhet.gyldigTom < tilknytning.gyldigFom
                     }
                     if (nonNull(t.gyldigTom()) && orgEnhet.isPresent() && orgEnhet.get().gyldigFom().isAfter(t.gyldigTom())) {
                         return true; // orgEnhet.gyldigFom > tilknytning.gyldigTom
                     }
-                    return isNull(t.gyldigTom()) && orgEnhet.isPresent() && orgEnhet.get().gyldigTom().isPresent(); // orgEnhet avsluttet > tilknytning ikke avsluttet
+                    return isNull(t.gyldigTom()) && orgEnhet.isPresent() && nonNull(orgEnhet.get().gyldigTom()); // orgEnhet avsluttet > tilknytning ikke avsluttet
                 }).toList();
     }
 

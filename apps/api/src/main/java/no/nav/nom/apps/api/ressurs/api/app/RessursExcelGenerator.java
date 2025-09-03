@@ -29,12 +29,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNullElse;
-import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 
 @Slf4j
 @Component
@@ -89,7 +88,7 @@ public class RessursExcelGenerator {
                 excelRows.add(createExcelRow(
                         ressurs,
                         "UKJENT",
-                        Optional.of("UKJENT"),
+                        "UKJENT",
                         "UKJENT",
                         null,
                         kanSeSluttdato
@@ -213,21 +212,21 @@ public class RessursExcelGenerator {
         }
     }
 
-    private ExcelRows createExcelRow(Ressurs ressurs, String orgEnhetId, Optional<String> agressoId, String orgEnhetNavn, LocalDate gyldigFom, boolean kanSeSluttdato) {
+    private ExcelRows createExcelRow(Ressurs ressurs, String orgEnhetId, String agressoId, String orgEnhetNavn, LocalDate gyldigFom, boolean kanSeSluttdato) {
         return new ExcelRows(
             ressurs.state().navident(),
             ressurs.state().visningsnavn().etternavn(),
             ressurs.state().visningsnavn().fornavn(),
             ressurs.state().visningsnavn().mellomnavn().orElse(null),
             sektorMap.get(ressurs.state().sektor().name()),
-            isNotNull(orgEnhetId) ? orgEnhetId : "UKJENT",
-            agressoId.orElse(null),
-            isNotNull(orgEnhetNavn) ? orgEnhetNavn : "UKJENT",
+            Objects.requireNonNullElse(orgEnhetId, "UKJENT"),
+            Objects.requireNonNullElse(agressoId, "UKJENT"),
+            Objects.requireNonNullElse(orgEnhetNavn, "UKJENT"),
             isNull(gyldigFom) ? "UKJENT" : gyldigFom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
-            isNotNull(ressurs.state().jobbtelefon()) ? ressurs.state().jobbtelefon().nummer() : "",
+            nonNull(ressurs.state().jobbtelefon()) ? ressurs.state().jobbtelefon().nummer() : "",
             requireNonNullElse(ressurs.state().primaryTelefonnummer(), ""),
             ressurs.epost(),
-            kanSeSluttdato && isNotNull(ressurs.state().sluttdato()) ? ressurs.state().sluttdato().toString() : null
+            kanSeSluttdato && nonNull(ressurs.state().sluttdato()) ? ressurs.state().sluttdato().toString() : null
         );
     }
 

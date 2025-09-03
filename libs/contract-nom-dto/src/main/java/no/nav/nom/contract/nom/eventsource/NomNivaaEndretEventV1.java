@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.nom.contract.nom.NomNivaa;
 
-import java.util.Optional;
-
 public class NomNivaaEndretEventV1 extends OrgEnhetEvent {
 
     @JsonCreator
@@ -23,7 +21,7 @@ public class NomNivaaEndretEventV1 extends OrgEnhetEvent {
     }
 
     public record NomNivaaEndretEventData(
-        Optional<NomNivaa> nomNivaa
+        NomNivaa nomNivaa
     ) implements Data {}
 
 }

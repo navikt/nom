@@ -3,7 +3,6 @@ package no.nav.nom.apps.admin.sanitycheck.dto.ressurs;
 import no.nav.nom.contract.nom.Sektor;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 public record RessursMedEnhet(
     String navident,
@@ -15,7 +14,7 @@ public record RessursMedEnhet(
     String orgEnhetId,
     String orgEnhetNavn,
     LocalDate gyldigFom,
-    Optional<LocalDate> gyldigTom,
+    LocalDate gyldigTom,
     String uniqueAgressoId
 ) {
 }

@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.groupingBy;
 import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.NO_END_DATE;
@@ -398,10 +399,10 @@ public class RessursStillingStrukturerer {
 
                              for (IOrgenhet oe : tidligereNomEnheterReverseSortedByTom) {
                                  // hvis previousOrgenhetFom er etter oe.getGyldigTom() - log potensielle hull i perioden
-                                 if(oe.getGyldigTom().isPresent() && previousOrgenhetFom.isAfter(oe.getGyldigTom().get())){
+                                 if(nonNull(oe.getGyldigTom()) && previousOrgenhetFom.isAfter(oe.getGyldigTom())){
                                      log.debug("Hull i perioden for navident {} fra {} til {}",
                                          navident,
-                                         oe.getGyldigTom().get(),
+                                         oe.getGyldigTom(),
                                          previousOrgenhetFom);
                                  }
 
@@ -411,8 +412,8 @@ public class RessursStillingStrukturerer {
 
                                  // stillingsperioder
                                  var stillingPeriodeTom = previousOrgenhetFom;
-                                 if(oe.getGyldigTom().isPresent()){
-                                     stillingPeriodeTom =  oe.getGyldigTom().get().isAfter(previousOrgenhetFom) ? previousOrgenhetFom : oe.getGyldigTom().get(); // if orgEnhets TOM is after previousOrgenhetFom, use previousOrgenhetFom
+                                 if (nonNull(oe.getGyldigTom())) {
+                                     stillingPeriodeTom =  oe.getGyldigTom().isAfter(previousOrgenhetFom) ? previousOrgenhetFom : oe.getGyldigTom(); // if orgEnhets TOM is after previousOrgenhetFom, use previousOrgenhetFom
                                  }
                                  var stillingPeriodeFom = oe.getGyldigFom().isBefore(stillingPeriode.gyldigFom()) ? stillingPeriode.gyldigFom():oe.getGyldigFom(); // if orgEnhets FOM is before stillingFOM, use stillingFOM
 
@@ -438,7 +439,7 @@ public class RessursStillingStrukturerer {
                             StillingPeriode.toString(historiskStillingsPerioder, true)
                         );
                         perioderGruppertMedOrgenhet.addAll(historiskStillingsPerioder);
-                    } else if (stillingPeriode.gyldigTom().isAfter(nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE))) {
+                    } else if (stillingPeriode.gyldigTom().isAfter(Objects.requireNonNullElse(nomEnheter.getFirst().getGyldigTom(), NO_END_DATE))) {
                         log.debug(
                             "Stillingperioden for navident {} slutter etter kjent orgenhets gyldighetsperiode. Må begrense stillingPeriodens gyldighet til å være innenfor",
                             navident
@@ -447,17 +448,17 @@ public class RessursStillingStrukturerer {
                             new StillingPeriode(
                                 stillingPeriode.stilling(),
                                 stillingPeriode.gyldigFom(),
-                                nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
-                                nomEnheter.get(0)
+                                Objects.requireNonNullElse(nomEnheter.getFirst().getGyldigTom(), NO_END_DATE),
+                                nomEnheter.getFirst()
                             )
                         );
 
                         // forsøker på å finne korrekt seinere enhet for den samme agressoid’en
                         List<IOrgenhet> seinereNomEnherer = Collections.emptyList();
-                        if(nomEnheter.get(0).getGyldigTom().isPresent()){
+                        if (nonNull(nomEnheter.getFirst().getGyldigTom())) {
                             seinereNomEnherer =  finnNomEnheterForExactId(
                                 stillingPeriode.stilling().agressoId().get(),
-                                nomEnheter.get(0).getGyldigTom().get().plusDays(1),
+                                nomEnheter.getFirst().getGyldigTom().plusDays(1),
                                 stillingPeriode.gyldigTom()
                             );
                         }
@@ -465,7 +466,7 @@ public class RessursStillingStrukturerer {
                         log.debug(
                             "Klippet etter stillingperioden for navident {} fra {} til {}. nomEnheter: {}, stillingPeriode: {}, seinereNomEnheter: {}",
                             navident,
-                            nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
+                            Objects.requireNonNullElse(nomEnheter.getFirst().getGyldigTom(), NO_END_DATE),
                             stillingPeriode.gyldigTom(),
                             orgenheterToString(nomEnheter),
                             stillingPeriode,
@@ -479,7 +480,7 @@ public class RessursStillingStrukturerer {
                                 log.warn(
                                     "Finner flere seinere enheter for stillingperioden for navident {} fra {} til {}. seinereNomEnheter: {}",
                                     navident,
-                                    nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
+                                    Objects.requireNonNullElse(nomEnheter.getFirst().getGyldigTom(), NO_END_DATE),
                                     stillingPeriode.gyldigTom(),
                                     orgenheterToString(seinereNomEnherer)
                                 );
@@ -487,22 +488,22 @@ public class RessursStillingStrukturerer {
                                 log.debug(
                                     "Fikser inkonsistens i stillingperioden for navident {} fra {} til {}. seinereNomEnheter: {}",
                                     navident,
-                                    nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
+                                    Objects.requireNonNullElse(nomEnheter.getFirst().getGyldigTom(), NO_END_DATE),
                                     stillingPeriode.gyldigTom(),
                                     orgenheterToString(seinereNomEnherer)
                                 );
                                 perioderGruppertMedOrgenhet.add(
                                     new StillingPeriode(
                                         stillingPeriode.stilling(),
-                                        nomEnheter.get(0).getGyldigTom().get().plusDays(1),
+                                        nomEnheter.getFirst().getGyldigTom().plusDays(1),
                                         stillingPeriode.gyldigTom(),
-                                        seinereNomEnherer.get(0)
+                                        seinereNomEnherer.getFirst()
                                     )
                                 );
                             }
                         }
                     } else {
-                        perioderGruppertMedOrgenhet.add(new StillingPeriode(stillingPeriode, nomEnheter.get(0)));
+                        perioderGruppertMedOrgenhet.add(new StillingPeriode(stillingPeriode, nomEnheter.getFirst()));
                     }
                 } else {
                     final var nomEnheterString = orgenheterToString(nomEnheter);
@@ -513,7 +514,7 @@ public class RessursStillingStrukturerer {
                     nomEnheter.stream()
                         .sorted(Comparator.comparing(IOrgenhet::getGyldigFom))
                         .forEach(oe -> {
-                            if (nextGyldigFom.get().isAfter(oe.getGyldigTom().orElse(NO_END_DATE).minusDays(1))) {
+                            if (nextGyldigFom.get().isAfter(Objects.requireNonNullElse(oe.getGyldigTom(), NO_END_DATE).minusDays(1))) {
                                 // Har truffet snag med match på flere enheter som har overlapp i periode
                                 // Vi må baile ut - Kan ikke matche på flere enheter. Orgenheter må korrigeres
                                 String msg = "Har funnet matchende orgenheter\n%s med overlappende perioder for stillingperiode for navident %s \n%s.\nDette kan ikke behandles.".formatted(
@@ -526,10 +527,10 @@ public class RessursStillingStrukturerer {
                                 nyeStillingPerioder.add(new StillingPeriode(
                                     stillingPeriode.stilling(),
                                     nextGyldigFom.get(),
-                                    oe.getGyldigTom().orElse(NO_END_DATE),
+                                    Objects.requireNonNullElse(oe.getGyldigTom(), NO_END_DATE),
                                     oe
                                 ));
-                                nextGyldigFom.set(oe.getGyldigTom().orElse(NO_END_DATE).plusDays(1));
+                                nextGyldigFom.set(Objects.requireNonNullElse(oe.getGyldigTom(), NO_END_DATE).plusDays(1));
                             }
                         });
                     log.debug(TEAM_LOGS,
@@ -551,7 +552,7 @@ public class RessursStillingStrukturerer {
     }
 
    public List<IOrgenhet>  reverseSortNomEnheterByGyldigTom(List<IOrgenhet> nomEnheter){
-       return nomEnheter.stream().sorted(Comparator.comparing(oe -> oe.getGyldigTom().orElse(LocalDate.MAX))).collect(Collectors.toList()).reversed();
+       return nomEnheter.stream().sorted(Comparator.comparing(oe -> Objects.requireNonNullElse(oe.getGyldigTom(), LocalDate.MAX))).collect(Collectors.toList()).reversed();
    }
 
     // Alle ORGENHET enheter med matched agressoId som overlapper i perioden
@@ -559,9 +560,9 @@ public class RessursStillingStrukturerer {
         return orgenhetService.matchByAgressoId(agressoId).stream()
             .filter(oe ->
                 "ORGENHET".equals(oe.getOrgNiv()) &&
-                    (gyldigTom.isAfter(oe.getGyldigFom().minusDays(1)) && gyldigFom.isBefore(oe.getGyldigTom().orElse(NO_END_DATE.plusDays(1))))
+                    (gyldigTom.isAfter(oe.getGyldigFom().minusDays(1)) && gyldigFom.isBefore(Objects.requireNonNullElse(oe.getGyldigTom(), NO_END_DATE).plusDays(1)))
             )
-            .filter(oe -> !oe.getGyldigFom().equals(oe.getGyldigTom().orElse(null))) // Ekskluder enheter hvor fra-til dato er lik
+            .filter(oe -> !oe.getGyldigFom().equals(oe.getGyldigTom())) // Ekskluder enheter hvor fra-til dato er lik
             .toList();
     }
 
@@ -570,9 +571,9 @@ public class RessursStillingStrukturerer {
         return orgenhetService.exactMatchByAgressoId(agressoId).stream()
             .filter(oe ->
                 "ORGENHET".equals(oe.getOrgNiv()) &&
-                    (gyldigTom.isAfter(oe.getGyldigFom().minusDays(1)) && gyldigFom.isBefore(oe.getGyldigTom().orElse(NO_END_DATE.plusDays(1))))
+                    (gyldigTom.isAfter(oe.getGyldigFom().minusDays(1)) && gyldigFom.isBefore(Objects.requireNonNullElse(oe.getGyldigTom(), NO_END_DATE).plusDays(1)))
             )
-            .filter(oe -> !oe.getGyldigFom().equals(oe.getGyldigTom().orElse(null))) // Ekskluder enheter hvor fra-til dato er lik
+            .filter(oe -> !oe.getGyldigFom().equals(oe.getGyldigTom())) // Ekskluder enheter hvor fra-til dato er lik
             .toList();
     }
 
@@ -583,9 +584,9 @@ public class RessursStillingStrukturerer {
             .filter(oe ->
                 "ORGENHET".equals(oe.getOrgNiv()) &&
                     enhetNavn.equals(oe.getNavn()) &&
-                    (gyldigTom.isAfter(oe.getGyldigFom().minusDays(1)) && gyldigFom.isBefore(oe.getGyldigTom().orElse(NO_END_DATE.plusDays(1))))
+                    (gyldigTom.isAfter(oe.getGyldigFom().minusDays(1)) && gyldigFom.isBefore(Objects.requireNonNullElse(oe.getGyldigTom(), NO_END_DATE).plusDays(1)))
             )
-            .filter(oe -> !oe.getGyldigFom().equals(oe.getGyldigTom().orElse(null))) // Ekskluder enheter hvor fra-til dato er lik
+            .filter(oe -> !oe.getGyldigFom().equals(oe.getGyldigTom())) // Ekskluder enheter hvor fra-til dato er lik
             .toList();
     }
 
@@ -606,7 +607,7 @@ public class RessursStillingStrukturerer {
             .append(" [")
             .append(orgenhet.getGyldigFom())
             .append(" - ")
-            .append(orgenhet.getGyldigTom().orElse(NO_END_DATE))
+            .append(Objects.requireNonNullElse(orgenhet.getGyldigTom(), NO_END_DATE))
             .append("]")
             .append(" - ")
             .append(orgenhet.getUniqueAgressoId());

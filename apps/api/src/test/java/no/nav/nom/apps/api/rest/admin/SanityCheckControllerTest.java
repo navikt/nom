@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -130,7 +129,7 @@ public class SanityCheckControllerTest extends RestTestBase {
             .agressoId(AGRESSO_ID_A)
             .uniqueAgressoId(AGRESSO_ID_A+"-"+ORG_ENHET_NAVN_A+"-"+AGRESSO_ORG_NIVAA_A)
             .orgNiv(AGRESSO_ORG_NIVAA_A)
-            .gyldigTom(Optional.of(LocalDate.now().plusDays(1)))
+            .gyldigTom(LocalDate.now().plusDays(1))
             .build();
 
         IOrgenhet orgenhet_B = MockBasisTestOrganisering.MockOrgenhet.builder()
@@ -139,7 +138,7 @@ public class SanityCheckControllerTest extends RestTestBase {
             .agressoId(AGRESSO_ID_B)
             .uniqueAgressoId(AGRESSO_ID_B+"-"+ORG_ENHET_NAVN_B+"-"+AGRESSO_ORG_NIVAA_B)
             .orgNiv(AGRESSO_ORG_NIVAA_B)
-            .gyldigTom(Optional.of(LocalDate.now().plusDays(1)))
+            .gyldigTom(LocalDate.now().plusDays(1))
             .build();
         return List.of(orgenhet_A, orgenhet_B);
     }

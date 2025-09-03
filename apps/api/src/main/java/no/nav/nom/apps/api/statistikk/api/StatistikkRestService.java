@@ -36,6 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 import static no.nav.nom.apps.api.common.SpringCacheConfig.STATISTIKK_REST_SERVICE_CACHE_NAME;
 
@@ -138,8 +139,8 @@ public class StatistikkRestService {
         }
         var alleOrgEnheterSomErLinjeEllerDriftId = orgenhetService.getAllEnheterMedOrganisering()
             .stream()
-            .filter(iOrgenhet -> iOrgenhet.getNomNivaa().isPresent() &&
-                (iOrgenhet.getNomNivaa().get().equals(NomNivaa.LINJEENHET) || iOrgenhet.getNomNivaa().get().equals(NomNivaa.DRIFTSENHET)))
+            .filter(iOrgenhet -> nonNull(iOrgenhet.getNomNivaa()) &&
+                (iOrgenhet.getNomNivaa().equals(NomNivaa.LINJEENHET) || iOrgenhet.getNomNivaa().equals(NomNivaa.DRIFTSENHET)))
             .map(IOrgenhet::getId)
             .toList();
 
@@ -180,10 +181,10 @@ public class StatistikkRestService {
         var erNestNedersteNode = orgenhetService.isOrgEnhetBeforeLeafNode(optionalOrgEnhet.get().getId(), lovnoder);
         var antallLovnoder = erNestNedersteNode ? 0 : lovnoder.size();
 
-        if (optionalOrgEnhet.get().getNomNivaa().isPresent()) {
-            if (optionalOrgEnhet.get().getNomNivaa().get().equals(NomNivaa.LINJEENHET)) {
+        if (nonNull(optionalOrgEnhet.get().getNomNivaa())) {
+            if (optionalOrgEnhet.get().getNomNivaa().equals(NomNivaa.LINJEENHET)) {
                 return hentStatistikkForLinjeenhet(ressursStatistikk, antallLovnoder, orgEnheter);
-            } else if (optionalOrgEnhet.get().getNomNivaa().get().equals(NomNivaa.DRIFTSENHET)) {
+            } else if (optionalOrgEnhet.get().getNomNivaa().equals(NomNivaa.DRIFTSENHET)) {
                 return hentStatistikkForDriftsenhet(ressursStatistikk, antallLovnoder, orgEnheter);
             }
         }
@@ -298,8 +299,8 @@ public class StatistikkRestService {
     private int finnAlleNavKontorer(Collection<IOrgenhet> alleOrgenheter) {
 
         var alleNavKontorer = alleOrgenheter.stream()
-            .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().isPresent())
-            .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().get().equals(OrgEnhetsType.NAV_KONTOR))
+            .filter(iOrgenhet -> nonNull(iOrgenhet.getOrgEnhetsType()))
+            .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().equals(OrgEnhetsType.NAV_KONTOR))
             .toList();
 
         var navKontorOverordnetId = alleNavKontorer.stream()
@@ -313,8 +314,8 @@ public class StatistikkRestService {
         var antallNavKontorer = navKontorOverordnetId.stream()
             .filter(nomId -> alleOrgenheter.stream()
                 .anyMatch(iOrgenhet -> iOrgenhet.getId().equals(nomId)
-                    && iOrgenhet.getNomNivaa().isPresent()
-                    && (!iOrgenhet.getNomNivaa().get().equals(NomNivaa.ARBEIDSOMRAADE) && iOrgenhet.getNomNivaa().isPresent())))
+                    && nonNull(iOrgenhet.getNomNivaa())
+                    && (!iOrgenhet.getNomNivaa().equals(NomNivaa.ARBEIDSOMRAADE) && nonNull(iOrgenhet.getNomNivaa()))))
             .toList();
 
         return antallNavKontorer.size();
@@ -322,10 +323,10 @@ public class StatistikkRestService {
 
     private List<IOrgenhet> createNewIOrgenhetList(Collection<IOrgenhet> allOrgenheter, NomNivaa nomNivaa, OrgEnhetsType orgEnhetsType) {
         return allOrgenheter.stream()
-            .filter(orgenhet -> orgenhet.getNomNivaa().isPresent())
-            .filter(orgenhet -> orgenhet.getNomNivaa().get().equals(nomNivaa))
-            .filter(orgenhet -> orgenhet.getOrgEnhetsType().isPresent())
-            .filter(orgenhet -> orgenhet.getOrgEnhetsType().get().equals(orgEnhetsType))
+            .filter(orgenhet -> nonNull(orgenhet.getNomNivaa()))
+            .filter(orgenhet -> orgenhet.getNomNivaa().equals(nomNivaa))
+            .filter(orgenhet -> nonNull(orgenhet.getOrgEnhetsType()))
+            .filter(orgenhet -> orgenhet.getOrgEnhetsType().equals(orgEnhetsType))
             .toList();
     }
 

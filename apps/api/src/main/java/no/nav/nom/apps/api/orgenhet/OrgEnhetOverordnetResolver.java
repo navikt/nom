@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+import static java.util.Objects.isNull;
+
 @Component
 public class OrgEnhetOverordnetResolver {
 
@@ -22,7 +24,7 @@ public class OrgEnhetOverordnetResolver {
 
     public Optional<OrgEnhetState> findOverordnetOrgEnhet(OrgEnhetState orgEnhetState) {
         // Ikke returner overordnet/organisering for enheter som er opprettet og avsluttet samme dag
-        if (orgEnhetState.endedOnStartDate()) { return Optional.empty(); }
+        if (isNull(orgEnhetState) || orgEnhetState.endedOnStartDate()) { return Optional.empty(); }
 
         return organiseringStateRepository
             .findActiveById(orgEnhetState.id())

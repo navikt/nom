@@ -26,7 +26,8 @@ import java.util.Collection;
 import java.util.List;
 
 import static java.util.Objects.isNull;
-import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNullElse;
 
 @Slf4j
 @Tag(name = "Admin for korrigeringer")
@@ -66,20 +67,20 @@ public class KorrigerOrgtilknytningerUtoverOrgenhetensPeriode {
                     ot.navident(),
                     ot.orgEnhetId(),
                     ot.gyldigFom(),
-                    isNotNull(ot.gyldigTom()) ? ot.gyldigTom() : " "
+                    requireNonNullElse(ot.gyldigTom(), " ")
                 );
                 String orgenhetDescription = "Orgenhet %s %s med periode %s - %s".formatted(
                     orgenhet.getId(),
                     orgenhet.getNavn(),
                     orgenhet.getGyldigFom(),
-                    orgenhet.getGyldigTom().isPresent() ? orgenhet.getGyldigTom().get() : " "
+                    requireNonNullElse(orgenhet.getGyldigTom(), " ")
                 );
 
                 ObjectNode node = mapper.createObjectNode();
                 node.put("Orgiltknytning", otDescription);
                 node.put("Orgenhet", orgenhetDescription);
 
-                if (ot.gyldigFom().isAfter(orgenhet.getGyldigTom().get())) {
+                if (ot.gyldigFom().isAfter(orgenhet.getGyldigTom())) {
                     // Vi må fjerne orgtilknytningen, dne starteretter orgenheten slutter
                     FjernOrgtilknytning fjernOrgtilknytning =
                         new FjernOrgtilknytning(
@@ -106,7 +107,7 @@ public class KorrigerOrgtilknytningerUtoverOrgenhetensPeriode {
                         new AvvikleOrgtilknytning(
                             ot.navident(),
                             ot.orgEnhetId(),
-                            orgenhet.getGyldigTom().get(),
+                            orgenhet.getGyldigTom(),
                             new InputMetadata(
                                 "Swagger",
                                 "Korriger orgtilknytinger som går utover orgenhetens periode",
@@ -136,16 +137,16 @@ public class KorrigerOrgtilknytningerUtoverOrgenhetensPeriode {
         return orgtilknytninger.stream()
             .filter( ot -> {
                 var orgEnhet = orgenhetService.getById(ot.orgEnhetId());
-                if (orgEnhet.get().getGyldigTom().isPresent() && orgEnhet.get().getGyldigTom().get().isBefore(ot.gyldigFom())) {
+                if (nonNull(orgEnhet.get().getGyldigTom()) && orgEnhet.get().getGyldigTom().isBefore(ot.gyldigFom())) {
                     return true; // orgEnhet.gyldigTom < tilknytning.gyldigFom
                 }
-                if (isNotNull(ot.gyldigTom()) && orgEnhet.get().getGyldigFom().isAfter(ot.gyldigTom())) {
+                if (nonNull(ot.gyldigTom()) && orgEnhet.get().getGyldigFom().isAfter(ot.gyldigTom())) {
                     return true; // orgEnhet.gyldigFom > tilknytning.gyldigTom
                 }
-                if (isNull(ot.gyldigTom()) && orgEnhet.get().getGyldigTom().isPresent()) {
+                if (isNull(ot.gyldigTom()) && nonNull(orgEnhet.get().getGyldigTom())) {
                     return true; // orgEnhet avsluttet < tilknytning ikke avsluttet
                 }
-                return isNotNull(ot.gyldigTom()) && orgEnhet.get().getGyldigTom().isPresent() && orgEnhet.get().getGyldigTom().get().isBefore(ot.gyldigTom()); // orgEnhet avsluttet < tilknytning avsluttet
+                return nonNull(ot.gyldigTom()) && nonNull(orgEnhet.get().getGyldigTom()) && orgEnhet.get().getGyldigTom().isBefore(ot.gyldigTom()); // orgEnhet avsluttet < tilknytning avsluttet
             } ).toList();
     }
 }

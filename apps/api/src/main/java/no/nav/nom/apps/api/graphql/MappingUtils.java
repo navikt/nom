@@ -42,10 +42,10 @@ public class MappingUtils {
                 .navn(orgEnhet.getNavn())
                 .agressoOrgenhetType(orgEnhet.getAgressoOrgenhetType())
                 .gyldigFom(orgEnhet.getGyldigFom())
-                .gyldigTom(orgEnhet.getGyldigTom().orElse(null))
-                .orgEnhetsKategori(orgEnhet.getNomNivaa().orElse(null))
-                .nomNivaa(orgEnhet.getNomNivaa().orElse(null))
-                .orgEnhetsType(orgEnhet.getOrgEnhetsType().orElse(null))
+                .gyldigTom(orgEnhet.getGyldigTom())
+                .orgEnhetsKategori(orgEnhet.getNomNivaa())
+                .nomNivaa(orgEnhet.getNomNivaa())
+                .orgEnhetsType(orgEnhet.getOrgEnhetsType())
                 .build();
     }
 

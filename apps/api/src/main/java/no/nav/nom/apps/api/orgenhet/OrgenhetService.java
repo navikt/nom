@@ -36,6 +36,8 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedAzpName;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
@@ -147,7 +149,7 @@ public class OrgenhetService {
 
     public List<IOrgenhet> matchByAgressoId(String agressoId) {
         return orgEnhetStateRepository.getAll().stream()
-            .filter(orgEnhetState -> !orgEnhetState.endedOnStartDate() && orgEnhetState.agressoId().isPresent() && orgEnhetState.agressoId().get().contains(agressoId))
+            .filter(orgEnhetState -> !orgEnhetState.endedOnStartDate() && nonNull(orgEnhetState.agressoId()) && orgEnhetState.agressoId().contains(agressoId))
             .map(this::map)
             .toList();
     }
@@ -156,8 +158,8 @@ public class OrgenhetService {
         return orgEnhetStateRepository.getAll().stream()
             .filter(orgEnhetState ->
                 !orgEnhetState.endedOnStartDate()
-                    && orgEnhetState.agressoId().isPresent()
-                    && orgEnhetState.agressoId().get().equalsIgnoreCase(agressoId))
+                    && nonNull(orgEnhetState.agressoId())
+                    && orgEnhetState.agressoId().equalsIgnoreCase(agressoId))
             .map(this::map)
             .toList();
     }
@@ -236,7 +238,7 @@ public class OrgenhetService {
             return false;
         }
 
-        if (orgenhetState.get().nomNivaa().isPresent() && orgenhetState.get().nomNivaa().get().equals(NomNivaa.ARBEIDSOMRAADE)) {
+        if (Objects.equals(orgenhetState.get().nomNivaa(), NomNivaa.ARBEIDSOMRAADE)) {
             return true;
         }
 
@@ -251,7 +253,7 @@ public class OrgenhetService {
             return false;
         }
 
-        if (orgenhetState.get().nomNivaa().isPresent() && orgenhetState.get().nomNivaa().get().equals(NomNivaa.DRIFTSENHET)) {
+        if (Objects.equals(orgenhetState.get().nomNivaa(), NomNivaa.DRIFTSENHET)) {
             return true;
         }
 
@@ -290,15 +292,14 @@ public class OrgenhetService {
     }
 
     private void sendEndreOrgEnhetsTypeEvent(OrgEnhetState orgEnhetState, OrgEnhetsType orgEnhetsType) {
-        var existingOrgEnhetsTypeIsDifferentFromNewValueOrNotPresent = orgEnhetState.orgEnhetsType()
-            .map(existingOrgenhetsType -> existingOrgenhetsType != orgEnhetsType)
-            .orElse(true);
+        boolean existingOrgEnhetsTypeIsDifferentFromNewValueOrNotPresent =
+            isNull(orgEnhetState.orgEnhetsType()) || orgEnhetState.orgEnhetsType() != orgEnhetsType;
 
         if (existingOrgEnhetsTypeIsDifferentFromNewValueOrNotPresent) {
             orgEnhetCommandService.endreOrgEnhetsType(
                 orgEnhetState.fid(),
                 new EndreOrgEnhetsType(
-                    Optional.ofNullable(orgEnhetsType),
+                    orgEnhetsType,
                     new InputMetadata(
                         "nom-api REST",
                         "setOrgEnhetsType",

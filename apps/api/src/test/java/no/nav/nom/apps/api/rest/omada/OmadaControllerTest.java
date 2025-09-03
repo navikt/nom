@@ -178,8 +178,8 @@ class OmadaControllerTest extends RestTestBase {
         return new OrgEnhet(OrgEnhetState.builder()
             .id(NOM_ID)
             .navn(ORG_ENHET_NAVN)
-            .agressoId(Optional.of(AGRESSO_ID))
-            .agressoOrgNivaa(Optional.of(AGRESSO_ORG_NIVAA))
+            .agressoId(AGRESSO_ID)
+            .agressoOrgNivaa(AGRESSO_ORG_NIVAA)
             .build());
     }
 

@@ -83,8 +83,8 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
         final var agressoIds = searchResults.stream().map(OrgEnhet::getAgressoId).collect(Collectors.toList());
 
         assertThat(searchResults.size(), greaterThan(1));
-        assertThat(agressoIds, hasItem(e1.agressoId().get()));
-        assertThat(agressoIds, hasItem(e2.agressoId().get()));
+        assertThat(agressoIds, hasItem(e1.agressoId()));
+        assertThat(agressoIds, hasItem(e2.agressoId()));
 
     }
 

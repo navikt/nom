@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.orgenhet;
 
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
-import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
@@ -79,8 +78,8 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
         allAgressoOrgenhetTyper.stream()
             .map(agressoOrgenhetType ->
                 orgEnhetStateBuilderWithDefaultValues().toBuilder()
-                    .agressoOrgNivaa(Optional.of("ORGENHET"))
-                    .agressoOrgenhetType(Optional.of(agressoOrgenhetType))
+                    .agressoOrgNivaa("ORGENHET")
+                    .agressoOrgenhetType(agressoOrgenhetType)
                     .build()
             )
             .forEach(orgEnhetState -> orgEnhetStateRepository.update(orgEnhetState));
@@ -92,7 +91,7 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
 
         assertThat(endreOrgEnhetsTypeArgumentCaptor.getAllValues())
             .hasSize(allAgressoOrgenhetTyper.size())
-            .map(event -> event.orgEnhetsType().orElse(null))
+            .map(EndreOrgEnhetsType::orgEnhetsType)
             // Assert that events are sent for all OrgEnhetsType values except DIR (legacy code that gets mapped to DIREKTORAT)
             .containsAll(Arrays.stream(OrgEnhetsType.values())
                 .filter(orgEnhetsType -> !orgEnhetsType.equals(OrgEnhetsType.DIR)).toList()
@@ -107,19 +106,19 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
 
         var leafNodes = List.of(
             orgEnhetStateBuilderWithDefaultValues().toBuilder()
-                .agressoOrgNivaa(Optional.of("ORGENHET"))
-                .agressoOrgenhetType(Optional.of("Doksenter"))
+                .agressoOrgNivaa("ORGENHET")
+                .agressoOrgenhetType("Doksenter")
                 .build(),
             orgEnhetStateBuilderWithDefaultValues().toBuilder()
-                .agressoOrgNivaa(Optional.of("ORGENHET"))
-                .agressoOrgenhetType(Optional.of("Fylke"))
+                .agressoOrgNivaa("ORGENHET")
+                .agressoOrgenhetType("Fylke")
                 .build()
         );
 
         var nonLeafNodes = List.of(
             orgEnhetStateBuilderWithDefaultValues().toBuilder()
-            .agressoOrgNivaa(Optional.of("ORGNIV3"))
-            .agressoOrgenhetType(Optional.of("HMS"))
+            .agressoOrgNivaa("ORGNIV3")
+            .agressoOrgenhetType("HMS")
             .build()
         );
 
@@ -140,9 +139,9 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
     public void updateOrgEnhetsTypeForLeafs_should_not_send_event_if_correct_orgenhetType_is_already_set() {
 
         var orgEnhetWithCorrectOrgenhetType = orgEnhetStateBuilderWithDefaultValues().toBuilder()
-            .agressoOrgNivaa(Optional.of("ORGENHET"))
-            .agressoOrgenhetType(Optional.of("Fylke"))
-            .orgEnhetsType(Optional.of(OrgEnhetsType.FYLKE))
+            .agressoOrgNivaa("ORGENHET")
+            .agressoOrgenhetType("Fylke")
+            .orgEnhetsType(OrgEnhetsType.FYLKE)
             .build();
 
         orgEnhetStateRepository.update(orgEnhetWithCorrectOrgenhetType);
@@ -158,9 +157,9 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
     public void updateOrgEnhetsTypeForLeafs_should_send_event_if_incorrect_orgenhetType_is_set() {
 
         var orgEnhetWithCorrectOrgenhetType = orgEnhetStateBuilderWithDefaultValues().toBuilder()
-            .agressoOrgNivaa(Optional.of("ORGENHET"))
-            .agressoOrgenhetType(Optional.of("Fylke"))
-            .orgEnhetsType(Optional.of(OrgEnhetsType.NAV_KONTOR))
+            .agressoOrgNivaa("ORGENHET")
+            .agressoOrgenhetType("Fylke")
+            .orgEnhetsType(OrgEnhetsType.NAV_KONTOR)
             .build();
 
         orgEnhetStateRepository.update(orgEnhetWithCorrectOrgenhetType);
@@ -182,10 +181,10 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
         var changedOrgenhetAndSiblings = List.of(
             changedOrgenhet,
             orgEnhetStateBuilderWithDefaultValues().toBuilder()
-                .orgEnhetsType(Optional.of(newOrgEnhetType))
+                .orgEnhetsType(newOrgEnhetType)
                 .build(),
             orgEnhetStateBuilderWithDefaultValues().toBuilder()
-                .orgEnhetsType(Optional.of(newOrgEnhetType))
+                .orgEnhetsType(newOrgEnhetType)
                 .build()
         );
 
@@ -201,7 +200,7 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
         orgEnhetTypeHandler.orgEnhetsTypeChanged(
             new OrgEnhetTypeEndretEventV1(
                 changedOrgenhet.fid(),
-                new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(Optional.of(newOrgEnhetType)),
+                new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(newOrgEnhetType),
                 new InputMetadata(null, null, null, null)
             )
         );
@@ -209,7 +208,7 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
         verify(orgEnhetCommandService, times(1))
             .endreOrgEnhetsType(eq(overordnetOrgEnhet.fid()), endreOrgEnhetsTypeArgumentCaptor.capture());
 
-        assertThat(endreOrgEnhetsTypeArgumentCaptor.getValue().orgEnhetsType()).isEqualTo(Optional.of(newOrgEnhetType));
+        assertThat(endreOrgEnhetsTypeArgumentCaptor.getValue().orgEnhetsType()).isEqualTo(newOrgEnhetType);
 
     }
 
@@ -220,7 +219,7 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
         var changedOrgenhet = orgEnhetStateBuilderWithDefaultValues();
 
         var overordnetOrgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
-            .orgEnhetsType(Optional.of(OrgEnhetsType.ARBEIDSLIVSSENTER))
+            .orgEnhetsType(OrgEnhetsType.ARBEIDSLIVSSENTER)
             .build();
 
         Stream.of(List.of(changedOrgenhet), List.of(overordnetOrgEnhet)).flatMap(List::stream)
@@ -231,7 +230,7 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
         orgEnhetTypeHandler.orgEnhetsTypeChanged(
             new OrgEnhetTypeEndretEventV1(
                 changedOrgenhet.fid(),
-                new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(Optional.of(newOrgEnhetType)),
+                new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(newOrgEnhetType),
                 new InputMetadata(null, null, null, null)
             )
         );
@@ -248,12 +247,12 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
         var changedOrgenhetAndSiblings = List.of(
             changedOrgenhet,
             orgEnhetStateBuilderWithDefaultValues().toBuilder()
-                .orgEnhetsType(Optional.of(OrgEnhetsType.FYLKE))
+                .orgEnhetsType(OrgEnhetsType.FYLKE)
                 .build()
         );
 
         var overordnetOrgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
-            .orgEnhetsType(Optional.empty())
+            .orgEnhetsType(null)
             .build();
 
         Stream.of(changedOrgenhetAndSiblings, List.of(overordnetOrgEnhet)).flatMap(List::stream)
@@ -266,7 +265,7 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
         orgEnhetTypeHandler.orgEnhetsTypeChanged(
             new OrgEnhetTypeEndretEventV1(
                 changedOrgenhet.fid(),
-                new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(Optional.of(OrgEnhetsType.DIREKTORAT)),
+                new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(OrgEnhetsType.DIREKTORAT),
                 new InputMetadata(null, null, null, null)
             )
         );
@@ -283,12 +282,12 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
         var changedOrgenhetAndSiblings = List.of(
             changedOrgenhet,
             orgEnhetStateBuilderWithDefaultValues().toBuilder()
-                .orgEnhetsType(Optional.of(OrgEnhetsType.DIREKTORAT))
+                .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
                 .build()
         );
 
         var overordnetOrgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
-            .orgEnhetsType(Optional.of(OrgEnhetsType.DIR)).build();
+            .orgEnhetsType(OrgEnhetsType.DIR).build();
 
         Stream.of(changedOrgenhetAndSiblings, List.of(overordnetOrgEnhet)).flatMap(List::stream)
             .forEach(orgEnhetState -> orgEnhetStateRepository.update(orgEnhetState));
@@ -300,7 +299,7 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
         orgEnhetTypeHandler.orgEnhetsTypeChanged(
             new OrgEnhetTypeEndretEventV1(
                 changedOrgenhet.fid(),
-                new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(Optional.of(OrgEnhetsType.DIREKTORAT)),
+                new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(OrgEnhetsType.DIREKTORAT),
                 new InputMetadata(null, null, null, null)
             )
         );
@@ -308,6 +307,6 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
         verify(orgEnhetCommandService, times(1))
             .endreOrgEnhetsType(eq(overordnetOrgEnhet.fid()), endreOrgEnhetsTypeArgumentCaptor.capture());
 
-        assertThat(endreOrgEnhetsTypeArgumentCaptor.getValue().orgEnhetsType()).isEqualTo(Optional.of(OrgEnhetsType.DIREKTORAT));
+        assertThat(endreOrgEnhetsTypeArgumentCaptor.getValue().orgEnhetsType()).isEqualTo(OrgEnhetsType.DIREKTORAT);
     }
 }
