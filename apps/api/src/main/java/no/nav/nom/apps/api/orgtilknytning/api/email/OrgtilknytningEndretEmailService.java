@@ -391,6 +391,10 @@ public class OrgtilknytningEndretEmailService {
         List<String> additionalRecipients = new ArrayList<>();
         additionalRecipients.add("Eivind.Staff@nav.no");
         additionalRecipients.add("Lise.Charlotte.Tviberg@nav.no");
+        additionalRecipients.add("bjornar.aarnes@nav.no");
+        additionalRecipients.add("stale.kristoffersen@nav.no");
+        additionalRecipients.add("frode.kristiansen@nav.no");
+        additionalRecipients.add("Sara.Lehne.Engesvik@nav.no");
         return additionalRecipients;
     }
 
