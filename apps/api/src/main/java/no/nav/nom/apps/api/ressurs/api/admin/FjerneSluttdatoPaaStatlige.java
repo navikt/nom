@@ -79,6 +79,7 @@ public class FjerneSluttdatoPaaStatlige {
     public ResponseEntity<String> fjerneSluttdato(
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
         @Parameter(description = "Behandle kun de med sluttdato etter") @RequestParam LocalDate sluttDatoEtter,
+        @Parameter(description = "Behandle kun de X antall første (0 angir behandle alle)") @RequestParam(defaultValue = "0") int behandleMaxAntall,
         @RequestBody List<String> ekskluderNavidenter
     ) {
         boolean commit = "CONFIRM".equalsIgnoreCase(confirm);
@@ -94,6 +95,10 @@ public class FjerneSluttdatoPaaStatlige {
             .sorted(Comparator.comparing(Ressurs::navident))
             .toList();
 
+        if (behandleMaxAntall > 0 && ressurserIUtvalg.size() > behandleMaxAntall) {
+            ressurserIUtvalg = ressurserIUtvalg.subList(0, behandleMaxAntall);
+        }
+
         StringBuilder result = new StringBuilder();
         if (!commit) {
             result.append("DRY RUN!\n\n");
@@ -101,6 +106,7 @@ public class FjerneSluttdatoPaaStatlige {
 
         result.append("Sluttdato etter: ").append(sluttDatoEtter).append("\n");
         result.append("Ekskluderer navidenter: ").append(ekskluderNavidenter).append("\n\n");
+        result.append("Behandle max antall: ").append(behandleMaxAntall == 0 ? "Alle" : behandleMaxAntall).append("\n");
 
         result.append("Totalt antall ressurser i utvalg: ").append(ressurserIUtvalg.size()).append("\n\n");
 
