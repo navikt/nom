@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDatoCommand;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
@@ -21,38 +23,45 @@ import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNullElse;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.*;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.etter;
 
 @Slf4j
 @Tag(name = "Admin for å scripte fjerning av sluttdato på statlige ressurser")
 @RestController
 @RequestMapping("/api/admin/ryddesluttdato")
 @PreAuthorize("hasAuthority('ADMIN')")
-public class RyddeSluttdatoPaaStatlige {
+public class FjerneSluttdatoPaaStatlige {
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningService orgtilknytningService;
     private final RessursCommandService ressursCommandService;
     private final NomMastered nomMastered;
 
     static final LocalDate MAX_DATE = LocalDate.of(2099, 12, 31);
+    private final OrgtilknytningCommandService orgtilknytningCommandService;
 
-    public RyddeSluttdatoPaaStatlige(RessursStateRepository ressursStateRepository, OrgtilknytningService orgtilknytningService,
-                                     RessursCommandService ressursCommandService, NomMastered nomMastered) {
+    public FjerneSluttdatoPaaStatlige(RessursStateRepository ressursStateRepository, OrgtilknytningService orgtilknytningService,
+                                      RessursCommandService ressursCommandService, NomMastered nomMastered,
+                                      OrgtilknytningCommandService orgtilknytningCommandService
+    ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningService = orgtilknytningService;
         this.ressursCommandService = ressursCommandService;
         this.nomMastered = nomMastered;
+        this.orgtilknytningCommandService = orgtilknytningCommandService;
     }
 
     @Operation(
@@ -69,7 +78,7 @@ public class RyddeSluttdatoPaaStatlige {
     @PostMapping(value = "/fjerneSluttdato")
     public ResponseEntity<String> fjerneSluttdato(
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
-        @Parameter(description = "Behandle kun de med sluttdato etter") @RequestParam LocalDate maxOTDatoEtter,
+        @Parameter(description = "Behandle kun de med sluttdato etter") @RequestParam LocalDate sluttDatoEtter,
         @RequestBody List<String> ekskluderNavidenter
     ) {
         boolean commit = "CONFIRM".equalsIgnoreCase(confirm);
@@ -79,20 +88,39 @@ public class RyddeSluttdatoPaaStatlige {
         // Og som ikke er ekskludert av angitt liste
 
         var ressurserIUtvalg = getAlleStatligeMastrede().stream()
-            .filter(ressurs -> ressurs.sluttDato() != null && etter(ressurs.sluttDato(), maxOTDatoEtter))
+            .filter(ressurs -> ressurs.sluttDato() != null && etter(ressurs.sluttDato(), sluttDatoEtter))
             .filter(ressurs -> !ekskluderNavidenter.contains(ressurs.navident))
             .filter(this::harTilknytningstypeFastPaaSisteOT)
             .sorted(Comparator.comparing(Ressurs::navident))
             .toList();
 
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         if (!commit) {
             result.append("DRY RUN!\n\n");
         }
 
+        result.append("Sluttdato etter").append(sluttDatoEtter).append("\n");
+        result.append("Ekskluderer navidenter: ").append(ekskluderNavidenter).append("\n\n");
+
+        result.append("Totalt antall ressurser i utvalg: ").append(ressurserIUtvalg.size()).append("\n\n");
+
         result.append("Utvalg med flere enn en 'siste' OT\n").append(listRessurserMedFlerEnnEnSisteOt(ressurserIUtvalg)).append("\n\n");
         result.append("Utvalg med max en 'siste' OT\n").append(listRessurserMedMaxEnSisteOt(ressurserIUtvalg)).append("\n\n");
 
+        if (commit) {
+            var userNavident = getAuthenticatedNavIdent();
+            var inputMetadata = new InputMetadata(
+                "nom-api FjerneSluttdatoPaaStatlige",
+                "fjerneSluttdato",
+                Map.of("sluttdatoEtter", sluttDatoEtter , "ekskluderNavidenter", ekskluderNavidenter),
+                new Origination(userNavident, "nom-api")
+            );
+
+            ressurserIUtvalg.forEach(ressurs -> {
+                fjernSluttDatoPaaRessurs(ressurs, inputMetadata);
+                fjernSluttDatoPaaSisteOTer(ressurs, inputMetadata);
+            });
+        }
         return ResponseEntity.ok(result.toString());
     }
 
@@ -132,6 +160,24 @@ public class RyddeSluttdatoPaaStatlige {
 
     private boolean harTilknytningstypeFastPaaSisteOT(Ressurs ressurs) {
         return ressurs.sisteOTer.stream().anyMatch(ot -> Tilknytningtype.FAST.equals(ot.orgtilknytningType()));
+    }
+
+    private void fjernSluttDatoPaaRessurs(Ressurs ressurs, InputMetadata inputMetadata) {
+        ressursCommandService.oppdaterRessursSluttdatoEvent(
+            new OppdaterSluttdatoCommand(
+                ressurs.fid(),
+                null,
+                inputMetadata
+            )
+        );
+    }
+
+    private void fjernSluttDatoPaaSisteOTer(Ressurs ressurs, InputMetadata inputMetadata) {
+        ressurs.sisteOTer.forEach(ot ->
+            orgtilknytningCommandService.endreOrgtilknytningDato(
+                new EndreOrgtilknytningDatoCommand(ot.fid(), ot.gyldigFom(), null, inputMetadata)
+            )
+        );
     }
 
     private String listRessurserMedFlerEnnEnSisteOt(List<Ressurs> ressurserIUtvalg) {
