@@ -149,7 +149,7 @@ public class RyddeSluttdatoPaaStatlige {
                     sb.append(ot.sektor()).append(", ");
                     sb.append(ot.orgEnhetId()).append(", ");
                     sb.append(ot.gyldigFom()).append(", ");
-                    sb.append(ot.gyldigTom()).append(", ");
+                    sb.append(ot.gyldigTom()).append("\n");
                 });
             });
         return sb.toString();
@@ -158,7 +158,7 @@ public class RyddeSluttdatoPaaStatlige {
     private String listRessurserMedMaxEnSisteOt(List<Ressurs> ressurserIUtvalg) {
         StringBuffer sb = new StringBuffer();
         ressurserIUtvalg.stream()
-            .filter(ressurs -> ressurs.sisteOTer.size() > 1)
+            .filter(ressurs -> ressurs.sisteOTer.size() <= 1)
             .forEach(ressurs -> {
                 sb.append(ressurs.navident).append(", ");
                 sb.append(ressurs.sektor).append(", ");
@@ -169,7 +169,7 @@ public class RyddeSluttdatoPaaStatlige {
                     sb.append(ot.sektor()).append(", ");
                     sb.append(ot.orgEnhetId()).append(", ");
                     sb.append(ot.gyldigFom()).append(", ");
-                    sb.append(ot.gyldigTom()).append(", ");
+                    sb.append(ot.gyldigTom()).append("\n");
                 });
             });
         return sb.toString();
