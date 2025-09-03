@@ -65,11 +65,11 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
     ) {
 
         var orgEnhetState = orgEnhetState().toBuilder()
-            .nomNivaa(Optional.of(nomNivaaDifferentFrom(exptectedNomNivaa)))
+            .nomNivaa(nomNivaaDifferentFrom(exptectedNomNivaa))
             .build();
 
         var overordnetOrgEnhetState = orgEnhetState().toBuilder()
-            .orgEnhetsType(Optional.of(orgEnhetsTypeDifferentFrom(orgEnhetsType)))
+            .orgEnhetsType(orgEnhetsTypeDifferentFrom(orgEnhetsType))
             .build();
 
         orgEnhetStateRepository.update(orgEnhetState);
@@ -88,7 +88,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
         verify(orgEnhetCommandService, times(1))
             .endreNomNivaa(any(), endreNomNivaaArgumentCaptor.capture());
 
-        assertThat(endreNomNivaaArgumentCaptor.getValue().nomNivaa()).isEqualTo(Optional.ofNullable(exptectedNomNivaa));
+        assertThat(endreNomNivaaArgumentCaptor.getValue().nomNivaa()).isEqualTo(exptectedNomNivaa);
     }
 
     public static Stream<Arguments> mapOrgEnhetTypeToNewNomNivaaAndUpdate_should_map_niva_correctly_and_send_event_for_topmost_with_orgenhet_type_input() {
@@ -119,12 +119,12 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
     ) {
 
         var orgEnhetState = orgEnhetState().toBuilder()
-            .nomNivaa(Optional.of(nomNivaaDifferentFrom(exptectedNomNivaa)))
+            .nomNivaa(nomNivaaDifferentFrom(exptectedNomNivaa))
             .build();
 
         var overordnetOrgEnhet = orgEnhetState().toBuilder()
-                .orgEnhetsType(Optional.of(orgEnhetsType))
-                    .build();
+                .orgEnhetsType(orgEnhetsType)
+                .build();
 
         orgEnhetStateRepository.update(orgEnhetState);
 
@@ -137,7 +137,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
             .thenReturn(
                 Optional.of(
                         orgEnhetState().toBuilder()
-                        .orgEnhetsType(Optional.of(orgEnhetsTypeDifferentFrom(orgEnhetsType)))
+                        .orgEnhetsType(orgEnhetsTypeDifferentFrom(orgEnhetsType))
                         .build()
                 )
             );
@@ -150,7 +150,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
         verify(orgEnhetCommandService, times(1))
             .endreNomNivaa(any(), endreNomNivaaArgumentCaptor.capture());
 
-        assertThat(endreNomNivaaArgumentCaptor.getValue().nomNivaa()).isEqualTo(Optional.ofNullable(exptectedNomNivaa));
+        assertThat(endreNomNivaaArgumentCaptor.getValue().nomNivaa()).isEqualTo(exptectedNomNivaa);
     }
 
     public static Stream<Arguments> mapOrgEnhetTypeToNewNomNivaaAndUpdate_should_map_niva_correctly_and_send_event_for_second_topmost_with_orgenhet_type_input() {
@@ -181,15 +181,15 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
     ) {
 
         var targetOrgEnhetState = orgEnhetState().toBuilder()
-            .nomNivaa(Optional.of(nomNivaaDifferentFrom(exptectedNomNivaa)))
+            .nomNivaa(nomNivaaDifferentFrom(exptectedNomNivaa))
             .build();
 
         var overordnetOrgEnhet = orgEnhetState().toBuilder()
-            .orgEnhetsType(Optional.of(orgEnhetsType))
+            .orgEnhetsType(orgEnhetsType)
             .build();
 
         var overOverordnetOrgEnhet = orgEnhetState().toBuilder()
-            .orgEnhetsType(Optional.of(orgEnhetsType))
+            .orgEnhetsType(orgEnhetsType)
             .build();
 
         orgEnhetStateRepository.update(targetOrgEnhetState);
@@ -206,7 +206,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
             .thenReturn(
                 Optional.of(
                     orgEnhetState().toBuilder()
-                        .orgEnhetsType(Optional.empty())
+                        .orgEnhetsType(null)
                         .build()
                 )
             );
@@ -219,7 +219,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
         verify(orgEnhetCommandService, times(1))
             .endreNomNivaa(any(), endreNomNivaaArgumentCaptor.capture());
 
-        assertThat(endreNomNivaaArgumentCaptor.getValue().nomNivaa()).isEqualTo(Optional.ofNullable(exptectedNomNivaa));
+        assertThat(endreNomNivaaArgumentCaptor.getValue().nomNivaa()).isEqualTo(exptectedNomNivaa);
     }
 
     public static Stream<Arguments> mapOrgEnhetTypeToNewNomNivaaAndUpdate_should_map_niva_correctly_and_send_event_for_third_topmost_with_orgenhet_type_input() {
@@ -246,7 +246,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
     public void mapOrgEnhetTypeToNewNomNivaaAndUpdate_should_not_send_event_if_no_change_in_nom_nivaa(){
 
         var orgeEnhetState = orgEnhetStateBuilderWithDefaultValues().toBuilder()
-            .nomNivaa(Optional.of(NomNivaa.DRIFTSENHET))
+            .nomNivaa(NomNivaa.DRIFTSENHET)
             .build();
 
         when(orgEnhetOverordnetResolver.findOverordnetOrgEnhet(eq(orgeEnhetState)))
@@ -308,17 +308,17 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
     public void addArbeidsomraadeInAllSubPathsIfMissing_should_update_if_ARBEIDSOMRAADE_missing_in_path() {
         var topNode = orgEnhetState().toBuilder()
             .id("topNode")
-            .nomNivaa(Optional.of(NomNivaa.DRIFTSENHET))
+            .nomNivaa(NomNivaa.DRIFTSENHET)
             .build();
 
-        var nodeInPathWithNoArbeidsomraade = orgEnhetState().toBuilder().id("nodeInPathWithNoArbeidsomraade").nomNivaa(Optional.empty()).build();
-        var arbeidsomraade = orgEnhetState().toBuilder().id("arbeidsomraade").nomNivaa(Optional.of(NomNivaa.ARBEIDSOMRAADE)).build();
+        var nodeInPathWithNoArbeidsomraade = orgEnhetState().toBuilder().id("nodeInPathWithNoArbeidsomraade").nomNivaa(null).build();
+        var arbeidsomraade = orgEnhetState().toBuilder().id("arbeidsomraade").nomNivaa(NomNivaa.ARBEIDSOMRAADE).build();
 
-        var secondBottomInPathWithNoArbeidsomraade = orgEnhetState().toBuilder().id("secondBottomInPathWithNoArbeidsomraade").nomNivaa(Optional.empty()).build();
+        var secondBottomInPathWithNoArbeidsomraade = orgEnhetState().toBuilder().id("secondBottomInPathWithNoArbeidsomraade").nomNivaa(null).build();
 
         //leaves
-        var leafInPathWithArbeidsomraade = orgEnhetState().toBuilder().id("leafInPathWithArbeidsomraade").nomNivaa(Optional.empty()).build();
-        var leafWithNoArbeidsomraadeInPath = orgEnhetState().toBuilder().id("leafWithNoArbeidsomraadeInPath").nomNivaa(Optional.empty()).build();
+        var leafInPathWithArbeidsomraade = orgEnhetState().toBuilder().id("leafInPathWithArbeidsomraade").nomNivaa(null).build();
+        var leafWithNoArbeidsomraadeInPath = orgEnhetState().toBuilder().id("leafWithNoArbeidsomraadeInPath").nomNivaa(null).build();
 
         mockChildren(topNode, List.of(nodeInPathWithNoArbeidsomraade, arbeidsomraade));
 
@@ -337,7 +337,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
         assertThat(fidArgumentCaptor.getAllValues()).containsOnly(secondBottomInPathWithNoArbeidsomraade.fid());
 
         assertThat(endreNomNivaaArgumentCaptor.getAllValues())
-            .allMatch(endreNomNivaa -> endreNomNivaa.nomNivaa().equals(Optional.of(NomNivaa.ARBEIDSOMRAADE)));
+            .allMatch(endreNomNivaa -> endreNomNivaa.nomNivaa().equals(NomNivaa.ARBEIDSOMRAADE));
     }
 
     @Test
@@ -345,16 +345,16 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
     public void addArbeidsomraadeInAllSubPathsIfMissing_should_only_update_to_ARBEIDSOMRAADE_if_node_is_second_bottom_in_some_paths() {
         var topNode = orgEnhetState().toBuilder()
             .id("topNode")
-            .nomNivaa(Optional.of(NomNivaa.DRIFTSENHET))
+            .nomNivaa(NomNivaa.DRIFTSENHET)
             .build();
 
-        var nodeThatIsSecondAndThirdBottomInDifferentPaths = orgEnhetState().toBuilder().id("nodeInPathWithNoArbeidsomraade").nomNivaa(Optional.empty()).build();
+        var nodeThatIsSecondAndThirdBottomInDifferentPaths = orgEnhetState().toBuilder().id("nodeInPathWithNoArbeidsomraade").nomNivaa(null).build();
 
-        var secondBottomInPathWithNoArbeidsomraade = orgEnhetState().toBuilder().id("secondBottomInPathWithNoArbeidsomraade").nomNivaa(Optional.empty()).build();
+        var secondBottomInPathWithNoArbeidsomraade = orgEnhetState().toBuilder().id("secondBottomInPathWithNoArbeidsomraade").nomNivaa(null).build();
 
         //leaves
-        var leafWithNoArbeidsomraadeInPath = orgEnhetState().toBuilder().id("leafWithNoArbeidsomraadeInPath").nomNivaa(Optional.empty()).build();
-        var anotherLeafWithNoArbeidsomraadeInPath = orgEnhetState().toBuilder().id("leafWithNoArbeidsomraadeInPath").nomNivaa(Optional.empty()).build();
+        var leafWithNoArbeidsomraadeInPath = orgEnhetState().toBuilder().id("leafWithNoArbeidsomraadeInPath").nomNivaa(null).build();
+        var anotherLeafWithNoArbeidsomraadeInPath = orgEnhetState().toBuilder().id("leafWithNoArbeidsomraadeInPath").nomNivaa(null).build();
 
         mockChildren(topNode, List.of(nodeThatIsSecondAndThirdBottomInDifferentPaths));
 

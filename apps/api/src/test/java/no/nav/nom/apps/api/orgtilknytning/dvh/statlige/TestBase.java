@@ -88,10 +88,10 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
         return new OrgEnhet(OrgEnhetState.builder()
             .id(id)
             .navn(navn)
-            .agressoId(Optional.ofNullable(agressoId))
-            .agressoOrgNivaa(Optional.of("ORGENHET"))
+            .agressoId(agressoId)
+            .agressoOrgNivaa("ORGENHET")
             .gyldigFom(gyldigFom)
-            .gyldigTom(Optional.ofNullable(gyldigTom))
+            .gyldigTom(gyldigTom)
             .build()
         );
     }

@@ -27,8 +27,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNullElse;
 
 @Service
 public class OrgtilknytningSanityCheckService {
@@ -59,12 +59,12 @@ public class OrgtilknytningSanityCheckService {
             var oe = orgEnhetStateRepository.findById(t.orgEnhetId()).get();
             orgtilknytningMedOrgEnhetList.add(new OrgtilknytningMedOrgEnhet(
                     t.navident(),
-                    oe.uniqueAgressoId().isPresent() ? oe.uniqueAgressoId().get() : "",
+                    Objects.requireNonNullElse(oe.uniqueAgressoId(), ""),
                     t.orgEnhetId(),
                     t.gyldigFom().toString(),
                     requireNonNullElse(t.gyldigTom(), "").toString(),
                     oe.gyldigFom().toString(),
-                    oe.gyldigTom().isPresent() ? oe.gyldigTom().get().toString() : ""
+                    nonNull(oe.gyldigTom()) ? oe.gyldigTom().toString() : ""
             ));
         });
 
@@ -247,13 +247,13 @@ public class OrgtilknytningSanityCheckService {
         return orgtilknytninger.stream()
                 .filter(t -> {
                     var orgEnhet = orgEnhetStateRepository.findByFid(t.orgEnhetId());
-                    if (orgEnhet.isPresent() && orgEnhet.get().gyldigTom().isPresent() && orgEnhet.get().gyldigTom().get().isBefore(t.gyldigFom())) {
+                    if (orgEnhet.isPresent() && nonNull(orgEnhet.get().gyldigTom()) && orgEnhet.get().gyldigTom().isBefore(t.gyldigFom())) {
                         return true; // orgEnhet.gyldigTom < tilknytning.gyldigFom
                     }
                     if (nonNull(t.gyldigTom()) && orgEnhet.isPresent() && orgEnhet.get().gyldigFom().isAfter(t.gyldigTom())) {
                         return true; // orgEnhet.gyldigFom > tilknytning.gyldigTom
                     }
-                    return isNull(t.gyldigTom()) && orgEnhet.isPresent() && orgEnhet.get().gyldigTom().isPresent(); // orgEnhet avsluttet > tilknytning ikke avsluttet
+                    return isNull(t.gyldigTom()) && orgEnhet.isPresent() && nonNull(orgEnhet.get().gyldigTom()); // orgEnhet avsluttet > tilknytning ikke avsluttet
                 }).toList();
     }
 

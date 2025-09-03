@@ -166,10 +166,10 @@ public class OrgtilknytningEndretEmailServiceTest {
             Optional.of(OrgEnhetState.builder()
                 .id(orgEnhet)
                 .navn(orgEnhetNavn)
-                .agressoId(Optional.of(agressoId))
-                .agressoOrgNivaa(Optional.of(orgNiva))
+                .agressoId(agressoId)
+                .agressoOrgNivaa(orgNiva)
                 .gyldigFom(LocalDate.now().minusDays(10))
-                .gyldigTom(Optional.of(LocalDate.now().plusDays(10)))
+                .gyldigTom(LocalDate.now().plusDays(10))
                 .build()
             )
         );

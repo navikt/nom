@@ -58,8 +58,8 @@ public class OrgEnhetMapper {
 
     public OrgEnhet mapToOrgEnhet(IOrgenhet orgEnhet) {
 
-        var remedyEnhetId = remedyEnhetMapperService.findByNomId(orgEnhet.getId()).map(RemedyEnhet::remedyEnhetId);
-        var overordnetId = overordnetResolver.findOverordnetOrgEnhet(orgEnhet.getFid()).map(OrgEnhetState::id);
+        var remedyEnhetId = remedyEnhetMapperService.findByNomId(orgEnhet.getId()).map(RemedyEnhet::remedyEnhetId).orElse(null);
+        var overordnetId = overordnetResolver.findOverordnetOrgEnhet(orgEnhet.getFid()).map(OrgEnhetState::id).orElse(null);
 
         Collator norwegianCollator = Collator.getInstance(new Locale.Builder().setLanguage("no").setRegion("NO").build());
         var underordnedeOrgEnhetIds = underordnetResolver.findUnderordnedeOrgEnheter(orgEnhet.getFid())
@@ -76,11 +76,11 @@ public class OrgEnhetMapper {
             orgEnhet.getAgressoOrgenhetType(),
             orgEnhet.getNavn(),
             orgEnhet.getGyldigFom(),
-            orgEnhet.getGyldigTom().orElse(null),
-            orgEnhet.getNomNivaa().orElse(null),
-            orgEnhet.getOrgEnhetsType().orElse(null),
-            remedyEnhetId.orElse(null),
-            overordnetId.orElse(null),
+            orgEnhet.getGyldigTom(),
+            orgEnhet.getNomNivaa(),
+            orgEnhet.getOrgEnhetsType(),
+            remedyEnhetId,
+            overordnetId,
             underordnedeOrgEnhetIds,
             hentOrgEnhetLedere(orgEnhet),
             orgtilknytningService.getByEnhet(orgEnhet.getId())

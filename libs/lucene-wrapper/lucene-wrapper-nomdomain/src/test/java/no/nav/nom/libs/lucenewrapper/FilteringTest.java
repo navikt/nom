@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public class FilteringTest {
 
@@ -18,8 +17,8 @@ public class FilteringTest {
     LuceneRessurs r2 = new LuceneRessurs("2", "peter pack", "2", "2", false,"NAV_STATLIG");
     LuceneRessurs r3 = new LuceneRessurs("3", "peter pack", "3", "3", true,"EKSTERN");
 
-    LuceneOrgEnhet o1 = new LuceneOrgEnhet("oe1","nav x","t","ORGENHET", Optional.of(LocalDate.now().plusDays(1)));
-    LuceneOrgEnhet o2 = new LuceneOrgEnhet("oe2","nav x","t","ORGNIV4", Optional.of(LocalDate.now().minusDays(1)));
+    LuceneOrgEnhet o1 = new LuceneOrgEnhet("oe1","nav x","t","ORGENHET", LocalDate.now().plusDays(1));
+    LuceneOrgEnhet o2 = new LuceneOrgEnhet("oe2","nav x","t","ORGNIV4", LocalDate.now().minusDays(1));
 
     @Test
     void filterOnActiveRessurs() {

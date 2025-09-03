@@ -359,8 +359,8 @@ public class OrgtilknytningEndretEmailService {
                         OrgEnhet.builder()
                             .id(orgenhetState.get().id())
                             .navn(orgenhetState.get().navn())
-                            .agressoId(orgenhetState.get().agressoId().orElse(null))
-                            .orgNiv(orgenhetState.get().agressoOrgNivaa().orElse(null))
+                            .agressoId(orgenhetState.get().agressoId())
+                            .orgNiv(orgenhetState.get().agressoOrgNivaa())
                             .build()
                     );
                     log.info("Orgenhet og leder ved OT endriner: {}, {}", orgenhetState.get(), leader);

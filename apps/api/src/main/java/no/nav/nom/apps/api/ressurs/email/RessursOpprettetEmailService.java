@@ -66,7 +66,7 @@ public class RessursOpprettetEmailService {
         log.info("Sender epost om opprettelse av ressurs {} til leder av orgenhet {}", opprettetRessurs.navident(), orgEnhet.id());
 
         // get leaders using lederResolver
-        List<String> leaders = dvhRepository.getLederByAgressoIdAndNivAndNavn(orgEnhet.agressoId().get(), orgEnhet.agressoOrgNivaa().get(), orgEnhet.navn())
+        List<String> leaders = dvhRepository.getLederByAgressoIdAndNivAndNavn(orgEnhet.agressoId(), orgEnhet.agressoOrgNivaa(), orgEnhet.navn())
             .stream()
             .map(leder -> tilOrgEnhetsLederNavIdents(ressursStateRepository.findByNavident(leder.getNavIdent(), MappingUtils::toRessurs)
                 .orElseThrow(LederNotFoundException::new)))

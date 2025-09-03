@@ -151,7 +151,7 @@ public class MasseflyttOrgtilknytningerService {
                 orgtilknytningerIkkeFlyttet.put(ot, "Orgtilknytning er ikke gyldig for flytting på angitt flyttedato");
                 return;
             }
-            if (etter(ot.gyldigTom(), nyOrgenhet.getGyldigTom().orElse(null))) {
+            if (etter(ot.gyldigTom(), nyOrgenhet.getGyldigTom())) {
                 orgtilknytningerIkkeFlyttet.put(ot, "Orgtilknytning er gyldig etter ny orgenhet sin gyldighetsperiode");
                 return;
             }

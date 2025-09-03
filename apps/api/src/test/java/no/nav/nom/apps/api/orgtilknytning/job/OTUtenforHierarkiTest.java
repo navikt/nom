@@ -165,10 +165,10 @@ class OTUtenforHierarkiTest {
             .fid("FID_1")
             .id("a123bc")
             .navn("Enhet 1 - Gammel")
-            .agressoId(Optional.of("AG1"))
-            .agressoOrgNivaa(Optional.of("ORGENHET"))
+            .agressoId("AG1")
+            .agressoOrgNivaa("ORGENHET")
             .gyldigFom(LocalDate.now().minusYears(3))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build()
     );
 
@@ -177,10 +177,10 @@ class OTUtenforHierarkiTest {
             .fid("FID_2")
             .id("ef456g")
             .navn("Enhet 2 - Ny")
-            .agressoId(Optional.of("AG1"))
-            .agressoOrgNivaa(Optional.of("ORGENHET"))
+            .agressoId("AG1")
+            .agressoOrgNivaa("ORGENHET")
             .gyldigFom(LocalDate.now().minusYears(3))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build()
     );
 
@@ -189,10 +189,10 @@ class OTUtenforHierarkiTest {
             .fid("FID_3")
             .id("xy890z")
             .navn("Enhet 3")
-            .agressoId(Optional.of("AG3"))
-            .agressoOrgNivaa(Optional.of("ORGNIV_3"))
+            .agressoId("AG3")
+            .agressoOrgNivaa("ORGNIV_3")
             .gyldigFom(LocalDate.now().minusYears(3))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build()
     );
 }

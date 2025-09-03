@@ -25,6 +25,9 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNullElse;
 
 @Service
 public class OrgEnhetSanityCheckService {
@@ -115,9 +118,9 @@ public class OrgEnhetSanityCheckService {
                 .map(oe ->
                         new OrgEnhetOrganisering(
                                 oe.id(),
-                                oe.uniqueAgressoId().orElse(""),
+                                Objects.requireNonNullElse(oe.uniqueAgressoId(), ""),
                                 oe.gyldigFom(),
-                                oe.gyldigTom().orElse(null)))
+                                oe.gyldigTom()))
                 .toList();
     }
 
@@ -139,9 +142,9 @@ public class OrgEnhetSanityCheckService {
                 .map(oe ->
                         new OrgEnhetOrganisering(
                                 oe.id(),
-                                oe.uniqueAgressoId().orElse(""),
+                                Objects.requireNonNullElse(oe.uniqueAgressoId(), ""),
                                 oe.gyldigFom(),
-                                oe.gyldigTom().orElse(null)))
+                                oe.gyldigTom()))
                 .toList();
     }
 
@@ -154,11 +157,12 @@ public class OrgEnhetSanityCheckService {
     private Map<String, List<OrgEnhetState>> duplikatPaaSammeUniqueAgresssoId(List<OrgEnhetState> aktiveEnheter) {
         var duplicateListMap = new HashMap<String, List<OrgEnhetState>>();
         aktiveEnheter.forEach(e -> {
-            OrgEnhetState enhetPaaUniqueAgressoId = getEnhetByAgressoIdNivaAndName(e.agressoId().get(), e.agressoOrgNivaa().get(), e.navn()).get();
-                if (!enhetPaaUniqueAgressoId.id().equals(e.id())) {
-                    List<OrgEnhetState> duplicates = duplicateListMap.computeIfAbsent(enhetPaaUniqueAgressoId.id(), k -> new ArrayList<>());
+            getEnhetByAgressoIdNivaAndName(e.agressoId(), e.agressoOrgNivaa(), e.navn()).ifPresent(enhet -> {
+                if (!enhet.id().equals(e.id())) {
+                    List<OrgEnhetState> duplicates = duplicateListMap.computeIfAbsent(enhet.id(), k -> new ArrayList<>());
                     duplicates.add(e);
                 }
+            });
             }
         );
         return duplicateListMap;
@@ -188,18 +192,18 @@ public class OrgEnhetSanityCheckService {
     }
 
     private List<OrgEnhetState> enheterMedSluttdato(List<OrgEnhetState> enheter) {
-        return enheter.stream().filter(oe -> oe.gyldigTom().isPresent()).toList();
+        return enheter.stream().filter(oe -> nonNull(oe.gyldigTom())).toList();
     }
 
     private List<OrgEnhetState> enheterMedSluttdatoFoerStartdato(List<OrgEnhetState> enheter) {
-        return enheter.stream().filter(oe -> oe.gyldigTom().isPresent()).filter(oe -> oe.gyldigTom().get().isBefore(oe.gyldigFom())).toList();
+        return enheter.stream().filter(oe -> nonNull(oe.gyldigTom())).filter(oe -> oe.gyldigTom().isBefore(oe.gyldigFom())).toList();
     }
 
     private List<OrgEnhetState> aktiveEnheter(List<OrgEnhetState> enheter) {
         // FOM er før eller lik dagens dat, samt at TOM er null eller fremtidig
         return enheter.stream().filter(oe ->
                 oe.gyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
-                        (oe.gyldigTom().isEmpty() || oe.gyldigTom().get().isAfter(LocalDate.now()))
+                        (isNull(oe.gyldigTom()) || oe.gyldigTom().isAfter(LocalDate.now()))
         ).toList();
     }
 
@@ -245,9 +249,9 @@ public class OrgEnhetSanityCheckService {
             .map(oe ->
                 new OrgEnhetOrganisering(
                     oe.id(),
-                    oe.uniqueAgressoId().orElse(""),
+                    Objects.requireNonNullElse(oe.uniqueAgressoId(), ""),
                     oe.gyldigFom(),
-                    oe.gyldigTom().orElse(null)))
+                    oe.gyldigTom()))
             .toList();
     }
     
@@ -286,7 +290,7 @@ public class OrgEnhetSanityCheckService {
     }
 
     private int findArbeidsomraadeCountInHierarkiAbove(OrgEnhetState orgenhet) {
-        boolean isArbOmr = NomNivaa.ARBEIDSOMRAADE.equals(orgenhet.nomNivaa().orElse(null));
+        boolean isArbOmr = NomNivaa.ARBEIDSOMRAADE.equals(orgenhet.nomNivaa());
         AtomicInteger countAbove = new AtomicInteger();
         organiseringStateRepository.findActiveById(orgenhet.id())
                 .ifPresent(org -> countAbove.set(
@@ -332,15 +336,14 @@ public class OrgEnhetSanityCheckService {
 
         var validHierarchy = orgenheterOver
             .stream()
-            .filter(oe ->
-                oe.agressoOrgNivaa().isPresent() && oe.agressoOrgNivaa().get().equals("ORGNIV0")
-                    && oe.agressoId().isPresent() && oe.agressoId().get().equals("NAV"))
+            .filter(oe -> Objects.equals(oe.agressoOrgNivaa(), "ORGNIV0")
+                    && Objects.equals(oe.agressoId(), "NAV"))
             .count() == 1;
 
-        long countArbeidsomrade = orgEnhetState.nomNivaa().equals(Optional.of(NomNivaa.ARBEIDSOMRAADE))? 1 : 0;
+        long countArbeidsomrade = Objects.equals(orgEnhetState.nomNivaa(), NomNivaa.ARBEIDSOMRAADE) ? 1 : 0;
         long countArbeidsomradeOver = orgenheterOver
             .stream()
-            .filter(oe -> oe.nomNivaa().equals(Optional.of(NomNivaa.ARBEIDSOMRAADE)))
+            .filter(oe -> Objects.equals(oe.nomNivaa(), NomNivaa.ARBEIDSOMRAADE))
             .count();
         countArbeidsomrade += countArbeidsomradeOver;
         var invalidArbeidomradeConfig = countArbeidsomrade != 1;
@@ -400,9 +403,9 @@ public class OrgEnhetSanityCheckService {
             .map(oe ->
                 new OrgEnhetOrganisering(
                     oe.id(),
-                    oe.uniqueAgressoId().orElse(""),
+                    requireNonNullElse(oe.uniqueAgressoId(), ""),
                     oe.gyldigFom(),
-                    oe.gyldigTom().orElse(null)))
+                    oe.gyldigTom()))
             .toList();
     }
 
@@ -418,13 +421,12 @@ public class OrgEnhetSanityCheckService {
 
         List<OrgEnhetState> orgenheterOver = findAllOrgenheterOver(orgEnhetState, aktiveEnheter, aktiveOrganiseringer);
 
-        var validHierarchy = orgenheterOver
+        return orgenheterOver
             .stream()
             .filter(oe ->
-                oe.agressoOrgNivaa().isPresent() && oe.agressoOrgNivaa().get().equals("ORGNIV0")
-                    && oe.agressoId().isPresent() && oe.agressoId().get().equals("NAV"))
+                Objects.equals(oe.agressoOrgNivaa(), "ORGNIV0")
+                    && Objects.equals(oe.agressoId(), "NAV"))
             .count() == 1;
-        return validHierarchy;
     }
 
 }

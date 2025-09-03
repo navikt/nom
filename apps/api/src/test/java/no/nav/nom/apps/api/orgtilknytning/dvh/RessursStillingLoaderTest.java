@@ -51,45 +51,45 @@ class RessursStillingLoaderTest extends TestBase {
             "x111yz",
             "Data og innsikt gruppe 5",
             LocalDate.of(2000, 1, 1),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.of("8620005-ORGENHET-Data og innsikt gruppe 5"),
-            Optional.of("8620005"),
-            Optional.of("ORGENHET"),
-            Optional.empty()
+            null,
+            null,
+            null,
+            null,
+            null,
+            "8620005-ORGENHET-Data og innsikt gruppe 5",
+            "8620005",
+            "ORGENHET",
+            null
         ));
         agr_8552106 = new OrgEnhet(new OrgEnhetState(
             "FID_2",
             "z222xy",
             "IT utvikling 6",
             LocalDate.of(2000, 1, 1),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.of("8552106-ORGENHET-IT utvikling 6"),
-            Optional.of("8552106"),
-            Optional.of("ORGENHET"),
-            Optional.empty()
+            null,
+            null,
+            null,
+            null,
+            null,
+            "8552106-ORGENHET-IT utvikling 6",
+            "8552106",
+            "ORGENHET",
+            null
         ));
         agr_0807001 = new OrgEnhet(new OrgEnhetState(
             "FID_3",
             "z999xy",
             "Notodden lagene",
             LocalDate.of(2000, 1, 1),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.of("0807001-ORGENHET-Notodden lagene"),
-            Optional.of("0807001"),
-            Optional.of("ORGENHET"),
-            Optional.empty()
+            null,
+            null,
+            null,
+            null,
+            null,
+            "0807001-ORGENHET-Notodden lagene",
+            "0807001",
+            "ORGENHET",
+            null
         ));
     }
 

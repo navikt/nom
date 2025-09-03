@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -431,7 +432,7 @@ public class AuthorizedNavident {
 
     private List<String> alleOrgenheterMellomDriftsenhetOgArbeidsomraade() {
         var arbeidsomraadeEnheter = orgenhetService.getAllEnheterMedOrganisering().stream()
-            .filter(orgenhet -> orgenhet.getNomNivaa().isPresent() && orgenhet.getNomNivaa().get().equals(NomNivaa.ARBEIDSOMRAADE));
+            .filter(orgenhet -> Objects.equals(orgenhet.getNomNivaa(), NomNivaa.ARBEIDSOMRAADE));
 
         Set<String> orgenheter = new HashSet<>();
         arbeidsomraadeEnheter.forEach(orgenhet -> alleEnheterIHierarkiFraArbeidsomraadeTilDriftsenhet(orgenhet, orgenheter));
@@ -439,7 +440,7 @@ public class AuthorizedNavident {
     }
 
     private void alleEnheterIHierarkiFraArbeidsomraadeTilDriftsenhet(IOrgenhet orgenhet, Set<String> orgenheter) {
-        if (orgenhet.getNomNivaa().isPresent() && orgenhet.getNomNivaa().get().equals(NomNivaa.DRIFTSENHET)) {
+        if (Objects.equals(orgenhet.getNomNivaa(), NomNivaa.DRIFTSENHET)) {
             orgenheter.add(orgenhet.getId());
             return;
         }
@@ -453,7 +454,7 @@ public class AuthorizedNavident {
 
     private List<String> alleEnheterIHierarkiFraDriftsenhet() {
         var driftsenhetEnheter = orgenhetService.getAllEnheterMedOrganisering().stream()
-            .filter(orgenhet -> orgenhet.getNomNivaa().isPresent() && orgenhet.getNomNivaa().get().equals(NomNivaa.DRIFTSENHET));
+            .filter(orgenhet -> Objects.equals(orgenhet.getNomNivaa(), NomNivaa.DRIFTSENHET));
         List<String> orgenheter = new ArrayList<>();
         driftsenhetEnheter.forEach(orgenhet -> orgenheter.addAll(alleEnheterIHierarkiFra(orgenhet.getId())));
         return orgenheter;

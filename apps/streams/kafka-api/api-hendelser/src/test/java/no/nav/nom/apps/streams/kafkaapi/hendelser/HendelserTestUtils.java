@@ -39,15 +39,15 @@ public class HendelserTestUtils {
                 id,
                 "TestName",
                 LocalDate.of(2022, 12, 1),
-                Optional.of("orgEnhet_123"),
-                Optional.of("ressurs_123")
+                "orgEnhet_123",
+                "ressurs_123"
             ),
             eventMetadata,
             new OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData(
                 "AgressoId_123",
                 "AgressoNavn",
                 "AgressoOrgNivaa_1",
-                Optional.of("AgressoOrgEnhetType"),
+                "AgressoOrgEnhetType",
                 "AgressoId_123-AgressoNavn-AgressoOrgNivaa_1"
             )
         );
@@ -60,16 +60,16 @@ public class HendelserTestUtils {
                 id,
                 "TestName",
                 LocalDate.of(2022, 12, 1),
-                Optional.of(LocalDate.now().plusDays(10)),
-                Optional.of("orgEnhet_123"),
-                Optional.of("ressurs_123")
+                LocalDate.now().plusDays(10),
+                "orgEnhet_123",
+                "ressurs_123"
             ),
             eventMetadata,
             new OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData(
                 "AgressoId_123",
                 "AgressoNavn",
                 "AgressoOrgNivaa_1",
-                Optional.of("AgressoOrgEnhetType"),
+                "AgressoOrgEnhetType",
                 "AgressoId_123-AgressoNavn-AgressoOrgNivaa_1"
             )
         );

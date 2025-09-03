@@ -44,8 +44,8 @@ public class EventsrcToStateTest {
                 "DummyIntenrnId_1",
                 "TestName",
                 LocalDate.of(2022, 12, 01),
-                Optional.of("orgEnhet_123"),
-                Optional.of("ressurs_123")
+                "orgEnhet_123",
+                "ressurs_123"
         );
 
 
@@ -53,7 +53,7 @@ public class EventsrcToStateTest {
                 "AgressoId_123",
                 "AgressoNavn",
                 "AgressoOrgNivaa_1",
-                Optional.of("AgressoOrgEnhetType"),
+                "AgressoOrgEnhetType",
                 "AgressoId_123-AgressoNavn-AgressoOrgNivaa_1"
         );
 

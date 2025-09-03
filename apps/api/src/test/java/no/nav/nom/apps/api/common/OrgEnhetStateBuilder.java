@@ -5,22 +5,21 @@ import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 public class OrgEnhetStateBuilder {
     String fid;
     String id;  // Ikke kryptisk uid; ment for menneskelig daglig bruk
     String navn;
     LocalDate gyldigFom;
-    Optional<LocalDate> gyldigTom;
-    Optional<String> overordnetOrgEnhetFid;
-    Optional<String> lederFid;
-    Optional<OrgEnhetsType> orgEnhetsType;
-    Optional<NomNivaa> nomNivaa;
-    Optional<String> uniqueAgressoId;
-    Optional<String> agressoId;
-    Optional<String> agressoOrgNivaa;
-    Optional<String> agressoOrgenhetType;
+    LocalDate gyldigTom;
+    String overordnetOrgEnhetFid;
+    String lederFid;
+    OrgEnhetsType orgEnhetsType;
+    NomNivaa nomNivaa;
+    String uniqueAgressoId;
+    String agressoId;
+    String agressoOrgNivaa;
+    String agressoOrgenhetType;
 
     public OrgEnhetStateBuilder fid(String fid) {
         this.fid = fid;
@@ -43,47 +42,47 @@ public class OrgEnhetStateBuilder {
     }
 
     public OrgEnhetStateBuilder gyldigTom(LocalDate gyldigTom) {
-        this.gyldigTom = Optional.ofNullable(gyldigTom);
+        this.gyldigTom = gyldigTom;
         return this;
     }
 
     public OrgEnhetStateBuilder overordnetOrgEnhetFid(String overordnetOrgEnhetFid) {
-        this.overordnetOrgEnhetFid = Optional.of(overordnetOrgEnhetFid);
+        this.overordnetOrgEnhetFid = overordnetOrgEnhetFid;
         return this;
     }
 
     public OrgEnhetStateBuilder lederFid(String lederFid) {
-        this.lederFid = Optional.of(lederFid);
+        this.lederFid = lederFid;
         return this;
     }
 
     public OrgEnhetStateBuilder orgEnhetsType(OrgEnhetsType orgEnhetsType) {
-        this.orgEnhetsType = Optional.of(orgEnhetsType);
+        this.orgEnhetsType = orgEnhetsType;
         return this;
     }
 
     public OrgEnhetStateBuilder nomNivaa(NomNivaa nomNivaa) {
-        this.nomNivaa = Optional.of(nomNivaa);
+        this.nomNivaa = nomNivaa;
         return this;
     }
 
     public OrgEnhetStateBuilder uniqueAgressoId(String uniqueAgressoId) {
-        this.uniqueAgressoId = Optional.of(uniqueAgressoId);
+        this.uniqueAgressoId = uniqueAgressoId;
         return this;
     }
 
     public OrgEnhetStateBuilder agressoId(String agressoId) {
-        this.agressoId = Optional.of(agressoId);
+        this.agressoId = agressoId;
         return this;
     }
 
     public OrgEnhetStateBuilder agressoOrgNivaa(String agressoOrgNivaa) {
-        this.agressoOrgNivaa = Optional.of(agressoOrgNivaa);
+        this.agressoOrgNivaa = agressoOrgNivaa;
         return this;
     }
 
     public OrgEnhetStateBuilder agressoOrgenhetType(String agressoOrgenhetType) {
-        this.agressoOrgenhetType = Optional.of(agressoOrgenhetType);
+        this.agressoOrgenhetType = agressoOrgenhetType;
         return this;
     }
 
@@ -92,15 +91,15 @@ public class OrgEnhetStateBuilder {
         this.id = String.valueOf(i);
         this.navn = String.valueOf(i);
         this.gyldigFom = LocalDate.now();
-        this.gyldigTom = Optional.of(LocalDate.now());
-        this.overordnetOrgEnhetFid = Optional.empty();
-        this.lederFid = Optional.empty();
-        this.orgEnhetsType = Optional.empty();
-        this.nomNivaa = Optional.empty();
-        this.uniqueAgressoId = Optional.empty();
-        this.agressoId = Optional.of(String.valueOf(i));
-        this.agressoOrgNivaa = Optional.of("ORGENHET");
-        this.agressoOrgenhetType = Optional.empty();
+        this.gyldigTom = LocalDate.now();
+        this.overordnetOrgEnhetFid = null;
+        this.lederFid = null;
+        this.orgEnhetsType = null;
+        this.nomNivaa = null;
+        this.uniqueAgressoId = null;
+        this.agressoId = String.valueOf(i);
+        this.agressoOrgNivaa = "ORGENHET";
+        this.agressoOrgenhetType = null;
     }
 
     public OrgEnhetState build() {

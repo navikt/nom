@@ -28,6 +28,8 @@ import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDate;
 
+import static java.util.Objects.requireNonNullElse;
+
 @Slf4j
 @Tag(name = "Admin for å lage manuelle Evtsrc meldinger")
 @RestController
@@ -75,7 +77,7 @@ public class ManuelleOrgenhetEvtsrcMeldinger {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Orgenhet %s - %s [%s - %s] kan avsluttes på dato %s. Men vil ikke utføres da handling ikke er bekreftet".formatted(
                     HtmlUtils.htmlEscape(orgenhetId), HtmlUtils.htmlEscape(orgenhet.getNavn()),
-                    orgenhet.getGyldigFom(), orgenhet.getGyldigTom().isPresent() ? orgenhet.getGyldigTom() : "", HtmlUtils.htmlEscape(gyldigTom.toString())));
+                    orgenhet.getGyldigFom(), requireNonNullElse(orgenhet.getGyldigTom(), ""), HtmlUtils.htmlEscape(gyldigTom.toString())));
         }
 
         orgEnhetCommandService.avikleOrgEnhet(
@@ -96,7 +98,7 @@ public class ManuelleOrgenhetEvtsrcMeldinger {
         return ResponseEntity.ok()
             .body("Orgenhet %s - %s [%s - %s] avsluttes på dato %s.".formatted(
                 HtmlUtils.htmlEscape(orgenhetId), HtmlUtils.htmlEscape(orgenhet.getNavn()),
-                orgenhet.getGyldigFom(), orgenhet.getGyldigTom().isPresent() ? orgenhet.getGyldigTom() : "", HtmlUtils.htmlEscape(gyldigTom.toString())));
+                orgenhet.getGyldigFom(), requireNonNullElse(orgenhet.getGyldigTom(), ""), HtmlUtils.htmlEscape(gyldigTom.toString())));
     }
 
 }

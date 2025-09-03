@@ -6,7 +6,6 @@ import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 public class OrgEnhet implements IOrgenhet {
 
@@ -25,11 +24,11 @@ public class OrgEnhet implements IOrgenhet {
     public String getId() { return orgEnhetState.id(); }
 
     @Override
-    public String getAgressoId() { return orgEnhetState.agressoId().orElse(null); }
+    public String getAgressoId() { return orgEnhetState.agressoId(); }
 
     @Override
     public String getAgressoOrgenhetType() {
-        return orgEnhetState.agressoOrgenhetType().orElse(null);
+        return orgEnhetState.agressoOrgenhetType();
     }
 
     @Override
@@ -39,7 +38,7 @@ public class OrgEnhet implements IOrgenhet {
 
     @Override
     public String getOrgNiv() {
-        return orgEnhetState.agressoOrgNivaa().orElse(null);
+        return orgEnhetState.agressoOrgNivaa();
     }
 
     @Override
@@ -48,24 +47,24 @@ public class OrgEnhet implements IOrgenhet {
     }
 
     @Override
-    public Optional<LocalDate> getGyldigTom() { return orgEnhetState.gyldigTom(); }
+    public LocalDate getGyldigTom() { return orgEnhetState.gyldigTom(); }
 
     @Override
-    public Optional<NomNivaa> getNomNivaa() {
+    public NomNivaa getNomNivaa() {
         return orgEnhetState.nomNivaa();
     }
 
     @Override
     public String getUniqueAgressoId() {
-        return orgEnhetState.uniqueAgressoId().orElse(null);
+        return orgEnhetState.uniqueAgressoId();
     }
 
     @Override
-    public Optional<OrgEnhetsType> getOrgEnhetsType() {
+    public OrgEnhetsType getOrgEnhetsType() {
         return orgEnhetState.orgEnhetsType();
     }
 
-    public Optional<String> getOverordnetOrgEnhetFid() {
+    public String getOverordnetOrgEnhetFid() {
         return orgEnhetState.overordnetOrgEnhetFid();
     }
 }

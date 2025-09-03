@@ -36,12 +36,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.AbstractMap.SimpleEntry;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNullElse;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.NO_END_DATE;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isCurrentOrFuture;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.lik;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.overlapsInterval;
-import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 
 @Component
 @Slf4j
@@ -71,7 +71,7 @@ public class NyeRessursStillingProcessor {
         Map<String, StrukturerteStillingPerioderForNavident> stillingPerioderPerNavidentResultat = new HashMap<>();
         stillingPerioderPerNavident.forEach( (navident, sspForNavident) -> {
             var resultat = process(navident, sspForNavident);
-            if (isNotNull(resultat)) {
+            if (nonNull(resultat)) {
                 stillingPerioderPerNavidentResultat.put(navident, resultat);
             }
         });
@@ -130,7 +130,7 @@ public class NyeRessursStillingProcessor {
                 } else {
                     endringer.add(lagEndreGyldigTomCmd(ot, sp, sspForNavident));
                 }
-            } else if (isNotNull(ot.gyldigTom()) && isNotNull(sp.gyldigTom())) {
+            } else if (nonNull(ot.gyldigTom()) && nonNull(sp.gyldigTom())) {
                 // hvis begge lik og 2099-12-31, set null og legge til endringer lista
                 // kanskje legge til lagEndreDOLCmd også?
                 if (sp.gyldigTom().isEqual(PeriodeUtil.NO_END_DATE) || ot.gyldigTom().isEqual(PeriodeUtil.NO_END_DATE)) {
@@ -144,19 +144,19 @@ public class NyeRessursStillingProcessor {
 
             if (!lik(ot.gyldigFom(), sp.gyldigFom())) {
                 var cmd = lagEndreGyldigFomCmd(ot, sp, sspForNavident, gyldigTomErUlik);
-                if (isNotNull(cmd)) {
+                if (nonNull(cmd)) {
                     endringer.add(cmd);
                 }
             }
 
             if (isCurrentOrFuture(sp.gyldigTom())) {
-                if (isNotNull(sp.sektor())) {
+                if (nonNull(sp.sektor())) {
                     if (isNull(ot.sektor()) || ot.sektor() != sp.sektor()) {
                         endringer.add(lagSektorEndringCmd(ot, sp, sspForNavident));
                     }
                 }
             }
-            if (isNotNull(sp.tilknytningtype())) {
+            if (nonNull(sp.tilknytningtype())) {
                 if (isNull(ot.orgtilknytningType()) || !Objects.equals(ot.orgtilknytningType(), sp.tilknytningtype())) {
                     endringer.add(lagEndreTilknytningtypeCmd(ot, sp));
                 }
@@ -308,11 +308,11 @@ public class NyeRessursStillingProcessor {
             }
 
             if (isCurrentOrFuture(sp.gyldigTom())) {
-                if (isNotNull(sp.sektor())) {
+                if (nonNull(sp.sektor())) {
                     nye.add(lagSektorEndringCmd(fiktivFID, sp, sspForNavident));
                 }
             }
-            if (isNotNull(sp.tilknytningtype())) {
+            if (nonNull(sp.tilknytningtype())) {
                 nye.add(lagEndreTilknytningtypeCmd(fiktivFID, sp, sspForNavident));
             }
 

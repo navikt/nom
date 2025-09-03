@@ -112,7 +112,7 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
             .append("], (")
             .append(enhet.getGyldigFom())
             .append(" - ")
-            .append(enhet.getGyldigTom().isPresent() ? enhet.getGyldigTom().get() : " ")
+            .append(Objects.requireNonNullElse(enhet.getGyldigTom(), " "))
             .append(")");
         return enhetStr.toString();
     }

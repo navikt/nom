@@ -4,8 +4,9 @@ import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.Objects;
 
+import static java.util.Objects.nonNull;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.NO_END_DATE;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerEtter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerFoer;
@@ -25,15 +26,15 @@ public interface IOrgenhet {
 
     LocalDate getGyldigFom();
 
-    Optional<LocalDate> getGyldigTom();
+    LocalDate getGyldigTom();
 
-    Optional<NomNivaa> getNomNivaa();
+    NomNivaa getNomNivaa();
 
-    Optional<OrgEnhetsType> getOrgEnhetsType();
+    OrgEnhetsType getOrgEnhetsType();
 
     String getUniqueAgressoId();
 
-    Optional<String> getOverordnetOrgEnhetFid();
+    String getOverordnetOrgEnhetFid();
 
     record AgressoIdCombo(
             String agressoId,
@@ -47,18 +48,18 @@ public interface IOrgenhet {
 
     // Enheter som er opprettet og avsluttet samme dag er ikke gyldige
     default boolean endedOnStartDate() {
-        return getGyldigTom().isPresent() && getGyldigFom().isEqual(getGyldigTom().get());
+        return nonNull(getGyldigTom()) && getGyldigFom().isEqual(getGyldigTom());
     }
 
     default boolean erORGENHETnode() { return "ORGENHET".equals(getOrgNiv()); }
 
     default boolean overlapper(LocalDate FOMDato, LocalDate TOMDato) {
         return likEllerFoer(getGyldigFom(), TOMDato)
-            && likEllerEtter(getGyldigTom().orElse(NO_END_DATE), FOMDato);
+            && likEllerEtter(Objects.requireNonNullElse(getGyldigTom(), NO_END_DATE), FOMDato);
     }
 
     default boolean erAktivForDato(LocalDate dato) {
         return likEllerFoer(getGyldigFom(), dato)
-            && likEllerEtter(getGyldigTom().orElse(NO_END_DATE), dato);
+            && likEllerEtter(Objects.requireNonNullElse(getGyldigTom(), NO_END_DATE), dato);
     }
 }

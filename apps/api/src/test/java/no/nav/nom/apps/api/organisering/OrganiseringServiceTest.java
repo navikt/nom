@@ -119,7 +119,7 @@ class OrganiseringServiceTest {
         OrgEnhet orgEnhetOver = new OrgEnhet(OrgEnhetState.builder()
             .id(newNomIdOver)
             .navn(initialDvhOrg.getNavnOver())
-            .agressoOrgNivaa(Optional.of(newOrgNivOver))
+            .agressoOrgNivaa(newOrgNivOver)
             .build());
 
 
@@ -153,7 +153,7 @@ class OrganiseringServiceTest {
         OrgEnhet orgEnhetOver = new OrgEnhet(OrgEnhetState.builder()
             .id(newNomIdOver)
             .navn(initialDvhOrg.getNavnOver())
-            .agressoId(Optional.of(newAgressoIdOver))
+            .agressoId(newAgressoIdOver)
             .build());
 
 

@@ -15,9 +15,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
+import java.util.Objects;
 
-import static java.util.function.Predicate.not;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Data
 @NoArgsConstructor
@@ -55,30 +56,30 @@ public class DvhOrgenhetV2 implements IOrgenhet {
     }
 
     @Override
-    public Optional<LocalDate> getGyldigTom() {
+    public LocalDate getGyldigTom() {
         // Alle Enheter !"ORGENHET" har alltid agressoGyldigFom="0" && agressoGyldigTom = "209912" => Så alltid return empty()
         // "ORGENHET" har aldri agressoGyldigFom="0"
         if (!"ORGENHET".equals(orgNiv)) {
-            return Optional.empty();
+            return null;
         }
 
-        final var agressoGyldigTomDato = getDate(getLastDay(agressoGyldigTom)); // getDate returnerer Optional.Empty hvis Max dato (2099-12-31)
-        if (agressoGyldigTomDato.isPresent()) {
+        final var agressoGyldigTomDato = getDate(getLastDay(agressoGyldigTom)); // getDate returnerer null hvis Max dato (2099-12-31)
+        if (nonNull(agressoGyldigTomDato)) {
             return agressoGyldigTomDato;
         }
 
         final var useMaxStillingDate = "P".equals(orgenhetStatus) && "ORGENHET".equals(orgNiv);
-        return useMaxStillingDate ? getDate(stillingMaksDato) : Optional.empty();
+        return useMaxStillingDate ? getDate(stillingMaksDato) : null;
     }
 
     @Override
-    public Optional<NomNivaa> getNomNivaa() {
-        return Optional.empty();
+    public NomNivaa getNomNivaa() {
+        return null;
     }
 
     @Override
-    public Optional<OrgEnhetsType> getOrgEnhetsType() {
-        return Optional.empty();
+    public OrgEnhetsType getOrgEnhetsType() {
+        return null;
     }
 
     @Override
@@ -98,15 +99,18 @@ public class DvhOrgenhetV2 implements IOrgenhet {
         return LocalDate.parse(yyyyMM + FIRST_DAY_OF_MONTH, yyyyMMdd_FORMATTER);
     }
 
-    private Optional<LocalDate> getDate(LocalDate date) {
-        return Optional.ofNullable(date).filter(not(AGRESSO_MAX_DATE::isEqual));
+    private LocalDate getDate(LocalDate date) {
+        if (isNull(date) || date.equals(AGRESSO_MAX_DATE)) {
+            return null;
+        }
+        return date;
     }
 
     public DvhOrgenhetV2 merge(DvhOrgenhetV2 dvhOrgenhetV2, ObjectMapper objectMapper) {
         if (getGyldigFom().isAfter(dvhOrgenhetV2.getGyldigFom())) {
             this.agressoGyldigFom = dvhOrgenhetV2.getAgressoGyldigFom();
         }
-        if (getGyldigTom().orElse(LocalDate.MAX).isBefore(dvhOrgenhetV2.getGyldigTom().orElse(LocalDate.MAX))) {
+        if (Objects.requireNonNullElse(getGyldigTom(), LocalDate.MAX).isBefore(Objects.requireNonNullElse(dvhOrgenhetV2.getGyldigTom(), LocalDate.MAX))) {
             this.agressoGyldigTom = dvhOrgenhetV2.getAgressoGyldigTom();
         }
         if (dvhOrgenhetV2.orgenhetStatus.equals("N")) {
@@ -122,8 +126,8 @@ public class DvhOrgenhetV2 implements IOrgenhet {
     }
 
     @Override
-    public Optional<String> getOverordnetOrgEnhetFid() {
-        return Optional.empty();
+    public String getOverordnetOrgEnhetFid() {
+        return null;
     }
 
     public static DvhOrgenhetV2 fromOrds(JsonNode node) {

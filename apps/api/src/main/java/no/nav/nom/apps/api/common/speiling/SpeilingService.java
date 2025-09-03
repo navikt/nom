@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
-import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 
 @Service
 public class SpeilingService {
@@ -53,7 +53,7 @@ public class SpeilingService {
             .stream()
             .filter(OrgtilknytningState::erDagligOppfolging)
             .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
-            .filter(orgtilknytningState -> isNotNull(orgtilknytningState.sektor()))
+            .filter(orgtilknytningState -> nonNull(orgtilknytningState.sektor()))
             .filter(orgtilknytningState -> nomMastered.isMastered(orgtilknytningState.navident()))
             .toList();
 

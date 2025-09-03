@@ -3,7 +3,6 @@ package no.nav.nom.contract.nom.eventsource;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 public class OrgEnhetKorrigertEventV1 extends OrgEnhetEvent {
 
@@ -20,16 +19,16 @@ public class OrgEnhetKorrigertEventV1 extends OrgEnhetEvent {
             String id,
             String navn,
             LocalDate gyldigFom,
-            Optional<LocalDate> gyldigTom,
-            Optional<String> overordnetOrgEnhetFid,
-            Optional<String> lederRessursFid
+            LocalDate gyldigTom,
+            String overordnetOrgEnhetFid,
+            String lederRessursFid
     ) implements Data{ }
 
     public record OrgEnhetKorrigertAdditionalAgressoData(
             String agressoId,
             String agressoNavn,
             String agressoOrgNivaa,
-            Optional<String> agressoOrgenhetType,
+            String agressoOrgenhetType,
             String uniqueAgressoId
     ) implements OrgEnhetEvent.Data { }
 }

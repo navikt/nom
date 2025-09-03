@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident.ErrorType.CURRENT_PERIODE_KAN_IKKE_MATCHE_ORGENHET_PAA_RESSURS_FOR_DOL;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident.ErrorType.DUPLIKATE_EKSISTERENDE_ORGTILKNYNINGER_I_HISTORISK_PERIODE;
@@ -1392,42 +1391,42 @@ class SettDOLPerioderPaaStrukturerteStillingerTest extends TestBase {
     IOrgenhet ENHET_A = new OrgEnhet(
         new OrgEnhetState(
             "FID_A", "a100xy", "Enhet A",
-            LocalDate.of(2015, 1, 1), Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("Enhet_A"), Optional.of("ORGENHET"), Optional.empty()
+            LocalDate.of(2015, 1, 1), null,
+            null, null, null, null, null,
+            "Enhet_A", "ORGENHET", null
         )
     );
     IOrgenhet ENHET_B = new OrgEnhet(
         new OrgEnhetState(
             "FID_B", "b100xy", "Enhet B",
-            LocalDate.of(2015, 1, 1), Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("Enhet_B"), Optional.of("ORGENHET"), Optional.empty()
+            LocalDate.of(2015, 1, 1), null,
+            null, null, null, null, null,
+            "Enhet_B", "ORGENHET", null
         )
     );
     IOrgenhet ENHET_C = new OrgEnhet(
         new OrgEnhetState(
             "FID_C", "c100xy", "Enhet C",
-            LocalDate.of(2015, 1, 1), Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("Enhet_C"), Optional.of("ORGENHET"), Optional.empty()
+            LocalDate.of(2015, 1, 1), null,
+            null, null, null, null, null,
+            "Enhet_C", "ORGENHET", null
         )
     );
 
     IOrgenhet ENHET_A_0110021 = new OrgEnhet(
         new OrgEnhetState(
             "FID_A", "a100xy", "Enhet A",
-            LocalDate.of(2015, 1, 1), Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("0110021"), Optional.of("ORGENHET"), Optional.empty()
+            LocalDate.of(2015, 1, 1), null,
+            null, null, null, null, null,
+            "0110021", "ORGENHET", null
         )
     );
     IOrgenhet ENHET_B_0110010 = new OrgEnhet(
         new OrgEnhetState(
             "FID_B", "b100xy", "Enhet B",
-            LocalDate.of(2015, 1, 1), Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("0110010"), Optional.of("ORGENHET"), Optional.empty()
+            LocalDate.of(2015, 1, 1), null,
+            null, null, null, null, null,
+            "0110010", "ORGENHET", null
         )
     );
 }

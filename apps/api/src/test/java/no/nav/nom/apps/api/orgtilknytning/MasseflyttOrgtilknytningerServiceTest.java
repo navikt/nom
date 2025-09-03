@@ -347,15 +347,15 @@ class MasseflyttOrgtilknytningerServiceTest {
             id,
             navn,
             gyldigFom,
-            gyldigTom == null ? Optional.empty() : Optional.of(gyldigTom),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty()
+            gyldigTom,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
         ));
     }
 }

@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.groupingBy;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.dayAfter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.etter;
@@ -33,7 +34,6 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.overlapsInterva
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.erEtterRessursensSluttDato;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.erFoerRessursensStartDato;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.statlige.Util.erLikEllerEtterRessursensSluttDato;
-import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 
 @Component
 @Slf4j
@@ -65,8 +65,8 @@ public class GrupperOgSlaaSammenDvhStillinger {
         List<StillingPeriode> perioderGruppert = new ArrayList<>();
 
         var ressurs = ressursStateRepository.findByNavident(sspForNavident.navident()).orElseThrow();
-        LocalDate ressursStartdato = isNotNull(ressurs.startdato()) ? ressurs.startdato() : null;
-        LocalDate ressursSluttdato = isNotNull(ressurs.sluttdato()) ? ressurs.sluttdato() : null;
+        LocalDate ressursStartdato = ressurs.startdato();
+        LocalDate ressursSluttdato = ressurs.sluttdato();
 
         // Sorter og slå sammen sammenhengende perioder
         grupperteDvhStillinger.forEach((stillingPeriodeKey, grupperteRessursStillinger) -> {
@@ -138,7 +138,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
             }
 
             // Siste RessursStilling er slått sammen - Lag StillingsPeriode, hvis vi har en periode
-            if (isNotNull(periodStart)) {
+            if (nonNull(periodStart)) {
                 perioderGruppert.add(new StillingPeriode(
                     stillingPeriodeKey.stillingAgressoOrgIdOgNavn,
                     periodStart,
@@ -168,7 +168,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
         if (isNull(perioderGruppert) || perioderGruppert.isEmpty() || isDatoerSammenhengende(perioderGruppert)) return;
 
         var spMedTilknytningtype = perioderGruppert.stream()
-            .filter(sp -> isNotNull(sp.tilknytningtype()))
+            .filter(sp -> nonNull(sp.tilknytningtype()))
             .sorted(Comparator.comparing(StillingPeriode::gyldigFom))
             .toList();
 
@@ -188,7 +188,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
             LocalDate stillingMedTilknytningFom = stillingPeriodeMedTilknytning.gyldigFom();
             LocalDate stillingMedTilknytningTom = stillingPeriodeMedTilknytning.gyldigTom();
 
-            if (isNotNull(stillingPeriodeBeforeBreak)) {
+            if (nonNull(stillingPeriodeBeforeBreak)) {
                 spUtenTilknytningtype.remove(stillingPeriodeBeforeBreak);
                 stillingPeriodeBeforeBreak = null;
             }
@@ -198,7 +198,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                 if (lik(sp.gyldigFom(), stillingMedTilknytningFom) && lik(sp.gyldigTom(), stillingMedTilknytningTom) && stillingIsEquals) {
                     continue;
                 }
-                if (isNotNull(brekkpunktFom) && stillingIsEquals && isBetween(stillingMedTilknytningFom, stillingMedTilknytningTom, sp.gyldigTom())) {
+                if (nonNull(brekkpunktFom) && stillingIsEquals && isBetween(stillingMedTilknytningFom, stillingMedTilknytningTom, sp.gyldigTom())) {
                     brekkpunktTom = stillingMedTilknytningFom.minusDays(1);
                     perioderSomSkalBeholdes.add(new StillingPeriode(
                         sp.stilling(),
@@ -259,7 +259,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                 }
             }
         }
-        if (isNotNull(brekkpunktTom) && !spUtenTilknytningtype.isEmpty()) {
+        if (nonNull(brekkpunktTom) && !spUtenTilknytningtype.isEmpty()) {
             var stillingPeriode = spUtenTilknytningtype.getLast();
             perioderSomSkalBeholdes.add(new StillingPeriode(
                 stillingPeriode.stilling(),

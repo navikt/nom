@@ -15,8 +15,6 @@ import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.ShadowOrgtilknytningerKommunaleRepository;
 import no.nav.nom.apps.api.telefon.TelefonService;
-import no.nav.nom.contract.nom.NomNivaa;
-import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -38,7 +36,7 @@ import java.io.StringWriter;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
-import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
+import static java.util.Objects.nonNull;
 
 @Tag(name = "Omada uttrekk")
 @RestController
@@ -156,7 +154,7 @@ public class OmadaUttrekk {
                             kobling.fid(),
                             kobling.erDagligOppfolging(),
                             kobling.gyldigFom().format(dateTimeFormatter),
-                            isNotNull(kobling.gyldigTom()) ? kobling.gyldigTom().format(dateTimeFormatter) : "",
+                            nonNull(kobling.gyldigTom()) ? kobling.gyldigTom().format(dateTimeFormatter) : "",
                             Objects.requireNonNullElse(kobling.masseflyttetFraFid(), "")
                         );
 
@@ -314,15 +312,15 @@ public class OmadaUttrekk {
                             orgenhet.getAgressoOrgenhetType(),
                             orgenhet.getNavn(),
                             orgenhet.getGyldigFom().format(dateTimeFormatter),
-                            orgenhet.getGyldigTom().map(dateTimeFormatter::format).orElse(""),
+                            nonNull(orgenhet.getGyldigTom()) ? orgenhet.getGyldigTom().format(dateTimeFormatter) : "",
                             dvhRepository.getLedere().stream()
                                 .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
                                     .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
                                 .findAny()
                                 .map(DvhLeder::getNavIdent)
                                 .orElse(""),
-                            orgenhet.getNomNivaa().map(NomNivaa::name).orElse(""),
-                            orgenhet.getOrgEnhetsType().map(OrgEnhetsType::name).orElse(""),
+                            nonNull(orgenhet.getNomNivaa()) ? orgenhet.getNomNivaa().name() : "",
+                            nonNull(orgenhet.getOrgEnhetsType()) ? orgenhet.getOrgEnhetsType().name() : "",
                             orgenhet.endedOnStartDate() ? "" : // Hvis enhet er avsluttet samme dag som den er opprettet, så er den ikke i organiseringen
                                 getOrgenhetOver(orgenhet),
                             remedyEnhetIdResolver.remedyEnhetId(orgenhet)

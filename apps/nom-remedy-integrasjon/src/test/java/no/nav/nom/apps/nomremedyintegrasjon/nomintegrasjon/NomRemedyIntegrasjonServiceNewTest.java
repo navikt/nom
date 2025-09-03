@@ -32,11 +32,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNullElse;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitalizeNavn;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeNoon;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.formatFornavnWithMellomnavn;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.nomSektorToRemedyCode;
-import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -633,7 +633,7 @@ public class NomRemedyIntegrasjonServiceNewTest {
     }
 
     private boolean erKonsulentSomMaaHaSluttDato(Integer sektor, OrgtilknytningState ot) {
-        var tilknytningstype = isNotNull(ot.orgtilknytningType()) ? ot.orgtilknytningType() : Tilknytningtype.ANNET;
+        var tilknytningstype = requireNonNullElse(ot.orgtilknytningType(), Tilknytningtype.ANNET);
         //Hvis 'Ekstern' sektor, krev sluttdato med unntak av HELFO og Skatteetaten
         return sektor == 2 && tilknytningstype != Tilknytningtype.HELFO && tilknytningstype != Tilknytningtype.SKATTEETATEN;
     }

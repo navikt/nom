@@ -260,8 +260,8 @@ public class RessursUtloperSnartEmailService {
             }
 
             var ledere = orgEnhetMapper.hentOrgEnhetLedereNavident(
-                orgEnhetState.agressoId().orElse(null),
-                orgEnhetState.agressoOrgNivaa().orElse(null),
+                orgEnhetState.agressoId(),
+                orgEnhetState.agressoOrgNivaa(),
                 orgEnhetState.navn()
             );
 

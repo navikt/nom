@@ -13,7 +13,10 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.nonNull;
 
 @Slf4j
 @Service
@@ -45,7 +48,7 @@ public class DvhDuplikatAgressoIdAnalyse {
                     return true;
                 }).filter(e -> {
                     if (e.getOrgNiv().equals("ORGENHET")) {
-                        return !e.getOrgenhetStatus().equals("P") || !e.getGyldigFom().isAfter(e.getGyldigTom().orElse(LocalDate.MAX));
+                        return !e.getOrgenhetStatus().equals("P") || !e.getGyldigFom().isAfter(Objects.requireNonNullElse(e.getGyldigTom(), LocalDate.MAX));
                     }
                     return true;
                 }).toList();
@@ -84,15 +87,15 @@ public class DvhDuplikatAgressoIdAnalyse {
         log.info("Ferdig med å gruppere og liste filtrerte DVH enheter:{}", filtrerteDvhEnheter.size());
 
         var stateOrgEnheterByAgressoId = filtrerteStateEnheter.stream()
-            .filter(e -> !(e.getGyldigTom().isPresent() && e.getGyldigFom().isEqual(e.getGyldigTom().get()))) // Filter ut de som slutter samme dag som de starter
+            .filter(e -> !(nonNull(e.getGyldigTom()) && e.getGyldigFom().isEqual(e.getGyldigTom()))) // Filter ut de som slutter samme dag som de starter
             .collect(Collectors.groupingBy(IOrgenhet::getAgressoId));
 
         var stateOrgEnheterByAgressoIdAndNivaa = filtrerteStateEnheter.stream()
-            .filter(e -> !(e.getGyldigTom().isPresent() && e.getGyldigFom().isEqual(e.getGyldigTom().get()))) // Filter ut de som slutter samme dag som de starter
+            .filter(e -> !(nonNull(e.getGyldigTom()) && e.getGyldigFom().isEqual(e.getGyldigTom()))) // Filter ut de som slutter samme dag som de starter
             .collect(Collectors.groupingBy( o -> o.getAgressoId() + " - " + o.getOrgNiv()));
 
         var stateOrgEnheterByAgressoIdAndNivaaOgGyldigFom = filtrerteStateEnheter.stream()
-            .filter(e -> !(e.getGyldigTom().isPresent() && e.getGyldigFom().isEqual(e.getGyldigTom().get()))) // Filter ut de som slutter samme dag som de starter
+            .filter(e -> !(nonNull(e.getGyldigTom()) && e.getGyldigFom().isEqual(e.getGyldigTom()))) // Filter ut de som slutter samme dag som de starter
             .collect(Collectors.groupingBy( o -> o.getAgressoId() + " - " + o.getOrgNiv() + " - " + o.getGyldigFom()));
 
         String stateDuplikaterPaaAgressoId = stateDuplikaterPaaAgressoId(stateOrgEnheterByAgressoId, "AgressoId");
@@ -123,7 +126,7 @@ public class DvhDuplikatAgressoIdAnalyse {
                             .append(dvhOrgenhetV2.getNavn()).append(";")
                             .append(dvhOrgenhetV2.getOrgNiv()).append(";")
                             .append(dvhOrgenhetV2.getGyldigFom()).append(";")
-                            .append(dvhOrgenhetV2.getGyldigTom().isPresent() ? dvhOrgenhetV2.getGyldigTom().get() : "").append(";")
+                            .append(nonNull(dvhOrgenhetV2.getGyldigTom()) ? dvhOrgenhetV2.getGyldigTom() : "").append(";")
                             .append(dvhOrgenhetV2.getRawData())
                             .append("\n"));
             });
@@ -147,7 +150,7 @@ public class DvhDuplikatAgressoIdAnalyse {
                             .append(oe.getId()).append(";")
                             .append(enhetIdForEnheterIOrganisering.contains(oe.getId()) ? "Y" : "N").append(";")
                             .append(oe.getGyldigFom()).append(";")
-                            .append(oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "")
+                            .append(nonNull(oe.getGyldigTom()) ? oe.getGyldigTom() : "")
                             .append("\n"));
             });
         return result.toString();

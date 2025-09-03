@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.Objects.nonNull;
+
 @Tag(name = "Admin for å kjøre en sanity check på data")
 @RestController
 @RequestMapping("/api/admin/SanityCheck")
@@ -74,7 +76,7 @@ public class SanityCheck {
                 .append(";")
                 .append(oe.getGyldigFom())
                 .append(";")
-                .append(oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "")
+                .append(nonNull(oe.getGyldigTom()) ? oe.getGyldigTom() : "")
                 .append("\n")
         );
         return result.toString();

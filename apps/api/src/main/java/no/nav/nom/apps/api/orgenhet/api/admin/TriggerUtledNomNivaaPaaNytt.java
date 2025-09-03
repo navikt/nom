@@ -22,7 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
+import static java.util.Objects.isNull;
+
 
 @Tag(name = "Admin for å utlede nom nivåer på nytt.")
 @RestController
@@ -64,22 +65,22 @@ public class TriggerUtledNomNivaaPaaNytt {
                 .gyldigFom(iOrgenhet.getGyldigFom())
                 .gyldigTom(iOrgenhet.getGyldigTom())
                 .overordnetOrgEnhetFid(iOrgenhet.getOverordnetOrgEnhetFid())
-                .lederFid(Optional.empty())
+                .lederFid(null)
                 .orgEnhetsType(iOrgenhet.getOrgEnhetsType())
                 .nomNivaa(iOrgenhet.getNomNivaa())
-                .uniqueAgressoId(Optional.ofNullable(iOrgenhet.getUniqueAgressoId()))
-                .agressoId(Optional.ofNullable(iOrgenhet.getAgressoId()))
-                .agressoOrgenhetType(Optional.empty())
+                .uniqueAgressoId(iOrgenhet.getUniqueAgressoId())
+                .agressoId(iOrgenhet.getAgressoId())
+                .agressoOrgenhetType(null)
                 .build()).toList();
 
         dvhStartupLoadMonitor.awaitInitialLoadComplete();
 
         orgenheterToProcess
             .forEach(orgEnhetState -> {
-                if (orgEnhetState.orgEnhetsType().isEmpty()) {
+                if (isNull(orgEnhetState.orgEnhetsType())) {
                     logger.error("OrgEnhetState {} har ingen orgEnhetsType, kan ikke utlede nomNivaa", orgEnhetState.id());
                 }
-                    orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdate(orgEnhetState, orgEnhetState.orgEnhetsType().isPresent() ? orgEnhetState.orgEnhetsType().get() : null);
+                    orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdate(orgEnhetState, orgEnhetState.orgEnhetsType());
                 }
             );
 
@@ -88,7 +89,7 @@ public class TriggerUtledNomNivaaPaaNytt {
         }
 
         orgenheterToProcess.stream()
-            .filter(orgEnhetState -> orgEnhetState.nomNivaa().equals(Optional.of(NomNivaa.DRIFTSENHET)))
+            .filter(orgEnhetState -> orgEnhetState.nomNivaa().equals(NomNivaa.DRIFTSENHET))
             .forEach(orgEnhetNomNivaaHandler::addArbeidsomraadeInAllSubPathsIfMissing);
 
 

@@ -566,8 +566,8 @@ public class RessursControllerTest extends RestTestBase {
             .build();
 
         var orgEnhet = orgEnhetState().toBuilder()
-            .agressoId(Optional.of("123456"))
-            .agressoOrgNivaa(Optional.of("4"))
+            .agressoId("123456")
+            .agressoOrgNivaa("4")
             .navn("NAV")
             .build();
 

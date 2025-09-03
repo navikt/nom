@@ -99,15 +99,15 @@ class RessursStillingStrukturererTest extends TestBase {
             id,
             navn,
             fra,
-            Optional.ofNullable(til),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.of(agressoId + "-ORGENHET-" + navn),
-            Optional.of(agressoId),
-            Optional.of("ORGENHET"),
-            Optional.empty()
+            til,
+            null,
+            null,
+            null,
+            null,
+            agressoId + "-ORGENHET-" + navn,
+            agressoId,
+            "ORGENHET",
+            null
         ));
     }
 
