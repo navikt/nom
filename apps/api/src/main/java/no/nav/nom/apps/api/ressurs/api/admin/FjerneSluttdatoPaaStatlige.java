@@ -99,7 +99,7 @@ public class FjerneSluttdatoPaaStatlige {
             result.append("DRY RUN!\n\n");
         }
 
-        result.append("Sluttdato etter").append(sluttDatoEtter).append("\n");
+        result.append("Sluttdato etter: ").append(sluttDatoEtter).append("\n");
         result.append("Ekskluderer navidenter: ").append(ekskluderNavidenter).append("\n\n");
 
         result.append("Totalt antall ressurser i utvalg: ").append(ressurserIUtvalg.size()).append("\n\n");
@@ -108,12 +108,11 @@ public class FjerneSluttdatoPaaStatlige {
         result.append("Utvalg med max en 'siste' OT\n").append(listRessurserMedMaxEnSisteOt(ressurserIUtvalg)).append("\n\n");
 
         if (commit) {
-            var userNavident = getAuthenticatedNavIdent();
             var inputMetadata = new InputMetadata(
                 "nom-api FjerneSluttdatoPaaStatlige",
                 "fjerneSluttdato",
                 Map.of("sluttdatoEtter", sluttDatoEtter , "ekskluderNavidenter", ekskluderNavidenter),
-                new Origination(userNavident, "nom-api")
+                new Origination("nom-api", "nom-api")
             );
 
             ressurserIUtvalg.forEach(ressurs -> {
