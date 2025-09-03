@@ -19,20 +19,8 @@ spec:
     - team: org
       application: org-kafka-manager
       access: read
-    - team: repr                      # Har migrert til v4 - https://nav-it.slack.com/archives/CLQSWA83U/p1755859471008789
-      application: repr-fullmakt
-      access: read
-    - team: shout-out
-      application: shout-out-sync-service   # Har migrert til v4 -
-      access: read
-    - team: org
-      application: nom-admin                # Har migrert til v4 -
-      access: read
     - team: team-nof
       application: fullmaktsregister-api
-      access: read
-    - team: org
-      application: team-catalog-backend     # Har migrert til v4 -
       access: read
     - team: nom
       application: skjermede-personer
@@ -62,23 +50,8 @@ spec:
     - team: org
       application: org-kafka-manager
       access: read
-    - team: repr                                # Har migrert til v4 - https://nav-it.slack.com/archives/CLQSWA83U/p1755859471008789
-      application: repr-fullmakt
-      access: read
-    - team: shout-out
-      application: shout-out-sync-service       # Har migrert til v4 -
-      access: read
-    - team: org
-      application: nom-admin                    # Har migrert til v4 -
-      access: read
     - team: team-nof
       application: fullmaktsregister-api
-      access: read
-    - team: org
-      application: team-catalog-backend        # Har migrert til v4 -
-      access: read
-    - team: tilgangsmaskin                     # Har migrert til v4 - https://nav-it.slack.com/archives/C07GGDP38S2/p1755858671839959
-      application: populasjonstilgangskontroll
       access: read
 
 ---
@@ -143,6 +116,7 @@ spec:
     partitions: 1
     replication: 3
     cleanupPolicy: compact
+    maxCompactionLagMs: 3600000  # 1000 * 60 * 60 = 3600000 = 1 hour
   acl:
     - team: org
       application: nom-kafka-api-orgenhet-state
