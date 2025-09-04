@@ -50,7 +50,7 @@ public class OrgEnhetTypeHandler {
                 if (nonNull(leafOrgEnhet.agressoOrgenhetType())) {
                     OrgEnhetsType nomOrgenhetType = mapToNomOrgEnhetsType(leafOrgEnhet.agressoOrgenhetType());
                     if (nonNull(nomOrgenhetType)) {
-                        var orgEnhetsTypeNotEqualToExistingValue = leafOrgEnhet.orgEnhetsType() != nomOrgenhetType;
+                        var orgEnhetsTypeNotEqualToExistingValue = !Objects.equals(leafOrgEnhet.orgEnhetsType(), nomOrgenhetType);
 
                         if (orgEnhetsTypeNotEqualToExistingValue) {
                             // Send kafka melding om å oppdatere orgEnhetsType. Antar at type fra agresso er sannheten.
@@ -70,57 +70,54 @@ public class OrgEnhetTypeHandler {
     }
 
     public void orgEnhetsTypeChanged(OrgEnhetTypeEndretEventV1 orgEnhetTypeEndretEventV1) {
-        orgEnhetOverordnetResolver.findOverordnetOrgEnhet(
-            orgEnhetStateRepository.findByFid(orgEnhetTypeEndretEventV1.getFid()).orElse(null)
-        ).ifPresent(overordnetOrgEnhet -> {
-            if (nonNull(overordnetOrgEnhet.orgEnhetsType())) {
-                //TODO: Need this check until all orgEnhetTypes DIR are renamed to DIREKTORAT
-                var existingOrgEnhetTypeIsDir = overordnetOrgEnhet.orgEnhetsType().equals(OrgEnhetsType.DIR);
+        OrgEnhetState endretOrgEnhet = orgEnhetStateRepository.findByFid(orgEnhetTypeEndretEventV1.getFid()).orElse(null);
+        orgEnhetOverordnetResolver.findOverordnetOrgEnhet(endretOrgEnhet).ifPresent(
+            overordnetOrgEnhet -> {
+                if (nonNull(overordnetOrgEnhet.orgEnhetsType())) {
+                    //TODO: Need this check until all orgEnhetTypes DIR are renamed to DIREKTORAT
+                    var existingOrgEnhetTypeIsDir = overordnetOrgEnhet.orgEnhetsType().equals(OrgEnhetsType.DIR);
 
-                if (!existingOrgEnhetTypeIsDir) {
-                    logger.debug(
-                        "Overordnet enhet {} funnet har allerede type {}",
-                        overordnetOrgEnhet.fid(),
-                        overordnetOrgEnhet.orgEnhetsType()
-                    );
-                    return;
-                }
-            }
-
-            Set<OrgEnhetsType> orgEnhetsTyperTilBarna = orgEnhetStateRepository.getAll().stream().filter(this::isOrgEnhetActive)
-                .filter(orgEnhetState -> {
-                    Optional<OrgEnhetState> overordnetOrgEnhetForIt = orgEnhetOverordnetResolver.findOverordnetOrgEnhet(orgEnhetState);
-                    return overordnetOrgEnhetForIt.filter(enhetState -> overordnetOrgEnhet.id().equals(enhetState.id())).isPresent();
-                })
-                .flatMap(orgEnhetBarn -> {
-                    OrgEnhetsType orgEnhetsTypeFromEventSource = orgEnhetTypeEndretEventV1.getData().orgEnhetsType();
-                    // Ekskluder type fra staten til fid for dette eventet da staten ikke nødvendigvis har blitt oppdatert ennå
-                    if (orgEnhetBarn.fid().equals(orgEnhetTypeEndretEventV1.getFid())) {
-                        return Stream.of(orgEnhetsTypeFromEventSource);
-                    } else {
-                        return Stream.of(orgEnhetBarn.orgEnhetsType(), orgEnhetsTypeFromEventSource);
+                    if (!existingOrgEnhetTypeIsDir) {
+                        logger.debug(
+                            "Overordnet enhet {} funnet har allerede type {}",
+                            overordnetOrgEnhet.fid(),
+                            overordnetOrgEnhet.orgEnhetsType()
+                        );
+                        return;
                     }
-                })
-                .collect(Collectors.toSet());
-
-            if (orgEnhetsTyperTilBarna.size() == 1) {
-                var newOrgEnhetsType = orgEnhetsTyperTilBarna.stream().toList().getFirst();
-                if (!Objects.equals(overordnetOrgEnhet.orgEnhetsType(), newOrgEnhetsType)) {
-                    var endreType = new EndreOrgEnhetsType(
-                        newOrgEnhetsType,
-                        new InputMetadata("kafka: org.nom.orgenhet-eventsource", "orgEnhetsTypeChanged", null, new Origination("nom-api", "nom-api"))
-                    );
-                    orgEnhetCommandService.endreOrgEnhetsType(overordnetOrgEnhet.fid(), endreType);
-                    logger.debug("Changed orgenhet {} because all its children are of orgEnhetsType {}", overordnetOrgEnhet.fid(), newOrgEnhetsType);
                 }
-            } else {
-                // Log id til overordnet orgenhet sammen med hvilke orgtyper barna dens har. Så lenge alle barna ikke har samme så må det bestemmes manuelt.
-                logger.debug(
-                    "Did not change orgenhet {} because children are of differents orgEnhetsTypes {}",
-                    overordnetOrgEnhet.fid(),
-                    orgEnhetsTyperTilBarna
-                );
-            }
+
+                Stream<OrgEnhetState> andreAktiveUnderenheter = orgEnhetStateRepository.getAll().stream()
+                    .filter(orgEnhetState -> !orgEnhetState.fid().equals(orgEnhetTypeEndretEventV1.getFid()))
+                    .filter(this::isOrgEnhetActive)
+                    .filter(orgEnhetState -> {
+                        Optional<OrgEnhetState> overordnetOrgEnhetForIt = orgEnhetOverordnetResolver.findOverordnetOrgEnhet(orgEnhetState);
+                        return overordnetOrgEnhetForIt.filter(enhetState -> overordnetOrgEnhet.id().equals(enhetState.id())).isPresent();
+                    });
+
+                OrgEnhetsType endretOrgEnhetsType = orgEnhetTypeEndretEventV1.getData().orgEnhetsType();
+                Set<OrgEnhetsType> orgEnhetsTyperTilUnderenheter = andreAktiveUnderenheter
+                    .map(OrgEnhetState::orgEnhetsType)
+                    .collect(Collectors.toSet());
+                orgEnhetsTyperTilUnderenheter.add(endretOrgEnhetsType);
+
+                if (orgEnhetsTyperTilUnderenheter.size() == 1) {
+                    if (!Objects.equals(overordnetOrgEnhet.orgEnhetsType(), endretOrgEnhetsType)) {
+                        var endreType = new EndreOrgEnhetsType(
+                            endretOrgEnhetsType,
+                            new InputMetadata("kafka: org.nom.orgenhet-eventsource", "orgEnhetsTypeChanged", null, new Origination("nom-api", "nom-api"))
+                        );
+                        orgEnhetCommandService.endreOrgEnhetsType(overordnetOrgEnhet.fid(), endreType);
+                        logger.debug("Changed orgenhet {} because all its children are of orgEnhetsType {}", overordnetOrgEnhet.fid(), endretOrgEnhetsType);
+                    }
+                } else {
+                    // Log id til overordnet orgenhet sammen med hvilke orgtyper barna dens har. Så lenge alle barna ikke har samme så må det bestemmes manuelt.
+                    logger.debug(
+                        "Did not change orgenhet {} because children are of differents orgEnhetsTypes {}",
+                        overordnetOrgEnhet.fid(),
+                        orgEnhetsTyperTilUnderenheter
+                    );
+                }
         });
     }
 
