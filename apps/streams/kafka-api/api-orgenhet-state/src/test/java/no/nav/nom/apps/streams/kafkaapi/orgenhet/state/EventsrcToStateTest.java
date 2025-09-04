@@ -23,7 +23,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -68,9 +67,9 @@ public class EventsrcToStateTest {
                 eventData.id(),
                 eventData.navn(),
                 eventData.gyldigFom(),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty()
+                null,
+                null,
+                null
         );
 
         inputTopic.pipeInput(UUID.randomUUID().toString(), event);

@@ -21,7 +21,6 @@ import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Component
 class EventsrcToState {
@@ -55,15 +54,15 @@ class EventsrcToState {
     }
 
     public OrgEnhetState toOrgEnhetState(String fid, JsonNode eventStateAggregate){
-        Optional<NomNivaa> nomNivaa = Optional.ofNullable(eventStateAggregate.hasNonNull("nomNivaa") ? NomNivaa.valueOf(eventStateAggregate.get("nomNivaa").asText()) : null);
-        Optional<OrgEnhetsType> orgEnhetsType =  Optional.ofNullable(eventStateAggregate.hasNonNull("orgEnhetsType") ? OrgEnhetsType.valueOf(eventStateAggregate.get("orgEnhetsType").asText()) : null);
+        NomNivaa nomNivaa = eventStateAggregate.hasNonNull("nomNivaa") ? NomNivaa.valueOf(eventStateAggregate.get("nomNivaa").asText()) : null;
+        OrgEnhetsType orgEnhetsType =  eventStateAggregate.hasNonNull("orgEnhetsType") ? OrgEnhetsType.valueOf(eventStateAggregate.get("orgEnhetsType").asText()) : null;
 
         try {
             return new OrgEnhetState(
                 eventStateAggregate.get("id").asText(),
                 eventStateAggregate.get("navn").asText(),
                 LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
-                Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null),
+                eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null,
                 nomNivaa,
                 orgEnhetsType
             );
