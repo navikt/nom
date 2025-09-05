@@ -23,7 +23,7 @@ spec:
       application: fullmaktsregister-api
       access: read
     - team: nom
-      application: skjermede-personer
+      application: skjermede-personer   # migrert til v4
       access: read
 
 ---
