@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -49,8 +48,8 @@ public class EventsrcToStateTest {
                 "DummyIntenrnId_1",
                 "TestName",
                 LocalDate.of(2022, 12, 01),
-                Optional.of("orgEnhet_123"),
-                Optional.of("ressurs_123")
+                "orgEnhet_123",
+                "ressurs_123"
         );
 
 
@@ -58,7 +57,7 @@ public class EventsrcToStateTest {
                 "AgressoId_123",
                 "AgressoNavn",
                 "AgressoOrgNivaa_1",
-                Optional.of("AgressoOrgEnhetType"),
+                "AgressoOrgEnhetType",
                 "AgressoId_123-AgressoNavn-AgressoOrgNivaa_1"
         );
 
@@ -74,14 +73,14 @@ public class EventsrcToStateTest {
                 eventData.id(),
                 eventData.navn(),
                 eventData.gyldigFom(),
-                Optional.empty(),
+                null,
                 eventData.overordnetOrgEnhetFid(),
                 eventData.lederRessursFid(),
-                Optional.empty(),
-            Optional.empty(),
-                Optional.ofNullable(additionalData.uniqueAgressoId()),
-                Optional.ofNullable(additionalData.agressoId()),
-                Optional.ofNullable(additionalData.agressoOrgNivaa()),
+                null,
+                null,
+                additionalData.uniqueAgressoId(),
+                additionalData.agressoId(),
+                additionalData.agressoOrgNivaa(),
                 additionalData.agressoOrgenhetType()
         );
 
@@ -101,8 +100,8 @@ public class EventsrcToStateTest {
             "DummyIntenrnId_1",
             "TestName",
             LocalDate.of(2022, 12, 01),
-            Optional.of("orgEnhet_123"),
-            Optional.of("ressurs_123")
+            "orgEnhet_123",
+            "ressurs_123"
         );
 
         final OrgEnhetEvent createEvent = new OrgEnhetOpprettetEventV1(
@@ -119,15 +118,15 @@ public class EventsrcToStateTest {
             createEventData.id(),
             createEventData.navn(),
             createEventData.gyldigFom(),
-            Optional.empty(),
+            null,
             createEventData.overordnetOrgEnhetFid(),
             createEventData.lederRessursFid(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty()
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
         );
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
@@ -137,7 +136,7 @@ public class EventsrcToStateTest {
 
         final OrgEnhetEvent updateTypeEvent = new OrgEnhetTypeEndretEventV1(
             createEvent.getFid(),
-            new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(Optional.of(OrgEnhetsType.DIR)),
+            new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(OrgEnhetsType.DIR),
             new Event.Metadata(null, LocalDateTime.now())
         );
 
@@ -148,15 +147,15 @@ public class EventsrcToStateTest {
             createEventData.id(),
             createEventData.navn(),
             createEventData.gyldigFom(),
-            Optional.empty(),
+            null,
             createEventData.overordnetOrgEnhetFid(),
             createEventData.lederRessursFid(),
-            Optional.of(OrgEnhetsType.DIR),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty()
+            OrgEnhetsType.DIR,
+            null,
+            null,
+            null,
+            null,
+            null
         );
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
@@ -166,7 +165,7 @@ public class EventsrcToStateTest {
 
         final OrgEnhetEvent updateNomNivaaEvent = new NomNivaaEndretEventV1(
             createEvent.getFid(),
-            new NomNivaaEndretEventV1.NomNivaaEndretEventData(Optional.of(NomNivaa.ARBEIDSOMRAADE)),
+            new NomNivaaEndretEventV1.NomNivaaEndretEventData(NomNivaa.ARBEIDSOMRAADE),
             new Event.Metadata(null, LocalDateTime.now())
         );
 
@@ -177,15 +176,15 @@ public class EventsrcToStateTest {
             createEventData.id(),
             createEventData.navn(),
             createEventData.gyldigFom(),
-            Optional.empty(),
+            null,
             createEventData.overordnetOrgEnhetFid(),
             createEventData.lederRessursFid(),
-            Optional.of(OrgEnhetsType.DIR),
-            Optional.of(NomNivaa.ARBEIDSOMRAADE),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty()
+            OrgEnhetsType.DIR,
+            NomNivaa.ARBEIDSOMRAADE,
+            null,
+            null,
+            null,
+            null
         );
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())

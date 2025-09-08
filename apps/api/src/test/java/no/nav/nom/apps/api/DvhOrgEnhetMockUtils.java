@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -56,11 +55,11 @@ public class DvhOrgEnhetMockUtils {
 
     public OrgEnhetState dvhMockToState(DvhOrgEnhetMock dvhMock, int nr, String from, String to) {
         LocalDate fromDate = LocalDate.of(Integer.parseInt(from.substring(0, 4)), Integer.parseInt(from.substring(4, 6)), 1);
-        Optional<LocalDate> toDate = Optional.empty();
+        LocalDate toDate = null;
         if (!isEmpty(to)) {
-            toDate = Optional.of(LocalDate.of(Integer.parseInt(to.substring(0, 4)), Integer.parseInt(to.substring(4, 6)), 1)
+            toDate = LocalDate.of(Integer.parseInt(to.substring(0, 4)), Integer.parseInt(to.substring(4, 6)), 1)
                 .plusMonths(1)
-                .minusDays(1));
+                .minusDays(1);
         }
         String agressoId = dvhMock.getORGENHET_KODE();
         String agressoNavn = dvhMock.getORGENHET_NAVN();
@@ -74,14 +73,14 @@ public class DvhOrgEnhetMockUtils {
             agressoNavn,
             fromDate,
             toDate,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.ofNullable(orgenhetstype),
-            Optional.empty(),
-            Optional.of(uniqueAgressoId),
-            Optional.of(agressoId),
-            Optional.of(agressoNiv),
-            Optional.of(agressoType)
+            null,
+            null,
+            orgenhetstype,
+            null,
+            uniqueAgressoId,
+            agressoId,
+            agressoNiv,
+            agressoType
         );
     }
 }

@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.nonNull;
 
 @Service
 public class OrgEnhetStateRepositoryImpl implements OrgEnhetStateRepository {
@@ -68,7 +69,7 @@ public class OrgEnhetStateRepositoryImpl implements OrgEnhetStateRepository {
 
     @Override
     public List<OrgEnhetState> findAllByAgressoIdIn(Set<String> agressoIds) {
-        return getAll().stream().filter(orgEnhetState -> agressoIds.contains(orgEnhetState.agressoId().orElseGet(null))).toList();
+        return getAll().stream().filter(orgEnhetState -> agressoIds.contains(orgEnhetState.agressoId())).toList();
     }
 
     @Override
@@ -114,25 +115,21 @@ public class OrgEnhetStateRepositoryImpl implements OrgEnhetStateRepository {
 
 
     void addToUniqueAgressoIdList(OrgEnhetState newOrgEnhetState) {
-        if (newOrgEnhetState.uniqueAgressoId().isPresent()) {
-            List<OrgEnhetState> orgEnheter = findAllByUniqueAgressoId(newOrgEnhetState.uniqueAgressoId().get());
+        if (nonNull(newOrgEnhetState.uniqueAgressoId())) {
+            List<OrgEnhetState> orgEnheter = findAllByUniqueAgressoId(newOrgEnhetState.uniqueAgressoId());
             var enhet = orgEnheter.stream().filter(orgEnhet -> orgEnhet.fid().equals(newOrgEnhetState.fid())).findAny();
-            if (enhet.isPresent()) {
-                orgEnheter.remove(enhet.get());
-            }
+            enhet.ifPresent(orgEnheter::remove);
             orgEnheter.add(newOrgEnhetState);
-            orgEnheterByUniqueAgressoId.put(newOrgEnhetState.uniqueAgressoId().get(), orgEnheter);
+            orgEnheterByUniqueAgressoId.put(newOrgEnhetState.uniqueAgressoId(), orgEnheter);
         }
     }
 
     void addToAgressoIdAndNivList(OrgEnhetState newOrgEnhetState) {
-        if (newOrgEnhetState.agressoId().isPresent() && newOrgEnhetState.agressoOrgNivaa().isPresent()) {
-            var concatIdNiv = newOrgEnhetState.agressoId().get() + "--" + newOrgEnhetState.agressoOrgNivaa().get();
+        if (nonNull(newOrgEnhetState.agressoId()) && nonNull(newOrgEnhetState.agressoOrgNivaa())) {
+            var concatIdNiv = newOrgEnhetState.agressoId() + "--" + newOrgEnhetState.agressoOrgNivaa();
             List<OrgEnhetState> orgEnheter = findAllByAgressoIdAndNiv(concatIdNiv);
             var enhet = orgEnheter.stream().filter(orgEnhet -> orgEnhet.fid().equals(newOrgEnhetState.fid())).findAny();
-            if (enhet.isPresent()) {
-                orgEnheter.remove(enhet.get());
-            }
+            enhet.ifPresent(orgEnheter::remove);
             orgEnheter.add(newOrgEnhetState);
             orgEnheterByAgressoIdAndNiv.put(concatIdNiv, orgEnheter);
         }

@@ -23,7 +23,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -44,8 +43,8 @@ public class EventsrcToStateTest {
                 "DummyIntenrnId_1",
                 "TestName",
                 LocalDate.of(2022, 12, 01),
-                Optional.of("orgEnhet_123"),
-                Optional.of("ressurs_123")
+                "orgEnhet_123",
+                "ressurs_123"
         );
 
 
@@ -53,7 +52,7 @@ public class EventsrcToStateTest {
                 "AgressoId_123",
                 "AgressoNavn",
                 "AgressoOrgNivaa_1",
-                Optional.of("AgressoOrgEnhetType"),
+                "AgressoOrgEnhetType",
                 "AgressoId_123-AgressoNavn-AgressoOrgNivaa_1"
         );
 
@@ -68,9 +67,9 @@ public class EventsrcToStateTest {
                 eventData.id(),
                 eventData.navn(),
                 eventData.gyldigFom(),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty()
+                null,
+                null,
+                null
         );
 
         inputTopic.pipeInput(UUID.randomUUID().toString(), event);

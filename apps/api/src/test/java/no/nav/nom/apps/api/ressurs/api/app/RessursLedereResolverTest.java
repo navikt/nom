@@ -84,8 +84,8 @@ public class RessursLedereResolverTest {
         OrgEnhet orgEnhetOver = new OrgEnhet(OrgEnhetState.builder()
             .id(ORG_ENHET_2_ID)
             .navn(ORG_ENHET_2_NAVN)
-            .agressoId(Optional.of(ORG_ENHET_2_AGRESSO_ID))
-            .agressoOrgNivaa(Optional.of(ORG_ENHET_2_ORG_NIV))
+            .agressoId(ORG_ENHET_2_AGRESSO_ID)
+            .agressoOrgNivaa(ORG_ENHET_2_ORG_NIV)
             .build());
         when(orgenhetServiceMock.getById(ORG_ENHET_2_ID)).thenReturn(Optional.of(orgEnhetOver));
 
@@ -134,14 +134,14 @@ public class RessursLedereResolverTest {
         OrgEnhet orgEnhetOver = new OrgEnhet(OrgEnhetState.builder()
             .id(ORG_ENHET_2_ID)
             .navn(ORG_ENHET_2_NAVN)
-            .agressoId(Optional.of(ORG_ENHET_2_AGRESSO_ID))
-            .agressoOrgNivaa(Optional.of(ORG_ENHET_2_ORG_NIV))
+            .agressoId(ORG_ENHET_2_AGRESSO_ID)
+            .agressoOrgNivaa(ORG_ENHET_2_ORG_NIV)
             .build());
         OrgEnhet orgEnhetLeder = new OrgEnhet(OrgEnhetState.builder()
             .id(ORG_ENHET_3_ID)
             .navn(ORG_ENHET_3_NAVN)
-            .agressoId(Optional.of(ORG_ENHET_3_AGRESSO_ID))
-            .agressoOrgNivaa(Optional.of(ORG_ENHET_3_ORG_NIV))
+            .agressoId(ORG_ENHET_3_AGRESSO_ID)
+            .agressoOrgNivaa(ORG_ENHET_3_ORG_NIV)
             .build());
         when(orgenhetServiceMock.getById(ORG_ENHET_2_ID)).thenReturn(Optional.of(orgEnhetOver));
         when(orgenhetServiceMock.getById(ORG_ENHET_3_ID)).thenReturn(Optional.of(orgEnhetLeder));
@@ -191,14 +191,14 @@ public class RessursLedereResolverTest {
         OrgEnhet orgEnhetRessurs = new OrgEnhet(OrgEnhetState.builder()
             .id(ORG_ENHET_1_ID)
             .navn(ORG_ENHET_1_NAVN)
-            .agressoId(Optional.of(ORG_ENHET_1_AGRESSO_ID))
-            .agressoOrgNivaa(Optional.of(ORG_ENHET_1_ORG_NIV))
+            .agressoId(ORG_ENHET_1_AGRESSO_ID)
+            .agressoOrgNivaa(ORG_ENHET_1_ORG_NIV)
             .build());
         OrgEnhet orgEnhetOver = new OrgEnhet(OrgEnhetState.builder()
             .id(ORG_ENHET_2_ID)
             .navn(ORG_ENHET_2_NAVN)
-            .agressoId(Optional.of(ORG_ENHET_2_AGRESSO_ID))
-            .agressoOrgNivaa(Optional.of(ORG_ENHET_2_ORG_NIV))
+            .agressoId(ORG_ENHET_2_AGRESSO_ID)
+            .agressoOrgNivaa(ORG_ENHET_2_ORG_NIV)
             .build());
         when(orgenhetServiceMock.getById(ORG_ENHET_1_ID)).thenReturn(Optional.of(orgEnhetRessurs));
         when(orgenhetServiceMock.getById(ORG_ENHET_2_ID)).thenReturn(Optional.of(orgEnhetOver));

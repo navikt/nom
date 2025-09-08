@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static java.util.Objects.nonNull;
+
 @Service
 @Slf4j
 public class DvhRessursRestService {
@@ -100,11 +102,11 @@ public class DvhRessursRestService {
         return new DvhOrgenhetDTO(
             orgenhet.getId(),
             orgenhet.getNavn(),
-            orgenhet.getOrgEnhetsType().isPresent() ? orgenhet.getOrgEnhetsType().get().name() : null,
-            orgenhet.getNomNivaa().isPresent() ? orgenhet.getNomNivaa().get().name() : null,
+            nonNull(orgenhet.getOrgEnhetsType()) ? orgenhet.getOrgEnhetsType().name() : null,
+            nonNull(orgenhet.getNomNivaa()) ? orgenhet.getNomNivaa().name() : null,
             overordnet,
             orgenhet.getGyldigFom(),
-            orgenhet.getGyldigTom().orElse(null),
+            orgenhet.getGyldigTom(),
             orgenhet.getAgressoId(),
             orgenhet.getOrgNiv(),
             remedyEnhetId

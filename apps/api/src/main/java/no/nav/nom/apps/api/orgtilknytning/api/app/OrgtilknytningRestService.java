@@ -56,6 +56,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNullElse;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 import static no.nav.nom.apps.api.common.DateUtils.isPerioderOverlapping;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.ADMIN;
@@ -64,7 +66,6 @@ import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_UT
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_VIKAFOSSEN;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
-import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 
 @Service
 public class OrgtilknytningRestService {
@@ -106,7 +107,7 @@ public class OrgtilknytningRestService {
     }
 
     public List<OrgtilknytningState> getOrgtilknytninger(String navident) {
-        if (isNotNull(navident)) {
+        if (nonNull(navident)) {
             return orgtilknytningStateRepository.findByNavident(navident).stream().toList();
         }
         return orgtilknytningStateRepository.getAll().stream().toList();
@@ -214,7 +215,7 @@ public class OrgtilknytningRestService {
                     );
                 }
 
-                if (isNotNull(firstDuplicate.gyldigTom()) && duplicate.gyldigFom().isBefore(firstDuplicate.gyldigTom())
+                if (nonNull(firstDuplicate.gyldigTom()) && duplicate.gyldigFom().isBefore(firstDuplicate.gyldigTom())
                     && Objects.equals(firstDuplicate.sektor(), duplicate.sektor())
                     && Objects.equals(firstDuplicate.orgtilknytningType(), duplicate.orgtilknytningType())) {
                     throw InvalidOppdaterOrgtilknytningerForRessursRequestException.duplikatOrgtilknytning(
@@ -242,7 +243,7 @@ public class OrgtilknytningRestService {
             .map(EndreOrgtilknytningRequest::gyldigFom);
         var nyeFomDatoer = request.nyeOrgtilknytninger().stream()
             .map(LeggTilOrgtilknytningRequest::gyldigFom);
-        var tilknyttetRessursStartdato = isNotNull(tilknyttetRessurs.startdato()) ? tilknyttetRessurs.startdato() : null;
+        var tilknyttetRessursStartdato = tilknyttetRessurs.startdato();
         var nyMinimumStartdato = Stream.concat(endredeFomDatoer, nyeFomDatoer).reduce(LocalDate.MAX, (it, acc) -> it.isBefore(acc) ? it : acc);
         if (nyMinimumStartdato != LocalDate.MAX && !nyMinimumStartdato.equals(tilknyttetRessursStartdato)) {
             ressursCommandService.oppdaterRessursStartdatoEvent(
@@ -327,7 +328,7 @@ public class OrgtilknytningRestService {
         if (loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)) return;
         log.info("Validerer at nyeOrgtilknytninger ikke er eldre enn to måneder");
         oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(leggTilOrgtilknytningRequest -> {
-            if (isNotNull(leggTilOrgtilknytningRequest.gyldigTom()) && leggTilOrgtilknytningRequest.gyldigTom().isBefore(LocalDate.now().minusMonths(2))) {
+            if (nonNull(leggTilOrgtilknytningRequest.gyldigTom()) && leggTilOrgtilknytningRequest.gyldigTom().isBefore(LocalDate.now().minusMonths(2))) {
                 throw new AccessDeniedException("Det er ikke lov å legge til en orgtilknytning som er eldre enn to måneder gammelt, gjelder endring for orgenhet " + leggTilOrgtilknytningRequest.orgEnhetId());
             }
         });
@@ -335,7 +336,7 @@ public class OrgtilknytningRestService {
         log.info("Validerer at eksisterendeOrgtilknytninger ikke er eldre enn to måneder");
         oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(orgtilknytningRequest -> orgtilknytningStateRepository.findByFid(orgtilknytningRequest.fid()).ifPresent(orgtilknytningState -> {
             if (compareDateForExistingOrgtilknytningWithStateOrgtilknytning(orgtilknytningRequest, orgtilknytningState)) return;
-            if (isNotNull(orgtilknytningState.gyldigTom()) && orgtilknytningState.gyldigTom().isBefore(LocalDate.now().minusMonths(2))) {
+            if (nonNull(orgtilknytningState.gyldigTom()) && orgtilknytningState.gyldigTom().isBefore(LocalDate.now().minusMonths(2))) {
                 throw new AccessDeniedException("Det er ikke lov å endre en orgtilknytning som er eldre enn to måneder gammelt, gjelder endring for orgenhet " + orgtilknytningState.orgEnhetId());
             }
         }));
@@ -345,7 +346,7 @@ public class OrgtilknytningRestService {
         EndreOrgtilknytningRequest orgtilknytningRequest,
         OrgtilknytningState orgtilknytningState
     ) {
-        var stateDate = isNotNull(orgtilknytningState.gyldigTom()) ? orgtilknytningState.gyldigTom() : LocalDate.MAX;
+        var stateDate = requireNonNullElse(orgtilknytningState.gyldigTom(), LocalDate.MAX);
         return new EqualsBuilder()
             .append(orgtilknytningRequest.gyldigFom(), orgtilknytningState.gyldigFom())
             .append(orgtilknytningRequest.gyldigTom(), stateDate)
@@ -498,7 +499,7 @@ public class OrgtilknytningRestService {
             );
         }
 
-        if (isNotNull(orgtilknytningStateBeforeChanges.orgtilknytningType())
+        if (nonNull(orgtilknytningStateBeforeChanges.orgtilknytningType())
             && !isNull(endreOrgtilknytningRequest.sektor())
             && !Objects.equals(endreOrgtilknytningRequest.sektor(), orgtilknytningStateBeforeChanges.sektor())
             && !Objects.equals(endreOrgtilknytningRequest.sektor(), Sektor.EKSTERN)) {
@@ -633,7 +634,7 @@ public class OrgtilknytningRestService {
                     .map(LeggTilOrgtilknytningRequest::gyldigTom)
             )
             .flatMap(Function.identity())
-            .map(gyldigTom -> isNotNull(gyldigTom) ? gyldigTom : LocalDate.MAX)
+            .map(gyldigTom -> requireNonNullElse(gyldigTom, LocalDate.MAX))
             .max(Comparator.naturalOrder());
 
         newSluttdato.ifPresent(sluttdato -> {
@@ -675,14 +676,14 @@ public class OrgtilknytningRestService {
                 && Objects.equals(endreOrgtilknytningRequest.gyldigTom(), currentOrgtilknytningState.gyldigTom())
                 && endreOrgtilknytningRequest.erDagligOppfolging() == currentOrgtilknytningState.erDagligOppfolging()
                 && Objects.equals(endreOrgtilknytningRequest.tilknytningtype(), currentOrgtilknytningState.orgtilknytningType())
-                && (isNotNull(endreOrgtilknytningRequest.sektor()) && Objects.equals(endreOrgtilknytningRequest.sektor(), currentOrgtilknytningState.sektor()))
+                && (nonNull(endreOrgtilknytningRequest.sektor()) && Objects.equals(endreOrgtilknytningRequest.sektor(), currentOrgtilknytningState.sektor()))
         );
     }
 
     private static void validateSektorCanBeChanged(EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState) {
         if (!loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)
-            && isNotNull(endreOrgtilknytningRequest.sektor())
-            && (!Objects.equals(endreOrgtilknytningRequest.sektor(), currentOrgtilknytningState.sektor()) && isNotNull(currentOrgtilknytningState.sektor()))) {
+            && nonNull(endreOrgtilknytningRequest.sektor())
+            && (!Objects.equals(endreOrgtilknytningRequest.sektor(), currentOrgtilknytningState.sektor()) && nonNull(currentOrgtilknytningState.sektor()))) {
             throw InvalidOrgtilknytningSektorException.sektorCannotBeChanged();
         }
     }
@@ -690,7 +691,7 @@ public class OrgtilknytningRestService {
     private static void validateTilknytningCanBeChanged(EndreOrgtilknytningRequest endreOrgtilknytningRequest, OrgtilknytningState currentOrgtilknytningState) {
         var currentTilknytningType = setCorrectTilknytningtype(currentOrgtilknytningState);
         if (!loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)
-            && isNotNull(endreOrgtilknytningRequest.tilknytningtype())
+            && nonNull(endreOrgtilknytningRequest.tilknytningtype())
             && (currentTilknytningType.isPresent() && !endreOrgtilknytningRequest.tilknytningtype().equals(currentTilknytningType.get()))) {
             throw InvalidOrgtilknytningTilknytningtypeException.tilknytningtypeCannotBeChanged();
         }
@@ -698,7 +699,7 @@ public class OrgtilknytningRestService {
 
     private static Optional<Tilknytningtype> setCorrectTilknytningtype(OrgtilknytningState currentOrgtilknytningState) {
 
-        if (isNotNull(currentOrgtilknytningState.orgtilknytningType())
+        if (nonNull(currentOrgtilknytningState.orgtilknytningType())
             && Objects.equals(currentOrgtilknytningState.orgtilknytningType(), Tilknytningtype.INGEN)
             && (isNull(currentOrgtilknytningState.sektor()) || !currentOrgtilknytningState.sektor().erKommunal())) {
             return Optional.empty();
@@ -749,7 +750,7 @@ public class OrgtilknytningRestService {
         var tilknyttetRessurs = ressursStateRepository.findByNavident(orgtilknytning.navident())
             .orElseThrow(() -> RessursNotFoundException.navident(orgtilknytning.navident()));
 
-        if (isNotNull(endreTilknytningtypeRequest.tilknytningtype())) {
+        if (nonNull(endreTilknytningtypeRequest.tilknytningtype())) {
             validateOrgtilknytningTypeSektorCombination(endreTilknytningtypeRequest.tilknytningtype(), tilknyttetRessurs.sektor());
         }
 

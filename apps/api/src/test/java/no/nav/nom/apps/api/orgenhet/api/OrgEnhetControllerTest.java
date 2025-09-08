@@ -22,12 +22,12 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static no.nav.nom.apps.api.common.TestData.organiseringState;
 import static no.nav.nom.apps.api.common.TestData.ressursState;
 import static no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils.orgEnhetStateBuilderWithDefaultValues;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -53,7 +53,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
     public void should_set_new_orgEnhetsType() {
 
         var existingOrgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
-                .orgEnhetsType(Optional.empty())
+                .orgEnhetsType(null)
                 .build();
 
         var setOrgEnhetsTypeRequest = setOrgEnhetsTypeRequest().toBuilder()
@@ -69,8 +69,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
         verify(orgEnhetCommandService, times(1))
                 .endreOrgEnhetsType(eq(existingOrgEnhet.fid()), endreOrgEnhetsTypeArgumentCaptor.capture());
 
-        assertThat(endreOrgEnhetsTypeArgumentCaptor.getValue().orgEnhetsType())
-                .contains(setOrgEnhetsTypeRequest.getOrgEnhetsType());
+        assertEquals(endreOrgEnhetsTypeArgumentCaptor.getValue().orgEnhetsType(), setOrgEnhetsTypeRequest.getOrgEnhetsType());
     }
 
     @Test
@@ -79,7 +78,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
         var existingOrgenhetsType = OrgEnhetsType.FYLKE;
 
         var existingOrgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
-                .orgEnhetsType(Optional.of(existingOrgenhetsType))
+                .orgEnhetsType(existingOrgenhetsType)
                 .build();
 
         orgEnhetStateRepository.update(existingOrgEnhet);
@@ -120,7 +119,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
         OrgEnhetState orgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
                 .id(orgEnhetId)
                 .gyldigFom(LocalDate.now().minusMonths(6))
-                .agressoOrgNivaa(Optional.of("ORGENHET"))
+                .agressoOrgNivaa("ORGENHET")
                 .build();
         
         OrganiseringState organisering = organiseringState().toBuilder()
@@ -136,8 +135,8 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
         @SuppressWarnings("OptionalGetWithoutIsPresent")
         DvhLeder dvhLeder = DvhLeder.builder()
-                .orgEnhetNr(orgEnhet.agressoId().get())
-                .orgNiv(orgEnhet.agressoOrgNivaa().get())
+                .orgEnhetNr(orgEnhet.agressoId())
+                .orgNiv(orgEnhet.agressoOrgNivaa())
                 .orgenhetNavn(orgEnhet.navn())
                 .navIdent(lederRessurs.navident())
                 .build();

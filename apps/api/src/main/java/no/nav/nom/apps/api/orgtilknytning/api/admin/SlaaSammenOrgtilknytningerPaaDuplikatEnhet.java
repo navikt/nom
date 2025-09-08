@@ -33,10 +33,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import static java.util.Objects.isNull;
-import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
+import static java.util.Objects.nonNull;
 
 @Slf4j
 @Tag(name = "Admin for korrigeringer")
@@ -163,7 +162,7 @@ public class SlaaSammenOrgtilknytningerPaaDuplikatEnhet {
             nyGyldigFom,
             nyEnhet.getGyldigTom(),
             nyEnhet.getOverordnetOrgEnhetFid(),
-            Optional.empty(),
+            null,
             metadata
         );
 
@@ -224,7 +223,7 @@ public class SlaaSammenOrgtilknytningerPaaDuplikatEnhet {
             fid = "DRY RUN fid";
         }
 
-        if (isNotNull(ot.gyldigTom())) {
+        if (nonNull(ot.gyldigTom())) {
             var avvikleOtDatoCmd = new AvvikleOrgtilknytning(
                 ot.navident(),
                 nyEnhet.getId(),
@@ -280,7 +279,7 @@ public class SlaaSammenOrgtilknytningerPaaDuplikatEnhet {
             enhet.getId(),
             enhet.getNavn(),
             enhet.getGyldigFom(),
-            enhet.getGyldigTom().orElse(null)
+            enhet.getGyldigTom()
         );
     }
 

@@ -73,7 +73,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_X")
             .id("X")
             .navn("OrgEnhet X")
-            .nomNivaa(Optional.of(NomNivaa.LINJEENHET))
+            .nomNivaa(NomNivaa.LINJEENHET)
             .agressoId("X")
             .orgNiv("NAV")
             .build();
@@ -82,7 +82,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_A")
             .id("A")
             .navn("OrgEnhet A")
-            .nomNivaa(Optional.of(NomNivaa.DRIFTSENHET))
+            .nomNivaa(NomNivaa.DRIFTSENHET)
             .agressoId("A")
             .orgNiv("NAV")
             .build();
@@ -91,7 +91,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_A1")
             .id("A1")
             .navn("OrgEnhet A1")
-            .nomNivaa(Optional.empty())
+            .nomNivaa(null)
             .agressoId("A1")
             .orgNiv("ORGNIV2")
             .build();
@@ -100,7 +100,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_A11")
             .id("A11")
             .navn("OrgEnhet A11")
-            .nomNivaa(Optional.of(NomNivaa.ARBEIDSOMRAADE))
+            .nomNivaa(NomNivaa.ARBEIDSOMRAADE)
             .agressoId("A11")
             .orgNiv("ORGNIV3")
             .build();
@@ -109,7 +109,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_B")
             .id("B")
             .navn("OrgEnhet B")
-            .nomNivaa(Optional.of(NomNivaa.ARBEIDSOMRAADE))
+            .nomNivaa(NomNivaa.ARBEIDSOMRAADE)
             .agressoId("B")
             .orgNiv("ORGNIV3")
             .build();
@@ -118,7 +118,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_B1")
             .id("B1")
             .navn("OrgEnhet B1")
-            .nomNivaa(Optional.empty())
+            .nomNivaa(null)
             .agressoId("B1")
             .orgNiv("ORGNIV4")
             .build();
@@ -127,7 +127,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_B11")
             .id("B11")
             .navn("OrgEnhet B11")
-            .nomNivaa(Optional.empty())
+            .nomNivaa(null)
             .agressoId("B11")
             .orgNiv("ORGENHET")
             .build();
@@ -136,7 +136,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_C")
             .id("C")
             .navn("OrgEnhet C")
-            .nomNivaa(Optional.of(NomNivaa.ARBEIDSOMRAADE))
+            .nomNivaa(NomNivaa.ARBEIDSOMRAADE)
             .agressoId("C")
             .orgNiv("ORGNIV3")
             .build();
@@ -145,7 +145,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_C1")
             .id("C1")
             .navn("OrgEnhet C1")
-            .nomNivaa(Optional.empty())
+            .nomNivaa(null)
             .agressoId("C1")
             .orgNiv("ORGNIV4")
             .build();
@@ -154,7 +154,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_C11")
             .id("C11")
             .navn("OrgEnhet C11")
-            .nomNivaa(Optional.empty())
+            .nomNivaa(null)
             .agressoId("C11")
             .orgNiv("ORGENHET")
             .build();
@@ -163,7 +163,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_C2")
             .id("C2")
             .navn("OrgEnhet C2")
-            .nomNivaa(Optional.empty())
+            .nomNivaa(null)
             .agressoId("C2")
             .orgNiv("ORGNIV4")
             .build();
@@ -172,7 +172,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_C22")
             .id("C22")
             .navn("OrgEnhet C22")
-            .nomNivaa(Optional.empty())
+            .nomNivaa(null)
             .agressoId("C22")
             .orgNiv("ORGENHET")
             .build();
@@ -181,7 +181,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_D")
             .id("D")
             .navn("OrgEnhet D")
-            .nomNivaa(Optional.of(NomNivaa.ARBEIDSOMRAADE))
+            .nomNivaa(NomNivaa.ARBEIDSOMRAADE)
             .agressoId("D")
             .orgNiv("ORGNIV3")
             .build();
@@ -190,7 +190,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_D1")
             .id("D1")
             .navn("OrgEnhet D1")
-            .nomNivaa(Optional.empty())
+            .nomNivaa(null)
             .agressoId("D1")
             .orgNiv("ORGENHET")
             .build();
@@ -199,7 +199,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_E")
             .id("E")
             .navn("OrgEnhet E")
-            .nomNivaa(Optional.of(NomNivaa.ARBEIDSOMRAADE))
+            .nomNivaa(NomNivaa.ARBEIDSOMRAADE)
             .agressoId("E")
             .orgNiv("ORGNIV3")
             .build();
@@ -208,7 +208,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_E1")
             .id("E1")
             .navn("OrgEnhet E1")
-            .nomNivaa(Optional.empty())
+            .nomNivaa(null)
             .agressoId("E1")
             .orgNiv("ORGENHET")
             .build();
@@ -217,7 +217,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_HELFO")
             .id("dummyHelfoId")
             .navn("OrgEnhet HELFO")
-            .nomNivaa(Optional.empty())
+            .nomNivaa(null)
             .agressoId("HELFO")
             .orgNiv("NAV")
             .build();
@@ -226,7 +226,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_SKATT")
             .id("dummySkattId")
             .navn("OrgEnhet SKATT")
-            .nomNivaa(Optional.empty())
+            .nomNivaa(null)
             .agressoId("SKATT")
             .orgNiv("NAV")
             .build();
@@ -235,7 +235,7 @@ abstract public class MockBasisTestOrganisering {
             .fid("FID_RIKSREV")
             .id("dummyRiksrevisjonId")
             .navn("OrgEnhet RIKSREV")
-            .nomNivaa(Optional.empty())
+            .nomNivaa(null)
             .agressoId("RIKSREV")
             .orgNiv("NAV")
             .build();
@@ -779,10 +779,10 @@ abstract public class MockBasisTestOrganisering {
         String navn;
         String orgNiv;
         LocalDate gyldigFom;
-        Optional<LocalDate> gyldigTom;
-        Optional<NomNivaa> nomNivaa;
-        Optional<OrgEnhetsType> orgEnhetsType;
+        LocalDate gyldigTom;
+        NomNivaa nomNivaa;
+        OrgEnhetsType orgEnhetsType;
         String uniqueAgressoId;
-        Optional<String> overordnetOrgEnhetFid;
+        String overordnetOrgEnhetFid;
     }
 }

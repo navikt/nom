@@ -49,12 +49,12 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitalizeNavn;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeEndOfDay;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeNoon;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.formatFornavnWithMellomnavn;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.isActive;
-import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
 import static org.apache.kafka.common.utils.Utils.isBlank;
 
 @Service
@@ -214,7 +214,7 @@ public class NomRemedyIntegrasjonServiceOld {
     }
 
     private static boolean orgtilknytningIsActiveOnCurrentDate(OrgtilknytningState orgtilknytningState) {
-        return !orgtilknytningState.getGyldigFom().isAfter(LocalDate.now()) && isNotNull(orgtilknytningState.getGyldigTom()) && !orgtilknytningState.getGyldigTom().isBefore(LocalDate.now());
+        return !orgtilknytningState.getGyldigFom().isAfter(LocalDate.now()) && nonNull(orgtilknytningState.getGyldigTom()) && !orgtilknytningState.getGyldigTom().isBefore(LocalDate.now());
     }
 
     private void handleDelayedOrgtiknytning(OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {

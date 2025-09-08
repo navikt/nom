@@ -18,7 +18,6 @@ import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -53,7 +52,7 @@ public class OrgEnhetCommandService {
                     dvhOrgenhet2.getAgressoId(),
                     dvhOrgenhet2.getNavn(),
                     dvhOrgenhet2.getOrgNiv(),
-                    Optional.ofNullable(dvhOrgenhet2.getAgressoOrgenhetType()),
+                    dvhOrgenhet2.getAgressoOrgenhetType(),
                     dvhOrgenhet2.getUniqueAgressoId()
                 );
             } catch (Exception e) {
@@ -96,7 +95,7 @@ public class OrgEnhetCommandService {
                     dvhOrgenhet2.getAgressoId(),
                     dvhOrgenhet2.getNavn(),
                     dvhOrgenhet2.getOrgNiv(),
-                    Optional.ofNullable(dvhOrgenhet2.getAgressoOrgenhetType()),
+                    dvhOrgenhet2.getAgressoOrgenhetType(),
                     dvhOrgenhet2.getUniqueAgressoId()
             );
         }

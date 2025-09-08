@@ -58,18 +58,18 @@ class EventsrcToState {
     }
 
     public OrgEnhetState toOrgEnhetState(String fid, JsonNode eventStateAggregate){
-        Optional<String> overordnetOrgEnhetFid = Optional.ofNullable(eventStateAggregate.hasNonNull("overordnetOrgEnhetFid") ? eventStateAggregate.get("overordnetOrgEnhetFid").asText() : null);
-        Optional<String> lederFid = Optional.ofNullable(eventStateAggregate.hasNonNull("lederRessursFid") ? eventStateAggregate.get("lederRessursFid").asText() : null);
+        String overordnetOrgEnhetFid = eventStateAggregate.hasNonNull("overordnetOrgEnhetFid") ? eventStateAggregate.get("overordnetOrgEnhetFid").asText() : null;
+        String lederFid = eventStateAggregate.hasNonNull("lederRessursFid") ? eventStateAggregate.get("lederRessursFid").asText() : null;
 
-        Optional<NomNivaa> orgEnhetsKategori = Optional.ofNullable(eventStateAggregate.hasNonNull("nomNivaa") ? NomNivaa.valueOf(eventStateAggregate.get("nomNivaa").asText()) : null);
-        Optional<OrgEnhetsType> orgEnhetsType =  Optional.ofNullable(eventStateAggregate.hasNonNull("orgEnhetsType") ? OrgEnhetsType.valueOf(eventStateAggregate.get("orgEnhetsType").asText()) : null);
+        NomNivaa orgEnhetsKategori = eventStateAggregate.hasNonNull("nomNivaa") ? NomNivaa.valueOf(eventStateAggregate.get("nomNivaa").asText()) : null;
+        OrgEnhetsType orgEnhetsType =  eventStateAggregate.hasNonNull("orgEnhetsType") ? OrgEnhetsType.valueOf(eventStateAggregate.get("orgEnhetsType").asText()) : null;
 
         // Agresso data
         var additionalData = Optional.ofNullable(eventStateAggregate.hasNonNull("additionalData") ? eventStateAggregate.get("additionalData") : null);
-        Optional<String> uniqueAgressoId = Optional.ofNullable(additionalData.isPresent() && additionalData.get().hasNonNull("uniqueAgressoId") ? additionalData.get().get("uniqueAgressoId").asText() : null);
-        Optional<String> agressoId = Optional.ofNullable(additionalData.isPresent() && additionalData.get().hasNonNull("agressoId") ? additionalData.get().get("agressoId").asText() : null);
-        Optional<String> agressoOrgNivaa = Optional.ofNullable(additionalData.isPresent() && additionalData.get().hasNonNull("agressoOrgNivaa") ? additionalData.get().get("agressoOrgNivaa").asText() : null);
-        Optional<String> agressoOrgenhetType = Optional.ofNullable(additionalData.isPresent() && additionalData.get().hasNonNull("agressoOrgenhetType") ? additionalData.get().get("agressoOrgenhetType").asText() : null);
+        String uniqueAgressoId = additionalData.isPresent() && additionalData.get().hasNonNull("uniqueAgressoId") ? additionalData.get().get("uniqueAgressoId").asText() : null;
+        String agressoId = additionalData.isPresent() && additionalData.get().hasNonNull("agressoId") ? additionalData.get().get("agressoId").asText() : null;
+        String agressoOrgNivaa = additionalData.isPresent() && additionalData.get().hasNonNull("agressoOrgNivaa") ? additionalData.get().get("agressoOrgNivaa").asText() : null;
+        String agressoOrgenhetType = additionalData.isPresent() && additionalData.get().hasNonNull("agressoOrgenhetType") ? additionalData.get().get("agressoOrgenhetType").asText() : null;
 
         try {
             return new OrgEnhetState(
@@ -77,7 +77,7 @@ class EventsrcToState {
                 eventStateAggregate.get("id").asText(),
                 eventStateAggregate.get("navn").asText(),
                 LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
-                Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null),
+                eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null,
                 overordnetOrgEnhetFid,
                 lederFid,
                 orgEnhetsType,

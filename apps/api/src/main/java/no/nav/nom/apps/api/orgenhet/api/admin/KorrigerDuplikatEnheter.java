@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import static java.util.Objects.isNull;
 
 @Slf4j
 @Tag(name = "Admin for korrigeringer")
@@ -55,7 +58,7 @@ public class KorrigerDuplikatEnheter {
             ObjectNode node = mapper.createObjectNode();
             node.put("Duplikate of", faktiskId);
             node.put("For", duplikat.getAgressoId() + "-" + duplikat.getNavn() + "-" + duplikat.getOrgNiv());
-            node.put("With period", duplikat.getGyldigFom().toString() + " - " + (duplikat.getGyldigTom().isPresent() ? duplikat.getGyldigTom().get() :  " "));
+            node.put("With period", duplikat.getGyldigFom().toString() + " - " + Objects.requireNonNullElse(duplikat.getGyldigTom(), " "));
             AvvikleOrgEnhet avvikleOrgEnhet =
                 new AvvikleOrgEnhet(
                     duplikat.getGyldigFom(),
@@ -78,7 +81,7 @@ public class KorrigerDuplikatEnheter {
         // FOM er før eller lik dagens dat, samt at TOM er null eller fremtidig
         return enheter.stream().filter( oe ->
             oe.getGyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
-                (oe.getGyldigTom().isEmpty() || oe.getGyldigTom().get().isAfter(LocalDate.now()))
+                (isNull(oe.getGyldigTom()) || oe.getGyldigTom().isAfter(LocalDate.now()))
         ).toList();
     }
 

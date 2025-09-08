@@ -1,7 +1,6 @@
 package no.nav.nom.libs.lucenewrapper.domain;
 
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgenhetFilter.GyldigTomSelection;
-import no.nav.nom.libs.lucenewrapper.search.Analyzers;
 import no.nav.nom.libs.lucenewrapper.search.IEntityIndexer;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
@@ -36,7 +35,7 @@ public class OrgEnhetIndexer implements IEntityIndexer<LuceneOrgEnhet, LuceneOrg
     public Document toDoc(LuceneOrgEnhet entity) {
         var doc = helper.createDocumentWithCommonFields(entity.id(), entity.navn());
 
-        doc.add(new IntPoint("gyldigTom", encodedDate(entity.gyldigTom().orElse(null))));
+        doc.add(new IntPoint("gyldigTom", encodedDate(entity.gyldigTom())));
         if (entity.orgNiv() != null) {
             doc.add(new Field("orgniv", entity.orgNiv(), TextField.TYPE_NOT_STORED));
         }

@@ -90,7 +90,7 @@ public class TeamcatController {
         // build hierarchy
         while (enhet.isPresent()) {
             var overenhetidByResolver = overordnetResolver.findOverordnetOrgEnhet(enhet.get().getFid()).map(OrgEnhetState::fid);
-            var overenhetid = enhet.flatMap(IOrgenhet::getOverordnetOrgEnhetFid).or(() -> overenhetidByResolver);
+            var overenhetid = enhet.map(IOrgenhet::getOverordnetOrgEnhetFid).or(() -> overenhetidByResolver);
 
             if (overenhetid.isEmpty()) {
                 enhet = Optional.empty();
@@ -269,7 +269,7 @@ public class TeamcatController {
         return ResponseEntity.ok(new TeamcatOrgenhetDTO(
             enhet.getId(),
             enhet.getNavn(),
-            enhet.getOverordnetOrgEnhetFid().orElse(null),
+            enhet.getOverordnetOrgEnhetFid(),
             determineAvdelingNavnByEnhet(enhet, new PerRequestCache()),
             mapped.ledere().stream().findFirst().map(RessursState::navident).orElse(null)
         ));

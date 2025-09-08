@@ -977,70 +977,70 @@ class E2eFraDvhTilEventsTest extends TestBase {
     IOrgenhet ENHET_A = new OrgEnhet(
         new OrgEnhetState(
             "FID_A", "a100xy", "Enhet A",
-            DD_10Y, Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("0AA0001"), Optional.of("ORGENHET"), Optional.empty()
+            DD_10Y, null,
+            null, null, null, null, null,
+            "0AA0001", "ORGENHET", null
         )
     );
     IOrgenhet ENHET_B = new OrgEnhet(
         new OrgEnhetState(
             "FID_B", "b100xy", "Enhet B",
-            DD_10Y, Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("0BB0001"), Optional.of("ORGENHET"), Optional.empty()
+            DD_10Y, null,
+            null, null, null, null, null,
+            "0BB0001", "ORGENHET", null
         )
     );
     IOrgenhet ENHET_C = new OrgEnhet(
         new OrgEnhetState(
             "FID_C", "c100xy", "Enhet C",
-            DD_10Y, Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("0CC0001"), Optional.of("ORGENHET"), Optional.empty()
+            DD_10Y, null,
+            null, null, null, null, null,
+            "0CC0001", "ORGENHET", null
         )
     );
 
     IOrgenhet ENHET_D1= new OrgEnhet(
         new OrgEnhetState(
             "FID_D1", "d100xy", "Enhet D1",
-            DD_10Y, Optional.of(DD_1Y_1D),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("0DD0001"), Optional.of("ORGENHET"), Optional.empty()
+            DD_10Y, DD_1Y_1D,
+            null, null, null, null, null,
+            "0DD0001", "ORGENHET", null
         )
     );
 
     IOrgenhet ENHET_D2 = new OrgEnhet(
         new OrgEnhetState(
             "FID_D2", "d200xy", "Enhet D2",
-            DD_1Y, Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("0DD0001"), Optional.of("ORGENHET"), Optional.empty()
+            DD_1Y, null,
+            null, null, null, null, null,
+            "0DD0001", "ORGENHET", null
         )
     );
     
     IOrgenhet ENHET_E = new OrgEnhet(
         new OrgEnhetState(
             "FID_E", "e100xy", "Enhet E",
-            DD_10Y, Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("0EE0001"), Optional.of("ORGENHET"), Optional.empty()
+            DD_10Y, null,
+            null, null, null, null, null,
+            "0EE0001", "ORGENHET", null
         )
     );
 
     IOrgenhet ENHET_F1 = new OrgEnhet(
         new OrgEnhetState(
             "FID_F1", "f100xy", "Enhet F1",
-            DD_10Y, Optional.of(LocalDate.of(2022, 10, 31)),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("0FF0001"), Optional.of("ORGENHET"), Optional.empty()
+            DD_10Y, LocalDate.of(2022, 10, 31),
+            null, null, null, null, null,
+            "0FF0001", "ORGENHET", null
         )
     );
 
     IOrgenhet ENHET_F2 = new OrgEnhet(
         new OrgEnhetState(
             "FID_F2", "f200xy", "Enhet F2",
-            LocalDate.of(2022, 11, 1), Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("0FF0001"), Optional.of("ORGENHET"), Optional.empty()
+            LocalDate.of(2022, 11, 1), null,
+            null, null, null, null, null,
+            "0FF0001", "ORGENHET", null
         )
     );
 }

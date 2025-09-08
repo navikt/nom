@@ -112,14 +112,14 @@ public class NyeRessursStillingStrukturerer {
 
     private void sjekkStillingPerioderMotOrgenhetensPeriode(StrukturerteStillingPerioderForNavident sspForNavident) {
         sspForNavident.stillingPerioder().forEach(sp -> {
-            if (foer(sp.gyldigFom(), sp.orgenhet().getGyldigFom()) || etter(sp.gyldigTom(), sp.orgenhet().getGyldigTom().orElse(null))) {
+            if (foer(sp.gyldigFom(), sp.orgenhet().getGyldigFom()) || etter(sp.gyldigTom(), sp.orgenhet().getGyldigTom())) {
                 sspForNavident.addError(
                     StrukturerteStillingPerioderForNavident.ErrorType.STILLINGPERIODE_ER_UTENFOR_ORGENHET_PERIODE,
                     """
                     Etter behandling av DvhStillinger til behandlede StillingPerioder:
                     StillingsPeriode for Navident %s med gyldighetsperiode [%s - %s] går utover orgenhetens gyldighetsperiode [%s - %s].
                     """.formatted(
-                        sspForNavident.navident(), sp.gyldigFom(), sp.gyldigTom(), sp.orgenhet().getGyldigFom(), sp.orgenhet().getGyldigTom().orElse(null)
+                        sspForNavident.navident(), sp.gyldigFom(), sp.gyldigTom(), sp.orgenhet().getGyldigFom(), sp.orgenhet().getGyldigTom()
                     ),
                     sp
                 );

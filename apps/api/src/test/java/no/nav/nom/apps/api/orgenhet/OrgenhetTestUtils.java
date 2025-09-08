@@ -14,11 +14,11 @@ public class OrgenhetTestUtils {
             .fid(UUID.randomUUID().toString())
             .id(UUID.randomUUID().toString())
             .navn(UUID.randomUUID().toString())
-            .uniqueAgressoId(Optional.of(UUID.randomUUID().toString()))
-            .agressoOrgNivaa(Optional.empty())
-            .agressoId(Optional.of(UUID.randomUUID().toString()))
-            .gyldigTom(Optional.of(LocalDate.now().plusDays(1)))
-            .orgEnhetsType(Optional.empty())
+            .uniqueAgressoId(UUID.randomUUID().toString())
+            .agressoOrgNivaa(null)
+            .agressoId(UUID.randomUUID().toString())
+            .gyldigTom(LocalDate.now().plusDays(1))
+            .orgEnhetsType(null)
             .build();
 
     }

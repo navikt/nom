@@ -12,6 +12,8 @@ import org.springframework.messaging.handler.annotation.Header;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
+
 @Slf4j
 public class NomStateOrgEnhetListener extends AbstractNomStateListener<OrgEnhetState> {
     private final OrgEnhetStateRepository orgEnhetStateRepository;
@@ -34,7 +36,7 @@ public class NomStateOrgEnhetListener extends AbstractNomStateListener<OrgEnhetS
 
     @Override
     protected void registerMessageWithState(String key, OrgEnhetState orgEnhetState) {
-        if (orgEnhetState.uniqueAgressoId().isPresent()) {
+        if (nonNull(orgEnhetState.uniqueAgressoId())) {
             orgEnhetStateRepository.update(orgEnhetState);
         } else { log.info("OrgEnhetState with key {} has no uniqueAgressoId - will not add to state", key); }
     }

@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Import;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Slf4j
 @Import({
@@ -25,11 +24,11 @@ public class OrgEnhetStateTopicConsumerTest extends StateTopicConsumerTestBase<O
         testMessage = OrgEnhetState.builder()
             .fid("FID_X")
             .id("ID_1")
-            .agressoId(Optional.of("001"))
-            .agressoOrgNivaa(Optional.of("ORGENHET"))
+            .agressoId("001")
+            .agressoOrgNivaa("ORGENHET")
             .navn("NAVNET")
             .gyldigFom(LocalDate.of(2021, 1, 1))
-            .uniqueAgressoId(Optional.of("001-NAVNET-ORGENHET"))
+            .uniqueAgressoId("001-NAVNET-ORGENHET")
             .build();
     }
 

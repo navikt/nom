@@ -3,8 +3,6 @@ package no.nav.nom.contract.nom.eventsource;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 
-import java.util.Optional;
-
 public class OrgEnhetTypeEndretEventV1 extends OrgEnhetEvent {
 
     @JsonCreator
@@ -21,7 +19,7 @@ public class OrgEnhetTypeEndretEventV1 extends OrgEnhetEvent {
     }
 
     public record OrgEnhetTypeEndretEventData(
-        Optional<OrgEnhetsType> orgEnhetsType
+        OrgEnhetsType orgEnhetsType
     ) implements Data {}
 
 }

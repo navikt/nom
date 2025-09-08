@@ -11,7 +11,6 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
-import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -27,9 +26,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Slf4j
 @Service
@@ -76,7 +77,7 @@ public class DvhOrgenhetsLast {
                         return true;
                     }).filter(e -> {
                         if (e.getOrgNiv().equals("ORGENHET")) {
-                            if (e.getOrgenhetStatus().equals("P") && e.getGyldigFom().isAfter(e.getGyldigTom().orElse(LocalDate.MAX))) {
+                            if (e.getOrgenhetStatus().equals("P") && e.getGyldigFom().isAfter(Objects.requireNonNullElse(e.getGyldigTom(), LocalDate.MAX))) {
                                 validations.get(ValidationType.PARKED_INVALID_PERIOD).add(e);
                                 return false;
                             }
@@ -117,20 +118,20 @@ public class DvhOrgenhetsLast {
                             .filter(p ->
                                     isOverlapping(parsedEnhet,
                                             fidChangedStartDate.containsKey(p.fid()) ? fidChangedStartDate.get(p.fid()) : p.gyldigFom(),
-                                            fidMarkedForEndDate.containsKey(p.fid()) ? fidMarkedForEndDate.get(p.fid()) : p.gyldigTom().orElse(null))
+                                            fidMarkedForEndDate.containsKey(p.fid()) ? fidMarkedForEndDate.get(p.fid()) : p.gyldigTom())
                                     || withinOneMonth(parsedEnhet,
                                             fidChangedStartDate.containsKey(p.fid()) ? fidChangedStartDate.get(p.fid()) : p.gyldigFom(),
-                                            fidMarkedForEndDate.containsKey(p.fid()) ? fidMarkedForEndDate.get(p.fid()) : p.gyldigTom().orElse(null))
+                                            fidMarkedForEndDate.containsKey(p.fid()) ? fidMarkedForEndDate.get(p.fid()) : p.gyldigTom())
                                     )
                             .toList();
 
                     if (stateEnheterMatchingDvhParsedEnhet.size() < 2) {
                         stateEnheterMatchingDvhParsedEnhet.stream().findAny().ifPresentOrElse( orgEnhetState -> {
                             // Parsed DVH enhet found in state
-                            if (parsedEnhet.getGyldigTom().isPresent() && orgEnhetState.gyldigTom().isEmpty()) {
+                            if (nonNull(parsedEnhet.getGyldigTom()) && isNull(orgEnhetState.gyldigTom())) {
                                 avvikleOrgEnhet(orgEnhetState.fid(), parsedEnhet);
                                 // Need to keep track of Eventual gyldigTom in case there are more parsed enheter for same uniqueAgressoId to process
-                                fidMarkedForEndDate.put(orgEnhetState.fid(), parsedEnhet.getGyldigTom().get());
+                                fidMarkedForEndDate.put(orgEnhetState.fid(), parsedEnhet.getGyldigTom());
                             }
                             // Ved overlapp skal orgEnhetState korrigeres med fra-til dato settes likt DvhEnhet fra-til - Hvis disse er forskjellig
                             korrigerOrgEnhetHvisEndringer(parsedEnhet, orgEnhetState);
@@ -141,7 +142,7 @@ public class DvhOrgenhetsLast {
                         }, () -> {
                             // Parsed DVH enhet NOT found in state
                             String fid = opprettOrgEnhet(parsedEnhet);
-                            if (parsedEnhet.getGyldigTom().isPresent()) {
+                            if (nonNull(parsedEnhet.getGyldigTom())) {
                                 avvikleOrgEnhet(fid, parsedEnhet);
                             }
                         });
@@ -175,10 +176,10 @@ public class DvhOrgenhetsLast {
                     val stateEnheterPerUniqueAgressoId = orgEnhetStateRepository.findAllByUniqueAgressoId(orgenhetV2.getUniqueAgressoId());
                     stateEnheterPerUniqueAgressoId
                         .stream()
-                        .filter(orgEnhetState -> orgEnhetState.gyldigTom().map(gyldigTom -> gyldigTom.isBefore(LocalDate.now())).orElse(false))
+                        .filter(orgEnhetState -> nonNull(orgEnhetState.gyldigTom()) && orgEnhetState.gyldigTom().isBefore(LocalDate.now()))
                         .forEach(orgEnhetState -> {
-                            LocalDate gyldigTom = orgenhetV2.getGyldigTom().orElse(LocalDate.now());
-                            if (orgEnhetState.gyldigTom().orElse(LocalDate.MAX).isAfter(gyldigTom)) { // hvis State har gyldigTom < evt. ny 'kalkulert gyldigTom' så ikke endre, for å slippe case med dobbelt parkerte enheter
+                            LocalDate gyldigTom = Objects.requireNonNullElse(orgenhetV2.getGyldigTom(), LocalDate.now());
+                            if (orgEnhetState.gyldigTom().isAfter(gyldigTom)) { // hvis State har gyldigTom < evt. ny 'kalkulert gyldigTom' så ikke endre, for å slippe case med dobbelt parkerte enheter
                                 avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, gyldigTom);
                             }
                         });
@@ -190,7 +191,7 @@ public class DvhOrgenhetsLast {
                     val stateEnheterPerUniqueAgressoId = orgEnhetStateRepository.findAllByUniqueAgressoId(orgenhetV2.getUniqueAgressoId());
                     stateEnheterPerUniqueAgressoId
                         .stream()
-                        .filter(orgEnhetState -> orgEnhetState.gyldigTom().map(gyldigTom -> gyldigTom.isBefore(LocalDate.now())).orElse(false))
+                        .filter(orgEnhetState -> nonNull(orgEnhetState.gyldigTom()) && orgEnhetState.gyldigTom().isBefore(LocalDate.now()))
                         .forEach(orgEnhetState -> avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, LocalDate.now()));
                 }
             );
@@ -213,25 +214,24 @@ public class DvhOrgenhetsLast {
     }
 
     public boolean isOverlapping(IOrgenhet orgenhetV2One, IOrgenhet orgenhetV2Two) {
-        return orgenhetV2One.getGyldigFom().isBefore(orgenhetV2Two.getGyldigTom().orElse(LocalDate.MAX)) && orgenhetV2Two.getGyldigFom()
-                .isBefore(orgenhetV2One.getGyldigTom().orElse(LocalDate.MAX));
+        return orgenhetV2One.getGyldigFom().isBefore(Objects.requireNonNullElse(orgenhetV2Two.getGyldigTom(), LocalDate.MAX)) && orgenhetV2Two.getGyldigFom()
+                .isBefore(Objects.requireNonNullElse(orgenhetV2One.getGyldigTom(), LocalDate.MAX));
     }
 
     public boolean isOverlapping(DvhOrgenhetV2 dvhOrgenhet, LocalDate fromDate, LocalDate toDate) {
         toDate = toDate != null ? toDate : LocalDate.MAX;
         return dvhOrgenhet.getGyldigFom().isBefore(toDate) && fromDate
-                .isBefore(dvhOrgenhet.getGyldigTom().orElse(LocalDate.MAX));
+                .isBefore(Objects.requireNonNullElse(dvhOrgenhet.getGyldigTom(), LocalDate.MAX));
     }
 
     public boolean withinOneMonth(IOrgenhet dvhOrgenhetV2One, IOrgenhet dvhOrgenhetV2Two) {
         return dvhOrgenhetV2One != dvhOrgenhetV2Two && (Math.abs(ChronoUnit.MONTHS.between(
                 dvhOrgenhetV2One.getGyldigFom().withDayOfMonth(1),
-                dvhOrgenhetV2Two.getGyldigTom()
-                        .orElse(LocalDate.MAX)
+                Objects.requireNonNullElse(dvhOrgenhetV2Two.getGyldigTom(), LocalDate.MAX)
                         .withDayOfMonth(1)
         )) <= 1 || Math.abs(ChronoUnit.MONTHS.between(
                 dvhOrgenhetV2Two.getGyldigFom().withDayOfMonth(1),
-                dvhOrgenhetV2One.getGyldigTom().orElse(LocalDate.MAX).withDayOfMonth(1)
+                Objects.requireNonNullElse(dvhOrgenhetV2One.getGyldigTom(), LocalDate.MAX).withDayOfMonth(1)
         )) <= 1);
     }
 
@@ -244,7 +244,7 @@ public class DvhOrgenhetsLast {
                 )) <= 1
             || Math.abs(ChronoUnit.MONTHS.between(
                     fromDate,
-                    dvhOrgenhet.getGyldigTom().orElse(LocalDate.MAX).withDayOfMonth(1)
+                    Objects.requireNonNullElse(dvhOrgenhet.getGyldigTom(), LocalDate.MAX).withDayOfMonth(1)
                 )) <= 1);
     }
 
@@ -253,15 +253,15 @@ public class DvhOrgenhetsLast {
                 orgEnhetIdGenerator.newId(),
                 dvhOrgenhetV2.getNavn(),
                 dvhOrgenhetV2.getGyldigFom(),
-                Optional.empty(),
-                Optional.empty(),
+                null,
+                null,
             new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrgenhetV2.getRawData(), new Origination("nom-api", "nom-api"))
         );
         return orgEnhetCommandService.opprettOrgEnhet(opprettOrgEnhet);
     }
 
     private void avvikleOrgEnhet(String fid, DvhOrgenhetV2 dvhOrgenhetV2) {
-        avvikleOrgEnhet(fid, dvhOrgenhetV2, dvhOrgenhetV2.getGyldigTom().get());
+        avvikleOrgEnhet(fid, dvhOrgenhetV2, dvhOrgenhetV2.getGyldigTom());
     }
 
     private void avvikleOrgEnhet(String fid, DvhOrgenhetV2 dvhOrgenhetV2, LocalDate gyldigTom) {
@@ -279,8 +279,8 @@ public class DvhOrgenhetsLast {
     private void korrigerOrgEnhetHvisEndringer(DvhOrgenhetV2 dvhOrgenhetV2, OrgEnhetState orgEnhetState) {
         val navnEndret = !orgEnhetState.navn().equals(dvhOrgenhetV2.getNavn());
         val datoFOMEndret = !orgEnhetState.gyldigFom().equals(dvhOrgenhetV2.getGyldigFom());
-        val datoTOMEndret = orgEnhetState.gyldigTom().isPresent() && !dvhOrgenhetV2.getGyldigTom().equals(orgEnhetState.gyldigTom());
-        val agressoOrgEnhetTypeEndret = !Objects.equals(orgEnhetState.agressoOrgenhetType().orElse(null), dvhOrgenhetV2.getAgressoOrgenhetType());
+        val datoTOMEndret = nonNull(orgEnhetState.gyldigTom()) && !dvhOrgenhetV2.getGyldigTom().equals(orgEnhetState.gyldigTom());
+        val agressoOrgEnhetTypeEndret = !Objects.equals(orgEnhetState.agressoOrgenhetType(), dvhOrgenhetV2.getAgressoOrgenhetType());
 
         if (navnEndret || datoFOMEndret || datoTOMEndret ||agressoOrgEnhetTypeEndret) {
             val korrigering = new KorrigerOrgEnhet(

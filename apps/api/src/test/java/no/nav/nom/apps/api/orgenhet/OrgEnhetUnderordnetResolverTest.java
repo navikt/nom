@@ -8,12 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static no.nav.nom.apps.api.common.TestData.orgEnhetState;
 import static no.nav.nom.apps.api.common.TestData.organiseringState;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 public class OrgEnhetUnderordnetResolverTest extends OrgEnhetTestBase {
 
@@ -52,17 +50,17 @@ public class OrgEnhetUnderordnetResolverTest extends OrgEnhetTestBase {
 
         orgEnhetStateRepository.update(orgEnhetState().toBuilder().id(idUnderordnet1)
             .gyldigFom(LocalDate.now().minusDays(20))
-            .gyldigTom(Optional.of(LocalDate.now().plusDays(5)))
+            .gyldigTom(LocalDate.now().plusDays(5))
             .build());
 
         orgEnhetStateRepository.update(orgEnhetState().toBuilder().id(idUnderordnet2)
             .gyldigFom(LocalDate.now().minusDays(20))
-            .gyldigTom(Optional.of(LocalDate.now().plusDays(0)))
+            .gyldigTom(LocalDate.now().plusDays(0))
             .build());
 
         orgEnhetStateRepository.update(orgEnhetState().toBuilder().id(idUnderordnet3)
             .gyldigFom(LocalDate.now().minusDays(20))
-            .gyldigTom(Optional.of(LocalDate.now().plusDays(1)))
+            .gyldigTom(LocalDate.now().plusDays(1))
             .build());
 
         OrgEnhetState orgEnhet = orgEnhetState().toBuilder()
@@ -105,7 +103,7 @@ public class OrgEnhetUnderordnetResolverTest extends OrgEnhetTestBase {
 
         orgEnhetStateRepository.update(orgEnhetState().toBuilder().id(idUnderordnet)
             .gyldigFom(LocalDate.now().minusDays(20))
-            .gyldigTom(Optional.of(LocalDate.now().plusDays(0)))
+            .gyldigTom(LocalDate.now().plusDays(0))
             .build());
 
         OrgEnhetState orgEnhet = orgEnhetState().toBuilder()
@@ -134,7 +132,7 @@ public class OrgEnhetUnderordnetResolverTest extends OrgEnhetTestBase {
         orgEnhetStateRepository.update(orgEnhetState().toBuilder()
             .id(idOrgEnhet)
             .gyldigFom(LocalDate.now().minusDays(20))
-            .gyldigTom(Optional.of(LocalDate.now().minusDays(2)))
+            .gyldigTom(LocalDate.now().minusDays(2))
             .build());
 
         orgEnhetStateRepository.update(orgEnhetState().toBuilder().id(idOrgEnhetOver).build());

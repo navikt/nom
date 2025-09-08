@@ -165,15 +165,15 @@ public class KafkaUtils {
             "testOrgenhetId" + suffix,
             "testOrgenhetNavn" + suffix,
             LocalDate.now(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.of("0000000".substring(0, 7 - suffix.length()) + suffix),
-            Optional.of("ORGENHET"),
-            Optional.empty()
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "0000000".substring(0, 7 - suffix.length()) + suffix,
+            "ORGENHET",
+            null
         );
 
         createOrgenhetHendelseEventSource(orgEnhetState);

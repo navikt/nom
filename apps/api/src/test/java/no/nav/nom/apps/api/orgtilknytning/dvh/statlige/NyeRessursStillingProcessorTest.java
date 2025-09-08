@@ -529,25 +529,25 @@ class NyeRessursStillingProcessorTest extends TestBase {
     IOrgenhet ENHET_A = new OrgEnhet(
         new OrgEnhetState(
             "FID_A", "a100xy", "Enhet A",
-            LocalDate.now().minusYears(10), Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("Enhet_A"), Optional.of("ORGENHET"), Optional.empty()
+            LocalDate.now().minusYears(10), null,
+            null, null, null, null, null,
+            "Enhet_A", "ORGENHET", null
         )
     );
     IOrgenhet ENHET_B = new OrgEnhet(
         new OrgEnhetState(
             "FID_B", "b100xy", "Enhet B",
-            LocalDate.now().minusYears(10), Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("Enhet_B"), Optional.of("ORGENHET"), Optional.empty()
+            LocalDate.now().minusYears(10), null,
+            null, null, null, null, null,
+            "Enhet_B", "ORGENHET", null
         )
     );
     IOrgenhet ENHET_C = new OrgEnhet(
         new OrgEnhetState(
             "FID_C", "c100xy", "Enhet C",
-            LocalDate.now().minusYears(10), Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("Enhet_C"), Optional.of("ORGENHET"), Optional.empty()
+            LocalDate.now().minusYears(10), null,
+            null, null, null, null, null,
+            "Enhet_C", "ORGENHET", null
         )
     );
 }

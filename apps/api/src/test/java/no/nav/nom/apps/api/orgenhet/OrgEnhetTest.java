@@ -20,8 +20,9 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
@@ -283,7 +284,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet.get().getAgressoOrgenhetType());
         assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet.get().getOrgNiv());
         assertEquals(LocalDate.parse("2021-08-01"), outputEnhet.get().getGyldigFom());
-        assertFalse(outputEnhet.get().getGyldigTom().isPresent());
+        assertNull(outputEnhet.get().getGyldigTom());
     }
 
     @Test
@@ -340,7 +341,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet.get().getAgressoOrgenhetType());
         assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet.get().getOrgNiv());
         assertEquals(LocalDate.parse("2022-06-01"), outputEnhet.get().getGyldigFom());
-        assertFalse(outputEnhet.get().getGyldigTom().isPresent());
+        assertNull(outputEnhet.get().getGyldigTom());
     }
 
     @Test
@@ -376,7 +377,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet.get().getAgressoOrgenhetType());
         assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet.get().getOrgNiv());
         assertEquals(LocalDate.parse("2021-08-01"), outputEnhet.get().getGyldigFom());
-        assertFalse(outputEnhet.get().getGyldigTom().isPresent());
+        assertNull(outputEnhet.get().getGyldigTom());
 
         dvhOrgenhetMockUtils.createEmptyResponse();
         val mockedEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault()
@@ -412,8 +413,8 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet2.get().getAgressoOrgenhetType());
         assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet2.get().getOrgNiv());
         assertEquals(LocalDate.parse("2021-08-01"), outputEnhet2.get().getGyldigFom());
-        assertTrue(outputEnhet2.get().getGyldigTom().isPresent());
-        assertEquals(LocalDate.parse("2022-01-31"), outputEnhet2.get().getGyldigTom().get());
+        assertNotNull(outputEnhet2.get().getGyldigTom());
+        assertEquals(LocalDate.parse("2022-01-31"), outputEnhet2.get().getGyldigTom());
     }
 
     @Test
@@ -463,13 +464,13 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet1.get().getAgressoOrgenhetType());
         assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet1.get().getOrgNiv());
         assertEquals(LocalDate.parse("2021-06-01"), outputEnhet1.get().getGyldigFom());
-        assertFalse(outputEnhet1.get().getGyldigTom().isPresent());
+        assertNull(outputEnhet1.get().getGyldigTom());
 
         val historicFid = allEnheter.stream().filter(e -> !e.getFid().equals(outputEnhet1.get().getFid())).findFirst().orElseThrow().getFid();
 
         var historicOutputEnhet = orgenhetService.getByFid(historicFid);
         assertTrue(historicOutputEnhet.isPresent());
-        assertEquals(LocalDate.parse("2020-12-31"), historicOutputEnhet.get().getGyldigTom().orElseThrow());
+        assertEquals(LocalDate.parse("2020-12-31"), historicOutputEnhet.get().getGyldigTom());
 
         dvhOrgenhetMockUtils.createEmptyResponse();
         mockedEnhet1.setORGENHET_TIL_PERIODE(202102);
@@ -498,7 +499,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
 
         historicOutputEnhet = orgenhetService.getByFid(historicStateFid);
         assertTrue(historicOutputEnhet.isPresent());
-        assertEquals(LocalDate.parse("2021-02-28"), historicOutputEnhet.get().getGyldigTom().orElseThrow());
+        assertEquals(LocalDate.parse("2021-02-28"), historicOutputEnhet.get().getGyldigTom());
     }
 
     @Test
@@ -554,7 +555,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet1.get().getAgressoOrgenhetType());
         assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet1.get().getOrgNiv());
         assertEquals(LocalDate.parse("2020-08-01"), outputEnhet1.get().getGyldigFom());
-        assertFalse(outputEnhet1.get().getGyldigTom().isPresent());
+        assertNull(outputEnhet1.get().getGyldigTom());
 
         mockedEnhet1.setORGENHET_TIL_PERIODE(202011);
         dvhOrgenhetMockUtils.createEmptyResponse();
@@ -603,12 +604,12 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
 
         assertEquals(outputEnhet1Before.get().getFid(), outputEnhet1After.get().getFid());
         assertEquals(LocalDate.parse("2021-01-01"), outputEnhet1After.get().getGyldigFom());
-        assertFalse(outputEnhet1After.get().getGyldigTom().isPresent());
+        assertNull(outputEnhet1After.get().getGyldigTom());
 
         val outputEnhet3 = allEnheter.stream().filter(e -> !e.getFid().equals(outputEnhet1After.get().getFid())).findAny();
         assertTrue(outputEnhet3.isPresent());
         assertEquals(LocalDate.parse("2020-08-01"), outputEnhet3.get().getGyldigFom());
-        assertEquals(LocalDate.parse("2020-11-30"), outputEnhet3.get().getGyldigTom().orElseThrow());
+        assertEquals(LocalDate.parse("2020-11-30"), outputEnhet3.get().getGyldigTom());
     }
 
     @Test
@@ -675,12 +676,12 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet1.get().getAgressoOrgenhetType());
         assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet1.get().getOrgNiv());
         assertEquals(LocalDate.parse("2021-01-01"), outputEnhet1.get().getGyldigFom());
-        assertFalse(outputEnhet1.get().getGyldigTom().isPresent());
+        assertNull(outputEnhet1.get().getGyldigTom());
 
         val outputEnhet3 = allEnheter.stream().filter(e -> !e.getFid().equals(outputEnhet1.get().getFid())).findAny();
         assertTrue(outputEnhet3.isPresent());
         assertEquals(LocalDate.parse("2020-08-01"), outputEnhet3.get().getGyldigFom());
-        assertEquals(LocalDate.parse("2020-11-30"), outputEnhet3.get().getGyldigTom().orElseThrow());
+        assertEquals(LocalDate.parse("2020-11-30"), outputEnhet3.get().getGyldigTom());
     }
 
     @Test

@@ -9,6 +9,7 @@ import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
@@ -24,11 +25,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNullElse;
 
 @Service
 public class OrgtilknytningSanityCheckService {
@@ -59,12 +61,12 @@ public class OrgtilknytningSanityCheckService {
             var oe = orgEnhetStateRepository.findById(t.orgEnhetId()).get();
             orgtilknytningMedOrgEnhetList.add(new OrgtilknytningMedOrgEnhet(
                     t.navident(),
-                    oe.uniqueAgressoId().isPresent() ? oe.uniqueAgressoId().get() : "",
+                    Objects.requireNonNullElse(oe.uniqueAgressoId(), ""),
                     t.orgEnhetId(),
                     t.gyldigFom().toString(),
                     requireNonNullElse(t.gyldigTom(), "").toString(),
                     oe.gyldigFom().toString(),
-                    oe.gyldigTom().isPresent() ? oe.gyldigTom().get().toString() : ""
+                    nonNull(oe.gyldigTom()) ? oe.gyldigTom().toString() : ""
             ));
         });
 
@@ -246,14 +248,17 @@ public class OrgtilknytningSanityCheckService {
     private List<OrgtilknytningState> orgtilknytningerUtoverEnhetPeriode(List<OrgtilknytningState> orgtilknytninger) {
         return orgtilknytninger.stream()
                 .filter(t -> {
-                    var orgEnhet = orgEnhetStateRepository.findByFid(t.orgEnhetId());
-                    if (orgEnhet.isPresent() && orgEnhet.get().gyldigTom().isPresent() && orgEnhet.get().gyldigTom().get().isBefore(t.gyldigFom())) {
-                        return true; // orgEnhet.gyldigTom < tilknytning.gyldigFom
+                    Optional<OrgEnhetState> orgEnhet = orgEnhetStateRepository.findByFid(t.orgEnhetId());
+                    if (orgEnhet.isPresent()) {
+                        if (nonNull(orgEnhet.get().gyldigTom()) && orgEnhet.get().gyldigTom().isBefore(t.gyldigFom())) {
+                            return true; // orgEnhet.gyldigTom < tilknytning.gyldigFom
+                        }
+                        if (nonNull(t.gyldigTom()) && orgEnhet.get().gyldigFom().isAfter(t.gyldigTom())) {
+                            return true; // orgEnhet.gyldigFom > tilknytning.gyldigTom
+                        }
+                        return isNull(t.gyldigTom()) && nonNull(orgEnhet.get().gyldigTom()); // orgEnhet avsluttet > tilknytning ikke avsluttet
                     }
-                    if (nonNull(t.gyldigTom()) && orgEnhet.isPresent() && orgEnhet.get().gyldigFom().isAfter(t.gyldigTom())) {
-                        return true; // orgEnhet.gyldigFom > tilknytning.gyldigTom
-                    }
-                    return isNull(t.gyldigTom()) && orgEnhet.isPresent() && orgEnhet.get().gyldigTom().isPresent(); // orgEnhet avsluttet > tilknytning ikke avsluttet
+                    return false;
                 }).toList();
     }
 

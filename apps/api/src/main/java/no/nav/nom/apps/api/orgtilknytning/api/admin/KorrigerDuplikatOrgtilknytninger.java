@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static no.nav.nom.libs.utils.common.util.ObjectUtils.isNotNull;
+import static java.util.Objects.requireNonNullElse;
 
 @Slf4j
 @Tag(name = "Admin for korrigeringer")
@@ -90,7 +90,7 @@ public class KorrigerDuplikatOrgtilknytninger {
             ObjectNode node = mapper.createObjectNode();
             node.put("Duplikate of", originalFid);
             node.put("For enhetId", duplikat.orgEnhetId());
-            node.put("With period", duplikat.gyldigFom().toString() + " - " + (isNotNull(duplikat.gyldigTom()) ? duplikat.gyldigTom() :  " "));
+            node.put("With period", duplikat.gyldigFom().toString() + " - " + requireNonNullElse(duplikat.gyldigTom(),  " "));
             FjernOrgtilknytning fjernOrgtilknytning =
                 new FjernOrgtilknytning(
                     duplikat.navident(),

@@ -153,8 +153,8 @@ public class TeamcatControllerTest extends RestTestBase {
         return new OrgEnhet(OrgEnhetState.builder().navn(name)
             .fid(oeId)
             .id(oeId)
-            .overordnetOrgEnhetFid(Optional.ofNullable(overOeId))
-            .agressoId(Optional.of(oeId))
+            .overordnetOrgEnhetFid(overOeId)
+            .agressoId(oeId)
             .build());
     }
 
