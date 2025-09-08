@@ -24,7 +24,7 @@ import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
 const schema = z.object({
   fid: fidValidator(),
   confirm: confirmTextValidator(),
-  personident: z.string().regex(/\d{11}/, "Personident må være 11 tegn"),
+  nyPersonident: z.string().regex(/\d{11}/, "Personident må være 11 tegn"),
 });
 
 type SchemaType = z.infer<typeof schema>;
@@ -67,10 +67,10 @@ export function OppdaterPersonidentRessurs() {
             <Modal.Body className="flex gap-4 flex-col">
               <FidTextField />
               <TextField
-                error={methods.formState.errors.personident?.message}
+                error={methods.formState.errors.nyPersonident?.message}
                 htmlSize={11}
                 label="Ny personident"
-                {...methods.register("personident")}
+                {...methods.register("nyPersonident")}
               />
               <ConfirmTextField />
               {(() => {
