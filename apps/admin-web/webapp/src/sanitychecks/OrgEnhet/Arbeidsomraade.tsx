@@ -48,7 +48,7 @@ export function Arbeidsomraade() {
       <AntallOgExcelEksportKnapp
         antall={arbOmraadeInfo?.loevnoderMedFeil.length}
         exportName="validerArbeidsomraade"
-        exportType="orgEnhet"
+        exportType="orgenhet"
       />
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>

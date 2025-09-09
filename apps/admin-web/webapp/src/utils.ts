@@ -51,7 +51,7 @@ export function isTodayOrAfter(date: Date) {
 }
 
 export const exportSanityCheckToExcel = async (
-  exportType: "orgEnhet" | "ressurs" | "orgtilknytning" | "RemedyCompare",
+  exportType: "orgenhet" | "ressurs" | "orgtilknytning" | "RemedyCompare",
   exportName: string | undefined,
 ) => {
   await exportSanityCheckToExcelOptions(exportType, exportName);

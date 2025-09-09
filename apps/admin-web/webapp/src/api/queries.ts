@@ -740,7 +740,7 @@ export async function getDuplikateRessursHendelser(): Promise<
 }
 
 export async function exportSanityCheckToExcelOptions(
-  exportType: "orgEnhet" | "ressurs" | "orgtilknytning" | "RemedyCompare",
+  exportType: "orgenhet" | "ressurs" | "orgtilknytning" | "RemedyCompare",
   exportName: string | undefined,
 ) {
   const response =
