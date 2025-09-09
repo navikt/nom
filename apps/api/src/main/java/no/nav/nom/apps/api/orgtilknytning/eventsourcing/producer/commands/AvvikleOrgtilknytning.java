@@ -9,6 +9,11 @@ public record AvvikleOrgtilknytning(
     String navident,
     String orgenhetId,
     LocalDate gyldigTom,
+    String masseflyttetFraFid,
     InputMetadata inputMetadata,
     OrgtilknytningEvent.AdditionalAgressoData additionalAgressoData
-) implements OrgtilknytningCommand {}
+) implements OrgtilknytningCommand {
+    public AvvikleOrgtilknytning(String navident, String orgenhetId, LocalDate gyldigTom, InputMetadata inputMetadata, OrgtilknytningEvent.AdditionalAgressoData additionalAgressoData) {
+        this(navident, orgenhetId, gyldigTom, null, inputMetadata, additionalAgressoData);
+    }
+}

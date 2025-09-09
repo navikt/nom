@@ -5,8 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningAvsluttetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -43,13 +46,14 @@ class KafkaStreamProcessor {
             .aggregate(
                 objectMapper::createObjectNode,
                 (key, event, state) -> {
+                    var convertedEvent = objectMapper.convertValue(event.getData(), ObjectNode.class);
                     if (event instanceof OrgtilknytningFjernetEventV1) {
                         state.put("TOMBSTONE", true);
                         // return null; // Create TOMBSTONE - should skip mapValues and get forwarded directly to output stream. -
                         // (See https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Stream+Usage+Patterns#KafkaStreamUsagePatterns-Howtomanagethesizeofstatestoresusingtombstones?)
                         // NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
                     } else {
-                        state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                        state.setAll(convertedEvent);
                         if (event.getMetadata() != null && event.getMetadata().inputMetadata() != null) {
                             var origination = event.getMetadata().inputMetadata().origination();
                             if (origination != null && origination.initiatedBy() != null) {
@@ -57,6 +61,7 @@ class KafkaStreamProcessor {
                             }
                         }
                     }
+                    fjernMasseflyttFraFidHvisIkkeAngittIEvent(state, convertedEvent);
                     return state;
                 },
                 Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
@@ -64,6 +69,18 @@ class KafkaStreamProcessor {
             .mapValues(this::toOrgtilknytningState)
             .toStream()
             .to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(OrgtilknytningState.class)));
+    }
+
+    private void fjernMasseflyttFraFidHvisIkkeAngittIEvent(ObjectNode state, ObjectNode event) {
+        if (state.has("masseflyttetFraFid")) {
+            if (!eventHarMasseflyttFraFidSatt(event)) {
+                state.remove("masseflyttetFraFid");
+            }
+        }
+    }
+
+    private boolean eventHarMasseflyttFraFidSatt(ObjectNode event) {
+        return event.hasNonNull("masseflyttetFraFid");
     }
 
     public OrgtilknytningState toOrgtilknytningState(String fid, JsonNode eventStateAggregate) {

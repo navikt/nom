@@ -84,7 +84,8 @@ public class OrgtilknytningCommandService {
                 endreDagligOppfolgingOrgtilknytningCommand.orgenhetId(),
                 endreDagligOppfolgingOrgtilknytningCommand.gyldigFom(),
                 endreDagligOppfolgingOrgtilknytningCommand.gyldigTom(),
-                endreDagligOppfolgingOrgtilknytningCommand.erDagligOppfolging()
+                endreDagligOppfolgingOrgtilknytningCommand.erDagligOppfolging(),
+                endreDagligOppfolgingOrgtilknytningCommand.masseflyttetFraFid()
             ),
             endreDagligOppfolgingOrgtilknytningCommand.inputMetadata(),
             endreDagligOppfolgingOrgtilknytningCommand.additionalAgressoData()
@@ -97,7 +98,8 @@ public class OrgtilknytningCommandService {
             new OrgtilknytningAvsluttetEventV1.OrgtilknytningAvsluttetEventData(
                 avvikleOrgtilknytning.navident(),
                 avvikleOrgtilknytning.orgenhetId(),
-                avvikleOrgtilknytning.gyldigTom()
+                avvikleOrgtilknytning.gyldigTom(),
+                avvikleOrgtilknytning.masseflyttetFraFid()
             ),
             avvikleOrgtilknytning.inputMetadata(),
             avvikleOrgtilknytning.additionalAgressoData()
@@ -137,7 +139,8 @@ public class OrgtilknytningCommandService {
             new OrgtilknytningTilknytningtypeEndretEventV1(
                 endreTilknytningTypeCommand.fid(),
                 new OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData(
-                    endreTilknytningTypeCommand.tilknytningtype()
+                    endreTilknytningTypeCommand.tilknytningtype(),
+                    endreTilknytningTypeCommand.masseflyttetFraFid()
                 ),
                 endreTilknytningTypeCommand.inputMetadata()
             ));

@@ -341,17 +341,23 @@ public class KafkaProcessorTest {
 
         final OrgtilknytningEvent opprettEventEn = lagMasseflyttetOpprettEvent("FID_1", "A000001", nyOrgEnhetId, sektor, LocalDate.now(), otFidEn);
         final OrgtilknytningEvent opprettEventTo = lagMasseflyttetOpprettEvent("FID_2", "A000002", nyOrgEnhetId, sektor, LocalDate.now(), otFidTo);
-        final OrgtilknytningEvent avsluttetEventTo = lagAvsluttEvent("FID_2", "A000002", nyOrgEnhetId, gyldigTom);
-        final OrgtilknytningEvent opprettDagligOppfolgingEventEn = lagDagligOppfolgingEndretEvent("FID_1", "A000001", nyOrgEnhetId, LocalDate.now(), null, true);
-        final OrgtilknytningEvent opprettDagligOppfolgingEventTo = lagDagligOppfolgingEndretEvent("FID_2", "A000002", nyOrgEnhetId, LocalDate.now(), gyldigTom, true);
-        final OrgtilknytningEvent endreTilnytningTypeEventEn = new OrgtilknytningTypeEndretEventV1(
+        final OrgtilknytningEvent avsluttetEventTo = lagAvsluttEvent("FID_2", "A000002", nyOrgEnhetId, gyldigTom, otFidTo);
+        final OrgtilknytningEvent opprettDagligOppfolgingEventEn = lagDagligOppfolgingEndretEvent("FID_1", "A000001", nyOrgEnhetId, LocalDate.now(), null, true, otFidEn);
+        final OrgtilknytningEvent opprettDagligOppfolgingEventTo = lagDagligOppfolgingEndretEvent("FID_2", "A000002", nyOrgEnhetId, LocalDate.now(), gyldigTom, true, otFidTo);
+        final OrgtilknytningEvent endreTilnytningTypeEventEn = new OrgtilknytningTilknytningtypeEndretEventV1(
             "FID_1",
-            new OrgtilknytningTypeEndretEventV1.OrgtilknytningTypeEndretEventData(Tilknytningtype.INGEN),
+            new OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData(Tilknytningtype.INGEN, otFidEn),
             (Event.Metadata) null
         );
-        final OrgtilknytningEvent endreTilnytningTypeEventTo = new OrgtilknytningTypeEndretEventV1(
+        final OrgtilknytningEvent endreTilnytningTypeEventTo = new OrgtilknytningTilknytningtypeEndretEventV1(
             "FID_2",
-            new OrgtilknytningTypeEndretEventV1.OrgtilknytningTypeEndretEventData(Tilknytningtype.INGEN),
+            new OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData(Tilknytningtype.INGEN, otFidTo),
+            (Event.Metadata) null
+        );
+
+        final OrgtilknytningEvent endreTilnytningTypeEventToEtterMasseflytt = new OrgtilknytningTilknytningtypeEndretEventV1(
+            "FID_2",
+            new OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData(Tilknytningtype.FAST),
             (Event.Metadata) null
         );
 
@@ -524,6 +530,19 @@ public class KafkaProcessorTest {
             "S123456"
         );
 
+        final OrgtilknytningState expectedTilknytningEndretToEtterMasseflytt = lagStateObjekt(
+            "FID_2",
+            "A000002",
+            nyOrgEnhetId,
+            sektor,
+            true,
+            LocalDate.now(),
+            gyldigTom,
+            Tilknytningtype.FAST,
+            null,
+            "S123456"
+        );
+
 
         inputTopic.pipeInput(opprettEventGammelEn.getFid(), opprettEventGammelEn);
         inputTopic.pipeInput(opprettEventGammelTo.getFid(), opprettEventGammelTo);
@@ -538,6 +557,7 @@ public class KafkaProcessorTest {
         inputTopic.pipeInput(opprettDagligOppfolgingEventTo.getFid(), opprettDagligOppfolgingEventTo);
         inputTopic.pipeInput(endreTilnytningTypeEventEn.getFid(), endreTilnytningTypeEventEn);
         inputTopic.pipeInput(endreTilnytningTypeEventTo.getFid(), endreTilnytningTypeEventTo);
+        inputTopic.pipeInput(endreTilnytningTypeEventTo.getFid(), endreTilnytningTypeEventToEtterMasseflytt);
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
             .containsExactly(
@@ -553,7 +573,8 @@ public class KafkaProcessorTest {
                 KeyValue.pair(opprettDagligOppfolgingEventEn.getFid(), expectedDagligOppfolgingEn),
                 KeyValue.pair(opprettDagligOppfolgingEventTo.getFid(), expectedDagligOppfolgingTo),
                 KeyValue.pair(endreTilnytningTypeEventEn.getFid(), expectedTilknytningEndretEn),
-                KeyValue.pair(endreTilnytningTypeEventTo.getFid(), expectedTilknytningEndretTo)
+                KeyValue.pair(endreTilnytningTypeEventTo.getFid(), expectedTilknytningEndretTo),
+                KeyValue.pair(endreTilnytningTypeEventTo.getFid(), expectedTilknytningEndretToEtterMasseflytt)
             );
     }
 
@@ -596,36 +617,62 @@ public class KafkaProcessorTest {
     }
 
     private OrgtilknytningAvsluttetEventV1 lagAvsluttEvent(String navident, String orgEnhetId, LocalDate gyldigTom) {
-        return lagAvsluttEvent("FID_1", navident, orgEnhetId, gyldigTom);
+        return lagAvsluttEvent("FID_1", navident, orgEnhetId, gyldigTom, null);
     }
 
     private OrgtilknytningAvsluttetEventV1 lagAvsluttEvent(String fid, String navident, String orgEnhetId, LocalDate gyldigTom) {
+        return lagAvsluttEvent(fid, navident, orgEnhetId, gyldigTom, null);
+    }
+
+    private OrgtilknytningAvsluttetEventV1 lagAvsluttEvent(String fid, String navident, String orgEnhetId, LocalDate gyldigTom, String masseflyttetFraFid) {
         return new OrgtilknytningAvsluttetEventV1(
             fid,
-            new OrgtilknytningAvsluttetEventV1.OrgtilknytningAvsluttetEventData(
-                navident,
-                orgEnhetId,
-                gyldigTom
-            ),
+            masseflyttetFraFid == null ?
+                new OrgtilknytningAvsluttetEventV1.OrgtilknytningAvsluttetEventData(
+                    navident,
+                    orgEnhetId,
+                    gyldigTom
+                )
+                : new OrgtilknytningAvsluttetEventV1.OrgtilknytningAvsluttetEventData(
+                    navident,
+                    orgEnhetId,
+                    gyldigTom,
+                    masseflyttetFraFid
+                )
+            ,
             (Event.Metadata) null,
             dummyAdditionalAgressoData
         );
     }
 
     private OrgtilknytningDagligOppfolgingEndretEventV1 lagDagligOppfolgingEndretEvent(String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom, boolean dagligOppfolging) {
-        return lagDagligOppfolgingEndretEvent("FID_1", navident, orgEnhetId, gyldigFom, gyldigTom, dagligOppfolging);
+        return lagDagligOppfolgingEndretEvent("FID_1", navident, orgEnhetId, gyldigFom, gyldigTom, dagligOppfolging, null);
     }
 
     private OrgtilknytningDagligOppfolgingEndretEventV1 lagDagligOppfolgingEndretEvent(String fid, String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom, boolean dagligOppfolging) {
+        return lagDagligOppfolgingEndretEvent(fid, navident, orgEnhetId, gyldigFom, gyldigTom, dagligOppfolging, null);
+    }
+
+    private OrgtilknytningDagligOppfolgingEndretEventV1 lagDagligOppfolgingEndretEvent(String fid, String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom, boolean dagligOppfolging, String masseflyttetFraFid) {
         return new OrgtilknytningDagligOppfolgingEndretEventV1(
             fid,
-            new OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData(
-                navident,
-                orgEnhetId,
-                gyldigFom,
-                gyldigTom,
-                dagligOppfolging
-            ),
+            masseflyttetFraFid == null ?
+                new OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData(
+                    navident,
+                    orgEnhetId,
+                    gyldigFom,
+                    gyldigTom,
+                    dagligOppfolging
+                )
+                : new OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData(
+                    navident,
+                    orgEnhetId,
+                    gyldigFom,
+                    gyldigTom,
+                    dagligOppfolging,
+                    masseflyttetFraFid
+                )
+            ,
             (Event.Metadata) null,
             dummyAdditionalAgressoData
         );

@@ -758,6 +758,7 @@ public class OrgtilknytningRestService {
             new EndreTilknytningtypeCommand(
                 orgtilknytning.fid(),
                 endreTilknytningtypeRequest.tilknytningtype(),
+                null,
                 new InputMetadata(
                     "REST",
                     "updateOrgtilknytningType",

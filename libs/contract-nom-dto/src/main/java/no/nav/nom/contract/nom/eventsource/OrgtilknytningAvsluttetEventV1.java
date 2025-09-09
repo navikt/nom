@@ -18,7 +18,12 @@ public class OrgtilknytningAvsluttetEventV1 extends OrgtilknytningEvent {
     public record OrgtilknytningAvsluttetEventData (
         String navident,
         String orgEnhetId,
-        LocalDate gyldigTom
-    ) implements Data{ }
+        LocalDate gyldigTom,
+        String masseflyttetFraFid
+    ) implements Data{
+        public OrgtilknytningAvsluttetEventData(String navident, String orgEnhetId, LocalDate gyldigTom) {
+            this(navident, orgEnhetId, gyldigTom, null);
+        }
+    }
 
 }

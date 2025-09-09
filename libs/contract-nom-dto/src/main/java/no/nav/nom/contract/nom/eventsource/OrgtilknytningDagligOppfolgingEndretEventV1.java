@@ -24,11 +24,16 @@ public class OrgtilknytningDagligOppfolgingEndretEventV1 extends OrgtilknytningE
 
     @Builder(toBuilder = true)
     public record OrgtilknytningDagligOppfolgingEndretEventData(
-            String navident,
-            String orgEnhetId,
-            LocalDate gyldigFom,
-            LocalDate gyldigTom,
-            boolean dagligOppfolging
-    ) implements Data{ }
+        String navident,
+        String orgEnhetId,
+        LocalDate gyldigFom,
+        LocalDate gyldigTom,
+        boolean dagligOppfolging,
+        String masseflyttetFraFid
+    ) implements Data{
+        public OrgtilknytningDagligOppfolgingEndretEventData(String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom, boolean dagligOppfolging) {
+            this(navident, orgEnhetId, gyldigFom, gyldigTom, dagligOppfolging, null);
+        }
+    }
 
 }
