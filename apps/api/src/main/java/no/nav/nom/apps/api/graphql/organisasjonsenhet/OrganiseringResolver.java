@@ -44,7 +44,7 @@ public class OrganiseringResolver {
             .orgNiv("")
             .orgEnhetNavn(retning == OrganiseringRetning.over ? organisering.navnOver() : organisering.navn())
             .gyldigFom(organisering.gyldigFom())
-            .gyldigTom(organisering.gyldigTom().orElse(null))
+            .gyldigTom(organisering.gyldigTom())
             .build();
     }
 }

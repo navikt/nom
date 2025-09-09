@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Component
 public class EventsrcToState {
@@ -57,7 +56,7 @@ public class EventsrcToState {
                 eventStateAggregate.get("idOver").asText(),
                 eventStateAggregate.get("navnOver").asText(),
                 LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
-                Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null)
+                eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null
             );
         } catch (Exception e){
             log.error("Error mapping to OrganiseringState", e);

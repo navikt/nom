@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -141,7 +140,7 @@ public class EventsrcToStateTest {
             eventDataOpprett.idOver(),
             eventDataOpprett.navnOver(),
             eventDataOpprett.gyldigFom(),
-            Optional.of(LocalDate.now())
+            LocalDate.now()
         );
 
         final List<OrganiseringEvent> inputList = Arrays.asList(eventOpprett, eventAvslutt);
@@ -193,7 +192,7 @@ public class EventsrcToStateTest {
             "idOver",
             "navnOver",
             LocalDate.of(2021, 1, 1),
-            Optional.empty()
+            null
         );
     }
 
@@ -212,7 +211,7 @@ public class EventsrcToStateTest {
             "idOver",
             "navnOver",
             LocalDate.of(2021, 1, 1),
-            Optional.empty()
+            null
         );
     }
 

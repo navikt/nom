@@ -3,7 +3,6 @@ package no.nav.nom.contract.nom.state;
 import lombok.Builder;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Builder(toBuilder = true)
 public record OrganiseringState(
@@ -13,7 +12,7 @@ public record OrganiseringState(
     String idOver,
     String navnOver,
     LocalDate gyldigFom,
-    Optional<LocalDate> gyldigTom
+    LocalDate gyldigTom
 ) {
     public boolean containsOrgEnhet(String id) {
         return this.id.equals(id) || this.idOver.equals(id);

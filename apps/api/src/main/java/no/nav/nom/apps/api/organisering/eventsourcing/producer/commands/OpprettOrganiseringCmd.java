@@ -3,7 +3,6 @@ package no.nav.nom.apps.api.organisering.eventsourcing.producer.commands;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 public record OpprettOrganiseringCmd(
     String id,
@@ -11,6 +10,6 @@ public record OpprettOrganiseringCmd(
     String idOver,
     String navnOver,
     LocalDate gyldigFom,
-    Optional<LocalDate> gyldigTom,
+    LocalDate gyldigTom,
     InputMetadata inputMetadata
 ) {}

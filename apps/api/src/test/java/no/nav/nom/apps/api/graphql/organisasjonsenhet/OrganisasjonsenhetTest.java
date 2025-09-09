@@ -542,7 +542,7 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
             .idOver(idOver)
             .navnOver(navnOver)
             .gyldigFom(gyldigFom)
-            .gyldigTom(Optional.ofNullable(gyldigTom))
+            .gyldigTom(gyldigTom)
             .build();
     }
 }
