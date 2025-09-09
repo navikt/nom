@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.admin.ExcelGenerator;
 import no.nav.nom.apps.admin.SanityCheckMappingUtils;
 import no.nav.nom.apps.admin.SwaggerConfig;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.DuplikatOrgtilknytning;
@@ -14,6 +13,7 @@ import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OrgtilknytningMedOrg
 import no.nav.nom.apps.admin.sanitycheck.dto.orgtilknytning.OverlappendeOrgtilknytning;
 import no.nav.nom.apps.admin.sanitycheck.service.OrgtilknytningSanityCheckService;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.libs.utils.common.excel.ExcelGenerator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

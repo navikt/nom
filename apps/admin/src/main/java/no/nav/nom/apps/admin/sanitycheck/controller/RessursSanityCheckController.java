@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.admin.ExcelGenerator;
 import no.nav.nom.apps.admin.SanityCheckMappingUtils;
 import no.nav.nom.apps.admin.SwaggerConfig;
 import no.nav.nom.apps.admin.sanitycheck.StandardResponse;
@@ -17,6 +16,7 @@ import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningUlikSl
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RobotRessurs;
 import no.nav.nom.apps.admin.sanitycheck.service.RessursSanityCheckService;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.utils.common.excel.ExcelGenerator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
