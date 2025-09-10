@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
-@Controller
+@Controller // Oppslag PDL - Feier uansett - kan fjernes
 @PreAuthorize("@securityUtil.checkAuth(authentication)")
 public class GraphQLPersonController {
 
@@ -37,7 +37,7 @@ public class GraphQLPersonController {
         this.counter = graphQLFieldConsumptionCounter;
     }
 
-    @QueryMapping("person")
+    @QueryMapping("person")  // Oppslag PDL - Feier uansett - kan fjernes
     public Optional<PersonResult> person(@Argument("where") PersonSearch personSearch, DataFetchingEnvironment environment) {
         counter.count(environment);
         return personSearch.resolveIdent().flatMap(personResolver::person);

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-@Component
+@Component // Oppslag PDL - Feier uansett - kan fjernes
 public class PersonResolver {
 
     private final RessursStateRepository ressursStateRepository;

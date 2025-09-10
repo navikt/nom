@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 
-@Component
+@Component // Oppslag PDL - Feier uansett - kan fjernes
 public class FolkeregisterPersonResolver {
 
     private final PersonBatchLoader personBatchLoader;

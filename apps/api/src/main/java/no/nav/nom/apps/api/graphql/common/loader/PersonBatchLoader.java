@@ -28,7 +28,7 @@ import java.util.function.Function;
 import static java.util.stream.Collectors.toMap;
 
 @Slf4j
-@Component
+@Component // Oppslag PDL - Feier uansett - kan fjernes
 public class PersonBatchLoader {
 
     private final static String PDL_BOLK_HENT_PERSON_QUERY = // language=graphql

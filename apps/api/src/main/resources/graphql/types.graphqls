@@ -33,8 +33,8 @@ type Ressurs {
     orgTilknytning: [RessursOrgTilknytning!]!
     lederFor: [LederOrgEnhet!]!
     ledere: [RessursLeder!]!
-    person: FolkeregisterPerson  @deprecated(reason: "person er erstatet med folkeregisterPerson")
-    folkeregisterPerson: FolkeregisterPerson
+    person: FolkeregisterPerson  @deprecated(reason: "Folkeregisteroppslag tillates ikke mer")
+    folkeregisterPerson: FolkeregisterPerson @deprecated(reason: "Folkeregisteroppslag tillates ikke mer")
     epost: String
     visningsNavn: String @deprecated(reason: "visningsNavn er erstattet med visningsnavn")
     visningsnavn: String
@@ -44,11 +44,12 @@ type Ressurs {
     telefon: [Telefon!]!
     ressurstype: [Sektor!]! @deprecated(reason: "ressurstype er erstatet med sektor")
     sektor: [Sektor!]!
-    sluttdato: Date @deprecated(reason: "Dårlig datakvalitet, kontakt #nom for mer informasjon før bruk")
+    sluttdato: Date
     startdato: Date
 }
 
-type FolkeregisterPerson {
+
+type FolkeregisterPerson {  # Oppslag PDL - Feier uansett - kan fjernes
     navn: Navn!
 }
 
@@ -154,6 +155,7 @@ enum TilknytningType {
     ARBEIDSTRENING,
     EKSTERN_SAMARBEIDSPARTNER,
     FAST,
+    HELFO,
     INGEN,
     JOBBSPESIALIST,
     KONSULENT,
@@ -161,6 +163,9 @@ enum TilknytningType {
     MIDLERTIDIG,
     PENSJONIST,
     PRAKSISARBEID,
+    RIKSREVISJONEN,
+    SKATTEETATEN,
+    STATSFORVALTEREN,
     STUDENT,
     UFORUTSETT_BEHOV,
     UTDANNINGSSTILLINGER,
