@@ -1,13 +1,12 @@
-package no.nav.nom.apps.admin;
+package no.nav.nom.libs.utils.common.excel;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
-
-import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -81,3 +80,4 @@ public class ExcelGenerator {
         }
     }
 }
+

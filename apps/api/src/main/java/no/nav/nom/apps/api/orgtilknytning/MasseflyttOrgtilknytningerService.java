@@ -247,6 +247,7 @@ public class MasseflyttOrgtilknytningerService {
                     navident,
                     nyOrgenhetId,
                     gyldigTom,
+                    beholdTilganger ? originalFid : null,
                     inputMetadata,
                     null
                 )
@@ -260,6 +261,7 @@ public class MasseflyttOrgtilknytningerService {
             gyldigFom,
             gyldigTom,
             isDOL,
+            beholdTilganger ? originalFid : null,
             inputMetadata,
             null
         ));
@@ -268,9 +270,12 @@ public class MasseflyttOrgtilknytningerService {
             orgtilknytningCommandService.endreTilknytningtype(new EndreTilknytningtypeCommand(
                 newFid,
                 tilknytningType,
+                beholdTilganger ? originalFid : null,
                 inputMetadata
             ));
         }
+
+        // NBNB! Hvis det legges til flere eventer i denne metoden, pass på å ta med evt masseflyttetFraFid
 
         ventPaaState(latch, ventPaaState);
     }

@@ -45,7 +45,7 @@ public class GraphQLRessursController {
     private final LederResolver lederResolver;
     private final OrgTilknytningResolver orgTilknytningResolver;
     private final FolkeregisterPersonResolver personResolver;
-    private final GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
+    private final GraphQLFieldConsumptionCounter counter;
 
     private final RessursStateRepository ressursStateRepository;
 
@@ -64,7 +64,7 @@ public class GraphQLRessursController {
         this.propertyResolver = propertyResolver;
         this.telefonResolver = telefonResolver;
         this.lederResolver = lederResolver;
-        this.graphQLFieldConsumptionCounter = graphQLFieldConsumptionCounter;
+        this.counter = graphQLFieldConsumptionCounter;
         this.orgTilknytningResolver = orgTilknytningResolver;
         this.personResolver = personResolver;
         this.ressursStateRepository = ressursStateRepository;
@@ -79,7 +79,7 @@ public class GraphQLRessursController {
     @QueryMapping("ressurs")
     public Optional<Ressurs> ressurs(@Argument("where") RessursSearch search, DataFetchingEnvironment dataFetchingEnvironment) {
         // Using @Argument("where") to tell Spring to bind the RessursSearch projected payload on the values below the "where" key.
-        graphQLFieldConsumptionCounter.count(dataFetchingEnvironment);
+        counter.count(dataFetchingEnvironment);
         return ressursResolver.ressurs(search);
     }
 
@@ -91,7 +91,7 @@ public class GraphQLRessursController {
     )
     @QueryMapping("ressurser")
     public List<RessursResult> ressurser(@Argument("where") RessurserSearch search, DataFetchingEnvironment dataFetchingEnvironment) {
-        graphQLFieldConsumptionCounter.count(dataFetchingEnvironment);
+        counter.count(dataFetchingEnvironment);
         return ressursResolver.ressurser(search);
     }
 
@@ -103,7 +103,7 @@ public class GraphQLRessursController {
     )
     @QueryMapping("ressurserWithMetadata")
     public List<RessursWithMetadataResult> ressurserWithMetadata(DataFetchingEnvironment dataFetchingEnvironment) {
-        graphQLFieldConsumptionCounter.count(dataFetchingEnvironment);
+        counter.count(dataFetchingEnvironment);
         return ressursResolver.ressurserWithMetadata();
     }
 

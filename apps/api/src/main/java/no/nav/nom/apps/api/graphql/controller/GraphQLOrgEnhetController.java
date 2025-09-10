@@ -52,9 +52,10 @@ public class GraphQLOrgEnhetController {
         this.counter = counter;
     }
 
-    @Deprecated(forRemoval = true)
+    @Deprecated(forRemoval = true) // NB! ikke fjern umiddelbart. Counter manglet - lagt inn 10.09
     @QueryMapping("organisasjonsenhet")
     public Optional<OrgEnhet> organisasjonsenhet(@Argument("where") OrgEnhetSearch orgEnhetSearch, DataFetchingEnvironment environment) {
+        counter.count(environment);
         return orgEnhet(orgEnhetSearch, environment);
     }
 
@@ -64,9 +65,10 @@ public class GraphQLOrgEnhetController {
         return orgEnhetResolver.orgEnhet(orgEnhetSearch);
     }
 
-    @Deprecated(forRemoval = true)
+    @Deprecated(forRemoval = true)  // NB! ikke fjern umiddelbart. Counter manglet - lagt inn 10.09
     @QueryMapping("organisasjonsenheter")
     public List<OrgEnhetResult> organisasjonsenheter(@Argument("where") OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment) {
+        counter.count(environment);
         return orgEnheter(orgEnheterSearch, environment);
     }
 

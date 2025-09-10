@@ -14,6 +14,11 @@ public record EndreDagligOppfolgingOrgtilknytningCommand(
     LocalDate gyldigFom,
     LocalDate gyldigTom,
     boolean erDagligOppfolging,
+    String masseflyttetFraFid,
     InputMetadata inputMetadata,
     OrgtilknytningEvent.AdditionalAgressoData additionalAgressoData
-) implements OrgtilknytningCommand {}
+) implements OrgtilknytningCommand {
+    public EndreDagligOppfolgingOrgtilknytningCommand(String fid, String navident, String orgenhetId, LocalDate gyldigFom, LocalDate gyldigTom, boolean erDagligOppfolging, InputMetadata inputMetadata, OrgtilknytningEvent.AdditionalAgressoData additionalAgressoData) {
+        this(fid, navident, orgenhetId, gyldigFom, gyldigTom, erDagligOppfolging, null, inputMetadata, additionalAgressoData);
+    }
+}

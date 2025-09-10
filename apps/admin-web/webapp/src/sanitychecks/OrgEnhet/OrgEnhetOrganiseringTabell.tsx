@@ -64,7 +64,7 @@ export function OrgEnhetOrganiseringTabell({
       <AntallOgExcelEksportKnapp
         antall={data.length}
         exportName={exportTypeNavn}
-        exportType="orgEnhet"
+        exportType="orgenhet"
       />
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>

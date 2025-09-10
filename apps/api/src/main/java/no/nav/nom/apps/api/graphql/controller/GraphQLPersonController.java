@@ -24,7 +24,7 @@ public class GraphQLPersonController {
 
     private final PersonResolver personResolver;
     private final FolkeregisterPersonResolver folkeregisterPersonResolver;
-    private final GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
+    private final GraphQLFieldConsumptionCounter counter;
 
     @Autowired
     public GraphQLPersonController(
@@ -34,12 +34,12 @@ public class GraphQLPersonController {
     ) {
         this.personResolver = personResolver;
         this.folkeregisterPersonResolver = folkeregisterPersonResolver;
-        this.graphQLFieldConsumptionCounter = graphQLFieldConsumptionCounter;
+        this.counter = graphQLFieldConsumptionCounter;
     }
 
     @QueryMapping("person")
     public Optional<PersonResult> person(@Argument("where") PersonSearch personSearch, DataFetchingEnvironment environment) {
-        graphQLFieldConsumptionCounter.count(environment);
+        counter.count(environment);
         return personSearch.resolveIdent().flatMap(personResolver::person);
     }
 

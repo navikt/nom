@@ -23,6 +23,11 @@ public class OrgtilknytningTilknytningtypeEndretEventV1 extends OrgtilknytningEv
 
     @Builder(toBuilder = true)
     public record OrgtilknytningTilknytningtypeEndretEventData(
-        Tilknytningtype orgtilknytningType
-    ) implements Data {}
+        Tilknytningtype orgtilknytningType,
+        String masseflyttetFraFid
+    ) implements Data {
+        public OrgtilknytningTilknytningtypeEndretEventData(Tilknytningtype orgtilknytningType) {
+            this(orgtilknytningType, null);
+        }
+    }
 }

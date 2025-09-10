@@ -86,7 +86,7 @@ export function DuplikateEnheter() {
       <AntallOgExcelEksportKnapp
         antall={sortedData.length}
         exportName="duplikateEnheter"
-        exportType="orgEnhet"
+        exportType="orgenhet"
       />
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>

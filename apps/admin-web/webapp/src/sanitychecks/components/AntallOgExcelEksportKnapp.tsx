@@ -10,7 +10,7 @@ export function AntallOgExcelEksportKnapp({
 }: {
   antall: number | undefined;
   exportName: string | undefined;
-  exportType: "orgEnhet" | "ressurs" | "orgtilknytning" | "RemedyCompare";
+  exportType: "orgenhet" | "ressurs" | "orgtilknytning" | "RemedyCompare";
 }) {
   const handleExport = async () => {
     await exportSanityCheckToExcel(exportType, exportName);
