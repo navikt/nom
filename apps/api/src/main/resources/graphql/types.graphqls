@@ -33,8 +33,6 @@ type Ressurs {
     orgTilknytning: [RessursOrgTilknytning!]!
     lederFor: [LederOrgEnhet!]!
     ledere: [RessursLeder!]!
-    person: FolkeregisterPerson  @deprecated(reason: "Folkeregisteroppslag tillates ikke mer")
-    folkeregisterPerson: FolkeregisterPerson @deprecated(reason: "Folkeregisteroppslag tillates ikke mer")
     epost: String
     visningsNavn: String @deprecated(reason: "visningsNavn er erstattet med visningsnavn")
     visningsnavn: String
@@ -46,11 +44,6 @@ type Ressurs {
     sektor: [Sektor!]!
     sluttdato: Date
     startdato: Date
-}
-
-
-type FolkeregisterPerson {  # Oppslag PDL - Feier uansett - kan fjernes
-    navn: Navn!
 }
 
 type Navn {

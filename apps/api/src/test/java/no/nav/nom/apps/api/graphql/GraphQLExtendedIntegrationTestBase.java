@@ -10,7 +10,6 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.common.metrics.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.graphql.controller.GraphQLOrgEnhetController;
-import no.nav.nom.apps.api.graphql.controller.GraphQLPersonController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLRessursController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLSearchController;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
@@ -86,7 +85,7 @@ import static java.util.Collections.emptyMap;
         "nom.libs.state.mastered-ressurs.state-topic: org.nom.nom-mastered-ressurs",
         "nom.libs.state.mastered-ressurs.listener-id: nomStateMasteredRessursListener_test"
     }
-    , controllers = {GraphQLRessursController.class, GraphQLPersonController.class, GraphQLOrgEnhetController.class, GraphQLSearchController.class})
+    , controllers = {GraphQLRessursController.class, GraphQLOrgEnhetController.class, GraphQLSearchController.class})
 public class GraphQLExtendedIntegrationTestBase {
 
     private final static Duration TIMEOUT_DURATION = Duration.of(5, SECONDS);

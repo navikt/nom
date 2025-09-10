@@ -403,7 +403,7 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
     }
 
     @Test
-    @DisplayName("Henter ut person navn i kontekst av enhet leder spørring")
+    @DisplayName("Henter ut person navn i kontekst av enhet leder spørring - ikke slå opp mot PDL mer")
     void scenario34() {
         final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
@@ -422,13 +422,10 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
         final var response = postForResource("organisasjonsenhet/scenario34.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
-        final var lederNavn = outputEnhetJson.get("leder")
-            .get(0)
-            .get("ressurs")
-            .get("person")
-            .get("navn");
+        final var leder = outputEnhetJson.get("leder").get(0).get("ressurs");
 
-        pdlUtils.assertNavn(ressurs.personident(), lederNavn);
+        assertEquals(ressurs.visningsnavn().getFornavnMellomnavn(), leder.get("fornavn").asText());
+        assertEquals(ressurs.visningsnavn().etternavn(), leder.get("etternavn").asText());
     }
 
     @Test
@@ -505,19 +502,13 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE())));
 
-        //        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
-
         final var response = postForResource("organisasjonsenhet/scenario34.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
-        final var lederNavn = outputEnhetJson.get("koblinger")
-            .get(0)
-            .get("ressurs")
-            .get("person")
-            .get("navn");
+        final var leder = outputEnhetJson.get("leder").get(0).get("ressurs");
 
-        pdlUtils.assertNavn(ressurs.personident(), lederNavn);
-
+        assertEquals(ressurs.visningsnavn().getFornavnMellomnavn(), leder.get("fornavn").asText());
+        assertEquals(ressurs.visningsnavn().etternavn(), leder.get("etternavn").asText());
     }
 
     private Optional<OrgEnhetResult> getEnhetInList(String id, List<OrgEnhetResult> organisasjonsenhetResult) {

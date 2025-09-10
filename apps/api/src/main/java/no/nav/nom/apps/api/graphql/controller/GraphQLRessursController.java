@@ -5,13 +5,11 @@ import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.apps.api.graphql.common.metrics.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.graphql.common.projections.RessursSearch;
 import no.nav.nom.apps.api.graphql.common.projections.RessurserSearch;
-import no.nav.nom.apps.api.graphql.common.resolver.FolkeregisterPersonResolver;
 import no.nav.nom.apps.api.graphql.ressurs.LederResolver;
 import no.nav.nom.apps.api.graphql.ressurs.OrgTilknytningResolver;
 import no.nav.nom.apps.api.graphql.ressurs.RessursPropertyResolver;
 import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
 import no.nav.nom.apps.api.graphql.ressurs.TelefonResolver;
-import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
@@ -44,7 +42,6 @@ public class GraphQLRessursController {
     private final TelefonResolver telefonResolver;
     private final LederResolver lederResolver;
     private final OrgTilknytningResolver orgTilknytningResolver;
-    private final FolkeregisterPersonResolver personResolver;
     private final GraphQLFieldConsumptionCounter counter;
 
     private final RessursStateRepository ressursStateRepository;
@@ -57,7 +54,6 @@ public class GraphQLRessursController {
             LederResolver lederResolver,
             GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter,
             OrgTilknytningResolver orgTilknytningResolver,
-            FolkeregisterPersonResolver personResolver,
             RessursStateRepository ressursStateRepository
     ) {
         this.ressursResolver = ressursResolver;
@@ -66,7 +62,6 @@ public class GraphQLRessursController {
         this.lederResolver = lederResolver;
         this.counter = graphQLFieldConsumptionCounter;
         this.orgTilknytningResolver = orgTilknytningResolver;
-        this.personResolver = personResolver;
         this.ressursStateRepository = ressursStateRepository;
     }
 
@@ -126,20 +121,6 @@ public class GraphQLRessursController {
     @BatchMapping(typeName = "Ressurs", field = "ledere")
     public Mono<Map<Ressurs, List<RessursLeder>>> ledere(List<Ressurs> ressurser) {
         return Mono.fromSupplier(() -> lederResolver.load(ressurser, lederResolver::ledere));
-    }
-
-    @Deprecated
-    @BatchMapping(typeName = "Ressurs", field = "person")
-    public Mono<Map<Ressurs, DataFetcherResult<FolkeregisterPerson>>> person(List<Ressurs> ressurser) {
-        return folkeregisterPerson(ressurser);
-    }
-
-    @BatchMapping(typeName = "Ressurs", field = "folkeregisterPerson")
-    public Mono<Map<Ressurs, DataFetcherResult<FolkeregisterPerson>>> folkeregisterPerson(List<Ressurs> ressurser) {
-        // personidenter blir sladdet i ressurs resolver, mens usladdet personident må brukes videre for å slå opp i PDL.
-        // derfor slår vi opp usladdete personidenter fra en annen kilde
-        var lookedupRessursPersonIdentMap = getLookedupRessursPersonIdentMap(ressurser);
-        return personResolver.folkeregisterPerson(ressurser, (Ressurs res) -> lookedupRessursPersonIdentMap.get(res));
     }
 
     @BatchMapping(typeName = "Ressurs", field = "epost")

@@ -30,18 +30,6 @@ public class PdlUtils {
     private final AppProperties appProperties;
     private final ObjectMapper objectMapper;
 
-    public void assertNavn(String personIdent, JsonNode navn) {
-        val navnActual = pdlEntryByIdent.get(personIdent).getPerson().getNavn().get(0);
-        assertEquals(navnActual.getFornavn(), navn.get("fornavn").asText());
-        assertEquals(navnActual.getEtternavn(), navn.get("etternavn").asText());
-
-        if (navnActual.getMellomnavn() != null) {
-            assertEquals(navnActual.getMellomnavn(), navn.get("mellomnavn").asText());
-        } else {
-            assertFalse(navn.hasNonNull("mellomnavn"));
-        }
-    }
-
     private void mockPdlResponse(String response) {
         stubFor(post("/graphql")
             .withHeader("Tema", equalTo(appProperties.clients().pdl().tema()))

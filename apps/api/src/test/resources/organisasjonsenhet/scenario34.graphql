@@ -5,24 +5,14 @@ query {
             ressurs{
                 navIdent
                 personIdent
-                person{
-                    navn{
-                        fornavn
-                        mellomnavn
-                        etternavn
-                    }
-                }
+                fornavn
+                etternavn
             }
         }
         koblinger{
             ressurs{
-                person{
-                    navn{
-                        fornavn
-                        mellomnavn
-                        etternavn
-                    }
-                }
+                fornavn
+                etternavn
             }
         }
     }

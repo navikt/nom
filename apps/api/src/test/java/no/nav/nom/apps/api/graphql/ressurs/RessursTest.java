@@ -236,7 +236,7 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
 
 
     @Test
-    @DisplayName("Kan hente fulle navn fra PDL")
+    @DisplayName("Kan hente fulle navn fra NOM")
     void scenarioNavn1() {
         var r1 = kafkaUtils.createRessursHendelseEventSource("3");
         var r2 = kafkaUtils.createRessursHendelseEventSource("4");
@@ -249,12 +249,15 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
         assertEquals(2, ressurser.size());
 
         // assertions krever samme rekkefølge i respons som i event-source
-        pdlUtils.assertNavn(r1.personident(), ressurser.get(0).get("ressurs").get("person").get("navn"));
-        pdlUtils.assertNavn(r2.personident(), ressurser.get(1).get("ressurs").get("person").get("navn"));
+        assertEquals(r1.visningsnavn().getFornavnMellomnavn(),  ressurser.get(0).get("ressurs").get("fornavn").asText());
+        assertEquals(r1.visningsnavn().etternavn(),             ressurser.get(0).get("ressurs").get("etternavn").asText());
+
+        assertEquals(r2.visningsnavn().getFornavnMellomnavn(),  ressurser.get(1).get("ressurs").get("fornavn").asText());
+        assertEquals(r2.visningsnavn().etternavn(),             ressurser.get(1).get("ressurs").get("etternavn").asText());
     }
 
     @Test
-    @DisplayName("Kan hente navn uten mellomnavn fra PDL")
+    @DisplayName("Kan hente navn uten mellomnavn fra NOM")
     void scenarioNavn2() {
         var r3 = kafkaUtils.createRessursHendelseEventSource("3");
         var r4 = kafkaUtils.createRessursHendelseEventSource("4");
@@ -267,46 +270,12 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
         assertEquals(2, ressurser.size());
 
         // assertions krever samme rekkefølge i respons som i event-source
-        pdlUtils.assertNavn(r3.personident(), ressurser.get(0).get("ressurs").get("person").get("navn"));
-        pdlUtils.assertNavn(r4.personident(), ressurser.get(1).get("ressurs").get("person").get("navn"));
+        assertEquals(r3.visningsnavn().getFornavnMellomnavn(),  ressurser.get(0).get("ressurs").get("fornavn").asText());
+        assertEquals(r3.visningsnavn().etternavn(),             ressurser.get(0).get("ressurs").get("etternavn").asText());
+
+        assertEquals(r4.visningsnavn().getFornavnMellomnavn(),  ressurser.get(1).get("ressurs").get("fornavn").asText());
+        assertEquals(r4.visningsnavn().etternavn(),             ressurser.get(1).get("ressurs").get("etternavn").asText());
     }
-
-    @Test
-    @DisplayName("Hente navn hvor PDL er utilgjengelig")
-    void scenarioNavn3() {
-        kafkaUtils.createRessursHendelseEventSource("3");
-        kafkaUtils.createRessursHendelseEventSource("4");
-
-        pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
-        stubFor(post("/graphql").willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
-
-        final var response = postForResource("ressurs/scenario5.graphql");
-
-        response.errors().satisfy(errors -> assertEquals(2, errors.size()));
-
-        final var ressurs = response.path("ressurser").entityList(JsonNode.class).get().get(0);
-        assertTrue(ressurs.hasNonNull("id"));
-        assertFalse(ressurs.hasNonNull("person"));
-    }
-
-    @Test
-    @DisplayName("Hente navn hvor PDL er gir feil og manglende respons")
-    void scenarioNavn4() {
-        kafkaUtils.createRessursHendelseEventSource("3");
-        kafkaUtils.createRessursHendelseEventSource("4");
-
-        pdlUtils.addErrorToPdlResponse("testPersonIdent3", "bad_request");
-        pdlUtils.addErrorToPdlResponse("testPersonIdent4", "not_found");
-
-        final var response = postForResource("ressurs/scenario5.graphql");
-
-        response.errors().satisfy(errors -> assertEquals(2, errors.size()));
-
-        final var ressurs = response.path("ressurser").entityList(JsonNode.class).get().get(0);
-        assertTrue(ressurs.hasNonNull("id"));
-        assertFalse(ressurs.hasNonNull("person"));
-    }
-
 
     @Test
     @DisplayName("Kan hente email fra AD og visningsnavn")

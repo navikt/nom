@@ -20,18 +20,14 @@ import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.common.config.ExceptionhandlerConfig;
 import no.nav.nom.apps.api.graphql.common.config.GraphQLConfig;
 import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader;
-import no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader;
 import no.nav.nom.apps.api.graphql.common.metrics.GraphQLFieldConsumptionCounter;
-import no.nav.nom.apps.api.graphql.common.resolver.FolkeregisterPersonResolver;
 import no.nav.nom.apps.api.graphql.controller.GraphQLOrgEnhetController;
-import no.nav.nom.apps.api.graphql.controller.GraphQLPersonController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLRessursController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLSearchController;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetKoblingResolver;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrganiseringResolver;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
-import no.nav.nom.apps.api.graphql.person.PersonResolver;
 import no.nav.nom.apps.api.graphql.ressurs.OrgTilknytningResolver;
 import no.nav.nom.apps.api.graphql.ressurs.RessursPropertyResolver;
 import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
@@ -82,7 +78,6 @@ import org.springframework.test.context.bean.override.mockito.MockReset;
      TestTokensGenerator.class
     , NomProxyClient.class
     , GraphQLOrgEnhetController.class
-    , GraphQLPersonController.class
     , GraphQLRessursController.class
     , GraphQLSearchController.class
     , OrgEnhetResolver.class
@@ -91,9 +86,6 @@ import org.springframework.test.context.bean.override.mockito.MockReset;
     , no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver.class
     , no.nav.nom.apps.api.graphql.ressurs.LederResolver.class
     , RemedyEnhetIdResolver.class
-    , PersonResolver.class
-    , FolkeregisterPersonResolver.class
-    , PersonBatchLoader.class
     , RessursResolver.class
     , RessursPropertyResolver.class
     , ActiveDirectoryRessursBatchLoader.class

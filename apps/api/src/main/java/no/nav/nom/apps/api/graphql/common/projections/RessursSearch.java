@@ -9,7 +9,7 @@ import java.util.Optional;
  * Use resolveIdent() to resolve the current navident, and then the personident
  */
 @ProjectedPayload
-public interface RessursSearch extends PersonSearch {
+public interface RessursSearch {
 
     @Deprecated(forRemoval = true)
     String getNavIdent();
@@ -18,6 +18,18 @@ public interface RessursSearch extends PersonSearch {
 
     String getTelefonNummer();
 
+    @Deprecated(forRemoval = true)
+    String getPersonIdent();
+
+    String getPersonident();
+
+    default boolean isPersonidentPresent() {
+        return getPersonident() != null || getPersonIdent() != null;
+    }
+
+    default String resolvePersonident() {
+        return getPersonident() != null ? getPersonident() : getPersonIdent();
+    }
 
     default boolean isNavidentPresent() {
         return getNavIdent() != null || getNavident() != null;
@@ -27,7 +39,6 @@ public interface RessursSearch extends PersonSearch {
         return getNavident() != null ? getNavident() : getNavIdent();
     }
 
-    @Override
     default Optional<String> resolveIdent() {
         if (isNavidentPresent()) {
             return Optional.of(resolveNavident());
