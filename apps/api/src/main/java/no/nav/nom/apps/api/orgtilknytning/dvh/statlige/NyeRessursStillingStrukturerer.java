@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.groupingBy;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.etter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.foer;
@@ -55,8 +57,8 @@ public class NyeRessursStillingStrukturerer {
 
     protected Map<String, List<DvhRessursStilling>> grupperDvhRessursStillingerPerNavident(List<DvhRessursStilling> dvhRessursStillinger) {
         return dvhRessursStillinger.stream()
-            .filter(rs -> rs.getNavident().isPresent())
-            .collect(groupingBy(rs -> rs.getNavident().get()));
+            .filter(rs -> nonNull(rs.getNavident()))
+            .collect(groupingBy(DvhRessursStilling::getNavident));
     }
 
 
@@ -177,7 +179,8 @@ public class NyeRessursStillingStrukturerer {
             .filter(StillingPeriode::isCurrentPeriod)
             .filter(StillingPeriode::erDagligOppfolging)
             .forEach(sp -> {
-                if (!sp.orgenhet().getAgressoId().startsWith(sp.stilling().ressursAgressoId().orElse(""))) {
+                String ressursAgressoId = requireNonNullElse(sp.stilling().ressursAgressoId(), "");
+                if (!sp.orgenhet().getAgressoId().startsWith(ressursAgressoId)) {
                     sspForNavident.addError(
                         StrukturerteStillingPerioderForNavident.ErrorType.AKTIV_DOL_MATCHER_IKKE_ORGENHET_PAA_RESSURS,
                         """
@@ -187,7 +190,7 @@ public class NyeRessursStillingStrukturerer {
                         """.formatted(
                             sspForNavident.navident(), sp.gyldigFom(), sp.gyldigTom(),
                             sp.orgenhet().getId(), sp.orgenhet().getNavn(), sp.orgenhet().getAgressoId(),
-                            sp.stilling().ressursAgressoId().orElse("")
+                            ressursAgressoId
                         ),
                         sp
                     );

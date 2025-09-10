@@ -7,7 +7,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -54,16 +53,16 @@ class DvhRessursStillingTestResponse {
         DvhRessursStilling expected =
             DvhRessursStilling.builder()
                 .payload(node.toPrettyString())
-                .navident(Optional.of("A112343"))
+                .navident("A112343")
                 .stillingDatoFom(LocalDate.of(2020,1,1))
                 .stillingDatoTom(LocalDate.of(2020, 9,30))
-                .stillingAgressoId(Optional.of("0499000"))
+                .stillingAgressoId("0499000")
                 .stillingOrgenhetNavn("Innlandet Arbeidslivssenter")
-                .ressursAgressoId(Optional.of("0499000"))
-                .ressursOrgenhetNiv(Optional.of("ORGENHET"))
-                .ressursRemedyEnhetId(Optional.of("0491"))
-                .stillingRessursAgressoId(Optional.of("0499000"))
-                .stillingAnsettelsesTypeBesk(Optional.of("Fast"))
+                .ressursAgressoId("0499000")
+                .ressursOrgenhetNiv("ORGENHET")
+                .ressursRemedyEnhetId("0491")
+                .stillingRessursAgressoId("0499000")
+                .stillingAnsettelsesTypeBesk("Fast")
                 .ressursAgressoDatoFom(LocalDate.of(2006,4,18))
                 .ressursAgressoDatoTom(LocalDate.of(2099,12,31))
                 .ressursDvhDatoFom(LocalDate.of(2006,4,4))
@@ -110,16 +109,16 @@ class DvhRessursStillingTestResponse {
         DvhRessursStilling expected =
             DvhRessursStilling.builder()
                 .payload(node.toPrettyString())
-                .navident(Optional.of("A112343"))
+                .navident("A112343")
                 .stillingDatoFom(LocalDate.of(2020,1,1))
                 .stillingDatoTom(LocalDate.of(2020, 9,30))
-                .stillingAgressoId(Optional.of("0499000"))
+                .stillingAgressoId("0499000")
                 .stillingOrgenhetNavn("Innlandet Arbeidslivssenter")
-                .ressursAgressoId(Optional.empty())
-                .ressursOrgenhetNiv(Optional.of("Mangler"))
-                .ressursRemedyEnhetId(Optional.empty())
-                .stillingRessursAgressoId(Optional.of("0499000"))
-                .stillingAnsettelsesTypeBesk(Optional.of("Fast"))
+                .ressursAgressoId(null)
+                .ressursOrgenhetNiv("Mangler")
+                .ressursRemedyEnhetId(null)
+                .stillingRessursAgressoId("0499000")
+                .stillingAnsettelsesTypeBesk("Fast")
                 .ressursAgressoDatoFom(LocalDate.of(2006,4,18))
                 .ressursAgressoDatoTom(LocalDate.of(2099,12,31))
                 .ressursDvhDatoFom(LocalDate.of(2006,4,4))
@@ -166,7 +165,7 @@ class DvhRessursStillingTestResponse {
         DvhRessursStilling expected =
             DvhRessursStilling.builder()
                 .payload(node.toPrettyString())
-                .navident(Optional.empty())
+                .navident(null)
                 // Null på resten
                 .build();
         assertEquals(expected, actual);

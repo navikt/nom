@@ -224,9 +224,9 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("0110001",                 forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("0110001",                 forsteStillingPeriode.stilling().agressoId());
         assertEquals("Single match",            forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET",                forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET",                forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2022, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE,                  forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());
@@ -248,10 +248,10 @@ class MatchStrukturerteStillingPerioderTilNOMTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("01100",                   forsteStillingPeriode.stilling().agressoId().orElse(null));
-        assertEquals("0110001",                 forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
+        assertEquals("01100",                   forsteStillingPeriode.stilling().agressoId());
+        assertEquals("0110001",                 forsteStillingPeriode.stilling().ressursAgressoId());
         assertEquals("Single match",            forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET",                forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET",                forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2022, 1, 1),  forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE,                  forsteStillingPeriode.gyldigTom());
         assertEquals("a123bc",                  forsteStillingPeriode.orgenhet().getId());

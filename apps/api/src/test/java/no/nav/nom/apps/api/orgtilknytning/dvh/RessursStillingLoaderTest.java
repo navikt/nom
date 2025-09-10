@@ -135,11 +135,11 @@ class RessursStillingLoaderTest extends TestBase {
         var result = ressursStillingLoader.load();
 
         assertEquals(7, result.size());
-        assertEquals(4, result.stream().filter(rs -> rs.getNavident().equals(Optional.of("A100036"))).count());
+        assertEquals(4, result.stream().filter(rs -> rs.getNavident().equals("A100036")).count());
         assertEquals(
             LocalDate.of(2021, 7, 1),
             result.stream()
-                .filter(rs -> rs.getNavident().equals(Optional.of("A100036")))
+                .filter(rs -> rs.getNavident().equals("A100036"))
                 .min(Comparator.comparing(DvhRessursStilling::getStillingDatoFom))
                 .get()
                 .getStillingDatoFom()
@@ -147,16 +147,16 @@ class RessursStillingLoaderTest extends TestBase {
         assertEquals(
             LocalDate.of(2022, 1, 1),
             result.stream()
-                .filter(rs -> rs.getNavident().equals(Optional.of("A100036")))
+                .filter(rs -> rs.getNavident().equals("A100036"))
                 .max(Comparator.comparing(DvhRessursStilling::getStillingDatoFom))
                 .get()
                 .getStillingDatoFom()
         );
-        assertEquals(3, result.stream().filter(rs -> rs.getNavident().equals(Optional.of("A100180"))).count());
+        assertEquals(3, result.stream().filter(rs -> rs.getNavident().equals("A100180")).count());
         assertEquals(
             LocalDate.of(2024, 6, 1),
             result.stream()
-                .filter(rs -> rs.getNavident().equals(Optional.of("A100180")))
+                .filter(rs -> rs.getNavident().equals("A100180"))
                 .min(Comparator.comparing(DvhRessursStilling::getStillingDatoFom))
                 .get()
                 .getStillingDatoFom()
@@ -169,11 +169,11 @@ class RessursStillingLoaderTest extends TestBase {
         var result = ressursStillingLoader.load();
 
         assertEquals(7, result.size());
-        assertEquals(4, result.stream().filter(rs -> rs.getNavident().equals(Optional.of("A100036"))).count());
+        assertEquals(4, result.stream().filter(rs -> rs.getNavident().equals("A100036")).count());
         assertEquals(
             LocalDate.of(2021, 7, 1),
             result.stream()
-                .filter(rs -> rs.getNavident().equals(Optional.of("A100036")))
+                .filter(rs -> rs.getNavident().equals("A100036"))
                 .min(Comparator.comparing(DvhRessursStilling::getStillingDatoFom))
                 .get()
                 .getStillingDatoFom()
@@ -181,16 +181,16 @@ class RessursStillingLoaderTest extends TestBase {
         assertEquals(
             LocalDate.of(2022, 1, 1),
             result.stream()
-                .filter(rs -> rs.getNavident().equals(Optional.of("A100036")))
+                .filter(rs -> rs.getNavident().equals("A100036"))
                 .max(Comparator.comparing(DvhRessursStilling::getStillingDatoFom))
                 .get()
                 .getStillingDatoFom()
         );
-        assertEquals(3, result.stream().filter(rs -> rs.getNavident().equals(Optional.of("A100180"))).count());
+        assertEquals(3, result.stream().filter(rs -> rs.getNavident().equals("A100180")).count());
         assertEquals(
             LocalDate.of(2024, 6, 1),
             result.stream()
-                .filter(rs -> rs.getNavident().equals(Optional.of("A100180")))
+                .filter(rs -> rs.getNavident().equals("A100180"))
                 .min(Comparator.comparing(DvhRessursStilling::getStillingDatoFom))
                 .get()
                 .getStillingDatoFom()
@@ -227,11 +227,11 @@ class RessursStillingLoaderTest extends TestBase {
         LocalDate to
     ) {
         return DvhRessursStilling.builder()
-            .navident(Optional.of(navid))
-            .stillingAgressoId(Optional.of(stillingAgressoId))
+            .navident(navid)
+            .stillingAgressoId(stillingAgressoId)
             .stillingOrgenhetNavn(stillingOrgenhetNavn)
-            .ressursAgressoId(Optional.of(ressursAgressoId))
-            .ressursOrgenhetNiv(Optional.of(ressursOrgenhetNiv))
+            .ressursAgressoId(ressursAgressoId)
+            .ressursOrgenhetNiv(ressursOrgenhetNiv)
             .stillingDatoFom(from)
             .stillingDatoTom(to)
             .build();

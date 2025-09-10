@@ -7,7 +7,10 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNullElse;
 
 public record StillingPeriode(
     StillingAgressoOrgIdOgNavn stilling,
@@ -61,42 +64,41 @@ public record StillingPeriode(
     }
 
     public boolean harSammeAgressoIdPaStillingOgRessurs() {
-        return this.stilling.agressoId.isPresent()
-            && this.stilling.ressursAgressoId.isPresent()
-            && this.stilling.agressoId.get().equals(this.stilling.ressursAgressoId.get());
+        return nonNull(this.stilling.agressoId)
+            && nonNull(this.stilling.ressursAgressoId)
+            && this.stilling.agressoId.equals(this.stilling.ressursAgressoId);
     }
 
     public record StillingAgressoOrgIdOgNavn(
-        Optional<String> agressoId,
+        String agressoId,
         String enhetNavn,
-        Optional<String> ressursAgressoId,
-        Optional<String> ressursAgressoOrgNiv
+        String ressursAgressoId,
+        String ressursAgressoOrgNiv
     ) {
         @Override
         public String toString() {
-            return "HRRES_STILLING[" + agressoId.orElse("NULL") + "-" + enhetNavn + "]/HRRES_RESSURS[" + ressursAgressoId.orElse("NULL") + "-" + ressursAgressoOrgNiv.orElse(
-                "NULL") + "]";
+            return "HRRES_STILLING[" + agressoId + "-" + enhetNavn + "]/HRRES_RESSURS[" + ressursAgressoId + "-" + ressursAgressoOrgNiv + "]";
         }
     }
 
     public boolean erAgressoIdPresis() {
-        return stilling.agressoId.isPresent() && stilling.agressoId.get().length() > 6;
+        return nonNull(stilling.agressoId) && stilling.agressoId.length() > 6;
     }
 
     public boolean erRessursAgressoIdPresis() {
-        return stilling.ressursAgressoId.isPresent() && stilling.ressursAgressoId.get().length() > 6;
+        return nonNull(stilling.ressursAgressoId) && stilling.ressursAgressoId.length() > 6;
     }
 
     public boolean manglerAgressoId() {
-        return stilling.agressoId.isEmpty() || stilling.agressoId.get().isBlank() || stilling.agressoId.get().startsWith("-");
+        return isNull(stilling.agressoId) || stilling.agressoId.isBlank() || stilling.agressoId.startsWith("-");
     }
 
     public boolean manglerRessursAgressoId() {
-        return stilling.ressursAgressoId.isEmpty() || stilling.ressursAgressoId.get().isBlank() || stilling.ressursAgressoId.get().startsWith("-");
+        return isNull(stilling.ressursAgressoId) || stilling.ressursAgressoId.isBlank() || stilling.ressursAgressoId.startsWith("-");
     }
 
     public boolean erRessursAgressoOrgNivORGENHETnode() {
-        return "ORGENHET".equalsIgnoreCase(stilling.ressursAgressoOrgNiv.orElse(""));
+        return "ORGENHET".equalsIgnoreCase(stilling.ressursAgressoOrgNiv);
     }
 
     public boolean erAgressoIdOgRessursAgressoIdLike() {
@@ -105,22 +107,22 @@ public record StillingPeriode(
 
     public boolean matcherRessursAgressoIdOgAgressoId() {
         if (erAgressoIdPresis()) {
-            return stilling.agressoId.get().startsWith(stilling.ressursAgressoId.orElse("-"));
+            return stilling.agressoId.startsWith(requireNonNullElse(stilling.ressursAgressoId, "-"));
         } else if (erRessursAgressoIdPresis()) {
-            return stilling.ressursAgressoId.get().startsWith(stilling.agressoId.orElse("-"));
+            return stilling.ressursAgressoId.startsWith(requireNonNullElse(stilling.agressoId, "-"));
         }
         return false;
     }
 
     public String getPresisAgressoId() {
         if (erAgressoIdPresis()) {
-            return stilling.agressoId.get();
+            return stilling.agressoId;
         }
         if (erRessursAgressoIdPresis() && matcherRessursAgressoIdOgAgressoId()) {
-            return stilling.ressursAgressoId.get();
+            return stilling.ressursAgressoId;
         }
         if (erRessursAgressoIdPresis() && isCurrentPeriod()) {
-            return stilling.ressursAgressoId.get();
+            return stilling.ressursAgressoId;
         }
         return null;
     }

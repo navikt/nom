@@ -194,10 +194,10 @@ class RessursStillingStrukturererTest extends TestBase {
         when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
         var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(2, result.size());
-        assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId().orElse("NULL"));
+        assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId());
         assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom());
         assertEquals(LocalDate.of(2020, 10, 31), result.get(0).gyldigTom());
-        assertEquals("AGRID_2", result.get(1).stilling().ressursAgressoId().orElse("NULL"));
+        assertEquals("AGRID_2", result.get(1).stilling().ressursAgressoId());
         assertEquals(LocalDate.of(2020, 11, 1), result.get(1).gyldigFom());
         assertEquals(MAX_DATE, result.get(1).gyldigTom());
     }
@@ -215,10 +215,10 @@ class RessursStillingStrukturererTest extends TestBase {
         when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
         var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(2, result.size());
-        assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId().orElse("NULL"));
+        assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId());
         assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom());
         assertEquals(LocalDate.of(2020, 10, 31), result.get(0).gyldigTom());
-        assertEquals("AGRID_2", result.get(1).stilling().ressursAgressoId().orElse("NULL"));
+        assertEquals("AGRID_2", result.get(1).stilling().ressursAgressoId());
         assertEquals(LocalDate.of(2020, 11, 1), result.get(1).gyldigFom());
         assertEquals(MAX_DATE, result.get(1).gyldigTom());
     }
@@ -239,11 +239,11 @@ class RessursStillingStrukturererTest extends TestBase {
 
         var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(2, result.size());
-        assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId().orElse("NULL"));
+        assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId());
         assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom());
         assertEquals(LocalDate.of(2020, 5, 31), result.get(0).gyldigTom());
         assertEquals("FID_1", result.get(0).orgenhet().getFid());
-        assertEquals("AGRID_1", result.get(1).stilling().ressursAgressoId().orElse("NULL"));
+        assertEquals("AGRID_1", result.get(1).stilling().ressursAgressoId());
         assertEquals(LocalDate.of(2020, 6, 1), result.get(1).gyldigFom());
         assertEquals(MAX_DATE, result.get(1).gyldigTom());
         assertEquals("FID_2", result.get(1).orgenhet().getFid());
@@ -259,7 +259,7 @@ class RessursStillingStrukturererTest extends TestBase {
         when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1));
         var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(1, result.size());
-        assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId().orElse("NULL"));
+        assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId());
         assertEquals("FID_1", result.get(0).orgenhet().getFid());
     }
 
@@ -276,7 +276,7 @@ class RessursStillingStrukturererTest extends TestBase {
 
         var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(1, result.size());
-        assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId().orElse("NULL"));
+        assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId());
         assertEquals("FID_1", result.get(0).orgenhet().getFid());
         assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom()); // Strukturert stilling skal kun tas med fra enhet start dato
     }
@@ -298,7 +298,7 @@ class RessursStillingStrukturererTest extends TestBase {
 
         var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(1, result.size());
-        assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId().orElse("NULL"));
+        assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId());
         assertEquals("FID_1", result.get(0).orgenhet().getFid());
         assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom()); // Strukturert stilling skal kun tas med fra enhet start dato
     }
@@ -579,11 +579,11 @@ class RessursStillingStrukturererTest extends TestBase {
         LocalDate to
     ) {
         return DvhRessursStilling.builder()
-            .navident(Optional.of(navid))
-            .stillingAgressoId(Optional.of(stillingAgressoId))
+            .navident(navid)
+            .stillingAgressoId(stillingAgressoId)
             .stillingOrgenhetNavn(stillingOrgenhetNavn)
-            .ressursAgressoId(Optional.of(ressursAgressoId))
-            .ressursOrgenhetNiv(Optional.of("ORGENHET"))
+            .ressursAgressoId(ressursAgressoId)
+            .ressursOrgenhetNiv("ORGENHET")
             .stillingDatoFom(from)
             .stillingDatoTom(to)
             .build();

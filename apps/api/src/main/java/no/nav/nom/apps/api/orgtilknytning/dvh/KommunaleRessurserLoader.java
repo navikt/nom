@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.util.Objects.nonNull;
+
 /**
  * Denne lager ingen faktiske orgtilknytninger
  * Den parser om kommunale ressurser mangler stillinger i Unit4 og smatidig ikke har en OT i NOM (e.g. mastret)
@@ -92,7 +94,7 @@ public class KommunaleRessurserLoader {
     private Map<String, List<StillingPeriode>> loadStillinger(List<String> kommunaleNavidenter) {
         List<DvhRessursStilling> kommunaleRessursStilllinger =
             ressursStillingLoader.load().stream()
-                .filter(rs -> rs.getNavident().isPresent() && kommunaleNavidenter.contains(rs.getNavident().get()))
+                .filter(rs -> nonNull(rs.getNavident()) && kommunaleNavidenter.contains(rs.getNavident()))
                 .toList();
 
         return ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(kommunaleRessursStilllinger);
