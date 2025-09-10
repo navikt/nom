@@ -39,9 +39,19 @@ export function sortTableData<T>({
 }) {
   const { orderBy, direction } = sort;
 
+  // Dette sikrer at sortKey-feltet fungerer riktig selv om det er
+  // brukt feil case sammenlignet med navnet på feltet i dataene
+  const objectExample = tableData[0] ?? undefined;
+
+  const keys = !!objectExample ? Object.keys(objectExample) : undefined;
+
+  const caseCorrectedKey = keys?.find(
+    (key) => key.toLowerCase() === orderBy.toLowerCase(),
+  );
+
   let sortedData = [...tableData];
 
-  if (orderBy === "dato" && isKafkaEventArray(tableData)) {
+  if (caseCorrectedKey === "dato" && isKafkaEventArray(tableData)) {
     sortedData = sortedData.sort((a, b) => {
       const kafkaA = a as KafkaEvent;
       const kafkaB = b as KafkaEvent;
@@ -54,11 +64,10 @@ export function sortTableData<T>({
       return dateA - dateB;
     });
   } else {
-    // Default sorting for other fields
-    sortedData = sortBy(tableData, orderBy);
+    sortedData = sortBy(tableData, caseCorrectedKey ?? orderBy);
   }
 
-  const reversed = direction === "descending";
+  const reversed = direction === "ascending";
 
   return reversed ? sortedData.reverse() : sortedData;
 }

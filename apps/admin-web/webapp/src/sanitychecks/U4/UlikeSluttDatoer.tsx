@@ -116,8 +116,8 @@ export function UlikeSluttDatoer() {
           </Table.ColumnHeader>
         </Table.Header>
         <Table.Body>
-          {sortedData.map((ident) => (
-            <Table.Row key={ident.navident} shadeOnHover={false}>
+          {sortedData.map((ident, index) => (
+            <Table.Row key={index} shadeOnHover={false}>
               <Table.DataCell>
                 <NomLink path={`ressurs/${ident.navident}`}>
                   {ident.navident}

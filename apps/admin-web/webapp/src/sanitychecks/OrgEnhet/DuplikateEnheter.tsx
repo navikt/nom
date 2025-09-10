@@ -110,8 +110,8 @@ export function DuplikateEnheter() {
           </Table.ColumnHeader>
         </Table.Header>
         <Table.Body>
-          {sortedData.map((orgEnhet) => (
-            <Table.Row key={orgEnhet.id} shadeOnHover={false}>
+          {sortedData.map((orgEnhet, index) => (
+            <Table.Row key={index} shadeOnHover={false}>
               <Table.DataCell>{orgEnhet.fid}</Table.DataCell>
               <Table.DataCell>{orgEnhet.id}</Table.DataCell>
               <Table.DataCell>{orgEnhet.navn}</Table.DataCell>

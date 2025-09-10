@@ -90,10 +90,10 @@ export function AlleDifferanser() {
           <Table.ColumnHeader scope="col" sortKey="id" sortable>
             ID
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="diff-type" sortable>
+          <Table.ColumnHeader scope="col" sortKey="type" sortable>
             Diff type
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="diff-kilde" sortable>
+          <Table.ColumnHeader scope="col" sortKey="kilde" sortable>
             Diff kilde
           </Table.ColumnHeader>
           <Table.ColumnHeader scope="col" sortKey="navident" sortable>
@@ -102,10 +102,10 @@ export function AlleDifferanser() {
           <Table.ColumnHeader scope="col" sortKey="DOL">
             NOM DOL
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="nom-gyldigFom" sortable>
+          <Table.ColumnHeader scope="col" sortKey="nomGyldigFom" sortable>
             NOM Gyldig FOM
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="nom-gyldigTom" sortable>
+          <Table.ColumnHeader scope="col" sortKey="nomGyldigTom" sortable>
             NOM Gyldig TOM
           </Table.ColumnHeader>
           <Table.ColumnHeader scope="col" sortKey="nomOrgEnhetId" sortable>
@@ -152,8 +152,8 @@ export function AlleDifferanser() {
           </Table.ColumnHeader>
         </Table.Header>
         <Table.Body>
-          {sortedData.map((ident) => (
-            <Table.Row key={ident.navident} shadeOnHover={false}>
+          {sortedData.map((ident, index) => (
+            <Table.Row key={index} shadeOnHover={false}>
               <Table.DataCell>{ident.id}</Table.DataCell>
               <Table.DataCell>{ident.type}</Table.DataCell>
               <Table.DataCell>{ident.kilde}</Table.DataCell>

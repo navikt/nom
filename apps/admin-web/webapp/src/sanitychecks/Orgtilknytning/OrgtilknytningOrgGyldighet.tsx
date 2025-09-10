@@ -114,8 +114,8 @@ export function OrgtilknytningOrgGyldighet() {
           </Table.ColumnHeader>
         </Table.Header>
         <Table.Body>
-          {sortedData.map((orgtilknytning) => (
-            <Table.Row key={orgtilknytning.navident} shadeOnHover={false}>
+          {sortedData.map((orgtilknytning, index) => (
+            <Table.Row key={index} shadeOnHover={false}>
               <Table.DataCell>{orgtilknytning.navident}</Table.DataCell>
               <Table.DataCell>{orgtilknytning.uniqueAgressoId}</Table.DataCell>
               <Table.DataCell>{orgtilknytning.orgEnhetId}</Table.DataCell>

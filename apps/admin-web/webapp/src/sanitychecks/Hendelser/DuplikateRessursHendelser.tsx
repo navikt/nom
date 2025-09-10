@@ -56,8 +56,8 @@ export function DuplikateRessursHendelser() {
           <Table.ColumnHeader scope="col">OT gyldig TOM</Table.ColumnHeader>
         </Table.Header>
         <Table.Body>
-          {data.map((ressursHendelse) => (
-            <Table.Row key={ressursHendelse.navident} shadeOnHover={false}>
+          {data.map((ressursHendelse, index) => (
+            <Table.Row key={index} shadeOnHover={false}>
               <Table.DataCell>
                 <NomLink path={`ressurs/${ressursHendelse.navident}`}>
                   {ressursHendelse.navident}

@@ -53,16 +53,8 @@ export function RessursUlikSluttdatoOrgtilknytning() {
           </Table.ColumnHeader>
         </Table.Header>
         <Table.Body>
-          {data.map((ulikDato) => (
-            <Table.Row
-              key={
-                ulikDato.navident +
-                ulikDato.orgEnhetId +
-                ulikDato.ressursSluttdato +
-                ulikDato.orgtilknytningSluttdato
-              }
-              shadeOnHover={false}
-            >
+          {data.map((ulikDato, index) => (
+            <Table.Row key={index} shadeOnHover={false}>
               <Table.DataCell>
                 <NomLink path={`ressurs/${ulikDato.navident}`}>
                   {ulikDato.navident}

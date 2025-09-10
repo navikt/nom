@@ -96,10 +96,10 @@ export function IdenterUtenStilling() {
           <Table.ColumnHeader scope="col" sortKey="DOL">
             DOL
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="nom-gyldigFom" sortable>
+          <Table.ColumnHeader scope="col" sortKey="nomGyldigFom" sortable>
             NOM Gyldig FOM
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="nom-gyldigTom" sortable>
+          <Table.ColumnHeader scope="col" sortKey="nomGyldigTom" sortable>
             NOM Gyldig TOM
           </Table.ColumnHeader>
           <Table.ColumnHeader scope="col" sortKey="nomOrgEnhetId" sortable>
@@ -146,8 +146,8 @@ export function IdenterUtenStilling() {
           </Table.ColumnHeader>
         </Table.Header>
         <Table.Body>
-          {sortedData.map((ident) => (
-            <Table.Row key={ident.navident} shadeOnHover={false}>
+          {sortedData.map((ident, index) => (
+            <Table.Row key={index} shadeOnHover={false}>
               <Table.DataCell>{ident.id}</Table.DataCell>
               <Table.DataCell>
                 <NomLink path={`ressurs/${ident.navident}`}>

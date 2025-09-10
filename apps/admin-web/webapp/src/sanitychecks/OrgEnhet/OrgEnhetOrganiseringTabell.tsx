@@ -82,8 +82,8 @@ export function OrgEnhetOrganiseringTabell({
           </Table.ColumnHeader>
         </Table.Header>
         <Table.Body>
-          {sortedData.map((orgEnhet) => (
-            <Table.Row key={orgEnhet.orgEnhetId} shadeOnHover={false}>
+          {sortedData.map((orgEnhet, index) => (
+            <Table.Row key={index} shadeOnHover={false}>
               <Table.DataCell>{orgEnhet.orgEnhetId}</Table.DataCell>
               <Table.DataCell>{orgEnhet.uniqueAgressoId}</Table.DataCell>
               <Table.DataCell>{orgEnhet.gyldigFom}</Table.DataCell>
