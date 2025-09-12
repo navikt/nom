@@ -172,6 +172,31 @@ public class OrgEnhetController {
         }
     }
 
+    @GetMapping("/nyExportKontaktpersonerFor/{orgenhetId}")
+    @Operation(
+        description = "Genererer regneark med oversikt over kontakt personer for en orgenhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Exported file"),
+        }
+    )
+    public void nyExportKontaktpersonerForOrgenhetId(HttpServletResponse response, @PathVariable String orgenhetId) throws IOException {
+
+        var loggedInUser = SecurityUtil.getAuthenticatedNavIdent();
+        var isAdminToEnhet = SecurityUtil.loggedInUserHasAccessScope(NomApiAccessScope.ADMIN);
+        boolean kanRedigereOrgenhet = authResolver.kanRessursRedigereOrgenhet(loggedInUser, orgenhetId);
+        if (!isAdminToEnhet && !kanRedigereOrgenhet) {
+            var accessDeniedError = String.format("Bruker %s har ikke tilgang til å se ressurser og kontaktpersoner for orgenhet %s", loggedInUser, orgenhetId);
+            log.error(accessDeniedError);
+            throw new AccessDeniedException(accessDeniedError);
+        }
+
+        kontaktpersonerExcelGenerator.generateExcelFile(response, orgenhetId);
+
+    }
+
     @GetMapping
     @Operation(
         description = "Henter alle orgenheter",
