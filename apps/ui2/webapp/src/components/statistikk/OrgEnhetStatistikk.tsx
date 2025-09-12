@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Buildings3FillIcon, PersonFillIcon } from "@navikt/aksel-icons";
+import { Buildings3FillIcon } from "@navikt/aksel-icons";
 import {
   BodyLong,
   BodyShort,
@@ -8,16 +8,21 @@ import {
   HStack,
   Loader,
   ReadMore,
+  VStack,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import React, { type ReactNode } from "react";
 
-import { getStatistikkForOrgEnhet } from "~/api/react-query-endpoints";
+import {
+  getStatistikkForOrgEnhet,
+  getUnderliggendeOrgenheter,
+} from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import type { ChartRow } from "~/components/charts/HorizontalBarChart";
 import { HorizontalBarChart } from "~/components/charts/HorizontalBarChart";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import type { GlobalStatistikkResponse, OrgEnhet } from "~/types/api-models";
-import { formatDisplayNumber } from "~/utils";
+import { isInDevelopment } from "~/utils";
 
 export function OrgEnhetStatistikk({
   orgEnhet,
@@ -25,16 +30,12 @@ export function OrgEnhetStatistikk({
   header,
   expandable = false,
   className,
-  displayOrgEnheterStatistikk,
-  teknologiavdelingen,
 }: {
   orgEnhet: OrgEnhet | undefined;
   gittStatistikk?: GlobalStatistikkResponse | undefined;
   header?: string;
   expandable?: boolean;
   className?: string;
-  displayOrgEnheterStatistikk: boolean;
-  teknologiavdelingen?: boolean;
 }) {
   if (!orgEnhet) {
     return;
@@ -75,6 +76,20 @@ export function OrgEnhetStatistikk({
     return;
   }
 
+  const inDevelopment = isInDevelopment();
+
+  const tekAvdNavId = inDevelopment ? "je104d" : "te627k";
+
+  const enheterUnderTekAvdQuery = useQuery({
+    queryKey: getUnderliggendeOrgenheter.queryKey(tekAvdNavId),
+    queryFn: () => getUnderliggendeOrgenheter.queryFn(tekAvdNavId),
+  });
+
+  const enheterUnderTekAvd = enheterUnderTekAvdQuery.data;
+
+  const underTeknologiavdelingen =
+    orgEnhet.id === tekAvdNavId || enheterUnderTekAvd?.includes(orgEnhet.id);
+
   const innerContent = isLoading ? (
     <div
       css={css`
@@ -98,12 +113,10 @@ export function OrgEnhetStatistikk({
     >
       <MedarbeidereBarChartGridWrapper
         statistikk={medarbeidereStatistikk}
-        teknologiavdelingen={teknologiavdelingen}
+        teknologiavdelingen={underTeknologiavdelingen}
       />
 
-      {displayOrgEnheterStatistikk && (
-        <OrgEnheterStatistikkGridWrapper statistikk={statistikk} />
-      )}
+      <OrgEnheterStatistikkGridWrapper statistikk={statistikk} />
     </div>
   );
 
@@ -221,83 +234,28 @@ function MedarbeidereBarChart({
   return (
     <HorizontalBarChart
       helpText={
-        <>
+        <VStack gap="2">
           <BodyLong>
-            Alle medarbeidere med en aktiv Nav-ident telles én gang.
-          </BodyLong>
-          <BodyLong>
+            Alle medarbeidere med en aktiv Nav-ident telles én gang.{" "}
             {teknologiavdelingen
               ? "Tallet for eksterne viser antall lånt inn via Teknologiavdelingens avtaler. Teamkatalogen viser hvor disse faktisk jobber."
-              : "Eksterne medarbeidere som får utbetalinger, som tolker og lese- og sekretærhjelper, telles også."}
+              : "Eksterne medarbeidere som får utbetalinger, som tolker og lese- og sekretærhjelper, telles også."}{" "}
+            Roboter og andre ikke-menneskelige identer telles ikke. Du kan lese
+            mer om statistikken i NOM på Navet.
           </BodyLong>
           <BodyLong>
-            Roboter og andre ikke-menneskelige identer telles ikke.
+            <SmartLink
+              href="https://navno.sharepoint.com/sites/intranett-organisasjon/SitePages/Statistikk-i-NOM.aspx?csf=1&web=1&e=yJDbFQ&CID=9e0a51fa-2cdb-4e98-ac05-32baaac3525c"
+              inline
+            >
+              Statistikk i NOM på Navet
+            </SmartLink>
           </BodyLong>
-        </>
+        </VStack>
       }
       rows={medarbeidereData}
-      title={
-        <div
-          css={css`
-            display: flex;
-            justify-content: space-between;
-          `}
-        >
-          <div
-            css={css`
-              display: flex;
-              align-items: center;
-              font-size: var(--a-font-size-large);
-            `}
-          >
-            <div
-              css={css`
-                background: var(--nom-secondary-hover);
-                border-radius: 50%;
-                height: 40px;
-                width: 40px;
-                justify-items: center;
-                align-content: center;
-              `}
-            >
-              <PersonFillIcon
-                css={css`
-                  background: #fff;
-                  border-radius: 50%;
-                  width: 37px;
-                  height: 37px;
-                  padding: var(--a-spacing-1);
-                `}
-                fontSize="1.75rem"
-                title="a11y-title"
-              />
-            </div>
-
-            <div
-              css={css`
-                display: flex;
-              `}
-            >
-              <BodyShort
-                css={css`
-                  margin-left: var(--a-spacing-4);
-                  font-size: inherit;
-                `}
-                size="large"
-              >
-                Antall medarbeidere:
-              </BodyShort>
-              <span
-                css={css`
-                  margin-left: var(--a-spacing-4);
-                `}
-              >
-                <b>{formatDisplayNumber(statistikk.totalt)}</b>
-              </span>
-            </div>
-          </div>
-        </div>
-      }
+      title="Medarbeidere:"
+      total={statistikk.totalt}
     />
   );
 }
@@ -326,68 +284,56 @@ function OrgEnheterStatistikkGridWrapper({
 
   if (antallFylkekontor > 0) {
     statistikkItems.push({
-      label: "Antall fylkesenheter:",
+      label: "Fylkesenheter:",
       value: antallFylkekontor,
-      helpText:
-        "Antall Nav-regioner. Navs regioner avviker noe fra den administrative inndelingen av landet i fylker.",
     });
   }
   if (antallNavKontorer > 0) {
     statistikkItems.push({
-      label: "Antall Nav-kontor:",
+      label: "Nav-kontorer:",
       value: antallNavKontorer,
-      helpText:
-        "Antallet kan avvike noe blant annet fordi det er bevegelser i start/slutt-dato for Nav-kontor ifm. vertskommunesamarbeid.",
     });
   }
   if (antallHjelpemidlerOgTilrettelegging > 0 && hasAdminAccess) {
     statistikkItems.push({
       label: "Hjelpemidler og tilrettelegging:",
       value: antallHjelpemidlerOgTilrettelegging,
-      helpText: "Hjelpetekst",
     });
   }
   if (antallKlageinstanser > 0 && hasAdminAccess) {
     statistikkItems.push({
-      label: "Antall klageinstanser:",
+      label: "Klageinstanser:",
       value: antallKlageinstanser,
-      helpText: "Hjelpetekst",
     });
   }
   if (antallKontrollKonrollenheter > 0 && hasAdminAccess) {
     statistikkItems.push({
       label: "Kontrollenheter:",
       value: antallKontrollKonrollenheter,
-      helpText: "Hjelpetekst",
     });
   }
   if (antallNavKontaktsenter > 0 && hasAdminAccess) {
     statistikkItems.push({
       label: "Nav kontaktsenter:",
       value: antallNavKontaktsenter,
-      helpText: "Hjelpetekst",
     });
   }
   if (antallNavArbeidOgYtelser > 0 && hasAdminAccess) {
     statistikkItems.push({
       label: "Nav arbeid og ytelser:",
       value: antallNavArbeidOgYtelser,
-      helpText: "Hjelpetekst",
     });
   }
   if (antallNavFamilieOgPensjonsytelser > 0 && hasAdminAccess) {
     statistikkItems.push({
       label: "Nav familie- og pensjonsytelser:",
       value: antallNavFamilieOgPensjonsytelser,
-      helpText: "Hjelpetekst",
     });
   }
   if (antallLovnoder > 0 && hasAdminAccess) {
     statistikkItems.push({
       label: "Organisasjonsenheter:",
       value: antallLovnoder,
-      helpText:
-        "Antall enheter der det er registrert medarbeidere. På et Nav-kontor telles antall avdelinger.",
     });
   }
 
@@ -397,47 +343,106 @@ function OrgEnheterStatistikkGridWrapper({
 
   return (
     <GridItem standalone>
-      <OrgEnheterStatistikk statistikk={statistikkItems} />
+      <OrgEnheterStatistikk
+        helpText={
+          <VStack gap="2">
+            <BodyLong>
+              Vi teller organisasjonsenheter basert på hvilken type enhet det
+              er, eksempelvis Nav-kontor, kontaktsenter, etc. Du kan lese mer om
+              statistikken, telleregler og årsaker til avvik i NOM på Navet.
+            </BodyLong>
+            <BodyLong>
+              <SmartLink
+                href="https://navno.sharepoint.com/sites/intranett-organisasjon/SitePages/Statistikk-i-NOM.aspx?csf=1&web=1&e=yJDbFQ&CID=9e0a51fa-2cdb-4e98-ac05-32baaac3525c"
+                inline
+              >
+                Statistikk i NOM på Navet
+              </SmartLink>
+            </BodyLong>
+          </VStack>
+        }
+        statistikk={statistikkItems}
+        title="Organisasjonsenheter:"
+      />
     </GridItem>
   );
 }
 
 function OrgEnheterStatistikk({
+  title,
+  helpText,
   statistikk,
 }: {
+  title?: string;
+  helpText?: string | ReactNode;
   statistikk: OrgEnhetStatistikkItem[];
 }) {
   return (
-    <HStack gap="4">
-      {statistikk.map((statistikkItem) => (
-        <OrgEnhetStatistikkVerdi
-          helpText={statistikkItem.helpText}
-          icon={
+    <div>
+      {(!!title || !!helpText) && (
+        <div
+          css={css`
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--a-spacing-6);
+          `}
+        >
+          {!!title && (
+            <Heading level="3" size="small">
+              {title}
+            </Heading>
+          )}
+
+          {!!helpText && (
             <div
               css={css`
-                display: flex;
-                align-items: center;
+                width: 100%;
               `}
             >
-              <Buildings3FillIcon
+              <HelpText
                 css={css`
-                  background: #fff;
-                  border-radius: 50%;
-                  width: 37px;
-                  height: 37px;
-                  padding: var(--a-spacing-1);
+                  justify-self: end;
                 `}
-                fontSize="1.75rem"
-                title="a11y-title"
-              />
+              >
+                {helpText}
+              </HelpText>
             </div>
-          }
-          key={statistikkItem.label}
-          label={statistikkItem.label}
-          value={statistikkItem.value}
-        />
-      ))}
-    </HStack>
+          )}
+        </div>
+      )}
+
+      <HStack gap="4">
+        {statistikk.map((statistikkItem) => (
+          <OrgEnhetStatistikkVerdi
+            helpText={statistikkItem.helpText}
+            icon={
+              <div
+                css={css`
+                  display: flex;
+                  align-items: center;
+                `}
+              >
+                <Buildings3FillIcon
+                  css={css`
+                    background: #fff;
+                    border-radius: 50%;
+                    width: 37px;
+                    height: 37px;
+                    padding: var(--a-spacing-1);
+                  `}
+                  fontSize="1.75rem"
+                  title="a11y-title"
+                />
+              </div>
+            }
+            key={statistikkItem.label}
+            label={statistikkItem.label}
+            value={statistikkItem.value}
+          />
+        ))}
+      </HStack>
+    </div>
   );
 }
 

@@ -21,7 +21,6 @@ import {
   getOrgEnheterSomKanHaRessurser,
   getRessurserByListNavident,
   getTeamcatSection,
-  getUnderliggendeOrgenheter,
   harLederTilgangForOrgenhetOptions,
   isOrgEnhetArbeidsomraade,
   isOrgEnhetDriftsenhet,
@@ -53,8 +52,6 @@ export const ValgtOrgEnhet = ({
   orgEnhet: OrgEnhet;
   hideRessurser?: boolean;
 }) => {
-  const hasAdminAccess = useHasAdminAccess();
-
   const inDevelopment = isInDevelopment();
 
   const ressurserNavidents = orgEnhet.ressursKoblinger
@@ -91,18 +88,6 @@ export const ValgtOrgEnhet = ({
   const valgtOrgenhetKanHaRessurser = (
     enheterSomKanHaRessurser.data || []
   ).some((enhet) => enhet.id === orgEnhet.id);
-
-  const tekAvdNavId = inDevelopment ? "je104d" : "te627k";
-
-  const enheterUnderTekAvdQuery = useQuery({
-    queryKey: getUnderliggendeOrgenheter.queryKey(tekAvdNavId),
-    queryFn: () => getUnderliggendeOrgenheter.queryFn(tekAvdNavId),
-  });
-
-  const enheterUnderTekAvd = enheterUnderTekAvdQuery.data;
-
-  const underTeknologiavdelingen =
-    orgEnhet.id === tekAvdNavId || enheterUnderTekAvd?.includes(orgEnhet.id);
 
   const eksternSamarbeidspartner = isEksternSamarbeidspartnerOrgEnhet(
     orgEnhet.id,
@@ -257,19 +242,14 @@ export const ValgtOrgEnhet = ({
           />
         )}
 
-        {(hasAdminAccess ||
-          orgEnhet.orgEnhetsType !== OrgEnhetsType.DIREKTORAT) && (
-          <OrgEnhetStatistikk
-            css={css`
-              margin-top: var(--a-spacing-6);
-            `}
-            displayOrgEnheterStatistikk={hasAdminAccess}
-            expandable
-            header="Statistikk"
-            orgEnhet={orgEnhet}
-            teknologiavdelingen={underTeknologiavdelingen}
-          />
-        )}
+        <OrgEnhetStatistikk
+          css={css`
+            margin-top: var(--a-spacing-6);
+          `}
+          expandable
+          header="Statistikk"
+          orgEnhet={orgEnhet}
+        />
       </div>
     </div>
   );

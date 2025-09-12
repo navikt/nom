@@ -42,7 +42,6 @@ export const FrontPage = () => {
         />
 
         <OrgEnhetStatistikk
-          displayOrgEnheterStatistikk
           gittStatistikk={globalStatistikk}
           header="Nøkkelinfo for hele Nav"
           orgEnhet={orgEnhet}

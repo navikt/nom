@@ -1,7 +1,9 @@
 import { css } from "@emotion/react";
-import { Heading, HelpText } from "@navikt/ds-react";
+import { PersonFillIcon } from "@navikt/aksel-icons";
+import { BodyShort, Heading, HelpText } from "@navikt/ds-react";
 import maxBy from "lodash/maxBy";
 import type { ReactNode } from "react";
+import React from "react";
 import { useEffect, useRef, useState } from "react";
 
 import { formatDisplayNumber } from "~/utils";
@@ -14,11 +16,13 @@ export type ChartRow = {
 
 export function HorizontalBarChart({
   rows,
+  total,
   title,
   helpText,
 }: {
   rows: ChartRow[];
-  title: string | ReactNode;
+  total?: number;
+  title?: string;
   helpText?: string | ReactNode;
 }) {
   const data = normalizeData(rows);
@@ -38,26 +42,96 @@ export function HorizontalBarChart({
     <div
       css={css`
         width: 100%;
-        border-radius: 10px;
         line-height: 1.5rem;
       `}
     >
-      <div
-        css={css`
-          display: flex;
-          justify-content: space-between;
-        `}
-      >
-        {typeof title === "string" ? (
-          <Heading level="2" size="medium">
-            {title}
-          </Heading>
-        ) : (
-          <>{title}</>
-        )}
+      {(!!title || !!helpText) && (
+        <div
+          css={css`
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--a-spacing-6);
+          `}
+        >
+          {!!title && (
+            <Heading level="3" size="small">
+              {title}
+            </Heading>
+          )}
 
-        {!!helpText && <HelpText>{helpText}</HelpText>}
-      </div>
+          {!!helpText && (
+            <div
+              css={css`
+                width: 100%;
+              `}
+            >
+              <HelpText
+                css={css`
+                  justify-self: end;
+                `}
+              >
+                {helpText}
+              </HelpText>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!!total && (
+        <div
+          css={css`
+            display: flex;
+            align-items: center;
+            font-size: var(--a-font-size-large);
+          `}
+        >
+          <div
+            css={css`
+              background: var(--nom-secondary-hover);
+              border-radius: 50%;
+              height: 40px;
+              width: 40px;
+              justify-items: center;
+              align-content: center;
+            `}
+          >
+            <PersonFillIcon
+              css={css`
+                background: #fff;
+                border-radius: 50%;
+                width: 37px;
+                height: 37px;
+                padding: var(--a-spacing-1);
+              `}
+              fontSize="1.75rem"
+              title="a11y-title"
+            />
+          </div>
+
+          <div
+            css={css`
+              display: flex;
+            `}
+          >
+            <BodyShort
+              css={css`
+                margin-left: var(--a-spacing-2);
+                font-size: inherit;
+              `}
+            >
+              Totalt:
+            </BodyShort>
+            <span
+              css={css`
+                margin-left: var(--a-spacing-4);
+              `}
+            >
+              <b>{formatDisplayNumber(total)}</b>
+            </span>
+          </div>
+        </div>
+      )}
 
       <div
         css={css`
